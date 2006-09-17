@@ -1,4 +1,9 @@
-ITEM  "Compiler attributes and pragmas are abstracted"
+ITEM "Compiler attributes and pragmas are abstracted"
 	TASK: "Review PT_ALIGN macro"
 	TASK: "Introduce PTV_API macro"
 	TASK: "Check if more warnings need to be disabled"
+
+ITEM "POD types of fixed size are defined"
+	TASK: "Review Types.h"
+	TASK: "Write test case"
+	TASK: "Find out how to enable 64 bit types under linux/gcc"
