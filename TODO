@@ -10,5 +10,6 @@ ITEM "POD types of fixed size are defined"
 
 ITEM "An API to for byte-order conversion exists"
 	TASK "Review Byteorder.h"
+	TASK "Remove swa template function"
 	TASK "Write test cases"
 	TASK "Improve swabUnaligned function"
