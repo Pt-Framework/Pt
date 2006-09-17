@@ -1,4 +1,64 @@
-ITEM "Byteorder API has ASM optimisation"
+ITEM P0 S0 "Compiler attributes and pragmas are abstracted"
+	TASK "Review PT_PACKED macro"
+	TASK "Review PT_ALIGN macro"
+	TASK "Introduce PTV_API macro"
+	TASK "Check if more warnings need to be disabled"
+
+ITEM P0 S0 "POD types of fixed size are defined"
+	TASK "Review Types.h"
+	TASK "Write test case"
+	TASK "Find out how to enable 64 bit types under linux/gcc"
+
+ITEM P0 S0 "All classes of the Pt module are forward declared in a dedicated header"
+	TASK "Add missing declarations to Pt.h"
+
+ITEM P0 S0 "An API for byte-order conversion exists"
+	TASK "Review Byteorder.h"
+	TASK "Remove swap() template function"
+	TASK "Write test cases"
+	TASK "Improve swabUnaligned() function"
+	TASK "Add function to swap float and double correctly"
+
+ITEM P0 S0 "A empty Void type exists"
+	TASK "Review Void.h"
+	TASK "Write Documentation"
+
+ITEM P0 S0 "A SourceInfo class exits."
+	TASK "Review SourceInfo.h"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S0 "An common exception hierachy exits."
+	TASK "Review Exception.h"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S0 "A NonCopyable base class exits."
+	TASK "Review NonCopyable.h"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S0 "A Singleton base class exits."
+	TASK "Review Singleton.h"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S0 "The AtomicInt class implements atomic operations"
+	TASK "Add fallback version that uses pthreads"
+	TASK "Review asm"
+	TASK "Write test case"
+	TASK "Write docs"
+
+ITEM P0 S0 "A base class for thread-safe refcounting exists."
+	TASK "Make Shared.h use AtomicInt"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S0 "Byteorder API has ASM optimisation"
 	TASK "Optimize swab16() using standard ASM and if possible SIMD"
 	TASK "Optimize swab32() using standard ASM and if possible SIMD"
 	TASK "Optimize swab64() using standard ASM and if possible SIMD"
+
+ITEM P0 S0 "The Pt::Unit module exists"
+	TASK "Review ccpunit code"
+	TASK "Review mini-cppunit from STLport code"
