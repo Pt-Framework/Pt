@@ -1,1 +1,4 @@
- 
+ITEM "Byteorder API has ASM optimisation"
+	TASK "Optimize swab16() using standard ASM and if possible SIMD"
+	TASK "Optimize swab32() using standard ASM and if possible SIMD"
+	TASK "Optimize swab64() using standard ASM and if possible SIMD"
