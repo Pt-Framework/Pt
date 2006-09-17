@@ -1,4 +1,3 @@
-ITEM  "Compiler attributes and pragmas are abstracted" 
-	TASK: Review PT_PACKED macro
-	TASK: Review PT_ALIGN macro
-	TASK: Introduce PTV_API macro
+ITEM  "Compiler attributes and pragmas are abstracted"
+	TASK: "Review PT_ALIGN macro"
+	TASK: "Introduce PTV_API macro"

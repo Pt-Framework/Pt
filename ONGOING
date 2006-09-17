@@ -1,2 +1,2 @@
 ITEM  "Compiler attributes and pragmas are abstracted"
-	TASK: Review PT_PACKED macro
+	TASK: "Review PT_PACKED macro" blue_wind_25
