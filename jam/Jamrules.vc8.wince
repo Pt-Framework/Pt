@@ -1,0 +1,68 @@
+# Include target specific options
+#
+JamInclude Jamrules.vc8.wince.$(TARGET_OSPLAT:L) ;
+
+
+# Flags and options
+#
+CCFLAGS  += /D "WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "_UNICODE" /D "UNICODE" ;
+C++FLAGS += /Od /Os /FD /D "_WIN32_WCE=0x420" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "WINCE" ;
+C++FLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /EHsc /fp:fast /GR- /W3 /TP ;
+LINKFLAGS += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
+LINKFLAGS += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
+
+if $(CONFIG:L) = debug 
+{
+	C++FLAGS += /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
+	LINKFLAGS += /DEBUG ;
+}
+else
+{
+	C++FLAGS += /MD ;
+}
+
+
+# set MFC directory
+#
+MFCDIR = \"$(VISUALC)\\vc\\ce\\atlmfc\" ;
+
+
+STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" 
+	  \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
+
+
+# Builds executables for wince
+#
+rule Main
+{
+	# in case of debug d.exe is added
+	local _target = $(<:S=$(SUFEXE)) ;
+
+	LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;
+
+	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+	Objects $(>) ;
+
+	# Tell jam where it can find the .pdb, .lib, .exp
+	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
+
+	# clean rules only replace '.exe' suffic while 'd' for debug is kept
+	Clean clean : $(_target) ;
+	Clean clean : $(_target:S=.lib) ;
+	Clean clean : $(_target:S=.exp) ;
+	Clean clean : $(_target:S=.pdb) ;
+	Clean clean : $(_target:S=.ilk) ;
+}
+
+
+# Link a target to another
+#
+actions Link bind NEEDLIBS
+{
+	set PATH=$(VISUALC)\Common7\IDE;%PATH%
+	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}

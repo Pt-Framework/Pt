@@ -1,0 +1,25 @@
+SubDir TOP src Pt-Gui ;
+
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Gui/$(GUI:L) ;
+
+SharedLibrary Pt-Gui : Application.cpp 
+                       Button.cpp
+                       CloseEvent.cpp
+                       Event.cpp
+                       KeyEvent.cpp
+                       MouseEvent.cpp
+                       MouseMoveEvent.cpp
+                       MoveEvent.cpp
+                       PaintEvent.cpp
+                       ResizeEvent.cpp
+                       Pixmap.cpp
+                       Widget.cpp
+                       ;
+
+SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
+SharedLibrary_LinkSharedLibraries Pt-Gui : Pt-Gfx Pt-System Pt ;
+SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
+SharedLibrary_MakeLocate Pt-Gui : bin ;
+
+SubInclude TOP src Pt-Gui $(GUI:L) ;

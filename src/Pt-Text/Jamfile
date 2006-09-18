@@ -1,0 +1,26 @@
+SubDir TOP src Pt-Text ;
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt-Text : AsciiCodec.cpp
+                        Base64Codec.cpp
+                        Base64Stream.cpp
+                        Char.cpp
+                        String.cpp
+                        StringList.cpp
+                        TextCodec.cpp
+                        TextStream.cpp
+                        UnicodeTable.cpp
+                        Utf.cpp
+                        Utf8Codec.cpp
+                        Utf32Codec.cpp
+                        codecvt.cpp
+                        ctype.cpp
+                        num_get.cpp
+                        numpunct.cpp ;
+
+SharedLibrary_LinkSharedLibraries Pt-Text : Pt ;
+SharedLibrary_MakeLocate Pt-Text : bin ;
+
+Main StringTest : StringTest.cpp ;
+Main_LinkSharedLibraries StringTest : Pt-Text Pt ;
+Main_MakeLocate StringTest : bin ;

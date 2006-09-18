@@ -1,0 +1,6 @@
+SubDir TOP include Pt ;
+
+SubInclude TOP include Pt IO ;
+SubInclude TOP include Pt Text ;
+SubInclude TOP include Pt System ;
+SubInclude TOP include Pt Gfx ;

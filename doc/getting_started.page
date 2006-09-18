@@ -1,0 +1,54 @@
+
+/** \page "Getting Started"
+
+!!! Getting Started
+
+!!Aquiring PPR
+PPR is a commercial product maintained and supported by PTV AG and is 
+part of the navi-platform. Visit www.ptv.de for more information. 
+Alternatively, the free Platinum C++ framework is available under the LGPL,
+which is mostly identical to PPR.
+
+!!Including PPR Headers
+The header files are arranged in include directories named by the module
+namespace. The ptv-io headers are therefore placed in <includedir>/ptv/io.
+Library headers are always included with a path beginning at the top-level
+namespace.
+
+\code
+#include <ptv/Api.h>
+#include <ptv/io/IOStream.h>
+\endcode
+
+!!Linking against PPR
+The libraries built from each module follow a special naming scheme which
+is derived from the module namespace as shown in the following table.
+
+||Namespace||Win32||Unix
+|ptv|ptv.dll|libptv.so
+|ptv::io|ptv-io.dll|libptv-io.so
+
+!!Building PPR from source
+The cross-platform build tool 'jam' is used to build PPR on all platforms
+with a unified build system. To build PPR for your system run the jam tool
+in the project root with some of the following parameters:
+
+||Argument||Possible Value||Default Value
+|CONFIG|debug / release|debug
+|TOOLSET| vc7 / vc8 / gcc /qcc / evc4|---
+|BYTEORDER| le / be|le
+
+Jam executables for various platforms are provided in the jam subdirectory.
+For example, to build PPR for windows with the VC7 compiler open the Visual 
+Studio build shell and run:
+
+@code
+jam\jam.exe -sCONFIG=release -sTOOLSET=vc7
+@endcode
+
+Of course jam-enabled project files are provided for many IDE's too 
+(Visual Studio, Eclipse, KDevelop...), as well as .bat and unix shell
+scripts for convenience.
+
+*/
+

@@ -1,0 +1,14 @@
+SubDir TOP src ;
+
+SubInclude TOP src Pt ;
+SubInclude TOP src Pt-IO ;
+SubInclude TOP src Pt-Text ;
+SubInclude TOP src Pt-System ;
+SubInclude TOP src Pt-Xml ;
+SubInclude TOP src Pt-Gfx ;
+
+if $(TARGET_OS:U) = LINUX
+{
+	SubInclude TOP src Pt-Gui ;
+	SubInclude TOP src examples ;
+}

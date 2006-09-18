@@ -1,0 +1,22 @@
+SubDir TOP src Pt-Gfx ;
+
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt-Gfx :
+	ARgbColor.cpp
+	Brush.cpp
+	BasicImage.cpp
+	CmykColor.cpp
+	Font.cpp
+	Pen.cpp
+	YuvColor.cpp
+	Rgb565Color.cpp
+	XRgb1555Color.cpp
+	XRgb8888Color.cpp 
+	;
+
+SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt ;
+SharedLibrary_MakeLocate Pt-Gfx : bin ;
+
+Main GreyscaleTest : GreyscaleTest.cpp ;
+Main_LinkSharedLibraries GreyscaleTest : Pt-Gfx Pt ;

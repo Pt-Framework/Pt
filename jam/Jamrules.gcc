@@ -1,0 +1,88 @@
+# Configuration specific compiler flags
+#
+if $(CONFIG) = debug 
+{
+	CCFLAGS += -DDEBUG -g ;
+	OPTIM   = -O ;
+}
+else
+{
+	OPTIM		= -O2 ;
+}
+
+CCFLAGS 	+= -Wall ;
+C++FLAGS	+= $(CCFLAGS) -std=c++98 -D__STDC_VERSION__=199901L ;
+LINKFLAGS	?= $(CCFLAGS) ;
+LINKLIBS	+= -lstdc++ ;
+RANLIB		?= ranlib ;
+
+
+# Add a compiler define
+#
+# The specified string will be returnd as a define compiler
+# option, i.e. -D on gcc or /D on vc++
+#
+rule FDefines 
+{ return -D$(<) ; }
+
+
+rule FIncludes 
+{ return -I$(<) ; }
+
+
+# @brief Links a shared library to an executable
+#
+# @param < the target name
+# @param > list of shared libraries
+rule Main_LinkSharedLibraries
+{
+	local _target = $(<)$(SUFEXE) ;
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
+	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
+}
+
+
+rule SharedLibrary_MakeLocate
+{
+	MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
+	SEARCH_SHLIB += $(>) ;
+}
+
+
+# @brief Links a shared library to an executable
+#
+# @param < the target name
+# @param > list of shared libraries
+rule SharedLibrary_LinkSharedLibraries
+{
+	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
+	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
+}
+
+
+# @brief builds a shared library from object files
+#
+rule SharedLibraryFromObjects
+{
+	# Add grist to file names
+	local _sources = [ FGristFiles $(>) ] ;
+
+	# Add library name decorations <lib><name><.so>
+	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+	# setup dependencies
+	Depends exe : $(_target) ;
+	Depends lib : $(_target) ;
+	Depends $(_target) : $(_sources) ;
+
+	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+
+	# include library path
+	SEARCH_SHLIB += $(LOCATE_TARGET) ;
+
+	Clean clean : $(_target) ;
+
+	LINKFLAGS on $(_target) += -shared ;
+	Link $(_target) : $(_sources) ;
+}

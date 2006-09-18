@@ -1,0 +1,47 @@
+// Copyright (C) 2000-2004 Marc Boris Drner <marcd __at arklinux __dot org>
+// All rights reserved.
+
+#include "Pt/Reflectable.h"
+
+
+namespace Pt {
+
+Reflectable::Reflectable(const std::string& typeName)
+: _typeName(typeName)
+{
+	this->registerProperty( "typeName", this, &Reflectable::typeName );
+}
+
+
+Reflectable::~Reflectable()
+{
+	for(PropertyMap::iterator it = _properties.begin(); it != _properties.end(); ++it) {
+		delete it->second;
+	}
+	_properties.clear();
+}
+
+
+Pt::Any Reflectable::property(const std::string& name)
+{
+	PropertyMap::iterator it = _properties.find(name);
+	if(it == _properties.end())
+		return Any();
+
+	return it->second->value();
+}
+
+
+void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
+{
+	PropertyMap::iterator it = _properties.find(name);
+	if( it == _properties.end() ) {
+		std::cerr << "Reflectable: Could not set '" << name << "' = " << value << std::endl;
+		return;
+	}
+
+	it->second->setValue(value);
+}
+
+} // namespace Pt
+

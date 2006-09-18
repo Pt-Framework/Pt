@@ -1,0 +1,179 @@
+
+
+
+if $(VISUALC) 
+{
+	VISUALC = $(VISUALC:J=" ") ;
+}
+
+# Add a compiler define
+#
+# The specified string will be added as a define compiler
+# option, i.e. -D on gcc or /D on vc++
+#
+rule FDefines 
+{ 
+	return /D$(<) ; 
+}
+
+
+rule FIncludes 
+{ 
+	return /I$(<) ; 
+}
+
+
+# Builds an executable
+#
+rule Main
+{
+	# in case of debug d.exe is added
+	local _target = $(<:S=$(SUFEXE)) ;
+	
+	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+	Objects $(>) ;
+    
+    	# Tell jam where it can find the .pdb, .lib, .exp
+    	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+    	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
+    	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.exe.manifest) : $(LOCATE_TARGET) ;
+	
+	# clean rules only replace '.exe' suffic while 'd' for debug is kept
+	Clean clean : $(_target) ;
+	Clean clean : $(_target:S=.lib) ;
+	Clean clean : $(_target:S=.exp) ;
+	Clean clean : $(_target:S=.pdb) ;
+	Clean clean : $(_target:S=.ilk) ;
+}
+
+
+# Links a shared library into another shared library
+#
+# param < the target name
+# param > list of shared libraries
+#
+rule Main_LinkSharedLibraries
+{
+	LinkLibraries $(<) : $(>) ;
+}
+
+
+rule Main_MakeLocate
+{
+	local _target = $(<:S=$(SUFEXE)) ;
+	MakeLocate $(_target) : $(>) ;
+	
+	MakeLocate $(_target:S=.lib) : $(>) ;
+	MakeLocate $(_target:S=.exp) : $(>) ;
+	MakeLocate $(_target:S=.pdb) : $(>) ;
+	MakeLocate $(_target:S=.ilk) : $(>) ;
+	MakeLocate $(_target:S=.exe.manifest) : $(LOCATE_TARGET) ;
+}
+
+
+# @brief builds a shared library from object files
+rule SharedLibraryFromObjects
+{
+	# Add grist to file names
+	local _sources = [ FGristFiles $(>) ] ;
+
+	# Add library name decorations <name><.dll/.so>
+	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+	# setup dependencies
+	Depends exe : $(_target) ;
+	Depends lib : $(_target) ;
+	Depends $(_target) : $(_sources) ;
+	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+
+	# Tell jam where it can find the .dll, .lib, .ilk and .pdb
+	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
+	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
+
+	# clean the .dll, .lib, .ilk and .pdb
+	Clean clean : $(_target) ;
+	Clean clean : $(_target:S=.lib) ;
+	Clean clean : $(_target:S=.ilk) ;
+	Clean clean : $(_target:S=.pdb) ;
+	Clean clean : $(_target:S=.exp) ;
+	
+	LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+	Link $(_target) : $(_sources) ;
+
+}
+
+
+rule SharedLibrary_MakeLocate
+{
+	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+	
+	MakeLocate $(_target) : $(>) ;
+	MakeLocate $(_target:S=.lib) : $(>) ;
+	MakeLocate $(_target:S=.exp) : $(>) ;
+	MakeLocate $(_target:S=.pdb) : $(>) ;
+	MakeLocate $(_target:S=.ilk) : $(>) ;
+	
+	SEARCH_SHLIB += $(>) ;
+}
+
+
+# Adds dependend shared libraries to a shared library
+#
+# @param < the target name
+# @param > list of shared libraries
+rule SharedLibrary_LinkSharedLibraries
+{
+	# Add library name decorations <name><.dll/.so>
+	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+		
+	# make library dependency of target		
+	Depends $(_target) : $(>:S=$(SUFLIB)) ;
+	Depends $(_target) : $(>:S=$(SUFDLL)) ;
+	
+	# set NEEDLIBS variable used by 'Link'		
+	NEEDLIBS on $(_target) += $(>:S=$(SUFLIB)) ;
+}
+
+
+actions updated together piecemeal Archive
+{
+	set PATH=$(VISUALC)\Common7/IDE;%PATH%
+	if exist $(<) set _$(<:B)_=$(<)
+	"$(AR)" /out:$(<) %_$(<:B)_% $(>)
+}
+
+
+actions As
+{
+set PATH=$(VISUALC)\Common7/IDE;%PATH%
+"$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc
+{
+set PATH=$(VISUALC)\Common7/IDE;%PATH%
+"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++
+{
+	set PATH=$(VISUALC)\Common7\IDE;%PATH%
+	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
+
+actions Link bind NEEDLIBS
+{
+	set PATH=$(VISUALC)\Common7\IDE;%PATH%
+	set LIB=$(VCDIR)\lib\;$(VCDIR)\PlatformSDK\lib\;%LIB%
+	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}

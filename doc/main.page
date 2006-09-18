@@ -1,0 +1,35 @@
+/** \mainpage Ptv Portable Runtime (PPR)
+!!! Discover the PTV Portable Runtime
+Do you want effective design? Do you want portability? Do you want high 
+performance? ...if the answer to these questions is yes, then PPR is for you! 
+
+Boost your daily performance with this modern C++ framework! With PPR your
+applications are portable to many platforms without change. Its clean and
+concise design assists you in writing robust and highly reusable code easily.
+Unleash the power of C++ onto your programs and let them run like they have 
+never run before.
+
+!!! Features
+
+!! Portablility
+PPR is extremely portable and runs on everything from embedded devices up 
+to large servers. The supported platforms include Windows, Windows CE, 
+Linux, QNX, Unix with many more to come. PPR lets you spend your time on 
+YOUR application, and takes away the pain of low-level programming.
+
+!! Performance
+A high degree of performance is achieved through the use of modern C++
+features. Your program will benefit from the many optimizations 
+included in the framework.
+
+!! Easy to use
+PPR is designed from the ground up to be flexible and extensible.
+It provide simple solutions to your problems. Programs written with
+PPR tend to be significantly shorter and much easier to understand.
+
+!! Open Source
+Its not just open, its free! Published under the LGPL it allows you
+to write commercial application and be part of the great community that
+develops PPR and determines its future.
+
+*/

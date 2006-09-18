@@ -1,0 +1,29 @@
+JAVA_SYSTEM_INCLUDE = win32 ;
+
+SUFOBJ		= .obj ;
+PRELIB		= "" ;
+
+if $(CONFIG) = debug 
+{
+	SUFLIB		= d.lib ;
+	SUFEXE		= d.exe ;
+	SUFDLL	= d.dll ;
+}
+else
+{
+	SUFLIB		= .lib ;
+	SUFEXE		= .exe ;
+	SUFDLL	= .dll ;
+}
+
+TOOLSET		?= vc7 ;
+SYS		?= win32 ;
+GUI		?= gdi ;
+
+SYSLIBS += wsock32.lib ;
+SYSLIBS += version.lib ;
+GFXLIBS = ;
+GUILIBS = ;
+
+
+

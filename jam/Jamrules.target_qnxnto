@@ -1,0 +1,45 @@
+# Set default values for toolset, system API and GUI API
+#
+SYS = posix ;
+GUI ?= gf ;
+TOOLSET ?= qcc ;
+
+# Required Libraries
+#
+SYSLIBS ?= ;
+GFXLIBS ?= ;
+GUILIBS ?= ;
+
+
+# System specific library naming
+#
+if $(CONFIG) = debug 
+{
+	SUFLIB = d.a ;
+	SUFDLL = d.so ;
+	SUFEXE	= d ;
+}
+else
+{
+	SUFLIB = .a ;
+	SUFDLL = .so ;
+	SUFEXE	= "" ;
+}
+
+PRELIB = lib ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

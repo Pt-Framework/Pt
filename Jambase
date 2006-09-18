@@ -1,0 +1,68 @@
+# OS specific string for current directory
+#
+DOT = . ;
+JAMDIR ?= jam ;
+
+
+# Return path to jamrules
+#
+rule JamInclude
+{
+	local _s = $(DOT) ;
+
+	_s = $(JAMDIR:R=$(_s)) ;
+
+	local _i ;	    
+	for _i in $(<)
+	{
+	    _s = $(_i:R=$(_s)) ;
+	}
+
+	include $(_s) ;
+}
+
+
+# Set Target OS to host OS if unset
+#
+TARGET_OS ?= $(OS:L) ;
+
+
+# Set target platform to host platform if unset
+#
+TARGET_OSPLAT ?= $(OSPLAT:L) ;
+
+
+# Include base rules
+#
+# This adds/sets basic rules and variables.
+#
+JamInclude Jamrules.base ;
+
+
+# Include host platform specifics
+#
+# This adds/sets platform specific rules and variables. May override base 
+# rules and variables.
+#
+JamInclude Jamrules.host_$(OS:L) ;
+
+
+# Include target platform specifics
+#
+# This adds/sets platform specific rules and variables. May override base 
+# rules and variables.
+#
+JamInclude Jamrules.target_$(TARGET_OS:L) ;
+
+
+# Include toolset specifics
+#
+# This adds/sets toolset specific rules and variables. May override platform
+# specific rules and variables.
+#
+JamInclude Jamrules.$(TOOLSET:L) ;
+
+
+# include the project top level Jamfile
+#
+include Jamfile ;

@@ -1,0 +1,39 @@
+SubDir TOP src Pt-System ;
+
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
+
+SharedLibrary Pt-System : [ FDirName $(SYS:L) ConditionImpl.cpp ]
+                          [ FDirName $(SYS:L) DirectoryImpl.cpp ]
+                          [ FDirName $(SYS:L) FileImpl.cpp ]
+                          [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
+                          [ FDirName $(SYS:L) FileSystemImpl.cpp ]
+                          [ FDirName $(SYS:L) MutexImpl.cpp ]
+                          [ FDirName $(SYS:L) SemaphoreImpl.cpp ]
+                          [ FDirName $(SYS:L) ThreadImpl.cpp  ]
+                          [ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
+                          Application.cpp
+                          Condition.cpp
+                          Directory.cpp
+                          Event.cpp
+                          EventLoop.cpp
+                          File.cpp
+                          FileDevice.cpp
+                          FileStream.cpp
+                          FileSystem.cpp
+                          Mutex.cpp
+                          MutexLock.cpp
+                          Plugin.cpp
+                          Process.cpp
+                          Semaphore.cpp
+                          SharedLib.cpp
+                          SharedMemory.cpp
+                          Spinlock.cpp
+                          SystemError.cpp
+                          Thread.cpp
+                          ThreadKey.cpp 
+                          ;
+
+SharedLibrary_LinkSharedLibraries Pt-System : Pt Pt-IO ;
+SharedLibrary_AddLibraries Pt-System : $(SYSLIBS) ;
+SharedLibrary_MakeLocate Pt-System : bin ;

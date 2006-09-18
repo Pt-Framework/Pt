@@ -1,0 +1,45 @@
+
+JamInclude Jamrules.gcc ;
+
+
+# Compiler flags and tools
+#
+GCCVERSION ?= 3.3.5 ;
+C++		= QCC ;
+CC		= qcc ;
+LINK		= $(CC) ;
+CCFLAGS		+= -Y_cpp -D_FILE_OFFSET_BITS=64 -D__QNX__ ; 
+
+
+#ARM, PPC and MIPS exist for BE as well as for LE, the compiler wants byteorder to be specified.
+#SH4 and X86 both are little endian CPUs, but only for x86 qcc doesn't want the endianess to be specified
+if $(TARGET_OSPLAT:L) = x86
+{
+	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+}
+else
+{
+	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+}	
+
+
+#Redefine toolset for cross compilation
+if $(OS:L) = nt 
+{
+	AR = nto$(TARGET_OSPLAT)-ar.exe ru ;
+	RANLIB = nto$(TARGET_OSPLAT)-ranlib.exe ;
+	
+	actions Chmod1
+	{
+	 REM is not necessary within cross development environment
+	}
+}
+
+
+
+PRELIB = lib ;
+
+C++FLAGS	= $(CCFLAGS) -lang-c++ -fexceptions ;
+LINKFLAGS	= $(CCFLAGS) ;
+LINKLIBS	= -lcpp -lc -lm ;
+OPTIM		= -O ;

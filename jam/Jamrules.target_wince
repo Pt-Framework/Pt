@@ -1,0 +1,24 @@
+# For wince cross compiles we default to arm CPUs
+#
+TARGET_OSPLAT ?= arm ;
+
+SUFOBJ	= .obj ;
+PRELIB	= "" ;
+SUFLIB	= .lib ;
+SUFEXE	= .exe ;
+SUFDLL	= .dll ;
+
+if $(CONFIG) = debug 
+{
+	SUFLIB	= d.lib ;
+	SUFEXE	= d.exe ;
+	SUFDLL	= d.dll ;
+}
+
+TOOLSET		?= vc8 ;
+SYS		?= wince ;
+GUI		?= gdi ;
+
+SYSLIBS = ;
+GFXLIBS = ;
+GUILIBS = ;

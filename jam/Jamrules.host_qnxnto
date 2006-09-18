@@ -1,0 +1,24 @@
+# Shell commands
+#
+CHMOD		= chmod ;
+CHGRP		= chgrp ;
+CHOWN		= chown ;
+RANLIB		?= ranlib ;
+YACC		= yacc ;
+YACCGEN		= .c ;
+YACCFILES	= y.tab ;
+YACCFLAGS	= -d ;
+LEX		= lex ;
+
+
+
+
+
+
+
+
+
+
+
+
+

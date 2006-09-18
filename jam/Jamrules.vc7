@@ -1,0 +1,61 @@
+# contains common rules for all vc-compilers
+#
+JamInclude Jamrules.vc ;
+
+if $(TARGET_OS:L) != nt 
+{
+	exit "This target-os is not supported on this toolset" ;
+}
+
+if $(TARGET_OSPLAT:L) != x86
+{
+	exit "This target-platform is not supported on this toolset" ;
+}
+
+# Set Path to Visual Studio 2003 installation from envvar if 
+# not set by user
+#
+VISUALC ?= $(VCINSTALLDIR:J=" ") ;
+
+# Path to VC/C++ module of visual studio installation 
+#
+VCDIR = $(VISUALC)\\vc7 ;
+
+# This probably shouldnt be here...
+#
+JamInclude Jamrules.mfc ;
+
+
+if $(CONFIG) = debug 
+{
+	LINKFLAGS += /DEBUG ;
+	CCFLAGS += /MDd /Zi ;
+}
+else
+{
+	LINKFLAGS += "" ;
+	CCFLAGS += /MD ;
+}
+
+AR		= $(VISUALC)\\vc7\\bin\\lib ;
+AS		= masm386 ;
+CC		= $(VISUALC)\\vc7\\bin\\cl /nologo ;
+C++		= $(CC) ;
+C++FLAGS	+= $(CCFLAGS) /EHsc /GR /FD /W3 /DWIN32  ;
+LINK		= $(VISUALC)\\vc7\\bin\\link /nologo ;
+LINKFLAGS       += "/INCREMENTAL:NO" ;
+LINKLIBS        += \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\advapi32.lib\"
+                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\gdi32.lib\"
+                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\user32.lib\"
+                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\kernel32.lib\" 
+                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\version.lib\"
+		  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\wsock32.lib\" ;
+OPTIM	 	?= "" ;
+STDHDRS         = \"$(VISUALC)\\vc7\\include\" 
+	          \"$(VISUALC)\\vc7\\PlatformSDK\\include\" ;
+UNDEFFLAG	= "/u _" ;
+
+
+# set directory to mfc for this toolset
+MFCDIR = \"$(VCDIR)\\atlmfc\" ;
+

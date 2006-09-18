@@ -1,0 +1,21 @@
+PRELIB    = lib ;
+SUFLIB    = .a ;
+SUFDLL    = .so ;
+SUFEXE	  = "" ;
+SUFDBG    = "" ;
+
+if $(CONFIG) = debug 
+{
+	SUFLIB  = d.a ;
+	SUFDLL  = d.so ;
+	SUFEXE	= d ;
+	SUFDBG  = d ;
+}
+
+SYSLIBS     = -ldl -lpthread -lrt ;
+GFXLIBS     = ;
+GUILIBS     = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
+
+TOOLSET     ?= gcc ;
+SYS         ?= posix ;
+GUI         ?= x11 ;

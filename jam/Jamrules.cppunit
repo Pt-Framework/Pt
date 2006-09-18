@@ -1,0 +1,68 @@
+# Rules for build and execute cppunit test
+#
+rule CppUnitTest
+{
+        local _exe = $(1:S=$(SUFEXE)) ;
+        local _output = $(1:S=.cppunit) ;
+
+	testExe on $(1) = $(_exe) ;
+	
+	
+	Depends $(_output) : $(_exe) ;
+        Depends $(1) : $(_output) ;
+	Depends all : $(1) ;
+	
+	Main $(1) : $(2) ;
+	Main_LinkLibraries $(1) : cppunit ;	
+	
+	Clean clean : $(_output) ;
+}
+
+
+rule CppUnitTest_MakeLocate
+{
+	Main_MakeLocate $(<) : $(>) ;
+	
+	MakeLocate $(<:S=.cppunit) : $(>) ;
+}
+
+
+actions CppUnitTest bind testExe
+{ 
+	$(testExe) $(testExe:D)$(SLASH)$(1:S=.cppunit)
+}
+
+
+if $(TARGET_OS:U) = WINCE 
+{
+
+	if $(REMOTE_TESTS)
+	{
+		actions CppUnitTest bind testExe
+		{ 	
+			ce connect 1
+
+			ce copy $(testExe) \$(testExe:BS)
+
+			ce start "\$(testExe:BS)" \$(testExe:B).cppunit
+
+			@ping 127.0.0.1 -n 2 -w 1000 > nul
+			@ping 127.0.0.1 -n 5 -w 1000 > nul
+
+			ce get \$(testExe:B).cppunit $(testExe:D)$(SLASH)$(1:S=.cppunit)
+
+			ce get \$(testExe:B).cppunit.ok $(testExe:D)$(SLASH)$(1:S=.cppunit.ok)
+
+			taskkill /F /IM DeviceEmulator.exe
+		}
+	}
+	else
+	{
+		actions CppUnitTest bind testExe
+		{ 	
+			echo Remote tests for WinCE omitted. Enable with -sREMOTE_TESTS=true
+			echo NOTE: Device Command Shell must be installed.
+		}
+	}
+	
+}

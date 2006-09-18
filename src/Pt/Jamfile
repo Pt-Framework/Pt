@@ -1,0 +1,24 @@
+SubDir TOP src Pt ;
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt : Any.cpp
+                   AnyTraits.cpp
+                   Connection.cpp
+                   Connectable.cpp
+                   Callable.cpp
+                   Delegate.cpp
+                   Exception.cpp
+                   Reflectable.cpp
+                   Property.cpp
+                   Signal.cpp
+                   TypeInfo.cpp ;
+
+SharedLibrary_MakeLocate Pt : bin ;
+
+Main AtomicTest : AtomicTest.cpp ;
+Main_LinkSharedLibraries AtomicTest : Pt ;
+Main_MakeLocate AtomicTest : bin ;
+
+Main SignalTest : SignalTest.cpp ;
+Main_LinkSharedLibraries SignalTest : Pt ;
+Main_MakeLocate SignalTest : bin ;

@@ -1,0 +1,36 @@
+# contains common rules for all vc-compilers
+JamInclude Jamrules.vc ;
+
+# Set Path to Visual Studio 2005 installation from envvar if 
+# not set by user
+#
+VISUALC ?= $(VSINSTALLDIR:J=" ") ;
+
+
+# Path to VC/C++ module of visual studio installation 
+#
+VCDIR = $(VISUALC)\\vc ;
+
+JamInclude Jamrules.mfc ;
+
+AR		= $(VISUALC)\\vc\\bin\\lib ;
+AS		= masm386 ;
+CC		= $(VISUALC)\\vc\\bin\\cl /nologo ;
+CCFLAGS		?= "" ;
+C++		= $(CC) ;
+C++FLAGS	+= $(CCFLAGS) /Zc:wchar_t- ;
+LINK		= $(VISUALC)\\vc\\bin\\link /nologo ;
+#LINKFLAGS	+= /MANIFEST:NO ;
+LINKLIBS        ?= "" ;
+OPTIM	 	?= "" ;
+UNDEFFLAG	= "/u _" ;
+
+
+# set directory to mfc for this toolset
+#
+MFCDIR = \"$(VCDIR)\\atlmfc\" ;
+
+
+# Include rules for selected target OS
+#
+JamInclude Jamrules.vc8.$(TARGET_OS:L) ;
