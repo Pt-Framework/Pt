@@ -7,7 +7,7 @@ JamInclude Jamrules.vc8.wince.$(TARGET_OSPLAT:L) ;
 #
 CCFLAGS  += /D "WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "_UNICODE" /D "UNICODE" ;
 C++FLAGS += /D "_WIN32_WCE=0x420" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "WINCE" ;
-C++FLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /EHsc /fp:fast /GR- /W3 /TP ;
+C++FLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /EHsc /fp:fast /GR /W3 /TP ;
 LINKFLAGS += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
 LINKFLAGS += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
 
