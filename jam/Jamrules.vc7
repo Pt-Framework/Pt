@@ -34,7 +34,7 @@ if $(CONFIG) = debug
 else
 {
 	LINKFLAGS += "" ;
-	CCFLAGS += /MD ;
+	CCFLAGS += /MD /O1 /Oy ;
 }
 
 AR		= $(VISUALC)\\vc7\\bin\\lib ;
