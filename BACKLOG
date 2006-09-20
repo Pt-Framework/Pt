@@ -1,7 +1,5 @@
 ITEM P0 S0 "Compiler attributes and pragmas are abstracted"
-	TASK "Review PT_PACKED macro"
-	TASK "Review PT_ALIGN macro"
-	TASK "Introduce PTV_API macro"
+	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
 
 ITEM P0 S0 "POD types of fixed size are defined"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Drner                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -30,21 +30,18 @@
 #ifdef _MSC_VER
 	#define PT_EXPORT __declspec(dllexport)
 	#define PT_IMPORT __declspec(dllimport)
-	#define PT_ALIGN_BEGIN(value) __declspec( align( value ) )
-	#define PT_ALIGN_END(value)
 	#define PT_PACKED
+	#define PT_ALIGN(value) __declspec( align( value ) )
 #elif __GNUC__ >= 4
 	#define PT_EXPORT __attribute__((visibility("default")))
 	#define PT_IMPORT
-	#define PT_ALIGN_BEGIN(value)
-	#define PT_ALIGN_END(value) __attribute__ ((aligned ( value )))
 	#define PT_PACKED __attribute__ ((packed))
+	#define PT_ALIGN(value) __attribute__ ((aligned ( value )))
 #elif __GNUC__
 	#define PT_EXPORT
 	#define PT_IMPORT
-	#define PT_ALIGN_BEGIN(value)
-	#define PT_ALIGN_END(value) __attribute__ ((aligned ( value )))
 	#define PT_PACKED __attribute__ ((packed))
+	#define PT_ALIGN(value) __attribute__ ((aligned ( value )))
 #elif __BCPLUSPLUS__
 	#error borland compiler at the time not supported
 #else
@@ -52,9 +49,9 @@
 #endif
 
 #ifdef PT_DLL_API
-	#define PT_API PTV_EXPORT
+	#define PT_API PT_EXPORT
 #else
-	#define PT_API PTV_IMPORT
+	#define PT_API PT_IMPORT
 #endif
 
 

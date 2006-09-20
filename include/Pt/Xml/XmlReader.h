@@ -19,7 +19,7 @@ namespace Xml {
 	class XmlDeclaration;
 	class StartElement;
 	class EndElement;
-	class PT_EXPORT EndDocument;
+	class EndDocument;
 	class Characters;
 	class ProcessingInstruction;
 	class Comment;
