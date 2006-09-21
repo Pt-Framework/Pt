@@ -5,8 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME                        = Platinum
 PROJECT_NUMBER                      = 0.0.1
-INPUT                               = ./main.page ./svn.page ./faq.page ./mailinglist.page ./features.page ./download.page ./people.page cplusplus.page building.page acknowledgements.page
-#../include
+INPUT                               = ./main.page ./svn.page ./faq.page ./mailinglist.page ./features.page ./download.page ./people.page cplusplus.page building.page acknowledgements.page 
 OUTPUT_DIRECTORY                    = ./doxys
 GENERATE_DOXYS_HELP                 = NO
 HTML_FILE_EXTENSION                 = .html
@@ -21,7 +20,7 @@ DELETE_OUTPUT_DIRECTORY             = YES
 MS_DOT_NET_INTEGRATION              = NO
 MS_DOT_NET_INTEGRATION_PATH         = 
 GENERATE_HTMLHELP1                  = NO
-GENERATE_STATISTICS                 = YES
+GENERATE_STATISTICS                 = NO
 #---------------------------------------------------------------------------
 # Search page options
 #---------------------------------------------------------------------------
@@ -170,7 +169,7 @@ TEMPLATE_RELATIONS                  = YES
 INCLUDE_GRAPH                       = YES
 INCLUDED_BY_GRAPH                   = YES
 CALL_GRAPH                          = YES
-DIR_GRAPH                           = YES
+DIR_GRAPH                           = NO
 GRAPHICAL_HIERARCHY                 = YES
 DOT_IMAGE_FORMAT                    = png
 DOTFILE_DIRS                        = 
