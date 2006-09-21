@@ -1,18 +1,15 @@
-/** \mainpage Ptv Portable Runtime (PPR)
-!!! Discover the PTV Portable Runtime
+/** \mainpage "The Platinum C++ Framework"
+!!! Discover the Platinum C++ Framework
 Do you want effective design? Do you want portability? Do you want high 
-performance? ...if the answer to these questions is yes, then PPR is for you! 
+performance? ...if the answer to these questions is yes, then Platinum is for you! 
 
-Boost your daily performance with this modern C++ framework! With PPR your
+Boost your daily performance with this modern C++ framework! With Platinum your
 applications are portable to many platforms without change. Its clean and
 concise design assists you in writing robust and highly reusable code easily.
-Unleash the power of C++ onto your programs and let them run like they have 
-never run before.
-
-!!! Features
+Unleash the power of C++ onto your programs today!
 
 !! Portablility
-PPR is extremely portable and runs on everything from embedded devices up 
+Platinum is extremely portable and runs on everything from embedded devices up 
 to large servers. The supported platforms include Windows, Windows CE, 
 Linux, QNX, Unix with many more to come. PPR lets you spend your time on 
 YOUR application, and takes away the pain of low-level programming.
@@ -23,9 +20,9 @@ features. Your program will benefit from the many optimizations
 included in the framework.
 
 !! Easy to use
-PPR is designed from the ground up to be flexible and extensible.
+Platinum is designed from the ground up to be flexible and extensible.
 It provide simple solutions to your problems. Programs written with
-PPR tend to be significantly shorter and much easier to understand.
+Platinum tend to be significantly shorter and much easier to understand.
 
 !! Open Source
 Its not just open, its free! Published under the LGPL it allows you

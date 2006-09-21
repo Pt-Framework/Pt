@@ -1,0 +1,84 @@
+
+/** \page "Building"
+
+!!! Building Platinum with jam
+Jam is a make-like program that provides a versatile, unified build process across many platforms including automated unit-tests, cross-compilation and concurrent execution of build steps. This document intends to introduce the jam-based build system used to build Platinum step-by-step.
+
+!! Requirements
+It is usually not neccessary to install any additional tools since precompiled jam binaries for several platforms are provided in the 'jam' subdirectory of the project and nothing else is required. the following table lists the available precompiled binaries.
+
+||Operation System|binary name
+|Linux-X86|jam.linux.x86
+|Windows NT/XP|jam.exe
+|QNX6.3.0-X86|jam.qnx630.x86
+
+If no precompiled tool is available for the desired platform, the complete source code can be found in the jam directory in the project tree. Makefiles for win32-based and posix-based systems are available.
+
+!! Build options
+Ihe jam tool must be invoked in the project root, where a 'jam' subdirectory and a file called 'Jambase' are located. If jam is run without any arguments, default values are deduced from the environment, which might not be possible in all cases. It will work from well from a unix shell or the 'build command shell' provided by Microsoft visual studio installations. All outdated targets and its dependencies are rebuild, when no target specified. To build a specific target of the project simply invoke jam with a target name. The following command will build the target program.exe and all its dependencies:
+
+@code
+jam\jam.exe program.exe
+@endcode
+
+Besides concrete targets, jam knows several pseudo-targets. One important pseudo-target is 'clean'. To delete all object and binary files on a linux-x86 from the project tree enter:
+
+@code
+./jam/jam.linux.x86 clean
+@endcode
+
+Other pseudo-targets are 'all', 'lib' and 'exe', which will build all targets, all library targets or all execultables, respectively.
+
+Several command line arguments can be passed to jam:
+
+||Argument||Description
+|-a|Build target(s), even if they are current.
+|-n|Don't actually execute the updating actions.
+|-q|Quit quickly as soon as a target fails.
+|-sXXX=YYY|Set variable XXX to value YYY
+
+The last parameter '-s' is very important, because it will control how a target will be built. A variable set with the -s option will directly handed to jam. Instead of setting a variable with the -s option, environment variables can be set. The following table gives an overview of the possible variables and values:
+
+||Argument||Description|Possible Values||Default Value
+|TARGET_OS|Target operating system|nt / linux / qnx-nto / wince| same as host OS
+|TARGET_OSPLAT|Target Platform|x86 / arm /mips| same as host CPU
+|CONFIG|Optimisation|debug / release|debug
+|TOOLSET|Compiler/build tools to be used| vc7 / vc8 / gcc /qcc / evc4| deduced from environment
+|BYTEORDER|Endianess of the target CPU| le / be|le
+
+The following command builds a release version with the gnu compiler toolset:
+@code
+jam\jam.linux.x86 -sCONFIG=release -sTOOLSET=gcc
+@endcode
+
+
+!! Compiling for Linux with GCC
+
+Compiling for Linux with the GNU compiler is done from a normal shell. The default value for the TOOLSET is gcc. The following command builds a release version on a X86 linux system:
+
+@code
+./jam/jam.linux.x86 -sCONFIG=release
+@endcode
+
+
+!! Compiling for Windows NT/XP with Visual Studio 7/8
+
+The Microsoft visual studio installation contains a special 'build command shell'. It differs from a regular command shell in that more environment variables are set. If the build command shell is not used, the VISUALC variable has to be set either as environment variable or with -s when jam is invoked. If the path to the visual studio installation contains whitespace the path has to be put in quotes. The following command demonstrates how a build can be started from a regular console on windows to build with VisualC++ 2003 (vc7):
+
+@code
+jam\jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 2003 .Net" -sTOOLSET=vc7
+@endcode
+
+If the special 'build command shell' is used, VISUALC is determined from other environment variables and does not have to be specified. It is not possible to build vc7 targets from the 'build command shell' provided by a Microsoft visual studio 8 installation.
+
+
+!! Compiling Windows CE targets
+
+Windows CE targets need to be cross compiled under Windows NT/XP. Therefore the TARGET_OS and TARGET_OSPLAT variables need to be set. The following command builds for ARM CPU's:
+
+@code
+./jam/jam.exe -sTOOLSET=vc8 -sTARGET_OS=wince -sTARGET_OSPLAT=arm
+@endcode
+
+*/
+

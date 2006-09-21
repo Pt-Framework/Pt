@@ -5,7 +5,8 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME                        = Platinum
 PROJECT_NUMBER                      = 0.0.1
-INPUT                               = ./main.page ./intro.page ./concepts.page ./getting_started.page ./authors.page ../include
+INPUT                               = ./main.page ./svn.page ./faq.page ./mailinglist.page ./features.page ./download.page ./people.page cplusplus.page building.page acknowledgements.page
+#../include
 OUTPUT_DIRECTORY                    = ./doxys
 GENERATE_DOXYS_HELP                 = NO
 HTML_FILE_EXTENSION                 = .html

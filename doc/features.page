@@ -1,0 +1,53 @@
+/**
+\page Features
+
+!!! Features
+
+!!Modular Design
+Platinum is highly modular and every module builds to a separate libray. 
+Library modules can depend on other modules and form a hierarchy.
+
+\pre
+                             Ptv
+                              |
+                             I/O
+                              |
+                 +------------+------------+
+                 |            |            |
+               System        Gfx          Text
+                 |            |            |
+    +------------+------+-----+           Xml
+    |                   |
+   Net                 Gui
+\endpre
+
+The core module is relatively small and the extentions make up
+for the most part of the library. This allows the programmer to select only 
+the parts of the framework that he really needs.
+
+!! The core module
+The core module provides basic types and support for object modelling. A template based 'signal/slot mechanism' and object reflection is available.
+
+!! The I/O module
+The I/O module extends standard C++ IOStreams and allows transparent and asynchronous I/O.
+
+!! The System module
+The system module provides classes for multi-threading and concurrency, file and directory management, file I/O, library loading and plugins.
+
+!! The Net module
+The networking module provides TCP and UDP I/O over various address spaces Network I/O is available through standard C++ IOStreams.
+
+!! The Text module
+The text handling module implements Unicode support and classes to encode and decode between various encodings.
+
+!! The Xml module
+The Xml module provides an Xml pull parser and an Xml writer.
+
+!! The Gfx module
+The graphics module offers support for graphics operations and drawing on images in many different color spaces (ARGB, CMYK, YUV, HSV) and for conversion between them. It extends the I/O module to allow reading and writing to various popular image formats (.jpg, .png)
+
+
+!! The Gui module
+The Gui module provides basic widget classes, an API for event handling and extends the drawing API of the Gfx module to allow drawing on widgets and widget back buffers.
+*/
+
