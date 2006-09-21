@@ -15,7 +15,7 @@ It is usually not neccessary to install any additional tools since precompiled j
 If no precompiled tool is available for the desired platform, the complete source code can be found in the jam directory in the project tree. Makefiles for win32-based and posix-based systems are available.
 
 !! Build options
-Ihe jam tool must be invoked in the project root, where a 'jam' subdirectory and a file called 'Jambase' are located. If jam is run without any arguments, default values are deduced from the environment, which might not be possible in all cases. It will work from well from a unix shell or the 'build command shell' provided by Microsoft visual studio installations. All outdated targets and its dependencies are rebuild, when no target specified. To build a specific target of the project simply invoke jam with a target name. The following command will build the target program.exe and all its dependencies:
+Ihe jam tool must be invoked in the project root, where a 'jam' subdirectory and a file called 'Jambase' are located. If jam is run without any arguments, default values for the configuration are deduced from the environment, which might not be possible in all cases. It will work from well from a unix shell or the 'build command shell' provided by Microsoft visual studio installations. All outdated targets and its dependencies are rebuild, when no target specified. To build a specific target of the project simply invoke jam with a target name. The following command will build the target program.exe and all its dependencies:
 
 @code
 jam\jam.exe program.exe
