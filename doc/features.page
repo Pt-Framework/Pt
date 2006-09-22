@@ -2,7 +2,7 @@
 \page Features
 
 !!! Features
-
+\n
 !!Modular Design
 Platinum is highly modular and every module builds to a separate libray. 
 Library modules can depend on other modules and form a hierarchy.

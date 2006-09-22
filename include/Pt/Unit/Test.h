@@ -16,58 +16,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_REPORTER_H
-#define PT_UNIT_REPORTER_H
+#ifndef PT_UNIT_TEST_H
+#define PT_UNIT_TEST_H
 
-#include <Pt/SourceInfo.h>
+#include <Pt/NonCopyable.h>
+#include <Pt/Invokable.h>
 
-#include <iostream>
+#include <string>
 
 
 namespace Pt {
 
 namespace Unit {
 
-	class Reporter
+	class Test : public NonCopyable
 	{
 		public:
-			Reporter()
-			{}
+			template <typename InvokableT>
+			Test(const InvokableT& inv, const std::string name)
+			: _name(name)
+			, _invokable( inv.clone() )
+			{ }
 
-			virtual ~Reporter()
-			{}
+			~Test()
+			{ delete _invokable; }
 
-			virtual void message(const std::string& msg)
-			{
-				std::cerr << msg << std::endl;
-			}
+			const std::string& name() const
+			{ return _name; }
 
-			virtual void success( const std::string testCaseName, const std::string testName)
-			{
-				std::cerr << testCaseName << "::" << testName << ": OK."<< std::endl;
-			}
+			void run()
+			{ _invokable->invoke(); }
 
-			virtual void assertion(const std::string& className,
-			                        const std::string& functionName,
-			                        const SourceInfo& info)
-			{
-				std::cerr << className << "::" << functionName << ": Assertion!" << std::endl;
-				std::cerr << '\t' << info.file() << ":" << info.line() << std::endl;
-			}
-
-			virtual void exception( const std::string testCaseName,
-			                         const std::string testName,
-			                         const std::string& what)
-			{
-				std::cerr << testCaseName << "::" << testName << ": Exception!" << std::endl;
-				std::cerr << '\t' << what << std::endl;
-			}
-
-			virtual void error(const std::string& className,
-			                    const std::string& functionName)
-			{
-				std::cerr << className << "::" << functionName << ": Error!" << std::endl;
-			}
+		private:
+			std::string _name;
+			Pt::Invokable<>* _invokable;
 	};
 
 } // namespace Unit

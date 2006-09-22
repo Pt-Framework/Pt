@@ -16,11 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_REPORTER_H
-#define PT_UNIT_REPORTER_H
+#ifndef PT_UNIT_ASSERTION_H
+#define PT_UNIT_ASSERTION_H
 
-#include <Pt/SourceInfo.h>
-
+#include <Pt/Exception.h>
 #include <iostream>
 
 
@@ -28,47 +27,24 @@ namespace Pt {
 
 namespace Unit {
 
-	class Reporter
+	class Assertion : public Pt::Exception
 	{
 		public:
-			Reporter()
+			Assertion(const std::string& what, const SourceInfo& si)
+			: Exception(what, si)
 			{}
 
-			virtual ~Reporter()
+			//! @brief Copy constructor.
+			Assertion(const Assertion& a)
+			: Exception(a)
 			{}
 
-			virtual void message(const std::string& msg)
-			{
-				std::cerr << msg << std::endl;
-			}
-
-			virtual void success( const std::string testCaseName, const std::string testName)
-			{
-				std::cerr << testCaseName << "::" << testName << ": OK."<< std::endl;
-			}
-
-			virtual void assertion(const std::string& className,
-			                        const std::string& functionName,
-			                        const SourceInfo& info)
-			{
-				std::cerr << className << "::" << functionName << ": Assertion!" << std::endl;
-				std::cerr << '\t' << info.file() << ":" << info.line() << std::endl;
-			}
-
-			virtual void exception( const std::string testCaseName,
-			                         const std::string testName,
-			                         const std::string& what)
-			{
-				std::cerr << testCaseName << "::" << testName << ": Exception!" << std::endl;
-				std::cerr << '\t' << what << std::endl;
-			}
-
-			virtual void error(const std::string& className,
-			                    const std::string& functionName)
-			{
-				std::cerr << className << "::" << functionName << ": Error!" << std::endl;
-			}
+			//! @brief Destructor.
+			~Assertion() throw()
+			{}
 	};
+
+	#define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion("Assertion", PT_SOURCEINFO);
 
 } // namespace Unit
 

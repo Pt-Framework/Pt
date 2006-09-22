@@ -19,12 +19,15 @@
 #ifndef PT_UNIT_TESTCASE_H
 #define PT_UNIT_TESTCASE_H
 
-#include <Pt/Unit/TestFixture.h>
+#include <Pt/Exception.h>
 #include <Pt/Invokable.h>
+#include <Pt/Unit/Test.h>
+#include <Pt/Unit/TestFixture.h>
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/Reporter.h>
 
 #include <list>
 #include <string>
-#include <iostream>
 
 
 namespace Pt {
@@ -34,81 +37,110 @@ namespace Unit {
 	class TestCase : public TestFixture
 	{
 		public:
-			TestCase()
+			TestCase(const std::string& name)
+			: _name(name)
 			{
 				_testCases.push_back(this);
 			}
 
 			virtual ~TestCase()
 			{
-				std::list< Pt::Invokable<>* >::iterator it;
-				for( it = _tests.begin(); it != _tests.end(); ++it)
-				{
+				for(std::list<Test*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
 					delete *it;
-				}
+
 				_tests.clear();
 			}
 
-			template <typename I>
-			void registerTest(const I& invokable)
+			template <typename InvokableT>
+			void registerTest(const InvokableT& invokable, const std::string& name)
 			{
-				_tests.push_back( invokable.clone() );
+				_tests.push_back( new Test(invokable, name) );
 			}
 
-			int errors() const
+			const std::string& name() const
+			{ return _name; }
+
+			size_t errors() const
 			{ return _errors; }
 
 			void run()
 			{
-				std::list< Pt::Invokable<>* >::iterator it;
+				std::list<Test*>::iterator it;
 				for( it = _tests.begin(); it != _tests.end(); ++it)
 				{
-					try {
-						this->setUp();
-						//this->progress("AtomicTest", "test");
-						(*it)->invoke();
-						this->tearDown();
+					this->setUp();
+
+					_numTests++;
+
+					try
+					{
+						(*it)->run();
+						this->success( this->name(), (*it)->name() );
 					}
-					catch(...) {
-						TestCase::error("Test Failed: An Exception was thrown.", "test", __FILE__, __LINE__);
+					catch(const Assertion& assertion)
+					{
+						this->assertion( this->name(), (*it)->name(), assertion.sourceInfo() );
 					}
+					catch(const std::exception& ex)
+					{
+						this->exception( this->name(), (*it)->name(), ex.what() );
+					}
+					catch(...)
+					{
+						this->error( this->name(), (*it)->name() );
+					}
+
+					this->tearDown();
 				}
 			}
 
-			void assertion(bool cond)
+			void success(const std::string className, const std::string functionName)
 			{
-				if(!cond)
+				if(_reporter)
 				{
-					TestCase::error("ASSERTION", "...", __FILE__, __LINE__);
+					_reporter->success(className, functionName);
 				}
 			}
 
-			void error(const char* macroName, const char* macro, const char* file, int line)
+			void assertion(const std::string className, const std::string functionName, const SourceInfo& info)
 			{
-				_errors++;
+				++_errors;
 
-				if(_out)
-					*_out << macroName << ": line " << line << " Error: " << macro << std::endl;
+				if(_reporter)
+				{
+					_reporter->assertion(className, functionName, info);
+				}
 			}
 
-			static void message( const char *msg )
+			void exception(const std::string className, const std::string functionName, const std::string what)
 			{
-				if(_out)
-					*_out << msg;
+				++_errors;
+
+				if(_reporter)
+				{
+					_reporter->exception(className, functionName, what);
+				}
 			}
 
-
-			void progress(const char* className, const char* functionName)
+			void error(const std::string className, const std::string functionName)
 			{
-				_numTests++;
+				++_errors;
 
-				if(_out)
-					*_out << className << "::" << functionName << " : OK"<< std::endl;
+				if(_reporter)
+				{
+					_reporter->error(className, functionName);
+				}
 			}
 
-			static int start(std::ostream& out)
+			static void message( const std::string msg )
 			{
-				TestCase::_out = &out;
+				if(_reporter)
+					_reporter->message(msg);
+			}
+
+			static int start(Reporter& reporter)
+			{
+				TestCase::_reporter = &reporter;
 			
 				_errors = 0;
 				_numTests = 0;
@@ -123,26 +155,28 @@ namespace Unit {
 				return _errors;
 			}
 
-		protected:
-			static int _errors;
+		private:
+			std::string _name;
+			std::list<Test*> _tests;
 
-			static int _numTests;
-
-			static std::list<TestCase*> _testCases;
-		
-			static std::ostream* _out;
 
 		private:
-			std::list< Pt::Invokable<>* > _tests;
+			static size_t _errors;
+
+			static size_t _numTests;
+
+			static std::list<TestCase*> _testCases;
+
+			static Reporter* _reporter;
 	};
 
-	int Pt::Unit::TestCase::_errors = 0;
+	size_t Pt::Unit::TestCase::_errors = 0;
 
-	int Pt::Unit::TestCase::_numTests = 0;
+	size_t Pt::Unit::TestCase::_numTests = 0;
 
 	std::list<Pt::Unit::TestCase*> Pt::Unit::TestCase::_testCases;
 
-	std::ostream* Pt::Unit::TestCase::_out = 0;
+	Reporter* Pt::Unit::TestCase::_reporter = 0;
 
 } // namespace Unit
 

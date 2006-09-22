@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   //  -x=CLASS[::TEST]    run all except the test class CLASS or member test CLASS::TEST
   //  -f=FILE             save output in file FILE instead of stdout
 
-	int num_errors = 0;
+/*
 	char* fileName = 0;
 	char* testName = "";
 	char* xtestName = "";
@@ -55,11 +55,9 @@ int main(int argc, char** argv)
 			xtestName = argv[i] + 3;
 		}
 	}
+*/
 
-	num_errors = Pt::Unit::TestCase::start(std::cerr);
+	Pt::Unit::Reporter reporter;
 
-	//reporter->printSummary();
-	//delete reporter;
-
-	return num_errors;
+	return Pt::Unit::TestCase::start(reporter);
 }

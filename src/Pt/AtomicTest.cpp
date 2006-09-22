@@ -21,10 +21,6 @@
 #include "Pt/Unit/TestMain.h"
 
 #include <string>
-#include <iostream>
-#include <iomanip>
-#include <iterator>
-#include <cassert>
 
 using namespace std;
 using namespace Pt;
@@ -34,27 +30,28 @@ class AtomicTest : public Pt::Unit::TestCase
 {
 	public:
 		AtomicTest()
+		: Pt::Unit::TestCase("AtomicIntTest")
 		{
-			Unit::TestCase::registerTest( callable(this, &AtomicTest::test) );
+			Unit::TestCase::registerTest( callable(this, &AtomicTest::test), "test" );
 		}
 
 	protected:
 		void test()
 		{
 			AtomicInt a(5);
-			Unit::TestCase::assertion( a.value() == 5 );
+			PT_UNIT_ASSERT( a.value() == 5 );
 
 			int value = a.value();
-			Unit::TestCase::assertion(value == 5);
+			PT_UNIT_ASSERT( value == 5 );
 
 			a = 10;
-			Unit::TestCase::assertion(a.value() == 10);
+			PT_UNIT_ASSERT( a.value() == 10 );
 
 			a -= 3;
-			Unit::TestCase::assertion(a.value() == 7);
+			PT_UNIT_ASSERT( a.value() == 7 );
 
 			a += 2;
-			Unit::TestCase::assertion(a.value() == 9);
+			PT_UNIT_ASSERT( a.value() == 9 );
 		}
 };
 
