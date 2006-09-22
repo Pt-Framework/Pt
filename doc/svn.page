@@ -2,19 +2,18 @@
 /** \page Subversion
 
 !!! Subversion
+\n
+%Subversion is used as the version control system for the Platinum framework.
 
-Subversion is used as the version control system for the Platinum framework. The source code can be checked out at:
-
+- #Current Development Version#\n
 https://svn.sourceforge.net/svnroot/pt-framework/trunk
 
-Branches and tags can be viewed in the usual SVN locations:
-https://svn.sourceforge.net/svnroot/pt-framework/tags
+- #Branches and tags#\n
+https://svn.sourceforge.net/svnroot/pt-framework/tags \n
 https://svn.sourceforge.net/svnroot/pt-framework/branches
 
-Some precompiled development tools are available thruogh:
-
+- #Precompiled Development Tools#\n
 https://svn.sourceforge.net/svnroot/pt-framework/tools
-
 
 */
 

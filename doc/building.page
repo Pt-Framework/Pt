@@ -2,6 +2,7 @@
 /** \page "Building"
 
 !!! Building Platinum with jam
+\n
 Jam is a make-like program that provides a versatile, unified build process across many platforms including automated unit-tests, cross-compilation and concurrent execution of build steps. This document intends to introduce the jam-based build system used to build Platinum step-by-step.
 
 !! Requirements

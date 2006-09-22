@@ -2,18 +2,18 @@
 \page "C++ used by Platinum"
 
 !!! C++ used by Platinum
-
-!!C++ Standard Library
+\n
+- #C++ Standard Library#\n
 The C++ standard library is available for almost all devices. It is one
 of the best documented pieces of software in the C++ world and a great
-example how both, good design and high performance can be achieved. PPR
+example how both, good design and high performance can be achieved. Pt
 truly embraces the C++ standard library like few others do and benefits
 greatly from the effort the designers have put into it. IO is done 
 with real iostreams and there is no need for yet another string class or
-set of container classes. All exceptions thrown by PPR are derived from 
+set of container classes. All exceptions thrown by Pt are derived from 
 std::exception and std::allocators can be used when needed.
 
-!!Exceptions
+- #Exceptions#\n
 In traditional C/C++ programs without exceptions approximately half of
 the code is required for error handling. Error states constantly have to
 be checked and passed through the many layers that form a big application.
@@ -24,7 +24,7 @@ language to solve these problems. They effectively separate error handling
 from the normal program flow, which lets the program run faster and eliminates
 many lines of code.
 
-!!Templates
+- #Templates#\n
 Platinum makes extensive use of templates and generic programming and this is the 
 main reason why it beats most other toolkits in performance. This technique is
 sometimes refered to as compile time polymorphism, because a compiler is able
@@ -33,13 +33,13 @@ performance is is not the only reason for templates. Generic programming
 offers flexibility and code reuse that can not easily achieved with classic
 object-oriented methods.
 
-!!Objects
+- #Object-Orientation#\n
 Most of the framework consists of classes - it is a class library after all!
 Multiple inheritance and RTTI are supported, and there are some prime example
-within PPR how these often misunderstood features can lead to elegant and 
+within Pt how these often misunderstood features can lead to elegant and 
 robust code.
 
-!!Namespaces
+- #Namespaces#\n
 Platinum opens the namespace Pt, which spans over all
 provided modules. All modules open their own module-wide namespace i.e.
 The Pt-IO module uses the Pt::IO namespace. All macros are given a prefix
