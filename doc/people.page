@@ -3,15 +3,15 @@
 !!! People
 \n
 | #Marc Duerner#\n
-Marc earned a PhD in Chemistry in 2004 and works since then as a professional C++ programmer. Although he started as a "programming chemist" to solve his every day scientific computational problems, he quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. He has written much code for the System, IO, Net, Text, XML, Gui and the core module of Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
+Marc earned a PhD in Chemistry in 2004 and works as a professional C++ programmer since then. Although he started as a "programming chemist" to solve his every day scientific computational problems, he quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. He has written much code for the System, IO, Net, Text, XML, Gui and the core module of Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
 
-| #Tommi Mäkitalo#\n
-Tommi has many years of experience with C++ development in general and network, system and database programming in particular. Tommi is also the founder of the TNT web application server (www.tntnet.org). He currently works for Eckhard+Partner Gmbh in Germany.
+| #Tommi Mï¿½italo#\n
+Tommi has many years of experience with C++ development in general and network, system and database programming in particular. Tommi is also the founder of the TNT web application server (www.tntnet.org). He currently works for Eckhard+Partner GmBH in Germany.
 
 | #Aloysius Indrayanto#\n
-Aloysius finished his Bsc as electrical engineer in 2003 and after he spend a few years as a professional C++ developer he is now working on a Msc degree. He has written large parts of the Gfx and Gui module of Pt. Additionally, he is the main author of the VortexGE renderer.
+Aloysius finished his B.Sc. in electrical engineering in early 2004 and after he spent a few years as a professional C++ developer he is now working on a M.Sc. degree. He has written large parts of the Gfx and some parts of the Gui module of Pt. Additionally, he is the main author of the VortexGE software renderer (freshmeat.net/projects/vortexge).
 
 | #Stephan Beal#\n
-Stephan has been a professional C++ developer for many years. He currently works for navigating.de in Berlin, Germany. Besides Pt, he works on s11n a C++ serialisation framework (www.s11n.net)
+Stephan has been a professional C++ developer for many years. He currently works for navigating.de in Berlin, Germany. Besides Pt, he works on s11n, a C++ serialisation framework (www.s11n.net).
 
 */
