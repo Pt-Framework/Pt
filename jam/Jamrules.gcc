@@ -12,7 +12,7 @@ else
 
 # CPU specific compiler flags
 #
-if $(TARGET_OSPLAT:U) = AMD64
+if $(TARGET_OSPLAT:U) != X86
 {
 	CCFLAGS += -fPIC ;
 }
