@@ -10,6 +10,13 @@ else
 	OPTIM		= -O2 ;
 }
 
+# CPU specific compiler flags
+#
+if $(TARGET_OSPLAT) = AMD64
+{
+	CCFLAGS += -fPIC ;
+}
+
 CCFLAGS 	+= -Wall ;
 C++FLAGS	+= $(CCFLAGS) -std=c++98 -D__STDC_VERSION__=199901L ;
 LINKFLAGS	?= $(CCFLAGS) ;
