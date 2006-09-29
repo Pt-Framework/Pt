@@ -18,7 +18,7 @@ if $(TARGET_OSPLAT:U) != X86
 }
 
 CCFLAGS 	+= -Wall ;
-C++FLAGS	+= $(CCFLAGS) -std=c++98 -D__STDC_VERSION__=199901L ;
+C++FLAGS	+= $(CCFLAGS) ;
 LINKFLAGS	?= $(CCFLAGS) ;
 LINKLIBS	+= -lstdc++ ;
 RANLIB		?= ranlib ;
