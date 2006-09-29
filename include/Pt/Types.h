@@ -25,6 +25,10 @@
 #include <climits>
 #include <cstddef>
 
+#ifdef __GNUC__
+	#include <stdint.h>
+#endif
+
 
 namespace Pt {
 
@@ -82,6 +86,10 @@ namespace Pt {
 	#define PT_64BIT 1
 	typedef long long int64_t;
 	typedef unsigned long long uint64_t;
+#elif __GNUC__
+	#define PTV_64BIT 1
+	typedef ::int64_t int64_t;
+	typedef ::uint64_t uint64_t;
 #endif
 
 } // namespace Pt
