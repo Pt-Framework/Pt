@@ -48,10 +48,10 @@
 	#error unknown compiler
 #endif
 
-#ifdef PT_DLL_API
-	#define PT_API PT_EXPORT
-#else
+#ifdef PT_API_IMPORT
 	#define PT_API PT_IMPORT
+#else
+	#define PT_API PT_EXPORT
 #endif
 
 
