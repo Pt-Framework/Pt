@@ -1,0 +1,6 @@
+ITEM P0 S0 "All Gfx image classes accept (x,y) as coordinate"
+	TASK "Convert current access mode from (y,x) to (x,y)"
+	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"
+	TASK "Implement 'ColorT& get(int x, int y)' as the 'unchecked' version of at() and color()"
+	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"
+	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"
