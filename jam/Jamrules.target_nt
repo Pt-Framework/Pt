@@ -16,7 +16,21 @@ else
 	SUFDLL	= .dll ;
 }
 
-TOOLSET		?= vc7 ;
+# Deduce TOOLSET from envars usually set by build console
+#
+if $(MSVCDir)
+{
+	TOOLSET ?= vc7 ;
+}
+else if $(VSINSTALLDIR) 
+{
+	TOOLSET ?= vc8 ;
+}
+else
+{
+	TOOLSET ?= vc7 ;
+}
+
 SYS		?= win32 ;
 GUI		?= gdi ;
 

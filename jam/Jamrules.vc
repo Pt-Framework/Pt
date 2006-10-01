@@ -1,6 +1,4 @@
 
-
-
 if $(VISUALC) 
 {
 	VISUALC = $(VISUALC:J=" ") ;
