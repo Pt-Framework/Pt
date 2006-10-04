@@ -75,6 +75,7 @@ namespace System {
 			{
 				ThreadImpl* impl = (ThreadImpl*)arg;
                 impl->_thread.run();
+                impl->_state = Thread::Finished;
 				return 0;
 			}
 
