@@ -1,5 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,9 +30,9 @@ using namespace std;
 int main()
 {
 	std::vector<Pt::Gfx::ARgbColor> data(1000);
-	
+
 	clock_t begin, time;
-	
+
 	begin = clock();
 	for(int i = 0; i < 10000; ++i)
 	{
@@ -51,6 +50,6 @@ int main()
 	time = clock() - begin;
 
 	std::cerr << "Duration: " << time << std::endl;
-	
+
 	return 0;
 }

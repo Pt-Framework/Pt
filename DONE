@@ -1,3 +1,8 @@
 ITEM-1 P0 S0 "Compiler attributes and pragmas are abstracted"
-	TASK "Review PT_PACKED macro"	blue_wind_25
-	TASK "Review PT_ALIGN macro"	blue_wind_25
+	TASK "Review PT_PACKED macro"	blue_wind_25	2006-09-26
+	TASK "Review PT_ALIGN macro"	blue_wind_25	2006-09-26
+
+ITEM-12 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
+	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"	blue_wind_25	2006-10-04
+	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
+	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04

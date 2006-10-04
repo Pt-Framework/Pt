@@ -31,10 +31,13 @@ namespace Pt {
 		template <typename ColorSpaceT_>
 		class PT_EXPORT SubImage {
 			public:
-				typedef BasicImage<ColorSpaceT_> ImageT;
-				typedef SubImage<ColorSpaceT_> SubImageT;
+				typedef BasicImage<ColorSpaceT_>     ImageT;
+				typedef SubImage<ColorSpaceT_>       SubImageT;
 				typedef typename ImageT::ColorSpaceT ColorSpaceT;
-				typedef typename ImageT::ColorT ColorT;
+				typedef typename ImageT::ColorT      ColorT;
+
+				typedef ColorT*       Scanline;
+				typedef const ColorT* ConstScanline;
 
 			public:
 				class PixelIterator;
@@ -82,11 +85,11 @@ namespace Pt {
 				{ return _image; }
 
 				//! Random access without range check
-				inline ColorT* operator[] (int y)
+				inline Scanline scanline(int y)
 				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
 
 				//! Random access without range check
-				inline const ColorT* operator[] (int y) const
+				inline ConstScanline scanline(int y) const
 				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
 
 				//! Random access with range check
@@ -155,12 +158,12 @@ namespace Pt {
 					public:
 						//! Construct a PixelIterator object at coordinate (0,0)
 						inline PixelIterator(SubImageT& image)
-						: _pixel(&image[0][0]), _offsetX(0), _currentX(0), _width(image.width()),
+						: _pixel(&image.scanline(0)[0]), _offsetX(0), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1) {}
 
 						//! Construct a PixelIterator object at coordinate (x,y)
 						inline PixelIterator(SubImageT& image, uint x, uint y)
-						: _pixel(&image[y-1][x-1]), _offsetX(x), _currentX(0), _width(image.width()),
+						: _pixel(&image.scanline(y-1)[x-1]), _offsetX(x), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1) {}
 
 						//! Return the pixel at the current coordinate
@@ -206,12 +209,12 @@ namespace Pt {
 					public:
 						//! Construct a ConstPixelIterator object at coordinate (0,0)
 						inline ConstPixelIterator(const SubImageT& image)
-						: _pixel(&image[0][0]), _offsetX(0), _currentX(0), _width(image.width()),
+						: _pixel(&image.scanline(0)[0]), _offsetX(0), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1) {}
 
 						//! Construct a ConstPixelIterator object at coordinate (x,y)
 						inline ConstPixelIterator(const SubImageT& image, uint x, uint y)
-						: _pixel(&image[y-1][x-1]), _offsetX(x), _currentX(0), _width(image.width()),
+						: _pixel(&image.scanline(y-1)[x-1]), _offsetX(x), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1) {}
 
 						//! Return the pixel at the current coordinate

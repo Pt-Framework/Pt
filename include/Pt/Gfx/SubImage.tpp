@@ -50,7 +50,7 @@ namespace Pt {
 		{
 			for(uint y = _area.y1(); y < (_area.y1()+_area.height()); y++) {
 				for(uint x = _area.x1(); x < (_area.x1()+_area.width()); x++) {
-					_image[y][x] = color;
+					_image.scanline(y)[x] = color;
 				}
 			}
 			return *this;
