@@ -46,7 +46,6 @@ namespace Gfx {
 			typedef Yuv ColorSpaceT;
 
 		public:
-
 			//! Default ctor, will generate default color (black)
 			inline BasicColor()
 			: _y(0), _u(0), _v(0)

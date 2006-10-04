@@ -49,7 +49,6 @@ namespace Pt {
 				typedef Cmyk ColorSpaceT;
 
 			public:
-
 				//! Default ctor, will generate default color (black)
 				inline BasicColor()
 				: _c(0), _m(0), _y(0), _k(0xFFFF)

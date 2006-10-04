@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Drner                                  *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -26,45 +27,45 @@
 
 namespace Pt {
 
-namespace Gfx {
-	class Pen;
-	class Brush;
-	class Font;
-	class Rect;
-	class RgbColor;
-	class RgbImage;
+	namespace Gfx {
+		class Pen;
+		class Brush;
+		class Font;
+		class Rect;
+		class RgbColor;
+		class RgbImage;
 
-	class PT_EXPORT Painter {
-		public:
-			virtual ~Painter()
-			{}
+		class PT_EXPORT Painter {
+			public:
+				virtual ~Painter()
+				{}
 
-			virtual void setPen(const Pen& pen) = 0;
+				virtual void setPen(const Pen& pen) = 0;
 
-			virtual const Pen& pen() const = 0;
+				virtual const Pen& pen() const = 0;
 
-			virtual void setBrush(const Brush& brush) = 0;
+				virtual void setBrush(const Brush& brush) = 0;
 
-			virtual const Brush& brush() const = 0;
+				virtual const Brush& brush() const = 0;
 
-			void setFont(const Font& font);
+				void setFont(const Font& font);
 
-			const Font& font() const;
+				const Font& font() const;
 
-			virtual void drawPixel(const Point& to) = 0;
+				virtual void drawPixel(const Point& to) = 0;
 
-			virtual void drawLine(const Point& from, const Point& to) = 0;
+				virtual void drawLine(const Point& from, const Point& to) = 0;
 
-			virtual void drawText(const Point& from, const char* text, short angle = 0) = 0;
+				virtual void drawText(const Point& from, const char* text, short angle = 0) = 0;
 
-			virtual void fillRect(const Rect& imageRect) = 0;
+				virtual void fillRect(const Rect& imageRect) = 0;
 
-			virtual void drawImage(const Point& to, const ARgbImage& image) = 0;
+				virtual void drawImage(const Point& to, const ARgbImage& image) = 0;
 
-			virtual void drawImage(const Point& to, const ARgbImage& image, const Rect& imageRect) = 0;
-	};
+				virtual void drawImage(const Point& to, const ARgbImage& image, const Rect& imageRect) = 0;
+		};
 
-} // namespace Gfx
+	} // namespace Gfx
 
 } // namespace Pt
 

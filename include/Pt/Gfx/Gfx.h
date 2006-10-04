@@ -25,12 +25,12 @@ namespace Pt {
 
 	namespace Gfx {
 
-		class Brush;
-		class Font;
 		class Point;
 		class Size;
 		class Rect;
 		class Pen;
+		class Brush;
+		class Font;
 
 		struct ARgb;
 		struct Cmyk;
