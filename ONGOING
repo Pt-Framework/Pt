@@ -1,2 +1,0 @@
-ITEM-12 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
-	TASK "Implement 'ColorT& get(int x, int y)' as the 'unchecked' version of at() and color()"

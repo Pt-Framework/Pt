@@ -84,13 +84,21 @@ namespace Pt {
 				inline const ImageT& fullImage() const
 				{ return _image; }
 
-				//! Random access without range check
+				//! Scanline access without range check
 				inline Scanline scanline(int y)
 				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
 
-				//! Random access without range check
+				//! Scanline access without range check
 				inline ConstScanline scanline(int y) const
 				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
+
+				//! Random access without range check
+				inline ColorT& pixel(int x, int y)
+				{ return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()]; }
+
+				//! Random access without range check
+				inline const ColorT& pixel(int x, int y) const
+				{ return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()]; }
 
 				//! Random access with range check
 				ColorT& at(int x, int y);

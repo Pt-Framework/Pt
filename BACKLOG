@@ -1,13 +1,16 @@
-ITEM-13 P0 S0 "A base class for thread-safe refcounting exists."
+ITEM-1 P0 S0 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
+	TASK "Implement the helper application so that we won't need to edit the text files manually"
+
+ITEM-1 P0 S0 "A base class for thread-safe refcounting exists."
 	TASK "Make Shared.h use AtomicInt"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-14 P0 S0 "Byteorder API has ASM optimisation"
+ITEM-2 P0 S0 "Byteorder API has ASM optimisation"
 	TASK "Optimize swab16() using standard ASM and if possible SIMD"
 	TASK "Optimize swab32() using standard ASM and if possible SIMD"
 	TASK "Optimize swab64() using standard ASM and if possible SIMD"
 
-ITEM-15 P0 S0 "The Pt::Unit module exists"
+ITEM-3 P0 S0 "The Pt::Unit module exists"
 	TASK "Review ccpunit code"
 	TASK "Review mini-cppunit from STLport code"

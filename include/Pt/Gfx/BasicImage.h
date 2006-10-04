@@ -166,11 +166,19 @@ namespace Pt {
 				inline ConstScanline scanline(int y) const
 				{ return &_buff[y*_width]; }
 
+				//! Random access without range check
+				inline ColorT& pixel(int x, int y)
+				{ return _buff[y*_width + x]; }
+
+				//! Random access without range check
+				inline const ColorT& pixel(int x, int y) const
+				{ return _buff[y*_width + x]; }
+
 				//! Random access with range check
 				ColorT& at(int x, int y);
 
 				//! Random access with range check
-				const ColorT& at(int x, int u) const;
+				const ColorT& at(int x, int y) const;
 
 				//! Returns the color at the specified coordinates, if the
 				//! coordinates are out of range, the given "invalid" color
