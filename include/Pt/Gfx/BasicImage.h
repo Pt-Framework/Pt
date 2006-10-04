@@ -167,18 +167,18 @@ namespace Pt {
 				{ return &_buff[y*_width]; }
 
 				//! Random access with range check
-				ColorT& at(int y, int x);
+				ColorT& at(int x, int y);
 
 				//! Random access with range check
-				const ColorT& at(int y, int x) const;
+				const ColorT& at(int x, int u) const;
 
 				//! Returns the color at the specified coordinates, if the
 				//! coordinates are out of range, the given "invalid" color
 				//! will be returned
-				const ColorT& color(int y, int x, const ColorT& invalid = ColorT() ) const;
+				const ColorT& color(int x, int y, const ColorT& invalid = ColorT() ) const;
 
 				//! Set the color at the specified coordinates
-				void setColor(int y, int x, const ColorT& color_);
+				void setColor(int x, int y, const ColorT& color_);
 
 				//! Returns an iterator indicating the position
 				//! of the first pixel in this image

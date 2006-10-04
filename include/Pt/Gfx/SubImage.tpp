@@ -122,7 +122,7 @@ namespace Pt {
 
 
 		template <typename ColorSpaceT_>
-		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int y, int x)
+		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
 			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
@@ -130,7 +130,7 @@ namespace Pt {
 
 
 		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int y, int x) const
+		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
 			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
@@ -138,7 +138,7 @@ namespace Pt {
 
 
 		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::color(int y, int x, const ColorT& invalid) const
+		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return invalid;
 			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
@@ -146,7 +146,7 @@ namespace Pt {
 
 
 		template <typename ColorSpaceT_>
-		void SubImage<ColorSpaceT_>::setColor(int y, int x, const ColorT& color_)
+		void SubImage<ColorSpaceT_>::setColor(int x, int y, const ColorT& color_)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return;
 			_image.data()[(y+_area.y1())*_image.width() + x+_area.x1()] = color_;

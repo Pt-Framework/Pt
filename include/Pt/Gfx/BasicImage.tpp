@@ -67,7 +67,7 @@ namespace Pt {
 		}
 
 		template <typename ColorSpaceT>
-		typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int y, int x)
+		typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int x, int y)
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
 				throw RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
@@ -76,7 +76,7 @@ namespace Pt {
 		}
 
 		template <typename ColorSpaceT>
-		const typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int y, int x) const
+		const typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int x, int y) const
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
 				throw RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
@@ -85,14 +85,14 @@ namespace Pt {
 		}
 
 		template <typename ColorSpaceT>
-		const typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::color(int y, int x, const ColorT& invalid) const
+		const typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
 			return(_buff[y*_width + x]);
 		}
 
 		template <typename ColorSpaceT>
-		void BasicImage<ColorSpaceT>::setColor(int y, int x, const ColorT& color_)
+		void BasicImage<ColorSpaceT>::setColor(int x, int y, const ColorT& color_)
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
 			_buff[y*_width + x] = color_;

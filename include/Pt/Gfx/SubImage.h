@@ -93,16 +93,16 @@ namespace Pt {
 				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
 
 				//! Random access with range check
-				ColorT& at(int y, int x);
+				ColorT& at(int x, int y);
 
 				//! Random access with range check
-				const ColorT& at(int y, int x) const;
+				const ColorT& at(int x, int y) const;
 
 				//! Returns the color at the specified coordinates
-				const ColorT& color(int y, int x, const ColorT& invalid = ColorT()) const;
+				const ColorT& color(int x, int y, const ColorT& invalid = ColorT()) const;
 
 				//! Returns the color at the specified coordinates
-				void setColor(int y, int x, const ColorT& color_);
+				void setColor(int x, int y, const ColorT& color_);
 
 				//! Returns an iterator indicating the position
 				//! of the first pixel in this image
