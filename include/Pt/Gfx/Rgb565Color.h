@@ -82,31 +82,38 @@ namespace Pt {
 					setBlue(b);
 				}
 
+				//!
 				//! Convert this color to ARGB components of the master color model
-				//! (destinations range from 0 to 0xFFFF)
+				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
 					//                     1111111100000000
 					//                     7654321076543210
 					//                     RRRRRGGGGGGBBBBB
 					//                     CCCCCCCCCCCCCCCC
-					a = 0xFFFF;
-					r = (_val & 0xF800)     ;
+					a = 65535;
+					r = ((uint32_t(_val) & 0xF800) >> 11) * 65535 / 31;
+					g = ((uint32_t(_val) & 0x07E0) >> 5 ) * 65535 / 63;
+					b = ((uint32_t(_val) & 0x001F) >> 0 ) * 65535 / 31;
+/*					r = (_val & 0xF800);
 					g = (_val & 0x07E0) << 5;
-					b = (_val & 0x001F) << 11;
+					b = (_val & 0x001F) << 12;*/
 				}
-
+				//!
 				//! Set this color from the given ARGB components of the master color model
-				//! (sources range from 0 to 0xFFFF)
+				//! (sources range from 0 to 65535)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					int32_t rr = static_cast<int32_t>(r) * a / 0xFFFF;
-					int32_t gg = static_cast<int32_t>(g) * a / 0xFFFF;
-					int32_t bb = static_cast<int32_t>(b) * a / 0xFFFF;
+					setRed  (r / 2048);
+					setGreen(g / 1024);
+					setBlue (b / 2048);
+					/*int32_t rr = static_cast<int32_t>(r) * a / 32767;
+					int32_t gg = static_cast<int32_t>(g) * a / 32767;
+					int32_t bb = static_cast<int32_t>(b) * a / 32767;
 
-					setRed  ( uint8_t(rr>>8) );
-					setGreen( uint8_t(gg>>8) );
-					setBlue ( uint8_t(bb>>8) );
+					setRed  ( uint8_t(rr>>7) );
+					setGreen( uint8_t(gg>>7) );
+					setBlue ( uint8_t(bb>>7) );*/
 				}
 
 				//! Assignment operator from the same color space
