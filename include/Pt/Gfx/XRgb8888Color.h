@@ -66,13 +66,24 @@ namespace Pt {
 
 				//! Construct color using the given packed color constant
 				inline BasicColor(uint32_t val)
-				: _val(val & 0x00FFFFFF)
+				: _val(val & 0xFFFFFFFF)
 				{}
+
+				//! Construct color using the given components
+				inline BasicColor(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+				: _val(0)
+				{
+					setAlpha(a);
+					setRed(r);
+					setGreen(g);
+					setBlue(b);
+				}
 
 				//! Construct color using the given components
 				inline BasicColor(uint8_t r, uint8_t g, uint8_t b)
 				: _val(0)
 				{
+					setAlpha(0xFF);
 					setRed(r);
 					setGreen(g);
 					setBlue(b);
@@ -84,9 +95,9 @@ namespace Pt {
 				{
 					//                     33333333222222221111111100000000
 					//                     76543210765432107654321076543210
-					//                     XXXXXXXXRRRRRRRRGGGGGGGGBBBBBBBB
+					//                     AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
 					//                                     CCCCCCCCCCCCCCCC
-					a = 0xFFFF;
+					a = (_val & 0xFF000000) >> 16;
 					r = (_val & 0x00FF0000) >> 8;
 					g = (_val & 0x0000FF00)     ;
 					b = (_val & 0x000000FF) << 8;
@@ -96,13 +107,17 @@ namespace Pt {
 				//! (sources range from 0 to 0xFFFF)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					int32_t rr = static_cast<int32_t>(r) * a / 0xFFFF;
-					int32_t gg = static_cast<int32_t>(g) * a / 0xFFFF;
-					int32_t bb = static_cast<int32_t>(b) * a / 0xFFFF;
+					//int32_t rr = static_cast<int32_t>(r) * a / 0xFFFF;
+					//int32_t gg = static_cast<int32_t>(g) * a / 0xFFFF;
+					//int32_t bb = static_cast<int32_t>(b) * a / 0xFFFF;
+					//setRed  ( uint8_t(rr>>8) );
+					//setGreen( uint8_t(gg>>8) );
+					//setBlue ( uint8_t(bb>>8) );
 
-					setRed  ( uint8_t(rr>>8) );
-					setGreen( uint8_t(gg>>8) );
-					setBlue ( uint8_t(bb>>8) );
+					setAlpha( uint8_t(a>>8) );
+					setRed  ( uint8_t(r>>8) );
+					setGreen( uint8_t(g>>8) );
+					setBlue ( uint8_t(b>>8) );
 				}
 
 				//! Assignment operator from the same color space
@@ -130,6 +145,10 @@ namespace Pt {
 				inline uint32_t color() const
 				{ return _val; }
 
+				//! Return the alpha component of this color
+				inline uint8_t alpha() const
+				{ return (_val & 0xFF000000) >> 24; }
+
 				//! Return the red component of this color
 				inline uint8_t red() const
 				{ return (_val & 0x00FF0000) >> 16; }
@@ -146,17 +165,21 @@ namespace Pt {
 				void setColor(uint32_t c)
 				{ _val = c & 0x00FFFFFF; }
 
+				//! Set the alpha component of this color
+				inline void setAlpha(uint8_t a)
+				{ _val &= 0x00FFFFFF; _val |= (uint32_t(a) << 24); }
+
 				//! Set the red component of this color
 				inline void setRed(uint8_t r)
-				{ _val &= 0x0000FFFF; _val |= (uint32_t(r) << 16); }
+				{ _val &= 0xFF00FFFF; _val |= (uint32_t(r) << 16); }
 
 				//! Set the green component of this color
 				inline void setGreen(uint8_t g)
-				{ _val &= 0x00FF00FF; _val |= (uint32_t(g) <<  8); }
+				{ _val &= 0xFFFF00FF; _val |= (uint32_t(g) <<  8); }
 
 				//! Set the blue component of this color
 				inline void setBlue(uint8_t b)
-				{ _val &= 0x00FFFF00; _val |= (uint32_t(b) <<  0); }
+				{ _val &= 0xFFFFFF00; _val |= (uint32_t(b) <<  0); }
 
 				//! Get brightness
 				inline uint8_t brightness() const;
