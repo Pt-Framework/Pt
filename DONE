@@ -8,3 +8,7 @@ ITEM-2 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"	blue_wind_25	2006-10-04
 	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
 	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04
+
+ITEM-12 P0 S2 "XRgb8888Color was changed to ARgb888Color"
+	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
+	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
