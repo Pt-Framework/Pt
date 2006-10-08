@@ -51,6 +51,6 @@ ITEM-11 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Review 'ColorT& pixel(int x, int y)'"
 	TASK "Revie 'Scanline scanline(int y)'"
 
-ITEM-12 P0 S0 "XRgb8888Color was changed to ARgb888Color"
+ITEM-12 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Add getters/setters for alpha channel"
 	TASK "Include alpha channel in conversion"
