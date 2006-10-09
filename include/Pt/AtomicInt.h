@@ -240,7 +240,7 @@ namespace Pt {
 					            "      bne- 0b\n"
 					            "      isync\n"
 					            : "=&r"(ret)
-					            : "r"(_value), "r"(n)
+					            : "r"(&_value), "r"(n)
 					            : "cr0","memory","r0");
 				}
 
