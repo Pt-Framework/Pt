@@ -32,6 +32,27 @@ TARGET_OS ?= $(OS:L) ;
 TARGET_OSPLAT ?= $(OSPLAT:L) ;
 
 
+# Set byte order
+#
+# Can be set with 'jam -sBYTEORDER=BE' or 'jam -sBYTEORDER=LE'. Default
+# is processor specific.
+#
+if $(TARGET_OSLAT:U) = PPC
+{
+	BYTEORDER ?= be ;
+}
+else
+{
+	BYTEORDER ?= le ;
+}
+
+# Set configuration
+#
+# Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
+#
+CONFIG ?= debug ;
+
+
 # Include base rules
 #
 # This adds/sets basic rules and variables.
