@@ -123,7 +123,7 @@ namespace Pt {
 				std::list<Connection>::const_iterator end = Signal::_slots.end();
 
 				for(; it != end; ++it) {
-					const Pt::Invokable<Arg1>* invokable = static_cast<const Pt::Invokable<Arg1>*>( it->slot().callable() );
+					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1);
 				}
 			}
@@ -135,7 +135,7 @@ namespace Pt {
 				std::list<Connection>::const_iterator end = Signal::_slots.end();
 
 				for(; it != end; ++it) {
-					const Pt::Invokable<Arg1, Arg2>* invokable = static_cast<const Pt::Invokable<Arg1, Arg2>*>( it->slot().callable() );
+					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2);
 				}
 			}
@@ -147,7 +147,7 @@ namespace Pt {
 				std::list<Connection>::const_iterator end = Signal::_slots.end();
 
 				for(; it != end; ++it) {
-					const Pt::Invokable<Arg1, Arg2, Arg3>* invokable = static_cast<const Pt::Invokable<Arg1, Arg2, Arg3>*>( it->slot().callable() );
+					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2, a3);
 				}
 			}
