@@ -27,6 +27,12 @@ using namespace std;
 namespace Pt {
 
 
+Connection::Connection()
+{
+	_data = new ConnectionData();
+}
+
+
 Connection::Connection(Connectable& sender, Slot* slot)
 {
 	_data = new ConnectionData(sender, slot);

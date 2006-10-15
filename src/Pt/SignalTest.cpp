@@ -168,11 +168,8 @@ void methodTest1()
 		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
 
 	recv = new Receiver;
-	cerr << 1 << endl;
 	connect(signal, *recv, &Receiver::onSignal1);
-	cerr << 2 << endl;
 	signal.send(1);
-	cerr << 3 << endl;
 	if(recv->called() == false)
 		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
 
