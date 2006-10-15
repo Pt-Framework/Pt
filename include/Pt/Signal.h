@@ -129,12 +129,12 @@ namespace Pt {
 			template <typename Arg1>
 			inline void send(Arg1 a1) const
 			{
-				const std::list<Connection>& conns = Connectable::connections();
+				Sentry sentry(*this);
 
-				std::list<Connection>::const_iterator it;
-				for(it = conns.begin(); it != conns.end(); ++it)
+				std::list<Connection>::const_iterator it = Connectable::connections().begin();
+				for(; it != _connections.end(); ++it)
 				{
-					if( &( it->sender() ) != this)
+					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
 
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
@@ -145,12 +145,12 @@ namespace Pt {
 			template <typename Arg1, typename Arg2>
 			inline void send(Arg1 a1, Arg2 a2) const
 			{
-				const std::list<Connection>& conns = Connectable::connections();
+				Sentry sentry(*this);
 
-				std::list<Connection>::const_iterator it;
-				for(it = conns.begin(); it != conns.end(); ++it)
+				std::list<Connection>::const_iterator it = Connectable::connections().begin();
+				for(; it != _connections.end(); ++it)
 				{
-					if( &( it->sender() ) != this)
+					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
 
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
@@ -161,12 +161,12 @@ namespace Pt {
 			template <typename Arg1, typename Arg2, typename Arg3>
 			inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
 			{
-				const std::list<Connection>& conns = Connectable::connections();
+				Sentry sentry(*this);
 
-				std::list<Connection>::const_iterator it;
-				for(it = conns.begin(); it != conns.end(); ++it)
+				std::list<Connection>::const_iterator it = Connectable::connections().begin();
+				for(; it != _connections.end(); ++it)
 				{
-					if( &( it->sender() ) != this)
+					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
 
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
