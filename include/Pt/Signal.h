@@ -113,7 +113,7 @@ namespace Pt {
 
 			inline void send() const
 			{
-				Sentry sentry(*this);
+				const Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
 				for(; it != _connections.end(); ++it)
@@ -129,7 +129,7 @@ namespace Pt {
 			template <typename Arg1>
 			inline void send(Arg1 a1) const
 			{
-				Sentry sentry(*this);
+				const Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
 				for(; it != _connections.end(); ++it)
@@ -145,7 +145,7 @@ namespace Pt {
 			template <typename Arg1, typename Arg2>
 			inline void send(Arg1 a1, Arg2 a2) const
 			{
-				Sentry sentry(*this);
+				const Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
 				for(; it != _connections.end(); ++it)
@@ -161,7 +161,7 @@ namespace Pt {
 			template <typename Arg1, typename Arg2, typename Arg3>
 			inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
 			{
-				Sentry sentry(*this);
+				const Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
 				for(; it != _connections.end(); ++it)
