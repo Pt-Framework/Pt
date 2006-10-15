@@ -37,7 +37,7 @@ ITEM-22 P0 S5 "Object reflection API is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
-	
+
 ITEM-23 P0 S5 "CTTI system is implemented"
 	TASK "Review IfElse template"
 	TASK "Review code"
@@ -52,7 +52,7 @@ ITEM-25 P0 S13 "An easy CLI based (or maybe ncurses based) application for manag
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
 
 ITEM-26 P0 S13 "The system module supports WinCE and QNX"
-	TASK "update changes from ppr"
+	TASK "Update changes from ppr"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
