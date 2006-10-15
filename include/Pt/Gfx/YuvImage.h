@@ -28,11 +28,11 @@ namespace Pt {
 	namespace Gfx {
 
 		//!
-		//! \brief YUV image class
+		//! \brief Yuv image class
 		typedef BasicImage<Yuv> YuvImage;
 
 		//!
-		//! \brief YUV sub image class
+		//! \brief Yuv sub image class
 		typedef SubImage<Yuv> YuvSubImage;
 
 	}

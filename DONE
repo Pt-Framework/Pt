@@ -12,3 +12,5 @@ ITEM-2 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
 ITEM-12 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
 	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
+	TASK "Verify the getters/setters for alpha channel"	blue_wind_25	2006-10-15
+	TASK "Verify the alpha channel conversion"	blue_wind_25	2006-10-15

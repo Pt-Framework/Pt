@@ -28,11 +28,11 @@ namespace Pt {
 	namespace Gfx {
 
 		//!
-		//! \brief RGB565 image class
+		//! \brief RgbGB565 image class
 		typedef BasicImage<Rgb565> Rgb565Image;
 
 		//!
-		//! \brief RGB565 sub image class
+		//! \brief RgbGB565 sub image class
 		typedef SubImage<Rgb565> Rgb565SubImage;
 
 	}

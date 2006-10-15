@@ -107,13 +107,6 @@ namespace Pt {
 				//! (sources range from 0 to 0xFFFF)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					//int32_t rr = static_cast<int32_t>(r) * a / 0xFFFF;
-					//int32_t gg = static_cast<int32_t>(g) * a / 0xFFFF;
-					//int32_t bb = static_cast<int32_t>(b) * a / 0xFFFF;
-					//setRed  ( uint8_t(rr>>8) );
-					//setGreen( uint8_t(gg>>8) );
-					//setBlue ( uint8_t(bb>>8) );
-
 					setAlpha( uint8_t(a>>8) );
 					setRed  ( uint8_t(r>>8) );
 					setGreen( uint8_t(g>>8) );
@@ -163,7 +156,7 @@ namespace Pt {
 
 				//! Set the packed color value of this color
 				void setColor(uint32_t c)
-				{ _val = c & 0x00FFFFFF; }
+				{ _val = c; }
 
 				//! Set the alpha component of this color
 				inline void setAlpha(uint8_t a)

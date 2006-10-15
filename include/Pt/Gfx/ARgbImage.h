@@ -28,13 +28,13 @@ namespace Pt {
 	namespace Gfx {
 
 		//!
-		//! \brief ARGB image class
+		//! \brief ARgb image class
 		//!
 		//! <B>This is the master image model</B>
 		typedef BasicImage<ARgb> ARgbImage;
 
 		//!
-		//! \brief ARGB sub image class
+		//! \brief ARgb sub image class
 		//!
 		//! <B>This is the master sub image model</B>
 		typedef SubImage<ARgb> ARgbSubImage;

@@ -28,11 +28,11 @@ namespace Pt {
 	namespace Gfx {
 
 		//!
-		//! \brief XRGB8888 image class
+		//! \brief ARgb8888 image class
 		typedef BasicImage<ARgb8888> ARgb8888Image;
 
 		//!
-		//! \brief XRGB8888 sub image class
+		//! \brief ARgb8888 sub image class
 		typedef SubImage<ARgb8888> ARgb8888SubImage;
 	}
 }

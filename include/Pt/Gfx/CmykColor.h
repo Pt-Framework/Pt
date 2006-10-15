@@ -36,7 +36,7 @@ namespace Pt {
 
 
 		//!
-		//! \brief CMYK color class
+		//! \brief Cmyk color class
 		//!
 		//! Valid range of the color components for this color model:\n
 		//!    Cyan    : 0 - 0xFFFF\n

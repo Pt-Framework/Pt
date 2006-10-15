@@ -32,7 +32,7 @@ namespace Pt {
 		struct ARgb {};
 
 
-		//! \brief ARGB color
+		//! \brief ARgb color
 		template <>
 		class PT_EXPORT BasicColor<ARgb> {
 			public:
@@ -164,7 +164,7 @@ namespace Pt {
 			color.setBlue(_f);
 		}
 
-		
+
 		//! \brief Full specialization for Greyscale<T> to be used with ARgb color space
 		template<>
 		struct Greyscale<ARgb>

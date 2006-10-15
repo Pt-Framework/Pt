@@ -34,7 +34,7 @@ namespace Gfx {
 	struct Yuv { };
 
 
-	//! \brief The Yuv color class
+	//! \brief Yuv color class
 	//!
 	//! Valid range of the color components for this color model:\n
 	//!    Luminance     :      0 to 32767\n

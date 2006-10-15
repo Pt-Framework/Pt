@@ -28,11 +28,11 @@ namespace Pt {
 	namespace Gfx {
 
 		//!
-		//! \brief CMYK image class
+		//! \brief Cmyk image class
 		typedef BasicImage<Cmyk> CmykImage;
 
 		//!
-		//! \brief CMYK sub image class
+		//! \brief Cmyk sub image class
 		typedef SubImage<Cmyk> CmykSubImage;
 
 	}
