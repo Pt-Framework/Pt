@@ -47,6 +47,6 @@ ITEM-10 P0 S0 "The AtomicInt class implements atomic operations"
 	TASK "Write test case"
 	TASK "Write docs"
 
-ITEM-11 P0 S0 "All Gfx image classes accept (x,y) as coordinate"
+ITEM-11 P0 S2 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Review 'ColorT& pixel(int x, int y)'"
 	TASK "Review 'Scanline scanline(int y)'"

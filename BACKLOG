@@ -6,7 +6,7 @@ ITEM-1 P0 S0 "A base class for thread-safe refcounting exists."
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-2 P0 S0 "Byteorder API has ASM optimisation"
+ITEM-2 P0 S5 "Byteorder API has ASM optimisation"
 	TASK "Optimize swab16() using standard ASM and if possible SIMD"
 	TASK "Optimize swab32() using standard ASM and if possible SIMD"
 	TASK "Optimize swab64() using standard ASM and if possible SIMD"
