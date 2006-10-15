@@ -9,7 +9,7 @@ ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
 	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04
 
-ITEM-12 P0 S2 "XRgb8888Color was changed to ARgb888Color"
+ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
 	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
 	TASK "Verify the getters/setters for alpha channel"	blue_wind_25	2006-10-15
