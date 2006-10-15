@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Exception.h>
-#include <Pt/Gfx/XRgb8888Color.h>
+#include <Pt/Gfx/ARgb8888Color.h>
 using namespace Pt;
 using namespace Pt::Gfx;
 
@@ -27,7 +27,7 @@ using namespace Pt::Gfx;
 using namespace std;
 
 
-Pt::uint8_t Pt::Gfx::BasicColor<XRgb8888>::brightness() const
+Pt::uint8_t Pt::Gfx::BasicColor<ARgb8888>::brightness() const
 {
 	Pt::uint8_t r = red();
 	Pt::uint8_t g = green();
@@ -36,7 +36,7 @@ Pt::uint8_t Pt::Gfx::BasicColor<XRgb8888>::brightness() const
 }
 
 
-void Pt::Gfx::BasicColor<XRgb8888>::setBrightness(Pt::uint8_t l)
+void Pt::Gfx::BasicColor<ARgb8888>::setBrightness(Pt::uint8_t l)
 {
 	if(l == 0) {
 		_val = 0;

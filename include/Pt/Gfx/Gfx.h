@@ -36,7 +36,7 @@ namespace Pt {
 		struct Cmyk;
 		struct Rgb565;
 		struct XRgb1555;
-		struct XRgb8888;
+		struct ARgb8888;
 
 		template <typename ColorSpaceT>
 		class BasicColor;
@@ -45,7 +45,7 @@ namespace Pt {
 		typedef BasicColor<Cmyk>     CmykColor;
 		typedef BasicColor<Rgb565>   Rgb565Color;
 		typedef BasicColor<XRgb1555> XRgb1555Color;
-		typedef BasicColor<XRgb8888> XRgb8888Color;
+		typedef BasicColor<ARgb8888> ARgb8888Color;
 
 		template <typename ColorSpaceT>
 		class BasicImage;
@@ -54,7 +54,7 @@ namespace Pt {
 		typedef BasicImage<Cmyk>     CmykImage;
 		typedef BasicImage<Rgb565>   Rgb565Image;
 		typedef BasicImage<XRgb1555> XRgb1555Image;
-		typedef BasicImage<XRgb8888> XRgb8888Image;
+		typedef BasicImage<ARgb8888> ARgb8888Image;
 
 		template <typename ColorSpaceT>
 		class SubImage;
@@ -63,7 +63,7 @@ namespace Pt {
 		typedef SubImage<Cmyk>     CmykSubImage;
 		typedef SubImage<Rgb565>   Rgb565SubImage;
 		typedef SubImage<XRgb1555> XRgb1555SubImage;
-		typedef SubImage<XRgb8888> XRgb8888SubImage;
+		typedef SubImage<ARgb8888> ARgb8888SubImage;
 
 	} // namespace Gfx
 

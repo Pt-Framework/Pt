@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Drner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,7 +27,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/XRgb8888Image.h>
+#include <Pt/Gfx/ARgb8888Image.h>
 #include <Pt/Gfx/XRgb1555Image.h>
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gui/Painter.h>
@@ -95,7 +95,7 @@ namespace Gui {
 				switch( this->depth() ) {
 					case 32:
 					case 24: {
-						Gfx::XRgb8888Image rgb24Image( width, height );
+						Gfx::ARgb8888Image rgb24Image( width, height );
 						assign( begin, end, rgb24Image.begin() );
 						this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
 						break;

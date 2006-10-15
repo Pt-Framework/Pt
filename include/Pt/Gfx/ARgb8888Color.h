@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_XRgb8888Color_h
-#define Pt_Gfx_XRgb8888Color_h
+#ifndef Pt_Gfx_ARgb8888Color_h
+#define Pt_Gfx_ARgb8888Color_h
 
 #include <Pt/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
@@ -28,20 +28,20 @@ namespace Pt {
 
 	namespace Gfx {
 
-		//! \brief XRgb8888 color space
-		struct XRgb8888 {};
+		//! \brief ARgb8888 color space
+		struct ARgb8888 {};
 
 
-		//! \brief XRgb8888 color class
+		//! \brief ARgb8888 color class
 		//!
 		//! Valid range of the color components for this color model:\n
 		//!    Red   : 0 to 255\n
 		//!    Green : 0 to 255\n
 		//!    Blue  : 0 to 255
 		template <>
-		class PT_EXPORT PT_PACKED BasicColor<XRgb8888> {
+		class PT_EXPORT PT_PACKED BasicColor<ARgb8888> {
 			public:
-				typedef XRgb8888 ColorSpaceT;
+				typedef ARgb8888 ColorSpaceT;
 
 			public:
 				//! Default ctor, will generate default color (black)
@@ -50,7 +50,7 @@ namespace Pt {
 				{}
 
 				//! Copy ctor
-				inline BasicColor(const BasicColor<XRgb8888>& c)
+				inline BasicColor(const BasicColor<ARgb8888>& c)
 				: _val(c._val)
 				{}
 
@@ -121,12 +121,12 @@ namespace Pt {
 				}
 
 				//! Assignment operator from the same color space
-				inline BasicColor<XRgb8888>& operator=(const BasicColor<XRgb8888>& c)
+				inline BasicColor<ARgb8888>& operator=(const BasicColor<ARgb8888>& c)
 				{ _val = c._val; return *this; }
 
 				//! Assignment operator from different color space
 				template <typename SrcColorSpaceT> inline
-				BasicColor<XRgb8888>& operator=(const BasicColor<SrcColorSpaceT>& c)
+				BasicColor<ARgb8888>& operator=(const BasicColor<SrcColorSpaceT>& c)
 				{ convert(*this, c); return *this; }
 
 				//! Equality comparison operator
@@ -192,7 +192,7 @@ namespace Pt {
 		};
 
 		// For convenience
-		typedef BasicColor<XRgb8888> XRgb8888Color;
+		typedef BasicColor<ARgb8888> ARgb8888Color;
 
 	} // namespace Gfx
 

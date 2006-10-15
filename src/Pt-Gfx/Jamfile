@@ -12,7 +12,7 @@ SharedLibrary Pt-Gfx :
 	YuvColor.cpp
 	Rgb565Color.cpp
 	XRgb1555Color.cpp
-	XRgb8888Color.cpp 
+	ARgb8888Color.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt ;

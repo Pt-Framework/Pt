@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Drner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -204,9 +204,9 @@ void X11Painter::drawText(const Gfx::Point& to, const char* text, short angle)
 	mx.yx = sina;
 	mx.yy = cosa;
 
-	XftFont* font = XftFontOpen(display, screen, 
+	XftFont* font = XftFontOpen(display, screen,
 	                            XFT_MATRIX, XftTypeMatrix, &mx,
-	                            XFT_SIZE, XftTypeDouble, 12.0, 
+	                            XFT_SIZE, XftTypeDouble, 12.0,
 	                            NULL);
 	//XftFont* font = XftFontOpenName(display, screen, "Luxi Sans");
 
@@ -272,7 +272,7 @@ long X11Painter::toXColor(const Gfx::ARgbColor& color)
 		case 32:
 		case 24:
 		{
-			Gfx::XRgb8888Color rgb8888 = color;
+			Gfx::ARgb8888Color rgb8888 = color;
 			return reinterpret_cast<long&>(rgb8888);
 		}
 

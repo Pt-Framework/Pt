@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_XRgb8888Image_h
-#define Pt_XRgb8888Image_h
+#ifndef Pt_ARgb8888Image_h
+#define Pt_ARgb8888Image_h
 
-#include <Pt/Gfx/XRgb8888Color.h>
+#include <Pt/Gfx/ARgb8888Color.h>
 #include <Pt/Gfx/SubImage.h>
 
 
@@ -29,11 +29,11 @@ namespace Pt {
 
 		//!
 		//! \brief XRGB8888 image class
-		typedef BasicImage<XRgb8888> XRgb8888Image;
+		typedef BasicImage<ARgb8888> ARgb8888Image;
 
 		//!
 		//! \brief XRGB8888 sub image class
-		typedef SubImage<XRgb8888> XRgb8888SubImage;
+		typedef SubImage<ARgb8888> ARgb8888SubImage;
 	}
 }
 
