@@ -273,13 +273,13 @@ long X11Painter::toXColor(const Gfx::ARgbColor& color)
 		case 24:
 		{
 			Gfx::ARgb8888Color rgb8888 = color;
-			return reinterpret_cast<long&>(rgb8888);
+			return reinterpret_cast<uint32_t&>(rgb8888);
 		}
 
 		case 16:
 		{
 			Gfx::Rgb565Color rgb565 = color;
-			return reinterpret_cast<long&>(rgb565);
+			return reinterpret_cast<uint16_t&>(rgb565);
 		}
 	}
 
