@@ -43,13 +43,16 @@ namespace Pt {
 			const std::list<Connection>& connections() const
 			{ return _connections; }
 
+			std::list<Connection>& connections()
+			{ return _connections; }
+
 		protected:
 			Connectable(const Connectable& c);
 
 			Connectable& operator=(const Connectable& rhs);
 
-		private:
-			std::list<Connection> _connections;
+		protected:
+			mutable std::list<Connection> _connections;
 	};
 
 } // !namespace Pt

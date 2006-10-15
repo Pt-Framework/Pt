@@ -28,6 +28,7 @@
 #include <Pt/Connectable.h>
 
 #include <list>
+#include <algorithm>
 #include <iostream>
 
 
@@ -42,75 +43,84 @@ namespace Pt {
 		public:
 			typedef Pt::Invokable<A1, A2, A3> Invokable;
 
+			struct Sentry {
+				Sentry(const Signal& signal)
+				: _signal(signal)
+				{
+					_signal._sending = true;
+					_signal._cleanup = false;
+				}
+
+				~Sentry()
+				{
+					_signal._sending = false;
+					if(_signal._cleanup)
+					{
+						_signal._connections.remove( Connection() );
+						_signal._cleanup = false;
+					}
+				}
+
+				const Signal& _signal;
+			};
+
 		public:
 			Signal()
+			: _sending(false)
 			{ }
 
 			Signal(const Signal& signal)
 			: Connectable()
+			, _sending(false)
 			{
 				Signal::operator=(signal);
 			}
 
 			~Signal()
-			{ Signal::disconnect(); }
+			{ }
 
 			Signal& operator=(const Signal& other)
 			{
 				Connectable::operator=(other);
-
-				Signal::disconnect();
-
-				std::list<Connection>::const_iterator it = other._slots.begin();
-				std::list<Connection>::const_iterator end = other._slots.end();
-
-				for( ; it != end; ++it) {
-					const Slot& slot = it->slot();
-					Connection connection( *this, slot.clone()  );
-				}
-
 				return *this;
-			}
-
-			void disconnect()
-			{
-				while( !_slots.empty() )
-				{
-					Connection connection = _slots.front();
-					connection.close();
-				}
 			}
 
 			virtual void opened(const Connection& c)
 			{
-				if( this == &c.sender() )
-				{
-					_slots.push_back(c);
-				}
-				else
-				{
-					Connectable::opened(c);
-				}
+				Connectable::opened(c);
 			}
 
 			virtual void closed(const Connection& c)
 			{
-				if( this == &c.sender() )
+				// if the signal is currently calling its slots, do not
+				// remove the connection now, but just replace it by
+				// an invalid one and set the cleanup flag to true.
+				// Any invalid connection objects will be removed after
+				// the signal has finished calling its slots.
+				if(_sending)
 				{
-					_slots.remove(c);
+					std::list<Connection>::iterator it;
+					it = std::find(this->connections().begin(), this->connections().end(), c );
+					if( it != this->connections().end() )
+					{
+						*it = Connection();
+						_cleanup = true;
+					}
 				}
 				else
-				{
 					Connectable::closed(c);
-				}
 			}
 
 			inline void send() const
 			{
-				std::list<Connection>::const_iterator it = Signal::_slots.begin();
-				std::list<Connection>::const_iterator end = Signal::_slots.end();
+				Sentry sentry(*this);
 
-				for(; it != end; ++it) {
+				std::list<Connection>::const_iterator it = Connectable::connections().begin();
+				for(; it != _connections.end(); ++it)
+				{
+					if( &( it->sender() ) != this || false == it->valid() )
+						continue;
+
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke();
 				}
@@ -119,10 +129,14 @@ namespace Pt {
 			template <typename Arg1>
 			inline void send(Arg1 a1) const
 			{
-				std::list<Connection>::const_iterator it = Signal::_slots.begin();
-				std::list<Connection>::const_iterator end = Signal::_slots.end();
+				const std::list<Connection>& conns = Connectable::connections();
 
-				for(; it != end; ++it) {
+				std::list<Connection>::const_iterator it;
+				for(it = conns.begin(); it != conns.end(); ++it)
+				{
+					if( &( it->sender() ) != this)
+						continue;
+
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1);
 				}
@@ -131,10 +145,14 @@ namespace Pt {
 			template <typename Arg1, typename Arg2>
 			inline void send(Arg1 a1, Arg2 a2) const
 			{
-				std::list<Connection>::const_iterator it = Signal::_slots.begin();
-				std::list<Connection>::const_iterator end = Signal::_slots.end();
+				const std::list<Connection>& conns = Connectable::connections();
 
-				for(; it != end; ++it) {
+				std::list<Connection>::const_iterator it;
+				for(it = conns.begin(); it != conns.end(); ++it)
+				{
+					if( &( it->sender() ) != this)
+						continue;
+
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2);
 				}
@@ -143,10 +161,14 @@ namespace Pt {
 			template <typename Arg1, typename Arg2, typename Arg3>
 			inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
 			{
-				std::list<Connection>::const_iterator it = Signal::_slots.begin();
-				std::list<Connection>::const_iterator end = Signal::_slots.end();
+				const std::list<Connection>& conns = Connectable::connections();
 
-				for(; it != end; ++it) {
+				std::list<Connection>::const_iterator it;
+				for(it = conns.begin(); it != conns.end(); ++it)
+				{
+					if( &( it->sender() ) != this)
+						continue;
+
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2, a3);
 				}
@@ -168,7 +190,8 @@ namespace Pt {
 			{ this->send(a1, a2, a3); }
 
 		private:
-			std::list<Connection> _slots;
+			mutable bool _sending;
+			mutable bool _cleanup;
 	};
 
 

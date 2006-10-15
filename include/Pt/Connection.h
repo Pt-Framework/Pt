@@ -14,6 +14,13 @@ namespace Pt {
 
 	class PT_EXPORT ConnectionData : public Shared {
 		public:
+			ConnectionData()
+			: _refs(1)
+			, _valid(false)
+			, _slot(0)
+			, _sender(0)
+			{ }
+
 			ConnectionData(Connectable& sender, Slot* slot)
 			: _refs(1)
 			, _valid(true)
@@ -62,6 +69,8 @@ namespace Pt {
 	class PT_EXPORT Connection
     {
 		public:
+			Connection();
+
 			Connection(Connectable& sender, Slot* slot);
 
 			Connection(const Connection& connection);
