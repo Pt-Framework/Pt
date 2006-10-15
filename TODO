@@ -1,3 +1,7 @@
+ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
+	TASK "Review 'ColorT& pixel(int x, int y)'"
+	TASK "Review 'Scanline scanline(int y)'"
+
 ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
@@ -46,7 +50,3 @@ ITEM-13 P0 S5 "The AtomicInt class implements atomic operations"
 	TASK "Review asm"
 	TASK "Write test case"
 	TASK "Write docs"
-
-ITEM-14 P0 S2 "All Gfx image classes accept (x,y) as coordinate"
-	TASK "Review 'ColorT& pixel(int x, int y)'"
-	TASK "Review 'Scanline scanline(int y)'"
