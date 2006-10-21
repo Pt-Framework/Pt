@@ -26,3 +26,7 @@ Main_MakeLocate SignalTest : bin ;
 Main TypesTest : TypesTest.cpp ;
 Main_LinkSharedLibraries TypesTest : Pt ;
 Main_MakeLocate TypesTest : bin ;
+
+Main SourceInfoTest : SourceInfoTest.cpp ;
+Main_LinkSharedLibraries SourceInfoTest : Pt ;
+Main_MakeLocate SourceInfoTest : bin ;

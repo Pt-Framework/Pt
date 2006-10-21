@@ -18,3 +18,7 @@ ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 ITEM-5 P0 S5 "POD types of fixed size are defined"
 	TASK "Review Types.h"	blue_wind_25	2006-10-21
 	TASK "Write test case"	blue_wind_25	2006-10-21
+
+ITEM-9 P0 S3 "A SourceInfo class exits."
+	TASK "Review SourceInfo.h"	blue_wind_25	2006-10-21
+	TASK "Write test case"	blue_wind_25	2006-10-21

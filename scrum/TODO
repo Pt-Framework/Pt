@@ -16,11 +16,6 @@ ITEM-8 P0 S3 "A empty Void type exists"
 	TASK "Review Void.h"
 	TASK "Write Documentation"
 
-ITEM-9 P0 S3 "A SourceInfo class exits."
-	TASK "Review SourceInfo.h"
-	TASK "Write Documentation"
-	TASK "Write test case"
-
 ITEM-10 P0 S5 "An common exception hierachy exits."
 	TASK "Review Exception.h"
 	TASK "Write Documentation"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Drner                             *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *                                                                         *
@@ -127,6 +127,6 @@ class PT_EXPORT SourceInfo {
     std::string  _func;
 };
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif
