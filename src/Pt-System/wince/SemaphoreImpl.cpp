@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,13 +18,13 @@
  ***************************************************************************/
 
 #include "SemaphoreImpl.h"
-#include "Ptv/System/Semaphore.h"
-#include "Ptv/System/SystemError.h"
+#include "Pt/System/Semaphore.h"
+#include "Pt/System/SystemError.h"
 
 #include <climits>
 
 
-namespace Ptv {
+namespace Pt {
 
 namespace System {
 
@@ -35,7 +35,7 @@ SemaphoreImpl::SemaphoreImpl(Semaphore& sem, unsigned int initial)
 	_handle = CreateSemaphore(NULL, initial, LONG_MAX, 0);
 
 	if( !_handle ) {
-		SystemError error("Could not create semaphore.", PTV_SOURCEINFO);
+		SystemError error("Could not create semaphore.", PT_SOURCEINFO);
 		_sem.raiseError( error );
 		return;
 	}
@@ -52,7 +52,7 @@ void SemaphoreImpl::wait()
 {
 	DWORD ret = WaitForSingleObject(_handle, INFINITE);
 	if(ret == WAIT_FAILED){
-		SystemError error("Could not wait on semaphore.", PTV_SOURCEINFO);
+		SystemError error("Could not wait on semaphore.", PT_SOURCEINFO);
 		_sem.raiseError( error );
 		return;
 	}
@@ -63,7 +63,7 @@ bool SemaphoreImpl::tryWait()
 {
 	DWORD ret = WaitForSingleObject(_handle, 0);
 	if(ret == WAIT_FAILED) {
-		SystemError error("Could not wait on semaphore.", PTV_SOURCEINFO);
+		SystemError error("Could not wait on semaphore.", PT_SOURCEINFO);
 		_sem.raiseError( error );
 		return false;
 	}
@@ -78,7 +78,7 @@ bool SemaphoreImpl::tryWait()
 void SemaphoreImpl::post()
 {
 	if( 0 == ReleaseSemaphore(_handle, 1, NULL) ) {
-		SystemError error("Could not post semaphore.", PTV_SOURCEINFO);
+		SystemError error("Could not post semaphore.", PT_SOURCEINFO);
 		_sem.raiseError( error );
 		return;
 	}

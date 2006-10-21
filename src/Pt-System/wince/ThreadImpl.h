@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Marc Boris Drner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,17 +17,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Ptv/Export.h"
-#include "Ptv/System/Thread.h"
+#include "Pt/Export.h"
+#include "Pt/System/Thread.h"
 
 #include <windows.h>
 
 
-namespace Ptv {
+namespace Pt {
 
 namespace System {
 
-	class PTV_EXPORT ThreadImpl {
+	class PT_EXPORT ThreadImpl {
 		public:
 			ThreadImpl(Thread& obj, Thread::Mode mode);
 

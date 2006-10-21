@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,17 +17,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Ptv/Export.h"
-#include "Ptv/System/Mutex.h"
+#include "Pt/Export.h"
+#include "Pt/System/Mutex.h"
 
 #include <windows.h>
 
 
-namespace Ptv {
+namespace Pt {
 
 namespace System {
 
-	class PTV_EXPORT MutexImpl {
+	class PT_EXPORT MutexImpl {
 		public:
 			MutexImpl(Mutex& mutex);
 

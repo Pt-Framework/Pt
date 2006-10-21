@@ -45,11 +45,11 @@ namespace Pt {
 			//! @brief Creates an exception from an error message and SourceInfo.
 			/**
 				Construction of an Exception object, requires a SourceInfo object as
-			    argument. Use the PTV_SOURCEINFO macro to pass SourceInfos to
+			    argument. Use the PT_SOURCEINFO macro to pass SourceInfos to
 			    exceptions:
 
 			    @code
-					throw MyException( "dammit!", PTV_SOURCEINFO );
+					throw MyException( "dammit!", PT_SOURCEINFO );
 			    @endcode
 
 			    @param what the error message
@@ -164,7 +164,7 @@ namespace Pt {
 	//! @ingroup Pt
 	//!	@brief This indicates an illegal argument error.
 	/**
-		An exception of class ÍllegalArgument is used to report invalid
+		An exception of class ï¿½legalArgument is used to report invalid
 		arguments e.g. if a bit set is initialized with a char other than
 		'0' or '1'.
 		This class implements Exception.

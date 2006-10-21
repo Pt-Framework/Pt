@@ -1130,7 +1130,7 @@ basic_string<Pt::Char>::find_last_of(const Pt::Char* s, size_type pos, size_type
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_not_of(const Pt::Char* tok, size_type pos, size_type n) const
 {
-	// ptv_requires_string_len(str, n);
+	// pt_requires_string_len(str, n);
 	const Char* str = _data->str();
 
 	for (; pos < this->size(); ++pos) {

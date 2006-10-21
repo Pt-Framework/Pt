@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,11 +18,11 @@
  ***************************************************************************/
 #include "MutexImpl.h"
 
-#include "Ptv/System/SystemError.h"
-#include "Ptv/System/Mutex.h"
+#include "Pt/System/SystemError.h"
+#include "Pt/System/Mutex.h"
 
 
-namespace Ptv {
+namespace Pt {
 
 namespace System {
 
@@ -34,7 +34,7 @@ MutexImpl::MutexImpl(Mutex& mutex)
 
 	if( !_handle ) {
 		std::string text = std::string("Could not create mutex: ");
-		SystemError error(text, PTV_SOURCEINFO);
+		SystemError error(text, PT_SOURCEINFO);
 		_mutex.raiseError( error );
 		return;
 	}
@@ -53,7 +53,7 @@ void MutexImpl::lock()
 
 	if(ret != WAIT_OBJECT_0) {
 		std::string text = std::string("Could not wait for mutex: ");
-		SystemError error(text, PTV_SOURCEINFO);
+		SystemError error(text, PT_SOURCEINFO);
 		_mutex.raiseError( error );
 		return;
 	}
@@ -66,7 +66,7 @@ bool MutexImpl::tryLock(unsigned int msec)
 
 	if(ret == WAIT_FAILED) {
 		std::string text = std::string("Could not wait for mutex: ");
-		SystemError error(text, PTV_SOURCEINFO);
+		SystemError error(text, PT_SOURCEINFO);
 		_mutex.raiseError( error );
 		return false;
 	}
@@ -81,7 +81,7 @@ void MutexImpl::unlock()
 {
 	if( !ReleaseMutex(_handle) ) {
 		std::string text = std::string("Could not release mutex: ");
-		SystemError error(text, PTV_SOURCEINFO);
+		SystemError error(text, PT_SOURCEINFO);
 		_mutex.raiseError( error );
 		return;
 	}

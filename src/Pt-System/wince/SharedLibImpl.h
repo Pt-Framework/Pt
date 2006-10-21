@@ -28,7 +28,7 @@ class SharedLibImpl
 			_handle = ::LoadLibrary((LPCTSTR) wpath );
 //            _handle = ::LoadLibrary(_T("MGNavigation.dll"));
 			//if(_handle == 0)
-			//	throw SystemError(GetLastError(), "Could not load shared library", PTV_SOURCEINFO);
+			//	throw SystemError(GetLastError(), "Could not load shared library", PT_SOURCEINFO);
 		}
 
 		~SharedLibImpl() throw()
@@ -46,7 +46,7 @@ class SharedLibImpl
 
 			_handle = ::LoadLibrary((LPCTSTR) path );
 			//if(_handle == 0)
-			//	throw SystemError(GetLastError(), "Could not load shared library", PTV_SOURCEINFO);
+			//	throw SystemError(GetLastError(), "Could not load shared library", PT_SOURCEINFO);
 		}
 
 		void* resolve(const char* symbol)

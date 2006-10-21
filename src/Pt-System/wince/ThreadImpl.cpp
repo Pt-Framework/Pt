@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,10 +19,10 @@
 
 #include "ThreadImpl.h"
 
-#include "Ptv/System/SystemError.h"
+#include "Pt/System/SystemError.h"
 
 
-namespace Ptv {
+namespace Pt {
 
 namespace System {
 
@@ -84,7 +84,7 @@ void ThreadImpl::setPriority(Thread::Priority prio)
 	// TODO: InheritPriority ???
 
 	if(0 == ::SetThreadPriority(_handle, winPrio) ) {
-		SystemError error("Could not set priority.", PTV_SOURCEINFO);
+		SystemError error("Could not set priority.", PT_SOURCEINFO);
 		_thread.raiseError( error );
 		return;
 	}
@@ -103,7 +103,7 @@ void ThreadImpl::start(Thread::Mode mode) {
 
 	if(_handle == NULL) {
 		_id = 0;
-		SystemError te("Could not create thread", PTV_SOURCEINFO);
+		SystemError te("Could not create thread", PT_SOURCEINFO);
 		_thread.raiseError( te );
 		return;
 	}
@@ -133,7 +133,7 @@ void ThreadImpl::wait()
 {
 	DWORD status = ::WaitForSingleObject(_handle, INFINITE);
 	if( status != WAIT_OBJECT_0 ) {
-		SystemError te("Could not join thread", PTV_SOURCEINFO);
+		SystemError te("Could not join thread", PT_SOURCEINFO);
 		_thread.raiseError( te );
 		return;
 	}
@@ -153,7 +153,7 @@ void ThreadImpl::exit() throw()
 void ThreadImpl::terminate()
 {
 	if( !TerminateThread(_handle, 0) ) {
-		SystemError te("Could not kill thread.", PTV_SOURCEINFO);
+		SystemError te("Could not kill thread.", PT_SOURCEINFO);
 		_thread.raiseError( te );
 		return;
 	}
