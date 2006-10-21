@@ -2,7 +2,10 @@ ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Review 'ColorT& pixel(int x, int y)'"
 	TASK "Review 'Scanline scanline(int y)'"
 
-ITEM-21 P0 S5 "Object reflection API is implemented" 
+ITEM-5 P0 S5 "POD types of fixed size are defined"
+	TASK "Verify the method of how to enable 64 bit types under linux/gcc"
+
+ITEM-21 P0 S5 "Object reflection API is implemented"
 	TASK "Split property in property and property proxy" Laurentiu
 	TASK "Specialize property for Reflectable" Laurentiu
 	TASk "Add signal changed to property" Laurentiu

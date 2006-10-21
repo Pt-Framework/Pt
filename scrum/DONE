@@ -14,3 +14,7 @@ ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
 	TASK "Verify the getters/setters for alpha channel"	blue_wind_25	2006-10-15
 	TASK "Verify the alpha channel conversion"	blue_wind_25	2006-10-15
+
+ITEM-5 P0 S5 "POD types of fixed size are defined"
+	TASK "Review Types.h"	blue_wind_25	2006-10-21
+	TASK "Write test case"	blue_wind_25	2006-10-21

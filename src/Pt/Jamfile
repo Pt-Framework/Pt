@@ -22,3 +22,7 @@ Main_MakeLocate AtomicTest : bin ;
 Main SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
+
+Main TypesTest : TypesTest.cpp ;
+Main_LinkSharedLibraries TypesTest : Pt ;
+Main_MakeLocate TypesTest : bin ;
