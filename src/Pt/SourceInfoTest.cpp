@@ -21,6 +21,7 @@
 using namespace std;
 
 #include "Pt/SourceInfo.h"
+#include "Pt/Exception.h"
 using namespace Pt;
 
 
