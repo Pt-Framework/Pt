@@ -12,9 +12,10 @@ ITEM P0 S13 "The system module supports WinCE and QNX"
 
 ITEM P0 S5 "The Image class supports several planar image formats, mostly compatible to version 2"
 	TASK "Rename BasicImage<T> to Image<T>"
-	TASK "Implement YV12 image, since it is the most used one for movie playback"
+	TASK "Find out which YUV formats are used for movie playback on linux and win32"	
+	TASK "Implement YV12 image as template specialisation"
 	TASK "Implement the needed image conversion from and to the YV12 image "
 
 ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
-	TASK "Gather information about all memory layout of (almost) all possible image formats in the world both planar and packed formats with all their channel variations, bit depths and paddings"
+	TASK "Gather information about memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
 	TASK "Implement proper tagging and class structure to cover those many formats"
