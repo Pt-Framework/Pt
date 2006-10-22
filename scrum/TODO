@@ -82,3 +82,7 @@ ITEM-22 P0 S5 "CTTI system is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
+
+ITEM-23 P0 S13 "The Pt::Unit module exists"
+	TASK "Review ccpunit code"
+	TASK "Review mini-cppunit from STLport code"
