@@ -13,5 +13,5 @@ ITEM P0 S5 "The Image class supports several planar image formats, mostly compat
 	TASK "Implement the needed image conversion from and to the YV12 image "
 
 ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
-	TASK "Gather information about memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
+	TASK "Review memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
 	TASK "Implement proper tagging and class structure to cover those many formats"
