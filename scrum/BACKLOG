@@ -1,11 +1,16 @@
-ITEM-23 P0 S13 "The Pt::Unit module exists"
+ITEM P0 S13 "The Pt::Unit module exists"
 	TASK "Review ccpunit code"
 	TASK "Review mini-cppunit from STLport code"
 
-ITEM-24 P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
+ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
 
-ITEM-25 P0 S13 "The system module supports WinCE and QNX"
+ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
 	TASK "Write Documentation"
 	TASK "Write test case"
+
+ITEM P0 S0 "The Image class supports planar Images, mostly compatible to version 2"
+
+
+ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
