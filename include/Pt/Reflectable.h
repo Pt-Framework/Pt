@@ -27,8 +27,7 @@ class PT_EXPORT Reflectable {
 
 		const PropertyMap& properties() const
 		{return _properties;}
-
-	protected:
+	
 		template <typename R, typename Parent, typename Object>
 		void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
 		{ _properties.insert( std::make_pair(name, new ReadProperty<R>(parent, getter)) ); }

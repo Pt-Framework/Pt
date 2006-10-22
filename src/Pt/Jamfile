@@ -15,6 +15,10 @@ SharedLibrary Pt : Any.cpp
 
 SharedLibrary_MakeLocate Pt : bin ;
 
+Main ReflectableTest : ReflectableTest.cpp ;
+Main_LinkSharedLibraries ReflectableTest : Pt ;
+Main_MakeLocate ReflectableTest : bin ;
+
 Main AtomicTest : AtomicTest.cpp ;
 Main_LinkSharedLibraries AtomicTest : Pt ;
 Main_MakeLocate AtomicTest : bin ;

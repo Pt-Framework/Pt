@@ -9,9 +9,13 @@
 #include <Pt/Any.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
+#include <Pt/Signal.h>
+
 
 
 namespace Pt {
+
+class Reflectable;
 
 class PT_EXPORT Property : public Clonable<Property> {
 	public:
@@ -28,6 +32,49 @@ class PT_EXPORT Property : public Clonable<Property> {
 		virtual void setValue(const Pt::Any& value) = 0;
 };
 
+template <typename T>
+class PT_EXPORT ValueProperty : virtual public Property 
+{
+	public:
+		ValueProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+		: Property()
+		, _value(value)
+		{ 				
+			parent->registerProperty( name, this, &ValueProperty<T>::get, &ValueProperty<T>::set ); 
+		}
+
+		~ValueProperty()
+		{ }
+
+		Property* clone() const
+		{ return new ValueProperty<T>(*this); }
+
+		virtual Pt::Any value()
+		{ return _value; }
+
+		virtual void setValue(const Pt::Any& value)
+		{ 
+			_value = value;
+			onValueChanged.send();
+		}
+
+		T get() const
+		{  return any_cast<T>(_value); }
+
+		void set( T value )
+		{
+			_value = value;
+			onValueChanged.send();
+		}
+
+		virtual void closed(const Connection& c)
+		{ }
+
+		Signal<> onValueChanged;
+
+	private:
+	    Pt::Any _value;
+};
 
 template <typename T>
 class PT_EXPORT ReadProperty : virtual public Property {
@@ -82,7 +129,12 @@ class PT_EXPORT WriteProperty : virtual public Property {
 
 		WriteProperty(const WriteProperty& property)
 		: Property()
-		{ _setter = property._setter->clone(); }
+		{ 
+			
+		//	_setter = property._setter->clone(); 
+			_setter = property._setter; 
+		
+		}
 
 		~WriteProperty()
 		{ delete _setter; }
