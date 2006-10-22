@@ -18,6 +18,9 @@
  ***************************************************************************/
 #include "Pt/AtomicInt.h"
 #include "Pt/Method.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestFixture.h"
+#include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 
 #include <string>
@@ -26,14 +29,15 @@ using namespace std;
 using namespace Pt;
 
 
-class AtomicTest : public Pt::Unit::TestCase
+class AtomicTest : public Pt::Unit::TestSuite
 {
 	public:
 		AtomicTest()
-		: Pt::Unit::TestCase("AtomicIntTest")
+		: Pt::Unit::TestSuite("AtomicIntTest")
 		{
-			Unit::TestCase::registerTest( callable(this, &AtomicTest::test), "test" );
+			Unit::TestSuite::registerTest( callable(this, &AtomicTest::test), "test" );
 		}
+
 
 	protected:
 		void test()
@@ -56,7 +60,7 @@ class AtomicTest : public Pt::Unit::TestCase
 };
 
 
-static AtomicTest atomicTest;
+Pt::Unit::RegisterTest<AtomicTest> atomicTest;
 
 
 
