@@ -20,8 +20,7 @@
 #define PT_UNIT_TEST_H
 
 #include <Pt/NonCopyable.h>
-#include <Pt/Invokable.h>
-
+#include <Pt/Signal.h>
 #include <string>
 
 
@@ -32,24 +31,28 @@ namespace Unit {
 	class Test : public NonCopyable
 	{
 		public:
-			template <typename InvokableT>
-			Test(const InvokableT& inv, const std::string name)
+			Test(const std::string& name)
 			: _name(name)
-			, _invokable( inv.clone() )
 			{ }
 
-			~Test()
-			{ delete _invokable; }
+			virtual ~Test()
+			{ }
 
 			const std::string& name() const
 			{ return _name; }
 
-			void run()
-			{ _invokable->invoke(); }
+			virtual void run() = 0;
+
+			Signal<const std::string&> success;
+
+			Signal<const std::string&, const Assertion&> assertion;
+
+			Signal<const std::string&, const std::exception&> exception;
+
+			Signal<const std::string&> error;
 
 		private:
 			std::string _name;
-			Pt::Invokable<>* _invokable;
 	};
 
 } // namespace Unit

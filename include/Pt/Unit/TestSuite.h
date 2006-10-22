@@ -16,13 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTCASE_H
-#define PT_UNIT_TESTCASE_H
+#ifndef PT_UNIT_TESTSUITE_H
+#define PT_UNIT_TESTSUITE_H
 
 #include <Pt/Exception.h>
 #include <Pt/Invokable.h>
 #include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestFixture.h>
+#include <Pt/Unit/TestCase.h>
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/Reporter.h>
 
 #include <list>
 #include <string>
@@ -32,42 +34,48 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestCase : public Test, public TestFixture
+	class TestSuite : public Test
 	{
 		public:
-			template <typename InvokableT>
-			TestCase(const InvokableT& inv, const std::string& name)
+			TestSuite(const std::string& name)
 			: Test(name)
-			, _invokable( inv.clone() )
 			{ }
 
-			virtual ~TestCase()
-			{ delete _invokable; }
+			virtual ~TestSuite()
+			{
+				for(std::list<TestCase*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
+					delete *it;
+
+				_tests.clear();
+			}
+
+			template <typename InvokableT>
+			void registerTest(const InvokableT& invokable, const std::string& name)
+			{
+				TestCase* tc = new TestCase(invokable, this->name() + "::" + name);
+				connect(tc->success, this->success);
+				connect(tc->assertion, this->assertion);
+				connect(tc->exception, this->exception);
+				connect(tc->error, this->error);
+
+				_tests.push_back( tc );
+			}
 
 			virtual void run()
 			{
-				try
+				std::list<TestCase*>::iterator it;
+				for( it = _tests.begin(); it != _tests.end(); ++it)
 				{
-					_invokable->invoke();
-					Test::success( this->name() );
-				}
-				catch(const Assertion& assertion)
-				{
-					Test::assertion( this->name(), assertion );
-				}
-				catch(const std::exception& ex)
-				{
-					Test::exception( this->name(), ex );
-				}
-				catch(...)
-				{
-					Test::error( this->name() );
+					(*it)->setUp();
+					(*it)->run();
+					(*it)->tearDown();
 				}
 			}
 
 		private:
-			Pt::Invokable<>* _invokable;
+			std::list<TestCase*> _tests;
 	};
+
 
 } // namespace Unit
 

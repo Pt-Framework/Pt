@@ -19,7 +19,7 @@
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
-#include <Pt/SourceInfo.h>
+#include <Pt/Unit/Assertion.h>
 
 #include <iostream>
 
@@ -42,31 +42,26 @@ namespace Unit {
 				std::cerr << msg << std::endl;
 			}
 
-			virtual void success( const std::string testCaseName, const std::string testName)
+			virtual void success( const std::string testName)
 			{
-				std::cerr << testCaseName << "::" << testName << ": OK."<< std::endl;
+				std::cerr << testName <<  ": OK."<< std::endl;
 			}
 
-			virtual void assertion(const std::string& className,
-			                        const std::string& functionName,
-			                        const SourceInfo& info)
+			virtual void assertion(const std::string& testName, const Assertion& a)
 			{
-				std::cerr << className << "::" << functionName << ": Assertion!" << std::endl;
-				std::cerr << '\t' << info.file() << ":" << info.line() << std::endl;
+				std::cerr << testName << ": Assertion!" << std::endl;
+				std::cerr << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
 			}
 
-			virtual void exception( const std::string testCaseName,
-			                         const std::string testName,
-			                         const std::string& what)
+			virtual void exception( const std::string testName, const std::exception& ex)
 			{
-				std::cerr << testCaseName << "::" << testName << ": Exception!" << std::endl;
-				std::cerr << '\t' << what << std::endl;
+				std::cerr << testName << ": Exception!" << std::endl;
+				std::cerr << '\t' << ex.what() << std::endl;
 			}
 
-			virtual void error(const std::string& className,
-			                    const std::string& functionName)
+			virtual void error(const std::string& testName)
 			{
-				std::cerr << className << "::" << functionName << ": Error!" << std::endl;
+				std::cerr << testName << ": Error!" << std::endl;
 			}
 	};
 
