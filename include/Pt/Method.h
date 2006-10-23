@@ -86,8 +86,8 @@ class PT_EXPORT Method : public Callable<R, A1, A2, A3> {
 			return false;
 		}
 
-		virtual void closed(const Connection& c) 
-		{ _object->closed(c); }
+		//virtual void closed(const Connection& c)
+		//{ _object->closed(c); }
 
 	private:
 		C* _object;
@@ -158,8 +158,8 @@ class PT_EXPORT Method<R, C, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::
 			return false;
 		}
 
-		virtual void closed(const Connection& c) 
-		{ _object->closed(c); }
+		//virtual void closed(const Connection& c)
+		//{ _object->closed(c); }
 
 	private:
 		ClassT* _object;
@@ -227,8 +227,8 @@ class PT_EXPORT Method<R, C, A1, Pt::Void, Pt::Void> : public Callable<R, A1, Pt
 			return false;
 		}
 
-		virtual void closed(const Connection& c) 
-		{ _object->closed(c); }
+		//virtual void closed(const Connection& c)
+		//{ _object->closed(c); }
 
 	private:
 		ClassT* _object;
@@ -311,7 +311,7 @@ template < typename R,
             class C,
             typename A1 = Pt::Void,
             typename A2 = Pt::Void,
-            typename A3 = Pt::Void 
+            typename A3 = Pt::Void
           >
 class PT_EXPORT MethodSlot : public BasicSlot<R, A1, A2, A3> {
 	public:
@@ -320,7 +320,7 @@ class PT_EXPORT MethodSlot : public BasicSlot<R, A1, A2, A3> {
 		{}
 
 		Slot* clone() const
-		{ 
+		{
 			return new MethodSlot(*this);
 		}
 
@@ -333,7 +333,7 @@ class PT_EXPORT MethodSlot : public BasicSlot<R, A1, A2, A3> {
 			connectable.opened(c);
 		}
 
-		virtual void closed(const Connection& c) 
+		virtual void closed(const Connection& c)
 		{
 			Connectable& connectable = _method.object();
 			connectable.closed(c);

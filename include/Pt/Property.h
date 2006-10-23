@@ -32,15 +32,16 @@ class PT_EXPORT Property : public Clonable<Property> {
 		virtual void setValue(const Pt::Any& value) = 0;
 };
 
+
 template <typename T>
-class PT_EXPORT ValueProperty : virtual public Property 
+class PT_EXPORT ValueProperty : virtual public Property
 {
 	public:
 		ValueProperty( const std::string& name, Reflectable* parent, const T& value = T() )
 		: Property()
 		, _value(value)
-		{ 				
-			parent->registerProperty( name, this, &ValueProperty<T>::get, &ValueProperty<T>::set ); 
+		{
+			parent->registerProperty( name, this, &ValueProperty<T>::get, &ValueProperty<T>::set );
 		}
 
 		~ValueProperty()
@@ -53,7 +54,7 @@ class PT_EXPORT ValueProperty : virtual public Property
 		{ return _value; }
 
 		virtual void setValue(const Pt::Any& value)
-		{ 
+		{
 			_value = value;
 			onValueChanged.send();
 		}
@@ -67,14 +68,12 @@ class PT_EXPORT ValueProperty : virtual public Property
 			onValueChanged.send();
 		}
 
-		virtual void closed(const Connection& c)
-		{ }
-
 		Signal<> onValueChanged;
 
 	private:
 	    Pt::Any _value;
 };
+
 
 template <typename T>
 class PT_EXPORT ReadProperty : virtual public Property {
@@ -129,11 +128,8 @@ class PT_EXPORT WriteProperty : virtual public Property {
 
 		WriteProperty(const WriteProperty& property)
 		: Property()
-		{ 
-			
-		//	_setter = property._setter->clone(); 
-			_setter = property._setter; 
-		
+		{
+			_setter = property._setter->cloneInvokable();
 		}
 
 		~WriteProperty()

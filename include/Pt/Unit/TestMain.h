@@ -29,7 +29,7 @@ namespace Unit {
 	class Application
 	{
 		template <typename TestT>
-		friend class RegisterTest;
+		friend struct RegisterTest;
 
 		public:
 			Application()
@@ -50,7 +50,7 @@ namespace Unit {
 			int run(Reporter& reporter)
 			{
 				Application::_reporter = &reporter;
-			
+
 				_errors = 0;
 				_numTests = 0;
 
@@ -155,21 +155,21 @@ int main(int argc, char** argv)
 	char* fileName = 0;
 	char* testName = "";
 	char* xtestName = "";
-	
+
 	for(int i = 1; i < argc; ++i)
 	{
 		if(argv[i][0] != '-')
 			break;
 
-		if( !strncmp(argv[i], "-t=", 3) ) 
+		if( !strncmp(argv[i], "-t=", 3) )
 		{
 			testName = argv[i] + 3;
 		}
-		else if( !strncmp(argv[i], "-f=", 3) ) 
+		else if( !strncmp(argv[i], "-f=", 3) )
 		{
 			fileName = argv[i] + 3;
 		}
-		else if ( !strncmp(argv[i], "-x=", 3) ) 
+		else if ( !strncmp(argv[i], "-x=", 3) )
 		{
 			xtestName = argv[i] + 3;
 		}

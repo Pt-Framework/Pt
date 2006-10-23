@@ -221,7 +221,7 @@ Function<R> callable(R (*func)()) throw()
 template < typename R,
             typename A1 = Pt::Void,
             typename A2 = Pt::Void,
-            typename A3 = Pt::Void 
+            typename A3 = Pt::Void
           >
 class PT_EXPORT FunctionSlot : public BasicSlot<R, A1, A2, A3> {
 	public:
@@ -238,7 +238,7 @@ class PT_EXPORT FunctionSlot : public BasicSlot<R, A1, A2, A3> {
 		virtual void opened(const Connection& c)
 		{ }
 
-		virtual void closed(const Connection& c) 
+		virtual void closed(const Connection& c)
 		{ }
 
 	private:

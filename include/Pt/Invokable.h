@@ -37,6 +37,8 @@ namespace Pt {
 			virtual ~Invokable()
 			{}
 
+			virtual Invokable* cloneInvokable() const = 0;
+
 			virtual void invoke(A1, A2, A3, A4) const = 0;
 	};
 
@@ -49,6 +51,8 @@ namespace Pt {
 			virtual ~Invokable()
 			{}
 
+			virtual Invokable* cloneInvokable() const = 0;
+
 			virtual void invoke(A1, A2, A3) const = 0;
 	};
 
@@ -60,6 +64,8 @@ namespace Pt {
 			virtual ~Invokable()
 			{}
 
+			virtual Invokable* cloneInvokable() const = 0;
+
 			virtual void invoke(A1, A2) const = 0;
 	};
 
@@ -70,6 +76,8 @@ namespace Pt {
 			virtual ~Invokable()
 			{}
 
+			virtual Invokable* cloneInvokable() const = 0;
+
 			virtual void invoke(A1) const = 0;
 	};
 
@@ -79,6 +87,8 @@ namespace Pt {
 		public:
 			virtual ~Invokable()
 			{}
+
+			virtual Invokable* cloneInvokable() const = 0;
 
 			virtual void invoke() const = 0;
 	};

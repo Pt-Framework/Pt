@@ -45,6 +45,9 @@ namespace Pt {
 		public:
 			virtual Callable* clone() const = 0;
 
+			Invokable<A1, A2, A3, A4>* cloneInvokable() const
+			{ return this->clone(); }
+
 			virtual R operator()(A1, A2, A3, A4) const = 0;
 
 			R call(A1 a1, A2 a2, A3 a3, A4 a4) const
@@ -71,6 +74,9 @@ namespace Pt {
 		public:
 			virtual Callable* clone() const = 0;
 
+			Invokable<A1, A2, A3, A4>* cloneInvokable() const
+			{ return this->clone(); }
+
 			virtual void operator()(A1, A2, A3, A4) const = 0;
 
 			void call(A1 a1, A2 a2, A3 a3, A4 a4) const
@@ -96,6 +102,9 @@ namespace Pt {
 		public:
 			virtual Callable* clone() const = 0;
 
+			Invokable<A1, A2, A3>* cloneInvokable() const
+			{ return this->clone(); }
+
 			virtual R operator()(A1, A2, A3) const = 0;
 
 			R call(A1 a1, A2 a2, A3 a3) const
@@ -119,6 +128,9 @@ namespace Pt {
 
 		public:
 			virtual Callable* clone() const = 0;
+
+			Invokable<A1, A2, A3>* cloneInvokable() const
+			{ return this->clone(); }
 
 			virtual void operator()(A1, A2, A3) const = 0;
 
@@ -144,6 +156,9 @@ namespace Pt {
 		public:
 			virtual Callable* clone() const = 0;
 
+			Invokable<A1, A2>* cloneInvokable() const
+			{ return this->clone(); }
+
 			virtual R operator()(A1, A2) const = 0;
 
 			R call(A1 a1, A2 a2) const
@@ -166,6 +181,9 @@ namespace Pt {
 
 		public:
 			virtual Callable* clone() const = 0;
+
+			Invokable<A1, A2>* cloneInvokable() const
+			{ return this->clone(); }
 
 			virtual void operator()(A1, A2) const = 0;
 
@@ -192,6 +210,9 @@ namespace Pt {
 
 			virtual R operator()(A1) const = 0;
 
+			Invokable<A1>* cloneInvokable() const
+			{ return this->clone(); }
+
 			R call(A1 a1) const
 			{ return this->operator()(a1); }
 
@@ -211,6 +232,9 @@ namespace Pt {
 
 		public:
 			virtual Callable* clone() const = 0;
+
+			Invokable<A1>* cloneInvokable() const
+			{ return this->clone(); }
 
 			virtual void operator()(A1) const = 0;
 
@@ -234,6 +258,9 @@ namespace Pt {
 		public:
 			virtual Callable* clone() const = 0;
 
+			Invokable<>* cloneInvokable() const
+			{ return this->clone(); }
+
 			virtual R operator()() const = 0;
 
 			R call() const
@@ -255,6 +282,9 @@ namespace Pt {
 
 		public:
 			virtual Callable* clone() const = 0;
+
+			Invokable<>* cloneInvokable() const
+			{ return this->clone(); }
 
 			virtual void operator()() const = 0;
 

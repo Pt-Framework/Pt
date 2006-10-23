@@ -11,14 +11,14 @@ class ReflactableObject : public Reflectable
     public:
 		ReflactableObject()
 		: aProperty( "aProperty", me() , 20 )
-		{ } 
-    
-		ValueProperty<int> aProperty;    
+		{ }
+
+		ValueProperty<int> aProperty;
 
 	private:
 		//By using "this" in ctor produce unter VC compiler a warnning.
 		ReflactableObject* me()
-		{ return this; }	
+		{ return this; }
 };
 
 
@@ -32,17 +32,17 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 			Unit::TestSuite::registerTest( callable(this, &ReflectableTest::test), "test" );
 		}
 
-	protected:	
+	protected:
 		void test()
 		{
-			ReflactableObject	test; 	
+			ReflactableObject	test;
 			int					value;
 			Any					any;
-       
+
 			//Test the getter.
 			value = test.aProperty.get();;
 			PT_UNIT_ASSERT( value == 20 );
-			
+
 			//Test the setter.
 			test.aProperty.set( 10 );
 			value = test.aProperty.get();;
@@ -59,11 +59,11 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 			value = any_cast<int>(any);
 			PT_UNIT_ASSERT( value == -3 );
 
-			//Test the reflection getter. 
+			//Test the reflection getter.
 			any = test.property("aProperty");
 			value = any_cast<int>(any);
 			PT_UNIT_ASSERT( value == -3 );
-			
+
 			//Test the reflection setter.
 			any =  5;
 			test.setProperty( "aProperty", any );
@@ -72,7 +72,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 
 			//Test the property signal "onValueChanged".
 			connect( test.aProperty.onValueChanged, slot(this, &ReflectableTest::onValueChanged) );
-			
+
 			//Test the setter.
 			test.aProperty.set( 2 );
 			PT_UNIT_ASSERT( _onValueChanged == true );
@@ -88,8 +88,9 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 			any =  1;
 			test.setProperty( "aProperty", any );
 			PT_UNIT_ASSERT( _onValueChanged == true );
+
 		}
-	
+
 	private:
 		void onValueChanged()
 		{ _onValueChanged = true; }
