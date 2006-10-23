@@ -17,7 +17,8 @@ namespace Pt {
 
 class Reflectable;
 
-class PT_EXPORT Property : public Clonable<Property> {
+class PT_EXPORT Property : public Clonable<Property>
+{
 	public:
 		Property()
 		{}
@@ -27,9 +28,15 @@ class PT_EXPORT Property : public Clonable<Property> {
 
 		virtual Property* clone() const = 0;
 
-		virtual Pt::Any value() = 0;
+		virtual Pt::Any value()
+		{
+			throw LogicError("Property is not readable", PT_SOURCEINFO);
+		}
 
-		virtual void setValue(const Pt::Any& value) = 0;
+		virtual void setValue(const Pt::Any& value)
+		{
+			throw LogicError("Property is not writable", PT_SOURCEINFO);
+		}
 };
 
 
@@ -105,9 +112,6 @@ class PT_EXPORT ReadProperty : virtual public Property {
 			return any;
 		}
 
-		virtual void setValue(const Pt::Any&)
-		{ }
-
 		T get() const
 		{ return _getter->operator()(); }
 
@@ -138,8 +142,6 @@ class PT_EXPORT WriteProperty : virtual public Property {
 		Property* clone() const
 		{ return new WriteProperty(*this); }
 
-		virtual Pt::Any value()
-		{ return Pt::Any(); }
 
 		virtual void setValue(const Pt::Any& a)
 		{
