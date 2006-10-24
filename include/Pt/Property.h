@@ -44,7 +44,8 @@ template <typename T>
 class PT_EXPORT ValueProperty : virtual public Property
 {
 	public:
-		ValueProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+		template <typename ReflectableT>
+		ValueProperty( const std::string& name, ReflectableT* parent, const T& value = T() )
 		: Property()
 		, _value(value)
 		{
