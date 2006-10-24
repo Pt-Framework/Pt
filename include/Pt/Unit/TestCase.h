@@ -35,20 +35,20 @@ namespace Unit {
 	class TestCase : public Test, public TestFixture
 	{
 		public:
-			template <typename InvokableT>
-			TestCase(const InvokableT& inv, const std::string& name)
+			TestCase(const std::string& name)
 			: Test(name)
-			, _invokable( inv.clone() )
 			{ }
 
 			virtual ~TestCase()
-			{ delete _invokable; }
+			{ }
 
 			virtual void run()
 			{
 				try
 				{
-					_invokable->invoke();
+					this->setUp();
+					this->test();
+					this->tearDown();
 					Test::success( this->name() );
 				}
 				catch(const Assertion& assertion)
@@ -65,8 +65,33 @@ namespace Unit {
 				}
 			}
 
+			virtual void test() = 0;
+	};
+
+
+	template <class FixtureT>
+	class TestMethod : public TestCase
+	{
+		public:
+			typedef void (FixtureT::*MemFuncT)();
+
+		public:
+			TestMethod(FixtureT& fixture, MemFuncT memFunc, const std::string& name)
+			: TestCase(name)
+			, _method(&fixture, memFunc)
+			{}
+
+			void setUp()
+			{ _method.object().setUp(); }
+
+			void tearDown()
+			{ _method.object().tearDown(); }
+
+			void test()
+			{ _method.invoke(); }
+
 		private:
-			Pt::Invokable<>* _invokable;
+			Method<void, FixtureT> _method;
 	};
 
 } // namespace Unit

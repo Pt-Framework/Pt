@@ -34,7 +34,7 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Test
+	class TestSuite : public Test, public TestFixture
 	{
 		public:
 			TestSuite(const std::string& name)
@@ -43,37 +43,39 @@ namespace Unit {
 
 			virtual ~TestSuite()
 			{
-				for(std::list<TestCase*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
+				for(std::list<Test*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
 					delete *it;
 
 				_tests.clear();
 			}
 
-			template <typename InvokableT>
-			void registerTest(const InvokableT& invokable, const std::string& name)
+			template <typename FixtureT>
+			void registerMethod(FixtureT& fixture, void (FixtureT::*memFunc)(), const std::string& name)
 			{
-				TestCase* tc = new TestCase(invokable, this->name() + "::" + name);
-				connect(tc->success, this->success);
-				connect(tc->assertion, this->assertion);
-				connect(tc->exception, this->exception);
-				connect(tc->error, this->error);
+				this->addTest( new TestMethod<FixtureT>(fixture, memFunc, this->name() + "::" + name) );
+			}
 
-				_tests.push_back( tc );
+			void addTest(Test* test)
+			{
+				connect(test->success, this->success);
+				connect(test->assertion, this->assertion);
+				connect(test->exception, this->exception);
+				connect(test->error, this->error);
+
+				_tests.push_back( test );
 			}
 
 			virtual void run()
 			{
-				std::list<TestCase*>::iterator it;
+				std::list<Test*>::iterator it;
 				for( it = _tests.begin(); it != _tests.end(); ++it)
 				{
-					(*it)->setUp();
 					(*it)->run();
-					(*it)->tearDown();
 				}
 			}
 
 		private:
-			std::list<TestCase*> _tests;
+			std::list<Test*> _tests;
 	};
 
 
