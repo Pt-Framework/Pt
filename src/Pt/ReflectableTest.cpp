@@ -5,7 +5,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 using namespace Pt;
-
+/*
 class ReflactableObject : public Reflectable
 {
     public:
@@ -100,3 +100,5 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 
 
 Pt::Unit::RegisterTest<ReflectableTest> reflectableTest;
+*/
+

@@ -35,9 +35,8 @@ class AtomicTest : public Pt::Unit::TestSuite
 		AtomicTest()
 		: Pt::Unit::TestSuite("AtomicIntTest")
 		{
-			Unit::TestSuite::registerTest( callable(this, &AtomicTest::test), "test" );
+			Unit::TestSuite::registerMethod( *this, &AtomicTest::test, "test" );
 		}
-
 
 	protected:
 		void test()
