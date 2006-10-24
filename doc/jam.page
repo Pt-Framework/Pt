@@ -194,13 +194,13 @@ Microsoft visual studio 8 installation.
 !! Compiling Windows CE targets
 
 Windows CE targets need to be cross compiled under Windows NT/XP. Therefore 
-the TARGET_OS and TARGET_OSPLAT variables need to be set. No build command
-shell for embedded targets is provided by Microsoft, so the path to the 
-Visual studio installation has to be set. The following command builds for 
-ARM CPU's:
+the TARGET_OS and TARGET_OSPLAT variables need to be set when jam is invoked. 
+No build command shell for embedded targets is provided by Microsoft, so the 
+path to the Visual studio installation has to be set and a regular command 
+shell has to be used. The following command builds for ARM CPU's:
 
 @code
-./jam/jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 2003 .Net" 
+./jam/jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 8" 
               -sTOOLSET=vc8 -sTARGET_OS=wince -sTARGET_OSPLAT=arm
 @endcode
 
