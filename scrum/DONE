@@ -29,3 +29,9 @@ ITEM-23 P0 S13 "The Pt::Unit module exists"
 	TASK "Review qt-unit code" d-marc 2006-10-24
 	TASK "Review boost unittest framework" d-marc 2006-10-24
 	TASK "Review mini-cppunit from STLport code" d-marc 2006-10-24
+	TASK "Write Test interface" d-marc 2006-10-25
+	TASK "Write TestFixture" d-marc 2006-10-25
+	TASK "Write TestCase class" d-marc 2006-10-25
+	TASK "Write Assertion handling" d-marc 2006-10-25
+	TASK "Write TestSuite class" d-marc 2006-10-25
+	TASK "Write Application class" d-marc 2006-10-25
