@@ -1,0 +1,156 @@
+/***************************************************************************
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+#ifndef PT_UNIT_APPLICATION_H
+#define PT_UNIT_APPLICATION_H
+
+#include<Pt/Unit/Reporter.h>
+#include<Pt/Unit/Test.h>
+
+#include <sstream>
+
+
+namespace Pt {
+
+namespace Unit {
+
+	class Application
+	{
+		template <typename TestT>
+		friend struct RegisterTest;
+
+		public:
+			Application()
+			{}
+
+			~Application()
+			{}
+
+			static void registerTest(Test& test)
+			{
+				connect(test.success, &Application::success);
+				connect(test.assertion, &Application::assertion);
+				connect(test.exception, &Application::exception);
+				connect(test.error, &Application::error);
+				_allTests.push_back(&test);
+			}
+
+			int run(Reporter& reporter, const std::string& testName = "")
+			{
+				Application::_reporter = &reporter;
+
+				_errors = 0;
+
+				std::list<Test*>::iterator it;
+				for(it = _allTests.begin(); it != _allTests.end(); ++it)
+				{
+					if(testName == "" || (*it)->name() == testName)
+						(*it)->run();
+				}
+
+				if(_errors == 0)
+				{
+					this->message("*** Success ***");
+				}
+				else
+				{
+					std::stringstream msg;
+					msg << "*** " << _errors << " errors occured. ***";
+					this->message( msg.str() );
+				}
+
+				return _errors;
+			}
+
+			const std::list<Test*>& tests() const
+			{ return _allTests; }
+
+			static void success(const std::string& testName)
+			{
+				if(_reporter)
+				{
+					_reporter->success(testName);
+				}
+			}
+
+			static void assertion(const std::string& testName, const Assertion& a)
+			{
+				++_errors;
+
+				if(_reporter)
+				{
+					_reporter->assertion(testName, a);
+				}
+			}
+
+			static void exception(const std::string& testName, const std::exception& ex)
+			{
+				++_errors;
+
+				if(_reporter)
+				{
+					_reporter->exception(testName, ex);
+				}
+			}
+
+			static void error(const std::string& testName)
+			{
+				++_errors;
+
+				if(_reporter)
+				{
+					_reporter->error(testName);
+				}
+			}
+
+			static void message( const std::string msg )
+			{
+				if(_reporter)
+					_reporter->message(msg);
+			}
+
+		private:
+			static size_t _errors;
+
+			static std::list<Test*> _allTests;
+
+			static Reporter* _reporter;
+	};
+
+	size_t Application::_errors = 0;
+
+	std::list<Test*> Application::_allTests;
+
+	Reporter* Application::_reporter = 0;
+
+
+	template <class TestT>
+	struct RegisterTest
+	{
+		RegisterTest()
+		{
+			static TestT test;
+			Application::registerTest(test);
+		}
+	};
+
+} // namespace Unit
+
+} // namespace Pt
+
+#endif

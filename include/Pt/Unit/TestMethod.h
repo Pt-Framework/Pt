@@ -16,15 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTSUITE_H
-#define PT_UNIT_TESTSUITE_H
+#ifndef PT_UNIT_TESTMETHOD_H
+#define PT_UNIT_TESTMETHOD_H
 
-#include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestFixture.h>
-#include <Pt/Unit/TestFunction.h>
-#include <Pt/Unit/TestMethod.h>
+#include <Pt/Method.h>
+#include <Pt/Unit/TestCase.h>
 
-#include <list>
 #include <string>
 
 
@@ -32,59 +29,34 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Test, public TestFixture
+	template <class FixtureT>
+	class TestMethod : public TestCase
 	{
 		public:
-			TestSuite(const std::string& name)
-			: Test(name)
-			{ }
+			typedef void (FixtureT::*MemFuncT)();
 
-			virtual ~TestSuite()
-			{
-				for(std::list<Test*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
-					delete *it;
+		public:
+			TestMethod(FixtureT& fixture, MemFuncT memFunc, const std::string& name)
+			: TestCase(name)
+			, _method(&fixture, memFunc)
+			{}
 
-				_tests.clear();
-			}
+			void setUp()
+			{ _method.object().setUp(); }
 
-			template <typename FixtureT>
-			void registerMethod(FixtureT& fixture, void (FixtureT::*memFunc)(), const std::string& name)
-			{
-				this->registerTest( new TestMethod<FixtureT>(fixture, memFunc, this->name() + "::" + name) );
-			}
+			void tearDown()
+			{ _method.object().tearDown(); }
 
-			void registerFunction( void (*func)(), const std::string& name )
-			{
-				this->registerTest( new TestFunction(func, this->name() + "::" + name) );
-			}
-
-			void registerTest(Test* test)
-			{
-				connect(test->success, this->success);
-				connect(test->assertion, this->assertion);
-				connect(test->exception, this->exception);
-				connect(test->error, this->error);
-
-				_tests.push_back( test );
-			}
-
-			virtual void run()
-			{
-				std::list<Test*>::iterator it;
-				for( it = _tests.begin(); it != _tests.end(); ++it)
-				{
-					(*it)->run();
-				}
-			}
+			void test()
+			{ _method.invoke(); }
 
 		private:
-			std::list<Test*> _tests;
+			Method<void, FixtureT> _method;
 	};
-
 
 } // namespace Unit
 
 } // namespace Pt
 
-#endif // for header
+#endif
 

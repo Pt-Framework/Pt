@@ -35,7 +35,6 @@ namespace Unit {
 			/** \brief Set up context before running a test.
 			    This function is called before each registered tester function
 			    is invoked. It is meant to initialize any required resources.
-
 			*/
 			virtual void setUp() 
 			{};

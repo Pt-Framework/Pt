@@ -17,128 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include<Pt/Unit/Reporter.h>
-#include<Pt/Unit/TestSuite.h>
+#include<Pt/Unit/Application.h>
 
 #include <cstring>
-
-
-namespace Pt {
-
-namespace Unit {
-
-	class Application
-	{
-		template <typename TestT>
-		friend struct RegisterTest;
-
-		public:
-			Application()
-			{}
-
-			~Application()
-			{}
-
-			static void addTest(Test& test)
-			{
-				connect(test.success, &Application::success);
-				connect(test.assertion, &Application::assertion);
-				connect(test.exception, &Application::exception);
-				connect(test.error, &Application::error);
-				_allTests.push_back(&test);
-			}
-
-			int run(Reporter& reporter)
-			{
-				Application::_reporter = &reporter;
-
-				_errors = 0;
-				_numTests = 0;
-
-				std::list<Test*>::iterator it;
-				for(it = _allTests.begin(); it != _allTests.end(); ++it)
-				{
-					(*it)->run();
-				}
-
-				return _errors;
-			}
-
-			static void success(const std::string& testName)
-			{
-				if(_reporter)
-				{
-					_reporter->success(testName);
-				}
-			}
-
-			static void assertion(const std::string& testName, const Assertion& a)
-			{
-				++_errors;
-
-				if(_reporter)
-				{
-					_reporter->assertion(testName, a);
-				}
-			}
-
-			static void exception(const std::string& testName, const std::exception& ex)
-			{
-				++_errors;
-
-				if(_reporter)
-				{
-					_reporter->exception(testName, ex);
-				}
-			}
-
-			static void error(const std::string& testName)
-			{
-				++_errors;
-
-				if(_reporter)
-				{
-					_reporter->error(testName);
-				}
-			}
-
-			static void message( const std::string msg )
-			{
-				if(_reporter)
-					_reporter->message(msg);
-			}
-
-		private:
-			static size_t _errors;
-
-			static size_t _numTests;
-
-			static std::list<Test*> _allTests;
-
-			static Reporter* _reporter;
-	};
-
-	size_t Application::_errors = 0;
-
-	size_t Application::_numTests = 0;
-
-	std::list<Test*> Application::_allTests;
-
-	Reporter* Application::_reporter = 0;
-
-
-	template <class TestT>
-	struct RegisterTest
-	{
-		RegisterTest()
-		{
-			static TestT test;
-			Application::addTest(test);
-		}
-	};
-
-} // namespace Unit
-
-} // namespace Pt
 
 
 int main(int argc, char** argv)
@@ -148,35 +29,38 @@ int main(int argc, char** argv)
   // test [OPTIONS]
   // where OPTIONS are
   //  -t=CLASS[::TEST]    run the test class CLASS or member test CLASS::TEST
-  //  -x=CLASS[::TEST]    run all except the test class CLASS or member test CLASS::TEST
   //  -f=FILE             save output in file FILE instead of stdout
 
-/*
-	char* fileName = 0;
+	Pt::Unit::Reporter reporter;
+	Pt::Unit::Application app;
+
+	//char* fileName = 0;
 	char* testName = "";
-	char* xtestName = "";
 
 	for(int i = 1; i < argc; ++i)
 	{
 		if(argv[i][0] != '-')
 			break;
 
-		if( !strncmp(argv[i], "-t=", 3) )
+		if( !strncmp(argv[i], "--help", 6) )
 		{
-			testName = argv[i] + 3;
+			std::cerr << "Available Tests:\n";
+			std::list<Pt::Unit::Test*>::const_iterator it;
+			for( it = app.tests().begin(); it != app.tests().end(); ++it)
+			{
+				std::cerr << "  - "<< (*it)->name() << std::endl;
+			}
+			return 0;
 		}
-		else if( !strncmp(argv[i], "-f=", 3) )
+		else if( !strncmp(argv[i], "-t", 2) )
 		{
-			fileName = argv[i] + 3;
+			testName = argv[++i];
 		}
-		else if ( !strncmp(argv[i], "-x=", 3) )
-		{
-			xtestName = argv[i] + 3;
-		}
+		//else if( !strncmp(argv[i], "-f=", 3) )
+		//{
+		//	fileName = argv[i] + 3;
+		//}
 	}
-*/
-	Pt::Unit::Application app;
-	Pt::Unit::Reporter reporter;
 
-	return app.run(reporter);
+	return app.run(reporter, testName);
 }

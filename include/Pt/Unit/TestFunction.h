@@ -16,15 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTSUITE_H
-#define PT_UNIT_TESTSUITE_H
+#ifndef PT_UNIT_TESTFUNCTION_H
+#define PT_UNIT_TESTFUNCTION_H
 
-#include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestFixture.h>
-#include <Pt/Unit/TestFunction.h>
-#include <Pt/Unit/TestMethod.h>
+#include <Pt/Function.h>
+#include <Pt/Unit/TestCase.h>
 
-#include <list>
 #include <string>
 
 
@@ -32,59 +29,26 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Test, public TestFixture
+	class TestFunction : public TestCase
 	{
 		public:
-			TestSuite(const std::string& name)
-			: Test(name)
-			{ }
+			typedef void (*FuncT)();
 
-			virtual ~TestSuite()
-			{
-				for(std::list<Test*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
-					delete *it;
+		public:
+			TestFunction(FuncT func, const std::string& name)
+			: TestCase(name)
+			, _function(func)
+			{}
 
-				_tests.clear();
-			}
-
-			template <typename FixtureT>
-			void registerMethod(FixtureT& fixture, void (FixtureT::*memFunc)(), const std::string& name)
-			{
-				this->registerTest( new TestMethod<FixtureT>(fixture, memFunc, this->name() + "::" + name) );
-			}
-
-			void registerFunction( void (*func)(), const std::string& name )
-			{
-				this->registerTest( new TestFunction(func, this->name() + "::" + name) );
-			}
-
-			void registerTest(Test* test)
-			{
-				connect(test->success, this->success);
-				connect(test->assertion, this->assertion);
-				connect(test->exception, this->exception);
-				connect(test->error, this->error);
-
-				_tests.push_back( test );
-			}
-
-			virtual void run()
-			{
-				std::list<Test*>::iterator it;
-				for( it = _tests.begin(); it != _tests.end(); ++it)
-				{
-					(*it)->run();
-				}
-			}
+			void test()
+			{ _function.invoke(); }
 
 		private:
-			std::list<Test*> _tests;
+			Pt::Function<void> _function;
 	};
-
 
 } // namespace Unit
 
 } // namespace Pt
 
-#endif // for header
-
+#endif

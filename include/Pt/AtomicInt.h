@@ -17,7 +17,7 @@ namespace Pt {
     class AtomicInt
     {
         public:
-            AtomicInt(atomic_t value)
+            AtomicInt(atomic_t value = 0)
             : _value(value)
             {}
 
@@ -50,7 +50,7 @@ namespace Pt {
 		class AtomicInt
 		{
 			public:
-				AtomicInt(atomic_t value)
+				AtomicInt(atomic_t value = 0)
 				: _value(value)
 				{}
 
@@ -104,7 +104,7 @@ namespace Pt {
 		class AtomicInt
 		{
 			public:
-				AtomicInt(atomic_t value)
+				AtomicInt(atomic_t value = 0)
 				: _value(value)
 				{}
 
@@ -191,7 +191,7 @@ namespace Pt {
 		class AtomicInt
 		{
 			public:
-				AtomicInt(atomic_t value)
+				AtomicInt(atomic_t value = 0)
 				: _value(value)
 				{}
 

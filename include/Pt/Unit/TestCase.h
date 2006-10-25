@@ -19,12 +19,10 @@
 #ifndef PT_UNIT_TESTCASE_H
 #define PT_UNIT_TESTCASE_H
 
-#include <Pt/Exception.h>
-#include <Pt/Invokable.h>
+#include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/TestFixture.h>
 
-#include <list>
 #include <string>
 
 
@@ -66,32 +64,6 @@ namespace Unit {
 			}
 
 			virtual void test() = 0;
-	};
-
-
-	template <class FixtureT>
-	class TestMethod : public TestCase
-	{
-		public:
-			typedef void (FixtureT::*MemFuncT)();
-
-		public:
-			TestMethod(FixtureT& fixture, MemFuncT memFunc, const std::string& name)
-			: TestCase(name)
-			, _method(&fixture, memFunc)
-			{}
-
-			void setUp()
-			{ _method.object().setUp(); }
-
-			void tearDown()
-			{ _method.object().tearDown(); }
-
-			void test()
-			{ _method.invoke(); }
-
-		private:
-			Method<void, FixtureT> _method;
 	};
 
 } // namespace Unit

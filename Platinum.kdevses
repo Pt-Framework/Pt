@@ -1,15 +1,32 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="1" >
-  <Doc0 NumberOfViews="1" URL="file:///home/marc/src/Platinum/include/Pt/Gfx/Rect.h" >
-   <View0 line="29" Type="Source" />
+ <DocsAndViews NumberOfDocuments="6" >
+  <Doc0 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestMain.h" >
+   <View0 line="36" Type="Source" />
   </Doc0>
+  <Doc1 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/Application.h" >
+   <View0 line="149" Type="Source" />
+  </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:///home/arklinux/Platinum/src/Pt/AtomicTest.cpp" >
+   <View0 line="92" Type="Source" />
+  </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestSuite.h" >
+   <View0 line="57" Type="Source" />
+  </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestCase.h" >
+   <View0 line="0" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestFunction.h" >
+   <View0 line="0" Type="Source" />
+  </Doc5>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
    <breakpointList>
-    <breakpoint0 location="/home/marc/Platinum/include/Pt/Singleton.h:66" type="1" condition="" enabled="1" />
+    <breakpoint0 location="/home/marc/Platinum/include/Pt/Singleton.h:66" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
+     <tracedExpressions/>
+    </breakpoint0>
    </breakpointList>
   </kdevdebugger>
   <kdevvalgrind>

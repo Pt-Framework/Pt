@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/AtomicInt.h"
-#include "Pt/Method.h"
+
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestSuite.h"
@@ -25,84 +25,76 @@
 
 #include <string>
 
-using namespace std;
-using namespace Pt;
 
-
-class AtomicTest : public Pt::Unit::TestSuite
+class AtomicIntConstructorTest : public Pt::Unit::TestCase
 {
 	public:
-		AtomicTest()
-		: Pt::Unit::TestSuite("AtomicIntTest")
-		{
-			Unit::TestSuite::registerMethod( *this, &AtomicTest::test, "test" );
-		}
+		AtomicIntConstructorTest()
+		: TestCase("AtomicIntConstructorTest")
+		{}
 
-	protected:
-		void test()
+		virtual void test()
 		{
-			AtomicInt a(5);
+			Pt::AtomicInt a(5);
 			PT_UNIT_ASSERT( a.value() == 5 );
-
-			int value = a.value();
-			PT_UNIT_ASSERT( value == 5 );
-
-			a = 10;
-			PT_UNIT_ASSERT( a.value() == 10 );
-
-			a -= 3;
-			PT_UNIT_ASSERT( a.value() == 7 );
-
-			a += 2;
-			PT_UNIT_ASSERT( a.value() == 9 );
 		}
 };
 
-
-Pt::Unit::RegisterTest<AtomicTest> atomicTest;
-
+Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTest;
 
 
-/*
-int main(int agrv, char* argv[])
+
+
+class AtomicOperatorTest : public Pt::Unit::TestFixture
 {
-			const size_t len = strlen( argv[0] );
-			char buffer[len + 1];
-			memcpy(buffer, argv[0], len);
-			buffer[len+1] = '\0';
-			cerr << buffer << endl;
-			
-	cerr << "\n----- AtomicTest -----" << endl;
+	public:
+		virtual void setUp()
+		{
+			_value = 5;
+		}
 
-	cerr << "AtomicInt::AtomicInt(atomic_t): ";
-	AtomicInt a(5);
-	assert(a.value() == 5);
-	cerr << "ok\n";
+		virtual void tearDown()
+		{}
 
-	cerr << "AtomicInt::value(): ";
-	int value = a.value();
-	assert(value == 5);
-	cerr << "ok\n";
+		void testSubstract()
+		{
+			_value -= 3;
+			PT_UNIT_ASSERT( _value.value() == 2 );
+		}
 
-	cerr << "AtomicInt::operator=: ";
-	a = 10;
-	assert(a.value() == 10);
-	cerr << "ok\n";
-
-	cerr << "AtomicInt::operator-=: ";
-	a -= 3;
-	assert(a.value() == 7);
-	cerr << "ok\n";
-
-	cerr << "AtomicInt::operator+=: ";
-	a += 2;
-	assert(a.value() == 9);
-	cerr << "ok\n";
-
-	cerr << "=> success.\n";
-	return 0;
-}
-*/
+		void testAdd()
+		{
+			_value += 3;
+			PT_UNIT_ASSERT( _value.value() == 8 );
+		}
 
 
+	private:
+		Pt::AtomicInt _value;
+};
 
+
+class AtomicTestSuite : public Pt::Unit::TestSuite
+{
+	public:
+		AtomicTestSuite()
+		: Pt::Unit::TestSuite("AtomicIntTest")
+		{
+			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::testAssign, "AssignmentTest" );
+			Pt::Unit::TestSuite::registerMethod( _operatorTest, &AtomicOperatorTest::testSubstract, "SubstractionTest" );
+			Pt::Unit::TestSuite::registerMethod( _operatorTest, &AtomicOperatorTest::testAdd, "AdditionTest" );
+		}
+
+	protected:
+		void testAssign()
+		{
+			Pt::AtomicInt a;
+			a = 10;
+			PT_UNIT_ASSERT( a.value() == 10 );
+		}
+
+	private:
+		AtomicOperatorTest _operatorTest;
+};
+
+Pt::Unit::RegisterTest<AtomicTestSuite> register_AtomicTestSuite;
