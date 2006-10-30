@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-	/** Multicast Signal.
+	/** @brief Multicast Signal.
 	    A Signal can be connected to multiple targets. The return
 	    value of the target is ignored, when the signal is sent.
 	*/
@@ -43,22 +43,36 @@ namespace Pt {
 		public:
 			typedef Pt::Invokable<A1, A2, A3> Invokable;
 
-			struct Sentry {
+			struct Sentry
+			{
 				Sentry(const Signal& signal)
 				: _signal(signal)
 				{
 					_signal._sending = true;
-					_signal._cleanup = false;
+					_signal._dirty = false;
 				}
 
 				~Sentry()
 				{
 					_signal._sending = false;
-					if(_signal._cleanup)
+
+					if( _signal._dirty == false )
+						return;
+
+					std::list<Connection>::iterator it = _signal._connections.begin();
+					while( it != _signal._connections.end() )
 					{
-						_signal._connections.remove( Connection() );
-						_signal._cleanup = false;
+						if( it->valid() )
+						{
+							++it;
+						}
+						else
+						{
+							it = _signal._connections.erase(it);
+						}
 					}
+
+					_signal._dirty = false;
 				}
 
 				const Signal& _signal;
@@ -66,23 +80,31 @@ namespace Pt {
 
 		public:
 			Signal()
-			: _sending(false)
+			: _destructing(false)
+			, _sending(false)
 			{ }
 
 			Signal(const Signal& signal)
 			: Connectable()
+			, _destructing(false)
 			, _sending(false)
 			{
 				Signal::operator=(signal);
 			}
 
 			~Signal()
-			{ }
+			{ _destructing = true; }
 
 			Signal& operator=(const Signal& other)
 			{
 				Connectable::operator=(other);
 				return *this;
+			}
+
+			template <typename R>
+			Connection connect(const BasicSlot<R, A1, A2, A3>& slot)
+			{
+				return Connection(*this, slot.clone() );
 			}
 
 			virtual void opened(const Connection& c)
@@ -93,32 +115,27 @@ namespace Pt {
 			virtual void closed(const Connection& c)
 			{
 				// if the signal is currently calling its slots, do not
-				// remove the connection now, but just replace it by
-				// an invalid one and set the cleanup flag to true.
+				// remove the connection now, but only set the cleanup flag
 				// Any invalid connection objects will be removed after
-				// the signal has finished calling its slots.
-				if(_sending)
+				// the signal has finished calling its slots by the Sentry.
+				if( _sending )
 				{
-					std::list<Connection>::iterator it;
-					it = std::find(this->connections().begin(), this->connections().end(), c );
-					if( it != this->connections().end() )
-					{
-						*it = Connection();
-						_cleanup = true;
-					}
+					_dirty = true;
 				}
 				else
+				{
 					Connectable::closed(c);
+				}
 			}
 
 			inline void send() const
 			{
-				const Sentry sentry(*this);
+				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; it != _connections.end(); ++it)
+				for(; !_destructing && it != _connections.end(); ++it)
 				{
-					if( &( it->sender() ) != this || false == it->valid() )
+					if( false == it->valid() || &( it->sender() ) != this  )
 						continue;
 
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
@@ -129,12 +146,12 @@ namespace Pt {
 			template <typename Arg1>
 			inline void send(Arg1 a1) const
 			{
-				const Sentry sentry(*this);
+				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; it != _connections.end(); ++it)
+				for(; !_destructing && it != _connections.end(); ++it)
 				{
-					if( &( it->sender() ) != this || false == it->valid() )
+					if( false == it->valid() || &( it->sender() ) != this )
 						continue;
 
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
@@ -145,10 +162,10 @@ namespace Pt {
 			template <typename Arg1, typename Arg2>
 			inline void send(Arg1 a1, Arg2 a2) const
 			{
-				const Sentry sentry(*this);
+				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; it != _connections.end(); ++it)
+				for(; !_destructing && it != _connections.end(); ++it)
 				{
 					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
@@ -161,10 +178,10 @@ namespace Pt {
 			template <typename Arg1, typename Arg2, typename Arg3>
 			inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
 			{
-				const Sentry sentry(*this);
+				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; it != _connections.end(); ++it)
+				for(; !_destructing && it != _connections.end(); ++it)
 				{
 					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
@@ -190,8 +207,9 @@ namespace Pt {
 			{ this->send(a1, a2, a3); }
 
 		private:
+			bool _destructing;
 			mutable bool _sending;
-			mutable bool _cleanup;
+			mutable bool _dirty;
 	};
 
 
@@ -283,7 +301,7 @@ namespace Pt {
 	template <typename R, class BaseT, class ClassT, typename A1>
 	Connection connect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1))
 	{
-		return connect( signal, slot(&object, memFunc) );
+		return signal.connect( slot(&object, memFunc) );
 	}
 
 
