@@ -59,7 +59,7 @@ Connection::~Connection()
 		this->close();
 	}
 
-	// delete the shared
+	// delete the shared data
 	delete _data;
 	_data = 0;
 }
@@ -68,9 +68,7 @@ Connection::~Connection()
 void Connection::close()
 {
 	_data->setValid(false);
-
 	_data->slot().closed( *this );
-
 	_data->sender().closed( *this );
 }
 
