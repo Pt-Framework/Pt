@@ -409,12 +409,64 @@ void functionTest3()
 
 
 
+class DeleteTest : public Pt::Connectable
+{
+public:
+	Signal<> signal;
+
+	DeleteTest()
+	: _caller(0), _callee(0)
+	{}
+
+	~DeleteTest()
+	{
+		//cerr << "SelfDisconnectTest::~SelfDisconnectTest" << endl;
+	}
+
+	void deleteCaller()
+	{
+		//cerr << "SelfDisconnectTest::deleteCaller" << endl;
+		delete _caller;
+		_caller = 0;
+	}
+
+
+	void deleteCallee()
+	{
+		//cerr << "SelfDisconnectTest::deleteCallee" << endl;
+		delete _callee;
+		_callee = 0;
+	}
+
+	void operator()()
+	{
+		_caller = new Signal<>;
+		_callee = new DeleteTest;
+
+		connect(*_caller, *this, &DeleteTest::deleteCallee );
+		_caller->send();
+
+		connect(*_caller, *this, &DeleteTest::deleteCaller);
+		_caller->send();
+	}
+
+	Signal<>* _caller;
+	DeleteTest* _callee;
+};
+
+
+
 int main()
 {
 	cerr << "----- SignalTest -----" << endl;
 
 	try
 	{
+		cerr << "  DeleteTest: ";
+		DeleteTest delTest;
+		delTest();
+		cerr << "ok." << endl;
+
 		cerr << "  CopyTest: ";
 		CopyTest();
 		cerr << "ok." << endl;
