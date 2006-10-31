@@ -47,6 +47,7 @@ namespace Pt {
 			{
 				Sentry(const Signal& signal)
 				: _signal(signal)
+				, _released(false)
 				{
 					_signal._sending = true;
 					_signal._dirty = false;
@@ -54,6 +55,9 @@ namespace Pt {
 
 				~Sentry()
 				{
+					if( _released )
+						return;
+
 					_signal._sending = false;
 
 					if( _signal._dirty == false )
@@ -75,7 +79,11 @@ namespace Pt {
 					_signal._dirty = false;
 				}
 
+				void release()
+				{ _released = true; }
+
 				const Signal& _signal;
+				bool _released;
 			};
 
 		public:
@@ -133,13 +141,19 @@ namespace Pt {
 				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; !_destructing && it != _connections.end(); ++it)
+				for(; it != _connections.end(); ++it)
 				{
 					if( false == it->valid() || &( it->sender() ) != this  )
 						continue;
 
+					Connection c = *it;
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke();
+
+					if( c.valid() == false) {
+						sentry.release();
+						return;
+					}
 				}
 			}
 
@@ -154,8 +168,14 @@ namespace Pt {
 					if( false == it->valid() || &( it->sender() ) != this )
 						continue;
 
+					Connection c = *it;
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1);
+
+					if( c.valid() == false) {
+						sentry.release();
+						return;
+					}
 				}
 			}
 
@@ -170,8 +190,14 @@ namespace Pt {
 					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
 
+					Connection c = *it;
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2);
+
+					if( c.valid() == false) {
+						sentry.release();
+						return;
+					}
 				}
 			}
 
@@ -186,8 +212,14 @@ namespace Pt {
 					if( &( it->sender() ) != this || false == it->valid() )
 						continue;
 
+					Connection c = *it;
 					const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
 					invokable->invoke(a1, a2, a3);
+
+					if( c.valid() == false) {
+						sentry.release();
+						return;
+					}
 				}
 			}
 
@@ -207,6 +239,7 @@ namespace Pt {
 			{ this->send(a1, a2, a3); }
 
 		private:
+			mutable std::list< void (*)(void*) > _notifyList;
 			bool _destructing;
 			mutable bool _sending;
 			mutable bool _dirty;
