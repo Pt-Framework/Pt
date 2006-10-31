@@ -412,20 +412,12 @@ void functionTest3()
 class DeleteTest : public Pt::Connectable
 {
 public:
-	Signal<> signal;
-
 	DeleteTest()
 	: _caller(0), _callee(0)
 	{}
 
-	~DeleteTest()
-	{
-		//cerr << "SelfDisconnectTest::~SelfDisconnectTest" << endl;
-	}
-
 	void deleteCaller()
 	{
-		//cerr << "SelfDisconnectTest::deleteCaller" << endl;
 		delete _caller;
 		_caller = 0;
 	}
@@ -433,7 +425,6 @@ public:
 
 	void deleteCallee()
 	{
-		//cerr << "SelfDisconnectTest::deleteCallee" << endl;
 		delete _callee;
 		_callee = 0;
 	}
