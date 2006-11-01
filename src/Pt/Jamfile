@@ -10,6 +10,7 @@ SharedLibrary Pt : Any.cpp
                    Exception.cpp
                    Reflectable.cpp
                    Property.cpp
+                   PropertyProxy.cpp
                    Signal.cpp
                    TypeInfo.cpp ;
 

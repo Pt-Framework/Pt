@@ -3,13 +3,13 @@
 #ifndef Pt_Reflectable_h
 #define Pt_Reflectable_h
 
-#include <Pt/Property.h>
+#include <Pt/PropertyProxy.h>
 #include <map>
 
 
 namespace Pt {
 
-typedef std::multimap<std::string, Property*> PropertyMap;
+typedef std::multimap<std::string, AbstractProperty*> PropertyMap;
 
 
 class PT_EXPORT Reflectable {
@@ -30,19 +30,19 @@ class PT_EXPORT Reflectable {
 	
 		template <typename R, typename Parent, typename Object>
 		void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
-		{ _properties.insert( std::make_pair(name, new ReadProperty<R>(parent, getter)) ); }
+		{ _properties.insert( std::make_pair(name, new ReadPropertyProxy<R>(parent, getter)) ); }
 
 		template <typename R, typename Parent, typename Object>
 		void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)())
-		{ _properties.insert( std::make_pair(name, new ReadProperty<R>(parent, getter)) ); }
+		{ _properties.insert( std::make_pair(name, new ReadPropertyProxy<R>(parent, getter)) ); }
 
 		template <typename R1, typename R2, typename A, typename Parent, typename Object>
 		void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
-		{ _properties.insert( std::make_pair(name, new ReadWriteProperty<R1, A>(parent, getter, setter)) ); }
+		{ _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) ); }
 
 		template <typename R1, typename R2, typename A, typename Parent, typename Object>
 		void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
-		{ _properties.insert( std::make_pair(name, new ReadWriteProperty<R1, A>(parent, getter, setter)) ); }
+		{ _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) ); }
 
 	private:
 		std::string _typeName;

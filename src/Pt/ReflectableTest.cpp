@@ -1,23 +1,24 @@
 #include "Pt/Reflectable.h"
 #include "Pt/Property.h"
+#include "Pt/PropertyProxy.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 using namespace Pt;
-/*
+
 class ReflactableObject : public Reflectable
 {
     public:
 		ReflactableObject()
-		: aProperty( "aProperty", me() , 20 )
+		: aProperty( "aProperty", self() , 20 )
 		{ }
 
-		ValueProperty<int> aProperty;
+		Property<int> aProperty;
 
 	private:
-		//By using "this" in ctor produce unter VC compiler a warnning.
-		ReflactableObject* me()
+		//By using "this" in ctor produce with VC compiler a warnning.
+		ReflactableObject* self()
 		{ return this; }
 };
 
@@ -29,11 +30,11 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 		: Pt::Unit::TestSuite( "ReflectableTest" )
 		, _onValueChanged(false)
 		{
-			Unit::TestSuite::registerTest( callable(this, &ReflectableTest::test), "test" );
+			Pt::Unit::TestSuite::registerMethod( *this,&ReflectableTest::reflectableTest, "ReflectableTest" );
 		}
 
 	protected:
-		void test()
+		void reflectableTest()
 		{
 			ReflactableObject	test;
 			int					value;
@@ -81,7 +82,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 			_onValueChanged = false;
 			any = 3;
 			test.aProperty.setValue( any );
-			PT_UNIT_ASSERT( _onValueChanged == true );
+			PT_UNIT_ASSERT( _onValueChanged == false);
 
 			//Test the reflection setter.
 			_onValueChanged = false;
@@ -100,5 +101,3 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 
 
 Pt::Unit::RegisterTest<ReflectableTest> reflectableTest;
-*/
-
