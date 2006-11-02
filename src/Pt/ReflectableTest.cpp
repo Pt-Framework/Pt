@@ -7,18 +7,29 @@
 #include "Pt/Unit/TestMain.h"
 using namespace Pt;
 
-class ReflactableObject : public Reflectable
+class ReflectableObject : public Reflectable
 {
     public:
-		ReflactableObject()
+		ReflectableObject()
 		: aProperty( "aProperty", self() , 20 )
-		{ }
+		{
+			this->registerProperty("value", this, &ReflectableObject::value, &ReflectableObject::setValue);
+		}
 
 		Property<int> aProperty;
 
+
+		void setValue(int i)
+		{ _value = i; }
+
+		int value()
+		{ return _value; }
+
 	private:
-		//By using "this" in ctor produce with VC compiler a warnning.
-		ReflactableObject* self()
+		int _value;
+
+		//By using "this" in ctor produce with VC compiler a warning.
+		ReflectableObject* self()
 		{ return this; }
 };
 
@@ -36,7 +47,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 	protected:
 		void reflectableTest()
 		{
-			ReflactableObject	test;
+			ReflectableObject	test;
 			int					value;
 			Any					any;
 
@@ -82,7 +93,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 			_onValueChanged = false;
 			any = 3;
 			test.aProperty.setValue( any );
-			PT_UNIT_ASSERT( _onValueChanged == false);
+			PT_UNIT_ASSERT( _onValueChanged == true);
 
 			//Test the reflection setter.
 			_onValueChanged = false;

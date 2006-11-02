@@ -16,97 +16,87 @@
 
 namespace Pt {
 
-template <typename T>
-class PT_EXPORT ReadProperty : public AbstractProperty 
+
+class PT_EXPORT PropertyValue : public AbstractProperty
 {
 	public:
-		ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
-		: AbstractProperty()
-		, _value( value )
-		{ parent->registerProperty( name, this, &ReadProperty<T>::get ); }
-
-		~ReadProperty()
-		{ }
-
-		AbstractProperty* clone() const
-		{  return new Property<T>(*this); }
-
 		virtual Pt::Any value()
 		{  return _value; }
 
-		T get() const
-		{  return any_cast<T>(_value); }
+		virtual void setValue(const Pt::Any& value)
+		{
+			_value = value;
+			onValueChanged.send();
+		}
 
-	private:
+	protected:
 	    Pt::Any _value;
 };
 
 
 template <typename T>
-class PT_EXPORT WriteProperty : public AbstractProperty 
+class PT_EXPORT ReadProperty : public PropertyValue
+{
+	public:
+		ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+		: PropertyValue()
+		{
+			parent->registerProperty( name, this, &ReadProperty<T>::get );
+			_value = value;
+		}
+
+		AbstractProperty* clone() const
+		{  return new ReadProperty<T>(*this); }
+
+		T get() const
+		{  return any_cast<T>(_value); }
+};
+
+
+template <typename T>
+class PT_EXPORT WriteProperty : public PropertyValue
 {
 	public:
 		WriteProperty( const std::string& name, Reflectable* parent, const T& value = T() )
-		: AbstractProperty()
-		, _value( value )
-		{ parent->registerProperty( name, this, &WriteProperty<T>::get, &WriteProperty<T>::set ); }
-
-		~WriteProperty()
-		{ }
+		: PropertyValue()
+		{
+			parent->registerWriteProperty( name, this, &WriteProperty<T>::set );
+			_value = value;
+		}
 
 		AbstractProperty* clone() const
 		{ return new WriteProperty<T>(*this); }
-
-
-		virtual void setValue(const Pt::Any& value)
-		{ _value = value; }
-
-		void set( T value )
-		{ 
-			_value = value;
-			onValueChanged.send();
-		}		
-
-	private:
-
-		T get() const
-		{  throw LogicError("A WriteProperty can not be readed", PT_SOURCEINFO); }
-
-	    Pt::Any _value;
-};
-
-template <typename T>
-class PT_EXPORT Property : public AbstractProperty 
-{
-	public:
-		Property( const std::string& name, Reflectable* parent, const T& value = T() )
-		: AbstractProperty()
-		, _value( value )
-		{ parent->registerProperty( name, this, &Property<T>::get, &Property<T>::set ); }
-
-		~Property()
-		{ }
-
-		AbstractProperty* clone() const
-		{ return new Property<T>(*this); }
-
-		virtual Pt::Any value()
-		{ return _value; }
-
-		virtual void setValue(const Pt::Any& value)
-		{ _value = value; }
-
-		T get() const
-		{ return any_cast<T>(_value); }
 
 		void set( T value )
 		{
 			_value = value;
 			onValueChanged.send();
-		}		
+		}
+};
 
-	private:
-	    Pt::Any _value;
+
+template <typename T>
+class PT_EXPORT Property : public PropertyValue
+{
+	public:
+		Property( const std::string& name, Reflectable* parent, const T& value = T() )
+		: PropertyValue()
+		{
+			parent->registerProperty( name, this, &Property<T>::get, &Property<T>::set );
+			_value = value;
+		}
+
+		T get() const
+		{  return any_cast<T>(_value); }
+
+		void set( T value )
+		{
+			_value = value;
+			onValueChanged.send();
+		}
+
+		AbstractProperty* clone() const
+		{ return new Property<T>(*this); }
 };
 
 

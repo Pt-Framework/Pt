@@ -3,7 +3,6 @@
 
 #include <Pt/Exception.h>
 #include <Pt/TypeInfo.h>
-#include <Pt/Clonable.h>
 #include <Pt/Any.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
@@ -12,7 +11,7 @@
 
 namespace Pt {
 
-class PT_EXPORT AbstractProperty : public Clonable<AbstractProperty>
+class PT_EXPORT AbstractProperty
 {
 	public:
 		AbstractProperty()
@@ -26,35 +25,37 @@ class PT_EXPORT AbstractProperty : public Clonable<AbstractProperty>
 		virtual Pt::Any value()
 		{ throw LogicError("AbstractProperty is not readable", PT_SOURCEINFO); }
 
+		// Set value and notify all listeners
 		virtual void setValue(const Pt::Any& value)
 		{ throw LogicError("AbstractProperty is not writable", PT_SOURCEINFO); }
 
 		Signal<> onValueChanged;
 };
 
+
 template <typename T>
-class PT_EXPORT ReadPropertyProxy : virtual public AbstractProperty 
+class PT_EXPORT ReadPropertyProxy : virtual public AbstractProperty
 {
 	public:
 
 		template <typename Object, typename ObjectBase>
 		ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() const )
 		: AbstractProperty()
-		{ 
-			_getter = new Pt::ConstMethod<T, Object>( parent, getter ); 
+		{
+			_getter = new Pt::ConstMethod<T, Object>( parent, getter );
 		}
 
 		template <typename Object, typename ObjectBase>
 		ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() )
 		: AbstractProperty()
-		{ 
-			_getter = new Pt::Method<T, Object>( parent, getter ); 
+		{
+			_getter = new Pt::Method<T, Object>( parent, getter );
 		}
 
 		ReadPropertyProxy( const ReadPropertyProxy& property )
 		: AbstractProperty()
-		{ 
-			_getter = property._getter->clone(); 
+		{
+			_getter = property._getter->clone();
 		}
 
 		~ReadPropertyProxy()
@@ -80,15 +81,16 @@ class PT_EXPORT ReadPropertyProxy : virtual public AbstractProperty
 		Pt::Callable<T>* _getter;
 };
 
+
 template <typename T>
-class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty 
+class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty
 {
 	public:
 		template <typename R, typename Object, typename ObjectBase>
 		WritePropertyProxy(Object* parent, R (ObjectBase::*setter)(T type) )
 		: AbstractProperty()
-		{ 
-			_setter = new Pt::Method<R, Object, T>(parent, setter); 
+		{
+			_setter = new Pt::Method<R, Object, T>(parent, setter);
 		}
 
 		WritePropertyProxy(const WritePropertyProxy& property)
@@ -98,13 +100,13 @@ class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty
 		}
 
 		~WritePropertyProxy()
-		{ 
-			delete _setter; 
+		{
+			delete _setter;
 		}
 
 		AbstractProperty* clone() const
-		{ 
-			return new WritePropertyProxy( *this ); 
+		{
+			return new WritePropertyProxy( *this );
 		}
 
 		virtual void setValue(const Pt::Any& a)
@@ -124,8 +126,8 @@ class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty
 		{ this->set(type); }
 
 		void set(T type)
-		{ 
-			_setter->invoke(type); 
+		{
+			_setter->invoke(type);
 			onValueChanged.send();
 		}
 
