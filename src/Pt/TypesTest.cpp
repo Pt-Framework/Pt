@@ -23,42 +23,53 @@ using namespace std;
 #include "Pt/Types.h"
 using namespace Pt;
 
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestFixture.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
 
-int main()
+
+class TypesTest : public Pt::Unit::TestCase
 {
-	cerr << "----- TypesTest -----" << endl;
+	public:
+		TypesTest()
+	: TestCase("TypesTest")
+		{}
 
-	try
-	{
-		cerr << endl;
-		cerr << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
-		cerr << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
-		cerr << "sizeof(Pt::uint    ) = " << sizeof(Pt::uint    ) << endl;
-		cerr << "sizeof(Pt::ulong   ) = " << sizeof(Pt::ulong   ) << endl;
-		cerr << endl;
-		cerr << "sizeof(Pt::size_t  ) = " << sizeof(Pt::size_t  ) << endl;
-		cerr << "sizeof(Pt::ssize_t ) = " << sizeof(Pt::ssize_t ) << endl;
-		cerr << endl;
-		cerr << "sizeof(Pt::int8_t  ) = " << sizeof(Pt::int8_t  ) << endl;
-		cerr << "sizeof(Pt::uint8_t ) = " << sizeof(Pt::uint8_t ) << endl;
-		cerr << endl;
-		cerr << "sizeof(Pt::int16_t ) = " << sizeof(Pt::int16_t ) << endl;
-		cerr << "sizeof(Pt::uint16_t) = " << sizeof(Pt::uint16_t) << endl;
-		cerr << endl;
-		cerr << "sizeof(Pt::int32_t ) = " << sizeof(Pt::int32_t ) << endl;
-		cerr << "sizeof(Pt::uint32_t) = " << sizeof(Pt::uint32_t) << endl;
-		cerr << endl;
+		virtual void test()
+		{
+			cerr << endl;
+			cerr << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
+			cerr << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
+			cerr << "sizeof(Pt::uint    ) = " << sizeof(Pt::uint    ) << endl;
+			cerr << "sizeof(Pt::ulong   ) = " << sizeof(Pt::ulong   ) << endl;
+			cerr << endl;
+			cerr << "sizeof(Pt::size_t  ) = " << sizeof(Pt::size_t  ) << endl;
+			cerr << "sizeof(Pt::ssize_t ) = " << sizeof(Pt::ssize_t ) << endl;
+			cerr << endl;
+			cerr << "sizeof(Pt::int8_t  ) = " << sizeof(Pt::int8_t  ) << endl;
+			cerr << "sizeof(Pt::uint8_t ) = " << sizeof(Pt::uint8_t ) << endl;
+			cerr << endl;
+			cerr << "sizeof(Pt::int16_t ) = " << sizeof(Pt::int16_t ) << endl;
+			cerr << "sizeof(Pt::uint16_t) = " << sizeof(Pt::uint16_t) << endl;
+			cerr << endl;
+			cerr << "sizeof(Pt::int32_t ) = " << sizeof(Pt::int32_t ) << endl;
+			cerr << "sizeof(Pt::uint32_t) = " << sizeof(Pt::uint32_t) << endl;
+			cerr << endl;
+			PT_UNIT_ASSERT( sizeof(Pt::int8_t) == 1 );
+			PT_UNIT_ASSERT( sizeof(Pt::uint8_t) == 1 );
+			PT_UNIT_ASSERT( sizeof(Pt::int16_t) == 2 );
+			PT_UNIT_ASSERT( sizeof(Pt::uint16_t) == 2 );
+			PT_UNIT_ASSERT( sizeof(Pt::int32_t) == 4 );
+			PT_UNIT_ASSERT( sizeof(Pt::uint32_t) == 4 );
 #ifdef PT_64BIT
-		cerr << "sizeof(Pt::int64_t ) = " << sizeof(Pt::int64_t ) << endl;
-		cerr << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
-		cerr << endl;
+			cerr << "sizeof(Pt::int64_t ) = " << sizeof(Pt::int64_t ) << endl;
+			cerr << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
+			cerr << endl;
+			PT_UNIT_ASSERT( sizeof(Pt::int64_t) == 8 );
+			PT_UNIT_ASSERT( sizeof(Pt::uint64_t) == 8 );
 #endif
-	}
-	catch(const std::exception& e) {
-		cerr << "failed. " << e.what() << endl;
-		return 1;
-	}
+		}
+};
 
-	return 0;
-}
-
+Pt::Unit::RegisterTest<TypesTest> register_TypesTest;
