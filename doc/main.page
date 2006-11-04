@@ -1,34 +1,34 @@
 /** \mainpage "The Platinum C++ Framework"
-!!! Discover the Platinum C++ Framework
+<B> Discover the Platinum C++ Framework </B>
 \n
 Boost your daily performance with the Platinum C++ framework! With Pt your
 applications are portable to many platforms without change. Its clean and
 concise design assists you in writing robust and highly reusable code.
 
-#Unleash the power of Pt and C++ onto your programs today!#
+<B> Unleash the power of Pt and C++ onto your programs today!</B>
 
-- #Portablility#\n
-Platinum is extremely portable and runs on everything from embedded devices up 
-to large servers. The supported platforms include Windows, Windows CE, 
-Linux, QNX, Unix with many more to come. PPR lets you spend your time on 
+- Portablility\n
+Platinum is extremely portable and runs on everything from embedded devices up
+to large servers. The supported platforms include Windows, Windows CE,
+Linux, QNX, Unix with many more to come. PPR lets you spend your time on
 YOUR application, and takes away the pain of low-level programming.
 
-- #Performance#\n
+- Performance\n
 A high degree of performance is achieved through the use of modern C++
-features. Your program will benefit from the many optimizations 
+features. Your program will benefit from the many optimizations
 included in the framework.
 
-- #Easy of use#\n
+- Easy of use\n
 Platinum is designed from the ground up to be flexible and extensible.
 It provide simple solutions to your problems. Programs written with
 Platinum tend to be significantly shorter and much easier to understand.
 
-- #Open Source#\n
+- Open Source\n
 Its not just open, its free! Published under the LGPL it allows you
 to write commercial application and be part of the great community that
 develops PPR and determines its future.
 
-!!! News
-| #22-09-2006, }Pt on Sourceforge}#\n
+<B> News </B> \n
+| <B> 22-09-2006, <I>Pt on Sourceforge </I></B> \n
 The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
 */
