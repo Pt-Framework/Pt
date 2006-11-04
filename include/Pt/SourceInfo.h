@@ -54,43 +54,33 @@
 namespace Pt {
 
 /** @brief Source code info class
-		@ingroup Pt
+	@ingroup Pt
 
-		This class is used by exception classes for storing information
-		about the location in the source code where the error occured.
-		The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
-		object conveniently.\n
-		\n
-		Example:
-		@code
-		int main()
+	This class is used by exception classes for storing information
+	about the location in the source code where the error occured.
+	The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
+	object conveniently.\n
+	\n
+	Example:
+	@code
+	int main()
+	{
+		try
 		{
-			try
-			{
-				cerr << endl;
+			const Pt::SourceInfo& si = PT_SOURCEINFO;
+			throw Pt::Exception("Some error occured", si);
 
-				const Pt::SourceInfo& siA = PT_SOURCEINFO;
-				cerr << "const Pt::SourceInfo& siA = PT_SOURCEINFO;" << endl;
-				cerr << "\t\tsiA.file() = " << siA.file() << endl;
-				cerr << "\t\tsiA.line() = " << siA.line() << endl;
-				cerr << "\t\tsiA.func() = " << siA.func() << endl;
-				cerr << endl;
-
-				throw Exception("Test exception :)", PT_SOURCEINFO);
-
-			}
-			catch(const Pt::Exception& e) {
-				cerr << "FAILED:" << endl;
-				cerr << "\t\te.what()							= " << e.what() << endl;
-				cerr << "\t\te.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				cerr << "\t\te.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				cerr << "\t\te.sourceInfo().func() = " << e.sourceInfo().func() << endl;
-				cerr << endl;
-				return 1;
-			}
-			return 0;
 		}
-		@endcode
+		catch(const Pt::Exception& e) {
+			cerr << "Error    : " << e.what() << endl;
+			cerr << "File     : " << e.sourceInfo().file() << endl;
+			cerr << "Line     : " << e.sourceInfo().line() << endl;
+			cerr << "Function : " << e.sourceInfo().func() << endl;
+			return 1;
+		}
+		return 0;
+	}
+	@endcode
 */
 class PT_EXPORT SourceInfo {
 	public:
