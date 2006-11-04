@@ -1,11 +1,12 @@
 /** \mainpage "The Platinum C++ Framework"
-<B> Discover the Platinum C++ Framework </B>
+
+<B>Discover the Platinum C++ Framework</B>
 \n
 Boost your daily performance with the Platinum C++ framework! With Pt your
 applications are portable to many platforms without change. Its clean and
 concise design assists you in writing robust and highly reusable code.
 
-<B> Unleash the power of Pt and C++ onto your programs today!</B>
+<B>Unleash the power of Pt and C++ onto your programs today!</B>
 
 - Portablility\n
 Platinum is extremely portable and runs on everything from embedded devices up
@@ -28,7 +29,8 @@ Its not just open, its free! Published under the LGPL it allows you
 to write commercial application and be part of the great community that
 develops PPR and determines its future.
 
-<B> News </B> \n
-| <B> 22-09-2006, <I>Pt on Sourceforge </I></B> \n
+<B>News</B>\n
+|<B>22-09-2006, <I>Pt on Sourceforge</I></B>\n
 The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
+
 */
