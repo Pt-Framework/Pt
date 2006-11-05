@@ -1,5 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner, Sven Falk                      *
+ *   Copyright (C) 2006 Sven Falk                                          *
+ *   Copyright (C) 2006 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,40 +27,46 @@
 
 namespace Pt {
 
-	//! @ingroup Pt
-	//! @brief Protects derived classes from being copied
-	/**
+	/** @brief Protects derived classes from being copied
+	 *  @ingroup Pt
+	 *
 	 *  The NonCopyable class has a private copy constructor and assignment
 	 *  operator, therefore derived classes cannot be copied. This class
-	 *  is meant to be used as a mixin class as shown in the code example
+	 *  is meant to be used as a mix-in class as shown in the code example
 	 *  below.
 	 *
 	 *  @code
 	 *  	class MyClass : public NonCopyable {
-	 *			//custom implementation
+	 *			// ...
+	 *			// The class' implementation
+	 *			// ...
 	 *		};
 	 *  @endcode
 	 *
-	 *	Trying to copy a NonCopyable object will cause compiler errors.
+	 *	Trying to copy a NonCopyable object will cause compile-time error.
 	 */
 	class PT_EXPORT NonCopyable {
 		public:
-			//! @brief default constructor
+			/** @brief Default constructor
+			*/
 			NonCopyable()
-			{}
+			{ }
 
-			//! @brief destructor
+			/** @brief Destructor
+			*/
 			~NonCopyable()
-			{}
+			{ }
 
 		private:
-			//! @brief declared as private to prevent usage of copy constructor
-			NonCopyable(const NonCopyable&)
-			{}
+			/** @brief Declared as private to prevent usage of copy constructor
+			*/
+			NonCopyable(const NonCopyable&); // No need to really implement it
+			//{ }
 
-			//! @brief declared as private to prevent usage of assignment operator
-			NonCopyable& operator=(const NonCopyable&)
-			{ return *this; }
+			/**  @brief Declared as private to prevent usage of assignment operator
+			*/
+			NonCopyable& operator=(const NonCopyable&); // No need to really implement it
+			//{ return *this; }
 	};
 
 }
