@@ -5,29 +5,12 @@ ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
 ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
 	TASK "Add missing declarations to Pt.h"
 
-ITEM-7 P0 S3 "An API for byte-order conversion exists"
-	TASK "Review Byteorder.h"
-	TASK "Remove swap() template function"
-	TASK "Write test cases"
-	TASK "Improve swabUnaligned() function"
-	TASK "Add function to swap float and double correctly"
-
 ITEM-8 P0 S3 "A empty Void type exists"
 	TASK "Review Void.h"
 	TASK "Write Documentation"
 
 ITEM-10 P0 S5 "An common exception hierachy exits."
 	TASK "Review Exception.h"
-	TASK "Write Documentation"
-	TASK "Write test case"
-
-ITEM-11 P0 S3 "A NonCopyable base class exits."
-	TASK "Review NonCopyable.h"
-	TASK "Write Documentation"
-	TASK "Write test case"
-
-ITEM-12 P0 S3 "A Singleton base class exits."
-	TASK "Review Singleton.h"
 	TASK "Write Documentation"
 	TASK "Write test case"
 

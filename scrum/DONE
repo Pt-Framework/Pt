@@ -24,6 +24,13 @@ ITEM-9 P0 S3 "A SourceInfo class exits."
 	TASK "Write test case"	blue_wind_25	2006-10-21
 	TASK "Write Documentation"	blue_wind_25	2006-10-21
 
+ITEM-11 P0 S3 "A NonCopyable base class exits."
+	TASK "Review NonCopyable.h"	blue_wind_25	2006-11-05
+	TASK "Write Documentation"	blue_wind_25	2006-11-05
+
+ITEM-12 P0 S3 "A Singleton base class exits."
+	TASK "Write test case"	blue_wind_25	2006-11-05
+
 ITEM-23 P0 S13 "The Pt::Unit module exists"
 	TASK "Review ccpunit code" d-marc 2006-10-24
 	TASK "Review qt-unit code" d-marc 2006-10-24

@@ -5,6 +5,20 @@ ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 ITEM-5 P0 S5 "POD types of fixed size are defined"
 	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	blue_wind_25
 
+ITEM-7 P0 S3 "An API for byte-order conversion exists"
+	TASK "Review Byteorder.h"	blue_wind_25
+	TASK "Remove swap() template function"	blue_wind_25
+	TASK "Write test cases"	blue_wind_25
+	TASK "Improve swabUnaligned() function"	blue_wind_25
+	TASK "Add function to swap float and double correctly"	blue_wind_25
+
+ITEM-11 P0 S3 "A NonCopyable base class exits."
+	TASK "Write test case"	blue_wind_25
+
+ITEM-12 P0 S3 "A Singleton base class exits."
+	TASK "Review Singleton.h"	blue_wind_25
+	TASK "Write Documentation"	blue_wind_25
+
 ITEM-21 P0 S5 "Object reflection API is implemented"
 	TASK "Split property in property and property proxy"	Laurentiu
 	TASK "Specialize property for Reflectable"	Laurentiu
