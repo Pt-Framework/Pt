@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 -2006 by Marc Boris Dürner                         *
+ *   Copyright (C) 2005-2006 by Marc Boris Duerner                         *
+ *   Copyright (C)      2006 by Aloysius Indrayanto                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,57 +29,83 @@
 
 namespace Pt {
 
-/**
- \param T type of the singleton
- \param A optional allocator for type T
-*/
-template <typename T, typename A = std::allocator<T> >
+	/** @brief Makes derived classes become singleton
+	 *  @ingroup Pt
+	 *
+	 *  @param T type of the singleton
+	 *  @param A optional allocator for type T
+	 *
+	 *  This class is meant to be used as a mix-in class as shown in the code
+	 *  example below.
+	 *
+	 *  @code
+	 *		class SingletonClassName : public Singleton<SingletonClassName> {
+	 *			friend class Singleton<SingletonClassName>;
+	 *
+	 *			// ...
+	 *			// The class' implementation
+	 *			// ...
+	 *		};
+	 *  @endcode
+	 *
+	 */
+	template <typename T, typename A = std::allocator<T> >
+	class Singleton : public NonCopyable {
+		public:
+			// For convenience
+			typedef A Allocator;
 
-/** Singletons can be instantiated with this class.
- FileSystem is an example how to use the %Singleton class
- */
-class Singleton : public NonCopyable {
-	public:
-		typedef A Allocator;
-
-	public:
-		static T& instance()
-		{
-			if(!_instance)
+		public:
+			/** @brief Returns an instance of the class
+			 *
+			 *  This function will always returns the same class instance.
+			 */
+			static T& instance()
 			{
-				_instance = _allocator.allocate(1);
-				new (_instance) T();
-				std::atexit(&atExit);
+				if(!_instance)
+				{
+					_instance = _allocator.allocate(1);
+					new (_instance) T();
+					std::atexit(&atExit);
+				}
+
+				return *_instance;
 			}
 
-			return *_instance;
-		}
+		protected:
+			/**  @brief Declared as protected to prevent direct instantiation of this class
+			 */
+			Singleton()
+			{ }
 
-	protected:
-		Singleton()
-		{}
+			/**  @brief Declared as protected to prevent direct deletion of this class
+			 */
+			~Singleton()
+			{ }
 
-		~Singleton()
-		{}
+		private:
+			/**  @brief On exit it will destroy the one and the only instance of the class
+			 */
+			static void atExit()
+			{
+				_allocator.destroy(_instance);
+				_allocator.deallocate(_instance, 1);
+				_instance = 0;
+			}
 
-	private:
-		static void atExit()
-		{
-			_allocator.destroy(_instance);
-			_allocator.deallocate(_instance, 1);
-			_instance = 0;
-		}
+		private:
+			static A  _allocator;
+			static T* _instance;
+	};
 
-	private:
-		static A _allocator;
-		static T* _instance;
-};
+	// Definition of the variable above
+	template <typename T, typename A>
+	A Singleton<T, A>::_allocator;
 
-template <typename T, typename A>
-A Singleton<T, A>::_allocator;
+	// Definition of the variable above
+	template <typename T, typename A>
+	T* Singleton<T, A>::_instance = 0;
 
-template <typename T, typename A>
-T* Singleton<T, A>::_instance = 0;
-}
+} // namespace Pt
 
 #endif
