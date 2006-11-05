@@ -34,7 +34,7 @@ class TypesTest : public Pt::Unit::TestCase
 {
 	public:
 		TypesTest()
-	: TestCase("TypesTest")
+		: TestCase("TypesTest")
 		{}
 
 		virtual void test()

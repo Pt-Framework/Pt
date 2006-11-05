@@ -35,3 +35,7 @@ Main_MakeLocate TypesTest : bin ;
 Main SourceInfoTest : SourceInfoTest.cpp ;
 Main_LinkSharedLibraries SourceInfoTest : Pt ;
 Main_MakeLocate SourceInfoTest : bin ;
+
+Main SingletonTest : SingletonTest.cpp ;
+Main_LinkSharedLibraries SingletonTest : Pt ;
+Main_MakeLocate SingletonTest : bin ;
