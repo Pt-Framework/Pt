@@ -79,10 +79,10 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
-					case 3: return TypeTraits<A3>::typeName();
-					case 4: return TypeTraits<A4>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
+					case 2: return TypeTraits<A3>::typeName();
+					case 3: return TypeTraits<A4>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -92,10 +92,10 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
-					case 3: return typeid(A3);
-					case 4: return typeid(A4);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
+					case 2: return typeid(A3);
+					case 3: return typeid(A4);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -146,10 +146,10 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
-					case 3: return TypeTraits<A3>::typeName();
-					case 4: return TypeTraits<A4>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
+					case 2: return TypeTraits<A3>::typeName();
+					case 3: return TypeTraits<A4>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -159,10 +159,10 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
-					case 3: return typeid(A3);
-					case 4: return typeid(A4);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
+					case 2: return typeid(A3);
+					case 3: return typeid(A4);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -212,9 +212,9 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
-					case 3: return TypeTraits<A3>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
+					case 2: return TypeTraits<A3>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -224,9 +224,9 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
-					case 3: return typeid(A3);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
+					case 2: return typeid(A3);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -275,9 +275,9 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
-					case 3: return TypeTraits<A3>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
+					case 2: return TypeTraits<A3>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -287,9 +287,9 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
-					case 3: return typeid(A3);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
+					case 2: return typeid(A3);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -338,8 +338,8 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -349,8 +349,8 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -398,8 +398,8 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
-					case 2: return TypeTraits<A2>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
+					case 1: return TypeTraits<A2>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -409,8 +409,8 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);
-					case 2: return typeid(A2);
+					case 0: return typeid(A1);
+					case 1: return typeid(A2);
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -458,7 +458,7 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -468,7 +468,7 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);;
+					case 0: return typeid(A1);;
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -515,7 +515,7 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return TypeTraits<A1>::typeName();
+					case 0: return TypeTraits<A1>::typeName();
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
@@ -525,7 +525,7 @@ namespace Pt {
 			{
 				switch(index)
 				{
-					case 1: return typeid(A1);;
+					case 0: return typeid(A1);;
 				}
 
 				throw IllegalArgument("No such argument", PT_SOURCEINFO);
