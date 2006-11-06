@@ -45,56 +45,59 @@ Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTe
 
 
 
-class AtomicOperatorTest : public Pt::Unit::TestFixture
+class AtomicTestSuite : public Pt::Unit::TestSuite
 {
 	public:
+		class Protocol : public Pt::Unit::TestSuiteProtocol
+		{
+			public:
+				Protocol()
+				{
+					this->includeTest( "AdditionTest" );
+					this->includeTest( "AssignmentTest", 42 );
+					this->includeTest( "AssignmentTest", 56 );
+					this->includeTest( "AssignmentTest", 3445 );
+					this->includeTest( "AssignmentTest", 777 );
+					this->includeTest( "SubstractionTest" );
+				}
+		} _protocol;
+
+	public:
+		AtomicTestSuite()
+		: Pt::Unit::TestSuite("AtomicIntTest", _protocol)
+		{
+			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::AssignmentTest, "AssignmentTest" );
+			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::SubstractionTest, "SubstractionTest" );
+			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::AdditionTest, "AdditionTest" );
+		}
+
 		virtual void setUp()
 		{
 			_value = 5;
 		}
 
-		virtual void tearDown()
-		{}
+	protected:
+		void AssignmentTest(int value)
+		{
+			Pt::AtomicInt a;
+			a = value;
+			PT_UNIT_ASSERT( a.value() == value );
+		}
 
-		void testSubstract()
+		void SubstractionTest()
 		{
 			_value -= 3;
 			PT_UNIT_ASSERT( _value.value() == 2 );
 		}
 
-		void testAdd()
+		void AdditionTest()
 		{
 			_value += 3;
 			PT_UNIT_ASSERT( _value.value() == 8 );
 		}
 
-
 	private:
 		Pt::AtomicInt _value;
-};
-
-
-class AtomicTestSuite : public Pt::Unit::TestSuite
-{
-	public:
-		AtomicTestSuite()
-		: Pt::Unit::TestSuite("AtomicIntTest")
-		{
-			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::testAssign, "AssignmentTest" );
-			Pt::Unit::TestSuite::registerMethod( _operatorTest, &AtomicOperatorTest::testSubstract, "SubstractionTest" );
-			Pt::Unit::TestSuite::registerMethod( _operatorTest, &AtomicOperatorTest::testAdd, "AdditionTest" );
-		}
-
-	protected:
-		void testAssign()
-		{
-			Pt::AtomicInt a;
-			a = 10;
-			PT_UNIT_ASSERT( a.value() == 10 );
-		}
-
-	private:
-		AtomicOperatorTest _operatorTest;
 };
 
 Pt::Unit::RegisterTest<AtomicTestSuite> register_AtomicTestSuite;

@@ -21,14 +21,14 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>bin/Scribbled</mainprogram>
+      <mainprogram>bin/SignalTestd</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs/>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars>
-        <envvar value="/home/marc/Platinum/bin/" name="LD_LIBRARY_PATH" />
+        <envvar value="/home/arklinux/Platinum/bin/" name="LD_LIBRARY_PATH" />
       </envvars>
     </run>
     <build>

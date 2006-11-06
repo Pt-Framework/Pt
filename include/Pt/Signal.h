@@ -141,7 +141,7 @@ namespace Pt {
 				Sentry sentry(*this);
 
 				std::list<Connection>::const_iterator it = Connectable::connections().begin();
-				for(; it != _connections.end(); ++it)
+				for(; !_destructing && it != _connections.end(); ++it)
 				{
 					if( false == it->valid() || &( it->sender() ) != this  )
 						continue;
@@ -239,7 +239,6 @@ namespace Pt {
 			{ this->send(a1, a2, a3); }
 
 		private:
-			mutable std::list< void (*)(void*) > _notifyList;
 			bool _destructing;
 			mutable bool _sending;
 			mutable bool _dirty;

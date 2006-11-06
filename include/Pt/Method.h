@@ -58,13 +58,7 @@ class PT_EXPORT Method : public Callable<R, A1, A2, A3> {
 		{ return _memFunc;}
 
 		inline R operator()(A1 a1, A2 a2, A3 a3) const
-		{ return this->call(a1, a2, a3); }
-
-		inline R call(A1 a1, A2 a2, A3 a3) const
 		{ return (_object->*_memFunc)(a1, a2, a3); }
-
-		inline void exec(A1 a1, A2 a2, A3 a3) const
-		{ this->call(a1, a2, a3); }
 
 		Method<R, C, A1, A2, A3>* clone() const
 		{ return new Method(*this); }
@@ -130,13 +124,7 @@ class PT_EXPORT Method<R, C, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::
 		{ return _memFunc;}
 
 		inline R operator()(A1 a1, A2 a2) const
-		{ return this->call(a1, a2); }
-
-		inline R call(A1 a1, A2 a2) const
 		{ return (_object->*_memFunc)(a1, a2); }
-
-		inline void exec(A1 a1, A2 a2) const
-		{ this->call(a1, a2); }
 
 		Method<R, ClassT, A1, A2>* clone() const
 		{ return new Method(*this); }
@@ -157,9 +145,6 @@ class PT_EXPORT Method<R, C, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::
 
 			return false;
 		}
-
-		//virtual void closed(const Connection& c)
-		//{ _object->closed(c); }
 
 	private:
 		ClassT* _object;
@@ -199,13 +184,7 @@ class PT_EXPORT Method<R, C, A1, Pt::Void, Pt::Void> : public Callable<R, A1, Pt
 		{ return _memFunc;}
 
 		inline R operator()(A1 a1) const
-		{ return this->call(a1); }
-
-		inline R call(A1 a1) const
 		{ return (_object->*_memFunc)(a1); }
-
-		inline void exec(A1 a1) const
-		{ this->call(a1); }
 
 		Method<R, ClassT, A1>* clone() const
 		{ return new Method(*this); }
@@ -267,13 +246,7 @@ class PT_EXPORT Method<R, C, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, 
 		{ return _memFunc;}
 
 		inline R operator()() const
-		{ return this->call(); }
-
-		inline R call() const
 		{ return (_object->*_memFunc)(); }
-
-		inline void exec() const
-		{ this->call(); }
 
 		Method<R, ClassT>* clone() const
 		{ return new Method(*this); }
