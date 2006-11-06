@@ -24,15 +24,23 @@
 #include <Pt/Invokable.h>
 #include <Pt/Exception.h>
 
+#include <typeinfo>
+
 
 //! \addtogroup Pt
 namespace Pt {
 
-	class ICallable
+	class PT_EXPORT ICallable
 	{
 		public:
 			virtual ~ICallable()
 			{}
+
+			virtual size_t argSize() const = 0;
+
+			virtual const char* argName(size_t index) const = 0;
+
+			virtual const std::type_info& argType(size_t index) const = 0;
 
 			virtual void call(const Args& args) const = 0;
 	};
@@ -64,11 +72,40 @@ namespace Pt {
 			R call(A1 a1, A2 a2, A3 a3, A4 a4) const
 			{ return this->operator()(a1, a2, a3, a4); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+					case 3: return TypeTraits<A3>::typeName();
+					case 4: return TypeTraits<A4>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+					case 3: return typeid(A3);
+					case 4: return typeid(A4);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2, A3, A4>* args = dynamic_cast< const BasicArgs<A1, A2, A3, A4>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second(), args->third(), args->fourth() );
 			}
@@ -102,11 +139,40 @@ namespace Pt {
 			void call(A1 a1, A2 a2, A3 a3, A4 a4) const
 			{ return this->operator()(a1, a2, a3, a4); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+					case 3: return TypeTraits<A3>::typeName();
+					case 4: return TypeTraits<A4>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+					case 3: return typeid(A3);
+					case 4: return typeid(A4);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2, A3, A4>* args = dynamic_cast< const BasicArgs<A1, A2, A3, A4>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second(), args->third(), args->fourth() );
 			}
@@ -139,11 +205,38 @@ namespace Pt {
 			R call(A1 a1, A2 a2, A3 a3) const
 			{ return this->operator()(a1, a2, a3); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+					case 3: return TypeTraits<A3>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+					case 3: return typeid(A3);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2, A3>* args = dynamic_cast< const BasicArgs<A1, A2, A3>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second(), args->third() );
 			}
@@ -175,11 +268,38 @@ namespace Pt {
 			void call(A1 a1, A2 a2, A3 a3) const
 			{ return this->operator()(a1, a2, a3); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+					case 3: return TypeTraits<A3>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+					case 3: return typeid(A3);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2, A3>* args = dynamic_cast< const BasicArgs<A1, A2, A3>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second(), args->third() );
 			}
@@ -211,11 +331,36 @@ namespace Pt {
 			R call(A1 a1, A2 a2) const
 			{ return this->operator()(a1, a2); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2>* args = dynamic_cast< const BasicArgs<A1, A2>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second() );
 			}
@@ -246,11 +391,36 @@ namespace Pt {
 			void call(A1 a1, A2 a2) const
 			{ return this->operator()(a1, a2); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+					case 2: return TypeTraits<A2>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);
+					case 2: return typeid(A2);
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1, A2>* args = dynamic_cast< const BasicArgs<A1, A2>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first(), args->second() );
 			}
@@ -281,11 +451,34 @@ namespace Pt {
 			R call(A1 a1) const
 			{ return this->operator()(a1); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);;
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1>* args = dynamic_cast< const BasicArgs<A1>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first() );
 			}
@@ -315,11 +508,34 @@ namespace Pt {
 			void call(A1 a1) const
 			{ return this->operator()(a1); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return TypeTraits<A1>::typeName();
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
+			const std::type_info& argType(size_t index) const
+			{
+				switch(index)
+				{
+					case 1: return typeid(A1);;
+				}
+
+				throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			}
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<A1>* args = dynamic_cast< const BasicArgs<A1>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()( args->first() );
 			}
@@ -349,11 +565,20 @@ namespace Pt {
 			R call() const
 			{ return this->operator()(); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+
+			const std::type_info& argType(size_t index) const
+			{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<>* args = dynamic_cast< const BasicArgs<>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()();
 			}
@@ -383,11 +608,20 @@ namespace Pt {
 			void call() const
 			{ this->operator()(); }
 
+			size_t argSize() const
+			{ return NumArgs; }
+
+			const char* argName(size_t index) const
+			{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+
+			const std::type_info& argType(size_t index) const
+			{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+
 			void call(const Args& a) const
 			{
 				const BasicArgs<>* args = dynamic_cast< const BasicArgs<>* >(&a);
 				if(!args)
-					throw IllegalArgument("Argument list mismatch. Expected one argument.", PT_SOURCEINFO);
+					throw IllegalArgument("No such argument", PT_SOURCEINFO);
 
 				this->operator()();
 			}

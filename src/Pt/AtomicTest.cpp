@@ -54,6 +54,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 				Protocol()
 				{
 					this->includeTest( "AdditionTest" );
+					//this->includeSleep(4000);
 					this->includeTest( "AssignmentTest", 42 );
 					this->includeTest( "AssignmentTest", 56 );
 					this->includeTest( "AssignmentTest", 3445 );
@@ -66,9 +67,9 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 		AtomicTestSuite()
 		: Pt::Unit::TestSuite("AtomicIntTest", _protocol)
 		{
-			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::AssignmentTest, "AssignmentTest" );
-			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::SubstractionTest, "SubstractionTest" );
-			Pt::Unit::TestSuite::registerMethod( *this, &AtomicTestSuite::AdditionTest, "AdditionTest" );
+			Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
+			Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
+			Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
 		}
 
 		virtual void setUp()

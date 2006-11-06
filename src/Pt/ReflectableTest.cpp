@@ -41,7 +41,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Connectable
 		: Pt::Unit::TestSuite( "ReflectableTest" )
 		, _onValueChanged(false)
 		{
-			Pt::Unit::TestSuite::registerMethod( *this,&ReflectableTest::reflectableTest, "ReflectableTest" );
+			Pt::Unit::TestSuite::registerMethod( "ReflectableTest", *this,&ReflectableTest::reflectableTest );
 		}
 
 	protected:

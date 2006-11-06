@@ -19,6 +19,14 @@ Reflectable::~Reflectable()
 		delete it->second;
 	}
 	_properties.clear();
+
+	MethodMap::iterator it;
+	for( it = _methods.begin(); it != _methods.end(); ++it)
+	{
+		delete it->second;
+	}
+
+	_methods.clear();
 }
 
 

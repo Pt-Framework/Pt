@@ -80,11 +80,11 @@ namespace Unit {
 			const std::list<Test*>& tests() const
 			{ return _allTests; }
 
-			static void success(const std::string& testName)
+			static void success(const Test& test)
 			{
 				if(_reporter)
 				{
-					_reporter->success(testName);
+					_reporter->success(test);
 				}
 			}
 

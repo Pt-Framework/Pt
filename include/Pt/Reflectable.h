@@ -4,13 +4,14 @@
 #define Pt_Reflectable_h
 
 #include <Pt/PropertyProxy.h>
+#include <Pt/Method.h>
 #include <map>
 
 
 namespace Pt {
 
 typedef std::multimap<std::string, AbstractProperty*> PropertyMap;
-
+typedef std::multimap<std::string, ICallable*> MethodMap;
 
 class PT_EXPORT Reflectable {
 	public:
@@ -48,8 +49,47 @@ class PT_EXPORT Reflectable {
 		void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
 		{ _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) ); }
 
+		template <typename ParentT>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
+		{
+			_methods.insert( std::make_pair(name, new Method<void, ParentT>(&parent, memFunc) ) );
+		}
+
+		template <class ParentT, typename A1>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
+		{
+			_methods.insert( std::make_pair(name, new Method<void, ParentT, A1>(&parent, memFunc) ) );
+		}
+
+		template <class ParentT, typename A1, typename A2>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
+		{
+			_methods.insert( std::make_pair(name, new Method<void, ParentT, A1, A2>(&parent, memFunc) ) );
+		}
+
+		template <class ParentT, typename A1, typename A2, typename A3>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
+		{
+			_methods.insert( std::make_pair(name, new Method<void, ParentT, A1, A2, A3>(&parent, memFunc) ) );
+		}
+
+		const MethodMap& methods() const
+		{ return _methods; }
+
+		void call(const std::string& name, const Args& args)
+		{
+			MethodMap::iterator it = _methods.find(name);
+			if( it == _methods.end() )
+				throw Pt::IllegalArgument("No such method.", PT_SOURCEINFO);
+
+			it->second->call(args);
+		}
+
 	private:
 		std::string _typeName;
+
+		MethodMap _methods;
+
 		PropertyMap _properties;
 };
 

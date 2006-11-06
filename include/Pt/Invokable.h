@@ -143,7 +143,6 @@ namespace Pt {
 	};
 
 
-
 	//! \ingroup Pt
 	template < typename A1 = Pt::Void,
 	            typename A2 = Pt::Void,

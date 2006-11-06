@@ -42,9 +42,9 @@ namespace Unit {
 				std::cerr << msg << std::endl;
 			}
 
-			virtual void success( const std::string testName)
+			virtual void success( const Test& test )
 			{
-				std::cerr << testName <<  ": OK."<< std::endl;
+				std::cerr << test.name() <<  ": OK."<< std::endl;
 			}
 
 			virtual void assertion(const std::string& testName, const Assertion& a)

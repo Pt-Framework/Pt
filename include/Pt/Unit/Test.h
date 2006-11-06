@@ -67,7 +67,7 @@ namespace Unit {
 			virtual void runTest( const std::string& name, const Args& args = Args() )
 			{ }
 
-			Signal<const std::string&> success;
+			Signal<const Test&> success;
 
 			Signal<const std::string&, const Assertion&> assertion;
 

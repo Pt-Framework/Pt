@@ -19,12 +19,16 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
+#include <Pt/Exception.h>
+#include <Pt/Reflectable.h>
+
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/TestFixture.h>
 #include <Pt/Unit/TestFunction.h>
 #include <Pt/Unit/TestMethod.h>
 
 #include <list>
+#include <map>
 #include <string>
 
 
@@ -32,58 +36,28 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Test, public TestFixture
+	class TestSuite : public Reflectable, public Test, public TestFixture
 	{
 		public:
 			TestSuite(const std::string& name, TestProtocol& protocol = defaultProtocol)
 			: Test(name)
-			{ this->setProtocol(protocol); }
+			{
+				this->setProtocol(protocol);
+			}
 
 			virtual ~TestSuite()
 			{
-				for(std::list<Test*>::iterator it = _tests.begin(); it != _tests.end(); ++it)
-				{
-					delete *it;
-				}
 
-				_tests.clear();
 			}
 
-			template <typename FixtureT>
-			void registerMethod(FixtureT& fixture, void (FixtureT::*memFunc)(), const std::string& name)
+			void runTest( const std::string& name, const Args& args = Args() )
 			{
-				this->registerTest( new TestMethod<FixtureT>(this->name() + "::" + name, fixture, memFunc) );
-			}
+				this->setUp();
+				Reflectable::call(name, args);
+				this->tearDown();
 
-			template <class FixtureT, typename A1>
-			void registerMethod(FixtureT& fixture, void (FixtureT::*memFunc)(A1), const std::string& name)
-			{
-				this->registerTest( new TestMethod<FixtureT, A1>(this->name() + "::" + name, fixture, memFunc) );
+				Test::success( this->name() + "::" + name );
 			}
-
-			void registerTest(Test* test)
-			{
-				connect(test->success, this->success);
-				connect(test->assertion, this->assertion);
-				connect(test->exception, this->exception);
-				connect(test->error, this->error);
-				_tests.push_back( test );
-			}
-
-			void runTest(const std::string& name, const Args& args = Args())
-			{
-				std::list<Test*>::const_iterator it;
-				for( it = _tests.begin(); it != _tests.end(); ++it)
-				{
-					if( (*it)->name() == name ) {
-						(*it)->runTest(name, args);
-						return;
-					}
-				}
-			}
-
-		private:
-			std::list<Test*> _tests;
 	};
 
 
@@ -101,12 +75,12 @@ namespace Unit {
 				_items.insert( std::make_pair(testName, new BasicArgs<A1>(a1)) );
 			}
 
-			void run(Test& test)
+			void run(Test& suite)
 			{
-				std::map<std::string, Args*>::iterator it;
+				std::multimap<std::string, Args*>::iterator it;
 				for(it = _items.begin(); it != _items.end(); ++it)
 				{
-					test.runTest( test.name() + "::" + it->first, *it->second );
+					suite.runTest( it->first, *it->second );
 				}
 			}
 

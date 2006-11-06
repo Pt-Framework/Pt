@@ -29,50 +29,7 @@ namespace Pt {
 
 namespace Unit {
 
-	template <class FixtureT, typename A1 = Pt::Void>
-	class TestMethod : public Test
-	                  , public Method<void, FixtureT, A1>
-	{
-		public:
-			typedef void (FixtureT::*MemFuncT)(A1);
 
-		public:
-			TestMethod(const std::string& name, FixtureT& fixture, MemFuncT memFunc)
-			: Test(name)
-			, Method<void, FixtureT, A1>(&fixture, memFunc)
-			{}
-
-			void runTest( const std::string& name, const Args& args = Args() )
-			{
-				this->object().setUp();
-				this->call(args);
-				this->object().tearDown();
-				Test::success( this->name() );
-			}
-	};
-
-
-	template <class FixtureT>
-	class TestMethod<FixtureT, Pt::Void> : public Test
-	                                      , public Method<void, FixtureT>
-	{
-		public:
-			typedef void (FixtureT::*MemFuncT)();
-
-		public:
-			TestMethod(const std::string& name, FixtureT& fixture, MemFuncT memFunc)
-			: Test(name)
-			, Method<void, FixtureT>(&fixture, memFunc)
-			{}
-
-			void runTest( const std::string& name, const Args& args = Args() )
-			{
-				this->object().setUp();
-				this->call(args);
-				this->object().tearDown();
-				Test::success( this->name() );
-			}
-	};
 
 } // namespace Unit
 
