@@ -19,6 +19,7 @@
 #ifndef PT_UNIT_TEST_H
 #define PT_UNIT_TEST_H
 
+#include <Pt/Any.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <string>
@@ -28,11 +29,25 @@ namespace Pt {
 
 namespace Unit {
 
+	class Test;
+
+	class TestProtocol
+	{
+		public:
+			virtual ~TestProtocol()
+			{}
+
+			virtual void run(Test& test)
+			{}
+	};
+
+
 	class Test : public NonCopyable
 	{
 		public:
 			Test(const std::string& name)
 			: _name(name)
+			, _protocol( &Test::defaultProtocol )
 			{ }
 
 			virtual ~Test()
@@ -41,7 +56,16 @@ namespace Unit {
 			const std::string& name() const
 			{ return _name; }
 
-			virtual void run() = 0;
+			void setProtocol(TestProtocol& protocol)
+			{ _protocol = &protocol; }
+
+			virtual void run()
+			{
+				_protocol->run(*this);
+			}
+
+			virtual void runTest( const std::string& name, const Args& args = Args() )
+			{ }
 
 			Signal<const std::string&> success;
 
@@ -53,7 +77,16 @@ namespace Unit {
 
 		private:
 			std::string _name;
+
+		protected:
+			TestProtocol* _protocol;
+
+		public:
+			static TestProtocol defaultProtocol;
 	};
+
+
+	TestProtocol Test::defaultProtocol;
 
 } // namespace Unit
 

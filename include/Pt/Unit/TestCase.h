@@ -63,6 +63,12 @@ namespace Unit {
 				}
 			}
 
+			virtual void runTest( const std::string& name, const Args& args = Args() )
+			{
+				if( name == this->name() )
+					this->test();
+			}
+
 			virtual void test() = 0;
 	};
 

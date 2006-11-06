@@ -62,5 +62,13 @@ int main(int argc, char** argv)
 		//}
 	}
 
-	return app.run(reporter, testName);
+	try {
+		return app.run(reporter, testName);
+	}
+	catch(const std::exception& ex)
+	{
+		std::cerr << ex.what() << std::endl;
+	}
+
+	return 1;
 }

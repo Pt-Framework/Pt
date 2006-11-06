@@ -38,7 +38,7 @@ namespace Unit {
 			Application()
 			{}
 
-			~Application()
+			virtual ~Application()
 			{}
 
 			static void registerTest(Test& test)
