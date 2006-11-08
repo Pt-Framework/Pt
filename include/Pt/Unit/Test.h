@@ -22,6 +22,8 @@
 #include <Pt/Any.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
+#include <Pt/Reflectable.h>
+
 #include <string>
 
 
@@ -31,23 +33,23 @@ namespace Unit {
 
 	class Test;
 
-	class TestProtocol
+	class PT_EXPORT TestProtocol
 	{
 		public:
 			virtual ~TestProtocol()
 			{}
 
-			virtual void run(Test& test)
-			{}
+			virtual void run(Test& test);
 	};
 
 
 	class Test : public Reflectable, public NonCopyable
 	{
 		public:
-			Test(const std::string& name)
-			: _name(name)
-			, _protocol( &Test::defaultProtocol )
+			Test(const std::string& name, TestProtocol& protocol = Test::defaultProtocol)
+			: Reflectable(name)
+			, _name(name)
+			, _protocol( &protocol )
 			{ }
 
 			virtual ~Test()
@@ -59,7 +61,7 @@ namespace Unit {
 			void setProtocol(TestProtocol& protocol)
 			{ _protocol = &protocol; }
 
-			virtual void run()
+			void run()
 			{
 				_protocol->run(*this);
 			}
@@ -85,8 +87,19 @@ namespace Unit {
 			static TestProtocol defaultProtocol;
 	};
 
-
 	TestProtocol Test::defaultProtocol;
+
+
+
+	inline void TestProtocol::run(Test& test)
+	{
+		const MethodMap& methods = test.methods();
+		MethodMap::const_iterator it;
+		for(it = methods.begin(); it != methods.end(); ++it)
+		{
+			test.runTest( it->first, BasicArgs<>() );
+		}
+	}
 
 } // namespace Unit
 

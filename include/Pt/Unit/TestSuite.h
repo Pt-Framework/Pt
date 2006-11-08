@@ -19,8 +19,6 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
-#include <Pt/Reflectable.h>
-
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/TestFixture.h>
 
@@ -36,29 +34,13 @@ namespace Unit {
 	class TestSuite : public Test, public TestFixture
 	{
 		public:
-			class DefaultProtocol : public TestProtocol
-			{
-				public:
-					void run(Test& test)
-					{
-						TestSuite& suite = static_cast<TestSuite&>(test);
-						const MethodMap& methods = suite.methods();
-						MethodMap::const_iterator it;
-						for(it = methods.begin(); it != methods.end(); ++it)
-						{
-							suite.runTest( it->first, BasicArgs<>() );
-						}
-					}
-			};
+			TestSuite(const std::string& name, TestProtocol& protocol)
+			: Test(name, protocol)
+			{ }
 
-		public:
-			TestSuite(const std::string& name,
-			          TestProtocol& protocol = TestSuite::Default)
-			: Reflectable(name)
-			, Test(name)
-			{
-				this->setProtocol(protocol);
-			}
+			TestSuite(const std::string& name)
+			: Test(name)
+			{ }
 
 			void runTest( const std::string& name, const Args& args = Args() )
 			{
@@ -68,13 +50,7 @@ namespace Unit {
 
 				Test::success( this->name() + "::" + name );
 			}
-
-			static DefaultProtocol Default;
 	};
-
-	TestSuite::DefaultProtocol TestSuite::Default;
-
-
 
 
 	class TestSuiteProtocol : public TestProtocol

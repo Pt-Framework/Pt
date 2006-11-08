@@ -31,7 +31,7 @@ namespace Pt {
 namespace Unit {
 
 	//! DEPRECATED. This class is obsolete.
-	class TestCase : public Test, public TestFixture
+	/*class TestCase : public Test, public TestFixture
 	{
 		public:
 			TestCase(const std::string& name)
@@ -71,7 +71,7 @@ namespace Unit {
 			}
 
 			virtual void test() = 0;
-	};
+	};*/
 
 } // namespace Unit
 
