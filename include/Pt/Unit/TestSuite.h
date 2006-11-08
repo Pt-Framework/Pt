@@ -23,8 +23,6 @@
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/TestFixture.h>
-#include <Pt/Unit/TestFunction.h>
-#include <Pt/Unit/TestMethod.h>
 
 #include <list>
 #include <map>
@@ -35,7 +33,7 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Reflectable, public Test, public TestFixture
+	class TestSuite : public Test, public TestFixture
 	{
 		public:
 			class DefaultProtocol : public TestProtocol

@@ -30,6 +30,7 @@ namespace Pt {
 
 namespace Unit {
 
+	//! DEPRECATED. This class is obsolete.
 	class TestCase : public Test, public TestFixture
 	{
 		public:

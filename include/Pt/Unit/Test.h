@@ -42,7 +42,7 @@ namespace Unit {
 	};
 
 
-	class Test : public NonCopyable
+	class Test : public Reflectable, public NonCopyable
 	{
 		public:
 			Test(const std::string& name)
