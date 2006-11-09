@@ -26,6 +26,7 @@
 #include <string>
 
 
+/*
 class AtomicIntConstructorTest : public Pt::Unit::TestCase
 {
 	public:
@@ -41,7 +42,7 @@ class AtomicIntConstructorTest : public Pt::Unit::TestCase
 };
 
 Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTest;
-
+*/
 
 
 
