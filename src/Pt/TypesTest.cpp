@@ -30,14 +30,16 @@ using namespace Pt;
 #include "Pt/Unit/TestMain.h"
 
 
-class TypesTest : public Pt::Unit::TestCase
+class TypesTest : public Pt::Unit::TestSuite
 {
 	public:
 		TypesTest()
-		: TestCase("TypesTest")
-		{}
+		: TestSuite("TypesTest")
+		{
+			this->registerMethod("test", *this, &TypesTest::test);
+		}
 
-		virtual void test()
+		void test()
 		{
 			stringstream ss;
 

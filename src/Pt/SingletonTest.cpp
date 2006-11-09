@@ -44,12 +44,14 @@ class SingletonClass : public Singleton<SingletonClass> {
 };
 
 
-class SingletonTest : public Pt::Unit::TestCase
+class SingletonTest : public Pt::Unit::TestSuite
 {
 	public:
 		SingletonTest()
-		: TestCase("SingletonTest")
-		{}
+		: TestSuite("SingletonTest")
+		{
+			this->registerMethod("test", *this, &SingletonTest::test);
+		}
 
 		virtual void test()
 		{
