@@ -19,6 +19,10 @@ ITEM-5 P0 S5 "POD types of fixed size are defined"
 	TASK "Review Types.h"	blue_wind_25	2006-10-21
 	TASK "Write test case"	blue_wind_25	2006-10-21
 
+ITEM-7 P0 S3 "An API for byte-order conversion exists"
+	TASK "Remove swap() template function"	blue_wind_25	2006-11-10
+	TASK "Improve swabUnaligned() function"	blue_wind_25	2006-11-10
+
 ITEM-9 P0 S3 "A SourceInfo class exits."
 	TASK "Review SourceInfo.h"	blue_wind_25	2006-10-21
 	TASK "Write test case"	blue_wind_25	2006-10-21

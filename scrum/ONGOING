@@ -7,9 +7,7 @@ ITEM-5 P0 S5 "POD types of fixed size are defined"
 
 ITEM-7 P0 S3 "An API for byte-order conversion exists"
 	TASK "Review Byteorder.h"	blue_wind_25
-	TASK "Remove swap() template function"	blue_wind_25
 	TASK "Write test cases"	blue_wind_25
-	TASK "Improve swabUnaligned() function"	blue_wind_25
 	TASK "Add function to swap float and double correctly"	blue_wind_25
 
 ITEM-11 P0 S3 "A NonCopyable base class exits."
@@ -18,6 +16,11 @@ ITEM-11 P0 S3 "A NonCopyable base class exits."
 ITEM-12 P0 S3 "A Singleton base class exits."
 	TASK "Review Singleton.h"	blue_wind_25
 	TASK "Write Documentation"	blue_wind_25
+
+ITEM-15 P0 S5 "Byteorder API has ASM optimisation"
+	TASK "Optimize swab16() using standard ASM and if possible SIMD"	blue_wind_25
+	TASK "Optimize swab32() using standard ASM and if possible SIMD"	blue_wind_25
+	TASK "Optimize swab64() using standard ASM and if possible SIMD"	blue_wind_25
 
 ITEM-21 P0 S5 "Object reflection API is implemented"
 	TASK "Split property in property and property proxy"	Laurentiu
