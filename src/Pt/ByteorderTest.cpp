@@ -72,6 +72,20 @@ class ByteorderTest : public Pt::Unit::TestSuite
 #ifdef PT_64BIT
 			cerr << hex << "0x" <<         val64u << endl;
 #endif
+
+			cerr << endl;
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val16u), sizeof(val16u));
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val32u), sizeof(val32u));
+#ifdef PT_64BIT
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val64u), sizeof(val64u));
+#endif
+
+			cerr << "After swabUnaligned()s:" << endl;
+			cerr << hex << "0x" << val16u << endl;
+			cerr << hex << "0x" << val32u << endl;
+#ifdef PT_64BIT
+			cerr << hex << "0x" << val64u << endl;
+#endif
 		}
 
 	};

@@ -246,10 +246,12 @@ namespace Pt
 	 */
 	inline uint8_t* swabUnaligned(uint8_t* data, size_t size)
 	{
+		assert( (size/2)*2 == size );
+
 		for(size_t i = 0; i < size/2; ++i) {
 			const uint8_t buf = data[i];
 
-			data[i]        = data[size- i-1];
+			data[i]        = data[size-i-1];
 			data[size-i-1] = buf;
 		}
 
