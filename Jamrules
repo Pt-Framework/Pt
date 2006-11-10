@@ -1,21 +1,25 @@
-# Translate build variables to preprocessor defines
-#
+JamInclude Jamrules.cppunit ;
+JamInclude Jamrules.ppr ;
+
+
 C++FLAGS += [ FDefines "PT_"$(OS:U) ] ;
 C++FLAGS += [ FDefines "PT_"$(OSPLAT:U) ] ;
 C++FLAGS += [ FDefines "PT_"$(TOOLSET:U) ] ;
 
 
-# print project information
+# Print project information
 Echo ;
-Echo "Project                  :" "Platinum Framework" ;
-Echo "Operating System         :" $(OS:L) ;
-Echo "Platform                 :" $(OSPLAT:L) ;
-Echo "Target Operating System  :" $(TARGET_OS:L) ;
-Echo "Target Platform          :" $(TARGET_OSPLAT:L) ;
-Echo "Toolset                  :" $(TOOLSET) ;
-Echo "Byte Order               :" $(BYTEORDER:L) ;
-Echo "System Interface         :" $(SYS) ;
-Echo "Graphic User Interface   :" $(GUI) ;
-Echo "Configuration            :" $(CONFIG) ;
+Echo "Project                         :" "Platinum C++ Framework" ;
+Echo "Configuration (CONFIG)          :" $(CONFIG) ;
+Echo "Toolset (TOOLSET)               :" $(TOOLSET) ;
+Echo "Host Operating System (OS)      :" $(OS:L) ;
+Echo "Host Platform (OSPLAT)          :" $(OSPLAT:L) ;
+Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
+Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
+Echo "Byte Order (BYTEORDER)          :" $(BYTEORDER:L) ;
+Echo "Graphic User Interface (GUI)    :" $(GUI) ;
+Echo "System Interface (SYS)          :" $(SYS) ;
+Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
+Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
+Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
 Echo ;
-
