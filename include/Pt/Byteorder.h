@@ -77,14 +77,14 @@ namespace Pt
 	 *
 	 *  Just for the sake of completeness.
 	 */
-	inline int8_t swab(int8_t value)
+	inline int8_t swap(int8_t value)
 	{ return value; }
 
 	/** @brief Dummy function which does nothing.
 	 *
 	 *  Just for the sake of completeness.
 	 */
-	inline uint8_t swab(uint8_t value)
+	inline uint8_t swap(uint8_t value)
 	{ return value; }
 
 
@@ -93,9 +93,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline int16_t swab(int16_t value)
+	inline int16_t swap(int16_t value)
 	{ return swab16(value); }
 
 	/** @brief Swaps the byteorder of a uint16_t.
@@ -103,9 +103,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline uint16_t swab(uint16_t value)
+	inline uint16_t swap(uint16_t value)
 	{ return swab16(value); }
 
 
@@ -114,9 +114,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline int32_t swab(int32_t value)
+	inline int32_t swap(int32_t value)
 	{ return swab32(value); }
 
 	/** @brief Swaps the byteorder of a uint32_t.
@@ -124,9 +124,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline uint32_t swab(uint32_t value)
+	inline uint32_t swap(uint32_t value)
 	{ return swab32(value); }
 
 
@@ -136,9 +136,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline int64_t swab(int64_t value)
+	inline int64_t swap(int64_t value)
 	{ return swab64(value); }
 
 	/** @brief Swaps the byteorder of a uint64t.
@@ -146,9 +146,9 @@ namespace Pt
 	 *  @param value The value to be byte-swapped
 	 *  @return The byte-swapped value
 	 *
-	 *  Overloads the generic swab().
+	 *  Overloads the generic swap().
 	 */
-	inline uint64_t swab(uint64_t value)
+	inline uint64_t swap(uint64_t value)
 	{ return swab64(value); }
 #endif
 
@@ -160,8 +160,8 @@ namespace Pt
 	 *  @param value The value in host-byteorder
 	 *  @return The value changed to little-endian
 	 *
-	 *  This function does nothing on a LE system, but calls swab() on a BE system.
-	 *  The generic swab() function expects the type passed in to be bitwise-copyable
+	 *  This function does nothing on a LE system, but calls swap() on a BE system.
+	 *  The generic swap() function expects the type passed in to be bitwise-copyable
 	 *  and thus does this function. Overloading swab can remove this restriction and
 	 *  may improve performance for custon types.
 	 */
@@ -171,7 +171,7 @@ namespace Pt
 #ifdef PT_LE
 		return value;
 #else
-		return swab(value);
+		return swap(value);
 #endif
 	}
 
@@ -180,8 +180,8 @@ namespace Pt
 	 *  @param value The value in host-byteorder
 	 *  @return The value changed to little-endian
 	 *
-	 *  This function does nothing on a LE system, but calls swab() on a BE system.
-	 *  The generic swab() function expects the type passed in to be bitwise-copyable
+	 *  This function does nothing on a LE system, but calls swap() on a BE system.
+	 *  The generic swap() function expects the type passed in to be bitwise-copyable
 	 *  and thus does this function. Overloading swab can remove this restriction and
 	 *  may improve performance for custon types.
 	 */
@@ -191,7 +191,7 @@ namespace Pt
 #ifdef PT_LE
 		return value;
 #else
-		return swab(value);
+		return swap(value);
 #endif
 	}
 
@@ -201,8 +201,8 @@ namespace Pt
 	 *  @param value The value in host-byteorder
 	 *  @return The value in big-endian
 	 *
-	 *  This function does nothing on a BE system, but calls swab() on a LE system.
-	 *  The generic swab() function expects the type passed in to be bitwise-copyable
+	 *  This function does nothing on a BE system, but calls swap() on a LE system.
+	 *  The generic swap() function expects the type passed in to be bitwise-copyable
 	 *  and thus does this function. Overloading swab can remove this restriction and
 	 *  may improve performance for custon types.
 	 */
@@ -210,7 +210,7 @@ namespace Pt
 	inline T hostToBe(const T& value)
 	{
 #ifdef PT_LE
-		return swab(value);
+		return swap(value);
 #else
 		return value;
 #endif
@@ -221,8 +221,8 @@ namespace Pt
 	 *  @param value The value in host-byteorder
 	 *  @return The value in big-endian
 	 *
-	 *  This function does nothing on a BE system, but calls swab() on a LE system.
-	 *  The generic swab() function expects the type passed in to be bitwise-copyable
+	 *  This function does nothing on a BE system, but calls swap() on a LE system.
+	 *  The generic swap() function expects the type passed in to be bitwise-copyable
 	 *  and thus does this function. Overloading swab can remove this restriction and
 	 *  may improve performance for custon types.
 	 */
@@ -230,10 +230,30 @@ namespace Pt
 	inline T beToHost(const T& value)
 	{
 #ifdef PT_LE
-		return swab(value);
+		return swap(value);
 #else
 		return value;
 #endif
+	}
+
+
+
+
+	/** @brief In-place swab a type byte-wise.
+	 *
+	 *  This function could be used when a specialized function to swap a particular
+	 *  data type is not exist. This function has a lot of additional overhead.
+	 */
+	inline uint8_t* swabUnaligned(uint8_t* data, size_t size)
+	{
+		for(size_t i = 0; i < size/2; ++i) {
+			const uint8_t buf = data[i];
+
+			data[i]        = data[size- i-1];
+			data[size-i-1] = buf;
+		}
+
+		return data;
 	}
 
 } // namespace Pt
