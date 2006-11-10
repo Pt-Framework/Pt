@@ -1,3 +1,12 @@
+CC              = gcc ;
+C++             = g++ ;
+CCFLAGS 	+= -Wall ;
+C++FLAGS	+= $(CCFLAGS) ; # -std=c++98 -D__STDC_VERSION__=199901L ;
+LINKFLAGS	?= $(CCFLAGS) ;
+LINKLIBS	+= -lstdc++ ;
+RANLIB		?= ranlib ;
+
+
 # Configuration specific compiler flags
 #
 if $(CONFIG) = debug 
@@ -17,11 +26,25 @@ if $(TARGET_OSPLAT:U) != X86
 	CCFLAGS += -fPIC ;
 }
 
-CCFLAGS 	+= -Wall ;
-C++FLAGS	+= $(CCFLAGS) ;
-LINKFLAGS	?= $(CCFLAGS) ;
-LINKLIBS	+= -lstdc++ ;
-RANLIB		?= ranlib ;
+
+# MinGW support for gcc under NT
+#
+if $(TARGET_OS:L) = "nt"
+{
+	if $(MINGW) 
+	{
+		MINGW   = $(MINGW:J=" ") ;
+		AR      = "$(MINGW)\\bin\\ar ru" ;
+		CC      = $(MINGW)\\bin\\gcc ;
+		C++     = $(MINGW)\\bin\\g++ ;
+		RANLIB  = $(MINGW)\\bin\\ranlib ;
+		LINKFLAGS += -Wl,--enable-runtime-pseudo-reloc ;
+	}
+	else
+	{
+		Exit "Please specify path to the MinGW installation with -sMINGW" ;
+	}
+}
 
 
 # Add a compiler define
@@ -63,8 +86,26 @@ rule SharedLibrary_MakeLocate
 rule SharedLibrary_LinkSharedLibraries
 {
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
-	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
+	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;	
 	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
+}
+
+# Set outputdirectory for binary files
+#
+# param 1 target name
+# param 2 file name with suffix
+# param 3 directory name
+#
+rule SetOutputDirectory
+{
+	local _outputDir = $(LOCATE_TARGET) ;
+	
+	if $(3)	{	
+		_outputDir = $(3) ;		
+	}	
+	MakeLocate $(2) : $(_outputDir) ;
+	LINKFLAGS on $(2) += -L$(3) ;
 }
 
 
@@ -73,23 +114,32 @@ rule SharedLibrary_LinkSharedLibraries
 rule SharedLibraryFromObjects
 {
 	# Add grist to file names
-	local _sources = [ FGristFiles $(>) ] ;
+	local _sources = [ FGristObjectFiles $(>) ] ;
 
 	# Add library name decorations <lib><name><.so>
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
+	
 	# setup dependencies
 	Depends exe : $(_target) ;
 	Depends lib : $(_target) ;
 	Depends $(_target) : $(_sources) ;
+	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
 
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+	#MakeLocate $(_target) : $(LOCATE_TARGET) ;
 
 	# include library path
 	SEARCH_SHLIB += $(LOCATE_TARGET) ;
 
 	Clean clean : $(_target) ;
 
-	LINKFLAGS on $(_target) += -shared ;
+	LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
 	Link $(_target) : $(_sources) ;
 }
+
+
+actions Link bind NEEDLIBS
+{
+    $(CC) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) -Wl,--start-group $(LINKLIBS) $(NEEDLIBS) --end-group
+}
+

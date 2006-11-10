@@ -25,6 +25,7 @@ LINKLIBS += coredll.lib
             comsuppwd.lib
             winsock.lib
             Ws2.lib
+            mmtimer.lib
 	    ;
  
 # also possible:

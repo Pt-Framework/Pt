@@ -17,9 +17,14 @@ if $(TARGET_OSPLAT:L) != x86
 #
 VISUALC ?= $(VCINSTALLDIR:J=" ") ;
 
+
 # Path to VC/C++ module of visual studio installation 
 #
 VCDIR = $(VISUALC)\\vc7 ;
+
+
+PLATFORMSDK ?= $(VISUALC)\\vc7\\PlatformSDK ;
+
 
 # This probably shouldnt be here...
 #
@@ -41,7 +46,7 @@ AR		= $(VISUALC)\\vc7\\bin\\lib ;
 AS		= masm386 ;
 CC		= $(VISUALC)\\vc7\\bin\\cl /nologo ;
 C++		= $(CC) ;
-C++FLAGS	+= $(CCFLAGS) /EHsc /GR /FD /W3 /DWIN32  ;
+C++FLAGS	+= $(CCFLAGS) /EHsc /GR /W3 /DWIN32 ; #/FD /Gm
 LINK		= $(VISUALC)\\vc7\\bin\\link /nologo ;
 LINKFLAGS       += "/INCREMENTAL:NO" ;
 LINKLIBS        += \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\advapi32.lib\"

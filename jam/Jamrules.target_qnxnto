@@ -1,15 +1,6 @@
 # Set default values for toolset, system API and GUI API
 #
-SYS = posix ;
-GUI ?= gf ;
 TOOLSET ?= qcc ;
-
-# Required Libraries
-#
-SYSLIBS ?= ;
-GFXLIBS ?= ;
-GUILIBS ?= ;
-
 
 # System specific library naming
 #

@@ -21,30 +21,55 @@ rule FIncludes
 }
 
 
-# Builds an executable
+# Set outputdirectory for binary files
 #
-rule Main
-{
-	# in case of debug d.exe is added
-	local _target = $(<:S=$(SUFEXE)) ;
+# param 1 target name
+# param 2 file name with suffix
+# param 3 directory name
+#
+rule SetOutputDirectory
+{	
+	local _outputDir = $(LOCATE_TARGET) ;
 	
-	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-	Objects $(>) ;
-    
-    	# Tell jam where it can find the .pdb, .lib, .exp
-    	MakeLocate $(_target) : $(LOCATE_TARGET) ;
-    	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
-    	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.exe.manifest) : $(LOCATE_TARGET) ;
+	if $(3)
+	{
+		_outputDir = $(3) ;		
+	}
+
+	# SetProgramDataBase $(_outputDir) : $(2) ;	
+	
+	# Tell jam where it can find the .pdb, .lib, .exp   
+	MakeLocate $(2) : $(_outputDir) ;
+	MakeLocate $(2:S=.lib) : $(_outputDir) ;
+	MakeLocate $(2:S=.exp) : $(_outputDir) ;
+	MakeLocate $(2:S=.pdb) : $(_outputDir) ;
+	MakeLocate $(2:S=.ilk) : $(_outputDir) ;
+	MakeLocate $(2).manifest : $(_outputDir) ;
 	
 	# clean rules only replace '.exe' suffic while 'd' for debug is kept
-	Clean clean : $(_target) ;
-	Clean clean : $(_target:S=.lib) ;
-	Clean clean : $(_target:S=.exp) ;
-	Clean clean : $(_target:S=.pdb) ;
-	Clean clean : $(_target:S=.ilk) ;
+	Clean clean : $(2) ;
+	Clean clean : $(2:S=.lib) ;
+	Clean clean : $(2:S=.exp) ;	
+	Clean clean : $(2:S=.pdb) ;
+	Clean clean : $(2:S=.ilk) ;
+	Clean clean : $(2).manifest ;
+}
+
+
+# Set the filename /-path for .pdb file
+#
+# param 1 output directory
+# param 2 filename with suffix
+#
+rule SetProgramDataBase
+{
+	# set output for program data base
+	PROGRAMDATABASE = [ FDirName $(1) $(2:S=.pdb) ] ;	
+	
+	LINKFLAGS on $(2) += /PDB:$(PROGRAMDATABASE) $(LINKFLAGS) ;
+	
+	DEPENDS obj : $(1) ;
+	
 }
 
 
@@ -76,7 +101,7 @@ rule Main_MakeLocate
 rule SharedLibraryFromObjects
 {
 	# Add grist to file names
-	local _sources = [ FGristFiles $(>) ] ;
+	local _sources = [ FGristObjectFiles $(>) ] ;
 
 	# Add library name decorations <name><.dll/.so>
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -86,39 +111,9 @@ rule SharedLibraryFromObjects
 	Depends lib : $(_target) ;
 	Depends $(_target) : $(_sources) ;
 	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
-
-	# Tell jam where it can find the .dll, .lib, .ilk and .pdb
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
-
-	# clean the .dll, .lib, .ilk and .pdb
-	Clean clean : $(_target) ;
-	Clean clean : $(_target:S=.lib) ;
-	Clean clean : $(_target:S=.ilk) ;
-	Clean clean : $(_target:S=.pdb) ;
-	Clean clean : $(_target:S=.exp) ;
 	
 	LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
 	Link $(_target) : $(_sources) ;
-
-}
-
-
-rule SharedLibrary_MakeLocate
-{
-	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-
-	
-	MakeLocate $(_target) : $(>) ;
-	MakeLocate $(_target:S=.lib) : $(>) ;
-	MakeLocate $(_target:S=.exp) : $(>) ;
-	MakeLocate $(_target:S=.pdb) : $(>) ;
-	MakeLocate $(_target:S=.ilk) : $(>) ;
-	
-	SEARCH_SHLIB += $(>) ;
 }
 
 
@@ -140,12 +135,35 @@ rule SharedLibrary_LinkSharedLibraries
 }
 
 
+rule SharedLibrary_MakeLocate
+{
+	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+	
+	MakeLocate $(_target) : $(>) ;
+	MakeLocate $(_target:S=.lib) : $(>) ;
+	MakeLocate $(_target:S=.exp) : $(>) ;
+	MakeLocate $(_target:S=.pdb) : $(>) ;
+	MakeLocate $(_target:S=.ilk) : $(>) ;
+	
+	SEARCH_SHLIB += $(>) ;
+}
+
+
 actions updated together piecemeal Archive
 {
+	set _inputfile_=archive.cmd
+	echo $(>) > %_inputfile_%
+
 	set PATH=$(VISUALC)\Common7/IDE;%PATH%
-	if exist $(<) set _$(<:B)_=$(<)
-	"$(AR)" /out:$(<) %_$(<:B)_% $(>)
+	"$(AR)" /NOLOGO /out:$(<)  @%_inputfile_%
+	
+	del %_inputfile_%
 }
+
+#set PATH=$(VISUALC)\Common7/IDE;%PATH%
+#if exist $(<) set _$(<:B)_=$(<)
+#"$(AR)" /out:$(<) %_$(<:B)_% $(>)
 
 
 actions As
@@ -158,20 +176,19 @@ set PATH=$(VISUALC)\Common7/IDE;%PATH%
 actions Cc
 {
 set PATH=$(VISUALC)\Common7/IDE;%PATH%
-"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /I$(HDRS) /I$(STDHDRS) $(>)
+"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) $(>)
 }
 
 
 actions C++
-{
+{	
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
-
-actions Link bind NEEDLIBS
+actions together piecemeal Link bind NEEDLIBS
 {
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	set LIB=$(VCDIR)\lib\;$(VCDIR)\PlatformSDK\lib\;%LIB%
+	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
 	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }

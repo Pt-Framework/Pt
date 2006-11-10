@@ -1,0 +1,65 @@
+if $(TARGET_OS:L) = nt
+{
+	SYS	?= win32 ;
+	GUI	?= gdi ;
+}
+if $(TARGET_OS:L) = linux
+{
+	SYS     ?= posix ;
+	GUI     ?= x11 ;
+
+}
+if $(TARGET_OS:L) = qnxnto
+{
+	SYS ?= posix ;
+	GUI ?= gf ;
+}
+if $(TARGET_OS:L) = wince
+{
+	SYS ?= wince ;
+	GUI ?= gdi ;
+}
+
+
+if $(SYS:L) = "win32"
+{
+	SYSLIBS = wsock32.lib version.lib Winmm.lib ;
+
+	if $(MINGW)
+	{
+		SYSLIBS = $(MINGW)\\lib\\libwsock32.a 
+			  $(MINGW)\\lib\\libversion.a 
+			  $(MINGW)\\lib\\libwinmm.a ;
+	}
+}
+if $(SYS:L) = "posix"
+{
+	SYSLIBS     = -ldl -lpthread -lrt ;
+}
+if $(SYS:L) = wince
+{
+
+}
+
+
+if $(GUI:L) = "gdi"
+{
+	if $(TARGET_OS:L) = "nt"
+	{
+		GUILIBS = gdi32.lib ;
+	}
+	if $(MINGW)
+	{
+		GUILIBS = $(MINGW)\\lib\\libgdi32.a ;
+	}
+}
+if $(GUI:L) = "x11"
+{
+	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
+}
+if $(GUI:L) = "gf"
+{
+	GUI ?= gf ;
+	GUILIBS = ;
+}
+

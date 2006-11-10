@@ -19,6 +19,7 @@ if $(CONFIG:L) = debug
 else
 {
 	C++FLAGS += /MD /O1 /Oy ;
+	CCFLAGS += /MD /O1 /Oy ;
 }
 
 

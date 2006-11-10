@@ -1,19 +1,21 @@
 JAVA_SYSTEM_INCLUDE = win32 ;
 
-SUFOBJ		= .obj ;
-PRELIB		= "" ;
+SUFOBJ	= .obj ;
+PRELIB	= "" ;
 
 if $(CONFIG) = debug 
 {
-	SUFLIB		= d.lib ;
-	SUFEXE		= d.exe ;
+	SUFLIB	= d.lib ;
+	SUFEXE	= d.exe ;
 	SUFDLL	= d.dll ;
+	SUFDBG  = d ;
 }
 else
 {
-	SUFLIB		= .lib ;
-	SUFEXE		= .exe ;
+	SUFLIB	= .lib ;
+	SUFEXE	= .exe ;
 	SUFDLL	= .dll ;
+	SUFDBG  = "" ;
 }
 
 # Deduce TOOLSET from envars usually set by build console
@@ -30,14 +32,4 @@ else
 {
 	TOOLSET ?= vc7 ;
 }
-
-SYS		?= win32 ;
-GUI		?= gdi ;
-
-SYSLIBS += wsock32.lib ;
-SYSLIBS += version.lib ;
-GFXLIBS = ;
-GUILIBS = ;
-
-
 

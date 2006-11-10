@@ -1,5 +1,7 @@
 # For wince cross compiles we default to arm CPUs
 #
+JAVA_SYSTEM_INCLUDE = win32 ;
+
 TARGET_OSPLAT ?= arm ;
 
 SUFOBJ	= .obj ;
@@ -15,10 +17,4 @@ if $(CONFIG) = debug
 	SUFDLL	= d.dll ;
 }
 
-TOOLSET		?= vc8 ;
-SYS		?= wince ;
-GUI		?= gdi ;
-
-SYSLIBS = ;
-GFXLIBS = ;
-GUILIBS = ;
+TOOLSET ?= vc8 ;
