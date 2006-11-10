@@ -20,8 +20,6 @@
 #include <iostream>
 using namespace std;
 
-#define PT_LE
-
 #include "Pt/Byteorder.h"
 using namespace Pt;
 

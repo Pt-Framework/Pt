@@ -408,7 +408,6 @@ void functionTest3()
 }
 
 
-
 class DeleteTest : public Pt::Connectable
 {
 public:
@@ -529,6 +528,4 @@ int main()
 
 	return 0;
 }
-
-
 
