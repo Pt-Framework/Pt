@@ -248,11 +248,12 @@ namespace Pt
 	{
 		assert( (size/2)*2 == size );
 
-		for(size_t i = 0; i < size/2; ++i) {
-			const uint8_t buf = data[i];
+		for(size_t idx = 0; idx < size/2; ++idx) {
+			const uint8_t tmp = data[idx];
+			const size_t  pos = size-idx-1;
 
-			data[i]        = data[size-i-1];
-			data[size-i-1] = buf;
+			data[idx] = data[pos];
+			data[pos] = tmp;
 		}
 
 		return data;
