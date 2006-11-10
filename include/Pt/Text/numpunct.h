@@ -35,6 +35,8 @@ namespace std {
 			typedef Pt::Char char_type;
 			typedef basic_string<Pt::Text::Char> string_type;
 
+			typedef __numpunct_cache<Pt::Text::Char>  __cache_type;
+
 			static locale::id id;
 
 		public:

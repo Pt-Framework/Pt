@@ -47,7 +47,7 @@ class PT_EXPORT SharedLibImpl {
 				return 0;
 			}
 
-			return ::GetProcAddress(_handle, symbol);
+			return (void*)::GetProcAddress(_handle, symbol);
 		}
 
 		bool failed()
@@ -62,7 +62,7 @@ class PT_EXPORT SharedLibImpl {
 			if(handle == 0)
 				throw SystemError("Could not open shared library", PT_SOURCEINFO);
 
-			return ::GetProcAddress(handle, symbol);
+			return (void*)::GetProcAddress(handle, symbol);
 		}
 
 	private:
