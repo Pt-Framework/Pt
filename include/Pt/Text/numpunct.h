@@ -35,8 +35,9 @@ namespace std {
 			typedef Pt::Char char_type;
 			typedef basic_string<Pt::Text::Char> string_type;
 
+			#if _GNUC_ == 3 && __GNUCMINOR__ == 4
 			typedef __numpunct_cache<Pt::Text::Char>  __cache_type;
-
+			#endif
 			static locale::id id;
 
 		public:
