@@ -24,8 +24,6 @@
 #include <Pt/Types.h>
 
 #include <string>
-#include <cassert>
-#include <cstddef>
 
 
 namespace Pt {
@@ -419,155 +417,108 @@ namespace std {
 
 	/// @cond INTERNAL
 	template<>
-	struct PT_EXPORT char_traits<Pt::Char> {
-		typedef Pt::Char char_type;
+	struct char_traits<Pt::Text::Char>
+	{
+		typedef Pt::Text::Char char_type;
 		typedef Pt::uint32_t int_type;
 		typedef streamoff off_type;
 		typedef off_t pos_type;
 		typedef mbstate_t state_type;
 
-		inline static void assign(char_type& c1, const char_type& c2);
-
-		inline static bool eq(const char_type& c1, const char_type& c2);
-
-		inline static bool lt(const char_type& c1, const char_type& c2);
-
-		inline static int compare(const char_type* c1, const char_type* c2, size_t n);
-
-		inline static size_t length(const char_type* s);
-
-		inline static const char_type* find(const char_type* s, size_t n, const char_type& a);
-
-		inline static char_type* move(char_type* s1, const char_type* s2, int_type n);
-
-		inline static char_type* copy(char_type* s1, const char_type* s2, size_t n);
-
-		inline static char_type* assign(char_type* s, size_t n, char_type a);
-
-		inline static char_type to_char_type(const int_type& c);
-
-		inline static int_type to_int_type(const char_type& c);
-
-		inline static bool eq_int_type(const int_type& c1, const int_type& c2);
-
-		inline static int_type eof();
-
-		inline static int_type not_eof(const int_type& c);
-	};
-
-
-	inline void char_traits<Pt::Char>::assign(char_type& c1, const char_type& c2)
-	{
-		c1 = c2;
-	}
-
-
-	inline bool char_traits<Pt::Char>::eq(const char_type& c1, const char_type& c2)
-	{
-		return c1 == c2;
-	}
-
-
-	inline bool char_traits<Pt::Char>::lt(const char_type& c1, const char_type& c2)
-	{
-		return c1 < c2;
-	}
-
-
-	inline int char_traits<Pt::Char>::compare(const char_type* s1, const char_type* s2, size_t n)
-	{
-		while(n-- > 0)
+		inline static void assign(char_type& c1, const char_type& c2)
 		{
-			if( !eq(*s1, *s2) )
-				return lt(*s1, *s2) ? -1 : +1;
-
-			++s1;
-			++s2;
+			c1 = c2;
 		}
 
-		return 0;
-	}
-
-
-	inline size_t char_traits<Pt::Char>::length(const char_type* s)
-	{
-		static const Pt::Char term(0);
-		std::size_t n = 0;
-		while( !eq(s[n], term) )
-			++n;
-
-		return n;
-	}
-
-
-	inline const char_traits<Pt::Char>::char_type*
-	char_traits<Pt::Char>::find(const char_type* s, size_t n, const char_type& a)
-	{
-		while(n-- > 0) {
-			if (*s == a)
-				return s;
-			++s;
+		inline static bool eq(const char_type& c1, const char_type& c2)
+		{
+			return c1 == c2;
 		}
 
-		return 0;
-	}
-
-
-	inline char_traits<Pt::Char>::char_type*
-	char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, int_type n)
-	{
-		return (Pt::Char*)memmove(s1, s2, n * sizeof(Pt::Char));
-	}
-
-
-	inline char_traits<Pt::Char>::char_type*
-	char_traits<Pt::Char>::copy(char_type* s1, const char_type* s2, size_t n)
-	{
-		return (Pt::Char*)memcpy(s1, s2, n * sizeof(Pt::Char));
-	}
-
-
-	inline char_traits<Pt::Char>::char_type*
-	char_traits<Pt::Char>::assign(char_type* s, size_t n, char_type a)
-	{
-		while(n-- > 0) {
-			*(s++) = a;
+		inline static bool lt(const char_type& c1, const char_type& c2)
+		{
+			return c1 < c2;
 		}
 
-		return s;
-	}
+		inline static int compare(const char_type* c1, const char_type* c2, size_t n)
+		{
+			while(n-- > 0)
+			{
+				if( !eq(*s1, *s2) )
+					return lt(*s1, *s2) ? -1 : +1;
 
+				++s1;
+				++s2;
+			}
 
-	inline char_traits<Pt::Char>::char_type
-	char_traits<Pt::Char>::to_char_type(const int_type& c)
-	{
-		return char_type(c);
-	}
+			return 0;
+		}
 
+		inline static size_t length(const char_type* s)
+		{
+			static const Pt::Char term(0);
+			std::size_t n = 0;
+			while( !eq(s[n], term) )
+				++n;
 
-	inline char_traits<Pt::Char>::int_type
-	char_traits<Pt::Char>::to_int_type(const char_type& c)
-	{
-		return c.value();
-	}
+			return n;
+		}
 
+		inline static const char_type* find(const char_type* s, size_t n, const char_type& a)
+		{
+			while(n-- > 0) {
+				if (*s == a)
+					return s;
+				++s;
+			}
 
-	inline bool char_traits<Pt::Char>::eq_int_type(const int_type& c1, const int_type& c2)
-	{
-		return c1 == c2;
-	}
+			return 0;
+		}
 
+		inline static char_type* move(char_type* s1, const char_type* s2, int_type n)
+		{
+			return (Pt::Char*)memmove(s1, s2, n * sizeof(Pt::Char));
+		}
 
-	inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::eof()
-	{
-		return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
-	}
+		inline static char_type* copy(char_type* s1, const char_type* s2, size_t n)
+		{
+			return (Pt::Char*)memcpy(s1, s2, n * sizeof(Pt::Char));
+		}
 
+		inline static char_type* assign(char_type* s, size_t n, char_type a)
+		{
+			while(n-- > 0) {
+				*(s++) = a;
+			}
 
-	inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_type& c)
-	{
-		return eq_int_type(c, eof()) ? 0 : c;
-	}
+			return s;
+		}
+
+		inline static char_type to_char_type(const int_type& c)
+		{
+			return char_type(c);
+		}
+
+		inline static int_type to_int_type(const char_type& c)
+		{
+			return c.value();
+		}
+
+		inline static bool eq_int_type(const int_type& c1, const int_type& c2)
+		{
+			return c1 == c2;
+		}
+
+		inline static int_type eof()
+		{
+			return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
+		}
+
+		inline static int_type not_eof(const int_type& c)
+		{
+			return eq_int_type(c, eof()) ? 0 : c;
+		}
+	};
 
 } // namespace std
 
