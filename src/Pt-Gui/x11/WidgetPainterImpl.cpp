@@ -29,18 +29,13 @@ namespace Pt {
 namespace Gui {
 
 
-WidgetPainter::WidgetPainter(WidgetImpl& wimpl)
-: X11Painter( wimpl )
+WidgetPainterImpl::WidgetPainterImpl(WidgetImpl& wimpl)
+: PainterImpl( wimpl )
 {
-}
-
-
-void WidgetPainter::setWidget(WidgetImpl& wimpl)
-{
-	this->setDrawable( wimpl );
 }
 
 
 } // namespace Gui
-} // namespace Ptv
+
+} // namespace Pt
 

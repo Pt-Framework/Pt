@@ -22,6 +22,7 @@
 
 #include "Pt/Api.h"
 #include "Pt/Gfx/Size.h"
+#include "Pt/Gui/Painter.h"
 #include "Drawable.h"
 
 #include <X11/X.h>
@@ -33,7 +34,7 @@
 namespace Pt {
 
 namespace Gui {
-	class PixmapPainter;
+	class PixmapPainterImpl;
 
 	class PT_EXPORT PixmapImpl : public Drawable {
 		public:
@@ -46,12 +47,15 @@ namespace Gui {
 			const Gfx::Size& size() const
 			{ return _size; }
 
-			PixmapPainter& getPainter();
+			Painter painter();
+
+			//bool isPainting() const
+			//{ return true; }
 
 		private:
 			::Pixmap _x11Pixmap;
 			Gfx::Size _size;
-			PixmapPainter* _painter;
+			PixmapPainterImpl* _painter;
 	};
 
 } // namespace Gui

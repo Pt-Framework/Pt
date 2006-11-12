@@ -4,9 +4,11 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs /usr/include/freetype2 ;
 
 Library Pt-Gui-x11 : ApplicationImpl.cpp
-                     Drawable.cpp
-                     PixmapImpl.cpp
-                     PixmapPainterImpl.cpp
-                     WidgetImpl.cpp
-                     WidgetPainterImpl.cpp
-                     X11PainterImpl.cpp ;
+                      Drawable.cpp
+                      PixmapImpl.cpp
+                      PixmapPainterImpl.cpp
+                      WidgetImpl.cpp
+                      WidgetPainterImpl.cpp
+                      PainterImpl.cpp
+                      ;
+

@@ -20,21 +20,19 @@
 #ifndef Pt_PixmapPainterImpl_h
 #define Pt_PixmapPainterImpl_h
 
-#include "X11PainterImpl.h"
-
+#include "PainterImpl.h"
 #include <Pt/Api.h>
 
 
 namespace Pt {
 
 namespace Gui {
+
 	class PixmapImpl;
 
-	class PT_EXPORT PixmapPainter : public X11Painter {
+	class PT_EXPORT PixmapPainterImpl : public PainterImpl {
 		public:
-			PixmapPainter(PixmapImpl& pimpl);
-
-			void setPixmap(PixmapImpl& pixmap);
+			PixmapPainterImpl(PixmapImpl& pimpl);
 	};
 
 } // namespace Gui

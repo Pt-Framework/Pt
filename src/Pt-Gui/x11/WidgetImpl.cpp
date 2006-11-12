@@ -26,6 +26,7 @@
 #include <Pt/Gui/ResizeEvent.h>
 
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 
@@ -34,9 +35,7 @@ namespace Pt {
 namespace Gui {
 
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
-: _apiWidget(apiWidget),
-  _parent(parent),
-  _rect(at, size)
+: _parent(parent)
 , _painter(0)
 {
 	// Display and Screen are inited in Application
@@ -75,13 +74,13 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	wattr.cursor = None; // None means parents cursor
 
 	wattr.override_redirect = False; // no WM interaction if True
-	if(_parent) {
+	/*if(_parent) {
 		wattr.override_redirect = True;
-	}
+	}*/
 
 	// determines which fields from XSetWindowAttributes are used
-	unsigned long winMask = CWBackPixmap|CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
-	                        CWCursor|CWOverrideRedirect|CWSaveUnder|CWColormap|CWBackingStore;
+	unsigned long winMask = CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
+	                        CWCursor|CWOverrideRedirect|CWColormap|CWBackingStore|CWSaveUnder|CWBackPixmap;
 
 	Window parentId;
 	if(!_parent) { // top level window
@@ -89,7 +88,6 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	}
 	else { // subwindow
 		parentId = _parent->impl().x11Drawable();
-		parent->impl().addChild(apiWidget);
 	}
 
 	unsigned int borderWidth = 0;
@@ -97,10 +95,10 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	// create the X11 window
 	_drawable = XCreateWindow(display,
 	                          parentId,
-	                          _rect.x1(),
-	                          _rect.y1(),
-	                          _rect.width(), // at least 1
-	                          _rect.height(), // at least 1
+	                          at.x(),
+	                          at.y(),
+	                          std::max(ssize_t(1), size.width() ), // at least 1
+	                          std::max(ssize_t(1), size.height() ), // at least 1
 	                          borderWidth,
 	                          DefaultDepth(display, screen),
 	                          InputOutput,
@@ -111,7 +109,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	XSync(display, false);
 
 	// closing a window generates a ClientMessage, which we convert to a close event.
-	Atom atomWMDeleteWindow = XInternAtom(display, "WM_DELETE_WINDOW", false);
+	Atom atomWMDeleteWindow = X11EventLoop::instance().AtomWindowClosed;
 	XSetWMProtocols(display, _drawable, &atomWMDeleteWindow, 1);
 
 	// Child windows are visible by default
@@ -133,45 +131,32 @@ WidgetImpl::~WidgetImpl()
 	// remove this window from widget map
 	X11EventLoop::instance().unregisterWidget(_drawable);
 
-	// unregister from parent
-	if(_parent) {
-		_parent->impl().removeChild(_apiWidget);
-		_parent = 0;
-	}
-
-	// unparent any leftover children
-	while(_childWidgets.empty() == false) {
-		Widget* child = _childWidgets.front();
-		child->impl().reparent(0);
-	}
-
 	Display* display = X11EventLoop::instance().display();
 	XDestroyWindow(display, _drawable);
 	XSync(display, false);
-
-	// mark window invalid
-	_drawable = 0;
 }
 
 
-void WidgetImpl::setTitle(const char* text)
+void WidgetImpl::setTitle(const std::string& text)
 {
+	_title = text;
 	Display* display = X11EventLoop::instance().display();
 	XTextProperty tp;
-	XmbTextListToTextProperty(display, (char**)&text, 1, XStringStyle, &tp);
+	const char* textAsPointer = text.c_str();
+	XmbTextListToTextProperty(display, (char**)&textAsPointer, 1, XStringStyle, &tp);
 	XSetWMName(display, _drawable, &tp);
 	XFree( tp.value );
 	XSync(display, false);
 }
 
 
-WidgetPainter& WidgetImpl::getPainter()
+Painter WidgetImpl::painter()
 {
 	if (0 == _painter) {
-		_painter = new WidgetPainter(*this);
+		_painter = new WidgetPainterImpl(*this);
 	}
 
-	return *_painter;
+	return Painter(_painter);
 }
 
 
@@ -192,25 +177,8 @@ void WidgetImpl::hide()
 }
 
 
-void WidgetImpl::resizeEvent(const ResizeEvent& event)
+void WidgetImpl::setParent(Widget* parent)
 {
-	_rect.setWidth( event.width() );
-	_rect.setHeight( event.height() );
-}
-
-
-void WidgetImpl::unparent()
-{
-	this->reparent(0);
-}
-
-
-void WidgetImpl::reparent(Widget* parent)
-{
-	if (_parent == parent) {
-		return;
-	}
-
 	Window parentId;
 	Display* display = X11EventLoop::instance().display();
 	unsigned int screen = XDefaultScreen(display);
@@ -219,13 +187,7 @@ void WidgetImpl::reparent(Widget* parent)
 		parentId = XRootWindow(display, screen);
 	}
 	else {
-		parent->impl().addChild(_apiWidget);
 		parentId = parent->impl().x11Drawable();
-	}
-
-	if(_parent) {
-		_parent->impl().removeChild(_apiWidget);
-		_parent = parent;
 	}
 
 	XReparentWindow(display, _drawable, parentId, 0, 0);
@@ -237,20 +199,45 @@ void WidgetImpl::move(size_t x, size_t y)
 {
 	Display* display = X11EventLoop::instance().display();
 	XMoveWindow(display, _drawable, x, y);
-	XSync(display, false);
 
-	_rect.setX1(x);
-	_rect.setY1(y);
+	// X11 does not create move events, when we resize ourselves
+	// so we report it directly to the X11 event loop.
+	XClientMessageEvent event;
+	event.send_event = False;
+	event.type = ClientMessage;
+	event.display = display;
+	event.window = _drawable;
+	event.message_type = X11EventLoop::instance().AtomWindowMove;
+	event.format = 32;
+	event.data.l[0] = x;
+	event.data.l[1] = y;
+
+	XPutBackEvent(display, (XEvent*)&event);
+	XSync(display, false);
 }
 
 
 void WidgetImpl::resize(size_t width, size_t height)
 {
-	Display* display = X11EventLoop::instance().display();
-	_rect.setWidth( std::max(width, size_t(1)) );
-	_rect.setHeight( std::max(height, size_t(1)) );
+	width = std::max(size_t(1), width);
+	height = std::max(size_t(1), height);
 
-	XResizeWindow(display, _drawable, _rect.width(), _rect.height());
+	Display* display = X11EventLoop::instance().display();
+	XResizeWindow( display, _drawable, width, height );
+
+	// X11 does not create resize events, when we resize ourselves
+	// so we report it directly to the X11 event loop.
+	XClientMessageEvent event;
+	event.send_event = False;
+	event.type = ClientMessage;
+	event.display = display;
+	event.window = _drawable;
+	event.message_type = X11EventLoop::instance().AtomWindowResize;
+	event.format = 32;
+	event.data.l[0] = width;
+	event.data.l[1] = height;
+
+	XPutBackEvent(display, (XEvent*)&event);
 	XSync(display, false);
 }
 

@@ -20,7 +20,6 @@
 #include "Drawable.h"
 
 #include <iostream>
-using namespace std;
 
 
 namespace Pt {
@@ -38,4 +37,5 @@ Drawable::~Drawable()
 
 
 } // namespace Gui
+
 } // namespace Ptv

@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Drawable_h
-#define Pt_Drawable_h
+#ifndef PT_Drawable_h
+#define PT_Drawable_h
 
 #include <Pt/Api.h>
 

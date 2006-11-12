@@ -26,14 +26,12 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-#include <X11/extensions/Xvlib.h>
 
 #include <Pt/Api.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
-#include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/Event.h> // forward decl only
+#include <Pt/System/Event.h>
 
 #include <map>
 #include <iostream>
@@ -48,9 +46,16 @@ namespace Gui {
 	class Widget;
 
 
-	class X11EventLoop : public Pt::Singleton<X11EventLoop> 
+	class X11EventLoop : public Pt::Singleton<X11EventLoop>
 	{
 		friend class Pt::Singleton<X11EventLoop>;
+
+		public:
+			Atom AtomAppWake;
+			Atom AtomWindowResize;
+			Atom AtomWindowMove;
+			Atom AtomWindowClosed;
+			Atom AtomWMProtocols;
 
 		public:
 			~X11EventLoop();
@@ -71,6 +76,8 @@ namespace Gui {
 			void commitEvent(const Pt::Event& event);
 
 			void queueEvent(const Pt::Event& event);
+
+			void processX11Events();
 
 			void processEvents();
 
@@ -106,12 +113,19 @@ namespace Gui {
 			//! @brief Creates a MouseEvent from an X11 ButtonRelease
 			void configureNotify(Widget& widget, XEvent& xev);
 
+			//! @brief Creates a MouseEvent from an X11 EnterNotify
+			void enterNotify(Widget& widget, XEvent& xev);
+
+			//! @brief Creates a MouseEvent from an X11 LeaveNotify
+			void leaveNotify(Widget& widget, XEvent& xev);
+
 			//! @brief Converts the X11 key symbol to a unicode character.
 			wchar_t keysymToUtf(int sym);
 
 		private:
 			bool _stop;
 			Display* _display;
+			int _wakeFds[2];
 			XEvent _xev;
 			std::list<Pt::Event*> _eventQueue;
 			System::Mutex _queueMutex;
@@ -119,7 +133,10 @@ namespace Gui {
 	};
 
 
-	class PT_EXPORT ApplicationImpl : public Pt::Connectable {
+	class PT_API ApplicationImpl : public Pt::Connectable
+	{
+		friend class Gui::Application;
+
 		public:
 			ApplicationImpl(Application& app);
 
@@ -133,21 +150,13 @@ namespace Gui {
 
 			int run();
 
+			void wake();
+
 			void exit();
-
-		public:
-			Signal<const Pt::Event&> event;
-
-		protected:
-			void dispatchEvent(const Pt::Event& ev)
-			{ event.send<const Pt::Event&>(ev); }
-
-		private:
-			Gui::Application& _app;
 	};
 
 } // namespace Gui
 
-} // namespace Ptv
+} // namespace Pt
 
 #endif

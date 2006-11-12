@@ -17,28 +17,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_WidgetPainterImpl_h
-#define Pt_WidgetPainterImpl_h
+#ifndef Pt_x11_WidgetPainterImpl_h
+#define Pt_x11_WidgetPainterImpl_h
 
-#include "X11PainterImpl.h"
+#include "PainterImpl.h"
 #include <Pt/Api.h>
 
 
 namespace Pt {
 
 namespace Gui {
+
 	class WidgetImpl;
 
-	//! @ingroup Ptv
-	class PT_EXPORT WidgetPainter : public X11Painter {
+	class PT_API WidgetPainterImpl : public PainterImpl {
 		public:
-			WidgetPainter(WidgetImpl& wimpl);
-
-			void setWidget(WidgetImpl& pixmap);
+			WidgetPainterImpl(WidgetImpl& wimpl);
 	};
 
 } // namespace Gui
 
-} // namespace Ptv
+} // namespace Pt
 
 #endif

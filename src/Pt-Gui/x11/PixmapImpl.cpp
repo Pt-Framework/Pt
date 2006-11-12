@@ -85,13 +85,13 @@ PixmapImpl::~PixmapImpl()
 }
 
 
-PixmapPainter& PixmapImpl::getPainter()
+Painter PixmapImpl::painter()
 {
 	if (0 == _painter) {
-		_painter = new PixmapPainter(*this);
+		_painter = new PixmapPainterImpl(*this);
 	}
 
-	return *_painter;
+	return Painter(_painter);
 }
 
 

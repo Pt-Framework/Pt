@@ -34,6 +34,7 @@
 #include <Pt/Gui/Widget.h>
 
 #include <iostream>
+#include <vector>
 using namespace std;
 
 
@@ -58,18 +59,32 @@ static SymPoint sympoints[] = {
 */
 
 
-
 X11EventLoop::X11EventLoop()
 : _stop(false), _display(0)
 {
+	// open a X11 display connection
 	_display = XOpenDisplay(NULL);
-	if(0 == _display) {
+	if(0 == _display)
+	{
 		throw RuntimeError("Could not open X11 display.", PT_SOURCEINFO);
 	}
-
 	XSync(_display, false);
 
-	XSynchronize(_display, true);
+	// open a pipe to send wake up messages
+	if( 0 != ::pipe(_wakeFds) )
+	{
+		throw RuntimeError("Could not open pipe.", PT_SOURCEINFO);
+	}
+
+	// Set X11 to sync mode. Slow, for debugging only.
+	//XSynchronize(_display, true);
+
+	AtomAppWake = XInternAtom(_display, "PT_APP_WAKE", false);
+	AtomWindowResize = XInternAtom(_display, "PT_WINDOW_RESIZE", false);
+	AtomWindowMove = XInternAtom(_display, "PT_WINDOW_MOVE", false);
+	AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
+	AtomWMProtocols = XInternAtom(_display, "WM_PROTOCOLS", false);
+
 	// do we really need this?
 	XftInit(0);
 }
@@ -80,6 +95,10 @@ X11EventLoop::~X11EventLoop()
 	XSync(_display, true);
 	XCloseDisplay(_display);
 	_display = NULL;
+
+	::close(_wakeFds[0]);
+	::close(_wakeFds[1]);
+
 }
 
 
@@ -108,53 +127,36 @@ Widget* X11EventLoop::findWidget(Window winId)
 
 int X11EventLoop::run()
 {
+	std::vector<char> msgbuf(100);
+	int xfd = XConnectionNumber(_display);
+
 	while( _stop == false)
 	{
-		struct timeval delta;
-		delta.tv_usec = 1000;
-		delta.tv_sec = 0;
-
-		Display* display = X11EventLoop::instance().display();
-
 		fd_set readfds;
-		int xfd = XConnectionNumber(display);
-
 		FD_ZERO(&readfds);
 		FD_SET( xfd, &readfds );
+		FD_SET( _wakeFds[0], &readfds );
+		int maxFd = std::max( xfd, _wakeFds[0] );
 
-		int nfds = ::select(xfd + 1, &readfds, 0, 0, &delta);
-		if(nfds < 0 && errno != EAGAIN && errno != EINTR) {
-			std::clog << "Error: select failed." << std::endl;
+		int nfds = ::select( maxFd + 1, &readfds, 0, 0, NULL);
+		if( nfds < 0 && errno != EAGAIN && errno != EINTR )
+		{
+			std::clog << "Error: select failed in X11EventLoop::run" << std::endl;
+			return 1;
 		}
 
-		// check if we have pending X events
-		if( XPending(display) <= 0 ) {
-			continue;
+		// test if it was a message on the pipe
+		if( FD_ISSET(_wakeFds[0], &readfds) )
+		{
+			read( _wakeFds[0], &msgbuf[0], msgbuf.size() );
+			this->processEvents();
 		}
 
-		// get next event
-		XNextEvent(display, &_xev);
-
-		// check which window receives the event
-		Widget* widget = X11EventLoop::instance().findWidget( _xev.xany.window );
-		if(widget == 0) {
-			continue;
+		// test if it was an X11 event
+		if( FD_ISSET(xfd, &readfds) )
+		{
+			this->processX11Events();
 		}
-
-		//clog << "X11 Event: #" << _xev.xany.type << endl;
-		switch( _xev.xany.type ) {
-			case ClientMessage:   clientMessage(*widget, _xev);   break;
-			case MotionNotify:    motionNotify(*widget, _xev);    break;
-			case ButtonPress:     buttonPress(*widget, _xev);     break;
-			case ButtonRelease:   buttonRelease(*widget, _xev);   break;
-			case Expose:          expose(*widget, _xev);          break;
-			case NoExpose:        noExpose(*widget, _xev);        break;
-			case ConfigureNotify: configureNotify(*widget, _xev); break;
-			case KeyPress:        keyEvent(*widget, _xev);        break;
-			case KeyRelease:      keyEvent(*widget, _xev);        break;
-		}
-
-		this->processEvents();
 	}
 
 	return 0;
@@ -163,6 +165,8 @@ int X11EventLoop::run()
 
 void X11EventLoop::wake()
 {
+	::write( _wakeFds[1], "PT_APP_WAKE", 11);
+	//::flush(_wakeFds[1]);
 }
 
 
@@ -179,8 +183,54 @@ void X11EventLoop::queueEvent(const Pt::Event& event)
 
 	Pt::Event* ev = event.clone();
 	_eventQueue.push_back(ev);
-
 	_queueMutex.unlock();
+}
+
+
+void X11EventLoop::processX11Events()
+{
+	// get all pending events after a flush
+	if( XPending(_display) == 0 )
+		return;
+
+	// XEventsQueued(_display, QueuedAlready) > 0
+	while( XPending(_display) > 0 )
+	{
+		XNextEvent(_display, &_xev);
+
+		// check which window receives the event
+		Widget* widget = X11EventLoop::instance().findWidget( _xev.xany.window );
+		if(widget == 0) {
+			continue;
+		}
+
+		//clog << "X11 Event: #" << widget << " " << _xev.xany.type << endl;
+		switch( _xev.xany.type )
+		{
+			case ClientMessage:   clientMessage(*widget, _xev);   break;
+			case MotionNotify:    motionNotify(*widget, _xev);    break;
+			case ButtonPress:     buttonPress(*widget, _xev);     break;
+			case ButtonRelease:   buttonRelease(*widget, _xev);   break;
+			case Expose:          expose(*widget, _xev);          break;
+			case NoExpose:        noExpose(*widget, _xev);        break;
+			case ConfigureNotify:
+			{
+				// use only last configure event for the window in queue
+				XPending(_display);
+				while( XCheckTypedWindowEvent(_display, _xev.xany.window, ConfigureNotify, &_xev) )
+				{ }
+				this->configureNotify(*widget, _xev);
+				break;
+			}
+			case KeyPress:        keyEvent(*widget, _xev);        break;
+			case KeyRelease:      keyEvent(*widget, _xev);        break;
+			case EnterNotify:     enterNotify(*widget, _xev);     break;
+			case LeaveNotify:     leaveNotify(*widget, _xev);     break;
+
+			default:
+				break;
+		}
+	}
 }
 
 
@@ -214,8 +264,30 @@ void X11EventLoop::exit()
 
 void X11EventLoop::clientMessage(Widget& widget, XEvent& xev)
 {
-	CloseEvent ev(widget);
-	event.send(ev);
+	if(xev.xclient.message_type == AtomWindowResize)
+	{
+		size_t width = xev.xclient.data.l[0];
+		size_t height = xev.xclient.data.l[1];
+		ResizeEvent ev(widget, width, height);
+		event.send( ev );
+		return;
+	}
+
+	if(xev.xclient.message_type == AtomWindowMove)
+	{
+		size_t x = xev.xclient.data.l[0];
+		size_t y = xev.xclient.data.l[1];
+		MoveEvent ev(widget, x, y);
+		event.send( ev );
+		return;
+	}
+
+	if(xev.xclient.message_type == AtomWMProtocols)
+	{
+		CloseEvent ev(widget);
+		event.send(ev);
+		return;
+	}
 }
 
 
@@ -234,8 +306,8 @@ void X11EventLoop::keyEvent(Widget& widget, XEvent& xev)
 
 	KeyEvent::KeyCode code = KeyEvent::Void;
 	switch( sym ) {
-		case XK_Control_L: code = KeyEvent::ControlL; break;
-		case XK_Control_R: code = KeyEvent::ControlR; break;
+		case XK_Control_L: code = KeyEvent::CtrlL; break;
+		case XK_Control_R: code = KeyEvent::CtrlR; break;
 		case XK_Alt_L:     code = KeyEvent::AltL; break;
 		case XK_Alt_R:     code = KeyEvent::AltR; break;
 		case XK_F1:        code = KeyEvent::F1; break;
@@ -276,7 +348,7 @@ void X11EventLoop::motionNotify(Widget& widget, XEvent& xev)
 	if( xev.xmotion.state & Mod1Mask)
 		modifiers |= MouseMoveEvent::AltDown;
 
-	MouseMoveEvent ev(widget, x, y, modifiers);
+	MouseMoveEvent ev(widget, x, y, MouseMoveEvent::Moved, modifiers);
 	event.send( ev );
 }
 
@@ -326,7 +398,7 @@ void X11EventLoop::expose(Widget& widget, XEvent& xev)
 	const size_t x = xev.xexpose.x;
 	const size_t y = xev.xexpose.y;
 
-	PaintEvent ev(widget, x, y, width, height);
+	PaintEvent ev( widget, Gfx::Point(x, y), Gfx::Size(width, height) );
 	event.send( ev );
 }
 
@@ -339,20 +411,35 @@ void X11EventLoop::noExpose(Widget& widget, XEvent& xev)
 
 void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
 {
-	const size_t width = xev.xconfigure.width;
-	const size_t height = xev.xconfigure.height;
-	const size_t x = xev.xconfigure.x;
-	const size_t y = xev.xconfigure.y;
+	const ssize_t width = xev.xconfigure.width;
+	const ssize_t height = xev.xconfigure.height;
+	const ssize_t x = xev.xconfigure.x;
+	const ssize_t y = xev.xconfigure.y;
 
-	if(widget.rect().width() != width || widget.rect().height() != height) {
+	if( widget.rect().width() != width || widget.rect().height() != height )
+	{
 		ResizeEvent ev(widget, width, height);
 		event.send( ev );
 	}
-
-	if(widget.rect().x1() != x || widget.rect().height() != y) {
+	if( widget.rect().x() != x || widget.rect().height() != y)
+	{
 		MoveEvent ev(widget, x, y);
 		event.send( ev );
 	}
+}
+
+
+void X11EventLoop::enterNotify(Widget& widget, XEvent& xev)
+{
+	MouseMoveEvent ev(widget, 0, 0, MouseMoveEvent::Entered, MouseMoveEvent::NoButton);
+	event.send( ev );
+}
+
+
+void X11EventLoop::leaveNotify(Widget& widget, XEvent& xev)
+{
+	MouseMoveEvent ev(widget, 0, 0, MouseMoveEvent::Exited, MouseMoveEvent::NoButton);
+	event.send( ev );
 }
 
 
@@ -382,9 +469,8 @@ wchar_t X11EventLoop::keysymToUtf(int sym)
 
 
 ApplicationImpl::ApplicationImpl(Application& app)
-: _app(app)
 {
-	connect(X11EventLoop::instance().event, *this, &ApplicationImpl::dispatchEvent);
+	connect(X11EventLoop::instance().event, app.event);
 }
 
 
@@ -415,6 +501,12 @@ void ApplicationImpl::processEvents()
 int ApplicationImpl::run()
 {
 	return X11EventLoop::instance().run();
+}
+
+
+void ApplicationImpl::wake()
+{
+	X11EventLoop::instance().wake();
 }
 
 

@@ -25,6 +25,7 @@
 #include <Pt/Api.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gui/Painter.h>
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -43,29 +44,25 @@ namespace Pt {
 namespace Gui {
 
 	class Widget;
-	class WidgetPainter;
+	class WidgetPainterImpl;
 	class ResizeEvent;
 
-	class PT_EXPORT WidgetImpl : public Drawable
+	class PT_API WidgetImpl : public Drawable
 	{
 		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size);
+			WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at = Gfx::Point(0, 0),
+			                                              const Gfx::Size& size = Gfx::Size(400, 300));
 
 			virtual ~WidgetImpl();
 
-			void setTitle(const char* text);
+			void setTitle(const std::string& text);
 
 			std::string title() const
-			{ return ""; }
+			{ return _title; }
 
-			const Gfx::Rect& rect() const
-			{ return _rect; }
+			Painter painter();
 
-			WidgetPainter& getPainter();
-
-			void unparent();
-
-			void reparent(Widget* parent);
+			void setParent(Widget* parent);
 
 			void move(size_t x, size_t y);
 
@@ -75,31 +72,16 @@ namespace Gui {
 
 			void hide();
 
-			void resizeEvent(const ResizeEvent& event);
-
-		protected:
-			void addChild(Widget& widget)
-			{ _childWidgets.push_back(&widget); }
-
-			void removeChild(Widget& widget)
-			{ _childWidgets.remove(&widget); }
-
 		private:
-			//! a reference to the API object
-			Widget& _apiWidget;
-
 			//! The X11 root window.
 			Window _root;
 
 			//! the X11 parent window id
 			Widget* _parent;
 
-			//! X geometry of the widget relative the pparent
-			Gfx::Rect _rect;
+			WidgetPainterImpl* _painter;
 
-			std::list<Widget*> _childWidgets;
-
-			WidgetPainter* _painter;
+			std::string _title;
 	};
 
 } // namespace Gui

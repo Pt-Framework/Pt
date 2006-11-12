@@ -21,7 +21,6 @@
 #include "PixmapImpl.h"
 
 #include <iostream>
-using namespace std;
 
 
 namespace Pt {
@@ -29,18 +28,13 @@ namespace Pt {
 namespace Gui {
 
 
-PixmapPainter::PixmapPainter(PixmapImpl& pimpl)
-: X11Painter( pimpl )
+PixmapPainterImpl::PixmapPainterImpl(PixmapImpl& pimpl)
+: PainterImpl( pimpl )
 {
-}
-
-
-void PixmapPainter::setPixmap(PixmapImpl& pimpl)
-{
-	this->setDrawable( pimpl );
 }
 
 
 } // namespace Gui
-} // namespace Ptv
+
+} // namespace Pt
 
