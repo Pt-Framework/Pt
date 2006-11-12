@@ -16,6 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <Pt/Main.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/Algorithm.h>
 
@@ -27,9 +28,9 @@
 using namespace std;
 
 
-int main()
+int main(int argc, char* argv[])
 {
-	std::vector<Pt::Gfx::ARgbColor> data(1000);
+	/*std::vector<Pt::Gfx::ARgbColor> data(1000);
 
 	clock_t begin, time;
 
@@ -49,7 +50,7 @@ int main()
 	}
 	time = clock() - begin;
 
-	std::cerr << "Duration: " << time << std::endl;
+	std::cerr << "Duration: " << time << std::endl;*/
 
 	return 0;
 }

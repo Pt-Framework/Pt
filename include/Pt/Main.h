@@ -23,6 +23,8 @@
 
 #ifdef _WIN32_WCE
 
+#include <string.h>
+
 int main(int, char**);
 
 /** @brief A wmain function for wince that calls a regular main function

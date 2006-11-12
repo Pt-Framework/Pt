@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Drner                                   *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,11 +21,15 @@
 #ifndef Pt_Exception_h
 #define Pt_Exception_h
 
+
+
 #include <Pt/Api.h>
+
+#include <exception>
+
 #include <Pt/SourceInfo.h>
 
-#include <string>
-#include <exception>
+//#include <string>
 
 
 namespace std

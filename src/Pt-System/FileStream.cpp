@@ -39,10 +39,13 @@ FileStream::FileStream(const char* path, FileDevice::OpenMode omode) throw(IO::I
 : IO::IOStream( &_buffer ),
   _buffer(path, omode)
 {
+	// no std::locale on WinCE
+	#ifndef _WIN32_WCE
 	this->imbue( std::locale(this->getloc(), new std::ctype<char>()) );
 	this->imbue( std::locale(this->getloc(), new std::num_get<char>()) );
 	this->imbue( std::locale(this->getloc(), new std::num_put<char>()) );
 	this->imbue( std::locale(this->getloc(), new std::numpunct<char>()) );
+	#endif
 }
 
 
@@ -50,7 +53,7 @@ FileStream::~FileStream() throw()
 {
 	try {
 		IO::IOStream::sync();
-	} 
+	}
 	catch(...) {}
 }
 

@@ -27,6 +27,12 @@
 #include <memory>
 
 
+namespace std
+{
+	class PT_API std::ios_base;
+}
+
+
 namespace Pt {
 
 namespace IO {

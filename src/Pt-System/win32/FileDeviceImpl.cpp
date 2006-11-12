@@ -16,6 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "win32.h"
 #include "Pt/IO/IODevice.h"
 using namespace Pt::IO;
 
@@ -23,7 +24,7 @@ using namespace Pt::IO;
 
 
 //LPSTR message;
-//FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM, 
+//FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
 //              NULL, exxr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
 //printf(message);
 
@@ -77,18 +78,23 @@ void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::I
 	if(mode & IODevice::Trunc)
 		create |= TRUNCATE_EXISTING;
 
-	if(mode & IODevice::NonBlock) {
+	if(mode & IODevice::NonBlock)
+	{
+		#ifdef _WIN32_WCE
+			throw RuntimeError("Overlapped I/O not supported under WinCE", PT_SOURCEINFO);
+		#endif
 		flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
 		_readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
 		_writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	}
 
-	_handle = ::CreateFile(path, access, share, NULL, create, flags, NULL);
+	std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+	_handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
 	if(_handle == INVALID_HANDLE_VALUE) {
 		throw IO::IOError("Could not open file handle", PT_SOURCEINFO);
 	}
-		
+
 	try {
 		if(mode & IODevice::AtEnd)
 			this->seek(0, IODevice::SeekEnd);
@@ -104,9 +110,9 @@ void FileDeviceImpl::close() throw(IO::IOError)
 {
 	if(_readOv.hEvent != NULL)
 		::CloseHandle(_readOv.hEvent);
-		
+
 	if(_writeOv.hEvent != NULL)
-		::CloseHandle(_writeOv.hEvent);	
+		::CloseHandle(_writeOv.hEvent);
 
 	if(_handle != INVALID_HANDLE_VALUE)
 	{
@@ -152,7 +158,7 @@ void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
 {
 	// remember current position
 	off_type current = ::SetFilePointer(_handle, 0, NULL, FILE_CURRENT);
-	
+
 	// under Win32 resizeing is done by moving to the desired position
 	// and then call SetEndOfFile on the handle.
 	DWORD ret = ::SetFilePointer(_handle, size, NULL, FILE_BEGIN);
@@ -167,7 +173,7 @@ void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
 	}
 
 	_readOv.Offset = size;
-	_writeOv.Offset = size;	
+	_writeOv.Offset = size;
 }
 */
 
@@ -186,19 +192,26 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOE
 	eof = false;
 	DWORD readBytes = 0;
 
-	if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) ) {
-		if( ERROR_HANDLE_EOF == GetLastError() ) {
+	if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
+	{
+		if( ERROR_HANDLE_EOF == GetLastError() )
+		{
 			eof = true;
 			readBytes = 0;
 		}
-		else if( ERROR_IO_PENDING != GetLastError() ) {
+		else if( ERROR_IO_PENDING != GetLastError() )
+		{
 			throw IO::IOError("Could not read from file handle", PT_SOURCEINFO);
 		}
-		else if( FALSE == GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == TRUE ) {
+
+		#ifndef _WIN32_WCE
+		else if
+		( FALSE == GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == TRUE ) {
 			readBytes = 0;
-		}	
+		}
+		#endif
 	}
-		
+
 	_readOv.Offset += readBytes;
 	_writeOv.Offset += readBytes;
 	return readBytes;
@@ -209,14 +222,19 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError
 {
 	DWORD writtenBytes = 0;
 
-	if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, &_writeOv) ){
-		if( ERROR_IO_PENDING != GetLastError() ) {
+	if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, &_writeOv) )
+	{
+		if( ERROR_IO_PENDING != GetLastError() )
+		{
 			throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
 		}
-		
-		if( FALSE == GetOverlappedResult(_handle, &_readOv, &writtenBytes, FALSE) == TRUE ) {
+
+		#ifndef _WIN32_WCE
+		if( FALSE == GetOverlappedResult(_handle, &_readOv, &writtenBytes, FALSE) == TRUE )
+		{
 			writtenBytes = 0;
-		}	
+		}
+		#endif
 	}
 
 	_readOv.Offset += writtenBytes;
@@ -255,7 +273,7 @@ bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::
 	}
 	if(mode & IODevice::WaitOutput) {
 		handles[count] = _writeOv.hEvent;
-		count++;	
+		count++;
 	}
 
 	DWORD ret = ::WaitForMultipleObjects(count, handles, FALSE, msec);

@@ -24,6 +24,7 @@
 
 #include <climits>
 #include <cstddef>
+#include <stddef.h>
 
 #ifdef __GNUC__
 	#include <stdint.h>
@@ -42,7 +43,7 @@ namespace Pt {
 	typedef unsigned long  ulong;
 
 	/// \exclude
-	typedef ::size_t size_t;
+	using ::size_t;
 	/// \exclude
 	typedef std::ptrdiff_t ssize_t;
 

@@ -22,6 +22,7 @@ using namespace std;
 
 #include "Pt/SourceInfo.h"
 #include "Pt/Exception.h"
+#include "Pt/Main.h"
 using namespace Pt;
 
 
@@ -117,7 +118,7 @@ class TestClass {
 };
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	cerr << "----- SourceInfoTest -----" << endl;
 

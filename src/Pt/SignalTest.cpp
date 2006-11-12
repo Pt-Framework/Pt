@@ -19,14 +19,15 @@
  ***************************************************************************/
 #include "Pt/Signal.h"
 #include "Pt/Exception.h"
-using namespace Pt;
+#include "Pt/Main.h"
 
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include <iterator>
 #include <ctime>
-using namespace std;
+
+using namespace Pt;
 
 
 bool testFunction0Called = false;
@@ -47,7 +48,7 @@ void testFunction3(int, int, int)
 { testFunction3Called = true; }
 
 
-class Receiver : public Connectable {
+class Receiver : public Pt::Connectable {
 	public:
 		Receiver()
 		: _called(false)
@@ -75,23 +76,23 @@ class Receiver : public Connectable {
 		bool _called;
 };
 
-
+/*
 void performanceTest()
 {
 		clock_t begin, end;
 		Receiver receiver;
 
-		cerr << "\n------- Performance Test --------" << endl;
+		std::cerr << "\n------- Performance Test --------" << std::endl;
 
 		Signal<> signal;
 		connect(signal, receiver, &Receiver::onSignal0);
-		cerr << "Signal benchmark... ";
+		std::cerr << "Signal benchmark... ";
 		begin = clock();
 		for(long i = 0; i < 100000000; ++i) {
 			signal();
 		}
 		end = clock();
-		cerr << "Duration: " << (end - begin) << endl;
+		std::cerr << "Duration: " << (end - begin) << std::endl;
 
 		cerr << "mem_fun_t benchmark... ";
 		begin = clock();
@@ -100,9 +101,11 @@ void performanceTest()
 			mf(&receiver);
 		}
 		end = clock();
-		cerr << "Duration: " << (end - begin) << endl;
-		cerr << "---------------------------------\n\n";
+		std::cerr << "Duration: " << (end - begin) << std::endl;
+		std::cerr << "---------------------------------\n\n";
 }
+*/
+
 void CopyTest()
 {
 	Receiver* recv = new Receiver;
@@ -455,74 +458,74 @@ public:
 
 
 
-int main()
+int main(int argc, char* argv[])
 {
-	cerr << "----- SignalTest -----" << endl;
+	std::cerr << "----- SignalTest -----" << std::endl;
 
 	try
 	{
-		cerr << "  DeleteTest: ";
+		std::cerr << "  DeleteTest: ";
 		DeleteTest delTest;
 		delTest();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  CopyTest: ";
+		std::cerr << "  CopyTest: ";
 		CopyTest();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  MethodTest0: ";
+		std::cerr << "  MethodTest0: ";
 		methodTest0();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  MethodTest1: ";
+		std::cerr << "  MethodTest1: ";
 		methodTest1();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  MethodTest2: ";
+		std::cerr << "  MethodTest2: ";
 		methodTest2();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  MethodTest3: ";
+		std::cerr << "  MethodTest3: ";
 		methodTest3();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  SignalTest0: ";
+		std::cerr << "  SignalTest0: ";
 		signalTest0();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  SignalTest1: ";
+		std::cerr << "  SignalTest1: ";
 		signalTest1();
 
-		cerr << "ok." << endl;
-		cerr << "  SignalTest2: ";
+		std::cerr << "ok." << std::endl;
+		std::cerr << "  SignalTest2: ";
 		signalTest2();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  SignalTest3: ";
+		std::cerr << "  SignalTest3: ";
 		signalTest3();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  FunctionTest0: ";
+		std::cerr << "  FunctionTest0: ";
 		functionTest0();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  FunctionTest1: ";
+		std::cerr << "  FunctionTest1: ";
 		functionTest1();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  FunctionTest2: ";
+		std::cerr << "  FunctionTest2: ";
 		functionTest2();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		cerr << "  FunctionTest3: ";
+		std::cerr << "  FunctionTest3: ";
 		functionTest3();
-		cerr << "ok." << endl;
+		std::cerr << "ok." << std::endl;
 
-		performanceTest();
+		//performanceTest();
 
 	}
 	catch(const std::exception& e) {
-		cerr << "failed. " << e.what() << endl;
+		std::cerr << "failed. " << e.what() << std::endl;
 		return 1;
 	}
 

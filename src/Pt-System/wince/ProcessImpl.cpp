@@ -18,14 +18,12 @@
  ***************************************************************************/
 
 #include "ProcessImpl.h"
-
-// include base class code
 #include "../win32/ProcessImplBase.cpp"
 
 
 namespace Pt {
 
-namespace system {
+namespace System {
 
 ProcessImpl::ProcessImpl(const string& command)
 : ProcessImplBase(command)

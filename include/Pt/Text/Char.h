@@ -422,7 +422,7 @@ namespace std {
 		typedef Pt::Text::Char char_type;
 		typedef Pt::uint32_t int_type;
 		typedef streamoff off_type;
-		typedef off_t pos_type;
+		typedef streampos pos_type;
 		typedef mbstate_t state_type;
 
 		inline static void assign(char_type& c1, const char_type& c2)
@@ -440,7 +440,7 @@ namespace std {
 			return c1 < c2;
 		}
 
-		inline static int compare(const char_type* c1, const char_type* c2, size_t n)
+		inline static int compare(const char_type* s1, const char_type* s2, size_t n)
 		{
 			while(n-- > 0)
 			{

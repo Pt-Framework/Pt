@@ -2,11 +2,15 @@ SubDir TOP src ;
 
 SubInclude TOP src Pt ;
 SubInclude TOP src Pt-IO ;
-SubInclude TOP src Pt-Text ;
 SubInclude TOP src Pt-System ;
-SubInclude TOP src Pt-Xml ;
 SubInclude TOP src Pt-Gfx ;
-
-
 SubInclude TOP src Pt-Gui ;
-#SubInclude TOP src examples ;
+
+if $(TARGET_OS:L) != wince
+{
+SubInclude TOP src Pt-Text ;
+SubInclude TOP src Pt-Xml ;
+}
+
+
+
