@@ -17,28 +17,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Ptv_Gui_ApplicationImpl_h
-#define Ptv_Gui_ApplicationImpl_h
+#ifndef Pt_Gui_ApplicationImpl_h
+#define Pt_Gui_ApplicationImpl_h
 
 #include <map>
 #include <iostream>
 
-#include <ptv/Api.h>
-#include <ptv/Singleton.h>
-#include <ptv/Signal.h>
+#include <Pt/Api.h>
+#include <Pt/Singleton.h>
+#include <Pt/Signal.h>
 
-#include <ptv/Event.h>
-#include <ptv/system/Mutex.h>
+#include <Pt/Event.h>
+#include <Pt/system/Mutex.h>
 
-#include <ptv/gui/MouseEvent.h>
-#include <ptv/gui/KeyEvent.h>
+#include <Pt/Gui/MouseEvent.h>
+#include <Pt/Gui/KeyEvent.h>
 
 #include <windows.h>
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 	class Application;
 	class Widget;
@@ -61,7 +61,7 @@ namespace gui {
 	 * method of this singleton class. It creates the essential association between the
 	 * Windows' HWND and the application's widget.
 	 */
-	class PTV_API GDIRegistry : public ptv::Singleton<GDIRegistry>
+	class PT_API GDIRegistry : public Pt::Singleton<GDIRegistry>
 	{
 		public:
 			//! @brief Initializes the instance handle and registers the window classes.
@@ -83,7 +83,7 @@ namespace gui {
 			 * who only know the windows handle can find out what PPR widget is associated
 			 * with it, for example to send events to the widget. The method findWidget
 			 * can be used to find the Widget to a Window handle.
-			 * 
+			 *
 			 * @param windowHandle The Window handle to be associated with the given widget
 			 * @param widget The widget to be associated with the given Window handle.
 			 * @see unregisterWidget
@@ -98,7 +98,7 @@ namespace gui {
 			 * It clears the association between the given Window handle (HWND) and the
 			 * widget object which is going to be destroyed.
 			 * If the given Window handle can not be found, nothing happens.
-			 * 
+			 *
 			 * @param windowHandle The Window handle which is going to be unregistered.
 			 */
 			void unregisterWidget(HWND windowHandle);
@@ -111,7 +111,7 @@ namespace gui {
 			 * handle 0 is returned. To associate a Window handle with a PPR widget use the
 			 * registerWidget method. To release the association again use unregisterWidget.
 			 *
-			 * @param windowHandle The Window handle to which the associated widget shall be 
+			 * @param windowHandle The Window handle to which the associated widget shall be
 			 * found.
 			 * @return A pointer to the widget which was found; or 0 if no widget was found.
 			 * @see registerWidget
@@ -132,21 +132,21 @@ namespace gui {
 		public:
 			//! @brief Window class name for top level windows.
 			static const LPCSTR TOP_WINDOW_CLASS_NAME;
-			
+
 			//! @brief Window class name for child windows.
 			static const LPCSTR CHILD_WINDOW_CLASS_NAME;
 
 		private:
 			//! @brief Registers the top level and child window classes with Windows for later use.
 			void registerWindowClasses();
-			
+
 			//! @brief Unregisters the top level and child window classes.
 			void unregisterWindowClasses();
 
 		private:
 			//! @brief Instance handle of this application
 			HINSTANCE _instanceHandle;
-			
+
 			//! @brief Map for associations between Window handles and widgets.
 			std::map<HWND, Widget*> _windowHandle2Widget;
 	};
@@ -154,7 +154,7 @@ namespace gui {
 
 	/**
 	 * @brief Central EventLoop-Singleton which addiitionally processes all Windows messages.
-	 * 
+	 *
 	 * This class contains the actual Event Loop of the application, which includes the Windows
 	 * message queue and the applicatio's event queue. To ensure a single-threaded model both
 	 * queues are processed in only one loop. This loop waits for events or message and is only
@@ -175,25 +175,25 @@ namespace gui {
 	 * of this class. Messages are passed to dispatchGDIEvent(HWND, unsigned int, unsigned int, long),
 	 * where they are processed, possibly converted to a GUI event and dispatched to any registered
 	 * slot.
-	 * 
+	 *
 	 */
-	class PTV_API GDIEventLoop : public ptv::Singleton<GDIEventLoop>
+	class PT_API GDIEventLoop : public Pt::Singleton<GDIEventLoop>
 	{
 		public:
 			//! @brief Empty constructor
 			GDIEventLoop();
-			
+
 			//! @brief Empty destructor
 			~GDIEventLoop();
 
-			//! @see ptv::Application::commitEvent(ptv::Event)
+			//! @see Pt::Application::commitEvent(Pt::Event)
 			//! @see wake()
-			void commitEvent(const ptv::Event& e);
+			void commitEvent(const Pt::Event& e);
 
-			//! @see ptv::Application::queueEvent(ptv::Event)
-			void queueEvent(const ptv::Event& e);
+			//! @see Pt::Application::queueEvent(Pt::Event)
+			void queueEvent(const Pt::Event& e);
 
-			//! @see ptv::Application::processEvents()
+			//! @see Pt::Application::processEvents()
 			void processEvents();
 
 			/**
@@ -228,7 +228,7 @@ namespace gui {
 
 			/**
 			 * @brief Exits the application by making the run() method to exit.
-			 * 
+			 *
 			 * The Windows quit message (WM_QUIT) is posted to the message queue. This causes
 			 * the run() method to return and therefore basically exiting the application.
 			 *
@@ -278,12 +278,12 @@ namespace gui {
 			/**
 			 * @brief A signal to post GUI application events to.
 			 *
-			 * The events will be delivered to gui::Application::dispatchEvent() where they will
+			 * The events will be delivered to Gui::Application::dispatchEvent() where they will
 			 * eventually be delivered to the widget for which the event was created.
 			 *
 			 * @see dispatchGDIEvent(HWND, unsigned int, unsigned int, long)
 			 */
-			static ptv::Signal<const ptv::Event&> eventQueueSignal;
+			static Pt::Signal<const Pt::Event&> eventQueueSignal;
 
 		private:
 			/**
@@ -321,7 +321,7 @@ namespace gui {
 			 *
 			 * Also does the "mouse entered"-handling. When the mouse is moved inside window
 			 * that the mouse was not previously in, processMouseEntered() is called.
-			 * 
+			 *
 			 * @param widget The widget for which this message was created.
 			 * @param wParam Windows parameters containing additional information to the message.
 			 * @param lParam Windows parameters containing additional information to the message.
@@ -332,7 +332,7 @@ namespace gui {
 			/**
 			 * @brief Creates a MouseMoveEvent for entering a window
 			 * and sends it to the application event queue.
-			 * 
+			 *
 			 * Also the TrackMouseEvent-API of Windows is used to initiate WM_MOUSELEAVE message
 			 * delivery. As soon as the mouse leaves the window, for which the TrackMouseEvent
 			 * function was called, a WM_MOUSELEAVE message is sent, which is processed in
@@ -344,11 +344,11 @@ namespace gui {
 			 * @see processMouseLeaveMessage()
 			 */
 			static void processMouseEntered(Widget& widget, int wParam, int lParam);
-			
+
 			/**
 			 * @brief Creates a MouseEvent from a GDI mouse button press, release or double-click message
 			 * and sends it to the application event queue.
-			 * 
+			 *
 			 * @param widget The widget for which this message was created.
 			 * @param wParam Windows parameters containing additional information to the message.
 			 * @param lParam Windows parameters containing additional information to the message.
@@ -390,7 +390,7 @@ namespace gui {
 			/**
 			 * @brief Creates a MoveEvent from a GDI move message
 			 * and sends it to the application event queue.
-			 * 
+			 *
 			 * @param widget The widget for which this message was created.
 			 * @param wParam Windows parameters containing additional information to the message.
 			 * @param lParam Windows parameters containing additional information to the message.
@@ -409,7 +409,7 @@ namespace gui {
 
 			/**
 			 * @brief Creates a bitwise ORed mouse modifier list from the passed parameter.
-			 * 
+			 *
 			 * The parameter wParam contains Windows specific information about modifier keys pressed
 			 * while the mouse message happened. Supported keys are: shift, control, left mouse
 			 * button, right mouse button, middle mouse button. The value which is returned is
@@ -428,8 +428,8 @@ namespace gui {
 			 * by one in method "processEvents()".
 			 * @see processEvents()
 			 */
-			std::list<ptv::Event*> _eventQueue;
-			system::Mutex          _queueMutex;
+			std::list<Pt::Event*> _eventQueue;
+			System::Mutex          _queueMutex;
 			DWORD                  _messageLoopThreadId;
 
 			/**
@@ -438,7 +438,7 @@ namespace gui {
 			 * Message Queue.
 			 */
 			static const UINT WM_MESSAGE_QUEUE_WAKE_UP;
-			
+
 			/**
 			 * Is set to true when the Windows TrackMouseEvent-API was used for a window to
 			 * being notified as soon as the mouse leaves this window. When it's false, no
@@ -458,38 +458,38 @@ namespace gui {
 	 * calls to the method of the same name of GDIEventLoop, where the acutal event loop and event
 	 * processing is located.
 	 *
-	 * All events, which are sent by GDIEventLoop are tranfered to gui::Application::event by
-	 * connecting the signal GDIEventLoop::eventQueueSignal to the gui::Application::event slot.
+	 * All events, which are sent by GDIEventLoop are tranfered to Gui::Application::event by
+	 * connecting the signal GDIEventLoop::eventQueueSignal to the Gui::Application::event slot.
 	 */
-	class PTV_API ApplicationImpl
+	class PT_API ApplicationImpl
 	{
 		public:
 			//! Connects the event signal to Application::event and stores the Application object.
 			ApplicationImpl(Application& app);
 
-			//! @brief Delegates to GDIEventLoop::commitEvent(ptv::Event)
-			//! @see ptv::Application::commitEvent(ptv::Event)
-			void commitEvent(const ptv::Event& e);
+			//! @brief Delegates to GDIEventLoop::commitEvent(Pt::Event)
+			//! @see Pt::Application::commitEvent(Pt::Event)
+			void commitEvent(const Pt::Event& e);
 
-			//! @brief Delegates to GDIEventLoop::queueEvent(ptv::Event)
-			//! @see ptv::Application::queueEvent(ptv::Event)
-			void queueEvent(const ptv::Event& e);
+			//! @brief Delegates to GDIEventLoop::queueEvent(Pt::Event)
+			//! @see Pt::Application::queueEvent(Pt::Event)
+			void queueEvent(const Pt::Event& e);
 
 			//! @brief Starts to process the events (by calling GDIEventLoop::processEvents())
 			//! @see GDIEventLoop::processEvents()
 			void processEvents();
 
 			//! @brief Delegates to GDIEventLoop::run()
-			//! @see ptv::Application::run()
+			//! @see Pt::Application::run()
 			int run();
 
 			//! @brief Delegates to GDIEventLoop::exit()
-			//! @see ptv::Application::exit()
+			//! @see Pt::Application::exit()
 			int exit();
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

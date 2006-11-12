@@ -20,11 +20,11 @@
 #include "PainterImpl.h"
 #include "PixmapImpl.h"
 
-#include "ptv/Types.h"
-#include "ptv/gui/Pixmap.h"
-#include "ptv/gfx/Rect.h"
-#include "ptv/gfx/FontMetrics.h"
-#include "ptv/gfx/XRgb8888Color.h"
+#include "Pt/Types.h"
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
+#include "Pt/Gfx/FontMetrics.h"
+#include "Pt/Gfx/XRgb8888Color.h"
 #include "win32.h"
 
 #include <iostream>
@@ -33,16 +33,16 @@
 #include <windows.h>
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 
 PainterImpl::PainterImpl(Drawable& drawable)
 : _drawable(drawable),
-  _pen(gfx::Pen(1)),
-  _brush(gfx::Brush(gfx::ARgbColor(0, 0, 0))),
-  _font(gfx::Font(determinePlatformDefaultFontName()))
+  _pen(Gfx::Pen(1)),
+  _brush(Gfx::Brush(Gfx::ARgbColor(0, 0, 0))),
+  _font(Gfx::Font(determinePlatformDefaultFontName()))
 {
 }
 
@@ -64,7 +64,7 @@ void PainterImpl::end()
 }
 
 
-void PainterImpl::setPen(const gfx::Pen& pen)
+void PainterImpl::setPen(const Gfx::Pen& pen)
 {
 	if (pen == _pen) {
 		return;
@@ -81,7 +81,7 @@ void PainterImpl::updatePen()
 		return;
 	}
 
-	gfx::XRgb8888Color penCol = _pen.color();
+	Gfx::XRgb8888Color penCol = _pen.color();
 
 #ifdef _WIN32_WCE
 	HPEN newPen = CreatePen(PS_SOLID, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()));
@@ -103,13 +103,13 @@ void PainterImpl::updatePen()
 }
 
 
-const gfx::Pen& PainterImpl::pen() const
+const Gfx::Pen& PainterImpl::pen() const
 {
 	return _pen;
 }
 
 
-void PainterImpl::setBrush(const gfx::Brush& brush)
+void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
 	_brush = brush;
 	updateBrush();
@@ -126,17 +126,17 @@ void PainterImpl::updateBrush()
 
 	switch (_brush.fillStyle()) {
 
-		case gfx::Brush::SolidFill: {
-			gfx::XRgb8888Color col = _brush.color();
+		case Gfx::Brush::SolidFill: {
+			Gfx::XRgb8888Color col = _brush.color();
 			newBrushHandle = CreateSolidBrush(RGB(col.red(), col.green(), col.blue()));
 			break;
 		}
 
-		case gfx::Brush::TextureFill: {
-			const gfx::ARgbImage& texture = _brush.texture();
+		case Gfx::Brush::TextureFill: {
+			const Gfx::ARgbImage& texture = _brush.texture();
 
 			// Convert our generic format to a 32 bit image format which Windows can understand.
-			gfx::XRgb8888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
+			Gfx::XRgb8888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
 			assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
 
 			// Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
@@ -181,12 +181,12 @@ void PainterImpl::updateBrush()
 }
 
 
-const gfx::Brush& PainterImpl::brush() const
+const Gfx::Brush& PainterImpl::brush() const
 {
 	return _brush;
 }
 
-void PainterImpl::setFont(const gfx::Font& font)
+void PainterImpl::setFont(const Gfx::Font& font)
 {
 	if (font == _font) {
 		return;
@@ -208,18 +208,18 @@ void PainterImpl::updateFont()
 
 	int fontWeight;
 	switch (_font.fontStyle()) {
-		case gfx::Font::NormalStyle:
-		case gfx::Font::ItalicStyle:
+		case Gfx::Font::NormalStyle:
+		case Gfx::Font::ItalicStyle:
 			fontWeight = FW_NORMAL;
 			break;
 
-		case gfx::Font::BoldStyle:
-		case gfx::Font::BoldItalicStyle:
+		case Gfx::Font::BoldStyle:
+		case Gfx::Font::BoldItalicStyle:
 			fontWeight = FW_BOLD;
 			break;
 	}
 
-	BYTE italic = (_font.fontStyle() == gfx::Font::ItalicStyle || _font.fontStyle() == gfx::Font::BoldItalicStyle);
+	BYTE italic = (_font.fontStyle() == Gfx::Font::ItalicStyle || _font.fontStyle() == Gfx::Font::BoldItalicStyle);
 
 	LOGFONT fontDescription;
 	fontDescription.lfHeight         = -((int)_font.size()); // negative value -> Value is converted to device units.
@@ -262,24 +262,24 @@ std::string PainterImpl::determinePlatformDefaultFontName()
 }
 
 
-const gfx::Font& PainterImpl::font() const
+const Gfx::Font& PainterImpl::font() const
 {
 	return _font;
 }
 
 
-gfx::FontMetrics PainterImpl::fontMetrics() const
+Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
 	ensureActivePainter();
 
 	TEXTMETRIC metrics;
 	GetTextMetrics(_drawable.deviceContext(), &metrics);
 
-	return gfx::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
+	return Gfx::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
 }
 
 
-gfx::FontMetrics PainterImpl::fontMetrics(std::string text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(std::string text) const
 {
 	ensureActivePainter();
 
@@ -290,7 +290,7 @@ gfx::FontMetrics PainterImpl::fontMetrics(std::string text) const
 	SIZE textSize;
 	GetTextExtentPoint32(_drawable.deviceContext(), win32::fromMultiByte(text).c_str(), text.length(), &textSize);
 
-	return gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
+	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
 }
 
 
@@ -361,11 +361,11 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const gfx::Point& to)
+void PainterImpl::drawPixel(const Gfx::Point& to)
 {
 	ensureActivePainter();
 
-	gfx::XRgb8888Color col = _pen.color();
+	Gfx::XRgb8888Color col = _pen.color();
 	SetPixel(
 		_drawable.deviceContext(),
 		to.x(),
@@ -375,7 +375,7 @@ void PainterImpl::drawPixel(const gfx::Point& to)
 }
 
 
-void PainterImpl::drawLine(const gfx::Point& from, const gfx::Point& to)
+void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
 	ensureActivePainter();
 
@@ -393,7 +393,7 @@ void PainterImpl::drawLine(const gfx::Point& from, const gfx::Point& to)
 }
 
 
-void PainterImpl::drawText(const gfx::Point& to, const std::string& text)
+void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
 {
 	ensureActivePainter();
 
@@ -403,7 +403,7 @@ void PainterImpl::drawText(const gfx::Point& to, const std::string& text)
 }
 
 
-void PainterImpl::fillRect(const gfx::Rect& rect)
+void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
 	ensureActivePainter();
 
@@ -415,7 +415,7 @@ void PainterImpl::fillRect(const gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawRect(const gfx::Rect& rect)
+void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
 	ensureActivePainter();
 
@@ -435,7 +435,7 @@ void PainterImpl::drawRect(const gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawEllipse(const gfx::Point& topLeft, const gfx::Size& size)
+void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 	ensureActivePainter();
 
@@ -454,7 +454,7 @@ void PainterImpl::drawEllipse(const gfx::Point& topLeft, const gfx::Size& size)
 }
 
 
-void PainterImpl::fillEllipse(const gfx::Point& topLeft, const gfx::Size& size)
+void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
 	ensureActivePainter();
 
@@ -473,7 +473,7 @@ void PainterImpl::fillEllipse(const gfx::Point& topLeft, const gfx::Size& size)
 }
 
 
-void PainterImpl::drawPolyline(const gfx::Point* points, const size_t pointCount) const
+void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount) const
 {
 	ensureActivePainter();
 
@@ -492,7 +492,7 @@ void PainterImpl::drawPolyline(const gfx::Point* points, const size_t pointCount
 }
 
 
-void PainterImpl::fillPolygon(const ptv::gfx::Point* points, const size_t pointCount) const
+void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount) const
 {
 	ensureActivePainter();
 
@@ -515,7 +515,7 @@ void PainterImpl::fillPolygon(const ptv::gfx::Point* points, const size_t pointC
 }
 
 
-void PainterImpl::drawPixmap(const gfx::Point& to, Pixmap& pixmap, const gfx::Rect& pixmapRect)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap, const Gfx::Rect& pixmapRect)
 {
 	ensureActivePainter();
 
@@ -534,7 +534,7 @@ void PainterImpl::drawPixmap(const gfx::Point& to, Pixmap& pixmap, const gfx::Re
 	pixmap.impl().endPaint();
 }
 
-void PainterImpl::drawPixmap(const gfx::Point& to, Pixmap& pixmap)
+void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap)
 {
 	ensureActivePainter();
 
@@ -554,7 +554,7 @@ void PainterImpl::drawPixmap(const gfx::Point& to, Pixmap& pixmap)
 }
 
 
-void PainterImpl::drawImage(const gfx::Point& to, const gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 {
 	ensureActivePainter();
 
@@ -562,11 +562,11 @@ void PainterImpl::drawImage(const gfx::Point& to, const gfx::ARgbImage& image)
 }
 
 
-void PainterImpl::drawImage(const gfx::Point& to, const gfx::ARgbImage& image, const gfx::Rect& imageRect)
+void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect)
 {
 	ensureActivePainter();
 
-	gfx::ARgbSubImage subImage(const_cast<gfx::ARgbImage&>( image ), imageRect);
+	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRect);
 	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
 }
 
@@ -620,7 +620,7 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 

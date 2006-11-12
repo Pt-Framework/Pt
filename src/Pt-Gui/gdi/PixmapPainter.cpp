@@ -22,9 +22,9 @@
 
 #include <windows.h>
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 
 PixmapPainter::PixmapPainter(PixmapImpl& pixmapImpl)
@@ -59,7 +59,7 @@ void PixmapPainter::end()
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 

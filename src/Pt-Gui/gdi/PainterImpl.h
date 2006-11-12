@@ -17,88 +17,88 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PTV_GUI_GDI_PAINTERIMPL_H
-#define PTV_GUI_GDI_PAINTERIMPL_H
+#ifndef PT_GUI_GDI_PAINTERIMPL_H
+#define PT_GUI_GDI_PAINTERIMPL_H
 
 #include <windows.h>
 
-#include <ptv/Api.h>
-#include <ptv/gfx/Font.h>
-#include <ptv/gfx/gfx.h>
-#include <ptv/gui/Painter.h>
-#include <ptv/gfx/Pen.h>
-#include <ptv/gfx/Brush.h>
-#include <ptv/gfx/Algorithm.h>
-#include <ptv/gfx/ARgbImage.h>
-#include <ptv/gfx/XRgb8888Image.h>
-#include <ptv/gfx/Rgb565Image.h>
-#include <ptv/gfx/XRgb1555Color.h>
+#include <Pt/Api.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Painter.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/XRgb8888Image.h>
+#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/XRgb1555Color.h>
 
 #include "Drawable.h"
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 	class WidgetImpl;
 	class Pixmap;
 
-	class PTV_EXPORT PainterImpl {
+	class PT_EXPORT PainterImpl {
 		public:
 			PainterImpl(Drawable& drawable);
 
 			virtual ~PainterImpl();
 
 			virtual void begin() = 0;
-			
+
 			virtual void end() = 0;
 
-			void setPen(const gfx::Pen& pen);
+			void setPen(const Gfx::Pen& pen);
 
-			const gfx::Pen& pen() const;
+			const Gfx::Pen& pen() const;
 
-			void setBrush(const gfx::Brush& brush);
+			void setBrush(const Gfx::Brush& brush);
 
-			const gfx::Brush& brush() const;
+			const Gfx::Brush& brush() const;
 
-			void setFont(const gfx::Font& font);
+			void setFont(const Gfx::Font& font);
 
-			const gfx::Font& font() const;
+			const Gfx::Font& font() const;
 
-			gfx::FontMetrics fontMetrics() const;
+			Gfx::FontMetrics fontMetrics() const;
 
-			gfx::FontMetrics fontMetrics(std::string text) const;
+			Gfx::FontMetrics fontMetrics(std::string text) const;
 
 			const std::list<std::string>& fontFamilyNames();
-			
+
 			int depth() const;
 
-			void drawPixel(const gfx::Point& to);
+			void drawPixel(const Gfx::Point& to);
 
-			void drawLine(const gfx::Point& from, const gfx::Point& to);
+			void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
-			void drawText(const gfx::Point& to, const std::string& text);
+			void drawText(const Gfx::Point& to, const std::string& text);
 
-			void drawRect(const gfx::Rect& rectangle);
+			void drawRect(const Gfx::Rect& rectangle);
 
-			void fillRect(const gfx::Rect& rectangle);
+			void fillRect(const Gfx::Rect& rectangle);
 
-			void drawEllipse(const gfx::Point& topLeft, const gfx::Size& size);
+			void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-			void fillEllipse(const gfx::Point& topLeft, const gfx::Size& size);
+			void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-			void drawPolyline(const gfx::Point* points, const size_t pointCount) const;
+			void drawPolyline(const Gfx::Point* points, const size_t pointCount) const;
 
-			void fillPolygon(const gfx::Point* points, const size_t pointCount) const;
+			void fillPolygon(const Gfx::Point* points, const size_t pointCount) const;
 
-			void drawPixmap(const gfx::Point& to, Pixmap& pm, const gfx::Rect& pmRect);
+			void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Rect& pmRect);
 
-			void drawPixmap(const gfx::Point& to, Pixmap& pm);
+			void drawPixmap(const Gfx::Point& to, Pixmap& pm);
 
-			void drawImage(const gfx::Point& to, const gfx::ARgbImage& image);
+			void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const gfx::Point& to, const gfx::ARgbImage& image, const gfx::Rect& imageRect);
+			void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect);
 
 			template <typename Iterator>
 			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
@@ -110,7 +110,7 @@ namespace gui {
 				switch (depth()) {
 					case 32:
 					case 24: {
-						gfx::XRgb8888Image rgb32Image(width, height);
+						Gfx::XRgb8888Image rgb32Image(width, height);
 						assign(begin, end, rgb32Image.begin());
 						drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
 						break;
@@ -118,14 +118,14 @@ namespace gui {
 
 					case 16:
 					case 15: {
-						gfx::XRgb1555Image rgb16Image(width, height);
+						Gfx::XRgb1555Image rgb16Image(width, height);
 						assign(begin, end, rgb16Image.begin());
 						drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
 						break;
 					}
 
 					default: { // Below 16 bit or anything inbetween
-						gfx::XRgb8888Image rgb32Image(width, height);
+						Gfx::XRgb8888Image rgb32Image(width, height);
 						assign(begin, end, rgb32Image.begin());
 						drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
 						break;
@@ -148,7 +148,7 @@ namespace gui {
 			void ensureActivePainter() const
 			{
 				if (!_drawable.isPainting()) {
-					throw LogicError("Painter is not currently active. Use painter() to activate painter.", PTV_SOURCEINFO);
+					throw LogicError("Painter is not currently active. Use painter() to activate painter.", PT_SOURCEINFO);
 				}
 			}
 
@@ -161,15 +161,15 @@ namespace gui {
 		protected:
 			Drawable&  _drawable;
 
-			gfx::Pen   _pen;
-			gfx::Brush _brush;
-			gfx::Font  _font;
+			Gfx::Pen   _pen;
+			Gfx::Brush _brush;
+			Gfx::Font  _font;
 
 			std::list<std::string> _fontNamesList;
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

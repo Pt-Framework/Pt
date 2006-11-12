@@ -23,9 +23,9 @@
 #include <windows.h>
 #include <iostream>
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 
 WidgetPainter::WidgetPainter(WidgetImpl& widgetImpl)
@@ -63,7 +63,7 @@ void WidgetPainter::end()
 	_widgetImpl.endPaint();
 }
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 

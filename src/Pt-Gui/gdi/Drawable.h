@@ -17,23 +17,23 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PTV_GUI_GDI_DRAWABLE_H
-#define PTV_GUI_GDI_DRAWABLE_H
+#ifndef PT_GUI_GDI_DRAWABLE_H
+#define PT_GUI_GDI_DRAWABLE_H
 
-#include <ptv/Api.h>
+#include <Pt/Api.h>
 
 #include <windows.h>
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
-	class PTV_API Drawable
+	class PT_API Drawable
 	{
 		public:
 			virtual ~Drawable()
 			{ }
-	
+
 			virtual HDC beginPaint() = 0;
 
 			virtual void endPaint() = 0;
@@ -59,8 +59,8 @@ namespace gui {
 			virtual bool isPainting() const = 0;
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

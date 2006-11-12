@@ -1,16 +1,31 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
 #include "ApplicationImpl.h"
 
-#include "ptv/gui/Application.h"
-#include <ptv/gui/Widget.h>
-#include <ptv/gui/ResizeEvent.h>
-#include <ptv/gui/CloseEvent.h>
-#include <ptv/gui/PaintEvent.h>
-#include <ptv/gui/MoveEvent.h>
-#include <ptv/gui/MouseMoveEvent.h>
+#include "Pt/Gui/Application.h"
+#include <Pt/Gui/Widget.h>
+#include <Pt/Gui/ResizeEvent.h>
+#include <Pt/Gui/CloseEvent.h>
+#include <Pt/Gui/PaintEvent.h>
+#include <Pt/Gui/MoveEvent.h>
+#include <Pt/Gui/MouseMoveEvent.h>
 
 #include "WidgetImpl.h"
 #include "win32.h"
@@ -21,9 +36,9 @@
 using namespace std;
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 
 const LPCSTR GDIRegistry::TOP_WINDOW_CLASS_NAME   = "PTVTopWindow";
@@ -33,14 +48,14 @@ const UINT GDIEventLoop::WM_MESSAGE_QUEUE_WAKE_UP = WM_APP + 1;
 
 bool GDIEventLoop::_trackingMouseEvent = false;
 
-ptv::Signal<const ptv::Event&> GDIEventLoop::eventQueueSignal;
+Pt::Signal<const Pt::Event&> GDIEventLoop::eventQueueSignal;
 
 
 
 GDIRegistry::GDIRegistry()
 {
 	_instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
-	
+
 	registerWindowClasses();
 }
 
@@ -53,7 +68,7 @@ GDIRegistry::~GDIRegistry()
 
 void GDIRegistry::registerWidget(HWND windowHandle, Widget& widget)
 {
-	_windowHandle2Widget.insert(std::make_pair(windowHandle, &widget)); 
+	_windowHandle2Widget.insert(std::make_pair(windowHandle, &widget));
 }
 
 
@@ -67,7 +82,7 @@ Widget* GDIRegistry::findWidget(HWND windowHandle)
 {
 	std::map<HWND, Widget*>::iterator it = _windowHandle2Widget.find(windowHandle);
 	if( it == _windowHandle2Widget.end() ) {
-		return 0; 
+		return 0;
 	}
 
 	return it->second;
@@ -93,7 +108,7 @@ void GDIRegistry::registerWindowClasses()
 
 	// Register top-level window class that is used for all top-level-windows.
 	WNDCLASS topWindowClass;
-	
+
 	topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
 	topWindowClass.lpfnWndProc   = (WNDPROC)GDIEventLoop::wndProc;
 	topWindowClass.cbClsExtra    = 0;
@@ -146,7 +161,7 @@ GDIEventLoop::~GDIEventLoop()
 }
 
 
-void GDIEventLoop::commitEvent(const ptv::Event& e)
+void GDIEventLoop::commitEvent(const Pt::Event& e)
 {
 //	std::cout << "committing an event" << std::endl;
 
@@ -155,11 +170,11 @@ void GDIEventLoop::commitEvent(const ptv::Event& e)
 }
 
 
-void GDIEventLoop::queueEvent(const ptv::Event& e)
+void GDIEventLoop::queueEvent(const Pt::Event& e)
 {
 	_queueMutex.lock();
 
-	ptv::Event* ev = e.clone();
+	Pt::Event* ev = e.clone();
 	_eventQueue.push_back(ev);
 
 	_queueMutex.unlock();
@@ -177,13 +192,13 @@ void GDIEventLoop::processEvents()
 			break;
 		}
 
-		ptv::Event* ev = _eventQueue.front();
+		Pt::Event* ev = _eventQueue.front();
 		_eventQueue.remove(ev);
 
 		_queueMutex.unlock();
 
 
-		eventQueueSignal.send<const ptv::Event&>(*ev);
+		eventQueueSignal.send<const Pt::Event&>(*ev);
 		delete ev;
 	}
 }
@@ -248,16 +263,13 @@ LRESULT GDIEventLoop::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned
 		return 0;
 	}
 
-	int wmId    = LOWORD(wParam); 
-	int wmEvent = HIWORD(wParam); 
-
 	Widget* widget = GDIRegistry::instance().findWidget(hwnd);
 
 	if (widget == 0) {
 		return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 
-	switch (message) 
+	switch (message)
 	{
 		case WM_DESTROY:
 			processDestroyMessage(*widget);
@@ -324,12 +336,12 @@ LRESULT GDIEventLoop::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned
 			break;
 
 // TODO See processMouseEnter()
-#ifndef _WIN32_WCE			
+#ifndef _WIN32_WCE
 		case WM_MOUSELEAVE:
 			processMouseLeaveMessage(*widget);
 			break;
 #endif
-			
+
 		case WM_PAINT:
 			processPaintMessage(hwnd, *widget);
 			break;
@@ -337,7 +349,7 @@ LRESULT GDIEventLoop::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned
 		case WM_MOVE:
 			processMoveMessage(*widget, wParam, lParam);
 			break;
-			
+
 		case WM_SIZE:
 			processSizeMessage(*widget, wParam, lParam);
 			break;
@@ -445,8 +457,8 @@ void GDIEventLoop::processCharacterKeyMessage(Widget& widget, int wParam, int lP
 
 void GDIEventLoop::processMouseMoveMessage(Widget& widget, int wParam, int lParam)
 {
-	int x = LOWORD(lParam); 
-	int y = HIWORD(lParam); 
+	int x = LOWORD(lParam);
+	int y = HIWORD(lParam);
 
 	//std::cout << __FUNCTION__ << " x:" << x << "   y:" << y << std::endl;
 
@@ -481,8 +493,8 @@ void GDIEventLoop::processMouseEntered(Widget& widget, int wParam, int lParam)
 // window and remove the hook appropriately.
 // http://www.catch22.net/tuts/tips.asp#DetectMouseLeave
 #ifndef _WIN32_WCE
-	int x = LOWORD(lParam); 
-	int y = HIWORD(lParam); 
+	int x = LOWORD(lParam);
+	int y = HIWORD(lParam);
 
 	TRACKMOUSEEVENT trackMouseEvent;
 	trackMouseEvent.cbSize = sizeof(trackMouseEvent);
@@ -503,8 +515,8 @@ void GDIEventLoop::processMouseButtonMessage(Widget& widget, int wParam, int lPa
 	//std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
 
-	int x = LOWORD(lParam); 
-	int y = HIWORD(lParam); 
+	int x = LOWORD(lParam);
+	int y = HIWORD(lParam);
 
 	unsigned int modifiers = createModifiersFromMouseMessage(wParam);
 
@@ -518,8 +530,8 @@ void GDIEventLoop::processMouseWheelMessage(Widget& widget, int wParam, int lPar
 	//std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
 
-	int x = LOWORD(lParam); 
-	int y = HIWORD(lParam); 
+	int x = LOWORD(lParam);
+	int y = HIWORD(lParam);
 
 	int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
@@ -533,7 +545,7 @@ void GDIEventLoop::processMouseWheelMessage(Widget& widget, int wParam, int lPar
 void GDIEventLoop::processMouseLeaveMessage(Widget& widget)
 {
 	_trackingMouseEvent = false;
-	
+
 	MouseMoveEvent mouseMoveEvent(widget, 0, 0, MouseMoveEvent::Exited, MouseMoveEvent::NoButton);
 	eventQueueSignal.send(mouseMoveEvent);
 }
@@ -548,9 +560,9 @@ void GDIEventLoop::processPaintMessage(HWND hwnd, Widget& widget)
 
 	GetUpdateRect(hwnd, &gdiRectangle, false);
 
-	gfx::Rect rectangle(
-		gfx::Point(gdiRectangle.left, gdiRectangle.top),
-		gfx::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
+	Gfx::Rect rectangle(
+		Gfx::Point(gdiRectangle.left, gdiRectangle.top),
+		Gfx::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
 	);
 
 	PaintEvent paintEvent(widget, rectangle);
@@ -571,7 +583,7 @@ void GDIEventLoop::processMoveMessage(Widget& widget, int wParam, int lParam)
 
 	int x = LOWORD(lParam);
 	int y = HIWORD(lParam);
-	
+
 	MoveEvent moveEvent(widget, x, y);
 	eventQueueSignal.send(moveEvent);
 }
@@ -585,25 +597,25 @@ void GDIEventLoop::processSizeMessage(Widget& widget, int wParam, int lParam)
 	//std::cout << __FUNCTION__ << "  width: " << width << "   height: " << height << std::endl;
 
 	ResizeEvent::Type resizeType;
-	
+
 	switch (wParam) {
 		case SIZE_MAXIMIZED:
 			resizeType = ResizeEvent::Maximized;
 			break;
-			
+
 		case SIZE_MINIMIZED:
 			resizeType = ResizeEvent::Minimized;
 			break;
-			
+
 		case SIZE_RESTORED:
 			resizeType = ResizeEvent::Restored;
 			break;
-			
+
 		default:
 			resizeType = ResizeEvent::Resize;
 			break;
 	}
-	
+
 	ResizeEvent resizeEvent(widget, width, height, resizeType);
 	eventQueueSignal.send(resizeEvent);
 }
@@ -634,13 +646,13 @@ ApplicationImpl::ApplicationImpl(Application& app)
 }
 
 
-void ApplicationImpl::commitEvent(const ptv::Event& e)
+void ApplicationImpl::commitEvent(const Pt::Event& e)
 {
 	GDIEventLoop::instance().commitEvent(e);
 }
 
 
-void ApplicationImpl::queueEvent(const ptv::Event& e)
+void ApplicationImpl::queueEvent(const Pt::Event& e)
 {
 	GDIEventLoop::instance().queueEvent(e);
 }
@@ -663,7 +675,7 @@ void ApplicationImpl::processEvents()
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 

@@ -17,21 +17,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Ptv_Gui_Gdi_PixmapImpl_h
-#define Ptv_Gui_Gdi_PixmapImpl_h
+#ifndef Pt_Gui_Gdi_PixmapImpl_h
+#define Pt_Gui_Gdi_PixmapImpl_h
 
-#include <ptv/Api.h>
-#include <ptv/gfx/Size.h>
-#include <ptv/gui/Painter.h>
+#include <Pt/Api.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gui/Painter.h>
 #include "Drawable.h"
 #include "PixmapPainter.h"
 
 #include <windows.h>
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
-	class PTV_API PixmapImpl : public Drawable
+namespace Gui {
+
+	class PT_API PixmapImpl : public Drawable
 	{
 		public:
 			PixmapImpl(size_t width, size_t height);
@@ -40,7 +41,7 @@ namespace gui {
 
 			virtual ~PixmapImpl();
 
-			const gfx::Size& size() const
+			const Gfx::Size& size() const
 			{ return _size; }
 
 			Painter painter();
@@ -60,7 +61,7 @@ namespace gui {
 			void setupDeviceContext();
 
 		private:
-			gfx::Size      _size;
+			Gfx::Size      _size;
 			HDC            _deviceContext;
 			HBITMAP        _bitmapHandle;
 			PixmapPainter* _painter;
@@ -70,8 +71,8 @@ namespace gui {
 			HFONT  _oldFont;
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

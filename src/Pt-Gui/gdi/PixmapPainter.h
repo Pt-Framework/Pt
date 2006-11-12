@@ -17,22 +17,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PTV_PIXMAPPAINTER_H
-#define PTV_PIXMAPPAINTER_H
+#ifndef PT_PIXMAPPAINTER_H
+#define PT_PIXMAPPAINTER_H
 
 #include "PainterImpl.h"
 
-#include <ptv/Api.h>
-#include <ptv/gfx/gfx.h>
+#include <Pt/Api.h>
+#include <Pt/gfx/gfx.h>
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 	class PixmapImpl;
 
-	class PTV_EXPORT PixmapPainter : public PainterImpl
+	class PT_EXPORT PixmapPainter : public PainterImpl
 	{
 		public:
 			PixmapPainter(PixmapImpl& pixmapImpl);
@@ -48,8 +48,8 @@ namespace gui {
 			PixmapImpl& _pixmapImpl;
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

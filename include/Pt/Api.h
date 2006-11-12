@@ -32,6 +32,15 @@
 	#define PT_IMPORT __declspec(dllimport)
 	#define PT_PACKED
 	#define PT_ALIGN(value) __declspec( align( value ) )
+
+	#ifndef _WIN32_WINNT		// Allow use of features specific to Windows XP or later.
+		#define _WIN32_WINNT 0x0501	// Change this to the appropriate value to target other versions of Windows.
+	#endif
+
+	#ifndef _WIN32_WINDOWS		// Allow use of features specific to Windows 98 or later.
+		#define _WIN32_WINDOWS 0x0410 // Change this to the appropriate value to target Windows Me or later.
+	#endif
+
 #elif __GNUC__ >= 4
 	#define PT_EXPORT __attribute__((visibility("default")))
 	#define PT_IMPORT

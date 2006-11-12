@@ -22,19 +22,19 @@
 #include "WidgetPainter.h"
 #include "win32.h"
 
-#include <ptv/gui/Application.h>
-#include <ptv/gui/Widget.h>
-#include <ptv/gui/Painter.h>
+#include <Pt/Gui/Application.h>
+#include <Pt/Gui/Widget.h>
+#include <Pt/Gui/Painter.h>
 
 #include <iostream>
 using namespace std;
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
-WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size)
+WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
 : _widget(widget)
 , _painter(0)
 , _deviceContextUsageCount(0)
@@ -48,11 +48,11 @@ WidgetImpl::WidgetImpl(Widget& widget, Widget* parent)
 , _painter(0)
 , _deviceContextUsageCount(0)
 {
-	init(widget, parent, gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), gfx::Size(CW_USEDEFAULT, CW_USEDEFAULT));
+	init(widget, parent, Gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), Gfx::Size(CW_USEDEFAULT, CW_USEDEFAULT));
 }
 
 
-void WidgetImpl::init(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size)
+void WidgetImpl::init(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
 {
 	basic_string<TCHAR> windowClassName;
 	HWND                parentWindowHandle;
@@ -88,7 +88,7 @@ void WidgetImpl::init(Widget& widget, Widget* parent, const gfx::Point& at, cons
 		GDIRegistry::instance().getInstanceHandle(),
 		NULL
 	);
-	
+
 	GDIRegistry::instance().registerWidget(_hwnd, widget);
 
 	// Hide top-level windows from start.
@@ -109,7 +109,7 @@ WidgetImpl::~WidgetImpl()
 	// Destroy GDI window.
 	DestroyWindow(_hwnd);
 
-	
+
 	// Release this window's device context.
 	ReleaseDC(_hwnd, _deviceContext);
 }
@@ -239,6 +239,6 @@ bool WidgetImpl::isPainting() const
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt

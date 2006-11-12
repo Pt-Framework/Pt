@@ -17,13 +17,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Ptv_Gui_WidgetImpl_h
-#define Ptv_Gui_WidgetImpl_h
+#ifndef Pt_Gui_WidgetImpl_h
+#define Pt_Gui_WidgetImpl_h
 
-#include <ptv/Api.h>
-#include <ptv/gfx/Point.h>
-#include <ptv/gfx/Rect.h>
-#include <ptv/gui/Painter.h>
+#include <Pt/Api.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gui/Painter.h>
 #include "WidgetPainter.h"
 #include "Drawable.h"
 
@@ -34,18 +34,18 @@
 using namespace std;
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 	class Widget;
 	class ResizeEvent;
 	class GDIPainter;
 
-	class PTV_API WidgetImpl : public Drawable
+	class PT_API WidgetImpl : public Drawable
 	{
 		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
+			WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size);
 
 			WidgetImpl(Widget& widget, Widget* parent);
 
@@ -76,9 +76,9 @@ namespace gui {
 			virtual HDC deviceContext() const;
 
 			virtual bool isPainting() const;
-			
+
 		private:
-			void init(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
+			void init(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size);
 
 		private:
 			HWND           _hwnd;
@@ -95,8 +95,8 @@ namespace gui {
 			HFONT  _oldFont;
 	};
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
 
 #endif

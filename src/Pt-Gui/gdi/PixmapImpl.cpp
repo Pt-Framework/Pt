@@ -20,16 +20,16 @@
 #include "PixmapImpl.h"
 #include "PixmapPainter.h"
 
-#include <ptv/gui/Pixmap.h>
+#include <Pt/Gui/Pixmap.h>
 
 #include <tchar.h>
 #include <iostream>
 using namespace std;
 
 
-namespace ptv {
+namespace Pt {
 
-namespace gui {
+namespace Gui {
 
 
 PixmapImpl::PixmapImpl(size_t width, size_t height)
@@ -78,7 +78,7 @@ PixmapImpl::PixmapImpl(const PixmapImpl& oldPixmap)
 	DeleteDC(destinationDC);
 	DeleteDC(sourceDC);
 
-	
+
 	setupDeviceContext();
 }
 
@@ -109,7 +109,7 @@ PixmapImpl::~PixmapImpl()
 	HPEN oldFont = (HPEN)SelectObject(_deviceContext, _oldFont);
 	DeleteObject(oldFont);
 
-	
+
 	// Delete the DC of this painter.
 	DeleteDC(_deviceContext);
 
@@ -157,6 +157,6 @@ bool PixmapImpl::isPainting() const
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt
