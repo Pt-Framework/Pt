@@ -35,12 +35,7 @@ namespace std {
 			typedef Pt::Char char_type;
 			typedef basic_string<Pt::Text::Char> string_type;
 
-
 			// gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-			// My intention was to ifdef the typedef for gcc 3.4.x and not for MinGW
-			//
-			// #if __GNUC__ == 3 && __GNUC_MINOR__ >= 4
-
 			#if __GNUC__ == 3 && __GNUC_MINOR__ == 4
 			typedef __numpunct_cache<Pt::Text::Char>  __cache_type;
 			#endif
