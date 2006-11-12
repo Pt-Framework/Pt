@@ -17,86 +17,53 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Ptv_Gui_WidgetImpl_h
-#define Ptv_Gui_WidgetImpl_h
-
-#include <ptv/Api.h>
-#include <ptv/gfx/Point.h>
-#include <ptv/gfx/Rect.h>
-#include <ptv/gui/Painter.h>
 #include "WidgetPainter.h"
-#include "Drawable.h"
+#include "WidgetImpl.h"
 
 #include <windows.h>
-
-#include <string>
-#include <list>
-using namespace std;
-
+#include <iostream>
 
 namespace ptv {
 
 namespace gui {
 
-	class Widget;
-	class ResizeEvent;
-	class GDIPainter;
 
-	class PTV_API WidgetImpl : public Drawable
-	{
-		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
+WidgetPainter::WidgetPainter(WidgetImpl& widgetImpl)
+: PainterImpl(widgetImpl)
+, _widgetImpl(widgetImpl)
+{
+}
 
-			WidgetImpl(Widget& widget, Widget* parent);
 
-			virtual ~WidgetImpl();
+WidgetPainter::~WidgetPainter()
+{
+}
 
-			void setTitle(const std::string& text);
 
-			std::string title();
+void WidgetPainter::begin()
+{
+	bool firstUse = !_widgetImpl.isPainting();
 
-			void move(size_t x, size_t y);
+	_widgetImpl.beginPaint();
 
-			void resize(size_t width, size_t height);
+	if (firstUse) {
+		// Send default settings to GDI.
+		updatePen();
+		updateFont();
+		updateBrush();
 
-			void show();
+		// Initialize default Device Context settings.
+		SetBkMode(_widgetImpl.deviceContext(), TRANSPARENT);
+	}
+}
 
-			void hide();
 
-			void setParent(Widget* parent);
-
-			HWND hwnd();
-
-			Painter painter();
-
-			virtual HDC beginPaint();
-
-			virtual void endPaint();
-
-			virtual HDC deviceContext() const;
-
-			virtual bool isPainting() const;
-			
-		private:
-			void init(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
-
-		private:
-			HWND           _hwnd;
-			HDC            _deviceContext;
-			WidgetPainter* _painter;
-			size_t         _deviceContextUsageCount;
-
-			Widget&     _widget;
-
-			DWORD       _windowStyle;
-
-			HPEN   _oldPen;
-			HBRUSH _oldBrush;
-			HFONT  _oldFont;
-	};
+void WidgetPainter::end()
+{
+	_widgetImpl.endPaint();
+}
 
 } // namespace gui
 
 } // namespace ptv
 
-#endif

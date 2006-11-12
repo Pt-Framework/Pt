@@ -3,10 +3,10 @@ SubDir TOP src Pt-Gui gdi ;
 SubDirHdrs $(TOP)/include ;
 
 Library Pt-Gui-gdi : ApplicationImpl.cpp
-                     #PixmapImpl.cpp
-                     #PixmapPainterImpl.cpp
+                     PainterImpl.cpp
+                     PixmapImpl.cpp
+                     PixmapPainter.cpp
                      WidgetImpl.cpp
-                     #WidgetPainterImpl.cpp
-                     #X11PainterImpl.cpp 
+                     WidgetPainter.cpp
                      ;
 

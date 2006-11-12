@@ -17,39 +17,61 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Gui_gdi_PixmapImpl_h
-#define Pt_Gui_gdi_PixmapImpl_h
+#ifndef Ptv_Gui_Gdi_PixmapImpl_h
+#define Ptv_Gui_Gdi_PixmapImpl_h
 
+#include <ptv/Api.h>
+#include <ptv/gfx/Size.h>
+#include <ptv/gui/Painter.h>
+#include "Drawable.h"
+#include "PixmapPainter.h"
 
-#include <Pt/Api.h>
+#include <windows.h>
 
+namespace ptv {
 
-namespace Pt {
-
-namespace Gui {
-
-	class PT_EXPORT PixmapImpl {
+namespace gui {
+	class PTV_API PixmapImpl : public Drawable
+	{
 		public:
-			PixmapImpl(size_t width, size_t height)
-			{}
+			PixmapImpl(size_t width, size_t height);
 
-			virtual ~PixmapImpl()
-			{}
+			PixmapImpl(const PixmapImpl& oldPixmap);
 
-			size_t width() const
-			{ return 0; }
+			virtual ~PixmapImpl();
 
-			size_t height() const
-			{ return 0; }
-
-			const Gfx::Size& size() const
+			const gfx::Size& size() const
 			{ return _size; }
+
+			Painter painter();
+
+			HBITMAP bitmapHandle() const;
+
+			virtual HDC beginPaint();
+
+			virtual void endPaint();
+
+			virtual HDC deviceContext() const;
+
+			virtual bool isPainting() const;
+
+
 		private:
-			Gfx::Size _size;
+			void setupDeviceContext();
+
+		private:
+			gfx::Size      _size;
+			HDC            _deviceContext;
+			HBITMAP        _bitmapHandle;
+			PixmapPainter* _painter;
+
+			HPEN   _oldPen;
+			HBRUSH _oldBrush;
+			HFONT  _oldFont;
 	};
 
-} // namespace Gui
+} // namespace gui
 
-} // namespace Pt
+} // namespace ptv
 
 #endif

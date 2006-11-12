@@ -19,108 +19,226 @@
 
 #include "WidgetImpl.h"
 #include "ApplicationImpl.h"
+#include "WidgetPainter.h"
+#include "win32.h"
 
-#include <Pt/Gui/Application.h>
-#include <Pt/Gui/Widget.h>
-#include <Pt/Gui/ResizeEvent.h>
+#include <ptv/gui/Application.h>
+#include <ptv/gui/Widget.h>
+#include <ptv/gui/Painter.h>
 
 #include <iostream>
 using namespace std;
 
 
-namespace Pt {
+namespace ptv {
 
-namespace Gui {
+namespace gui {
 
-WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
-: _apiWidget(apiWidget),
-  _parent(parent),
-  _isMain(false),
-  _rect(at, size)
+WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size)
+: _widget(widget)
+, _painter(0)
+, _deviceContextUsageCount(0)
 {
-	clog << "[" << this << "] WidgetImpl::WidgetImpl" << endl;
-
-
+	init(widget, parent, at, size);
 }
 
 
-void WidgetImpl::unparent()
+WidgetImpl::WidgetImpl(Widget& widget, Widget* parent)
+: _widget(widget)
+, _painter(0)
+, _deviceContextUsageCount(0)
 {
-
+	init(widget, parent, gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), gfx::Size(CW_USEDEFAULT, CW_USEDEFAULT));
 }
 
 
-void WidgetImpl::setTitle(const char* text)
+void WidgetImpl::init(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size)
 {
+	basic_string<TCHAR> windowClassName;
+	HWND                parentWindowHandle;
 
+	if (parent) {
+		// Child window attributes
+		windowClassName    = win32::fromMultiByte(GDIRegistry::CHILD_WINDOW_CLASS_NAME);
+		parentWindowHandle = parent->impl()._hwnd;
+		_windowStyle       = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+
+	} else {
+
+		// Top level window attributes
+		windowClassName = win32::fromMultiByte(GDIRegistry::TOP_WINDOW_CLASS_NAME);
+		parentWindowHandle = NULL;
+		#ifdef _WIN32_WCE
+			_windowStyle       = WS_SYSMENU;
+		#else
+			_windowStyle       = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+		#endif
+	}
+
+	_hwnd = CreateWindow(
+		windowClassName.c_str(),
+		_T(""),
+		_windowStyle,
+		at.x(),
+		at.y(),
+		size.width(),
+		size.height(),
+		parentWindowHandle,
+		NULL,
+		GDIRegistry::instance().getInstanceHandle(),
+		NULL
+	);
+	
+	GDIRegistry::instance().registerWidget(_hwnd, widget);
+
+	// Hide top-level windows from start.
+	if (!parent) {
+		ShowWindow(_hwnd, SW_HIDE);
+	}
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-	clog << "[" << this << "] WidgetImpl::~WidgetImpl()" << endl;
-	this->destroy();
+	// Destroy the painter (in case we created one).
+	delete _painter;
+
+	// Unregister from GDIRegistry.
+	GDIRegistry::instance().unregisterWidget(_hwnd);
+
+	// Destroy GDI window.
+	DestroyWindow(_hwnd);
+
+	
+	// Release this window's device context.
+	ReleaseDC(_hwnd, _deviceContext);
 }
 
 
-void WidgetImpl::setMainWidget(bool isMain)
+void WidgetImpl::setTitle(const std::string& text)
 {
-	_isMain = isMain;
+	SetWindowText(_hwnd, win32::fromMultiByte(text).c_str());
 }
 
 
-bool WidgetImpl::isMainWidget()
+std::string WidgetImpl::title()
 {
-	return _isMain;
+	std::vector<TCHAR> buffer(255);
+	GetWindowText(_hwnd, &buffer[0], buffer.size());
+
+	return win32::toMultiByte(&buffer[0]);
+}
+
+
+void WidgetImpl::setParent(Widget* newParent)
+{
+	if (newParent) {
+		SetParent(_hwnd, newParent->impl()._hwnd);
+	} else {
+		SetParent(_hwnd, NULL);
+	}
 }
 
 
 void WidgetImpl::show()
 {
-
+	ShowWindow(_hwnd, SW_SHOW);
 }
 
 
 void WidgetImpl::hide()
 {
-
-}
-
-
-void WidgetImpl::resizeEvent(const ResizeEvent& event)
-{
-
+	ShowWindow(_hwnd, SW_HIDE);
 }
 
 
 void WidgetImpl::move(size_t x, size_t y)
 {
-
+	SetWindowPos(_hwnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 
 void WidgetImpl::resize(size_t width, size_t height)
 {
+	RECT clientRect;
+	SetRect(&clientRect, 0, 0, width - 1, height - 1);
 
+	// TODO We currently expect the window to not have a menu. If we natively support that,
+	// we should change this "false" here to a varying value.
+	AdjustWindowRectEx(&clientRect, _windowStyle, false, 0);
+
+	LONG clientWidth  = clientRect.right  - clientRect.left + 1;
+	LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
+	SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 
-void WidgetImpl::destroy()
+HWND WidgetImpl::hwnd()
 {
-
+	return _hwnd;
 }
 
 
-bool WidgetImpl::valid()
+Painter WidgetImpl::painter()
 {
-	return false;
+	if (0 == _painter) {
+		_painter = new WidgetPainter(*this);
+	}
+
+	return Painter(_painter);
 }
 
-const Gfx::Rect& WidgetImpl::rect() const
+
+HDC WidgetImpl::beginPaint()
 {
-	return _rect;
+	if (_deviceContextUsageCount == 0) {
+		_deviceContext = GetDC(_hwnd);
+
+		_oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
+		_oldBrush = (HBRUSH)GetCurrentObject(_deviceContext, OBJ_BRUSH);
+		_oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
+	}
+
+	_deviceContextUsageCount++;
+
+	return _deviceContext;
 }
 
-} // namespace Gui
 
-} // namespace Pt
+void WidgetImpl::endPaint()
+{
+	if (_deviceContextUsageCount > 0) {
+		_deviceContextUsageCount--;
+	}
+
+	if (_deviceContextUsageCount == 0) {
+		HPEN oldPen = (HPEN)SelectObject(_deviceContext, _oldPen);
+		DeleteObject(oldPen);
+
+		HPEN oldBrush = (HPEN)SelectObject(_deviceContext, _oldBrush);
+		DeleteObject(oldBrush);
+
+		HPEN oldFont = (HPEN)SelectObject(_deviceContext, _oldFont);
+		DeleteObject(oldFont);
+
+		ReleaseDC(_hwnd, _deviceContext);
+		_deviceContext = 0;
+	}
+}
+
+
+HDC WidgetImpl::deviceContext() const
+{
+	return _deviceContext;
+}
+
+
+bool WidgetImpl::isPainting() const
+{
+	return _deviceContextUsageCount != 0;
+}
+
+
+} // namespace gui
+
+} // namespace ptv

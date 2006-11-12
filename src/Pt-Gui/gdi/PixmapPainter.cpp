@@ -17,86 +17,49 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Ptv_Gui_WidgetImpl_h
-#define Ptv_Gui_WidgetImpl_h
-
-#include <ptv/Api.h>
-#include <ptv/gfx/Point.h>
-#include <ptv/gfx/Rect.h>
-#include <ptv/gui/Painter.h>
-#include "WidgetPainter.h"
-#include "Drawable.h"
+#include "PixmapPainter.h"
+#include "PixmapImpl.h"
 
 #include <windows.h>
-
-#include <string>
-#include <list>
-using namespace std;
-
 
 namespace ptv {
 
 namespace gui {
 
-	class Widget;
-	class ResizeEvent;
-	class GDIPainter;
 
-	class PTV_API WidgetImpl : public Drawable
-	{
-		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
+PixmapPainter::PixmapPainter(PixmapImpl& pixmapImpl)
+: PainterImpl(pixmapImpl)
+, _pixmapImpl(pixmapImpl)
+{
+	// Send default settings to GDI.
+	updatePen();
+	updateFont();
+	updateBrush();
 
-			WidgetImpl(Widget& widget, Widget* parent);
+	// Initialize default Device Context settings.
+	SetBkMode(pixmapImpl.deviceContext(), TRANSPARENT);
+}
 
-			virtual ~WidgetImpl();
 
-			void setTitle(const std::string& text);
+PixmapPainter::~PixmapPainter()
+{
 
-			std::string title();
+}
 
-			void move(size_t x, size_t y);
 
-			void resize(size_t width, size_t height);
+void PixmapPainter::begin()
+{
+	// Nothing.
+}
 
-			void show();
 
-			void hide();
+void PixmapPainter::end()
+{
+	// Nothing.
+}
 
-			void setParent(Widget* parent);
-
-			HWND hwnd();
-
-			Painter painter();
-
-			virtual HDC beginPaint();
-
-			virtual void endPaint();
-
-			virtual HDC deviceContext() const;
-
-			virtual bool isPainting() const;
-			
-		private:
-			void init(Widget& widget, Widget* parent, const gfx::Point& at, const gfx::Size& size);
-
-		private:
-			HWND           _hwnd;
-			HDC            _deviceContext;
-			WidgetPainter* _painter;
-			size_t         _deviceContextUsageCount;
-
-			Widget&     _widget;
-
-			DWORD       _windowStyle;
-
-			HPEN   _oldPen;
-			HBRUSH _oldBrush;
-			HFONT  _oldFont;
-	};
 
 } // namespace gui
 
 } // namespace ptv
 
-#endif
