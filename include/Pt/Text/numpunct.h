@@ -41,7 +41,7 @@ namespace std {
 			//
 			// #if __GNUC__ == 3 && __GNUC_MINOR__ >= 4
 
-			#ifdef __MINGW32__
+			#if __GNUC__ == 3 && __GNUC_MINOR__ == 4
 			typedef __numpunct_cache<Pt::Text::Char>  __cache_type;
 			#endif
 
