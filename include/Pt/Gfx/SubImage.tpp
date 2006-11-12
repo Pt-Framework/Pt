@@ -33,8 +33,8 @@ namespace Pt {
 		: _image(image), _area(area)
 		{
 			// Validate the area
-			int x1 = area.x1();
-			int y1 = area.y1();
+			int x1 = area.x();
+			int y1 = area.y();
 			int x2 = x1 + area.width() - 1;
 			int y2 = y1 + area.height() - 1;
 
@@ -48,8 +48,8 @@ namespace Pt {
 		template <typename ColorSpaceT_>
 		SubImage<ColorSpaceT_>& SubImage<ColorSpaceT_>::operator=(const typename SubImage<ColorSpaceT_>::ColorT& color)
 		{
-			for(uint y = _area.y1(); y < (_area.y1()+_area.height()); y++) {
-				for(uint x = _area.x1(); x < (_area.x1()+_area.width()); x++) {
+			for(int y = _area.y(); y < (_area.y()+_area.height()); y++) {
+				for(int x = _area.x(); x < (_area.x()+_area.width()); x++) {
 					_image.scanline(y)[x] = color;
 				}
 			}
@@ -67,13 +67,13 @@ namespace Pt {
 				cubicScale(tmp, src, _area.width(), _area.height());
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y1()][x+_area.x1()] = tmp[y][x];
+						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
 			}
 			// If the size is the same, we just need to copy convert
 			else {
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						convert(_image[y+_area.y1()][x+_area.x1()], src[y][x]);
+						convert(_image[y+_area.y()][x+_area.x()], src[y][x]);
 			}
 		}
 
@@ -88,13 +88,13 @@ namespace Pt {
 				// Copy convert the source pixels to the temporary image
 				for(uint y = 0; y < src.height(); y++)
 					for(uint x = 0; x < src.width(); x++)
-						convert(tmp[y][x], src._image[y+src._area.y1()][x+src._area.x1()]);
+						convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
 				// Scale the temporary image
 				cubicScale(tmp, _area.width(), _area.height());
 				// Copy the pixels to this sub image
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y1()][x+_area.x1()] = tmp[y][x];
+						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
 			}
 			// If the size is the same, we just need to copy convert
 			else {
@@ -105,17 +105,17 @@ namespace Pt {
 					// Copy convert the source pixels to the temporary image
 					for(uint y = 0; y < src.height(); y++)
 						for(uint x = 0; x < src.width(); x++)
-							convert(tmp[y][x], src._image[y+src._area.y1()][x+src._area.x1()]);
+							convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
 					// Copy the pixels to this sub image
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							_image[y+_area.y1()][x+_area.x1()] = tmp[y][x];
+							_image[y+_area.y()][x+_area.x()] = tmp[y][x];
 				}
 				// If the source and destination image are different, just copy convert
 				else {
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							convert(_image[y+_area.y1()][x+_area.x1()], src._image[y+src._area.y1()][x+src._area.x1()]);
+							convert(_image[y+_area.y()][x+_area.x()], src._image[y+src._area.y()][x+src._area.x()]);
 				}
 			}
 		}
@@ -125,7 +125,7 @@ namespace Pt {
 		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
-			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
+			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
@@ -133,7 +133,7 @@ namespace Pt {
 		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
-			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
+			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
@@ -141,7 +141,7 @@ namespace Pt {
 		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return invalid;
-			return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()];
+			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
@@ -149,7 +149,7 @@ namespace Pt {
 		void SubImage<ColorSpaceT_>::setColor(int x, int y, const ColorT& color_)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return;
-			_image.data()[(y+_area.y1())*_image.width() + x+_area.x1()] = color_;
+			_image.data()[(y+_area.y())*_image.width() + x+_area.x()] = color_;
 		}
 
 	} // namespace Gfx

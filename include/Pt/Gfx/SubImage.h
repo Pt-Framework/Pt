@@ -1,35 +1,20 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
-#ifndef Pt_SubImage_h
-#define Pt_SubImage_h
+
+#ifndef PT_GFX_SUBIMAGE_H
+#define PT_GFX_SUBIMAGE_H
 
 #include <Pt/Gfx/BasicImage.h>
 
 
 namespace Pt {
 
-	namespace Gfx {
+namespace Gfx {
 
 		//! \brief SubImage class
 		template <typename ColorSpaceT_>
-		class PT_EXPORT SubImage {
+		class PT_API SubImage {
 			public:
 				typedef BasicImage<ColorSpaceT_>     ImageT;
 				typedef SubImage<ColorSpaceT_>       SubImageT;
@@ -86,19 +71,19 @@ namespace Pt {
 
 				//! Scanline access without range check
 				inline Scanline scanline(int y)
-				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
+				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
 				//! Scanline access without range check
 				inline ConstScanline scanline(int y) const
-				{ return &_image.data()[(y+_area.y1())*_image.width() + _area.x1()]; }
+				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
 				//! Random access without range check
 				inline ColorT& pixel(int x, int y)
-				{ return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()]; }
+				{ return _image.data()[(y+_area.y())*_image.width() + x+_area.x()]; }
 
 				//! Random access without range check
 				inline const ColorT& pixel(int x, int y) const
-				{ return _image.data()[(y+_area.y1())*_image.width() + x+_area.x1()]; }
+				{ return _image.data()[(y+_area.y())*_image.width() + x+_area.x()]; }
 
 				//! Random access with range check
 				ColorT& at(int x, int y);
@@ -125,7 +110,7 @@ namespace Pt {
 				//! Returns an iterator indicating the position
 				//! of a pixel at(x,y)
 				inline PixelIterator iterator(uint y, uint x)
-				{ return PixelIterator(*this, _area.x1()+y, _area.y1()+x); }
+				{ return PixelIterator(*this, _area.x()+y, _area.y()+x); }
 
 				//! Returns a const iterator indicating the position
 				//! of the first pixel in this image
@@ -140,7 +125,7 @@ namespace Pt {
 				//! Returns a const iterator indicating the position
 				//! of a pixel at(x,y)
 				inline ConstPixelIterator iterator(uint y, uint x) const
-				{ return ConstPixelIterator(*this, _area.x1()+y, _area.y1()+x); }
+				{ return ConstPixelIterator(*this, _area.x()+y, _area.y()+x); }
 
 			protected:
 				ImageT& _image;
@@ -259,6 +244,8 @@ namespace Pt {
 
 } // namespace Pt
 
+#include <Pt/Gfx/SubImage.tpp>
+
 #endif
 
-#include <Pt/Gfx/SubImage.tpp>
+

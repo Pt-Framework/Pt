@@ -28,6 +28,10 @@ namespace Pt {
 
 namespace Gui {
 
+
+const type_info& Gui::Event::TYPE_INFO = typeid(Gui::Event);
+
+
 Event::Event(Widget& widget)
 : _widget(widget)
 {}

@@ -1,0 +1,211 @@
+/***************************************************************************
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#include "PainterImpl.h"
+
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
+#include "Pt/Gfx/Font.h"
+#include "Pt/Gfx/FontMetrics.h"
+
+#include <iostream>
+
+using namespace Pt::Gfx;
+
+
+namespace Pt {
+
+namespace Gui {
+
+Painter::Painter(PainterImpl* painterImpl)
+: _active(false)
+{
+	_painterImpl = painterImpl;
+}
+
+
+Painter::~Painter()
+{
+	if (!_active) {
+		_painterImpl->end();
+	}
+}
+
+
+void Painter::setPen(const Pen& pen)
+{
+	_painterImpl->setPen(pen);
+}
+
+
+const Pen& Painter::pen() const
+{
+	return _painterImpl->pen();
+}
+
+
+void Painter::setBrush(const Brush& brush)
+{
+	_painterImpl->setBrush(brush);
+}
+
+
+const Brush& Painter::brush() const
+{
+	return _painterImpl->brush();
+}
+
+
+void Painter::setFont(const Gfx::Font& font)
+{
+	_painterImpl->setFont(font);
+}
+
+
+const Gfx::Font& Painter::font() const
+{
+	return _painterImpl->font();
+}
+
+
+FontMetrics Painter::fontMetrics() const
+{
+	this->begin();
+	return _painterImpl->fontMetrics();
+}
+
+
+FontMetrics Painter::fontMetrics(std::string text) const 
+{
+	this->begin();
+	return _painterImpl->fontMetrics(text);
+}
+
+
+const std::list<std::string>& Painter::fontFamilyNames()
+{
+	this->begin();
+	return _painterImpl->fontFamilyNames();
+}
+
+
+void Painter::drawPixel(const Point& to)
+{
+	this->begin();
+	_painterImpl->drawPixel(to);
+}
+
+
+void Painter::drawLine(const Point& from, const Point& to)
+{
+	this->begin();
+	_painterImpl->drawLine(from, to);
+}
+
+
+void Painter::drawText(const Point& to, const std::string& text)
+{
+	this->begin();
+	_painterImpl->drawText(to, text);
+}
+
+
+void Painter::drawRect(const Rect& rect)
+{
+	this->begin();
+	_painterImpl->drawRect(rect);
+}
+
+
+void Painter::fillRect(const Rect& rect)
+{
+	this->begin();
+	_painterImpl->fillRect(rect);
+}
+
+
+void Painter::drawEllipse(const Point& topLeft, const Size& size)
+{
+	this->begin();
+	_painterImpl->drawEllipse(topLeft, size);
+}
+
+
+void Painter::fillEllipse(const Point& topLeft, const Size& size)
+{
+	this->begin();
+	_painterImpl->fillEllipse(topLeft, size);
+}
+
+
+void Painter::drawPolyline(const Point* points, const size_t pointCount)
+{
+	this->begin();
+	_painterImpl->drawPolyline(points, pointCount);
+}
+
+
+void Painter::fillPolygon(const Point* points, const size_t pointCount)
+{
+	this->begin();
+	_painterImpl->fillPolygon(points, pointCount);
+}
+
+
+void Painter::drawImage(const Point& to, const ARgbImage& image)
+{
+	this->begin();
+	_painterImpl->drawImage(to, image);
+}
+
+
+void Painter::drawImage(const Point& to, const ARgbImage& image, const Rect& imageRect)
+{
+	this->begin();
+	_painterImpl->drawImage(to, image, imageRect);
+}
+
+
+void Painter::drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Rect& fromRect)
+{
+	this->begin();
+	_painterImpl->drawPixmap(to, from, fromRect);
+}
+
+
+void Painter::drawPixmap(const Gfx::Point& to, Pixmap& pm)
+{
+	this->begin();
+	_painterImpl->drawPixmap(to, pm);
+}
+
+
+void Painter::begin() const
+{
+	if (!_active) {
+		_painterImpl->begin();
+		_active = true;
+	}
+}
+
+
+} // namespace Gui
+
+} // namespace Pt
+

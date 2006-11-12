@@ -1,91 +1,108 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
-#ifndef Pt_Gfx_Point_h
-#define Pt_Gfx_Point_h
 
-#include <Pt/Api.h>
+#ifndef PT_GFX_POINT_H
+#define PT_GFX_POINT_H
+
 #include <Pt/Types.h>
+#include <Pt/Api.h>
+#include <Pt/Gfx/Gfx.h>
 
 
 namespace Pt {
 
 	namespace Gfx {
 
-		/** \brief Point class
+		/** \brief BasicPoint class
 		*/
-		class PT_EXPORT Point {
+		template<typename T>
+		class PT_API BasicPoint {
 			public:
-				Point(size_t x = 0, size_t y = 0)
-				: _x(x), _y(y)
+				BasicPoint()
+				: _x(0)
+				, _y(0)
 				{}
-	
-				Point(const Point& pt)
-				: _x(pt._x), _y(pt._y)
+
+				BasicPoint(T x, T y)
+				: _x(x)
+				, _y(y)
+				{}
+
+				BasicPoint(const BasicPoint& pt)
+				: _x(pt._x)
+				, _y(pt._y)
 				{ }
 
-				size_t x() const
+				T x() const
 				{ return _x; }
 
-				size_t y() const
+				T y() const
 				{ return _y; }
 
-				void setX(int x_)
+				void setX(T x_)
 				{_x = x_; }
 
-				void setY(int y_)
+				void setY(T y_)
 				{_y = y_; }
 
-				const Point& move(size_t dx, size_t dy)
+                const BasicPoint& addX(T x)
+                {
+                  _x +=  x;
+                  return *this; 
+                }
+                
+                const BasicPoint& subX(T x)
+                {
+                  _x -=  x;
+                  return *this;
+                }
+                const BasicPoint& addY(T y)
+                {
+                  _y +=  y;
+                  return *this;
+                }
+                
+                const BasicPoint& subY(T y)
+                {
+                  _y -=  y;
+                  return *this;
+                }
+                
+				const BasicPoint& move(T dx, T dy)
 				{ _x += dy; _y += dy; return *this; }
 
-				const Point& operator=(const Point& pt)
+				const BasicPoint& operator=(const BasicPoint& pt)
 				{
 					_x = pt._x; _y = pt._y;
 					return *this;
 				}
 
-				bool operator==(const Point& pt) const
+				bool operator==(const BasicPoint& pt) const
 				{ return (_x == pt._x && _y == pt._y); }
 
-				bool operator!=(const Point& pt) const
+				bool operator!=(const BasicPoint& pt) const
 				{ return (_x != pt._x || _y != pt._y); }
 
-				bool operator>(const Point& pt) const
+				bool operator>(const BasicPoint& pt) const
 				{
-					if ( _x < pt._x || _y < pt._y) 
+					if ( _x < pt._x || _y < pt._y)
 						return false;
 
 					return ( (*this) != pt );
 				}
 
-				bool operator<(const Point& pt) const
+				bool operator<(const BasicPoint& pt) const
 				{
-					if ( _x > pt._x || _y > pt._y ) 
+					if ( _x > pt._x || _y > pt._y )
 						return false;
 
 					return ( pt != (*this) );
 				}
 
 			protected:
-				size_t _x;
-				size_t _y;
+				T _x;
+				T _y;
 		};
 
 	} // namespace Gfx

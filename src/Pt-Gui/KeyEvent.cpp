@@ -28,6 +28,7 @@ namespace Pt {
 
 namespace Gui {
 
+const type_info& KeyEvent::TYPE_INFO = typeid(KeyEvent);
 
 KeyEvent::KeyEvent(Widget& widget, const Type& type, KeyCode code, wchar_t text)
 : Event(widget), _type(type), _code(code), _text(text)
@@ -39,6 +40,13 @@ KeyEvent::~KeyEvent()
 {
 }
 
-} // namespace Gui
 
-} // namespace Ptv
+const std::type_info& KeyEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(KeyEvent);
+	return ti;
+}
+
+} // namespace gui
+
+} // namespace Pt

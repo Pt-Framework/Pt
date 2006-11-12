@@ -30,6 +30,9 @@ namespace Pt {
 namespace Gui {
 
 
+const type_info& MouseEvent::TYPE_INFO = typeid(MouseEvent);
+
+
 MouseEvent::MouseEvent(Widget& widget, size_t x, size_t y, const Button& button, const Action& action, unsigned int modifiers)
 : Event(widget), _x(x), _y(y), _button(button), _action(action), _modifiers(modifiers)
 {}
@@ -68,6 +71,12 @@ unsigned int MouseEvent::modifiers() const
 }
 
 
+const std::type_info& MouseEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(MouseEvent);
+	return ti;
+}
+
 } // namespace Gui
 
-} // namespace Ptv
+} // namespace Pt

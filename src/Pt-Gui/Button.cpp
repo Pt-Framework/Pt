@@ -21,16 +21,20 @@
 #include "Pt/Gfx/Size.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Button.h"
+#include <Pt/Gui/Painter.h>
 #include "Pt/Gui/CloseEvent.h"
 #include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
 #include "Pt/Gui/MoveEvent.h"
 #include "Pt/Gui/PaintEvent.h"
+#include "Pt/Gui/Painter.h"
 #include "Pt/Gui/ResizeEvent.h"
 #include "Pt/Gui/KeyEvent.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/Brush.h"
-
+#include "Pt/Gfx/Font.h"
+#include "Pt/Gfx/FontMetrics.h"
 
 #include <iostream>
 
@@ -43,11 +47,20 @@ namespace Pt {
 namespace Gui {
 
 
-Button::Button(Widget& parent, const Gfx::Point& at, const Gfx::Size& size)
-: Widget(parent, at, size),
- _backbuffer( new Pixmap( size.width(), size.height() ) )
+Button::Button(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const std::string& text)
+: Widget(parent, at, size)
+, _pressed(false)
+, _backbuffer(new Pixmap(size.width(), size.height()))
+, _text(text)
 {
-	
+	setForegroundColor(ARgbColor(0, 0, 0));
+	setBackgroundColor(ARgbColor(54272, 53248, 51200));
+	setInsets(Insets(3, 5, 3, 5));
+}
+
+
+Button::~Button()
+{
 }
 
 
@@ -66,40 +79,120 @@ const std::string& Button::text() const
 
 void Button::update()
 {
-	Painter& widgetPainter = getPainter();
-	Painter& backbufferPainter = _backbuffer->getPainter();
+	Painter widgetPainter = painter();
+	Painter backbufferPainter = _backbuffer->painter();
 
-	// draw backround
-	Brush brush(Brush::SolidFill, this->backgroundColor());
+	if (_pressed) {
+		drawPressed(widgetPainter);
+		drawPressed(backbufferPainter);
+	} else {
+		drawNormal(widgetPainter, false);
+		drawNormal(backbufferPainter, false);
+	}
+}
+
+
+void Button::drawPressed(Painter& painter)
+{
+	// Draw backround and border. First paint the background in the button's background color...
+	Brush brush(this->backgroundColor());
+
+	painter.setBrush(brush);
+	painter.fillRect( Rect( Point(0, 0), size() ) );
+
+	// ... then draw the border around the button.
+	Pen borderPen(1, ARgbColor(16384, 16384, 16384));
+
+	painter.setPen(borderPen);
+	painter.drawLine(Point(0, 0), Point(size().width() - 1, 0));
+	painter.drawLine(Point(0, 0), Point(0, size().height() - 1));
+
+	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+	painter.setPen(borderPen);
+
+	painter.drawLine(Point(1, 1), Point(size().width() - 2, 1));
+	painter.drawLine(Point(1, 1), Point(1, size().height() - 2));
+
+	borderPen = Pen(1, ARgbColor(65535, 65535, 65535));
+	painter.setPen(borderPen);
+
+	painter.drawLine(Point(size().width() - 1, 0), Point(size().width() - 1, size().height()));
+	painter.drawLine(Point(0, size().height() - 1), Point(size().width(), size().height() - 1));
+
+	// Draw button's text.
 	Pen pen(4, this->foregroundColor());
-
-	widgetPainter.setBrush(brush);
-	backbufferPainter.setBrush(brush);
-
-	widgetPainter.fillRect( Rect( Point(0, 0), size() ) );
-	backbufferPainter.fillRect( Rect( Point(0, 0), _backbuffer->size() ) );
-
-	widgetPainter.setPen(pen);
-
-	// TODO Replace with drawRect
-	widgetPainter.drawLine(Point(0, 0), Point(size().width(), 0));
-	widgetPainter.drawLine(Point(size().width(), 0), Point(size().width(), size().height()));
-	widgetPainter.drawLine(Point(size().width(), size().height()), Point(0, size().height()));
-	widgetPainter.drawLine(Point(0, size().height()), Point(0, 0));
-
-	backbufferPainter.setPen(pen);
-
-	// TODO Replace with drawRect
-	backbufferPainter.drawLine(Point(0, 0), Point(size().width(), 0));
-	backbufferPainter.drawLine(Point(size().width(), 0), Point(size().width(), size().height()));
-	backbufferPainter.drawLine(Point(size().width(), size().height()), Point(0, size().height()));
-	backbufferPainter.drawLine(Point(0, size().height()), Point(0, 0));
-
+	painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
+	painter.setPen(pen);
 
 	if( !_text.empty() ) {
-		widgetPainter.drawText( Point(7, 16), _text.c_str() );
-		backbufferPainter.drawText( Point(7, 16), _text.c_str() );
+		// Calculate the position of the text to center it inside the button.
+		FontMetrics metrics = painter.fontMetrics(_text);
+		ssize_t x = (size().width()  - metrics.width())  / 2;
+		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
+
+		// Draw the button's text.
+		painter.drawText( Point(x + 1, y + 1), _text.c_str() );
 	}
+}
+
+
+void Button::drawNormal(Painter& painter, bool focused)
+{
+	// Draw backround and border. First paint the background in the button's background color...
+	Brush brush(this->backgroundColor());
+
+	painter.setBrush(brush);
+	painter.fillRect( Rect( Point(0, 0), size() ) );
+
+	// ... then draw the border around the button.
+	Pen borderPen(1, ARgbColor(65535, 65535, 65535));
+
+	painter.setPen(borderPen);
+	painter.drawLine(Point(0, 0), Point(size().width() - 1, 0));
+	painter.drawLine(Point(0, 0), Point(0, size().height() - 1));
+
+	borderPen = Pen(1, ARgbColor(16384, 16384, 16384));
+	painter.setPen(borderPen);
+
+	painter.drawLine(Point(size().width() - 1, 0), Point(size().width() - 1, size().height()));
+	painter.drawLine(Point(0, size().height() - 1), Point(size().width(), size().height() - 1));
+
+	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+	painter.setPen(borderPen);
+
+	painter.drawLine(Point(size().width() - 2, 1), Point(size().width() - 2, size().height() - 1));
+	painter.drawLine(Point(1, size().height() - 2), Point(size().width() - 1, size().height() - 2));
+
+	// Draw button's text.
+	Pen pen(4, this->foregroundColor());
+	painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
+	painter.setPen(pen);
+
+	if( !_text.empty() ) {
+		// Calculate the position of the text to center it inside the button.
+		FontMetrics metrics = painter.fontMetrics(_text);
+		ssize_t x = (size().width()  - metrics.width())  / 2;
+		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
+
+		// Draw the button's text.
+		painter.drawText( Point(x, y), _text.c_str() );
+	}
+}
+
+
+
+Size Button::minimumSize()
+{
+	return Size(0, 0);
+}
+
+
+Size Button::preferredSize()
+{
+	FontMetrics metrics = painter().fontMetrics(_text);
+
+	return Size(metrics.width()  + insets().left() + insets().right(),
+	            metrics.height() + insets().top()  + insets().bottom());
 }
 
 
@@ -107,21 +200,37 @@ void Button::_resizeEvent(const ResizeEvent& event)
 {
 	_backbuffer.reset( new Pixmap( event.width(), event.height() ) );
 
+	Painter backbufferPainter = _backbuffer->painter();
 	this->update();
 }
 
 
 void Button::_paintEvent(const PaintEvent& event)
 {
-	getPainter().drawPixmap( event.origin(), *_backbuffer, event.rect() );
+	painter().drawPixmap( event.origin(), *_backbuffer, event.rect() );
 }
 
 
 void Button::_mouseEvent(const MouseEvent& event)
 {
-	if( event.button() == MouseEvent::LeftButton )
+	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton )
 	{
+		_pressed = true;
+		this->update();
+	}
+	else if (event.action() == MouseEvent::Release && event.button() == MouseEvent::LeftButton && _pressed)
+	{
+		_pressed = false;
+		this->update();
 		clicked.send();
+	}
+}
+
+void Button::_mouseMoveEvent(const MouseMoveEvent& event)
+{
+	if (_pressed && event.action() == MouseMoveEvent::Exited) {
+		_pressed = false;
+		this->update();
 	}
 }
 

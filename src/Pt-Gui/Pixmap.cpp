@@ -20,7 +20,6 @@
 #include "Pt/Gui/Pixmap.h"
 
 #include "PixmapImpl.h"
-#include "PixmapPainterImpl.h"
 
 #include <string>
 #include <iostream>
@@ -56,13 +55,13 @@ const Gfx::Size& Pixmap::size() const
 }
 
 
-Painter& Pixmap::getPainter()
+Painter Pixmap::painter()
 {
-	return _impl->getPainter();
+	return _impl->painter();
 }
 
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt

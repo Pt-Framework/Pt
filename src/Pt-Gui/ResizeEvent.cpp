@@ -30,8 +30,10 @@ namespace Pt {
 namespace Gui {
 
 
-ResizeEvent::ResizeEvent(Widget& widget, size_t width, size_t height)
-: Event(widget), _width(width), _height(height)
+const type_info& ResizeEvent::TYPE_INFO = typeid(ResizeEvent);
+
+ResizeEvent::ResizeEvent(Widget& widget, size_t width, size_t height, ResizeEvent::Type resizeType)
+: Event(widget), _width(width), _height(height), _resizeType(resizeType)
 {
 }
 
@@ -51,6 +53,18 @@ size_t ResizeEvent::height() const
 	return _height;
 }
 
+ResizeEvent::Type ResizeEvent::resizeType() const
+{
+	return _resizeType;
+}
+
+
+const std::type_info& ResizeEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(ResizeEvent);
+	return ti;
+}
+
 } // namespace Gui
 
-} // namespace Ptv
+} // namespace Pt

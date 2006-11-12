@@ -18,16 +18,22 @@
  ***************************************************************************/
 
 #include "Pt/Gui/Widget.h"
+
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/CloseEvent.h"
+#include "Pt/Gui/Event.h"
+#include "Pt/Gui/KeyEvent.h"
+#include "Pt/Gui/LayoutData.h"
+#include "Pt/Gui/LayoutManager.h"
+#include "Pt/Gui/NullLayout.h"
 #include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
 #include "Pt/Gui/MoveEvent.h"
+#include "Pt/Gui/Painter.h"
 #include "Pt/Gui/PaintEvent.h"
 #include "Pt/Gui/ResizeEvent.h"
-#include "Pt/Gui/KeyEvent.h"
 
 #include "WidgetImpl.h"
-#include "WidgetPainterImpl.h"
 
 #include <string>
 #include <iostream>
@@ -43,28 +49,68 @@ namespace Gui {
 
 
 Widget::Widget(Widget& parent, const Gfx::Point& at, const Gfx::Size& size)
-: _foregroundColor( ARgbColor(0, 0, 0) ),
-  _backgroundColor( ARgbColor(1, 1, 1) )
+: _parent(&parent)
+, _rect(at, size)
+, _foregroundColor( ARgbColor(0, 0, 0) )
+, _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
+	parent.addChild(*this);
 	_impl = new WidgetImpl( *this, &parent, at, size );
+	_layout.reset(NullLayout::createFor(*this));
 }
 
 
 Widget::Widget(const Gfx::Point& at, const Gfx::Size& size)
-: _foregroundColor( ARgbColor(0, 0, 0) ),
-  _backgroundColor( ARgbColor(1, 1, 1) )
+: _parent(0)
+, _rect(at, size)
+, _foregroundColor( ARgbColor(0, 0, 0) )
+, _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
 	_impl = new WidgetImpl( *this, 0, at, size );
+	_layout.reset(NullLayout::createFor(*this));
+}
+
+
+Widget::Widget(Widget& parent)
+: _parent(&parent)
+, _rect(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _foregroundColor( ARgbColor(0, 0, 0) )
+, _backgroundColor( ARgbColor(65535, 65535, 65535) )
+{
+	parent.addChild(*this);
+	_impl = new WidgetImpl(*this, &parent);
+	_layout.reset(NullLayout::createFor(*this));
+}
+
+
+Widget::Widget()
+: _parent(0)
+, _rect(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _foregroundColor( ARgbColor(0, 0, 0) )
+, _backgroundColor( ARgbColor(65535, 65535, 65535) )
+{
+	_impl = new WidgetImpl(*this, 0);
+	_layout.reset(NullLayout::createFor(*this));
 }
 
 
 Widget::~Widget()
 {
+	// Unparent this widget from its parent.
+	this->unparent();
+
+	// Unparent all children of this widget. Children remove themselves from the child list of this widget.
+	while (!_childWidgets.empty()) {
+		Widget* w = _childWidgets.front();
+		w->unparent();
+	}
+
+	destroyed.send<Widget&>(*this);
 	delete _impl;
 }
 
 
-void Widget::setTitle(const char* text)
+void Widget::setTitle(const std::string& text)
 {
 	_impl->setTitle(text);
 }
@@ -101,9 +147,24 @@ void Widget::setForegroundColor(const Gfx::ARgbColor& color)
 }
 
 
+void Widget::setInsets(const Insets& insets)
+{
+	if (_insets != insets) {
+		_insets = insets;
+		this->update();
+	}
+}
+
+
+const Insets& Widget::insets() const
+{
+	return _insets;
+}
+
+
 const Gfx::Rect& Widget::rect() const
 {
-	return _impl->rect();
+	return _rect;
 }
 
 const Gfx::Size& Widget::size() const
@@ -111,21 +172,40 @@ const Gfx::Size& Widget::size() const
 	return rect().size();
 }
 
-void Widget::move(size_t x, size_t y)
+void Widget::move(ssize_t x, ssize_t y)
 {
+	if (x == _rect.x() && y == _rect.y()) {
+		return;
+	}
+
 	_impl->move(x, y);
+	
+	_rect.setX(x);
+	_rect.setY(y);
+
+	this->updateLayout();
 }
 
 
-void Widget::resize(size_t width, size_t height)
+void Widget::resize(ssize_t width, ssize_t height)
 {
+	if (width == _rect.width() && height == _rect.height()) {
+		return;
+	}
+
 	_impl->resize(width, height);
+
+	_rect.setWidth(width);
+	_rect.setHeight(height);
+
+	this->updateLayout();
 }
 
 
 void Widget::show()
 {
 	_impl->show();
+	this->updateLayout();
 }
 
 
@@ -135,9 +215,115 @@ void Widget::hide()
 }
 
 
-Gui::Painter& Widget::getPainter()
+Size Widget::minimumSize()
 {
-	return _impl->getPainter();
+	return Size(0, 0); // TODO
+}
+
+
+Size Widget::preferredSize()
+{
+	// Non-top-level widgets that are not containers should override this method to provide a specific preferred size.
+	// Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
+	// If they don't have a layout manager they return the current size.
+	// TODO We can currently not check if the widget has no layout manager. Every widget has a layout manager, namely
+	// NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
+	// no layout manager set. Is this good?
+	
+	Size preferredSize = layout().preferredSize();
+	if (preferredSize.width() == 0 && preferredSize.height() == 0) {
+		// No layout manager given. Use the current size as preferred size.
+		return size();
+	}
+
+	// A layout manager returns a useful preferred size. Use it as preferred size.
+	return preferredSize;
+}
+
+
+void Widget::updateLayout()
+{
+	if (_layout.get() != 0) {
+		_layout->update();
+	}
+}
+
+
+void Widget::pack()
+{
+	if (parent() != 0) {
+		return; // This method has a parent, so is not a top-level widget. Thus it can not be packed.
+	}
+
+	resize(preferredSize().width(), preferredSize().height());
+}
+
+
+void Widget::setLayout(Layout* layout)
+{
+	_layout.reset(layout);
+}
+
+
+Layout& Widget::layout() const
+{
+	return *_layout.get();
+}
+
+
+const std::list<Widget*>& Widget::childWidgets()
+{
+	return _childWidgets;
+}
+
+
+const std::list<Widget*>& Widget::childWidgets() const
+{
+	return _childWidgets;
+}
+
+
+void Widget::unparent()
+{
+	this->reparent(0);
+}
+
+
+void Widget::reparent(Widget* newParent)
+{
+	if (_parent == newParent) {
+		return; // Same parent as it is at the moment.
+	}
+		
+	if (_parent) {
+		_parent->removeChild(*this);
+	}
+
+	if (newParent) {
+		_parent = newParent;
+		_impl->setParent(newParent);
+		newParent->addChild(*this);
+	} else {
+		_parent = 0;
+		_impl->setParent(0);
+	}
+}
+
+
+Widget* Widget::parent() const
+{
+	return _parent;
+}
+
+Painter Widget::painter()
+{
+	return _impl->painter();
+}
+
+
+void Widget::event(const Event& event)
+{
+	this->_event(event);
 }
 
 
@@ -166,6 +352,9 @@ void Widget::mouseMoveEvent(const MouseMoveEvent& event)
 void Widget::moveEvent(const MoveEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::moveEvent" << std::endl;
+	_rect.setX(event.x());
+	_rect.setY(event.y());
+
 	this->_moveEvent(event);
 }
 
@@ -180,17 +369,58 @@ void Widget::paintEvent(const PaintEvent& event)
 void Widget::resizeEvent(const ResizeEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
+	if (event.width() == Pt::size_t( _rect.width() ) &&
+	    event.height() == Pt::size_t( _rect.height()) ) {
+		return;
+	}
 
-	// we have be notified that our size has changed, so update
-	// the private members in WidgetImpl
-	_impl->resizeEvent(event);
+	_rect.setWidth(event.width());
+	_rect.setHeight(event.height());
+
 	this->_resizeEvent(event);
+
+	this->updateLayout();
 }
 
 
 void Widget::keyEvent(const KeyEvent& event)
 {
 	this->_keyEvent(event);
+}
+
+
+void Widget::_event(const Event& e)
+{
+	const type_info& typeInfo = e.typeInfo();
+
+	if( typeInfo == CloseEvent::TYPE_INFO ) {
+		const CloseEvent& ev = (const CloseEvent&)(e);
+		this->closeEvent(ev);
+	}
+	else if( typeInfo == MouseEvent::TYPE_INFO ) {
+		const MouseEvent& ev = (const MouseEvent&)(e);
+		this->mouseEvent(ev);
+	}
+	else if( typeInfo == KeyEvent::TYPE_INFO ) {
+		const KeyEvent& ev = (const KeyEvent&)(e);
+		this->keyEvent(ev);
+	}
+	else if( typeInfo == MoveEvent::TYPE_INFO ) {
+		const MoveEvent& ev = (const MoveEvent&)(e);
+		this->moveEvent(ev);
+	}
+	else if( typeInfo == MouseMoveEvent::TYPE_INFO ) {
+		const MouseMoveEvent& ev = (const MouseMoveEvent&)(e);
+		this->mouseMoveEvent(ev);
+	}
+	else if( typeInfo == ResizeEvent::TYPE_INFO ) {
+		const ResizeEvent& ev = (const ResizeEvent&)(e);
+		this->resizeEvent(ev);
+	}
+	else if( typeInfo == PaintEvent::TYPE_INFO ) {
+		const PaintEvent& ev = (const PaintEvent&)(e);
+		this->paintEvent(ev);
+	}
 }
 
 
@@ -240,6 +470,6 @@ void Widget::_keyEvent(const KeyEvent& event)
 }
 
 
-} // namespace gui
+} // namespace Gui
 
-} // namespace ptv
+} // namespace Pt

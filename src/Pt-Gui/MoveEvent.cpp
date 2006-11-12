@@ -30,6 +30,8 @@ namespace Pt {
 namespace Gui {
 
 
+const type_info& MoveEvent::TYPE_INFO = typeid(MoveEvent);
+
 MoveEvent::MoveEvent(Widget& widget, size_t x, size_t y)
 : Event(widget), _x(x), _y(y)
 {
@@ -49,6 +51,13 @@ size_t MoveEvent::x() const
 size_t MoveEvent::y() const
 {
 	return _y;
+}
+
+
+const std::type_info& MoveEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(MoveEvent);
+	return ti;
 }
 
 } // namespace Gui

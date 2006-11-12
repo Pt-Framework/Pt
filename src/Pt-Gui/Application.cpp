@@ -19,6 +19,7 @@
 #include "ApplicationImpl.h"
 
 #include "Pt/Signal.h"
+#include "Pt/Gui/Event.h"
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/PaintEvent.h"
 #include "Pt/Gui/CloseEvent.h"
@@ -29,9 +30,6 @@
 #include "Pt/Gui/KeyEvent.h"
 #include "Pt/Gui/Widget.h"
 
-#include <string>
-#include <iostream>
-#include <typeinfo>
 using namespace std;
 
 
@@ -39,21 +37,11 @@ namespace Pt {
 
 namespace Gui {
 
-const type_info& Application::TYPE_CLOSE_EVENT     = typeid(CloseEvent);
-const type_info& Application::TYPE_MOUSE_EVENT     = typeid(MouseEvent);
-const type_info& Application::TYPE_KEY_EVENT       = typeid(KeyEvent);
-const type_info& Application::TYPE_MOVE_EVENT      = typeid(MoveEvent);
-const type_info& Application::TYPE_RESIZE_EVENT    = typeid(ResizeEvent);
-const type_info& Application::TYPE_PAINT_EVENT     = typeid(PaintEvent);
-const type_info& Application::TYPE_MOUSEMOVE_EVENT = typeid(MouseMoveEvent);
-
 
 Application::Application()
 {
 	_impl = new ApplicationImpl(*this);
-	connect(_impl->event, slot(this->event) );
-
-	connect(this->event, *this, &Application::dispatchEvent);
+	connect(event, *this, &Application::dispatchEvent);
 }
 
 
@@ -100,35 +88,10 @@ void Application::processEvents()
 
 void Application::dispatchEvent(const Pt::Event& e) const
 {
-	const type_info& typeInfo = typeid(e);
+	const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
 
-	if( typeInfo == TYPE_CLOSE_EVENT ) {
-		const CloseEvent& ev = (const CloseEvent&)(e);
-		ev.widget().closeEvent( ev );
-	}
-	else if( typeInfo == TYPE_MOUSE_EVENT ) {
-		const MouseEvent& ev = (const MouseEvent&)(e);
-		ev.widget().mouseEvent( ev );
-	}
-	else if( typeInfo == TYPE_KEY_EVENT ) {
-		const KeyEvent& ev = (const KeyEvent&)(e);
-		ev.widget().keyEvent( ev );
-	}
-	else if( typeInfo == TYPE_MOVE_EVENT ) {
-		const MoveEvent& ev = (const MoveEvent&)(e);
-		ev.widget().moveEvent( ev );
-	}
-	else if( typeInfo == TYPE_MOUSEMOVE_EVENT ) {
-		const MouseMoveEvent& ev = (const MouseMoveEvent&)(e);
-		ev.widget().mouseMoveEvent( ev );
-	}
-	else if( typeInfo == TYPE_RESIZE_EVENT ) {
-		const ResizeEvent& ev = (const ResizeEvent&)(e);
-		ev.widget().resizeEvent( ev );
-	}
-	else if( typeInfo == TYPE_PAINT_EVENT ) {
-		const PaintEvent& ev = (const PaintEvent&)(e);
-		ev.widget().paintEvent( ev );
+	if (guiEvent) {
+		guiEvent->widget().event(*guiEvent);
 	}
 }
 

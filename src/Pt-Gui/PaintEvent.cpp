@@ -30,9 +30,15 @@ namespace Pt {
 namespace Gui {
 
 
-PaintEvent::PaintEvent(Widget& widget, size_t x, size_t y, size_t width, size_t height)
-: Event(widget),
-  _rect( Gfx::Point(x,y), Gfx::Size(width, height) )
+const type_info& PaintEvent::TYPE_INFO = typeid(PaintEvent);
+
+PaintEvent::PaintEvent(Widget& widget, Gfx::Rect rect)
+: Event(widget), _rect( rect )
+{
+}
+
+PaintEvent::PaintEvent(Widget& widget, Gfx::Point point, Gfx::Size size)
+: Event(widget), _rect( point, size )
 {
 }
 
@@ -41,6 +47,12 @@ PaintEvent::~PaintEvent()
 {}
 
 
+const std::type_info& PaintEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(PaintEvent);
+	return ti;
+}
+
 } // namespace Gui
 
-} // namespace Ptv
+} // namespace Pt

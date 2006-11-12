@@ -7,6 +7,7 @@
 #define PT_EVENT_H
 
 #include <Pt/Api.h>
+#include <typeinfo>
 
 
 namespace Pt {
@@ -25,7 +26,7 @@ namespace Pt {
 	 * The method clone() is abstract and needs to be defined by subclasses to
 	 * allow cloning of the specific Event object.
 	 */
-	class PT_EXPORT Event {
+	class PT_API Event {
 		public:
 			/**
 			 * \brief Constructor to initialize the Event class.
@@ -43,6 +44,12 @@ namespace Pt {
 
 			//! Clone method.
 			virtual Event* clone() const = 0;
+
+			/** @brief Returns the type info for this class of events.
+			 
+				 @return The type info for this class of events.
+			*/
+			virtual const std::type_info& typeInfo() const = 0;
 	};
 
 } // namespace Pt

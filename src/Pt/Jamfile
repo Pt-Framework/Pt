@@ -6,12 +6,15 @@ SharedLibrary Pt : Any.cpp
                    Connection.cpp
                    Connectable.cpp
                    Callable.cpp
+                   Date.cpp
+                   DateTime.cpp
                    Delegate.cpp
                    Exception.cpp
                    Reflectable.cpp
                    Property.cpp
                    PropertyProxy.cpp
                    Signal.cpp
+                   Time.cpp
                    TypeInfo.cpp ;
 
 SharedLibrary_MakeLocate Pt : bin ;

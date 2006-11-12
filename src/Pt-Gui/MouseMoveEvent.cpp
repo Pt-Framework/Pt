@@ -30,8 +30,14 @@ namespace Pt {
 namespace Gui {
 
 
-MouseMoveEvent::MouseMoveEvent(Widget& widget, size_t x, size_t y, unsigned int modifiers)
-: Event(widget), _x(x), _y(y), _modifiers(modifiers)
+const type_info& MouseMoveEvent::TYPE_INFO = typeid(MouseMoveEvent);
+
+MouseMoveEvent::MouseMoveEvent(Widget& widget, size_t x, size_t y, MouseMoveEvent::Action action, unsigned int modifiers)
+: Event(widget)
+, _x(x)
+, _y(y)
+, _action(action)
+, _modifiers(modifiers)
 {}
 
 
@@ -51,9 +57,22 @@ size_t MouseMoveEvent::y() const
 }
 
 
+MouseMoveEvent::Action MouseMoveEvent::action() const
+{
+	return _action;
+}
+
+
 unsigned int MouseMoveEvent::modifiers() const
 {
 	return _modifiers;
+}
+
+
+const std::type_info& MouseMoveEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(MouseMoveEvent);
+	return ti;
 }
 
 } // namespace Gui

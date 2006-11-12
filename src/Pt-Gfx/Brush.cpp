@@ -1,32 +1,23 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
+
 #include "Pt/Gfx/Brush.h"
+
 
 
 namespace Pt {
 
 namespace Gfx {
 
+Brush::Brush(const ARgbColor& color)
+: _brushData(new BrushData(SolidFill, color, 0))
+{
+}
 
-Brush::Brush(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture)
-: _brushData(new BrushData(fillStyle, color, texture))
+
+Brush::Brush(const ARgbImage* texture)
+: _brushData(new BrushData(TextureFill, ARgbColor(0, 0, 0), texture))
 {
 }
 
@@ -84,7 +75,24 @@ const ARgbImage& BrushData::texture() const
 }
 
 
+void BrushData::setFillStyle(Brush::FillStyle fillStyle)
+{
+	_fillStyle = fillStyle;
+}
 
-} // namespace gfx
 
-} // namespace ptv
+void BrushData::setColor(const ARgbColor& color)
+{
+	_color = color;
+}
+
+
+void BrushData::setTexture(const ARgbImage& texture)
+{
+	_texture = new ARgbImage(texture);
+}
+
+
+} // namespace Gfx
+
+} // namespace Pt

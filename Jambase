@@ -8,14 +8,14 @@ JAMDIR ?= jam ;
 rule JamInclude
 {
 	local _s = $(DOT) ;
-
 	_s = $(JAMDIR:R=$(_s)) ;
+	_s = $(<:R=$(_s)) ;
 
-	local _i ;	    
-	for _i in $(<)
-	{
-	    _s = $(_i:R=$(_s)) ;
-	}
+#	local _i ;	    
+#	for _i in $(<)
+#	{
+#	    _s = $(_i:R=$(_s)) ;
+#	}
 
 	include $(_s) ;
 }

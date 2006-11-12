@@ -30,6 +30,8 @@ namespace Pt {
 namespace Gui {
 
 
+const type_info& CloseEvent::TYPE_INFO = typeid(CloseEvent);
+
 CloseEvent::CloseEvent(Widget& widget)
 : Event(widget)
 {
@@ -39,6 +41,12 @@ CloseEvent::CloseEvent(Widget& widget)
 CloseEvent::~CloseEvent()
 {}
 
+
+const std::type_info& CloseEvent::typeInfo() const
+{
+	static const std::type_info& ti = typeid(CloseEvent);
+	return ti;
+}
 
 } // namespace Gui
 
