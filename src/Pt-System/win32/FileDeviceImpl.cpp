@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -120,7 +120,7 @@ void FileDeviceImpl::close() throw(IO::IOError)
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError)
 {
-	DWORD whence;
+	DWORD whence = FILE_BEGIN;
 	switch(mode)
 	{
 		case IODevice::SeekBegin:

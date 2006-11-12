@@ -1,20 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by PTV AG                                          *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
 #include "ThreadImpl.h"
@@ -79,19 +65,26 @@ void ThreadImpl::setPriority(Priority prio)
 		case HighestPriority:
 			winPrio = THREAD_PRIORITY_HIGHEST;
 			break;
+			
+		case InheritPriority:
+			// TODO: InheritPriority ???
+			break;
 	}
-
-	// TODO: InheritPriority ???
 
 	if(0 == ::SetThreadPriority(_handle, winPrio) )
 		throw SystemError("Could not set priority.", PT_SOURCEINFO);
 }
 
 
-void ThreadImpl::start(Thread::Mode mode) {
+void ThreadImpl::start(Thread::Mode mode) 
+{
 	SIZE_T stackSize = 0;
 
+#ifdef _WIN32_WCE
 	_handle = ::CreateThread(NULL, stackSize, entry, this, 0, &_id);
+#else
+	_handle = (HANDLE)_beginthreadex(NULL, stackSize, entry, this, 0, &_id);
+#endif
 
 	if(_handle == NULL) {
 		_id = 0;
@@ -133,7 +126,13 @@ void ThreadImpl::wait()
 void ThreadImpl::exit() throw()
 {
 	DWORD status = 0;
+	
+#ifdef _WIN32_WCE
 	::ExitThread(status);
+#else
+	_endthreadex(status);
+#endif
+
 }
 
 
@@ -149,13 +148,21 @@ void ThreadImpl::terminate()
 
 void ThreadImpl::yield() throw()
 {
+#ifdef _WIN32_WCE
+	::Sleep(0);
+#else
 	::SleepEx(0, FALSE);
+#endif
 }
 
 
 void ThreadImpl::sleep(unsigned int ms) throw()
 {
+#ifdef _WIN32_WCE
+	::Sleep(ms);
+#else
 	::SleepEx(ms, FALSE);
+#endif
 }
 
 

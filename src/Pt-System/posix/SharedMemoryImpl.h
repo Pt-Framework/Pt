@@ -50,5 +50,3 @@ namespace System {
 
 } // !namespace Pt
 
-
-#include "SharedMemoryImpl.cpp"

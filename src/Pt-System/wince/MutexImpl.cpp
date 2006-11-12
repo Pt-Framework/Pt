@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,78 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "MutexImpl.h"
-
-#include "Pt/System/SystemError.h"
-#include "Pt/System/Mutex.h"
-
-
-namespace Pt {
-
-namespace System {
-
-
-MutexImpl::MutexImpl(Mutex& mutex)
-: _mutex(mutex)
-{
-	_handle = CreateMutex(NULL, FALSE, NULL);
-
-	if( !_handle ) {
-		std::string text = std::string("Could not create mutex: ");
-		SystemError error(text, PT_SOURCEINFO);
-		_mutex.raiseError( error );
-		return;
-	}
-}
-
-
-MutexImpl::~MutexImpl()
-{
-	::CloseHandle(_handle);
-}
-
-
-void MutexImpl::lock()
-{
-	DWORD ret = WaitForSingleObject(_handle, INFINITE);
-
-	if(ret != WAIT_OBJECT_0) {
-		std::string text = std::string("Could not wait for mutex: ");
-		SystemError error(text, PT_SOURCEINFO);
-		_mutex.raiseError( error );
-		return;
-	}
-}
-
-
-bool MutexImpl::tryLock(unsigned int msec)
-{
-	DWORD ret = WaitForSingleObject(_handle, msec);
-
-	if(ret == WAIT_FAILED) {
-		std::string text = std::string("Could not wait for mutex: ");
-		SystemError error(text, PT_SOURCEINFO);
-		_mutex.raiseError( error );
-		return false;
-	}
-	else if(ret == WAIT_OBJECT_0)
-		return true;
-
-	return false;
-}
-
-
-void MutexImpl::unlock()
-{
-	if( !ReleaseMutex(_handle) ) {
-		std::string text = std::string("Could not release mutex: ");
-		SystemError error(text, PT_SOURCEINFO);
-		_mutex.raiseError( error );
-		return;
-	}
-}
-
-
-}
-
-}
+ 
+#include "../win32/MutexImpl.cpp"

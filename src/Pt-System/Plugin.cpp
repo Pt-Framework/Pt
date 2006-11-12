@@ -50,7 +50,7 @@ std::list<SharedLib*>& PluginManagerBase::sharedLibs()
 
 SharedLib* PluginManagerBase::openPlugin(const std::string& path) throw(SystemError)
 {
-	SharedLib* shlib = new SharedLib(path.c_str(), SharedLib::BindNow);
+	SharedLib* shlib = new SharedLib( path.c_str() );
 	return shlib;
 }
 

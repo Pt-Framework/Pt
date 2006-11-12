@@ -26,43 +26,32 @@ namespace Pt {
 
 namespace System {
 
-
-File::File() throw(SystemError)
+File::File(const std::string& path, mode mode)
 {
-	_impl = new FileImpl();
+	_impl = new FileImpl(path);
+	switch(mode) {
+		case UseExisting:
+			if ( !_impl->exists() )
+				throw IllegalArgument("File " + path + " does not exist.", PT_SOURCEINFO);
+			break;
+
+		case Create: 
+			if ( !_impl->exists() )
+				_impl->create();
+			break;
+		default: IllegalArgument("wrong mode for constructor", PT_SOURCEINFO);
+			 break;
+
+	}
 }
 
 
-File::File(const char* path) throw(SystemError)
+File::~File()
 {
-	_impl = new FileImpl();
-	this->open(path);
 }
 
 
-File::~File() throw()
-{
-	try {
-		_impl->close();
-	} catch(...) {}
-	
-	delete _impl;
-}
-
-
-void File::open(const char* path) throw(SystemError)
-{
-	_impl->open(path);
-}
-
-
-void File::close() throw(SystemError)
-{
-	_impl->close();
-}
-
-
-const char* File::path() const
+const std::string& File::path() const
 {
 	return _impl->path();
 }
@@ -90,14 +79,12 @@ void File::copy(const char* to) const
 {
 	return _impl->copy(to);
 }
-
-
-void File::move(const char* to)
-{
-	return _impl->move(to);
-}
 */
 
+void File::move(const std::string& newname)
+{
+	return _impl->move(newname);
+}
 
 } // namespace System
 

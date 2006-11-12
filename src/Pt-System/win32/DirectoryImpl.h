@@ -17,7 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Api.h"
 #include "Pt/System/FileSystemNode.h"
 #include <string>
 #include <windows.h>
@@ -27,7 +26,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_EXPORT DirectoryIteratorImpl {
+class PT_API DirectoryIteratorImpl {
 	public:
 		DirectoryIteratorImpl();
 
@@ -56,18 +55,24 @@ class PT_EXPORT DirectoryIteratorImpl {
 };
 
 
-class PT_EXPORT DirectoryImpl {
+class PT_API DirectoryImpl {
 	public:
 		DirectoryImpl();
 		~DirectoryImpl();
-		
+
 	public:
 		static void create(const char* dirpath);
+		static void remove(const std::string& path);
 
-		static void remove(const char* dirpath);
-		
+		static void move(const std::string& oldname, const std::string& newname);
+		static bool exists(const std::string& path);
+
+		static char separator()
+		{ return '\\'; }
+
+
 		static std::string current();
-		
+
 		static std::string system();
 
 		static void changeCurrent(const char* dirpath);

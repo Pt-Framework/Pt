@@ -16,6 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "win32.h"
 
 #include "Pt/Api.h"
 #include "Pt/System/Directory.h"
@@ -28,24 +29,27 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT FileSystemImpl {
+	class PT_API FileSystemImpl {
 		public:
 			FileSystemImpl()
 			{}
 
 			static FileSystemNode* create(const char* path)
 			{
-				DWORD attr = GetFileAttributes(path);
+				std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+				DWORD attr = GetFileAttributes( tpath.c_str() );
+
 				if(attr == 0xffffffff)
 					throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
-					
+
+
 				if(attr & FILE_ATTRIBUTE_DIRECTORY) {
 					return new Directory(path);
 				}
 				else {
 					return new File(path);
 				}
-			
+
 				return 0;
 			}
 	};

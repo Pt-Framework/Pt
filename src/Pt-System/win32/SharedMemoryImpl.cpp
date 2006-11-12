@@ -1,34 +1,31 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 PTV AG                                             *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
  *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include <windows.h>
-
+#include <iostream>
+#include "SharedMemoryImpl.h"
+#include "Pt/SourceInfo.h"
+#include "Pt/System/SharedMemory.h"
 
 namespace Pt {
 
 namespace System {
 
 
-SharedMemoryImpl::SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError)
-: _mode(omode), _size(sz)
+SharedMemoryImpl::SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode)
+: _name(name)
+, _size(sz)
 {
-	throw SystemError("SharedMemory not implemented", PT_SOURCEINFO);
+	_mode = omode==SharedMemory::Write ? PAGE_READWRITE : PAGE_READONLY;
+
+  _handle = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, _mode, 0, _size, _name);
+
+	if (_handle == NULL || _handle == INVALID_HANDLE_VALUE)
+	{
+		throw SystemError("Could not create Windows file mapping object", PT_SOURCEINFO);
+	}
 }
 
 
@@ -37,19 +34,31 @@ SharedMemoryImpl::~SharedMemoryImpl()
 }
 
 
-void SharedMemoryImpl::unlink() throw(SystemError)
+void SharedMemoryImpl::unlink()
 {
+	if ( CloseHandle(_handle)==0 )
+	{
+		throw SystemError("Could not unlink Windows shared-memory segment", PT_SOURCEINFO);
+	}
+	_handle = NULL;
 }
 
 
-void* SharedMemoryImpl::map(const void* addr) throw(SystemError)
+void* SharedMemoryImpl::map(const void* addr)
 {
-	return 0;
+	DWORD access = _mode==PAGE_READWRITE ? FILE_MAP_WRITE : FILE_MAP_READ;
+	LPVOID mapAddr = MapViewOfFile(_handle, access, 0, 0, _size);
+	if (mapAddr == NULL)
+	{
+		throw SystemError("Could not map view of file", PT_SOURCEINFO);
+	}
+	return mapAddr;
 }
 
 
-void SharedMemoryImpl::unmap(void* addr) throw(SystemError)
+void SharedMemoryImpl::unmap(void* addr)
 {
+	UnmapViewOfFile(addr);
 }
 
 

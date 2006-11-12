@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,28 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Export.h"
-#include <cstddef>
-
-
-namespace Pt {
-
-namespace System {
-
-	class PT_EXPORT SpinlockImpl {
-		public:
-			SpinlockImpl();
-
-			~SpinlockImpl();
-
-			void lock();
-
-			void unlock();
-
-		private:
-			volatile long _count;
-	};
-}
-
-}
+ 
+#include "../win32/SpinlockImpl.h"

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,36 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Export.h"
-#include "Pt/System/Mutex.h"
-
-#include <windows.h>
-
-
-namespace Pt {
-
-namespace System {
-
-	class PT_EXPORT MutexImpl {
-		public:
-			MutexImpl(Mutex& mutex);
-
-			~MutexImpl();
-
-			void lock();
-
-			bool tryLock(unsigned int msec);
-
-			void unlock();
-
-		private:
-			Mutex& _mutex;
-			HANDLE _handle;
-	};
-
-}
-
-}
-
-
+ 
+#include "../win32/MutexImpl.h"

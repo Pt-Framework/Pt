@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,38 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#ifndef Pt_SemaphoreImpl_h
-#define Pt_SemaphoreImpl_h
-
-#include <Pt/Export.h>
-#include <windows.h>
-
-
-namespace Pt {
-
-namespace System {
-	class Semaphore;
-
-	class PT_EXPORT SemaphoreImpl {
-		public:
-			SemaphoreImpl(Semaphore& sem, unsigned int initial = 0);
-
-			~SemaphoreImpl();
-
-			void wait();
-
-			bool tryWait();
-
-			void post();
-
-		private:
-			Semaphore& _sem;
-			HANDLE _handle;
-	};
-
-} // !namespace System
-
-} // !namespace Pt
-
-#endif
+ 
+#include "../win32/SemaphoreImpl.h"

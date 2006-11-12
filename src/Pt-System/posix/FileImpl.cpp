@@ -18,65 +18,39 @@
  ***************************************************************************/
 #include "FileImpl.h"
 
+#include "Pt/System/SystemError.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <iostream>
+using namespace std;
+
 
 namespace Pt {
 
 namespace System {
 
-FileImpl::FileImpl() throw(SystemError)
-: _fd(-1)
+FileImpl::FileImpl(const std::string& path)
+: _path(path)	
 {
+
 }
 
 
-FileImpl::~FileImpl() throw()
+FileImpl::~FileImpl()
 {
-}
-
-
-void FileImpl::open(const char* name) throw(SystemError)
-{
-	if(_fd != -1)
-		this->close();
-
-	// try to open read/write...
-	_fd = ::open(name, O_RDWR);
-
-	// try to open for reading...
-	if(_fd == -1)
-		_fd = ::open(name, O_RDONLY);
-
-	// ... Houston, we got a problem.
-	if(_fd == -1) {
-		throw SystemError("Could not open file handle", PT_SOURCEINFO);
-	}
-
-	_path = name;
-}
-
-
-void FileImpl::close() throw(SystemError)
-{
-	if(_fd != -1)
-	{
-		if( ::close(_fd) != 0 )
-			throw SystemError("Could not close file handle", PT_SOURCEINFO);
-
-		_fd = -1;
-	}
 }
 
 
 std::size_t FileImpl::size() const
 {
 	struct stat buff;
-	if( 0 != fstat(_fd, &buff) )
+
+	if( 0 != stat(_path.c_str(), &buff) )
 		throw SystemError("Could not stat file", PT_SOURCEINFO);
 
 	return buff.st_size;
@@ -85,7 +59,11 @@ std::size_t FileImpl::size() const
 
 void FileImpl::resize(std::size_t newSize)
 {
-	int ret = ftruncate(_fd, newSize);
+	int ret = 0;
+	do {
+		ret = truncate(_path.c_str(), newSize);
+	} while ( ret == EINTR );
+
 	if(ret != 0)
 		throw SystemError("Could not truncate file", PT_SOURCEINFO);
 }
@@ -93,24 +71,48 @@ void FileImpl::resize(std::size_t newSize)
 
 void FileImpl::remove()
 {
-	this->close();
-
 	if(0 != ::remove(_path.c_str()) == -1)
 		throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 
 
-void FileImpl::copy(const char* to) const
+void FileImpl::copy(const std::string& to) const
 {
 	throw SystemError("Could not copy file", PT_SOURCEINFO);
 }
 
 
-void FileImpl::move(const char* to)
+void FileImpl::move(const std::string& to)
 {
-	//this->close();
+	if (0 != ::rename(_path.c_str(), to.c_str()))
+		throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
+ 	_path = to;	
+}
 
-	throw SystemError("Could not move file", PT_SOURCEINFO);
+void FileImpl::create()
+{
+	FILE* f = fopen(_path.c_str(), "w");
+	if (!f)
+		throw SystemError("Could not create file " + _path, PT_SOURCEINFO);
+
+	fclose(f);
+}
+
+bool FileImpl::exists()
+{
+	struct stat buff;
+
+	int err = stat(_path.c_str(), &buff);
+	if (err == -1 )
+	{
+		if (errno == ENOENT || errno == ENOTDIR)
+			return false;
+
+		throw SystemError("Could not stat file " + _path, PT_SOURCEINFO);
+	}
+
+	return true;
+
 }
 
 }

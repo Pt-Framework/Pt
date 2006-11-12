@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Drner                          *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,73 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Export.h"
-#include "Pt/System/Thread.h"
-
-#include <windows.h>
-
-
-namespace Pt {
-
-namespace System {
-
-	class PT_EXPORT ThreadImpl {
-		public:
-			ThreadImpl(Thread& obj, Thread::Mode mode);
-
-			~ThreadImpl();
-
-
-			Thread::Mode mode() const
-			{ return _mode; }
-
-			Thread::State state() const
-			{ return _state; }
-
-			void start(Thread::Mode mode);
-
-			void detach();
-
-			void wait();
-
-			void setPriority(Thread::Priority prio);
-
-			Thread::Priority priority() const
-			{ return _priority; }
-
-			static void exit() throw();
-
-			void terminate();
-
-			static void yield() throw();
-
-			static void sleep(unsigned int ms) throw();
-
-		public:
-			static DWORD WINAPI entry(void* arg)
-			{
-				ThreadImpl* impl = (ThreadImpl*)arg;
-				impl->_thread.main();
-				return 0;
-			}
-
-		protected:
-			void close();
-
-		private:
-			Thread& _thread;
-			HANDLE  _handle;
-			DWORD  _id;
-			Thread::Priority _priority;
-			Thread::State _state;
-			Thread::Mode _mode;
-	};
-
-
-} // namespace System
-
-} // namespace Ptv
-
-
-
+ 
+#include "../win32/ThreadImpl.h"

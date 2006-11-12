@@ -31,7 +31,8 @@ namespace System {
 
 Application::Application()
 {
-	//connect(_loop.event, this->event);
+    connect(_loop.event, this->event);
+    //connect(_loop.event, *this, &Application::dispatchEvent);
 }
 
 
@@ -70,7 +71,6 @@ void Application::processEvents()
 	_loop.processEvents();
 }
 
+} // namespace System
 
-} // namespace Gui
-
-} // namespace Ptv
+} // namespace Pt

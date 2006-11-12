@@ -1,24 +1,11 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 PTV AG                                             *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
  *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_SemaphoreImpl_h
-#define Pt_SemaphoreImpl_h
+#ifndef PT_SEMAPHOREIMPL_H
+#define PT_SEMAPHOREIMPL_H
 
 #include <Pt/Api.h>
 #include <windows.h>
@@ -28,16 +15,36 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT SemaphoreImpl {
+	//! @brief MS Windows specific semaphore class
+	/**
+		This class represents the MS Windows specific implementation
+		of the Semaphore class. It is used as delegate from the common
+		Semaphore class.
+	*/
+	class PT_API SemaphoreImpl {
 		public:
+			//! @brief Default Constructor
 			SemaphoreImpl(unsigned int initial = 0);
 
+			//! @brief Destructor
 			~SemaphoreImpl();
 
+			//! @brief MS Windows specific implementation of wait()
+			/**
+				@see Semaphore#wait()
+			*/
 			void wait();
 
+			//! @brief MS Windows specific implementation of tryWait()
+			/**
+				@see Semaphore#tryWait()
+			*/
 			bool tryWait();
 
+			//! @brief MS Windows specific implementation of post()
+			/**
+				@see Semaphore#post()
+			*/
 			void post();
 
 		private:

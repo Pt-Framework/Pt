@@ -32,29 +32,29 @@ namespace System {
 	class FileSystemNode;
 
 
-	class PT_EXPORT DirectoryIteratorImpl {
+	class PT_API DirectoryIteratorImpl {
 		public:
 			DirectoryIteratorImpl();
-	
+
 			DirectoryIteratorImpl(const char* path);
-	
+
 			~DirectoryIteratorImpl();
-	
+
 			int ref();
-	
+
 			int deref();
-	
+
 			void advance();
-	
+
 			const char* path() const
 			{ return _path.c_str(); }
-	
+
 			FileSystemNode& node();
-	
+
 			std::string name() const;
-	
+
 			bool operator==(const DirectoryIteratorImpl& impl) const;
-	
+
 		private:
 			unsigned int _refs;
 			std::string _path;
@@ -64,19 +64,26 @@ namespace System {
 	};
 
 
-	class PT_EXPORT DirectoryImpl {
+	class PT_API DirectoryImpl {
 		public:
-			DirectoryImpl();
-			~DirectoryImpl();
-			
+			DirectoryImpl() {}
+			~DirectoryImpl() {}
+
 		public:
 			static void create(const char* dirpath);
 
-			static void remove(const char* dirpath);
+			static void remove(const std::string& path);
+
+			static void move(const std::string& oldname, const std::string& newname);
+
+			static bool exists(const std::string& path);
 
 			static std::string current();
 
 			static std::string system();
+
+			static char separator()
+			{ return '/'; }
 
 			static void changeCurrent(const char* dirpath);
 	};

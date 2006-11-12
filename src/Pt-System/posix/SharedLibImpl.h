@@ -1,5 +1,7 @@
-#include "Pt/System/SharedLib.h"
+#ifndef PT_SHAREDLIBIMPL_H
+#define PT_SHAREDLIBIMPL_H
 
+#include "Pt/System/SharedLib.h"
 #include "Pt/System/SystemError.h"
 
 #include <string>
@@ -12,41 +14,58 @@ namespace Pt {
 
 namespace System {
 
+//! @brief Implementation of SharedLib class for POSIX systems
+/**
+	This class represents the implementation of the bridge pattern of
+	the SharedLib class for POSIX systems. It implements the specific
+	procedures of SharedLib in a system dependend manner. The behaviour
+	of the shared library loading is adapted to the behaviour of shared
+	library loading under MS Windows operating systems.
+	This means that the mode of loading	shared libraries is limitted
+	to the RTLD_NOW mode only.
 
+	@see SharedLib documentation
+*/
 class SharedLibImpl {
 	public:
+		//! @brief default Constructor
 		SharedLibImpl()
 		: _handle(0)
 		{ }
 
-		SharedLibImpl(const char* path, SharedLib::BindMode mode)
+		//! @brief Constructor which takes the path to the shared library to load
+		/**
+			@see SharedLib#SharedLib()
+			@param path the shared library to load implicitely
+		*/
+		SharedLibImpl(const char* path)
 		: _handle(0)
 		{
-			this->open(path, mode);
+			this->open(path);
 		}
 
-		~SharedLibImpl() throw()
+		//! @brief Destructor
+		~SharedLibImpl()
 		{
 			if(_handle)
 				::dlclose(_handle);
 		}
 
-		void open(const char* path, SharedLib::BindMode mode)
+		//! @brief Loads the shared library specified by path
+		/**
+			This method holds the operating system dependend code to actually
+			load the shared library.
+
+			@see SharedLib#open()
+			@param path the shared library to load
+		*/
+		void open(const char* path)
 		{
 			if(_handle)
 				return;
 
-			int flags = 0;
-			switch(mode)
-			{
-				case SharedLib::BindLazy:
-					flags = RTLD_LAZY;
-					break;
-				case SharedLib::BindNow:
-					flags = RTLD_NOW;
-					break;
-			}
-			//flags |= RTLD_GLOBAL; this causes a SIGSEGV when loading multiple plugins with same exported vars
+			//since lazy loading is not supported by every target platform
+			int flags = RTLD_NOW;
 
 			_handle = ::dlopen(path, flags);
 			if( !_handle ) {
@@ -54,24 +73,50 @@ class SharedLibImpl {
 			}
 		}
 
+		//! @brief Resolves the symbol specified by symbol
+		/**
+			This method holds the operating system dependend code to actually
+			resolve the symbol within the shared library.
+
+			@see SharedLib#resolve()
+			@param symbol the symbol to resolve
+			@return the resolved symbol or 0 if the symbol cannot be resolved
+		*/
 		void* resolve(const char* symbol)
 		{
 			if(_handle)
 				return ::dlsym(_handle, symbol);
-				
+
 			return 0;
 		}
 
+		//! @brief Returns if the loading of the shared library was successful or not
+		/**
+			@see SharedLib#failed()
+			@return true if the loading of the shared library has failed,
+			false otherwise
+		*/
 		bool failed()
 		{ return _handle == 0; }
 
 	public:
+		//! @brief Implicitely loads the shared library specified by path and tries to resolve the symbol specified by symbol
+		/**
+			This method contains the operating system dependend code to load the
+			shared library and to resolve the desired symbol.
+
+			@see SharedLib#failed()
+			@param path the shared library to load
+			@param symbol the symbol to resolve within the loaded library
+			@param the resolved symbol or 0 if the loading of the shared
+			library has failed
+		*/
 		static void* openResolve(const char* path, const char* symbol)
 		{
 			void* handle = ::dlopen(path, RTLD_NOW);
 			if(handle)
 				return ::dlsym(handle, symbol);
-				
+
 			return 0;
 		}
 
@@ -82,3 +127,5 @@ class SharedLibImpl {
 } // namespace System
 
 } // namespace Pt
+
+#endif

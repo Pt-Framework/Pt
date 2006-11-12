@@ -1,20 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   Copyright (C) 2006 												   *
  ***************************************************************************/
 #include "ConditionImpl.h"
 #include "Pt/Exception.h"
@@ -43,7 +28,6 @@ ConditionImpl::~ConditionImpl()
 	DeleteCriticalSection(&_critSec);
 }
 
-
 void ConditionImpl::wait(Mutex& mtx)
 {
 	ConditionImpl::wait(mtx, INFINITE);
@@ -60,9 +44,6 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms )
 	HANDLE handles[2];
 	handles[0] = _event1;
 	handles[1] = _event2;
-
-	if( ms == size_t(-1) )
-		ms = INFINITE;
 
 	DWORD result = WaitForMultipleObjects(2, handles, 0, ms);
 

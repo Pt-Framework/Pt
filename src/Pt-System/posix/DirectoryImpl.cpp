@@ -26,6 +26,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
+
 
 
 namespace Pt {
@@ -68,14 +70,14 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 
 
 int DirectoryIteratorImpl::ref()
-{ 
-	return ++_refs; 
+{
+	return ++_refs;
 }
 
 
 int DirectoryIteratorImpl::deref()
-{ 
-	return --_refs; 
+{
+	return --_refs;
 }
 
 
@@ -104,7 +106,7 @@ FileSystemNode& DirectoryIteratorImpl::node()
 
 	// build complete path
 	std::string path = _path;
-	if( !path.empty() && path[path.size()] != '/') 
+	if( !path.empty() && path[path.size()] != '/')
 		path += '/';
 	path += this->name();
 
@@ -128,7 +130,7 @@ std::string DirectoryIteratorImpl::name() const
 
 bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 {
-	return _current == impl._current; 
+	return _current == impl._current;
 }
 
 
@@ -138,18 +140,40 @@ void DirectoryImpl::create(const char* dirpath)
 		throw SystemError("Could not create directory" , PT_SOURCEINFO);
 }
 
-
-void DirectoryImpl::remove(const char* dirpath)
+bool DirectoryImpl::exists(const std::string& path)
 {
-	if( -1 == ::rmdir(dirpath) )
+	struct stat buff;
+	int err = stat(path.c_str(), &buff);
+	if (err == -1 )
+	{
+		if (errno == ENOENT || errno == ENOTDIR)
+			return false;
+		throw SystemError("Could not stat file " + path, PT_SOURCEINFO);
+	}
+
+	return true;
+}
+
+
+void DirectoryImpl::remove(const std::string& path)
+{
+	if( -1 == ::rmdir(path.c_str()) )
 		throw SystemError("Could not remove directory" , PT_SOURCEINFO);
+}
+
+
+void DirectoryImpl::move(const std::string& oldname, const std::string& newname)
+{
+	if (0 != ::rename(oldname.c_str(), newname.c_str()))
+		throw SystemError("Could not move directory" + oldname + " to " + newname , PT_SOURCEINFO);
+
 }
 
 
 std::string DirectoryImpl::current()
 {
 	char cwd[PATH_MAX];
-	
+
 	if( !getcwd(cwd, PATH_MAX) )
 		throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
 

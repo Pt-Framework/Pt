@@ -26,28 +26,29 @@ namespace Pt {
 
 namespace System {
 
-class PT_EXPORT FileImpl {
+class PT_API FileImpl {
 	public:
-		FileImpl() throw(SystemError);
+		FileImpl(const std::string& path);
 
-		~FileImpl() throw();
+		~FileImpl();
 
-		void open(const char* name) throw(SystemError);
-
-		void close() throw(SystemError);
-
-		const char* path() const throw()
-		{ return _path.c_str(); }
+		const std::string& path()
+		{ return _path; }
 
 		std::size_t size() const;
-				
+
 		void resize(std::size_t newSize);
 
 		void remove();
-		
-		void copy(const char* to) const;
-		
-		void move(const char* to);
+
+		void copy(const std::string& to) const;
+
+		void move(const std::string& to);
+
+		bool exists();
+
+		void create();
+
 
 	private:
 		std::string _path;

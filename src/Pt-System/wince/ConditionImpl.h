@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,37 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Export.h"
-#include "Pt/System/Mutex.h"
-
-#include <windows.h>
-//#include <errno.h>
+ 
+#include "../win32/ConditionImpl.h"
 
 
-namespace Pt {
-
-namespace System {
-
-		class PT_EXPORT ConditionImpl {
-		public:
-			ConditionImpl();
-
-			~ConditionImpl();
-
-			bool wait(Mutex& mtx, unsigned int ms );
-
-			void signal();
-
-			void broadcast();
-
-		private:
-			HANDLE _event1;
-			HANDLE _event2;
-			unsigned int _blockCount;
-			CRITICAL_SECTION _critSec;
-	};
-
-}
-
-}

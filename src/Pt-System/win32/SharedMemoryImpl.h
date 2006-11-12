@@ -1,53 +1,62 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 PTV AG                                             *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
  *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/Types.h"
+#ifndef PT_SYSTEM_SHAREDMEMORYIMPL_H
+#define PT_SYSTEM_SHAREDMEMORYIMPL_H
+
+#include "Pt/Api.h"
 #include "Pt/System/SharedMemory.h"
-
-#include <string>
-
+#include "Pt/System/SystemError.h"
+#include <windows.h>
 
 namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT SharedMemoryImpl {
-		public:
+class PT_API SharedMemoryImpl {
+	public:
 
-			SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError);
+		//! @brief Constructor
+		//  @throw SystemError
+		SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode);
 
-			~SharedMemoryImpl();
+		//! @brief Destructor
+		~SharedMemoryImpl();
 
-			void unlink() throw(SystemError);
+		//! @brief MS Windows specific implementation of unlink()
+		/**
+			@see SharedMemory#unlink()
+			@throw SystemError
+		*/
+		void unlink();
 
-			void* map(const void* addr) throw(SystemError);
+		//! @brief MS Windows specific implementation of map()
+		/**
+			@see SharedMemory#map()
 
-			void unmap(void* addr) throw(SystemError);
+			@param addr ignored
+			@throw SystemError
+		*/
+		void* map(const void* addr);
 
-		private:
-			std::string _name;
-			SharedMemory::OpenMode _mode;
-			size_t _size;
-	};
+		//! @brief MS Windows specific implementation of unmap()
+		/**
+			@see SharedMemory#unmap()
+			@throw SystemError
+		*/
+		void unmap(void* addr);
+
+	private:
+		LPCSTR _name;
+		DWORD  _mode;
+		DWORD  _size;
+		HANDLE _handle;
+};
 
 } // !namespace System
 
 } // !namespace Pt
 
-
-#include "SharedMemoryImpl.cpp"
+#endif

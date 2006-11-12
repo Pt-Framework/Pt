@@ -3,7 +3,8 @@ SubDir TOP src Pt-System ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 
-SharedLibrary Pt-System : [ FDirName $(SYS:L) ConditionImpl.cpp ]
+SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
+                          [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
                           [ FDirName $(SYS:L) FileImpl.cpp ]
                           [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
@@ -12,7 +13,10 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) SemaphoreImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
                           [ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
+                          [ FDirName $(SYS:L) ProcessImpl.cpp ]
+                          [ FDirName $(SYS:L) SharedMemoryImpl.cpp ]
                           Application.cpp
+                          Clock.cpp
                           Condition.cpp
                           Directory.cpp
                           Event.cpp
@@ -31,7 +35,8 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           Spinlock.cpp
                           SystemError.cpp
                           Thread.cpp
-                          ThreadKey.cpp 
+                          ThreadKey.cpp
+                          TimeValue.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt Pt-IO ;

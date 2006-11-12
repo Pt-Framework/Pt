@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,46 +16,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "SpinlockImpl.h"
-
-#include <windows.h>
-
-
-namespace Pt {
-
-namespace System {
-
-
-SpinlockImpl::SpinlockImpl()
-: _count(0)
-{
-}
-
-
-SpinlockImpl::~SpinlockImpl()
-{
-}
-
-
-void SpinlockImpl::lock()
-{
-	// busy loop until unlock
-	while( InterlockedExchange((long*)&_count,_count) != 0 ) {
-		;
-	}
-
-	// set locked
-	InterlockedExchange((long*)&_count, 1);
-}
-
-
-void SpinlockImpl::unlock()
-{
-	// set unlocked
-	InterlockedExchange((long*)&_count, 0);
-}
-
-
-}
-
-}
+ 
+#include "../win32/SpinlockImpl.cpp"

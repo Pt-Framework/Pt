@@ -17,10 +17,10 @@ SharedLib::SharedLib()
 }
 
 
-SharedLib::SharedLib(const char* name, BindMode mode)
+SharedLib::SharedLib(const char* name)
 : _impl(0)
 {
-	_impl = new SharedLibImpl(name, mode);
+	_impl = new SharedLibImpl(name);
 }
 
 
@@ -30,9 +30,9 @@ SharedLib::~SharedLib()
 }
 
 
-SharedLib& SharedLib::open(const char* path, SharedLib::BindMode mode)
+SharedLib& SharedLib::open(const char* path)
 {
-  _impl->open(path, mode);
+  _impl->open(path);
   return *this;
 }
 
@@ -71,5 +71,5 @@ void* SharedLib::openResolve(const char* path, const char* symbol)
 } // namespace Pt
 
 
-void Pt_System_testSharedLib()
-{ cerr << "Pt_System_testSharedLib() called." << endl; }
+void ptv_system_testSharedLib()
+{ cerr << "ptv_system_testSharedLib() called." << endl; }
