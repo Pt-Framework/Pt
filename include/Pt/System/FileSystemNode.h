@@ -20,6 +20,7 @@
 #ifndef Pt_System_FileSystemNode_h
 #define Pt_System_FileSystemNode_h
 
+#include <string>
 #include <Pt/Types.h>
 #include <Pt/Api.h>
 
@@ -27,7 +28,8 @@ namespace Pt {
 
 namespace System {
 
-class PT_EXPORT FileSystemNode {
+class PT_API FileSystemNode 
+{
 	public:
 		FileSystemNode()
 		{}
@@ -36,16 +38,15 @@ class PT_EXPORT FileSystemNode {
 		{}
 
 		//! Returns the path of the file system node.
-		virtual const char* path() const = 0;
+		virtual const std::string& path() const = 0;
 
 		//! Returns the size of the file system node.
 		virtual std::size_t size() const = 0;
 
-		//! Resizes the file system node.
-		virtual void resize(std::size_t length) = 0;
+		virtual void remove() = 0;
 
-		//virtual void remove() = 0;
-
+		// virtual void rename(const std::string& newname);
+		virtual void move(const std::string& newname) = 0;
 };
 
 } // namespace System

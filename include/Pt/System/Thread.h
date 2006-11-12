@@ -1,64 +1,18 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Dürner                           *
+ *   Copyright (C) 2006 by PTV AG                                          *
  *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#ifndef Pt_Thread_h
-#define Pt_Thread_h
+#if !defined(PTV_Thread_H)
+#define PTV_Thread_H
 
 #include <Pt/Api.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Runnable.h>
 
 
 namespace Pt {
 
 namespace System {
-
-
-    //! @brief Runnable interface.
-    /**
-	*   The Runnable interface should be implemented by any class whose
-    *   instances are intended to be executed by a thread. The class must
-    *   define a method of no arguments called run. This interface is
-    *   designed to provide a common protocol for objects that wish to
-    *   execute code while they are active. In addition, Runnable provides
-    *   the means for a class to be active while not subclassing Thread.
-    *   A class that implements Runnable can run without subclassing Thread
-    *   by instantiating a Thread instance and passing itself in as the target.
-    */
-    class PT_EXPORT Runnable : public NonCopyable
-    {
-        public:
-	        //! @brief Thread function
-			/** When an object implementing interface Runnable is used to
-            *   create a thread, starting the thread causes the object's
-            *   run method to be called in that separately executing thread.
-            *   The general contract of the method run is that it may take any
-            *   action whatsoever.
-            */
-            virtual void run() = 0;
-
-        protected:
-             //! @brief Default constructor
-            Runnable(){};
-
-            //! @brief Destructor
-            virtual ~Runnable(){};
-    };
 
 	//! @brief Thread class.
 	/**
@@ -100,7 +54,7 @@ namespace System {
     *    A thread can give up CPU time either by calling Thread::yield() or
     *    Thread::sleep() to stop for a specified periode of time.
     */
-	class PT_EXPORT Thread : public NonCopyable
+	class PT_API Thread : public NonCopyable
     {
 		friend class ThreadImpl;
 
@@ -220,8 +174,9 @@ namespace System {
             Runnable* _runnable;
 	};
 
+
 } // !namespace System
 
 } // !namespace Pt
 
-#endif
+#endif // PT_Thread_H

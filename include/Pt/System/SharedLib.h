@@ -1,101 +1,106 @@
-#ifndef Pt_SharedLib_h
-#define Pt_SharedLib_h
+/***************************************************************************
+ *   Copyright (C) 2006 PTV AG                                             *
+ *                                                                         *
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef PT_SYSTEM_SHAREDLIB_H
+#define PT_SYSTEM_SHAREDLIB_H
 
 #include <Pt/Api.h>
 #include <Pt/NonCopyable.h>
 
 #include <string>
 
+
 namespace Pt {
 
 namespace System {
 
-//! Shared library loader
-/*!
+//! @ingroup ptv-system
+//! @brief Shared library loader
+/**
   A class that can be used to dynamically load shared libraries
   to resolve symbols from it. The example below shows how to retrieve
-  the address of the cos function in the math library:
+  the address of the myProcedure function in the MySharedLib library:
 
-  \code
-    SharedLib shlib("libm.so");
-    double (*cosine)(double);
-    cosine = shlib["cos"];
-    (*cosine)(2.0);
-  \endcode
+  @code
+    typedef int (*MyProcType)();
+	SharedLib shlib("MySharedLib.dll");
+	void* procAddr = shlib["myProcedure"];
+	MyProcType proc;
+	int result = -1;
+
+	proc = (MyProcType)procAddr;
+    result = proc();
+  @endcode
 */
-class PT_EXPORT SharedLib : private NonCopyable {
+class PT_API SharedLib : private NonCopyable {
 	public:
-		//! Binding mode
-		enum BindMode {
-			BindNow,  /** < Bind now */
-			BindLazy  /** < Bind lazy (on first call) */
-		};
 
-		//! Default Constructor
+		//! @brief Default Constructor
 		SharedLib();
 
-		//! Constructor
+		//! @brief Constructor
 		/**
 			Constructs the object and loads the shared library specified
 			in the path argument.
 
 			@param path the path to the shared library
-			@param mode enum specifying the mode when loading the shlib
 		*/
-		SharedLib(const char* path, BindMode mode = BindNow);
+		SharedLib(const char* path);
 
-		//! Destructor
+		//! @brief Destructor
 		/**
 			The destructor unloads the shared library from memory.
 		*/
 		~SharedLib();
 
-		//! Loads a shared library.
+		//! @brief Loads a shared library.
 		/**
 			Loads a shared library.
 
 			@param path the path to the shared library
-			@param mode enum specifying the mode when loading the shlib
 		*/
-		SharedLib& open(const char* path, BindMode mode = BindNow);
+		SharedLib& open(const char* path);
 
-		//! Resolve symbol from shared library
+		//! @brief Resolve symbol from shared library
 		/**
 			Resolves a symbol from the shared library.
 
-			@symbol the name of the symbol to be resolved.
+			@param symbol the name of the symbol to be resolved.
 			@return the address of the symbol or NULL if it was not found
 		*/
 		void* operator[](const char* symbol);
 
-		//! Resolve symbol from shared library
+		//! @brief Resolve symbol from shared library
 		/**
 			Resolves a symbol from the shared library.
 
-			@symbol the name of the symbol to be resolved.
+			@param symbol the name of the symbol to be resolved.
 			@return the address of the symbol or NULL if it was not found
 		*/
 		void* resolve(const char* symbol);
 
-		//! Object status checking
+		//! @brief Object status checking
 		/**
 			@return NULL if object is in a failed state, otherwise non-NULL
 		*/
 		operator void*();
 
-		//! Object status checking
+		//! @brief Object status checking
 		/**
 			@return true if object is in a failed state
 		*/
 		bool operator!();
 
 	public:
-		//! Resolve symbol from a shared library
+		//! @brief Resolve symbol from a shared library
 		/**
 			Loads and resolves a symbol from the shared library.
 
 			@param path the path to the shared library
-			@symbol the name of the symbol to be resolved.
+			@param symbol the name of the symbol to be resolved.
 			@return the address of the symbol or NULL if it was not found
 		*/
 		static void* openResolve(const char* path, const char* symbol);
@@ -110,7 +115,8 @@ class PT_EXPORT SharedLib : private NonCopyable {
 
 extern "C" {
 
-	PT_EXPORT void Pt_System_testSharedLib();
+	/// \exclude
+	PT_API void pt_system_testSharedLib();
 
 }
 

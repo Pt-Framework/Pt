@@ -1,90 +1,120 @@
-#ifndef Pt_System_Directory_h
-#define Pt_System_Directory_h
+/***************************************************************************
+ *   Copyright (C) 2006 by PTV AG                                          *
+ *                                                                         *
+ ***************************************************************************/
 
-#include <Pt/Exception.h>
+#ifndef PTV_SYSTEM_DIRECTORY_H
+#define PTV_SYSTEM_DIRECTORY_H
 
+#include <Pt/System/System.h>
+#include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
+#include <Pt/Api.h>
 
 #include <string>
 #include <list>
 #include <iostream>
 
+
 namespace Pt {
 
 namespace System {
 
-	class FileSystemNode;
-
-
-	class PT_EXPORT Directory : public FileSystemNode {
+	/** Cycling through Directories.
+	 *
+	 * You use the iterator as follows:
+	\code
+	Directory d("/usr");
+	Directory::iterator it = d.begin();
+	while (it != d.end())
+	{
+		std::cout << "name : " << (*it).path() << std::endl;
+		++it;
+	}
+	\endcode
+ 	*/
+	class PT_API DirectoryIterator {
 		public:
-			typedef std::string value_type;
+			DirectoryIterator();
 
+			DirectoryIterator(const char* path);
+
+			DirectoryIterator(const DirectoryIterator& it);
+
+			~DirectoryIterator();
+
+			DirectoryIterator& operator++();
+
+			DirectoryIterator& operator=(const DirectoryIterator& it);
+
+			bool operator==(const DirectoryIterator& it) const;
+
+			bool operator!=(const DirectoryIterator& it) const;
+
+			FileSystemNode& operator*() const;
+
+		private:
+			class DirectoryIteratorImpl* _impl;
+	};
+
+/** Directory Operations.
+ This class contains methods to create, move, delete directories and gives to possibility to iterate over the contents of the directory.
+
+!Iterator Example:
+
+\code
+Directory d("/usr");
+Directory::iterator it = d.begin();
+while (it != d.end())
+{
+	std::cout << "name : " << (*it).path() << std::endl;
+	++it;
+}
+\endcode
+*/
+	class PT_API Directory : public FileSystemNode {
 		public:
-			class PT_EXPORT Iterator {
-				public:
-					Iterator();
+			typedef DirectoryIterator Iterator;
 
-					Iterator(const char* path);
+			enum mode { Create, UseExisting};
 
-					Iterator(const Iterator& it);
+			Directory(const std::string& path, mode m = UseExisting);
 
-					~Iterator();
-
-					Iterator& operator++();
-
-					Iterator& operator=(const Iterator& it);
-
-					bool operator==(const Iterator& it) const;
-
-					bool operator!=(const Iterator& it) const;
-
-					//FileSystemNode& node();
-
-					FileSystemNode& operator*() const;
-
-				private:
-					class DirectoryIteratorImpl* _impl;
-			};
-
-		public:
-			Directory(const char* path)
-			: _path(path)
-			{ /* check if Dir is valid? */ }
-
-			~Directory() throw()
+			~Directory()
 			{ }
 
-			const char* path() const
-			{ return _path.c_str(); }
+			bool exists() const;
+
+			///< gives the system-specific path separator
+			static char separator();
+
+			virtual const std::string& path() const
+			{ return _path; }
 
 			virtual std::size_t size() const
 			{ return 0; }
 
-			virtual void resize(std::size_t length)
-			{ /* do nothing on purpose */ }
-
 			//! Returns an iterator to the node in the directory.
-			Iterator begin() const
-			{ return Iterator( _path.c_str() ); }
+			DirectoryIterator begin() const
+			{ return DirectoryIterator( _path.c_str() ); }
 
 			//! Returns an iterator to the end of the directory.
-			Iterator end() const
+			DirectoryIterator end() const
 			{
-				static Iterator _end;
+				static DirectoryIterator _end;
 				return _end;
 			}
 
+			virtual void remove();
+
+			virtual void move(const std::string& newname);
+
 		public:
-			static Directory create(const char* dirpath);
-
-			static void remove(const char* dirpath);
-
+			// DEPRECATED
 			static Directory system();
 
+			// DEPRECATED
 			static Directory current();
-
-			static void changeCurrent(const char* dirpath);
 
 		private:
 			std::string _path;

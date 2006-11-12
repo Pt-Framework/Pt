@@ -30,32 +30,31 @@ namespace Pt {
 
 namespace System {
 
-class PT_EXPORT File : public FileSystemNode, public NonCopyable {
+/** Provides common operations on files.
+ */
+class PT_API File : public FileSystemNode, public NonCopyable {
 	private:
 		class FileImpl* _impl;
 
 	public:
-		File() throw(SystemError);
 
-		File(const char* path) throw(SystemError);
+		enum mode { Create, UseExisting };
 
-		~File() throw();
+		File(const std::string& path, mode mode = UseExisting);
 
-		void open(const char* path) throw(SystemError);
+		~File();
 
-		void close() throw(SystemError);
+		virtual const std::string& path() const;
 
-		const char* path() const;
+		virtual std::size_t size() const;
 
-		std::size_t size() const;
-				
 		void resize(std::size_t newSize);
 
-		void remove();
+		virtual void remove();
 
 		//void copy(const char* to) const;
 
-		//void move(const char* to);
+		virtual void move(const std::string& newname);
 };
 
 } // namespace System

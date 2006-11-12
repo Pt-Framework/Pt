@@ -1,31 +1,16 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
 
-#ifndef Pt_System_Application_h
-#define Pt_System_Application_h
+#ifndef PTV_SYSTEM_APPLICATION_H
+#define PTV_SYSTEM_APPLICATION_H
 
 #include <Pt/Api.h>
 #include <Pt/Connectable.h>
-#include <Pt/System/EventLoop.h>
-#include <Pt/System/Event.h>
 #include <Pt/Application.h>
 
+#include <Pt/System/Event.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
@@ -53,12 +38,12 @@ namespace System {
 	 * EventLoop::processEvents() to keep the application responsive.
 	 *
 	 * There are convenience methods available for easier access to functionality of
-	 * the underlaying event loop. commitEvent() delegates to EventLoop::commitEvent(),
+	 * the underlying event loop. commitEvent() delegates to EventLoop::commitEvent(),
 	 * queueEvent() delegates to EventLoop::delegateEvent() and processEvents() delegates
 	 * to EventLoop::processEvents() without making it necessary to first obtain the
 	 * event loop manually.
 	 */
-	class PT_EXPORT Application : public Pt::Application {
+	class PT_API Application : public Pt::Application {
 		public:
 			Application();
 
@@ -91,7 +76,7 @@ namespace System {
 			 * This method delegates directly to EventLoop::commitEvent(const Event&).
 			 * @param event The event object that will be added to the event queue.
 			 */
-			virtual void commitEvent(const Pt::Event& event);
+            virtual void commitEvent(const Pt::Event& event);
 
 			/**
 			 * \brief Queues the given event to this application's EventLoop without
@@ -124,8 +109,8 @@ namespace System {
 			EventLoop _loop;
 	};
 
-} // namespace System
+} // namespace system
 
-} // namespace Pt
+} // namespace ptv
 
 #endif
