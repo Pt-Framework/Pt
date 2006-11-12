@@ -16,14 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Gui/Pixmap.h"
-
 #include "PixmapImpl.h"
 
-#include <string>
-#include <iostream>
-using namespace std;
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gui/Painter.h"
 
 
 namespace Pt {
