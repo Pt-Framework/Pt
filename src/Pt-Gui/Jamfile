@@ -30,8 +30,8 @@ SharedLibrary_LinkSharedLibraries Pt-Gui : Pt-Gfx Pt-System Pt ;
 SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : bin ;
 
-Main ScribbleClassic : ScribbleClassic.cpp ;
-Main_LinkSharedLibraries ScribbleClassic : Pt-Gui Pt-Gfx Pt-System Pt-IO Pt ;
-Main_MakeLocate ScribbleClassic : bin ;
+Main Scribble : Scribble.cpp ;
+Main_LinkSharedLibraries Scribble : Pt-Gui Pt-Gfx Pt-System Pt-IO Pt ;
+Main_MakeLocate Scribble : bin ;
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;
