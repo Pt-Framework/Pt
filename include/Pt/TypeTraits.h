@@ -31,8 +31,8 @@ namespace Pt {
 		static bool isSpecialized()
 		{ return false; }
 
-		static const char* typeName()
-		{ return typeid(T).name(); }
+		//static const char* typeName()
+		//{ return typeid(T).name(); }
 	};
 
 
@@ -83,6 +83,15 @@ namespace Pt {
 
 		static const char* typeName()
 		{ return "double"; }
+	};
+
+	template <>
+	struct PT_EXPORT TypeTraits<std::string> {
+		static bool isSpecialized()
+		{ return true; }
+
+		static const char* typeName()
+		{ return "std::string"; }
 	};
 
 } // !namespace Pt

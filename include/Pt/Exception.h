@@ -28,6 +28,11 @@
 #include <exception>
 
 
+namespace std
+{
+	class PT_API std::exception;
+}
+
 namespace Pt {
 
 	//! @ingroup Pt
