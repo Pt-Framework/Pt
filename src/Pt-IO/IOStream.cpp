@@ -21,8 +21,6 @@
 #include "Pt/IO/IOStream.h"
 using namespace Pt;
 
-#include <locale>
-using namespace std;
 
 
 
