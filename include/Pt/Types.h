@@ -42,7 +42,7 @@ namespace Pt {
 	typedef unsigned long  ulong;
 
 	/// \exclude
-	using std::size_t;
+	typedef ::size_t size_t;
 	/// \exclude
 	typedef std::ptrdiff_t ssize_t;
 

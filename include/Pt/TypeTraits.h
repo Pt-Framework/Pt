@@ -31,8 +31,8 @@ namespace Pt {
 		static bool isSpecialized()
 		{ return false; }
 
-		//static const char* typeName()
-		//{ return typeid(T).name(); }
+		static const char* typeName()
+		{ return "unknown"; }
 	};
 
 
