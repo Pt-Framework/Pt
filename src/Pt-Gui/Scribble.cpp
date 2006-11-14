@@ -30,7 +30,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 		: Widget( )
 		, _lastX(0)
 		, _lastY(0)
-		, _penSize(10)
+		, _penSize(2)
 		, _penColor(0, 0, 0)
 		{
 			Widget::setTitle("Scribble Classic");
@@ -83,10 +83,10 @@ class ScribbleWidget : public Pt::Gui::Widget
 
 			Gui::Painter widgetPainter = painter();
 			Gui::Painter pixmapPainter = _pixmap->painter();
-	
+
 			widgetPainter.setBrush(brush);
 			widgetPainter.fillRect( Rect(Point(0, 0), this->size() ) );
-			
+
 			pixmapPainter.setBrush(brush);
 			pixmapPainter.fillRect( Rect(Point(0, 0), this->size() ) );
 		}
@@ -111,10 +111,10 @@ class ScribbleWidget : public Pt::Gui::Widget
 			if (event.action() != MouseMoveEvent::Moved) {
 				return;
 			}
-			
+
 			Gui::Painter widgetPainter = painter();
 			Gui::Painter pixmapPainter = _pixmap->painter();
-		
+
 			if( event.modifiers() & MouseMoveEvent::LeftButtonDown )
 			{
 				widgetPainter.drawLine( Point(_lastX, _lastY), Point(event.x(), event.y()) );
@@ -130,7 +130,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 			Gui::Painter widgetPainter = painter();
 			Gui::Painter pixmapPainter = _pixmap->painter();
 
-			if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton) 
+			if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
 			{
 				_lastX = event.x();
 				_lastY = event.y();
@@ -148,7 +148,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
 			pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
 			pixmapPainter.fillRect( Rect( Point(0, 0), newPixmap->size() ) );
-			
+
 			pixmapPainter.drawPixmap( Point(0, 0), *_pixmap );
 			_pixmap.reset(newPixmap);
 
@@ -164,13 +164,13 @@ class ScribbleWidget : public Pt::Gui::Widget
 		virtual void _keyEvent(const KeyEvent& event)
 		{
 			if(event.text() == 'r') {
-				this->setPenColor( ARgbColor(65535, 0, 0) ); 
+				this->setPenColor( ARgbColor(65535, 0, 0) );
 			}
 			else if(event.text() == 'g') {
-				this->setPenColor( ARgbColor(0, 58000, 0) ); 
+				this->setPenColor( ARgbColor(0, 58000, 0) );
 			}
 			else if(event.text() == 'b') {
-				this->setPenColor( ARgbColor(0, 0, 65535) ); 
+				this->setPenColor( ARgbColor(0, 0, 65535) );
 			}
 		}
 
