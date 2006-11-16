@@ -85,10 +85,6 @@ namespace Pt {
 				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
-					//                     1111111100000000
-					//                     7654321076543210
-					//                     XRRRRRGGGGGBBBBB
-					//                     CCCCCCCCCCCCCCCC
 					a = 65535;
 					r = ((uint32_t(_val) & 0x7C00) >> 10) * 65535 / 31;
 					g = ((uint32_t(_val) & 0x03E0) >> 5 ) * 65535 / 31;

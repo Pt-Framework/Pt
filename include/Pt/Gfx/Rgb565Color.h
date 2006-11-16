@@ -20,6 +20,8 @@
 #ifndef Pt_Gfx_Rgb565Color_h
 #define Pt_Gfx_Rgb565Color_h
 
+#include <assert.h>
+
 #include <Pt/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 
@@ -39,9 +41,9 @@ namespace Pt {
 		//! \brief Rgb565 color class
 		//!
 		//! Valid range of the color components for this color model:\n
-		//!    Red   : 0 to 255 (clipped to 5 bit on storage)\n
-		//!    Green : 0 to 255 (clipped to 6 bit on storage)\n
-		//!    Blue  : 0 to 255 (clipped to 5 bit on storage)
+		//!    Red   : 0 to 31 \n
+		//!    Green : 0 to 63 \n
+		//!    Blue  : 0 to 31
 		template <>
 		class PT_EXPORT PT_PACKED BasicColor<Rgb565> {
 			public:
@@ -87,33 +89,24 @@ namespace Pt {
 				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
-					//                     1111111100000000
-					//                     7654321076543210
-					//                     RRRRRGGGGGGBBBBB
-					//                     CCCCCCCCCCCCCCCC
+					// 7654321076543210
+					// RRRRRGGGGGGBBBBB
+					// 1111100000000000
+					// 0000011111100000
+					// 0000000000011111
 					a = 65535;
-					r = ((uint32_t(_val) & 0xF800) >> 11) * 65535 / 31;
-					g = ((uint32_t(_val) & 0x07E0) >> 5 ) * 65535 / 63;
-					b = ((uint32_t(_val) & 0x001F) >> 0 ) * 65535 / 31;
-/*					r = (_val & 0xF800);
-					g = (_val & 0x07E0) << 5;
-					b = (_val & 0x001F) << 12;*/
+					r = ( _val           >> 11) / 31 * 65535;
+					g = ((_val & 0x07E0) >>  5) / 63 * 65535;
+					b = ( _val & 0x001F       ) / 31 * 65535;
 				}
 				//!
 				//! Set this color from the given ARGB components of the master color model
 				//! (sources range from 0 to 65535)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					setRed  (r / 2048);
-					setGreen(g / 1024);
-					setBlue (b / 2048);
-					/*int32_t rr = static_cast<int32_t>(r) * a / 32767;
-					int32_t gg = static_cast<int32_t>(g) * a / 32767;
-					int32_t bb = static_cast<int32_t>(b) * a / 32767;
-
-					setRed  ( uint8_t(rr>>7) );
-					setGreen( uint8_t(gg>>7) );
-					setBlue ( uint8_t(bb>>7) );*/
+					setRed  (r / 2114);
+					setGreen(g / 1040);
+					setBlue (b / 2114);
 				}
 
 				//! Assignment operator from the same color space
@@ -141,38 +134,38 @@ namespace Pt {
 				inline uint16_t color() const
 				{ return _val; }
 
-				//! Return the red component of this color
+				//! Return the red component of this color (in range 0 to 31)
 				inline uint8_t red() const
-				{ return (_val & 0xF800) >> 8; }
+				{ return _val >> 11; }
 
-				//! Return the green component of this color
+				//! Return the green component of this color (in range 0 to 63)
 				inline uint8_t green() const
-				{ return (_val & 0x07E0) >> 3; }
+				{ return (_val & 0x07E0) >> 5; }
 
-				//! Return the blue component of this color
+				//! Return the blue component of this color (in range 0 to 31)
 				inline uint8_t blue() const
-				{ return (_val & 0x001F) << 3; }
+				{ return _val & 0x001F; }
 
 				//! Set the packed color value of this color
 				inline void setColor(uint16_t c)
 				{ _val = c; }
 
-				//! Set the red component of this color
+				//! Set the red component of this color (in range 0 to 31)
 				inline void setRed(uint8_t r)
-				{ _val &= 0x07FF; _val |= (uint16_t(r&0xF8) << 8); }
+				{ assert(r <= 31); _val = (_val & 0x07FF) | (uint16_t(r) << 11); }
 
-				//! Set the green component of this color
+				//! Set the green component of this color (in range 0 to 63)
 				inline void setGreen(uint8_t g)
-				{ _val &= 0xF81F; _val |= (uint16_t(g&0xFC) << 3); }
+				{ assert(g <= 63); _val = (_val & 0xF81F) | (uint16_t(g) << 5); }
 
-				//! Set the blue component of this color
+				//! Set the blue component of this color (in range 0 to 31)
 				inline void setBlue(uint8_t b)
-				{ _val &= 0xFFE0; _val |= (uint16_t(b&0xF8) >> 3); }
+				{ assert(b <= 31); _val = (_val & 0xFFE0) | uint16_t(b); }
 
-				//! Get brightness
+				//! Get brightness (in range 0 to 31)
 				inline uint8_t brightness() const;
 
-				//! Set brightness
+				//! Set brightness (in range 0 to 31)
 				inline void setBrightness(uint8_t l);
 
 			protected:

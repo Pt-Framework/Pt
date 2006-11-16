@@ -26,7 +26,7 @@ using namespace Pt::Gfx;
 Pt::uint8_t Pt::Gfx::BasicColor<Rgb565>::brightness() const
 {
 	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
+	Pt::uint8_t g = green() / 2;
 	Pt::uint8_t b = blue();
 	return((r>=g && r>=b) ? r : ((g>=r && g>=b) ? g : b));
 }
@@ -40,25 +40,25 @@ void Pt::Gfx::BasicColor<Rgb565>::setBrightness(Pt::uint8_t l)
 	}
 
 	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
+	Pt::uint8_t g = green() / 2;
 	Pt::uint8_t b = blue();
 
 	if(r>=g && r>=b) {
 		float o = r;
 		setRed  (l);
-		setGreen(Pt::uint8_t(g * l / o));
+		setGreen(Pt::uint8_t(g * l / o * 2.03226f));
 		setBlue (Pt::uint8_t(b * l / o));
 	}
 	else if (g>=r && g>=b) {
 		float o = g;
 		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(l);
+		setGreen(l * 2.03226f);
 		setBlue (Pt::uint8_t(b * l / o));
 	}
 	else {
 		float o = b;
 		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(Pt::uint8_t(g * l / o));
+		setGreen(Pt::uint8_t(g * l / o * 2.03226f));
 		setBlue (l);
 	}
 }
