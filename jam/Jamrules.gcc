@@ -1,5 +1,5 @@
 CC              = gcc ;
-C++             = g++ ;
+C++             = g++ ; if $(CXX) { C++ = $(CXX) ; }
 CCFLAGS 	+= -Wall ;
 C++FLAGS	+= $(CCFLAGS) ; # -std=c++98 -D__STDC_VERSION__=199901L ;
 LINKFLAGS	?= $(CCFLAGS) ;
