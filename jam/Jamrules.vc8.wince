@@ -34,29 +34,43 @@ STDHDRS = \"$(VISUALC)\\vc\\ce\\include\"
 
 # Builds executables for wince
 #
+#rule Main
+#{
+#	# in case of debug d.exe is added
+#	local _target = $(<:S=$(SUFEXE)) ;
+#
+#	LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;
+#
+#	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+#	Objects $(>) ;
+#
+#	# Tell jam where it can find the .pdb, .lib, .exp
+#	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+#	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
+#	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
+#	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
+#	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
+#
+#	# clean rules only replace '.exe' suffic while 'd' for debug is kept
+#	Clean clean : $(_target) ;
+#	Clean clean : $(_target:S=.lib) ;
+#	Clean clean : $(_target:S=.exp) ;
+#	Clean clean : $(_target:S=.pdb) ;
+#	Clean clean : $(_target:S=.ilk) ;
+#}
+
 rule Main
 {
-	# in case of debug d.exe is added
-	local _target = $(<:S=$(SUFEXE)) ;
-
+	local _target = $(1:S=$(SUFEXE)) ;
 	LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;
-
-	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-	Objects $(>) ;
-
-	# Tell jam where it can find the .pdb, .lib, .exp
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.lib) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.exp) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.pdb) : $(LOCATE_TARGET) ;
-	MakeLocate $(_target:S=.ilk) : $(LOCATE_TARGET) ;
-
-	# clean rules only replace '.exe' suffic while 'd' for debug is kept
-	Clean clean : $(_target) ;
-	Clean clean : $(_target:S=.lib) ;
-	Clean clean : $(_target:S=.exp) ;
-	Clean clean : $(_target:S=.pdb) ;
-	Clean clean : $(_target:S=.ilk) ;
+	
+	SetObjectOutput $(1) ;	
+	
+	SetOutputDirectory $(1) : $(_target) : $(3) ;
+	
+	Objects $(2) : $(3) ;
+	
+	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;    
 }
 
 
