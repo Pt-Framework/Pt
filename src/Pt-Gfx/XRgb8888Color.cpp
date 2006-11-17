@@ -1,21 +1,29 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Exception.h"
-#include "Pt/Gfx/XRgb8888Color.h"
-
-#include <iomanip>
-#include <sstream>
-using namespace std;
+#include <Pt/Exception.h>
+#include <Pt/Gfx/XRgb8888Color.h>
+using namespace Pt;
+using namespace Pt::Gfx;
 
 
-namespace Pt {
-
-namespace Gfx {
-
-
-Pt::uint8_t BasicColor<XRgb8888>::brightness() const
+Pt::uint8_t Pt::Gfx::BasicColor<XRgb8888>::brightness() const
 {
 	Pt::uint8_t r = red();
 	Pt::uint8_t g = green();
@@ -24,7 +32,7 @@ Pt::uint8_t BasicColor<XRgb8888>::brightness() const
 }
 
 
-void BasicColor<XRgb8888>::setBrightness(Pt::uint8_t l)
+void Pt::Gfx::BasicColor<XRgb8888>::setBrightness(Pt::uint8_t l)
 {
 	if(l == 0) {
 		_val = 0;
@@ -53,8 +61,4 @@ void BasicColor<XRgb8888>::setBrightness(Pt::uint8_t l)
 		setGreen(Pt::uint8_t(g * l / o));
 		setBlue (l);
 	}
-}
-
-}
-
 }

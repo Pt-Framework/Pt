@@ -20,6 +20,8 @@
 #ifndef Pt_Gfx_XRgb1555Color_h
 #define Pt_Gfx_XRgb1555Color_h
 
+#include <assert.h>
+
 #include <Pt/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 
@@ -37,9 +39,9 @@ namespace Pt {
 		//! \brief XRgb1555 color class
 		//!
 		//! Valid range of the color components for this color model:\n
-		//!    Red   : 0 to 255 (clipped to 5 bit on storage)\n
-		//!    Green : 0 to 255 (clipped to 5 bit on storage)\n
-		//!    Blue  : 0 to 255 (clipped to 5 bit on storage)
+		//!    Red   : 0 to 31 \n
+		//!    Green : 0 to 31 \n
+		//!    Blue  : 0 to 31
 		template <>
 		class PT_EXPORT PT_PACKED BasicColor<XRgb1555> {
 			public:
@@ -85,10 +87,16 @@ namespace Pt {
 				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
+					// 1111111100000000
+					// 7654321076543210
+					// XRRRRRGGGGGBBBBB
+					// 0111110000000000
+					// 0000001111100000
+					// 0000000000011111
 					a = 65535;
-					r = ((uint32_t(_val) & 0x7C00) >> 10) * 65535 / 31;
-					g = ((uint32_t(_val) & 0x03E0) >> 5 ) * 65535 / 31;
-					b = ((uint32_t(_val) & 0x001F) >> 0 ) * 65535 / 31;
+					r = uint32_t( _val           >> 10) * 65535 / 31;
+					g = uint32_t((_val & 0x03E0) >>  5) * 65535 / 31;
+					b = uint32_t( _val & 0x001F       ) * 65535 / 31;
 				}
 				//!
 				//! Set this color from the given ARGB components of the master color model
@@ -125,38 +133,38 @@ namespace Pt {
 				inline uint16_t color() const
 				{ return _val; }
 
-				//! Return the red component of this color
+				//! Return the red component of this color (in range 0 to 31)
 				inline uint8_t red() const
-				{ return (_val & 0x7C00) >> 7; }
+				{ return _val >> 10; }
 
-				//! Return the green component of this color
+				//! Return the green component of this color (in range 0 to 31)
 				inline uint8_t green() const
-				{ return (_val & 0x03E0) >> 2; }
+				{ return (_val & 0x03E0) >> 5; }
 
-				//! Return the blue component of this color
+				//! Return the blue component of this color (in range 0 to 31)
 				inline uint8_t blue() const
-				{ return (_val & 0x001F) << 3; }
+				{ return _val & 0x001F; }
 
 				//! Set the packed color value of this color
 				inline void setColor(uint16_t c)
-				{ _val = c & 0x7FFF; }
+				{ _val = c; }
 
-				//! Set the red component of this color
+				//! Set the red component of this color (in range 0 to 31)
 				inline void setRed(uint8_t r)
-				{ _val &= 0x83FF; _val |= (uint16_t(r&0xF8) << 7); }
+				{ assert(r <= 31); _val = (_val & 0x83FF) | (uint16_t(r) << 10); }
 
-				//! Set the green component of this color
+				//! Set the green component of this color (in range 0 to 31)
 				inline void setGreen(uint8_t g)
-				{ _val &= 0xFC1F; _val |= (uint16_t(g&0xF8) << 2); }
+				{ assert(g <= 31); _val = (_val & 0xFC1F) | (uint16_t(g) << 5); }
 
-				//! Set the blue component of this color
+				//! Set the blue component of this color (in range 0 to 31)
 				inline void setBlue(uint8_t b)
-				{ _val &= 0xFFE0; _val |= (uint16_t(b&0xF8) >> 3); }
+				{ assert(b <= 31); _val = (_val & 0xFFE0) | uint16_t(b); }
 
-				//! Get brightness
+				//! Get brightness (in range 0 to 31)
 				inline uint8_t brightness() const;
 
-				//! Set brightness
+				//! Set brightness (in range 0 to 31)
 				inline void setBrightness(uint8_t l);
 
 			protected:

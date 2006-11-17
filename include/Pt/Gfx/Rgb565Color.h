@@ -89,24 +89,25 @@ namespace Pt {
 				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
+					// 1111111100000000
 					// 7654321076543210
 					// RRRRRGGGGGGBBBBB
 					// 1111100000000000
 					// 0000011111100000
 					// 0000000000011111
 					a = 65535;
-					r = ( _val           >> 11) / 31 * 65535;
-					g = ((_val & 0x07E0) >>  5) / 63 * 65535;
-					b = ( _val & 0x001F       ) / 31 * 65535;
+					r = uint32_t( _val           >> 11) * 65535 / 31;
+					g = uint32_t((_val & 0x07E0) >>  5) * 65535 / 31;
+					b = uint32_t( _val & 0x001F       ) * 65535 / 31;
 				}
 				//!
 				//! Set this color from the given ARGB components of the master color model
 				//! (sources range from 0 to 65535)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					setRed  (r / 2114);
-					setGreen(g / 1040);
-					setBlue (b / 2114);
+					setRed  (r / 2048);
+					setGreen(g / 1024);
+					setBlue (b / 2048);
 				}
 
 				//! Assignment operator from the same color space

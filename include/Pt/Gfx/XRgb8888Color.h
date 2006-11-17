@@ -83,19 +83,22 @@ namespace Pt {
 				//! (destinations range from 0 to 65535)
 				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
 				{
+					// 33333333222222221111111100000000
+					// 76543210765432107654321076543210
+					// XXXXXXXXRRRRRRRRGGGGGGGGBBBBBBBB
 					a = 65535;
 					r = ((_val & 0x00FF0000) >> 16) * 257;
 					g = ((_val & 0x0000FF00) >> 8 ) * 257;
-					b = ((_val & 0x000000FF) >> 0 ) * 257;
+					b = ( _val & 0x000000FF       ) * 257;
 				}
 				//!
 				//! Set this color from the given ARGB components of the master color model
 				//! (sources range from 0 to 65535)
 				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				{
-					setRed  (uint8_t(r / 257));
-					setGreen(uint8_t(g / 257));
-					setBlue (uint8_t(b / 257));
+					setRed  (uint8_t(r >> 8));
+					setGreen(uint8_t(g >> 8));
+					setBlue (uint8_t(b >> 8));
 				}
 
 				//! Assignment operator from the same color space
@@ -123,38 +126,38 @@ namespace Pt {
 				inline uint32_t color() const
 				{ return _val; }
 
-				//! Return the red component of this color
+				//! Return the red component of this color (in range 0 to 255)
 				inline uint8_t red() const
 				{ return (_val & 0x00FF0000) >> 16; }
 
-				//! Return the green component of this color
+				//! Return the green component of this color (in range 0 to 255)
 				inline uint8_t green() const
-				{ return (_val & 0x0000FF00) >>  8; }
+				{ return (_val & 0x0000FF00) >> 8; }
 
-				//! Return the blue component of this color
+				//! Return the blue component of this color (in range 0 to 255)
 				inline uint8_t blue() const
-				{ return (_val & 0x000000FF) >>  0; }
+				{ return _val & 0x000000FF; }
 
 				//! Set the packed color value of this color
 				void setColor(uint32_t c)
-				{ _val = c & 0x00FFFFFF; }
+				{ _val = c; }
 
-				//! Set the red component of this color
+				//! Set the red component of this color (in range 0 to 255)
 				inline void setRed(uint8_t r)
-				{ _val &= 0x0000FFFF; _val |= (uint32_t(r) << 16); }
+				{ _val = _val & 0xFF00FFFF | (uint32_t(r) << 16); }
 
-				//! Set the green component of this color
+				//! Set the green component of this color (in range 0 to 255)
 				inline void setGreen(uint8_t g)
-				{ _val &= 0x00FF00FF; _val |= (uint32_t(g) <<  8); }
+				{ _val = _val & 0xFFFF00FF | (uint32_t(g) << 8); }
 
-				//! Set the blue component of this color
+				//! Set the blue component of this color (in range 0 to 255)
 				inline void setBlue(uint8_t b)
-				{ _val &= 0x00FFFF00; _val |= (uint32_t(b) <<  0); }
+				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
-				//! Get brightness
+				//! Get brightness (in range 0 to 255)
 				inline uint8_t brightness() const;
 
-				//! Set brightness
+				//! Set brightness (in range 0 to 255)
 				inline void setBrightness(uint8_t l);
 
 			protected:

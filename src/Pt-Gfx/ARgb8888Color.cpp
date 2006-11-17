@@ -22,10 +22,6 @@
 using namespace Pt;
 using namespace Pt::Gfx;
 
-#include <iomanip>
-#include <sstream>
-using namespace std;
-
 
 Pt::uint8_t Pt::Gfx::BasicColor<ARgb8888>::brightness() const
 {
