@@ -17,6 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#if 1
+
 #include <iostream>
 using namespace std;
 
@@ -89,3 +91,125 @@ class ByteorderTest : public Pt::Unit::TestSuite
 	};
 
 Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;
+
+#else
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+extern uint16_t swap16(uint16_t value)
+{
+#if 0
+	value = ( (value & 0x00FF) << 8 ) |
+				  ( (value & 0xFF00) >> 8 );
+  return(value);
+	/*
+	movzwl	8(%ebp), %edx
+	movl	%edx, %eax
+	sall	$8, %eax
+	shrl	$8, %edx
+	orl	%edx, %eax
+	movzwl	%ax, %eax
+	leave
+	ret
+	*/
+#else
+	union {
+		uint16_t v;
+		uint8_t  b[2];
+	} u;
+
+	u.v = value;
+
+	const uint8_t b0 = u.b[0];
+	const uint8_t b1 = u.b[1];
+	u.b[0] = b1;
+	u.b[1] = b0;
+
+	return(u.v);
+	/*
+	movl	8(%ebp), %edx
+	movl	%edx, %eax
+	movzbl	%dh, %ecx
+	movb	%cl, %al
+	movb	%dl, %ah
+	movzwl	%ax, %eax
+	leave
+	ret
+	*/
+#endif
+}
+
+extern uint32_t swap32(uint32_t value)
+{
+#if 0
+	value = ( (value & 0x000000FF) << 24 ) |
+				  ( (value & 0x0000FF00) <<  8 ) |
+				  ( (value & 0x00FF0000) >>  8 ) |
+				  ( (value & 0xFF000000) >> 24 );
+	return(value);
+	/*
+	movl	8(%ebp), %ecx
+	movl	%ecx, %eax
+	sall	$24, %eax
+	movl	%ecx, %edx
+	andl	$65280, %edx
+	sall	$8, %edx
+	orl	%edx, %eax
+	movl	%ecx, %edx
+	andl	$16711680, %edx
+	shrl	$8, %edx
+	shrl	$24, %ecx
+	orl	%ecx, %edx
+	orl	%edx, %eax
+	leave
+	ret
+	*/
+#else
+	uint8_t *w = reinterpret_cast<uint8_t*>(&value);
+
+	const uint8_t w0 = w[0];
+	const uint8_t w1 = w[1];
+	const uint8_t w2 = w[2];
+	const uint8_t w3 = w[3];
+	w[0] = w3;
+	w[1] = w2;
+	w[2] = w1;
+	w[3] = w0;
+	return(value);
+	/*
+	movb	8(%ebp), %cl
+	movb	9(%ebp), %dl
+	movb	11(%ebp), %al
+	movb	%al, 8(%ebp)
+	movb	10(%ebp), %al
+	movb	%al, 9(%ebp)
+	movb	%dl, 10(%ebp)
+	movb	%cl, 11(%ebp)
+	movl	8(%ebp), %eax
+	leave
+	ret
+	*/
+#endif
+}
+
+int main(int argc, void *argv[])
+{
+	uint16_t X = 0x2010;
+	uint32_t Y = 0x40302010;
+
+	printf("%04X\n", X);
+	X = swap16(X);
+	printf("%04X\n", X);
+
+	printf("\n");
+
+	printf("%08X\n", Y);
+	Y = swap32(Y);
+	printf("%08X\n", Y);
+
+	return(X);
+}
+
+#endif
