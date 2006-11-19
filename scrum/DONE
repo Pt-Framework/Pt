@@ -18,7 +18,8 @@ ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 ITEM-5 P0 S5 "POD types of fixed size are defined"
 	TASK "Review Types.h"	blue_wind_25	2006-10-21
 	TASK "Write test case"	blue_wind_25	2006-10-21
-
+	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	d-marc
+	
 ITEM-7 P0 S3 "An API for byte-order conversion exists"
 	TASK "Review Byteorder.h"	blue_wind_25	2006-11-10
 	TASK "Remove swap() template function"	blue_wind_25	2006-11-10

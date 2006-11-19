@@ -2,9 +2,6 @@ ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25
 	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25
 
-ITEM-5 P0 S5 "POD types of fixed size are defined"
-	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	blue_wind_25
-
 ITEM-7 P0 S3 "An API for byte-order conversion exists"
 	TASK "Improve swabUnaligned() function"	blue_wind_25
 	TASK "Add function to swap float and double correctly"	blue_wind_25
