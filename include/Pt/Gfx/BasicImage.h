@@ -183,6 +183,7 @@ namespace Pt {
 				//! Returns the color at the specified coordinates, if the
 				//! coordinates are out of range, the given "invalid" color
 				//! will be returned
+				//! TODO: find better name
 				const ColorT& color(int x, int y, const ColorT& invalid = ColorT() ) const;
 
 				//! Set the color at the specified coordinates

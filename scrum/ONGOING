@@ -1,22 +1,5 @@
-ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
-	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25
-	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25
-
 ITEM-7 P0 S3 "An API for byte-order conversion exists"
-	TASK "Improve swabUnaligned() function"	blue_wind_25
 	TASK "Add function to swap float and double correctly"	blue_wind_25
-
-ITEM-11 P0 S3 "A NonCopyable base class exits."
-	TASK "Write test case"	blue_wind_25
-
-ITEM-12 P0 S3 "A Singleton base class exits."
-	TASK "Review Singleton.h"	blue_wind_25
-	TASK "Write Documentation"	blue_wind_25
-
-ITEM-15 P0 S5 "Byteorder API has ASM optimisation"
-	TASK "Optimize swab16() using standard ASM and if possible SIMD"	blue_wind_25
-	TASK "Optimize swab32() using standard ASM and if possible SIMD"	blue_wind_25
-	TASK "Optimize swab64() using standard ASM and if possible SIMD"	blue_wind_25
 
 ITEM-21 P0 S5 "Object reflection API is implemented"
 	TASK "Split property in property and property proxy"	Laurentiu

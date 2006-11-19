@@ -29,36 +29,41 @@
 
 namespace Pt {
 
-	/** @brief Makes derived classes become singleton
-	 *  @ingroup Pt
-	 *
-	 *  @param T type of the singleton
-	 *  @param A optional allocator for type T
-	 *
-	 *  This class is meant to be used as a mix-in class as shown in the code
-	 *  example below.
-	 *
-	 *  @code
-	 *		class SingletonClassName : public Singleton<SingletonClassName> {
-	 *			friend class Singleton<SingletonClassName>;
-	 *
-	 *			// ...
-	 *			// The class' implementation
-	 *			// ...
-	 *		};
-	 *  @endcode
-	 *
+	/** @brief Singleton class template
+	   @ingroup Pt
+	  
+	    @param T Type of the singleton
+	    @param A Allocator for type T
+	  
+	    The Singleton class template can be used to easily implement the Singleton
+	    design pattern. It can either be used directly or as a base class. An
+	    allocator can be used to control how the singleton instance will be
+	    allocated.
+
+	    The follwing example shows how to use the singleton as a base class:
+	    @code
+	  		class MySingleton : public Singleton<MySingleton>
+	  		{
+	 			  friend class Singleton<MySingleton>;
+
+	 			  // ...
+	 		  };
+	    @endcode
 	 */
 	template <typename T, typename A = std::allocator<T> >
-	class Singleton : public NonCopyable {
+	class Singleton : public NonCopyable
+	{
 		public:
-			// For convenience
 			typedef A Allocator;
 
 		public:
-			/** @brief Returns an instance of the class
-			 *
-			 *  This function will always returns the same class instance.
+			/** @brief Returns the instance of the singleton type
+
+					When called for the first time, the singleton instance will be
+					created with the specified alloctaor. All subsequent calls wikk
+					return a reference to the previously created instance.
+			
+			    @return The singleton instance
 			 */
 			static T& instance()
 			{
@@ -73,18 +78,22 @@ namespace Pt {
 			}
 
 		protected:
-			/**  @brief Declared as protected to prevent direct instantiation of this class
+			/**  @brief Contructor
 			 */
 			Singleton()
 			{ }
 
-			/**  @brief Declared as protected to prevent direct deletion of this class
+			/**  @brief Destructor
 			 */
 			~Singleton()
 			{ }
 
 		private:
-			/**  @brief On exit it will destroy the one and the only instance of the class
+			/** @brief Exit handler
+
+			    This function is set as the progra exit handler and will destroy
+			    the singleton instance at the end of the program using the
+			    specified allocator.
 			 */
 			static void atExit()
 			{
@@ -98,11 +107,11 @@ namespace Pt {
 			static T* _instance;
 	};
 
-	// Definition of the variable above
+
 	template <typename T, typename A>
 	A Singleton<T, A>::_allocator;
 
-	// Definition of the variable above
+
 	template <typename T, typename A>
 	T* Singleton<T, A>::_instance = 0;
 

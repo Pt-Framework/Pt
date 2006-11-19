@@ -1,3 +1,61 @@
+ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
+	TASK "Introduce PT_API macro"
+	TASK "Check if more warnings need to be disabled"
+
+ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
+	TASK "Add missing declarations to Pt.h"
+
+ITEM-8 P0 S3 "A empty Void type exists"
+	TASK "Review Void.h"
+	TASK "Write Documentation"
+
+ITEM-10 P0 S5 "An common exception hierachy exits."
+	TASK "Review Exception.h"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-13 P0 S5 "The AtomicInt class implements atomic operations"
+	TASK "Add fallback version that uses pthreads"
+	TASK "Review asm"
+	TASK "Write test case"
+	TASK "Write docs"
+
+ITEM-14 P0 S8 "A base class for thread-safe refcounting exists."
+	TASK "Make Shared.h use AtomicInt"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-16 P0 S5 "Signals and Delegates are implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-17 P0 S5 "Any class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-18 P0 S5 "Variant class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-19 P0 S5 "SmartPtr class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-20 P0 S5 "Event based Application class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM P0 S5 "CTTI system is implemented"
+	TASK "Review IfElse template"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
 ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
 
@@ -15,3 +73,8 @@ ITEM P0 S5 "The Image class supports several planar image formats, mostly compat
 ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
 	TASK "Review memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
 	TASK "Implement proper tagging and class structure to cover those many formats"
+
+ITEM-15 P0 S5 "Byteorder API has ASM optimisation"
+	TASK "Optimize swab16() using standard ASM and if possible SIMD"	blue_wind_25
+	TASK "Optimize swab32() using standard ASM and if possible SIMD"	blue_wind_25
+	TASK "Optimize swab64() using standard ASM and if possible SIMD"	blue_wind_25
