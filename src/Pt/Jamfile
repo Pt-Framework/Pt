@@ -18,6 +18,7 @@ SharedLibrary Pt : Any.cpp
                    TypeInfo.cpp ;
 
 SharedLibrary_MakeLocate Pt : bin ;
+SharedLibrary_Install Pt ;
 
 Main ReflectableTest : ReflectableTest.cpp ;
 Main_LinkSharedLibraries ReflectableTest : Pt ;

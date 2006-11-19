@@ -12,5 +12,4 @@ if $(CONFIG) = debug
 	SUFDBG  = d ;
 }
 
-
 TOOLSET ?= gcc ;

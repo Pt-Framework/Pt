@@ -162,6 +162,7 @@ FILEMODE    ?= 644 ;
 FORTRAN     ?= f77 ;
 FORTRANFLAGS ?= ;
 HDRS        ?= ;
+INCLUDEDIR  ?= /usr/local/include ;
 INSTALLGRIST ?= installed ;
 JAMFILE     ?= Jamfile ;
 JAMRULES    ?= Jamrules ;
@@ -450,6 +451,38 @@ rule InstallFile
 {
     InstallInto $(<) : $(>) ;
     MODE on $(>:G=installed) = $(FILEMODE) ;
+}
+
+
+# Installs all header files from a directory to a subdirectory
+# within INCLUDEDIR
+#
+# $(<) subdirectory destination within INCLUDEDIR
+# $(>) directory to search for headers
+#
+# Example
+#   InstallHeaders dir : TOP d1 [ d2 [ d3 [ d4 ] ] ]
+#
+# to install all headers from TOP d1 d2... to the subdirectory
+# dir in INCLUDEDIR.
+rule InstallHeaders
+{
+	if ! $($(>[1]))
+	{
+			EXIT Top level of source tree has not been set with $(>[1]) ;
+	}
+	
+	local _s = [ FDirName $(>[2-]) ] ;
+	local _targetdir = $(_s:R=$($(>[1]))) ;
+  local _includedir = [ FDirName $(INCLUDEDIR) $(<) ] ;
+
+	local _headers ;
+	for local h in [ GLOB  $(_targetdir) : *.h ]
+	{
+		_headers += $(h:BS) ;
+	}
+
+	InstallFile $(_includedir) : $(_headers) ;
 }
 
 
@@ -946,6 +979,13 @@ rule SharedLibrary_AddLibraries
 rule SharedLibraryFromObjects
 {
 	Exit  "SharedLibraryFromObjects rule not implemented in Jamrules.base. Must be implemented in Jamrules.$(TOOLSET)" ;
+}
+
+
+rule SharedLibrary_Install
+{
+		local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+		InstallLib $(LIBDIR) : $(_target) ;
 }
 
 

@@ -1,5 +1,7 @@
 SubDir TOP include Pt ;
 
+InstallHeaders Pt : TOP include Pt ;
+
 SubInclude TOP include Pt IO ;
 SubInclude TOP include Pt Text ;
 SubInclude TOP include Pt System ;
