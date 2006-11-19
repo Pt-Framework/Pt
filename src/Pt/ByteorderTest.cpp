@@ -42,15 +42,15 @@ class ByteorderTest : public Pt::Unit::TestSuite
 
 		virtual void test()
 		{
-			Pt::uint8_t  val8u  = 0x10;
-			Pt::uint16_t val16u = 0x1020;
-			Pt::uint32_t val32u = 0x10203040;
+			const Pt::uint8_t  val8u  = 0x10;
+			const Pt::uint16_t val16u = 0x1020;
+			const Pt::uint32_t val32u = 0x10203040;
 #ifdef PT_64BIT
-			Pt::uint64_t val64u = 0x1020304050607080ULL;
+			const Pt::uint64_t val64u = 0x1020304050607080ULL;
 #endif
 
 			cerr << "Before swap()s:" << endl;
-			cerr << hex << "0x" << (void*) val8u  << endl;
+			cerr << hex         << (void*) val8u  << endl;
 			cerr << hex << "0x" <<         val16u << endl;
 			cerr << hex << "0x" <<         val32u << endl;
 #ifdef PT_64BIT
@@ -58,34 +58,42 @@ class ByteorderTest : public Pt::Unit::TestSuite
 #endif
 
 			cerr << endl;
-			val8u  = swap(val8u);
-			val16u = swap(val16u);
-			val32u = swap(val32u);
+			Pt::uint8_t  sval8u  = swap(val8u);
+			Pt::uint16_t sval16u = swap(val16u);
+			Pt::uint32_t sval32u = swap(val32u);
 #ifdef PT_64BIT
-			val64u = swap(val64u);
+			Pt::uint64_t sval64u = swap(val64u);
 #endif
 
 			cerr << "After swap()s:" << endl;
-			cerr << hex << "0x" << (void*) val8u  << endl;
-			cerr << hex << "0x" <<         val16u << endl;
-			cerr << hex << "0x" <<         val32u << endl;
+			cerr << hex         << (void*) sval8u  << endl;
+			cerr << hex << "0x" <<         sval16u << endl;
+			cerr << hex << "0x" <<         sval32u << endl;
 #ifdef PT_64BIT
-			cerr << hex << "0x" <<         val64u << endl;
+			cerr << hex << "0x" <<         sval64u << endl;
 #endif
 
 			cerr << endl;
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val16u), sizeof(val16u));
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val32u), sizeof(val32u));
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval16u), sizeof(sval16u));
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval32u), sizeof(sval32u));
 #ifdef PT_64BIT
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&val64u), sizeof(val64u));
+			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval64u), sizeof(sval64u));
 #endif
 
 			cerr << "After swabUnaligned()s:" << endl;
-			cerr << hex << "0x" << val16u << endl;
-			cerr << hex << "0x" << val32u << endl;
+			cerr << hex << "0x" << sval16u << endl;
+			cerr << hex << "0x" << sval32u << endl;
 #ifdef PT_64BIT
-			cerr << hex << "0x" << val64u << endl;
+			cerr << hex << "0x" << sval64u << endl;
 #endif
+
+			PT_UNIT_ASSERT( val8u  == sval8u );
+			PT_UNIT_ASSERT( val16u == sval16u );
+			PT_UNIT_ASSERT( val32u == sval32u );
+#ifdef PT_64BIT
+			PT_UNIT_ASSERT( val64u == sval64u );
+#endif
+
 		}
 
 	};
