@@ -49,6 +49,10 @@ class TypesTest : public Pt::Unit::TestSuite
 			PT_UNIT_ASSERT( sizeof(Pt::uint16_t) == 2 );
 			PT_UNIT_ASSERT( sizeof(Pt::int32_t) == 4 );
 			PT_UNIT_ASSERT( sizeof(Pt::uint32_t) == 4 );
+
+			PT_UNIT_ASSERT( sizeof(float) == 4 );
+			PT_UNIT_ASSERT( sizeof(double) == 8 );
+
 			ss << endl;
 			ss << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
 			ss << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
@@ -74,6 +78,10 @@ class TypesTest : public Pt::Unit::TestSuite
 			ss << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
 			ss << endl;
 #endif
+			ss << "sizeof(float       ) = " << sizeof(float       ) << endl;
+			ss << "sizeof(double      ) = " << sizeof(double      ) << endl;
+			ss << endl;
+
 			//Unit::Application::message(ss.str());
 			cerr << ss.str();
 		}

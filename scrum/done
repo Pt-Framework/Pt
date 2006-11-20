@@ -8,9 +8,9 @@ ITEM-2 P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"	blue_wind_25	2006-10-04
 	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
 	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04
-	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25,d-marc 2006-11-19
-	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25,d-marc 2006-11-19
-	
+	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25,d-marc	2006-11-19
+	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25,d-marc	2006-11-19
+
 ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
 	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
@@ -20,13 +20,14 @@ ITEM-3 P0 S2 "XRgb8888Color was changed to ARgb888Color"
 ITEM-5 P0 S5 "POD types of fixed size are defined"
 	TASK "Review Types.h"	blue_wind_25	2006-10-21
 	TASK "Write test case"	blue_wind_25	2006-10-21
-	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	d-marc 2006-11-19
-	
+	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	d-marc	2006-11-19
+
 ITEM-7 P0 S3 "An API for byte-order conversion exists"
 	TASK "Review Byteorder.h"	blue_wind_25	2006-11-10
 	TASK "Remove swap() template function"	blue_wind_25	2006-11-10
 	TASK "Write test cases"	blue_wind_25	2006-11-10
-	TASK "Improve swabUnaligned() function"	blue_wind_25,d-marc 2006-11-19
+	TASK "Improve swabUnaligned() function"	blue_wind_25,d-marc	2006-11-19
+	TASK "Add function to swap float and double correctly"	blue_wind_25	2006-11-20
 
 ITEM-9 P0 S3 "A SourceInfo class exits."
 	TASK "Review SourceInfo.h"	blue_wind_25	2006-10-21
@@ -39,17 +40,17 @@ ITEM-11 P0 S3 "A NonCopyable base class exits."
 
 ITEM-12 P0 S3 "A Singleton base class exits."
 	TASK "Write test case"	blue_wind_25	2006-11-05
-	TASK "Review Singleton.h"	blue_wind_25,d-marc 2006-11-19
-	TASK "Write Documentation"	blue_wind_25,d-marc 2006-11-19
-	
+	TASK "Review Singleton.h"	blue_wind_25,d-marc	2006-11-19
+	TASK "Write Documentation"	blue_wind_25,d-marc	2006-11-19
+
 ITEM-23 P0 S13 "The Pt::Unit module exists"
-	TASK "Review ccpunit code" d-marc 2006-10-24
-	TASK "Review qt-unit code" d-marc 2006-10-24
-	TASK "Review boost unittest framework" d-marc 2006-10-24
-	TASK "Review mini-cppunit from STLport code" d-marc 2006-10-24
-	TASK "Write Test interface" d-marc 2006-10-25
-	TASK "Write TestFixture" d-marc 2006-10-25
-	TASK "Write TestCase class" d-marc 2006-10-25
-	TASK "Write Assertion handling" d-marc 2006-10-25
-	TASK "Write TestSuite class" d-marc 2006-10-25
-	TASK "Write Application class" d-marc 2006-10-25
+	TASK "Review ccpunit code" d-marc	2006-10-24
+	TASK "Review qt-unit code" d-marc	2006-10-24
+	TASK "Review boost unittest framework" d-marc	2006-10-24
+	TASK "Review mini-cppunit from STLport code" d-marc	2006-10-24
+	TASK "Write Test interface" d-marc	2006-10-25
+	TASK "Write TestFixture" d-marc	2006-10-25
+	TASK "Write TestCase class" d-marc	2006-10-25
+	TASK "Write Assertion handling" d-marc	2006-10-25
+	TASK "Write TestSuite class" d-marc	2006-10-25
+	TASK "Write Application class" d-marc	2006-10-25

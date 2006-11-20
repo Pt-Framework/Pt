@@ -4,7 +4,7 @@ ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
 
 ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
 	TASK "Add missing declarations to Pt.h"
-	
+
 ITEM-21 P0 S5 "Object reflection API is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"

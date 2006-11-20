@@ -352,6 +352,35 @@ namespace Pt
 #endif
 
 
+	/** @brief Swaps the byteorder of a float.
+	 *
+	 *  @param value The value to be byte-swapped
+	 *  @return The byte-swapped value
+	 *
+	 *  Overloads the generic swap().
+	 */
+	inline float swap(float value)
+	{
+		const uint32_t &p = *reinterpret_cast<const uint32_t*>(&value);
+		const uint32_t  s = swab32(p);
+		return *reinterpret_cast<const float*>(&s);
+	}
+
+	/** @brief Swaps the byteorder of a double.
+	 *
+	 *  @param value The value to be byte-swapped
+	 *  @return The byte-swapped value
+	 *
+	 *  Overloads the generic swap().
+	 */
+	inline double swap(double value)
+	{
+		const uint64_t &p = *reinterpret_cast<const uint64_t*>(&value);
+		const uint64_t  s = swab64(p);
+		return *reinterpret_cast<const double*>(&s);
+	}
+
+
 
 
 	/** @brief Changes the byteorder of a given value from host-byteorder to little-endian.
