@@ -74,7 +74,8 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	//wattr.background_pixel = XWhitePixel(display, screen);
 
 	// Backing store
-	// NOTE (blue_wind_25): IMO, it is not too useful and just eating up clients' memory
+	// NOTE (blue_wind_25): IMO, it is not too useful and just eating up
+	//                      server's and/or clients' memory
 	wattr.backing_store = None;//Always;
 	wattr.save_under = False;//True;
 
