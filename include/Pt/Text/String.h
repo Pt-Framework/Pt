@@ -26,6 +26,7 @@
 #include <iterator>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 
 namespace Pt {
@@ -195,7 +196,7 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 		reference at(size_type n)
 		{
 			if( n > this->size() ) {
-				::abort();
+				throw std::out_of_range("The given at-value is out of range");
 			}
 			this->detach( _data->length() );
 			_data->setBusy();
@@ -205,7 +206,7 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 		const_reference at(size_type n) const
 		{
 			if( n > this->size() ) {
-				::abort();
+				throw std::out_of_range("The given at-value is out of range");
 			}
 			return *(_data->str() + n);
 		}
@@ -232,7 +233,7 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 		basic_string substr(size_type pos, size_type n) const
 		{ return basic_string(*this, pos, n); }
 
-		basic_string substr(size_type pos) const
+		basic_string substr(size_type pos = 0) const
 		{ return basic_string(*this, pos); }
 
 	public:
