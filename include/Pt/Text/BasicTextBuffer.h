@@ -31,6 +31,26 @@ namespace Pt {
 
 namespace Text {
 
+	/**
+	 * @brief Generic text-buffer which wraps a streaming buffer and converts its character
+	 * data on-the-fly using a Codec.
+	 *
+	 * This class derives from std::basic_streambuf which is the super-class of all stream buffer
+	 * classes. Stream buffer classes are used to connect to an external device, transport characters
+	 * from and to this external device and buffer the characters in an internal buffer.
+	 *
+	 * The internal character set can be specified using the template parameters 'InternT_', the
+	 * external character set using 'ExternT_'. The external type is the input type and output
+	 * type when reading from or writing to the external device. The internal type is the type
+	 * which is used to internally store the data from the external device after the external
+	 * format was converted using the Codec which is passed when constructing an object of this
+	 * class.
+	 *
+	 * The Codec object which is passed as pointer to the constructor will afterwards be completely
+	 * managed by this class and also be deleted by this class when it's destructed!
+	 *
+	 * @see std::basic_streambuf
+	 */
 	template <typename InternT_, typename ExternT_>
 	class BasicTextBuffer : public std::basic_streambuf<InternT_> {
 		public:
@@ -41,6 +61,19 @@ namespace Text {
 			typedef TextCodec<InternT, ExternT> CodecT;
 
 		public:
+			/**
+			 * @brief Creates a BasicTextBuffer using the given stream buffer and codec.
+			 *
+			 * The given stream buffer is used as external device, buffered by this text buffer
+			 * and all input from and output to the external device is converted using the
+			 * given codec class.
+			 *
+			 * Note: The Codec object which is passed as pointer will afterwards be completely
+			 * managed by this class and also be deleted by this class when it's destructed!
+			 *
+			 * @param buffer The buffer (external device) which is wrapped by this object.
+			 * @param codec The codec which is used to convert data from or to the external device.
+			 */
 			BasicTextBuffer(std::basic_streambuf<ExternT>* buffer, CodecT* codec)
 			: _streambuf(buffer), _codec(codec)
 			{
@@ -63,38 +96,43 @@ namespace Text {
 			{ return this->egptr(); }
 
 		protected:
+			//! @brief Initializes this text buffer by creating the internal buffer.
 			void btinit();
 
-			//! reimplemented from basic_streambuf
+			//! inheritdoc - reimplemented from basic_streambuf
 			virtual int sync();
 
-			//! reimplemented from basic_streambuf
+			//! inheritdoc - reimplemented from basic_streambuf
 			virtual IntT overflow(IntT ch);
 
-			//! reimplemented from basic_streambuf
+			//! inheritdoc - reimplemented from basic_streambuf
 			virtual IntT underflow();
 
 		private:
+			//! The external device (stream buffer) from which data is read and to which data is written.
 			std::basic_streambuf<ExternT>* _streambuf;
 
+			//! Contains the state of conversion.
 			mbstate_t _state;
 
+			//! The codec which is used to convert character data from or to the external device.
 			CodecT* _codec;
 
+			//! The size of the internal input and output buffer.
 			size_t _bufferSize;
 
 			size_t _putbackMax;
 
-			//! buffer for reading encoded chars
+			//! Buffer for reading encoded chars
 			std::vector<ExternT> _readBuffer;
 
-			//! input buffer for the decoded chars, used by the stream
+			//! Input buffer for the decoded chars, used by the stream
 			std::vector<InternT> _inBuffer;
 
-			//! output buffer for the decoded chars, used by the stream
+			//! Output buffer for the decoded chars, used by the stream
 			std::vector<InternT> _outBuffer;
 
-			//! buffer for writing ecoded chars
+			//! Buffer for writing ecoded chars
 			std::vector<ExternT> _writeBuffer;
 	};
 

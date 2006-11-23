@@ -30,6 +30,14 @@ namespace Pt {
 
 	namespace Text {
 
+		/**
+		 * @brief A specialized list-class for ptv::String objects.
+		 *
+		 * This class is a convenience class which is derived from std::list and specialized for
+		 * containing ptv::String.
+		 *
+		 * See std::list for more details.
+		 */
 		class PT_EXPORT StringList : public std::list<Pt::String> {
 			public:
 				typedef std::list<Pt::String>::iterator Iterator;

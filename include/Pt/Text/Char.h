@@ -30,6 +30,31 @@ namespace Pt {
 
 namespace Text {
 
+	/**
+	 * @brief A lightweight Unicode class (32 bits).
+	 *
+	 * Unicode characters are 32-bit entities. This class represents such an entity. It is lightweight, so it
+	 * can be used everywhere. Most compilers treat it like an unsigned int of 32 bits.
+	 *
+	 * This class provides methods for testing/classification, converting to and from other formats, comparing
+	 * and case-converting. To convert a character or number to a instance of this class use one of the
+	 * constructors provided. To check the type of the character use one of the method starting with "is", like
+	 * isLetter() or isDigit(). To compare lower- or upper-case use isUpper() and isLower(). To compare two
+	 * characters the corresponding operators are overloaded accordingly. Addition and substraction is supported
+	 * as well. Comparison of numeric values (>, <, ==) is supported when using these operators.
+	 *
+	 * The classification methods operate on the full range of Unicode characters. All methods return $true$
+	 * if the character is a certain type of character. These methods are are wrappers around category() which
+	 * return the Unicode-defined category of each character.
+	 *
+	 * Comparison is critical in Unicode as it covers the characters of the entire world where characters which
+	 * look the same may be different in the thinking of numeric values (aka positions in the Unicode table)
+	 * Comparing characters will compare based purely on the numeric Unicode value (code point) of the characters.
+	 * Upper- and lower-casing using upper() and lower() will only work if the character has a well-defined
+	 * upper/lower-case equivalent.
+	 *
+	 * @see Category
+	 */
 	class PT_EXPORT Char
 	{
 		public:
@@ -241,99 +266,236 @@ namespace Text {
 			};
 
 		public:
+			//! Constructs a character with a value of 0.
 			Char()
 			: _value(0)
 			{}
 
+			//! Constructs a character using the given 8-bit char as base for the character value.
 			Char(char ch)
 			: _value( (uint32_t)((unsigned char)ch) )
 			{}
 
+			//! Constructs a character using the given wide-char as base for the character value.
 			Char(wchar_t ch)
 			: _value(ch)
 			{}
 
+			//! Constructs a character using the given char as base for the character value.
 			Char(unsigned char ch)
 			: _value( (uint32_t)(ch) )
 			{}
 
+			//! Constructs a character using the given 16-bit integer as base for the character value.
 			Char(const int16_t& val)
 			: _value( (uint16_t)(val) )
 			{}
 
+			//! Constructs a character using the given 16-bit integer as base for the character value.
 			Char(const uint16_t& val)
 			: _value(val)
 			{}
 
+			//! Constructs a character using the given 32-bit integer as base for the character value.
 			Char(const int32_t& val)
 			: _value( (uint32_t)(val) )
 			{}
 
+			//! Constructs a character using the given 32-bit integer as base for the character value.
 			Char(const uint32_t& val)
 			: _value(val)
 			{}
 
+			//! Constructs a character using the given long as base for the character value.
 			Char(const long value)
 			: _value( (uint32_t)((unsigned long)value) )
 			{}
 
+			//! Constructs a character using the given long as base for the character value.
 			Char(const unsigned long val)
 			: _value(val)
 			{}
 
+			/**
+			 * @brief Returns this character's category.
+			 * @return This character's category.
+			 * @see Category
+			 */
 			int category() const;
 
 			int bidiClass() const;
 
 			int decomposition() const;
 
+			/**
+			 * @brief Returns the combining class for this character as defined in the Unicode standard.
+			 * This is mainly useful as a positioning hint for marks attached to a base character.
+			 * @return The combining class for this character.
+			 */
 			int combining() const;
 
+			/**
+			 * @brief Determines if this character is alpha-numerical and returns $true$ if it is.
+			 *
+			 * An alphanumerical character is a letter or a number.
+			 *
+			 * @return $true$ if this character is alphanumerical and $false$ if it is not.
+			 */
 			int isAlnum() const;
 
+			/**
+			 * @brief Determines if this character is a letter and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a letter and $false$ if it is not.
+			 */
 			int isAlpha() const;
 
+			/**
+			 * @brief Determines if this character is a control character and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a contral character and $false$ if it is not.
+			 */
 			int isControl() const;
 
+			/**
+			 * @brief Determines if this character is a digit and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a digit and $false$ if it is not.
+			 */
 			int isDigit() const;
 
+			/**
+			 * @brief Determines if this character is a symbol and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a symbol and $false$ if it is not.
+			 */
 			int isGraph() const;
 
+			/**
+			 * @brief Determines if this character is a upper-case letter and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a upper-case and $false$ if it is not.
+			 */
 			int isLower() const;
 
+			/**
+			 * @brief Determines if this character is a printable character and returns $true$ if it is.
+			 *
+			 * Note that this gives no indication of whether the character is available in a particular font.
+			 *
+			 * @return $true$ if this character is printable and $false$ if it is not.
+			 */
 			int isPrint() const;
 
+			/**
+			 * @brief Determines if this character is a upper-case letter and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a upper-case and $false$ if it is not.
+			 */
 			int isUpper() const;
 
+			/**
+			 * @brief Determines if this character is a punctuation mark and returns $true$ if it is.
+			 *
+			 * @return $true$ if this character is a punctuation mark and $false$ if it is not.
+			 */
 			int isPunctuation() const;
 
+			/**
+			 * @brief Determines if this character is a whitespace character and returns $true$ if it is.
+			 *
+			 * Whitespace characters are spaces, tabs, line breaks, line feeds etc.
+			 *
+			 * @return $true$ if this character is a whitespace character and $false$ if it is not.
+			 */
 			int isSpace() const;
 
+			/**
+			 * @brief Returns this character as lower-case character.
+			 *
+			 * This character object is not changed.
+			 *
+			 * @return The lower-case version of this character.
+			 */
 			Char toLower() const;
 
+			/**
+			 * @brief Returns this character as upper-case character.
+			 *
+			 * This character object is not changed.
+			 *
+			 * @return The upper-case version of this character.
+			 */
 			Char toUpper() const;
 
+			/**
+			 * @brief Narrows this character into an 8-bit char if possible.
+			 *
+			 * If the character can not be converted into an 8-bit char because its value is
+			 * greater than 255, the defaultCharacter which is passed to this method is returned.
+			 *
+			 * If this character is equal or lower than 255 the character is cast to char.
+			 *
+			 * @param The default character which is returned if this character can not be narrowed
+			 * @return An 8-bit char which is a narrowed representation of this character object or
+			 * the default character if this character object's value is out of range (>255).
+			 */
 			char narrow(char defaultValue) const;
 
 		public:
+			/**
+			 * @brief Assigns the given wchar_t as new value for this character.
+			 * @param ch The new wide-char value for this character.
+			 * @return A reference to this object to allow concatination of operations.
+			 */
 			Char& operator=(wchar_t ch)
 			{ _value = ch; return *this; }
 
+			/**
+			 * @brief Returns the internal value (unsigned 32 bits) of this character.
+			 * @return The 32-bit-value of this character.
+			 */
 			const uint32_t value() const
 			{ return _value; }
 
+			/**
+			 * @brief Returns the internal value (unsigned 32 bits) of this character.
+			 * @return The 32-bit-value of this character.
+			 */
 			uint32_t value()
 			{ return _value; }
 
+			/**
+			 * @brief This conversion operator converts the internal value of this character to unsigned 32 bits.
+			 *
+			 * As the internal value also is an unsigned 32-bit value, the internal value of this character
+			 * ist returned.
+			 *
+			 * @return The character converted to unsigned 32-bit.
+			 */
 			operator uint32_t()
 			{ return _value; }
 
+			/**
+			 * @brief Substracts the numeric value of this character and the numeric value of the given character and
+			 * stores the result in this chracater class.
+			 *
+			 * @param value This character's numeric value is subtracted from this' character numeric value.
+			 * @return A reference to this character class.
+			 */
 			Char& operator-=(const Char& value)
 			{
 				this->_value -= value._value;
 				return *this;
 			}
 
+			/**
+			 * @brief Sums the numeric value of this character and the numeric value of the given character and
+			 * stores the result in this chracater class.
+			 *
+			 * @param value This character's numeric value is added to this' character numeric value.
+			 * @return A reference to this character class.
+			 */
 			Char& operator+=(const Char& value)
 			{
 				this->_value += value._value;
@@ -352,45 +514,73 @@ namespace Text {
 				return *this;
 			}
 
+			//! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
+			//! @return $true$ if the a and b are the same character; $false$ otherwise.
 			friend bool operator==(const Char& a, const Char& b)
 			{ return a.value() == b.value(); }
 
+			//! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
+			//! @return $true$ if the a and b are the same character; $false$ otherwise.
 			friend bool operator==(const Char& a, char b)
 			{ return a.value() == (unsigned char)b; }
 
+			//! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
+			//! @return $true$ if the a and b are the same character; $false$ otherwise.
 			friend bool operator==(const Char& a, int b)
 			{ return a.value() == (unsigned int)b; }
 
+			//! @brief Returns $true$ if the a and b are not the same character; $false$ otherwise.
+			//! @return $true$ if the a and b are not the same character; $false$ otherwise.
 			friend bool operator!=(const Char& a, const Char& b)
 			{ return a.value() != b.value(); }
 
+			//! @brief Returns $true$ if the numeric value of a is less than the numeric value of b; $false$ otherwise.
+			//! @return $true$ if the numeric value of a is less than the numeric value of b; $false$ otherwise.
 			friend bool operator<(const Char& a, const Char& b)
 			{ return a.value() < b.value(); }
 
+			//! @brief Returns $true$ if the numeric value of a is greater than the numeric value of b; $false$ otherwise.
+			//! @return $true$ if the numeric value of a is greater than the numeric value of b; $false$ otherwise.
 			friend bool operator>(const Char& a, const Char& b)
 			{ return a.value() > b.value(); }
 
+			//! @brief Returns $true$ if the numeric value of a is equal or less than the numeric value of b; $false$ otherwise.
+			//! @return $true$ if the numeric value of a is equal or less than the numeric value of b; $false$ otherwise.
 			friend  bool operator<=(const Char& a, const Char& b)
 			{ return a.value() <= b.value(); }
 
+			//! @brief Returns $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
+			//! @return $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
 			friend  bool operator>=(const Char& a, const Char& b)
 			{ return a.value() >= b.value(); }
 
+			//! @brief Sums the numeric value of a and the numeric value of b and returns the sum.
+			//! @return The sum of the numeric values of a and b.
 			friend Char operator+(const Char& a, const Char& b)
 			{ return a.value() + b.value(); }
 
+			//! @brief Sums the numeric value of a and the numeric value of b and returns the sum.
+			//! @return The sum of the numeric values of a and b.
 			friend Char operator+(const Char& a, char ch)
 			{ return a.value() + ch; }
 
+			//! @brief Subtracts the numeric value of b from the numeric value of b and returns the result.
+			//! @return The substraction of the numeric values of b from a.
 			friend Char operator-(const Char& a, const Char& b)
 			{ return a.value() - b.value(); }
 
+			//! @brief Subtracts the numeric value of b from the numeric value of b and returns the result.
+			//! @return The substraction of the numeric values of b from a.
 			friend Char operator-(const Char& a, char ch)
 			{ return a.value() - ch; }
 
+			//! @brief Does an OR-combination of the numeric value of a and b and returns the result.
+			//! @return The OR-combination of the numeric values of a and b.
 			friend Char operator|(const Char& a, const Char& b)
 			{ return a.value() | b.value(); }
 
+			//! @brief Does an AND-combination of the numeric value of a and b and returns the result.
+			//! @return The AND-combination of the numeric values of a and b.
 			friend Char operator&(const Char& a, const Char& b)
 			{ return a.value() & b.value(); }
 
