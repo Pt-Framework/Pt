@@ -27,6 +27,10 @@
 	#pragma warning( disable : 4290 ) // exception sepcification ignored
 #endif
 
+#ifdef _WIN32_WCE
+	#define PT_WITHOUT_STD_LOCALE  // WinCE does not provide locale-classes
+#endif
+
 #ifdef _MSC_VER
 	#define PT_EXPORT __declspec(dllexport)
 	#define PT_IMPORT __declspec(dllimport)
