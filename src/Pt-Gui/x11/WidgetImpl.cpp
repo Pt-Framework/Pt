@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -46,30 +47,40 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 	memset(&wattr, 0, sizeof(wattr));
 	wattr.colormap = DefaultColormap(display, screen);
 
-	// the events we want to receive
+	// The events we want to receive
 	wattr.event_mask = StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|
 	                   LeaveWindowMask|KeyPressMask|KeyReleaseMask|KeymapStateMask|
 	                   ButtonPressMask|ButtonReleaseMask|PointerMotionMask;
 
-	// propagate these events?
+	// Propagate these events?
+	// NOTE (blue_wind_25): * It will depends on how we will send event to our controls,
+	//                        normally, we just let our our controls draw/do whatever
+	//                        they need based on the event (so just give the controls
+	//                        the event the main window just got)
+	//                      * However, for performance, seems that emulating the event
+	//                        propagation will be better (thats is propagate the event
+	//                        via Pt's internal event managament instead of asking the
+	//                        X server to do this automatically). Isn't it what the
+	//                        current implementation does?
 	wattr.do_not_propagate_mask = KeyPressMask|KeyReleaseMask|ButtonPressMask|
 	                              ButtonReleaseMask|PointerMotionMask|ButtonMotionMask;
 
-	// border
-	wattr.border_pixel = 0; // needed for OpenGL
+	// Border
+	wattr.border_pixel = 0; // Needed for OpenGL
 	wattr.border_pixmap = CopyFromParent;
 
 	// Background
 	wattr.background_pixmap = None ;
 	//wattr.background_pixel = XWhitePixel(display, screen);
 
-	// backing
-	wattr.backing_store = Always;
-	wattr.save_under = True;
+	// Backing store
+	// NOTE (blue_wind_25): IMO, it is not too useful and just eating up clients' memory
+	wattr.backing_store = None;//Always;
+	wattr.save_under = False;//True;
 
-	// gravity
-	wattr.bit_gravity = ForgetGravity; // region to be retained on resize
-	wattr.win_gravity = NorthWestGravity; // how to to reposition when parent resizes
+	// Gravity
+	wattr.bit_gravity = ForgetGravity; // Region to be retained on resize
+	wattr.win_gravity = NorthWestGravity; // How to to reposition when parent resizes
 
 	wattr.cursor = None; // None means parents cursor
 
@@ -78,21 +89,21 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 		wattr.override_redirect = True;
 	}*/
 
-	// determines which fields from XSetWindowAttributes are used
+	// Determines which fields from XSetWindowAttributes are used
 	unsigned long winMask = CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
 	                        CWCursor|CWOverrideRedirect|CWColormap|CWBackingStore|CWSaveUnder|CWBackPixmap;
 
 	Window parentId;
-	if(!_parent) { // top level window
+	// Top level window
+	if(!_parent)
 		parentId = RootWindow(display, screen);
-	}
-	else { // subwindow
+	// Subwindow
+	else
 		parentId = _parent->impl().x11Drawable();
-	}
 
 	unsigned int borderWidth = 0;
 
-	// create the X11 window
+	// Create the X11 window
 	_drawable = XCreateWindow(display,
 	                          parentId,
 	                          at.x(),
@@ -108,7 +119,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, 
 
 	XSync(display, false);
 
-	// closing a window generates a ClientMessage, which we convert to a close event.
+	// Closing a window generates a ClientMessage, which we convert to a close event.
 	Atom atomWMDeleteWindow = X11EventLoop::instance().AtomWindowClosed;
 	XSetWMProtocols(display, _drawable, &atomWMDeleteWindow, 1);
 
@@ -128,7 +139,7 @@ WidgetImpl::~WidgetImpl()
 {
 	delete _painter;
 
-	// remove this window from widget map
+	// Remove this window from widget map
 	X11EventLoop::instance().unregisterWidget(_drawable);
 
 	Display* display = X11EventLoop::instance().display();
@@ -152,9 +163,7 @@ void WidgetImpl::setTitle(const std::string& text)
 
 Painter WidgetImpl::painter()
 {
-	if (0 == _painter) {
-		_painter = new WidgetPainterImpl(*this);
-	}
+	if (!_painter) _painter = new WidgetPainterImpl(*this);
 
 	return Painter(_painter);
 }
@@ -183,12 +192,10 @@ void WidgetImpl::setParent(Widget* parent)
 	Display* display = X11EventLoop::instance().display();
 	unsigned int screen = XDefaultScreen(display);
 
-	if( 0 == parent) {
+	if(!parent)
 		parentId = XRootWindow(display, screen);
-	}
-	else {
+	else
 		parentId = parent->impl().x11Drawable();
-	}
 
 	XReparentWindow(display, _drawable, parentId, 0, 0);
 	XSync(display, false);

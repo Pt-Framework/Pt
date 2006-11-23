@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -80,8 +80,7 @@ PainterImpl::~PainterImpl()
 	XFreeGC(display, _brushGc);
 	_brushGc = 0;
 
-	if(_xftFont)
-	{
+	if(_xftFont) {
 		XftFontClose(display, _xftFont);
 		_xftFont = 0;
 	}
@@ -105,19 +104,15 @@ void PainterImpl::end()
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
-	if (pen == _pen) {
-		return;
-	}
+	if (pen == _pen) return;
 
-	if( _pen.color() != pen.color() ) 
-	{
+	if( _pen.color() != pen.color() ) {
 		Display* display = X11EventLoop::instance().display();
 		XSetForeground( display, _penGc, this->toXColor( pen.color() ) );
 		XSetBackground( display, _penGc, this->toXColor( pen.color() ) );
 	}
 
-	if( _pen.size() != pen.size() )
-	{
+	if( _pen.size() != pen.size() ) {
 		int lineStyle = LineSolid;
 		int capStyle  = CapButt;
 		int joinStyle = JoinBevel;
@@ -138,15 +133,13 @@ const Gfx::Pen& PainterImpl::pen() const
 
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
-	if( brush.fillStyle() == Brush::SolidFill )
-	{
+	if( brush.fillStyle() == Brush::SolidFill ) {
 		Display* display = X11EventLoop::instance().display();
 		XSetFillStyle( display, _brushGc, FillSolid );
 		XSetForeground( display, _brushGc, this->toXColor( brush.color() ) );
 		XSetBackground( display, _brushGc, this->toXColor( brush.color() ) );
 	}
-	else if( brush.fillStyle() == Brush::TextureFill )
-	{
+	else if( brush.fillStyle() == Brush::TextureFill ) {
 		Display* display = X11EventLoop::instance().display();
 		Pixmap tile( brush.texture().width(), brush.texture().width() );
 		Painter painter = tile.painter();
@@ -166,7 +159,7 @@ const Gfx::Brush& PainterImpl::brush() const
 
 
 const Gfx::Font& PainterImpl::font() const
-{ 
+{
 	return _font;
 }
 
@@ -176,8 +169,7 @@ void PainterImpl::setFont(const Gfx::Font& font)
 	Display* display = X11EventLoop::instance().display();
 	unsigned int screen = DefaultScreen(display);
 
-	if(_xftFont)
-	{
+	if(_xftFont) {
 		XftFontClose(display, _xftFont);
 		_xftFont = 0;
 	}
@@ -267,12 +259,9 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 		char *family;
 
 		XftFontSet* fonts = XftListFonts( display, screen, 0, XFT_FAMILY, 0 );
-		for (int i = 0; i < fonts->nfont; i++) 
-		{
+		for (int i = 0; i < fonts->nfont; i++) {
 			if( XftPatternGetString(fonts->fonts[i], XFT_FAMILY, 0, &family) == XftResultMatch )
-			{
 				_fontList.push_back(family);
-			}
 		}
 		XftFontSetDestroy(fonts);
 	}
@@ -304,9 +293,7 @@ void PainterImpl::drawPixel(const Gfx::Point& to)
 
 void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
-	if (_pen.size() == 0) {
-		return; // Draw nothing if the pen size is 0.
-	}
+	if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
 	Display* display = X11EventLoop::instance().display();
 	XDrawLine(display, _drawable->x11Drawable(), _penGc, from.x(), from.y(), to.x(), to.y());
@@ -317,7 +304,7 @@ void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
 {
 	XftColor xftColor;
-	xftColor.pixel = 0; // this would be input for XftColorAllocValue
+	xftColor.pixel = 0; // This would be input for XftColorAllocValue
 	xftColor.color.red = _pen.color().red();
 	xftColor.color.green = _pen.color().green();
 	xftColor.color.blue = _pen.color().blue();
@@ -329,11 +316,9 @@ void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
 
 void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
-	if (rect.width() == 0 || rect.height() == 0) {
-		// Rectangle has 0 width or height so does not have to be drawn.
-		// (Its not possible to draw a 0 pixel wide/high rectangle in X11.)
-		return;
-	}
+	// Rectangle which has 0 width or height does not have to be drawn.
+	// (Its not possible to draw a 0 pixel wide/high rectangle in X11.)
+	if (rect.width() == 0 || rect.height() == 0) return;
 
 	Display* display = X11EventLoop::instance().display();
 	XDrawRectangle(display, _drawable->x11Drawable(), _penGc, rect.x(), rect.y(), rect.width() - 1, rect.height() - 1);
@@ -343,9 +328,7 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 
 void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
-	if (_pen.size() == 0) {
-		return; // Draw nothing if the pen size is 0.
-	}
+	if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
 	Display* display = X11EventLoop::instance().display();
 
@@ -363,11 +346,9 @@ void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount
 
 void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
-	if (size.width() == 0 || size.height() == 0) {
-		// Ellipse has 0 width or height so does not have to be drawn.
-		// (Its not possible to draw a 0 pixel wide/high ellipse in X11.)
-		return;
-	}
+	// Ellipse which has 0 width or height does not have to be drawn.
+	// (Its not possible to draw a 0 pixel wide/high ellipse in X11.)
+	if (size.width() == 0 || size.height() == 0) return;
 
 	Display* display = X11EventLoop::instance().display();
 	XDrawArc(display, _drawable->x11Drawable(), _penGc, topLeft.x(), topLeft.y(), size.width() - 1, size.height() - 1, 0, 360*64);
@@ -396,8 +377,7 @@ void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 	Display* display = X11EventLoop::instance().display();
 
 	XPoint xpoints[pointCount];
-	for(size_t n = 0; n < pointCount; ++n)
-	{
+	for(size_t n = 0; n < pointCount; ++n) {
 		xpoints[n].x = points[n].x();
 		xpoints[n].y = points[n].y();
 	}
