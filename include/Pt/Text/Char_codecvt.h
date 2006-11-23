@@ -22,8 +22,10 @@
 
 #include <Pt/Api.h>
 #include <Pt/Text/Char.h>
+#include <Pt/Text/locale.h>
 
-#include <locale>
+// This class' filename was suffixed with "Char_" because using "codecvt.h" as filename confuses
+// the compiler/linker as there a STL-files of the same name.
 
 
 namespace std {

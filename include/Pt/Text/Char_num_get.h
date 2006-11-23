@@ -21,8 +21,10 @@
 #define Pt_Text_num_get_h
 
 #include <Pt/Text/Char.h>
+#include <Pt/Text/locale.h>
 
-#include <locale>
+// This class' filename was suffixed with "Char_" because using "num_get.h" as filename confuses
+// the compiler/linker as there a STL-files of the same name.
 
 
 namespace std {

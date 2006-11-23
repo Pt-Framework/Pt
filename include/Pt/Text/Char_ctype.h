@@ -20,14 +20,22 @@
 #ifndef Pt_ctype_h
 #define Pt_ctype_h
 
+#include <Pt/Api.h>
 #include <Pt/Text/Char.h>
+#include <Pt/Text/locale.h>
 
-#include <locale>
+// This class' filename was suffixed with "Char_" because using "codecvt.h" as filename confuses
+// the compiler/linker as there a STL-files of the same name.
+
 
 
 namespace std {
 
+	class PT_EXPORT ios_base;
+	
 #ifdef _MSC_VER
+
+	class PT_EXPORT ctype_base;
 
 	template <>
 	class PT_EXPORT ctype<Pt::Char> : public ctype_base {
