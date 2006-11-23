@@ -18,11 +18,10 @@
  ***************************************************************************/
 
 #include "Pt/Text/TextStream.h"
-#include "Pt/Text/numpunct.h"
-#include "Pt/Text/ctype.h"
+#include "Pt/Text/Char_numpunct.h"
+#include "Pt/Text/Char_ctype.h"
 
 #include <iostream>
-#include <locale>
 using namespace std;
 
 
@@ -35,12 +34,15 @@ namespace Text {
 TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 : BasicTextBuffer<Pt::Char, char>(buffer, codec)
 { 
-	if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
-		std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-	}
+	#ifndef PT_WITHOUT_STD_LOCALE
+		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) 
+		{
+			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+		}
+	#endif
 }
 
 
@@ -62,12 +64,14 @@ TextIStream::TextIStream(TextBuffer* buffer)
 : BasicTextIStream<Pt::Char, char>( buffer )
 , _buffer(0)
 {
-	if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
-		std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-	}
+	#ifndef PT_WITHOUT_STD_LOCALE
+		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
+			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+		}
+	#endif
 }
 
 
