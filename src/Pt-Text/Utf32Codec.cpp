@@ -18,7 +18,7 @@
  **************************************************************************/
 
 #include "Pt/Text/Utf32Codec.h"
-using namespace Pt;
+using namespace Pt::Text;
 
 
 Utf32Codec::Utf32Codec(size_t ref)

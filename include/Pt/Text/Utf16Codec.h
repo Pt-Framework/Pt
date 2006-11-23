@@ -68,6 +68,8 @@
 
 namespace Pt {
 
+namespace Text {
+
 //! decode UTF-16 to UTF-32
 //! encode UTF-32 to UTF-16
 class PT_EXPORT Utf16Codec : public TextCodec {
@@ -87,6 +89,8 @@ class PT_EXPORT Utf16Codec : public TextCodec {
 		virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 		virtual int do_max_length() const throw();
 };
+
+} //namespace Text
 
 } //namespace Pt
 

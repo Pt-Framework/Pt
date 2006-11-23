@@ -69,6 +69,8 @@
 
 namespace Pt {
 
+namespace Text {
+
 	/**
 	 * @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
 	 *
@@ -112,6 +114,7 @@ namespace Pt {
 			virtual int do_max_length() const throw();
 	};
 
+} //namespace Text
 
 } //namespace Pt
 

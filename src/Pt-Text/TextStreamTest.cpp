@@ -66,7 +66,7 @@ void TextStreamTest::testTextStreamDirectFromUTF8ToUnicode()
 {
 	stringstream ss(_textUTF8);
 
-	Pt::Text::TextStream textStream(ss, new Pt::Utf8Codec());
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
 
 	assert(textStream.get() == _textUnicode[0].value());
 	assert(textStream.get() == _textUnicode[1].value());
@@ -81,7 +81,7 @@ void TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode()
 	stringstream ss;
 	ss << _textUTF8;
 	
-	Pt::Text::TextStream textStream(ss, new Pt::Utf8Codec());
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
 
 	Char c[6];
 	textStream.getline(c, 6);
@@ -100,7 +100,7 @@ void TextStreamTest::testTextBufferFromUnicodeToUTF8()
 {
 	stringstream ss;
 
-	Pt::Text::TextBuffer textBuffer(ss.rdbuf(), new Pt::Utf8Codec());
+	Pt::Text::TextBuffer textBuffer(ss.rdbuf(), new Pt::Text::Utf8Codec());
 	textBuffer.sputn(_textUnicode, 5);
 	textBuffer.pubsync();
 
@@ -115,7 +115,7 @@ void TextStreamTest::testTextStreamFromUnicodeToUTF8()
 {
 	stringstream ss;
 
-	Pt::Text::TextStream textStream(ss, new Pt::Utf8Codec());
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
 	textStream << _textUnicode;
 
 	string str = ss.str();
@@ -129,7 +129,7 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 {
 	stringstream ss;
 
-	Pt::Text::TextStream textStream(ss, new Pt::Utf32Codec());
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf32Codec());
 	textStream << _textUnicode;
 
 	Char c[6];

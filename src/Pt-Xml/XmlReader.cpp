@@ -30,7 +30,7 @@ XmlIStream::XmlIStream(std::istream& is)
 , _buffer(0)
 , _tokenMax(512)
 {
-	_buffer = new Text::TextBuffer( is.rdbuf(), new Utf8Codec() );
+	_buffer = new Text::TextBuffer( is.rdbuf(), new Pt::Text::Utf8Codec() );
 	_textBuffer = _buffer;
 
 	this->init();

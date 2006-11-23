@@ -27,6 +27,8 @@
 
 namespace Pt {
 
+namespace Text {
+
 	class PT_EXPORT Utf32Codec : public TextCodec<Char, char> {
 		public:
 			/**
@@ -58,6 +60,8 @@ namespace Pt {
 			// inheritdoc
 			virtual bool do_always_no_conv() const throw();
 	};
+
+} //namespace Text
 
 } //namespace Pt
 

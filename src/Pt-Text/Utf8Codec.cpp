@@ -27,6 +27,8 @@ using namespace std;
 
 namespace Pt {
 
+namespace Text {
+
 Utf8Codec::Utf8Codec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
@@ -177,5 +179,7 @@ bool Utf8Codec::do_always_noconv() const throw()
 {
 	return false;
 }
+
+} // namespace Text
 
 } // namespace Pt

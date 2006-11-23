@@ -20,7 +20,7 @@
 
 #include "UtfCommons.h"
 #include "Pt/Text/Utf16Codec.h"
-using namespace Pt;
+using namespace Pt::Text;
 
 
 Utf16Codec::Utf16Codec(size_t ref) : Pt::TextCodec(ref)
