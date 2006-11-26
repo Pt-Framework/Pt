@@ -22,6 +22,8 @@
 
 #include <Pt/Gfx/BasicImage.h>
 
+#include <iostream>
+
 
 namespace Pt {
 
@@ -74,7 +76,7 @@ namespace Pt {
 		}
 
 
-		//! @brief Greyscales an image
+		//! @brief Greyscale a pixel range.
 		template <typename In, typename Out>
 		inline void greyscale(In begin, In end, Out to)
 		{
@@ -84,12 +86,35 @@ namespace Pt {
 			}
 		}
 
+		/** @brief Block-scale a pixel range.
+		    
+		    @param from Begin of the source range
+		    @param fromWidth Width of the source range
+		    @param fromHeight Height of the source range
+		    @param to Begin of the destination range
+		    @param fromWidth Width of the destination range
+		    @param fromHeight Height of the destination range
+		    
+		    This algorithm block-scales the source range [from, fromEnd] to the
+		    destination range [to, toEnd]
+		*/
+		template<typename In, typename Out>
+		void blockScale(In from, size_t fromWdth, size_t fromHeight, 
+		                Out to,  size_t toWdth, size_t toHeight);
+		                
 
-		//! Block scale (pixel replication/removal) the image to another image.
-		template<typename DstColorSpaceT, typename SrcColorSpaceT>
-		void blockScale(BasicImage<DstColorSpaceT>& dstImage,
-		                const BasicImage<SrcColorSpaceT>& srcImage,
-		                uint newWidth, uint newHeight);
+		/** @brief Block-scale a pixel range.
+		    
+		    @param from Begin of the source range
+		    @param fromEnd End of the source range
+		    @param to Begin of the destination range
+		    @param toEnd End of the destination range
+		    
+		    This algorithm block-scales the source range [from, fromEnd] to the
+		    destination range [to, toEnd]
+		*/
+		template<typename In, typename Out>
+		void blockScale(In from, In fromEnd, Out to, Out toEnd);
 
 	} // namespace Gfx
 

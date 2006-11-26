@@ -16,42 +16,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#include <vector>
+
 #include <Pt/Main.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Algorithm.h>
 
-#include <vector>
-#include <iostream>
-#include <sstream>
-#include <ctime>
 
-using namespace std;
+void ScaleARgbImageTest()
+{
+	const Pt::Gfx::ARgbImage image(30, 20);
+	Pt::Gfx::ARgbImage image2(40, 40);
+	blockScale(image.begin(), image.end(), image2.begin(), image2.end());
+}
+
+
+void ScaleVectorTest()
+{
+	std::vector<Pt::Gfx::ARgbColor> from(30*20);
+	std::vector<Pt::Gfx::ARgbColor> to(40*30);
+	blockScale(from.begin(), 30, 20, to.begin(), 40, 30);
+}
 
 
 int main(int argc, char* argv[])
 {
-	/*std::vector<Pt::Gfx::ARgbColor> data(1000);
-
-	clock_t begin, time;
-
-	begin = clock();
-	for(int i = 0; i < 10000; ++i)
-	{
-		Pt::Gfx::transform( data.begin(), data.end(), Pt::Gfx::Greyscale<Pt::Gfx::ARgb>() );
-	}
-	time = clock() - begin;
-
-	std::cerr << "Duration: " << time << std::endl;
-
-	begin = clock();
-	for(int i = 0; i < 10000; ++i)
-	{
-		Pt::Gfx::greyscale( data.begin(), data.end() );
-	}
-	time = clock() - begin;
-
-	std::cerr << "Duration: " << time << std::endl;*/
-
+	ScaleARgbImageTest();
+	ScaleVectorTest();
 	return 0;
 }

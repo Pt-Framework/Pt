@@ -29,7 +29,7 @@ namespace Pt {
 
 		// IMPL: Image scalling using the block scale method (pixel replication/removal)
 		template<typename DstColorSpaceT, typename SrcColorSpaceT>
-		void blockScale(BasicImage<DstColorSpaceT>& dstImage, const BasicImage<SrcColorSpaceT>& srcImage,
+		void old_blockScale(BasicImage<DstColorSpaceT>& dstImage, const BasicImage<SrcColorSpaceT>& srcImage,
 		                uint newWidth, uint newHeight)
 		{
 			// Resize the destination image
@@ -64,6 +64,54 @@ namespace Pt {
 					dh -= dstH;
 				}
 			}
+		}
+
+
+		template<typename In, typename Out>
+		void blockScale(In from, size_t fromWidth, size_t fromHeight, 
+		                Out to,  size_t toWidth, size_t toHeight)
+		{
+			size_t dh = 0;
+			size_t y  = 0;
+
+			while(y < toHeight)
+			{
+				In pos = from;
+				do
+				{
+					size_t dw = 0;
+					for(size_t x = 0; x < toWidth; ++x)
+					{
+						assign(*to, *from);
+						++to;
+						for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
+					}
+					from = pos;
+					y++;
+				}
+				while( (dh += fromHeight) < toHeight );
+
+				while(dh >= toHeight)
+				{
+					from += fromWidth;
+					dh -= toHeight;
+				}
+			}
+		}
+		
+
+		template<typename In, typename Out>
+		void blockScale(In from, In fromEnd, Out to, Out toEnd)
+		{
+			const Size fromSize = fromEnd - from;
+			const size_t fromWidth = fromSize.width();
+			const size_t fromHeight = fromSize.height();
+
+			const Size toSize = toEnd - to;
+			const size_t toWidth = toSize.width();
+			const size_t toHeight = toSize.height();
+
+			blockScale(from, fromWidth, fromHeight, to, toWidth, toHeight);
 		}
 
 	} // namespace Gfx

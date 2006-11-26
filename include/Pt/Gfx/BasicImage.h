@@ -225,68 +225,105 @@ namespace Pt {
 				size_t _width;
 				size_t _height;
 
-				//! \brief Pixel iterator class
-				class PixelIterator {
+				/** \brief Pixel-based iterator
+				*/
+				class PixelIterator
+				{
 					public:
 						typedef BasicImage<ColorSpaceT> ImageT;
 						typedef typename ImageT::ColorT ColorT;
 
 					public:
-						//! Construct a PixelIterator object at coordinate (0,0)
-						inline PixelIterator(ImageT& image)
-						: _image(image), _pixel(&image.scanline(0)[0]) {}
+						PixelIterator(ImageT& image, uint x = 0, uint y = 0)
+						: _image(&image), _pixel(&image.scanline(y)[x]) {}
 
-						//! Construct a PixelIterator object at coordinate (x,y)
-						inline PixelIterator(ImageT& image, uint x, uint y)
-						: _image(image), _pixel(&image.scanline(y)[x]) {}
+						PixelIterator operator=(PixelIterator other)
+						{
+							_pixel = other._pixel;
+							_image = other._image;
+							return *this;
+						}
 
-						//! Return the pixel at the current coordinate
-						inline ColorT& operator*() const
+						ColorT& operator*() const
 						{ return *_pixel; }
 
-						//! Increment to the next pixel
-						inline PixelIterator& operator++()
+						PixelIterator operator+=(size_t n)
+						{ _pixel += n; return *this; }
+
+						PixelIterator& operator++()
 						{ ++_pixel; return *this; }
 
-						//! Unequality comparison operator
-						inline bool operator!=(const PixelIterator& it) const
+						bool operator!=(const PixelIterator& it) const
 						{ return this->_pixel != it._pixel; }
 
+						Size operator-(const PixelIterator& other)
+						{
+							const size_t pos = _pixel - _image->data();
+							const size_t otherPos = other._pixel - other._image->data();
+
+							const size_t otherWidth = otherPos / other._image->height();
+							const size_t otherHeight = otherPos / other._image->width();
+
+							const size_t width = pos / _image->height();
+							const size_t height = pos / _image->width();
+
+							return Size(width - otherWidth, height -otherHeight);
+						}
+
 					private:
-						ImageT& _image;
+						ImageT* _image;
 						ColorT* _pixel;
 				};
 
 
-				//! \brief Constant pixel iterator class
-				class ConstPixelIterator {
+				/** \brief Const pixel-based iterator
+				*/
+				class ConstPixelIterator
+				{
 					public:
 						typedef BasicImage<ColorSpaceT> ImageT;
 						typedef typename ImageT::ColorT ColorT;
 
 					public:
-						//! Construct a PixelIterator object at coordinate (0,0)
-						inline ConstPixelIterator(const ImageT& image)
-						: _image(image), _pixel(&image.scanline(0)[0]) {}
+						ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
+						: _image(&image), _pixel(&image.scanline(y)[x])
+						{}
 
-						//! Construct a PixelIterator object at coordinate (x,y)
-						inline ConstPixelIterator(const ImageT& image, uint x, uint y)
-						: _image(image), _pixel(&image.scanline(y)[x]) {}
+						ConstPixelIterator operator=(ConstPixelIterator other)
+						{
+							_pixel = other._pixel;
+							_image = other._image;
+							return *this;
+						}
 
-						//! Return the pixel at the current coordinate
-						inline const ColorT& operator*() const
+						const ColorT& operator*() const
 						{ return *_pixel; }
 
-						//! Increment to the next pixel
-						inline ConstPixelIterator& operator++()
+						ConstPixelIterator& operator++()
 						{ ++_pixel; return *this; }
 
-						//! Unequality comparison operator
-						inline bool operator!=(const ConstPixelIterator& it) const
+						ConstPixelIterator operator+=(size_t n)
+						{ _pixel += n; return *this; }
+
+						bool operator!=(const ConstPixelIterator& it) const
 						{ return this->_pixel != it._pixel; }
 
+						Size operator-(const ConstPixelIterator& other)
+						{
+							const size_t pos = _pixel - _image->data();
+							const size_t otherPos = other._pixel - other._image->data();
+
+							const size_t otherWidth = otherPos / other._image->height();
+							const size_t otherHeight = otherPos / other._image->width();
+
+							const size_t width = pos / _image->height();
+							const size_t height = pos / _image->width();
+
+							return Size(width - otherWidth, height -otherHeight);
+						}
+
 					private:
-						const ImageT& _image;
+						const ImageT* _image;
 						const ColorT* _pixel;
 				};
 		};
