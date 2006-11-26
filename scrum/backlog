@@ -58,16 +58,25 @@ ITEM-22 P0 S5 "CTTI system is implemented"
 
 
 ITEM P0 S8 "The BasicColor<T> class interface is improved"
-	TASK "Review the interface of the BasicColor<T> class"
-
-ITEM P0 S5 "The image classes support faster conversion to hardware's image format"
-	TASK "Write fast_toARgb() and fast_fromARgb()"
-	TASK "Write fast_assign()"
+	TASK "Discuss the interface of the BasicColor<T> class"
+	TASK "Make toARgb and from ARgb free functions supporting precision and fast conversion"
+	TASK "Make brightness a free function."
+	TASK "Make greyscale a free function."
+	TASK "remove BasicColor class."
+	TASK "write assign functions for color classes (precise and approx)"
 
 ITEM P0 S8 "The BasicImage<T> class interface is improved"
 	TASK "Review the interface of the BasicImage<T> class"
 	TASK "Consider to write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
+	TASK "Write iterator based algorithm greyscale"
+	TASK "Write iterator based algorithm brighten/darken"
+	TASK "Write iterator based algorithm assign"
+	TASK "Write iterator based algorithm blockScale"
 
+ITEM P0 S8 "The Image class has a block iterator"
+	TASK "Write BlockIterator"
+	TASK "Write BlockIterator based algorithm for scale"
+	
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
 	TASK "Write Documentation"
