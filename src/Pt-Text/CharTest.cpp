@@ -156,7 +156,7 @@ void CharTest::testCategory()
 	assert(!p.isSpace());
 
 
-	p = p.toUpper();  // �
+	p = p.toUpper();  // ?
 	assert( p.isAlpha());
 	assert( p.isAlnum());
 	assert(!p.isDigit());
