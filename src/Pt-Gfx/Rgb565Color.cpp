@@ -52,7 +52,7 @@ void Pt::Gfx::BasicColor<Rgb565>::setBrightness(Pt::uint8_t l)
 	else if (g>=r && g>=b) {
 		float o = g;
 		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(l * 2.03226f);
+		setGreen(Pt::uint8_t(l * 2.03226f));
 		setBlue (Pt::uint8_t(b * l / o));
 	}
 	else {

@@ -31,11 +31,11 @@
 
 namespace std {
 
-	class PT_EXPORT ios_base;
-	
+	class ios_base;
+
 #ifdef _MSC_VER
 
-	class PT_EXPORT ctype_base;
+	class ctype_base;
 
 	template <>
 	class PT_EXPORT ctype<Pt::Char> : public ctype_base {

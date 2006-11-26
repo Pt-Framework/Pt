@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tobias Müller                                   *
+ *   Copyright (C) 2006 by Tobias Mller                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -56,7 +56,7 @@ void CharTest::testConstructor()
 
 	Char p2((char)'a');
 	assert(p2.value() == 97);
-	
+
 	Char p3((wchar_t)'a');
 	assert(p3.value() == 97);
 
@@ -89,7 +89,7 @@ void CharTest::testAssign()
 
 	p = (char)'a';
 	assert(p.value() == 97);
-	
+
 	p = (wchar_t)('b');
 	assert(p.value() == 98);
 
@@ -143,7 +143,7 @@ void CharTest::testCategory()
 	assert(!p.isPunctuation());
 	assert(!p.isSpace());
 
-	p = L'ö';
+	p = 'l';
 	assert( p.isAlpha());
 	assert( p.isAlnum());
 	assert(!p.isDigit());
@@ -155,8 +155,8 @@ void CharTest::testCategory()
 	assert(!p.isPunctuation());
 	assert(!p.isSpace());
 
-	
-	p = p.toUpper();  // Ö
+
+	p = p.toUpper();  // ï¿½
 	assert( p.isAlpha());
 	assert( p.isAlnum());
 	assert(!p.isDigit());
@@ -260,7 +260,7 @@ void CharTest::testOperators()
 	Char a('a'); // 97
 	Char z('z'); // 122
 	Char r;
-	
+
 	r = z - a;
 	assert(r == 25);
 
