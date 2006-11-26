@@ -108,7 +108,7 @@ namespace Pt {
 
 
 		//! Assign color value
-		template <typename CS1, typename CS2>
+		template <typename CS1, typename CS2> inline
 		void assign(BasicColor<CS1>& to, const BasicColor<CS2>& from)
 		{
 			uint16_t a, r, g, b;
