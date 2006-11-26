@@ -28,9 +28,10 @@
 
 void ScaleARgbImageTestSimple()
 {
-	const Pt::Gfx::ARgbImage image(30, 20);
+	/*const Pt::Gfx::ARgbImage image(30, 20);
 	Pt::Gfx::ARgbImage image2;
 	blockScale(image, image2, 40, 40);
+	*/
 }
 
 

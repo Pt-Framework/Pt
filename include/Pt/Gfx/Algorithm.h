@@ -106,15 +106,15 @@ namespace Pt {
 		    @param newWidth  Wanted width of the destination image
 		    @param newHeight Wanted height of the destination image
 		 */
-		template<typename SrcColorSpaceT, typename DstColorSpaceT> inline
+		/*template<typename SrcColorSpaceT, typename DstColorSpaceT> inline
 		void blockScale(const BasicImage<SrcColorSpaceT>& srcImage,
 		                BasicImage<DstColorSpaceT>& dstImage,
-		                uint newWidth, uint newHeight)
+		                size_t newWidth, size_t newHeight)
 		{
 			dstImage.resize(newWidth, newHeight);
 			blockScale(srcImage.begin(), srcImage.width(), srcImage.height(),
 			           dstImage.begin(), newWidth, newHeight);
-		}
+		}*/
 
 	} // namespace Gfx
 

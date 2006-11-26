@@ -76,14 +76,11 @@ namespace Pt {
 			size_t dh = 0;
 			size_t y  = 0;
 
-			while(y < toHeight)
-			{
+			while(y < toHeight) {
 				In pos = from;
-				do
-				{
+				do {
 					size_t dw = 0;
-					for(size_t x = 0; x < toWidth; ++x)
-					{
+					for(size_t x = 0; x < toWidth; ++x) {
 						assign(*to, *from);
 						++to;
 						for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
@@ -93,8 +90,7 @@ namespace Pt {
 				}
 				while( (dh += fromHeight) < toHeight );
 
-				while(dh >= toHeight)
-				{
+				while(dh >= toHeight) {
 					from += fromWidth;
 					dh -= toHeight;
 				}
