@@ -27,10 +27,10 @@ namespace Pt {
 
 	namespace Gfx {
 
-		// IMPL: Image scalling using the block scale method (pixel replication/removal)
+		/*
 		template<typename DstColorSpaceT, typename SrcColorSpaceT>
 		void old_blockScale(BasicImage<DstColorSpaceT>& dstImage, const BasicImage<SrcColorSpaceT>& srcImage,
-		                uint newWidth, uint newHeight)
+		                    uint newWidth, uint newHeight)
 		{
 			// Resize the destination image
 			dstImage.resize(newWidth, newHeight);
@@ -65,10 +65,12 @@ namespace Pt {
 				}
 			}
 		}
+		*/
 
 
+		// IMPL: Image scalling using the block scale method (pixel replication/removal)
 		template<typename In, typename Out>
-		void blockScale(In from, size_t fromWidth, size_t fromHeight, 
+		void blockScale(In from, size_t fromWidth, size_t fromHeight,
 		                Out to,  size_t toWidth, size_t toHeight)
 		{
 			size_t dh = 0;
@@ -98,7 +100,7 @@ namespace Pt {
 				}
 			}
 		}
-		
+
 
 		template<typename In, typename Out>
 		void blockScale(In from, In fromEnd, Out to, Out toEnd)

@@ -25,6 +25,14 @@
 #include <Pt/Gfx/Algorithm.h>
 
 
+void ScaleARgbImageTestSimple()
+{
+	const Pt::Gfx::ARgbImage image(30, 20);
+	Pt::Gfx::ARgbImage image2;
+	blockScale(image, image2, 40, 40);
+}
+
+
 void ScaleARgbImageTest()
 {
 	const Pt::Gfx::ARgbImage image(30, 20);
@@ -43,6 +51,7 @@ void ScaleVectorTest()
 
 int main(int argc, char* argv[])
 {
+	ScaleARgbImageTestSimple();
 	ScaleARgbImageTest();
 	ScaleVectorTest();
 	return 0;
