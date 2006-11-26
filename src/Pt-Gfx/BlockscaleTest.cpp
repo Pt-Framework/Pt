@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include <vector>
+//#include <ctime>
 
 #include <Pt/Main.h>
 #include <Pt/Gfx/ARgbColor.h>
@@ -35,23 +36,30 @@ void ScaleARgbImageTestSimple()
 
 void ScaleARgbImageTest()
 {
-	const Pt::Gfx::ARgbImage image(30, 20);
-	Pt::Gfx::ARgbImage image2(40, 40);
-	blockScale(image.begin(), image.end(), image2.begin(), image2.end());
+	const Pt::Gfx::ARgbImage image(100, 100);
+	Pt::Gfx::ARgbImage image2(400, 300);
+
+	//clock_t begin = clock();
+	//for(int i = 0; i < 1000; ++i)
+		blockScale(image.begin(), image.end(), image2.begin(), image2.end());
+	//std::cerr << "PixelIterator: " << clock() - begin << std::endl;
 }
 
 
 void ScaleVectorTest()
 {
-	std::vector<Pt::Gfx::ARgbColor> from(30*20);
-	std::vector<Pt::Gfx::ARgbColor> to(40*30);
-	blockScale(from.begin(), 30, 20, to.begin(), 40, 30);
+	std::vector<Pt::Gfx::ARgbColor> from(100*100);
+	std::vector<Pt::Gfx::ARgbColor> to(400*300);
+	
+	//clock_t begin = clock();
+	//for(int i = 0; i < 1000; ++i)
+		blockScale(from.begin(), 100, 100, to.begin(), 400, 300);
+	//std::cerr << "Manual w/h:" << clock() - begin << std::endl;
 }
 
 
 int main(int argc, char* argv[])
 {
-	ScaleARgbImageTestSimple();
 	ScaleARgbImageTest();
 	ScaleVectorTest();
 	return 0;
