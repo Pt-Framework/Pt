@@ -19,9 +19,12 @@
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
+#include <Pt/System/Clock.h>
 #include <Pt/Unit/Assertion.h>
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 
 namespace Pt {
@@ -30,39 +33,107 @@ namespace Unit {
 
 	class Reporter
 	{
-		public:
-			Reporter()
-			{}
+	public:
 
-			virtual ~Reporter()
-			{}
+		Reporter(std::ostream* outputStream = &std::cerr)
+		: outStream(outputStream)
+		{
+		}
 
-			virtual void message(const std::string& msg)
+		virtual ~Reporter()
+		{
+		}
+
+		virtual void message(const std::string& msg)
+		{
+			*outStream << msg << std::endl;
+		}
+
+		virtual void success(const Test& test)
+		{
+			*outStream << test.name() <<  ": OK."<< std::endl;
+		}
+
+		virtual void assertion(const Test& test, const Assertion& a)
+		{
+			*outStream << test.name() << ": Assertion!" << std::endl;
+			*outStream << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
+			*outStream << '\t' << a.sourceInfo().func() << std::endl;
+		}
+
+		virtual void exception(const Test& test, const std::exception& ex)
+		{
+			*outStream << test.name() << ": Exception!" << std::endl;
+			*outStream << '\t' << ex.what() << std::endl;
+		}
+
+		virtual void error(const Test& test)
+		{
+			*outStream << test.name() << ": Error!" << std::endl;
+		}
+
+
+	protected:
+
+		std::ostream* outStream;
+	};
+
+
+	class FileReporter : public Reporter
+	{
+	public:
+
+		FileReporter(std::string outFileName, std::ofstream::openmode mode = std::ofstream::out | std::ofstream::trunc, bool writeTimestamp = false)
+		{
+			outFileStream.open(outFileName.c_str(), mode);
+
+			if(outFileStream)
 			{
-				std::cerr << msg << std::endl;
+				outStream = &outFileStream;
 			}
 
-			virtual void success( const Test& test )
+			else
 			{
-				std::cerr << test.name() <<  ": OK."<< std::endl;
+				outStream = &std::cerr;
+
+				std::cerr << std::endl;
+				std::cerr << "FileReporter::FileReporter(std::string outFileName)" << std::endl;
+				std::cerr << "--> Cannot open out file: " << outFileName << std::endl;
+				std::cerr << "--> Using std::cerr instead" << std::endl;
+				std::cerr << std::endl;
 			}
 
-			virtual void assertion(const std::string& testName, const Assertion& a)
-			{
-				std::cerr << testName << ": Assertion!" << std::endl;
-				std::cerr << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
-			}
 
-			virtual void exception( const std::string testName, const std::exception& ex)
+			if(writeTimestamp)
 			{
-				std::cerr << testName << ": Exception!" << std::endl;
-				std::cerr << '\t' << ex.what() << std::endl;
-			}
+				std::stringstream msg;
 
-			virtual void error(const std::string& testName)
-			{
-				std::cerr << testName << ": Error!" << std::endl;
+				msg << std::endl;
+				msg << std::endl;
+				msg << "--------------------------------------------------" << std::endl;
+				msg << outFileName << std::endl;
+				msg << "Test started: " << Pt::System::Clock::getCurrentTime().toIsoString() << std::endl;
+				//msg << "Test started: " << "TODO: Insert current time" << std::endl;
+				msg << "--------------------------------------------------" << std::endl;
+				msg << std::endl;
+
+				message(msg.str());
 			}
+		}
+
+
+		virtual ~FileReporter()
+		{
+			if(outFileStream)
+			{
+				outFileStream.close();
+			}
+		}
+
+
+	private:
+
+		std::ofstream outFileStream;
 	};
 
 } // namespace Unit
