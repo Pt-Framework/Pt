@@ -25,7 +25,7 @@ class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2, A3>
 
 	public:
 		MethodProxy(C* object, MemFuncT memFunc)
-		: Method(object, memFunc)
+		: Method<R, C, A1, A2, A3>(object, memFunc)
 		{}
 
 		size_t argSize() const
@@ -76,7 +76,7 @@ class PT_EXPORT MethodProxy<R, C, A1, A2, Pt::Void> : public ICallable, private 
 
 	public:
 		MethodProxy(C* object, MemFuncT memFunc)
-		: Method(object, memFunc)
+		: Method<R, C, A1, A2>(object, memFunc)
 		{}
 
 		size_t argSize() const
@@ -123,7 +123,7 @@ class PT_EXPORT MethodProxy<R, C, A1, Pt::Void, Pt::Void> : public ICallable, pr
 
 	public:
 		MethodProxy(C* object, MemFuncT memFunc)
-		: Method(object, memFunc)
+		: Method<R, C, A1>(object, memFunc)
 		{}
 
 		size_t argSize() const
@@ -166,7 +166,7 @@ class PT_EXPORT MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void> : public ICallab
 
 	public:
 		MethodProxy(C* object, MemFuncT memFunc)
-		: Method(object, memFunc)
+		:  Method<R, C>(object, memFunc)
 		{}
 
 		size_t argSize() const
