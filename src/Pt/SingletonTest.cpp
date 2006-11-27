@@ -50,7 +50,7 @@ class SingletonTest : public Pt::Unit::TestSuite
 		SingletonTest()
 		: TestSuite("SingletonTest")
 		{
-			this->registerMethod("test", *this, &SingletonTest::test);
+			//this->registerMethod("test", *this, &SingletonTest::test);
 		}
 
 		virtual void test()

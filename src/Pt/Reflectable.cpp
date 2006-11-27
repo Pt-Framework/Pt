@@ -52,21 +52,21 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
-const ICallable& Reflectable::method(const std::string& name) const
+/*const ICallable& Reflectable::method(const std::string& name) const
 {
 	MethodMap::const_iterator it = _methods.find(name);
 	if( it == _methods.end() )
 		throw Pt::IllegalArgument("No such method.", PT_SOURCEINFO);
 
 	return *(it->second);
-}
+}*/
 
 
 void Reflectable::call(const std::string& name, const Args& args)
 {
 	MethodMap::iterator it = _methods.find(name);
 	if( it == _methods.end() )
-		throw Pt::IllegalArgument("No such method.", PT_SOURCEINFO);
+		throw Pt::IllegalArgument("No such method:" + name, PT_SOURCEINFO);
 
 	it->second->call(args);
 }

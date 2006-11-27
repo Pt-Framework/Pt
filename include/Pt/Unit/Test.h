@@ -97,7 +97,7 @@ namespace Unit {
 		MethodMap::const_iterator it;
 		for(it = methods.begin(); it != methods.end(); ++it)
 		{
-			test.runTest( it->first, BasicArgs<>() );
+			test.runTest( it->first, Args() );
 		}
 	}
 

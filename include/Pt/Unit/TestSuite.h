@@ -58,13 +58,15 @@ namespace Unit {
 		public:
 			void includeTest(const std::string& testName)
 			{
-				_items.insert( std::make_pair(testName, new BasicArgs<>()) );
+				_items.insert( std::make_pair(testName, new Args()) );
 			}
 
 			template <typename A1>
 			void includeTest(const std::string& testName, A1 a1)
 			{
-				_items.insert( std::make_pair(testName, new BasicArgs<A1>(a1)) );
+				Args* args = new Args();
+				args->push_back(a1);
+				_items.insert( std::make_pair(testName, args) );
 			}
 
 			void run(Test& suite)

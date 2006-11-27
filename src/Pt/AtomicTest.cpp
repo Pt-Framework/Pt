@@ -55,7 +55,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 				Protocol()
 				{
 					this->includeTest( "AdditionTest" );
-					//this->includeSleep(4000);
 					this->includeTest( "AssignmentTest", 42 );
 					this->includeTest( "AssignmentTest", 56 );
 					this->includeTest( "AssignmentTest", 3445 );

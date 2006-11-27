@@ -37,7 +37,7 @@ class ByteorderTest : public Pt::Unit::TestSuite
 		ByteorderTest()
 	: TestSuite("ByteorderTest")
 		{
-			this->registerMethod("test", *this, &ByteorderTest::test);
+			//this->registerMethod("test", *this, &ByteorderTest::test);
 		}
 
 		virtual void test()

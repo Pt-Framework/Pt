@@ -36,7 +36,12 @@ class TypesTest : public Pt::Unit::TestSuite
 		TypesTest()
 		: TestSuite("TypesTest")
 		{
-			this->registerMethod("test", *this, &TypesTest::test);
+			this->registerMethod("test", *this, &TypesTest::test);;
+		}
+
+		void test1(int a)
+		{
+			std::cerr << "\ncalled: " << a << "\n";
 		}
 
 		void test()
