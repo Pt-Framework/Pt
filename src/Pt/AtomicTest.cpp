@@ -49,7 +49,7 @@ Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTe
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
 	public:
-		class Protocol : public Pt::Unit::TestSuiteProtocol
+		class Protocol : public Pt::Unit::ListedProtocol
 		{
 			public:
 				Protocol()
