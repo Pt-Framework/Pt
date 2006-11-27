@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include "Pt/DateTime.h"
 #include "Pt/System/TimeValue.h"
 
 
@@ -16,9 +17,11 @@ class PT_API ClockImpl
 	public:
 		ClockImpl();
 		~ClockImpl();
-		
-        void start ();         
+
+        void start ();
 		TimeValue stop();
+
+		static DateTime getCurrentTime();
 
 	private:
 		struct timeval  _startTime;

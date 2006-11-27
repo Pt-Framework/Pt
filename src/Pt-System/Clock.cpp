@@ -26,6 +26,11 @@ TimeValue Clock::stop()
 	return _impl->stop();
 }
 
+DateTime Clock::getCurrentTime()
+{
+	return ClockImpl::getCurrentTime();
+}
+
 } //namespace System
 
 } //namespace Pt

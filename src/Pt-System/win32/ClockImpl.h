@@ -2,6 +2,7 @@
 #define PT_ClockImpl_H
 
 #include <Windows.h>
+#include "Pt/DateTime.h"
 #include "Pt/System/TimeValue.h"
 
 
@@ -15,18 +16,20 @@ public:
 	ClockImpl();
 
 	~ClockImpl();
-	
+
 	void start();
 
-	TimeValue stop(); 
+	TimeValue stop();
+
+	static DateTime getCurrentTime();
 
 private:
 	DWORD           _procAffinity;
-	DWORD           _sysAffinity;	
+	DWORD           _sysAffinity;
 	HANDLE          _currentProcessHandle;
 	LARGE_INTEGER   _frequency;
 	LARGE_INTEGER   _startValue;
-	LARGE_INTEGER   _stopValue;		
+	LARGE_INTEGER   _stopValue;
 	DWORD           _secondStartValue;
 	DWORD           _secondStopValue;
 };

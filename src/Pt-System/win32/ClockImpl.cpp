@@ -1,7 +1,7 @@
 #include "ClockImpl.h"
 #include "Pt/Exception.h"
 #include "time.h"
-#include <mmsystem.h> 
+#include <mmsystem.h>
 
 
 namespace Pt {
@@ -10,13 +10,13 @@ namespace System {
 
 ClockImpl::ClockImpl()
 : _procAffinity(0)
-, _sysAffinity(0)	
+, _sysAffinity(0)
 , _currentProcessHandle(0)
-{  
+{
     _currentProcessHandle = GetCurrentProcess();
-    
+
 #ifndef _WIN32_WCE
-  
+
     if( !GetProcessAffinityMask( _currentProcessHandle,  &_procAffinity, &_sysAffinity ))
         throw RuntimeError("GetProcessAffinityMask failed", PT_SOURCEINFO);
 
@@ -49,25 +49,42 @@ TimeValue ClockImpl::stop()
     LARGE_INTEGER delta;
     delta.QuadPart      = _stopValue.QuadPart - _startValue.QuadPart;
     DWORD secondDelta   = _secondStopValue - _secondStartValue;
-    
+
     TimeValue result;
-    
+
     if( secondDelta > 100 )
     {
         result.setSeconds( secondDelta / 1000 );
         result.setMicroSeconds ( ( secondDelta * 1000 ) % 1000000 );
     }
     else
-    {     	
-        size_t seconds = static_cast<size_t>( delta.QuadPart / _frequency.QuadPart );        
+    {
+        size_t seconds = static_cast<size_t>( delta.QuadPart / _frequency.QuadPart );
 	    result.setSeconds( seconds );
-	    
+
 	    size_t microSeconds = static_cast<size_t>( ( ( delta.QuadPart * 1000000 ) / _frequency.QuadPart ) % 1000000 );
 	    result.setMicroSeconds( microSeconds );
 	}
-	
+
 	return result;
-}	
+}
+
+DateTime ClockImpl::getCurrentTime()
+{
+	SYSTEMTIME systemTime;
+	GetSystemTime(&systemTime);
+
+	Date date(	systemTime.wYear,
+				systemTime.wMonth,
+				systemTime.wDay	);
+	Time time(	systemTime.wHour,
+				systemTime.wMinute,
+				systemTime.wSecond,
+				systemTime.wMilliseconds	);
+	DateTime dateTime(date, time);
+
+	return dateTime;
+}
 
 } // namespace Pt
 
