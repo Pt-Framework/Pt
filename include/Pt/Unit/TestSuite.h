@@ -44,16 +44,55 @@ namespace Unit {
 
 			void runTest( const std::string& name, const Args& args = Args() )
 			{
-				this->setUp();
-				Reflectable::call(name, args);
-				this->tearDown();
+				bool isUp = false;
 
-				Test::success( this->name() + "::" + name );
+				try
+				{
+					this->setUp();
+					isUp = true;
+					Reflectable::call(name, args);
+					this->tearDown();
+					Test::success( this->name() + "::" + name );
+					return;
+				}
+				catch(const Assertion& assertion)
+				{
+					Test::assertion(this->name(), assertion);
+				}
+				catch(const std::exception& ex)
+				{
+					Test::exception(this->name(), ex);
+				}
+				catch(...)
+				{
+					Test::error(this->name());
+				}
+
+
+				try
+				{
+					if(isUp)
+					{
+						this->tearDown();
+					}
+				}
+				catch(const Assertion& assertion)
+				{
+					Test::assertion(this->name(), assertion);
+				}
+				catch(const std::exception& ex)
+				{
+					Test::exception(this->name(), ex);
+				}
+				catch(...)
+				{
+					Test::error(this->name());
+				}
 			}
 	};
 
 
-	class TestSuiteProtocol : public TestProtocol
+	class ListedProtocol : public TestProtocol
 	{
 		public:
 			void includeTest(const std::string& testName)
