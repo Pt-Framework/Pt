@@ -2,6 +2,7 @@
 #define PTV_SYSTEM_CLOCK_H
 
 #include <Pt/Api.h>
+#include <Pt/DateTime.h>
 #include <Pt/Types.h>
 #include <Pt/System/TimeValue.h>
 
@@ -29,8 +30,13 @@ class PT_API Clock
         /** @brief Stop the clock.
             @return Return the time diference.
         */
-		TimeValue stop();			
-		
+		TimeValue stop();
+
+		/** @brief Gets the current time
+		    @return Returns the current time
+		*/
+		static DateTime getCurrentTime();
+
 	private:
 		class ClockImpl *_impl;
 };

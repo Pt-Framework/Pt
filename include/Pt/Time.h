@@ -28,6 +28,9 @@
 #include <limits>
 
 
+#undef max
+
+
 namespace Pt {
 
 	/**	\brief This class holds a time.
@@ -71,34 +74,34 @@ namespace Pt {
 
 		/** \brief Returns the hour-part of the Time.
 		*/
-		unsigned short hours() const     
+		unsigned short hours() const
 		{ return _hour; }
 
 		/** \brief Returns the minute-part of the Time.
 		*/
-		unsigned short minutes() const   
+		unsigned short minutes() const
 		{ return _minute; }
 
 		/** \brief Returns the second-part of the Time.
 		*/
-		unsigned short seconds() const   
+		unsigned short seconds() const
 		{ return _second; }
 
 		/** \brief Returns the millisecond-part of the Time.
 		*/
-		unsigned short msecs() const   
+		unsigned short msecs() const
 		{ return _msec; }
 
 		/** \brief Check if Time value is valid
 		*/
-		bool isNull() const  
+		bool isNull() const
 		{ return _hour == std::numeric_limits<unsigned short>::max(); }
 
 		/** \brief Sets the time.
 
 			Sets the time to a new hour, minute, second, milli-second.
 			No range-checks are done.
-			
+
 			\param hour Hour component of time.
 			\param minute Minute component of time.
 			\param second Second component of time.
@@ -133,21 +136,21 @@ namespace Pt {
 
 		/** \brief Equality comparison operator
 
-			Returns true if both times are equal. 
+			Returns true if both times are equal.
 			\param dt time object
 			\return true if equal
 		*/
 		bool operator==(const Time& dt) const
-		{ 
+		{
 			return _hour == dt._hour
 				&& _minute == dt._minute
 				&& _second == dt._second
-				&& _msec == dt._msec; 
+				&& _msec == dt._msec;
 		}
 
 		/** \brief Inequality comparison operator
 
-			Returns true if times are different. 
+			Returns true if times are different.
 			\param dt time object
 			\return true if not equal
 		*/
@@ -156,12 +159,12 @@ namespace Pt {
 
 		/** \brief Less-than comparison operator
 
-			Returns true if this time is earlier. 
+			Returns true if this time is earlier.
 			\param dt time object
 			\return true if earlier
 		*/
 		bool operator< (const Time& dt) const
-		{ 
+		{
 			return _hour < dt._hour
 				|| _hour == dt._hour
 				&& ( _minute < dt._minute
@@ -170,12 +173,12 @@ namespace Pt {
 				|| _second == dt._second
 				&& _msec < dt._msec
 				)
-				); 
+				);
 		}
 
 		/** \brief Greater-than comparison operator
 
-			Returns true if this time is later. 
+			Returns true if this time is later.
 			\param dt time object
 			\return true if later
 		*/
@@ -183,8 +186,8 @@ namespace Pt {
 		{ return dt < *this; }
 
 		/** \brief Less-than-equal comparison operator
-		
-			Returns true if this time is earlier or equal. 
+
+			Returns true if this time is earlier or equal.
 			\param dt time object
 			\return true if earlier or equal
 		*/
@@ -193,7 +196,7 @@ namespace Pt {
 
 		/** \brief Greater-than-equal comparison operator
 
-			Returns true if this time is later or equal. 
+			Returns true if this time is later or equal.
 			\param dt time object
 			\return true if later or equal
 		*/
