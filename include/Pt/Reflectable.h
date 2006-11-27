@@ -3,6 +3,8 @@
 #ifndef Pt_Reflectable_h
 #define Pt_Reflectable_h
 
+#include <Pt/Args.h>
+#include <Pt/ICallable.h>
 #include <Pt/PropertyProxy.h>
 #include <Pt/Method.h>
 #include <map>
@@ -10,53 +12,63 @@
 
 namespace Pt {
 
-
-class Args
+template < typename R,
+           class C,
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void,
+           typename A3 = Pt::Void>
+class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2, A3>
 {
 	public:
-		virtual ~Args()
-		{}
+		typedef C ClassT;
+		typedef R (C::*MemFuncT)(A1, A2, A3);
 
-		const Any& get(size_t n) const
-		{
-			if( n >= _args.size() )
-				throw LogicError("No such argument", PT_SOURCEINFO);
-
-			return _args[n];
-		}
-
-		template <typename T>
-		void push_back(T value)
-		{
-			_args.push_back( Any(value) );
-		}
-
-	private:
-		std::vector<Any> _args;
-};
-
-
-class PT_EXPORT ICallable
-{
 	public:
-		virtual ~ICallable()
+		MethodProxy(C* object, MemFuncT memFunc)
+		: Method(object, memFunc)
 		{}
 
-		virtual size_t argSize() const = 0;
+		size_t argSize() const
+		{ return 3; }
 
-		virtual const char* argName(size_t index) const = 0;
+		const char* argName(size_t index) const
+		{
+			switch(index)
+			{
+				case 0: return TypeTraits<A1>::typeName();
+				case 1: return TypeTraits<A2>::typeName();
+				case 2: return TypeTraits<A3>::typeName();
+			}
 
-		virtual const std::type_info& argType(size_t index) const = 0;
+			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+		}
 
-		virtual void call(const Args& args) = 0;
+		const std::type_info& argType(size_t index) const
+		{
+			switch(index)
+			{
+				case 0: return typeid(A1);
+				case 1: return typeid(A2);
+				case 2: return typeid(A3);
+			}
+
+			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+		}
+
+		void call(const Args& a)
+		{
+			Method<R, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
+			                                any_cast<A2>( a.get(1) ),
+			                                any_cast<A3>( a.get(2) ));
+		}
 };
 
 
 template < typename R,
            class C,
-           typename A1 = Pt::Void,
-           typename A2 = Pt::Void>
-class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2>
+           typename A1,
+           typename A2>
+class PT_EXPORT MethodProxy<R, C, A1, A2, Pt::Void> : public ICallable, private Method<R, C, A1, A2>
 {
 	public:
 		typedef C ClassT;
@@ -103,7 +115,7 @@ class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2>
 template < typename R,
            class C,
            typename A1>
-class PT_EXPORT MethodProxy<R, C, A1, Pt::Void> : public ICallable, private Method<R, C, A1>
+class PT_EXPORT MethodProxy<R, C, A1, Pt::Void, Pt::Void> : public ICallable, private Method<R, C, A1>
 {
 	public:
 		typedef C ClassT;
@@ -146,7 +158,7 @@ class PT_EXPORT MethodProxy<R, C, A1, Pt::Void> : public ICallable, private Meth
 
 template < typename R,
            class C>
-class PT_EXPORT MethodProxy<R, C, Pt::Void, Pt::Void> : public ICallable, private Method<R, C>
+class PT_EXPORT MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void> : public ICallable, private Method<R, C>
 {
 	public:
 		typedef C ClassT;
@@ -239,10 +251,24 @@ class PT_EXPORT Reflectable {
 			_methods.insert( std::make_pair(name, cb) );
 		}
 
+		template <class ParentT, typename A1, typename A2>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
+		{
+			ICallable* cb =  new MethodProxy<void, ParentT, A1, A2>(&parent, memFunc);
+			_methods.insert( std::make_pair(name, cb) );
+		}
+
+		template <class ParentT, typename A1, typename A2, typename A3>
+		void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
+		{
+			ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3>(&parent, memFunc);
+			_methods.insert( std::make_pair(name, cb) );
+		}
+
 		const MethodMap& methods() const
 		{ return _methods; }
 
-		/*const ICallable& method(const std::string& name) const;*/
+		const ICallable& method(const std::string& name) const;
 
 		void call(const std::string& name, const Args& args);
 
