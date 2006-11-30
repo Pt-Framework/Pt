@@ -56,7 +56,8 @@ void XmlIStream::init()
 	String start(firstBytes, size);
 
 	// see if byte order mark and a valid XML declaration is present
-	size_t pos = start.find(L"<?xml");
+	static const String xmlDeclStart(L"<?xml");
+	size_t pos = start.find(xmlDeclStart);
 	if(pos != 0)
 		throw LogicError("Invalid XML declaration.", PT_SOURCEINFO);
 
@@ -267,10 +268,10 @@ void XmlIStream::onDocType()
 		throw LogicError("Invalid DOCTYPE declaration.", PT_SOURCEINFO);
 
 	// read the whole DOCTYPE declaration
-	this->getUntil(content, L"<");
+	this->getUntil(content, L">");
+	_nodeBuffer.push( new DocTypeDeclaration(content) );
 
 	_textBuffer->snextc();
-	_nodeBuffer.push( new DocTypeDeclaration(content) );
 }
 
 
@@ -300,8 +301,10 @@ void XmlIStream::onTextElement()
 
 void XmlIStream::onComment()
 {
+	static const String commentEnd(L">");
+
 	String text;
-	this->getUntil(text, L">");
+	this->getUntil(text, commentEnd);
 	_textBuffer->snextc();
 	_nodeBuffer.push( new Comment(text) );
 }
@@ -313,26 +316,30 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 		return false;
 	}
 
-	this->findNotOf(L"> /");
+	static const String attributeNameBegin(L"> /");
+	this->findNotOf(attributeNameBegin);
 
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
 		return false;
 	}
 
-	this->getUntil(name, L">/= ");
+	static const String attributeNameEnd(L">/= ");
+	this->getUntil(name, attributeNameEnd);
 
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
 		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
 	}
 
-	this->findOf(L">/\"\'");
+	static const String attributeValueBegin(L">/\"\'");
+	this->findOf(attributeValueBegin);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
 		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
 	}
 
 	_textBuffer->snextc();
 
-	this->getUntil(value, L"\"\'>/");
+	static const String attributeValueEnd(L"\"\'>/");
+	this->getUntil(value, attributeValueEnd);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
 		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
 	}
@@ -346,12 +353,15 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 
 void XmlIStream::parseStartElement(StartElement& to)
 {
-	this->findNotOf(L">/ \t");
+	static const String startElementBegin(L">/ \t");
+
+	this->findNotOf(startElementBegin);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
 		throw LogicError("Invalid XML end element: no name", PT_SOURCEINFO);
 	}
 
-	this->getUntil(to.name(), L"> \t/");
+	static const String startElementEnd(L"> \t/");
+	this->getUntil(to.name(), startElementEnd);
 
 	while(true)
 	{
@@ -371,13 +381,15 @@ void XmlIStream::parseStartElement(StartElement& to)
 
 void XmlIStream::parseEndElement(EndElement& to)
 {
-	this->findNotOf(L">/ \t");
+	static const String endElementBegin(L">/ \t");
+	this->findNotOf(endElementBegin);
 
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
 		throw LogicError("Invalid XML end element: no name", PT_SOURCEINFO);
 	}
 
-	this->getUntil(to.name(), L"> \t/");
+	static const String endElementEnd(L"> \t/");
+	this->getUntil(to.name(), endElementEnd);
 
 	_textBuffer->snextc();
 }
@@ -385,7 +397,8 @@ void XmlIStream::parseEndElement(EndElement& to)
 
 void XmlIStream::parseTextElement(Characters& to)
 {
-	this->getUntil(to.content(), L"<");
+	static const String textElementEnd(L"<");
+	this->getUntil(to.content(), textElementEnd);
 }
 
 
