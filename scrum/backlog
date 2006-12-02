@@ -1,3 +1,10 @@
+ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
+	TASK "Introduce PT_API macro"
+	TASK "Check if more warnings need to be disabled"
+
+ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
+	TASK "Add missing declarations to Pt.h"
+
 ITEM-8 P0 S3 "A empty Void type exists"
 	TASK "Review Void.h"
 	TASK "Write Documentation"
@@ -54,7 +61,13 @@ ITEM-22 P0 S5 "CTTI system is implemented"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
+ITEM-24 P0 S5 "Object reflection API is documented"
+	TASK "Write Documentation"
+	TASK "Write test case"
 
+ITEM-25 P0 S13 "The Pt::Unit module is documented"
+	TASK "Write docs"
+	TASK "Write tutorial"
 
 
 ITEM P0 S8 "The BasicColor<T> class interface is improved"

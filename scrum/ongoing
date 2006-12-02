@@ -1,8 +1,1 @@
-ITEM-21 P0 S5 "Object reflection API is implemented"
-	TASK "Split property in property and property proxy"	Laurentiu
-	TASK "Specialize property for Reflectable"	Laurentiu
-	TASk "Add signal changed to property"	Laurentiu
 
-ITEM-23 P0 S13 "The Pt::Unit module exists"
-	TASK "Write reporter" d-marc
-	TASK "Write logger" d-marc
