@@ -28,8 +28,8 @@ if $(SYS:L) = "win32"
 	if $(MINGW)
 	{
 		SYSLIBS = $(MINGW)\\lib\\libwsock32.a 
-			  $(MINGW)\\lib\\libversion.a 
-			  $(MINGW)\\lib\\libwinmm.a ;
+		          $(MINGW)\\lib\\libversion.a 
+		          $(MINGW)\\lib\\libwinmm.a ;
 	}
 }
 if $(SYS:L) = "posix"
@@ -55,25 +55,30 @@ if $(GUI:L) = "gdi"
 }
 if $(GUI:L) = "x11"
 {
-	# first we check for Xft includes
-	local _xft = [ GLOB  /usr/include/X11 : Xft ] ;
-	if  $(_xft) = ""
+	#
+	# Check if Xft includes are installed
+	#
+	local _xftIncludes = [ GLOB  /usr/include/X11 : Xft ] ;
+	if  $(_xftIncludes) = ""
 	{
 		Exit "Checking for Xft includes... FAILED" ;
 	}
 	else
 	{
-		Echo "Checking for Xft includes... OK" ;
+		Echo "Checking for Xft includes... $(_xftIncludes)" ;
 	}
 
-	local _libXmu = [ GLOB  /usr/lib : *Xmu* ] ;
+	#
+	# Check if Xmu library is installed
+	#
+	local _libXmu = [ GLOB  /usr/lib : *Xmu.so ] ;
 	if  $(_libXmu) = ""
 	{
-		Exit "Checking for Xmu libraries... FAILED" ;
+		Exit "Checking for Xmu library... FAILED" ;
 	}
 	else
 	{
-		Echo "Checking for Xmu libraries... OK" ;
+		Echo "Checking for Xmu library... " $(_libXmu) ;
 	}
 
 	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;

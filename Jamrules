@@ -1,6 +1,3 @@
-JamInclude Jamrules.cppunit ;
-JamInclude Jamrules.platinum ;
-
 
 C++FLAGS += [ FDefines "PT_"$(TARGET_OS:U) ] ;
 C++FLAGS += [ FDefines "PT_"$(TARGET_OSPLAT:U) ] ;
@@ -24,3 +21,6 @@ Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
 Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
 Echo ;
+
+JamInclude Jamrules.cppunit ;
+JamInclude Jamrules.platinum ;
