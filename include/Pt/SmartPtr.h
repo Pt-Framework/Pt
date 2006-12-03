@@ -113,14 +113,14 @@ namespace Pt
 		managed heap object but part of the policy Linking and unlinking will increase and 
 		decrease the policies counter and delete the managed object if it reaches zero.
 	*/
-	class RefCounted
+	class ExternalRefCounted
 	{
 		public:
 			size_t refs() const
 			{ return *_count; }
 
 		protected:
-			RefCounted()
+			ExternalRefCounted()
 			: _count(0)
 			{ }
 			
@@ -135,7 +135,7 @@ namespace Pt
 			}
 			
 			//! \brief link a smart pointer to a managed object
-			void link(const RefCounted& ptr, T* object)
+			void link(const ExternalRefCounted& ptr, T* object)
 			{
 				if(ptr._count == 0) {
 					_count = new size_t(1);
