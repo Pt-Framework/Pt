@@ -17,6 +17,8 @@ ITEM-25 P9 S5 "The Pt::Unit module is documented"
 	TASK "Write tutorial"
 
 ITEM P8 S13 "The BasicColor<T> class interface is improved"
+	TASK "Investigate libart"
+	TASK "Investigate AGG 2.4"
 	TASK "Impl the color classes as simple wrapper for POD"
 	TASK "Implement all needed operators overload like ==, <, +, etc" for colors"
 	TASK "Make toARgb and from ARgb free functions supporting precision and fast conversion"
