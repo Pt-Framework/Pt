@@ -1,6 +1,7 @@
-ITEM-4 P0 S5 "Compiler attributes and pragmas are abstracted"
+ITEM-4 P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
+	TASK "Look into other compiler attributes"
 
 ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
 	TASK "Add missing declarations to Pt.h"
@@ -111,3 +112,5 @@ ITEM P0 S5 "The Image class supports several planar image formats, mostly compat
 ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
 	TASK "Review memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
 	TASK "Implement proper tagging and class structure to cover those many formats"
+
+ITEM P0 S99 "Support for precompiled headers was added"
