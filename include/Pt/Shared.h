@@ -20,6 +20,9 @@
 #ifndef PT_SHARED_H
 #define PT_SHARED_H
 
+#include <Pt/Types.h>
+
+
 namespace Pt
 {
 	class PT_EXPORT Shared
