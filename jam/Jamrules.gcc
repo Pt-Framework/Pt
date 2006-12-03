@@ -29,6 +29,7 @@ else
 if $(TARGET_OSPLAT:U) != X86
 {
 	CCFLAGS += -fPIC ;
+	C++FLAGS += -fPIC ;
 }
 
 
