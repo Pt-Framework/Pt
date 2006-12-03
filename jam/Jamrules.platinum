@@ -55,6 +55,13 @@ if $(GUI:L) = "gdi"
 }
 if $(GUI:L) = "x11"
 {
+	# first we check for Xft includes
+	local _xft = [ GLOB  /usr/include/X11 : Xft ] ;
+	if  $(_xft) = ""
+	{
+		Exit "Error: Xft includes must be installed." ;
+	}
+
 	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
 }
 if $(GUI:L) = "gf"
