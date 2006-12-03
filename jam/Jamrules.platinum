@@ -59,11 +59,11 @@ if $(GUI:L) = "x11"
 	local _xft = [ GLOB  /usr/include/X11 : Xft ] ;
 	if  $(_xft) = ""
 	{
-		Exit "Checking fo Xft includes... FAILED" ;
+		Exit "Checking for Xft includes... FAILED" ;
 	}
 	else
 	{
-		Echo "Checking fo Xft includes... OK" ;
+		Echo "Checking for Xft includes... OK" ;
 	}
 
 	local _libXmu = [ GLOB  /usr/lib : *Xmu* ] ;
@@ -73,7 +73,7 @@ if $(GUI:L) = "x11"
 	}
 	else
 	{
-		Echo "Checking fo Xmu libraries... OK" ;
+		Echo "Checking for Xmu libraries... OK" ;
 	}
 
 	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
