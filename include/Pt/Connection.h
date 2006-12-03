@@ -3,7 +3,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Slot.h>
-#include <Pt/Shared.h>
+#include <Pt/RefCounted.h>
 #include <Pt/SmartPtr.h>
 
 
@@ -12,7 +12,7 @@ namespace Pt {
 	class Connectable;
 
 
-	class PT_EXPORT ConnectionData : public Shared {
+	class PT_EXPORT ConnectionData : public RefCounted {
 		public:
 			ConnectionData()
 			: _refs(1)

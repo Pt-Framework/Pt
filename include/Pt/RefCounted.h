@@ -17,22 +17,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_SHARED_H
-#define PT_SHARED_H
+#ifndef PT_REFCOUNTED_H
+#define PT_REFCOUNTED_H
 
 #include <Pt/Types.h>
 
 
 namespace Pt
 {
-	class PT_EXPORT Shared
+	class PT_EXPORT RefCounted
 	{
 		public:
-			Shared()
+			RefCounted()
 			: _refs(0)
 			{ }
 
-			virtual ~Shared()
+			virtual ~RefCounted()
 			{ }
 
 			virtual void addRef()
@@ -54,5 +54,5 @@ namespace Pt
 	};
 }
 
-#endif // PT_SHARED_H
+#endif // PT_REFCOUNTED_H
 
