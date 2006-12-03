@@ -52,6 +52,12 @@ ITEM P1 S13 "The Image class supports several planar image formats, mostly compa
 	TASK "Implement the needed image conversion from and to the YV12 image "
 
 
+ITEM P0 S99 "A program argument parser is impemented"
+	TASK "Review arg.h from cxxtools"
+	TASK "Consider using Pt::Variant or Pt::Any"
+	TASK "Write docs"
+	TASK "Write unit tests"
+
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
 	TASK "Write Documentation"
