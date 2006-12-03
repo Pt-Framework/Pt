@@ -33,7 +33,7 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-#include <X11/extensions/Xvlib.h>
+//#include <X11/extensions/Xvlib.h>
 
 #include <list>
 #include <string>
