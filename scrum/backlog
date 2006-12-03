@@ -70,6 +70,10 @@ ITEM-25 P0 S13 "The Pt::Unit module is documented"
 	TASK "Write tutorial"
 
 
+ITEM "The scrum files have been improved"
+	TASK "remove item numbering"
+	TASK "improve the format"
+
 ITEM P0 S8 "The BasicColor<T> class interface is improved"
 	TASK "Discuss the interface of the BasicColor<T> class"
 	TASK "Make toARgb and from ARgb free functions supporting precision and fast conversion"
