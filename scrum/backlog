@@ -3,53 +3,59 @@ ITEM-4 P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Check if more warnings need to be disabled"
 	TASK "Look into other compiler attributes"
 
-ITEM-6 P0 S2 "All classes of the Pt module are forward declared in a dedicated header"
-	TASK "Add missing declarations to Pt.h"
-
-ITEM-8 P0 S3 "A empty Void type exists"
-	TASK "Review Void.h"
-	TASK "Write Documentation"
-
-ITEM-10 P0 S5 "An common exception hierachy exits."
+ITEM-10 P10 S5 "An common exception hierachy exits."
 	TASK "Review Exception.h"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-13 P0 S5 "The AtomicInt class implements atomic operations"
+ITEM-6 P8 S2 "All classes of the Pt module are forward declared in a dedicated header"
+	TASK "Add missing declarations to Pt.h"
+
+ITEM-8 P8 S3 "A empty Void type exists"
+	TASK "Review Void.h"
+	TASK "Write Documentation"
+
+ITEM-13 P7 S5 "The AtomicInt class implements atomic operations"
 	TASK "Add fallback version that uses pthreads"
 	TASK "Review asm"
 	TASK "Write test case"
 	TASK "Write docs"
 
-ITEM-14 P0 S8 "A base class for thread-safe refcounting exists."
+ITEM-14 P1 S8 "A base class for thread-safe refcounting exists."
 	TASK "Make Shared.h use AtomicInt"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-15 P0 S5 "Byteorder API has ASM optimisation"
+ITEM-17 P7 S5 "Any class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-16 P6 S5 "Signals and Delegates are implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-18 P5 S5 "Variant class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-19 P5 S5 "SmartPtr class is implemented"
+	TASK "Review code"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
+ITEM-15 P1 S5 "Byteorder API has ASM optimisation"
 	TASK "Optimize swab16() using standard ASM and if possible SIMD"
 	TASK "Optimize swab32() using standard ASM and if possible SIMD"
 	TASK "Optimize swab64() using standard ASM and if possible SIMD"
 
-ITEM-16 P0 S5 "Signals and Delegates are implemented"
-	TASK "Review code"
-	TASK "Write Documentation"
-	TASK "Write test case"
 
-ITEM-17 P0 S5 "Any class is implemented"
-	TASK "Review code"
-	TASK "Write Documentation"
-	TASK "Write test case"
 
-ITEM-18 P0 S5 "Variant class is implemented"
-	TASK "Review code"
-	TASK "Write Documentation"
-	TASK "Write test case"
 
-ITEM-19 P0 S5 "SmartPtr class is implemented"
-	TASK "Review code"
-	TASK "Write Documentation"
-	TASK "Write test case"
+
+
 
 ITEM-20 P0 S5 "Event based Application class is implemented"
 	TASK "Review code"
