@@ -59,13 +59,21 @@ if $(GUI:L) = "x11"
 	local _xft = [ GLOB  /usr/include/X11 : Xft ] ;
 	if  $(_xft) = ""
 	{
-		Exit "Error: Xft includes must be installed. [Jamrules.platinum]" ;
+		Exit "Checking fo Xft includes... FAILED" ;
+	}
+	else
+	{
+		Echo "Checking fo Xft includes... OK" ;
 	}
 
 	local _libXmu = [ GLOB  /usr/lib : *Xmu* ] ;
 	if  $(_libXmu) = ""
 	{
-		Exit "Error: Xmu libraries must be installed. [Jamrules.platinum]" ;
+		Exit "Checking for Xmu libraries... FAILED" ;
+	}
+	else
+	{
+		Echo "Checking fo Xmu libraries... OK" ;
 	}
 
 	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
