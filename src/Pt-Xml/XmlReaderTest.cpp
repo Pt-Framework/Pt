@@ -50,7 +50,7 @@ void test()
 	input << "wirklich zulaesst. Widmen Sie Ihre Aufmerksamkeit in erster Linie dem Autofahren! ";
 	input << "Als Fahrer tragen Sie die volle Verantwortung fuer die Verkehrssicherheit.</init-message>";
 	input << "<init-message type=\"warning\" priority=\"3\"> <!-- error, info -->";
-	input << "Es gilt immer die Strassen-verkehrsordnung (StVO), auch wenn eine Fahrempfehlung 2";
+	input << "Es gilt immer die Strassen-verkehrsordnung (StVO), auch wenn eine Fahrempfehlung ";
 	input << "im Widerspruch zur StVO steht.</init-message>";
 	input << "<dialog id=\"mainmenu_dialog\" title=\"Main-Menu\" background-color=\"#ffffe1\" modal=\"true\">";
 	input << "<horizontal-fill-position margin-left=\"10\" margin-right=\"10\"/>";
