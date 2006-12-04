@@ -12,10 +12,6 @@ ITEM-10 P10 S5 "An common exception hierachy exits."
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-25 P9 S5 "The Pt::Unit module is documented"
-	TASK "Write docs"
-	TASK "Write tutorial"
-
 ITEM P8 S13 "The BasicColor<T> class interface is improved"
 	TASK "Investigate libart"
 	TASK "Investigate AGG 2.4"
