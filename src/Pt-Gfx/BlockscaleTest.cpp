@@ -37,7 +37,7 @@ void ScaleARgbImageTestSimple()
 
 void ScaleARgbImageTest()
 {
-	const Pt::Gfx::ARgbImage image(100, 100);
+	const Pt::Gfx::ARgbImage image(800, 600);
 	Pt::Gfx::ARgbImage image2(400, 300);
 
 	//clock_t begin = clock();
@@ -61,7 +61,9 @@ void ScaleVectorTest()
 
 int main(int argc, char* argv[])
 {
-	ScaleARgbImageTest();
+	for(int n = 0; n < 100; ++n)
+		ScaleARgbImageTest();
+	
 	ScaleVectorTest();
 	return 0;
 }

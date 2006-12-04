@@ -30,7 +30,8 @@ namespace Pt {
 	            typename A1 = Pt::Void,
 	            typename A2 = Pt::Void,
 	            typename A3 = Pt::Void,
-	            typename A4 = Pt::Void >
+	            typename A4 = Pt::Void,
+	            typename A5 = Pt::Void >
 	class PT_EXPORT BasicSlot : public Slot {
 		public:
 			virtual Slot* clone() const = 0;

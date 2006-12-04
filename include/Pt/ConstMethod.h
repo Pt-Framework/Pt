@@ -27,13 +27,97 @@
 
 namespace Pt {
 
-
 template < typename R,
            class Object,
            typename A1 = Pt::Void,
            typename A2 = Pt::Void,
-           typename A3 = Pt::Void >
-class PT_EXPORT ConstMethod : public Callable<R, A1, A2, A3> {
+           typename A3 = Pt::Void,
+           typename A4 = Pt::Void,
+           typename A5 = Pt::Void >
+class PT_EXPORT ConstMethod : public Callable<R, A1, A2, A3, A4, A5> {
+	public:
+		typedef Object ObjectT;
+		typedef R (Object::*MethodT)(A1, A2, A3, A4, A5) const;
+
+		ConstMethod(Object* object, MethodT ptr) throw()
+		: _object(object), _method(ptr)
+		{ }
+
+		ConstMethod(const ConstMethod& method) throw()
+		: Callable<R, A1, A2, A3, A4, A5>()
+		{ this->operator=(method); }
+
+		Object& object()
+		{ return *_object;}
+
+		const Object& object() const
+		{ return *_object;}
+
+		R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A4 a5) const
+		{ return (_object->*_method)(a1, a2, a3, a4, a5); }
+
+		ConstMethod<R, Object, A1, A2, A3, A4, A5>* clone() const
+		{ return new ConstMethod(*this); }
+
+	private:
+		Object* _object;
+		MethodT _method;
+};
+
+
+template <typename R, class Object, typename A1, typename A2, typename A3, typename A4, typename A5>
+ConstMethod<R, Object, A1, A2, A3, A4, A5> callable( Object* obj, R (Object::*ptr)(A1, A2, A3, A4, A5) const ) throw()
+{ return ConstMethod<R, Object, A1, A2, A3, A4, A5>(obj, ptr); }
+
+
+template < typename R,
+           class Object,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4 >
+class PT_EXPORT ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
+	public:
+		typedef Object ObjectT;
+		typedef R (Object::*MethodT)(A1, A2, A3, A4) const;
+
+		ConstMethod(Object* object, MethodT ptr) throw()
+		: _object(object), _method(ptr)
+		{ }
+
+		ConstMethod(const ConstMethod& method) throw()
+		: Callable<R, A1, A2, A3>()
+		{ this->operator=(method); }
+
+		Object& object()
+		{ return *_object;}
+
+		const Object& object() const
+		{ return *_object;}
+
+		R operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
+		{ return (_object->*_method)(a1, a2, a3, a4); }
+
+		ConstMethod<R, Object, A1, A2, A3, A4>* clone() const
+		{ return new ConstMethod(*this); }
+
+	private:
+		Object* _object;
+		MethodT _method;
+};
+
+
+template <typename R, class Object, typename A1, typename A2, typename A3, typename A4>
+ConstMethod<R, Object, A1, A2, A3, A4> callable( Object* obj, R (Object::*ptr)(A1, A2, A3, A4) const ) throw()
+{ return ConstMethod<R, Object, A1, A2, A3, A4>(obj, ptr); }
+
+
+template < typename R,
+           class Object,
+           typename A1,
+           typename A2,
+           typename A3 >
+class PT_EXPORT ConstMethod<R, Object, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
 	public:
 		typedef Object ObjectT;
 		typedef R (Object::*MethodT)(A1, A2, A3) const;
@@ -58,23 +142,6 @@ class PT_EXPORT ConstMethod : public Callable<R, A1, A2, A3> {
 		ConstMethod<R, Object, A1, A2, A3>* clone() const
 		{ return new ConstMethod(*this); }
 
-		ConstMethod& operator=(const ConstMethod& method)
-		{
-			_object = method._object;
-			_method = method._method;
-			return (*this);
-		}
-
-		/*virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const ConstMethod& method = dynamic_cast<const ConstMethod&>(cb);
-				return _object == method._object && _method == method._method;
-			} catch(...) {}
-
-			return false;
-		}*/
-
 	private:
 		Object* _object;
 		MethodT _method;
@@ -90,7 +157,7 @@ template < typename R,
            class Object,
            typename A1,
            typename A2 >
-class PT_EXPORT ConstMethod<R, Object, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::Void> {
+class PT_EXPORT ConstMethod<R, Object, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
 	public:
 		typedef Object ObjectT;
 		typedef R (Object::*MethodT)(A1, A2) const;
@@ -115,23 +182,6 @@ class PT_EXPORT ConstMethod<R, Object, A1, A2, Pt::Void> : public Callable<R, A1
 		ConstMethod<R, Object, A1, A2>* clone() const
 		{ return new ConstMethod(*this); }
 
-		ConstMethod& operator=(const ConstMethod& method)
-		{
-			_object = method._object;
-			_method = method._method;
-			return (*this);
-		}
-
-		/*virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const ConstMethod& method = dynamic_cast<const ConstMethod&>(cb);
-				return _object == method._object && _method == method._method;
-			} catch(...) {}
-
-			return false;
-		}*/
-
 	private:
 		Object* _object;
 		MethodT _method;
@@ -146,7 +196,7 @@ ConstMethod<R, Object, A1, A2> callable( Object* obj, R (Object::*ptr)(A1, A2) c
 template < typename R,
            class Object,
            typename A1 >
-class PT_EXPORT ConstMethod<R, Object, A1, Pt::Void, Pt::Void> : public Callable<R, A1, Pt::Void, Pt::Void> {
+class PT_EXPORT ConstMethod<R, Object, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
 	public:
 		typedef Object ObjectT;
 		typedef R (Object::*MethodT)(A1) const;
@@ -171,23 +221,6 @@ class PT_EXPORT ConstMethod<R, Object, A1, Pt::Void, Pt::Void> : public Callable
 		ConstMethod<R, Object, A1>* clone() const
 		{ return new ConstMethod(*this); }
 
-		ConstMethod& operator=(const ConstMethod& method)
-		{
-			_object = method._object;
-			_method = method._method;
-			return (*this);
-		}
-
-		/*virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const ConstMethod& method = dynamic_cast<const ConstMethod&>(cb);
-				return _object == method._object && _method == method._method;
-			} catch(...) {}
-
-			return false;
-		}*/
-
 	private:
 		Object* _object;
 		MethodT _method;
@@ -201,7 +234,7 @@ ConstMethod<R,Object, A1> callable( Object* obj, R (Object::*ptr)(A1) const ) th
 
 template < typename R,
            class C >
-class PT_EXPORT ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, Pt::Void, Pt::Void, Pt::Void> {
+class PT_EXPORT ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)() const;
@@ -232,23 +265,6 @@ class PT_EXPORT ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void> : public Callabl
 		ConstMethod* clone() const
 		{ return new ConstMethod(*this); }
 
-		ConstMethod& operator=(const ConstMethod& method)
-		{
-			_object = method._object;
-			_memFunc = method._memFunc;
-			return (*this);
-		}
-
-		/*virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const ConstMethod& method = dynamic_cast<const ConstMethod&>(cb);
-				return _object == method._object && _memFunc == method._memFunc;
-			} catch(...) {}
-
-			return false;
-		}*/
-
 	private:
 		ClassT* _object;
 		MemFuncT _memFunc;
@@ -263,14 +279,16 @@ ConstMethod<R,Object> callable( Object* obj, R (Object::*ptr)() const ) throw()
 
 
 template < typename R,
-            class C,
-            typename A1 = Pt::Void,
-            typename A2 = Pt::Void,
-            typename A3 = Pt::Void 
-          >
-class PT_EXPORT ConstMethodSlot : public BasicSlot<R, A1, A2, A3> {
+           class C,
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void,
+           typename A3 = Pt::Void,
+           typename A4 = Pt::Void,
+           typename A5 = Pt::Void
+         >
+class PT_EXPORT ConstMethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
 	public:
-		ConstMethodSlot(const ConstMethod<R, C, A1, A2, A3>& method)
+		ConstMethodSlot(const ConstMethod<R, C, A1, A2, A3, A4, A5>& method)
 		: _method( method )
 		{}
 
@@ -293,7 +311,7 @@ class PT_EXPORT ConstMethodSlot : public BasicSlot<R, A1, A2, A3> {
 		}
 
 	private:
-		ConstMethod<R, C, A1, A2, A3> _method;
+		ConstMethod<R, C, A1, A2, A3, A4, A5> _method;
 };
 
 
@@ -315,6 +333,16 @@ ConstMethodSlot<R, ClassT, A1, A2> slot( ClassT* obj, R (BaseT::*method)(A1, A2)
 template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3>
 ConstMethodSlot<R, ClassT, A1, A2, A3> slot( ClassT* obj, R (BaseT::*method)(A1, A2, A3) const ) throw()
 { return ConstMethodSlot<R, ClassT, A1, A2, A3>( callable(obj, method) ); }
+
+
+template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4>
+ConstMethodSlot<R, ClassT, A1, A2, A3, A4> slot( ClassT* obj, R (BaseT::*method)(A1, A2, A3, A4) const ) throw()
+{ return ConstMethodSlot<R, ClassT, A1, A2, A3, A4>( callable(obj, method) ); }
+
+
+template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5>
+ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5> slot( ClassT* obj, R (BaseT::*method)(A1, A2, A3, A4, A5) const ) throw()
+{ return ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5>( callable(obj, method) ); }
 
 } // !namespace Pt
 
