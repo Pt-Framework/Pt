@@ -27,8 +27,8 @@ if $(SYS:L) = "win32"
 
 	if $(MINGW)
 	{
-		SYSLIBS = $(MINGW)\\lib\\libwsock32.a 
-		          $(MINGW)\\lib\\libversion.a 
+		SYSLIBS = $(MINGW)\\lib\\libwsock32.a
+		          $(MINGW)\\lib\\libversion.a
 		          $(MINGW)\\lib\\libwinmm.a ;
 	}
 }
@@ -55,6 +55,88 @@ if $(GUI:L) = "gdi"
 }
 if $(GUI:L) = "x11"
 {
+	# Must search X11 includes in these locations (sorted by priority) :
+	# /usr/X11R7/include/X11
+	# /usr/X11R6/include/X11
+	# /usr/include/X11
+	# /usr/X11R6/include
+	# /usr/X11R7/include
+	# /usr/include
+	#
+	# /usr/local/X11R6/include/X11
+	# /usr/local/X11R7/include/X11
+	# /usr/local/include/X11
+	# /usr/local/X11R6/include
+	# /usr/local/X11R7/include
+	# /usr/local/include
+	#
+	# /opt/X11R6/include/X11
+	# /opt/X11R7/include/X11
+	# /opt/include/X11
+	# /opt/X11R6/include
+	# /opt/X11R7/include
+	# /opt/include
+	#
+
+	# Must search X11 libraries in these locations (sorted by priority) :
+	# /usr/X11R6/lib64/X11
+	# /usr/X11R6/lib32/X11
+	# /usr/X11R6/lib/X11
+	# /usr/X11R7/lib64/X11
+	# /usr/X11R7/lib32/X11
+	# /usr/X11R7/lib/X11
+	# /usr/lib64/X11
+	# /usr/lib32/X11
+	# /usr/lib/X11
+	# /usr/X11R6/lib64
+	# /usr/X11R6/lib32
+	# /usr/X11R6/lib
+	# /usr/X11R7/lib64
+	# /usr/X11R7/lib32
+	# /usr/X11R7/lib
+	# /usr/lib64
+	# /usr/lib32
+	# /usr/lib
+	#
+	# /usr/local/X11R6/lib64/X11
+	# /usr/local/X11R6/lib32/X11
+	# /usr/local/X11R6/lib/X11
+	# /usr/local/X11R7/lib64/X11
+	# /usr/local/X11R7/lib32/X11
+	# /usr/local/X11R7/lib/X11
+	# /usr/local/lib64/X11
+	# /usr/local/lib32/X11
+	# /usr/local/lib/X11
+	# /usr/local/X11R6/lib64
+	# /usr/local/X11R6/lib32
+	# /usr/local/X11R6/lib
+	# /usr/local/X11R7/lib64
+	# /usr/local/X11R7/lib32
+	# /usr/local/X11R7/lib
+	# /usr/local/lib64
+	# /usr/local/lib32
+	# /usr/local/lib
+	#
+	# /opt/X11R6/lib64/X11
+	# /opt/X11R6/lib32/X11
+	# /opt/X11R6/lib/X11
+	# /opt/X11R7/lib64/X11
+	# /opt/X11R7/lib32/X11
+	# /opt/X11R7/lib/X11
+	# /opt/lib64/X11
+	# /opt/lib32/X11
+	# /opt/lib/X11
+	# /opt/X11R6/lib64
+	# /opt/X11R6/lib32
+	# /opt/X11R6/lib
+	# /opt/X11R7/lib64
+	# /opt/X11R7/lib32
+	# /opt/X11R7/lib
+	# /opt/lib64
+	# /opt/lib32
+	# /opt/lib
+	#
+
 	#
 	# Check if Xft includes are installed
 	#
@@ -72,6 +154,10 @@ if $(GUI:L) = "x11"
 	# Check if Xmu library is installed
 	#
 	local _libXmu = [ GLOB  /usr/lib : *Xmu.so ] ;
+	if  $(_libXmu) = ""
+	{
+		_libXmu = [ GLOB  /usr/X11R6/lib : *Xmu.so ] ;
+	}
 	if  $(_libXmu) = ""
 	{
 		Exit "Checking for Xmu library... FAILED" ;
