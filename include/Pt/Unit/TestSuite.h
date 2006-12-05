@@ -31,95 +31,131 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestSuite : public Test, public TestFixture
-	{
-		public:
-			TestSuite(const std::string& name, TestProtocol& protocol)
-			: Test(name, protocol)
-			{ }
-
-			TestSuite(const std::string& name)
-			: Test(name)
-			{ }
-
-			void runTest( const std::string& name, const Args& args = Args() )
-			{
-				bool isUp = false;
-
-				try
-				{
-					this->setUp();
-					isUp = true;
-					Reflectable::call(name, args);
-					this->tearDown();
-					Test::success( this->name() + "::" + name );
-					return;
-				}
-				catch(const Assertion& assertion)
-				{
-					Test::assertion(this->name(), assertion);
-				}
-				catch(const std::exception& ex)
-				{
-					Test::exception(this->name(), ex);
-				}
-				catch(...)
-				{
-					Test::error(this->name());
-				}
+    class TestSuite;
 
 
-				try
-				{
-					if(isUp)
-					{
-						this->tearDown();
-					}
-				}
-				catch(const Assertion& assertion)
-				{
-					Test::assertion(this->name(), assertion);
-				}
-				catch(const std::exception& ex)
-				{
-					Test::exception(this->name(), ex);
-				}
-				catch(...)
-				{
-					Test::error(this->name());
-				}
-			}
-	};
+    class PT_EXPORT TestProtocol
+    {
+        public:
+            virtual ~TestProtocol()
+            {}
+
+            virtual void run(TestSuite& test);
+    };
 
 
-	class ListedProtocol : public TestProtocol
-	{
-		public:
-			void includeTest(const std::string& testName)
-			{
-				_items.insert( std::make_pair(testName, new Args()) );
-			}
+    // TODO: Andreas:
+    // 1. Pull ITestSuite from component
+    // 2. Set TestProtocol on ITestSuite
+    // 3. Run TestSuite
+    class TestSuite : public Test, public TestFixture
+    {
+        public:
+            TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
+            : Test(name/*, protocol*/)
+            , _protocol(&protocol)
+            { }
 
-			template <typename A1>
-			void includeTest(const std::string& testName, A1 a1)
-			{
-				Args* args = new Args();
-				args->push_back(a1);
-				_items.insert( std::make_pair(testName, args) );
-			}
+            virtual void run()
+            {
+                _protocol->run(*this);
+            }
 
-			void run(Test& suite)
-			{
-				std::multimap<std::string, Args*>::iterator it;
-				for(it = _items.begin(); it != _items.end(); ++it)
-				{
-					suite.runTest( it->first, *it->second );
-				}
-			}
+            void runTest( const std::string& name, const Args& args = Args() )
+            {
+                bool isUp = false;
 
-		private:
-			std::multimap<std::string, Args*> _items;
-	};
+                try
+                {
+                    this->setUp();
+                    isUp = true;
+                    Reflectable::call(name, args);
+                    this->tearDown();
+                    Test::success( this->name() + "::" + name );
+                    return;
+                }
+                catch(const Assertion& assertion)
+                {
+                    Test::assertion(this->name(), assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    Test::exception(this->name(), ex);
+                }
+                catch(...)
+                {
+                    Test::error(this->name());
+                }
+
+
+                try
+                {
+                    if(isUp)
+                    {
+                        this->tearDown();
+                    }
+                }
+                catch(const Assertion& assertion)
+                {
+                    Test::assertion(this->name(), assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    Test::exception(this->name(), ex);
+                }
+                catch(...)
+                {
+                    Test::error(this->name());
+                }
+            }
+        protected:
+            TestProtocol* _protocol;
+
+        public:
+            static TestProtocol defaultProtocol;
+    };
+
+    TestProtocol TestSuite::defaultProtocol;
+
+
+    inline void TestProtocol::run(TestSuite& test)
+    {
+        const MethodMap& methods = test.methods();
+        MethodMap::const_iterator it;
+        for(it = methods.begin(); it != methods.end(); ++it)
+        {
+            test.runTest( it->first, Args() );
+        }
+    }
+
+    class ListedProtocol : public TestProtocol
+    {
+        public:
+            void includeTest(const std::string& testName)
+            {
+                _items.insert( std::make_pair(testName, new Args()) );
+            }
+
+            template <typename A1>
+            void includeTest(const std::string& testName, A1 a1)
+            {
+                Args* args = new Args();
+                args->push_back(a1);
+                _items.insert( std::make_pair(testName, args) );
+            }
+
+            void run(TestSuite& suite)
+            {
+                std::multimap<std::string, Args*>::iterator it;
+                for(it = _items.begin(); it != _items.end(); ++it)
+                {
+                    suite.runTest( it->first, *it->second );
+                }
+            }
+
+        private:
+            std::multimap<std::string, Args*> _items;
+    };
 
 } // namespace Unit
 

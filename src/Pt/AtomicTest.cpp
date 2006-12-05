@@ -22,11 +22,12 @@
 #include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/TestCase.h"
 
 #include <string>
 
 
-/*
+
 class AtomicIntConstructorTest : public Pt::Unit::TestCase
 {
 	public:
@@ -42,7 +43,7 @@ class AtomicIntConstructorTest : public Pt::Unit::TestCase
 };
 
 Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTest;
-*/
+
 
 
 

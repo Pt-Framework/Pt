@@ -319,7 +319,7 @@ class PT_EXPORT Reflectable {
 
 		virtual ~Reflectable();
 
-		const std::string& typeName() const
+		const std::string& name() const
 		{ return _typeName; }
 
 		Pt::Any property(const std::string& name);

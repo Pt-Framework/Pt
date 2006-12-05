@@ -29,125 +29,125 @@ namespace Pt {
 
 namespace Unit {
 
-	class Application
-	{
-		template <typename TestT>
-		friend struct RegisterTest;
+    class Application
+    {
+        template <typename TestT>
+        friend struct RegisterTest;
 
-		public:
-			Application()
-			{}
+        public:
+            Application()
+            {}
 
-			virtual ~Application()
-			{}
+            virtual ~Application()
+            {}
 
-			static void registerTest(Test& test)
-			{
-				connect(test.success, &Application::success);
-				connect(test.assertion, &Application::assertion);
-				connect(test.exception, &Application::exception);
-				connect(test.error, &Application::error);
-				_allTests.push_back(&test);
-			}
+            static void registerTest(Test& test)
+            {
+                connect(test.success, &Application::success);
+                connect(test.assertion, &Application::assertion);
+                connect(test.exception, &Application::exception);
+                connect(test.error, &Application::error);
+                _allTests.push_back(&test);
+            }
 
-			int run(Reporter& reporter, const std::string& testName = "")
-			{
-				Application::_reporter = &reporter;
+            int run(Reporter& reporter, const std::string& testName = "")
+            {
+                Application::_reporter = &reporter;
 
-				_errors = 0;
+                _errors = 0;
 
-				std::list<Test*>::iterator it;
-				for(it = _allTests.begin(); it != _allTests.end(); ++it)
-				{
-					if(testName == "" || (*it)->name() == testName)
-						(*it)->run();
-				}
+                std::list<Test*>::iterator it;
+                for(it = _allTests.begin(); it != _allTests.end(); ++it)
+                {
+                    if(testName == "" || (*it)->name() == testName)
+                        (*it)->run();
+                }
 
-				if(_errors == 0)
-				{
-					this->message("*** Success ***");
-				}
-				else
-				{
-					std::stringstream msg;
-					msg << "*** " << _errors << " errors occured. ***";
-					this->message( msg.str() );
-				}
+                if(_errors == 0)
+                {
+                    this->message("*** Success ***");
+                }
+                else
+                {
+                    std::stringstream msg;
+                    msg << "*** " << _errors << " errors occured. ***";
+                    this->message( msg.str() );
+                }
 
-				return _errors;
-			}
+                return _errors;
+            }
 
-			const std::list<Test*>& tests() const
-			{ return _allTests; }
+            const std::list<Test*>& tests() const
+            { return _allTests; }
 
-			static void success(const Test& test)
-			{
-				if(_reporter)
-				{
-					_reporter->success(test);
-				}
-			}
+            static void success(const Test& test)
+            {
+                if(_reporter)
+                {
+                    _reporter->success(test);
+                }
+            }
 
-			static void assertion(const std::string& testName, const Assertion& a)
-			{
-				++_errors;
+            static void assertion(const std::string& testName, const Assertion& a)
+            {
+                ++_errors;
 
-				if(_reporter)
-				{
-					_reporter->assertion(testName, a);
-				}
-			}
+                if(_reporter)
+                {
+                    _reporter->assertion(testName, a);
+                }
+            }
 
-			static void exception(const std::string& testName, const std::exception& ex)
-			{
-				++_errors;
+            static void exception(const std::string& testName, const std::exception& ex)
+            {
+                ++_errors;
 
-				if(_reporter)
-				{
-					_reporter->exception(testName, ex);
-				}
-			}
+                if(_reporter)
+                {
+                    _reporter->exception(testName, ex);
+                }
+            }
 
-			static void error(const std::string& testName)
-			{
-				++_errors;
+            static void error(const std::string& testName)
+            {
+                ++_errors;
 
-				if(_reporter)
-				{
-					_reporter->error(testName);
-				}
-			}
+                if(_reporter)
+                {
+                    _reporter->error(testName);
+                }
+            }
 
-			static void message( const std::string msg )
-			{
-				if(_reporter)
-					_reporter->message(msg);
-			}
+            static void message( const std::string msg )
+            {
+                if(_reporter)
+                    _reporter->message(msg);
+            }
 
-		private:
-			static size_t _errors;
+        private:
+            static size_t _errors;
 
-			static std::list<Test*> _allTests;
+            static std::list<Test*> _allTests;
 
-			static Reporter* _reporter;
-	};
+            static Reporter* _reporter;
+    };
 
-	size_t Application::_errors = 0;
+    size_t Application::_errors = 0;
 
-	std::list<Test*> Application::_allTests;
+    std::list<Test*> Application::_allTests;
 
-	Reporter* Application::_reporter = 0;
+    Reporter* Application::_reporter = 0;
 
 
-	template <class TestT>
-	struct RegisterTest
-	{
-		RegisterTest()
-		{
-			static TestT test;
-			Application::registerTest(test);
-		}
-	};
+    template <class TestT>
+    struct RegisterTest
+    {
+        RegisterTest()
+        {
+            static TestT test;
+            Application::registerTest(test);
+        }
+    };
 
 } // namespace Unit
 

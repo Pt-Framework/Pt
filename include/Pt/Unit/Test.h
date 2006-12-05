@@ -31,94 +31,91 @@ namespace Pt {
 
 namespace Unit {
 
-	class Test;
+    class Test;
 
-	class PT_EXPORT TestProtocol
-	{
-		public:
-			virtual ~TestProtocol()
-			{}
+    /*class PT_EXPORT TestProtocol
+    {
+        public:
+            virtual ~TestProtocol()
+            {}
 
-			virtual void run(Test& test);
-	};
+            virtual void run(Test& test);
+    };*/
 
 
-	class Test : public Reflectable, public NonCopyable
-	{
-		public:
-			Test(const std::string& name, TestProtocol& protocol = Test::defaultProtocol)
-			: Reflectable(name)
-			, _name(name)
-			, _protocol( &protocol )
-			{ }
+    class Test : public Reflectable, public NonCopyable
+    {
+        public:
+            Test(const std::string& name/*, TestProtocol& protocol = Test::defaultProtocol*/)
+            : Reflectable(name)
+            //, _name(name)
+            //, _protocol( &protocol )
+            { }
 
-			virtual ~Test()
-			{ }
+            virtual ~Test()
+            { }
 
-			const std::string& name() const
-			{ return _name; }
+            //void setProtocol(TestProtocol& protocol)
+            //{ _protocol = &protocol; }
 
-			void setProtocol(TestProtocol& protocol)
-			{ _protocol = &protocol; }
+            virtual void run()
+            {
+                //_protocol->run(*this);
+            }
 
-			void run()
-			{
-				_protocol->run(*this);
-			}
+            /*virtual void runTest( const std::string& name, const Args& args = Args() )
+            {
+                try
+                {
+                    Reflectable::call(name, args);
+                    Test::success( this->name() + "::" + name );
+                    return;
+                }
+                catch(const Assertion& assertion)
+                {
+                    Test::assertion(this->name(), assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    Test::exception(this->name(), ex);
+                }
+                catch(...)
+                {
+                    Test::error(this->name());
+                }
+            }*/
 
-			virtual void runTest( const std::string& name, const Args& args = Args() )
-			{
-				try
-				{
-					Reflectable::call(name, args);
-					Test::success( this->name() + "::" + name );
-					return;
-				}
-				catch(const Assertion& assertion)
-				{
-					Test::assertion(this->name(), assertion);
-				}
-				catch(const std::exception& ex)
-				{
-					Test::exception(this->name(), ex);
-				}
-				catch(...)
-				{
-					Test::error(this->name());
-				}
-			}
+            Signal<const Test&> success;
 
-			Signal<const Test&> success;
+            Signal<const std::string&, const Assertion&> assertion;
 
-			Signal<const std::string&, const Assertion&> assertion;
+            Signal<const std::string&, const std::exception&> exception;
 
-			Signal<const std::string&, const std::exception&> exception;
+            Signal<const std::string&> error;
 
-			Signal<const std::string&> error;
+        //private:
+            //std::string _name;
 
-		private:
-			std::string _name;
+        protected:
+            //TestProtocol* _protocol;
 
-		protected:
-			TestProtocol* _protocol;
+        public:
+            //static TestProtocol defaultProtocol;
+    };
 
-		public:
-			static TestProtocol defaultProtocol;
-	};
-
-	TestProtocol Test::defaultProtocol;
+    //TestProtocol Test::defaultProtocol;
 
 
 
-	inline void TestProtocol::run(Test& test)
-	{
-		const MethodMap& methods = test.methods();
-		MethodMap::const_iterator it;
-		for(it = methods.begin(); it != methods.end(); ++it)
-		{
-			test.runTest( it->first, Args() );
-		}
-	}
+    /*inline void TestProtocol::run(Test& test)
+    {
+        const MethodMap& methods = test.methods();
+        MethodMap::const_iterator it;
+        for(it = methods.begin(); it != methods.end(); ++it)
+        {
+            test.runTest( it->first, Args() );
+        }
+    }*/
 
 } // namespace Unit
 

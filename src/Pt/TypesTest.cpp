@@ -26,23 +26,16 @@ using namespace Pt;
 
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestFixture.h"
-#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
 
 
-class TypesTest : public Pt::Unit::TestSuite
+class TypesTest : public Pt::Unit::TestCase
 {
 	public:
 		TypesTest()
-		: TestSuite("TypesTest")
-		{
-			this->registerMethod("test", *this, &TypesTest::test);;
-		}
-
-		void test1(int a)
-		{
-			std::cerr << "\ncalled: " << a << "\n";
-		}
+		: TestCase("TypesTest")
+		{}
 
 		void test()
 		{

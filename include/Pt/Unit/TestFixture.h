@@ -24,29 +24,29 @@ namespace Pt {
 
 namespace Unit {
 
-	class TestFixture
-	{
-		public:
-			/** \brief Destructor.
-			*/
-			virtual ~TestFixture() 
-			{};
-		
-			/** \brief Set up context before running a test.
-			    This function is called before each registered tester function
-			    is invoked. It is meant to initialize any required resources.
-			*/
-			virtual void setUp() 
-			{};
-		
-			/** \brief Clean up after the test run.
-			    This function is called after each registered tester function
-			    is invoked. It is meant to remove any resources previously
-			    initialized in TestFixture::setUp.
-			*/
-			virtual void tearDown() 
-			{};
-	};
+    class TestFixture
+    {
+        public:
+            /** \brief Destructor.
+            */
+            virtual ~TestFixture()
+            {};
+
+            /** \brief Set up context before running a test.
+                This function is called before each registered tester function
+                is invoked. It is meant to initialize any required resources.
+            */
+            virtual void setUp()
+            {};
+
+            /** \brief Clean up after the test run.
+                This function is called after each registered tester function
+                is invoked. It is meant to remove any resources previously
+                initialized in TestFixture::setUp.
+            */
+            virtual void tearDown()
+            {};
+    };
 
 } // namespace Unit
 

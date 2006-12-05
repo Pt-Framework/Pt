@@ -30,48 +30,66 @@ namespace Pt {
 
 namespace Unit {
 
-	//! DEPRECATED. This class is obsolete.
-	/*class TestCase : public Test, public TestFixture
-	{
-		public:
-			TestCase(const std::string& name)
-			: Test(name)
-			{ }
+    //! DEPRECATED. This class is obsolete.
+    class TestCase : public Test, public TestFixture
+    {
+        public:
+            TestCase(const std::string& name)
+            : Test(name)
+            {
+                this->registerMethod(name, *this, &TestCase::test);
+            }
 
-			virtual ~TestCase()
-			{ }
+            virtual void run()
+            {
+                bool isUp = false;
 
-			virtual void run()
-			{
-				try
-				{
-					this->setUp();
-					this->test();
-					this->tearDown();
-					Test::success( this->name() );
-				}
-				catch(const Assertion& assertion)
-				{
-					Test::assertion( this->name(), assertion );
-				}
-				catch(const std::exception& ex)
-				{
-					Test::exception( this->name(), ex );
-				}
-				catch(...)
-				{
-					Test::error( this->name() );
-				}
-			}
+                try
+                {
+                    this->setUp();
+                    isUp = true;
+                    this->test();
+                    this->tearDown();
+                    Test::success( this->name() );
+                    return;
+                }
+                catch(const Assertion& assertion)
+                {
+                    Test::assertion(this->name(), assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    Test::exception(this->name(), ex);
+                }
+                catch(...)
+                {
+                    Test::error(this->name());
+                }
 
-			virtual void runTest( const std::string& name, const Args& args = Args() )
-			{
-				if( name == this->name() )
-					this->test();
-			}
+                try
+                {
+                    if(isUp)
+                    {
+                        this->tearDown();
+                    }
+                }
+                catch(const Assertion& assertion)
+                {
+                    Test::assertion(this->name(), assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    Test::exception(this->name(), ex);
+                }
+                catch(...)
+                {
+                    Test::error(this->name());
+                }
+            }
 
-			virtual void test() = 0;
-	};*/
+        protected:
+            virtual void test() = 0;
+    };
 
 } // namespace Unit
 
