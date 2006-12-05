@@ -19,17 +19,13 @@
 #
 # regards,
 # Aloysius
+#
 
 
 ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
 	TASK "Look into other compiler attributes"
-
-ITEM P10 S5 "An common exception hierachy exits"
-	TASK "Review Exception.h"
-	TASK "Write Documentation"
-	TASK "Write test case"
 
 ITEM P8 S13 "The BasicColor<T> class interface is improved"
 	TASK "Investigate libart"

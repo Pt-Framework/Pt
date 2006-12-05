@@ -21,8 +21,12 @@
 # multiple sprints. For now, I use the comment characters, but if you like, it can
 # be changed.
 #
+# Ah yes, finished ITEMs and TASKs from newer sprint should be put in front of (at
+# the beginning of) this file.
+#
 # regards,
 # Aloysius
+#
 
 
 ITEM P10 S1 "The scrum files have been improved"
