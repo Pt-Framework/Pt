@@ -29,18 +29,16 @@ using namespace Pt;
 #include "Pt/Unit/TestMain.h"
 
 
-class SingletonClass : public Singleton<SingletonClass> {
-	friend class Singleton<SingletonClass>;
+class TestSingleton : public Singleton<TestSingleton> 
+{
+	friend class Singleton<TestSingleton>;
 
 	public:
-		SingletonClass()
-		{
-			cerr << "SingletonClass() invoked!" << endl;
-		}
-		~SingletonClass()
-		{
-			cerr << "~SingletonClass() invoked!" << endl;
-		}
+		TestSingleton()
+		{}
+
+		~TestSingleton()
+		{}
 };
 
 
@@ -50,14 +48,13 @@ class SingletonTest : public Pt::Unit::TestSuite
 		SingletonTest()
 		: TestSuite("SingletonTest")
 		{
-			//this->registerMethod("test", *this, &SingletonTest::test);
+			this->registerMethod("testEqualInstance", *this, &SingletonTest::testEqualInstance);
 		}
 
-		virtual void test()
+		virtual void testEqualInstance()
 		{
-			SingletonClass *_inst1 = &SingletonClass::instance();
-			SingletonClass *_inst2 = &SingletonClass::instance();
-
+			TestSingleton* _inst1 = &( TestSingleton::instance() );
+			TestSingleton* _inst2 = &( TestSingleton::instance() );
 			PT_UNIT_ASSERT( _inst1 == _inst2 );
 		}
 

@@ -27,18 +27,16 @@ using namespace Pt;
 
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestFixture.h"
-#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
 
 
-class ByteorderTest : public Pt::Unit::TestSuite
+class ByteorderTest : public Pt::Unit::TestCase
 {
 	public:
-		ByteorderTest()
-	: TestSuite("ByteorderTest")
-		{
-			//this->registerMethod("test", *this, &ByteorderTest::test);
-		}
+	ByteorderTest()
+	: TestCase("ByteorderTest")
+		{ }
 
 		virtual void test()
 		{
@@ -107,9 +105,7 @@ class ByteorderTest : public Pt::Unit::TestSuite
 #endif
 			PT_UNIT_ASSERT( valf   == svalf   );
 			PT_UNIT_ASSERT( vald   == svald   );
-
 		}
-
 	};
 
 Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;

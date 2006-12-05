@@ -57,6 +57,16 @@ namespace Pt {
 
 
 	template <>
+	struct PT_EXPORT TypeTraits<char> {
+		static bool isSpecialized()
+		{ return true; }
+
+		static const char* typeName()
+		{ return "char"; }
+	};
+
+
+	template <>
 	struct PT_EXPORT TypeTraits<int> {
 		static bool isSpecialized()
 		{ return true; }

@@ -87,7 +87,6 @@ namespace Unit {
                     Test::error(this->name());
                 }
 
-
                 try
                 {
                     if(isUp)
@@ -108,6 +107,7 @@ namespace Unit {
                     Test::error(this->name());
                 }
             }
+
         protected:
             TestProtocol* _protocol;
 

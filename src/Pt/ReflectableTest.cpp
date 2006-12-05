@@ -16,9 +16,9 @@ class TestReflectable : public Pt::Reflectable
 		{
 			this->registerProperty("value", this, &TestReflectable::value, &TestReflectable::setValue);
 
-			//this->registerMethod("method1", *this, &TestReflectable::method1);
-			//this->registerMethod("method2", *this, &TestReflectable::method2);
-			//this->registerMethod("method3", *this, &TestReflectable::method3);
+			this->registerMethod("method1", *this, &TestReflectable::method1);
+			this->registerMethod("method2", *this, &TestReflectable::method2);
+			this->registerMethod("method3", *this, &TestReflectable::method3);
 		}
 
 		Pt::Property<int> intProperty;
@@ -53,10 +53,10 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
 		: Pt::Unit::TestSuite( "ReflectableTest" )
 		, _onValueChanged(false)
 		{
-			//Pt::Unit::TestSuite::registerMethod( "PropertyTest", *this, &ReflectableTest::PropertyTest );
-			//Pt::Unit::TestSuite::registerMethod( "Method1Test", *this, &ReflectableTest::Method1Test );
-			//Pt::Unit::TestSuite::registerMethod( "Method2Test", *this, &ReflectableTest::Method2Test );
-			//Pt::Unit::TestSuite::registerMethod( "Method3Test", *this, &ReflectableTest::Method3Test );
+			Pt::Unit::TestSuite::registerMethod( "PropertyTest", *this, &ReflectableTest::PropertyTest );
+			Pt::Unit::TestSuite::registerMethod( "Method1Test", *this, &ReflectableTest::Method1Test );
+			Pt::Unit::TestSuite::registerMethod( "Method2Test", *this, &ReflectableTest::Method2Test );
+			Pt::Unit::TestSuite::registerMethod( "Method3Test", *this, &ReflectableTest::Method3Test );
 		}
 
 	protected:
@@ -119,24 +119,25 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
 
 		void Method1Test()
 		{
-			//TestReflectable refl;
-			//PT_UNIT_ASSERT( refl.method("method1").argName(0) == std::string("int") );
+			TestReflectable refl;
+			PT_UNIT_ASSERT( refl.method("method1").argName(0) == std::string("int") );
 		}
 
 		void Method2Test()
 		{
-			//TestReflectable refl;
-			//PT_UNIT_ASSERT( refl.method("method2").argName(0) == std::string("int") );
-			//PT_UNIT_ASSERT( refl.method("method2").argName(1) == std::string("bool") );
+			TestReflectable refl;
+			PT_UNIT_ASSERT( refl.method("method2").argName(0) == std::string("int") );
+			PT_UNIT_ASSERT( refl.method("method2").argName(1) == std::string("bool") );
 		}
 
 		void Method3Test()
 		{
-			//TestReflectable refl;
-			//PT_UNIT_ASSERT( refl.method("method3").argName(0) == std::string("int") );
-			//PT_UNIT_ASSERT( refl.method("method3").argName(1) == std::string("bool") );
-			//PT_UNIT_ASSERT( refl.method("method3").argName(2) == std::string("char") );
+			TestReflectable refl;
+			PT_UNIT_ASSERT( refl.method("method3").argName(0) == std::string("int") );
+			PT_UNIT_ASSERT( refl.method("method3").argName(1) == std::string("bool") );
+			PT_UNIT_ASSERT( refl.method("method3").argName(2) == std::string("char") );
 		}
+
 	private:
 		void onValueChanged()
 		{ _onValueChanged = true; }
