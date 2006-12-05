@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
+ *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,30 +27,23 @@ using namespace std;
 namespace Pt {
 
 Exception::Exception(const std::string & what, const SourceInfo& si) throw()
-	: _what(what), _source(si)
+: _what(what), _source(si)
 { }
 
-
 Exception::Exception(const Exception& err) throw()
-	: _what(err._what), _source(err._source)
+: _what(err._what), _source(err._source)
 { }
 
 
 Exception::~Exception() throw()
 { }
 
-
 const SourceInfo& Exception::sourceInfo() const throw()
-{
-	return _source;
-}
+{ return _source; }
 
 
 const char* Exception::what() const throw()
-{
-	return _what.c_str();
-}
-
+{ return _what.c_str(); }
 
 Exception& Exception::operator=(const Exception& err) throw()
 {
@@ -66,7 +59,6 @@ RuntimeError::RuntimeError(const std::string & what, const SourceInfo& si) throw
 : Exception(what, si)
 { }
 
-
 RuntimeError::~RuntimeError() throw()
 { }
 
@@ -76,7 +68,6 @@ RuntimeError::~RuntimeError() throw()
 LogicError::LogicError(const std::string & what, const SourceInfo& si) throw()
 : Exception(what, si)
 { }
-
 
 LogicError::~LogicError() throw()
 { }
@@ -88,7 +79,6 @@ RangeError::RangeError(const std::string & what, const SourceInfo& si) throw()
 : RuntimeError(what, si)
 { }
 
-
 RangeError::~RangeError() throw()
 { }
 
@@ -98,7 +88,6 @@ RangeError::~RangeError() throw()
 OverflowError::OverflowError(const std::string & what, const SourceInfo& si) throw()
 : RuntimeError(what, si)
 { }
-
 
 OverflowError::~OverflowError() throw()
 { }
@@ -110,7 +99,6 @@ UnderflowError::UnderflowError(const std::string & what, const SourceInfo& si) t
 : RuntimeError(what, si)
 { }
 
-
 UnderflowError::~UnderflowError() throw()
 { }
 
@@ -120,7 +108,6 @@ UnderflowError::~UnderflowError() throw()
 IllegalArgument::IllegalArgument(const std::string& what, const SourceInfo& si) throw()
 : LogicError(what, si)
 { }
-
 
 IllegalArgument::~IllegalArgument() throw()
 { }

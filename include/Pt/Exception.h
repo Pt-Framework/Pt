@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Duerner                                 *
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
+ *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,64 +21,61 @@
 #ifndef Pt_Exception_h
 #define Pt_Exception_h
 
-
-
-#include <Pt/Api.h>
-
 #include <exception>
 
+#include <Pt/Api.h>
 #include <Pt/SourceInfo.h>
 
-//#include <string>
 
-
-namespace std
-{
+namespace std {
 	class PT_API std::exception;
 }
 
+
 namespace Pt {
 
-	//! @ingroup Pt
-	//!	@brief This is the base Exception class for the Pt framework.
-	/**
-		This is the base class for all Exceptions used in this framework. This
-		class implements std::exception and overrides std::exception::what()
-		to return the error message passed at construction time. Besides an
-		error message, Exceptions can provide information where it was
-		raised in the source code through a SourceInfo object.
-
-	*/
+	/** @brief This is the base Exception class for the Pt framework.
+	 *  @ingroup Pt
+	 *
+	 *  This is the base class for all Exceptions used in this framework. This
+	 *  class implements std::exception and overrides std::exception::what()
+	 *  to return the error message passed at construction time. Besides the
+	 *  error message, Exceptions can provide information about where the
+	 *  exception was raised in the source code through a SourceInfo object.
+	 */
 	class PT_EXPORT Exception : public std::exception {
 		public:
-			//! @brief Creates an exception from an error message and SourceInfo.
-			/**
-				Construction of an Exception object, requires a SourceInfo object as
-			    argument. Use the PT_SOURCEINFO macro to pass SourceInfos to
-			    exceptions:
-
-			    @code
-					throw MyException( "dammit!", PT_SOURCEINFO );
-			    @endcode
-
-			    @param what the error message
-			    @param si location where the exception was raised
-			*/
+			/** @brief Construct an Exception from an error message and SourceInfo.
+			 *
+			 *  @param what the error message
+			 *  @param si location where the exception was raised
+			 *
+			 *  Construction of an Exception object requires a SourceInfo object as
+			 *  argument. Use the PT_SOURCEINFO macro to pass SourceInfo to Exception:
+			 *  @code
+			 *  throw MyException( "dammit!", PT_SOURCEINFO );
+			 *  @endcode
+			 */
 			Exception(const std::string& what, const SourceInfo& si) throw();
 
-			//! @brief Copy constructor.
+			/** @brief Copy constructor.
+			 */
 			Exception(const Exception& err) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~Exception() throw();
 
-			//! @brief Returns information where the exception was raised
-			const SourceInfo& sourceInfo() const throw();
-
-			//! @brief Returns an error message
+			/** @brief Returns the error message.
+			 */
 			const char* what() const throw();
 
-			//! @brief Destructor.
+			/** @brief Returns information where the exception was raised.
+			 */
+			const SourceInfo& sourceInfo() const throw();
+
+			/** @brief Assigment operator.
+			 */
 			Exception& operator=(const Exception& err) throw();
 
 		protected:
@@ -87,104 +84,111 @@ namespace Pt {
 	};
 
 
-	//! @ingroup Pt
-	//!	@brief This is the base class for runtime errors.
-	/**
-		This is the base class for all runtime errors used in this framework.
-		This class implements Exception.
-
-	*/
+	/** @brief This is the base class for all runtime errors.
+	 *  @ingroup Pt
+	 *
+	 *  This is the base class for all runtime errors used in this framework.
+	 *  This class implements Exception.
+	 */
 	class PT_EXPORT RuntimeError : public Exception {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			RuntimeError(const std::string & what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~RuntimeError() throw();
 	};
 
-	//! @ingroup Pt
-	//!	@brief This is the base class for logic errors.
-	/**
-		This is the base class for all logic errors used in this framework.
-		This class implements Exception.
 
-	*/
+	/** @brief This is the base class for all logic errors.
+	 *  @ingroup Pt
+	 *
+	 *  This is the base class for all logic errors used in this framework.
+	 *  This class implements Exception.
+	 */
 	class PT_EXPORT LogicError : public Exception {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			LogicError(const std::string & what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~LogicError() throw();
 	};
 
-	//! @ingroup Pt
-	//!	@brief This class indicates an overflow error.
-	/**
-		An exception of class OverflowError is used to report an arithmetic
-		overflow.
-		This class implements Exception.
 
-	*/
+	/** @brief This class indicates an overflow error.
+	 *  @ingroup Pt
+	 *
+	 *  An exception of class OverflowError is used to report an arithmetic overflow.
+	 *  This class implements Exception.
+	 */
 	class PT_EXPORT OverflowError : public RuntimeError {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			OverflowError(const std::string & what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~OverflowError() throw();
 	};
 
-	//! @ingroup Pt
-	//!	@brief This class indicates an underflow error.
-	/**
-		An exception of class UnderflowError is used to report an arithmetic
-		underflow.
-		This class implements Exception.
 
-	*/
+	/** @brief This class indicates an underflow error.
+	 *  @ingroup Pt
+	 *
+	 *  An exception of class UnderflowError is used to report an arithmetic underflow.
+	 *  This class implements Exception.
+	 */
 	class PT_EXPORT UnderflowError : public RuntimeError {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			UnderflowError(const std::string & what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~UnderflowError() throw();
 	};
 
-	//! @ingroup Pt
-	//!	@brief This class indicates a range error.
-	/**
-		An exception of class RangeError is used to report a range error
-		in internal computations.
-		This class implements Exception.
 
-	*/
+	/** @brief This class indicates a range error.
+	 *  @ingroup Pt
+	 *
+	 *  An exception of class RangeError is used to report a range error in internal
+	 *  computations. This class implements Exception.
+	 */
 	class PT_EXPORT RangeError : public RuntimeError {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			RangeError(const std::string & what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~RangeError() throw();
 	};
 
-	//! @ingroup Pt
-	//!	@brief This indicates an illegal argument error.
-	/**
-		An exception of class �legalArgument is used to report invalid
-		arguments e.g. if a bit set is initialized with a char other than
-		'0' or '1'.
-		This class implements Exception.
 
-	*/
+	/** @brief This class indicates an illegal argument error.
+	 *  @ingroup Pt
+	 *
+	 *  An exception of class IllegalArgument is used to report invalid	arguments
+	 *  (e.g. if a bit set is initialized with a char other than '0' or '1').
+	 *  This class implements Exception.
+	 */
 	class PT_EXPORT IllegalArgument : public LogicError {
 		public:
-			//! @see Exception()
+			/** @see Exception().
+			 */
 			IllegalArgument(const std::string& what, const SourceInfo& si) throw();
 
-			//! @brief Destructor.
+			/** @brief Destructor.
+			 */
 			~IllegalArgument() throw();
 	};
 

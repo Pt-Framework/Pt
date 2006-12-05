@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Duerner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -58,7 +58,7 @@ namespace Pt {
 			R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
 			{ return this->operator()(a1, a2, a3, a4, a5); }
 
-			void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5) const
+			void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
 			{ this->operator()(a1, a2, a3, a4, a5); }
 	};
 
