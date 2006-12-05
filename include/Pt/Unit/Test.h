@@ -67,7 +67,26 @@ namespace Unit {
 			}
 
 			virtual void runTest( const std::string& name, const Args& args = Args() )
-			{ }
+			{
+				try
+				{
+					Reflectable::call(name, args);
+					Test::success( this->name() + "::" + name );
+					return;
+				}
+				catch(const Assertion& assertion)
+				{
+					Test::assertion(this->name(), assertion);
+				}
+				catch(const std::exception& ex)
+				{
+					Test::exception(this->name(), ex);
+				}
+				catch(...)
+				{
+					Test::error(this->name());
+				}
+			}
 
 			Signal<const Test&> success;
 

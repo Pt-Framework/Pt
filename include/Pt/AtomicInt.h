@@ -47,7 +47,12 @@ namespace Pt {
 
 #elif __GNUC__
 
-    #ifdef PT_X86 // pentium and higher...
+	#if defined( _i386_ ) || \
+	    defined( __i386__ ) || \
+	    defined( _M_IX86 ) || \
+	    defined( __x86_64__ )
+
+    //#if defined(PT_X86) || defined(PT_X86_64) // pentium and higher...
 
         typedef std::sig_atomic_t atomic_t;
 
@@ -105,7 +110,7 @@ namespace Pt {
                 volatile atomic_t _value;
         };
 
-    #elif PT_ARM
+	#elif defined( __arm__ )
 
         typedef std::sig_atomic_t atomic_t;
 
@@ -194,7 +199,11 @@ namespace Pt {
                 volatile atomic_t _value;
         };
 
-    #elif PT_PPC
+	#elif defined( _M_PPC ) || \
+	      defined( PPC ) || \
+	      defined( ppc ) || \
+	      defined( __powerpc__ ) || \
+	      defined( __ppc__ )
 
         typedef std::sig_atomic_t atomic_t;
 
@@ -247,17 +256,16 @@ namespace Pt {
                 void operator=(atomic_t n)
                 {
                     atomic_t ret = 0;
-		    asm volatile(
-				"0:	lwarx %0,0,%1\n"
-				"	stwcx. %2,0,%1\n" 
-				"	bne- 0b\n"
-				"	isync\n"
-				: "=&r" (ret)
-				: "r" (&_value),"r"(n)
-				: "cr0","memory","r0"
-			);
-
-		}               
+                    asm volatile(
+                        "0:	lwarx %0,0,%1\n"
+                        "	stwcx. %2,0,%1\n"
+                        "	bne- 0b\n"
+                        "	isync\n"
+                        : "=&r" (ret)
+                        : "r" (&_value),"r"(n)
+                        : "cr0","memory","r0"
+                    );
+                }
 
                 bool compareExchange(atomic_t oldval, atomic_t newval)
                 {
