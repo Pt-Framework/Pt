@@ -28,7 +28,7 @@ using namespace Pt;
 #include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
-
+#include "Pt/Unit/Application.h"
 
 class TypesTest : public Pt::Unit::TestCase
 {
@@ -51,37 +51,28 @@ class TypesTest : public Pt::Unit::TestCase
 			PT_UNIT_ASSERT( sizeof(float) == 4 );
 			PT_UNIT_ASSERT( sizeof(double) == 8 );
 
-			ss << endl;
 			ss << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
 			ss << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
 			ss << "sizeof(Pt::uint    ) = " << sizeof(Pt::uint    ) << endl;
 			ss << "sizeof(Pt::ulong   ) = " << sizeof(Pt::ulong   ) << endl;
-			ss << endl;
 			ss << "sizeof(Pt::size_t  ) = " << sizeof(Pt::size_t  ) << endl;
 			ss << "sizeof(Pt::ssize_t ) = " << sizeof(Pt::ssize_t ) << endl;
-			ss << endl;
 			ss << "sizeof(Pt::int8_t  ) = " << sizeof(Pt::int8_t  ) << endl;
 			ss << "sizeof(Pt::uint8_t ) = " << sizeof(Pt::uint8_t ) << endl;
-			ss << endl;
 			ss << "sizeof(Pt::int16_t ) = " << sizeof(Pt::int16_t ) << endl;
 			ss << "sizeof(Pt::uint16_t) = " << sizeof(Pt::uint16_t) << endl;
-			ss << endl;
 			ss << "sizeof(Pt::int32_t ) = " << sizeof(Pt::int32_t ) << endl;
 			ss << "sizeof(Pt::uint32_t) = " << sizeof(Pt::uint32_t) << endl;
-			ss << endl;
 #ifdef PT_64BIT
 			PT_UNIT_ASSERT( sizeof(Pt::int64_t) == 8 );
 			PT_UNIT_ASSERT( sizeof(Pt::uint64_t) == 8 );
 			ss << "sizeof(Pt::int64_t ) = " << sizeof(Pt::int64_t ) << endl;
 			ss << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
-			ss << endl;
 #endif
 			ss << "sizeof(float       ) = " << sizeof(float       ) << endl;
 			ss << "sizeof(double      ) = " << sizeof(double      ) << endl;
-			ss << endl;
 
-			//Unit::Application::message(ss.str());
-			cerr << ss.str();
+			Unit::Application::message( ss.str() );
 		}
 };
 
