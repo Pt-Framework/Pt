@@ -459,6 +459,10 @@
 # endif
 # endif 
 
+# if defined( __x86_64__)
+# define OSPLAT "OSPLAT=X86_64"
+# endif
+
 # ifdef __sparc__
 # if !defined( OS_SUNOS ) && \
      !defined( OS_SOLARIS )
