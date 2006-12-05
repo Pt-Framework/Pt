@@ -24,6 +24,7 @@ AS		= masm386 ;
 CC		= $(VISUALC)\\vc\\bin\\cl /nologo ;
 CCFLAGS		?= /D_CRT_SECURE_NO_DEPRECATE ;
 C++		= $(CC) ;
+#C++FLAGS	+= $(CCFLAGS) /Zc:wchar_t- ;
 C++FLAGS	+= $(CCFLAGS) ;
 LINK		= $(VISUALC)\\vc\\bin\\link /nologo ;
 #LINKFLAGS	+= /MANIFEST:NO ;

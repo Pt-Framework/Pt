@@ -11,8 +11,8 @@ LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\SmartDevices\\SDK\\PocketPC2003\\Lib\\armv4
 LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\VC\\ce\\lib\\armv4"\" ;
 LINKFLAGS += /ARMPADCODE ;
 LINKFLAGS += /machine:ARM ;
-C++FLAGS +=  /D ARM /D _ARM_ /QRarch4 ;
-CCFLAGS  += -DARM -D_ARM_ -DQRarch4 ;
+#C++FLAGS +=  /D ARM /D _ARM_ /QRarch4 ;
+CCFLAGS  += /D ARM /D _ARM_ /QRarch4 ;
 
 LINKLIBS += coredll.lib 
 	    corelibc.lib

@@ -1,36 +1,37 @@
+# Tools
+#
 CC        = gcc ;
 C++       = g++ ;
 if $(CXX)
 {
 	C++ = $(CXX) ;
 }
-
-CCFLAGS 	+= -Wall ;
-C++FLAGS	+= $(CCFLAGS) ; # -std=c++98 -D__STDC_VERSION__=199901L ;
-LINKFLAGS	?= $(CCFLAGS) ;
-LINKLIBS	+= -lstdc++ ;
 RANLIB		?= ranlib ;
 
-
-# Configuration specific compiler flags
+# Flags and options
 #
-if $(CONFIG) = debug 
+CCFLAGS 	+= -Wall ;
+LINKFLAGS	?= -Wall ;
+LINKLIBS	+= -lstdc++ ;
+
+if $(CONFIG) = debug
 {
 	CCFLAGS += -DDEBUG -g ;
 	OPTIM   = -O ;
 }
 else
 {
-	OPTIM		= -O2 ;
+	CCFLAGS += -DNDEBUG ;
+	OPTIM	= -O2 ;
 }
 
-# CPU specific compiler flags
-#
+# only use -fPIC for non-X86 CPUs
 if $(TARGET_OSPLAT:U) != X86
 {
 	CCFLAGS += -fPIC ;
-	C++FLAGS += -fPIC ;
 }
+
+C++FLAGS	+= $(CCFLAGS) ;
 
 
 # MinGW support for gcc under NT

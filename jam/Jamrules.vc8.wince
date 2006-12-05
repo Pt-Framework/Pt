@@ -5,22 +5,25 @@ JamInclude Jamrules.vc8.wince.$(TARGET_OSPLAT:L) ;
 
 # Flags and options
 #
-CCFLAGS  += /D "WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "_UNICODE" /D "UNICODE" ;
-C++FLAGS += /D "_WIN32_WCE=0x420" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" /D "WINCE" ;
-C++FLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /EHsc /fp:fast /GR /W3 /TP ;
+CCFLAGS += /D "_WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" ;
+CCFLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /W3 ;
+
 LINKFLAGS += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
 LINKFLAGS += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
 
 if $(CONFIG:L) = debug 
 {
-	C++FLAGS += /Os /Od /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
+	CCFLAGS += /Os /Od /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
 	LINKFLAGS += /DEBUG ;
 }
 else
 {
-	C++FLAGS += /MD /O1 /Oy ;
-	CCFLAGS += /MD /O1 /Oy ;
+	#C++FLAGS += /MD /O1 /Oy /D "NDEBUG" ;
+	CCFLAGS += /MD /O1 /Oy /D "NDEBUG" ;
 }
+
+C++FLAGS  +=  $(CCFLAGS) ;
+C++FLAGS  +=  /EHsc /fp:fast /GR /TP ;
 
 
 # set MFC directory
@@ -76,8 +79,8 @@ rule Main
 
 # Link a target to another
 #
-actions Link bind NEEDLIBS
+actions win32-Link bind NEEDLIBS RESPONSEFILE
 {
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) @$(RESPONSEFILE) $(NEEDLIBS) $(LINKLIBS)
 }

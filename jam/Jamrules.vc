@@ -189,9 +189,76 @@ actions C++
 	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
-actions together piecemeal Link bind NEEDLIBS
+actions together Link bind NEEDLIBS
 {
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
 	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
 	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
+
+
+###################################################################################################
+# Die hier folgende Implementierung der Rule Link ist ein Workaround, um die Zeilenlängen-
+# beschränkung der Shell unter Windows für den VC Linker zu umgehen. Dazu wird ein Response-File
+# mit den zu linkenden Object-Files angelegt, der dann dem Linker übergeben wird.
+# Problematisch ist diese Rule, wenn JAM mit dem Parameter -r aufgerufen wird (z.B. im Autobuild)
+# Dann verursacht das von JAM genutzte Pipen der Logausgabe mittels >> in Kombination mit dem Pipen
+# in den Responsefile einen Konflikt
+###################################################################################################
+#actions win32-Link bind RESPONSEFILE NEEDLIBS
+#{
+#	set PATH=$(VISUALC)\Common7\IDE;%PATH%
+#	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
+#	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) @$(RESPONSEFILE) $(NEEDLIBS) $(LINKLIBS)
+#}
+#
+#
+#
+#rule ResponseFile # target-requiring-response-file : files-to-write ;
+#{
+#    local responsefile = $(1).rsp ;
+#   
+#    if ! [ on $(1) FReturn $(RESPONSEFILE) ]
+#    {
+#        on $(1) MakeLocate $(responsefile) : $(LOCATE) ;
+#
+#        Depends $(1) : $(responsefile) ;
+#        Temporary $(responsefile) ;
+#       
+#        EmptyResponseFile $(1) ;
+#
+#        RESPONSEFILE on $(1) = $(responsefile) ;
+#    }
+#
+#    AppendResponseFile $(1) : $(2) ;
+#}
+#
+#rule FReturn
+#{
+#    return $(1) ;
+#}
+#
+#actions quietly ignore EmptyResponseFile bind RESPONSEFILE
+#{
+#    $(RM) $(RESPONSEFILE) 2> NUL
+#}
+#
+#actions quietly together piecemeal AppendResponseFile bind RESPONSEFILE
+#{
+#    echo "$(>)" >> $(RESPONSEFILE)
+#}
+#
+#actions together quietly ignore RemoveResponseFile bind RESPONSEFILE
+#{
+#    $(RM) $(RESPONSEFILE) 2> NUL
+#}
+#
+#rule Link
+#{
+#    ResponseFile $(<) : $(>) ;
+#    win32-Link $(<) : $(>) ;
+#    RemoveResponseFile $(<) ;
+#
+#    MODE on $(<) = $(EXEMODE) ;
+#    Chmod $(<) ;
+#}

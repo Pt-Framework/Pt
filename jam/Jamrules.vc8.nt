@@ -12,20 +12,20 @@ LINKLIBS += \"$(PLATFORMSDK)\\lib\\advapi32.lib\"
 	    \"$(PLATFORMSDK)\\lib\\gdi32.lib\"
 	    \"$(PLATFORMSDK)\\lib\\user32.lib\"
 	    \"$(PLATFORMSDK)\\lib\\kernel32.lib\" ;
-C++FLAGS += /EHsc /GR /FD /W3 /DWIN32 ;
 
+CCFLAGS += /DWIN32 ;
 
 if $(CONFIG:L) = debug 
 {
-	C++FLAGS += /ZI /MDd /Od /RTC1 ;
+	CCFLAGS += /MDd /Zi /MDd /Od /RTC1 ;
 	LINKFLAGS += /DEBUG ;
-
-	CCFLAGS += /MDd /Zi ;
 }
 else
 {
-	C++FLAGS += /MD /O1 /Oy ;
+	CCFLAGS += /MD /O1 /Oy /D "NDEBUG" ;
 }
+
+C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /W3  ;
 
 
 # set directories to standard header 
