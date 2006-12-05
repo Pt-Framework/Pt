@@ -1,7 +1,3 @@
-ITEM P10 S1 "The scrum files have been improved"
-	TASK "remove item numbering"
-	TASK "improve the format"
-
 ITEM-4 P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
@@ -20,8 +16,8 @@ ITEM P8 S13 "The BasicColor<T> class interface is improved"
 	TASK "Make toARgb and from ARgb free functions supporting precision and fast conversion"
 	TASK "Make brightness a free function."
 	TASK "Make greyscale a free function."
-	TASK "remove BasicColor class."
-	TASK "write assign functions for color classes (precise and approx)"
+	TASK "Remove BasicColor class."
+	TASK "Write assign functions for color classes (precise and approx)"
 
 ITEM-6 P8 S2 "All classes of the Pt module are forward declared in a dedicated header"
 	TASK "Add missing declarations to Pt.h"
@@ -29,7 +25,6 @@ ITEM-6 P8 S2 "All classes of the Pt module are forward declared in a dedicated h
 ITEM-8 P8 S2 "A empty Void type exists"
 	TASK "Review Void.h"
 	TASK "Write Documentation"
-
 
 ITEM P7 S8 "Blending is supported by color classes"
 
@@ -55,5 +50,3 @@ ITEM-17 P7 S5 "Any class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
-
-

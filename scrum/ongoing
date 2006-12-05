@@ -1,3 +1,6 @@
+ITEM P10 S1 "The scrum files have been improved"
+	TASK "Remove item numbering"	blue_wind_25
+	TASK "Improve the format"	blue_wind_25
 
 ITEM-25 P9 S5 "The Pt::Unit module is documented"
 	TASK "Write docs" d-marc
