@@ -1,10 +1,33 @@
-ITEM-13 P7 S5 "The AtomicInt class implements atomic operations"
+#
+# Dear developers,
+#
+# When editing ITEMs and TASKs in this BACKLOG file, please format them as follows:
+#
+# ITEM P? S? "Item's description"
+# <TAB> TASK "Task's description"
+# <TAB> TASK "Task's description"
+#
+# Priority is from 1 (lowest) to 10 (highest)
+# Size is a Fibonacci numbers 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
+#
+# One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
+#
+# In the (near) future when we want to have a front-end for this SCRUM files or
+# want to display their contents in our web, we must write a parser for the files.
+# So, please ensure that the formatting is correct so that we won't get any problem
+# when we want to parse the files later.
+#
+# regards,
+# Aloysius
+
+
+ITEM P7 S5 "The AtomicInt class implements atomic operations"
 	TASK "Add fallback version that uses pthreads"
 	TASK "Review asm"
 	TASK "Write test case"
 	TASK "Write docs"
 
-ITEM-16 P6 S5 "Signals and Delegates are implemented"
+ITEM P6 S5 "Signals and Delegates are implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
@@ -13,34 +36,34 @@ ITEM P0 S13 "The Image class has a block iterator"
 	TASK "Write BlockIterator"
 	TASK "Write BlockIterator based algorithm for scale"
 
-ITEM-18 P5 S5 "Variant class is implemented"
+ITEM P5 S5 "Variant class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-19 P5 S5 "SmartPtr class is implemented"
+ITEM P5 S5 "SmartPtr class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-20 P5 S5 "Event based Application class is implemented"
+ITEM P5 S5 "Event based Application class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-22 P2 S5 "CTTI system is implemented"
+ITEM P2 S5 "CTTI system is implemented"
 	TASK "Review IfElse template"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM-15 P1 S8 "Byteorder API has ASM optimisation"
+ITEM P1 S8 "Byteorder API has ASM optimisation"
 	TASK "Look at ffmpeg code"
 	TASK "Optimize swab16() using standard ASM and if possible SIMD"
 	TASK "Optimize swab32() using standard ASM and if possible SIMD"
 	TASK "Optimize swab64() using standard ASM and if possible SIMD"
 
-ITEM-14 P1 S5 "A base class for thread-safe refcounting exists."
+ITEM P1 S5 "A base class for thread-safe refcounting exists"
 	TASK "Make Shared.h use AtomicInt"
 	TASK "Write Documentation"
 	TASK "Write test case"
@@ -49,14 +72,10 @@ ITEM P1 S13 "The Image class supports several planar image formats, mostly compa
 	TASK "Rename BasicImage<T> to Image<T>"
 	TASK "Find out which YUV formats are used for movie playback on linux and win32"
 	TASK "Implement YV12 image as template specialisation"
-	TASK "Implement the needed image conversion from and to the YV12 image "
+	TASK "Implement the needed image conversion from and to the YV12 image"
 
 
-ITEM P0 S99 "A program argument parser is impemented"
-	TASK "Review arg.h from cxxtools"
-	TASK "Consider using Pt::Variant or Pt::Any"
-	TASK "Write docs"
-	TASK "Write unit tests"
+
 
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
@@ -65,6 +84,12 @@ ITEM P0 S13 "The system module supports WinCE and QNX"
 
 ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
+
+ITEM P0 S99 "A program argument parser is impemented"
+	TASK "Review arg.h from cxxtools"
+	TASK "Consider using Pt::Variant or Pt::Any"
+	TASK "Write docs"
+	TASK "Write unit tests"
 
 ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
 	TASK "Review memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"

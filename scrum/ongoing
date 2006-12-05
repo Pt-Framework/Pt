@@ -1,7 +1,26 @@
-ITEM P10 S1 "The scrum files have been improved"
-	TASK "Remove item numbering"	blue_wind_25
-	TASK "Improve the format"	blue_wind_25
+#
+# Dear developers,
+#
+# When editing ITEMs and TASKs in this ONGOING file, please format them as follows:
+#
+# ITEM P? S? "Item's description"
+# <TAB> TASK "Task's description" <TAB> developer1[,developer2]...
+# <TAB> TASK "Task's description" <TAB> developer1[,developer2]...
+#
+# Priority is from 1 (lowest) to 10 (highest)
+# Size is a Fibonacci numbers 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
+#
+# One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
+#
+# In the (near) future when we want to have a front-end for this SCRUM files or
+# want to display their contents in our web, we must write a parser for the files.
+# So, please ensure that the formatting is correct so that we won't get any problem
+# when we want to parse the files later.
+#
+# regards,
+# Aloysius
 
-ITEM-25 P9 S5 "The Pt::Unit module is documented"
-	TASK "Write docs" d-marc
-	TASK "Write tutorial" d-marc
+
+ITEM P9 S5 "The Pt::Unit module is documented"
+	TASK "Write docs"	d-marc
+	TASK "Write tutorial"	d-marc
