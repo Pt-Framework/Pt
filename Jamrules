@@ -1,10 +1,10 @@
 JamInclude Jamrules.cppunit ;
 JamInclude Jamrules.platinum ;
 
-C++FLAGS += [ FDefines "PT_"$(TARGET_OS:U) ] ;
-C++FLAGS += [ FDefines "PT_"$(TARGET_OSPLAT:U) ] ;
-C++FLAGS += [ FDefines "PT_"$(TOOLSET:U) ] ;
-C++FLAGS += [ FDefines "PT_"$(BYTEORDER:U) ] ;
+#C++FLAGS += [ FDefines "PT_"$(TARGET_OS:U) ] ;
+#C++FLAGS += [ FDefines "PT_"$(TARGET_OSPLAT:U) ] ;
+#C++FLAGS += [ FDefines "PT_"$(TOOLSET:U) ] ;
+#C++FLAGS += [ FDefines "PT_"$(BYTEORDER:U) ] ;
 
 # Print project information
 Echo ;

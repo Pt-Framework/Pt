@@ -22,20 +22,29 @@
 #define Pt_Byteorder_h
 
 #include <cassert>
-
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 
-
-// Check if the proper macro is defined or not
 #if !defined(PT_LE) && !defined(PT_BE)
-#error "PT_LE or PT_BE needs to be defined."
-#endif
 
+	#if __BYTE_ORDER == __LITTLE_ENDIAN
+		#define PT_LE
+
+	#elif __BYTE_ORDER == __BIG_ENDIAN
+		#define PT_BE
+
+	#elif defined(_MSC_VER)
+		#define PT_LE
+
+	#else
+		#error "PT_LE or PT_BE needs to be defined."
+
+	#endif
+
+#endif
 
 // For experiment
 #define USE_BYTE_MOVE
-
 
 namespace Pt
 {
