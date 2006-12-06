@@ -39,14 +39,14 @@ TARGET_OSPLAT ?= $(OSPLAT:L) ;
 # Can be set with 'jam -sBYTEORDER=BE' or 'jam -sBYTEORDER=LE'. Default
 # is processor specific.
 #
-if $(TARGET_OSPLAT:U) = PPC
-{
-	BYTEORDER ?= be ;
-}
-else
-{
-	BYTEORDER ?= le ;
-}
+#if $(TARGET_OSPLAT:U) = PPC
+#{
+#	BYTEORDER ?= be ;
+#}
+#else
+#{
+#	BYTEORDER ?= le ;
+#}
 
 
 # Set configuration
