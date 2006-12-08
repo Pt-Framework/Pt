@@ -8,11 +8,6 @@ namespace Pt {
 
 namespace Xml {
 
-EndElement::EndElement() 
-: Node(Node::EndElement)
-{
-
-}
 
 EndElement::EndElement(const String& name)
 : Node(Node::EndElement),

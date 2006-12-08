@@ -27,6 +27,38 @@ namespace Xml {
 	class XmlStreamIterator;
 
 
+	/**
+	 * @brief An input stream for parsing an XML document utilizing Pull Parsing.
+	 *
+	 * This class operates on another istream or TextStream from which it reads the XML character
+	 * data, parses it and lastly makes available the parsed XML elements (Nodes).
+	 *
+	 * A pull parser will only parse the XML document as far as the user read data from it.
+	 * To read the current element (Node) the method get() can be used. To parse and read the next
+	 * element the method next() can be used. Only when next() or any corresponding method or operator
+	 * is called the next chunk of XML input data is parsed.
+	 *
+	 * To parse an XML-document an object of this class is created and passed the input stream
+	 * for the document. The constructor initializes the parser, already parses the xml-declaration
+	 * and positions the internal cursor to the first actual element (Node) of the XML document.
+	 *
+	 * The current XML element (Node) can be read using get(). Every call to next() will parse the
+	 * next element, position the cursor to the next element and return the parsed element. The
+	 * returned element is of type Node, which is the super-class for all XML element classes. The
+	 * class Node has a method type() which returns the type of the read element. Depending on the
+	 * type the generic Node object may be cast to the more concrete element object. For example
+	 * a Node object with a node type of Node::StartElement can be cast to StartElement.
+	 *
+	 * Parsing using next() will continue until the end of the document is reached which will result
+	 * in a EndDocument element to be returned by next() and get().
+	 *
+	 * This class also provides the method current() to obtain an iterator which basically works the
+	 * same as using using get() and next() directly. The cursor can be set to the next element by
+	 * using the ++ operator of the iterator. The current element can be accessed by using the *
+	 * operator.
+	 *
+	 * @see Node
+	 */
 	class PT_EXPORT XmlIStream
 	{
 		public:
