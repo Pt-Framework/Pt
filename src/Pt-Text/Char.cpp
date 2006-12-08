@@ -20,7 +20,6 @@
 
 #include "Pt/Text/Char.h"
 #include "UnicodeTable.h"
-//#include "unicodedata.h"
 
 #include <iostream>
 
@@ -28,12 +27,6 @@
 namespace Pt {
 
 namespace Text {
-
-const Char Char::Null = Char(0);
-const Char Char::Replacement = Char(0xfffd);
-const Char Char::ByteOrderMark = Char(0xfeff);
-const Char Char::ByteOrderSwapped = Char(0xfffe);
-
 
 int Char::category() const
 {

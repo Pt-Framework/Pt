@@ -5,7 +5,6 @@ SharedLibrary Pt-Text : AsciiCodec.cpp
                         #Base64Codec.cpp
                         #Base64Stream.cpp
                         Char.cpp
-                        String.cpp
                         StringList.cpp
                         TextCodec.cpp
                         TextStream.cpp

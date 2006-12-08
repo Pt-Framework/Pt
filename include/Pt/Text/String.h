@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Duerner                         *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Text_String_h
-#define Pt_Text_String_h
+#ifndef PT_TEXT_STRING_H
+#define PT_TEXT_STRING_H
 
 #include <Pt/Text/Char.h>
+#include <Pt/Text/StringData.h>
 
 #include <string>
 #include <iterator>
@@ -29,95 +31,12 @@
 #include <stdexcept>
 
 
-namespace Pt {
-
-typedef unsigned int AtomicInt;
-
-
-class PT_EXPORT StringData {
-	public:
-		typedef size_t size_type;
-		typedef Pt::Text::Char value_type;
-		typedef std::char_traits<Pt::Text::Char> traits_type;
-		typedef std::allocator<Pt::Char> allocator_type;
-
-	public:
-		StringData( const allocator_type& a = allocator_type() );
-
-		StringData(const Pt::Char* s, size_type length, const allocator_type& a = allocator_type());
-
-		StringData(const wchar_t* wstr, size_type length, const allocator_type& a);
-
-		StringData(size_type length, Pt::Char ch);
-
-		~StringData();
-
-		allocator_type get_allocator() const
-		{ return _allocator; }
-
-		const AtomicInt& refs() const;
-
-		AtomicInt& ref();
-
-		AtomicInt& unref();
-
-		void setInitial()
-		{ _n = AtomicInt(1); }
-
-		bool busy() const
-		{ return _n == AtomicInt(-1); }
-
-		void setBusy()
-		{ _n = AtomicInt(-1); }
-
-		bool shared() const
-		{ return (_n > 1) && ( _n != AtomicInt(-1) ); }
-
-		Pt::Char* str();
-
-		Pt::Char* end();
-
-		size_type length() const;
-
-		size_type capacity() const;
-
-		void assign(const Pt::Char* s, size_type length);
-
-		void assign(size_type length, Pt::Char ch);
-
-		void append(size_type n, Pt::Char ch);
-
-		void append(const Pt::Char* str, size_type n);
-
-		void insert(size_type pos, const Pt::Char* str, size_type n);
-
-		void insert(size_type pos, size_type n, Pt::Char ch);
-
-		value_type* erase(value_type* pos, size_type n);
-
-		void replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
-
-		void replace(size_type pos, size_type n, size_type n2, Pt::Char ch);
-
-		void reserve(size_type length);
-
-	protected:
-		void allocate(size_type length);
-
-	private:
-		// the allocated size is the capacity plus 1
-		Pt::Char* _str;
-		size_type _length;
-		size_type _capacity;
-		allocator_type _allocator;
-		AtomicInt _n;
-};
-
-} // namespace Pt
-
 
 namespace std {
 
+/**
+ * @brief A Unicode string-class.
+ */
 template <>
 class PT_EXPORT basic_string< Pt::Text::Char > {
 	public:
@@ -142,10 +61,8 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 
 		basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
 
-		// untested
 		basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
 
-		// untested
 		basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
 
 		basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
@@ -221,13 +138,11 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 		// untested
 		void reserve(size_t n = 0);
 
-		// untested
 		void swap(basic_string& str);
 
 		allocator_type get_allocator() const
 		{ return _data->get_allocator(); }
 
-		// untested
 		size_type copy(Pt::Char* a, size_type n, size_type pos = 0) const;
 
 		basic_string substr(size_type pos, size_type n) const
@@ -297,33 +212,24 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 
 		iterator erase(iterator pos);
 
-		// untested
 		iterator erase(iterator first, iterator last);
 
-		// untested
 		basic_string& replace(size_type pos, size_type n, const Pt::Char* str);
 
-		// untested
 		basic_string& replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
 
-		// untested
 		basic_string& replace(size_type pos, size_type n, size_type n2, Pt::Char ch);
 
-		// untested
 		basic_string& replace(size_type pos, size_type n, const basic_string& str);
 
-		// untested
 		basic_string& replace(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2);
 
-		// untested
 		basic_string& replace(iterator i1, iterator i2, const Pt::Char* str);
-		// untested
+
 		basic_string& replace(iterator i1, iterator i2, const Pt::Char* str, size_type n);
 
-		// untested
 		basic_string& replace(iterator i1, iterator i2, size_type n, Pt::Char ch);
 
-		// untested
 		basic_string& replace(iterator i1, iterator i2, const basic_string& str);
 
 		//template<InputIterator>
@@ -349,73 +255,54 @@ class PT_EXPORT basic_string< Pt::Text::Char > {
 
 		size_type find(Pt::Char ch, size_type pos = 0) const;
 
-		// untested
 		size_type rfind(const basic_string& str, size_type pos = npos) const;
 
-		// untested
 		size_type rfind(const Pt::Char* str, size_type pos, size_type n) const;
 
-		// untested
 		size_type rfind(const Pt::Char* str, size_type pos = npos) const;
 
-		// untested
 		size_type rfind(Pt::Char ch, size_type pos = npos) const;
 
-		// untested
 		size_type find_first_of(const basic_string& str, size_type pos = 0) const
 		{ return this->find_first_of( str.data(), pos, str.size() ); }
 
-		// untested
 		size_type find_first_of(const Pt::Char* s, size_type pos, size_type n) const;
 
-		// untested
 		size_type find_first_of(const Pt::Char* str, size_type pos = 0) const
 		{ return this->find_first_of( str, pos, traits_type::length(str) ); }
 
-		// untested
 		size_type find_first_of(const Pt::Char ch, size_type pos = 0) const
 		{ return this->find(ch, pos); }
 
-		// untested
 		size_type find_last_of(const basic_string& str, size_type pos = npos) const
 		{ return this->find_last_of( str.data(), pos, str.size() ); }
 
-		// untested
 		size_type find_last_of(const Pt::Char* s, size_type pos, size_type n) const;
 
-		// untested
 		size_type find_last_of(const Pt::Char* str, size_type pos = npos) const
 		{ return this->find_last_of( str, pos, traits_type::length(str) ); }
 
-		// untested
 		size_type find_last_of(const Pt::Char ch, size_type pos = npos) const
 		{ return this->rfind(ch, pos); }
 
-		// untested
 		size_type find_first_not_of(const basic_string& str, size_type pos = 0) const
 		{ return this->find_first_not_of( str.data(), pos, str.size() ); }
 
-		// untested
 		size_type find_first_not_of(const Pt::Char* s, size_type pos, size_type n) const;
 
-		// untested
 		size_type find_first_not_of(const Pt::Char* str, size_type pos = 0) const
 		{
 			// requires_string(str);
 			return this->find_first_not_of( str, pos, traits_type::length(str) );
 		}
 
-		// untested
 		size_type find_first_not_of(const Pt::Char ch, size_type pos = 0) const;
 
-		// untested
 		size_type find_last_not_of(const basic_string& str, size_type pos = npos) const
 		{ return this->find_last_not_of( str.data(), pos, str.size() ); }
 
-		// untested
 		size_type find_last_not_of(const Pt::Char* tok, size_type pos, size_type n) const;
 
-		// untested
 		size_type find_last_not_of(const Pt::Char* str, size_type pos = npos) const
 		{
 			//requires_string(s);
@@ -488,5 +375,9 @@ namespace Pt {
 
 	using Pt::Text::String;
 } // namespace Pt
+
+
+// Include the implementation header
+#include <Pt/Text/String.tpp>
 
 #endif

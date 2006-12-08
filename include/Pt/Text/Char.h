@@ -514,6 +514,31 @@ namespace Text {
 				return *this;
 			}
 
+
+			static const Char& null()
+			{
+				static const Char c(0);
+				return c;
+			}
+
+			static const Char& replacement()
+			{
+				static const Char c(0xfffd);
+				return c;
+			}
+
+			static const Char& byteOrderMark()
+			{
+				static const Char c(0xfeff);
+				return c;
+			}
+
+			static const Char& byteOrderSwapped()
+			{
+				static const Char c(0xfffe);
+				return c;
+			}
+
 			//! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
 			//! @return $true$ if the a and b are the same character; $false$ otherwise.
 			friend bool operator==(const Char& a, const Char& b)
@@ -583,12 +608,6 @@ namespace Text {
 			//! @return The AND-combination of the numeric values of a and b.
 			friend Char operator&(const Char& a, const Char& b)
 			{ return a.value() & b.value(); }
-
-		public:
-			static const Char Null;
-			static const Char Replacement;
-			static const Char ByteOrderMark;
-			static const Char ByteOrderSwapped;
 
 		private:
 			Pt::uint32_t _value;
