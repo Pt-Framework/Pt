@@ -3,7 +3,7 @@ SubDir TOP src Pt-Gui ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gui/$(GUI:L) ;
 
-SharedLibrary Pt-Gui :  Application.cpp 
+SharedLibrary Pt-Gui :  Application.cpp
                         Pixmap.cpp
                         Widget.cpp
                         CloseEvent.cpp
@@ -26,12 +26,12 @@ SharedLibrary Pt-Gui :  Application.cpp
                        ;
 
 SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
-SharedLibrary_LinkSharedLibraries Pt-Gui : Pt-Gfx Pt-System Pt ;
+SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx ;
 SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : bin ;
 
 Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt-Gui Pt-Gfx Pt-System Pt-IO Pt ;
+Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-IO Pt-Gfx Pt-Gui ;
 Main_MakeLocate Scribble : bin ;
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;

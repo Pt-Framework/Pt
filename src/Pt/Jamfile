@@ -21,31 +21,31 @@ SharedLibrary_MakeLocate Pt : bin ;
 SharedLibrary_Install Pt ;
 
 Main ReflectableTest : ReflectableTest.cpp ;
-Main_LinkSharedLibraries ReflectableTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries ReflectableTest : Pt ;
 Main_MakeLocate ReflectableTest : bin ;
 
 Main AtomicTest : AtomicTest.cpp ;
-Main_LinkSharedLibraries AtomicTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries AtomicTest : Pt ;
 Main_MakeLocate AtomicTest : bin ;
 
 Main SignalTest : SignalTest.cpp ;
-Main_LinkSharedLibraries SignalTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
 
 Main TypesTest : TypesTest.cpp ;
-Main_LinkSharedLibraries TypesTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries TypesTest : Pt ;
 Main_MakeLocate TypesTest : bin ;
 
 Main SourceInfoTest : SourceInfoTest.cpp ;
-Main_LinkSharedLibraries SourceInfoTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries SourceInfoTest : Pt ;
 Main_MakeLocate SourceInfoTest : bin ;
 
 Main SingletonTest : SingletonTest.cpp ;
-Main_LinkSharedLibraries SingletonTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries SingletonTest : Pt ;
 Main_MakeLocate SingletonTest : bin ;
 
 Main ByteorderTest : ByteorderTest.cpp ;
-Main_LinkSharedLibraries ByteorderTest : Pt Pt-IO Pt-System ;
+Main_LinkSharedLibraries ByteorderTest : Pt ;
 Main_MakeLocate ByteorderTest : bin ;
 
 Main ExceptionTest : ExceptionTest.cpp ;

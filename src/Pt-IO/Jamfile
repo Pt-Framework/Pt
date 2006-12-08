@@ -1,11 +1,11 @@
 SubDir TOP src Pt-IO ;
 SubDirHdrs $(TOP)/include ;
 
-SharedLibrary Pt-IO : IODevice.cpp 
-                      IOError.cpp 
-                      IOHandler.cpp 
-                      IOManager.cpp 
-                      IOStream.cpp 
+SharedLibrary Pt-IO : IODevice.cpp
+                      IOError.cpp
+                      IOHandler.cpp
+                      IOManager.cpp
+                      IOStream.cpp
                       Url.cpp ;
 
 SharedLibrary_LinkSharedLibraries Pt-IO : Pt ;

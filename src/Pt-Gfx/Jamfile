@@ -21,11 +21,11 @@ SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
-Main_LinkSharedLibraries GreyscaleTest : Pt-Gfx Pt ;
+Main_LinkSharedLibraries GreyscaleTest : Pt Pt-Gfx ;
 Main_MakeLocate GreyscaleTest : bin ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
-Main_LinkSharedLibraries BlockscaleTest : Pt-Gfx Pt ;
+Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : bin ;
 
 
