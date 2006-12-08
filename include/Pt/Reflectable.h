@@ -32,7 +32,7 @@ class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2, A3,
 		{}
 
 		size_t argSize() const
-		{ return 3; }
+		{ return 5; }
 
 		const char* argName(size_t index) const
 		{
@@ -92,7 +92,7 @@ class PT_EXPORT MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
 		{}
 
 		size_t argSize() const
-		{ return 3; }
+		{ return 4; }
 
 		const char* argName(size_t index) const
 		{
