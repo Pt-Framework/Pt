@@ -1,8 +1,8 @@
 if ! $(JAMRULES_PTUNIT) {
 JAMRULES_PTUNIT = true ;
 
-
-# Rules for build and execute cppunit test
+#
+# Rules
 #
 rule PtUnitTest
 {
@@ -27,10 +27,27 @@ rule PtUnitTest
 	PtUnitTestAction $(_exe) : $(_output) ;
 }
 
-actions PtUnitTestAction bind testExe
-{ 
-	$(testExe) -f$(1:S=.cppunit)
-}
 
+#
+# Actions
+#
+if $(UNIX) 
+{
+
+	actions PtUnitTestAction bind testExe
+	{
+		$(testExe) -f$(1:S=.cppunit)
+	}
+
+}
+else
+{
+
+	actions PtUnitTestAction bind testExe
+	{ 
+		$(testExe) -f$(1:S=.cppunit)
+	}
+
+}
 
 } # JAMRULES_CPPUNIT
