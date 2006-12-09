@@ -67,30 +67,60 @@ class ExceptionTest : public Pt::Unit::TestCase
 			}
 			catch(const IllegalArgument& e) {
 				ss << "Got Pt::IllegalArgument" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const RangeError& e) {
 				ss << "Got Pt::RangeError" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const UnderflowError& e) {
 				ss << "Got Pt::UnderflowError" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const OverflowError& e) {
 				ss << "Got Pt::OverflowError" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const LogicError& e) {
 				ss << "Got Pt::LogicError" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const RuntimeError& e) {
 				ss << "Got Pt::RuntimeError" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const Exception& e) {
 				ss << "Got Pt::Exception" << endl;
+				ss << "  e.what()              = " << e.what()              << endl;
+				ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
+				ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
+				ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
 			}
 			catch(const std::exception& e) {
 				ss << "Got std::exception" << endl;
+				ss << "  e.what() = " << e.what();
 			}
 			catch(...) {
 				ss << "Got unknown exception" << endl;
+				PT_UNIT_ASSERT( 0 );
 			}
 
 			if(!ss.str().empty()) Unit::Application::message( ss.str() );
@@ -109,4 +139,3 @@ class ExceptionTest : public Pt::Unit::TestCase
 };
 
 Pt::Unit::RegisterTest<ExceptionTest> register_ExceptionTest;
-
