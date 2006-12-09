@@ -19,7 +19,6 @@
 #ifndef PT_UNIT_TEST_H
 #define PT_UNIT_TEST_H
 
-#include <Pt/Any.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/Reflectable.h>
@@ -31,59 +30,18 @@ namespace Pt {
 
 namespace Unit {
 
-    class Test;
-
-    /*class PT_EXPORT TestProtocol
-    {
-        public:
-            virtual ~TestProtocol()
-            {}
-
-            virtual void run(Test& test);
-    };*/
-
-
     class Test : public Reflectable, public NonCopyable
     {
         public:
-            Test(const std::string& name/*, TestProtocol& protocol = Test::defaultProtocol*/)
+            Test(const std::string& name)
             : Reflectable(name)
-            //, _name(name)
-            //, _protocol( &protocol )
             { }
 
             virtual ~Test()
             { }
 
-            //void setProtocol(TestProtocol& protocol)
-            //{ _protocol = &protocol; }
-
             virtual void run()
-            {
-                //_protocol->run(*this);
-            }
-
-            /*virtual void runTest( const std::string& name, const Args& args = Args() )
-            {
-                try
-                {
-                    Reflectable::call(name, args);
-                    Test::success( this->name() + "::" + name );
-                    return;
-                }
-                catch(const Assertion& assertion)
-                {
-                    Test::assertion(this->name(), assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    Test::exception(this->name(), ex);
-                }
-                catch(...)
-                {
-                    Test::error(this->name());
-                }
-            }*/
+            { }
 
             Signal<const Test&> success;
 
@@ -92,30 +50,7 @@ namespace Unit {
             Signal<const std::string&, const std::exception&> exception;
 
             Signal<const std::string&> error;
-
-        //private:
-            //std::string _name;
-
-        protected:
-            //TestProtocol* _protocol;
-
-        public:
-            //static TestProtocol defaultProtocol;
     };
-
-    //TestProtocol Test::defaultProtocol;
-
-
-
-    /*inline void TestProtocol::run(Test& test)
-    {
-        const MethodMap& methods = test.methods();
-        MethodMap::const_iterator it;
-        for(it = methods.begin(); it != methods.end(); ++it)
-        {
-            test.runTest( it->first, Args() );
-        }
-    }*/
 
 } // namespace Unit
 
