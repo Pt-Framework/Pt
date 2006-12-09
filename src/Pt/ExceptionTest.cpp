@@ -30,6 +30,24 @@ using namespace Pt;
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/Application.h"
 
+
+template <typename ExceptionT>
+class ExceptionThrower {
+	public:
+		ExceptionThrower(const string& msg)
+		: _msg(msg)
+		{}
+
+		~ExceptionThrower()
+		{}
+
+		void throwIt() const
+		{ throw ExceptionT(_msg, PT_SOURCEINFO); }
+
+	private:
+		string _msg;
+};
+
 class ExceptionTest : public Pt::Unit::TestCase
 {
 	public:
@@ -37,8 +55,56 @@ class ExceptionTest : public Pt::Unit::TestCase
 		: TestCase("ExceptionTest")
 		{}
 
+		template <typename ExceptionT>
+		void testException(const string &msg) const
+		{
+			stringstream ss;
+
+			ExceptionThrower<ExceptionT> et(msg);
+
+			try {
+				et.throwIt();
+			}
+			catch(const IllegalArgument& e) {
+				ss << "Got Pt::IllegalArgument" << endl;
+			}
+			catch(const RangeError& e) {
+				ss << "Got Pt::RangeError" << endl;
+			}
+			catch(const UnderflowError& e) {
+				ss << "Got Pt::UnderflowError" << endl;
+			}
+			catch(const OverflowError& e) {
+				ss << "Got Pt::OverflowError" << endl;
+			}
+			catch(const LogicError& e) {
+				ss << "Got Pt::LogicError" << endl;
+			}
+			catch(const RuntimeError& e) {
+				ss << "Got Pt::RuntimeError" << endl;
+			}
+			catch(const Exception& e) {
+				ss << "Got Pt::Exception" << endl;
+			}
+			catch(const std::exception& e) {
+				ss << "Got std::exception" << endl;
+			}
+			catch(...) {
+				ss << "Got unknown exception" << endl;
+			}
+
+			if(!ss.str().empty()) Unit::Application::message( ss.str() );
+		}
+
 		void test()
 		{
+			testException<Exception>("Throwing Pt::Exception");
+			testException<RuntimeError>("Throwing Pt::RuntimeError");
+			testException<LogicError>("Throwing Pt::LogicError");
+			testException<OverflowError>("Throwing Pt::OverflowError");
+			testException<UnderflowError>("Throwing Pt::UnderflowError");
+			testException<RangeError>("Throwing Pt::RangeError");
+			testException<IllegalArgument>("Throwing Pt::IllegalArgument");
 		}
 };
 
