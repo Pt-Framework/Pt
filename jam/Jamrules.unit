@@ -36,7 +36,7 @@ if $(UNIX)
 
 	actions PtUnitTestAction bind testExe
 	{
-		export LD_LIBRARY_PATH=`pwd`/bin && $(testExe) -f$(1:S=.cppunit)
+		export LD_LIBRARY_PATH=`pwd`/bin && $(testExe) -f$(1:S=.unit)
 	}
 
 }
@@ -45,7 +45,7 @@ else
 
 	actions PtUnitTestAction bind testExe
 	{
-		$(testExe) -f$(1:S=.cppunit)
+		$(testExe) -f$(1:S=.unit)
 	}
 
 }
