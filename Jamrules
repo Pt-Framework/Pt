@@ -1,4 +1,4 @@
-JamInclude Jamrules.cppunit ;
+JamInclude Jamrules.unit ;
 JamInclude Jamrules.platinum ;
 
 #C++FLAGS += [ FDefines "PT_"$(TARGET_OS:U) ] ;

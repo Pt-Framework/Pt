@@ -1,19 +1,25 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="4" >
-  <Doc0 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Gfx/Algorithm.h" >
-   <View0 line="89" Type="Source" />
+ <DocsAndViews NumberOfDocuments="6" >
+  <Doc0 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/Test.h" >
+   <View0 line="66" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Gfx/Algorithm.tpp" >
-   <View0 line="79" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestCase.h" >
+   <View0 line="58" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Gfx/BasicImage.h" >
-   <View0 line="250" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestSuite.h" >
+   <View0 line="125" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/arklinux/Platinum/src/Pt-Gfx/GreyscaleTest.cpp" >
-   <View0 line="41" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/TestFixture.h" >
+   <View0 line="35" Type="Source" />
   </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/arklinux/Platinum/include/Pt/Unit/Application.h" >
+   <View0 line="117" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/arklinux/Platinum/src/Pt/SingletonTest.cpp" >
+   <View0 line="0" Type="Source" />
+  </Doc5>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

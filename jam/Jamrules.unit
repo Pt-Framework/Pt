@@ -1,0 +1,36 @@
+if ! $(JAMRULES_PTUNIT) {
+JAMRULES_PTUNIT = true ;
+
+
+# Rules for build and execute cppunit test
+#
+rule PtUnitTest
+{
+	local _exe = $(1:S=$(SUFEXE)) ;
+	#local _output = $(1:S=.cppunit) ;
+	
+	Depends $(_output) : $(_exe) ;
+	Depends all : $(_output) ;
+
+	#Depends $(1) : $(_output) ;
+	#Depends all : $(1) ;
+	
+	Main $(1) : $(2) : $(3) ;
+	#Main_LinkLibraries $(1) : cppunit ;	
+	
+	#MakeLocate $(1:S=.cppunit) : $(3) ;
+	
+	Clean clean : $(_output) ;
+	
+	testExe on $(_exe) = $(_exe) ;
+
+	PtUnitTestAction $(_exe) : $(_output) ;
+}
+
+actions PtUnitTestAction bind testExe
+{ 
+	$(testExe) -f$(1:S=.cppunit)
+}
+
+
+} # JAMRULES_CPPUNIT
