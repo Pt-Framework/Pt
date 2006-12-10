@@ -9,8 +9,8 @@
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gui/Insets.h>
 #include <cstddef>
@@ -159,7 +159,7 @@ namespace Gui {
 			 * @param at The position of this widget inside its parent relative to the parent's top-left corner.
 			 * @param size The size of this widget. The size must be >0 for width and height.
 			 */
-			Widget(Widget& parent, const Gfx::Point& at, const Gfx::Size& size);
+			Widget(Widget& parent, const Math::Point& at, const Math::Size& size);
 
 			/**
 			 * @brief Constructs a new widget using the platform's default position and size.
@@ -192,7 +192,7 @@ namespace Gui {
 			 * @param at The position of this widget inside its parent relative to the parent's top-left corner.
 			 * @param size The size of this widget. The size must be >0 for width and height.
 			 */
-			Widget(const Gfx::Point& at, const Gfx::Size& size);
+			Widget(const Math::Point& at, const Math::Size& size);
 
 			/**
 			 * @brief Constructs a new top-level widget using the platform's default position and
@@ -312,7 +312,7 @@ namespace Gui {
 			 * @see resize()
 			 * @see size()
 			 */
-			const Gfx::Rect& rect() const;
+			const Math::Rect& rect() const;
 
 			/**
 			 * @brief Returns this widget's current size.
@@ -323,7 +323,7 @@ namespace Gui {
 			 * @see resize()
 			 * @see rect()
 			 */
-			const Gfx::Size& size() const;
+			const Math::Size& size() const;
 
 			/**
 			 * @brief Moves the widget to the given position (x, y).
@@ -392,7 +392,7 @@ namespace Gui {
 			 * @return The minimum size of this widget.
 			 * @see preferredSize()
 			 */
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			/**
 			 * @brief Calculates and returns the preferred size of this widget.
@@ -409,7 +409,7 @@ namespace Gui {
 			 * @return The preferred size of this widget.
 			 * @see minimumSize()
 			 */
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 			/**
 			 * @brief Updates the layout of this widget by doing a re-layout of all child widgets.
@@ -830,7 +830,7 @@ namespace Gui {
 
 		private:
 			Widget* _parent;
-			Gfx::Rect _rect;
+			Math::Rect _rect;
 			Gfx::ARgbColor _foregroundColor;
 			Gfx::ARgbColor _backgroundColor;
 			std::list<Widget*> _childWidgets;

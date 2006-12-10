@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,9 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gui/Button.h"
 #include <Pt/Gui/Painter.h>
 #include "Pt/Gui/CloseEvent.h"
@@ -47,7 +47,7 @@ namespace Pt {
 namespace Gui {
 
 
-Button::Button(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const std::string& text)
+Button::Button(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text)
 : Widget(parent, at, size)
 , _pressed(false)
 , _backbuffer(new Pixmap(size.width(), size.height()))
@@ -98,26 +98,26 @@ void Button::drawPressed(Painter& painter)
 	Brush brush(this->backgroundColor());
 
 	painter.setBrush(brush);
-	painter.fillRect( Rect( Point(0, 0), size() ) );
+	painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
 	// ... then draw the border around the button.
 	Pen borderPen(1, ARgbColor(16384, 16384, 16384));
 
 	painter.setPen(borderPen);
-	painter.drawLine(Point(0, 0), Point(size().width() - 1, 0));
-	painter.drawLine(Point(0, 0), Point(0, size().height() - 1));
+	painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
+	painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
 	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
 	painter.setPen(borderPen);
 
-	painter.drawLine(Point(1, 1), Point(size().width() - 2, 1));
-	painter.drawLine(Point(1, 1), Point(1, size().height() - 2));
+	painter.drawLine(Math::Point(1, 1), Math::Point(size().width() - 2, 1));
+	painter.drawLine(Math::Point(1, 1), Math::Point(1, size().height() - 2));
 
 	borderPen = Pen(1, ARgbColor(65535, 65535, 65535));
 	painter.setPen(borderPen);
 
-	painter.drawLine(Point(size().width() - 1, 0), Point(size().width() - 1, size().height()));
-	painter.drawLine(Point(0, size().height() - 1), Point(size().width(), size().height() - 1));
+	painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
+	painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
 
 	// Draw button's text.
 	Pen pen(4, this->foregroundColor());
@@ -131,7 +131,7 @@ void Button::drawPressed(Painter& painter)
 		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
 
 		// Draw the button's text.
-		painter.drawText( Point(x + 1, y + 1), _text.c_str() );
+		painter.drawText( Math::Point(x + 1, y + 1), _text.c_str() );
 	}
 }
 
@@ -142,26 +142,26 @@ void Button::drawNormal(Painter& painter, bool focused)
 	Brush brush(this->backgroundColor());
 
 	painter.setBrush(brush);
-	painter.fillRect( Rect( Point(0, 0), size() ) );
+	painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
 	// ... then draw the border around the button.
 	Pen borderPen(1, ARgbColor(65535, 65535, 65535));
 
 	painter.setPen(borderPen);
-	painter.drawLine(Point(0, 0), Point(size().width() - 1, 0));
-	painter.drawLine(Point(0, 0), Point(0, size().height() - 1));
+	painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
+	painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
 	borderPen = Pen(1, ARgbColor(16384, 16384, 16384));
 	painter.setPen(borderPen);
 
-	painter.drawLine(Point(size().width() - 1, 0), Point(size().width() - 1, size().height()));
-	painter.drawLine(Point(0, size().height() - 1), Point(size().width(), size().height() - 1));
+	painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
+	painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
 
 	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
 	painter.setPen(borderPen);
 
-	painter.drawLine(Point(size().width() - 2, 1), Point(size().width() - 2, size().height() - 1));
-	painter.drawLine(Point(1, size().height() - 2), Point(size().width() - 1, size().height() - 2));
+	painter.drawLine(Math::Point(size().width() - 2, 1), Math::Point(size().width() - 2, size().height() - 1));
+	painter.drawLine(Math::Point(1, size().height() - 2), Math::Point(size().width() - 1, size().height() - 2));
 
 	// Draw button's text.
 	Pen pen(4, this->foregroundColor());
@@ -175,23 +175,23 @@ void Button::drawNormal(Painter& painter, bool focused)
 		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
 
 		// Draw the button's text.
-		painter.drawText( Point(x, y), _text.c_str() );
+		painter.drawText( Math::Point(x, y), _text.c_str() );
 	}
 }
 
 
 
-Size Button::minimumSize()
+Math::Size Button::minimumSize()
 {
-	return Size(0, 0);
+	return Math::Size(0, 0);
 }
 
 
-Size Button::preferredSize()
+Math::Size Button::preferredSize()
 {
 	FontMetrics metrics = painter().fontMetrics(_text);
 
-	return Size(metrics.width()  + insets().left() + insets().right(),
+	return Math::Size(metrics.width()  + insets().left() + insets().right(),
 	            metrics.height() + insets().top()  + insets().bottom());
 }
 

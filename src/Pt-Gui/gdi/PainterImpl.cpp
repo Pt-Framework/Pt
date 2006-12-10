@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,7 +22,7 @@
 
 #include "Pt/Types.h"
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Gfx/XRgb8888Color.h"
 #include "win32.h"
@@ -361,7 +361,7 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Gfx::Point& to)
+void PainterImpl::drawPixel(const Math::Point& to)
 {
 	ensureActivePainter();
 
@@ -375,7 +375,7 @@ void PainterImpl::drawPixel(const Gfx::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
+void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
 	ensureActivePainter();
 
@@ -393,7 +393,7 @@ void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 }
 
 
-void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
+void PainterImpl::drawText(const Math::Point& to, const std::string& text)
 {
 	ensureActivePainter();
 
@@ -403,7 +403,7 @@ void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
 }
 
 
-void PainterImpl::fillRect(const Gfx::Rect& rect)
+void PainterImpl::fillRect(const Math::Rect& rect)
 {
 	ensureActivePainter();
 
@@ -415,7 +415,7 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawRect(const Gfx::Rect& rect)
+void PainterImpl::drawRect(const Math::Rect& rect)
 {
 	ensureActivePainter();
 
@@ -435,7 +435,7 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	ensureActivePainter();
 
@@ -454,7 +454,7 @@ void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 }
 
 
-void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	ensureActivePainter();
 
@@ -473,7 +473,7 @@ void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 }
 
 
-void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount) const
+void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount) const
 {
 	ensureActivePainter();
 
@@ -492,7 +492,7 @@ void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount
 }
 
 
-void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount) const
+void PainterImpl::fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const
 {
 	ensureActivePainter();
 
@@ -515,7 +515,7 @@ void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCo
 }
 
 
-void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap, const Gfx::Rect& pixmapRect)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap, const Math::Rect& pixmapRect)
 {
 	ensureActivePainter();
 
@@ -534,7 +534,7 @@ void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap, const Gfx::Re
 	pixmap.impl().endPaint();
 }
 
-void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap)
 {
 	ensureActivePainter();
 
@@ -554,7 +554,7 @@ void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pixmap)
 }
 
 
-void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 {
 	ensureActivePainter();
 
@@ -562,7 +562,7 @@ void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
 }
 
 
-void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect)
+void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect)
 {
 	ensureActivePainter();
 

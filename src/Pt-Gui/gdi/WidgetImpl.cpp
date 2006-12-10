@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,7 +34,7 @@ namespace Pt {
 
 namespace Gui {
 
-WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
+WidgetImpl::WidgetImpl(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _widget(widget)
 , _painter(0)
 , _deviceContextUsageCount(0)
@@ -48,11 +48,11 @@ WidgetImpl::WidgetImpl(Widget& widget, Widget* parent)
 , _painter(0)
 , _deviceContextUsageCount(0)
 {
-	init(widget, parent, Gfx::Point(CW_USEDEFAULT, CW_USEDEFAULT), Gfx::Size(CW_USEDEFAULT, CW_USEDEFAULT));
+	init(widget, parent, Math::Point(CW_USEDEFAULT, CW_USEDEFAULT), Math::Size(CW_USEDEFAULT, CW_USEDEFAULT));
 }
 
 
-void WidgetImpl::init(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
+void WidgetImpl::init(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size)
 {
 	basic_string<TCHAR> windowClassName;
 	HWND                parentWindowHandle;

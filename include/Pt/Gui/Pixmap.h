@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,7 +21,7 @@
 #define Ptv_Gui_Pixmap_h
 
 #include <Pt/Api.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Math/Size.h>
 #include <cstddef>
 
 
@@ -87,7 +87,7 @@ namespace Gui {
 			 * @brief Returns the size of this pixmap.
 			 * @return The size of this pixmap.
 			 */
-			const Gfx::Size& size() const;
+			const Math::Size& size() const;
 
 			/**
 			 * @brief Returns a painter for this pixmap to draw to its surface.

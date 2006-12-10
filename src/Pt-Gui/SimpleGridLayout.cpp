@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,8 +19,8 @@
 
 #include "Pt/Gui/SimpleGridLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
 
 #include <list>
 
@@ -138,7 +138,7 @@ void SimpleGridLayout::update()
 }
 
 
-Gfx::Size SimpleGridLayout::minimumSize()
+Math::Size SimpleGridLayout::minimumSize()
 {
 	const std::list<Widget*>& children = this->widget().childWidgets();
 
@@ -157,12 +157,12 @@ Gfx::Size SimpleGridLayout::minimumSize()
 		childrenIter++;
 	}
 
-	return Gfx::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
+	return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
 	                 _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
 }
 
 
-Gfx::Size SimpleGridLayout::preferredSize()
+Math::Size SimpleGridLayout::preferredSize()
 {
 	const std::list<Widget*>& children = this->widget().childWidgets();
 
@@ -181,7 +181,7 @@ Gfx::Size SimpleGridLayout::preferredSize()
 		childrenIter++;
 	}
 
-	return Gfx::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
+	return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
 	                 _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
 }
 

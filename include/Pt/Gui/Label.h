@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -61,7 +61,7 @@ namespace Gui {
 			 * @param text The (optional) text of this label.
 			 * @see setText(const std::string)
 			 */
-			Label(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const std::string& text = std::string());
+			Label(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text = std::string());
 
 			//! Empty destructor for the label widget.
 			~Label();
@@ -91,10 +91,10 @@ namespace Gui {
 			virtual void update();
 
 			// inherit doc
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			// inherit doc
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 		public:
 			/**

@@ -29,7 +29,7 @@ namespace Pt {
 		// IMPL: SubImage<ColorSpaceT>
 		//
 		template <typename ColorSpaceT_>
-		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Rect& area)
+		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Math::Rect& area)
 		: _image(image), _area(area)
 		{
 			// Validate the area

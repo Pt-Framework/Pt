@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace Gui {
 
-WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size)
+WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _parent(parent)
 , _painter(0)
 {

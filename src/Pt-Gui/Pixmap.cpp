@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -45,7 +45,7 @@ Pixmap::~Pixmap()
 }
 
 
-const Gfx::Size& Pixmap::size() const
+const Math::Size& Pixmap::size() const
 {
 	return _impl->size();
 }

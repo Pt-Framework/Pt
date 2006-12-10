@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dï¿½rner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/ARgbImage.h>
@@ -45,12 +45,12 @@ using namespace Pt::Gui;
 class ScribbleWidget : public Gui::Widget
 {
 	public:
-		ScribbleWidget(const Point& at, const Size& size)
+		ScribbleWidget(const Math::Point& at, const Math::Size& size)
 		: Widget( at, size ),
-		  _redButton( *this, Point(0,0), Size(50, 30) ),
-		  _greenButton( *this, Point(0,30), Size(50, 30) ),
-		  _blueButton( *this, Point(0,60), Size(50, 30) ),
-		  _clearButton( *this, Point(0,90), Size(50, 30) ),
+		  _redButton(   *this, Math::Point(0,0),  Math::Size(50, 30) ),
+		  _greenButton( *this, Math::Point(0,30), Math::Size(50, 30) ),
+		  _blueButton(  *this, Math::Point(0,60), Math::Size(50, 30) ),
+		  _clearButton( *this, Math::Point(0,90), Math::Size(50, 30) ),
 		  _pixmap( new Pixmap( size.width(), size.height() ) ),
 		  _lastX(0), _lastY(0),
 		  _brush( Gfx::Brush::SolidFill, Gfx::ARgbColor(0xffff,0xffff,0xffff) )
@@ -87,8 +87,8 @@ class ScribbleWidget : public Gui::Widget
 
 		void onClear()
 		{
-			_pixmap->getPainter().fillRect( Rect( Point(0, 0), _pixmap->size() ) );
-			this->getPainter().fillRect( Rect( Point(0, 0), _pixmap->size() ) );
+			_pixmap->getPainter().fillRect( Math::Rect( Math::Point(0, 0), _pixmap->size() ) );
+			this->getPainter().fillRect( Math::Rect( Math::Point(0, 0), _pixmap->size() ) );
 		}
 
 		void setPenColor( const ARgbColor& color)
@@ -131,8 +131,8 @@ class ScribbleWidget : public Gui::Widget
 		{
 			if( event.modifiers() & MouseMoveEvent::LeftButtonDown )
 			{
-				this->getPainter().drawLine( Point(_lastX, _lastY), Point(event.x(), event.y()) );
-				_pixmap->getPainter().drawLine( Point(_lastX, _lastY), Point(event.x(), event.y()) );
+				this->getPainter().drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
+				_pixmap->getPainter().drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
 			}
 
 			_lastX = event.x();
@@ -144,8 +144,8 @@ class ScribbleWidget : public Gui::Widget
 			auto_ptr<Pixmap> pm( new Pixmap( event.width(), event.height() ) );
 			pm->getPainter().setBrush(_brush);
 			pm->getPainter().setPen(_pen);
-			pm->getPainter().fillRect( Rect( Point(0, 0), pm->size() ) );
-			pm->getPainter().drawPixmap(Point(0, 0), *_pixmap, Rect( Point(0, 0), _pixmap->size()) );
+			pm->getPainter().fillRect( Math::Rect( Math::Point(0, 0), pm->size() ) );
+			pm->getPainter().drawPixmap(Math::Point(0, 0), *_pixmap, Math::Rect( Math::Point(0, 0), _pixmap->size()) );
 			_pixmap = pm;
 		}
 
@@ -186,7 +186,7 @@ int main()
 	{
 		Gui::Application app;
 
-		ScribbleWidget widget( Point(100, 100), Size(500, 500) );
+		ScribbleWidget widget( Math::Point(100, 100), Math::Size(500, 500) );
 		connect( widget.closed, app, &Gui::Application::exit );
 		widget.show();
 

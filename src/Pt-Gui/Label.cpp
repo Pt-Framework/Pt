@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,9 +20,9 @@
 #include "Pt/Gfx/Brush.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gui/Label.h"
 #include "Pt/Gui/MouseEvent.h"
 #include "Pt/Gui/PaintEvent.h"
@@ -41,7 +41,7 @@ namespace Pt {
 namespace Gui {
 
 
-Label::Label(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const std::string& text)
+Label::Label(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text)
 : Widget(parent, at, size)
 , _backbuffer(new Pixmap(size.width(), size.height()))
 , _text(text)
@@ -75,32 +75,32 @@ void Label::update()
 	Brush brush(backgroundColor());
 
 	widgetPainter.setBrush(brush);
-	widgetPainter.fillRect(Rect(Point(0, 0), size()));
+	widgetPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
 
 	backbufferPainter.setBrush(brush);
-	backbufferPainter.fillRect(Rect(Point(0, 0), size()));
+	backbufferPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
 
 	if( !_text.empty() ) {
 		Pen pen(1, foregroundColor());
 		widgetPainter.setPen(pen);
 		backbufferPainter.setPen(pen);
 
-		widgetPainter.drawText( Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
-		backbufferPainter.drawText( Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+		widgetPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+		backbufferPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
 	}
 }
 
 
-Size Label::minimumSize()
+Math::Size Label::minimumSize()
 {
-	return Size(0, 0);
+	return Math::Size(0, 0);
 }
 
 
-Size Label::preferredSize()
+Math::Size Label::preferredSize()
 {
 	FontMetrics metrics = painter().fontMetrics(_text);
-	return Size(metrics.width(), metrics.height());
+	return Math::Size(metrics.width(), metrics.height());
 }
 
 

@@ -119,14 +119,14 @@ namespace Gui {
 
 			virtual void update();
 
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 		protected:
 			VerticalLayout(Widget& widget, Mode mode, size_t gap);
 
-			Gfx::Size calculateSize(Widget& parent, bool forPreferredSize);
+			Math::Size calculateSize(Widget& parent, bool forPreferredSize);
 
 		private:
 			Mode _mode;

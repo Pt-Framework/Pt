@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -57,7 +57,7 @@ namespace Gui {
 			 * @param at The position of this panel inside its parent relative to the parent's top-left border.
 			 * @param size The size of this lanel. The size must be >0 for width and height.
 			 */
-			Panel(Widget& parent, const Gfx::Point& at, const Gfx::Size& size);
+			Panel(Widget& parent, const Math::Point& at, const Math::Size& size);
 
 			//! @brief Empty destructor.
 			~Panel();
@@ -72,12 +72,12 @@ namespace Gui {
 			// inherit doc
 			// As this is only a container with no "own size" it just returns the minimum
 			// size of the currently set layout manager.
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			// inherit doc
 			// As this is only a container with no "own size" it just returns the preferred
 			// size of the currently set layout manager.
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 		protected:
 			//! @brief Does a repaint of the widget.

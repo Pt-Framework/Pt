@@ -62,7 +62,7 @@ namespace Gui {
 			 * @param text The (optional) text of this button.
 			 * @see setText(const std::string)
 			 */
-			Button(Widget& parent, const Gfx::Point& at, const Gfx::Size& size, const std::string& text = std::string());
+			Button(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text = std::string());
 
 			//! @brief Emptry destructor for the button widget.
 			~Button();
@@ -92,10 +92,10 @@ namespace Gui {
 			virtual void update();
 
 			// Inherit doc
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			// Inherit doc
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 		public:
 			/**

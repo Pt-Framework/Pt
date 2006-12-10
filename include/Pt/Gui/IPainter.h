@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -63,15 +63,15 @@ namespace Gui {
 			 * other reasons, the pixmap is clipped (but not stretched or shrunk).
 			 *
 			 * To not only draw a sub-segment of the image but all of it use the method
-			 * drawPixmap(const Gfx::Point& to, Pixmap& pixmap) instead.
+			 * drawPixmap(const Math::Point& to, Pixmap& pixmap) instead.
 			 *
 			 * @param to The pixmap-segment is drawn at this location on the painter's area.
 			 * @param from A sub-segment of this pixmap is drawn.
 			 * @param fromRect Specifies the rectangular segment/section of the pixmap that
 			 * will be drawn.
-			 * @see drawPixmap(const Gfx::Point& to, Pixmap& pixmap)
+			 * @see drawPixmap(const Math::Point& to, Pixmap& pixmap)
 			 */
-			virtual void drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Rect& fromRect) = 0;
+			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect) = 0;
 
 			/**
 			 * @brief Draws a pixmap at the specified point on the painter's drawing area.
@@ -89,7 +89,7 @@ namespace Gui {
 			 * @param to The pixmap is drawn at this location on the painter's area.
 			 * @param pixmap This pixmap is drawn.
 			 */
-			virtual void drawPixmap(const Gfx::Point& to, Pixmap& pixmap) = 0;
+			virtual void drawPixmap(const Math::Point& to, Pixmap& pixmap) = 0;
 	};
 
 } // namespace Gui

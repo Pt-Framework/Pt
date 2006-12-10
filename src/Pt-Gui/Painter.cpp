@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,7 +20,7 @@
 #include "PainterImpl.h"
 
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
 
@@ -105,91 +105,91 @@ const std::list<std::string>& Painter::fontFamilyNames()
 }
 
 
-void Painter::drawPixel(const Point& to)
+void Painter::drawPixel(const Math::Point& to)
 {
 	this->begin();
 	_painterImpl->drawPixel(to);
 }
 
 
-void Painter::drawLine(const Point& from, const Point& to)
+void Painter::drawLine(const Math::Point& from, const Math::Point& to)
 {
 	this->begin();
 	_painterImpl->drawLine(from, to);
 }
 
 
-void Painter::drawText(const Point& to, const std::string& text)
+void Painter::drawText(const Math::Point& to, const std::string& text)
 {
 	this->begin();
 	_painterImpl->drawText(to, text);
 }
 
 
-void Painter::drawRect(const Rect& rect)
+void Painter::drawRect(const Math::Rect& rect)
 {
 	this->begin();
 	_painterImpl->drawRect(rect);
 }
 
 
-void Painter::fillRect(const Rect& rect)
+void Painter::fillRect(const Math::Rect& rect)
 {
 	this->begin();
 	_painterImpl->fillRect(rect);
 }
 
 
-void Painter::drawEllipse(const Point& topLeft, const Size& size)
+void Painter::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	this->begin();
 	_painterImpl->drawEllipse(topLeft, size);
 }
 
 
-void Painter::fillEllipse(const Point& topLeft, const Size& size)
+void Painter::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	this->begin();
 	_painterImpl->fillEllipse(topLeft, size);
 }
 
 
-void Painter::drawPolyline(const Point* points, const size_t pointCount)
+void Painter::drawPolyline(const Math::Point* points, const size_t pointCount)
 {
 	this->begin();
 	_painterImpl->drawPolyline(points, pointCount);
 }
 
 
-void Painter::fillPolygon(const Point* points, const size_t pointCount)
+void Painter::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
 	this->begin();
 	_painterImpl->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawImage(const Point& to, const ARgbImage& image)
+void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 {
 	this->begin();
 	_painterImpl->drawImage(to, image);
 }
 
 
-void Painter::drawImage(const Point& to, const ARgbImage& image, const Rect& imageRect)
+void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Math::Rect& imageRect)
 {
 	this->begin();
 	_painterImpl->drawImage(to, image, imageRect);
 }
 
 
-void Painter::drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Rect& fromRect)
+void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect)
 {
 	this->begin();
 	_painterImpl->drawPixmap(to, from, fromRect);
 }
 
 
-void Painter::drawPixmap(const Gfx::Point& to, Pixmap& pm)
+void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
 	this->begin();
 	_painterImpl->drawPixmap(to, pm);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/Gui/NullLayout.h"
-#include "Pt/Gfx/Size.h"
+#include "Pt/Math/Size.h"
 
 #include <list>
 
@@ -45,15 +45,15 @@ void NullLayout::remove(Widget& widget)
 }
 
 
-Gfx::Size NullLayout::minimumSize()
+Math::Size NullLayout::minimumSize()
 {
-	return Gfx::Size(0, 0);
+	return Math::Size(0, 0);
 }
 
 
-Gfx::Size NullLayout::preferredSize()
+Math::Size NullLayout::preferredSize()
 {
-	return Gfx::Size(0, 0);
+	return Math::Size(0, 0);
 }
 
 

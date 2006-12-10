@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -74,31 +74,31 @@ namespace Gui {
 
 			int depth() const;
 
-			void drawPixel(const Gfx::Point& to);
+			void drawPixel(const Math::Point& to);
 
-			void drawLine(const Gfx::Point& from, const Gfx::Point& to);
+			void drawLine(const Math::Point& from, const Math::Point& to);
 
-			void drawText(const Gfx::Point& to, const std::string& text);
+			void drawText(const Math::Point& to, const std::string& text);
 
-			void drawRect(const Gfx::Rect& rectangle);
+			void drawRect(const Math::Rect& rectangle);
 
-			void fillRect(const Gfx::Rect& rectangle);
+			void fillRect(const Math::Rect& rectangle);
 
-			void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+			void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-			void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+			void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-			void drawPolyline(const Gfx::Point* points, const size_t pointCount) const;
+			void drawPolyline(const Math::Point* points, const size_t pointCount) const;
 
-			void fillPolygon(const Gfx::Point* points, const size_t pointCount) const;
+			void fillPolygon(const Math::Point* points, const size_t pointCount) const;
 
-			void drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Rect& pmRect);
+			void drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect& pmRect);
 
-			void drawPixmap(const Gfx::Point& to, Pixmap& pm);
+			void drawPixmap(const Math::Point& to, Pixmap& pm);
 
-			void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
+			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect);
+			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect);
 
 			template <typename Iterator>
 			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)

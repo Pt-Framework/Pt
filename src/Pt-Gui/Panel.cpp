@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,9 +19,9 @@
 
 #include "Pt/Gfx/Brush.h"
 #include "Pt/Gui/Panel.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gui/Painter.h"
 #include "Pt/Gui/PaintEvent.h"
 #include "Pt/Gui/ResizeEvent.h"
@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gui {
 
 
-Panel::Panel(Widget& parent, const Gfx::Point& at, const Gfx::Size& size)
+Panel::Panel(Widget& parent, const Math::Point& at, const Math::Size& size)
 : Widget(parent, at, size)
 {
 }
@@ -53,17 +53,17 @@ void Panel::update()
 
 	Painter p = painter();
 	p.setBrush(brush);
-	p.fillRect(Rect(Point(0, 0), size()));
+	p.fillRect(Math::Rect(Math::Point(0, 0), size()));
 }
 
 
-Size Panel::minimumSize()
+Math::Size Panel::minimumSize()
 {
 	return layout().minimumSize();
 }
 
 
-Size Panel::preferredSize()
+Math::Size Panel::preferredSize()
 {
 	return layout().preferredSize();
 }

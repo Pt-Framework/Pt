@@ -101,11 +101,11 @@ namespace Pt {
 		template<typename In, typename Out>
 		void blockScale(In from, In fromEnd, Out to, Out toEnd)
 		{
-			const Size fromSize = fromEnd - from;
+			const Math::Size fromSize = fromEnd - from;
 			const size_t fromWidth = fromSize.width();
 			const size_t fromHeight = fromSize.height();
 
-			const Size toSize = toEnd - to;
+			const Math::Size toSize = toEnd - to;
 			const size_t toWidth = toSize.width();
 			const size_t toHeight = toSize.height();
 

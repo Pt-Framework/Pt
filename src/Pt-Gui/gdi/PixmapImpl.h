@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,7 +21,7 @@
 #define Pt_Gui_Gdi_PixmapImpl_h
 
 #include <Pt/Api.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Math/Size.h>
 #include <Pt/Gui/Painter.h>
 #include "Drawable.h"
 #include "PixmapPainter.h"
@@ -41,7 +41,7 @@ namespace Gui {
 
 			virtual ~PixmapImpl();
 
-			const Gfx::Size& size() const
+			const Math::Size& size() const
 			{ return _size; }
 
 			Painter painter();
@@ -61,7 +61,7 @@ namespace Gui {
 			void setupDeviceContext();
 
 		private:
-			Gfx::Size      _size;
+			Math::Size      _size;
 			HDC            _deviceContext;
 			HBITMAP        _bitmapHandle;
 			PixmapPainter* _painter;

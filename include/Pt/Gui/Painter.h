@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -79,43 +79,43 @@ namespace Gui {
 			virtual const std::list<std::string>& fontFamilyNames();
 			
 			// inerhit doc
-			virtual void drawPixel(const Gfx::Point& to);
+			virtual void drawPixel(const Math::Point& to);
 
 			// inerhit doc
-			virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
+			virtual void drawLine(const Math::Point& from, const Math::Point& to);
 
 			// inerhit doc
-			virtual void drawText(const Gfx::Point& to, const std::string& text);
+			virtual void drawText(const Math::Point& to, const std::string& text);
 
 			// inerhit doc
-			virtual void drawRect(const Gfx::Rect& Rect);
+			virtual void drawRect(const Math::Rect& rect);
 
 			// inerhit doc
-			virtual void fillRect(const Gfx::Rect& rect);
+			virtual void fillRect(const Math::Rect& rect);
 
 			// inerhit doc
-			virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+			virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
 			// inerhit doc
-			virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+			virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
 			// inerhit doc
-			virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
+			virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
 
 			// inerhit doc
-			virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
+			virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
 
 			// inerhit doc
-			virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image);
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
 			// inerhit doc
-			virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect);
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect);
 
 			// inerhit doc
-			virtual void drawPixmap(const Gfx::Point& to, Pixmap& from, const Gfx::Rect& fromRect);
+			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect);
 
 			// inerhit doc
-			virtual void drawPixmap(const Gfx::Point& to, Pixmap& pm);
+			virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
 
 		protected:
 			/**

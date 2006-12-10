@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,8 +21,8 @@
 #define Pt_Gui_WidgetImpl_h
 
 #include <Pt/Api.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
 #include <Pt/Gui/Painter.h>
 #include "WidgetPainter.h"
 #include "Drawable.h"
@@ -45,7 +45,7 @@ namespace Gui {
 	class PT_API WidgetImpl : public Drawable
 	{
 		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size);
+			WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size);
 
 			WidgetImpl(Widget& widget, Widget* parent);
 
@@ -78,7 +78,7 @@ namespace Gui {
 			virtual bool isPainting() const;
 
 		private:
-			void init(Widget& widget, Widget* parent, const Gfx::Point& at, const Gfx::Size& size);
+			void init(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size);
 
 		private:
 			HWND           _hwnd;

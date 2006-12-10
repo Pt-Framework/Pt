@@ -7,7 +7,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Math/Size.h>
 
 #include <cstddef>
 #include <string>
@@ -136,7 +136,7 @@ namespace Gfx {
 			 * @param to The pixel is drawn at this point.
 			 * @see setPen()
 			 */
-			virtual void drawPixel(const Gfx::Point& to) = 0;
+			virtual void drawPixel(const Math::Point& to) = 0;
 
 			/**
 			 * @brief Draws a line between the two given points, excluding the last point.
@@ -151,7 +151,7 @@ namespace Gfx {
 			 * @param to The line is drawn to this point (exclusively), starting from 'from'.
 			 * @see setPen()
 			 */
-			virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to) = 0;
+			virtual void drawLine(const Math::Point& from, const Math::Point& to) = 0;
 
 			/**
 			 * @brief Draws a text at the specified position.
@@ -164,7 +164,7 @@ namespace Gfx {
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText(const Gfx::Point& to, const std::string& text) = 0;
+			virtual void drawText(const Math::Point& to, const std::string& text) = 0;
 
 			/**
 			 * @brief Draws a rectangle outline.
@@ -175,7 +175,7 @@ namespace Gfx {
 			 * @param rect The rectangle is drawn at this rectangular location.
 			 * @see setPen()
 			 */
-			virtual void drawRect(const Gfx::Rect& rect) = 0;
+			virtual void drawRect(const Math::Rect& rect) = 0;
 
 			/**
 			 * @brief Draws a filled rectangle (without an outline)
@@ -186,7 +186,7 @@ namespace Gfx {
 			 * @param rect The rectangle is drawn at this rectangular location.
 			 * @see setBrush()
 			 */
-			virtual void fillRect(const Gfx::Rect& rect) = 0;
+			virtual void fillRect(const Math::Rect& rect) = 0;
 
 			/**
 			 * @brief Draws a circle outline with the given diameter at the specified position.
@@ -204,9 +204,9 @@ namespace Gfx {
 			 * @param diameter The diameter of the circle.
 			 * @see setPen()
 			 */
-			inline void drawCircle(const Gfx::Point& topLeft, size_t diameter)
+			inline void drawCircle(const Math::Point& topLeft, size_t diameter)
 			{
-				drawEllipse(topLeft, Size(diameter, diameter));
+				drawEllipse(topLeft, Math::Size(diameter, diameter));
 			}
 
 			/**
@@ -225,9 +225,9 @@ namespace Gfx {
 			 * @param diameter The diameter of the circle.
 			 * @see setBrush()
 			 */
-			inline void fillCircle(const Gfx::Point& topLeft, size_t diameter)
+			inline void fillCircle(const Math::Point& topLeft, size_t diameter)
 			{
-				fillEllipse(topLeft, Size(diameter, diameter));
+				fillEllipse(topLeft, Math::Size(diameter, diameter));
 			}
 
 			/**
@@ -243,7 +243,7 @@ namespace Gfx {
 			 * @param size The horizontal and vertical size of the ellipse.
 			 * @see setPen()
 			 */
-			virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size) = 0;
+			virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size) = 0;
 
 			/**
 			 * @brief Draws a filled ellipse with the given size at the specified position.
@@ -258,7 +258,7 @@ namespace Gfx {
 			 * @param size The horizontal and vertical size of the ellipse.
 			 * @see setBrush()
 			 */
-			virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size) = 0;
+			virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size) = 0;
 
 			/**
 			 * @brief Draws a polyline of multiple line segments connected by points.
@@ -277,7 +277,7 @@ namespace Gfx {
 			 * @param Specifies the number of points of the points array that should be
 			 * used to draw the polyline.
 			 */
-			virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount) = 0;
+			virtual void drawPolyline(const Math::Point* points, const size_t pointCount) = 0;
 
 			/**
 			 * @brief Draws/Fills a polygon by connecting the given points to a flat shape.
@@ -295,7 +295,7 @@ namespace Gfx {
 			 * @param Specifies the number of points of the points array that should be
 			 * used to draw the polygon.
 			 */
-			virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount) = 0;
+			virtual void fillPolygon(const Math::Point* points, const size_t pointCount) = 0;
 
 			/**
 			 * @brief Draws an image at the given position.
@@ -311,7 +311,7 @@ namespace Gfx {
 			 * @param to The x|y-position to where the image should be drawn on the painter's area.
 			 * @param image The image to be drawn.
 			 */
-			virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image) = 0;
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image) = 0;
 
 			/**
 			 * @brief Draws a rectangle segment of an image at the given position.
@@ -337,7 +337,7 @@ namespace Gfx {
 			 * @param imageRect Specifies the position and size of the segment that is to be cut out
 			 * of the image to be drawn at the specified position.
 			 */
-			virtual void drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect) = 0;
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect) = 0;
 	};
 
 } // namespace Gfx

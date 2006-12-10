@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,7 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Rect.h>
 #include <Pt/Gui/Event.h>
 
 #include <cstddef>
@@ -72,7 +72,7 @@ namespace Gui {
 			 * should be repainted.
 			 * @param rect The rectangular area of the widget which needs to be painted.
 			 */
-			PaintEvent(Widget& widget, Gfx::Rect rect);
+			PaintEvent(Widget& widget, Math::Rect rect);
 
 			/**
 			 * @brief Construct a new paint event with the given point and size as dirty area.
@@ -88,7 +88,7 @@ namespace Gui {
 			 * @param point The top-left corner of the area which is supposed to be repainted.
 			 * @param size The width and height of the area which is supposed to be repainted.
 			 */
-			PaintEvent(Widget& widget, Gfx::Point point, Gfx::Size size);
+			PaintEvent(Widget& widget, Math::Point point, Math::Size size);
 
 			//! @brief Empty destructor.
 			virtual ~PaintEvent();
@@ -105,7 +105,7 @@ namespace Gui {
 			 *
 			 * @return Returns the dirty area.
 			 */
-			const Gfx::Rect& rect() const
+			const Math::Rect& rect() const
 			{ return _rect; }
 
 			/**
@@ -116,7 +116,7 @@ namespace Gui {
 			 *
 			 * @return Returns the top-left corner of the dirty area.
 			 */
-			const Gfx::Point& origin() const
+			const Math::Point& origin() const
 			{ return _rect.topLeft(); }
 
 			/**
@@ -127,7 +127,7 @@ namespace Gui {
 			virtual const std::type_info& typeInfo() const;
 
 		private:
-			Gfx::Rect _rect;
+			Math::Rect _rect;
 	};
 
 } // namespace gui

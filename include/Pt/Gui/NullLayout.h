@@ -40,11 +40,11 @@ namespace Gui {
 
 			//! @brief Always returns a size of (0, 0).
 			//! @return Returns a size of (0, 0).
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			//! @brief Always returns a size of (0, 0).
 			//! @return Returns a size of (0, 0).
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 			/**
 			 * @brief Creates the NullLayout for the given widget.

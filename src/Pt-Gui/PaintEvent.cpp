@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,12 +32,12 @@ namespace Gui {
 
 const type_info& PaintEvent::TYPE_INFO = typeid(PaintEvent);
 
-PaintEvent::PaintEvent(Widget& widget, Gfx::Rect rect)
+PaintEvent::PaintEvent(Widget& widget, Math::Rect rect)
 : Event(widget), _rect( rect )
 {
 }
 
-PaintEvent::PaintEvent(Widget& widget, Gfx::Point point, Gfx::Size size)
+PaintEvent::PaintEvent(Widget& widget, Math::Point point, Math::Size size)
 : Event(widget), _rect( point, size )
 {
 }

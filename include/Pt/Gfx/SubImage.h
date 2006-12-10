@@ -30,7 +30,7 @@ namespace Gfx {
 
 			public:
 				//! Construct a subimage using the given image and area
-				SubImage(ImageT& image, const Rect& area);
+				SubImage(ImageT& image, const Math::Rect& area);
 
 				//! We can fill the sub image using a color
 				SubImage& operator=(const ColorT& color);
@@ -50,7 +50,7 @@ namespace Gfx {
 				{ return _image.empty(); }
 
 				//! Return the area of the subimage (in the term of the main image)
-				inline const Rect& rect() const
+				inline const Math::Rect& rect() const
 				{ return _area; }
 
 				//! Return the width of the subimage
@@ -129,7 +129,7 @@ namespace Gfx {
 
 			protected:
 				ImageT& _image;
-				Rect    _area;
+				Math::Rect    _area;
 
 				// Helper fucntions
 				template <typename SrcColorSpaceT>

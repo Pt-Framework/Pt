@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -48,7 +48,7 @@ namespace Pt {
 namespace Gui {
 
 
-Widget::Widget(Widget& parent, const Gfx::Point& at, const Gfx::Size& size)
+Widget::Widget(Widget& parent, const Math::Point& at, const Math::Size& size)
 : _parent(&parent)
 , _rect(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
@@ -60,7 +60,7 @@ Widget::Widget(Widget& parent, const Gfx::Point& at, const Gfx::Size& size)
 }
 
 
-Widget::Widget(const Gfx::Point& at, const Gfx::Size& size)
+Widget::Widget(const Math::Point& at, const Math::Size& size)
 : _parent(0)
 , _rect(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
@@ -73,7 +73,7 @@ Widget::Widget(const Gfx::Point& at, const Gfx::Size& size)
 
 Widget::Widget(Widget& parent)
 : _parent(&parent)
-, _rect(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _rect(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -85,7 +85,7 @@ Widget::Widget(Widget& parent)
 
 Widget::Widget()
 : _parent(0)
-, _rect(Gfx::Point(0, 0), Gfx::Size(0, 0))
+, _rect(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -162,12 +162,12 @@ const Insets& Widget::insets() const
 }
 
 
-const Gfx::Rect& Widget::rect() const
+const Math::Rect& Widget::rect() const
 {
 	return _rect;
 }
 
-const Gfx::Size& Widget::size() const
+const Math::Size& Widget::size() const
 {
 	return rect().size();
 }
@@ -215,13 +215,13 @@ void Widget::hide()
 }
 
 
-Size Widget::minimumSize()
+Math::Size Widget::minimumSize()
 {
-	return Size(0, 0); // TODO
+	return Math::Size(0, 0); // TODO
 }
 
 
-Size Widget::preferredSize()
+Math::Size Widget::preferredSize()
 {
 	// Non-top-level widgets that are not containers should override this method to provide a specific preferred size.
 	// Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
@@ -230,7 +230,7 @@ Size Widget::preferredSize()
 	// NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
 	// no layout manager set. Is this good?
 	
-	Size preferredSize = layout().preferredSize();
+	Math::Size preferredSize = layout().preferredSize();
 	if (preferredSize.width() == 0 && preferredSize.height() == 0) {
 		// No layout manager given. Use the current size as preferred size.
 		return size();

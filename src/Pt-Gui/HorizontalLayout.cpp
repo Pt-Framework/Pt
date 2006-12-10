@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,8 +19,8 @@
 
 #include "Pt/Gui/HorizontalLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
   
 #include <list>
 
@@ -152,19 +152,19 @@ void HorizontalLayout::update()
 	}
 }
 
-Size HorizontalLayout::minimumSize()
+Math::Size HorizontalLayout::minimumSize()
 {
 	return calculateSize(this->widget(), false);
 }
 
 
-Size HorizontalLayout::preferredSize()
+Math::Size HorizontalLayout::preferredSize()
 {
 	return calculateSize(this->widget(), true);
 }
 
 
-Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
+Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 {
 	if (_widthBehaviour == VaryingWidth) {
 		const std::list<Widget*>& children = parent.childWidgets();
@@ -191,7 +191,7 @@ Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 
 		allWidth += (children.size() - 1) * _gap;
 
-		return Size(allWidth, maxHeight);
+		return Math::Size(allWidth, maxHeight);
 
 	} else {  // _widthBehaviour == UniformWidth
 
@@ -217,7 +217,7 @@ Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 			childrenIter++;
 		}
 
-		return Size(maxWidth * children.size() + _gap * (children.size() - 1), maxHeight);
+		return Math::Size(maxWidth * children.size() + _gap * (children.size() - 1), maxHeight);
 	}
 }
 

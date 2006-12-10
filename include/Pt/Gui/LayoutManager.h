@@ -7,6 +7,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Connectable.h>
+#include <Pt/Math/Size.h>
 #include <Pt/Gfx/Gfx.h>
 
 
@@ -132,7 +133,7 @@ namespace Gui {
 			 *
 			 * @return The minium layout size.
 			 */
-			virtual Gfx::Size minimumSize() = 0;
+			virtual Math::Size minimumSize() = 0;
 
 			/**
 			 * @brief Calculates and returns the preferred size for the container widget's layout.
@@ -147,7 +148,7 @@ namespace Gui {
 			 *
 			 * @return The preferred layout size.
 			 */
-			virtual Gfx::Size preferredSize() = 0;
+			virtual Math::Size preferredSize() = 0;
 
 		protected:
 			/**

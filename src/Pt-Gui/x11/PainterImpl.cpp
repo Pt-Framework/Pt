@@ -23,7 +23,7 @@
 #include "PixmapImpl.h"
 
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
+#include "Pt/Math/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 
 #include <iostream>
@@ -143,7 +143,7 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
 		Display* display = X11EventLoop::instance().display();
 		Pixmap tile( brush.texture().width(), brush.texture().width() );
 		Painter painter = tile.painter();
-		painter.drawImage( Gfx::Point(0, 0), brush.texture() );
+		painter.drawImage( Math::Point(0, 0), brush.texture() );
 		XSetFillStyle( display, _brushGc, FillTiled );
 		XSetTile( display, _brushGc, tile.impl().x11Drawable() );
 	}
@@ -283,7 +283,7 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Gfx::Point& to)
+void PainterImpl::drawPixel(const Math::Point& to)
 {
 	Display* display = X11EventLoop::instance().display();
 	XDrawPoint( display, _drawable->x11Drawable(), _penGc, to.x(), to.y() );
@@ -291,7 +291,7 @@ void PainterImpl::drawPixel(const Gfx::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
+void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
 	if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
@@ -301,7 +301,7 @@ void PainterImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 }
 
 
-void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
+void PainterImpl::drawText(const Math::Point& to, const std::string& text)
 {
 	XftColor xftColor;
 	xftColor.pixel = 0; // This would be input for XftColorAllocValue
@@ -314,7 +314,7 @@ void PainterImpl::drawText(const Gfx::Point& to, const std::string& text)
 }
 
 
-void PainterImpl::drawRect(const Gfx::Rect& rect)
+void PainterImpl::drawRect(const Math::Rect& rect)
 {
 	// Rectangle which has 0 width or height does not have to be drawn.
 	// (Its not possible to draw a 0 pixel wide/high rectangle in X11.)
@@ -326,7 +326,7 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
 {
 	if (_pen.size() == 0) return; // Draw nothing if the pen size is 0.
 
@@ -344,7 +344,7 @@ void PainterImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount
 }
 
 
-void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	// Ellipse which has 0 width or height does not have to be drawn.
 	// (Its not possible to draw a 0 pixel wide/high ellipse in X11.)
@@ -356,7 +356,7 @@ void PainterImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 }
 
 
-void PainterImpl::fillRect(const Gfx::Rect& rect)
+void PainterImpl::fillRect(const Math::Rect& rect)
 {
 	Display* display = X11EventLoop::instance().display();
 	XFillRectangle(display, _drawable->x11Drawable(), _brushGc, rect.x(), rect.y(), rect.width(), rect.height());
@@ -364,7 +364,7 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
 }
 
 
-void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 	Display* display = X11EventLoop::instance().display();
 	XFillArc(display, _drawable->x11Drawable(), _brushGc, topLeft.x(), topLeft.y(), size.width(), size.height(), 0, 360*64);
@@ -372,7 +372,7 @@ void PainterImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 }
 
 
-void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
 	Display* display = X11EventLoop::instance().display();
 
@@ -387,7 +387,7 @@ void PainterImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 }
 
 
-void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
 	Display* display = X11EventLoop::instance().display();
 	::Pixmap from = pm.impl().x11Drawable();
@@ -403,7 +403,7 @@ void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm)
 }
 
 
-void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Rect& pmRect)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect& pmRect)
 {
 	Display* display = X11EventLoop::instance().display();
 	::Pixmap from = pm.impl().x11Drawable();
@@ -419,13 +419,13 @@ void PainterImpl::drawPixmap(const Gfx::Point& to, Pixmap& pm, const Gfx::Rect& 
 }
 
 
-void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 {
 	this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
-void PainterImpl::drawImage(const Gfx::Point& to, const Gfx::ARgbImage& image, const Gfx::Rect& imageRect)
+void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect)
 {
 	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRect);
 	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );

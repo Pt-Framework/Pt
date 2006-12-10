@@ -165,10 +165,10 @@ namespace Gui {
 			virtual void update();
 
 			// inerhit doc
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
 			// inerhit doc
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 			/**
 			 * @brief Creates a new HorizontalLayout for the given widget.
@@ -211,7 +211,7 @@ namespace Gui {
 			 * @param forPreferredSize When set to $true$ the preferred size is calculate; when
 			 * set to $false$ the minimum size is calculated.
 			 */
-			Gfx::Size calculateSize(Widget& parent, bool forPreferredSize);
+			Math::Size calculateSize(Widget& parent, bool forPreferredSize);
 
 		private:
 			WidthBehaviour _widthBehaviour;

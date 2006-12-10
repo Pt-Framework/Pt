@@ -22,7 +22,7 @@
 
 #include <Pt/Exception.h>
 #include <Pt/Gfx/BasicColor.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Rect.h>
 
 #include <vector>
 
@@ -256,7 +256,7 @@ namespace Pt {
 						bool operator!=(const PixelIterator& it) const
 						{ return this->_pixel != it._pixel; }
 
-						Size operator-(const PixelIterator& other)
+						Math::Size operator-(const PixelIterator& other)
 						{
 							const size_t pos = _pixel - _image->data();
 							const size_t otherPos = other._pixel - other._image->data();
@@ -267,7 +267,7 @@ namespace Pt {
 							const size_t width = pos / _image->height();
 							const size_t height = pos / _image->width();
 
-							return Size(width - otherWidth, height -otherHeight);
+							return Math::Size(width - otherWidth, height -otherHeight);
 						}
 
 					private:
@@ -308,7 +308,7 @@ namespace Pt {
 						bool operator!=(const ConstPixelIterator& it) const
 						{ return this->_pixel != it._pixel; }
 
-						Size operator-(const ConstPixelIterator& other)
+						Math::Size operator-(const ConstPixelIterator& other)
 						{
 							const size_t pos = _pixel - _image->data();
 							const size_t otherPos = other._pixel - other._image->data();
@@ -319,7 +319,7 @@ namespace Pt {
 							const size_t width = pos / _image->height();
 							const size_t height = pos / _image->width();
 
-							return Size(width - otherWidth, height -otherHeight);
+							return Math::Size(width - otherWidth, height -otherHeight);
 						}
 
 					private:

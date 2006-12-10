@@ -1,6 +1,6 @@
 #include <Pt/Main.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
 #include "Pt/Gui/Application.h"
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Button.h>
@@ -35,10 +35,10 @@ class ScribbleWidget : public Pt::Gui::Widget
 		{
 			Widget::setTitle("Scribble Classic");
 
-			_redButton.reset  ( new Button( *this, Point(10, 10),  Size(70, 30), "RED")   );
-			_greenButton.reset( new Button( *this, Point(10, 45),  Size(70, 30), "GREEN")  );
-			_blueButton.reset ( new Button( *this, Point(10, 80),  Size(70, 30), "BLUE")  );
-			_clearButton.reset( new Button( *this, Point(10, 115), Size(70, 30), "CLEAR") );
+			_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), "RED")   );
+			_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), "GREEN")  );
+			_blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), "BLUE")  );
+			_clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), "CLEAR") );
 			_pixmap.reset( new Pixmap( 0, 0 ) );
 
 			updatePen();
@@ -48,7 +48,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
 			// Clear the backbuffer (pixmap) with white color.
 			pixmapPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
-			pixmapPainter.fillRect( Rect(Point(0, 0), this->size() ) );
+			pixmapPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
 
 			_redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
 			connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
@@ -85,10 +85,10 @@ class ScribbleWidget : public Pt::Gui::Widget
 			Gui::Painter pixmapPainter = _pixmap->painter();
 
 			widgetPainter.setBrush(brush);
-			widgetPainter.fillRect( Rect(Point(0, 0), this->size() ) );
+			widgetPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
 
 			pixmapPainter.setBrush(brush);
-			pixmapPainter.fillRect( Rect(Point(0, 0), this->size() ) );
+			pixmapPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
 		}
 
 		void setPenColor(const ARgbColor& color)
@@ -117,8 +117,8 @@ class ScribbleWidget : public Pt::Gui::Widget
 
 			if( event.modifiers() & MouseMoveEvent::LeftButtonDown )
 			{
-				widgetPainter.drawLine( Point(_lastX, _lastY), Point(event.x(), event.y()) );
-				pixmapPainter.drawLine( Point(_lastX, _lastY), Point(event.x(), event.y()) );
+				widgetPainter.drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
+				pixmapPainter.drawLine( Math::Point(_lastX, _lastY), Math::Point(event.x(), event.y()) );
 
 				_lastX = event.x();
 				_lastY = event.y();
@@ -147,9 +147,9 @@ class ScribbleWidget : public Pt::Gui::Widget
 			Gui::Painter pixmapPainter = newPixmap->painter();
 
 			pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
-			pixmapPainter.fillRect( Rect( Point(0, 0), newPixmap->size() ) );
+			pixmapPainter.fillRect( Math::Rect( Math::Point(0, 0), newPixmap->size() ) );
 
-			pixmapPainter.drawPixmap( Point(0, 0), *_pixmap );
+			pixmapPainter.drawPixmap( Math::Point(0, 0), *_pixmap );
 			_pixmap.reset(newPixmap);
 
 			setPenColor(_penColor);

@@ -55,9 +55,9 @@ namespace Gui {
 
 			virtual void update();
 
-			virtual Gfx::Size minimumSize();
+			virtual Math::Size minimumSize();
 
-			virtual Gfx::Size preferredSize();
+			virtual Math::Size preferredSize();
 
 			static SimpleGridLayout& create(
 				Widget& widget,

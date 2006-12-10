@@ -1155,7 +1155,7 @@ void X11EventLoop::expose(Widget& widget, XEvent& xev)
 	const size_t x = xev.xexpose.x;
 	const size_t y = xev.xexpose.y;
 
-	PaintEvent ev( widget, Gfx::Point(x, y), Gfx::Size(width, height) );
+	PaintEvent ev( widget, Math::Point(x, y), Math::Size(width, height) );
 	event.send( ev );
 }
 

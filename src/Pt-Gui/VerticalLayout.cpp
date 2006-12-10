@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,8 +19,8 @@
 
 #include "Pt/Gui/VerticalLayout.h"
 #include "Pt/Gui/Widget.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Size.h"
+#include "Pt/Math/Point.h"
+#include "Pt/Math/Size.h"
 
 #include <list>
 
@@ -146,19 +146,19 @@ void VerticalLayout::update()
 	}
 }
 
-Size VerticalLayout::minimumSize()
+Math::Size VerticalLayout::minimumSize()
 {
 	return calculateSize(this->widget(), false);
 }
 
 
-Size VerticalLayout::preferredSize()
+Math::Size VerticalLayout::preferredSize()
 {
 	return calculateSize(this->widget(), true);
 }
 
 
-Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
+Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 {
 	const std::list<Widget*>& children = parent.childWidgets();
 	ssize_t maxWidth  = 0;
@@ -185,7 +185,7 @@ Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 		}
 
 		allHeight += (children.size() - 1) * _gap;
-		return Size(maxWidth, allHeight);
+		return Math::Size(maxWidth, allHeight);
 
 	}
 	else
@@ -207,7 +207,7 @@ Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 			}
 		}
 
-		return Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
+		return Math::Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
 	}
 }
 

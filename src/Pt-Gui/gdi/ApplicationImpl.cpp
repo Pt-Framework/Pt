@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -560,9 +560,9 @@ void GDIEventLoop::processPaintMessage(HWND hwnd, Widget& widget)
 
 	GetUpdateRect(hwnd, &gdiRectangle, false);
 
-	Gfx::Rect rectangle(
-		Gfx::Point(gdiRectangle.left, gdiRectangle.top),
-		Gfx::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
+	Math::Rect rectangle(
+		Math::Point(gdiRectangle.left, gdiRectangle.top),
+		Math::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
 	);
 
 	PaintEvent paintEvent(widget, rectangle);
