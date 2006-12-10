@@ -258,7 +258,7 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 		unsigned int screen = DefaultScreen(display);
 		char *family;
 
-		XftFontSet* fonts = XftListFonts( display, screen, 0, XFT_FAMILY, 0 );
+		XftFontSet* fonts = XftListFonts( display, screen, 0, XFT_FAMILY, (char*)0 );
 		for (int i = 0; i < fonts->nfont; i++) {
 			if( XftPatternGetString(fonts->fonts[i], XFT_FAMILY, 0, &family) == XftResultMatch )
 				_fontList.push_back(family);
