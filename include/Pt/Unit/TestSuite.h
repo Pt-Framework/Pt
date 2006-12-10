@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,12 +19,10 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
-#include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestFixture.h>
-
-#include <list>
 #include <map>
-#include <string>
+#include <Pt/Unit/Test.h>
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestFixture.h>
 
 
 namespace Pt {
@@ -44,15 +42,11 @@ namespace Unit {
     };
 
 
-    // TODO: Andreas:
-    // 1. Pull ITestSuite from component
-    // 2. Set TestProtocol on ITestSuite
-    // 3. Run TestSuite
     class TestSuite : public Test, public TestFixture
     {
         public:
             TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
-            : Test(name/*, protocol*/)
+            : Test(name)
             , _protocol(&protocol)
             { }
 
@@ -63,28 +57,30 @@ namespace Unit {
 
             void runTest( const std::string& name, const Args& args = Args() )
             {
+                // TODO: use a sentry object
                 bool isUp = false;
 
+                Test::started.send<const Test&>( *this );
                 try
                 {
                     this->setUp();
                     isUp = true;
                     Reflectable::call(name, args);
                     this->tearDown();
-                    Test::success( this->name() + "::" + name );
+                    Test::success.send<const Test&>( *this );
                     return;
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion(this->name(), assertion);
+                    Test::assertion.send<const Test&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception(this->name(), ex);
+                    Test::exception.send<const Test&>(*this, ex);
                 }
                 catch(...)
                 {
-                    Test::error(this->name());
+                    Test::error.send<const Test&>(*this);
                 }
 
                 try
@@ -96,16 +92,18 @@ namespace Unit {
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion(this->name(), assertion);
+                    Test::assertion.send<const Test&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception(this->name(), ex);
+                    Test::exception.send<const Test&>(*this, ex);
                 }
                 catch(...)
                 {
-                    Test::error(this->name());
+                    Test::error.send<const Test&>(*this);
                 }
+
+                Test::finished.send<const Test&>( *this );
             }
 
         protected:

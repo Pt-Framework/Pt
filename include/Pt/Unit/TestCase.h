@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,51 +19,66 @@
 #ifndef PT_UNIT_TESTCASE_H
 #define PT_UNIT_TESTCASE_H
 
-#include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/Test.h>
+#include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestFixture.h>
-
-#include <string>
 
 
 namespace Pt {
 
 namespace Unit {
 
-    //! DEPRECATED. This class is obsolete.
+    /** @brief Single test with setup and teardown
+
+        A %TestCase can be used for simple tests that require a initialization
+        and deinitialization of resources. The implementor is supposed to
+        implement the abstract method 'test' and the methods 'setUp' and
+        'tearDown' for resource management. When the test is run, 'setUp'
+        will be called first, then 'test' and finally 'tearDown'.
+    */
     class TestCase : public Test, public TestFixture
     {
         public:
+            /** @brief Construct by name
+
+                Constructs a %TestCase with the passed name.
+
+                @param name Name of the test
+            */
             TestCase(const std::string& name)
             : Test(name)
-            {
-                this->registerMethod(name, *this, &TestCase::test);
-            }
+            { }
 
+            /** @brief Runs the test
+                When the test is run, 'setUp' will be called first, then 
+                'test' and finally 'tearDown'. Signals inherited from
+                Unit::Test are sent appropriatly.
+            */
             virtual void run()
             {
                 bool isUp = false;
 
+                Test::started.send<const Test&>( *this );
                 try
                 {
                     this->setUp();
                     isUp = true;
                     this->test();
                     this->tearDown();
-                    Test::success( this->name() );
+                    Test::success.send<const Test&>( *this );
                     return;
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion(this->name(), assertion);
+                    Test::assertion.send<const Test&>( *this, assertion );
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception(this->name(), ex);
+                    Test::exception.send<const Test&>( *this, ex );
                 }
                 catch(...)
                 {
-                    Test::error(this->name());
+                    Test::error.send<const Test&>( *this );
                 }
 
                 try
@@ -75,19 +90,26 @@ namespace Unit {
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion(this->name(), assertion);
+                    Test::assertion.send<const Test&>( *this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception(this->name(), ex);
+                    Test::exception.send<const Test&>( *this, ex);
                 }
                 catch(...)
                 {
-                    Test::error(this->name());
+                    Test::error.send<const Test&>( *this );
                 }
+
+                Test::finished.send<const Test&>( *this );
             }
 
         protected:
+            /** @brief Performs the actual test
+                The implementor is supposed to override this method, which
+                is called between 'setUp' and 'tearDown'. Assertions may be 
+                thrown to indicate failed test assertions.
+            */
             virtual void test() = 0;
     };
 

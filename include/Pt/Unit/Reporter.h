@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,48 +34,53 @@ namespace Unit {
 	class Reporter
 	{
 	public:
-
-		Reporter(std::ostream* outputStream = &std::cerr)
-		: outStream(outputStream)
-		{
-		}
+		Reporter(std::ostream* out = &std::cerr)
+		: _out(out)
+		{}
 
 		virtual ~Reporter()
+		{}
+
+		virtual void started(const Test& test)
 		{
+			*_out << test.name() << ": ";
+		}
+
+		virtual void finished(const Test& test)
+		{
+			//*_out << std::endl;
 		}
 
 		virtual void message(const std::string& msg)
 		{
-			*outStream << msg << std::endl;
+			*_out << msg << std::endl;
 		}
 
 		virtual void success(const Test& test)
 		{
-			*outStream << test.name() <<  ": OK."<< std::endl;
+			*_out << "OK"<< std::endl;
 		}
 
 		virtual void assertion(const Test& test, const Assertion& a)
 		{
-			*outStream << test.name() << ": Assertion!" << std::endl;
-			*outStream << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
-			*outStream << '\t' << a.sourceInfo().func() << std::endl;
+			*_out << "ASSERTION" << std::endl;
+			*_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
+			*_out << '\t' << a.sourceInfo().func() << std::endl;
 		}
 
 		virtual void exception(const Test& test, const std::exception& ex)
 		{
-			*outStream << test.name() << ": Exception!" << std::endl;
-			*outStream << '\t' << ex.what() << std::endl;
+			*_out << test.name() << "EXCEPTION" << std::endl;
+			*_out << '\t' << ex.what() << std::endl;
 		}
 
 		virtual void error(const Test& test)
 		{
-			*outStream << test.name() << ": Error!" << std::endl;
+			*_out << test.name() << ": ERROR" << std::endl;
 		}
 
-
 	protected:
-
-		std::ostream* outStream;
+		std::ostream* _out;
 	};
 
 
@@ -89,12 +94,12 @@ namespace Unit {
 
 			if(outFileStream)
 			{
-				outStream = &outFileStream;
+				_out = &outFileStream;
 			}
 
 			else
 			{
-				outStream = &std::cerr;
+				_out = &std::cerr;
 
 				std::cerr << std::endl;
 				std::cerr << "FileReporter::FileReporter(std::string outFileName)" << std::endl;

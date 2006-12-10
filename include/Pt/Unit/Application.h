@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -41,8 +41,13 @@ namespace Unit {
             virtual ~Application()
             {}
 
+            void setReporter(Reporter& reporter)
+            { Application::_reporter = &reporter; }
+
             static void registerTest(Test& test)
             {
+                connect(test.started, &Application::started);
+                connect(test.finished, &Application::finished);
                 connect(test.success, &Application::success);
                 connect(test.assertion, &Application::assertion);
                 connect(test.exception, &Application::exception);
@@ -50,10 +55,21 @@ namespace Unit {
                 _allTests.push_back(&test);
             }
 
-            int run(Reporter& reporter, const std::string& testName = "")
+            int run()
             {
-                Application::_reporter = &reporter;
+                _errors = 0;
 
+                std::list<Test*>::iterator it;
+                for(it = _allTests.begin(); it != _allTests.end(); ++it)
+                {
+                        (*it)->run();
+                }
+
+                return _errors;
+            }
+
+            int run(const std::string& testName = "")
+            {
                 _errors = 0;
 
                 std::list<Test*>::iterator it;
@@ -63,22 +79,27 @@ namespace Unit {
                         (*it)->run();
                 }
 
-                if(_errors == 0)
-                {
-                    this->message("*** Success ***");
-                }
-                else
-                {
-                    std::stringstream msg;
-                    msg << "*** " << _errors << " errors occured. ***";
-                    this->message( msg.str() );
-                }
-
                 return _errors;
             }
 
             const std::list<Test*>& tests() const
             { return _allTests; }
+
+            static void started(const Test& test)
+            {
+                if(_reporter)
+                {
+                    _reporter->started(test);
+                }
+            }
+
+            static void finished(const Test& test)
+            {
+                if(_reporter)
+                {
+                    _reporter->finished(test);
+                }
+            }
 
             static void success(const Test& test)
             {
@@ -88,33 +109,33 @@ namespace Unit {
                 }
             }
 
-            static void assertion(const std::string& testName, const Assertion& a)
+            static void assertion(const Test& test, const Assertion& a)
             {
                 ++_errors;
 
                 if(_reporter)
                 {
-                    _reporter->assertion(testName, a);
+                    _reporter->assertion(test, a);
                 }
             }
 
-            static void exception(const std::string& testName, const std::exception& ex)
+            static void exception(const Test& test, const std::exception& ex)
             {
                 ++_errors;
 
                 if(_reporter)
                 {
-                    _reporter->exception(testName, ex);
+                    _reporter->exception(test, ex);
                 }
             }
 
-            static void error(const std::string& testName)
+            static void error(const Test& test)
             {
                 ++_errors;
 
                 if(_reporter)
                 {
-                    _reporter->error(testName);
+                    _reporter->error(test);
                 }
             }
 

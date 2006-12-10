@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,37 +19,95 @@
 #ifndef PT_UNIT_TEST_H
 #define PT_UNIT_TEST_H
 
-#include <Pt/NonCopyable.h>
-#include <Pt/Signal.h>
-#include <Pt/Reflectable.h>
-
 #include <string>
+#include <Pt/Signal.h>
+#include <Pt/NonCopyable.h>
+#include <Pt/Reflectable.h>
 
 
 namespace Pt {
 
 namespace Unit {
 
-    class Test : public Reflectable, public NonCopyable
+    /** @brief Test base class
+
+        This is the base class for all types of tests that can be registered
+        and run in a test application. It provides a virtual method run that
+        is overriden by the derived classes and signals to inform about
+        events that occur while the test is run.
+    */
+    class Test : public Reflectable, protected NonCopyable
     {
         public:
-            Test(const std::string& name)
-            : Reflectable(name)
-            { }
-
+            /** @brief Destructor
+            */
             virtual ~Test()
             { }
 
-            virtual void run()
-            { }
+            /** @brief Runs the test
 
+                Derived test classes are supposed to implement this method
+                to run the test procedure. A derived class should send the 
+                'started' signal at the begin of the test and send the 
+                'finished' signal at the end of the test. If the test was 
+                successful, the 'success' signal is sent, otheriwse one of the
+                signals indicating a failrue. In case of a failed assertion,
+                the signal 'assertion' is sent, if a regular std::exception was
+                the cause of the error the signal 'exception' is sent and and
+                the signal 'error' indicates an unknown exception or error. 
+                This method should not propagate any exceptions
+            */
+            virtual void run() = 0;
+
+            /** @brief Start notification
+
+                This signal is sent when the test has started.
+            */
+            Signal<const Test&> started;
+
+            /** @brief Finished notification
+
+                This signal is sent when the test finished. It does not
+                indicate that the test was successful.
+            */
+            Signal<const Test&> finished;
+
+            /** @brief Success notification
+
+                This signal is sent when the test was successful.
+            */
             Signal<const Test&> success;
 
-            Signal<const std::string&, const Assertion&> assertion;
+            /** @brief Assertion notification
 
-            Signal<const std::string&, const std::exception&> exception;
+                This signal is sent when a assertion failed.
+            */
+            Signal<const Test&, const Assertion&> assertion;
 
-            Signal<const std::string&> error;
+            /** @brief Exception notification
+
+                This signal is sent when a regular std::exception occured.
+            */
+            Signal<const Test&, const std::exception&> exception;
+
+            /** @brief Error notification
+
+                This signal is sent is an unknown error occured.
+            */
+            Signal<const Test&> error;
+
+        protected:
+            /** @brief Construct a test by name
+
+                This ctor is almost never called by the user directly, but 
+                rather from derived classes' initialization lists, which 
+                pass the name of the test.
+
+                @param name Name of the test
+            */
+            Test(const std::string& name)
+            : Reflectable(name)
+            { }
     };
 
 } // namespace Unit

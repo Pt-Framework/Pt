@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 
 	Pt::Unit::Reporter reporter;
 	Pt::Unit::Application app;
+    app.setReporter(reporter);
 
 	//char* fileName = 0;
 	char* testName = "";
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
 	}
 
 	try {
-		return app.run(reporter, testName);
+		return app.run(testName);
 	}
 	catch(const std::exception& ex)
 	{
