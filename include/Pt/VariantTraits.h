@@ -35,10 +35,11 @@ namespace Pt {
 			data = os.str();
 		}
 
-		static void fromData(T& value, const std::string& data)
+		static bool fromData(T& value, const std::string& data)
 		{
 			std::istringstream is(data);
 			is >> value;
+            return is;
 		}
 	};
 
@@ -47,8 +48,11 @@ namespace Pt {
 		static void toData(std::string& data, const std::string& value)
 		{ data = value; }
 
-		static void fromData(std::string& value, const std::string& data)
-		{ value = data; }
+		static bool fromData(std::string& value, const std::string& data)
+		{
+            value = data;
+            return true;
+        }
 	};
 
 } // namespace Pt

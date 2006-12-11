@@ -44,8 +44,8 @@ namespace Pt {
 			{ }
 
 			template <typename T>
-			void get(T& type) const throw()
-			{ VariantTraits<T>::fromData(type , _data); }
+			bool get(T& type) const throw()
+			{ return VariantTraits<T>::fromData(type , _data); }
 
 			template <typename T>
 			void set(const T& value) throw()
