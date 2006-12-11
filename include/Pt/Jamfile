@@ -6,3 +6,4 @@ SubInclude TOP include Pt IO ;
 SubInclude TOP include Pt Text ;
 SubInclude TOP include Pt System ;
 SubInclude TOP include Pt Gfx ;
+SubInclude TOP include Pt Gfx2 ;

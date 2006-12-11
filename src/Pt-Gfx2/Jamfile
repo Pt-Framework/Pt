@@ -1,0 +1,10 @@
+SubDir TOP src Pt-Gfx2 ;
+
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt-Gfx2 :
+	BasicImage.cpp
+	;
+
+SharedLibrary_LinkSharedLibraries Pt-Gfx2 : Pt ;
+SharedLibrary_MakeLocate Pt-Gfx2 : bin ;
