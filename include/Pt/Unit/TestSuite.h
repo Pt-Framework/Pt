@@ -32,29 +32,95 @@ namespace Unit {
     class TestSuite;
 
 
+    /** @brief Protocol for test suites
+    */
     class PT_EXPORT TestProtocol
     {
         public:
+            /** @brief Destructor
+            */
             virtual ~TestProtocol()
             {}
 
+            /** @brief Executes the protocol
+
+                This method can be overriden to specify a custom protocol
+                for a test suite. The default implementation will simply
+                call each registered method of the test suite. Implementors
+                will most likely call TestSuite::runTest to resolve a test
+                method by name and pass it required arguments.
+
+                @param test The test suite to apply the protocol
+            */
             virtual void run(TestSuite& test);
     };
 
 
+    /** @brief Protocol and data driven testing
+
+        The TestSuite is used to implement protocol and data driven tests.
+        It inherits its ability to register methods and properties from
+        %Reflectable. The implementor is supposed to write and register the 
+        required test methods on construction.
+
+        @code
+            class MyTest : public TestSuite
+            {
+                public:
+                    MyTest()
+                    : TestSuite("MyTest")
+                    {
+                        this->registerMethod("test1", *this, &MyTest::test1);
+                    }
+
+                    void test1();
+            };
+        @endcode
+
+        The default protocol will run each registered test method when the 
+        test is run. Before each test method setUp is called and tearDown 
+        after each test. The TestProtocol can be replaced with a customised 
+        one and reflection can be used to call any method multiple times with 
+        the required data.
+    */
     class TestSuite : public Test, public TestFixture
     {
         public:
+          /** @brief Construct by name and protocol
+
+                Constructs a %TestCase with the passed name and optionally
+                a custom protocol. The protocol is not owned by the TestSuite,
+                but can be owned by the derived class.
+
+                @param name Name of the test
+                @param protocol Protocol for the test.
+            */
             TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
             : Test(name)
             , _protocol(&protocol)
             { }
 
+            /** @brief Runs the test suite
+
+                The TestProtocol assosiated with the test will be executed.
+                The default protocol will simply call all registered tests.
+            */
             virtual void run()
             {
                 _protocol->run(*this);
             }
 
+            /** @brief Runs a registered test
+
+                A test method will be called by name and the given arguments
+                are passe to it just like when the reflection API is used.
+                The method 'setUp' will be called before, and the method
+                tearDown after the test. Signals inherited from Unit::Test
+                are sent appropriatly.
+
+                @param name Name of the method to be run
+                @param args Arguments to invoke the method
+            */
             void runTest( const std::string& name, const Args& args = Args() )
             {
                 // TODO: use a sentry object
@@ -107,6 +173,8 @@ namespace Unit {
             }
 
         protected:
+            /** @brief The assosiated test protocol
+            */
             TestProtocol* _protocol;
 
         public:
@@ -125,6 +193,7 @@ namespace Unit {
             test.runTest( it->first, Args() );
         }
     }
+
 
     class ListedProtocol : public TestProtocol
     {

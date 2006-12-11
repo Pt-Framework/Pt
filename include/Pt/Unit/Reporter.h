@@ -83,7 +83,9 @@ namespace Unit {
 		std::ostream* _out;
 	};
 
-
+    //TODO: is this obsolete? Andreas suspected so before and I have a 
+    //       feeling that he is right.
+    //       -Marc
 	class FileReporter : public Reporter
 	{
 	public:

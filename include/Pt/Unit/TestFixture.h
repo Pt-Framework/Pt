@@ -24,20 +24,26 @@ namespace Pt {
 
 namespace Unit {
 
+    /** @brief Maintain test context
+        The TestFixture class serves as an interface to maintain any resources
+        that need to be setup before a test or cleaned up after a test. The 
+        method SetUp is called before a test is run and the method tearDown
+        is run after a test.
+    */
     class TestFixture
     {
         public:
             /** \brief Destructor.
             */
             virtual ~TestFixture()
-            {};
+            {}
 
             /** \brief Set up context before running a test.
                 This function is called before each registered tester function
                 is invoked. It is meant to initialize any required resources.
             */
             virtual void setUp()
-            {};
+            {}
 
             /** \brief Clean up after the test run.
                 This function is called after each registered tester function
@@ -45,7 +51,7 @@ namespace Unit {
                 initialized in TestFixture::setUp.
             */
             virtual void tearDown()
-            {};
+            {}
     };
 
 } // namespace Unit
