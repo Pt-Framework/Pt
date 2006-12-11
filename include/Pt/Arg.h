@@ -24,7 +24,7 @@
 namespace Pt
 {
 
-    /** Read and extract commandline parameters from argc/argv.
+    /** @brief Read and extract commandline parameters from argc/argv.
 
         Programs usually need some parameters. Usually they start with a '-'
         followed by a single character and optionally a value.
@@ -50,7 +50,7 @@ namespace Pt
     class Arg
     {
         public:
-            /** default constructor. Initializes value.
+            /** @brief Default constructor. Initializes value.
 
                 \param def    initial value
             */
@@ -59,7 +59,7 @@ namespace Pt
                 m_isset(false)
               { }
 
-            /** extract parameter.
+            /** @brief extract parameter.
 
                \param argc      1. parameter of main
                \param argv      2. of main
@@ -79,7 +79,7 @@ namespace Pt
               set(argc, argv, ch);
             }
 
-            /** definition of long options.
+            /** @brief definition of long options.
 
                GNU defines long options starting with "--". This (and more) is
                supported here. Instead of giving a single option-character, you
@@ -104,7 +104,7 @@ namespace Pt
               m_isset = set(argc, argv);
             }
 
-           /** extract parameter.
+           /** @brief extract parameter.
 
                \param argc      1. parameter of main
                \param argv      2. of main
@@ -140,7 +140,7 @@ namespace Pt
               return false;
             }
 
-            /** definition of long options.
+            /** @brief definition of long options.
 
                 GNU defines long options starting with "--". This (and more) is
                 supported here. Instead of giving a single option-character, you
@@ -176,7 +176,8 @@ namespace Pt
               return false;
             }
 
-            /** Reads next parameter and removes it. */
+            /** @brief Reads next parameter and removes it. 
+            */
             bool set(int& argc, char* argv[])
             {
                 // don't extract value, when already found
@@ -202,10 +203,11 @@ namespace Pt
                 return m_isset;
             }
 
-            /** returns the value. */
+            /** @brief returns the value. 
+            */
             const T& getValue() const   { return m_value; }
 
-            /** returns the value.
+            /** @brief returns the value.
 
                 Instead of calling getValue() the argument can be converted
                 implicitly.
@@ -225,7 +227,8 @@ namespace Pt
             */
             operator T() const   { return m_value; }
 
-            /** returns true, if the option was found and the default was not used. */
+            /** @brief returns true, if the option was found and the default was not used. 
+            */
             bool isSet() const   { return m_isset; }
 
         private:
@@ -234,7 +237,7 @@ namespace Pt
     };
 
     ////////////////////////////////////////////////////////////////////////
-    /** specialization for bool.
+    /** @brief specialization for bool.
 
         Often programs need some switches, which are switched on or off.
         Users just enter a option without parameter.
@@ -250,7 +253,7 @@ namespace Pt
     class Arg<bool>
     {
       public:
-        /** default constructor. Initializes value.
+        /** @brief default constructor. Initializes value.
 
             \param def    initial value
          */
@@ -259,7 +262,7 @@ namespace Pt
             m_isset(false)
             { }
 
-        /** extract parameter.
+        /** @brief extract parameter.
 
             \param argc      1. parameter of main
             \param argv      2. of main
@@ -286,7 +289,7 @@ namespace Pt
           m_isset = set(argc, argv, str);
         }
 
-        /** Use this constructor to extract a bool-parameter.
+        /** @brief Use this constructor to extract a bool-parameter.
 
             As a special case options can be grouped. The parameter is
             recognized also in a argument, which starts with a '-' and contains
@@ -382,7 +385,7 @@ namespace Pt
           return false;
         }
 
-        /** Setter for long-options.
+        /** @brief Setter for long-options.
 
             The option-parameter is defined with a string. This can extract
             long-options like:
@@ -416,16 +419,20 @@ namespace Pt
           return false;
         }
 
-        /** returns true, if options is set. */
+        /** @brief returns true, if options is set. 
+        */
         bool isTrue() const   { return m_value; }
 
-        /** returns true, if options is not set. */
+        /** @brief returns true, if options is not set. 
+        */
         bool isFalse() const  { return !m_value; }
 
-        /** convertible to bool. */
+        /** @brief convertible to bool. 
+        */
         operator bool() const  { return m_value; }
 
-        /** returns true, if option is explicitly set */
+        /** @brief returns true, if option is explicitly set 
+        */
         bool isSet() const             { return m_isset; }
 
       private:
@@ -434,7 +441,7 @@ namespace Pt
     };
 
     ////////////////////////////////////////////////////////////////////////
-    /** Special handling for "const char*".
+    /** @brief Special handling for "const char*".
 
         "const char*" is not extracted with a stream. This is more flexible
         and easier to process. Also parameters can contain spaces.
@@ -469,8 +476,7 @@ namespace Pt
           m_isset = set(argc, argv);
         }
 
-        /**
-         Constructor for the short form.
+        /** @brief Constructor for the short form.
          */
         bool set(int& argc, char* argv[], char ch)
         {
@@ -493,7 +499,8 @@ namespace Pt
           return false;
         }
 
-        /** setter for the long form. */
+        /** @brief setter for the long form. 
+        */
         bool set(int& argc, char* argv[], const char* str, const char* def = 0)
         {
           // don't extract value, when already found
@@ -515,7 +522,8 @@ namespace Pt
           return false;
         }
 
-        /** extracts the next parameter. */
+        /** @brief extracts the next parameter. 
+        */
         bool set(int& argc, char* argv[])
         {
           // don't extract value, when already found
@@ -536,13 +544,16 @@ namespace Pt
             return false;
         }
 
-        /** returns the extracted value. */
+        /** @brief returns the extracted value. 
+        */
         const char* getValue() const   { return m_value; }
 
-        /** argument is convertible to "const char*" */
+        /** @brief argument is convertible to "const char*" 
+        */
         operator const char*() const   { return m_value; }
 
-        /** returns true, when the option is not set and the default is used. */
+        /** @brief returns true, when the option is not set and the default is used. 
+        */
         bool isSet() const             { return m_isset; }
 
       private:
@@ -551,7 +562,7 @@ namespace Pt
     };
 
     ////////////////////////////////////////////////////////////////////////
-    /** Special handling for std::string.
+    /** @brief Special handling for std::string.
 
         input-operator for std::string reads just the first word. This is
         not, what we normally expect, so this is speialized here.
@@ -565,7 +576,8 @@ namespace Pt
             m_isset(false)
         { }
 
-        /** Constructor for the short form. */
+        /** @brief Constructor for the short form. 
+        */
         Arg(int& argc, char* argv[], char ch, const std::string& def = std::string())
           : m_value(def),
             m_isset(false)
@@ -573,7 +585,8 @@ namespace Pt
           m_isset = set(argc, argv, ch);
         }
 
-        /** Constructor for the long form. */
+        /** @brief Constructor for the long form. 
+        */
         Arg(int& argc, char* argv[], const char* str, const std::string& def = std::string())
           : m_value(def),
             m_isset(false)
@@ -581,7 +594,8 @@ namespace Pt
           m_isset = set(argc, argv, str);
         }
 
-        /** Extracts the next parameter. */
+        /** @brief Extracts the next parameter. 
+        */
         Arg(int& argc, char* argv[])
           : m_value(std::string()),
             m_isset(false)
@@ -589,7 +603,8 @@ namespace Pt
           m_isset = set(argc, argv);
         }
 
-        /** setter for the short form. */
+        /** @brief setter for the short form. 
+        */
         bool set(int& argc, char* argv[], char ch)
         {
           // don't extract value, when already found
@@ -611,7 +626,8 @@ namespace Pt
           return false;
         }
 
-        /** setter for the long form. */
+        /** @brief setter for the long form. 
+        */
         bool set(int& argc, char* argv[], const char* str)
         {
           // don't extract value, when already found
@@ -633,7 +649,8 @@ namespace Pt
           return false;
         }
 
-        /** Extracts the next parameter. */
+        /** @brief Extracts the next parameter. 
+        */
         bool set(int& argc, char* argv[])
         {
           // don't extract value, when already found
@@ -654,7 +671,8 @@ namespace Pt
             return false;
         }
 
-        /** Extracts the next non-option-parameter. */
+        /** @brief Extracts the next non-option-parameter. 
+        */
         bool setNoOpt(int& argc, char* argv[])
         {
           // don't extract value, when already found
@@ -676,13 +694,16 @@ namespace Pt
           return false;
         }
 
-        /** returns the extracted value.  */
+        /** @brief returns the extracted value.
+        */
         const std::string& getValue() const   { return m_value; }
 
-        /** argument is convertible to "const std::string&" */
+        /** @brief argument is convertible to "const std::string&" 
+        */
         operator const std::string&() const   { return m_value; }
 
-        /** returns true, when the option is not set and the default is used. */
+        /** @brief returns true, when the option is not set and the default is used. 
+        */
         bool isSet() const             { return m_isset; }
 
       private:
