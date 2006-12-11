@@ -48,6 +48,6 @@ Main ByteorderTest : ByteorderTest.cpp ;
 Main_LinkSharedLibraries ByteorderTest : Pt ;
 Main_MakeLocate ByteorderTest : bin ;
 
-PtUnitTest ExceptionTest : ExceptionTest.cpp ;
+Main ExceptionTest : ExceptionTest.cpp ;
 Main_LinkSharedLibraries ExceptionTest : Pt ;
 Main_MakeLocate ExceptionTest : bin ;
