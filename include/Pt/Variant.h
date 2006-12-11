@@ -23,8 +23,6 @@
 #include <Pt/VariantTraits.h>
 
 #include <string>
-#include <sstream>
-#include <map>
 
 
 namespace Pt {
