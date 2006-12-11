@@ -17,29 +17,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_Gfx2_FloatedColor_h
+#define Pt_Gfx2_FloatedColor_h
 
-#include <Pt/Gfx2/ARgbColor.h>
-#include <Pt/Gfx2/ARgb8888Color.h>
+#include <Pt/Api.h>
 
 
 namespace Pt {
-namespace Gfx {
 
-void dummTest()
-{
-	ARgbColor     argb_1, argb_2;
-	ARgb8888Color argb8888_1, argb8888_2;
+	namespace Gfx {
 
-	toARgb(argb_1, argb_2);
-	fromARgb(argb_1, argb_2);
 
-	toARgb(argb_1, argb8888_2);
-	fromARgb(argb8888_1, argb_2);
+	} // namespace Gfx
 
-	toARgb_fast(argb_1, argb8888_2);
-	fromARgb_fast(argb8888_1, argb_2);
-}
-
-} // namespace Gfx
 } // namespace Pt
+
+#endif
 
