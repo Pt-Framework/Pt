@@ -27,25 +27,6 @@
 #include "Pt/Unit/TestSchedule.h"
 
 
-class AtomicIntConstructorTest : public Pt::Unit::TestCase
-{
-	public:
-		AtomicIntConstructorTest()
-		: TestCase("AtomicIntConstructorTest")
-		{}
-
-		virtual void test()
-		{
-			Pt::AtomicInt a(5);
-			PT_UNIT_ASSERT( a.value() == 5 );
-		}
-};
-
-Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTest;
-
-
-
-
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
     public:
@@ -59,6 +40,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
                 {
                     _args.push_back(42);
 
+                    this->includeTest( "ConstructorTest" );
                     this->includeTest( "AdditionTest" );
                     this->includeTest( "AssignmentTest", _args );
                     this->includeTest( "SubstractionTest" );
@@ -69,6 +51,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         AtomicTestSuite()
         : Pt::Unit::TestSuite("AtomicIntTest", _protocol)
         {
+            Pt::Unit::TestSuite::registerMethod( "ConstructorTest", *this, &AtomicTestSuite::ConstructorTest );
             Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
             Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
             Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
@@ -80,6 +63,12 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         }
 
     protected:
+        void ConstructorTest()
+        {
+			Pt::AtomicInt a(5);
+			PT_UNIT_ASSERT( a.value() == 5 );
+        }
+
         void AssignmentTest(int value)
         {
             Pt::AtomicInt a;
