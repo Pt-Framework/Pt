@@ -20,8 +20,6 @@
 #ifndef Pt_Gfx2_FloatedColor_h
 #define Pt_Gfx2_FloatedColor_h
 
-#include <Pt/Api.h>
-
 
 namespace Pt {
 

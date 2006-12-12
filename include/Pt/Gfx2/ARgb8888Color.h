@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ARgb8888Color_h
 #define Pt_Gfx2_ARgb8888Color_h
 
-#include <Pt/Gfx2/ARgb8888Color.h>
+#include <Pt/Gfx2/ARgbColor.h>
 
 
 namespace Pt {
@@ -133,35 +133,25 @@ namespace Pt {
 				inline void setBlue(uint8_t b)
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
+			public:
+				friend void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
+				friend void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+
 			protected:
 				uint32_t _val;
 		};
 
-
-		/** @brief Convert an ARgb8888Color to an ARgbColor.
+		/** @brief Convert an ARgb8888Color to ARgbColor's components.
 		 */
-		inline void toARgb(ARgbColor& dst, const ARgb8888Color& src)
-		{
-		}
+		template <> inline
+		void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
+		{ }
 
-		/** @brief Convert an ARgbColor to an ARgb8888Color.
+		/** @brief Convert ARgbColor's components to an ARgbColor.
 		 */
-		inline void fromARgb(ARgb8888Color& dst, const ARgbColor& src)
-		{
-		}
-
-
-		/** @brief Convert an ARgb8888Color to an ARgbColor.
-		 */
-		inline void toARgb_fast(ARgbColor& dst, const ARgb8888Color& src)
-		{
-		}
-
-		/** @brief Convert an ARgbColor to an ARgb8888Color.
-		 */
-		inline void fromARgb_fast(ARgb8888Color& dst, const ARgbColor& src)
-		{
-		}
+		template <> inline
+		void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		{ }
 
 	} // namespace Gfx
 

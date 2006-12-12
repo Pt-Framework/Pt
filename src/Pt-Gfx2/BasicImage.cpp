@@ -30,14 +30,27 @@ void dummTest()
 	ARgbColor     argb_1, argb_2;
 	ARgb8888Color argb8888_1, argb8888_2;
 
-	toARgb(argb_1, argb_2);
-	fromARgb(argb_1, argb_2);
+	uint16_t a, r, g, b;
 
-	toARgb(argb_1, argb8888_2);
-	fromARgb(argb8888_1, argb_2);
+	toARgb(a, r, g, b, argb_1);
+	fromARgb(argb_2, a, r, g, b);
 
-	toARgb_fast(argb_1, argb8888_2);
-	fromARgb_fast(argb8888_1, argb_2);
+	toARgb_fast(a, r, g, b, argb_1);
+	fromARgb_fast(argb_2, a, r, g, b);
+
+	toARgb(a, r, g, b, argb8888_1);
+	fromARgb(argb8888_2, a, r, g, b);
+
+	toARgb_fast(a, r, g, b, argb8888_1);
+	fromARgb_fast(argb8888_2, a, r, g, b);
+
+	assign(argb_1, argb_2);
+	assign(argb_1, argb8888_2);
+	assign(argb8888_1, argb_2);
+
+	assign_fast(argb_1, argb_2);
+	assign_fast(argb_1, argb8888_2);
+	assign_fast(argb8888_1, argb_2);
 }
 
 } // namespace Gfx

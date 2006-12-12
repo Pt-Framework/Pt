@@ -20,8 +20,7 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
+#include <Pt/Gfx2/BasicColorAlgorithm.h>
 
 
 namespace Pt {
@@ -124,39 +123,26 @@ namespace Pt {
 				inline void setBlue(uint16_t b)
 				{ _b = b; }
 
+			public:
+				friend void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from);
+				friend void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+
 			protected:
 				uint16_t _a, _r, _g, _b;
 		};
 
 
-		/** @brief Dummy function which will just copy the value.
-		 *
-		 *  Just for the sake of completeness.
+		/** @brief Convert an ARgbColor to ARgbColor's components.
 		 */
-		inline void toARgb(ARgbColor& dst, const ARgbColor& src)
-		{ dst = src; }
+		template <> inline
+		void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from)
+		{ a = from._a; r = from._r; g = from._g; b = from._b; }
 
-		/** @brief Dummy function which will just copy the value.
-		 *
-		 *  Just for the sake of completeness.
+		/** @brief Convert ARgbColor's components to an ARgbColor.
 		 */
-		inline void fromARgb(ARgbColor& dst, const ARgbColor& src)
-		{ dst = src; }
-
-
-		/** @brief Dummy function which will just copy the value.
-		 *
-		 *  Just for the sake of completeness.
-		 */
-		inline void toARgb_fast(ARgbColor& dst, const ARgbColor& src)
-		{ dst = src; }
-
-		/** @brief Dummy function which will just copy the value.
-		 *
-		 *  Just for the sake of completeness.
-		 */
-		inline void fromARgb_fast(ARgbColor& dst, const ARgbColor& src)
-		{ dst = src; }
+		template <> inline
+		void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		{ to._a = a; to._r = r; to._g = g; to._b = b; }
 
 	} // namespace Gfx
 
