@@ -25,7 +25,7 @@
 namespace Pt {
 namespace Gfx {
 
-void dummTest()
+void dummyTest()
 {
 	ARgbColor     argb_1, argb_2;
 	ARgb8888Color argb8888_1, argb8888_2;
