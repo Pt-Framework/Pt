@@ -29,18 +29,46 @@ namespace Pt {
 
 namespace Unit {
 
+    /** @brief Run registered tests
+
+        The application class serves as a container for a number of tests to
+        be run. Test can be registered easily with the RegisterTest<> class
+        template.
+
+        @code
+            class MyTest : public Unit::TestCase
+            { ... };
+
+            RegisterTest<MyTest> _registerMyTest;
+        @endcode
+
+        The application uses a reporter to process test events. Reporters can
+        be made to print information to the console or write XML logs.
+    */
     class Application
     {
         template <typename TestT>
         friend struct RegisterTest;
 
         public:
+            /** @brief Default Constructor
+            */
             Application()
             {}
 
+            /** @brief Destructor
+            */
             virtual ~Application()
             {}
 
+            /** @brief Set Reporter for test events
+
+                Sets a new reporter to report test events. Caller owns the
+                reporter and must make sure it lives as long as the 
+                application.
+
+                @param reporter 
+            */
             void setReporter(Reporter& reporter)
             { Application::_reporter = &reporter; }
 
@@ -55,6 +83,16 @@ namespace Unit {
                 _allTests.push_back(&test);
             }
 
+            /** @brief Run all tests
+
+                This method will run all tests that have been regietered 
+                previously. Use the RegisterTest<T> template to register
+                a test to the application. The function will return the
+                number of failed tests, so that its return value can directly
+                be used to return from the main function.
+
+                @return Number of failed tests.
+            */
             int run()
             {
                 _errors = 0;
@@ -68,6 +106,17 @@ namespace Unit {
                 return _errors;
             }
 
+            /** @brief Run test by name
+
+                This method will a previously registered tests. Use the
+                RegisterTest<T> template to register a test to the application.
+                The function will return the number of failed tests, so that 
+                its return value can directly be used to return from the main 
+                function.
+
+                @param testName name of the test to be run
+                @return Number of failed tests.
+            */
             int run(const std::string& testName = "")
             {
                 _errors = 0;
@@ -82,9 +131,15 @@ namespace Unit {
                 return _errors;
             }
 
+            /** @brief Returns a list of all registered test
+
+                @return Reference to the registered tests.
+            */
             const std::list<Test*>& tests() const
             { return _allTests; }
 
+            /** @brief Process started event
+            */
             static void started(const Test& test)
             {
                 if(_reporter)
@@ -93,6 +148,8 @@ namespace Unit {
                 }
             }
 
+            /** @brief Process finished event
+            */
             static void finished(const Test& test)
             {
                 if(_reporter)
@@ -101,6 +158,8 @@ namespace Unit {
                 }
             }
 
+            /** @brief Process success event
+            */
             static void success(const Test& test)
             {
                 if(_reporter)
@@ -109,6 +168,8 @@ namespace Unit {
                 }
             }
 
+            /** @brief Process assertion event
+            */
             static void assertion(const Test& test, const Assertion& a)
             {
                 ++_errors;
@@ -119,6 +180,8 @@ namespace Unit {
                 }
             }
 
+            /** @brief Process exception event
+            */
             static void exception(const Test& test, const std::exception& ex)
             {
                 ++_errors;
@@ -129,6 +192,8 @@ namespace Unit {
                 }
             }
 
+            /** @brief Process error event
+            */
             static void error(const Test& test)
             {
                 ++_errors;
@@ -139,6 +204,9 @@ namespace Unit {
                 }
             }
 
+
+            /** @brief Process informational messages
+            */
             static void message( const std::string msg )
             {
                 if(_reporter)

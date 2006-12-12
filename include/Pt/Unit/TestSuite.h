@@ -19,42 +19,14 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
-#include <map>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestFixture.h>
-
+#include <Pt/Unit/TestProtocol.h>
 
 namespace Pt {
 
 namespace Unit {
-
-    class TestSuite;
-
-
-    /** @brief Protocol for test suites
-    */
-    class PT_EXPORT TestProtocol
-    {
-        public:
-            /** @brief Destructor
-            */
-            virtual ~TestProtocol()
-            {}
-
-            /** @brief Executes the protocol
-
-                This method can be overriden to specify a custom protocol
-                for a test suite. The default implementation will simply
-                call each registered method of the test suite. Implementors
-                will most likely call TestSuite::runTest to resolve a test
-                method by name and pass it required arguments.
-
-                @param test The test suite to apply the protocol
-            */
-            virtual void run(TestSuite& test);
-    };
-
 
     /** @brief Protocol and data driven testing
 
@@ -86,7 +58,7 @@ namespace Unit {
     class TestSuite : public Test, public TestFixture
     {
         public:
-          /** @brief Construct by name and protocol
+            /** @brief Construct by name and protocol
 
                 Constructs a %TestCase with the passed name and optionally
                 a custom protocol. The protocol is not owned by the TestSuite,
@@ -193,36 +165,6 @@ namespace Unit {
             test.runTest( it->first, Args() );
         }
     }
-
-
-    class ListedProtocol : public TestProtocol
-    {
-        public:
-            void includeTest(const std::string& testName)
-            {
-                _items.insert( std::make_pair(testName, new Args()) );
-            }
-
-            template <typename A1>
-            void includeTest(const std::string& testName, A1 a1)
-            {
-                Args* args = new Args();
-                args->push_back(a1);
-                _items.insert( std::make_pair(testName, args) );
-            }
-
-            void run(TestSuite& suite)
-            {
-                std::multimap<std::string, Args*>::iterator it;
-                for(it = _items.begin(); it != _items.end(); ++it)
-                {
-                    suite.runTest( it->first, *it->second );
-                }
-            }
-
-        private:
-            std::multimap<std::string, Args*> _items;
-    };
 
 } // namespace Unit
 

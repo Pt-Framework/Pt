@@ -18,14 +18,13 @@
  ***************************************************************************/
 #include "Pt/AtomicInt.h"
 
+#include <string>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/TestCase.h"
-
-#include <string>
-
+#include "Pt/Unit/TestSchedule.h"
 
 
 class AtomicIntConstructorTest : public Pt::Unit::TestCase
@@ -49,57 +48,59 @@ Pt::Unit::RegisterTest<AtomicIntConstructorTest> register_AtomicIntConstructorTe
 
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
-	public:
-		class Protocol : public Pt::Unit::ListedProtocol
-		{
-			public:
-				Protocol()
-				{
-					this->includeTest( "AdditionTest" );
-					this->includeTest( "AssignmentTest", 42 );
-					this->includeTest( "AssignmentTest", 56 );
-					this->includeTest( "AssignmentTest", 3445 );
-					this->includeTest( "AssignmentTest", 777 );
-					this->includeTest( "SubstractionTest" );
-				}
-		} _protocol;
+    public:
+        class Protocol : public Pt::Unit::TestSchedule
+        {
+            private:
+                Pt::Args _args;
 
-	public:
-		AtomicTestSuite()
-		: Pt::Unit::TestSuite("AtomicIntTest", _protocol)
-		{
-			Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
-			Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
-			Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
-		}
+            public:
+                Protocol()
+                {
+                    _args.push_back(42);
 
-		virtual void setUp()
-		{
-			_value = 5;
-		}
+                    this->includeTest( "AdditionTest" );
+                    this->includeTest( "AssignmentTest", _args );
+                    this->includeTest( "SubstractionTest" );
+                }
+        } _protocol;
 
-	protected:
-		void AssignmentTest(int value)
-		{
-			Pt::AtomicInt a;
-			a = value;
-			PT_UNIT_ASSERT( a.value() == value );
-		}
+    public:
+        AtomicTestSuite()
+        : Pt::Unit::TestSuite("AtomicIntTest", _protocol)
+        {
+            Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
+            Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
+            Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
+        }
 
-		void SubstractionTest()
-		{
-			_value -= 3;
-			PT_UNIT_ASSERT( _value.value() == 2 );
-		}
+        virtual void setUp()
+        {
+            _value = 5;
+        }
 
-		void AdditionTest()
-		{
-			_value += 3;
-			PT_UNIT_ASSERT( _value.value() == 8 );
-		}
+    protected:
+        void AssignmentTest(int value)
+        {
+            Pt::AtomicInt a;
+            a = value;
+            PT_UNIT_ASSERT( a.value() == value );
+        }
 
-	private:
-		Pt::AtomicInt _value;
+        void SubstractionTest()
+        {
+            _value -= 3;
+            PT_UNIT_ASSERT( _value.value() == 2 );
+        }
+
+        void AdditionTest()
+        {
+            _value += 3;
+            PT_UNIT_ASSERT( _value.value() == 8 );
+        }
+
+    private:
+        Pt::AtomicInt _value;
 };
 
 Pt::Unit::RegisterTest<AtomicTestSuite> register_AtomicTestSuite;

@@ -100,3 +100,12 @@ src/Pt-Gfx/Rgb565Color.cpp
 src/Pt-Gfx/XRgb1555Color.cpp
 src/Pt-Gfx/XRgb8888Color.cpp
 src/Pt-Gfx/YuvColor.cpp
+include/Pt/Args.h
+include/Pt/Arg.h
+include/Pt/Date.h
+include/Pt/DateTime.h
+include/Pt/ICallable.h
+include/Pt/PropertyProxy.h
+include/Pt/RefCounted.h
+include/Pt/SmartPtr.h
+include/Pt/Time.h
