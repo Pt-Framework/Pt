@@ -63,6 +63,9 @@ namespace Pt {
 				inline ARgb8888Color(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 				: _val(uint32_t(a) << 24)
 				{
+					// 33333333222222221111111100000000
+					// 76543210765432107654321076543210
+					// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
 					_val |= (uint32_t(r) << 16);
 					_val |= (uint32_t(g) <<  8);
 					_val |=  uint32_t(b);
@@ -175,10 +178,10 @@ namespace Pt {
 			// 76543210765432107654321076543210
 			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
 			//                 CCCCCCCCCCCCCCCC
-			to._val = to._val & 0x00FFFFFF | ( uint32_t(a & 0xFF00) << 16 );
-			to._val = to._val & 0xFF00FFFF | ( uint32_t(r & 0xFF00) <<  8 );
-			to._val = to._val & 0xFFFF00FF |   uint32_t(g & 0xFF00)        ;
-			to._val = to._val & 0xFFFFFF00 |   uint32_t(b)          >>  8  ;
+			to._val  = ( uint32_t(a & 0xFF00) << 16 );
+			to._val |= ( uint32_t(r & 0xFF00) <<  8 );
+			to._val |=   uint32_t(g & 0xFF00)        ;
+			to._val |=   uint32_t(b)          >>  8  ;
 		}
 
 	} // namespace Gfx
