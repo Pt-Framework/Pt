@@ -42,10 +42,10 @@ namespace Pt {
 		 */
 		class PT_EXPORT PT_PACKED ARgbColor {
 			public:
-				/** @brief The default constructor, will generate default color (black).
+				/** @brief The default constructor, will generate the default color (black).
 				 */
 				inline ARgbColor()
-				: _a(0), _r(0), _g(0), _b(0)
+				: _a(0xFFFF), _r(0), _g(0), _b(0)
 				{}
 
 				/** @brief Copy constructor.
@@ -56,24 +56,15 @@ namespace Pt {
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbColor(uint16_t r, uint16_t g, uint16_t b)
-				: _a(0xFFFF), _r(0), _g(0), _b(0)
-				{
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
-				}
+				inline ARgbColor(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
+				: _a(a), _r(r), _g(g), _b(b)
+				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbColor(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
-				: _a(0), _r(0), _g(0), _b(0)
-				{
-					setAlpha(a);
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
-				}
+				inline ARgbColor(uint16_t r, uint16_t g, uint16_t b)
+				: _a(0xFFFF), _r(r), _g(g), _b(b)
+				{}
 
 
 				/** @brief Assignment operator.

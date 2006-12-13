@@ -38,11 +38,11 @@ namespace Pt {
 		template <typename ColorT> inline
 		void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ColorT& from);
 
-		/** @brief Faster version (but less precision) of toARgb().
+		/** @brief Faster (but less precision) version of toARgb().
 		 *
 		 *  Note that the default implementation will just actually call toARgb().
 		 *
-		 *  A color model implementor should fully specialize this function as needed.
+		 *  A color model implementor can fully specialize this function as needed.
 		 */
 		template <typename ColorT> inline
 		void toARgb_fast(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ColorT& from)
@@ -58,11 +58,11 @@ namespace Pt {
 		template <typename ColorT> inline
 		void fromARgb(ColorT& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 
-		/** @brief Faster version (but less precision) of fromARgb().
+		/** @brief Faster (but less precision) version of fromARgb().
 		 *
 		 *  Note that the default implementation will just actually call fromARgb().
 		 *
-		 *  A color model implementor should fully specialize this function as needed.
+		 *  A color model implementor can fully specialize this function as needed.
 		 */
 		template <typename ColorT> inline
 		void fromARgb_fast(ColorT& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
@@ -82,7 +82,7 @@ namespace Pt {
 			fromARgb(to, a, r, g, b);
 		}
 
-		/** @brief Faster version (but less precision) of assign().
+		/** @brief Faster (but less precision) version of assign().
 		 *
 		 *  A color model implementor should specialize this function as needed if
 		 *  faster implementation for the two colors is exist.
@@ -101,7 +101,7 @@ namespace Pt {
 		void assign(ColorT& to, const ColorT& from)
 		{ to = from; }
 
-		/** @brief Partial specialization of fast_assign() if both the color models are the same.
+		/** @brief Partial specialization of assign_fast() if both the color models are the same.
 		 */
 		template <typename ColorT> inline
 		void assign_fast(ColorT& to, const ColorT& from)

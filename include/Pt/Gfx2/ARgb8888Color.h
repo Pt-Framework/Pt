@@ -40,10 +40,10 @@ namespace Pt {
 		 */
 		class PT_EXPORT PT_PACKED ARgb8888Color {
 			public:
-				/** @brief The default constructor, will generate default color (black).
+				/** @brief The default constructor, will generate the default color (black).
 				 */
 				inline ARgb8888Color()
-				: _val(0)
+				: _val(0xFF000000)
 				{}
 
 				/** @brief Copy constructor.
@@ -55,29 +55,28 @@ namespace Pt {
 				/** @brief Construct color using the given packed color constant.
 				 */
 				inline ARgb8888Color(uint32_t val)
-				: _val(val & 0xFFFFFFFF)
+				: _val(val)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
 				inline ARgb8888Color(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
-				: _val(0)
+				: _val(uint32_t(a) << 24)
 				{
-					setAlpha(a);
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
+					_val |= (uint32_t(r) << 16);
+					_val |= (uint32_t(g) <<  8);
+					_val |=  uint32_t(b);
 				}
+
 
 				/** @brief Construct color using the given components.
 				 */
 				inline ARgb8888Color(uint8_t r, uint8_t g, uint8_t b)
-				: _val(0)
+				: _val(0xFF000000)
 				{
-					setAlpha(0xFF);
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
+					_val |= (uint32_t(r) << 16);
+					_val |= (uint32_t(g) <<  8);
+					_val |=  uint32_t(b);
 				}
 
 
@@ -90,7 +89,7 @@ namespace Pt {
 				/** @brief Return the alpha component of this color.
 				 */
 				inline uint8_t alpha() const
-				{ return (_val & 0xFF000000) >> 24; }
+				{ return _val >> 24; }
 
 				/** @brief Return the red component of this color.
 				 */
@@ -135,6 +134,7 @@ namespace Pt {
 
 			public:
 				friend void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
+				friend void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
 				friend void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 
 			protected:
@@ -145,13 +145,41 @@ namespace Pt {
 		 */
 		template <> inline
 		void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
-		{ }
+		{
+			// 33333333222222221111111100000000
+			// 76543210765432107654321076543210
+			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
+			a = ((from._val & 0xFF000000) >> 24) * 257;
+			r = ((from._val & 0x00FF0000) >> 16) * 257;
+			g = ((from._val & 0x0000FF00) >> 8 ) * 257;
+			b = (from. _val & 0x000000FF       ) * 257;
+		}
+
+		/** @brief Convert an ARgb8888Color to ARgbColor's components (faster, but less precision version).
+		 */
+		template <> inline
+		void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
+		{
+			a = (from._val & 0xFF000000) >> 16;
+			r = (from._val & 0x00FF0000) >>  8;
+			g = (from._val & 0x0000FF00)      ;
+			b = (from._val & 0x000000FF) <<  8;
+		}
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
 		 */
 		template <> inline
 		void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
-		{ }
+		{
+			// 33333333222222221111111100000000
+			// 76543210765432107654321076543210
+			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
+			//                 CCCCCCCCCCCCCCCC
+			to._val = to._val & 0x00FFFFFF | ( uint32_t(a & 0xFF00) << 16 );
+			to._val = to._val & 0xFF00FFFF | ( uint32_t(r & 0xFF00) <<  8 );
+			to._val = to._val & 0xFFFF00FF |   uint32_t(g & 0xFF00)        ;
+			to._val = to._val & 0xFFFFFF00 |   uint32_t(b)          >>  8  ;
+		}
 
 	} // namespace Gfx
 
