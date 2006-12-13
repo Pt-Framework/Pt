@@ -19,7 +19,7 @@
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
-#include <Pt/System/Clock.h>
+#include <Pt/System/Clock.h> // NOTE: should not be here !!!
 #include <Pt/Unit/Assertion.h>
 
 #include <iostream>
@@ -31,57 +31,127 @@ namespace Pt {
 
 namespace Unit {
 
-	class Reporter
-	{
-	public:
-		Reporter(std::ostream* out = &std::cerr)
-		: _out(out)
-		{}
+    /** @brief Test event reporter
 
-		virtual ~Reporter()
-		{}
+        This class is the base class for all reporters for test events. It
+        lets the implementor override several virtual methods that are called
+        on perticular events during the test. Reporters can be made to print 
+        information to the console or write XML logs. The default 
+        implementation will report events to a stream in a simple text format.
+    */
+    class Reporter
+    {
+    public:
+        /** @brief Constructs a reporter to use an ostream
 
-		virtual void started(const Test& test)
-		{
-			*_out << test.name() << ": ";
-		}
+            This conctructor creates a reporter that uses the passed
+            ostream to print messgages for the events that happen during a 
+            test. By default, std::cerr is used to print the messages to.
 
-		virtual void finished(const Test& test)
-		{
-			//*_out << std::endl;
-		}
+            @param reporter Reporeter to be used
+        */
+        Reporter(std::ostream* out = &std::cerr)
+        : _out(out)
+        {}
 
-		virtual void message(const std::string& msg)
-		{
-			*_out << msg << std::endl;
-		}
+        /** @brief Destructor
+        */
+        virtual ~Reporter()
+        {}
 
-		virtual void success(const Test& test)
-		{
-			*_out << "OK"<< std::endl;
-		}
+        /** @brief Start notification
 
-		virtual void assertion(const Test& test, const Assertion& a)
-		{
-			*_out << "ASSERTION" << std::endl;
-			*_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
-			*_out << '\t' << a.sourceInfo().func() << std::endl;
-		}
+            This method is called when a test has started. Every test sends
+            this signal at startup.
 
-		virtual void exception(const Test& test, const std::exception& ex)
-		{
-			*_out << test.name() << "EXCEPTION" << std::endl;
-			*_out << '\t' << ex.what() << std::endl;
-		}
+            @param test The started test
+        */
+        virtual void started(const Test& test)
+        {
+            *_out << test.name() << ": ";
+        }
 
-		virtual void error(const Test& test)
-		{
-			*_out << test.name() << ": ERROR" << std::endl;
-		}
+        /** @brief Finished notification
 
-	protected:
-		std::ostream* _out;
-	};
+            This method is called when a test has finished. Every test sends
+            this signal at its end no matter if it failed or succeeded.
+
+            @param test The finished test
+        */
+        virtual void finished(const Test& test)
+        {
+            //*_out << std::endl;
+        }
+
+        /** @brief Message notification
+
+            This method is called when a test has produced an informational
+            message.
+
+            @param msg The message
+        */
+        virtual void message(const std::string& msg)
+        {
+            *_out << msg << std::endl;
+        }
+
+        /** @brief Success notification
+
+            This method is called when a test was successful.
+
+            @param test The succeeded test
+        */
+        virtual void success(const Test& test)
+        {
+            *_out << "OK"<< std::endl;
+        }
+
+        /** @brief Assertion notification
+
+            This method is called when a an assertion failed during a test. an
+            assertion fails when a user defined condition is not met.
+
+            @param test The failed test
+        */
+        virtual void assertion(const Test& test, const Assertion& a)
+        {
+            *_out << "ASSERTION" << std::endl;
+            *_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
+            *_out << '\t' << a.sourceInfo().func() << std::endl;
+        }
+
+        /** @brief Exception notification
+
+            This method is called when a an exception failed during a test. An
+            exception usually means that an error occured that was even u
+            nexpected in a test scenario
+
+            @param test The failed test
+        */
+        virtual void exception(const Test& test, const std::exception& ex)
+        {
+            *_out << test.name() << "EXCEPTION" << std::endl;
+            *_out << '\t' << ex.what() << std::endl;
+        }
+
+        /** @brief Error notification
+
+            This method is called when a an unknown error occurs during a 
+            test.
+
+            @param test The failed test
+        */
+        virtual void error(const Test& test)
+        {
+            *_out << test.name() << ": ERROR" << std::endl;
+        }
+
+    protected:
+        /** @brief Ostream to print output to
+        */
+        std::ostream* _out;
+    };
+
 
     //TODO: is this obsolete? Andreas suspected so before and I have a 
     //       feeling that he is right.

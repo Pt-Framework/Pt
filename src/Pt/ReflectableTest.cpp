@@ -2,10 +2,9 @@
 #include "Pt/Reflectable.h"
 
 #include "Pt/Unit/Assertion.h"
-#include "Pt/Unit/TestFixture.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
-
+#include "Pt/Unit/RegisterTest.h"
 
 
 class TestReflectable : public Pt::Reflectable

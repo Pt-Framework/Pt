@@ -35,6 +35,34 @@ namespace Unit {
         implement the abstract method 'test' and the methods 'setUp' and
         'tearDown' for resource management. When the test is run, 'setUp'
         will be called first, then 'test' and finally 'tearDown'.
+
+        @code
+            class MyTest : public TestCase
+            {
+                public:
+                    MyTest()
+                    : TestCase("MyTest")
+                    {}
+
+                    virtual void setUp()
+                    {
+                        // init resource
+                    }
+
+                    virtual void tearDown()
+                    {
+                        // release resource
+                    }
+
+                    void test()
+                    {
+                        // test code using a resourc
+                    }
+            };
+        @endcode
+
+        Once the test is written it can be registered to an application by 
+        using the RegisterTest class template.
     */
     class TestCase : public Test, public TestFixture
     {

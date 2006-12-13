@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
- *   Copyright (C) 2004 Marc Boris Duerner                                 *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,48 +16,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <iostream>
-using namespace std;
+#ifndef PT_UNIT_REGISTERTEST_H
+#define PT_UNIT_REGISTERTEST_H
 
-#include "Pt/Singleton.h"
-using namespace Pt;
-
-#include "Pt/Unit/Assertion.h"
-#include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
-#include "Pt/Unit/RegisterTest.h"
+#include<Pt/Unit/Application.h>
 
 
-class TestSingleton : public Singleton<TestSingleton> 
-{
-	friend class Singleton<TestSingleton>;
+namespace Pt {
 
-	public:
-		TestSingleton()
-		{}
+namespace Unit {
 
-		~TestSingleton()
-		{}
-};
+    /** @brief Registers tests to an application
 
+        Test can be registered easily with the RegisterTest<> class
+        template to an Unit::Application at program initialisation.
+        A typical example looks like this:
 
-class SingletonTest : public Pt::Unit::TestSuite
-{
-	public:
-		SingletonTest()
-		: TestSuite("SingletonTest")
-		{
-			this->registerMethod("testEqualInstance", *this, &SingletonTest::testEqualInstance);
-		}
+        @code
+            class MyTest : public Unit::TestCase
+            { ... };
 
-		virtual void testEqualInstance()
-		{
-			TestSingleton* _inst1 = &( TestSingleton::instance() );
-			TestSingleton* _inst2 = &( TestSingleton::instance() );
-			PT_UNIT_ASSERT( _inst1 == _inst2 );
-		}
+            RegisterTest<MyTest> _registerMyTest;
+        @endcode
 
-};
+        The constructor of the RegisterTest class template will 
+        register an instance of its template parameter to the 
+        application.
+    */
+    template <class TestT>
+    struct RegisterTest
+    {
+        RegisterTest()
+        {
+            static TestT test;
+            Application::registerTest(test);
+        }
+    };
 
-Pt::Unit::RegisterTest<SingletonTest> register_TypesTest;
+} // namespace Unit
 
+} // namespace Pt
+
+#endif

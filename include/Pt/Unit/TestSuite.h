@@ -49,6 +49,9 @@ namespace Unit {
             };
         @endcode
 
+        Once the test is written it can be registered to an application by 
+        using the RegisterTest class template.
+
         The default protocol will run each registered test method when the 
         test is run. Before each test method setUp is called and tearDown 
         after each test. The TestProtocol can be replaced with a customised 

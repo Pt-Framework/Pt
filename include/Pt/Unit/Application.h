@@ -31,19 +31,25 @@ namespace Unit {
 
     /** @brief Run registered tests
 
-        The application class serves as a container for a number of tests to
-        be run. Test can be registered easily with the RegisterTest<> class
-        template.
+        The application class serves as an environment for a number of tests 
+        to be run. An application object is usually created in the main loop
+        of a program and the return value of Unit::Application::run returned.
+        A reporter can be set for the application to process test events. 
+        Reporters can be made to print information to the console or write 
+        XML logs. A typical example may look like this:
 
         @code
-            class MyTest : public Unit::TestCase
-            { ... };
-
-            RegisterTest<MyTest> _registerMyTest;
+            int main()
+            {
+                Pt::Unit::Reporter reporter;
+                Pt::Unit::Application app;
+                app.setReporter(reporter);
+                return app.run();
+            }
         @endcode
 
-        The application uses a reporter to process test events. Reporters can
-        be made to print information to the console or write XML logs.
+        The TestMain.h include already defines a main loop with an application
+        for the common use case.
     */
     class Application
     {
@@ -67,11 +73,21 @@ namespace Unit {
                 reporter and must make sure it lives as long as the 
                 application.
 
-                @param reporter 
+                @param reporter Reporeter to be used
             */
             void setReporter(Reporter& reporter)
             { Application::_reporter = &reporter; }
 
+            /** @brief Register a test
+
+                Registers a test to the application. The application will
+                not own the test and the caller has to make sure it exists
+                as long as the application object. This method is called
+                by the RegisterTest class template and does not need to 
+                be called directly.
+
+                @param test Test to register
+            */
             static void registerTest(Test& test)
             {
                 connect(test.started, &Application::started);
@@ -214,10 +230,16 @@ namespace Unit {
             }
 
         private:
+            /** @brief Number of errors that occured during a run
+            */
             static size_t _errors;
 
+            /** @brief List of all registered tests
+            */
             static std::list<Test*> _allTests;
 
+            /** @brief Currently used reporter
+            */
             static Reporter* _reporter;
     };
 
@@ -226,17 +248,6 @@ namespace Unit {
     std::list<Test*> Application::_allTests;
 
     Reporter* Application::_reporter = 0;
-
-
-    template <class TestT>
-    struct RegisterTest
-    {
-        RegisterTest()
-        {
-            static TestT test;
-            Application::registerTest(test);
-        }
-    };
 
 } // namespace Unit
 

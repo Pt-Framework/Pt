@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,8 +29,8 @@ int main(int argc, char** argv)
   // command line option syntax:
   // test [OPTIONS]
   // where OPTIONS are
-  //  -t=CLASS[::TEST]    run the test class CLASS or member test CLASS::TEST
-  //  -f=FILE             save output in file FILE instead of stdout
+  //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
+  //     -f=FILE           save output in file FILE instead of stdout
 
 	Pt::Unit::Reporter reporter;
 	Pt::Unit::Application app;
