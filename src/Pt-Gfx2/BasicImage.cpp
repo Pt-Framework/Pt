@@ -20,6 +20,19 @@
 
 #include <Pt/Gfx2/ARgbColor.h>
 #include <Pt/Gfx2/ARgb8888Color.h>
+#include <Pt/Gfx2/FloatedColor.h>
+
+
+namespace Pt {
+
+	namespace Gfx {
+
+		// Explicit instantiation of the image classes
+		// Explicit instantiation of the subimage classes
+
+	} // namespace Gfx
+
+} // namespace Pt
 
 
 namespace Pt {
@@ -27,8 +40,9 @@ namespace Gfx {
 
 void dummyTest()
 {
-	ARgbColor     argb_1, argb_2;
-	ARgb8888Color argb8888_1, argb8888_2;
+	ARgbColor        argb_1, argb_2;
+	ARgb8888Color    argb8888_1, argb8888_2;
+	FloatedARgbColor float_1, float_2;
 
 	uint16_t a, r, g, b;
 
@@ -51,8 +65,10 @@ void dummyTest()
 	assign_fast(argb_1, argb_2);
 	assign_fast(argb_1, argb8888_2);
 	assign_fast(argb8888_1, argb_2);
+
+	assign(float_1, argb_1);
+	assign(argb_2, float_1);
 }
 
 } // namespace Gfx
 } // namespace Pt
-

@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ARgb8888Color_h
 #define Pt_Gfx2_ARgb8888Color_h
 
-#include <Pt/Gfx2/ARgbColor.h>
+#include <Pt/Gfx2/FloatedColor.h>
 
 
 namespace Pt {
