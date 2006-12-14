@@ -37,6 +37,7 @@ ITEM P8 S2 "A empty Void type exists"
 ITEM P7 S8 "Blending is supported by color classes"
 
 ITEM P7 S13 "The BasicImage<T> class interface is improved"
+	TASK "Convert the BasicImage<T> class to use the new color model imlpementation"
 	TASK "Review the interface of the BasicImage<T> class"
 	TASK "Consider to write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
 	TASK "Write iterator based algorithm greyscale"
