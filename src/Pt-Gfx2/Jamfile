@@ -8,3 +8,8 @@ SharedLibrary Pt-Gfx2 :
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx2 : Pt ;
 SharedLibrary_MakeLocate Pt-Gfx2 : bin ;
+
+Main ColorTest : ColorTest.cpp ;
+Main_LinkSharedLibraries ColorTest : Pt ;
+Main_MakeLocate ColorTest : bin ;
+

@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ColorAlgorithm_h
 #define Pt_Gfx2_ColorAlgorithm_h
 
-#include <Pt/Gfx2/BasicColorAlgorithm.h>
+#include <Pt/Gfx2/ARgbColor.h>
 
 
 namespace Pt {
@@ -31,15 +31,18 @@ namespace Pt {
 		 *
 		 *  This is a fallback version in case the color model implementor does not
 		 *  implement the specific version of greyscale() for the color model.
+		 *  \n\n
+		 *  A color implementor must not rely on this function since this function
+		 *  will cause some overhead because of the conversion to and from ARgbColor.
 		 */
 		template <typename ColorT> inline
 		const ColorT& greyscale(ColorT& to, const ColorT& from)
 		{
-			uint16_t a, r, g, b;
-			toARgb(a, r, g, b, from);
+			ARgbColor tmp;
 
-			const uint16_t s = (uint32_t(r)*77 + uint32_t(g)*128 + uint32_t(b)*51) >> 8;
-			fromARgb(to, a, s, s, s);
+			assign(tmp, from);
+			greyscale(tmp, tmp);
+			assign(to, tmp);
 
 			return to;
 		}
