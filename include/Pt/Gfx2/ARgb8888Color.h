@@ -155,6 +155,8 @@ namespace Pt {
 				friend bool operator< <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
 				friend bool operator> <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
 
+				friend const ARgb8888Color& greyscale(ARgb8888Color& to, const ARgb8888Color& from);
+
 			protected:
 				uint32_t _val;
 		};
@@ -275,6 +277,26 @@ namespace Pt {
 
 			return *this;
 		}
+
+
+		/** @brief Make the greyscale version of the source ARgb8888Color color.
+		 */
+		inline const ARgb8888Color& greyscale(ARgb8888Color& to, const ARgb8888Color& from)
+		{
+			const uint32_t r = from.red();
+			const uint32_t g = from.green();
+			const uint32_t b = from.blue();
+			const uint32_t s = (r*77 + g*128 + b*51) >> 8;
+
+			// 33333333222222221111111100000000
+			// 76543210765432107654321076543210
+			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
+			//                         SSSSSSSS
+			to._val = (from._val&0xFF000000) | (s<<24) | (s<<16) | s;
+
+			return to;
+		}
+
 	} // namespace Gfx
 
 } // namespace Pt

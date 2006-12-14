@@ -136,6 +136,8 @@ namespace Pt {
 				friend bool operator< <FloatedARgbColor>(const FloatedARgbColor& c1, const FloatedARgbColor& c2);
 				friend bool operator> <FloatedARgbColor>(const FloatedARgbColor& c1, const FloatedARgbColor& c2);
 
+				friend const FloatedARgbColor& greyscale(FloatedARgbColor& to, const FloatedARgbColor& from);
+
 			protected:
 				float _a, _r, _g, _b;
 		};
@@ -188,6 +190,20 @@ namespace Pt {
 		bool operator> <FloatedARgbColor>(const FloatedARgbColor& c1, const FloatedARgbColor& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
+
+		/** @brief Make the greyscale version of the source FloatedARgbColor color.
+		 */
+		inline const FloatedARgbColor& greyscale(FloatedARgbColor& to, const FloatedARgbColor& from)
+		{
+			const float s = from._r*0.3f + from._g*0.5f + from._b*0.2f;
+
+			to._a = from._a;
+			to._r = s;
+			to._g = s;
+			to._b = s;
+
+			return to;
+		}
 	} // namespace Gfx
 
 } // namespace Pt

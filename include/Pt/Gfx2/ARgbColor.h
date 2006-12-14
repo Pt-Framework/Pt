@@ -131,6 +131,8 @@ namespace Pt {
 				friend bool operator< <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
 				friend bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
 
+				friend const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from);
+
 			protected:
 				uint16_t _a, _r, _g, _b;
 		};
@@ -172,6 +174,24 @@ namespace Pt {
 		template <> inline
 		bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
+
+
+		/** @brief Make the greyscale version of the source ARgbColor color.
+		 */
+		inline const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from)
+		{
+			const uint32_t r = from._r;
+			const uint32_t g = from._g;
+			const uint32_t b = from._b;
+			const uint32_t s = (r*77 + g*128 + b*51) >> 8;
+
+			to._a = from._a;
+			to._r = s;
+			to._g = s;
+			to._b = s;
+
+			return to;
+		}
 
 	} // namespace Gfx
 
