@@ -27,9 +27,13 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief 32-Bit Packed ARGB Color.
+		/** @brief 32-Bit ARGB color model.
 		 *  @ingroup Gfx
 		 *
+		 *  This class is exist so that the raw memory buffer of an image implementation
+		 *  which use this color model could be casted directly to hardware image buffer
+		 *  with format AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB.
+		 *  \n\n
 		 *  Valid range of the color components for this color model:
 		 *  <TABLE>
 		 *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>

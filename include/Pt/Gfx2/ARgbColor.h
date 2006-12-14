@@ -27,7 +27,7 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief 64-Bit ARGB Color.
+		/** @brief 64-Bit ARGB color model.
 		 *  @ingroup Gfx
 		 *
 		 *  This is the master color model for Pt::Gfx.

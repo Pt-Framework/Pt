@@ -27,7 +27,7 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief Floated ARGB Color.
+		/** @brief Floated ARGB color model.
 		 *  @ingroup Gfx
 		 *
 		 *  This is the temporary color model for Pt::Gfx.
