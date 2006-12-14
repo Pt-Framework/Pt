@@ -137,12 +137,18 @@ namespace Pt {
 
 
 		/** @brief Convert an ARgbColor to ARgbColor's components.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from)
 		{ a = from._a; r = from._r; g = from._g; b = from._b; }
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)

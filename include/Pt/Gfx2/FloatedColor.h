@@ -142,6 +142,9 @@ namespace Pt {
 
 
 		/** @brief Convert a FloatedARgbColor to ARgbColor's components.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void toARgb<FloatedARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const FloatedARgbColor& from)
@@ -153,6 +156,9 @@ namespace Pt {
 		}
 
 		/** @brief Convert ARgbColor's components to a FloatedARgbColor.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void fromARgb<FloatedARgbColor>(FloatedARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)

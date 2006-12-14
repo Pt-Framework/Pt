@@ -157,6 +157,9 @@ namespace Pt {
 
 
 		/** @brief Convert an ARgb8888Color to ARgbColor's components.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
@@ -171,6 +174,9 @@ namespace Pt {
 		}
 
 		/** @brief Convert an ARgb8888Color to ARgbColor's components (faster, but less precision version).
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
@@ -182,6 +188,9 @@ namespace Pt {
 		}
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
+		 *
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <> inline
 		void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
@@ -195,6 +204,27 @@ namespace Pt {
 			to._val |=   uint32_t(g & 0xFF00)        ;
 			to._val |=   uint32_t(b)          >>  8  ;
 		}
+
+
+		/** @brief Assign an ARgb8888Color to a FloatedARgbColor model.
+		 */
+		template <> inline
+		void assign<FloatedARgbColor, ARgb8888Color>(FloatedARgbColor& to, const ARgb8888Color& from)
+		{
+			to.setAlpha( float(from.alpha()) / 255.0f );
+			to.setRed  ( float(from.red  ()) / 255.0f );
+			to.setGreen( float(from.green()) / 255.0f );
+			to.setBlue ( float(from.blue ()) / 255.0f );
+		}
+
+		/** @brief Faster (but less precision) version of assign().
+		 *
+		 *  In this full specialization for FloatedARgbColor <- ARgb8888Color, this
+		 *  function will just actually call assign<FloatedARgbColor, ARgb8888Color>().
+		 */
+		template <> inline
+		void assign_fast<FloatedARgbColor, ARgb8888Color>(FloatedARgbColor& to, const ARgb8888Color& from)
+		{ assign<FloatedARgbColor, ARgb8888Color>(to, from); }
 
 
 		/** @brief Equality operator for ARgb8888Color comparison.

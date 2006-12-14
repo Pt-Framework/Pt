@@ -31,9 +31,12 @@ namespace Pt {
 		/** @brief Convert a ColorT to ARgbColor's components.
 		 *
 		 *  Note that by default, this function is just declared and not defined.
-		 *
+		 *  \n\n
 		 *  A color model implementor must implement the full specialization of
 		 *  this function.
+		 *  \n\n
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <typename ColorT> inline
 		void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ColorT& from);
@@ -41,8 +44,11 @@ namespace Pt {
 		/** @brief Faster (but less precision) version of toARgb().
 		 *
 		 *  Note that the default implementation will just actually call toARgb().
-		 *
+		 *  \n\n
 		 *  A color model implementor can fully specialize this function as needed.
+		 *  \n\n
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <typename ColorT> inline
 		void toARgb_fast(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ColorT& from)
@@ -51,9 +57,12 @@ namespace Pt {
 		/** @brief Convert ARgbColor's components to a ColorT.
 		 *
 		 *  Note that by default, this function is just declared and not defined.
-		 *
+		 *  \n\n
 		 *  A color model implementor must implement the full specialization of
 		 *  this function.
+		 *  \n\n
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <typename ColorT> inline
 		void fromARgb(ColorT& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
@@ -61,8 +70,11 @@ namespace Pt {
 		/** @brief Faster (but less precision) version of fromARgb().
 		 *
 		 *  Note that the default implementation will just actually call fromARgb().
-		 *
+		 *  \n\n
 		 *  A color model implementor can fully specialize this function as needed.
+		 *  \n\n
+		 *  Valid range of the individual color components (a, r, g, and b) are
+		 *  from 0 to 65535 (0xFFFF).
 		 */
 		template <typename ColorT> inline
 		void fromARgb_fast(ColorT& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
@@ -115,7 +127,7 @@ namespace Pt {
 		/** @brief Equality operator for color comparison.
 		 *
 		 *  Note that by default, this function is just declared and not defined.
-		 *
+		 *  \n\n
 		 *  A color model implementor must implement the full specialization of
 		 *  this function.
 		 */
@@ -125,7 +137,7 @@ namespace Pt {
 		/** @brief Less-than operator for color comparison.
 		 *
 		 *  Note that by default, this function is just declared and not defined.
-		 *
+		 *  \n\n
 		 *  A color model implementor must implement the full specialization of
 		 *  this function.
 		 */
@@ -135,7 +147,7 @@ namespace Pt {
 		/** @brief Greater-than operator for color comparison.
 		 *
 		 *  Note that by default, this function will use operator==() and operator<().
-		 *
+		 *  \n\n
 		 *  A color model implementor should implement the full specialization of
 		 *  this function for better performance.
 		 */
@@ -145,8 +157,8 @@ namespace Pt {
 
 		/** @brief Inequality operator for color comparison.
 		 *
-		 *  Note that by default, this function will use operator==().
-		 *
+		 *  Note that by default, this function will call operator==().
+		 *  \n\n
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
@@ -156,8 +168,8 @@ namespace Pt {
 
 		/** @brief Less-than-or-equal operator for color comparison.
 		 *
-		 *  Note that by default, this function will use operator==() and operator<().
-		 *
+		 *  Note that by default, this function will call operator==() and operator<().
+		 *  \n\n
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
@@ -167,8 +179,8 @@ namespace Pt {
 
 		/** @brief Greater-than-or-equal operator for color comparison.
 		 *
-		 *  Note that by default, this function will use operator<().
-		 *
+		 *  Note that by default, this function will call operator<().
+		 *  \n\n
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
@@ -178,20 +190,32 @@ namespace Pt {
 
 
 		/** @brief Addition operator for color mathematics (beware of overflow).
+		 *
+		 *  Note that by default, this function will call operator=() and operator+=().
+		 *  \n\n
+		 *  A color model implementor can implement the full specialization of
+		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
 		const ColorT& operator+(const ColorT& c1, const ColorT& c2)
 		{
-			const ColorT rs = c1 + c2;
+			ColorT rs = c1;
+			rs += c2;
 			return(rs);
 		}
 
 		/** @brief Addition operator for color mathematics (beware of underflow).
+		 *
+		 *  Note that by default, this function will call operator=() and operator+=().
+		 *  \n\n
+		 *  A color model implementor can implement the full specialization of
+		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
 		const ColorT& operator-(const ColorT& c1, const ColorT& c2)
 		{
-			const ColorT rs = c1 - c2;
+			ColorT rs = c1;
+			rs -= c2;
 			return(rs);
 		}
 
