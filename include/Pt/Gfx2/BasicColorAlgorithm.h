@@ -176,6 +176,25 @@ namespace Pt {
 		bool operator>=(const ColorT& c1, const ColorT& c2)
 		{ return !(c1<c2); }
 
+
+		/** @brief Addition operator for color mathematics (beware of overflow).
+		 */
+		template <typename ColorT> inline
+		const ColorT& operator+(const ColorT& c1, const ColorT& c2)
+		{
+			const ColorT rs = c1 + c2;
+			return(rs);
+		}
+
+		/** @brief Addition operator for color mathematics (beware of underflow).
+		 */
+		template <typename ColorT> inline
+		const ColorT& operator-(const ColorT& c1, const ColorT& c2)
+		{
+			const ColorT rs = c1 - c2;
+			return(rs);
+		}
+
 	} // namespace Gfx
 
 } // namespace Pt

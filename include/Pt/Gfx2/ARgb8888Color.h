@@ -85,16 +85,16 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline ARgb8888Color& operator=(const ARgb8888Color& c)
+				inline const ARgb8888Color& operator=(const ARgb8888Color& c)
 				{ _val = c._val; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline ARgb8888Color& operator+=(const ARgb8888Color& c);
+				inline const ARgb8888Color& operator+=(const ARgb8888Color& c);
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline ARgb8888Color& operator-=(const ARgb8888Color& c);
+				inline const ARgb8888Color& operator-=(const ARgb8888Color& c);
 
 
 				/** @brief Return the alpha component of this color.
@@ -218,7 +218,7 @@ namespace Pt {
 
 		/** @brief Assignment-addition operator (beware of overflow).
 		 */
-		inline ARgb8888Color& ARgb8888Color::operator+=(const ARgb8888Color& c)
+		inline const ARgb8888Color& ARgb8888Color::operator+=(const ARgb8888Color& c)
 		{
 			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
 			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
@@ -229,9 +229,9 @@ namespace Pt {
 			return *this;
 		}
 
-				/** @brief Assignment-substraction operator (beware of underflow).
-				 */
-		inline ARgb8888Color& ARgb8888Color::operator-=(const ARgb8888Color& c)
+		/** @brief Assignment-substraction operator (beware of underflow).
+		 */
+		inline const ARgb8888Color& ARgb8888Color::operator-=(const ARgb8888Color& c)
 		{
 			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
 			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
