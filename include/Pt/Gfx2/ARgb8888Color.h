@@ -286,6 +286,7 @@ namespace Pt {
 			const uint32_t r = from.red();
 			const uint32_t g = from.green();
 			const uint32_t b = from.blue();
+
 			const uint32_t s = (r*77 + g*128 + b*51) >> 8;
 
 			// 33333333222222221111111100000000

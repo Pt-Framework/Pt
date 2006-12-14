@@ -206,7 +206,7 @@ namespace Pt {
 
 		/** @brief Addition operator for color mathematics (beware of underflow).
 		 *
-		 *  Note that by default, this function will call operator=() and operator+=().
+		 *  Note that by default, this function will call operator=() and operator-=().
 		 *  \n\n
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.

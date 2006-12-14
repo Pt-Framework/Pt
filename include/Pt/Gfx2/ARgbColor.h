@@ -183,7 +183,8 @@ namespace Pt {
 			const uint32_t r = from._r;
 			const uint32_t g = from._g;
 			const uint32_t b = from._b;
-			const uint32_t s = (r*77 + g*128 + b*51) >> 8;
+
+			const uint16_t s = (r*77 + g*128 + b*51) >> 8;
 
 			to._a = from._a;
 			to._r = s;

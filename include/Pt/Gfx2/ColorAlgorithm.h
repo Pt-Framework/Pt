@@ -27,6 +27,29 @@ namespace Pt {
 
 	namespace Gfx {
 
+		/** @brief Make the greyscale version of the source color.
+		 *
+		 *  This is a fallback version in case the color model implementor does not
+		 *  implement the specific version of greyscale() for the color model.
+		 */
+		template <typename ColorT> inline
+		const ColorT& greyscale(ColorT& to, const ColorT& from)
+		{
+			uint16_t a, r, g, b;
+			toARgb(a, r, g, b, from);
+
+			const uint16_t s = (uint32_t(r)*77 + uint32_t(g)*128 + uint32_t(b)*51) >> 8;
+			fromARgb(to, a, s, s, s);
+
+			return to;
+		}
+
+		/** @brief Make the given ColorT become greyscale.
+		 */
+		template <typename ColorT> inline
+		const ColorT& greyscale(ColorT& c)
+		{ return greyscale(c, c); }
+
 	} // namespace Gfx
 
 } // namespace Pt
