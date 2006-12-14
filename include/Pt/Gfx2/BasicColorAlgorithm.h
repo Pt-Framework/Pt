@@ -96,16 +96,85 @@ namespace Pt {
 		}
 
 		/** @brief Partial specialization of assign() if both the color models are the same.
+		 *
+		 *  This function will just copy the value from the source to the destiantion.
 		 */
 		template <typename ColorT> inline
 		void assign(ColorT& to, const ColorT& from)
 		{ to = from; }
 
 		/** @brief Partial specialization of assign_fast() if both the color models are the same.
+		 *
+		 *  This function will just copy the value from the source to the destiantion.
 		 */
 		template <typename ColorT> inline
 		void assign_fast(ColorT& to, const ColorT& from)
 		{ to = from; }
+
+
+		/** @brief Equality operator for color comparison.
+		 *
+		 *  Note that by default, this function is just declared and not defined.
+		 *
+		 *  A color model implementor must implement the full specialization of
+		 *  this function.
+		 */
+		template <typename ColorT> inline
+		bool operator==(const ColorT& c1, const ColorT& c2);
+
+		/** @brief Less-than operator for color comparison.
+		 *
+		 *  Note that by default, this function is just declared and not defined.
+		 *
+		 *  A color model implementor must implement the full specialization of
+		 *  this function.
+		 */
+		template <typename ColorT> inline
+		bool operator<(const ColorT& c1, const ColorT& c2);
+
+		/** @brief Greater-than operator for color comparison.
+		 *
+		 *  Note that by default, this function will use operator==() and operator<().
+		 *
+		 *  A color model implementor should implement the full specialization of
+		 *  this function for better performance.
+		 */
+		template <typename ColorT> inline
+		bool operator>(const ColorT& c1, const ColorT& c2)
+		{ return !(c1==c2) && !(c1<c2); }
+
+		/** @brief Inequality operator for color comparison.
+		 *
+		 *  Note that by default, this function will use operator==().
+		 *
+		 *  A color model implementor can implement the full specialization of
+		 *  this function if better performance can be achieved by doing so.
+		 */
+		template <typename ColorT> inline
+		bool operator!=(const ColorT& c1, const ColorT& c2)
+		{ return !(c1==c2); }
+
+		/** @brief Less-than-or-equal operator for color comparison.
+		 *
+		 *  Note that by default, this function will use operator==() and operator<().
+		 *
+		 *  A color model implementor can implement the full specialization of
+		 *  this function if better performance can be achieved by doing so.
+		 */
+		template <typename ColorT> inline
+		bool operator<=(const ColorT& c1, const ColorT& c2)
+		{ return (c1==c2) || (c1<c2); }
+
+		/** @brief Greater-than-or-equal operator for color comparison.
+		 *
+		 *  Note that by default, this function will use operator<().
+		 *
+		 *  A color model implementor can implement the full specialization of
+		 *  this function if better performance can be achieved by doing so.
+		 */
+		template <typename ColorT> inline
+		bool operator>=(const ColorT& c1, const ColorT& c2)
+		{ return !(c1<c2); }
 
 	} // namespace Gfx
 

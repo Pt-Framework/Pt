@@ -139,10 +139,14 @@ namespace Pt {
 				friend void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
 				friend void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
 				friend void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==<ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
+				friend bool operator< <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
+				friend bool operator> <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
 
 			protected:
 				uint32_t _val;
 		};
+
 
 		/** @brief Convert an ARgb8888Color to ARgbColor's components.
 		 */
@@ -183,6 +187,25 @@ namespace Pt {
 			to._val |=   uint32_t(g & 0xFF00)        ;
 			to._val |=   uint32_t(b)          >>  8  ;
 		}
+
+
+		/** @brief Equality operator for ARgb8888Color comparison.
+		 */
+		template <> inline
+		bool operator==<ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		{ return c1._val==c2._val; }
+
+		/** @brief Less-than operator for ARgb8888Color comparison.
+		 */
+		template <> inline
+		bool operator< <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		{ return c1._val<c2._val; }
+
+		/** @brief Greater-than operator for ARgb8888Color comparison.
+		 */
+		template <> inline
+		bool operator> <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		{ return c1._val>c2._val; }
 
 	} // namespace Gfx
 

@@ -117,6 +117,9 @@ namespace Pt {
 			public:
 				friend void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from);
 				friend void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==<ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
+				friend bool operator< <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
+				friend bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
 
 			protected:
 				uint16_t _a, _r, _g, _b;
@@ -134,6 +137,25 @@ namespace Pt {
 		template <> inline
 		void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{ to._a = a; to._r = r; to._g = g; to._b = b; }
+
+
+		/** @brief Equality operator for ARgbColor comparison.
+		 */
+		template <> inline
+		bool operator==<ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
+
+		/** @brief Less-than operator for ARgbColor comparison.
+		 */
+		template <> inline
+		bool operator< <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
+
+		/** @brief Greater-than operator for ARgbColor comparison.
+		 */
+		template <> inline
+		bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
 	} // namespace Gfx
 
