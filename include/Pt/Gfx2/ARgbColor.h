@@ -72,6 +72,16 @@ namespace Pt {
 				inline ARgbColor& operator=(const ARgbColor& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
+				/** @brief Assignment-addition operator (beware of overflow).
+				  */
+				inline ARgbColor& operator+=(const ARgbColor& c)
+				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
+
+				/** @brief Assignment-substraction operator (beware of underflow).
+				 */
+				inline ARgbColor& operator-=(const ARgbColor& c)
+				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
+
 
 				/** @brief Return the alpha component of this color.
 				 */

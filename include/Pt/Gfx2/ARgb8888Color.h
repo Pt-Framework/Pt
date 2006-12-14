@@ -88,6 +88,14 @@ namespace Pt {
 				inline ARgb8888Color& operator=(const ARgb8888Color& c)
 				{ _val = c._val; return *this; }
 
+				/** @brief Assignment-addition operator (beware of overflow).
+				 */
+				inline ARgb8888Color& operator+=(const ARgb8888Color& c);
+
+				/** @brief Assignment-substraction operator (beware of underflow).
+				 */
+				inline ARgb8888Color& operator-=(const ARgb8888Color& c);
+
 
 				/** @brief Return the alpha component of this color.
 				 */
@@ -159,7 +167,7 @@ namespace Pt {
 			a = ((from._val & 0xFF000000) >> 24) * 257;
 			r = ((from._val & 0x00FF0000) >> 16) * 257;
 			g = ((from._val & 0x0000FF00) >> 8 ) * 257;
-			b = (from. _val & 0x000000FF       ) * 257;
+			b = ( from._val & 0x000000FF       ) * 257;
 		}
 
 		/** @brief Convert an ARgb8888Color to ARgbColor's components (faster, but less precision version).
@@ -207,6 +215,32 @@ namespace Pt {
 		bool operator> <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2)
 		{ return c1._val>c2._val; }
 
+
+		/** @brief Assignment-addition operator (beware of overflow).
+		 */
+		inline ARgb8888Color& ARgb8888Color::operator+=(const ARgb8888Color& c)
+		{
+			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
+			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
+
+			a1 += a2; r1 += r2; g1 += g2; b1 += b2;
+			fromARgb_fast(*this, a1, r1, g1, b1);
+
+			return *this;
+		}
+
+				/** @brief Assignment-substraction operator (beware of underflow).
+				 */
+		inline ARgb8888Color& ARgb8888Color::operator-=(const ARgb8888Color& c)
+		{
+			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
+			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
+
+			a1 -= a2; r1 -= r2; g1 -= g2; b1 -= b2;
+			fromARgb_fast(*this, a1, r1, g1, b1);
+
+			return *this;
+		}
 	} // namespace Gfx
 
 } // namespace Pt
