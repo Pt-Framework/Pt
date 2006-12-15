@@ -101,27 +101,27 @@ namespace Unit {
                 // TODO: use a sentry object
                 bool isUp = false;
 
-                Test::started.send<const Test&>( *this );
+                this->started.send<const Test&>( *this );
                 try
                 {
                     this->setUp();
                     isUp = true;
                     Reflectable::call(name, args);
                     this->tearDown();
-                    Test::success.send<const Test&>( *this );
+                    this->success.send<const Test&>( *this );
                     return;
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion.send<const Test&>(*this, assertion);
+                    this->assertion.send<const Test&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception.send<const Test&>(*this, ex);
+                    this->exception.send<const Test&>(*this, ex);
                 }
                 catch(...)
                 {
-                    Test::error.send<const Test&>(*this);
+                    this->error.send<const Test&>(*this);
                 }
 
                 try
@@ -133,18 +133,18 @@ namespace Unit {
                 }
                 catch(const Assertion& assertion)
                 {
-                    Test::assertion.send<const Test&>(*this, assertion);
+                    this->assertion.send<const Test&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    Test::exception.send<const Test&>(*this, ex);
+                    this->exception.send<const Test&>(*this, ex);
                 }
                 catch(...)
                 {
-                    Test::error.send<const Test&>(*this);
+                    this->error.send<const Test&>(*this);
                 }
 
-                Test::finished.send<const Test&>( *this );
+                this->finished.send<const Test&>( *this );
             }
 
         protected:

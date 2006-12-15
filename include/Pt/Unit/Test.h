@@ -92,9 +92,15 @@ namespace Unit {
 
             /** @brief Error notification
 
-                This signal is sent is an unknown error occured.
+                This signal is sent when an unknown error occured.
             */
             Signal<const Test&> error;
+
+            /** @brief Message notification
+
+                This signal can be sent to report informational messages.
+            */
+            Signal<const Test&> message;
 
         protected:
             /** @brief Construct a test by name

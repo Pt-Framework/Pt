@@ -88,6 +88,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( _value.value() == 8 );
         }
 
+
     private:
         Pt::AtomicInt _value;
 };
