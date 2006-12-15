@@ -100,7 +100,7 @@ namespace Unit {
 
                 This signal can be sent to report informational messages.
             */
-            Signal<const Test&> message;
+            Signal<const std::string&> message;
 
         protected:
             /** @brief Construct a test by name
