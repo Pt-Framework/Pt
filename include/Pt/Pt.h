@@ -20,6 +20,15 @@
 #ifndef Pt_h
 #define Pt_h
 
+/** \dir
+This module is the base module for all other modules. It provides
+basic types, support for byte-order handling and macros for conditional
+compilation. Support for object-modelling is included as well as the
+root of the exception hierachy.
+The core module introduces the namespace Pt and all extension modules
+use their own module-wide namespace i.e.The Pt-IO module uses the
+Pt::IO namespace.
+*/
 
 namespace Pt {
 

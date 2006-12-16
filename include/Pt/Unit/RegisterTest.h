@@ -26,9 +26,14 @@ namespace Pt {
 
 namespace Unit {
 
+
+    /** 
+        @param TestT The type of test to register
+    */
+    template <class TestT>
     /** @brief Registers tests to an application
 
-        Test can be registered easily with the RegisterTest<> class
+        Tests can be registered easily with the RegisterTest<> class
         template to an Unit::Application at program initialisation.
         A typical example looks like this:
 
@@ -43,7 +48,6 @@ namespace Unit {
         register an instance of its template parameter to the 
         application.
     */
-    template <class TestT>
     struct RegisterTest
     {
         RegisterTest()

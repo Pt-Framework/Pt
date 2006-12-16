@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME                        = Platinum
 PROJECT_NUMBER                      = 0.0.1
-INPUT                               = ./main.page ./svn.page ./faq.page ./mailinglist.page ./features.page ./download.page ./people.page cplusplus.page jam.page acknowledgements.page 
+INPUT                               = ./main.page ./svn.page ./faq.page ./mailinglist.page ./features.page ./download.page ./people.page cplusplus.page jam.page acknowledgements.page ../include/Pt ../include/Pt/Unit
 OUTPUT_DIRECTORY                    = ./doxys
 GENERATE_DOXYS_HELP                 = NO
 HTML_FILE_EXTENSION                 = .html
@@ -24,7 +24,7 @@ GENERATE_STATISTICS                 = NO
 #---------------------------------------------------------------------------
 # Search page options
 #---------------------------------------------------------------------------
-CREATE_SEARCHPAGE                   = YES
+CREATE_SEARCHPAGE                   = NO
 SEARCH_BRIEF_DESCRIPTION            = YES
 SEARCH_FUNCTIONS                    = YES
 SEARCH_VARIABLES                    = YES
@@ -39,7 +39,7 @@ EXTRACT_PRIVATE                     = NO
 EXTRACT_PROTECTED                   = YES
 EXTRACT_STATIC                      = YES
 EXTRACT_LOCAL_CLASSES               = YES
-HIDE_UNDOC_NAMESPACES               = NO
+HIDE_UNDOC_NAMESPACES               = YES
 HIDE_UNDOC_CLASSES                  = NO
 HIDE_UNDOC_FUNCTIONS                = NO
 HIDE_UNDOC_VARIABLES                = NO
@@ -66,7 +66,7 @@ CONCATENATE_DECL_AND_DEFINITION_DOC = YES
 #---------------------------------------------------------------------------
 # Customize layout for pure text projects (ie containing no code)
 #---------------------------------------------------------------------------
-PAGE_DOCUMENTATION_MODE             = NO
+PAGE_DOCUMENTATION_MODE             = YES
 #---------------------------------------------------------------------------
 # Options to control how the input is parsed
 #---------------------------------------------------------------------------
@@ -90,8 +90,8 @@ QUIET                               = YES
 #---------------------------------------------------------------------------
 IGNORE_FILE_NAME                    = DoxyS.ignore
 FILE_PATTERNS                       = *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.cs *.page *.dir *.dxd *.doc
-RECURSIVE                           = YES
-EXCLUDE                             = 
+RECURSIVE                           = NO
+EXCLUDE                             =
 EXCLUDE_SYMLINKS                    = NO
 EXCLUDE_PATTERNS                    = 
 EXAMPLE_PATH                        = 
@@ -101,18 +101,18 @@ FILTER_SOURCE_FILES                 = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the HTML layout
 #---------------------------------------------------------------------------
-NAVIGATION_CHAR_LENGTH              = 30
-LIMIT_COMPACT_IN_OVERVIEW_TABLES    = 100
-COLS_IN_OVERVIEW_TABLES             = 4
+NAVIGATION_CHAR_LENGTH              = 35
+LIMIT_COMPACT_IN_OVERVIEW_TABLES    = 200
+COLS_IN_OVERVIEW_TABLES             = 3
 LIMIT_ALFA_INDEX_IN_OVERVIEW_TABLES = 200
-COMPACT_CHAR_LENGTH                 = 25
+COMPACT_CHAR_LENGTH                 = 35
 INFO_ON_OVERVIEW_TABLES_NORMAL      = YES
 INFO_ON_OVERVIEW_TABLES_COMPACT     = YES
 INCLUDE_BRIEF_IN_HEADER             = YES
-INCLUDE_BRIEF_IN_DESCRIPTION        = NO
+INCLUDE_BRIEF_IN_DESCRIPTION        = YES
 HIDE_TYPE_ON_DESCRIPTION            = NO
 EXPAND_COLLAPSE_SECTIONS            = YES
-EXPAND_COLLAPSE_TABLE_SECTIONS_ONLY = YES
+EXPAND_COLLAPSE_TABLE_SECTIONS_ONLY = NO
 CENTER_ALIGN_IMAGES                 = NO
 #---------------------------------------------------------------------------
 # Configuration options related to Left Menu layout
@@ -123,7 +123,7 @@ SHOW_LEFT_MENU_SEARCH               = YES
 SHOW_LEFT_MENU_DIRECTORY            = YES
 SHOW_LEFT_MENU_DOC                  = YES
 SHOW_LOGO                           = NO
-LEFT_MENU_DIRECTORIES               = NO
+LEFT_MENU_DIRECTORIES               = YES
 LEFT_MENU_PAGES                     = YES
 LEFT_MENU_CLASSES                   = YES
 LEFT_MENU_FUNCTIONS                 = NO
@@ -139,10 +139,10 @@ STATISTICS_LINK_ON_MAIN_PAGE        = YES
 #---------------------------------------------------------------------------
 HIDE_HEADER_ON_DIRS_AND_PAGES       = YES
 HIDE_FOOTER_ON_DIRS_AND_PAGES       = YES
-HIDE_HEADER_ON_CLASS_AND_MEMBERS    = YES
-HIDE_FOOTER_ON_CLASS_AND_MEMBERS    = NO
+HIDE_HEADER_ON_CLASS_AND_MEMBERS    = NO
+HIDE_FOOTER_ON_CLASS_AND_MEMBERS    = YES
 HIDE_HEADER_ON_UNITS                = NO
-HIDE_FOOTER_ON_UNITS                = NO
+HIDE_FOOTER_ON_UNITS                = YES
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor   
 #---------------------------------------------------------------------------
@@ -158,19 +158,19 @@ SKIP_FUNCTION_MACROS                = YES
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool
 #---------------------------------------------------------------------------
-ENABLE_DOT_GRAPHS                   = YES
+ENABLE_DOT_GRAPHS                   = NO
 DOT_PATH                            = 
-CLASS_DIAGRAMS                      = YES
+CLASS_DIAGRAMS                      = NO
 HIDE_UNDOC_RELATIONS                = YES
-CLASS_GRAPH                         = YES
-COLLABORATION_GRAPH                 = YES
+CLASS_GRAPH                         = NO
+COLLABORATION_GRAPH                 = NO
 UML_LOOK                            = NO
 TEMPLATE_RELATIONS                  = YES
-INCLUDE_GRAPH                       = YES
-INCLUDED_BY_GRAPH                   = YES
-CALL_GRAPH                          = YES
-DIR_GRAPH                           = NO
-GRAPHICAL_HIERARCHY                 = YES
+INCLUDE_GRAPH                       = NO
+INCLUDED_BY_GRAPH                   = NO
+CALL_GRAPH                          = NO
+DIR_GRAPH                           = YES
+GRAPHICAL_HIERARCHY                 = NO
 DOT_IMAGE_FORMAT                    = png
 DOTFILE_DIRS                        = 
 MAX_DOT_GRAPH_WIDTH                 = 1024

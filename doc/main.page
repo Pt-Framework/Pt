@@ -1,11 +1,11 @@
 /** \mainpage "The Platinum C++ Framework"
 !!! Discover the Platinum C++ Framework
 \n
-Boost your daily performance with the Platinum C++ framework! With Pt your
+Boost your daily performance with the Platinum C++ framework! With %Pt your
 applications are portable to many platforms without change. Its clean and
 concise design assists you in writing robust and highly reusable code.
 
-#Unleash the power of Pt and C++ onto your programs today!#
+#Unleash the power of %Pt and C++ onto your programs today!#
 
 - #Portablility#\n
 Platinum is extremely portable and runs on everything from embedded devices up
@@ -18,7 +18,7 @@ A high degree of performance is achieved through the use of modern C++
 features. Your program will benefit from the many optimizations
 included in the framework.
 
-- #Easy of use#\n
+- #Easy to use#\n
 Platinum is designed from the ground up to be flexible and extensible.
 It provide simple solutions to your problems. Programs written with
 Platinum tend to be significantly shorter and much easier to understand.
@@ -29,9 +29,12 @@ to write commercial application and be part of the great community that
 develops PPR and determines its future.
 
 !!! News
-| #14-10-2006, }Pt and Tntnet at LinuxWorldExpo in Cologne}#\n
-Pt was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne. 
+| #01-12-2006, }Sprint Results#\n
+During the last sprint, enhancements have been made to the Gfx module and the core module, most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
 
-| #22-09-2006, }Pt on Sourceforge}#\n
+| #14-10-2006, }%Pt and Tntnet at LinuxWorldExpo in Cologne}#\n
+Platinum was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne at a booth in the open source pavillion.
+
+| #22-09-2006, }%Pt on Sourceforge}#\n
 The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
 */
