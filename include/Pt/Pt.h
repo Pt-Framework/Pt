@@ -21,13 +21,13 @@
 #define Pt_h
 
 /** \dir
-This module is the base module for all other modules. It provides
-basic types, support for byte-order handling and macros for conditional
-compilation. Support for object-modelling is included as well as the
-root of the exception hierachy.
-The core module introduces the namespace Pt and all extension modules
-use their own module-wide namespace i.e.The Pt-IO module uses the
-Pt::IO namespace.
+!!! Pt (module)
+\n
+!! The core module
+\n
+This module is the core module of the Platinum framework. It provides
+basic types and support for byte-order handling, support for object-modelling,
+and the exception hierachy root. The core module introduces the namespace Pt.
 */
 
 namespace Pt {

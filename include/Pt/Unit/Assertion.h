@@ -27,24 +27,52 @@ namespace Pt {
 
 namespace Unit {
 
-	class Assertion : public Pt::Exception
-	{
-		public:
-			Assertion(const std::string& what, const SourceInfo& si)
-			: Exception(what, si)
-			{}
+    /** @brief %Test %Assertion exception
 
-			//! @brief Copy constructor.
-			Assertion(const Assertion& a)
-			: Exception(a)
-			{}
+        Assertions are modeled as an exception type, which is thrown by unit
+        tests when an assertion has failed. It is recommended to use the 
+        PT_UNIT_ASSERT for easy creation from a source info object.
 
-			//! @brief Destructor.
-			~Assertion() throw()
-			{}
-	};
+        @code
+            void myTest()
+            {
+                int ten = 5 + 5;
+                PT_UNIT_ASSERT(ten == 10)
+            }
+        @endcode
+    */
+    class Assertion : public Pt::Exception
+    {
+        public:
+            /** @brief Construct from a message and source info.
 
-	#define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion("Assertion", PT_SOURCEINFO);
+                Constructs a assertion exception from a message string
+                and a source info object that describes where the 
+                assertion failed. Use the PT_UNIT_ASSERT macro instead
+                of this constructor.
+
+                @param what Error message
+                @param si Info where the assertion failed
+            */
+            Assertion(const std::string& what, const SourceInfo& si)
+            : Exception(what, si)
+            {}
+
+            /** @brief Copy constructor.
+
+                @param a Other asstertion exception
+            */
+            Assertion(const Assertion& a)
+            : Exception(a)
+            {}
+
+            /** @brief Destructor.
+            */
+            ~Assertion() throw()
+            {}
+    };
+
+    #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion("Assertion", PT_SOURCEINFO);
 
 } // namespace Unit
 

@@ -13,26 +13,52 @@ namespace Pt {
 
 class Args
 {
-	public:
-		virtual ~Args()
-		{}
+    public:
+        Args()
+        {}
 
-		const Any& get(size_t n) const
-		{
-			if( n >= _args.size() )
-				throw LogicError("No such argument", PT_SOURCEINFO);
+        template <typename A>
+        Args(A a)
+        {
+            _args.push_back( Any(a) );
+        }
 
-			return _args[n];
-		}
+        template <typename A, typename B>
+        Args(A a, B b)
+        {
+            _args.push_back( Any(a) );
+            _args.push_back( Any(b) );
+        }
 
-		template <typename T>
-		void push_back(T value)
-		{
-			_args.push_back( Any(value) );
-		}
+        template <typename A, typename B, typename C>
+        Args(A a, B b, C c)
+        {
+            _args.push_back( Any(a) );
+            _args.push_back( Any(b) );
+            _args.push_back( Any(c) );
+        }
 
-	private:
-		std::vector<Any> _args;
+        virtual ~Args()
+        {
+            _args.push_back( Any(a) );
+        }
+
+        const Any& get(size_t n) const
+        {
+            if( n >= _args.size() )
+                throw LogicError("No such argument", PT_SOURCEINFO);
+
+            return _args[n];
+        }
+
+        template <typename T>
+        void push_back(T value)
+        {
+            _args.push_back( Any(value) );
+        }
+
+    private:
+        std::vector<Any> _args;
 };
 
 
