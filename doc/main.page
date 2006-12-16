@@ -10,8 +10,8 @@ concise design assists you in writing robust and highly reusable code.
 - #Portablility#\n
 Platinum is extremely portable and runs on everything from embedded devices up
 to large servers. The supported platforms include Windows, Windows CE,
-Linux, QNX, Unix with many more to come. PPR lets you spend your time on
-YOUR application, and takes away the pain of low-level programming.
+Linux, QNX, Unix with many more to come. %Pt lets you spend your time on
+your application taking away the pain of low-level programming.
 
 - #Performance#\n
 A high degree of performance is achieved through the use of modern C++
@@ -29,12 +29,20 @@ to write commercial application and be part of the great community that
 develops PPR and determines its future.
 
 !!! News
-| #01-12-2006, }Sprint Results#\n
+\n
+| #01-12-2006, }Sprint Results}#\n
 During the last sprint, enhancements have been made to the Gfx module and the core module, most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
 
+| #01-11-2006, }Scrum project management introduced}#\n
+The scrum system can now be used by developers to coordinate their efforts to
+improve %Pt. It is not mandatory to take part in the scrum process, but highly
+encouraged. Progress can be monitored on the "Project Status" link on the 
+%Pt website.
+
 | #14-10-2006, }%Pt and Tntnet at LinuxWorldExpo in Cologne}#\n
-Platinum was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne at a booth in the open source pavillion.
+Platinum was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne in the open source pavillion.
 
 | #22-09-2006, }%Pt on Sourceforge}#\n
 The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
+
 */

@@ -1,0 +1,24 @@
+
+/** \page "Project Status"
+
+!!! Project Status
+\n
+The Scrum development system is used to make the development transparent to
+all developers and the audience. The backlog is a list of all featured that
+will be implemented in Platinum. Todo and Ongoing show what is currently
+under development. Done shows what has been accomplished so far.
+
+- #Backlog#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/backlog
+
+- #Todo#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/todo
+
+- #Ongoing#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/ongoing
+
+- #Done#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/done
+
+*/
+

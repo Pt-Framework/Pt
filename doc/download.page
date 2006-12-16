@@ -1,9 +1,23 @@
 
 /** \page "Download"
 
-!!! Download
+!!! Download 
 \n
-A presentation about Pt in pdf format:
-http://pt-framework.sourceforge.net/platinum-programming20061013.pdf
+!!Documentation
+\n
+- #Effective Library Design with %Pt#\n
+  http://pt-framework.sourceforge.net/platinum-programming20061013.pdf
+
+!! Subversion
+\n
+- #Current Development Version#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/trunk
+
+- #Branches and tags#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/tags \n
+  https://svn.sourceforge.net/svnroot/pt-framework/branches
+
+- #Precompiled Development Tools#\n
+  https://svn.sourceforge.net/svnroot/pt-framework/tools
 */
 

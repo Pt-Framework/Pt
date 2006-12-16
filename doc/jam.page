@@ -1,8 +1,9 @@
 
 /** \page "Building"
 
-!!! Building with jam
+!!! Building
 \n
+!! The jam build tool
 Jam is a make-like program that provides a versatile, unified build process 
 across many platforms including automated unit-tests, cross-compilation and 
 concurrent execution of build steps. This document intends to be a step-by-step
@@ -10,7 +11,6 @@ introduction to the jam-based build %system. Most examples demonstrate the usage
 of jam on a windows NT build host, but differ only in the name of the jam
 executable on other build hosts.
 
----
 !! Requirements
 It is usually not neccessary to install any additional tools since precompiled 
 jam binaries for several platforms are provided in the 'jam' subdirectory of 
@@ -19,6 +19,7 @@ available precompiled binaries.
 
 ||OS||CPU||Jam binary
 |Linux|x86|jam.linux.x86
+|Linux|x86-64|jam.linux.x86-64
 |Linux|ppc|jam.linux.ppc
 |Windows NT/XP|x86|jam.exe
 |QNX6.3.0|x86|jam.qnx630.x86
@@ -29,7 +30,6 @@ for win32-based and posix-based systems are available. The jam binary itself
 can be built with a regular C compiler and has no further dependencies than
 the %system C runtime library.
 
----
 !! Starting the build process
 The jam tool must be invoked in the project root, where a 'jam' subdirectory 
 and a file called 'Jambase' are located. If jam is run without any arguments, 
@@ -56,7 +56,6 @@ the chmod command. To do so for a linux/X86 binary enter the following
 command:\n\n
 #chmod +x ./jam/jam.linux.x86\n#
 
----
 !! Building specific targets
 All artefacts that are created during the build process are refered to as
 'targets'. A target can be a binary file, such as a executable or a so-called
@@ -81,7 +80,6 @@ and their dependencies in a project, invoke jam like so:
 jam\jam.exe lib
 @endcode
 
----
 !! Rebuilding targets
 To completely rebuild a target and its dependencies, the command line 
 parameter -a can be passed to jam. The option -a can be used with 
@@ -98,7 +96,6 @@ program.exe will be completely rebuild with the following command:
 jam\jam.exe -a program.exe
 @endcode
 
----
 !! Cleaning the project
 The pseudo-target 'clean' plays a special role in the jam build %system. All
 artefacts that are created during the build process are dependents of
@@ -110,7 +107,6 @@ will remove all artefacts that were created by a build with default options:
 jam\jam.exe clean
 @endcode
 
----
 !! Command line options
 Several command line arguments can be passed to jam:
 
@@ -122,12 +118,11 @@ Several command line arguments can be passed to jam:
 |-q|Quit quickly as soon as a target fails.
 |-sx=y|Set variable x=y, overriding environment.
 
----
 !! Build options
 Various build options can be set to control how jam builds the targets, 
 for example if a release or debug version should be built. Build
 options are set by special jam variables before or when jam is
-executed. 
+executed.
 A jam variable can be set with the command line option -s followed by a 
 variable/value pair separated by the equal sign (-sVARIABLE=VALUE) or by
 setting a environment variable with the same name. When jam is invoked, all 
@@ -139,7 +134,8 @@ build a release version of a project, use the following command:
 
 @code
 jam\jam.exe -sCONFIG=release
-@endcode \n
+@endcode 
+\n
 Most variables have default values or are deduced from environment variables.
 The default for CONFIG is 'debug'. The following table gives an overview
 which jam variables are used to enable certain build options:
@@ -158,9 +154,7 @@ builds a release version with the gnu compiler toolset on a linux host:
 ./jam/jam.linux.x86 -sCONFIG=release -sTOOLSET=gcc
 @endcode
 
-
 !! Compiling for Linux with GCC
-
 Compiling for Linux with the GNU compiler is done from a normal shell. The 
 default value for the TOOLSET is gcc. The following command builds a release 
 version on a X86 linux %system:
@@ -169,9 +163,7 @@ version on a X86 linux %system:
 ./jam/jam.linux.x86 -sCONFIG=release
 @endcode
 
----
 !! Compiling for Windows NT/XP with Visual Studio 7/8
-
 The Microsoft visual studio installation contains a special 'build command 
 shell'. It differs from a regular command shell in that more environment 
 variables are set. If the build command shell is not used, the VISUALC variable 
@@ -190,9 +182,7 @@ determined from the environment and does not have to be specified. It is not
 possible to build vc7 targets from the 'build command shell' provided by a 
 Microsoft visual studio 8 installation. 
 
----
 !! Compiling Windows CE targets
-
 Windows CE targets need to be cross compiled under Windows NT/XP. Therefore 
 the TARGET_OS and TARGET_OSPLAT variables need to be set when jam is invoked. 
 No build command shell for embedded targets is provided by Microsoft, so the 
@@ -204,15 +194,14 @@ shell has to be used. The following command builds for ARM CPU's:
               -sTOOLSET=vc8 -sTARGET_OS=wince -sTARGET_OSPLAT=arm
 @endcode
 
----
 !! Compiling QNX targets
-
 %Building with jam on a QNX host is not much different than on unix systems.
 To build on a X86 QNX %system enter:
 
 @code
 ./jam/jam.qnx630.x86
-@endcode \n
+@endcode 
+\n
 QNX targets can be cross compiled or directly compiled on a QNX host. Cross 
 compiling can be done on either a QNX host for another CPU or on a 
 Windows NT/XP host. For cross compiling the TARGET_OS and TARGET_OSPLAT 
@@ -221,14 +210,14 @@ Windows NT/XP host for QNX systems with X86 processors.
 
 @code
 ./jam/jam.exe -sTARGET_OS=qnx630 -sTARGET_OSPLAT=x86
-@endcode \n
+@endcode 
+\n
 To cross compile for QNX on a QNX host the TARGET_OSPLAT needs to be set:
 
 @code
 ./jam/jam.qnx630.x86 -sTARGET_OSPLAT=ppc
 @endcode
 
-===
 !! Setting up a new Project
 Jam requires a few files and one directory to be present to be able to compile
 a project.
@@ -254,7 +243,6 @@ further Jamfiles in subdirectories of the project, so that in a typical
 jam project all subdirectories contain a Jamfile. The Jamfile sepcifies what
 targets should be built.
 
-
 |#Rules and Variable Syntax#\n
 A Jam variable is global and can be assigned with the equal sign. To get
 the value in a variable the \$-sign has to be used:
@@ -271,7 +259,6 @@ target file, the second the source file:
 }Note that the jam syntax requires all tokens to be whitespace-separated including
 the semicolon at the end of each line.}
 
----
 !! Handling Directory Trees
 Jam defines a special variable called TOP. This variable contains the path
 to the project root directory. Path names can be constructed rooted with
@@ -288,7 +275,8 @@ contains the SubDir statement is in the the directory $(TOP)/src/util:
 
 @code
 SubDir $(TOP) src util
-@endcode \n
+@endcode 
+\n
 The Jamfile in the project root directory therefore simply sets its directory
 to $(TOP) with the SubDir rule.
 
@@ -303,12 +291,12 @@ SubInclude $(TOP) src
 SubInclude $(TOP) man
 SubInclude $(TOP) util
 SubInclude $(TOP) misc
-@endcode \n
+@endcode 
+\n
 The SubInclude statements must be the last statements in a Jamfile, because it
 is affected by the SubDir rule of the included Jamfiles. All paths are relative
 to the root directory.
 
----
 !! Setting Include Paths
 The rule 'SubDirHdrs' sets include paths for all source files in a directory. 
 The following jam statement will add the path $(PPR_TOP)/include to the header
@@ -318,7 +306,6 @@ search paths:
 SubDirHdrs $(TOP)/include ;
 @endcode
 
----
 !! Building Executables
 The rule 'Main' can be used to build executables from a list of source files. 
 The following example assumes that besides the mandatory jam files a file 
@@ -327,13 +314,13 @@ build a program called 'program', the Main rule must be applied in the Jamfile:
 
 @code
 Main program : main.cpp ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule is the target name, the second is 
 the list of source files. All %system specific target name decorations will 
 be added by jam auomatically. So under windows the resulting binary will 
 be called program.exe. Under unix it will simply be called 'program'.
 
----
 !! Building static libraries
 The rule 'Library' can be used to build a static library from a list of source 
 files. The following example assumes that besides the mandatory jam file a file
@@ -343,13 +330,13 @@ corresponding Jamfile:
 
 @code
 Library example : example.cpp ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule is the target name, the second is 
 the list of source files. All %system specific target name decorations will 
 be added by jam auomatically. So under windows the resulting library will 
 be called example.lib. Under unix it will be called libexample.a.
 
----
 !! Building shared libraries
 The rule 'SharedLibrary' can be used to build a shared library from a list of 
 source files. The following example assumes that besides the mandatory jam 
@@ -359,14 +346,14 @@ rule must be used in the corresponding Jamfile:
 
 @code
 SharedLibrary example : example.cpp ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule is the target name, the second is 
 the list of source files. All %system specific target name decorations will 
 be added by jam auomatically. So under windows the resulting library will 
 be called example.dll and a import library called example.lib will be created. 
 Under unix, one shared library called libexample.so will be created.
 
----
 !! Building Modules
 Building a module means simply to build a shared and a static library at the 
 same time. The rule 'Module' can be used to build a module from a list of 
@@ -377,7 +364,8 @@ like this:
 
 @code
 Module module : module.cpp ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule is the module target name, the second is 
 the list of source files. 
 All %system specific target name decorations will 
@@ -389,7 +377,6 @@ The resulting shared library will be called module.dll, with an import library
 called module.lib under windows. For unix only a shared library named 
 libmodule.so will be built.
 
----
 !!Linking Executables
 Separate rules exist to link shared or static libraries to an executable. The 
 rule Main_LinkLibraries can be used to link a number of static libraries to
@@ -403,7 +390,8 @@ Library example : example.cpp ;
 
 Main program : main.cpp ;
 Main_LinkLibraries program : example ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule 'Main_LinkLibraries' is the name 
 of the target the static libraries should be linked to, the second is 
 the list of static libraries to link.
@@ -419,12 +407,12 @@ SharedLibrary example : example.cpp ;
 
 Main program : main.cpp ;
 Main_LinkLibraries program : example ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule 'Main_LinkSharedLibraries' is the 
 name of the target the shared libraries should be linked to, the second 
 is the list of shared libraries to link.
 
----
 !!Linking Shared Libraries
 Separate rules exist to link shared or static libraries to a shared library. 
 The rule SharedLibrary_LinkLibraries can be used to link a number of static 
@@ -438,7 +426,8 @@ Library tire : tire.cpp ;
 
 SharedLibrary car : car.cpp ;
 SharedLibrary_LinkLibraries car : tire ;
-@endcode \n
+@endcode 
+\n
 The first parameter passed to the rule 'SharedLibrary_LinkLibraries' is 
 the name of the shared library target the static libraries should be linked 
 to, the second is the list of static libraries to link.
@@ -454,10 +443,10 @@ SharedLibrary tire : tire.cpp ;
 
 SharedLibrary car : car.cpp ;
 SharedLibrary_LinkSharedLibraries car : tire ;
-@endcode \n
+@endcode
+\n
 The first parameter passed to the rule 'SharedLibrary_LinkSharedLibraries' 
 is the name of the target the shared libraries should be linked to, the 
 second is the list of shared libraries to link.
-
 
 */
