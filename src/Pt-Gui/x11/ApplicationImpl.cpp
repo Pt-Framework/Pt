@@ -1178,7 +1178,7 @@ void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
 		event.send( ev );
 	}
 
-	if( widget.rect().x() != x || widget.rect().height() != y) {
+	if( widget.rect().x() != x || widget.rect().y() != y) {
 		MoveEvent ev(widget, x, y);
 		event.send( ev );
 	}
