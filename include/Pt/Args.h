@@ -40,7 +40,7 @@ class Args
 
         virtual ~Args()
         {
-            _args.push_back( Any(a) );
+            //_args.push_back( Any(a) );
         }
 
         const Any& get(size_t n) const
