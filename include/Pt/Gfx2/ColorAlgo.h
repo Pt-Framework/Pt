@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx2_ColorAlgorithm_h
-#define Pt_Gfx2_ColorAlgorithm_h
+#ifndef Pt_Gfx2_ColorAlgo_h
+#define Pt_Gfx2_ColorAlgo_h
 
 #include <Pt/Gfx2/ARgbColor.h>
 
@@ -26,6 +26,28 @@
 namespace Pt {
 
 	namespace Gfx {
+
+		/** @brief Assign a color model to another color model.
+		 *
+		 *  A color model implementor should specialize this function as needed if
+		 *  faster implementation for the two colors is exist.
+		 */
+		template <typename DstColorT, typename SrcColorT> inline
+		void assign(DstColorT& to, const SrcColorT& from)
+		{
+			uint16_t a, r, g, b;
+			toARgb(a, r, g, b, from);
+			fromARgb(to, a, r, g, b);
+		}
+
+		/** @brief Partial specialization of assign() if both the color models are the same.
+		 *
+		 *  This function will just copy the value from the source to the destiantion.
+		 */
+		template <typename ColorT> inline
+		void assign(ColorT& to, const ColorT& from)
+		{ to = from; }
+
 
 		/** @brief Make the greyscale version of the source color.
 		 *

@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
-#include <Pt/Gfx2/BasicColorAlgorithm.h>
+#include <Pt/Gfx2/Color.h>
 
 
 namespace Pt {

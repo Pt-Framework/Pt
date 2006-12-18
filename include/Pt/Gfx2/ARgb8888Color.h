@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ARgb8888Color_h
 #define Pt_Gfx2_ARgb8888Color_h
 
-#include <Pt/Gfx2/FloatedColor.h>
+#include <Pt/Gfx2/ARgbFColor.h>
 
 
 namespace Pt {
@@ -149,7 +149,6 @@ namespace Pt {
 
 			public:
 				friend void toARgb<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
-				friend void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
 				friend void fromARgb<ARgb8888Color>(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==<ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
 				friend bool operator< <ARgb8888Color>(const ARgb8888Color& c1, const ARgb8888Color& c2);
@@ -177,20 +176,10 @@ namespace Pt {
 			r = ((from._val & 0x00FF0000) >> 16) * 257;
 			g = ((from._val & 0x0000FF00) >> 8 ) * 257;
 			b = ( from._val & 0x000000FF       ) * 257;
-		}
-
-		/** @brief Convert an ARgb8888Color to ARgbColor's components (faster, but less precision version).
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
-		 */
-		template <> inline
-		void toARgb_fast<ARgb8888Color>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
-		{
-			a = (from._val & 0xFF000000) >> 16;
-			r = (from._val & 0x00FF0000) >>  8;
-			g = (from._val & 0x0000FF00)      ;
-			b = (from._val & 0x000000FF) <<  8;
+			//a = (from._val & 0xFF000000) >> 16;
+			//r = (from._val & 0x00FF0000) >>  8;
+			//g = (from._val & 0x0000FF00)      ;
+			//b = (from._val & 0x000000FF) <<  8;
 		}
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
@@ -212,25 +201,15 @@ namespace Pt {
 		}
 
 
-		/** @brief Assign an ARgb8888Color to a FloatedARgbColor model.
+		/** @brief Assign an ARgb8888Color to a ARgbFColor model.
 		 */
-		template <> inline
-		void assign<FloatedARgbColor, ARgb8888Color>(FloatedARgbColor& to, const ARgb8888Color& from)
+		inline void assign(ARgbFColor& to, const ARgb8888Color& from)
 		{
 			to.setAlpha( float(from.alpha()) / 255.0f );
 			to.setRed  ( float(from.red  ()) / 255.0f );
 			to.setGreen( float(from.green()) / 255.0f );
 			to.setBlue ( float(from.blue ()) / 255.0f );
 		}
-
-		/** @brief Faster (but less precision) version of assign().
-		 *
-		 *  In this full specialization for FloatedARgbColor <- ARgb8888Color, this
-		 *  function will just actually call assign<FloatedARgbColor, ARgb8888Color>().
-		 */
-		template <> inline
-		void assign_fast<FloatedARgbColor, ARgb8888Color>(FloatedARgbColor& to, const ARgb8888Color& from)
-		{ assign<FloatedARgbColor, ARgb8888Color>(to, from); }
 
 
 		/** @brief Equality operator for ARgb8888Color comparison.
@@ -256,11 +235,11 @@ namespace Pt {
 		 */
 		inline const ARgb8888Color& ARgb8888Color::operator+=(const ARgb8888Color& c)
 		{
-			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
-			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
+			uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
+			uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
 
 			a1 += a2; r1 += r2; g1 += g2; b1 += b2;
-			fromARgb_fast(*this, a1, r1, g1, b1);
+			fromARgb(*this, a1, r1, g1, b1);
 
 			return *this;
 		}
@@ -269,11 +248,11 @@ namespace Pt {
 		 */
 		inline const ARgb8888Color& ARgb8888Color::operator-=(const ARgb8888Color& c)
 		{
-			uint16_t a1, r1, g1, b1; toARgb_fast(a1, r1, g1, b1, *this);
-			uint16_t a2, r2, g2, b2; toARgb_fast(a2, r2, g2, b2, c);
+			uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
+			uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
 
 			a1 -= a2; r1 -= r2; g1 -= g2; b1 -= b2;
-			fromARgb_fast(*this, a1, r1, g1, b1);
+			fromARgb(*this, a1, r1, g1, b1);
 
 			return *this;
 		}
