@@ -19,9 +19,9 @@
  ***************************************************************************/
 
 #include <Pt/Gfx2/ARgbColor.h>
+#include <Pt/Gfx2/ARgbFColor.h>
 #include <Pt/Gfx2/ARgb8888Color.h>
-#include <Pt/Gfx2/FloatedColor.h>
-#include <Pt/Gfx2/ColorAlgorithm.h>
+#include <Pt/Gfx2/ColorAlgo.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;
@@ -29,31 +29,21 @@ using namespace Pt::Gfx;
 
 int main()
 {
-	ARgbColor        argb_1, argb_2;
-	ARgb8888Color    argb8888_1, argb8888_2;
-	FloatedARgbColor float_1, float_2;
+	ARgbColor      argb_1, argb_2;
+	ARgbFColor     float_1, float_2;
+	ARgb8888Color  argb8888_1, argb8888_2;
 
 	Pt::uint16_t a, r, g, b;
 
 	toARgb(a, r, g, b, argb_1);
 	fromARgb(argb_2, a, r, g, b);
 
-	toARgb_fast(a, r, g, b, argb_1);
-	fromARgb_fast(argb_2, a, r, g, b);
-
 	toARgb(a, r, g, b, argb8888_1);
 	fromARgb(argb8888_2, a, r, g, b);
-
-	toARgb_fast(a, r, g, b, argb8888_1);
-	fromARgb_fast(argb8888_2, a, r, g, b);
 
 	assign(argb_1, argb_2);
 	assign(argb_1, argb8888_2);
 	assign(argb8888_1, argb_2);
-
-	assign_fast(argb_1, argb_2);
-	assign_fast(argb_1, argb8888_2);
-	assign_fast(argb8888_1, argb_2);
 
 	assign(float_1, argb_1);
 	assign(argb_2, float_1);
