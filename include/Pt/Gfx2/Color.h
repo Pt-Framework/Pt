@@ -20,62 +20,16 @@
 #ifndef Pt_Gfx2_Color_h
 #define Pt_Gfx2_Color_h
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
+#ifndef PT_COLOR_IMPLEMENTATION
+#error "This header file is not meant to be included from outside the color model implementation header"
+#endif
 
 
 namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief Convert a ColorT to ARgbColor's components.
-		 *
-		 *  Note that by default, this function is just declared and not defined.
-		 *  \n\n
-		 *  A color model implementor must implement the full specialization of
-		 *  this function.
-		 *  \n\n
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
-		 */
-		template <typename ColorT> inline
-		void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ColorT& from);
-
-		/** @brief Convert ARgbColor's components to a ColorT.
-		 *
-		 *  Note that by default, this function is just declared and not defined.
-		 *  \n\n
-		 *  A color model implementor must implement the full specialization of
-		 *  this function.
-		 *  \n\n
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
-		 */
-		template <typename ColorT> inline
-		void fromARgb(ColorT& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-
-
-		/** @brief Equality operator for color comparison.
-		 *
-		 *  Note that by default, this function is just declared and not defined.
-		 *  \n\n
-		 *  A color model implementor must implement the full specialization of
-		 *  this function.
-		 */
-		template <typename ColorT> inline
-		bool operator==(const ColorT& c1, const ColorT& c2);
-
-		/** @brief Less-than operator for color comparison.
-		 *
-		 *  Note that by default, this function is just declared and not defined.
-		 *  \n\n
-		 *  A color model implementor must implement the full specialization of
-		 *  this function.
-		 */
-		template <typename ColorT> inline
-		bool operator<(const ColorT& c1, const ColorT& c2);
-
-		/** @brief Greater-than operator for color comparison.
+		/** @brief Greater-than operator for any color model comparison.
 		 *
 		 *  Note that by default, this function will use operator==() and operator<().
 		 *  \n\n
@@ -86,7 +40,7 @@ namespace Pt {
 		bool operator>(const ColorT& c1, const ColorT& c2)
 		{ return !(c1==c2) && !(c1<c2); }
 
-		/** @brief Inequality operator for color comparison.
+		/** @brief Inequality operator for any color model comparison.
 		 *
 		 *  Note that by default, this function will call operator==().
 		 *  \n\n
@@ -97,7 +51,7 @@ namespace Pt {
 		bool operator!=(const ColorT& c1, const ColorT& c2)
 		{ return !(c1==c2); }
 
-		/** @brief Less-than-or-equal operator for color comparison.
+		/** @brief Less-than-or-equal operator for any color model comparison.
 		 *
 		 *  Note that by default, this function will call operator==() and operator<().
 		 *  \n\n
@@ -120,7 +74,7 @@ namespace Pt {
 		{ return !(c1<c2); }
 
 
-		/** @brief Addition operator for color mathematics (beware of overflow).
+		/** @brief Addition operator for any color model mathematics (beware of overflow).
 		 *
 		 *  Note that by default, this function will call operator=() and operator+=().
 		 *  \n\n
@@ -135,7 +89,7 @@ namespace Pt {
 			return(rs);
 		}
 
-		/** @brief Addition operator for color mathematics (beware of underflow).
+		/** @brief Addition operator for any color model mathematics (beware of underflow).
 		 *
 		 *  Note that by default, this function will call operator=() and operator-=().
 		 *  \n\n

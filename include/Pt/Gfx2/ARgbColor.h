@@ -20,7 +20,8 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
-#include <Pt/Gfx2/Color.h>
+#include <Pt/Api.h>
+#include <Pt/Types.h>
 
 
 namespace Pt {
@@ -125,11 +126,11 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from);
-				friend void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==<ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
-				friend bool operator< <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
-				friend bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from);
+				friend void fromARgb(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const ARgbColor& c1, const ARgbColor& c2);
+				friend bool operator<(const ARgbColor& c1, const ARgbColor& c2);
+				friend bool operator>(const ARgbColor& c1, const ARgbColor& c2);
 
 				friend const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from);
 
@@ -143,8 +144,7 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		template <> inline
-		void toARgb<ARgbColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from)
 		{ a = from._a; r = from._r; g = from._g; b = from._b; }
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
@@ -152,31 +152,27 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		template <> inline
-		void fromARgb<ARgbColor>(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{ to._a = a; to._r = r; to._g = g; to._b = b; }
 
 
 		/** @brief Equality operator for ARgbColor comparison.
 		 */
-		template <> inline
-		bool operator==<ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator==(const ARgbColor& c1, const ARgbColor& c2)
 		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
 
 		/** @brief Less-than operator for ARgbColor comparison.
 		 */
-		template <> inline
-		bool operator< <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator<(const ARgbColor& c1, const ARgbColor& c2)
 		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
 
 		/** @brief Greater-than operator for ARgbColor comparison.
 		 */
-		template <> inline
-		bool operator> <ARgbColor>(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator>(const ARgbColor& c1, const ARgbColor& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
 
-		/** @brief Make the greyscale version of the source ARgbColor color.
+		/** @brief Make the greyscale version of the source ARgbColor.
 		 */
 		inline const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from)
 		{
@@ -200,3 +196,8 @@ namespace Pt {
 
 #endif
 
+
+// Include the common and generic inline functions implementation
+#define PT_COLOR_IMPLEMENTATION
+#include <Pt/Gfx2/Color.h>
+#undef PT_COLOR_IMPLEMENTATION

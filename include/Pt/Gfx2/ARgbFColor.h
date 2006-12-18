@@ -130,11 +130,11 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb<ARgbFColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from);
-				friend void fromARgb<ARgbFColor>(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==<ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2);
-				friend bool operator< <ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2);
-				friend bool operator> <ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from);
+				friend void fromARgb(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const ARgbFColor& c1, const ARgbFColor& c2);
+				friend bool operator<(const ARgbFColor& c1, const ARgbFColor& c2);
+				friend bool operator>(const ARgbFColor& c1, const ARgbFColor& c2);
 
 				friend const ARgbFColor& greyscale(ARgbFColor& to, const ARgbFColor& from);
 
@@ -148,8 +148,7 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		template <> inline
-		void toARgb<ARgbFColor>(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from)
 		{
 			a = from._a<0.0f ? 0 : ( from._a>1.0f ? 0xFFFF : uint16_t(from._a*65535.0f) );
 			r = from._r<0.0f ? 0 : ( from._r>1.0f ? 0xFFFF : uint16_t(from._r*65535.0f) );
@@ -162,8 +161,7 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		template <> inline
-		void fromARgb<ARgbFColor>(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{
 			to._a = float(a) / 65535.0;
 			to._r = float(r) / 65535.0;
@@ -174,20 +172,17 @@ namespace Pt {
 
 		/** @brief Equality operator for ARgbFColor comparison.
 		 */
-		template <> inline
-		bool operator==<ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator==(const ARgbFColor& c1, const ARgbFColor& c2)
 		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
 
 		/** @brief Less-than operator for ARgbFColor comparison.
 		 */
-		template <> inline
-		bool operator< <ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator<(const ARgbFColor& c1, const ARgbFColor& c2)
 		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
 
 		/** @brief Greater-than operator for ARgbFColor comparison.
 		 */
-		template <> inline
-		bool operator> <ARgbFColor>(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator>(const ARgbFColor& c1, const ARgbFColor& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
 
@@ -211,3 +206,8 @@ namespace Pt {
 
 #endif
 
+
+// Include the common and generic inline functions implementation
+#define PT_COLOR_IMPLEMENTATION
+#include <Pt/Gfx2/Color.h>
+#undef PT_COLOR_IMPLEMENTATION
