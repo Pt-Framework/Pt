@@ -917,6 +917,10 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
 		_data->unref();
 		_data = newBuffer;
 	}
+	else
+	{
+		_data->reserve( reserveSize );
+	}
 }
 
 
