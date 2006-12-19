@@ -135,37 +135,45 @@ void PainterImpl::updateBrush()
 		case Gfx::Brush::TextureFill: {
 			const Gfx::ARgbImage& texture = _brush.texture();
 
-			// Convert our generic format to a 32 bit image format which Windows can understand.
-			Gfx::XRgb8888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
-			assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
+			if (!texture.empty())
+			{
+				// Convert our generic format to a 32 bit image format which Windows can understand.
+				Gfx::XRgb8888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
+				assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
 
-			// Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
-			BITMAPINFO bitmapInfo;
-			ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+				// Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
+				BITMAPINFO bitmapInfo;
+				ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-			bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
-			bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
-			bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
-			bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
-			bitmapInfo.bmiHeader.biBitCount    = 32;                          // We internally use a 32-bit bitmap.
-			bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
-			bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
-			bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
-			bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
+				bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
+				bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
+				bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
+				bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
+				bitmapInfo.bmiHeader.biBitCount    = 32;                          // We internally use a 32-bit bitmap.
+				bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
+				bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
+				bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
+				bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
 
-			// Create the device-independent bitmap that will be filled with the texture
-			// and used as brush.
-			VOID* imageBits;
-			HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+				// Create the device-independent bitmap that will be filled with the texture
+				// and used as brush.
+				VOID* imageBits;
+				HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-			// Copy image data from the texture to the Windows bitmap.
-			memcpy(imageBits, rgb32Image.data(), texture.width() * texture.height() * 4);
+				// Copy image data from the texture to the Windows bitmap.
+				memcpy(imageBits, rgb32Image.data(), texture.width() * texture.height() * 4);
 
-			// Create the actual brush from this bitmap.
-			newBrushHandle = CreatePatternBrush(bitmap);
+				// Create the actual brush from this bitmap.
+				newBrushHandle = CreatePatternBrush(bitmap);
 
-			// Free the bitmap again.
-			DeleteObject(bitmap);
+				// Free the bitmap again.
+				DeleteObject(bitmap);
+			}
+			else // texture.empty() == true
+			{ 
+				// Use the empty brush for empty textures.
+				newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
+			}
 
 			break;
 		}

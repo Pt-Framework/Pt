@@ -170,6 +170,10 @@ void Painter::fillPolygon(const Math::Point* points, const size_t pointCount)
 
 void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 {
+	if (image.empty()) {
+		return;  // Don't try to draw empty images.
+	}
+
 	this->begin();
 	_painterImpl->drawImage(to, image);
 }
@@ -177,6 +181,10 @@ void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 
 void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Math::Rect& imageRect)
 {
+	if (image.empty()) {
+		return;  // Don't try to draw empty images.
+	}
+
 	this->begin();
 	_painterImpl->drawImage(to, image, imageRect);
 }
@@ -184,6 +192,10 @@ void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Mat
 
 void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect)
 {
+	if (from.size().width() == 0 || from.size().height() == 0) {
+		return;  // Don't try to draw empty pixmaps.
+	}
+
 	this->begin();
 	_painterImpl->drawPixmap(to, from, fromRect);
 }
@@ -191,6 +203,10 @@ void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& 
 
 void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
+	if (pm.size().width() == 0 || pm.size().height() == 0) {
+		return;  // Don't try to draw empty pixmaps.
+	}
+
 	this->begin();
 	_painterImpl->drawPixmap(to, pm);
 }

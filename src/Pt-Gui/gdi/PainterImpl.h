@@ -103,6 +103,10 @@ namespace Gui {
 			template <typename Iterator>
 			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
 			{
+				if (width == 0 || height == 0) {
+					return; // Don't draw empty images.
+				}
+
 				// Try to Convert our generic image format (ARgbImage) to an image format that is compatible
 				// with the current device settings. If this is not possible, convert it to a 32-bit
 				// device-independent image that windows has to convert to the current device settings

@@ -52,6 +52,10 @@ namespace Gfx {
 			 * interior of a rectangle or ellipse, use this brush for drawing.
 			 * The brush attributes consist of the brush color or texture.
 			 *
+			 * Setting a texture brush that does not have an image or has an image of
+			 * size 0 will result in undefinied behaviour when trying to draw a filled
+			 * surface with this brush!
+			 *
 			 * @param brush The brush to be set as new brush for this painter.
 			 * @see brush()
 			 */
