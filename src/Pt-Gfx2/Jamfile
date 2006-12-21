@@ -4,8 +4,8 @@ SubDirHdrs $(TOP)/include ;
 
 SharedLibrary Pt-Gfx2 :
 	ARgbColor.cpp
+	ARgbFColor.cpp
 	ARgb8888Color.cpp
-	FloatedColor.cpp
 	BasicImage.cpp
 	;
 
