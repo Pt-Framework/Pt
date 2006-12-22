@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT ThreadKeyImpl {
+	class PT_API ThreadKeyImpl {
 		public:
 			ThreadKeyImpl() throw(SystemError)
 			{

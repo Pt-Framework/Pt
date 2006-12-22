@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                                *
- *                         Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -171,4 +171,3 @@ bool Utf16Codec::do_always_no_conv() const throw()
 {
 	return false;
 }
-

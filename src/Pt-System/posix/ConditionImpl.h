@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,7 +28,7 @@ namespace Pt {
 namespace System {
 
 	//! @brief POSIX specific implementation of the Condition class.
-	class PT_EXPORT ConditionImpl {
+	class PT_API ConditionImpl {
 		public:
 			//! @brief Default Constructor
 			/**
@@ -74,5 +74,3 @@ namespace System {
 }
 
 }
-
-

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -26,7 +26,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT SharedMemoryImpl {
+	class PT_API SharedMemoryImpl {
 		public:
 
 			SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError);

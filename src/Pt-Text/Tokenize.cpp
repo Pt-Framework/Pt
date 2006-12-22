@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -46,4 +46,3 @@ void Pt::Text::tokenize(vector<string> &tokens, const string &source, const stri
 		pos = source.find_first_of(delimiters, lastPos);
 	}
 }
-

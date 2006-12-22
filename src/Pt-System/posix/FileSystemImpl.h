@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT FileSystemImpl {
+	class PT_API FileSystemImpl {
 		public:
 			FileSystemImpl()
 			{}

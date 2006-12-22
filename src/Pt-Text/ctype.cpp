@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Drner                                  *
+ *   Copyright (C) 2005 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -303,5 +303,3 @@ const Pt::Char* ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char
 }
 
 } // namespace std
-
-
