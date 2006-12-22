@@ -2,7 +2,7 @@
 
 !!! People
 \n
-| #Marc Duerner#\n
+| #Marc Dürner#\n
 Marc earned a PhD in Chemistry in 2004 and has been working as a professional C++ programmer since then. Although he started as a "programming chemist" to solve his every day scientific computational problems, he quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. Marc has written much code for the System, IO, Net, Text, XML, Gui and the core module of %Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
 
 | #Tommi Maekitalo#\n
@@ -15,5 +15,5 @@ Aloysius finished his B.Sc. in electrical engineering in early 2004. He has been
 Stephan has been a professional C++ developer for many years. He currently works for navigating.de in Berlin, Germany. Besides %Pt, he works on s11n, a C++ serialization framework (www.s11n.net).
 
 | #Laurentiu-Gheorghe Crisan#\n
-Laurentiu has many years of experience in object-oriented software architecture in the automotive and automatisation industry. He earned an M Sc. in Computer Science and Multimedia in 2003 at the University of Applied Science Karlsruhe. Laurentiu is currently employed by PTV AG in Karlsruhe, Germany. Platinum serves as the foundation for the MeaProcess- Automatisation and Measurement framework (http://www.crisan-soft.com). 
+Laurentiu has many years of experience in object-oriented software architecture in the automotive and automatisation industry. He earned an M Sc. in Computer Science and Multimedia in 2003 at the University of Applied Science Karlsruhe. Laurentiu is currently employed by PTV AG in Karlsruhe, Germany. Platinum serves as the foundation for the MeaProcess-Automatisation and Measurement framework (http://www.crisan-soft.com).
 */
