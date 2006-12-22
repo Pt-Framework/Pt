@@ -20,7 +20,7 @@
 #include "Socket.posix.cpp"
 
 
-class PT_EXPORT UdpSocketImpl : virtual public SocketImpl {
+class PT_API UdpSocketImpl : virtual public SocketImpl {
 	public:
 		UdpSocketImpl()
 		{ }

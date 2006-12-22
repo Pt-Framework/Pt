@@ -20,7 +20,7 @@
 #include "TcpSocket.posix.cpp"
 
 
-class PT_EXPORT TcpIp6SocketImpl : public TcpSocketImpl, public Ip6SocketImpl {
+class PT_API TcpIp6SocketImpl : public TcpSocketImpl, public Ip6SocketImpl {
 	public:
 		TcpIp6SocketImpl(long handle)
 		{

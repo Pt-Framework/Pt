@@ -28,7 +28,7 @@ namespace Pt {
 
 namespace Gui {
 
-	class PT_EXPORT Drawable {
+	class PT_API Drawable {
 		public:
 			Drawable();
 

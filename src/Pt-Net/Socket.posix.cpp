@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -36,7 +36,7 @@ using namespace Pt::Net;
 using namespace std;
 
 
-class PT_EXPORT SocketImpl {
+class PT_API SocketImpl {
 	public:
 		SocketImpl()
 		: _handle(0),
@@ -120,4 +120,3 @@ class PT_EXPORT SocketImpl {
 
 
 #endif
-

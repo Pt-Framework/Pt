@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Duerner                                 *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This code is based on code written by Christian Prochnow              *

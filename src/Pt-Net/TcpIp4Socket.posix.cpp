@@ -21,7 +21,7 @@
 
 
 
-class PT_EXPORT TcpIp4SocketImpl : public TcpSocketImpl, public Ip4SocketImpl {
+class PT_API TcpIp4SocketImpl : public TcpSocketImpl, public Ip4SocketImpl {
 	public:
 		TcpIp4SocketImpl(long handle)
 		{

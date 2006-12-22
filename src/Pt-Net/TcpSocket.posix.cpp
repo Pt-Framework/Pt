@@ -20,7 +20,7 @@
 #include "Socket.posix.cpp"
 
 
-class PT_EXPORT TcpSocketImpl : virtual public SocketImpl {
+class PT_API TcpSocketImpl : virtual public SocketImpl {
 	public:
 		TcpSocketImpl()
 		{ }

@@ -21,7 +21,7 @@
 #include "UdpSocket.posix.cpp"
 
 
-class PT_EXPORT UdpIp4SocketImpl : virtual public UdpSocketImpl, virtual public Ip4SocketImpl {
+class PT_API UdpIp4SocketImpl : virtual public UdpSocketImpl, virtual public Ip4SocketImpl {
 	public:
 		UdpIp4SocketImpl()
 		{ }

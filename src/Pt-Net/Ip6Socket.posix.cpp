@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,7 @@ using namespace Pt::Net;
 using namespace std;
 
 
-class PT_EXPORT Ip6SocketImpl : virtual public SocketImpl {
+class PT_API Ip6SocketImpl : virtual public SocketImpl {
 	public:
 		Ip6SocketImpl()
 		{}
@@ -69,6 +69,3 @@ class PT_EXPORT Ip6SocketImpl : virtual public SocketImpl {
 				throw IO::IOError(errno, "Could not bind address to socket", PT_SOURCEINFO);
 		}
 };
-
-
-
