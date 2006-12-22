@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT Socket : public IO::IODevice {
+	class PT_API Socket : public IO::IODevice {
 		public:
 			virtual ~Socket() throw();
 
@@ -43,7 +43,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT ServerSocket {
+	class PT_API ServerSocket {
 		public:
 			virtual ~ServerSocket() {}
 	};

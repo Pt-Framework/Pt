@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -52,7 +52,7 @@ namespace Text {
 	 * @see Utf32Codec
 	 */
 	template <typename I, typename E>
-	class PT_EXPORT TextCodec : public std::codecvt<I, E, mbstate_t> {
+	class PT_API TextCodec : public std::codecvt<I, E, mbstate_t> {
 		public:
 			typedef I InternT;
 			typedef E ExternT;
@@ -95,4 +95,3 @@ using Text::TextCodec;
 } //namespace Pt
 
 #endif
-

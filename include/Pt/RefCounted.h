@@ -25,7 +25,7 @@
 
 namespace Pt
 {
-	class PT_EXPORT RefCounted
+	class PT_API RefCounted
 	{
 		public:
 			RefCounted()

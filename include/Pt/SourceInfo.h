@@ -82,7 +82,7 @@ namespace Pt {
 	}
 	@endcode
 */
-class PT_EXPORT SourceInfo {
+class PT_API SourceInfo {
 	public:
 		/** @brief Copy constructor
 		*/

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                                *
- *                         Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -40,7 +40,7 @@ namespace Text {
 	 * The method do_out() converts an array of ptv::text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in ASCII-encoding.
 	 */
-	class PT_EXPORT AsciiCodec : public TextCodec<Char, char> {
+	class PT_API AsciiCodec : public TextCodec<Char, char> {
 		public:
 			/**
 			 * @brief Constructs a new AsciiCodec object with internal type of ptv::text::Char and
@@ -77,4 +77,3 @@ namespace Text {
 } //namespace Pt
 
 #endif
-

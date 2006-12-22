@@ -16,7 +16,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT PluginId {
+	class PT_API PluginId {
 		public:
 			PluginId(const std::string& iface, const std::string& feature, const std::string& info = "")
 			: _iface(iface),
@@ -44,7 +44,7 @@ namespace System {
 
 
 	template <typename Iface>
-	class PT_EXPORT Plugin : public PluginId {
+	class PT_API Plugin : public PluginId {
 		public:
 			Plugin(const std::string& iface, const std::string& feature, const std::string& info)
 			: PluginId( iface, feature, info)
@@ -66,12 +66,12 @@ namespace System {
 	   static Pt::BasicPlugin<SomeClass, MyIface> plugin0("some-feature");
 	   static Pt::BasicPlugin<OtherClass, MyIface> plugin1("other-feature");
 	   extern "C" { \
-	       PT_EXPORT Pt::PluginId* PluginList[] = { &plugin0, &plugin1, 0 }; \
+	       PT_API Pt::PluginId* PluginList[] = { &plugin0, &plugin1, 0 }; \
 	   }
 	   </code>
 	*/
 	template <typename Class, typename Iface>
-	class PT_EXPORT BasicPlugin : public Plugin<Iface> {
+	class PT_API BasicPlugin : public Plugin<Iface> {
 		public:
 			BasicPlugin(const std::string& feature, const std::string& info)
 			: Plugin<Iface>( TypeInfo<Iface>::typeName(), feature, info)
@@ -89,7 +89,7 @@ namespace System {
 	};
 
 
-	class PT_EXPORT  PluginManagerBase {
+	class PT_API  PluginManagerBase {
 		public:
 			PluginManagerBase();
 
@@ -110,7 +110,7 @@ namespace System {
 
 
 	template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
-	class PT_EXPORT PluginManager : PluginManagerBase {
+	class PT_API PluginManager : PluginManagerBase {
 		public:
 			typedef typename std::map< std::string, PluginT* > PluginMap;
 			typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;

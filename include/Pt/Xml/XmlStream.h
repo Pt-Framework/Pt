@@ -24,7 +24,7 @@ namespace Xml {
 	class CData;
 
 
-	class PT_EXPORT XmlToken {
+	class PT_API XmlToken {
 		public:
 			enum Type {
 				Unknown,
@@ -52,7 +52,7 @@ namespace Xml {
 	};
 
 
-	class PT_EXPORT XmlStreamBuffer : public Pt::TextStreamBuffer {
+	class PT_API XmlStreamBuffer : public Pt::TextStreamBuffer {
 		public:
 			XmlStreamBuffer(std::streambuf* endpoint)
 			: TextStreamBuffer( endpoint, new Utf8Codec() )
@@ -92,7 +92,7 @@ namespace Xml {
 	};
 
 
-	class PT_EXPORT XmlStreamBase {
+	class PT_API XmlStreamBase {
 		public:
 			enum Flags {
 				Normal = 0x00,
@@ -135,7 +135,7 @@ namespace Xml {
 	};
 
 
-	class PT_EXPORT XmlIStream : virtual public XmlStreamBase, protected std::basic_istream<Char> {
+	class PT_API XmlIStream : virtual public XmlStreamBase, protected std::basic_istream<Char> {
 		public:
 			XmlIStream(std::istream& is, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase( new XmlStreamBuffer(is), flags ),
@@ -173,7 +173,7 @@ namespace Xml {
 	};
 
 
-	class PT_EXPORT XmlOStream : virtual public XmlStreamBase, protected std::basic_ostream<Char> {
+	class PT_API XmlOStream : virtual public XmlStreamBase, protected std::basic_ostream<Char> {
 		public:
 			XmlOStream(std::ostream& os, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase( new XmlStreamBuffer(os), flags ),
@@ -226,10 +226,10 @@ namespace Xml {
 			std::auto_ptr<XmlStreamBuffer> _buffer;
 	};
 
-	PT_EXPORT XmlOStream& operator<<(XmlOStream&, const Pt::Xml::StartElement& element);
+	PT_API XmlOStream& operator<<(XmlOStream&, const Pt::Xml::StartElement& element);
 
 
-	class PT_EXPORT XmlIOStream : public XmlIStream, public XmlOStream {
+	class PT_API XmlIOStream : public XmlIStream, public XmlOStream {
 		public:
 			XmlIOStream(std::iostream& ios, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase(new XmlStreamBuffer(ios), flags),

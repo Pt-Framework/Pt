@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Duerner                                 *
+ *   Copyright (C) 2005 Marc Boris Dürner                                  *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

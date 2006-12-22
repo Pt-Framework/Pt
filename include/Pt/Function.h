@@ -223,7 +223,7 @@ template < typename R,
             typename A2 = Pt::Void,
             typename A3 = Pt::Void
           >
-class PT_EXPORT FunctionSlot : public BasicSlot<R, A1, A2, A3> {
+class PT_API FunctionSlot : public BasicSlot<R, A1, A2, A3> {
 	public:
 		FunctionSlot(const Function<R, A1, A2, A3>& func)
 		: _func( func )

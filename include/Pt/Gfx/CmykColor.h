@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -44,7 +44,7 @@ namespace Pt {
 		//!    Yellow  : 0 - 0xFFFF\n
 		//!    Black   : 0 - 0xFFFF
 		template <>
-		class PT_EXPORT BasicColor<Cmyk> {
+		class PT_API BasicColor<Cmyk> {
 			public:
 				typedef Cmyk ColorSpaceT;
 

@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT Ip6Address : public NetworkAddress {
+	class PT_API Ip6Address : public NetworkAddress {
 		public:
 			static const uint8_t Any[16];
 			static const uint8_t Loopback[16];

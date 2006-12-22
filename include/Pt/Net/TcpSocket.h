@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
- *                                                                         *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -31,7 +30,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT TcpSocket : virtual public Socket {
+	class PT_API TcpSocket : virtual public Socket {
 		public:
 			TcpSocket()
 			{}
@@ -43,7 +42,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT TcpServerSocket : virtual public ServerSocket {
+	class PT_API TcpServerSocket : virtual public ServerSocket {
 		public:
 			TcpServerSocket()
 			{}

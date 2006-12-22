@@ -27,7 +27,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_EXPORT Semaphore : public NonCopyable {
+class PT_API Semaphore : public NonCopyable {
 	friend class SemaphoreImpl;
 
 	public:

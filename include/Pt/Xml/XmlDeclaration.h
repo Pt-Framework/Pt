@@ -9,7 +9,7 @@ namespace Pt {
 
 	namespace Xml {
 
-		class PT_EXPORT XmlDeclaration : public Node {
+		class PT_API XmlDeclaration : public Node {
 			public:
 				XmlDeclaration();
 

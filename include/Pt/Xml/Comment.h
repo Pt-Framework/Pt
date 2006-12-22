@@ -22,7 +22,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_EXPORT Comment : public Node {
+		class PT_API Comment : public Node {
 			public:
 				/**
 				 * @brief Constructs a new Comment object with the given string as content/text.

@@ -18,7 +18,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_EXPORT EndDocument : public Node {
+		class PT_API EndDocument : public Node {
 			public:
 				//! Creates an EndDocument object.
 				EndDocument()

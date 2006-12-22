@@ -38,7 +38,7 @@ namespace Pt {
 		 *
 		 * See std::list for more details.
 		 */
-		class PT_EXPORT StringList : public std::list<Pt::String> {
+		class PT_API StringList : public std::list<Pt::String> {
 			public:
 				typedef std::list<Pt::String>::iterator Iterator;
 				typedef std::list<Pt::String>::const_iterator ConstIterator;
@@ -55,7 +55,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<Text::StringList> {
+	struct PT_API TypeTraits<Text::StringList> {
 		static const char* typeName()
 		{ return "Pt::StringList"; }
 	};
@@ -63,7 +63,7 @@ namespace Pt {
 
 	/*
 	template <>
-	struct PT_EXPORT AnyTraits<Text::StringList> {
+	struct PT_API AnyTraits<Text::StringList> {
 		static void output(std::ostream& os, const StringList& value);
 		static void input(std::istream& is, StringList& value);
 	};

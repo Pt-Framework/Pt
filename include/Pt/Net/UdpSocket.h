@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT UdpSender : virtual public Socket {
+	class PT_API UdpSender : virtual public Socket {
 		public:
 			UdpSender()
 			{}
@@ -39,7 +39,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT UdpReceiver : virtual public Socket {
+	class PT_API UdpReceiver : virtual public Socket {
 		public:
 			UdpReceiver()
 			{}
@@ -57,7 +57,7 @@ namespace Net {
 
 
 
-	class PT_EXPORT UdpSocket : virtual public Socket {
+	class PT_API UdpSocket : virtual public Socket {
 		public:
 			UdpSocket()
 			{}

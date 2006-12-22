@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@ namespace Pt {
 
 	namespace Text {
 
-		extern void PT_EXPORT tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters);
+		extern void PT_API tokenize(std::vector<std::string> &tokens, const std::string &source, const std::string &delimiters);
 
 	} // namespace Text
 

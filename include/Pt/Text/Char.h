@@ -55,7 +55,7 @@ namespace Text {
 	 *
 	 * @see Category
 	 */
-	class PT_EXPORT Char
+	class PT_API Char
 	{
 		public:
 			//! \brief General category

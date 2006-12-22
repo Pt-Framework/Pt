@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,12 +33,12 @@ namespace std {
 #ifdef _MSC_VER
 
 	template<>
-	class PT_EXPORT codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
+	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
 
 #else
 
 	template<>
-	class PT_EXPORT codecvt<Pt::Char, char, mbstate_t> : public codecvt_base, public locale::facet {
+	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base, public locale::facet {
 #endif
 
 		public:
@@ -102,4 +102,3 @@ namespace std {
 }
 
 #endif
-

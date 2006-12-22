@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                                *
- *                         Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -72,7 +71,7 @@ namespace Text {
 
 //! decode UTF-16 to UTF-32
 //! encode UTF-32 to UTF-16
-class PT_EXPORT Utf16Codec : public TextCodec {
+class PT_API Utf16Codec : public TextCodec {
 	public:
 		explicit Utf16Codec(size_t ref = 0);
 		virtual ~Utf16Codec();
@@ -95,4 +94,3 @@ class PT_EXPORT Utf16Codec : public TextCodec {
 } //namespace Pt
 
 #endif
-

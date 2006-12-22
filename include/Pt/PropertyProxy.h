@@ -11,7 +11,7 @@
 
 namespace Pt {
 
-class PT_EXPORT AbstractProperty
+class PT_API AbstractProperty
 {
 	public:
 		AbstractProperty()
@@ -34,7 +34,7 @@ class PT_EXPORT AbstractProperty
 
 
 template <typename T>
-class PT_EXPORT ReadPropertyProxy : virtual public AbstractProperty
+class PT_API ReadPropertyProxy : virtual public AbstractProperty
 {
 	public:
 
@@ -83,7 +83,7 @@ class PT_EXPORT ReadPropertyProxy : virtual public AbstractProperty
 
 
 template <typename T>
-class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty
+class PT_API WritePropertyProxy : virtual public AbstractProperty
 {
 	public:
 		template <typename R, typename Object, typename ObjectBase>
@@ -137,7 +137,7 @@ class PT_EXPORT WritePropertyProxy : virtual public AbstractProperty
 
 
 template <typename R, typename A = R>
-class PT_EXPORT PropertyProxy : public ReadPropertyProxy<R>, public WritePropertyProxy<A> {
+class PT_API PropertyProxy : public ReadPropertyProxy<R>, public WritePropertyProxy<A> {
 	public:
 		template <typename R2, typename Object, typename ObjectBase>
 		PropertyProxy(Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )

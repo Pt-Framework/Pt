@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Marc Boris Duerner                         *
+ *   Copyright (C) 2004-2006 by Marc Boris Dürner                          *
  *   Copyright (C) 2004-2006 by Stepan Beal                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

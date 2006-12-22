@@ -26,7 +26,7 @@ namespace Xml {
 	 * is parsed. The attributes are stored in a StartElement object from where they
 	 * can be retrieved.
 	 */
-	class PT_EXPORT Attribute
+	class PT_API Attribute
 	{
 		public:
 			//! Constructs a new Attribute object with an empty name and value.
@@ -98,7 +98,7 @@ namespace Xml {
 	 * @see Node
 	 * @see Attribute
 	 */
-	class PT_EXPORT StartElement : public Node
+	class PT_API StartElement : public Node
 	{
 		public:
 			//! Constructs a new StartElement object with no name and an empty attribute list.

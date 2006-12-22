@@ -32,7 +32,7 @@ namespace IO {
 	class IOHandler;
 
 
-	class PT_EXPORT IOTask : public NonCopyable {
+	class PT_API IOTask : public NonCopyable {
 		public:
 			IOTask(IOHandler& handler, const Url& url)
 			: _handler(handler), _url(url)
@@ -55,7 +55,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT GetTask : public IOTask {
+	class PT_API GetTask : public IOTask {
 		public:
 			GetTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -68,7 +68,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT PutTask : public IOTask {
+	class PT_API PutTask : public IOTask {
 		public:
 			PutTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -81,7 +81,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT UnlinkTask : public IOTask {
+	class PT_API UnlinkTask : public IOTask {
 		public:
 			UnlinkTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -94,7 +94,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT MakeDirTask : public IOTask {
+	class PT_API MakeDirTask : public IOTask {
 		public:
 			MakeDirTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -107,7 +107,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT RemoveDirTask: public IOTask {
+	class PT_API RemoveDirTask: public IOTask {
 		public:
 			RemoveDirTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -120,7 +120,7 @@ namespace IO {
 	};
 
 
-	class PT_EXPORT ListDirTask : public IOTask {
+	class PT_API ListDirTask : public IOTask {
 		public:
 			ListDirTask(IOHandler& handler, const Url& url)
 			: IOTask(handler, url)
@@ -134,7 +134,7 @@ namespace IO {
 
 
 	//! Base class to handle protocol specific IO.
-	class PT_EXPORT IOHandler {
+	class PT_API IOHandler {
 		public:
 			IOHandler()
 			{}

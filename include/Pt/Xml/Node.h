@@ -27,7 +27,7 @@ namespace Pt {
 		 *
 		 * @see Type
 		 */
-		class PT_EXPORT Node : public Clonable<Node> {
+		class PT_API Node : public Clonable<Node> {
 			public:
 				enum Type {
 					//! Unknown Node type (may not currently be supported)

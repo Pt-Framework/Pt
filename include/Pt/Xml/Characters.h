@@ -23,7 +23,7 @@ namespace Xml {
 		 *
 		 * @see Node
 		 */
-		class PT_EXPORT Characters : public Node {
+		class PT_API Characters : public Node {
 			public:
 				/**
 				 * @brief Constructs a new Character object with the given (optional) string as content.

@@ -30,7 +30,7 @@ namespace Pt {
 namespace Net {
 
 
-	class PT_EXPORT Ip6Socket : virtual public Socket {
+	class PT_API Ip6Socket : virtual public Socket {
 		public:
 			Ip6Socket()
 			{}

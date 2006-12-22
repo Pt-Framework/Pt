@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *   Copyright (C) 2004 by Christian Prochnow                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_EXPORT ThreadKeyBase : public NonCopyable {
+	class PT_API ThreadKeyBase : public NonCopyable {
 		public:
 			ThreadKeyBase() throw(SystemError);
 
@@ -49,7 +49,7 @@ namespace System {
 
 	//! Thread-specific storage template class
 	template <class T>
-	class PT_EXPORT ThreadKey: private ThreadKeyBase {
+	class PT_API ThreadKey: private ThreadKeyBase {
 		public:
 			ThreadKey() throw(SystemError)
 			: ThreadKeyBase()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *   Copyright (C) 2006 by Roman Schnider                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -59,7 +59,7 @@ namespace System {
  			};
 		@endcode
     */
-    class PT_EXPORT MutexLock {
+    class PT_API MutexLock {
         public:
             //! Constructor
             /**

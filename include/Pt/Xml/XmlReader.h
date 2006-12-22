@@ -59,7 +59,7 @@ namespace Xml {
 	 *
 	 * @see Node
 	 */
-	class PT_EXPORT XmlIStream
+	class PT_API XmlIStream
 	{
 		public:
 			static const EndDocument& documentEnd()
@@ -127,7 +127,7 @@ namespace Xml {
 	};
 
 
-	class PT_EXPORT XmlStreamIterator
+	class PT_API XmlStreamIterator
 	{
 		public:
 			XmlStreamIterator()

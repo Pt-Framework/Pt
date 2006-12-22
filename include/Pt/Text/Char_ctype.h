@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Drner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,12 +37,12 @@ namespace std {
 	class ctype_base;
 
 	template <>
-	class PT_EXPORT ctype<Pt::Char> : public ctype_base {
+	class PT_API ctype<Pt::Char> : public ctype_base {
 
 #else
 
 	template <>
-	class PT_EXPORT ctype<Pt::Char> : public ctype_base, public locale::facet {
+	class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
 
 #endif
 

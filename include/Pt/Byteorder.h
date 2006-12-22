@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
+ *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
  *   Copyright (C)      2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

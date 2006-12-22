@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
+ *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
  *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,7 +43,7 @@ namespace Pt {
 	 *  error message, Exceptions can provide information about where the
 	 *  exception was raised in the source code through a SourceInfo object.
 	 */
-	class PT_EXPORT Exception : public std::exception {
+	class PT_API Exception : public std::exception {
 		public:
 			/** @brief Construct an Exception from an error message and SourceInfo.
 			 *
@@ -90,7 +90,7 @@ namespace Pt {
 	 *  This is the base class for all runtime errors used in this framework.
 	 *  This class implements Exception.
 	 */
-	class PT_EXPORT RuntimeError : public Exception {
+	class PT_API RuntimeError : public Exception {
 		public:
 			/** @see Exception().
 			 */
@@ -108,7 +108,7 @@ namespace Pt {
 	 *  This is the base class for all logic errors used in this framework.
 	 *  This class implements Exception.
 	 */
-	class PT_EXPORT LogicError : public Exception {
+	class PT_API LogicError : public Exception {
 		public:
 			/** @see Exception().
 			 */
@@ -126,7 +126,7 @@ namespace Pt {
 	 *  An exception of class OverflowError is used to report an arithmetic overflow.
 	 *  This class implements Exception.
 	 */
-	class PT_EXPORT OverflowError : public RuntimeError {
+	class PT_API OverflowError : public RuntimeError {
 		public:
 			/** @see Exception().
 			 */
@@ -144,7 +144,7 @@ namespace Pt {
 	 *  An exception of class UnderflowError is used to report an arithmetic underflow.
 	 *  This class implements Exception.
 	 */
-	class PT_EXPORT UnderflowError : public RuntimeError {
+	class PT_API UnderflowError : public RuntimeError {
 		public:
 			/** @see Exception().
 			 */
@@ -162,7 +162,7 @@ namespace Pt {
 	 *  An exception of class RangeError is used to report a range error in internal
 	 *  computations. This class implements Exception.
 	 */
-	class PT_EXPORT RangeError : public RuntimeError {
+	class PT_API RangeError : public RuntimeError {
 		public:
 			/** @see Exception().
 			 */
@@ -181,7 +181,7 @@ namespace Pt {
 	 *  (e.g. if a bit set is initialized with a char other than '0' or '1').
 	 *  This class implements Exception.
 	 */
-	class PT_EXPORT IllegalArgument : public LogicError {
+	class PT_API IllegalArgument : public LogicError {
 		public:
 			/** @see Exception().
 			 */

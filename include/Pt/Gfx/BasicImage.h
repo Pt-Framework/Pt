@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -59,7 +59,7 @@ namespace Pt {
 		//!   struct MyColorSpace {};
 		//!
 		//!   template <>
-		//!   class PT_EXPORT BasicColor<MyColorSpace> {
+		//!   class PT_API BasicColor<MyColorSpace> {
 		//!     ...
 		//!     ...
 		//!     ...
@@ -72,7 +72,7 @@ namespace Pt {
 		//!   typedef BasicImage<MyColorSpace> MyImageType;
 		//!
 		template <typename C>
-		class PT_EXPORT BasicImage {
+		class PT_API BasicImage {
 			public:
 				typedef C                       ColorSpaceT;
 				typedef BasicColor<ColorSpaceT> ColorT;

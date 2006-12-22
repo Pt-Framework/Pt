@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,7 +32,7 @@ namespace System {
 	class FileSystemNode;
 
 
-	class PT_EXPORT FileSystem : public Singleton<FileSystem> 
+	class PT_API FileSystem : public Singleton<FileSystem> 
 	{
 		friend class Singleton<FileSystem>;
 

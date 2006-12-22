@@ -22,7 +22,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_EXPORT ProcessingInstruction : public Node {
+		class PT_API ProcessingInstruction : public Node {
 			public:
 				//! Constructs a new ProcessingInstruction.
 				ProcessingInstruction();

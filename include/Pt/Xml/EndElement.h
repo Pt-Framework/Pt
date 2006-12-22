@@ -27,7 +27,7 @@ namespace Pt {
 		 * @see StartElement
 		 * @see Node
 		 */
-		class PT_EXPORT EndElement : public Node {
+		class PT_API EndElement : public Node {
 			public:
 				/**
 				 * @brief Constructs a new EndElement object with the given (optional) string as tag name.

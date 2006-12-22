@@ -12,7 +12,7 @@ namespace Pt
 namespace System
 {
 
-class PT_EXPORT Timer : public Runnable
+class PT_API Timer : public Runnable
 {
 public:
 	Timer(void);

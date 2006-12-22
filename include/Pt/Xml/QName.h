@@ -8,7 +8,7 @@ namespace Pt {
 
 	namespace Xml {
 
-		class PT_EXPORT QName {
+		class PT_API QName {
 			public:
 				QName();
 

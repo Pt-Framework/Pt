@@ -36,7 +36,7 @@ namespace Net {
 	typedef uint16_t port_t;
 
 
-	class PT_EXPORT NetworkAddress {
+	class PT_API NetworkAddress {
 		public:
 			NetworkAddress()
 			{}

@@ -32,7 +32,7 @@ namespace Pt {
 namespace System {
 
 
-	class PT_EXPORT FileBuffer : public IO::IOBuffer {
+	class PT_API FileBuffer : public IO::IOBuffer {
 		public:
 			FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 	
@@ -44,7 +44,7 @@ namespace System {
 	};
 
 
-	class PT_EXPORT FileStream : public IO::IOStream {
+	class PT_API FileStream : public IO::IOStream {
 	public:
 			FileStream(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 	

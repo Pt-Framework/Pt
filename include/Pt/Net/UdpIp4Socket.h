@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT UdpIp4Sender : virtual public UdpSender, virtual public Ip4Socket {
+	class PT_API UdpIp4Sender : virtual public UdpSender, virtual public Ip4Socket {
 		public:
 			UdpIp4Sender(const Ip4Address& addr, port_t port);
 			~UdpIp4Sender() throw();
@@ -54,7 +54,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT UdpIp4Receiver : virtual public UdpReceiver, virtual public Ip4ServerSocket {
+	class PT_API UdpIp4Receiver : virtual public UdpReceiver, virtual public Ip4ServerSocket {
 		public:
 			UdpIp4Receiver(const Ip4Address& addr, port_t port);
 			~UdpIp4Receiver() throw();

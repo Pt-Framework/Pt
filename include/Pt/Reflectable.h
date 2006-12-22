@@ -1,5 +1,22 @@
-// Copyright (C) 2000-2004 Marc Boris Drner <marcd __at arklinux __dot org>
-// All rights reserved.
+/***************************************************************************
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 #ifndef Pt_Reflectable_h
 #define Pt_Reflectable_h
 
@@ -20,7 +37,7 @@ template < typename R,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
-class PT_EXPORT MethodProxy : public ICallable, private Method<R, C, A1, A2, A3, A4, A5>
+class PT_API MethodProxy : public ICallable, private Method<R, C, A1, A2, A3, A4, A5>
 {
 	public:
 		typedef C ClassT;
@@ -79,7 +96,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4>
-class PT_EXPORT MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
+class PT_API MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
                                                             , private Method<R, C, A1, A2, A3, A4>
 {
 	public:
@@ -135,7 +152,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class PT_EXPORT MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public ICallable
+class PT_API MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public ICallable
                                                                   , private Method<R, C, A1, A2, A3>
 {
 	public:
@@ -187,7 +204,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class PT_EXPORT MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class PT_API MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public ICallable
                                                                         , private Method<R, C, A1, A2>
 {
 	public:
@@ -235,7 +252,7 @@ class PT_EXPORT MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public
 template < typename R,
            class C,
            typename A1>
-class PT_EXPORT MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class PT_API MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
                                                                               , private Method<R, C, A1>
 {
 	public:
@@ -279,7 +296,7 @@ class PT_EXPORT MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : 
 
 template < typename R,
            class C>
-class PT_EXPORT MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class PT_API MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
                                                                                     , private Method<R, C>
 {
 	public:
@@ -313,7 +330,7 @@ typedef std::multimap<std::string, AbstractProperty*> PropertyMap;
 typedef std::multimap<std::string, ICallable*> MethodMap;
 
 
-class PT_EXPORT Reflectable {
+class PT_API Reflectable {
 	public:
 		Reflectable(const std::string& typeName = "Reflectable");
 

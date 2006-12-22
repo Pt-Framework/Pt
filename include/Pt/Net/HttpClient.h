@@ -11,7 +11,7 @@ namespace Pt {
 namespace Net {
 
 	//! HTTP Request
-	class PT_EXPORT HttpRequest {
+	class PT_API HttpRequest {
 		public:
 			//! HTTP Request methods
 			enum Method {
@@ -102,7 +102,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT HttpResponse {
+	class PT_API HttpResponse {
 		public:
 			HttpResponse();
 			HttpResponse(const std::string& protoVer, int code, const std::string& reason);
@@ -138,7 +138,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT HttpSocket : public TcpIp4Socket {
+	class PT_API HttpSocket : public TcpIp4Socket {
 		public:
 			HttpSocket(const Ip4Address& address, port_t port);
 

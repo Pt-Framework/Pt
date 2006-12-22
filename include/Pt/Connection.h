@@ -12,7 +12,7 @@ namespace Pt {
 	class Connectable;
 
 
-	class PT_EXPORT ConnectionData : public RefCounted {
+	class PT_API ConnectionData : public RefCounted {
 		public:
 			ConnectionData()
 			: _refs(1)
@@ -66,7 +66,7 @@ namespace Pt {
 	};
 
 
-	class PT_EXPORT Connection
+	class PT_API Connection
     {
 		public:
 			Connection();

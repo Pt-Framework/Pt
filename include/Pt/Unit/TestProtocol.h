@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,7 +38,7 @@ namespace Unit {
         test of the test suite without passing it any data. Implementors
         need to override the method TestProtocol::run.
     */
-    class PT_EXPORT TestProtocol
+    class PT_API TestProtocol
     {
         public:
             /** @brief Destructor

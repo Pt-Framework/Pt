@@ -31,7 +31,7 @@ namespace IO {
 
 	//! @brief a stream buffer for IODevices with linear buffer area.
 	template <typename CharT>
-	class PT_EXPORT BasicIOBuffer : public BasicStreamBuffer<CharT> {
+	class PT_API BasicIOBuffer : public BasicStreamBuffer<CharT> {
 		public:
 			typedef typename std::basic_streambuf<CharT>::int_type int_type;
 			typedef typename std::basic_streambuf<CharT>::traits_type traits_type;

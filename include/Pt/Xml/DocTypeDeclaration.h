@@ -19,7 +19,7 @@ namespace Xml {
 	 *
 	 * @see Node
 	 */
-	class PT_EXPORT DocTypeDeclaration : public Node {
+	class PT_API DocTypeDeclaration : public Node {
 		public:
 			/**
 			 * @brief Constructs a new DocTypeDeclaration object with the given string as content.

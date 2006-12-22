@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Drner                                   *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace IO {
 
-class PT_EXPORT InvalidUrl : public Exception {
+class PT_API InvalidUrl : public Exception {
 public:
 	inline InvalidUrl(const char* _what, const SourceInfo& _si)
 	: Exception(_what,_si)
@@ -46,7 +46,7 @@ public:
 	will not be printed out by the operator<< but can
 	be retrieved via password().
 */
-class PT_EXPORT Url {
+class PT_API Url {
 	public:
 		typedef std::map<std::string, std::string> ArgumentMap;
 
@@ -141,10 +141,10 @@ class PT_EXPORT Url {
 		//! Url-decodes the given string
 		static std::string decode(const std::string& str);
 
-		friend PT_EXPORT std::ostream& operator<<(std::ostream& os,
+		friend PT_API std::ostream& operator<<(std::ostream& os,
 			const Url& url);
 
-		friend PT_EXPORT std::istream& operator>>(std::istream& is, Url& url);
+		friend PT_API std::istream& operator>>(std::istream& is, Url& url);
 
 		//! Returns a ArgumentMap for given Url-encoded argument-string
 		static ArgumentMap fromString(const std::string& args);

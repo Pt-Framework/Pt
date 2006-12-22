@@ -11,12 +11,12 @@
 
 namespace Pt {
 
-	class  PT_EXPORT Any {
+	class  PT_API Any {
 		template <typename T>
 		friend T any_cast(const Any&);
 
 		public:
-			class PT_EXPORT Value : public Pt::Clonable<Value> {
+			class PT_API Value : public Pt::Clonable<Value> {
 				public:
 					virtual ~Value() {}
 					virtual const char* typeName() const = 0;
@@ -28,7 +28,7 @@ namespace Pt {
 			};
 
 			template <typename T>
-			class PT_EXPORT BasicValue : public Value {
+			class PT_API BasicValue : public Value {
 				public:
 					BasicValue(const T& value = T())
 					: _value(value)
@@ -148,10 +148,10 @@ namespace Pt {
 	};
 
 
-	PT_EXPORT std::ostream& operator<<(std::ostream& os, const Pt::Any& val);
+	PT_API std::ostream& operator<<(std::ostream& os, const Pt::Any& val);
 
 
-	PT_EXPORT std::istream& operator>>(std::istream& is, Pt::Any& val);
+	PT_API std::istream& operator>>(std::istream& is, Pt::Any& val);
 
 
 	template <typename T>

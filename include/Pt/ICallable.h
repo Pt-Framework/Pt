@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,7 +25,7 @@
 //! \addtogroup Pt
 namespace Pt {
 
-	class PT_EXPORT ICallable
+	class PT_API ICallable
 	{
 		public:
 			virtual ~ICallable()

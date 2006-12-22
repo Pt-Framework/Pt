@@ -21,7 +21,7 @@ namespace Xml {
 	 *
 	 * @see Namespace
 	 */
-	class PT_EXPORT NamespaceContext {
+	class PT_API NamespaceContext {
 		public:
 			//! Creates a new NamespaceContext object which manages the namespaces of an XML document.
 			NamespaceContext();

@@ -31,12 +31,12 @@ namespace Pt {
 namespace IO {
 
 	//! IOManager for protocol transparent IO.
-	class PT_EXPORT IOManager : public Pt::Singleton<IOManager> {
+	class PT_API IOManager : public Pt::Singleton<IOManager> {
 		friend class Pt::Singleton<IOManager>;
 
 		public:
 			template <typename HandlerT>
-			class PT_EXPORT Register {
+			class PT_API Register {
 				public:
 					Register(const std::string& protocol) {
 						IOManager::instance().registerHandler(protocol, new HandlerT);

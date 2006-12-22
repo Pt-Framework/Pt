@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Dr. Marc Boris Drner                           *
+ *   Copyright (C) 2004-2006 by Marc Boris Dürner                          *
  *   Copyright (C) 2005 Stephan Beal                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,7 +36,7 @@ namespace Pt {
 	/** A Delegate can be connected to one target, but forwards the return
 	    value of the target, when called. **/
 	template <typename R, typename A1 = Pt::Void, typename A2 = Pt::Void, typename A3 = Pt::Void>
-	class PT_EXPORT Delegate : public Connectable {
+	class PT_API Delegate : public Connectable {
 		public:
 			typedef Callable<R, A1, A2, A3> Callable;
 

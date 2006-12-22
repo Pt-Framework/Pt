@@ -16,7 +16,7 @@ namespace Xml {
  * the entity and the resolved entity value. To resolve the resolves value for an entity
  * the method resolveEntity() can be used.
  */
-class PT_EXPORT Resolver {
+class PT_API Resolver {
 	public:
 		/**
 		 * @brief Constructs a new Resolver object and initializes the entity list using the XML default entities.

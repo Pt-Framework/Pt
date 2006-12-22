@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -41,7 +41,7 @@ namespace Gfx {
 	//!    U-Chrominance : -16384 to 16384\n
 	//!    V-Chrominance : -16384 to 16384
 	template <>
-	class PT_EXPORT BasicColor<Yuv> {
+	class PT_API BasicColor<Yuv> {
 		public:
 			typedef Yuv ColorSpaceT;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,7 +34,7 @@ namespace Pt {
 
 		//! \brief ARgb color
 		template <>
-		class PT_EXPORT BasicColor<ARgb> {
+		class PT_API BasicColor<ARgb> {
 			public:
 				typedef ARgb ColorSpaceT;
 

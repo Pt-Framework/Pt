@@ -23,7 +23,7 @@ namespace Xml {
 	 * @see Node
 	 * @see NamespaceContext
 	 */
-	class PT_EXPORT Namespace {
+	class PT_API Namespace {
 		public:
 			/**
 			 * @brief Constructs a new Namespace object with the given namespace URI and prefix.

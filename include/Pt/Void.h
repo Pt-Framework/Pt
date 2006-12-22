@@ -25,12 +25,12 @@
 
 namespace Pt {
 
-	struct PT_EXPORT Void
+	struct PT_API Void
 	{};
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<Void> {
+	struct PT_API TypeTraits<Void> {
 		static const char* typeName()
 		{ return "Pt::Void"; }
 

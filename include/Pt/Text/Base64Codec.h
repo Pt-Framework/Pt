@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-	class PT_EXPORT Base64Codec : public TextCodec<char, char> {
+	class PT_API Base64Codec : public TextCodec<char, char> {
 		public:
 			explicit Base64Codec(size_t ref = 0);
 

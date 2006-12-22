@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -40,7 +40,7 @@ namespace Text {
 	 *
 	 * See BasicTextBuffer for a more detailed description.
 	 */
-	class PT_EXPORT TextBuffer : public BasicTextBuffer<Pt::Char, char> {
+	class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> Codec;
 
@@ -66,7 +66,7 @@ namespace Text {
 	 *
 	 * See BasicTextIStream for a more detailed description.
 	 */
-	class PT_EXPORT TextIStream : public BasicTextIStream<Char, char> {
+	class PT_API TextIStream : public BasicTextIStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 
@@ -101,7 +101,7 @@ namespace Text {
 	 *
 	 * See BasicTextOStream for a more detailed description.
 	 */
-	class PT_EXPORT TextOStream : public BasicTextOStream<Char, char> {
+	class PT_API TextOStream : public BasicTextOStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 
@@ -130,7 +130,7 @@ namespace Text {
 	 *
 	 * See BasicTextStream for a more detailed description.
 	 */
-	class PT_EXPORT TextStream : public BasicTextStream<Char, char> {
+	class PT_API TextStream : public BasicTextStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 
@@ -155,4 +155,3 @@ namespace Text {
 } // namespace Pt
 
 #endif
-

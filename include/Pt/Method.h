@@ -35,7 +35,7 @@ template < typename R,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
-class PT_EXPORT Method : public Callable<R, A1, A2, A3, A4, A5> {
+class PT_API Method : public Callable<R, A1, A2, A3, A4, A5> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
@@ -81,7 +81,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4 >
-class PT_EXPORT Method<R, C, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
+class PT_API Method<R, C, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)(A1, A2, A3, A4);
@@ -126,7 +126,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class PT_EXPORT Method<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
+class PT_API Method<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)(A1, A2, A3);
@@ -189,7 +189,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2 >
-class PT_EXPORT Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
+class PT_API Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)(A1, A2);
@@ -249,7 +249,7 @@ Method<R, ClassT, A1, A2> callable( ClassT* obj, R (ClassT::*ptr)(A1, A2) ) thro
 template < typename R,
            class C,
            typename A1 >
-class PT_EXPORT Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
+class PT_API Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)(A1);
@@ -311,7 +311,7 @@ Method<R,ClassT, A1> callable( ClassT* obj, R (BaseT::*ptr)(A1) ) throw()
 
 template < typename R,
            class C >
-class PT_EXPORT Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
+class PT_API Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
 	public:
 		typedef C ClassT;
 		typedef R (C::*MemFuncT)();
@@ -377,7 +377,7 @@ template < typename R,
             typename A4 = Pt::Void,
             typename A5 = Pt::Void
           >
-class PT_EXPORT MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
+class PT_API MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
 	public:
 		MethodSlot(const Method<R, C, A1, A2, A3, A4, A5>& method)
 		: _method(method)

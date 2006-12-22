@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -35,7 +35,7 @@ namespace System {
 	///	same thread can lock a mutex multiple times without deadlocking.
 	///	When unlocking the mutex, unlock() must be called for each time
 	///	a thread has successfully called lock() or tryLock().
-	class PT_EXPORT Mutex : public NonCopyable {
+	class PT_API Mutex : public NonCopyable {
 		friend class MutexImpl;
 
 		private:

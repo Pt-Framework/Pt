@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Drner                                   *
+ *   Copyright (C) 2005 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -159,7 +159,7 @@ namespace Pt {
 
 	//! CTTI for for void
 	template <>
-	struct PT_EXPORT TypeInfo<void> {
+	struct PT_API TypeInfo<void> {
 		typedef void Value;
 		typedef void ConstType;
 		typedef void Reference;
@@ -172,7 +172,7 @@ namespace Pt {
 	};
 
 
-	struct PT_EXPORT isTrue {
+	struct PT_API isTrue {
 		operator bool() const
 		{ return true; }
 
@@ -180,7 +180,7 @@ namespace Pt {
 	};
 
 
-	struct PT_EXPORT isFalse {
+	struct PT_API isFalse {
 		operator bool() const
 		{ return false; }
 

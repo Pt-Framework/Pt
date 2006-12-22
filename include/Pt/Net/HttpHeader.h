@@ -15,7 +15,7 @@ namespace Net {
 /*!
   The base class for a Http-Request or -Response.
 */
-class PT_EXPORT HttpHeader {
+class PT_API HttpHeader {
 	public:
 		typedef std::map<String, String> FieldMap;
 		typedef std::map<String, String>::iterator FieldIterator;
@@ -108,7 +108,7 @@ class PT_EXPORT HttpHeader {
 /*!
   A class used to store Http Request-Header informations
 */
-class PT_EXPORT HttpRequestHeader: public HttpHeader {
+class PT_API HttpRequestHeader: public HttpHeader {
 	public:
 		HttpRequestHeader();
 		~HttpRequestHeader();
@@ -175,7 +175,7 @@ class PT_EXPORT HttpRequestHeader: public HttpHeader {
 /*!
   A class used to store Http Response-Header informations
 */
-class PT_EXPORT HttpResponseHeader: public HttpHeader {
+class PT_API HttpResponseHeader: public HttpHeader {
 	public:
 		HttpResponseHeader();
 		~HttpResponseHeader();

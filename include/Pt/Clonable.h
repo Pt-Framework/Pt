@@ -23,7 +23,7 @@
 namespace Pt {
 
 	template <class Base>
-	class PT_EXPORT Clonable
+	class PT_API Clonable
 	{
 		public:
 			Clonable() {}

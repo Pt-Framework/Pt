@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner, Sven Falk                      *
+ *   Copyright (C) 2006 Marc Boris Dürner , Sven Falk                      *
  *   Copyright (C) 2006 Sven Falk                                          *
  *   Copyright (C) 2006 Aloysius Indrayanto                                *
  *                                                                         *
@@ -45,7 +45,7 @@ namespace Pt {
 	 *
 	 *	Trying to copy a NonCopyable object will cause compile-time error.
 	 */
-	class PT_EXPORT NonCopyable {
+	class PT_API NonCopyable {
 		public:
 			/** @brief Default constructor
 			*/

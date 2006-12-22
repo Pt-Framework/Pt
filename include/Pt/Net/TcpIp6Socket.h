@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT TcpIp6Socket : public Ip6Socket, public TcpSocket {
+	class PT_API TcpIp6Socket : public Ip6Socket, public TcpSocket {
 		public:
 			TcpIp6Socket();
 

@@ -46,10 +46,10 @@
 
 		namespace std {
 
-			class PT_EXPORT locale 
+			class PT_API locale 
 			{
 				public:
-					class PT_EXPORT facet
+					class PT_API facet
 					{
 						public:
 							facet(size_t refs)
@@ -69,7 +69,7 @@
 			};
 
 
-			class PT_EXPORT ctype_base
+			class PT_API ctype_base
 			{
 				public:
 					enum {
@@ -103,7 +103,7 @@
 
 			//typedef int mbstate_t;
 
-			class PT_EXPORT codecvt_base
+			class PT_API codecvt_base
 			{
 				public:
 					enum {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -30,7 +30,7 @@ namespace Pt {
 namespace System {
 	class Mutex;
 
-	class PT_EXPORT Condition : public NonCopyable {
+	class PT_API Condition : public NonCopyable {
 		public:
 			//! @brief Default Constructor.
 			Condition();

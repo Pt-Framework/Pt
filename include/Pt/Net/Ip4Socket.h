@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT Ip4Socket : virtual public Socket {
+	class PT_API Ip4Socket : virtual public Socket {
 		public:
 			Ip4Socket()
 			{}
@@ -54,7 +54,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT Ip4ServerSocket : virtual public ServerSocket {
+	class PT_API Ip4ServerSocket : virtual public ServerSocket {
 		public:
 			Ip4ServerSocket()
 			{}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
+ *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace IO {
 
-	class PT_EXPORT IOError : public RuntimeError {
+	class PT_API IOError : public RuntimeError {
 		public:
 			IOError(const std::string& what, const SourceInfo& si) throw();
 

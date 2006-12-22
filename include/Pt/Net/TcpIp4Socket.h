@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_EXPORT TcpIp4ServerSocket : public Ip4ServerSocket, public TcpServerSocket {
+	class PT_API TcpIp4ServerSocket : public Ip4ServerSocket, public TcpServerSocket {
 		friend class TcpIp4Socket;
 
 		public:
@@ -56,7 +56,7 @@ namespace Net {
 	};
 
 
-	class PT_EXPORT TcpIp4Socket : public Ip4Socket, public TcpSocket {
+	class PT_API TcpIp4Socket : public Ip4Socket, public TcpSocket {
 		public:
 			TcpIp4Socket();
 

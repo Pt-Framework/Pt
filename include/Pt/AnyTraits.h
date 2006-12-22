@@ -18,28 +18,28 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT AnyTraits<bool> {
+	struct PT_API AnyTraits<bool> {
 		static void output(std::ostream& os, const bool& value);
 		static void input(std::istream& is, bool& value);
 	};
 
 
 	template <>
-	struct PT_EXPORT AnyTraits<int> {
+	struct PT_API AnyTraits<int> {
 		static void output(std::ostream& os, const int& value);
 		static void input(std::istream& is, int& value);
 	};
 
 
 	template <>
-	struct PT_EXPORT AnyTraits<float> {
+	struct PT_API AnyTraits<float> {
 		static void output(std::ostream& os, const float& value);
 		static void input(std::istream& is, float& value);
 	};
 
 
 	template <>
-	struct PT_EXPORT AnyTraits<double> {
+	struct PT_API AnyTraits<double> {
 		static void output(std::ostream& os, const double& value);
 		static void input(std::istream& is, double& value);
 	};

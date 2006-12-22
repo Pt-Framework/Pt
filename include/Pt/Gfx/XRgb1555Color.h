@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -43,7 +43,7 @@ namespace Pt {
 		//!    Green : 0 to 31 \n
 		//!    Blue  : 0 to 31
 		template <>
-		class PT_EXPORT PT_PACKED BasicColor<XRgb1555> {
+		class PT_API PT_PACKED BasicColor<XRgb1555> {
 			public:
 				typedef XRgb1555 ColorSpaceT;
 

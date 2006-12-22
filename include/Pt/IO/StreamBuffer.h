@@ -29,7 +29,7 @@ namespace Pt {
 namespace IO {
 
 	template <typename CharT>
-	class PT_EXPORT BasicStreamBuffer : public std::basic_streambuf<CharT> {
+	class PT_API BasicStreamBuffer : public std::basic_streambuf<CharT> {
 		public:
 			typedef typename std::basic_streambuf<CharT>::int_type IntT;
 			typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;

@@ -28,7 +28,7 @@ namespace Pt {
 
 namespace Net {
 
-		class PT_EXPORT Ip4Address : public NetworkAddress {
+		class PT_API Ip4Address : public NetworkAddress {
 			public:
 				enum Type {
 					Any        = 0x00000000,

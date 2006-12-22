@@ -38,7 +38,7 @@ namespace std {
  * @brief A Unicode string-class.
  */
 template <>
-class PT_EXPORT basic_string< Pt::Text::Char > {
+class PT_API basic_string< Pt::Text::Char > {
 	public:
 		typedef Pt::Text::Char value_type;
 		typedef size_t size_type;

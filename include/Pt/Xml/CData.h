@@ -22,7 +22,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_EXPORT CData : public Node {
+		class PT_API CData : public Node {
 			public:
 				/**
 				 * @brief Constructs a new CData object with the given (optional) string as content.

@@ -81,7 +81,7 @@ namespace Text {
 	 * The method do_out() converts an array of ptv::text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in UTF-8-encoding.
 	 */
-	class PT_EXPORT Utf8Codec : public TextCodec<Char, char> {
+	class PT_API Utf8Codec : public TextCodec<Char, char> {
 		public:
 			/**
 			 * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.

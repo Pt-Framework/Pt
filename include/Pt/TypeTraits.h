@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Drner                                   *
+ *   Copyright (C) 2005 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -37,7 +37,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<void> {
+	struct PT_API TypeTraits<void> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -47,7 +47,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<bool> {
+	struct PT_API TypeTraits<bool> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -57,7 +57,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<char> {
+	struct PT_API TypeTraits<char> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -67,7 +67,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<int> {
+	struct PT_API TypeTraits<int> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -77,7 +77,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<float> {
+	struct PT_API TypeTraits<float> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -87,7 +87,7 @@ namespace Pt {
 
 
 	template <>
-	struct PT_EXPORT TypeTraits<double> {
+	struct PT_API TypeTraits<double> {
 		static bool isSpecialized()
 		{ return true; }
 
@@ -96,7 +96,7 @@ namespace Pt {
 	};
 
 	template <>
-	struct PT_EXPORT TypeTraits<std::string> {
+	struct PT_API TypeTraits<std::string> {
 		static bool isSpecialized()
 		{ return true; }
 
