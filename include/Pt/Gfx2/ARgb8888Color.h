@@ -27,6 +27,9 @@ namespace Pt {
 
 	namespace Gfx {
 
+		struct ARgb8888 {};
+
+
 		/** @brief 32-Bit ARGB color model.
 		 *  @ingroup Gfx
 		 *
@@ -42,29 +45,30 @@ namespace Pt {
 		 *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>
 		 *  </TABLE>
 		 */
-		class PT_EXPORT PT_PACKED ARgb8888Color {
+		template <>
+		class PT_API PT_PACKED Color<ARgb8888> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline ARgb8888Color()
+				inline Color<ARgb8888>()
 				: _val(0xFF000000)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline ARgb8888Color(const ARgb8888Color& c)
+				inline Color<ARgb8888>(const Color<ARgb8888>& c)
 				: _val(c._val)
 				{}
 
 				/** @brief Construct color using the given packed color constant.
 				 */
-				inline ARgb8888Color(uint32_t val)
+				inline Color<ARgb8888>(uint32_t val)
 				: _val(val)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgb8888Color(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+				inline Color<ARgb8888>(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 				: _val(uint32_t(a) << 24)
 				{
 					// 33333333222222221111111100000000
@@ -78,7 +82,7 @@ namespace Pt {
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgb8888Color(uint8_t r, uint8_t g, uint8_t b)
+				inline Color<ARgb8888>(uint8_t r, uint8_t g, uint8_t b)
 				: _val(0xFF000000)
 				{
 					_val |= (uint32_t(r) << 16);
@@ -89,12 +93,12 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const ARgb8888Color& operator=(const ARgb8888Color& c)
+				inline const Color<ARgb8888>& operator=(const Color<ARgb8888>& c)
 				{ _val = c._val; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const ARgb8888Color& operator+=(const ARgb8888Color& c)
+				inline const Color<ARgb8888>& operator+=(const Color<ARgb8888>& c)
 				{
 					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
 					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
@@ -107,7 +111,7 @@ namespace Pt {
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const ARgb8888Color& operator-=(const ARgb8888Color& c)
+				inline const Color<ARgb8888>& operator-=(const Color<ARgb8888>& c)
 				{
 					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
 					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
@@ -166,25 +170,31 @@ namespace Pt {
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from);
-				friend void fromARgb(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==(const ARgb8888Color& c1, const ARgb8888Color& c2);
-				friend bool operator<(const ARgb8888Color& c1, const ARgb8888Color& c2);
-				friend bool operator>(const ARgb8888Color& c1, const ARgb8888Color& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb8888>& from);
+				friend void fromARgb(Color<ARgb8888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
+				friend bool operator<(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
+				friend bool operator>(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
 
-				friend const ARgb8888Color& greyscale(ARgb8888Color& to, const ARgb8888Color& from);
+				friend const Color<ARgb8888>& greyscale(Color<ARgb8888>& to, const Color<ARgb8888>& from);
 
 			protected:
 				uint32_t _val;
 		};
 
 
-		/** @brief Convert an ARgb8888Color to ARgbColor's components.
+		/** @brief Convenience access to the 32-Bit ARGB color model.
+		 *  @ingroup Gfx
+		 */
+		typedef Color<ARgb8888> ARgb8888Color;
+
+
+		/** @brief Convert an Color<ARgb8888> to ARgbColor's components.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgb8888Color& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb8888>& from)
 		{
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
@@ -204,7 +214,7 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void fromARgb(ARgb8888Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<ARgb8888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
@@ -217,9 +227,9 @@ namespace Pt {
 		}
 
 
-		/** @brief Assign an ARgb8888Color to an ARgbFColor.
+		/** @brief Assign an Color<ARgb8888> to an ARgbFColor.
 		 */
-		inline void assign(ARgbFColor& to, const ARgb8888Color& from)
+		inline void assign(ARgbFColor& to, const Color<ARgb8888>& from)
 		{
 			to.setAlpha( float(from.alpha()) / 255.0f );
 			to.setRed  ( float(from.red  ()) / 255.0f );
@@ -228,25 +238,25 @@ namespace Pt {
 		}
 
 
-		/** @brief Equality operator for ARgb8888Color comparison.
+		/** @brief Equality operator for Color<ARgb8888> comparison.
 		 */
-		inline bool operator==(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		inline bool operator==(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
 		{ return c1._val==c2._val; }
 
-		/** @brief Less-than operator for ARgb8888Color comparison.
+		/** @brief Less-than operator for Color<ARgb8888> comparison.
 		 */
-		inline bool operator<(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		inline bool operator<(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
 		{ return c1._val<c2._val; }
 
-		/** @brief Greater-than operator for ARgb8888Color comparison.
+		/** @brief Greater-than operator for Color<ARgb8888> comparison.
 		 */
-		inline bool operator>(const ARgb8888Color& c1, const ARgb8888Color& c2)
+		inline bool operator>(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
 		{ return c1._val>c2._val; }
 
 
-		/** @brief Make the greyscale version of the source ARgb8888Color color.
+		/** @brief Make the greyscale version of the source Color<ARgb8888> color.
 		 */
-		inline const ARgb8888Color& greyscale(ARgb8888Color& to, const ARgb8888Color& from)
+		inline const Color<ARgb8888>& greyscale(Color<ARgb8888>& to, const Color<ARgb8888>& from)
 		{
 			const uint32_t r = from.red();
 			const uint32_t g = from.green();
@@ -269,8 +279,3 @@ namespace Pt {
 
 #endif
 
-
-// Include the common and generic inline functions implementation
-#define PT_COLOR_IMPLEMENTATION
-#include <Pt/Gfx2/Color.h>
-#undef PT_COLOR_IMPLEMENTATION

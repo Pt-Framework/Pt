@@ -33,7 +33,7 @@ namespace Pt {
 		 *  faster implementation for the two colors is exist.
 		 */
 		template <typename DstColorT, typename SrcColorT> inline
-		void assign(DstColorT& to, const SrcColorT& from)
+		void assign(Color<DstColorT>& to, const Color<SrcColorT>& from)
 		{
 			uint16_t a, r, g, b;
 			toARgb(a, r, g, b, from);
@@ -45,7 +45,7 @@ namespace Pt {
 		 *  This function will just copy the value from the source to the destiantion.
 		 */
 		template <typename ColorT> inline
-		void assign(ColorT& to, const ColorT& from)
+		void assign(Color<ColorT>& to, const Color<ColorT>& from)
 		{ to = from; }
 
 
@@ -58,7 +58,7 @@ namespace Pt {
 		 *  will cause some overhead because of the conversion to and from ARgbColor.
 		 */
 		template <typename ColorT> inline
-		const ColorT& greyscale(ColorT& to, const ColorT& from)
+		const Color<ColorT>& greyscale(Color<ColorT>& to, const Color<ColorT>& from)
 		{
 			ARgbColor tmp;
 
@@ -72,7 +72,7 @@ namespace Pt {
 		/** @brief Make the given ColorT become greyscale.
 		 */
 		template <typename ColorT> inline
-		const ColorT& greyscale(ColorT& c)
+		const Color<ColorT>& greyscale(Color<ColorT>& c)
 		{ return greyscale(c, c); }
 
 	} // namespace Gfx

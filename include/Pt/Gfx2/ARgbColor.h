@@ -20,13 +20,15 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
+#include <Pt/Gfx2/Color.h>
 
 
 namespace Pt {
 
 	namespace Gfx {
+
+		struct ARgb {};
+
 
 		/** @brief 64-Bit ARGB color model.
 		 *  @ingroup Gfx
@@ -41,46 +43,47 @@ namespace Pt {
 		 *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
 		 *  </TABLE>
 		 */
-		class PT_EXPORT PT_PACKED ARgbColor {
+		template <>
+		class PT_API PT_PACKED Color<ARgb> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline ARgbColor()
+				inline Color<ARgb>()
 				: _a(0xFFFF), _r(0), _g(0), _b(0)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline ARgbColor(const ARgbColor& c)
+				inline Color<ARgb>(const Color<ARgb>& c)
 				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbColor(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
+				inline Color<ARgb>(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
 				: _a(a), _r(r), _g(g), _b(b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbColor(uint16_t r, uint16_t g, uint16_t b)
+				inline Color<ARgb>(uint16_t r, uint16_t g, uint16_t b)
 				: _a(0xFFFF), _r(r), _g(g), _b(b)
 				{}
 
 
 				/** @brief Assignment operator.
 				 */
-				inline const ARgbColor& operator=(const ARgbColor& c)
+				inline const Color<ARgb>& operator=(const Color<ARgb>& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const ARgbColor& operator+=(const ARgbColor& c)
+				inline const Color<ARgb>& operator+=(const Color<ARgb>& c)
 				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const ARgbColor& operator-=(const ARgbColor& c)
+				inline const Color<ARgb>& operator-=(const Color<ARgb>& c)
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -126,55 +129,61 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from);
-				friend void fromARgb(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==(const ARgbColor& c1, const ARgbColor& c2);
-				friend bool operator<(const ARgbColor& c1, const ARgbColor& c2);
-				friend bool operator>(const ARgbColor& c1, const ARgbColor& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb>& from);
+				friend void fromARgb(Color<ARgb>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2);
+				friend bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2);
+				friend bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2);
 
-				friend const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from);
+				friend const Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from);
 
 			protected:
 				uint16_t _a, _r, _g, _b;
 		};
 
 
-		/** @brief Convert an ARgbColor to ARgbColor's components.
+		/** @brief Convenience access to the 64-Bit ARGB color model.
+		 *  @ingroup Gfx
+		 */
+		typedef Color<ARgb> ARgbColor;
+
+
+		/** @brief Convert an Color<ARgb> to Color<ARgb>'s components.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbColor& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb>& from)
 		{ a = from._a; r = from._r; g = from._g; b = from._b; }
 
-		/** @brief Convert ARgbColor's components to an ARgbColor.
+		/** @brief Convert Color<ARgb>'s components to an Color<ARgb>.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void fromARgb(ARgbColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<ARgb>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{ to._a = a; to._r = r; to._g = g; to._b = b; }
 
 
-		/** @brief Equality operator for ARgbColor comparison.
+		/** @brief Equality operator for Color<ARgb> comparison.
 		 */
-		inline bool operator==(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
 		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
 
-		/** @brief Less-than operator for ARgbColor comparison.
+		/** @brief Less-than operator for Color<ARgb> comparison.
 		 */
-		inline bool operator<(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
 		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
 
-		/** @brief Greater-than operator for ARgbColor comparison.
+		/** @brief Greater-than operator for Color<ARgb> comparison.
 		 */
-		inline bool operator>(const ARgbColor& c1, const ARgbColor& c2)
+		inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
 
-		/** @brief Make the greyscale version of the source ARgbColor.
+		/** @brief Make the greyscale version of the source Color<ARgb>.
 		 */
-		inline const ARgbColor& greyscale(ARgbColor& to, const ARgbColor& from)
+		inline const Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
 		{
 			const uint32_t r = from._r;
 			const uint32_t g = from._g;
@@ -196,8 +205,3 @@ namespace Pt {
 
 #endif
 
-
-// Include the common and generic inline functions implementation
-#define PT_COLOR_IMPLEMENTATION
-#include <Pt/Gfx2/Color.h>
-#undef PT_COLOR_IMPLEMENTATION

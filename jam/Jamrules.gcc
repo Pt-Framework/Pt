@@ -10,8 +10,10 @@ RANLIB		?= ranlib ;
 
 # Flags and options
 #
-CCFLAGS 	+= -Wall ;
-LINKFLAGS	?= -Wall ;
+# TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
+#       options below can be enabled ???
+CCFLAGS 	+= -Wall -fvisibility-inlines-hidden -fvisibility=hidden ;
+LINKFLAGS	?= -Wall -fvisibility-inlines-hidden -fvisibility=hidden ;
 LINKLIBS	+= -lstdc++ ;
 
 if $(CONFIG) = debug
@@ -38,7 +40,7 @@ C++FLAGS	+= $(CCFLAGS) ;
 #
 if $(TARGET_OS:L) = "nt"
 {
-	if $(MINGW) 
+	if $(MINGW)
 	{
 		MINGW   = $(MINGW:J=" ") ;
 		AR      = "$(MINGW)\\bin\\ar ru" ;
@@ -59,11 +61,11 @@ if $(TARGET_OS:L) = "nt"
 # The specified string will be returnd as a define compiler
 # option, i.e. -D on gcc or /D on vc++
 #
-rule FDefines 
+rule FDefines
 { return -D$(<) ; }
 
 
-rule FIncludes 
+rule FIncludes
 { return -I$(<) ; }
 
 
@@ -94,7 +96,7 @@ rule SharedLibrary_LinkSharedLibraries
 {
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
 	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;	
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
 	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
 }
 
@@ -107,10 +109,10 @@ rule SharedLibrary_LinkSharedLibraries
 rule SetOutputDirectory
 {
 	local _outputDir = $(LOCATE_TARGET) ;
-	
-	if $(3)	{	
-		_outputDir = $(3) ;		
-	}	
+
+	if $(3)	{
+		_outputDir = $(3) ;
+	}
 	MakeLocate $(2) : $(_outputDir) ;
 	LINKFLAGS on $(2) += -L$(3) ;
 }
@@ -126,7 +128,7 @@ rule SharedLibraryFromObjects
 	# Add library name decorations <lib><name><.so>
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-	
+
 	# setup dependencies
 	Depends exe : $(_target) ;
 	Depends lib : $(_target) ;

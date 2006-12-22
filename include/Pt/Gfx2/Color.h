@@ -20,14 +20,20 @@
 #ifndef Pt_Gfx2_Color_h
 #define Pt_Gfx2_Color_h
 
-#ifndef PT_COLOR_IMPLEMENTATION
-#error "This header file is not meant to be included from outside the color model implementation header"
-#endif
+#include <Pt/Api.h>
+#include <Pt/Types.h>
 
 
 namespace Pt {
 
 	namespace Gfx {
+
+		/** @brief Basic template declaration of all color model classes.
+		 *  @ingroup Gfx
+		 */
+		template <typename ColorT>
+		class Color;
+
 
 		/** @brief Greater-than operator for any color model comparison.
 		 *
@@ -37,7 +43,7 @@ namespace Pt {
 		 *  this function for better performance.
 		 */
 		template <typename ColorT> inline
-		bool operator>(const ColorT& c1, const ColorT& c2)
+		bool operator>(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{ return !(c1==c2) && !(c1<c2); }
 
 		/** @brief Inequality operator for any color model comparison.
@@ -48,7 +54,7 @@ namespace Pt {
 		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
-		bool operator!=(const ColorT& c1, const ColorT& c2)
+		bool operator!=(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{ return !(c1==c2); }
 
 		/** @brief Less-than-or-equal operator for any color model comparison.
@@ -59,7 +65,7 @@ namespace Pt {
 		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
-		bool operator<=(const ColorT& c1, const ColorT& c2)
+		bool operator<=(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{ return (c1==c2) || (c1<c2); }
 
 		/** @brief Greater-than-or-equal operator for color comparison.
@@ -70,7 +76,7 @@ namespace Pt {
 		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
-		bool operator>=(const ColorT& c1, const ColorT& c2)
+		bool operator>=(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{ return !(c1<c2); }
 
 
@@ -82,7 +88,7 @@ namespace Pt {
 		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
-		const ColorT& operator+(const ColorT& c1, const ColorT& c2)
+		const Color<ColorT>& operator+(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{
 			ColorT rs = c1;
 			rs += c2;
@@ -97,7 +103,7 @@ namespace Pt {
 		 *  this function if better performance can be achieved by doing so.
 		 */
 		template <typename ColorT> inline
-		const ColorT& operator-(const ColorT& c1, const ColorT& c2)
+		const Color<ColorT>& operator-(const Color<ColorT>& c1, const Color<ColorT>& c2)
 		{
 			ColorT rs = c1;
 			rs -= c2;

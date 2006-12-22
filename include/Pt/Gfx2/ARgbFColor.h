@@ -27,6 +27,9 @@ namespace Pt {
 
 	namespace Gfx {
 
+		struct ARgbF {};
+
+
 		/** @brief Floated ARGB color model.
 		 *  @ingroup Gfx
 		 *
@@ -45,46 +48,47 @@ namespace Pt {
 		 *  Complex color algorithms such as cubic-scale, dithering, etc. are suggested
 		 *  to use this color model to minimize rounding error propagation.
 		 */
-		class PT_EXPORT PT_PACKED ARgbFColor {
+		template <>
+		class PT_API PT_PACKED Color<ARgbF> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline ARgbFColor()
+				inline Color<ARgbF>()
 				: _a(1.0f), _r(0.0f), _g(0.0f), _b(0.0f)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline ARgbFColor(const ARgbFColor& c)
+				inline Color<ARgbF>(const Color<ARgbF>& c)
 				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbFColor(float a, float r, float g, float b)
+				inline Color<ARgbF>(float a, float r, float g, float b)
 				: _a(a), _r(r), _g(g), _b(b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline ARgbFColor(float r, float g, float b)
+				inline Color<ARgbF>(float r, float g, float b)
 				: _a(1.0f), _r(r), _g(g), _b(b)
 				{}
 
 
 				/** @brief Assignment operator.
 				 */
-				inline const ARgbFColor& operator=(const ARgbFColor& c)
+				inline const Color<ARgbF>& operator=(const Color<ARgbF>& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
 				/** @brief Assignment-addition operator.
 				 */
-				inline const ARgbFColor& operator+=(const ARgbFColor& c)
+				inline const Color<ARgbF>& operator+=(const Color<ARgbF>& c)
 				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
 				/** @brief Assignment-substraction operator.
 				 */
-				inline const ARgbFColor& operator-=(const ARgbFColor& c)
+				inline const Color<ARgbF>& operator-=(const Color<ARgbF>& c)
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -130,25 +134,31 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from);
-				friend void fromARgb(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==(const ARgbFColor& c1, const ARgbFColor& c2);
-				friend bool operator<(const ARgbFColor& c1, const ARgbFColor& c2);
-				friend bool operator>(const ARgbFColor& c1, const ARgbFColor& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgbF>& from);
+				friend void fromARgb(Color<ARgbF>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
+				friend bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
+				friend bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
 
-				friend const ARgbFColor& greyscale(ARgbFColor& to, const ARgbFColor& from);
+				friend const Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from);
 
 			protected:
 				float _a, _r, _g, _b;
 		};
 
 
-		/** @brief Convert a ARgbFColor to ARgbColor's components.
+		/** @brief Convenience access to the Floated ARGB color model.
+		 *  @ingroup Gfx
+		 */
+		typedef Color<ARgbF> ARgbFColor;
+
+
+		/** @brief Convert a Color<ARgbF> to ARgbColor's components.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const ARgbFColor& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgbF>& from)
 		{
 			a = from._a<0.0f ? 0 : ( from._a>1.0f ? 0xFFFF : uint16_t(from._a*65535.0f) );
 			r = from._r<0.0f ? 0 : ( from._r>1.0f ? 0xFFFF : uint16_t(from._r*65535.0f) );
@@ -156,12 +166,12 @@ namespace Pt {
 			b = from._b<0.0f ? 0 : ( from._b>1.0f ? 0xFFFF : uint16_t(from._b*65535.0f) );
 		}
 
-		/** @brief Convert ARgbColor's components to a ARgbFColor.
+		/** @brief Convert ARgbColor's components to a Color<ARgbF>.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void fromARgb(ARgbFColor& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<ARgbF>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{
 			to._a = float(a) / 65535.0;
 			to._r = float(r) / 65535.0;
@@ -170,25 +180,25 @@ namespace Pt {
 		}
 
 
-		/** @brief Equality operator for ARgbFColor comparison.
+		/** @brief Equality operator for Color<ARgbF> comparison.
 		 */
-		inline bool operator==(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
 		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
 
-		/** @brief Less-than operator for ARgbFColor comparison.
+		/** @brief Less-than operator for Color<ARgbF> comparison.
 		 */
-		inline bool operator<(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
 		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
 
-		/** @brief Greater-than operator for ARgbFColor comparison.
+		/** @brief Greater-than operator for Color<ARgbF> comparison.
 		 */
-		inline bool operator>(const ARgbFColor& c1, const ARgbFColor& c2)
+		inline bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
 		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
 
 
-		/** @brief Make the greyscale version of the source ARgbFColor color.
+		/** @brief Make the greyscale version of the source Color<ARgbF> color.
 		 */
-		inline const ARgbFColor& greyscale(ARgbFColor& to, const ARgbFColor& from)
+		inline const Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
 		{
 			const float s = from._r*0.3f + from._g*0.5f + from._b*0.2f;
 
@@ -206,8 +216,3 @@ namespace Pt {
 
 #endif
 
-
-// Include the common and generic inline functions implementation
-#define PT_COLOR_IMPLEMENTATION
-#include <Pt/Gfx2/Color.h>
-#undef PT_COLOR_IMPLEMENTATION
