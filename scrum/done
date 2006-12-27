@@ -28,6 +28,10 @@
 # Aloysius
 #
 
+ITEM P9 S5 "The Pt::Unit module is documented"
+	TASK "Write docs"	d-marc
+	TASK "Write tutorial"	d-marc
+
 ITEM P8 S2 "All classes of the Pt module are forward declared in a dedicated header"
 	TASK "Add missing declarations to Pt.h" d-marc 2006-12-20
 

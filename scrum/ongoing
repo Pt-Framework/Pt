@@ -38,6 +38,3 @@ ITEM P10 S5 "An common exception hierachy exits"
 	TASK "Write Documentation"	blue_wind_25
 	TASK "Write test case"	blue_wind_25
 
-ITEM P9 S5 "The Pt::Unit module is documented"
-	TASK "Write docs"	d-marc
-	TASK "Write tutorial"	d-marc
