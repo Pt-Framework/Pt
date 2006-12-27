@@ -38,3 +38,6 @@ ITEM P10 S5 "An common exception hierachy exits"
 	TASK "Write Documentation"	blue_wind_25
 	TASK "Write test case"	blue_wind_25
 
+ITEM P8 S2 "A empty Void type exists"
+	TASK "Review Void.h"
+	TASK "Write Documentation

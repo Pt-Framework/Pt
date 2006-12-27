@@ -27,10 +27,6 @@ ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Check if more warnings need to be disabled"
 	TASK "Look into other compiler attributes"
 
-ITEM P8 S2 "A empty Void type exists"
-	TASK "Review Void.h"
-	TASK "Write Documentation"
-
 ITEM P7 S8 "Blending is supported by color classes"
 
 ITEM P7 S13 "The BasicImage<T> class interface is improved"
