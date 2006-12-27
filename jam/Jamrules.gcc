@@ -77,6 +77,9 @@ rule FIncludes
 rule Main_LinkSharedLibraries
 {
 	local _target = $(<)$(SUFEXE) ;
+
+	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+
 	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
 	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
 }
@@ -96,8 +99,10 @@ rule SharedLibrary_MakeLocate
 rule SharedLibrary_LinkSharedLibraries
 {
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
 	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
+
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;	
 	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
 }
 

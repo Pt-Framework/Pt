@@ -62,6 +62,7 @@ STDHDRS = \"$(VISUALC)\\vc\\ce\\include\"
 #	Clean clean : $(_target:S=.ilk) ;
 #}
 
+# TODO: entry flags might go to global linkflags
 rule Main
 {
 	local _target = $(1:S=$(SUFEXE)) ;
@@ -75,6 +76,7 @@ rule Main
 	
 	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;    
 }
+
 
 
 # Link a target to another

@@ -1,34 +1,47 @@
 if ! $(JAMRULES_PTUNIT) {
 JAMRULES_PTUNIT = true ;
 
+
+# Special targets
 #
-# Rules
+NOTFILE test ;
+DEPENDS all-test : all test ;
+NOTFILE all-test ;
+
+
+# Build a unit test program
+#
+# Replaces the Main rule to build unit tests executables. The built target 
+# becomes a dependency of the special target 'test'.
 #
 rule PtUnitTest
 {
-	local _exe = $(1:S=$(SUFEXE)) ;
-	#local _output = $(1:S=.cppunit) ;
 
-	Depends $(_output) : $(_exe) ;
-	Depends all : $(_output) ;
+	local _target = $(1:S=$(SUFEXE)) ;
+
+    DEPENDS test : $(_target) ;
+
+	SetObjectOutput $(1) ;
+	SetOutputDirectory $(1) : $(_target) : $(3) ;
+	
+	Objects $(2) : $(3) ;
+    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;
+
+	local _output = $(1:S=.unit) ;
+	Depends $(_output) : $(_target) ;
+	Clean clean : $(_output) ;
 
 	#Depends $(1) : $(_output) ;
 	#Depends all : $(1) ;
-
-	Main $(1) : $(2) : $(3) ;
+	#Main $(1) : $(2) : $(3) ;
 	#Main_LinkLibraries $(1) : cppunit ;
-
 	#MakeLocate $(1:S=.cppunit) : $(3) ;
 
-	Clean clean : $(_output) ;
-
-	testExe on $(_exe) = $(_exe) ;
-
-	PtUnitTestAction $(_exe) : $(_output) ;
+	testExe on $(_target) = $(_target) ;
+	PtUnitTestAction $(_target) : $(_output) ;
 }
 
 
-#
 # Actions
 #
 if $(UNIX)

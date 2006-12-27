@@ -625,7 +625,9 @@ rule Main_MakeLocate
 rule Main
 {
 	local _target = $(1:S=$(SUFEXE)) ;
-	
+
+    DEPENDS exe : $(_target) ;
+
 	SetObjectOutput $(1) ;	
 	
 	SetOutputDirectory $(1) : $(_target) : $(3) ;
@@ -682,7 +684,7 @@ rule MainFromObjects
 
     # make compiled sources a dependency of target
 
-    DEPENDS exe : $(_t) ;
+    # DEPENDS exe : $(_t) ;
     DEPENDS $(_t) : $(_s) ;
     #MakeLocate $(_t) : $(LOCATE_TARGET) ;
 
