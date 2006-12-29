@@ -1,0 +1,77 @@
+/***************************************************************************
+ *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#ifndef Pt_Net_AddrInfo_H
+#define Pt_Net_AddrInfo_H
+
+#include <iterator>
+#include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+namespace Pt
+{
+namespace Net
+{
+
+    class AddrInfo
+    {
+          struct addrinfo* ai;
+
+      public:
+          AddrInfo(const std::string& ipaddr, unsigned short port,
+                   const addrinfo& hints);
+          ~AddrInfo();
+
+          class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+          {
+              struct addrinfo* current;
+
+            public:
+              explicit const_iterator(struct addrinfo* ai = 0)
+                : current(ai)
+                { }
+              bool operator== (const const_iterator& it) const
+                { return current == it.current; }
+              bool operator!= (const const_iterator& it) const
+                { return current != it.current; }
+              const_iterator& operator++ ()
+                { current = current->ai_next; return *this; }
+              const_iterator operator++ (int)
+                {
+                  const_iterator ret(current);
+                  current = current->ai_next;
+                  return ret;
+                }
+              reference operator* () const
+                { return *current; }
+              pointer operator-> () const
+                { return current; }
+          };
+
+          const_iterator begin() const  { return const_iterator(ai); }
+          const_iterator end() const    { return const_iterator(); }
+
+    };
+
+}
+}
+
+#endif

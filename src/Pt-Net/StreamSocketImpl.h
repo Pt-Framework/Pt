@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
+ *   Copyright (C) 2006 by Marc Boris Dürner, Tommi Maekitalo              *
+ *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,25 +18,32 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Net/Socket.h"
+#ifndef Pt_Net_StreamSocketImpl_h
+#define Pt_Net_StreamSocketImpl_h
+
 #include "SocketImpl.h"
+#include <string>
 
 namespace Pt
 {
 namespace Net
 {
+    class StreamSocketImpl : public SocketImpl
+    {
+        public:
+            void connect(const std::string& ipaddr, unsigned short int port);
+            size_t read(char* buffer, size_t count, bool& eof);
+            size_t write(const char* buffer, size_t count);
+            void setTimeout(ssize_t msec)
+                { timeout = msec; }
+            ssize_t getTimeout() const
+                { return timeout; }
 
-Socket::Socket()
-{ }
-
-Socket::~Socket()
-{}
-
-
-bool Socket::_remote() const
-{
-	return true;
+        private:
+            struct sockaddr_storage peeraddr;
+            ssize_t timeout;
+    };
+}
 }
 
-}
-}
+#endif

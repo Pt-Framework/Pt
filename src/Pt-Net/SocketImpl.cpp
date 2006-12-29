@@ -17,24 +17,53 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Net/Socket.h"
 #include "SocketImpl.h"
+#include <Pt/Net/Timeout.h>
+#include <Pt/Exception.h>
+#include <sys/types.h> 
+#include <sys/socket.h>
+#include <sys/poll.h>
 
 namespace Pt
 {
 namespace Net
 {
 
-Socket::Socket()
-{ }
-
-Socket::~Socket()
-{}
-
-
-bool Socket::_remote() const
+SocketImpl::~SocketImpl()
 {
-	return true;
+    if (fd >= 0)
+        close();
+}
+
+void SocketImpl::create(int domain, int type, int protocol)
+{
+    fd = ::socket(domain, type, protocol);
+    if (fd < 0)
+      throw RuntimeError("cannot create socket", PT_SOURCEINFO); // TODO change exceptiontype
+}
+
+void SocketImpl::close()
+{
+    ::close(fd);
+    fd = -1;
+}
+
+short SocketImpl::doPoll(short events, int timeout) const
+{
+    struct pollfd fds;
+    fds.fd = getFd();
+    fds.events = events;
+
+    int p = ::poll(&fds, 1, timeout);
+
+    if (p < 0)
+      throw Exception("poll", PT_SOURCEINFO); // TODO
+    else if (p == 0)
+      throw Timeout();
+    else if (fds.revents & (POLLERR | POLLHUP | POLLNVAL))
+      throw Exception("poll", PT_SOURCEINFO); // TODO
+
+    return fds.revents;
 }
 
 }

@@ -35,6 +35,7 @@ if $(SYS:L) = "win32"
 if $(SYS:L) = "posix"
 {
 	SYSLIBS     = -ldl -lpthread -lrt ;
+    NETLIBS     = -lnsl ;
 }
 if $(SYS:L) = wince
 {

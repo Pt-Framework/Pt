@@ -17,25 +17,45 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Net/Socket.h"
-#include "SocketImpl.h"
+#include "Pt/Net/StreamSocket.h"
+#include "StreamSocketImpl.h"
+#include "Pt/Exception.h"
 
 namespace Pt
 {
 namespace Net
 {
-
-Socket::Socket()
-{ }
-
-Socket::~Socket()
-{}
-
-
-bool Socket::_remote() const
+void StreamSocket::setTimeout(ssize_t msec)
 {
-	return true;
+    Socket::setTimeout(msec);
+    if (!_impl)
+        _impl = new StreamSocketImpl();
+    _impl->setTimeout(msec);
 }
+
+void StreamSocket::connect(const std::string& ipaddr, unsigned short int port)
+{
+    if (!_impl)
+        _impl = new StreamSocketImpl();
+    _impl->connect(ipaddr, port);
+}
+
+size_t StreamSocket::_read(char* buffer, size_t count, bool& eof)
+{
+    if (!_impl)
+        throw LogicError("socket is not connected", PT_SOURCEINFO);
+
+    return _impl->read(buffer, count, eof);
+}
+
+size_t StreamSocket::_write(const char* buffer, size_t count)
+{
+    if (!_impl)
+        throw LogicError("socket is not connected", PT_SOURCEINFO);
+
+    return _impl->write(buffer, count);
+}
+
 
 }
 }

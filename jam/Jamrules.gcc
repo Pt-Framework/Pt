@@ -13,8 +13,8 @@ RANLIB		?= ranlib ;
 # TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
 #       options below can be enabled ???
 #
-CCFLAGS 	+= -Wall -fvisibility-inlines-hidden -fvisibility=hidden ;
-LINKFLAGS	?= -Wall -fvisibility-inlines-hidden -fvisibility=hidden ;
+CCFLAGS 	+= -Wall ; #-fvisibility-inlines-hidden -fvisibility=hidden ;
+LINKFLAGS	?= -Wall ; #-fvisibility-inlines-hidden -fvisibility=hidden ;
 LINKLIBS	+= -lstdc++ ;
 
 if $(CONFIG) = debug

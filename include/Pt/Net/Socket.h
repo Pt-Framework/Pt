@@ -21,31 +21,32 @@
 #ifndef Pt_Net_Socket_h
 #define Pt_Net_Socket_h
 
-#include <Pt/Export.h>
+#include <Pt/Api.h>
 #include <Pt/IO/IODevice.h>
 
 
-namespace Pt {
+namespace Pt
+{
 
-namespace Net {
+namespace Net
+{
 
-	class PT_API Socket : public IO::IODevice {
+	class PT_API Socket : public IO::IODevice
+    {
 		public:
-			virtual ~Socket() throw();
+			virtual ~Socket();
 
-			//! Set the timout in milli-seconds. A timeout of -1 means unlimited timeout.
-			virtual void setTimeOut(int msec) throw(IO::IOError) = 0;
+			virtual void setTimeout(ssize_t msec)
+              { _timeout = msec; }
+            ssize_t getTimeout() const
+              { return _timeout; }
 
 		protected:
-			bool _remote() const throw();
+            Socket();
+			bool _remote() const;
 
-			Socket() throw(IO::IOError);
-	};
-
-
-	class PT_API ServerSocket {
-		public:
-			virtual ~ServerSocket() {}
+        private:
+            ssize_t _timeout;
 	};
 
 } // !namespace Net

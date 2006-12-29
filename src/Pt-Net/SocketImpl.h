@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
+ *   Copyright (C) 2006 by Marc Boris Dürner, Tommi Maekitalo              *
+ *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,25 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Net/Socket.h"
-#include "SocketImpl.h"
+#ifndef Pt_Net_SocketImpl_h
+#define Pt_Net_SocketImpl_h
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 namespace Pt
 {
 namespace Net
 {
+    class SocketImpl
+    {
+        public:
+            SocketImpl() : fd(-1) { }
+            ~SocketImpl();
+            void create(int domain, int type, int protocol);
+            void close();
+            short doPoll(short events, int timeout) const;
 
-Socket::Socket()
-{ }
+        protected:
+            int getFd() const    { return fd; }
 
-Socket::~Socket()
-{}
-
-
-bool Socket::_remote() const
-{
-	return true;
+        private:
+            int fd;
+    };
+}
 }
 
-}
-}
+#endif

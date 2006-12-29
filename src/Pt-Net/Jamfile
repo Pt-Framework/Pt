@@ -1,0 +1,15 @@
+SubDir TOP src Pt-Net ;
+
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt-Net : 
+                          Socket.cpp
+                          SocketImpl.cpp
+                          StreamSocket.cpp
+                          StreamSocketImpl.cpp
+                          AddrInfo.cpp
+                          ;
+
+SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-IO Pt-System ;
+SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
+SharedLibrary_MakeLocate Pt-Net : bin ;

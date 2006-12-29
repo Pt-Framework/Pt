@@ -17,24 +17,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Net/Socket.h"
-#include "SocketImpl.h"
+#include "AddrInfo.h"
+#include <sstream>
+#include <Pt/Exception.h>
 
 namespace Pt
 {
 namespace Net
 {
 
-Socket::Socket()
-{ }
-
-Socket::~Socket()
-{}
-
-
-bool Socket::_remote() const
+AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port,
+         const addrinfo& hints)
+    : ai(0)
 {
-	return true;
+    std::ostringstream p;
+    p << port;
+
+    if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
+      throw RuntimeError("invalid ipaddress " + ipaddr, PT_SOURCEINFO); // TODO specify errortype
+
+    if (ai == 0)
+      throw RuntimeError("unknown error in getaddrinfo", PT_SOURCEINFO); // TODO specify errortype
+}
+
+AddrInfo::~AddrInfo()
+{
+    if (ai)
+        freeaddrinfo(ai);
 }
 
 }
