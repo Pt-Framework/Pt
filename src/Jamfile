@@ -7,9 +7,13 @@ SubInclude TOP src Pt-Gfx ;
 SubInclude TOP src Pt-Gfx2 ;
 SubInclude TOP src Pt-Gui ;
 SubInclude TOP src Pt-Text ;
-SubInclude TOP src Pt-Net ;
+
+if $(SYS:L) = posix
+{
+    SubInclude TOP src Pt-Net ;
+}
 
 if $(TARGET_OS:L) != wince
 {
-SubInclude TOP src Pt-Xml ;
+    SubInclude TOP src Pt-Xml ;
 }

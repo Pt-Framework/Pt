@@ -23,21 +23,19 @@
 
 
 ITEM P8 S13 "The BasicColor<T> class interface is improved"
-	TASK "Investigate libart"
-	TASK "Investigate AGG 2.4"
 	TASK "Remove the BasicColor<T> class"	blue_wind_25
 	TASK "Reimplement the color classes as simple wrapper for POD"	blue_wind_25
 	TASK "Implement all needed operators overload like ==, <, +, etc" for the color classes"	blue_wind_25
 	TASK "Make toARgb and from ARgb free functions supporting precision and fast conversion"	blue_wind_25
-	TASK "Write assign functions for color classes (precise and approx)"	blue_wind_25
+	TASK "Write assign functions for color classes"	blue_wind_25
 	TASK "Make greyscale a free function"	blue_wind_25
 	TASK "Make brightness a free function"	blue_wind_25
 
 ITEM P10 S5 "An common exception hierachy exits"
-	TASK "Review Exception.h"	blue_wind_25
-	TASK "Write Documentation"	blue_wind_25
-	TASK "Write test case"	blue_wind_25
+	TASK "Review Exception.h"	blue_wind_25,d-marc
+	TASK "Write Documentation"	blue_wind_25, d-marc
+	TASK "Write test case"	blue_wind_25,d-marc
 
 ITEM P8 S2 "A empty Void type exists"
-	TASK "Review Void.h"
-	TASK "Write Documentation
+	TASK "Review Void.h" d-marc
+	TASK "Write Documentation d-marc
