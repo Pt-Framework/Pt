@@ -199,14 +199,20 @@ namespace Pt {
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
 			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
-			a = ((from._val & 0xFF000000) >> 24) * 257;
-			r = ((from._val & 0x00FF0000) >> 16) * 257;
-			g = ((from._val & 0x0000FF00) >> 8 ) * 257;
-			b = ( from._val & 0x000000FF       ) * 257;
-			//a = (from._val & 0xFF000000) >> 16;
-			//r = (from._val & 0x00FF0000) >>  8;
-			//g = (from._val & 0x0000FF00)      ;
-			//b = (from._val & 0x000000FF) <<  8;
+			//a = ((from._val & 0xFF000000) >> 24) * 257;
+			//r = ((from._val & 0x00FF0000) >> 16) * 257;
+			//g = ((from._val & 0x0000FF00) >> 8 ) * 257;
+			//b = ( from._val & 0x000000FF       ) * 257;
+
+			const uint16_t ta =  from._val               >> 24;
+			const uint16_t tr = (from._val & 0x00FF0000) >> 16;
+			const uint16_t tg = (from._val & 0x0000FF00) >> 8;
+			const uint16_t tb =  from._val & 0x000000FF;
+
+			a = ( (ta + !!ta) << 8 ) - !!ta; // Thanks to Mike Sharov for this algo
+			r = ( (tr + !!tr) << 8 ) - !!tr;
+			g = ( (tg + !!tg) << 8 ) - !!tg;
+			b = ( (tb + !!tb) << 8 ) - !!tb;
 		}
 
 		/** @brief Convert ARgbColor's components to an ARgbColor.
