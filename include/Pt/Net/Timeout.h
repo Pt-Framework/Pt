@@ -25,19 +25,19 @@
 #include <exception>
 
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Net
-{
+namespace Net {
 
-class PT_API Timeout : public std::exception
-{
-    public:
-        Timeout()  { }
-        const char* what() const throw()
-            { return "timeout"; }
-};
+	class PT_API Timeout : public std::exception
+	{
+		public:
+			Timeout()
+			{ }
+	        
+			const char* what() const throw()
+			{ return "timeout"; }
+	};
 
 } // !namespace Net
 

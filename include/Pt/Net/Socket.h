@@ -38,11 +38,13 @@ namespace Net
 
 			virtual void setTimeout(ssize_t msec)
               { _timeout = msec; }
+
             ssize_t getTimeout() const
               { return _timeout; }
 
 		protected:
             Socket();
+
 			bool _remote() const;
 
         private:

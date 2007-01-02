@@ -24,11 +24,9 @@
 #include <Pt/Net/Socket.h>
 
 
-namespace Pt
-{
+namespace Pt {
 
-namespace Net
-{
+namespace Net {
 
     class StreamSocketImpl;
 
@@ -36,18 +34,20 @@ namespace Net
     {
         public:
             StreamSocket()
-              : _impl(0)
-              { }
+            : _impl(0)
+            { }
 
             StreamSocket(const std::string& ipaddr, unsigned short int port)
-              : _impl(0)
-              { connect(ipaddr, port); }
+            : _impl(0)
+            { connect(ipaddr, port); }
 
             void setTimeout(ssize_t msec);
+
             void connect(const std::string& ipaddr, unsigned short int port);
 
         protected:
             size_t _read(char* buffer, size_t count, bool& eof);
+
 		    size_t _write(const char* buffer, size_t count);
 
         private:
