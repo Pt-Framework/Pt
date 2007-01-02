@@ -22,6 +22,7 @@
 #define Pt_Net_StreamSocketImpl_h
 
 #include "SocketImpl.h"
+#include "Pt/Types.h"
 #include <string>
 
 namespace Pt
@@ -32,10 +33,14 @@ namespace Net
     {
         public:
             void connect(const std::string& ipaddr, unsigned short int port);
+
             size_t read(char* buffer, size_t count, bool& eof);
+
             size_t write(const char* buffer, size_t count);
+
             void setTimeout(ssize_t msec)
                 { timeout = msec; }
+
             ssize_t getTimeout() const
                 { return timeout; }
 

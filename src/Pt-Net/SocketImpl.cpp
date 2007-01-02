@@ -20,20 +20,25 @@
 #include "SocketImpl.h"
 #include <Pt/Net/Timeout.h>
 #include <Pt/Exception.h>
-#include <sys/types.h> 
+
+//#include <winsock2.h>
+
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 
-namespace Pt
-{
-namespace Net
-{
+
+namespace Pt {
+
+namespace Net {
+
 
 SocketImpl::~SocketImpl()
 {
     if (fd >= 0)
         close();
 }
+
 
 void SocketImpl::create(int domain, int type, int protocol)
 {
@@ -42,11 +47,14 @@ void SocketImpl::create(int domain, int type, int protocol)
       throw RuntimeError("cannot create socket", PT_SOURCEINFO); // TODO change exceptiontype
 }
 
+
 void SocketImpl::close()
 {
     ::close(fd);
+    //closesocket(fd);
     fd = -1;
 }
+
 
 short SocketImpl::doPoll(short events, int timeout) const
 {
@@ -66,5 +74,7 @@ short SocketImpl::doPoll(short events, int timeout) const
     return fds.revents;
 }
 
-}
-}
+
+} // namespace Net
+
+} // namespace Pt

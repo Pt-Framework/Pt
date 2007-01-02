@@ -20,13 +20,13 @@
 #include "Pt/Net/Socket.h"
 #include "SocketImpl.h"
 
-namespace Pt
-{
-namespace Net
-{
+namespace Pt {
+
+namespace Net {
 
 Socket::Socket()
 { }
+
 
 Socket::~Socket()
 {}
@@ -37,5 +37,6 @@ bool Socket::_remote() const
 	return true;
 }
 
-}
-}
+} // namespace Net
+
+} // namespace Pt

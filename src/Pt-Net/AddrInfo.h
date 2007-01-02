@@ -20,58 +20,93 @@
 #ifndef Pt_Net_AddrInfo_H
 #define Pt_Net_AddrInfo_H
 
+#if defined(WIN32) || defined(_WIN32)
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+#else
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netdb.h>
+#endif
+
+#include <Pt/Exception.h>
 #include <iterator>
 #include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include <sstream>
 
-namespace Pt
-{
-namespace Net
-{
 
-    class AddrInfo
+namespace Pt {
+
+namespace Net {
+
+	class AddrInfo
     {
-          struct addrinfo* ai;
+		private:
+            ::addrinfo* ai;
 
-      public:
-          AddrInfo(const std::string& ipaddr, unsigned short port,
-                   const addrinfo& hints);
-          ~AddrInfo();
+		public:  
+			class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+			{
+				private:
+					::addrinfo* current;
 
-          class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
-          {
-              struct addrinfo* current;
+				public:
+					explicit const_iterator(struct addrinfo* ai = 0)
+					: current(ai)
+					{ }
 
-            public:
-              explicit const_iterator(struct addrinfo* ai = 0)
-                : current(ai)
-                { }
-              bool operator== (const const_iterator& it) const
-                { return current == it.current; }
-              bool operator!= (const const_iterator& it) const
-                { return current != it.current; }
-              const_iterator& operator++ ()
-                { current = current->ai_next; return *this; }
-              const_iterator operator++ (int)
-                {
-                  const_iterator ret(current);
-                  current = current->ai_next;
-                  return ret;
-                }
-              reference operator* () const
-                { return *current; }
-              pointer operator-> () const
-                { return current; }
-          };
+					bool operator== (const const_iterator& it) const
+					{ return current == it.current; }
 
-          const_iterator begin() const  { return const_iterator(ai); }
-          const_iterator end() const    { return const_iterator(); }
+					bool operator!= (const const_iterator& it) const
+					{ return current != it.current; }
 
+					const_iterator& operator++ ()
+					{ current = current->ai_next; return *this; }
+
+					const_iterator operator++ (int)
+					{
+					  const_iterator ret(current);
+					  current = current->ai_next;
+					  return ret;
+					}
+
+					reference operator* () const
+					{ return *current; }
+
+					pointer operator-> () const
+					{ return current; }
+			};
+
+		public:
+			AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
+			: ai(0)
+			{
+				std::ostringstream p;
+				p << port;
+
+				if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
+				  throw RuntimeError("invalid ipaddress " + ipaddr, PT_SOURCEINFO); // TODO specify errortype
+
+				if (ai == 0)
+				  throw RuntimeError("unknown error in getaddrinfo", PT_SOURCEINFO); // TODO specify errortype
+			}
+
+			~AddrInfo()
+			{
+				if (ai)
+					freeaddrinfo(ai);
+			}   
+
+			const_iterator begin() const  
+			{ return const_iterator(ai); }
+
+			const_iterator end() const    
+			{ return const_iterator(); }
     };
 
 }
+
 }
 
 #endif

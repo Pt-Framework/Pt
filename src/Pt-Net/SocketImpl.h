@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Dürner, Tommi Maekitalo              *
+ *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,30 +21,45 @@
 #ifndef Pt_Net_SocketImpl_h
 #define Pt_Net_SocketImpl_h
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#ifdef WIN32
+	#include <winsock2.h>
+#else
+	typedef int SOCKET;
+#endif
 
-namespace Pt
-{
-namespace Net
-{
+namespace Pt {
+
+namespace Net {
+
     class SocketImpl
     {
+		public:
+			enum WaitMode
+			{
+				WaitInput = 0x1, WaitOutput = 0x2
+			};
+
         public:
-            SocketImpl() : fd(-1) { }
+            SocketImpl();
+
             ~SocketImpl();
+
             void create(int domain, int type, int protocol);
+
             void close();
-            short doPoll(short events, int timeout) const;
+
+            bool wait(WaitMode events, int timeout) const;
 
         protected:
-            int getFd() const    { return fd; }
+            SOCKET handle() const 
+			{ return _sd; }
 
         private:
-            int fd;
+            SOCKET _sd;
     };
-}
-}
+
+} // namespace Net
+
+} //namespace Pt
 
 #endif

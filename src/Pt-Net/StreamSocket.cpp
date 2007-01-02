@@ -21,24 +21,30 @@
 #include "StreamSocketImpl.h"
 #include "Pt/Exception.h"
 
-namespace Pt
-{
-namespace Net
-{
+
+namespace Pt {
+
+namespace Net {
+
 void StreamSocket::setTimeout(ssize_t msec)
 {
     Socket::setTimeout(msec);
+
     if (!_impl)
         _impl = new StreamSocketImpl();
+
     _impl->setTimeout(msec);
 }
+
 
 void StreamSocket::connect(const std::string& ipaddr, unsigned short int port)
 {
     if (!_impl)
         _impl = new StreamSocketImpl();
+
     _impl->connect(ipaddr, port);
 }
+
 
 size_t StreamSocket::_read(char* buffer, size_t count, bool& eof)
 {
@@ -48,6 +54,7 @@ size_t StreamSocket::_read(char* buffer, size_t count, bool& eof)
     return _impl->read(buffer, count, eof);
 }
 
+
 size_t StreamSocket::_write(const char* buffer, size_t count)
 {
     if (!_impl)
@@ -56,6 +63,6 @@ size_t StreamSocket::_write(const char* buffer, size_t count)
     return _impl->write(buffer, count);
 }
 
+} // namespace Net
 
-}
-}
+} // namespace Pt
