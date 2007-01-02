@@ -32,7 +32,7 @@ Main SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
 
-Main TypesTest : TypesTest.cpp ;
+PtUnitTest TypesTest : TypesTest.cpp ;
 Main_LinkSharedLibraries TypesTest : Pt ;
 Main_MakeLocate TypesTest : bin ;
 
@@ -44,10 +44,10 @@ Main SingletonTest : SingletonTest.cpp ;
 Main_LinkSharedLibraries SingletonTest : Pt ;
 Main_MakeLocate SingletonTest : bin ;
 
-Main ByteorderTest : ByteorderTest.cpp ;
-Main_LinkSharedLibraries ByteorderTest : Pt ;
-Main_MakeLocate ByteorderTest : bin ;
+#Main ByteorderTest : ByteorderTest.cpp ;
+#Main_LinkSharedLibraries ByteorderTest : Pt ;
+#Main_MakeLocate ByteorderTest : bin ;
 
-Main ExceptionTest : ExceptionTest.cpp ;
+PtUnitTest ExceptionTest : ExceptionTest.cpp ;
 Main_LinkSharedLibraries ExceptionTest : Pt ;
 Main_MakeLocate ExceptionTest : bin ;

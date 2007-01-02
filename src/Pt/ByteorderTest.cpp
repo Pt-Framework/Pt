@@ -23,8 +23,6 @@
 using namespace std;
 
 #include "Pt/Byteorder.h"
-using namespace Pt;
-
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
@@ -60,8 +58,8 @@ class ByteorderTest : public Pt::Unit::TestCase
 			cerr << vald << hex << " (0x" << *reinterpret_cast<const Pt::uint64_t*>(&vald) << ")" << endl;
 
 			cerr << endl;
-			Pt::uint8_t  sval8u  = swap(val8u);
-			Pt::uint16_t sval16u = swap(val16u);
+			Pt::uint8_t  sval8u  = Pt::swap(val8u);
+			Pt::uint16_t sval16u = Pt::swap(val16u);
 			Pt::uint32_t sval32u = swap(val32u);
 #ifdef PT_64BIT
 			Pt::uint64_t sval64u = swap(val64u);
