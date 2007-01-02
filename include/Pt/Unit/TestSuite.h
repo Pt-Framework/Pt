@@ -101,7 +101,7 @@ namespace Unit {
                 // TODO: use a sentry object
                 bool isUp = false;
 
-                this->started.send<const Test&>( *this );
+                this->started.send( this->name() + "::" + name );
                 try
                 {
                     this->setUp();
@@ -148,7 +148,7 @@ namespace Unit {
             }
 
         protected:
-            /** @brief The assosiated test protocol
+            /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
 

@@ -21,6 +21,7 @@
 
 #include <map>
 #include <Pt/Args.h>
+#include <Pt/Unit/TestFixture.h>
 #include <Pt/Unit/TestSuite.h>
 
 
@@ -42,6 +43,7 @@ namespace Unit {
     {
         public:
             typedef std::multimap<std::string, const Args*> TestMap;
+            typedef std::map<std::string, TestFixture*> FixtureMap;
 
         public:
             /** @brief Include a method in the schedule
@@ -57,6 +59,19 @@ namespace Unit {
                 _items.insert( std::make_pair(testName, &_nullArgs) );
             }
 
+            /** @brief Set a TestFixture for a test
+
+                This method registers a TestFixture with a test. The given 
+                fixture will be used every time the test is run.
+
+                @param testName Name of the test to be run.
+                @param fixture TestFixture to be used
+            */
+			void setFixture(const std::string& testName, TestFixture& fixture)
+			{
+				_fixtures[testName] = &fixture;
+			}
+			
             /** @brief Include a method in the schedule
 
                 The method name passed to this method will be added to the 
@@ -95,6 +110,7 @@ namespace Unit {
         private:
             Args _nullArgs;
             TestMap _items;
+            FixtureMap _fixtures;
     };
 
 } // namespace Unit

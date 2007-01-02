@@ -57,6 +57,26 @@ namespace Unit {
             {}
     };
 
+
+	/** EXPRIMENTAL
+	*/
+	class TestContext : public TestFixture
+	{
+		public:
+			TestContext(Test& test)
+			: _test(&test)
+			{}
+			
+			virtual ~TestContext()
+			{}
+			
+			//virtual const std::string& name() const
+			//{ return "Unknown Test"; }
+			
+		private:
+			Test* _test;
+	};
+
 } // namespace Unit
 
 } // namespace Pt

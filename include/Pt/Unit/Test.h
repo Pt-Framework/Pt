@@ -62,8 +62,9 @@ namespace Unit {
             /** @brief Start notification
 
                 This signal is sent when the test has started.
+                TODO: use TestContext as paramater
             */
-            Signal<const Test&> started;
+            Signal<const std::string&> started;
 
             /** @brief Finished notification
 

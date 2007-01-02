@@ -19,7 +19,7 @@
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
-#include <Pt/System/Clock.h> // NOTE: should not be here !!!
+//#include <Pt/System/Clock.h> // NOTE: should not be here !!!
 #include <Pt/Unit/Assertion.h>
 
 #include <iostream>
@@ -66,9 +66,9 @@ namespace Unit {
 
             @param test The started test
         */
-        virtual void started(const Test& test)
+        virtual void started(const std::string& testName)
         {
-            *_out << test.name() << ": ";
+            *_out << testName << ": ";
         }
 
         /** @brief Finished notification
@@ -189,7 +189,7 @@ namespace Unit {
 				msg << std::endl;
 				msg << "--------------------------------------------------" << std::endl;
 				msg << outFileName << std::endl;
-				msg << "Test started: " << Pt::System::Clock::getCurrentTime().toIsoString() << std::endl;
+				//msg << "Test started: " << Pt::System::Clock::getCurrentTime().toIsoString() << std::endl;
 				//msg << "Test started: " << "TODO: Insert current time" << std::endl;
 				msg << "--------------------------------------------------" << std::endl;
 				msg << std::endl;

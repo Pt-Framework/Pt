@@ -156,11 +156,11 @@ namespace Unit {
 
             /** @brief Process started event
             */
-            static void started(const Test& test)
+            static void started(const std::string& testName)
             {
                 if(_reporter)
                 {
-                    _reporter->started(test);
+                    _reporter->started(testName);
                 }
             }
 

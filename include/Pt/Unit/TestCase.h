@@ -86,7 +86,7 @@ namespace Unit {
             {
                 bool isUp = false;
 
-                this->started.send<const Test&>( *this );
+                this->started.send<const std::string&>( this->name() );
                 try
                 {
                     this->setUp();
@@ -138,7 +138,11 @@ namespace Unit {
                 is called between 'setUp' and 'tearDown'. Assertions may be 
                 thrown to indicate failed test assertions.
             */
-            virtual void test() = 0;
+            virtual void test()
+            { }
+            
+        private:
+			TestFixture* _fixture;
     };
 
 } // namespace Unit
