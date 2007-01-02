@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="Pt-Unit"
+	ProjectGUID="{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=debug -q"
+				ReBuildCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=debug -a -q"
+				CleanCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=debug clean"
+				Output="bin\FileStreamTest.exe"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=release"
+				ReBuildCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=release -a"
+				CleanCommandLine="call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; .\jam\jam.exe -sTOOLSET=vc8 -sCONFIG=release clean"
+				Output="test.exe"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<File
+			RelativePath=".\include\Pt\Unit\Application.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\Assertion.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\RegisterTest.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\Reporter.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\Test.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestCase.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestFixture.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestMain.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestProtocol.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestSchedule.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\TestSuite.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\Pt\Unit\Unit.h"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

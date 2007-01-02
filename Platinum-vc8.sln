@@ -1,7 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Platinum-vc8", "Platinum-vc8.vcproj", "{4D5C49BD-391E-4C45-952A-7B86D891ED9E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt", "Platinum-vc8.vcproj", "{4D5C49BD-391E-4C45-952A-7B86D891ED9E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Net", "Platinum-Net-vc8.vcproj", "{42DD270B-8507-4AB2-BD18-7E3975A5E7A9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Unit", "Platinum-Unit-vc8.vcproj", "{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +17,14 @@ Global
 		{4D5C49BD-391E-4C45-952A-7B86D891ED9E}.Debug|Win32.Build.0 = Debug|Win32
 		{4D5C49BD-391E-4C45-952A-7B86D891ED9E}.Release|Win32.ActiveCfg = Release|Win32
 		{4D5C49BD-391E-4C45-952A-7B86D891ED9E}.Release|Win32.Build.0 = Release|Win32
+		{42DD270B-8507-4AB2-BD18-7E3975A5E7A9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{42DD270B-8507-4AB2-BD18-7E3975A5E7A9}.Debug|Win32.Build.0 = Debug|Win32
+		{42DD270B-8507-4AB2-BD18-7E3975A5E7A9}.Release|Win32.ActiveCfg = Release|Win32
+		{42DD270B-8507-4AB2-BD18-7E3975A5E7A9}.Release|Win32.Build.0 = Release|Win32
+		{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}.Debug|Win32.Build.0 = Debug|Win32
+		{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}.Release|Win32.ActiveCfg = Release|Win32
+		{D2F46A27-55B0-40C6-AEC8-C1763B05CB70}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
