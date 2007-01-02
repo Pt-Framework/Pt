@@ -65,7 +65,7 @@ namespace Pt {
 	class ConstMethod;
 
     template <typename T>
-	class TypeInfo;
+	struct TypeInfo;
 	
     class Date;
 
@@ -82,7 +82,7 @@ namespace Pt {
 	class Reflectable;
 
     template <typename T>
-	class TypeTraits;
+	struct TypeTraits;
 
     template <typename T>
 	class Arg;
@@ -138,7 +138,7 @@ namespace Pt {
 	template <typename T, typename ModelT >
 	class SmartPtr;
 
-	class Void;
+	struct Void;
 	class SourceInfo;
 	class NonCopyable;
 
