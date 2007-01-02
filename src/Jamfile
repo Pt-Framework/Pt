@@ -8,10 +8,10 @@ SubInclude TOP src Pt-Gfx2 ;
 SubInclude TOP src Pt-Gui ;
 SubInclude TOP src Pt-Text ;
 
-if $(SYS:L) = posix
-{
+#if $(SYS:L) = posix
+#{
     SubInclude TOP src Pt-Net ;
-}
+#}
 
 if $(TARGET_OS:L) != wince
 {
