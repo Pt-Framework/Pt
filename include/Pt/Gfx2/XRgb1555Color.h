@@ -68,13 +68,13 @@ namespace Pt {
 				/** @brief Construct color using the given components.
 				 */
 				inline Color<XRgb1555>(uint8_t r, uint8_t g, uint8_t b)
-				: _val(uint16_t(r & 0x07) << 7)
+				: _val(uint16_t(r & 0xF8) << 7)
 				{
 					// 1111111100000000
 					// 7654321076543210
 					// 0RRRRRGGGGGBBBBB
 					//         CCCCCCCC
-					_val |= (uint16_t(g & 0x07) << 2);
+					_val |= (uint16_t(g & 0xF8) << 2);
 					_val |=  uint16_t(b       ) >> 3;
 				}
 
@@ -140,12 +140,12 @@ namespace Pt {
 				/** @brief Set the red component of this color.
 				 */
 				inline void setRed(uint8_t r)
-				{ _val = _val & 0x83FF | (uint16_t(r & 0x07) << 7); }
+				{ _val = _val & 0x83FF | (uint16_t(r & 0xF8) << 7); }
 
 				/** @brief Set the green component of this color.
 				 */
 				inline void setGreen(uint8_t g)
-				{ _val = _val & 0xFC1F | (uint16_t(g & 0x07) << 2); }
+				{ _val = _val & 0xFC1F | (uint16_t(g & 0xF8) << 2); }
 
 				/** @brief Set the blue component of this color.
 				 */
@@ -179,9 +179,9 @@ namespace Pt {
 		 */
 		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<XRgb1555>& from)
 		{
-			const uint16_t tr = (from._val & 0x7C00) >> 10;
-			const uint16_t tg = (from._val & 0x03E0) >> 5;
-			const uint16_t tb =  from._val & 0x001F;
+			const uint16_t tr = from.red();
+			const uint16_t tg = from.green();
+			const uint16_t tb = from.blue();
 
 			a = 0xFFFF;
 			r = ( (tr + !!tr) << 11 ) - !!tr; // Thanks to Mike Sharov for this algorithm
@@ -200,9 +200,9 @@ namespace Pt {
 			// 7654321076543210
 			// 0RRRRRGGGGGBBBBB
 			// CCCCCCCCCCCCCCCC
-			to._val  = (uint16_t(r & 0xF800) >>  1);
-			to._val |= (uint16_t(g & 0xF800) >>  6);
-			to._val |=  uint16_t(b)          >> 11 ;
+			to._val  = ( (r & 0xF800) >>  1);
+			to._val |= ( (g & 0xF800) >>  6);
+			to._val |= (  b           >> 11);
 		}
 
 

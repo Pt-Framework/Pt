@@ -178,12 +178,9 @@ namespace Pt {
 		 */
 		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<XRgb8888>& from)
 		{
-			// 33333333222222221111111100000000
-			// 76543210765432107654321076543210
-			// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
-			const uint16_t tr = (from._val & 0x00FF0000) >> 16;
-			const uint16_t tg = (from._val & 0x0000FF00) >> 8;
-			const uint16_t tb =  from._val & 0x000000FF;
+			const uint16_t tr = from.red();
+			const uint16_t tg = from.green();
+			const uint16_t tb = from.blue();
 
 			a = 0xFFFF;
 			r = ( (tr + !!tr) << 8 ) - !!tr; // Thanks to Mike Sharov for this algorithm
@@ -204,7 +201,7 @@ namespace Pt {
 			//                 CCCCCCCCCCCCCCCC
 			to._val  = (uint32_t(r & 0xFF00) << 8);
 			to._val |=  uint32_t(g & 0xFF00)      ;
-			to._val |=  uint32_t(b)          >> 8 ;
+			to._val |= (uint32_t(b)          >> 8);
 		}
 
 
