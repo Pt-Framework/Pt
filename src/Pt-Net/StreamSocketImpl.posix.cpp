@@ -16,11 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "StreamSocketImpl.h"
-#include "AddrInfo.h"
 #include <Pt/Exception.h>
 #include <cerrno>
+using namespace std;
 
 
 namespace Pt {
@@ -40,8 +39,8 @@ void StreamSocketImpl::connect(const std::string& ipaddr, unsigned short int por
     {
         SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
 
-        if (::connect(getFd(), it->ai_addr, it->ai_addrlen) == 0)
-        {
+        //if ( ::connect(getFd(), it->ai_addr, it->ai_addrlen) == 0 )
+        if ( ::connect(handle(), it->ai_addr, it->ai_addrlen) == 0 ) {
             // save our information
             memmove(&peeraddr, it->ai_addr, it->ai_addrlen);
             return;
@@ -80,7 +79,7 @@ size_t StreamSocketImpl::read(char* buffer, size_t count, bool& eof)
         do
         {
             n = ::read(handle(), buffer, count);
-        } while (n <= 0 && errno == EINTR);
+				} while (n <= 0 && errno == EINTR);
 
         if (n <= 0)
         {
@@ -95,7 +94,8 @@ size_t StreamSocketImpl::read(char* buffer, size_t count, bool& eof)
 
                 do
                 {
-                    n = ::read(getFd(), buffer, count);
+                    //n = ::read(getFd(), buffer, count);
+                    n = ::read(handle(), buffer, count);
                 } while (n <= 0 && errno == EINTR);
 
                 if (n < 0)

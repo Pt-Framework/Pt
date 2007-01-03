@@ -51,8 +51,8 @@ namespace Net {
             bool wait(WaitMode events, int timeout) const;
 
         protected:
-            SOCKET handle() const 
-			{ return _sd; }
+            SOCKET handle() const
+						{ return _sd; }
 
         private:
             SOCKET _sd;

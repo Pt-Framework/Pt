@@ -21,9 +21,11 @@
 #ifndef Pt_Net_StreamSocketImpl_h
 #define Pt_Net_StreamSocketImpl_h
 
+#include "AddrInfo.h"
 #include "SocketImpl.h"
 #include "Pt/Types.h"
 #include <string>
+
 
 namespace Pt
 {

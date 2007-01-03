@@ -16,6 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <cerrno>
+using namespace std;
 
 #include "SocketImpl.h"
 #include <Pt/Net/Timeout.h>
@@ -30,8 +32,8 @@ namespace Pt {
 
 namespace Net {
 
-SocketImpl::SocketImpl() 
-: _sd(-1) 
+SocketImpl::SocketImpl()
+: _sd(-1)
 { }
 
 
@@ -52,8 +54,10 @@ void SocketImpl::create(int domain, int type, int protocol)
 
 void SocketImpl::close()
 {
-	::socket(_sd);
-    _sd = -1;
+	//::socket(_sd);
+	::shutdown(_sd, SHUT_RDWR);
+	::close(_sd);
+	_sd = -1;
 }
 
 
@@ -70,7 +74,7 @@ bool SocketImpl::wait(SocketImpl::WaitMode mode, int msec) const
 	_select:
 	int ret = -1;
 
-	switch(mode) 
+	switch(mode)
 	{
 		case SocketImpl::WaitInput:
 			ret = select(_sd + 1, &rfds, 0, 0, &tv);
@@ -82,7 +86,7 @@ bool SocketImpl::wait(SocketImpl::WaitMode mode, int msec) const
 	}
 
 	// error
-	if(ret == -1) 
+	if(ret == -1)
 	{
 		if(errno == EINTR)
 			goto _select;
@@ -93,7 +97,7 @@ bool SocketImpl::wait(SocketImpl::WaitMode mode, int msec) const
 	// data available
 	if(ret == 1)
 		return true;
-		
+
 	// no data available
 	return false;
 }
