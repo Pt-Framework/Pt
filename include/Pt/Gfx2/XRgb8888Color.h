@@ -73,7 +73,7 @@ namespace Pt {
 					// 33333333222222221111111100000000
 					// 76543210765432107654321076543210
 					// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
-					_val |= (uint32_t(g) <<  8);
+					_val |= (uint32_t(g) << 8);
 					_val |=  uint32_t(b);
 				}
 
@@ -249,7 +249,7 @@ namespace Pt {
 			// 76543210765432107654321076543210
 			// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
 			//                         SSSSSSSS
-			to._val = (from._val&0xFF000000) | (s<<24) | (s<<16) | s;
+			to._val = (s<<24) | (s<<16) | s;
 
 			return to;
 		}
