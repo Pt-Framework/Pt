@@ -56,7 +56,7 @@ namespace Pt {
 
 				/** @brief Copy constructor.
 				 */
-				inline Color(const Color<ARgb8888>& c)
+				inline Color(const Color& c)
 				: _val(c._val)
 				{}
 
@@ -92,31 +92,39 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const Color<ARgb8888>& operator=(const Color<ARgb8888>& c)
+				inline const Color& operator=(const Color& c)
 				{ _val = c._val; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const Color<ARgb8888>& operator+=(const Color<ARgb8888>& c)
+				inline const Color& operator+=(const Color& c)
 				{
-					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
-					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
+					const uint16_t a = alpha() + c.alpha();
+					const uint16_t r = red()   + c.red();
+					const uint16_t g = green() + c.green();
+					const uint16_t b = blue()  + c.blue();
 
-					a1 += a2; r1 += r2; g1 += g2; b1 += b2;
-					fromARgb(*this, a1, r1, g1, b1);
+					_val  =  uint32_t(a) << 24;
+					_val |= (uint32_t(r) << 16);
+					_val |= (uint32_t(g) <<  8);
+					_val |=  uint32_t(b);
 
 					return *this;
 				}
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const Color<ARgb8888>& operator-=(const Color<ARgb8888>& c)
+				inline const Color& operator-=(const Color& c)
 				{
-					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
-					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
+					const uint16_t a = alpha() - c.alpha();
+					const uint16_t r = red()   - c.red();
+					const uint16_t g = green() - c.green();
+					const uint16_t b = blue()  - c.blue();
 
-					a1 -= a2; r1 -= r2; g1 -= g2; b1 -= b2;
-					fromARgb(*this, a1, r1, g1, b1);
+					_val  =  uint32_t(a) << 24;
+					_val |= (uint32_t(r) << 16);
+					_val |= (uint32_t(g) <<  8);
+					_val |=  uint32_t(b);
 
 					return *this;
 				}
@@ -174,7 +182,6 @@ namespace Pt {
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb8888>& from);
 				friend void fromARgb(Color<ARgb8888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
 				friend bool operator<(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
