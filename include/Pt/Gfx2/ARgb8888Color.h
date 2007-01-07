@@ -187,7 +187,7 @@ namespace Pt {
 				friend bool operator<(const Color& c1, const Color& c2);
 				friend bool operator>(const Color& c1, const Color& c2);
 
-				friend const Color<ARgb8888>& greyscale(Color<ARgb8888>& to, const Color<ARgb8888>& from);
+				friend const Color& greyscale(Color& to, const Color& from);
 
 			protected:
 				uint32_t _val;
