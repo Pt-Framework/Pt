@@ -6,6 +6,8 @@ SharedLibrary Pt-Net : Socket.cpp
                        SocketImpl.$(SYS).cpp
                        StreamSocket.cpp
                        StreamSocketImpl.$(SYS).cpp
+                       StreamServerSocket.cpp
+                       StreamServerSocketImpl.$(SYS).cpp
                        AddrInfo.cpp
                        ;
 
