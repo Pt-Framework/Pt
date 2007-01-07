@@ -31,12 +31,12 @@ namespace Unit {
         method SetUp is called before a test is run and the method tearDown
         is run after a test.
     */
-    class TestFixture
+    class TestFixture2
     {
         public:
             /** \brief Destructor.
             */
-            virtual ~TestFixture()
+            virtual ~TestFixture2()
             {}
 
             /** \brief Set up context before running a test.
@@ -56,26 +56,6 @@ namespace Unit {
             virtual void tearDown()
             {}
     };
-
-
-	/** EXPRIMENTAL
-	*/
-	class TestContext : public TestFixture
-	{
-		public:
-			TestContext(Test& test)
-			: _test(&test)
-			{}
-			
-			virtual ~TestContext()
-			{}
-			
-			//virtual const std::string& name() const
-			//{ return "Unknown Test"; }
-			
-		private:
-			Test* _test;
-	};
 
 } // namespace Unit
 

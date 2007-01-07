@@ -66,9 +66,9 @@ namespace Unit {
 
             @param test The started test
         */
-        virtual void started(const std::string& testName)
+        virtual void started(const TestContext& test)
         {
-            *_out << testName << ": ";
+            *_out << test.testName() << ": ";
         }
 
         /** @brief Finished notification

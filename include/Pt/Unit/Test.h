@@ -27,8 +27,10 @@
 
 namespace Pt {
 
-namespace Unit {
-
+namespace Unit {	
+	
+	class TestContext;
+	
     /** @brief Test base class
 
         This is the base class for all types of tests that can be registered
@@ -36,7 +38,7 @@ namespace Unit {
         is overriden by the derived classes and signals to inform about
         events that occur while the test is run.
     */
-    class Test : public Reflectable, protected NonCopyable
+    class Test : protected NonCopyable
     {
         public:
             /** @brief Destructor
@@ -59,12 +61,15 @@ namespace Unit {
             */
             virtual void run() = 0;
 
+			const std::string& name() const
+			{ return _name; }
+			
             /** @brief Start notification
 
                 This signal is sent when the test has started.
                 TODO: use TestContext as paramater
             */
-            Signal<const std::string&> started;
+            Signal<const TestContext&> started;
 
             /** @brief Finished notification
 
@@ -113,10 +118,62 @@ namespace Unit {
                 @param name Name of the test
             */
             Test(const std::string& name)
-            : Reflectable(name)
+            : _name(name)
             { }
+            
+        private:
+			std::string _name;
     };
 
+
+	class PT_API TestContext
+	{
+		public:
+			virtual ~TestContext()
+			{
+				_test.finished.send<const Test&>( _test ); 
+			}
+			
+			virtual const std::string& testName() const
+			{ 
+				static const std::string unknown = "unknown";
+				return unknown;
+			}
+ 
+			void run()
+			{
+				try
+				{
+					_test.started.send<const TestContext&>( *this );
+					this->_run();
+					_test.success.send<const Test&>( _test );
+				}
+				catch(const Assertion& assertion)
+				{
+					_test.assertion.send<const Test&>(_test, assertion);
+				}
+				catch(const std::exception& ex)
+				{
+					_test.exception.send<const Test&>(_test, ex);
+				}
+				catch(...)
+				{
+					_test.error.send<const Test&>(_test);
+				}
+			}
+			
+		protected:
+			virtual void _run()
+			{}
+
+			TestContext(Test& test)
+			: _test(test)
+			{}
+			
+		private:
+			Test& _test;
+	};
+	
 } // namespace Unit
 
 } // namespace Pt

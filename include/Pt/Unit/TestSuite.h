@@ -58,8 +58,52 @@ namespace Unit {
         one and reflection can be used to call any method multiple times with 
         the required data.
     */
-    class TestSuite : public Test, public TestFixture
+    class TestSuite : public Reflectable, public Test
     {
+		public:
+			class Sentry : public TestContext
+			{
+				public:
+					Sentry(TestSuite& suite, const std::string& name, const Args& args)
+					: TestContext(suite)
+					, _suite(suite)
+					, _methodName( name )
+					, _args(args)
+					, _testName( _suite.name() + "::" + name )
+					, _setUp(false)
+					{
+						this->run();
+					}
+					
+					~Sentry()
+					{ 
+						try
+						{
+							if( _setUp ) 
+								_suite.tearDown(); 
+						}
+						catch(...)
+						{} 
+					}
+					 
+					const std::string& testName() const
+					{ return _testName; }
+					
+					void _run()
+					{
+						_suite.setUp();
+						_setUp = true;
+						_suite.call(_methodName, _args);
+					}
+										
+				private:
+					TestSuite& _suite;
+					std::string _methodName;
+					const Args& _args; 
+					std::string _testName;
+					bool _setUp;
+			};
+
         public:
             /** @brief Construct by name and protocol
 
@@ -71,10 +115,28 @@ namespace Unit {
                 @param protocol Protocol for the test.
             */
             TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
-            : Test(name)
+            : Reflectable("Pt::Unit::TestSuite")
+            , Test(name)
             , _protocol(&protocol)
             { }
 
+            /** \brief Set up context before running a test.
+
+                This function is called before each registered tester function
+                is invoked. It is meant to initialize any required resources.
+            */
+            virtual void setUp()
+            {}
+
+            /** \brief Clean up after the test run.
+
+                This function is called after each registered tester function
+                is invoked. It is meant to remove any resources previously
+                initialized in TestSuite::setUp.
+            */
+            virtual void tearDown()
+            {}
+            
             /** @brief Runs the test suite
 
                 The TestProtocol assosiated with the test will be executed.
@@ -84,7 +146,7 @@ namespace Unit {
             {
                 _protocol->run(*this);
             }
-
+			
             /** @brief Runs a registered test
 
                 A test method will be called by name and the given arguments
@@ -98,53 +160,7 @@ namespace Unit {
             */
             void runTest( const std::string& name, const Args& args = Args() )
             {
-                // TODO: use a sentry object
-                bool isUp = false;
-
-                this->started.send( this->name() + "::" + name );
-                try
-                {
-                    this->setUp();
-                    isUp = true;
-                    Reflectable::call(name, args);
-                    this->tearDown();
-                    this->success.send<const Test&>( *this );
-                    return;
-                }
-                catch(const Assertion& assertion)
-                {
-                    this->assertion.send<const Test&>(*this, assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    this->exception.send<const Test&>(*this, ex);
-                }
-                catch(...)
-                {
-                    this->error.send<const Test&>(*this);
-                }
-
-                try
-                {
-                    if(isUp)
-                    {
-                        this->tearDown();
-                    }
-                }
-                catch(const Assertion& assertion)
-                {
-                    this->assertion.send<const Test&>(*this, assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    this->exception.send<const Test&>(*this, ex);
-                }
-                catch(...)
-                {
-                    this->error.send<const Test&>(*this);
-                }
-
-                this->finished.send<const Test&>( *this );
+				Sentry cerb(*this, name, args);
             }
 
         protected:
@@ -159,16 +175,16 @@ namespace Unit {
     TestProtocol TestSuite::defaultProtocol;
 
 
-    inline void TestProtocol::run(TestSuite& test)
+    inline void TestProtocol::run(TestSuite& suite)
     {
-        const MethodMap& methods = test.methods();
-        MethodMap::const_iterator it;
-        for(it = methods.begin(); it != methods.end(); ++it)
+        const MethodMap& methods = suite.methods();
+
+        for(MethodMap::const_iterator it = methods.begin(); it != methods.end(); ++it)
         {
-            test.runTest( it->first, Args() );
+			suite.runTest( it->first, Args() );
         }
     }
-
+    
 } // namespace Unit
 
 } // namespace Pt

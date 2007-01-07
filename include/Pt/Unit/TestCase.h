@@ -64,8 +64,46 @@ namespace Unit {
         Once the test is written it can be registered to an application by 
         using the RegisterTest class template.
     */
-    class TestCase : public Test, public TestFixture
+    class TestCase : public Test
     {
+		public:
+			class Sentry : public TestContext
+			{
+				public:
+					Sentry(TestCase& test)
+					: TestContext(test)
+					, _test(test)
+					, _setUp(false)
+					{
+						//this->run();
+					}
+					
+					~Sentry()
+					{ 
+						try
+						{
+							if( _setUp ) 
+								_test.tearDown(); 
+						}
+						catch(...)
+						{}
+					}
+
+					const std::string& testName() const
+					{ return _test.name(); }
+						
+					void _run()
+					{
+						_test.setUp();
+						_setUp = true;
+						_test.test();
+					}
+
+				private:
+					TestCase& _test;
+					bool _setUp;
+			};
+			
         public:
             /** @brief Construct by name
 
@@ -84,65 +122,36 @@ namespace Unit {
             */
             virtual void run()
             {
-                bool isUp = false;
-
-                this->started.send<const std::string&>( this->name() );
-                try
-                {
-                    this->setUp();
-                    isUp = true;
-                    this->test();
-                    this->tearDown();
-                    this->success.send<const Test&>( *this );
-                    return;
-                }
-                catch(const Assertion& assertion)
-                {
-                    this->assertion.send<const Test&>( *this, assertion );
-                }
-                catch(const std::exception& ex)
-                {
-                    this->exception.send<const Test&>( *this, ex );
-                }
-                catch(...)
-                {
-                    this->error.send<const Test&>( *this );
-                }
-
-                try
-                {
-                    if(isUp)
-                    {
-                        this->tearDown();
-                    }
-                }
-                catch(const Assertion& assertion)
-                {
-                    this->assertion.send<const Test&>( *this, assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    this->exception.send<const Test&>( *this, ex);
-                }
-                catch(...)
-                {
-                    this->error.send<const Test&>( *this );
-                }
-
-                this->finished.send<const Test&>( *this );
+				Sentry cerb(*this);
+				cerb.run();
             }
+            
+            /** \brief Set up context before running a test.
 
+                This function is called before each registered tester function
+                is invoked. It is meant to initialize any required resources.
+            */
+            virtual void setUp()
+            {}
+
+            /** \brief Clean up after the test run.
+
+                This function is called after each registered tester function
+                is invoked. It is meant to remove any resources previously
+                initialized in TestCase::setUp.
+            */
+            virtual void tearDown()
+            {}
+    
         protected:
             /** @brief Performs the actual test
+
                 The implementor is supposed to override this method, which
                 is called between 'setUp' and 'tearDown'. Assertions may be 
                 thrown to indicate failed test assertions.
             */
             virtual void test()
             { }
-            
-        private:
-			TestFixture* _fixture;
     };
 
 } // namespace Unit

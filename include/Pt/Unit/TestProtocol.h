@@ -21,7 +21,6 @@
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestFixture.h>
 
 
 namespace Pt {
@@ -29,7 +28,6 @@ namespace Pt {
 namespace Unit {
 
     class TestSuite;
-
 
     /** @brief Protocol for test suites
 
@@ -57,6 +55,9 @@ namespace Unit {
                 @param test The test suite to apply the protocol
             */
             virtual void run(TestSuite& test);
+
+		protected:
+            void runTest(TestSuite& suite, const std::string& name, const Args& args);
     };
 
 
