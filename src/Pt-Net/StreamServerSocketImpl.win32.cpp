@@ -26,15 +26,43 @@ namespace Pt {
 
 namespace Net {
 
-void StreamServerSocketImpl::bind(const std::string& ipaddr, unsigned short int port)
+StreamServerSocketImpl::~StreamServerSocketImpl()
 {
-
 }
 
 
-void StreamServerSocketImpl::listen()
+void StreamServerSocketImpl::bind(const std::string& ipaddr, unsigned short int port)
 {
+    // give some useful default values to use for getaddrinfo()
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
 
+    AddrInfo ai(ipaddr, port, hints);
+
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    {
+        SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
+
+        //if ( ::connect(getFd(), it->ai_addr, it->ai_addrlen) == 0 )
+        if ( ::bind(handle(), it->ai_addr, it->ai_addrlen) == 0 ) {
+            // save our information
+            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+            return;
+        }
+
+        this->close();
+    }
+
+    throw Exception("connect", PT_SOURCEINFO); //TODO: Exception
+}
+
+
+void StreamServerSocketImpl::listen(unsigned backlog)
+{
+	int ret = ::listen(this->handle(), backlog);
+	if(ret == -1)
+		throw Exception("Could not listen on socket", PT_SOURCEINFO); //TODO: Exception
 }
 
 } // namespace Net

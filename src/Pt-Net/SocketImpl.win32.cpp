@@ -35,7 +35,7 @@ SocketImpl::SocketImpl()
 
 SocketImpl::~SocketImpl()
 {
-    if (_sd >= 0)
+    if (_sd != INVALID_SOCKET)
         close();
 }
 
@@ -56,6 +56,7 @@ void SocketImpl::create(int domain, int type, int protocol)
 
 void SocketImpl::close()
 {
+	::shutdown(_sd, SHUT_RDWR);
 	::closesocket(_sd);
     _sd = INVALID_SOCKET;
 }

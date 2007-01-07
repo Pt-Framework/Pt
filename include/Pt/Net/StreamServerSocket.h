@@ -28,8 +28,6 @@
 namespace Pt {
 
 namespace Net {
-
-	//class StreamServerSocketImpl
 	
     class PT_API StreamServerSocket
     {
@@ -45,7 +43,7 @@ namespace Net {
             
             void bind(const std::string& ipaddr, unsigned short int port);
             
-            void listen();
+            void listen(unsigned backlog = 16);
     };
 
 } // !namespace Net

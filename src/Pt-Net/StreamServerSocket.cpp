@@ -33,13 +33,21 @@ StreamServerSocket::~StreamServerSocket()
 
 void StreamServerSocket::bind(const std::string& ipaddr, unsigned short int port)
 {
-
+	if(!_impl)
+	{
+		_impl = new StreamServerSocketImpl;
+	}
+	
+	_impl->bind(ipaddr, port);
 }
 
 
-void StreamServerSocket::listen()
+void StreamServerSocket::listen(unsigned backlog)
 {
-
+	if(!_impl)
+		throw Exception("Socket not bound", PT_SOURCEINFO);
+		
+	_impl->listen(backlog);
 }
 
 } // namespace Net

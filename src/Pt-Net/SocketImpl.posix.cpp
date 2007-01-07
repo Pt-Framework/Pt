@@ -54,7 +54,6 @@ void SocketImpl::create(int domain, int type, int protocol)
 
 void SocketImpl::close()
 {
-	//::socket(_sd);
 	::shutdown(_sd, SHUT_RDWR);
 	::close(_sd);
 	_sd = -1;

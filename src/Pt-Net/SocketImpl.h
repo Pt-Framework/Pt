@@ -23,6 +23,7 @@
 
 #ifdef WIN32
 	#include <winsock2.h>
+	#define SHUT_RDWR 2
 #else
 	typedef int SOCKET;
 #endif

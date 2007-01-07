@@ -21,8 +21,8 @@
 #ifndef Pt_Net_StreamSocketImpl_h
 #define Pt_Net_StreamSocketImpl_h
 
-#include "AddrInfo.h"
 #include "SocketImpl.h"
+#include "AddrInfo.h"
 #include "Pt/Types.h"
 #include <string>
 
@@ -34,9 +34,14 @@ namespace Net
     class StreamServerSocketImpl : public SocketImpl
     {
         public:
+			~StreamServerSocketImpl();
+			
 			void bind(const std::string& ipaddr, unsigned short int port);
 			
-			void listen();
+			void listen(unsigned backlog);
+			
+        private:
+            struct sockaddr_storage _peeraddr;
     };
 }
 }
