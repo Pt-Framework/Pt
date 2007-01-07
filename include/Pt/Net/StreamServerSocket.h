@@ -29,8 +29,12 @@ namespace Pt {
 
 namespace Net {
 	
+    class StreamServerSocketImpl;
+
     class PT_API StreamServerSocket
     {
+            friend class StreamSocket;
+
         private:
             class StreamServerSocketImpl* _impl;
         

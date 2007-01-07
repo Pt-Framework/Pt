@@ -18,13 +18,20 @@
  ***************************************************************************/
 
 #include "Pt/Net/StreamSocket.h"
+#include "Pt/Net/StreamServerSocket.h"
 #include "StreamSocketImpl.h"
+#include "StreamServerSocketImpl.h"
 #include "Pt/Exception.h"
 
 
 namespace Pt {
 
 namespace Net {
+
+StreamSocket::~StreamSocket()
+{
+  delete _impl;
+}
 
 void StreamSocket::setTimeout(ssize_t msec)
 {
@@ -43,6 +50,18 @@ void StreamSocket::connect(const std::string& ipaddr, unsigned short int port)
         _impl = new StreamSocketImpl();
 
     _impl->connect(ipaddr, port);
+}
+
+
+void StreamSocket::accept(const StreamServerSocket& server)
+{
+    if (_impl)
+    {
+        delete _impl;
+        _impl = 0;
+    }
+
+    _impl = server._impl->accept();
 }
 
 

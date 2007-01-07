@@ -29,6 +29,7 @@ namespace Pt {
 namespace Net {
 
     class StreamSocketImpl;
+    class StreamServerSocket;
 
     class PT_API StreamSocket : public Socket
     {
@@ -41,9 +42,16 @@ namespace Net {
             : _impl(0)
             { connect(ipaddr, port); }
 
+            StreamSocket(const StreamServerSocket& server)
+            : _impl(0)
+            { accept(server); }
+
+            ~StreamSocket();
+
             void setTimeout(ssize_t msec);
 
             void connect(const std::string& ipaddr, unsigned short int port);
+            void accept(const StreamServerSocket& server);
 
         protected:
             size_t _read(char* buffer, size_t count, bool& eof);

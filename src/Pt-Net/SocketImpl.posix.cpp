@@ -37,6 +37,11 @@ SocketImpl::SocketImpl()
 { }
 
 
+SocketImpl::SocketImpl(SOCKET sd_)
+: _sd(sd_)
+{ }
+
+
 SocketImpl::~SocketImpl()
 {
     if (_sd >= 0)

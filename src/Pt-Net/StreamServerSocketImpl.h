@@ -18,19 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Net_StreamSocketImpl_h
-#define Pt_Net_StreamSocketImpl_h
+#ifndef Pt_Net_StreamServerSocketImpl_h
+#define Pt_Net_StreamServerSocketImpl_h
 
 #include "SocketImpl.h"
 #include "AddrInfo.h"
 #include "Pt/Types.h"
 #include <string>
 
-
 namespace Pt
 {
 namespace Net
 {
+    class StreamSocketImpl;
+
     class StreamServerSocketImpl : public SocketImpl
     {
         public:
@@ -39,9 +40,8 @@ namespace Net
 			void bind(const std::string& ipaddr, unsigned short int port);
 			
 			void listen(unsigned backlog);
-			
-        private:
-            struct sockaddr_storage _peeraddr;
+
+            StreamSocketImpl* accept();
     };
 }
 }

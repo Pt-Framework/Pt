@@ -22,10 +22,10 @@
 #define Pt_Net_SocketImpl_h
 
 #ifdef WIN32
-	#include <winsock2.h>
+  #include <winsock2.h>
 	#define SHUT_RDWR 2
 #else
-	typedef int SOCKET;
+  typedef int SOCKET;
 #endif
 
 namespace Pt {
@@ -34,14 +34,16 @@ namespace Net {
 
     class SocketImpl
     {
-		public:
-			enum WaitMode
-			{
-				WaitInput = 0x1, WaitOutput = 0x2
-			};
+        public:
+            enum WaitMode
+            {
+                WaitInput = 0x1, WaitOutput = 0x2
+            };
 
         public:
             SocketImpl();
+
+            explicit SocketImpl(SOCKET sd);
 
             ~SocketImpl();
 
@@ -53,7 +55,10 @@ namespace Net {
 
         protected:
             SOCKET handle() const
-						{ return _sd; }
+            { return _sd; }
+
+            void setHandle(SOCKET sd)
+            { _sd = sd; }
 
         private:
             SOCKET _sd;

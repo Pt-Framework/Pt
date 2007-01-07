@@ -31,9 +31,19 @@ namespace Pt
 {
 namespace Net
 {
+    class StreamServerSocketImpl;
+
     class StreamSocketImpl : public SocketImpl
     {
         public:
+            StreamSocketImpl()
+            { }
+
+            StreamSocketImpl(SOCKET sd, struct sockaddr_storage peeraddr_)
+              : SocketImpl(sd),
+                peeraddr(peeraddr_)
+            { }
+
             void connect(const std::string& ipaddr, unsigned short int port);
 
             size_t read(char* buffer, size_t count, bool& eof);
