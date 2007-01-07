@@ -8,10 +8,19 @@ if $(TARGET_OSPLAT:L) != x86
 
 CC = $(VISUALC)\\vc\\bin\\cl /nologo ;
 
-LINKLIBS += \"$(PLATFORMSDK)\\lib\\advapi32.lib\"
-	    \"$(PLATFORMSDK)\\lib\\gdi32.lib\"
-	    \"$(PLATFORMSDK)\\lib\\user32.lib\"
-	    \"$(PLATFORMSDK)\\lib\\kernel32.lib\" ;
+# Replaced by setting LINKFLAGS and LINKLIBS
+# 
+#LINKLIBS += \"$(PLATFORMSDK)\\lib\\advapi32.lib\"
+#	    \"$(PLATFORMSDK)\\lib\\gdi32.lib\"
+#	    \"$(PLATFORMSDK)\\lib\\user32.lib\"
+#	    \"$(PLATFORMSDK)\\lib\\kernel32.lib\" ;
+
+LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
+
+LINKLIBS += advapi32.lib
+	    gdi32.lib
+	    user32.lib
+	    kernel32.lib ;
 
 CCFLAGS += /DWIN32 ;
 
