@@ -22,7 +22,7 @@
 #define Pt_Net_StreamServerSocketImpl_h
 
 #include "SocketImpl.h"
-#include "AddrInfo.h"
+//#include "AddrInfo.h"
 #include "Pt/Types.h"
 #include <string>
 

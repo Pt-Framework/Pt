@@ -30,6 +30,7 @@ namespace Pt {
 
 namespace Net {
 
+/*
 SocketImpl::SocketImpl()
 : _sd(-1)
 { }
@@ -53,7 +54,7 @@ void SocketImpl::create(int domain, int type, int protocol)
     if (_sd < 0)
       throw RuntimeError("cannot create socket", PT_SOURCEINFO); // TODO change exceptiontype
 }
-
+*/
 
 void SocketImpl::close()
 {

@@ -79,24 +79,9 @@ namespace Net {
 			};
 
 		public:
-			AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
-			: ai(0)
-			{
-				std::ostringstream p;
-				p << port;
+			AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
 
-				if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-				  throw RuntimeError("invalid ipaddress " + ipaddr, PT_SOURCEINFO); // TODO specify errortype
-
-				if (ai == 0)
-				  throw RuntimeError("unknown error in getaddrinfo", PT_SOURCEINFO); // TODO specify errortype
-			}
-
-			~AddrInfo()
-			{
-				if (ai)
-					freeaddrinfo(ai);
-			}   
+			~AddrInfo();  
 
 			const_iterator begin() const  
 			{ return const_iterator(ai); }

@@ -21,11 +21,25 @@
 #ifndef Pt_Net_SocketImpl_h
 #define Pt_Net_SocketImpl_h
 
-#ifdef WIN32
-  #include <winsock2.h>
+#include <Pt/Net/Timeout.h>
+#include <Pt/Exception.h>
+#include <AddrInfo.h>
+
+#if defined(WIN32) || defined(_WIN32)
+	#include <winsock2.h>
+	#define SHUT_RD   1
 	#define SHUT_RDWR 2
+	#define PT_INVALID_SOCKET INVALID_SOCKET
+	
+	#define PT_EINTR WSAEINTR
+
 #else
-  typedef int SOCKET;
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <sys/poll.h>
+	typedef int SOCKET;
+	#define PT_INVALID_SOCKET -1
+	#define PT_EINTR EINTR
 #endif
 
 namespace Pt {
@@ -41,17 +55,89 @@ namespace Net {
             };
 
         public:
-            SocketImpl();
+			SocketImpl::SocketImpl()
+			: _sd(INVALID_SOCKET)
+			{ }
 
-            explicit SocketImpl(SOCKET sd);
+            explicit SocketImpl::SocketImpl(SOCKET sd)
+			: _sd(sd)
+			{ }
 
-            ~SocketImpl();
+			~SocketImpl()
+			{
+				if (_sd != PT_INVALID_SOCKET)
+					this->close();
+			}
 
-            void create(int domain, int type, int protocol);
+			void create(int domain, int type, int protocol)
+			{
+				
+				#ifdef WIN32
+				{   // TODO: concurrency
+					WSADATA wsadata;
+					WSAStartup(MAKEWORD(2,0), &wsadata);
+				}
+				#endif
+			
+				_sd = ::socket(domain, type, protocol);
+				if (_sd < 0)
+				  throw RuntimeError("cannot create socket", PT_SOURCEINFO); // TODO change exceptiontype
+			}
 
-            void close();
+			void close()
+			{
+				::shutdown(_sd, SHUT_RDWR);
+				
+				#ifdef WIN32
+					::closesocket(_sd);
+				#else
+					::close(_sd);
+				#endif
+				
+				_sd = -1;
+			}
 
-            bool wait(WaitMode events, int timeout) const;
+
+			bool SocketImpl::wait(SocketImpl::WaitMode mode, int msec) const
+			{
+				fd_set rfds;
+				FD_ZERO(&rfds);
+				FD_SET(_sd, &rfds);
+
+				struct timeval tv;
+				tv.tv_sec = msec / 1000;
+				tv.tv_usec = (msec % 1000) * 1000;
+
+				_select:
+				int ret = -1;
+
+				switch(mode)
+				{
+					case SocketImpl::WaitInput:
+						ret = select(_sd + 1, &rfds, 0, 0, &tv);
+						break;
+
+					case SocketImpl::WaitOutput:
+						ret = select(_sd + 1, 0, &rfds, 0, &tv);
+						break;
+				}
+
+				// error
+				if(ret == -1)
+				{
+					if(errno == PT_EINTR)
+						goto _select;
+
+					throw Exception("Could not select on socket", PT_SOURCEINFO); //TODO
+				}
+
+				// data available
+				if(ret == 1)
+					return true;
+
+				// no data available
+				return false;
+			}
 
         protected:
             SOCKET handle() const
