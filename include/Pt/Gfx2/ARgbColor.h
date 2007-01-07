@@ -87,43 +87,43 @@ namespace Pt {
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
-				/** @brief Return the alpha component of this color.
+				/** @brief Return the alpha component of this color (range 0 to 65535).
 				 */
 				inline uint16_t alpha() const
 				{ return _a; }
 
-				/** @brief Return the red component of this color.
+				/** @brief Return the red component of this color (range 0 to 65535).
 				 */
 				inline uint16_t red() const
 				{ return _r; }
 
-				/** @brief Return the green component of this color.
+				/** @brief Return the green component of this color (range 0 to 65535).
 				 */
 				inline uint16_t green() const
 				{ return _g; }
 
-				/** @brief Return the blue component of this color.
+				/** @brief Return the blue component of this color (range 0 to 65535).
 				 */
 				inline uint16_t blue() const
 				{ return _b; }
 
 
-				/** @brief Set the alpha component of this color.
+				/** @brief Set the alpha component of this color (range 0 to 65535).
 				 */
 				inline void setAlpha(uint16_t a)
 				{ _a = a; }
 
-				/** @brief Set the red component of this color.
+				/** @brief Set the red component of this color (range 0 to 65535).
 				 */
 				inline void setRed(uint16_t r)
 				{ _r = r; }
 
-				/** @brief Set the green component of this color.
+				/** @brief Set the green component of this color (range 0 to 65535).
 				 */
 				inline void setGreen(uint16_t g)
 				{ _g = g; }
 
-				/** @brief Set the blue component of this color.
+				/** @brief Set the blue component of this color (range 0 to 65535).
 				 */
 				inline void setBlue(uint16_t b)
 				{ _b = b; }

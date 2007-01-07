@@ -135,22 +135,22 @@ namespace Pt {
 				inline uint32_t value() const
 				{ return _val; }
 
-				/** @brief Return the alpha component of this color.
+				/** @brief Return the alpha component of this color (range 0 to 255).
 				 */
 				inline uint8_t alpha() const
 				{ return _val >> 24; }
 
-				/** @brief Return the red component of this color.
+				/** @brief Return the red component of this color (range 0 to 255).
 				 */
 				inline uint8_t red() const
 				{ return (_val & 0x00FF0000) >> 16; }
 
-				/** @brief Return the green component of this color.
+				/** @brief Return the green component of this color (range 0 to 255).
 				 */
 				inline uint8_t green() const
 				{ return (_val & 0x0000FF00) >> 8; }
 
-				/** @brief Return the blue component of this color.
+				/** @brief Return the blue component of this color (range 0 to 255).
 				 */
 				inline uint8_t blue() const
 				{ return _val & 0x000000FF; }
@@ -161,22 +161,22 @@ namespace Pt {
 				void setValue(uint32_t c)
 				{ _val = c; }
 
-				/** @brief Set the alpha component of this color.
+				/** @brief Set the alpha component of this color (range 0 to 255).
 				 */
 				inline void setAlpha(uint8_t a)
 				{ _val = _val & 0x00FFFFFF | (uint32_t(a) << 24); }
 
-				/** @brief Set the red component of this color.
+				/** @brief Set the red component of this color (range 0 to 255).
 				 */
 				inline void setRed(uint8_t r)
 				{ _val = _val & 0xFF00FFFF | (uint32_t(r) << 16); }
 
-				/** @brief Set the green component of this color.
+				/** @brief Set the green component of this color (range 0 to 255).
 				 */
 				inline void setGreen(uint8_t g)
 				{ _val = _val & 0xFFFF00FF | (uint32_t(g) << 8); }
 
-				/** @brief Set the blue component of this color.
+				/** @brief Set the blue component of this color (range 0 to 255).
 				 */
 				inline void setBlue(uint8_t b)
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }

@@ -126,17 +126,17 @@ namespace Pt {
 				inline uint16_t value() const
 				{ return _val; }
 
-				/** @brief Return the red component of this color.
+				/** @brief Return the red component of this color (range 0 to 31).
 				 */
 				inline uint8_t red() const
 				{ return (_val & 0xF800) >> 11; }
 
-				/** @brief Return the green component of this color.
+				/** @brief Return the green component of this color (range 0 to 63).
 				 */
 				inline uint8_t green() const
 				{ return (_val & 0x07E0) >> 5; }
 
-				/** @brief Return the blue component of this color.
+				/** @brief Return the blue component of this color (range 0 to 31).
 				 */
 				inline uint8_t blue() const
 				{ return _val & 0x001F; }
@@ -147,17 +147,17 @@ namespace Pt {
 				void setValue(uint16_t c)
 				{ _val = c; }
 
-				/** @brief Set the red component of this color.
+				/** @brief Set the red component of this color (range 0 to 31).
 				 */
 				inline void setRed(uint8_t r)
 				{ _val = _val & 0x07FF | (uint16_t(r & 0xF8) << 8); }
 
-				/** @brief Set the green component of this color.
+				/** @brief Set the green component of this color (range 0 to 63).
 				 */
 				inline void setGreen(uint8_t g)
 				{ _val = _val & 0xF81F | (uint16_t(g & 0xFC) << 3); }
 
-				/** @brief Set the blue component of this color.
+				/** @brief Set the blue component of this color (range 0 to 31).
 				 */
 				inline void setBlue(uint8_t b)
 				{ _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }

@@ -92,43 +92,43 @@ namespace Pt {
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
-				/** @brief Return the alpha component of this color.
+				/** @brief Return the alpha component of this color (range 0.0f to 1.0f).
 				 */
 				inline float alpha() const
 				{ return _a; }
 
-				/** @brief Return the red component of this color.
+				/** @brief Return the red component of this color (range 0.0f to 1.0f).
 				 */
 				inline float red() const
 				{ return _r; }
 
-				/** @brief Return the green component of this color.
+				/** @brief Return the green component of this color (range 0.0f to 1.0f).
 				 */
 				inline float green() const
 				{ return _g; }
 
-				/** @brief Return the blue component of this color.
+				/** @brief Return the blue component of this color (range 0.0f to 1.0f).
 				 */
 				inline float blue() const
 				{ return _b; }
 
 
-				/** @brief Set the alpha component of this color.
+				/** @brief Set the alpha component of this color (range 0.0f to 1.0f).
 				 */
 				inline void setAlpha(float a)
 				{ _a = a; }
 
-				/** @brief Set the red component of this color.
+				/** @brief Set the red component of this color (range 0.0f to 1.0f).
 				 */
 				inline void setRed(float r)
 				{ _r = r; }
 
-				/** @brief Set the green component of this color.
+				/** @brief Set the green component of this color (range 0.0f to 1.0f).
 				 */
 				inline void setGreen(float g)
 				{ _g = g; }
 
-				/** @brief Set the blue component of this color.
+				/** @brief Set the blue component of this color (range 0.0f to 1.0f).
 				 */
 				inline void setBlue(float b)
 				{ _b = b; }
