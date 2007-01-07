@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "StreamServerSocketImpl.h"
+#include "StreamSocketImpl.h"
 #include <Pt/Exception.h>
 #include <cerrno>
 
@@ -45,9 +46,10 @@ void StreamServerSocketImpl::bind(const std::string& ipaddr, unsigned short int 
         SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
 
         //if ( ::connect(getFd(), it->ai_addr, it->ai_addrlen) == 0 )
-        if ( ::bind(handle(), it->ai_addr, it->ai_addrlen) == 0 ) {
+        SOCKET fd = ::bind(handle(), it->ai_addr, it->ai_addrlen);
+        if ( fd == 0 ) {
             // save our information
-            memmove(&_peeraddr, it->ai_addr, it->ai_addrlen);
+            setHandle(fd);
             return;
         }
 
@@ -63,6 +65,20 @@ void StreamServerSocketImpl::listen(unsigned backlog)
 	int ret = ::listen(this->handle(), backlog);
 	if(ret == -1)
 		throw Exception("Could not listen on socket", PT_SOURCEINFO); //TODO: Exception
+}
+
+
+StreamSocketImpl* StreamServerSocketImpl::accept()
+{
+  struct sockaddr_storage peeraddr;
+  socklen_t peeraddr_len;
+  peeraddr_len = sizeof(peeraddr);
+  SOCKET fd = ::accept(handle(), reinterpret_cast <struct sockaddr *> (&peeraddr), &peeraddr_len);
+
+  if (fd < 0)
+    throw Exception("accept", PT_SOURCEINFO); // TODO
+
+  return new StreamSocketImpl(fd, peeraddr);
 }
 
 } // namespace Net
