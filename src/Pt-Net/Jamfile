@@ -2,13 +2,13 @@ SubDir TOP src Pt-Net ;
 
 SubDirHdrs $(TOP)/include ;
 
-SharedLibrary Pt-Net : Socket.cpp
-                       #SocketImpl.$(SYS).cpp
+SharedLibrary Pt-Net : AddrInfo.cpp
+					   Socket.cpp
                        StreamSocket.cpp
-                       StreamSocketImpl.$(SYS).cpp
                        StreamServerSocket.cpp
-                       StreamServerSocketImpl.$(SYS).cpp
-                       AddrInfo.cpp
+                       #SocketImpl.$(SYS).cpp
+                       #StreamServerSocketImpl.$(SYS).cpp
+                       #StreamSocketImpl.$(SYS).cpp 
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-IO Pt-System ;

@@ -21,10 +21,11 @@
 #ifndef Pt_Net_StreamSocketImpl_h
 #define Pt_Net_StreamSocketImpl_h
 
+#include <string>
 #include "AddrInfo.h"
 #include "SocketImpl.h"
 #include "Pt/Types.h"
-#include <string>
+#include "Pt/Net/Timeout.h"
 
 
 namespace Pt
@@ -44,11 +45,123 @@ namespace Net
                 peeraddr(peeraddr_)
             { }
 
-            void connect(const std::string& ipaddr, unsigned short int port);
+            void connect(const std::string& ipaddr, unsigned short int port)
+			{
+				// give some useful default values to use for getaddrinfo()
+				struct addrinfo hints;
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_socktype = SOCK_STREAM;
 
-            size_t read(char* buffer, size_t count, bool& eof);
+				AddrInfo ai(ipaddr, port, hints);
 
-            size_t write(const char* buffer, size_t count);
+				for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+				{
+					SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
+
+					if ( ::connect(handle(), it->ai_addr, it->ai_addrlen) == 0 )
+					{
+						// save our information
+						memmove(&peeraddr, it->ai_addr, it->ai_addrlen);
+						return;
+					}
+
+					close();
+				}
+
+				throw Exception("connect", PT_SOURCEINFO);
+			}
+			
+            size_t read(char* buffer, size_t count, bool& eof)
+			{
+				ssize_t n;
+
+				if (getTimeout() < 0)
+				{
+					// blocking read
+					do
+					{
+						n = ::recv(handle(), buffer, count, 0);
+					} while (n <= 0 && this->lastError() == PT_EINTR);
+
+					if (this->lastError() == PT_ECONNRESET)
+						eof = true;
+					else if (n < 0)
+						throw Exception("read", PT_SOURCEINFO); // TODO
+				}
+				else
+				{
+					// non-blocking read
+
+					// try reading without timeout
+					do
+					{
+						n = ::recv(handle(), buffer, count, 0);
+					} while (n <= 0 && this->lastError() == PT_EINTR);
+
+					if (n <= 0)
+					{
+						// no data available
+
+						if (this->lastError() == PT_EAGAIN)
+						{
+							if (getTimeout() == 0)
+							  return 0;
+
+							this->wait(WaitInput, getTimeout());
+
+							do
+							{
+								n = ::recv(handle(), buffer, count, 0);
+							} while (n <= 0 && this->lastError() == PT_EINTR);
+
+							if (n < 0)
+								throw Exception("read", PT_SOURCEINFO); // TODO
+						}
+						else if (this->lastError() == PT_ECONNRESET)
+							eof = true;
+						else if (this->lastError() != 0)
+							throw Exception("read", PT_SOURCEINFO); // TODO
+					}
+
+				}
+
+				return n < 0 ? 0 : n;
+			}
+			
+            size_t write(const char* buffer, size_t count)
+			{
+				ssize_t n = 0;
+				size_t s = count;
+
+				while (true)
+				{
+					do
+					{
+						n = ::send(handle(), buffer, s, 0);
+					} while (n <= 0 && this->lastError() == PT_EINTR);
+
+					if (n <= 0)
+					{
+						if (this->lastError() == PT_EAGAIN)
+							n = 0;
+						else
+							throw Exception("write", PT_SOURCEINFO); // TODO
+					}
+
+					buffer += n;
+					s -= n;
+
+					if (s <= 0)
+						break;
+
+					if (getTimeout() == 0)
+						return count - s;
+
+					this->wait(WaitOutput, getTimeout());
+				}
+
+				return count;
+			}
 
             void setTimeout(ssize_t msec)
                 { timeout = msec; }

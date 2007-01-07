@@ -21,10 +21,12 @@
 #ifndef Pt_Net_StreamServerSocketImpl_h
 #define Pt_Net_StreamServerSocketImpl_h
 
-#include "SocketImpl.h"
-//#include "AddrInfo.h"
-#include "Pt/Types.h"
 #include <string>
+#include "AddrInfo.h"
+#include "SocketImpl.h"
+#include "StreamSocketImpl.h"
+#include "Pt/Types.h"
+
 
 namespace Pt
 {
@@ -35,13 +37,55 @@ namespace Net
     class StreamServerSocketImpl : public SocketImpl
     {
         public:
-			~StreamServerSocketImpl();
+			~StreamServerSocketImpl()
+			{}
 			
-			void bind(const std::string& ipaddr, unsigned short int port);
-			
-			void listen(unsigned backlog);
+			void bind(const std::string& ipaddr, unsigned short int port)
+			{
+				// give some useful default values to use for getaddrinfo()
+				struct addrinfo hints;
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_socktype = SOCK_STREAM;
 
-            StreamSocketImpl* accept();
+				AddrInfo ai(ipaddr, port, hints);
+
+				for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+				{
+					SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
+
+					//if ( ::connect(getFd(), it->ai_addr, it->ai_addrlen) == 0 )
+					SOCKET fd = ::bind(handle(), it->ai_addr, it->ai_addrlen);
+					if ( fd == 0 ) {
+						// save our information
+						setHandle(fd);
+						return;
+					}
+
+					this->close();
+				}
+
+				throw Exception("connect", PT_SOURCEINFO); //TODO: Exception
+			}	
+		
+			void listen(unsigned backlog)
+			{
+				int ret = ::listen(this->handle(), backlog);
+				if(ret == -1)
+					throw Exception("Could not listen on socket", PT_SOURCEINFO); //TODO: Exception
+			}
+			
+            StreamSocketImpl* accept()
+			{
+				struct sockaddr_storage peeraddr;
+				socklen_t peeraddr_len;
+				peeraddr_len = sizeof(peeraddr);
+				SOCKET fd = ::accept(handle(), reinterpret_cast <struct sockaddr *> (&peeraddr), &peeraddr_len);
+
+				if (fd < 0)
+					throw Exception("accept", PT_SOURCEINFO); // TODO
+
+				return new StreamSocketImpl(fd, peeraddr);
+			}
     };
 }
 }

@@ -25,7 +25,7 @@
 namespace Pt {
 
 namespace Net {
-
+/*
 void StreamSocketImpl::connect(const std::string& ipaddr, unsigned short int port)
 {
     // give some useful default values to use for getaddrinfo()
@@ -149,7 +149,7 @@ size_t StreamSocketImpl::write(const char* buffer, size_t count)
 
     return count;
 }
-
+*/
 
 
 }

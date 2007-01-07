@@ -21,18 +21,14 @@
 #ifndef Pt_Net_SocketImpl_h
 #define Pt_Net_SocketImpl_h
 
-#include <Pt/Net/Timeout.h>
-#include <Pt/Exception.h>
-#include <AddrInfo.h>
-
 #if defined(WIN32) || defined(_WIN32)
 	#include <winsock2.h>
 	#define SHUT_RD   1
 	#define SHUT_RDWR 2
 	#define PT_INVALID_SOCKET INVALID_SOCKET
-	
 	#define PT_EINTR WSAEINTR
-
+	#define PT_ECONNRESET WSAECONNRESET
+	#define PT_EAGAIN WSAEWOULDBLOCK
 #else
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -40,7 +36,12 @@
 	typedef int SOCKET;
 	#define PT_INVALID_SOCKET -1
 	#define PT_EINTR EINTR
+	#define PT_ECONNRESET ECONNRESET
+	#define PT_EAGAIN EAGAIN
 #endif
+
+#include <Pt/Exception.h>
+
 
 namespace Pt {
 
@@ -69,6 +70,15 @@ namespace Net {
 					this->close();
 			}
 
+			static int lastError()
+			{
+				#ifdef WIN32
+					return WSAGetLastError();
+				#else
+					return errno;
+				#endif
+			}
+			
 			void create(int domain, int type, int protocol)
 			{
 				
@@ -125,7 +135,7 @@ namespace Net {
 				// error
 				if(ret == -1)
 				{
-					if(errno == PT_EINTR)
+					if(this->lastError() == PT_EINTR)
 						goto _select;
 
 					throw Exception("Could not select on socket", PT_SOURCEINFO); //TODO

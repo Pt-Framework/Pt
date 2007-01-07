@@ -26,7 +26,7 @@
 namespace Pt {
 
 namespace Net {
-
+/*
 StreamServerSocketImpl::~StreamServerSocketImpl()
 {
 }
@@ -80,7 +80,7 @@ StreamSocketImpl* StreamServerSocketImpl::accept()
 
   return new StreamSocketImpl(fd, peeraddr);
 }
-
+*/
 } // namespace Net
 
 } // namespace Pt

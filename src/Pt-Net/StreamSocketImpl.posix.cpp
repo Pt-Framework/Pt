@@ -50,7 +50,6 @@ void StreamSocketImpl::connect(const std::string& ipaddr, unsigned short int por
     }
 
     throw Exception("connect", PT_SOURCEINFO);
-
 }
 
 size_t StreamSocketImpl::read(char* buffer, size_t count, bool& eof)
