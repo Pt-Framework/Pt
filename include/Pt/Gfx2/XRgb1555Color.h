@@ -88,11 +88,17 @@ namespace Pt {
 				 */
 				inline Color& operator+=(const Color& c)
 				{
-					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
-					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
+					const uint16_t r = red()   + c.red();
+					const uint16_t g = green() + c.green();
+					const uint16_t b = blue()  + c.blue();
 
-					r1 += r2; g1 += g2; b1 += b2;
-					fromARgb(*this, 0, r1, g1, b1);
+					// 1111111100000000
+					// 7654321076543210
+					// 0RRRRRGGGGGBBBBB
+					//            CCCCC
+					_val  = (uint16_t(r) << 10);
+					_val |= (uint16_t(g) <<  5);
+					_val |=  uint16_t(b);
 
 					return *this;
 				}
@@ -101,11 +107,13 @@ namespace Pt {
 				 */
 				inline Color& operator-=(const Color& c)
 				{
-					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
-					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
+					const uint16_t r = red()   - c.red();
+					const uint16_t g = green() - c.green();
+					const uint16_t b = blue()  - c.blue();
 
-					r1 -= r2; g1 -= g2; b1 -= b2;
-					fromARgb(*this, 0, r1, g1, b1);
+					_val  = (uint16_t(r) << 10);
+					_val |= (uint16_t(g) <<  5);
+					_val |=  uint16_t(b);
 
 					return *this;
 				}
@@ -153,8 +161,6 @@ namespace Pt {
 				{ _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color& from);
-				friend void fromARgb(Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==(const Color& c1, const Color& c2);
 				friend bool operator<(const Color& c1, const Color& c2);
 				friend bool operator>(const Color& c1, const Color& c2);
@@ -198,9 +204,10 @@ namespace Pt {
 			// 7654321076543210
 			// 0RRRRRGGGGGBBBBB
 			// CCCCCCCCCCCCCCCC
-			to._val  = ( (r & 0xF800) >>  1);
-			to._val |= ( (g & 0xF800) >>  6);
-			to._val |= (  b           >> 11);
+			const uint16_t val  = ( (r & 0xF800) >>  1) |
+			                      ( (g & 0xF800) >>  6) |
+			                      (  b           >> 11);
+			to.setValue(val);
 		}
 
 
