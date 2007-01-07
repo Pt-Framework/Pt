@@ -23,9 +23,9 @@
 namespace Pt {
 
 Reflectable::Reflectable(const std::string& typeName)
-: _typeName(typeName)
+//: _typeName(typeName)
 {
-	this->registerProperty( "name", this, &Reflectable::name );
+	//this->registerProperty( "name", this, &Reflectable::name );
 }
 
 
