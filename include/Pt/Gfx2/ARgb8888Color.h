@@ -50,25 +50,25 @@ namespace Pt {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline Color<ARgb8888>()
+				inline Color()
 				: _val(0xFF000000)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline Color<ARgb8888>(const Color<ARgb8888>& c)
+				inline Color(const Color<ARgb8888>& c)
 				: _val(c._val)
 				{}
 
 				/** @brief Construct color using the given packed color constant.
 				 */
-				inline Color<ARgb8888>(uint32_t val)
+				inline Color(uint32_t val)
 				: _val(val)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color<ARgb8888>(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+				inline Color(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
 				: _val(uint32_t(a) << 24)
 				{
 					// 33333333222222221111111100000000
@@ -81,7 +81,7 @@ namespace Pt {
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color<ARgb8888>(uint8_t r, uint8_t g, uint8_t b)
+				inline Color(uint8_t r, uint8_t g, uint8_t b)
 				: _val(0xFF000000)
 				{
 					_val |= (uint32_t(r) << 16);
@@ -124,7 +124,7 @@ namespace Pt {
 
 				/** @brief Return the packed color value of this color.
 				 */
-				inline uint32_t color()
+				inline uint32_t value() const
 				{ return _val; }
 
 				/** @brief Return the alpha component of this color.
@@ -150,7 +150,7 @@ namespace Pt {
 
 				/** @brief Set the packed color value of this color.
 				 */
-				void setColor(uint32_t c)
+				void setValue(uint32_t c)
 				{ _val = c; }
 
 				/** @brief Set the alpha component of this color.

@@ -53,25 +53,25 @@ namespace Pt {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline Color<ARgbF>()
+				inline Color()
 				: _a(1.0f), _r(0.0f), _g(0.0f), _b(0.0f)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline Color<ARgbF>(const Color<ARgbF>& c)
+				inline Color(const Color<ARgbF>& c)
 				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color<ARgbF>(float a, float r, float g, float b)
+				inline Color(float a, float r, float g, float b)
 				: _a(a), _r(r), _g(g), _b(b)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color<ARgbF>(float r, float g, float b)
+				inline Color(float r, float g, float b)
 				: _a(1.0f), _r(r), _g(g), _b(b)
 				{}
 

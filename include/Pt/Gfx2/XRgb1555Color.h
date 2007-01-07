@@ -49,25 +49,25 @@ namespace Pt {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
-				inline Color<XRgb1555>()
+				inline Color()
 				: _val(0x0000)
 				{}
 
 				/** @brief Copy constructor.
 				 */
-				inline Color<XRgb1555>(const Color<XRgb1555>& c)
+				inline Color(const Color<XRgb1555>& c)
 				: _val(c._val)
 				{}
 
 				/** @brief Construct color using the given packed color constant.
 				 */
-				inline Color<XRgb1555>(uint16_t val)
+				inline Color(uint16_t val)
 				: _val(val)
 				{}
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color<XRgb1555>(uint8_t r, uint8_t g, uint8_t b)
+				inline Color(uint8_t r, uint8_t g, uint8_t b)
 				: _val(uint16_t(r & 0xF8) << 7)
 				{
 					// 1111111100000000
@@ -113,7 +113,7 @@ namespace Pt {
 
 				/** @brief Return the packed color value of this color.
 				 */
-				inline uint16_t color()
+				inline uint16_t value() const
 				{ return _val; }
 
 				/** @brief Return the red component of this color.
@@ -134,7 +134,7 @@ namespace Pt {
 
 				/** @brief Set the packed color value of this color.
 				 */
-				void setColor(uint16_t c)
+				void setValue(uint16_t c)
 				{ _val = c; }
 
 				/** @brief Set the red component of this color.
