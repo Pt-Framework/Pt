@@ -336,8 +336,8 @@ class PT_API Reflectable {
 
 		virtual ~Reflectable();
 
-		const std::string& name() const
-		{ return _typeName; }
+		//const std::string& name() const
+		//{ return _typeName; }
 
 		Pt::Any property(const std::string& name);
 
@@ -426,7 +426,7 @@ class PT_API Reflectable {
 		void call(const std::string& name, const Args& args);
 
 	private:
-		std::string _typeName;
+		//std::string _typeName;
 
 		MethodMap _methods;
 
