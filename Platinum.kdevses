@@ -1,13 +1,16 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="2" >
-  <Doc0 NumberOfViews="1" URL="file:///home/marc/Pt/include/Pt/Api.h" >
-   <View0 line="0" Type="Source" />
+ <DocsAndViews NumberOfDocuments="3" >
+  <Doc0 NumberOfViews="1" URL="file:///home/marc/Pt/include/Pt/Unit/TestCase.h" >
+   <View0 line="78" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/marc/Pt/include/Pt/Application.h" >
-   <View0 line="36" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/marc/Pt/include/Pt/Unit/Test.h" >
+   <View0 line="166" Type="Source" />
   </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:///home/marc/Pt/include/Pt/Unit/TestSuite.h" >
+   <View0 line="184" Type="Source" />
+  </Doc2>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>

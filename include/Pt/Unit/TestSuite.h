@@ -60,49 +60,48 @@ namespace Unit {
     */
     class TestSuite : public Reflectable, public Test
     {
-		public:
-			class Sentry : public TestContext
-			{
-				public:
-					Sentry(TestSuite& suite, const std::string& name, const Args& args)
-					: TestContext(suite)
-					, _suite(suite)
-					, _methodName( name )
-					, _args(args)
-					, _testName( _suite.name() + "::" + name )
-					, _setUp(false)
-					{
-						this->run();
-					}
-					
-					~Sentry()
-					{ 
-						try
-						{
-							if( _setUp ) 
-								_suite.tearDown(); 
-						}
-						catch(...)
-						{} 
-					}
-					 
-					const std::string& testName() const
-					{ return _testName; }
-					
-					void _run()
-					{
-						_suite.setUp();
-						_setUp = true;
-						_suite.call(_methodName, _args);
-					}
-										
-				private:
-					TestSuite& _suite;
-					std::string _methodName;
-					const Args& _args; 
-					std::string _testName;
-					bool _setUp;
-			};
+        public:
+            class Context : public TestContext
+            {
+                public:
+                    Context(TestSuite& suite, const std::string& name, const Args& args)
+                    : TestContext(suite)
+                    , _suite(suite)
+                    , _methodName( name )
+                    , _args(args)
+                    , _testName( _suite.name() + "::" + name )
+                    , _setUp(false)
+                    { }
+
+                    ~Context()
+                    {
+                        try
+                        {
+                            if( _setUp )
+                                _suite.tearDown();
+                        }
+                        catch(...)
+                        {}
+                    }
+
+                    const std::string& testName() const
+                    { return _testName; }
+
+                protected:
+                    void _run()
+                    {
+                        _suite.setUp();
+                        _setUp = true;
+                        _suite.call(_methodName, _args);
+                    }
+
+                private:
+                    TestSuite& _suite;
+                    std::string _methodName;
+                    const Args& _args;
+                    std::string _testName;
+                    bool _setUp;
+            };
 
         public:
             /** @brief Construct by name and protocol
@@ -136,7 +135,7 @@ namespace Unit {
             */
             virtual void tearDown()
             {}
-            
+
             /** @brief Runs the test suite
 
                 The TestProtocol assosiated with the test will be executed.
@@ -146,7 +145,7 @@ namespace Unit {
             {
                 _protocol->run(*this);
             }
-			
+
             /** @brief Runs a registered test
 
                 A test method will be called by name and the given arguments
@@ -160,7 +159,8 @@ namespace Unit {
             */
             void runTest( const std::string& name, const Args& args = Args() )
             {
-				Sentry cerb(*this, name, args);
+                Context ctx(*this, name, args);
+                ctx.run();
             }
 
         protected:
@@ -181,10 +181,10 @@ namespace Unit {
 
         for(MethodMap::const_iterator it = methods.begin(); it != methods.end(); ++it)
         {
-			suite.runTest( it->first, Args() );
+            suite.runTest( it->first, Args() );
         }
     }
-    
+
 } // namespace Unit
 
 } // namespace Pt

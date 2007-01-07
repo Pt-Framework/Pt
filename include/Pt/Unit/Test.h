@@ -28,9 +28,9 @@
 namespace Pt {
 
 namespace Unit {	
-	
-	class TestContext;
-	
+
+    class TestContext;
+
     /** @brief Test base class
 
         This is the base class for all types of tests that can be registered
@@ -61,9 +61,9 @@ namespace Unit {
             */
             virtual void run() = 0;
 
-			const std::string& name() const
-			{ return _name; }
-			
+            const std::string& name() const
+            { return _name; }
+
             /** @brief Start notification
 
                 This signal is sent when the test has started.
@@ -111,8 +111,8 @@ namespace Unit {
         protected:
             /** @brief Construct a test by name
 
-                This ctor is almost never called by the user directly, but 
-                rather from derived classes' initialization lists, which 
+                This ctor is almost never called by the user directly, but
+                rather from derived classes' initialization lists, which
                 pass the name of the test.
 
                 @param name Name of the test
@@ -120,59 +120,59 @@ namespace Unit {
             Test(const std::string& name)
             : _name(name)
             { }
-            
+
         private:
-			std::string _name;
+            std::string _name;
     };
 
 
-	class PT_API TestContext
-	{
-		public:
-			virtual ~TestContext()
-			{
-				_test.finished.send<const Test&>( _test ); 
-			}
-			
-			virtual const std::string& testName() const
-			{ 
-				static const std::string unknown = "unknown";
-				return unknown;
-			}
- 
-			void run()
-			{
-				try
-				{
-					_test.started.send<const TestContext&>( *this );
-					this->_run();
-					_test.success.send<const Test&>( _test );
-				}
-				catch(const Assertion& assertion)
-				{
-					_test.assertion.send<const Test&>(_test, assertion);
-				}
-				catch(const std::exception& ex)
-				{
-					_test.exception.send<const Test&>(_test, ex);
-				}
-				catch(...)
-				{
-					_test.error.send<const Test&>(_test);
-				}
-			}
-			
-		protected:
-			virtual void _run()
-			{}
+    class PT_API TestContext
+    {
+        public:
+            virtual ~TestContext()
+            {
+                _test.finished.send<const Test&>( _test );
+            }
 
-			TestContext(Test& test)
-			: _test(test)
-			{}
-			
-		private:
-			Test& _test;
-	};
+            virtual const std::string& testName() const
+            {
+                static const std::string unknown = "unknown";
+                return unknown;
+            }
+
+            void run()
+            {
+                try
+                {
+                    _test.started.send<const TestContext&>( *this );
+                    this->_run();
+                    _test.success.send<const Test&>( _test );
+                }
+                catch(const Assertion& assertion)
+                {
+                    _test.assertion.send<const Test&>(_test, assertion);
+                }
+                catch(const std::exception& ex)
+                {
+                    _test.exception.send<const Test&>(_test, ex);
+                }
+                catch(...)
+                {
+                    _test.error.send<const Test&>(_test);
+                }
+            }
+
+        protected:
+            virtual void _run()
+            {}
+
+            TestContext(Test& test)
+            : _test(test)
+            {}
+
+        private:
+            Test& _test;
+    };
 	
 } // namespace Unit
 

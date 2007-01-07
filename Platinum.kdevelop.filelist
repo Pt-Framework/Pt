@@ -109,3 +109,15 @@ include/Pt/PropertyProxy.h
 include/Pt/RefCounted.h
 include/Pt/SmartPtr.h
 include/Pt/Time.h
+include/Pt/Unit/Application.h
+include/Pt/Unit/Assertion.h
+include/Pt/Unit/RegisterTest.h
+include/Pt/Unit/Reporter.h
+include/Pt/Unit/TestCase.h
+include/Pt/Unit/TestFixture.h
+include/Pt/Unit/Test.h
+include/Pt/Unit/TestMain.h
+include/Pt/Unit/TestProtocol.h
+include/Pt/Unit/TestSchedule.h
+include/Pt/Unit/TestSuite.h
+include/Pt/Unit/Unit.h

@@ -21,7 +21,6 @@
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestFixture.h>
 
 
 namespace Pt {
@@ -66,44 +65,43 @@ namespace Unit {
     */
     class TestCase : public Test
     {
-		public:
-			class Sentry : public TestContext
-			{
-				public:
-					Sentry(TestCase& test)
-					: TestContext(test)
-					, _test(test)
-					, _setUp(false)
-					{
-						//this->run();
-					}
-					
-					~Sentry()
-					{ 
-						try
-						{
-							if( _setUp ) 
-								_test.tearDown(); 
-						}
-						catch(...)
-						{}
-					}
+        public:
+            class Context : public TestContext
+            {
+                public:
+                    Context(TestCase& test)
+                    : TestContext(test)
+                    , _test(test)
+                    , _setUp(false)
+                    { }
 
-					const std::string& testName() const
-					{ return _test.name(); }
-						
-					void _run()
-					{
-						_test.setUp();
-						_setUp = true;
-						_test.test();
-					}
+                    ~Context()
+                    {
+                        try
+                        {
+                            if( _setUp ) 
+                                _test.tearDown();
+                        }
+                        catch(...)
+                        {}
+                    }
 
-				private:
-					TestCase& _test;
-					bool _setUp;
-			};
-			
+                    const std::string& testName() const
+                    { return _test.name(); }
+
+                protected:
+                    void _run()
+                    {
+                        _test.setUp();
+                        _setUp = true;
+                        _test.test();
+                    }
+
+                private:
+                    TestCase& _test;
+                    bool _setUp;
+            };
+
         public:
             /** @brief Construct by name
 
@@ -122,10 +120,10 @@ namespace Unit {
             */
             virtual void run()
             {
-				Sentry cerb(*this);
-				cerb.run();
+                Context ctx(*this);
+                ctx.run();
             }
-            
+
             /** \brief Set up context before running a test.
 
                 This function is called before each registered tester function
@@ -142,7 +140,7 @@ namespace Unit {
             */
             virtual void tearDown()
             {}
-    
+
         protected:
             /** @brief Performs the actual test
 
