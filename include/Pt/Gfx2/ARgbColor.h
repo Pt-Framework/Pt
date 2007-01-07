@@ -73,17 +73,17 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const Color<ARgb>& operator=(const Color<ARgb>& c)
+				inline Color<ARgb>& operator=(const Color<ARgb>& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const Color<ARgb>& operator+=(const Color<ARgb>& c)
+				inline Color<ARgb>& operator+=(const Color<ARgb>& c)
 				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const Color<ARgb>& operator-=(const Color<ARgb>& c)
+				inline Color<ARgb>& operator-=(const Color<ARgb>& c)
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -129,13 +129,9 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb>& from);
-				friend void fromARgb(Color<ARgb>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2);
 				friend bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2);
 				friend bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2);
-
-				friend const Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from);
 
 			protected:
 				uint16_t _a, _r, _g, _b;
@@ -154,7 +150,7 @@ namespace Pt {
 		 *  from 0 to 65535 (0xFFFF).
 		 */
 		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb>& from)
-		{ a = from._a; r = from._r; g = from._g; b = from._b; }
+		{ a = from.alpha(); r = from.red(); g = from.green(); b = from.blue(); }
 
 		/** @brief Convert Color<ARgb>'s components to an Color<ARgb>.
 		 *
@@ -162,7 +158,7 @@ namespace Pt {
 		 *  from 0 to 65535 (0xFFFF).
 		 */
 		inline void fromARgb(Color<ARgb>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
-		{ to._a = a; to._r = r; to._g = g; to._b = b; }
+		{ to.setAlpha(a); to.setRed(r); to.setGreen(g); to.setBlue(b); }
 
 
 		/** @brief Equality operator for Color<ARgb> comparison.
@@ -183,18 +179,14 @@ namespace Pt {
 
 		/** @brief Make the greyscale version of the source Color<ARgb>.
 		 */
-		inline const Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
+		inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
 		{
-			const uint32_t r = from._r;
-			const uint32_t g = from._g;
-			const uint32_t b = from._b;
+			const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
 
-			const uint16_t s = (r*77 + g*128 + b*51) >> 8;
-
-			to._a = from._a;
-			to._r = s;
-			to._g = s;
-			to._b = s;
+			to.setAlpha(from.alpha());
+			to.setRed  (s);
+			to.setGreen(s);
+			to.setBlue (s);
 
 			return to;
 		}

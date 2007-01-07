@@ -80,12 +80,12 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const Color& operator=(const Color& c)
+				inline Color& operator=(const Color& c)
 				{ _val = c._val; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const Color& operator+=(const Color& c)
+				inline Color& operator+=(const Color& c)
 				{
 					const uint16_t r = red()   + c.red();
 					const uint16_t g = green() + c.green();
@@ -100,7 +100,7 @@ namespace Pt {
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const Color& operator-=(const Color& c)
+				inline Color& operator-=(const Color& c)
 				{
 					const uint16_t r = red()   - c.red();
 					const uint16_t g = green() - c.green();
@@ -159,8 +159,6 @@ namespace Pt {
 				friend bool operator==(const Color& c1, const Color& c2);
 				friend bool operator<(const Color& c1, const Color& c2);
 				friend bool operator>(const Color& c1, const Color& c2);
-
-				friend const Color& greyscale(Color& to, const Color& from);
 
 			protected:
 				uint32_t _val;
@@ -237,7 +235,7 @@ namespace Pt {
 
 		/** @brief Make the greyscale version of the source Color<XRgb8888> color.
 		 */
-		inline const Color<XRgb8888>& greyscale(Color<XRgb8888>& to, const Color<XRgb8888>& from)
+		inline Color<XRgb8888>& greyscale(Color<XRgb8888>& to, const Color<XRgb8888>& from)
 		{
 			const uint32_t r = from.red();
 			const uint32_t g = from.green();
@@ -249,7 +247,7 @@ namespace Pt {
 			// 76543210765432107654321076543210
 			// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
 			//                         SSSSSSSS
-			to._val = (s<<24) | (s<<16) | s;
+			to.setValue( (s<<24) | (s<<16) | s );
 
 			return to;
 		}

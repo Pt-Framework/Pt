@@ -58,7 +58,7 @@ namespace Pt {
 		 *  will cause some overhead because of the conversion to and from ARgbColor.
 		 */
 		template <typename ColorT> inline
-		const Color<ColorT>& greyscale(Color<ColorT>& to, const Color<ColorT>& from)
+		Color<ColorT>& greyscale(Color<ColorT>& to, const Color<ColorT>& from)
 		{
 			ARgbColor tmp;
 
@@ -72,7 +72,7 @@ namespace Pt {
 		/** @brief Make the given ColorT become greyscale.
 		 */
 		template <typename ColorT> inline
-		const Color<ColorT>& greyscale(Color<ColorT>& c)
+		Color<ColorT>& greyscale(Color<ColorT>& c)
 		{ return greyscale(c, c); }
 
 	} // namespace Gfx

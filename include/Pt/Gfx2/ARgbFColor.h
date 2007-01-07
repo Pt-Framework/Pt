@@ -78,17 +78,17 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const Color<ARgbF>& operator=(const Color<ARgbF>& c)
+				inline Color<ARgbF>& operator=(const Color<ARgbF>& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
 				/** @brief Assignment-addition operator.
 				 */
-				inline const Color<ARgbF>& operator+=(const Color<ARgbF>& c)
+				inline Color<ARgbF>& operator+=(const Color<ARgbF>& c)
 				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
 				/** @brief Assignment-substraction operator.
 				 */
-				inline const Color<ARgbF>& operator-=(const Color<ARgbF>& c)
+				inline Color<ARgbF>& operator-=(const Color<ARgbF>& c)
 				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -134,13 +134,9 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgbF>& from);
-				friend void fromARgb(Color<ARgbF>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
 				friend bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
 				friend bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-
-				friend const Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from);
 
 			protected:
 				float _a, _r, _g, _b;
@@ -160,10 +156,15 @@ namespace Pt {
 		 */
 		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgbF>& from)
 		{
-			a = from._a<0.0f ? 0 : ( from._a>1.0f ? 0xFFFF : uint16_t(from._a*65535.0f) );
-			r = from._r<0.0f ? 0 : ( from._r>1.0f ? 0xFFFF : uint16_t(from._r*65535.0f) );
-			g = from._g<0.0f ? 0 : ( from._g>1.0f ? 0xFFFF : uint16_t(from._g*65535.0f) );
-			b = from._b<0.0f ? 0 : ( from._b>1.0f ? 0xFFFF : uint16_t(from._b*65535.0f) );
+			const float fa = from.alpha();
+			const float fr = from.red();
+			const float fg = from.green();
+			const float fb = from.blue();
+
+			a = fa<0.0f ? 0 : ( fa>1.0f ? 0xFFFF : uint16_t(fa*65535.0f) );
+			r = fr<0.0f ? 0 : ( fr>1.0f ? 0xFFFF : uint16_t(fr*65535.0f) );
+			g = fg<0.0f ? 0 : ( fg>1.0f ? 0xFFFF : uint16_t(fg*65535.0f) );
+			b = fb<0.0f ? 0 : ( fb>1.0f ? 0xFFFF : uint16_t(fb*65535.0f) );
 		}
 
 		/** @brief Convert ARgbColor's components to a Color<ARgbF>.
@@ -173,10 +174,10 @@ namespace Pt {
 		 */
 		inline void fromARgb(Color<ARgbF>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{
-			to._a = float(a) / 65535.0;
-			to._r = float(r) / 65535.0;
-			to._g = float(g) / 65535.0;
-			to._b = float(b) / 65535.0;
+			to.setAlpha( float(a) / 65535.0 );
+			to.setRed  ( float(r) / 65535.0 );
+			to.setGreen( float(g) / 65535.0 );
+			to.setBlue ( float(b) / 65535.0 );
 		}
 
 
@@ -198,14 +199,14 @@ namespace Pt {
 
 		/** @brief Make the greyscale version of the source Color<ARgbF> color.
 		 */
-		inline const Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
+		inline Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
 		{
-			const float s = from._r*0.3f + from._g*0.5f + from._b*0.2f;
+			const float s = from.red()*0.3f + from.green()*0.5f + from.blue()*0.2f;
 
-			to._a = from._a;
-			to._r = s;
-			to._g = s;
-			to._b = s;
+			to.setAlpha(from.alpha());
+			to.setRed  (s);
+			to.setGreen(s);
+			to.setBlue (s);
 
 			return to;
 		}
