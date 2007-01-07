@@ -55,7 +55,7 @@ namespace Pt {
 
 				/** @brief Copy constructor.
 				 */
-				inline Color(const Color<Rgb565>& c)
+				inline Color(const Color& c)
 				: _val(c._val)
 				{}
 
@@ -81,12 +81,12 @@ namespace Pt {
 
 				/** @brief Assignment operator.
 				 */
-				inline const Color<Rgb565>& operator=(const Color<Rgb565>& c)
+				inline const Color& operator=(const Color& c)
 				{ _val = c._val; return *this; }
 
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
-				inline const Color<Rgb565>& operator+=(const Color<Rgb565>& c)
+				inline const Color& operator+=(const Color& c)
 				{
 					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
 					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
@@ -99,7 +99,7 @@ namespace Pt {
 
 				/** @brief Assignment-substraction operator (beware of underflow).
 				 */
-				inline const Color<Rgb565>& operator-=(const Color<Rgb565>& c)
+				inline const Color& operator-=(const Color& c)
 				{
 					uint16_t a1, r1, g1, b1; toARgb(a1, r1, g1, b1, *this);
 					uint16_t a2, r2, g2, b2; toARgb(a2, r2, g2, b2, c);
@@ -153,13 +153,13 @@ namespace Pt {
 				{ _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }
 
 			public:
-				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<Rgb565>& from);
-				friend void fromARgb(Color<Rgb565>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==(const Color<Rgb565>& c1, const Color<Rgb565>& c2);
-				friend bool operator<(const Color<Rgb565>& c1, const Color<Rgb565>& c2);
-				friend bool operator>(const Color<Rgb565>& c1, const Color<Rgb565>& c2);
+				friend void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color& from);
+				friend void fromARgb(Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const Color& c1, const Color& c2);
+				friend bool operator<(const Color& c1, const Color& c2);
+				friend bool operator>(const Color& c1, const Color& c2);
 
-				friend const Color<Rgb565>& greyscale(Color<Rgb565>& to, const Color<Rgb565>& from);
+				friend const Color& greyscale(Color& to, const Color& from);
 
 			protected:
 				uint16_t _val;

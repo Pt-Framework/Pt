@@ -182,7 +182,6 @@ namespace Pt {
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
 			public:
-				friend void fromARgb(Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
 				friend bool operator==(const Color& c1, const Color& c2);
 				friend bool operator<(const Color& c1, const Color& c2);
 				friend bool operator>(const Color& c1, const Color& c2);
@@ -229,10 +228,11 @@ namespace Pt {
 			// 76543210765432107654321076543210
 			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
 			//                 CCCCCCCCCCCCCCCC
-			to._val  = (uint32_t(a & 0xFF00) << 16);
-			to._val |= (uint32_t(r & 0xFF00) <<  8);
-			to._val |=  uint32_t(g & 0xFF00)       ;
-			to._val |= (uint32_t(b)          >>  8);
+			const uint32_t val = (uint32_t(a & 0xFF00) << 16) |
+			                     (uint32_t(r & 0xFF00) <<  8) |
+			                      uint32_t(g & 0xFF00)        |
+			                     (uint32_t(b)          >>  8);
+			to.setValue(val);
 		}
 
 
