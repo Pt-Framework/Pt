@@ -45,7 +45,7 @@ void SocketImpl::create(int domain, int type, int protocol)
 	// TODO: concurrency
 	{ 
 		WSADATA wsadata;
-		WSAStartup(0x101, &wsadata);
+		WSAStartup(MAKEWORD(2,0), &wsadata);
 	}
 	
     _sd = ::socket(domain, type, protocol);

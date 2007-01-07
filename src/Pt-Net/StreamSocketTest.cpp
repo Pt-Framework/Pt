@@ -33,7 +33,7 @@ class StreamSocketTest : public Pt::Unit::TestCase
 		: TestCase("StreamSocketTest")
 		{ }
 
-		virtual void test()
+		void test()
 		{
 		}
 };
