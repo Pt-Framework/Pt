@@ -21,6 +21,7 @@
 
 //#include <Pt/System/Clock.h> // NOTE: should not be here !!!
 #include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/Test.h>
 
 #include <iostream>
 #include <fstream>
