@@ -182,10 +182,10 @@ namespace Pt {
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
 			public:
-				friend void fromARgb(Color<ARgb8888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
-				friend bool operator==(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
-				friend bool operator<(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
-				friend bool operator>(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2);
+				friend void fromARgb(Color& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b);
+				friend bool operator==(const Color& c1, const Color& c2);
+				friend bool operator<(const Color& c1, const Color& c2);
+				friend bool operator>(const Color& c1, const Color& c2);
 
 				friend const Color<ARgb8888>& greyscale(Color<ARgb8888>& to, const Color<ARgb8888>& from);
 
