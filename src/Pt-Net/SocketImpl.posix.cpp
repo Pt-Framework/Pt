@@ -16,9 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <cerrno>
-using namespace std;
-
 #include "SocketImpl.h"
 #include <Pt/Net/Timeout.h>
 #include <Pt/Exception.h>
@@ -26,6 +23,7 @@ using namespace std;
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
+#include <cerrno>
 
 
 namespace Pt {
