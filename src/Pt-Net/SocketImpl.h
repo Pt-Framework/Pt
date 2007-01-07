@@ -104,7 +104,7 @@ namespace Net {
 					::close(_sd);
 				#endif
 				
-				_sd = -1;
+				_sd = PT_INVALID_SOCKET;
 			}
 
 
