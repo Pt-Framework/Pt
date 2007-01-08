@@ -124,52 +124,6 @@ namespace Unit {
         private:
             std::string _name;
     };
-
-
-    class PT_API TestContext
-    {
-        public:
-            virtual ~TestContext()
-            {
-                _test.finished.send<const Test&>( _test );
-            }
-
-            virtual const std::string& testName() const
-            { return _test.name(); }
-
-            void run()
-            {
-                try
-                {
-                    _test.started.send<const TestContext&>( *this );
-                    this->_run();
-                    _test.success.send<const Test&>( _test );
-                }
-                catch(const Assertion& assertion)
-                {
-                    _test.assertion.send<const Test&>(_test, assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    _test.exception.send<const Test&>(_test, ex);
-                }
-                catch(...)
-                {
-                    _test.error.send<const Test&>(_test);
-                }
-            }
-
-        protected:
-            virtual void _run()
-            {}
-
-            TestContext(Test& test)
-            : _test(test)
-            {}
-
-        private:
-            Test& _test;
-    };
 	
 } // namespace Unit
 

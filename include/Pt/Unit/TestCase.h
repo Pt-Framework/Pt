@@ -20,6 +20,7 @@
 #define PT_UNIT_TESTCASE_H
 
 #include <Pt/Unit/Test.h>
+#include <Pt/Unit/TestContext.h>
 #include <Pt/Unit/Assertion.h>
 
 

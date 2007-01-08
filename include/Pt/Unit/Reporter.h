@@ -19,13 +19,14 @@
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
-//#include <Pt/System/Clock.h> // NOTE: should not be here !!!
-#include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/Test.h>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+//#include <Pt/System/Clock.h> // NOTE: should not be here !!!
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/Test.h>
+#include <Pt/Unit/TestContext.h>
 
 
 namespace Pt {
