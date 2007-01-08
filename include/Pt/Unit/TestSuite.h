@@ -73,7 +73,7 @@ namespace Unit {
                     , _setUp(false)
                     { }
 
-                    ~Context()
+                    virtual ~Context()
                     {
                         try
                         {

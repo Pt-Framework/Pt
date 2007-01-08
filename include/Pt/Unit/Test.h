@@ -135,10 +135,7 @@ namespace Unit {
             }
 
             virtual const std::string& testName() const
-            {
-                static const std::string unknown = "unknown";
-                return unknown;
-            }
+            { return _test.name(); }
 
             void run()
             {
