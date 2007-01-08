@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx2_XRgb8888Color_h
-#define Pt_Gfx2_XRgb8888Color_h
+#ifndef Pt_Gfx2_Rgb888Color_h
+#define Pt_Gfx2_Rgb888Color_h
 
 #include <Pt/Gfx2/ARgbFColor.h>
 
@@ -27,7 +27,7 @@ namespace Pt {
 
 	namespace Gfx {
 
-		struct XRgb8888 {};
+		struct Rgb888 {};
 
 
 		/** @brief 32-Bit RGB color model.
@@ -45,7 +45,7 @@ namespace Pt {
 		 *  </TABLE>
 		 */
 		template <>
-		class PT_API PT_PACKED Color<XRgb8888> {
+		class PT_API PT_PACKED Color<Rgb888> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
@@ -168,15 +168,15 @@ namespace Pt {
 		/** @brief Convenience access to the 32-Bit ARGB color model.
 		 *  @ingroup Gfx
 		 */
-		typedef Color<XRgb8888> XRgb8888Color;
+		typedef Color<Rgb888> Rgb888Color;
 
 
-		/** @brief Convert an Color<XRgb8888> to ARgbColor's components.
+		/** @brief Convert an Color<Rgb888> to ARgbColor's components.
 		 *
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<XRgb8888>& from)
+		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<Rgb888>& from)
 		{
 			const uint16_t tr = from.red();
 			const uint16_t tg = from.green();
@@ -193,7 +193,7 @@ namespace Pt {
 		 *  Valid range of the individual color components (a, r, g, and b) are
 		 *  from 0 to 65535 (0xFFFF).
 		 */
-		inline void fromARgb(Color<XRgb8888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<Rgb888>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
 		{
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
@@ -206,9 +206,9 @@ namespace Pt {
 		}
 
 
-		/** @brief Assign an Color<XRgb8888> to an ARgbFColor.
+		/** @brief Assign an Color<Rgb888> to an ARgbFColor.
 		 */
-		inline void assign(ARgbFColor& to, const Color<XRgb8888>& from)
+		inline void assign(ARgbFColor& to, const Color<Rgb888>& from)
 		{
 			to.setAlpha( 1.0f                         );
 			to.setRed  ( float(from.red  ()) / 255.0f );
@@ -217,25 +217,25 @@ namespace Pt {
 		}
 
 
-		/** @brief Equality operator for Color<XRgb8888> comparison.
+		/** @brief Equality operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator==(const Color<XRgb8888>& c1, const Color<XRgb8888>& c2)
+		inline bool operator==(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1._val==c2._val; }
 
-		/** @brief Less-than operator for Color<XRgb8888> comparison.
+		/** @brief Less-than operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator<(const Color<XRgb8888>& c1, const Color<XRgb8888>& c2)
+		inline bool operator<(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1._val<c2._val; }
 
-		/** @brief Greater-than operator for Color<XRgb8888> comparison.
+		/** @brief Greater-than operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator>(const Color<XRgb8888>& c1, const Color<XRgb8888>& c2)
+		inline bool operator>(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1._val>c2._val; }
 
 
-		/** @brief Make the greyscale version of the source Color<XRgb8888> color.
+		/** @brief Make the greyscale version of the source Color<Rgb888> color.
 		 */
-		inline Color<XRgb8888>& greyscale(Color<XRgb8888>& to, const Color<XRgb8888>& from)
+		inline Color<Rgb888>& greyscale(Color<Rgb888>& to, const Color<Rgb888>& from)
 		{
 			const uint32_t r = from.red();
 			const uint32_t g = from.green();

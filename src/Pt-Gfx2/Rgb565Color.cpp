@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
+ *   Copyright (C) 2006 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,32 +18,4 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "AddrInfo.h"
-
-namespace Pt {
-
-namespace Net {
-
-AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
-: ai(0)
-{
-	std::ostringstream p;
-	p << port;
-
-	if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-	  throw RuntimeError("invalid ipaddress " + ipaddr, PT_SOURCEINFO); // TODO specify errortype
-
-	if (ai == 0)
-	  throw RuntimeError("unknown error in getaddrinfo", PT_SOURCEINFO); // TODO specify errortype
-}
-
-AddrInfo::~AddrInfo()
-{
-	if (ai)
-		::freeaddrinfo(ai);
-}
-
-}
-
-}
-
+#include <Pt/Gfx2/Rgb565Color.h>

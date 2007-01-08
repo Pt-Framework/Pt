@@ -21,8 +21,8 @@
 #include <Pt/Gfx2/ARgbColor.h>
 #include <Pt/Gfx2/ARgbFColor.h>
 #include <Pt/Gfx2/ARgb8888Color.h>
-#include <Pt/Gfx2/XRgb8888Color.h>
-#include <Pt/Gfx2/XRgb1555Color.h>
+#include <Pt/Gfx2/Rgb888Color.h>
+#include <Pt/Gfx2/Rgb555Color.h>
 #include <Pt/Gfx2/Rgb565Color.h>
 #include <Pt/Gfx2/ColorAlgo.h>
 

@@ -6,6 +6,9 @@ SharedLibrary Pt-Gfx2 :
 	ARgbColor.cpp
 	ARgbFColor.cpp
 	ARgb8888Color.cpp
+	Rgb888Color.cpp
+	Rgb565Color.cpp
+	Rgb555Color.cpp
 	BasicImage.cpp
 	;
 
