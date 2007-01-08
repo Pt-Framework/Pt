@@ -154,9 +154,6 @@ namespace Net {
             SOCKET handle() const
             { return _sd; }
 
-            void setHandle(SOCKET sd)
-            { _sd = sd; }
-
         private:
             SOCKET _sd;
     };

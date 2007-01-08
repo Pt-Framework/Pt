@@ -21,8 +21,6 @@
 #include <Pt/Net/Timeout.h>
 #include <Pt/Exception.h>
 
-//#include <winsock2.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>

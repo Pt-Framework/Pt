@@ -53,10 +53,9 @@ namespace Net
 				{
 					SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
 
-					SOCKET fd = ::bind(handle(), it->ai_addr, it->ai_addrlen);
-					if ( fd == 0 ) {
+					int ret = ::bind(handle(), it->ai_addr, it->ai_addrlen);
+					if ( ret == 0 ) {
 						// save our information
-						setHandle(fd);
 						return;
 					}
 
