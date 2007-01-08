@@ -16,16 +16,20 @@ NOTFILE all-test ;
 #
 rule PtUnitTest
 {
-
 	local _target = $(1:S=$(SUFEXE)) ;
 
-    DEPENDS test : $(_target) ;
+	DEPENDS test : $(_target) ;
 
 	SetObjectOutput $(1) ;
 	SetOutputDirectory $(1) : $(_target) : $(3) ;
-	
+
+	if $(TARGET_OS:L) = "wince"
+	{
+		LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;
+	}
+
 	Objects $(2) : $(3) ;
-    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;
+	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;
 
 	local _output = $(1:S=.unit) ;
 	Depends $(_output) : $(_target) ;
@@ -52,6 +56,14 @@ if $(UNIX)
 		sh -c "export LD_LIBRARY_PATH=`pwd`/bin && $(testExe) -f$(1:S=.unit)"
 	}
 
+}
+else if $(TARGET_OS:L) = "wince"
+{
+	#TODO: run device emulator
+	actions PtUnitTestAction bind testExe
+	{
+		echo ### WARNING: Can not run WinCE unit test.
+	}
 }
 else
 {
