@@ -21,7 +21,6 @@
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestFixture.h>
 #include <Pt/Unit/TestProtocol.h>
 
 namespace Pt {
