@@ -33,6 +33,7 @@
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <sys/poll.h>
+	#include <cerrno>
 	typedef int SOCKET;
 	#define PT_INVALID_SOCKET -1
 	#define PT_EINTR EINTR
@@ -56,11 +57,11 @@ namespace Net {
             };
 
         public:
-			SocketImpl::SocketImpl()
-			: _sd(INVALID_SOCKET)
+			SocketImpl()
+			: _sd(PT_INVALID_SOCKET)
 			{ }
 
-            explicit SocketImpl::SocketImpl(SOCKET sd)
+            explicit SocketImpl(SOCKET sd)
 			: _sd(sd)
 			{ }
 
@@ -108,7 +109,7 @@ namespace Net {
 			}
 
 
-			bool SocketImpl::wait(SocketImpl::WaitMode mode, int msec) const
+			bool wait(SocketImpl::WaitMode mode, int msec) const
 			{
 				fd_set rfds;
 				FD_ZERO(&rfds);
