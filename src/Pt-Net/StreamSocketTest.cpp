@@ -33,22 +33,33 @@ class StreamServer : public Pt::System::Thread
 {
 	public:
 		StreamServer(const std::string& ipaddr, short port)
-		{
-			_server.bind(ipaddr, port);
-		}
+		: _ipaddr(ipaddr), _port(port)
+		{ }
+
 		
+		const std::string& receivedData() const
+		{ return _receivedData; }
+
 	protected:
 		void run()
 		{
-			_server.listen();
+			_server.listen(_ipaddr, _port);
+
 			Pt::Net::StreamSocket socket(_server);
 			char buffer[80];
 			socket.read(buffer, 80);
-			std::cout << "READ: " << buffer << std::endl;
+			
+			_receivedData.assign(buffer, 2);
+			
+			socket.write("Bye", 4);
 		}
-		
+
+
 	private:
+		std::string _ipaddr;
+		short _port;
 		Pt::Net::StreamServerSocket _server;
+		std::string _receivedData;
 };
 
 
@@ -63,14 +74,22 @@ class StreamSocketTest : public Pt::Unit::TestCase
 		void setUp()
 		{
 			_server= new StreamServer("127.0.0.1", 8080);
+			_server->start();
+			Pt::System::Thread::sleep(200);
 		}
 		
 		void test()
 		{
-			_server->start();
-			Thread::sleep(250);
-			Pt::Net::StreamSocket c("127.0.0.1", 8080);
-			c.write("Hi", 3);
+			Pt::Net::StreamSocket socket("127.0.0.1", 8080);
+			socket.write("Hi", 3);
+			Pt::System::Thread::sleep(200);
+			
+			PT_UNIT_ASSERT(_server->receivedData() == "Hi");
+			
+			char buffer[80];
+			socket.read(buffer, 80);
+			
+			PT_UNIT_ASSERT( std::string(buffer, 3) == "Bye" );
 		}
 		
 		void tearDown()
