@@ -60,6 +60,10 @@
 #  define MSDOS
 #endif
 
+#if defined(_WIN32_WCE)
+#  define NO_ERRNO_H
+#endif
+
 /*
  * Compile with -DMAXSEG_64K if the alloc function cannot allocate more
  * than 64k bytes at a time (needed on systems with 16-bit int).
