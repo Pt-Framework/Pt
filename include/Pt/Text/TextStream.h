@@ -24,8 +24,9 @@
 #include <Pt/Text/Char.h>
 #include <Pt/Text/BasicTextStream.h>
 
+
 namespace std {
-	class ios_base;
+	class PT_API ios_base;
 }
 
 namespace Pt {
