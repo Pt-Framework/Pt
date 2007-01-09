@@ -18,6 +18,8 @@
  ***************************************************************************/
 #include <string>
 
+#include "Pt/System/Thread.h"
+
 #include "Pt/Net/StreamSocket.h"
 #include "Pt/Net/StreamServerSocket.h"
 
@@ -25,6 +27,30 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/RegisterTest.h"
+
+
+class StreamServer : public Pt::System::Thread
+{
+	public:
+		StreamServer(const std::string& ipaddr, short port)
+		{
+			_server.bind(ipaddr, port);
+		}
+		
+	protected:
+		void run()
+		{
+			_server.listen();
+			Pt::Net::StreamSocket socket(_server);
+			char buffer[80];
+			socket.read(buffer, 80);
+			std::cout << "READ: " << buffer << std::endl;
+		}
+		
+	private:
+		Pt::Net::StreamServerSocket _server;
+};
+
 
 class StreamSocketTest : public Pt::Unit::TestCase
 {
@@ -36,14 +62,15 @@ class StreamSocketTest : public Pt::Unit::TestCase
 
 		void setUp()
 		{
-			
+			_server= new StreamServer("127.0.0.1", 8080);
 		}
 		
 		void test()
 		{
-			_server = new Pt::Net::StreamServerSocket();
-			_server->bind("127.0.0.1", 8080);
-
+			_server->start();
+			Thread::sleep(250);
+			Pt::Net::StreamSocket c("127.0.0.1", 8080);
+			c.write("Hi", 3);
 		}
 		
 		void tearDown()
@@ -53,7 +80,7 @@ class StreamSocketTest : public Pt::Unit::TestCase
 		}
 		
 	private:
-		Pt::Net::StreamServerSocket* _server;
+		StreamServer* _server;
 };
 
 Pt::Unit::RegisterTest<StreamSocketTest> register_StreamSocketTest;

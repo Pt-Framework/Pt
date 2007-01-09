@@ -59,7 +59,14 @@ namespace Net {
         public:
             SocketImpl()
             : _sd(PT_INVALID_SOCKET)
-            { }
+            { 
+                #ifdef WIN32
+                {   // TODO: concurrency
+                    WSADATA wsadata;
+                    WSAStartup(MAKEWORD(2,0), &wsadata);
+                }
+                #endif
+            }
         
             explicit SocketImpl(SOCKET sd)
             : _sd(sd)
@@ -81,15 +88,7 @@ namespace Net {
             }
 			
             void create(int domain, int type, int protocol)
-            {
-                
-                #ifdef WIN32
-                {   // TODO: concurrency
-                    WSADATA wsadata;
-                    WSAStartup(MAKEWORD(2,0), &wsadata);
-                }
-                #endif
-            
+            {  
                 _sd = ::socket(domain, type, protocol);
                 if (_sd < 0)
                     throw RuntimeError("cannot create socket", PT_SOURCEINFO);
