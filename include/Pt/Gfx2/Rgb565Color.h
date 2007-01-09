@@ -163,9 +163,9 @@ namespace Pt {
 				{ _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }
 
 			public:
-				friend bool operator==(const Color& c1, const Color& c2);
-				friend bool operator<(const Color& c1, const Color& c2);
-				friend bool operator>(const Color& c1, const Color& c2);
+				//friend bool operator==(const Color& c1, const Color& c2);
+				//friend bool operator<(const Color& c1, const Color& c2);
+				//friend bool operator>(const Color& c1, const Color& c2);
 
 			protected:
 				uint16_t _val;
@@ -227,17 +227,17 @@ namespace Pt {
 		/** @brief Equality operator for Color<Rgb565> comparison.
 		 */
 		inline bool operator==(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1._val==c2._val; }
+		{ return c1.value()==c2.value(); }
 
 		/** @brief Less-than operator for Color<Rgb565> comparison.
 		 */
 		inline bool operator<(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1._val<c2._val; }
+		{ return c1.value()<c2.value(); }
 
 		/** @brief Greater-than operator for Color<Rgb565> comparison.
 		 */
 		inline bool operator>(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1._val>c2._val; }
+		{ return c1.value()>c2.value(); }
 
 
 		/** @brief Make the greyscale version of the source Color<Rgb565> color.

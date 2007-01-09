@@ -40,16 +40,6 @@ namespace Pt {
 			fromARgb(to, a, r, g, b);
 		}
 
-
-		template <typename ColorA, typename ColorB> inline
-		void assign_alternative(Color<ColorA>& to, const Color<ColorB>& from)
-		{
-			ARgbColor tmp;
-			assign(tmp, from);
-			assign(to, tmp);
-		}
-
-
 		/** @brief Partial specialization of assign() if both the color models are the same.
 		 *
 		 *  This function will just copy the value from the source to the destiantion.

@@ -134,9 +134,9 @@ namespace Pt {
 				{ _b = b; }
 
 			public:
-				friend bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-				friend bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-				friend bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
+				//friend bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
+				//friend bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
+				//friend bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
 
 			protected:
 				float _a, _r, _g, _b;
@@ -184,17 +184,17 @@ namespace Pt {
 		/** @brief Equality operator for Color<ARgbF> comparison.
 		 */
 		inline bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1._a==c2._a && c1._r==c2._r && c1._g==c2._g && c1._b==c2._b; }
+		{ return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
 		/** @brief Less-than operator for Color<ARgbF> comparison.
 		 */
 		inline bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1._a<c2._a || c1._r<c2._r || c1._g<c2._g || c1._b<c2._b; }
+		{ return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
 		/** @brief Greater-than operator for Color<ARgbF> comparison.
 		 */
 		inline bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1._a>c2._a || c1._r>c2._r || c1._g>c2._g || c1._b>c2._b; }
+		{ return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
 
 		/** @brief Make the greyscale version of the source Color<ARgbF> color.
