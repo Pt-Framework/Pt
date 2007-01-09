@@ -48,11 +48,11 @@ namespace Unit {
                 }
                 catch(const Assertion& assertion)
                 {
-                    _test.assertion.send<const Test&>(_test, assertion);
+                    _test.assertion.send<const Test&, const Assertion&>(_test, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    _test.exception.send<const Test&>(_test, ex);
+                    _test.exception.send<const Test&, const std::exception&>(_test, ex);
                 }
                 catch(...)
                 {

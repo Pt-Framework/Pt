@@ -31,11 +31,29 @@ class StreamSocketTest : public Pt::Unit::TestCase
 	public:
 		StreamSocketTest()
 		: TestCase("StreamSocketTest")
+		, _server(0)
 		{ }
 
+		void setUp()
+		{
+			
+		}
+		
 		void test()
 		{
+			_server = new Pt::Net::StreamServerSocket();
+			_server->bind("127.0.0.1", 8080);
+
 		}
+		
+		void tearDown()
+		{
+			delete _server;
+			_server = 0;
+		}
+		
+	private:
+		Pt::Net::StreamServerSocket* _server;
 };
 
 Pt::Unit::RegisterTest<StreamSocketTest> register_StreamSocketTest;
