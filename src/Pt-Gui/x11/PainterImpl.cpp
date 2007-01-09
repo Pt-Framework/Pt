@@ -25,8 +25,11 @@
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Math/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
+#include "Pt/Text/TextStream.h"
+#include "Pt/Text/Utf16Codec.h"
 
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 using namespace Pt::Gfx;
@@ -236,17 +239,22 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(const std::string& text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(const Text::String& text) const
 {
 	if(!_xftFont)
 		return Gfx::FontMetrics(0, 0, 0, 0);
 
 	Display* display = X11EventLoop::instance().display();
 	XGlyphInfo info;
-	const char* ctext = text.c_str();
-	XftTextExtents8(display, _xftFont, (const FcChar8*)ctext, text.size(), &info);
 
-	return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, info.width, info.height);
+	std::stringstream ss;
+	Text::TextStream textStream(ss, new Text::Utf16Codec());
+	textStream << text << Char(0);
+	textStream.flush();
+
+	XftTextExtents16(display, _xftFont, (const FcChar16*)ss.str().c_str(), text.size(), &info);
+
+	return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, info.width, _xftFont->height);
 }
 
 
@@ -301,16 +309,21 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const std::string& text)
+void PainterImpl::drawText(const Math::Point& to, const Text::String& text)
 {
 	XftColor xftColor;
-	xftColor.pixel = 0; // This would be input for XftColorAllocValue
-	xftColor.color.red = _pen.color().red();
+	xftColor.pixel = 0; // this would be input for XftColorAllocValue
+	xftColor.color.red   = _pen.color().red();
 	xftColor.color.green = _pen.color().green();
-	xftColor.color.blue = _pen.color().blue();
+	xftColor.color.blue  = _pen.color().blue();
 	xftColor.color.alpha = 0xffff;
 
-	XftDrawString8(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (const FcChar8*)text.c_str(), text.length());
+	std::stringstream ss;
+	Text::TextStream textStream(ss, new Text::Utf16Codec());
+	textStream << text << Char(0);
+	textStream.flush();
+
+	XftDrawString16(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (const FcChar16*)ss.str().c_str(), text.length());
 }
 
 
@@ -403,7 +416,8 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect& pmRect)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm,
+                             const Gfx::Region& pmRegion)
 {
 	Display* display = X11EventLoop::instance().display();
 	::Pixmap from = pm.impl().x11Drawable();
@@ -412,7 +426,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect
 	           from,
 	           _drawable->x11Drawable(),
 	           _brushGc,
-	           pmRect.x(), pmRect.y(), pmRect.width(), pmRect.height(),
+	           pmRegion.x(), pmRegion.y(), pmRegion.width(), pmRegion.height(),
 	           to.x(), to.y() );
 
 	//XSync(display, false);
@@ -425,12 +439,13 @@ void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect)
+void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+                            const Gfx::Region& imageRegion)
 {
-	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRect);
-	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
+	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
+	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(),
+	                 subImage.width(), subImage.height() );
 }
-
 
 long PainterImpl::toXColor(const Gfx::ARgbColor& color)
 {

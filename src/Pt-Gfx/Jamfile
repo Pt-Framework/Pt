@@ -38,7 +38,7 @@ Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : bin ;
 
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
-Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate ImagePainterDemo : bin ;
 
 SubInclude TOP src Pt-Gfx freetype ;

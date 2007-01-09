@@ -20,23 +20,26 @@
 #ifndef Pt_Gui_WidgetImpl_h
 #define Pt_Gui_WidgetImpl_h
 
-#include "Drawable.h"
-
-#include <Pt/Api.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
-#include <Pt/Gui/Painter.h>
-
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-//#include <X11/extensions/Xvlib.h>
+
+// X11 defines these two globally, which conflicts with enum values in ptv/text/Char.h
+#undef Above
+#undef Below
+
+#include "Drawable.h"
+
+#include <Pt/Api.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
+#include <Pt/Gui/Painter.h>
+#include <Pt/Text/String.h>
 
 #include <list>
-#include <string>
 
 
 namespace Pt {

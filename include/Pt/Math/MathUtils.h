@@ -6,7 +6,7 @@
 #define PT_MATHUTILS_H
 
 #include <Pt/Types.h>
-#include <Pt/Math/math.h>
+#include <Pt/Math/Math.h>
 #include <cmath>
 #include <cassert>
 

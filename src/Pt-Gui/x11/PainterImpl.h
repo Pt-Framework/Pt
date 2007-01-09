@@ -20,6 +20,17 @@
 #ifndef Pt_x11_PainterImpl_h
 #define Pt_x11_PainterImpl_h
 
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <X11/cursorfont.h>
+
+// X11 defines these two globally, which conflicts with enum values in Pt/text/Char.h
+#undef Above
+#undef Below
+
 #include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Pen.h>
@@ -31,13 +42,7 @@
 #include <Pt/Gfx/XRgb1555Color.h>
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gui/Painter.h>
-
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
+#include <Pt/Text/String.h>
 
 struct _XftFont;
 struct _XftDraw;
@@ -76,7 +81,7 @@ namespace Gui {
 
 			Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(const std::string& text) const;
+			Gfx::FontMetrics fontMetrics(const Text::String& text) const;
 
 			const std::list<std::string>& fontFamilyNames();
 
@@ -86,7 +91,7 @@ namespace Gui {
 
 			void drawLine(const Math::Point& from, const Math::Point& to);
 
-			void drawText(const Math::Point& to, const std::string& text);
+			void drawText(const Math::Point& to, const Text::String& text);
 
 			void drawRect(const Math::Rect& rect);
 
@@ -102,11 +107,12 @@ namespace Gui {
 
 			void drawPixmap(const Math::Point& to, Pixmap& pm);
 
-			void drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect& pmRect);
+			void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
 			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect);
+			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+			               const Gfx::Region& imageRegion);
 
 			template <typename Iterator>
 			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
