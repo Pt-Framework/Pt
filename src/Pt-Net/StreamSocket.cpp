@@ -82,6 +82,14 @@ size_t StreamSocket::_write(const char* buffer, size_t count)
     return _impl->write(buffer, count);
 }
 
+void StreamSocket::_close()
+{
+  if (_impl)
+    _impl->close();
+  delete _impl;
+  _impl = 0;
+}
+
 } // namespace Net
 
 } // namespace Pt

@@ -31,7 +31,7 @@ StreamServerSocket::~StreamServerSocket()
 }
 
 
-void StreamServerSocket::bind(const std::string& ipaddr, unsigned short int port)
+void StreamServerSocket::listen(const std::string& ipaddr, unsigned short int port, unsigned backlog)
 {
 	if(!_impl)
 	{
@@ -39,14 +39,6 @@ void StreamServerSocket::bind(const std::string& ipaddr, unsigned short int port
 	}
 	
 	_impl->bind(ipaddr, port);
-}
-
-
-void StreamServerSocket::listen(unsigned backlog)
-{
-	if(!_impl)
-		throw Exception("Socket not bound", PT_SOURCEINFO);
-		
 	_impl->listen(backlog);
 }
 

@@ -58,6 +58,8 @@ namespace Net {
 
 		    size_t _write(const char* buffer, size_t count);
 
+            void _close();
+
         private:
             StreamSocketImpl* _impl;
     };

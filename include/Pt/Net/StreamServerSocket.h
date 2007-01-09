@@ -42,12 +42,14 @@ namespace Net {
             StreamServerSocket()
             : _impl(0)
             { }
+
+            StreamServerSocket(const std::string& ipaddr, unsigned short int port, unsigned backlog = 16)
+            : _impl(0)
+            { listen(ipaddr, port, backlog); }
             
             ~StreamServerSocket();
             
-            void bind(const std::string& ipaddr, unsigned short int port);
-            
-            void listen(unsigned backlog = 16);
+            void listen(const std::string& ipaddr, unsigned short int port, unsigned backlog = 16);
     };
 
 } // !namespace Net
