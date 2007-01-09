@@ -1,0 +1,43 @@
+SubDir TOP src Pt-Gfx freetype src ;
+
+SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
+
+CCFLAGS += [ FDefines FT2_BUILD_LIBRARY ] ;
+
+Library Pt-Gfx-freetype :
+	autofit/autofit.c
+	bdf/bdf.c
+	cff/cff.c
+	base/ftbase.c
+	base/ftbitmap.c
+	base/ftdebug.c
+	base/ftglyph.c
+	base/ftinit.c
+	base/ftstroke.c
+	base/ftsystem.c
+	base/ftbbox.c
+	base/ftmm.c	
+	base/ftpfr.c
+	base/ftsynth.c
+	base/fttype1.c
+	base/ftwinfnt.c	
+	cache/ftcache.c
+	gzip/ftgzip.c
+	lzw/ftlzw.c
+	smooth/smooth.c
+	pcf/pcf.c
+	pfr/pfr.c
+	psaux/psaux.c
+	pshinter/pshinter.c
+	psnames/psmodule.c
+	raster/raster.c
+	sfnt/sfnt.c
+	truetype/truetype.c
+	type1/type1.c
+	cid/type1cid.c
+	type42/type42.c
+	winfonts/winfnt.c	
+	;
+
+Library_MakeLocate Pt-Gfx-freetype : bin ;
