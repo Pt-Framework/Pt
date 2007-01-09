@@ -57,98 +57,99 @@ namespace Net {
             };
 
         public:
-			SocketImpl()
-			: _sd(PT_INVALID_SOCKET)
-			{ }
-
+            SocketImpl()
+            : _sd(PT_INVALID_SOCKET)
+            { }
+        
             explicit SocketImpl(SOCKET sd)
-			: _sd(sd)
-			{ }
-
-			~SocketImpl()
-			{
-				if (_sd != PT_INVALID_SOCKET)
-					this->close();
-			}
-
-			static int lastError()
-			{
-				#ifdef WIN32
-					return WSAGetLastError();
-				#else
-					return errno;
-				#endif
-			}
+            : _sd(sd)
+            { }
+        
+            ~SocketImpl()
+            {
+                if (_sd != PT_INVALID_SOCKET)
+                    this->close();
+            }
+        
+            static int lastError()
+            {
+                #ifdef WIN32
+                    return WSAGetLastError();
+                #else
+                    return errno;
+                #endif
+            }
 			
-			void create(int domain, int type, int protocol)
-			{
-				
-				#ifdef WIN32
-				{   // TODO: concurrency
-					WSADATA wsadata;
-					WSAStartup(MAKEWORD(2,0), &wsadata);
-				}
-				#endif
-			
-				_sd = ::socket(domain, type, protocol);
-				if (_sd < 0)
-				  throw RuntimeError("cannot create socket", PT_SOURCEINFO); // TODO change exceptiontype
-			}
+            void create(int domain, int type, int protocol)
+            {
+                
+                #ifdef WIN32
+                {   // TODO: concurrency
+                    WSADATA wsadata;
+                    WSAStartup(MAKEWORD(2,0), &wsadata);
+                }
+                #endif
+            
+                _sd = ::socket(domain, type, protocol);
+                if (_sd < 0)
+                    throw RuntimeError("cannot create socket", PT_SOURCEINFO);
+                    // TODO change exceptiontype
+            }
+        
+            void close()
+            {
+                ::shutdown(_sd, SHUT_RDWR);
+                
+                #ifdef WIN32
+                ::closesocket(_sd);
+                #else
+                ::close(_sd);
+                #endif
+                
+                _sd = PT_INVALID_SOCKET;
+            }
 
-			void close()
-			{
-				::shutdown(_sd, SHUT_RDWR);
-				
-				#ifdef WIN32
-					::closesocket(_sd);
-				#else
-					::close(_sd);
-				#endif
-				
-				_sd = PT_INVALID_SOCKET;
-			}
 
+            bool wait(SocketImpl::WaitMode mode, int msec) const
+            {
+                fd_set rfds;
+                FD_ZERO(&rfds);
+                FD_SET(_sd, &rfds);
+        
+                struct timeval tv;
+                tv.tv_sec = msec / 1000;
+                tv.tv_usec = (msec % 1000) * 1000;
+        
+                _select:
+                int ret = -1;
+        
+                switch(mode)
+                {
+                    case SocketImpl::WaitInput:
+                        ret = select(_sd + 1, &rfds, 0, 0, &tv);
+                        break;
+            
+                    case SocketImpl::WaitOutput:
+                        ret = select(_sd + 1, 0, &rfds, 0, &tv);
+                        break;
+                }
+        
+                // error
+                if(ret == -1)
+                {
+                    if(this->lastError() == PT_EINTR)
+                        goto _select;
 
-			bool wait(SocketImpl::WaitMode mode, int msec) const
-			{
-				fd_set rfds;
-				FD_ZERO(&rfds);
-				FD_SET(_sd, &rfds);
-
-				struct timeval tv;
-				tv.tv_sec = msec / 1000;
-				tv.tv_usec = (msec % 1000) * 1000;
-
-				_select:
-				int ret = -1;
-
-				switch(mode)
-				{
-					case SocketImpl::WaitInput:
-						ret = select(_sd + 1, &rfds, 0, 0, &tv);
-						break;
-
-					case SocketImpl::WaitOutput:
-						ret = select(_sd + 1, 0, &rfds, 0, &tv);
-						break;
-				}
-
-				// error
-				if(ret == -1)
-				{
-					if(this->lastError() == PT_EINTR)
-						goto _select;
-
-					throw Exception("Could not select on socket", PT_SOURCEINFO); //TODO
-				}
-
-				// data available
-				if(ret == 1)
-					return true;
-
-				// no data available
-				return false;
-			}
+                 throw Exception("Could not select on socket", PT_SOURCEINFO); //TODO
+                }
+        
+                // data available
+                if(ret == 1)
+                    return true;
+        
+                // no data available
+                return false;
+            }
 
         protected:
             SOCKET handle() const
