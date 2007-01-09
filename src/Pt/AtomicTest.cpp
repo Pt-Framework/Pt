@@ -26,6 +26,24 @@
 #include "Pt/Unit/RegisterTest.h"
 
 
+class MyClass
+{
+	public:
+		MyClass(int i)
+		: _i(i)
+		{ std::cerr << "CTOR\n"; }
+
+		MyClass(const MyClass& m)
+		: _i(m._i)
+		{ std::cerr << "COPY CTOR\n"; }
+
+		MyClass& operator=(const MyClass& m)
+		{ std::cerr << "ASSIGNED\n"; _i = m._i; return *this; }
+
+		int _i;
+};
+
+
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
     public:
@@ -54,6 +72,12 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
             Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
             Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
+
+	std::cerr << "unnamed RVO:\n";
+	MyClass mc = unnamedRVO(5);
+
+	std::cerr << "named RVO:\n";
+	MyClass mc2 = namedRVO(5);
         }
 
         virtual void setUp()
@@ -66,7 +90,23 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         {
 			Pt::AtomicInt a(5);
 			PT_UNIT_ASSERT( a.value() == 5 );
+
+		
         }
+
+	MyClass unnamedRVO(int n) const
+	{ return MyClass(n); }
+
+	MyClass namedRVO(int n) const
+	{ 
+		MyClass mc(5);
+
+		if(n > 5)
+			return mc;
+
+		mc._i = n + 1;
+		return mc; 
+	}
 
         void AssignmentTest(int value)
         {
