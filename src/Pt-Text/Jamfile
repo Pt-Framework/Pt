@@ -11,6 +11,7 @@ SharedLibrary Pt-Text : AsciiCodec.cpp
                         UnicodeTable.cpp
                         Utf.cpp
                         Utf8Codec.cpp
+                        Utf16Codec.cpp
                         Utf32Codec.cpp
                         codecvt.cpp
                         ctype.cpp

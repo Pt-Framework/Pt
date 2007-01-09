@@ -15,9 +15,18 @@ SharedLibrary Pt-Gfx :
 	XRgb1555Color.cpp
 	XRgb8888Color.cpp
 	YuvColor.cpp
+	
+	ImagePainter.cpp
+	FillConvexPolygon.cpp
+	DrawThinPolyline.cpp
+	DrawThinLine.cpp
+	DrawThickPolyline.cpp
+	DrawThickLine.cpp
+	ClipConvexPolygon.cpp
+	
 	;
 
-SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt ;
+SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
@@ -28,4 +37,8 @@ Main BlockscaleTest : BlockscaleTest.cpp ;
 Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : bin ;
 
+Main ImagePainterDemo : ImagePainterDemo.cpp ;
+Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate ImagePainterDemo : bin ;
 
+SubInclude TOP src Pt-Gfx freetype ;

@@ -35,10 +35,10 @@ class ScribbleWidget : public Pt::Gui::Widget
 		{
 			Widget::setTitle("Scribble Classic");
 
-			_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), "RED")   );
-			_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), "GREEN")  );
-			_blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), "BLUE")  );
-			_clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), "CLEAR") );
+			_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
+			_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
+			_blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
+			_clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
 			_pixmap.reset( new Pixmap( 0, 0 ) );
 
 			updatePen();
@@ -158,7 +158,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 		virtual void _paintEvent(const PaintEvent& event)
 		{
 			Gui::Painter widgetPainter = painter();
-			widgetPainter.drawPixmap(event.origin(), *_pixmap, event.rect());
+			widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
 		}
 
 		virtual void _keyEvent(const KeyEvent& event)

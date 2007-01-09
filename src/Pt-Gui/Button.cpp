@@ -47,7 +47,7 @@ namespace Pt {
 namespace Gui {
 
 
-Button::Button(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text)
+Button::Button(Widget& parent, const Math::Point& at, const Math::Size& size, const Text::String& text)
 : Widget(parent, at, size)
 , _pressed(false)
 , _backbuffer(new Pixmap(size.width(), size.height()))
@@ -64,14 +64,14 @@ Button::~Button()
 }
 
 
-void Button::setText(const std::string& text)
+void Button::setText(const Text::String& text)
 {
 	_text = text;
 	this->update();
 }
 
 
-const std::string& Button::text() const
+const Text::String& Button::text() const
 {
 	return _text;
 }
@@ -207,7 +207,7 @@ void Button::_resizeEvent(const ResizeEvent& event)
 
 void Button::_paintEvent(const PaintEvent& event)
 {
-	painter().drawPixmap( event.origin(), *_backbuffer, event.rect() );
+	painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 
 

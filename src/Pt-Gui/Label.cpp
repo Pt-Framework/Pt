@@ -41,7 +41,7 @@ namespace Pt {
 namespace Gui {
 
 
-Label::Label(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text)
+Label::Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Text::String& text)
 : Widget(parent, at, size)
 , _backbuffer(new Pixmap(size.width(), size.height()))
 , _text(text)
@@ -54,14 +54,14 @@ Label::~Label()
 }
 
 
-void Label::setText(const std::string& text)
+void Label::setText(const Text::String& text)
 {
 	_text = text;
 	this->update();
 }
 
 
-const std::string& Label::text() const
+const Text::String& Label::text() const
 {
 	return _text;
 }
@@ -114,7 +114,7 @@ void Label::_resizeEvent(const ResizeEvent& event)
 
 void Label::_paintEvent(const PaintEvent& event)
 {
-	painter().drawPixmap( event.origin(), *_backbuffer, event.rect() );
+	painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 
 

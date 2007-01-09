@@ -59,9 +59,9 @@ namespace Gui {
 			 * @param at The position of this label inside its parent relative to the parent's top-left border.
 			 * @param size The size of this label. The size must be >0 for width and height.
 			 * @param text The (optional) text of this label.
-			 * @see setText(const std::string)
+			 * @see setText(const Text::String)
 			 */
-			Label(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text = std::string());
+			Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Text::String& text = Text::String());
 
 			//! Empty destructor for the label widget.
 			~Label();
@@ -74,14 +74,14 @@ namespace Gui {
 			 *
 			 * @param text The new text for this label.
 			 */
-			void setText(const std::string& text);
+			void setText(const Text::String& text);
 
 			/**
 			 * @brief Returns the current text of this label.
 			 *
 			 * @return The current text of this label.
 			 */
-			const std::string& text() const;
+			const Text::String& text() const;
 
 			/**
 			 * @brief Updates the presentation of this label.
@@ -114,7 +114,7 @@ namespace Gui {
 
 		private:
 			std::auto_ptr<Pixmap> _backbuffer;
-			std::string _text;
+			Text::String _text;
 	};
 
 } // namespace Gui

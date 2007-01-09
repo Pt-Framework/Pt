@@ -71,7 +71,7 @@ namespace Gui {
 			 * will be drawn.
 			 * @see drawPixmap(const Math::Point& to, Pixmap& pixmap)
 			 */
-			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect) = 0;
+			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect) = 0;
 
 			/**
 			 * @brief Draws a pixmap at the specified point on the painter's drawing area.

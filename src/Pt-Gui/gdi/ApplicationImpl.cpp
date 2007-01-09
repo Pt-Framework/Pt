@@ -381,7 +381,7 @@ void GDIEventLoop::processVirtualKeyMessage(Widget& widget, int wParam, int lPar
 
 	KeyEvent::KeyCode code = KeyEvent::Void;
 
-	// TODO How to distinguish between left and right shift?
+	// TODO How to distinGuish between left and right shift?
 	switch (wParam)
 	{
 		case VK_CONTROL: code = isExtendedKey ? KeyEvent::CtrlR : KeyEvent::CtrlL; break;
@@ -560,12 +560,12 @@ void GDIEventLoop::processPaintMessage(HWND hwnd, Widget& widget)
 
 	GetUpdateRect(hwnd, &gdiRectangle, false);
 
-	Math::Rect rectangle(
-		Math::Point(gdiRectangle.left, gdiRectangle.top),
-		Math::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
+	 Pt::Gfx::Region region(
+		 Pt::Math::Point(gdiRectangle.left, gdiRectangle.top),
+		 Pt::Math::Size(gdiRectangle.right - gdiRectangle.left + 1, gdiRectangle.bottom - gdiRectangle.top + 1)
 	);
 
-	PaintEvent paintEvent(widget, rectangle);
+	PaintEvent paintEvent(widget, region);
 
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hwnd, &ps);

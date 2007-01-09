@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                                *
+ *                         Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -57,10 +58,9 @@
 
  **************************************************************************/
 
-#ifndef _Pt_IO_Utf16Codec_h
-#define _Pt_IO_Utf16Codec_h
+#ifndef Ptv_IO_Utf16Codec_h
+#define Ptv_IO_Utf16Codec_h
 
-#include <Pt/Export.h>
 #include <Pt/Exception.h>
 #include <Pt/Text/TextCodec.h>
 
@@ -69,28 +69,42 @@ namespace Pt {
 
 namespace Text {
 
-//! decode UTF-16 to UTF-32
-//! encode UTF-32 to UTF-16
-class PT_API Utf16Codec : public TextCodec {
-	public:
-		explicit Utf16Codec(size_t ref = 0);
-		virtual ~Utf16Codec();
+	/**
+	 * @brief This Codec class is able to convert from UTF-16 to UTF-32 and from UTF-32 to UTF-16.
+	 *
+	 * The method do_in() converts an array of char containing UTF-16-encoded data into an array
+	 * of Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * 32-bit representation of the character.
+	 *
+	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
+	 * array of char which contains the same sequence of characters in UTF-16-encoding.
+	 */
+	class PT_API Utf16Codec : public TextCodec<Char, char> {
+		public:
+			explicit Utf16Codec(size_t ref = 0);
+			virtual ~Utf16Codec();
 
-		//! decode UTF-16 to UTF-32
-		virtual TextCodec::result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
-		                                     Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const;
+			//! @brief Decodes UTF-16 to UTF-32.
+			virtual result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+												 Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const;
 
-		//! >encode UTF-32 to UTF-16
-		virtual TextCodec::result do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
-		                                     char* toBegin, char* toEnd, char*& toNext) const;
-		
-		virtual bool do_always_no_conv() const throw();
-		virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
-		virtual int do_max_length() const throw();
-};
+			//! @brief Encodes UTF-32 to UTF-16.
+			virtual result do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
+												 char* toBegin, char* toEnd, char*& toNext) const;
+			
+			// inheritdoc
+			virtual bool do_always_no_conv() const throw();
+
+			// inheritdoc
+			virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+
+			// inheritdoc
+			virtual int do_max_length() const throw();
+	};
 
 } //namespace Text
 
 } //namespace Pt
 
 #endif
+

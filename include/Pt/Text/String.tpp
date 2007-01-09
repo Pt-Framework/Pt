@@ -18,13 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-using namespace Pt;
-
-using namespace std;
-
-
-
 namespace std {
 
 inline basic_string<Pt::Char>::basic_string(const allocator_type& a)
@@ -572,7 +565,7 @@ inline int basic_string<Pt::Char>::compare(const basic_string& str) const
 {
 	const size_type size = this->size();
 	const size_type osize = str.size();
-	size_type n = std::min(size , osize);
+	size_type n = min(size , osize);
 
 	const int result = traits_type::compare(_data->str(), str._data->str(), n);
 
@@ -589,7 +582,7 @@ inline int basic_string<Pt::Char>::compare(const Pt::Char* str) const
 {
 	const size_type size = this->size();
 	const size_type osize = traits_type::length(str);
-	size_type n = std::min(size , osize);
+	size_type n = min(size , osize);
 
 	const int result = traits_type::compare(_data->str(), str, n);
 
@@ -606,7 +599,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 {
 	const size_type size = n;
 	const size_type osize = str.size();
-	size_type len = std::min(size , osize);
+	size_type len = min(size , osize);
 
 	const int result = traits_type::compare(_data->str() + pos, str._data->str(), len);
 
@@ -623,7 +616,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 {
 	const size_type size = n;
 	const size_type osize = n2;
-	size_type len = std::min(size , osize);
+	size_type len = min(size , osize);
 
 	const int result = traits_type::compare(_data->str() + pos,
 	                                        str._data->str() + pos2,
@@ -642,7 +635,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt:
 {
 	const size_type size = n;
 	const size_type osize = traits_type::length(str);
-	size_type len = std::min(size , osize);
+	size_type len = min(size , osize);
 
 	const int result = traits_type::compare(_data->str() + pos,
 	                                        str,
@@ -661,7 +654,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt:
 {
 	const size_type size = n;
 	const size_type osize = n2;
-	size_type len = std::min(size , osize);
+	size_type len = min(size , osize);
 
 	const int result = traits_type::compare(_data->str() + pos,
 	                                        str,
@@ -749,7 +742,7 @@ basic_string<Pt::Char>::rfind(const Pt::Char* token, size_type pos, size_type n)
 		return npos;
 	}
 
-	pos = std::min(size_type(size - n), pos);
+	pos = min(size_type(size - n), pos);
 	const Char* str = _data->str();
 	do {
 		if (traits_type::compare(str + pos, token, n) == 0)

@@ -6,6 +6,7 @@
 #define Ptv_Gui_Button_h
 
 #include <Pt/Api.h>
+#include <Pt/Text/String.h>
 #include <Pt/Gfx/Gfx.h>
 
 #include <Pt/Gui/Pixmap.h>
@@ -62,7 +63,7 @@ namespace Gui {
 			 * @param text The (optional) text of this button.
 			 * @see setText(const std::string)
 			 */
-			Button(Widget& parent, const Math::Point& at, const Math::Size& size, const std::string& text = std::string());
+			Button(Widget& parent, const Math::Point& at, const Math::Size& size, const Text::String& text = Text::String());
 
 			//! @brief Emptry destructor for the button widget.
 			~Button();
@@ -75,14 +76,14 @@ namespace Gui {
 			 *
 			 * @param text The new text for this button.
 			 */
-			void setText(const std::string& text);
+			void setText(const Text::String& text);
 
 			/**
 			 * @brief Returns the current text of this button.
 			 *
 			 * @return The current text of this button.
 			 */
-			const std::string& text() const;
+			const Text::String& text() const;
 
 			/**
 			 * @brief Updates the presentation of this button.
@@ -132,7 +133,7 @@ namespace Gui {
 
 		private:
 			std::auto_ptr<Pixmap> _backbuffer;
-			std::string _text;
+			Text::String _text;
 	};
 
 } // namespace Gui

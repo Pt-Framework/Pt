@@ -24,6 +24,7 @@
 #include <Pt/Types.h>
 #include <Pt/Gui/IPainter.h>
 #include <Pt/Gfx/Gfx.h>
+#include "Pt/Gfx/Region.h"
 
 
 namespace Pt {
@@ -73,7 +74,7 @@ namespace Gui {
 			virtual Gfx::FontMetrics fontMetrics() const;
 
 			// inerhit doc
-			virtual Gfx::FontMetrics fontMetrics(std::string text) const;
+			virtual Gfx::FontMetrics fontMetrics( Text::String text) const;
 
 			// inerhit doc
 			virtual const std::list<std::string>& fontFamilyNames();
@@ -85,7 +86,7 @@ namespace Gui {
 			virtual void drawLine(const Math::Point& from, const Math::Point& to);
 
 			// inerhit doc
-			virtual void drawText(const Math::Point& to, const std::string& text);
+			virtual void drawText(const Math::Point& to, const Text::String& text);
 
 			// inerhit doc
 			virtual void drawRect(const Math::Rect& rect);
@@ -109,10 +110,10 @@ namespace Gui {
 			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
 			// inerhit doc
-			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect);
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect);
 
 			// inerhit doc
-			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect);
+			virtual void drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect);
 
 			// inerhit doc
 			virtual void drawPixmap(const Math::Point& to, Pixmap& pm);

@@ -5,8 +5,9 @@
 #ifndef PT_GFX_SUBIMAGE_H
 #define PT_GFX_SUBIMAGE_H
 
+#include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/BasicImage.h>
-
+#include <assert.h>
 
 namespace Pt {
 
@@ -30,7 +31,7 @@ namespace Gfx {
 
 			public:
 				//! Construct a subimage using the given image and area
-				SubImage(ImageT& image, const Math::Rect& area);
+				SubImage(ImageT& image, const Pt::Gfx::Region& area);
 
 				//! We can fill the sub image using a color
 				SubImage& operator=(const ColorT& color);
@@ -45,12 +46,16 @@ namespace Gfx {
 				SubImage<ColorSpaceT_>& operator=(SubImage<SrcColorSpaceT>& src)
 				{ _assign(src); return *this; }
 
+				//! pixel color value based compare
+				//template <typename SrcColorSpaceT> 
+				bool operator==(const SubImageT& src);
+
 				//! Check if the image is empty or not
 				inline bool empty() const
 				{ return _image.empty(); }
 
 				//! Return the area of the subimage (in the term of the main image)
-				inline const Math::Rect& rect() const
+				inline const Pt::Gfx::Region& region() const
 				{ return _area; }
 
 				//! Return the width of the subimage
@@ -71,11 +76,15 @@ namespace Gfx {
 
 				//! Scanline access without range check
 				inline Scanline scanline(int y)
-				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
+				{  
+					return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; 
+				}
 
 				//! Scanline access without range check
 				inline ConstScanline scanline(int y) const
-				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
+				{ 
+					return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; 
+				}
 
 				//! Random access without range check
 				inline ColorT& pixel(int x, int y)
@@ -105,7 +114,7 @@ namespace Gfx {
 				//! Returns an iterator indicating the position
 				//! after the last pixel in this image
 				inline PixelIterator end()
-				{ return PixelIterator(*this, _area.width(), _area.height()-1); }
+				{ return PixelIterator(*this, 1, _area.height() + 1); }
 
 				//! Returns an iterator indicating the position
 				//! of a pixel at(x,y)
@@ -120,7 +129,7 @@ namespace Gfx {
 				//! Returns a const iterator indicating the position
 				//! after the last pixel in this image
 				inline ConstPixelIterator end() const
-				{ return ConstPixelIterator(*this, _area.width(), _area.height()-1); }
+				{ return ConstPixelIterator(*this, 1, _area.height() + 1 ); }
 
 				//! Returns a const iterator indicating the position
 				//! of a pixel at(x,y)
@@ -128,8 +137,8 @@ namespace Gfx {
 				{ return ConstPixelIterator(*this, _area.x()+y, _area.y()+x); }
 
 			protected:
-				ImageT& _image;
-				Math::Rect    _area;
+				ImageT&          _image;
+				Pt::Gfx::Region _area;
 
 				// Helper fucntions
 				template <typename SrcColorSpaceT>
@@ -167,7 +176,7 @@ namespace Gfx {
 						inline PixelIterator& operator++()
 						{
 							// At the end of line
-							if(++_currentX == _width) {
+							if(++_currentX == _width ) {
 								_currentX = 0;
 								_pixel   += _incr;
 								return *this;
@@ -203,12 +212,16 @@ namespace Gfx {
 						//! Construct a ConstPixelIterator object at coordinate (0,0)
 						inline ConstPixelIterator(const SubImageT& image)
 						: _pixel(&image.scanline(0)[0]), _offsetX(0), _currentX(0), _width(image.width()),
-						  _incr(image.fullImage().width() - image.width() + 1) {}
+						  _incr(image.fullImage().width() - image.width() + 1) 
+						{
+						}
 
 						//! Construct a ConstPixelIterator object at coordinate (x,y)
 						inline ConstPixelIterator(const SubImageT& image, uint x, uint y)
 						: _pixel(&image.scanline(y-1)[x-1]), _offsetX(x), _currentX(0), _width(image.width()),
-						  _incr(image.fullImage().width() - image.width() + 1) {}
+						  _incr(image.fullImage().width() - image.width() + 1) 
+						{
+						}
 
 						//! Return the pixel at the current coordinate
 						inline const ColorT& operator*() const
@@ -218,7 +231,7 @@ namespace Gfx {
 						inline ConstPixelIterator& operator++()
 						{
 							// At the end of line
-							if(++_currentX == _width) {
+							if(++_currentX == _width)  {
 								_currentX = 0;
 								_pixel   += _incr;
 								return *this;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,7 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Region.h>
 #include <Pt/Gui/Event.h>
 
 #include <cstddef>
@@ -60,19 +60,19 @@ namespace Gui {
 		public:
 
 			/**
-			 * @brief Construct a new paint event with the given rectangle as dirty area.
+			 * @brief Construct a new paint event with the given region as dirty area.
 			 *
-			 * The given rectangle (rect) marks the dirty area of the widget for which
+			 * The given region marks the dirty area of the widget for which
 			 * this paint event is created. The coordinates are in widget coordinate space
 			 * and start in the left-top corner of the widget. Usually only the area
-			 * specified with this rectangle should be repainted to reduce the time that
+			 * specified with this region should be repainted to reduce the time that
 			 * is used for painting.
 			 *
 			 * @param widget The widget for which this paint event was created and that
 			 * should be repainted.
-			 * @param rect The rectangular area of the widget which needs to be painted.
+			 * @param region The rectangular area of the widget which needs to be painted.
 			 */
-			PaintEvent(Widget& widget, Math::Rect rect);
+			PaintEvent(Widget& widget, Pt::Gfx::Region region);
 
 			/**
 			 * @brief Construct a new paint event with the given point and size as dirty area.
@@ -80,7 +80,7 @@ namespace Gui {
 			 * The point in combination with the size span a rectangle which marks the
 			 * dirty area of the widget for which this paint event is created. The
 			 * coordinates are in widget coordinate space and start in the left-top corner
-			 * of the widget. Usually only the area specified with this rectangle (point +
+			 * of the widget. Usually only the area specified with this region (point +
 			 * size) should be repainted to reduce the time that is used for painting.
 			 *
 			 * @param widget The widget for which this paint event was created and that
@@ -88,7 +88,7 @@ namespace Gui {
 			 * @param point The top-left corner of the area which is supposed to be repainted.
 			 * @param size The width and height of the area which is supposed to be repainted.
 			 */
-			PaintEvent(Widget& widget, Math::Point point, Math::Size size);
+			PaintEvent(Widget& widget, Pt::Math::Point point, Pt::Math::Size size);
 
 			//! @brief Empty destructor.
 			virtual ~PaintEvent();
@@ -105,8 +105,8 @@ namespace Gui {
 			 *
 			 * @return Returns the dirty area.
 			 */
-			const Math::Rect& rect() const
-			{ return _rect; }
+			const Pt::Gfx::Region& region() const
+			{ return _region; }
 
 			/**
 			 * @brief Returns the top-left corner of the area which is supposed to be (re)painted.
@@ -116,8 +116,10 @@ namespace Gui {
 			 *
 			 * @return Returns the top-left corner of the dirty area.
 			 */
-			const Math::Point& origin() const
-			{ return _rect.topLeft(); }
+			Pt::Math::Point origin() const
+			{
+				return _region.topLeft();
+			}
 
 			/**
 			 * @brief Returns the type info for this event.
@@ -127,10 +129,10 @@ namespace Gui {
 			virtual const std::type_info& typeInfo() const;
 
 		private:
-			Math::Rect _rect;
+			 Pt::Gfx::Region _region;
 	};
 
-} // namespace gui
+} // namespace Gui
 
 } // namespace Pt
 

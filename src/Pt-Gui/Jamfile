@@ -26,12 +26,12 @@ SharedLibrary Pt-Gui :  Application.cpp
                        ;
 
 SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
-SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx ;
+SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
 SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : bin ;
 
 Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-IO Pt-Gfx Pt-Gui ;
+Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-IO Pt-Gfx Pt-Gui Pt-Text ;
 Main_MakeLocate Scribble : bin ;
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;

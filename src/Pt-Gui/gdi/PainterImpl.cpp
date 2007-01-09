@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,12 +23,19 @@
 #include "Pt/Types.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Region.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Gfx/XRgb8888Color.h"
 #include "win32.h"
+#include <windows.h>
 
 #include <iostream>
+#include <sstream>
 #include <algorithm>
+#include <Pt/system/Clock.h>
+
+#include "Pt/Text/Utf16Codec.h"
+#include "Pt/Text/TextStream.h"
 
 #include <windows.h>
 
@@ -87,10 +94,10 @@ void PainterImpl::updatePen()
 	HPEN newPen = CreatePen(PS_SOLID, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()));
 #else
 	LOGBRUSH brush;
-	brush.lbStyle = BS_SOLID;
+	brush.lbStyle = BS_SOLID ;
 	brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
 
-	HPEN newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL, _pen.size(), &brush, 0, NULL);
+	HPEN newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | /*PS_ENDCAP_FLAT*/PS_ENDCAP_ROUND | PS_JOIN_BEVEL, _pen.size(), &brush, 0, NULL);
 #endif
 
 	HPEN oldPen = (HPEN)SelectObject(_drawable.deviceContext(), newPen);
@@ -98,7 +105,7 @@ void PainterImpl::updatePen()
 	DeleteObject(oldPen);
 
 
-	// Set the text color to the pen color.
+	// Set the Text color to the pen color.
 	SetTextColor(_drawable.deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));
 }
 
@@ -170,7 +177,7 @@ void PainterImpl::updateBrush()
 				DeleteObject(bitmap);
 			}
 			else // texture.empty() == true
-			{ 
+			{
 				// Use the empty brush for empty textures.
 				newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
 			}
@@ -287,18 +294,25 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(std::string text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(Pt::Text::String Text) const
 {
 	ensureActivePainter();
 
-	// Basic font metrics without the text-specific width.
+	// Basic font metrics without the Text-specific width.
 	TEXTMETRIC basicMetrics;
 	GetTextMetrics(_drawable.deviceContext(), &basicMetrics);
 
-	SIZE textSize;
-	GetTextExtentPoint32(_drawable.deviceContext(), win32::fromMultiByte(text).c_str(), text.length(), &textSize);
+	// Convert the 32-bit string into 16 bit (using UTF-16).
+	std::stringstream ss;
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf16Codec());
+	TextStream << Text << Char(0); // Append extra \0 for proper line termination.
+	TextStream.flush();
 
-	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
+	// Calculate the width and height for the Text.
+	SIZE TextSize;
+	GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)ss.str().c_str(), Text.length(), &TextSize);
+
+	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, TextSize.cx, TextSize.cy);
 }
 
 
@@ -369,7 +383,7 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Math::Point& to)
+void PainterImpl::drawPixel(const Pt::Math::Point& to)
 {
 	ensureActivePainter();
 
@@ -383,7 +397,7 @@ void PainterImpl::drawPixel(const Math::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to)
 {
 	ensureActivePainter();
 
@@ -401,29 +415,36 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const std::string& text)
+void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::Text::String& Text)
 {
 	ensureActivePainter();
+
+	std::stringstream ss;
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf16Codec());
+	TextStream << Text << Char(0); // Append extra \0 for proper line termination.
+	TextStream.flush();
 
 	RECT rectangle;
 	SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
-	DrawText(_drawable.deviceContext(), win32::fromMultiByte(text).c_str(), -1, &rectangle, DT_NOCLIP);
+	DrawTextW(_drawable.deviceContext(), (wchar_t*)ss.str().c_str(), -1, &rectangle, DT_NOCLIP);
 }
 
 
-void PainterImpl::fillRect(const Math::Rect& rect)
+void PainterImpl::fillRect(const Pt::Math::Rect& rect)
 {
 	ensureActivePainter();
 
 	RECT rectangle;
-	SetRect(&rectangle, rect.x(), rect.y(), rect.x() + rect.width(), rect.y() + rect.height());
+	const Pt::Math::Point topLeft     = rect.topLeft();
+	const Pt::Math::Point bottomRight = rect.bottomRight();
+	SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
 	HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_drawable.deviceContext(), OBJ_BRUSH);
 	FillRect(_drawable.deviceContext(), &rectangle, currentBrush);
 }
 
 
-void PainterImpl::drawRect(const Math::Rect& rect)
+void PainterImpl::drawRect(const Pt::Math::Rect& rect)
 {
 	ensureActivePainter();
 
@@ -436,14 +457,17 @@ void PainterImpl::drawRect(const Math::Rect& rect)
 
 	// Temporarily select the empty brush to only draw the outline.
 	HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
-	Rectangle(_drawable.deviceContext(), rect.x(), rect.y(), rect.x() + rect.width(), rect.y() + rect.height());
+
+	const Pt::Math::Point topLeft     = rect.topLeft();
+	const Pt::Math::Point bottomRight = rect.bottomRight();
+	Rectangle(_drawable.deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
 	// Select the original brush again.
 	SelectObject(_drawable.deviceContext(), originalBrush);
 }
 
 
-void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
 {
 	ensureActivePainter();
 
@@ -462,7 +486,7 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
-void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
+void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
 {
 	ensureActivePainter();
 
@@ -481,22 +505,24 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
-void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount) const
+void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const
 {
-	ensureActivePainter();
-
-	if (_pen.size() == 0) {
-		return; // Draw nothing if the pen size is 0.
-	}
-
-	std::vector<POINT> winPoints(pointCount);
+/*
+    std::vector<POINT> winPoints(pointCount);
 
 	for (size_t i = 0; i < pointCount; i++) {
 		winPoints[i].x = points[i].x();
 		winPoints[i].y = points[i].y();
-	}
+    }
 
-    Polyline(_drawable.deviceContext(), &(winPoints[0]), pointCount);
+    Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
+    */
+    HDC hdc = _drawable.deviceContext();
+
+    MoveToEx( hdc, points[0].x(), points[0].y(), 0 );
+
+    for( size_t i = 1; i <  pointCount; i++)
+        LineTo( hdc, points[i].x(), points[i].y() );
 }
 
 
@@ -523,7 +549,7 @@ void PainterImpl::fillPolygon(const Pt::Math::Point* points, const size_t pointC
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap, const Math::Rect& pixmapRect)
+void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap, const  Pt::Gfx::Region& pixmapRegion)
 {
 	ensureActivePainter();
 
@@ -533,16 +559,16 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap, const Math::
 	BitBlt(
 		_drawable.deviceContext(),
 		to.x(),	to.y(),
-		pixmapRect.width(), pixmapRect.height(),
+		pixmapRegion.width(), pixmapRegion.height(),
 		pixmap.impl().deviceContext(),
-		pixmapRect.x(), pixmapRect.y(),
+		pixmapRegion.x(), pixmapRegion.y(),
 		SRCCOPY
 	);
 
 	pixmap.impl().endPaint();
 }
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap)
+void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap)
 {
 	ensureActivePainter();
 
@@ -562,7 +588,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pixmap)
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image)
 {
 	ensureActivePainter();
 
@@ -570,11 +596,11 @@ void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 }
 
 
-void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect)
+void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
 {
 	ensureActivePainter();
 
-	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRect);
+	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
 	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
 }
 
@@ -599,12 +625,12 @@ void PainterImpl::drawIndependentImage(size_t x, size_t y, const char* data, siz
 
 	memcpy(imageBits, data, width * height * 4);
 
-	HDC bitmapDeviceContext = CreateCompatibleDC(NULL);
-	SelectObject(bitmapDeviceContext, bitmap);
+	HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
+	SelectObject(bitmapDeviceConText, bitmap);
 
-	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceContext, 0, 0, SRCCOPY);
+	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
 
-	DeleteDC(bitmapDeviceContext);
+	DeleteDC(bitmapDeviceConText);
 	DeleteObject(bitmap);
 }
 
@@ -618,12 +644,12 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
 		return;
 	}
 
-	HDC bitmapDeviceContext = CreateCompatibleDC(NULL);
-	SelectObject(bitmapDeviceContext, bitmap);
+	HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
+	SelectObject(bitmapDeviceConText, bitmap);
 
-	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceContext, 0, 0, SRCCOPY);
+	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
 
-	DeleteDC(bitmapDeviceContext);
+	DeleteDC(bitmapDeviceConText);
 	DeleteObject(bitmap);
 }
 

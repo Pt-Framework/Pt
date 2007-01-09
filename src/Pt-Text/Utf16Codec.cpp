@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Drner                                *
+ *                         Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,12 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
 
-#include "UtfCommons.h"
 #include "Pt/Text/Utf16Codec.h"
 using namespace Pt::Text;
 
 
-Utf16Codec::Utf16Codec(size_t ref) : Pt::TextCodec(ref)
+Utf16Codec::Utf16Codec(size_t ref)
+: Pt::TextCodec<Char, char>(ref)
 {}
 
 
@@ -32,123 +32,124 @@ Utf16Codec::~Utf16Codec()
 
 
 //! decodes UTF-16 to UTF-32
-TextCodec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
-                                                Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
+Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+                                     Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
 {
-	TextCodec::result retstat = TextCodec::ok;
-	
-	UTF16 *fbegin = (UTF16 *) fromBegin;
-	UTF16 *fend   = (UTF16 *) fromEnd;
-	UTF16 *fnext  = fbegin;
-	
-	UTF32 *tbegin = (UTF32 *) toBegin;
-	UTF32 *tend   = (UTF32 *) toEnd;
-	UTF32 *tnext  = tbegin;
-	
-	UTF32 ch, ch2;
-	
-	while(fnext < fend) {
+	result retstat = ok;
+
+	fromNext = fromBegin;
+	uint16_t* fNext = (uint16_t*)fromBegin;
+	uint16_t* fEnd  = (uint16_t*)fromEnd;
+	uint16_t ch;
+	uint16_t ch2;
+
+	while(fNext < fEnd) {
 		
-		ch = *fnext++;
+		ch = *fNext++;
 		
 		/// If we have a surrogate pair, convert to UTF32 first. 
-		if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_HIGH_END) {
+		if (ch >= 0xD800 && ch <= 0xDBFF) {
 			// If the 16 bits following the high surrogate are in the source buffer... 
-			if (fnext < fend) {
-				ch2 = *fnext;
+			if (fNext < fEnd) {
+				ch2 = *fNext;
 				// If it's a low surrogate, convert to UTF32. 
-					if (ch2 >= UNI_SUR_LOW_START && ch2 <= UNI_SUR_LOW_END) {
-						ch = ((ch - UNI_SUR_HIGH_START) << halfShift) + (ch2 - UNI_SUR_LOW_START) + halfBase;
-						++fnext;
+					if (ch2 >= 0xDC00 && ch2 <= 0xDFFF) {
+						ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000UL;
+						++fNext;
 					} else {
-						--fnext; // return to the illegal value itself 
-						retstat = TextCodec::error;
+						--fNext; // return to the illegal value itself 
+						retstat = error;
 						break;
 					}
 			} else { // We don't have the 16 bits following the high surrogate (source exhausted) 
-				fnext--;
-				retstat = TextCodec::partial;
+				fNext--;
+				retstat = partial;
 				break;
 			}
 		} else {
 			// UTF-16 surrogate values are illegal in UTF-32 
-			if (ch >= UNI_SUR_LOW_START && ch <= UNI_SUR_LOW_END) {
-				--fnext; // return to the illegal value itself 
-				retstat = TextCodec::error;
+			if (ch >= 0xDC00 && ch <= 0xDFFF) {
+				--fNext; // return to the illegal value itself 
+				retstat = error;
 				break;
 			}
 		}
 	
-			if (tnext >= tend) {
-				--fnext;
-				tnext = tend;
-				retstat = TextCodec::partial;
-				break;
-			}
-			
-			*tnext++ = ch;
+		if (toNext >= toEnd) {
+			--fNext;
+			toNext = toEnd;
+			retstat = partial;
+			break;
+		}
+		
+		*toNext++ = ch;
 		
 	} // while
 
 	// update pointers	
-	fromNext = (const char *) fnext;
-	toNext = (Char *) tnext;
+	fromNext = (const char*)fNext;
 	
 	return retstat;
 }
 
 //! encodes UTF-32 to UTF-16
-TextCodec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
-                                                char* toBegin, char* toEnd, char*& toNext) const
+Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
+                                      char* toBegin, char* toEnd, char*& toNext) const
 { 
-	TextCodec::result retstat = TextCodec::ok;
+	result retstat = ok;
+
+	fromNext = fromBegin;
+	uint16_t* tNext = (uint16_t*)toBegin;
+	uint16_t* tEnd  = (uint16_t*)toEnd;
+	Pt::Char ch;
+
+	while (fromNext < fromEnd) {
 	
-	UTF32 *fbegin = (UTF32 *) fromBegin;
-	UTF32 *fend   = (UTF32 *) fromEnd;
-	UTF32 *fnext  = fbegin;
-	UTF32 ch;
-	
-	UTF16 *tbegin = (UTF16 *) toBegin;
-	UTF16 *tend   = (UTF16 *) toEnd;
-	UTF16 *tnext  = tbegin;
-	
-	while (fnext< fend) {
-	
-		if (tnext >= tend) {
-			tnext = tend;
-			retstat = TextCodec::partial;
+		if (tNext >= tEnd) {
+			tNext = tEnd;
+			retstat = partial;
 			break;
 		}
+
+		ch = *fromNext++;
 		
-		if (ch <= UNI_MAX_BMP) { // Target is a character <= 0xFFFF 
+		if (ch <= Pt::Char(0xFFFF)) 
+		{ // Target is a character <= 0xFFFF 
 			// UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values 
-			if (ch >= UNI_SUR_HIGH_START && ch <= UNI_SUR_LOW_END) {
-				--fnext; // return to the illegal value itself 
-				retstat = TextCodec::error;
+			if (ch >= Pt::Char(0xD800) && ch <= Pt::Char(0xDFFF)) 
+			{
+				--fromNext; // return to the illegal value itself 
+				retstat = error;
 				break;
-			} else {
-				*tnext++ = (UTF16)ch; // normal case 
+			} 
+			else 
+			{
+				*tNext++ = ch; // normal case 
 			}
-		}	else if (ch > UNI_MAX_LEGAL_UTF32) {
-				retstat = TextCodec::error;
-				*tnext++ = (UTF16)UNI_REPLACEMENT_CHAR;
-		} else {
+		} 
+		else if (ch > Pt::Char(0x0010FFFF)) 
+		{
+				retstat = error;
+				*tNext++ = 0xFFFD;
+		} 
+		else 
+		{
 			// target is a character in range 0xFFFF - 0x10FFFF. 
-			if (tnext + 1 >= tend) {
-				fnext--;
-				tnext = tend;
-				retstat = TextCodec::partial;
+			if (tNext + 1 >= tEnd) 
+			{
+				fromNext--;
+				tNext = tEnd;
+				retstat = partial;
 			}
-			ch -= halfBase;
-			*tnext++ = (UTF16)((ch >> halfShift) + UNI_SUR_HIGH_START);
-			*tnext++ = (UTF16)((ch & halfMask) + UNI_SUR_LOW_START);
+			ch -= 0x0010000UL;
+			*toNext++ = (((uint32_t)ch >> 10) + 0xD800);
+			*toNext++ = (((uint32_t)ch & 0x3FFUL) + 0xDC00);
 		}
 							
 	} // while
 	
 	// update pointers	
-	fromNext = (const Char *) fnext;
-	toNext = (char *) tnext;
+	toNext = (char*)tNext;
 	
 	return retstat;
 }
@@ -171,3 +172,4 @@ bool Utf16Codec::do_always_no_conv() const throw()
 {
 	return false;
 }
+

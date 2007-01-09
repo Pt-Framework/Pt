@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,6 +33,7 @@
 #include <Pt/Gfx/XRgb8888Image.h>
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/XRgb1555Color.h>
+#include <Pt/Gfx/Region.h>
 
 #include "Drawable.h"
 
@@ -44,7 +45,7 @@ namespace Gui {
 	class WidgetImpl;
 	class Pixmap;
 
-	class PT_API PainterImpl {
+	class PT_EXPORT PainterImpl {
 		public:
 			PainterImpl(Drawable& drawable);
 
@@ -68,37 +69,37 @@ namespace Gui {
 
 			Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(std::string text) const;
+			Gfx::FontMetrics fontMetrics(Pt::Text::String Text) const;
 
 			const std::list<std::string>& fontFamilyNames();
 
 			int depth() const;
 
-			void drawPixel(const Math::Point& to);
+			void drawPixel(const Pt::Math::Point& to);
 
-			void drawLine(const Math::Point& from, const Math::Point& to);
+			void drawLine(const Pt::Math::Point& from, const Pt::Math::Point& to);
 
-			void drawText(const Math::Point& to, const std::string& text);
+			void drawText(const Pt::Math::Point& to, const Pt::Text::String& Text);
 
-			void drawRect(const Math::Rect& rectangle);
+			void drawRect(const Pt::Math::Rect& rectangle);
 
-			void fillRect(const Math::Rect& rectangle);
+			void fillRect(const Pt::Math::Rect& rectangle);
 
-			void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+			void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
-			void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+			void fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
-			void drawPolyline(const Math::Point* points, const size_t pointCount) const;
+			void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const;
 
-			void fillPolygon(const Math::Point* points, const size_t pointCount) const;
+			void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const;
 
-			void drawPixmap(const Math::Point& to, Pixmap& pm, const Math::Rect& pmRect);
+			void drawPixmap(const Pt::Math::Point& to, Pixmap& pm, const Pt::Gfx::Region& pmRegion);
 
-			void drawPixmap(const Math::Point& to, Pixmap& pm);
+			void drawPixmap(const Pt::Math::Point& to, Pixmap& pm);
 
-			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+			void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect);
+			void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
 
 			template <typename Iterator>
 			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
@@ -107,7 +108,7 @@ namespace Gui {
 					return; // Don't draw empty images.
 				}
 
-				// Try to Convert our generic image format (ARgbImage) to an image format that is compatible
+				// Try to convert our generic image format (ARgbImage) to an image format that is compatible
 				// with the current device settings. If this is not possible, convert it to a 32-bit
 				// device-independent image that windows has to convert to the current device settings
 				// when we bit-blit it.
@@ -120,7 +121,14 @@ namespace Gui {
 						break;
 					}
 
-					case 16:
+					case 16: {
+						Gfx::Rgb565Image rgb16Image(width, height);
+						assign(begin, end, rgb16Image.begin());
+						drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
+						break;
+					}
+
+
 					case 15: {
 						Gfx::XRgb1555Image rgb16Image(width, height);
 						assign(begin, end, rgb16Image.begin());
@@ -151,16 +159,11 @@ namespace Gui {
 
 			void ensureActivePainter() const
 			{
-				if (!_drawable.isPainting()) {
+				if ( !_drawable.isPainting() ) {
 					throw LogicError("Painter is not currently active. Use painter() to activate painter.", PT_SOURCEINFO);
 				}
 			}
 
-/*			#ifdef _WIN32_WCE
-				static int CALLBACK PainterImpl::EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD type, LPARAM param);
-			#else
-				static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *physFont, DWORD type, LPARAM param);
-			#endif*/
 
 		protected:
 			Drawable&  _drawable;

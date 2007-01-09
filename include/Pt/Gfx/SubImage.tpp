@@ -20,7 +20,6 @@
 #ifndef Pt_Gfx_SubImage_tpp
 #define Pt_Gfx_SubImage_tpp
 
-
 namespace Pt {
 
 	namespace Gfx {
@@ -29,7 +28,7 @@ namespace Pt {
 		// IMPL: SubImage<ColorSpaceT>
 		//
 		template <typename ColorSpaceT_>
-		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Math::Rect& area)
+		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Pt::Gfx::Region& area)
 		: _image(image), _area(area)
 		{
 			// Validate the area
@@ -41,21 +40,32 @@ namespace Pt {
 			if(x1<0 || y1<0 || x2<0 ||y2<0 ||
 			   x1>=int(_image.width()) || y1>=int(_image.height()) ||
 			   x2>=int(_image.width()) || y2>=int(_image.height()))
-				throw RangeError("The given rectangle covers invalid area in the given image ", PT_SOURCEINFO);
+				throw RangeError("The given region covers invalid area in the given image ", PT_SOURCEINFO);
 		}
 
 
 		template <typename ColorSpaceT_>
 		SubImage<ColorSpaceT_>& SubImage<ColorSpaceT_>::operator=(const typename SubImage<ColorSpaceT_>::ColorT& color)
 		{
-			for(int y = _area.y(); y < (_area.y()+_area.height()); y++) {
-				for(int x = _area.x(); x < (_area.x()+_area.width()); x++) {
+			for(size_t y = 0; y < _area.height(); y++) {
+				for(size_t x = 0; x < _area.width(); x++) {
 					_image.scanline(y)[x] = color;
 				}
 			}
 			return *this;
 		}
 
+
+		template <typename ColorSpaceT_>
+		bool SubImage<ColorSpaceT_>::operator==(const SubImageT& src)
+		{
+			for(size_t y = 0; y < _area.height(); y++) {
+				if ( 0 != memcmp(this->scanline(y), src.scanline(y), sizeof(SubImageT) * _area.width()) ) {
+					return false;
+				}
+			}
+			return true;
+		}
 
 		template <typename ColorSpaceT_>
 		template <typename SrcColorSpaceT>

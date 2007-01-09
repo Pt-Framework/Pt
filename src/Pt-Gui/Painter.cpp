@@ -19,8 +19,8 @@
 
 #include "PainterImpl.h"
 
-#include "Pt/Gui/Pixmap.h"
 #include "Pt/Math/Rect.h"
+#include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
 
@@ -91,7 +91,7 @@ FontMetrics Painter::fontMetrics() const
 }
 
 
-FontMetrics Painter::fontMetrics(std::string text) const 
+FontMetrics Painter::fontMetrics(Text::String text) const 
 {
 	this->begin();
 	return _painterImpl->fontMetrics(text);
@@ -119,7 +119,7 @@ void Painter::drawLine(const Math::Point& from, const Math::Point& to)
 }
 
 
-void Painter::drawText(const Math::Point& to, const std::string& text)
+void Painter::drawText(const Math::Point& to, const Text::String& text)
 {
 	this->begin();
 	_painterImpl->drawText(to, text);
@@ -179,7 +179,7 @@ void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 }
 
 
-void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Math::Rect& imageRect)
+void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Gfx::Region& imageRect)
 {
 	if (image.empty()) {
 		return;  // Don't try to draw empty images.
@@ -190,7 +190,7 @@ void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Mat
 }
 
 
-void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Math::Rect& fromRect)
+void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect)
 {
 	if (from.size().width() == 0 || from.size().height() == 0) {
 		return;  // Don't try to draw empty pixmaps.

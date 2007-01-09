@@ -8,7 +8,7 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 
-#include <string>
+#include <Pt/Text/String.h>
 
 namespace Pt {
 

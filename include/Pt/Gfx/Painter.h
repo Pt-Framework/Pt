@@ -8,6 +8,8 @@
 #include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Math/Size.h>
+#include <Pt/Gfx/Region.h>
+#include <Pt/Text/String.h>
 
 #include <cstddef>
 #include <string>
@@ -117,7 +119,7 @@ namespace Gfx {
 			 * @return The font metrics of the currently selected font.
 			 * @see fontMetrics(std::string)
 			 */
-			virtual FontMetrics fontMetrics(std::string text) const = 0;
+			virtual FontMetrics fontMetrics(Text::String text) const = 0;
 
 			/**
 			 * @brief Returns a list of installed font (family) names on the current platform and device.
@@ -168,7 +170,7 @@ namespace Gfx {
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText(const Math::Point& to, const std::string& text) = 0;
+			virtual void drawText(const Math::Point& to, const Text::String& text) = 0;
 
 			/**
 			 * @brief Draws a rectangle outline.
@@ -341,7 +343,7 @@ namespace Gfx {
 			 * @param imageRect Specifies the position and size of the segment that is to be cut out
 			 * of the image to be drawn at the specified position.
 			 */
-			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Math::Rect& imageRect) = 0;
+			virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect) = 0;
 	};
 
 } // namespace Gfx

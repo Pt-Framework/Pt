@@ -11,7 +11,7 @@ namespace Pt {
 
 namespace Gfx {
 
-Font::Font(string name, size_t size, FontStyle fontStyle, ssize_t angle, Direction direction)
+Font::Font(std::string name, size_t size, FontStyle fontStyle, ssize_t angle, Direction direction)
 : _name(name),
   _size(size),
   _fontStyle(fontStyle),
