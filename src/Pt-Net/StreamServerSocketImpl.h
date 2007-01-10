@@ -49,9 +49,15 @@ namespace Net
 
 				AddrInfo ai(ipaddr, port, hints);
 
+                int reuseAddr = 1;
+
 				for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
 				{
 					SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
+
+                    if (::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR,
+                          &reuseAddr, sizeof(reuseAddr)) < 0)
+                        throw Exception("setsockopt", PT_SOURCEINFO); // TODO Exception
 
 					int ret = ::bind(handle(), it->ai_addr, it->ai_addrlen);
 					if ( ret == 0 ) {
