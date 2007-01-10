@@ -144,6 +144,24 @@ namespace Pt {
 				inline uint16_t brightness() const
 				{ return (_r>=_g && _r>=_b) ? _r : ((_g>=_r && _g>=_b) ? _g : _b); }
 
+                inline BasicColor& operator*=( float factor )
+                {
+                    _a *= factor; 
+                    _r *= factor;
+                    _g *= factor;
+                    _b *= factor;                    
+                    return *this;
+                }
+                
+                inline BasicColor& operator+=( const BasicColor& color)
+                {
+                    _a += color._a;
+                    _r += color._r;
+                    _g += color._g;
+                    _b += color._b;                    
+                    return *this;
+                }                
+                
 				//! Set brightness
 				void setBrightness(uint16_t l);
 

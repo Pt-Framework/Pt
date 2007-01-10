@@ -455,14 +455,7 @@ namespace Text {
 			 * @brief Returns the internal value (unsigned 32 bits) of this character.
 			 * @return The 32-bit-value of this character.
 			 */
-			const uint32_t value() const
-			{ return _value; }
-
-			/**
-			 * @brief Returns the internal value (unsigned 32 bits) of this character.
-			 * @return The 32-bit-value of this character.
-			 */
-			uint32_t value()
+			uint32_t value() const
 			{ return _value; }
 
 			/**

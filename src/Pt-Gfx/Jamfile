@@ -1,6 +1,7 @@
 SubDir TOP src Pt-Gfx ;
 
 SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 
 SharedLibrary Pt-Gfx :
 	ARgb8888Color.cpp
@@ -27,6 +28,7 @@ SharedLibrary Pt-Gfx :
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text ;
+SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
@@ -40,5 +42,9 @@ Main_MakeLocate BlockscaleTest : bin ;
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
 Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate ImagePainterDemo : bin ;
+
+Main FontDemo : FontDemo.cpp ;
+Main_LinkSharedLibraries FontDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate FontDemo : bin ;
 
 SubInclude TOP src Pt-Gfx freetype ;

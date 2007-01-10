@@ -20,7 +20,6 @@
  ***************************************************************************/
 #ifndef PT_GFX_IMAGE_PAINTER_H
 #define PT_GFX_IMAGE_PAINTER_H
-
 #include <memory>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/ARgbImage.h>
@@ -84,6 +83,15 @@ class PT_API ImagePainter : public Painter
 
 
     private:
+        void drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt::uint32_t bmWidth, Pt::uint32_t bmHeight, Pt::uint32_t bmPitch );  
+        
+        void mixColor( ARgbColor& dst, ARgbColor src, float factor)
+        {
+            dst *= ( 1.0f - factor );
+            dst += ( src *= factor );            
+        }
+        
+       
         ARgbImage&                    		_image;
         Pen                                 _pen;
         Brush                               _brush;
