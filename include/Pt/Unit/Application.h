@@ -31,11 +31,11 @@ namespace Unit {
 
     /** @brief Run registered tests
 
-        The application class serves as an environment for a number of tests 
+        The application class serves as an environment for a number of tests
         to be run. An application object is usually created in the main loop
         of a program and the return value of Unit::Application::run returned.
-        A reporter can be set for the application to process test events. 
-        Reporters can be made to print information to the console or write 
+        A reporter can be set for the application to process test events.
+        Reporters can be made to print information to the console or write
         XML logs. A typical example may look like this:
 
         @code
@@ -70,7 +70,7 @@ namespace Unit {
             /** @brief Set Reporter for test events
 
                 Sets a new reporter to report test events. Caller owns the
-                reporter and must make sure it lives as long as the 
+                reporter and must make sure it lives as long as the
                 application.
 
                 @param reporter Reporeter to be used
@@ -83,7 +83,7 @@ namespace Unit {
                 Registers a test to the application. The application will
                 not own the test and the caller has to make sure it exists
                 as long as the application object. This method is called
-                by the RegisterTest class template and does not need to 
+                by the RegisterTest class template and does not need to
                 be called directly.
 
                 @param test Test to register
@@ -96,12 +96,13 @@ namespace Unit {
                 connect(test.assertion, &Application::assertion);
                 connect(test.exception, &Application::exception);
                 connect(test.error, &Application::error);
+                connect(test.message, &Application::message);
                 _allTests.push_back(&test);
             }
 
             /** @brief Run all tests
 
-                This method will run all tests that have been regietered 
+                This method will run all tests that have been regietered
                 previously. Use the RegisterTest<T> template to register
                 a test to the application. The function will return the
                 number of failed tests, so that its return value can directly
@@ -126,8 +127,8 @@ namespace Unit {
 
                 This method will a previously registered tests. Use the
                 RegisterTest<T> template to register a test to the application.
-                The function will return the number of failed tests, so that 
-                its return value can directly be used to return from the main 
+                The function will return the number of failed tests, so that
+                its return value can directly be used to return from the main
                 function.
 
                 @param testName name of the test to be run
@@ -223,7 +224,7 @@ namespace Unit {
 
             /** @brief Process informational messages
             */
-            static void message( const std::string msg )
+            static void message(const std::string& msg)
             {
                 if(_reporter)
                     _reporter->message(msg);
