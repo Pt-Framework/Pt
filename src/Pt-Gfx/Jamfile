@@ -33,7 +33,6 @@ SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
 Main_LinkSharedLibraries GreyscaleTest : Pt Pt-Text Pt-Gfx ;
-SharedLibrary_LinkLibraries GreyscaleTest : Pt-Gfx-freetype ;
 Main_MakeLocate GreyscaleTest : bin ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
