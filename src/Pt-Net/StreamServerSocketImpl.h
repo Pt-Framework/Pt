@@ -27,7 +27,6 @@
 #include "StreamSocketImpl.h"
 #include "Pt/Types.h"
 
-
 namespace Pt
 {
 namespace Net
@@ -68,7 +67,7 @@ namespace Net
 					this->close();
 				}
 
-				throw Exception("connect", PT_SOURCEINFO); //TODO: Exception
+				throw Exception("bind", PT_SOURCEINFO); //TODO: Exception
 			}	
 		
 			void listen(unsigned backlog)

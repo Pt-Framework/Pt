@@ -145,17 +145,22 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
     FT_Attach_File( face, "\\WINDOWS\\tahoma" );
-#else
+#elif defined(WIN32)
     if( FT_New_Face( ft, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, &face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
     FT_Attach_File( face, "c:\\WINDOWS\\fonts\\tahoma" );
-#endif    
+#else
+    if( FT_New_Face( ft, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf", 0, &face ) )
+        throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
+
+    FT_Attach_File( face, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans" );
+#endif
 
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
             
-    FT_Set_Char_Size( face, size<< 6, size << 6, 72, 72 );
+    FT_Set_Char_Size( face, (size+2) << 6, (size+2) << 6, 72, 72 );
         
     FT_GlyphSlot slot     = face->glyph;
     FT_UInt      previous = 0;
@@ -290,9 +295,9 @@ void ImagePainter::drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt:
             
             float af = col / 255.0f;
             
-           // _image.pixel(dsx, dsy)  = ARgbColor( 0, 0 ,0 );
+           //_image.pixel(dsx, dsy)  = ARgbColor( 0, 0 ,0 );
            
-            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );                                                    
+            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );
         }
     }                 
 }
