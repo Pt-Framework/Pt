@@ -83,6 +83,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\include\Pt\Unit\TestContext.h"
+			>
+		</File>
+		<File
 			RelativePath=".\include\Pt\Unit\TestFixture.h"
 			>
 		</File>

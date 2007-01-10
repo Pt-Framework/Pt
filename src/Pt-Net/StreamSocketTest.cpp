@@ -19,6 +19,9 @@
 #include <string>
 
 #include "Pt/System/Thread.h"
+#include "Pt/System/Mutex.h"
+#include "Pt/System/MutexLock.h"
+#include "Pt/System/Condition.h"
 
 #include "Pt/Net/StreamSocket.h"
 #include "Pt/Net/StreamServerSocket.h"
@@ -29,36 +32,54 @@
 #include "Pt/Unit/RegisterTest.h"
 
 
-class StreamServer : public Pt::System::Thread
+//TODO: put condition in SreamSocketTest
+class ServerThread : public Pt::System::Thread
 {
 	public:
-		StreamServer(const std::string& ipaddr, short port)
-		: _ipaddr(ipaddr), _port(port)
-		{ }
+		ServerThread(const std::string& ipaddr, short port)
+		: _server(ipaddr, port)
+		{ 
+			_mutex.lock(); 
+		}
 
-		
+		~ServerThread()
+		{ 
+			_mutex.unlock(); 
+		}
+			
 		const std::string& receivedData() const
 		{ return _receivedData; }
+
+		void waitReady()
+		{
+			_ready.wait(_mutex);
+		}
 
 	protected:
 		void run()
 		{
-			_server.listen(_ipaddr, _port);
-
+			this->signalReady();
+			
 			Pt::Net::StreamSocket socket(_server);
 			char buffer[80];
 			socket.read(buffer, 80);
-			
 			_receivedData.assign(buffer, 2);
-			
+
 			socket.write("Bye", 4);
+			this->signalReady();
 		}
 
-
+	protected:
+		void signalReady()
+		{
+			Pt::System::MutexLock lock(_mutex);					
+			_ready.signal();
+		}
+			
 	private:
-		std::string _ipaddr;
-		short _port;
 		Pt::Net::StreamServerSocket _server;
+		Pt::System::Condition _ready;
+		Pt::System::Mutex _mutex;
 		std::string _receivedData;
 };
 
@@ -73,22 +94,20 @@ class StreamSocketTest : public Pt::Unit::TestCase
 
 		void setUp()
 		{
-			_server= new StreamServer("127.0.0.1", 8080);
+			_server = new ServerThread("127.0.0.1", 8080);
 			_server->start();
-			Pt::System::Thread::sleep(200);
+			_server->waitReady();
 		}
 		
 		void test()
 		{
 			Pt::Net::StreamSocket socket("127.0.0.1", 8080);
 			socket.write("Hi", 3);
-			Pt::System::Thread::sleep(200);
-			
+			_server->waitReady();
 			PT_UNIT_ASSERT(_server->receivedData() == "Hi");
-			
+					
 			char buffer[80];
 			socket.read(buffer, 80);
-			
 			PT_UNIT_ASSERT( std::string(buffer, 3) == "Bye" );
 		}
 		
@@ -99,7 +118,7 @@ class StreamSocketTest : public Pt::Unit::TestCase
 		}
 		
 	private:
-		StreamServer* _server;
+		ServerThread* _server;
 };
 
 Pt::Unit::RegisterTest<StreamSocketTest> register_StreamSocketTest;

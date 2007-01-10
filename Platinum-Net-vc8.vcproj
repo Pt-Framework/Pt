@@ -83,14 +83,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\src\Pt-Net\SocketImpl.posix.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\src\Pt-Net\SocketImpl.win32.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\src\Pt-Net\StreamServerSocket.cpp"
 			>
 		</File>
@@ -103,14 +95,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\src\Pt-Net\StreamServerSocketImpl.posix.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\src\Pt-Net\StreamServerSocketImpl.win32.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\src\Pt-Net\StreamSocket.cpp"
 			>
 		</File>
@@ -120,14 +104,6 @@
 		</File>
 		<File
 			RelativePath=".\src\Pt-Net\StreamSocketImpl.h"
-			>
-		</File>
-		<File
-			RelativePath=".\src\Pt-Net\StreamSocketImpl.posix.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\src\Pt-Net\StreamSocketImpl.win32.cpp"
 			>
 		</File>
 		<File
