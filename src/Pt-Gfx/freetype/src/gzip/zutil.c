@@ -49,6 +49,21 @@ void zmemzero(dest, len)
 }
 #endif
 
+#ifdef DEBUG
+
+#  ifndef verbose
+#    define verbose 0
+#  endif
+int z_verbose = verbose;
+
+void z_error (m)
+    char *m;
+{
+    fprintf(stderr, "%s\n", m);
+    exit(1);
+}
+#endif
+
 #ifdef __TURBOC__
 #if (defined( __BORLANDC__) || !defined(SMALL_MEDIUM)) && !defined(__32BIT__)
 /* Small and medium model in Turbo C are for now limited to near allocation

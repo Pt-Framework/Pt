@@ -19,7 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "freetype/include/ft2build.h"
-#include "freetype/include/freetype/ftoutln.h"
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
@@ -134,11 +133,13 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 
 void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 {
+
     FT_Library  ft;
     FT_Face     face;
     int size = 28;
-    
+
     FT_Init_FreeType( &ft );
+
 #ifdef _WIN32_WCE    
     if( FT_New_Face( ft, "\\WINDOWS\\tahoma.ttf", 0, &face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
