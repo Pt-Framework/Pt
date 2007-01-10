@@ -146,10 +146,10 @@ namespace Pt {
 
                 inline BasicColor& operator*=( float factor )
                 {
-                    _a *= factor; 
-                    _r *= factor;
-                    _g *= factor;
-                    _b *= factor;                    
+                    _a *= static_cast<Pt::uint16_t>( factor ); 
+                    _r *= static_cast<Pt::uint16_t>( factor );
+                    _g *= static_cast<Pt::uint16_t>( factor );
+                    _b *= static_cast<Pt::uint16_t>( factor );
                     return *this;
                 }
                 
