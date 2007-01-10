@@ -26,27 +26,27 @@ namespace Gfx{
 
 ClipConvexPolygon::ClipConvexPolygon()
 { }
-    
+
 ClipConvexPolygon::~ClipConvexPolygon()
 {}
-    
-void ClipConvexPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )                    
+
+void ClipConvexPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )
 {
     std::vector<Pt::Math::Point> buffer;
-    
+
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
 
     in.clear();
     clipEdge( buffer, in, clippingArea.bottomLeft(), clippingArea.bottomRight() );
-    
+
     buffer.clear();
     clipEdge( in, buffer, clippingArea.bottomRight(), clippingArea.topRight() );
-    
+
     in.clear();
     clipEdge( buffer, in, clippingArea.topRight(), clippingArea.topLeft() );
-}    
-    
-void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<Pt::Math::Point>& out,  
+}
+
+void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<Pt::Math::Point>& out,
                  Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1)
 {
     if( in.empty() )
@@ -55,13 +55,13 @@ void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::v
     Pt::Math::Point p;
     Pt::Math::Point i;
     Pt::Math::Point s = in[ in.size() - 1 ];
-    
+
     for( size_t j = 0; j < in.size(); ++j )
-    {   
+    {
         p = in[j];
         if( inside( p, edgePoint0, edgePoint1 ))
         {
-            if( inside( s, edgePoint0, edgePoint1 ))  
+            if( inside( s, edgePoint0, edgePoint1 ))
             {
                 out.push_back( p );
             }
@@ -78,8 +78,8 @@ void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::v
             {
                 i = intersect( s, p, edgePoint0, edgePoint1 );
                 out.push_back( i );
-            }                                
-        }     
+            }
+        }
         s = p;
     }
 }
@@ -87,30 +87,30 @@ void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::v
 Pt::Math::Point ClipConvexPolygon::intersect( const Pt::Math::Point& from, const Pt::Math::Point& to, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
 {
     Pt::Math::Point p;
-    
+
     if( edge0.y() == edge1.y() )
-    {            
+    {
         p.setX(  from.x() + ( to.x() - from.x() ) * ( edge0.y() - from.y() ) / ( to.y() - from.y() ) );
-        p.setY( edge0.y() );  
+        p.setY( edge0.y() );
     }
-    
+
     if( edge0.x() == edge1.x() )
     {
         p.setY( from.y() + ( to.y() - from.y() ) * ( edge0.x() - from.x() ) / ( to.x() - from.x() ) );
-        p.setX( edge0.x() );        
+        p.setX( edge0.x() );
     }
-    
+
     return p;
 }
 
 bool ClipConvexPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
-{        
+{
     /*
-    return ((( edge0.x() == edge1.x() ) && ((( edge0.y() < edge1.y() ) && ( p.x() > edge0.x() )) || 
+    return ((( edge0.x() == edge1.x() ) && ((( edge0.y() < edge1.y() ) && ( p.x() > edge0.x() )) ||
            ((  edge0.y() >= edge1.y() ) && ( p.x() < edge1.x() ))))  ||
            ((  edge0.y() == edge1.y() ) && ((( edge0.x() < edge1.x() ) && ( p.y() < edge0.y() )) ||
            ((  edge0.x() >= edge1.x() ) && ( p.y() > edge0.y() )))) ); */
-        
+
     if( edge0.x() == edge1.x())
     {  //Vertical
         if( edge0.y() < edge1.y())
@@ -122,8 +122,8 @@ bool ClipConvexPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point&
             return p.x() < edge1.x();
         }
     }
-    
-    if( edge0.y() == edge1.y() )        
+
+    if( edge0.y() == edge1.y() )
     {//Horizontal
         if(  edge0.x() < edge1.x() )
         {//Top is inside.

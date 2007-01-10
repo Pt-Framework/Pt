@@ -26,7 +26,7 @@
 
 
 namespace std {
-	class PT_API ios_base;
+	class ios_base;
 }
 
 namespace Pt {
