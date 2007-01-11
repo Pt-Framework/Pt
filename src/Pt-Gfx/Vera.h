@@ -6603,7 +6603,7 @@ static const unsigned char vera[] = {
 0x0, 0x0
 };
 
-static size_t veraSize = 65932;
+static const size_t veraSize = 65932;
 
 }
 

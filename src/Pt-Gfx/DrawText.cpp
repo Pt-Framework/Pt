@@ -83,10 +83,13 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
        
     for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
+        // 1.7e-05
         FT_UInt glyph_index = FT_Get_Char_Index( _face, it->value() );
 
         if( !glyph_index )
             continue;
+
+        // 1.9e-05
 
         if( FT_HAS_KERNING( _face ) && previous )
         {            
@@ -95,8 +98,12 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
             glyphPos.y -= delta.y >> 6;
         }
 
+        // 1.9e-05
+
         if( FT_Load_Glyph( _face, glyph_index, FT_LOAD_RENDER ) )
             continue;
+
+        // 0.00025
 
         incX = slot->advance.x >> 6;
         incY = slot->advance.y >> 6;
@@ -112,12 +119,16 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
             drawGlyph( image, *backGround, glyphPos.x + slot->bitmap_left - 1, glyphPos.y - slot->bitmap_top - 1, slot->bitmap );            
             drawGlyph( image, *backGround, glyphPos.x + slot->bitmap_left - 1, glyphPos.y - slot->bitmap_top + 1, slot->bitmap );             
         }
-        
+
+        // 0.00075
+  
         drawGlyph( image, pen.color(), glyphPos.x + slot->bitmap_left, glyphPos.y - slot->bitmap_top, slot->bitmap );
         
         glyphPos.x  += incX;
         glyphPos.y  -= incY;
-        previous    = glyph_index;        
+        previous    = glyph_index;
+
+        // 0.00084      
     }        
 }
 
@@ -134,22 +145,38 @@ void DrawText::draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, c
 
 void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPosX, int glyphPosY, FT_Bitmap& bm )
 {
-    Pt::uint8_t* bitmap =  bm.buffer;
-    int          bmWidth  = bm.width;
-    int          bmPitch  = bm.pitch;
-    int          bmHeight = bm.rows;
+    const Pt::uint8_t* bitmap =  bm.buffer;
+    const int          bmWidth  = bm.width;
+    int                bmPitch  = bm.pitch;
+    const int          bmHeight = bm.rows;
     
-    Pt::ssize_t x1 = 0;
-    Pt::ssize_t x2 = image.width() - 1;
-    Pt::ssize_t y1 = 0;
-    Pt::ssize_t y2 = image.height() - 1;
+    const Pt::ssize_t x1 = 0;
+    const Pt::ssize_t x2 = image.width() - 1;
+    const Pt::ssize_t y1 = 0;
+    const Pt::ssize_t y2 = image.height() - 1;
 
     if( bmPitch < bmWidth)
         bmPitch += bmWidth;
 
-    int dsy = glyphPosY;
+    /*int numpix = bmWidth;
+    int numrows = bmHeight;
 
-    for( Pt::uint32_t y = 0; y < bmHeight; y++, dsy++ )
+    const int maxX = glyphPosX + bmWidth;
+    if(maxX > x2)
+    {
+        numpix = bmWidth - (maxX - x2);
+        if(numpix < 0) numpix = 0;
+    }
+
+    const int maxY = glyphPosY + bmWidth;
+    if(maxY > y2)
+    {
+        numrows = bmHeight - (maxY - y2);
+        if(numrows < 0) numrows = 0;
+    }*/
+
+    int dsy = glyphPosY;       
+    for( Pt::uint32_t y = 0; y < bmHeight; ++y, ++dsy )
     {
         if( dsy < y1 )
             continue;
@@ -157,11 +184,10 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPo
         if( dsy > y2 )
             break;
 
-        Pt::uint32_t yOffset = y * bmPitch;
+        const Pt::uint32_t yOffset = y * bmPitch;
 
         int dsx = glyphPosX;
-
-        for( Pt::uint32_t x = 0; x < bmWidth; x++, dsx++ )
+        for( Pt::uint32_t x = 0; x < bmWidth; ++x, ++dsx )
         {
             if( dsx < x1 )
                 continue;
@@ -170,15 +196,17 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPo
                 break;
 
             const Pt::uint8_t col = bitmap[ yOffset + x ];
+            if( col )
+            {
+                //image.pixel(dsx, dsy) = color;
+                //mixColor( image.pixel(dsx, dsy), color, col / 255.0f );
+                mixColor( image.pixel(dsx, dsy), color, col );
+            }
 
-            if( !col )
-                continue;
-                      
-            //image.pixel(dsx, dsy) = color;
-            mixColor( image.pixel(dsx, dsy), color, col / 255.0f );                                                    
         }
     }
 }
 
 } //namespace Pt
+
 } //namespace Gfx

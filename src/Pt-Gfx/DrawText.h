@@ -55,7 +55,21 @@ class DrawText
             dst *= ( 1.0f - factor );
             dst += ( src *= factor );
          }
-                 
+         
+        inline void mixColor( ARgbColor& dst, const ARgbColor& src, unsigned char factor)
+        {
+            const unsigned char rfactor(255 - factor);
+
+            dst.setRed( (( dst.red() * rfactor ) / 255)
+                      + (( src.red() * factor)   / 255) );
+
+            dst.setGreen( (( dst.green() * rfactor ) / 255)
+                        + (( src.green() * factor)   / 255) );
+
+            dst.setBlue( (( dst.blue() * rfactor ) / 255)
+                       + (( src.blue() * factor)   / 255) );
+        }
+               
          FT_Library  _ft;
          FT_Face     _face; 
          Font        _font;   
