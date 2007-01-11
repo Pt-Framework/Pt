@@ -1,0 +1,26 @@
+SubDir TOP src Pt-Db ;
+
+SubDirHdrs $(TOP)/include ;
+
+SharedLibrary Pt-Db : Connection.cpp
+                      Result.cpp
+                      ResultImpl.cpp
+                      Row.cpp
+                      RowImpl.cpp
+                      Statement.cpp
+                      ValueImpl.cpp
+                    ;
+SharedLibrary_LinkSharedLibraries Pt-Db : Pt-IO Pt ;
+SharedLibrary_LinkLibraries Pt-Db : Pt-Db-sqlite ;
+SharedLibrary_MakeLocate Pt-Db : bin ;
+
+#PtUnitTest ResultImplTest : ResultImplTest.cpp : $(PPR_BINDIR) ;
+#Main_LinkSharedLibraries ResultImplTest : Pt-Db Pt ;
+
+#PtUnitTest RowImplTest : RowImplTest.cpp : $(PPR_BINDIR) ;
+#Main_LinkSharedLibraries RowImplTest : Pt-Db Pt ;
+
+#PtUnitTest ValueImplTest : ValueImplTest.cpp : $(PPR_BINDIR) ;
+#Main_LinkSharedLibraries ValueImplTest : Pt-Db Pt ;
+
+SubInclude TOP src Pt-Db sqlite ;
