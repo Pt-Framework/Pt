@@ -144,23 +144,27 @@ namespace Pt {
 				inline uint16_t brightness() const
 				{ return (_r>=_g && _r>=_b) ? _r : ((_g>=_r && _g>=_b) ? _g : _b); }
 
-                inline BasicColor& operator*=( float factor )
-                {
-                    _a *= static_cast<Pt::uint16_t>( factor ); 
-                    _r *= static_cast<Pt::uint16_t>( factor );
-                    _g *= static_cast<Pt::uint16_t>( factor );
-                    _b *= static_cast<Pt::uint16_t>( factor );
-                    return *this;
-                }
-                
-                inline BasicColor& operator+=( const BasicColor& color)
-                {
-                    _a += color._a;
-                    _r += color._r;
-                    _g += color._g;
-                    _b += color._b;                    
-                    return *this;
-                }                
+				/** Deprecated
+				*/
+        inline BasicColor& operator*=( float factor )
+        {
+            _a *= static_cast<Pt::uint16_t>( factor );
+            _r *= static_cast<Pt::uint16_t>( factor );
+            _g *= static_cast<Pt::uint16_t>( factor );
+            _b *= static_cast<Pt::uint16_t>( factor );
+            return *this;
+        }
+
+        /** Deprecated
+				*/
+        inline BasicColor& operator+=( const BasicColor& color)
+        {
+            _a += color._a;
+            _r += color._r;
+            _g += color._g;
+            _b += color._b;
+            return *this;
+        }
                 
 				//! Set brightness
 				void setBrightness(uint16_t l);
@@ -175,7 +179,9 @@ namespace Pt {
 
 		inline void greyscale(ARgbColor& color)
 		{
-			const Pt::uint16_t _f = static_cast<uint16_t>( color.red()*0.3f + color.green()*0.5f + color.blue()*0.2f );
+			const Pt::uint16_t _f = static_cast<uint16_t>( color.red()*0.3f +
+			                                               color.green()*0.5f +
+			                                               color.blue()*0.2f );
 			color.setAlpha( color.alpha() );
 			color.setRed(_f);
 			color.setGreen(_f);
@@ -197,7 +203,9 @@ namespace Pt {
 
 				inline void operator()(Color& to, const Color& from) const
 				{
-					const Pt::uint16_t _f = static_cast<uint16_t>(from.red()*0.3f + from.green()*0.5f + from.blue()*0.2f);
+					const Pt::uint16_t _f = static_cast<uint16_t>(from.red()*0.3f +
+					                                              from.green()*0.5f +
+					                                              from.blue()*0.2f);
 					to.setAlpha( from.alpha() );
 					to.setRed(_f);
 					to.setGreen(_f);

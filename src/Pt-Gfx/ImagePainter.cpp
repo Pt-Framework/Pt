@@ -139,7 +139,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     int size = 28;
 
     FT_Init_FreeType( &ft );
-
+// TODO: Implment font locator
 #ifdef _WIN32_WCE
     if( FT_New_Face( ft, "\\WINDOWS\\tahoma.ttf", 0, &face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
@@ -151,9 +151,9 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     FT_Attach_File( face, "c:\\WINDOWS\\fonts\\tahoma" );
 #else
-    //if( FT_New_Face( ft, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf", 0, &face ) )
-    if( FT_New_Face( ft, "/usr/share/fonts/bitstream-vera/Vera.ttf", 0, &face ) )
-        throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
+    if( FT_New_Face( ft, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf", 0, &face ) )
+        if( FT_New_Face( ft, "/usr/share/fonts/bitstream-vera/Vera.ttf", 0, &face ) )
+            throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
     //FT_Attach_File( face, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans" );
 #endif
