@@ -22,7 +22,7 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include "vera.h"
+#include "Vera.h"
 #include "Pt/Gfx/ImagePainter.h"
 #include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
