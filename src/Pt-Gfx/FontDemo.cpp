@@ -49,7 +49,7 @@ class FontDemo : public Pt::Gui::Widget
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
     {       
-        _imagePainter.drawText(Math::Point( 20, 40), L"Hallo PTV!");
+        _imagePainter.drawText(Math::Point( 20, 40), L"ABCDEFGHKLMNPOQRSTVWYXZ");
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
     }
 

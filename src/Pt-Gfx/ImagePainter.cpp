@@ -139,7 +139,12 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     FT_Face     face;
     int size = 28;
 
+
     FT_Init_FreeType( &ft );
+/*
+    if( FT_New_Memory_Face(ft, arial, arialSize, 0, &face) )
+        throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );*/
+    
 // TODO: Implment font locator
 #ifdef _WIN32_WCE
     if( FT_New_Face( ft, "\\WINDOWS\\tahoma.ttf", 0, &face ) )
@@ -161,7 +166,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
 
-    FT_Set_Char_Size( face, (size+2) << 6, (size+2) << 6, 72, 72 );
+    FT_Set_Char_Size( face, size<<6, size<< 6, 72, 72 );
 
     FT_GlyphSlot slot     = face->glyph;
     FT_UInt      previous = 0;
@@ -310,11 +315,11 @@ void ImagePainter::drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt:
             if( !col )
                 continue;
 
-            //float af = col / 255.0f;
+            float af = col / 255.0f;
             
-            _image.pixel(dsx, dsy)  = _pen.color();
+           // _image.pixel(dsx, dsy)  = _pen.color();
            
-           // mixColor( _image.pixel(dsx, dsy), _pen.color(), af );                                                    
+            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );                                                    
         }
     }
 }
