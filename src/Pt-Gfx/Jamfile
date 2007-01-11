@@ -27,7 +27,7 @@ SharedLibrary Pt-Gfx :
 
 	;
 
-SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text ;
+SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;
 SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
