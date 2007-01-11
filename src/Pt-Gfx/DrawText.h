@@ -58,16 +58,13 @@ class DrawText
          
         inline void mixColor( ARgbColor& dst, const ARgbColor& src, unsigned char factor)
         {
+            // factor says how much src color we want and rfactor how much
+            // dst color to mix in.
             const unsigned char rfactor(255 - factor);
 
-            dst.setRed( (( dst.red() * rfactor ) / 255)
-                      + (( src.red() * factor)   / 255) );
-
-            dst.setGreen( (( dst.green() * rfactor ) / 255)
-                        + (( src.green() * factor)   / 255) );
-
-            dst.setBlue( (( dst.blue() * rfactor ) / 255)
-                       + (( src.blue() * factor)   / 255) );
+            dst.setRed( (( dst.red() * rfactor ) + ( src.red() * factor)) >> 8 );
+            dst.setGreen( (( dst.green() * rfactor ) + ( src.green() * factor)) >> 8 );
+            dst.setBlue( (( dst.blue() * rfactor ) + ( src.blue() * factor)) >> 8 );
         }
                
          FT_Library  _ft;
