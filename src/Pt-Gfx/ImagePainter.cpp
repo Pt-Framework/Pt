@@ -22,7 +22,7 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include "arial.h"
+#include "vera.h"
 #include "Pt/Gfx/ImagePainter.h"
 #include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
@@ -143,7 +143,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     FT_Init_FreeType( &ft );
 
-    if( FT_New_Memory_Face(ft, arial, arialSize, 0, &face) )
+    if( FT_New_Memory_Face(ft, vera, veraSize, 0, &face) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
     
 // TODO: Implment font locator
