@@ -22,6 +22,7 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
+#include "arial.h"
 #include "Pt/Gfx/ImagePainter.h"
 #include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
@@ -141,11 +142,12 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
 
     FT_Init_FreeType( &ft );
-/*
+
     if( FT_New_Memory_Face(ft, arial, arialSize, 0, &face) )
-        throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );*/
+        throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
     
 // TODO: Implment font locator
+/*
 #ifdef _WIN32_WCE
     if( FT_New_Face( ft, "\\WINDOWS\\tahoma.ttf", 0, &face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
@@ -163,6 +165,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     //FT_Attach_File( face, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans" );
 #endif
+*/
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
 
