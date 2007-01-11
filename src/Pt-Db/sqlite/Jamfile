@@ -1,0 +1,77 @@
+SubDir TOP src Pt-Db sqlite ;
+
+SubDirHdrs $(TOP)/include ;
+
+# sqlite.org's codebase has a file for the OSm specific code.
+# On wince the file is identical to win32 and has lots of ifdefs.
+#
+if $(TARGET_OS:L) = wince
+{
+	# only the C++ compiler seemed to define _WIN32_WC, but not the
+	# C compiler ??? -marc 
+	CCFLAGS += /D_WIN32_WCE ;
+	OS_SOURCES = [ FDirName os_win32.c ] ;
+}
+else
+{
+	OS_SOURCES = [ FDirName os_$(SYS:L).c ] ;
+}
+
+PT_SQLITE_SOURCES = alter.c
+                    analyze.c
+                    attach.c
+                    auth.c
+                    btree.c
+                    build.c
+                    callback.c
+                    complete.c
+                    date.c
+                    delete.c
+                    expr.c
+                    func.c
+                    hash.c
+                    insert.c
+                    legacy.c
+                    loadext.c
+                    main.c
+                    opcodes.c
+                    os.c
+                    $(OS_SOURCES) 
+                    pager.c
+                    parse.c
+                    pragma.c
+                    prepare.c
+                    printf.c
+                    random.c
+                    select.c
+                    #shell.c
+                    table.c
+                    tokenize.c
+                    trigger.c
+                    update.c
+                    utf.c
+                    util.c
+                    vacuum.c
+                    vdbe.c
+                    vdbeapi.c
+                    vdbeaux.c
+                    vdbefifo.c
+                    vdbemem.c
+                    vtab.c
+                    where.c
+                    ;
+
+PT_SQLITE_SOURCES += Connection.cpp 
+                     Connector.cpp
+                     Cursor.cpp
+                     Statement.cpp
+                     StmtRow.cpp
+                     StmtValue.cpp
+                   ;
+
+Library Pt-Db-sqlite : $(PT_SQLITE_SOURCES) ;
+Library_MakeLocate Pt-Db-sqlite : bin ;
+
+#PtUnitTest SqliteTest : SqliteTest.cpp : $(PPR_BINDIR) ;
+#Main_LinkLibraries SqliteTest : ptv-db-sqlite ptv-db-static ptv-db-sqlite ptv-db-static 
+#                                ptv-system-static ptv-io-static ptv-static ;
