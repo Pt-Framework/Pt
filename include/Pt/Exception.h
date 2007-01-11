@@ -192,6 +192,23 @@ namespace Pt {
 			~IllegalArgument() throw();
 	};
 
+
+    /** @brief This indicates that a resource could not be accessed.
+        @ingroup ptv
+
+        An exception of class AccessError is used to report failed access
+        to a resource due to missing authorization, mising access rights
+        or if a resource is in an otherwise inaccessible state.
+        This class implements Exception.
+    */
+    class PT_API AccessError : public LogicError {
+        public:
+            //! @see Exception()
+            AccessError(const std::string& what, const SourceInfo& si) throw();
+
+            //! @brief Destructor.
+            ~AccessError() throw();
+    };
 } // namespace Pt
 
 #endif

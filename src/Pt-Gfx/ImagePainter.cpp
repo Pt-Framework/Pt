@@ -164,19 +164,29 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     FT_Attach_File( face, "c:\\WINDOWS\\fonts\\comic" );
 #else
-    if( FT_New_Face( ft, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf", 0, &face ) )
+    if( FT_New_Face( ft, "/usr/share/fonts/truetype/freefont/FreeSans.ttf", 0, &face ) )
         if( FT_New_Face( ft, "/usr/share/fonts/bitstream-vera/Vera.ttf", 0, &face ) )
             throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
+<<<<<<< .mine
+    FT_Attach_File( face, "/usr/share/fonts/truetype/freefont/FreeSans" );
+=======
     //FT_Attach_File( face, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans" );
+>>>>>>> .r427
 #endif
 */
 /*
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
+<<<<<<< .mine
+            
+    FT_Set_Char_Size( face, size<< 6, size << 6, 72, 72 );
+        
+=======
 
     FT_Set_Char_Size( face, size<<6, size<< 6, 72, 72 );
 
+>>>>>>> .r427
     FT_GlyphSlot slot     = face->glyph;
     FT_UInt      previous = 0;
     size_t border = 1;
@@ -325,10 +335,9 @@ void ImagePainter::drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt:
                 continue;
 
             float af = col / 255.0f;
-            
+
            // _image.pixel(dsx, dsy)  = _pen.color();
-           
-            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );                                                    
+            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );
         }
     }
 }

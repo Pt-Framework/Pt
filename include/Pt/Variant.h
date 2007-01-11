@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2004-2006 by Marc Boris Drner                          *
  *   Copyright (C) 2004-2006 by Stepan Beal                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -42,6 +42,16 @@ namespace Pt {
 			Variant(const Variant & variant) throw()
 			: _data(variant._data)
 			{ }
+
+            Variant(const void* blob, int byteCount) throw()
+            {
+                _data.assign((const char*)blob, byteCount);
+            }
+
+            void assign(const void* blob, int byteCount) throw()
+            {
+                _data.assign((const char*)blob, byteCount);
+            }
 
 			template <typename T>
 			bool get(T& type) const throw()

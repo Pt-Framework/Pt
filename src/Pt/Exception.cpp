@@ -112,4 +112,15 @@ IllegalArgument::IllegalArgument(const std::string& what, const SourceInfo& si) 
 IllegalArgument::~IllegalArgument() throw()
 { }
 
+
+
+
+AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
+: LogicError(what, si)
+{ }
+
+
+AccessError::~AccessError() throw()
+{ }
+
 } // namespace Ptv

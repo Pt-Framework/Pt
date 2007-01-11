@@ -3,15 +3,12 @@ SubDir TOP src ;
 SubInclude TOP src Pt ;
 SubInclude TOP src Pt-IO ;
 SubInclude TOP src Pt-System ;
+SubInclude TOP src Pt-Net ;
+SubInclude TOP src Pt-Db ;
 SubInclude TOP src Pt-Gfx ;
 SubInclude TOP src Pt-Gfx2 ;
 SubInclude TOP src Pt-Gui ;
 SubInclude TOP src Pt-Text ;
-
-#if $(SYS:L) = posix
-#{
-    SubInclude TOP src Pt-Net ;
-#}
 
 if $(TARGET_OS:L) != wince
 {
