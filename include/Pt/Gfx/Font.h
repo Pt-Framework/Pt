@@ -34,6 +34,7 @@ namespace Gfx {
 				FontStyle   fontStyle = NormalStyle,
 				ssize_t     angle     = 0,
 				Direction   direction = LeftToRightDirection
+				
 			);
 
 			std::string name() const;
@@ -51,7 +52,7 @@ namespace Gfx {
 			size_t      _size;
 			FontStyle   _fontStyle;
 			ssize_t     _angle;
-			Direction   _direction;
+			Direction   _direction;		
 	};
 
 	inline bool operator==(const Font& a, const Font& b)

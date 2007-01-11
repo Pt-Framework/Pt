@@ -38,6 +38,7 @@
 #include "DrawThinPolyline.h"
 #include "DrawThickPolyline.h"
 #include "FillConvexPolygon.h"
+#include "DrawText.h"
 #include <cmath>
 #include <Pt/System/Clock.h>
 
@@ -54,6 +55,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThinPolyline( new DrawThinPolyline() )
 , _drawThickPolyline( new DrawThickPolyline() )
 , _fillConvexPolygon( new FillConvexPolygon() )
+, _drawText( new DrawText() )
 {
      _drawLine      = _drawThinLine.get();
      _drawPolyline  = _drawThinPolyline.get();
@@ -96,6 +98,7 @@ const Brush& ImagePainter::brush() const
 
 void ImagePainter::setFont(const Font& font)
 {
+    _drawText->setFont(font);
 
 }
 const Font& ImagePainter::font() const
@@ -135,7 +138,9 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 
 void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 {
-
+    _drawText->draw( _image, _pen,  to, text, ARgbColor(0xffff,0xffff,0xffff) );
+    
+/*
     FT_Library  ft;
     FT_Face     face;
     int size = 28;
@@ -145,7 +150,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     if( FT_New_Memory_Face(ft, vera, veraSize, 0, &face) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
-    
+  
 // TODO: Implment font locator
 /*
 #ifdef _WIN32_WCE
@@ -154,10 +159,10 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     FT_Attach_File( face, "\\WINDOWS\\tahoma" );
 #elif defined(WIN32)
-    if( FT_New_Face( ft, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, &face ) )
+    if( FT_New_Face( ft, "c:\\WINDOWS\\fonts\\comic.ttf", 0, &face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
-    FT_Attach_File( face, "c:\\WINDOWS\\fonts\\tahoma" );
+    FT_Attach_File( face, "c:\\WINDOWS\\fonts\\comic" );
 #else
     if( FT_New_Face( ft, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf", 0, &face ) )
         if( FT_New_Face( ft, "/usr/share/fonts/bitstream-vera/Vera.ttf", 0, &face ) )
@@ -166,6 +171,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     //FT_Attach_File( face, "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans" );
 #endif
 */
+/*
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
 
@@ -276,7 +282,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     
     std::cerr<< "Font Time: " << (double) time.seconds() + time.microSeconds() / 1000000.0<< std::endl;
     FT_Done_Face( face );
-    FT_Done_FreeType( ft );
+    FT_Done_FreeType( ft );*/
 }
 
 void ImagePainter::drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt::uint32_t bmWidth, Pt::uint32_t bmHeight, Pt::uint32_t bmPitch )

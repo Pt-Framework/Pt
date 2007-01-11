@@ -43,6 +43,7 @@ class DrawThinPolyline;
 class DrawThickPolyline;
 
 class FillConvexPolygon;
+class DrawText;
 
 class PT_API ImagePainter : public Painter
 {
@@ -104,6 +105,7 @@ class PT_API ImagePainter : public Painter
         std::auto_ptr<DrawThinPolyline>     _drawThinPolyline;
         std::auto_ptr<DrawThickPolyline>    _drawThickPolyline;
         std::auto_ptr<FillConvexPolygon>    _fillConvexPolygon;
+        std::auto_ptr<DrawText>             _drawText;
 };
 
 }

@@ -28,6 +28,7 @@
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
 #include <Pt/Math/Point.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/System/Clock.h>
 
 #include <iostream>
@@ -49,7 +50,18 @@ class FontDemo : public Pt::Gui::Widget
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
     {       
-        _imagePainter.drawText(Math::Point( 20, 40), L"ABCDEFGHKLMNPOQRSTVWYXZ");
+        Pt::System::Clock clock;
+    
+        clock.start();
+        _imagePainter.setFont( Pt::Gfx::Font( "", 28, Pt::Gfx::Font::NormalStyle,-450) );
+        
+        
+        _imagePainter.drawText(Math::Point( 20, 40), L"Hallo PTV!");
+    
+        Pt::System::TimeValue time = clock.stop();
+        
+     std::cout<<" Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;                
+              
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
     }
 
