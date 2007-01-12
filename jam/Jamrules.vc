@@ -36,7 +36,7 @@ rule SetOutputDirectory
 		_outputDir = $(3) ;		
 	}
 
-	# SetProgramDataBase $(_outputDir) : $(2) ;	
+	# SetProgramDataBase $(_outputDir) : $(2) ;
 	
 	# Tell jam where it can find the .pdb, .lib, .exp   
 	MakeLocate $(2) : $(_outputDir) ;

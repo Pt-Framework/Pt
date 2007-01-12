@@ -60,7 +60,6 @@ STDHDRS         = \"$(VISUALC)\\vc7\\include\"
 	          \"$(VISUALC)\\vc7\\PlatformSDK\\include\" ;
 UNDEFFLAG	= "/u _" ;
 
-
 # set directory to mfc for this toolset
 MFCDIR = \"$(VCDIR)\\atlmfc\" ;
 
