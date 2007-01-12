@@ -22,6 +22,8 @@
 
 #include <string>
 #include <sstream>
+#include <iomanip>
+#include <Pt/Exception.h>
 
 
 namespace Pt {
@@ -39,7 +41,7 @@ namespace Pt {
 		{
 			std::istringstream is(data);
 			is >> value;
-            return is;
+            return is.good();
 		}
 	};
 
@@ -73,7 +75,7 @@ namespace Pt {
 			std::istringstream is(data);
 			is >> std::scientific >> std::setprecision(15) >> value;
 			if( !is )
-				throw LogicError("Conversion failed", PTV_SOURCEINFO);
+				throw LogicError("Conversion failed", PT_SOURCEINFO);
 		}
 	};
 
