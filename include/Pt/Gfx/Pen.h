@@ -28,7 +28,7 @@ namespace Gfx {
 	 * The Pen object is immutable. Thus a new object has to be created when a pen with
 	 * other attributes is needed.
 	 */
-	class PTV_API Pen
+	class PT_API Pen
 	{
 		friend bool operator==(const Pen& a, const Pen& b);
 

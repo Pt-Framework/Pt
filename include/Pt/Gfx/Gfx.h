@@ -15,6 +15,7 @@ namespace Pt {
 		class Brush;
 		class Font;
 		class FontMetrics;
+		class Region;
 
 		struct ARgb;
 		struct Rgb565;

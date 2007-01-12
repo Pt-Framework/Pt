@@ -7,8 +7,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/math/Size.h>
-#include <Pt/text/String.h>
+#include <Pt/Math/Size.h>
+#include <Pt/Text/String.h>
 
 #include <cstddef>
 #include <string>
@@ -29,7 +29,7 @@ namespace Gfx {
 	 * ellipses, polygons, but also simpler graphical primitives like pixels, lines and polylines.
 	 *
 	 * The Painter-API distinguishes between outlined shapes and filled shapes. Outlined shapes for example
-	 * are points, lines, outlined rectangle, outlined circles/ellipses, polylines and text. Filled shapes
+	 * are points, lines, outlined rectangle, outlined circles/ellipses, polylines and Text. Filled shapes
 	 * for example are filled rectangles, filled circles/ellipses and polygons.
 	 *
 	 * The Pen is used to draw outlined shapes, the Brush is used to draw filled shapes.
@@ -37,13 +37,13 @@ namespace Gfx {
 	 * The Painter object encapsulates state information needed for the rendering of the graphical primitives:
 	 * - Pen: The Pen is used to draw outlined shapes. It has a color and a size. A blue pen with a pen-size
 	 * of 5 will draw a line in blue color with a line size of 5 pixels, for example. This is valid for all
-	 * outlined shapes, except text-drawing. For texts only the pen color, but not the pen-size is used.
+	 * outlined shapes, except Text-drawing. For Texts only the pen color, but not the pen-size is used.
 	 * - Brush: The Brush is used to draw filled shapes. It can have two painting occurences: Solid color
-	 * or texture. When the brush is set to a solid color, the filling of the rectangle is completely drawn
-	 * with this color. When a texture (ARgbImage) is specified as brush texture, the interior of the rectangle
-	 * is painted using this texture.
-	 * - Font: The Font is used to draw text. It specifies the font-family name, the font style (normal, italic,
-	 * bold), the rotation angle and the font size. The pen color is used as color to draw the text.
+	 * or Texture. When the brush is set to a solid color, the filling of the rectangle is completely drawn
+	 * with this color. When a Texture (ARgbImage) is specified as brush Texture, the interior of the rectangle
+	 * is painted using this Texture.
+	 * - Font: The Font is used to draw Text. It specifies the font-family name, the font style (normal, italic,
+	 * bold), the rotation angle and the font size. The pen color is used as color to draw the Text.
 
 	 * To set the Pen of the painter the method Painter::setPen() is used. To set the Brush of the painter the
 	 * method Painter::setBrush() is used. Both properties are separate and don't interfere with each other.
@@ -56,7 +56,7 @@ namespace Gfx {
 	 * top-left corner of the drawing area the painter was created for. All drawing or writing is done
 	 * in the current color, using the current paint mode, and in the current font.
 	 */
-	class PTV_API Painter
+	class PT_API Painter
 	{
 		public:
 			//! @brief Empty virtual destructor.
@@ -88,9 +88,9 @@ namespace Gfx {
 			 *
 			 * All drawing operations which include surface filling, for example the
 			 * interior of a rectangle or ellipse, use this brush for drawing.
-			 * The brush attributes consist of the brush color or texture.
+			 * The brush attributes consist of the brush color or Texture.
 			 *
-			 * Setting a texture brush that does not have an image or has an image of
+			 * Setting a Texture brush that does not have an image or has an image of
 			 * size 0 will result in undefinied behaviour when trying to draw a filled
 			 * surface with this brush!
 			 *
@@ -110,7 +110,7 @@ namespace Gfx {
 			/**
 			 * @brief Sets the font of this painter to the given font.
 			 *
-			 * All text output with this painter will be done using this font.
+			 * All Text output with this painter will be done using this font.
 			 * The font attributes const of the font face, the font weight, the
 			 * font size, the rotation of the font and the writing order.
 			 *
@@ -135,7 +135,7 @@ namespace Gfx {
 			 * The font metrics contain the font's ascent, descent and height.
 			 * The width-attribute of the returned FontMetrics object always is set to 0.
 			 *
-			 * To measure the size of a text, use fontMetrics(std::string).
+			 * To measure the size of a Text, use fontMetrics(std::string).
 			 *
 			 * @return The font metrics of the currently selected font.
 			 * @see fontMetrics(std::string)
@@ -143,19 +143,19 @@ namespace Gfx {
 			virtual FontMetrics fontMetrics() const = 0;
 
 			/**
-			 * @brief Returns the metrics of the given text for the currently selected font.
+			 * @brief Returns the metrics of the given Text for the currently selected font.
 			 *
 			 * The metrics, which are returned contain the default metrics of the font: ascent,
 			 * descent and height. Additionally the width for showing the specified string object
 			 * using the currently selected font is
 			 * The width-attribute of the returned FontMetrics object always is set to 0.
 			 *
-			 * To measure the size of a text, use fontMetrics(std::string).
+			 * To measure the size of a Text, use fontMetrics(std::string).
 			 *
 			 * @return The font metrics of the currently selected font.
 			 * @see fontMetrics(std::string)
 			 */
-			virtual FontMetrics fontMetrics(Pt::text::String text) const = 0;
+			virtual FontMetrics fontMetrics(Pt::Text::String Text) const = 0;
 
 			/**
 			 * @brief Returns a list of installed font (family) names on the current platform and device.
@@ -178,7 +178,7 @@ namespace Gfx {
 			 * @param to The pixel is drawn at this point.
 			 * @see setPen()
 			 */
-			virtual void drawPixel(const Pt::math::Point& to) = 0;
+			virtual void drawPixel(const Pt::Math::Point& to) = 0;
 
 			/**
 			 * @brief Draws a line between the two given points, excluding the last point.
@@ -193,21 +193,21 @@ namespace Gfx {
 			 * @param to The line is drawn to this point (exclusively), starting from 'from'.
 			 * @see setPen()
 			 */
-			virtual void drawLine(const Pt::math::Point& from, const  Pt::math::Point& to) = 0;
+			virtual void drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to) = 0;
 
 			/**
-			 * @brief Draws a text at the specified position.
+			 * @brief Draws a Text at the specified position.
 			 *
-			 * The given text is drawn at the given position (from) using the current font
+			 * The given Text is drawn at the given position (from) using the current font
 			 * and the current pen color of this painter. The specified point to which the
-			 * text is drawn is the base-line of the text/font.
+			 * Text is drawn is the base-line of the Text/font.
 			 *
-			 * @param to Draws the text at this position on the painter.
-			 * @param text The text to be drawn.
+			 * @param to Draws the Text at this position on the painter.
+			 * @param Text The Text to be drawn.
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText(const Pt::math::Point& to, const Pt::text::String& text) = 0;
+			virtual void drawText(const Pt::Math::Point& to, const Pt::Text::String& Text) = 0;
 
 			/**
 			 * @brief Draws a rectangle outline.
@@ -218,7 +218,7 @@ namespace Gfx {
 			 * @param rect The rectangle is drawn at this rectangular location.
 			 * @see setPen()
 			 */
-			virtual void drawRect(const Pt::math::Rect& rect) = 0;
+			virtual void drawRect(const Pt::Math::Rect& rect) = 0;
 
 			/**
 			 * @brief Draws a filled rectangle (without an outline)
@@ -229,7 +229,7 @@ namespace Gfx {
 			 * @param rect The rectangle is drawn at this rectangular location.
 			 * @see setBrush()
 			 */
-			virtual void fillRect(const Pt::math::Rect& rect) = 0;
+			virtual void fillRect(const Pt::Math::Rect& rect) = 0;
 
 			/**
 			 * @brief Draws a circle outline with the given diameter at the specified position.
@@ -247,9 +247,9 @@ namespace Gfx {
 			 * @param diameter The diameter of the circle.
 			 * @see setPen()
 			 */
-			inline void drawCircle(const Pt::math::Point& topLeft, size_t diameter)
+			inline void drawCircle(const Pt::Math::Point& topLeft, size_t diameter)
 			{
-				drawEllipse(topLeft, Pt::math::Size(diameter, diameter));
+				drawEllipse(topLeft, Pt::Math::Size(diameter, diameter));
 			}
 
 			/**
@@ -268,9 +268,9 @@ namespace Gfx {
 			 * @param diameter The diameter of the circle.
 			 * @see setBrush()
 			 */
-			inline void fillCircle(const Pt::math::Point& topLeft, size_t diameter)
+			inline void fillCircle(const Pt::Math::Point& topLeft, size_t diameter)
 			{
-				fillEllipse(topLeft, Pt::math::Size(diameter, diameter));
+				fillEllipse(topLeft, Pt::Math::Size(diameter, diameter));
 			}
 
 			/**
@@ -286,7 +286,7 @@ namespace Gfx {
 			 * @param size The horizontal and vertical size of the ellipse.
 			 * @see setPen()
 			 */
-			virtual void drawEllipse(const Pt::math::Point& topLeft, const Pt::math::Size& size) = 0;
+			virtual void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
 
 			/**
 			 * @brief Draws a filled ellipse with the given size at the specified position.
@@ -301,7 +301,7 @@ namespace Gfx {
 			 * @param size The horizontal and vertical size of the ellipse.
 			 * @see setBrush()
 			 */
-			virtual void fillEllipse(const Pt::math::Point& topLeft, const Pt::math::Size& size) = 0;
+			virtual void fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
 
 			/**
 			 * @brief Draws a polyline of multiple line segments connected by points.
@@ -320,7 +320,7 @@ namespace Gfx {
 			 * @param Specifies the number of points of the points array that should be
 			 * used to draw the polyline.
 			 */
-			virtual void drawPolyline(const Pt::math::Point* points, const size_t pointCount) = 0;
+			virtual void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) = 0;
 
 			/**
 			 * @brief Draws/Fills a polygon by connecting the given points to a flat shape.
@@ -338,7 +338,7 @@ namespace Gfx {
 			 * @param Specifies the number of points of the points array that should be
 			 * used to draw the polygon.
 			 */
-			virtual void fillPolygon(const Pt::math::Point* points, const size_t pointCount) = 0;
+			virtual void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) = 0;
 
 			/**
 			 * @brief Draws an image at the given position.
@@ -354,7 +354,7 @@ namespace Gfx {
 			 * @param to The x|y-position to where the image should be drawn on the painter's area.
 			 * @param image The image to be drawn.
 			 */
-			virtual void drawImage(const Pt::math::Point& to, const Gfx::ARgbImage& image) = 0;
+			virtual void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image) = 0;
 
 			/**
 			 * @brief Draws a rectangle segment of an image at the given position.
@@ -373,14 +373,14 @@ namespace Gfx {
 			 * the top-left corner of the cut-out image segment in this painter's coordinate space.
 			 *
 			 * To not only draw a part of this image, but all of it, use the method
-			 * drawImage(const Pt::math::Point& to, const ARgbImage& image);
+			 * drawImage(const Pt::Math::Point& to, const ARgbImage& image);
 			 *
 			 * @param to The x|y-position to where the image semgnet should be drawn on the painter's area.
 			 * @param image The image of which a segment specified by 'imageRect' should to be drawn.
 			 * @param imageRegion Specifies the position and size of the segment that is to be cut out
 			 * of the image to be drawn at the specified position.
 			 */
-			virtual void drawImage(const Pt::math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion) = 0;
+			virtual void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion) = 0;
 	};
 
 } // namespace Gfx
