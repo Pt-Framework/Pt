@@ -31,6 +31,7 @@
 #include "Pt/Gfx/ARgbColor.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/Pen.h"
+#include "Pt/Gfx/FontMetrics.h"
 
 namespace Pt{
 namespace Gfx{
@@ -42,53 +43,37 @@ class DrawText
         ~DrawText();
 
         void setFont( const Font& font );
+        
+        FontMetrics fontMetrics( const Text::String& text );
+        
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text);
-
-				// NOTE: Shouldn't we call "const ARgbColor& backGround" as
-				//       "const ARgbColor& outline" ???
+       
+		// NOTE: Shouldn't we call "const ARgbColor& backGround" as
+		//       "const ARgbColor& outline" ???
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor& backGround );
 
     private:
-         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPosX, int glyphPosY, FT_Bitmap& bm );
+         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
          void _drawText( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
 
-         /*//Depricated
-         inline void mixColor( ARgbColor& dst, ARgbColor src, float factor)
-         {
-            dst *= ( 1.0f - factor );
-            dst += ( src *= factor );
-         }
-
-				 inline void mixColor( ARgbColor& dst, const ARgbColor& src, unsigned char factor)
+        // We cast to uint32_t to avoid overflow
+        inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
-            // factor says how much src color we want and rfactor how much
-            // dst color to mix in.
-            const unsigned char rfactor(255 - factor);
+             const uint32_t oF = factor;
+             const uint32_t rF = 255 - oF;
 
-            dst.setRed( (( dst.red() * rfactor ) + ( src.red() * factor)) >> 8 );
-            dst.setGreen( (( dst.green() * rfactor ) + ( src.green() * factor)) >> 8 );
-            dst.setBlue( (( dst.blue() * rfactor ) + ( src.blue() * factor)) >> 8 );
+             const uint32_t dR = uint32_t( dst.red()   ) * rF;
+             const uint32_t dG = uint32_t( dst.green() ) * rF;
+             const uint32_t dB = uint32_t( dst.blue()  ) * rF;
+
+             const uint32_t sR = uint32_t( src.red()   ) * oF;
+             const uint32_t sG = uint32_t( src.green() ) * oF;
+             const uint32_t sB = uint32_t( src.blue()  ) * oF;
+
+             dst.setRed  ( (dR + sR) >> 8);
+             dst.setGreen( (dG + sG) >> 8);
+             dst.setBlue ( (dB + sB) >> 8);
         }
-			 */
-
-				 // We cast to uint32_t to avoid overflow
-				 inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
-				 {
-					 const uint32_t oF = factor;
-					 const uint32_t rF = 255 - oF;
-
-					 const uint32_t dR = uint32_t( dst.red()   ) * rF;
-					 const uint32_t dG = uint32_t( dst.green() ) * rF;
-					 const uint32_t dB = uint32_t( dst.blue()  ) * rF;
-
-					 const uint32_t sR = uint32_t( src.red()   ) * oF;
-					 const uint32_t sG = uint32_t( src.green() ) * oF;
-					 const uint32_t sB = uint32_t( src.blue()  ) * oF;
-
-					 dst.setRed  ( (dR + sR) >> 8);
-					 dst.setGreen( (dG + sG) >> 8);
-					 dst.setBlue ( (dB + sB) >> 8);
-				 }
 
 
          FT_Library  _ft;
