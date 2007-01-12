@@ -55,8 +55,30 @@ namespace Pt {
         }
 	};
 
+	/** \brief Special trait for double.
+
+		VariantTraits for double.
+	*/
+	template <>
+	struct VariantTraits<double> {
+		static void toData(std::string& data, const double& value)
+		{
+			std::ostringstream os;
+			os << std::scientific << std::setprecision(15) << value;
+			data = os.str();
+		}
+
+		static void fromData(double& value, const std::string& data)
+		{
+			std::istringstream is(data);
+			is >> std::scientific >> std::setprecision(15) >> value;
+			if( !is )
+				throw LogicError("Conversion failed", PTV_SOURCEINFO);
+		}
+	};
+
 } // namespace Pt
 
 
-#endif 
+#endif
 
