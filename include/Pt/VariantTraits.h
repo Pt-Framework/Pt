@@ -23,7 +23,6 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <Pt/Exception.h>
 
 
 namespace Pt {
@@ -70,12 +69,11 @@ namespace Pt {
 			data = os.str();
 		}
 
-		static void fromData(double& value, const std::string& data)
+		static bool fromData(double& value, const std::string& data)
 		{
 			std::istringstream is(data);
 			is >> std::scientific >> std::setprecision(15) >> value;
-			if( !is )
-				throw LogicError("Conversion failed", PT_SOURCEINFO);
+			return is.good();
 		}
 	};
 
