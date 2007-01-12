@@ -56,7 +56,7 @@ namespace Gui {
 	 * the button's text and its painted border, for a checkbox this may be the distance between the
 	 * marker-box and its text. When a widget contains other widgets (parent-child-relationsip) the
 	 * insets are the spacing between the child widgets and the border of the parent widget.
-	 * 
+	 *
 	 * Each widget has a position and size. For top-level widgets this position is relative to top-left
 	 * corner of the desktop. For child widgets this position is relative to the top-left corner of
 	 * the parent's widget.
@@ -130,7 +130,7 @@ namespace Gui {
 	 * By calling the method pack() the widget will calculate the preferred size of the widget by using
 	 * the preferred size of all child widgets (and their child widgets) and then resize the top-level
 	 * widget to this preferred size. This does only work for top-level widgets (=windows and dialogs).
-	 * 
+	 *
 	 * @see Insets
 	 * @see LayoutManager
 	 */
@@ -185,7 +185,7 @@ namespace Gui {
 			 * as size.
 			 *
 			 * A widget is created. The widget is positioned relative to the top-left corner
-			 * of the desktop using the given size. 
+			 * of the desktop using the given size.
 			 *
 			 * As the widget is a top-level widget it is hidden from start. Use show() to show it.
 			 *
@@ -269,7 +269,7 @@ namespace Gui {
 			 *
 			 * The foreground color is the color which is usually used to paint the content of the
 			 * widget. The usage of the foreground color is widget-dependent. For a button or label
-			 * this may be the text color, for a checkbox this may be the color of the marker and 
+			 * this may be the text color, for a checkbox this may be the color of the marker and
 			 * or other widget it may have no meaning at all.
 			 *
 			 * @param color The new foreground color for this widget.
@@ -327,7 +327,7 @@ namespace Gui {
 
 			/**
 			 * @brief Moves the widget to the given position (x, y).
-			 * 
+			 *
 			 * The widget is moved to the specified position. For top-level widgets this position
 			 * is relative to the top-left corner of the desktop. For child widgets this position
 			 * is relative to the top-left corner of the parent widget.
@@ -416,7 +416,7 @@ namespace Gui {
 			 *
 			 * This methods lays out the child widgets of this widget by initiating the layouting
 			 * process of the associated LayoutManager.
-			 * 
+			 *
 			 * @see LayoutManager::update();
 			 */
 			virtual void updateLayout();
@@ -656,7 +656,7 @@ namespace Gui {
 			//! @brief Signal which is sent when the widget is closed by the underlying platform.
 			//! To get informed about signals use one of the connect()-methods.
 			Signal<> closed;
-			
+
 			//! @brief Signal which is sent when the widget object is destroyed (-> desctuctor).
 			//! To get informed about signals use one of the connect()-methods.
 			Signal<Widget&> destroyed;
@@ -782,7 +782,7 @@ namespace Gui {
 
 		protected:
 			friend class WidgetImpl;
-			
+
 			/**
 			 * @brief Add the given widget to the child list of this widget.
 			 *
@@ -816,7 +816,7 @@ namespace Gui {
 
 		private:
 			friend class Layout;
-			
+
 			/**
 			 * @brief Sets the given LayoutManger as new LayoutManager for this widget.
 			 *
