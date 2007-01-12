@@ -33,11 +33,11 @@ SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
-Main_LinkSharedLibraries GreyscaleTest : Pt Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries GreyscaleTest : Pt Pt-Text Pt-System Pt-IO Pt-Gfx ;
 Main_MakeLocate GreyscaleTest : bin ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
-Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Text Pt-System Pt-IO Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : bin ;
 
 Main ImagePainterDemo : ImagePainterDemo.cpp ;

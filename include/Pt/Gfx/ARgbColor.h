@@ -144,6 +144,7 @@ namespace Pt {
 				inline uint16_t brightness() const
 				{ return (_r>=_g && _r>=_b) ? _r : ((_g>=_r && _g>=_b) ? _g : _b); }
 
+#if 0
 				/** Deprecated
 				*/
         inline BasicColor& operator*=( float factor )
@@ -165,7 +166,8 @@ namespace Pt {
             _b += color._b;
             return *this;
         }
-                
+#endif
+
 				//! Set brightness
 				void setBrightness(uint16_t l);
 

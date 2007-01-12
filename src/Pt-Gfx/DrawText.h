@@ -37,26 +37,29 @@ namespace Gfx{
 
 class DrawText
 {
-    public:    
+    public:
         DrawText();
         ~DrawText();
-        
-        void setFont( const Font& font );
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text);       
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor& backGround );               
-    
-    private:            
-         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPosX, int glyphPosY, FT_Bitmap& bm );
-         void _drawText( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0); 
 
-         //Depricated
+        void setFont( const Font& font );
+        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text);
+
+				// NOTE: Shouldn't we call "const ARgbColor& backGround" as
+				//       "const ARgbColor& outline" ???
+        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor& backGround );
+
+    private:
+         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int glyphPosX, int glyphPosY, FT_Bitmap& bm );
+         void _drawText( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
+
+         /*//Depricated
          inline void mixColor( ARgbColor& dst, ARgbColor src, float factor)
          {
             dst *= ( 1.0f - factor );
             dst += ( src *= factor );
          }
-         
-        inline void mixColor( ARgbColor& dst, const ARgbColor& src, unsigned char factor)
+
+				 inline void mixColor( ARgbColor& dst, const ARgbColor& src, unsigned char factor)
         {
             // factor says how much src color we want and rfactor how much
             // dst color to mix in.
@@ -66,15 +69,36 @@ class DrawText
             dst.setGreen( (( dst.green() * rfactor ) + ( src.green() * factor)) >> 8 );
             dst.setBlue( (( dst.blue() * rfactor ) + ( src.blue() * factor)) >> 8 );
         }
-               
+			 */
+
+				 // We cast to uint32_t to avoid overflow
+				 inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
+				 {
+					 const uint32_t oF = factor;
+					 const uint32_t rF = 255 - oF;
+
+					 const uint32_t dR = uint32_t( dst.red()   ) * rF;
+					 const uint32_t dG = uint32_t( dst.green() ) * rF;
+					 const uint32_t dB = uint32_t( dst.blue()  ) * rF;
+
+					 const uint32_t sR = uint32_t( src.red()   ) * oF;
+					 const uint32_t sG = uint32_t( src.green() ) * oF;
+					 const uint32_t sB = uint32_t( src.blue()  ) * oF;
+
+					 dst.setRed  ( (dR + sR) >> 8);
+					 dst.setGreen( (dG + sG) >> 8);
+					 dst.setBlue ( (dB + sB) >> 8);
+				 }
+
+
          FT_Library  _ft;
-         FT_Face     _face; 
-         Font        _font;   
+         FT_Face     _face;
+         Font        _font;
          FT_Matrix   _matrix;
-         
+
 };
 
 } //namespace Gfx
 } //namespace Pt
 
-#endif 
+#endif

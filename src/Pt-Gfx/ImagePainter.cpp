@@ -139,8 +139,7 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 {
     _drawText->draw( _image, _pen,  to, text, ARgbColor(0xffff,0xffff,0xffff) );
-    
-/*
+
     FT_Library  ft;
     FT_Face     face;
     int size = 28;
@@ -150,7 +149,7 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     if( FT_New_Memory_Face(ft, vera, veraSize, 0, &face) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
-  
+
 // TODO: Implment font locator
 /*
 #ifdef _WIN32_WCE
@@ -179,9 +178,9 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     if( FT_Select_Charmap( face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( face, FT_ENCODING_NONE );
 <<<<<<< .mine
-            
+
     FT_Set_Char_Size( face, size<< 6, size << 6, 72, 72 );
-        
+
 =======
 
     FT_Set_Char_Size( face, size<<6, size<< 6, 72, 72 );
@@ -198,16 +197,16 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
     matrix.xx = (FT_Fixed) ( cos( angle )* 0x10000L );
     matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
     matrix.yx = (FT_Fixed) ( sin( angle )* 0x10000L );
-    matrix.yy = (FT_Fixed) ( cos( angle )* 0x10000L );   
- 
-    
+    matrix.yy = (FT_Fixed) ( cos( angle )* 0x10000L );
+
+
     pen.x = to.x();
     pen.y = to.y();
     Pt::System::Clock   clock;
-    FT_Set_Transform( face, &matrix, &pen );    
-    
+    FT_Set_Transform( face, &matrix, &pen );
+
     clock.start();
-    
+
     for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
         {
@@ -220,9 +219,9 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
             if( FT_HAS_KERNING( face ) && previous )
             {
                 FT_Vector delta;
-                
-                FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );       
-                pen.x += delta.x >> 6;    
+
+                FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
+                pen.x += delta.x >> 6;
                 pen.y -= delta.y >> 6;
             }
 
@@ -231,21 +230,21 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
             int incX = slot->advance.x >> 6;
             int incY = slot->advance.y >> 6;
-                
-            FT_Bitmap& bm = slot->bitmap;        
-            
-            drawGlyph(pen.x + slot->bitmap_left, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);               
-            
-            drawGlyph(pen.x + slot->bitmap_left + border, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            drawGlyph(pen.x + slot->bitmap_left - border, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            
-            drawGlyph(pen.x + slot->bitmap_left , pen.y - slot->bitmap_top + border, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            drawGlyph(pen.x + slot->bitmap_left , pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            
-            drawGlyph(pen.x + slot->bitmap_left + border , pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            drawGlyph(pen.x + slot->bitmap_left + border, pen.y - slot->bitmap_top + border, bm.buffer, bm.width, bm.rows, bm.pitch);                
-            
-            drawGlyph(pen.x + slot->bitmap_left  - border, pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);                
+
+            FT_Bitmap& bm = slot->bitmap;
+
+            drawGlyph(pen.x + slot->bitmap_left, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);
+
+            drawGlyph(pen.x + slot->bitmap_left + border, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);
+            drawGlyph(pen.x + slot->bitmap_left - border, pen.y - slot->bitmap_top, bm.buffer, bm.width, bm.rows, bm.pitch);
+
+            drawGlyph(pen.x + slot->bitmap_left , pen.y - slot->bitmap_top + border, bm.buffer, bm.width, bm.rows, bm.pitch);
+            drawGlyph(pen.x + slot->bitmap_left , pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);
+
+            drawGlyph(pen.x + slot->bitmap_left + border , pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);
+            drawGlyph(pen.x + slot->bitmap_left + border, pen.y - slot->bitmap_top + border, bm.buffer, bm.width, bm.rows, bm.pitch);
+
+            drawGlyph(pen.x + slot->bitmap_left  - border, pen.y - slot->bitmap_top - border, bm.buffer, bm.width, bm.rows, bm.pitch);
             drawGlyph(pen.x + slot->bitmap_left  - border, pen.y - slot->bitmap_top + border, bm.buffer, bm.width, bm.rows, bm.pitch);
         }
 
@@ -263,9 +262,9 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
             if( FT_HAS_KERNING( face ) && previous )
             {
                 FT_Vector delta;
-                
-                FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );       
-                pen.x += delta.x >> 6;    
+
+                FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
+                pen.x += delta.x >> 6;
                 pen.y -= delta.y >> 6;
             }
 
@@ -274,11 +273,11 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
             int incX = slot->advance.x >> 6;
             int incY = slot->advance.y >> 6;
-                
-            FT_Bitmap& bm = slot->bitmap;        
-            
-            drawGlyph(pen.x + slot->bitmap_left, pen.y - slot->bitmap_top , bm.buffer, bm.width, bm.rows, bm.pitch);            
-            
+
+            FT_Bitmap& bm = slot->bitmap;
+
+            drawGlyph(pen.x + slot->bitmap_left, pen.y - slot->bitmap_top , bm.buffer, bm.width, bm.rows, bm.pitch);
+
             pen.x += incX;
             pen.y -= incY;
             previous = glyph_index;
@@ -288,8 +287,8 @@ void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
 
     }
 
-    Pt::System::TimeValue time = clock.stop();        
-    
+    Pt::System::TimeValue time = clock.stop();
+
     std::cerr<< "Font Time: " << (double) time.seconds() + time.microSeconds() / 1000000.0<< std::endl;
     FT_Done_Face( face );
     FT_Done_FreeType( ft );*/
@@ -334,10 +333,11 @@ void ImagePainter::drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap, Pt:
             if( !col )
                 continue;
 
-            float af = col / 255.0f;
+            //float af = col / 255.0f;
 
            // _image.pixel(dsx, dsy)  = _pen.color();
-            mixColor( _image.pixel(dsx, dsy), _pen.color(), af );
+            //mixColor( _image.pixel(dsx, dsy), _pen.color(), af );
+            mixColor( _image.pixel(dsx, dsy), _pen.color(), col );
         }
     }
 }

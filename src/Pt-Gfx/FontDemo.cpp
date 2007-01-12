@@ -41,7 +41,7 @@ class FontDemo : public Pt::Gui::Widget
     FontDemo()
     : _image( )
     , _imagePainter( _image )
-    { 
+    {
         setTitle("FontDemo");
     }
 
@@ -49,19 +49,19 @@ class FontDemo : public Pt::Gui::Widget
     {}
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
-    {       
+    {
         Pt::System::Clock clock;
-    
+
         clock.start();
         _imagePainter.setFont( Pt::Gfx::Font( "", 28, Pt::Gfx::Font::NormalStyle,-450) );
-        
-        
-        _imagePainter.drawText(Math::Point( 20, 40), L"Hallo PTV!");
-    
+
+
+        _imagePainter.drawText(Math::Point( 20, 40), L"Hallo Platinum!");
+
         Pt::System::TimeValue time = clock.stop();
-        
-     std::cout<<" Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;                
-              
+
+     std::cout<<" Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;
+
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
     }
 

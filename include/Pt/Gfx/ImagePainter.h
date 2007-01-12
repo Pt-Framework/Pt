@@ -88,12 +88,21 @@ class PT_API ImagePainter : public Painter
         void drawGlyph( int penX, int penY, const Pt::uint8_t* bitmap,
                         Pt::uint32_t bmWidth, Pt::uint32_t bmHeight, Pt::uint32_t bmPitch );
 
-        void mixColor( ARgbColor& dst, ARgbColor src, float factor)
+        //void mixColor( ARgbColor& dst, ARgbColor src, float factor)
+        //{
+        //   dst *= ( 1.0f - factor );
+        //    dst += ( src *= factor );
+        //}
+
+				inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
-            dst *= ( 1.0f - factor );
-            dst += ( src *= factor );
-        }
-        
+					const uint8_t  iF = 255 - factor;
+
+					dst.setRed  ( (dst.red  ()*iF + src.red()  *factor) >> 8 );
+					dst.setGreen( (dst.green()*iF + src.green()*factor) >> 8 );
+					dst.setBlue ( (dst.blue ()*iF + src.blue() *factor) >> 8 );
+				}
+
         ARgbImage&                    		_image;
         Pen                                 _pen;
         Brush                               _brush;
