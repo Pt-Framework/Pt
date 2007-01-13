@@ -84,7 +84,7 @@ namespace Gui {
 
 			WidgetPainterImpl* _painter;
 
-			std::string _title;
+			Pt::Text::String _title;
 	};
 
 } // namespace Gui
