@@ -92,7 +92,7 @@ class PT_API Method<R, C, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2,
 		{ }
 
 		Method(const Method& method) throw()
-		: Callable<R, A1, A2, A3>()
+		: Callable<R, A1, A2, A3, A4>()
 		{ this->operator=(method); }
 
 		C& object()
