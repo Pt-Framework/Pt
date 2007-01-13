@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
     //     -f=FILE           save output in file FILE instead of stdout
 
-    Pt::Unit::Reporter reporter;
+    Pt::Unit::BriefTextReporter reporter;
     Pt::Unit::Application app;
       app.setReporter(reporter);
 
