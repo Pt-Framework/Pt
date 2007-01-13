@@ -72,7 +72,7 @@ namespace Unit {
             {}
     };
 
-    #define PTV_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
+    #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
 
 } // namespace Unit
 
