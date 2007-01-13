@@ -43,7 +43,7 @@ class FontDemo : public Pt::Gui::Widget
     : _image( )
     , _imagePainter( _image )
     {
-        setTitle("FontDemo");
+        setTitle(L"FontDemo");
     }
 
     virtual ~FontDemo()

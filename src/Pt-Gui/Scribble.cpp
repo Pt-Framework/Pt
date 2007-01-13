@@ -33,7 +33,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 		, _penSize(2)
 		, _penColor(0, 0, 0)
 		{
-			Widget::setTitle("Scribble Classic");
+			Widget::setTitle(L"Scribble");
 
 			_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
 			_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
