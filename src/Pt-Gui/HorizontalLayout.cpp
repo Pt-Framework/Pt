@@ -21,10 +21,9 @@
 #include "Pt/Gui/Widget.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-  
+#include <algorithm>
 #include <list>
 
-using namespace std;
 using namespace Pt::Gfx;
 
 
@@ -91,7 +90,7 @@ void HorizontalLayout::update()
 	if (_widthBehaviour == UniformWidth) {
 		for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) {
 			Widget* w = *childrenIter;
-			maxWidth = max(maxWidth, w->preferredSize().width());
+			maxWidth = max<size_t>(maxWidth, w->preferredSize().width());
 		}
 	}
 
@@ -180,10 +179,10 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
 
 			if (forPreferredSize) {
 				allWidth  += w->preferredSize().width();
-				maxHeight =  max(maxHeight,  w->preferredSize().height());
+				maxHeight =  max<size_t>(maxHeight,  w->preferredSize().height());
 			} else {
 				allWidth  += w->minimumSize().width();
-				maxHeight =  max(maxHeight,  w->minimumSize().height());
+				maxHeight =  max<size_t>(maxHeight,  w->minimumSize().height());
 			}
 
 			childrenIter++;
@@ -207,11 +206,11 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
 			Widget* w = *childrenIter;
 
 			if (forPreferredSize) {
-				maxWidth  = max(maxWidth,  w->preferredSize().width());
-				maxHeight = max(maxHeight, w->preferredSize().height());
+				maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
+				maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
 			} else {
-				maxWidth  = max(maxWidth,  w->minimumSize().width());
-				maxHeight = max(maxHeight, w->minimumSize().height());
+				maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
+				maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
 			}
 
 			childrenIter++;

@@ -151,8 +151,8 @@ Math::Size SimpleGridLayout::minimumSize()
 	while (childrenIter != children.end()) {
 		Widget* w = *childrenIter;
 
-		maxWidth  = max(maxWidth,  w->minimumSize().width());
-		maxHeight = max(maxHeight, w->minimumSize().height());
+		maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
+		maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
 
 		childrenIter++;
 	}
@@ -175,8 +175,8 @@ Math::Size SimpleGridLayout::preferredSize()
 	while (childrenIter != children.end()) {
 		Widget* w = *childrenIter;
 
-		maxWidth  = max(maxWidth,  w->preferredSize().width());
-		maxHeight = max(maxHeight, w->preferredSize().height());
+		maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
+		maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
 
 		childrenIter++;
 	}

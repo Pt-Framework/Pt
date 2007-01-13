@@ -82,7 +82,7 @@ ssize_t VerticalLayout::maximumHeight() const
 		for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) 
 		{
 			Widget* w = *childrenIter;
-			maxHeight = max(maxHeight, w->preferredSize().height());
+			maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
 		}
 	}
 
@@ -175,11 +175,11 @@ Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 
 			if (forPreferredSize)
 			{
-				maxWidth  =  max(maxWidth,  w->preferredSize().width());
+				maxWidth  =  max<size_t>(maxWidth,  w->preferredSize().width());
 				allHeight += w->preferredSize().height();
 			}
 			else {
-				maxWidth  =  max(maxWidth,  w->minimumSize().width());
+				maxWidth  =  max<size_t>(maxWidth,  w->minimumSize().width());
 				allHeight += w->minimumSize().height();
 			}
 		}
@@ -198,12 +198,12 @@ Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 
 			if (forPreferredSize)
 			{
-				maxWidth  = max(maxWidth,  w->preferredSize().width());
-				maxHeight = max(maxHeight, w->preferredSize().height());
+				maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
+				maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
 			}
 			else {
-				maxWidth  = max(maxWidth,  w->minimumSize().width());
-				maxHeight = max(maxHeight, w->minimumSize().height());
+				maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
+				maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
 			}
 		}
 

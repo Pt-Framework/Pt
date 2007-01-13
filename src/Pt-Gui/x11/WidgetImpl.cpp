@@ -112,8 +112,8 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 	                          parentId,
 	                          at.x(),
 	                          at.y(),
-	                          std::max(ssize_t(1), size.width() ), // at least 1
-	                          std::max(ssize_t(1), size.height() ), // at least 1
+	                          std::max(size_t(1), size.width() ), // at least 1
+	                          std::max(size_t(1), size.height() ), // at least 1
 	                          borderWidth,
 	                          DefaultDepth(display, screen),
 	                          InputOutput,
