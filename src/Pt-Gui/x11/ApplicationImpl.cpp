@@ -1173,12 +1173,12 @@ void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
 	const ssize_t x = xev.xconfigure.x;
 	const ssize_t y = xev.xconfigure.y;
 
-	if( widget.rect().width() != width || widget.rect().height() != height ) {
+	if( widget.region().width() != width || widget.region().height() != height ) {
 		ResizeEvent ev(widget, width, height);
 		event.send( ev );
 	}
 
-	if( widget.rect().x() != x || widget.rect().y() != y) {
+	if( widget.region().x() != x || widget.region().y() != y) {
 		MoveEvent ev(widget, x, y);
 		event.send( ev );
 	}
