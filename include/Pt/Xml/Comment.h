@@ -50,7 +50,7 @@ namespace Pt {
 				 *
 				 * @return The Text of this Comment object.
 				 */
-				String& Text();
+				String& text();
 
 				/**
 				 * @brief Returns the content/Text of this Comment object.
@@ -61,7 +61,7 @@ namespace Pt {
 				 *
 				 * @return The Text of this Comment object.
 				 */
-				const String& Text() const;
+				const String& text() const;
 
 				/**
 				 * @brief Sets the Text of this Comment object.
@@ -71,7 +71,7 @@ namespace Pt {
 
 			private:
 				//! The Text of this Comment object.
-				String _Text;
+				String _text;
 		};
 
 	}

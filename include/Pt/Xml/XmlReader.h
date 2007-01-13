@@ -123,7 +123,7 @@ namespace Xml {
 			void getUntil(String& buffer, const String& stop);
 
 		private:
-			std::basic_streambuf<Char>* _TextBuffer;
+			std::basic_streambuf<Char>* _textBuffer;
 			std::basic_streambuf<Char>* _buffer;
 			std::queue<Node*> _nodeBuffer;
 			Char _token[512];
