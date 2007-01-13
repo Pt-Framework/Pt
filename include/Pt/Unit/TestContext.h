@@ -27,12 +27,12 @@ namespace Pt {
 
 namespace Unit {
 
-    class PT_API TestConText
+    class PT_API TestContext
     {
         public:
-            virtual ~TestConText()
+            virtual ~TestContext()
             {
-                _test.finished.send<const TestConText&>(*this);
+                _test.finished.send<const TestContext&>(*this);
             }
 
             virtual const std::string& testName() const
@@ -42,21 +42,21 @@ namespace Unit {
             {
                 try
                 {
-                    _test.started.send<const TestConText&>(*this);
+                    _test.started.send<const TestContext&>(*this);
                     this->_run();
-                    _test.success.send<const TestConText&>(*this);
+                    _test.success.send<const TestContext&>(*this);
                 }
                 catch(const Assertion& assertion)
                 {
-                    _test.assertion.send<const TestConText&>(*this, assertion);
+                    _test.assertion.send<const TestContext&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    _test.exception.send<const TestConText&>(*this, ex);
+                    _test.exception.send<const TestContext&>(*this, ex);
                 }
                 catch(...)
                 {
-                    _test.error.send<const TestConText&>(*this);
+                    _test.error.send<const TestContext&>(*this);
                 }
             }
 
@@ -64,7 +64,7 @@ namespace Unit {
             virtual void _run()
             {}
 
-            TestConText(Test& test)
+            TestContext(Test& test)
             : _test(test)
             {}
 

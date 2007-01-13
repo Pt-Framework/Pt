@@ -61,11 +61,11 @@ namespace Unit {
     class TestSuite : public Reflectable, public Test
     {
         public:
-            class ConText : public TestConText
+            class ConText : public TestContext
             {
                 public:
                     ConText(TestSuite& suite, const std::string& name, const Args& args)
-                    : TestConText(suite)
+                    : TestContext(suite)
                     , _suite(suite)
                     , _methodName( name )
                     , _args(args)

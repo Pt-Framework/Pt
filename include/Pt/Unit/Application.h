@@ -162,7 +162,7 @@ namespace Unit {
 
             /** @brief Process started event
             */
-            static void started(const TestConText& test)
+            static void started(const TestContext& test)
             {
                 if(_reporter)
                 {
@@ -179,7 +179,7 @@ namespace Unit {
 
             /** @brief Process finished event
             */
-            static void finished(const TestConText& test)
+            static void finished(const TestContext& test)
             {
                 if(_reporter)
                 {
@@ -196,7 +196,7 @@ namespace Unit {
 
             /** @brief Process success event
             */
-            static void success(const TestConText& test)
+            static void success(const TestContext& test)
             {
                 if(_reporter)
                 {
@@ -213,7 +213,7 @@ namespace Unit {
 
             /** @brief Process assertion event
             */
-            static void assertion(const TestConText& test, const Assertion& a)
+            static void assertion(const TestContext& test, const Assertion& a)
             {
                 ++_errors;
 
@@ -232,7 +232,7 @@ namespace Unit {
 
             /** @brief Process exception event
             */
-            static void exception(const TestConText& test, const std::exception& ex)
+            static void exception(const TestContext& test, const std::exception& ex)
             {
                 ++_errors;
 
@@ -251,7 +251,7 @@ namespace Unit {
 
             /** @brief Process error event
             */
-            static void error(const TestConText& test)
+            static void error(const TestContext& test)
             {
                 ++_errors;
 

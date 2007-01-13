@@ -21,7 +21,7 @@
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestConText.h>
+#include <Pt/Unit/TestContext.h>
 
 #include <string>
 
@@ -69,11 +69,11 @@ namespace Unit {
     class TestCase : public Test
     {
         public:
-            class ConText : public TestConText
+            class ConText : public TestContext
             {
                 public:
                     ConText(TestCase& test)
-                    : TestConText(test)
+                    : TestContext(test)
                     , _test(test)
                     , _setUp(false)
                     { }
