@@ -27,6 +27,10 @@
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
+// X11 defines these two globally, which conflicts with enum values in ptv/text/Char.h
+#undef Above
+#undef Below
+
 #include <Pt/Api.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
