@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace Unit {
 
-    class TestConText;
+    class TestContext;
 
     /** @brief Test base class
 
@@ -68,40 +68,40 @@ namespace Unit {
             /** @brief Start notification
 
                 This signal is sent when the test has started.
-                TODO: use TestConText as paramater
+                TODO: use TestContext as paramater
             */
-            Signal<const TestConText&> started;
+            Signal<const TestContext&> started;
 
             /** @brief Finished notification
 
                 This signal is sent when the test finished. It does not
                 indicate that the test was successful.
             */
-            Signal<const TestConText&> finished;
+            Signal<const TestContext&> finished;
 
             /** @brief Success notification
 
                 This signal is sent when the test was successful.
             */
-            Signal<const TestConText&> success;
+            Signal<const TestContext&> success;
 
             /** @brief Assertion notification
 
                 This signal is sent when a assertion failed.
             */
-            Signal<const TestConText&, const Assertion&> assertion;
+            Signal<const TestContext&, const Assertion&> assertion;
 
             /** @brief Exception notification
 
                 This signal is sent when a regular std::exception occured.
             */
-            Signal<const TestConText&, const std::exception&> exception;
+            Signal<const TestContext&, const std::exception&> exception;
 
             /** @brief Error notification
 
                 This signal is sent when an unknown error occured.
             */
-            Signal<const TestConText&> error;
+            Signal<const TestContext&> error;
 
             /** @brief Message notification
 
