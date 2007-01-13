@@ -87,6 +87,12 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type p
 }
 
 
+inline basic_string<ptv::Char>::basic_string(ptv::text::Char* begin, ptv::text::Char* end)
+: _data( new StringData( begin, end - begin ) )
+{
+}
+
+
 inline basic_string<Pt::Char>::~basic_string()
 {
 	if( _data->busy() || _data->unref() < 1 ) {

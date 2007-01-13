@@ -78,9 +78,11 @@ class PT_API basic_string< Pt::Text::Char > {
 
 		basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a);
 
+		basic_string(ptv::text::Char* begin, ptv::text::Char* end);
+
 		~basic_string();
 
-	public: 
+	public:
 		iterator begin();
 
 		iterator end();
@@ -95,10 +97,10 @@ class PT_API basic_string< Pt::Text::Char > {
 		reverse_iterator rend()
 		{ return reverse_iterator( this->begin() ); }
 
-		const_reverse_iterator rbegin() const 
+		const_reverse_iterator rbegin() const
 		{ return const_reverse_iterator( this->end() ); }
 
-		const_reverse_iterator rend()   const 
+		const_reverse_iterator rend()   const
 		{ return const_reverse_iterator( this->begin() ); }
 
 		reference operator[](size_type n)
@@ -129,7 +131,7 @@ class PT_API basic_string< Pt::Text::Char > {
 			return *(_data->str() + n);
 		}
 
-	public: 
+	public:
 		void push_back(Pt::Char ch)
 		{ this->append(1, ch); }
 
