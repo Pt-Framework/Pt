@@ -25,6 +25,8 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/ResizeEvent.h>
+#include <Pt/Text/TextStream.h>
+#include <Pt/Text/Utf16Codec.h>
 
 #include <iostream>
 #include <sstream>
