@@ -54,8 +54,9 @@ namespace Net
 				{
 					SocketImpl::create(it->ai_family, SOCK_STREAM, 0);
 
+                    // some OS need char*, some void* for the value
                     if (::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR,
-                          &reuseAddr, sizeof(reuseAddr)) < 0)
+                          (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
                         throw Exception("setsockopt", PT_SOURCEINFO); // TODO Exception
 
 					int ret = ::bind(handle(), it->ai_addr, it->ai_addrlen);
