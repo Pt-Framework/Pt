@@ -1,17 +1,18 @@
-#ifndef PT_UNIT_UNIT_H
-#define PT_UNIT_UNIT_H
+#ifndef PTV_UNIT_UNIT_H
+#define PTV_UNIT_UNIT_H
 
 /** \dir
 !!! Pt::Unit (module)
 \n
-!! Protocol and data driven unit-testing
+!! Protocol and data driven Unit-testing
 \n
-This module provides a complete framework for effective unit testing. All unit
+This module provides a complete framework for effective Unit testing. All Unit
 tests in the Platinum framework are written using this module. Data-driven,
 as well as and protocol-driven testing is possible. %Unit tests can easily be integrated into the build process and test results can be reported and logged.
 Writing tests is similar to writing tests with the CppUnit framework, so that
 porting tests to use %Pt::Unit is simple.
 */
+
 
 namespace Pt {
 
@@ -23,10 +24,10 @@ namespace Unit {
 /** \page "A Simple Test Case"
 !!!A Simple Test Case
 \n
-The TestCase class can be used to implement simple unit test. This is simply
+The TestCase class can be used to implement simple Unit test. This is simply
 done by deriving from TestCase and implementing the %TestCase::test method.
 The member functions %TestCase::setUp and %TestCase::tearDown can be used
-to manage any resources the test might require. The PT_UNIT_ASSERT macro
+to manage any resources the test might require. The PTV_UNIT_ASSERT macro
 can be used to assert test conditions during the test.
 
 @code
@@ -51,7 +52,7 @@ class MyTestCase : public Pt::Unit::TestCase
         void test()
         {
             _a += _b;
-            PT_UNIT_ASSERT(_a == 10);
+            PTV_UNIT_ASSERT(_a == 10);
         }
 
     private:
@@ -65,17 +66,17 @@ class MyTestCase : public Pt::Unit::TestCase
 /** \page "Build System Integration"
 !!!Build System Integration
 \n
-The Jamrules.unit rule set containes rules to build a unit test and have it
+The Jamrules.Unit rule set containes rules to build a Unit test and have it
 automatically run after it has been build. Instead of the rule 'Main' the rule
-'PtUnitTest' has to be used in a Jamfile:
+'PtvUnitTest' has to be used in a Jamfile:
 
 @code
-PtUnitTest mytest : mytest.cpp ;
+PtvUnitTest mytest : mytest.cpp ;
 @endcode
 
-This will cause the jam tool to report a failed build if the unit
+This will cause the jam tool to report a failed build if the Unit
 test does not run through, which is the desired behaviour. This way
-unit tests can easily be integrated in automated builds.
+Unit tests can easily be integrated in automated builds.
 */
 
 
@@ -129,7 +130,7 @@ class MyTestSchedule : public Pt::Unit::TestSchedule
 @endcode
 
 When this protocol is applied to MyTestSuite, the AdditionTest will be called
-three times with different test data. It is very possible to read data from a 
+three times with different test data. It is very possible to read data from a
 file or another data source.
 */
 
@@ -139,8 +140,8 @@ file or another data source.
 \n
 Protocol driven testing implements the idea to control the order in which
 tests are executed, or to run test methods multiple times. To accomplish this
-a protocol is defined by deriving from the TestProtocol class.The 
-following example will run a test called 'MyTest' three times and sleeps 
+a protocol is defined by deriving from the TestProtocol class.The
+following example will run a test called 'MyTest' three times and sleeps
 between the tests for 1 second.
 
 @code
@@ -164,12 +165,12 @@ class MyProtocol : public Pt::Unit::TestProtocol
 };
 @endcode
 
-The protocol can then be applied to a TestSuite. The methods are 
+The protocol can then be applied to a TestSuite. The methods are
 resolved using object reflection. The TestSuite class requires
-that all runnable tests are registered for reflection. TestSuite inherits 
+that all runnable tests are registered for reflection. TestSuite inherits
 reflection capabilities from Pt::Reflectable. If a test can not be executed
 through the TestSuite::runTest method an exception of the type %Pt::LogicError
-is thrown and the test fails if it is allowed to propagate. The new protocol 
+is thrown and the test fails if it is allowed to propagate. The new protocol
 can be assigned to a TestSuite in the constructor:
 
 @code
@@ -191,7 +192,7 @@ class MyTestSuite
 };
 @endcode
 
-Alternatively, a protocol can be set using the Unit::TestSuite::setProtocol 
+Alternatively, a protocol can be set using the Unit::TestSuite::setProtocol
 method. It is entirely possible to load and assign protocols at run-time.
 */
 
@@ -201,7 +202,7 @@ method. It is entirely possible to load and assign protocols at run-time.
 \n
 All tests can be run by the Application object of the %Unit module. To register
 a test with the application object the RegisterTest class template can be used
-or Application::registerTest can be called. A typical test program will 
+or Application::registerTest can be called. A typical test program will
 instanciate an Application object and set reporters for result reporting and
 logging.
 
@@ -218,7 +219,7 @@ int main()
 
 For convenience, the header file TestMain.h already contains such a %main loop
 where reporters can be selected by command line arguments. So the implementor
-of a test only has to include TestMain.h in the file where be derives and 
+of a test only has to include TestMain.h in the file where be derives and
 registers the tests.
 
 */

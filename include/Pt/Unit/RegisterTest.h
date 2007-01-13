@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_REGISTERTEST_H
-#define PT_UNIT_REGISTERTEST_H
+#ifndef PTV_UNIT_REGISTERTEST_H
+#define PTV_UNIT_REGISTERTEST_H
 
 #include<Pt/Unit/Application.h>
 
@@ -26,35 +26,34 @@ namespace Pt {
 
 namespace Unit {
 
+    /**
+		@param TestT The type of test to register
+	*/
+	template <class TestT>
+	/** @brief Registers tests to an application
 
-    /** 
-        @param TestT The type of test to register
-    */
-    template <class TestT>
-    /** @brief Registers tests to an application
+		Tests can be registered easily with the RegisterTest<> class
+		template to an Unit::Application at program initialisation.
+		A typical example looks like this:
 
-        Tests can be registered easily with the RegisterTest<> class
-        template to an Unit::Application at program initialisation.
-        A typical example looks like this:
+		@code
+			class MyTest : public Unit::TestCase
+			{ ... };
 
-        @code
-            class MyTest : public Unit::TestCase
-            { ... };
+			RegisterTest<MyTest> _registerMyTest;
+		@endcode
 
-            RegisterTest<MyTest> _registerMyTest;
-        @endcode
-
-        The constructor of the RegisterTest class template will 
-        register an instance of its template parameter to the 
-        application.
-    */
-    struct RegisterTest
-    {
-        RegisterTest()
-        {
-            static TestT test;
-            Application::registerTest(test);
-        }
+		The constructor of the RegisterTest class template will
+		register an instance of its template parameter to the
+		application.
+	*/
+	struct RegisterTest
+	{
+		RegisterTest()
+		{
+			static TestT test;
+			Application::registerTest(test);
+		}
     };
 
 } // namespace Unit

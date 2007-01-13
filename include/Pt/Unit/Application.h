@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_APPLICATION_H
-#define PT_UNIT_APPLICATION_H
+#ifndef PTV_UNIT_APPLICATION_H
+#define PTV_UNIT_APPLICATION_H
 
 #include<Pt/Unit/Reporter.h>
 #include<Pt/Unit/Test.h>
@@ -78,6 +78,11 @@ namespace Unit {
             void setReporter(Reporter& reporter)
             { Application::_reporter = &reporter; }
 
+            void addReporter(Reporter& reporter)
+            {
+                Application::_reporterList.push_back(&reporter);
+            }
+
             /** @brief Register a test
 
                 Registers a test to the application. The application will
@@ -134,7 +139,7 @@ namespace Unit {
                 @param testName name of the test to be run
                 @return Number of failed tests.
             */
-            int run(const std::string& testName = "")
+            int run(const std::string& testName)
             {
                 _errors = 0;
 
@@ -157,37 +162,58 @@ namespace Unit {
 
             /** @brief Process started event
             */
-            static void started(const TestContext& test)
+            static void started(const TestConText& test)
             {
                 if(_reporter)
                 {
                     _reporter->started(test);
                 }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->started(test);
+                }
             }
 
             /** @brief Process finished event
             */
-            static void finished(const Test& test)
+            static void finished(const TestConText& test)
             {
                 if(_reporter)
                 {
                     _reporter->finished(test);
                 }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->finished(test);
+                }
             }
 
             /** @brief Process success event
             */
-            static void success(const Test& test)
+            static void success(const TestConText& test)
             {
                 if(_reporter)
                 {
                     _reporter->success(test);
                 }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->success(test);
+                }
             }
 
             /** @brief Process assertion event
             */
-            static void assertion(const Test& test, const Assertion& a)
+            static void assertion(const TestConText& test, const Assertion& a)
             {
                 ++_errors;
 
@@ -195,11 +221,18 @@ namespace Unit {
                 {
                     _reporter->assertion(test, a);
                 }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->assertion(test, a);
+                }
             }
 
             /** @brief Process exception event
             */
-            static void exception(const Test& test, const std::exception& ex)
+            static void exception(const TestConText& test, const std::exception& ex)
             {
                 ++_errors;
 
@@ -207,17 +240,31 @@ namespace Unit {
                 {
                     _reporter->exception(test, ex);
                 }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->exception(test, ex);
+                }
             }
 
             /** @brief Process error event
             */
-            static void error(const Test& test)
+            static void error(const TestConText& test)
             {
                 ++_errors;
 
                 if(_reporter)
                 {
                     _reporter->error(test);
+                }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->error(test);
                 }
             }
 
@@ -227,7 +274,16 @@ namespace Unit {
             static void message(const std::string& msg)
             {
                 if(_reporter)
+                {
                     _reporter->message(msg);
+                }
+
+
+                std::list<Reporter*>::iterator it;
+                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
+                {
+                    (*it)->message(msg);
+                }
             }
 
         private:
@@ -242,6 +298,8 @@ namespace Unit {
             /** @brief Currently used reporter
             */
             static Reporter* _reporter;
+
+            static std::list<Reporter*> _reporterList;
     };
 
     size_t Application::_errors = 0;
@@ -249,6 +307,8 @@ namespace Unit {
     std::list<Test*> Application::_allTests;
 
     Reporter* Application::_reporter = 0;
+
+    std::list<Reporter*> Application::_reporterList;
 
 } // namespace Unit
 

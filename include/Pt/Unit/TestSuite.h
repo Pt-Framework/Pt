@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,14 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTSUITE_H
-#define PT_UNIT_TESTSUITE_H
+#ifndef PTV_UNIT_TESTSUITE_H
+#define PTV_UNIT_TESTSUITE_H
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestProtocol.h>
-#include <Pt/Unit/TestContext.h>
-
+#include <Pt/Unit/TestConText.h>
 
 namespace Pt {
 
@@ -33,7 +32,7 @@ namespace Unit {
 
         The TestSuite is used to implement protocol and data driven tests.
         It inherits its ability to register methods and properties from
-        %Reflectable. The implementor is supposed to write and register the 
+        %Reflectable. The implementor is supposed to write and register the
         required test methods on construction.
 
         @code
@@ -50,23 +49,23 @@ namespace Unit {
             };
         @endcode
 
-        Once the test is written it can be registered to an application by 
+        Once the test is written it can be registered to an application by
         using the RegisterTest class template.
 
-        The default protocol will run each registered test method when the 
-        test is run. Before each test method setUp is called and tearDown 
-        after each test. The TestProtocol can be replaced with a customised 
-        one and reflection can be used to call any method multiple times with 
+        The default protocol will run each registered test method when the
+        test is run. Before each test method setUp is called and tearDown
+        after each test. The TestProtocol can be replaced with a customised
+        one and reflection can be used to call any method multiple times with
         the required data.
     */
     class TestSuite : public Reflectable, public Test
     {
         public:
-            class Context : public TestContext
+            class ConText : public TestConText
             {
                 public:
-                    Context(TestSuite& suite, const std::string& name, const Args& args)
-                    : TestContext(suite)
+                    ConText(TestSuite& suite, const std::string& name, const Args& args)
+                    : TestConText(suite)
                     , _suite(suite)
                     , _methodName( name )
                     , _args(args)
@@ -74,7 +73,7 @@ namespace Unit {
                     , _setUp(false)
                     { }
 
-                    virtual ~Context()
+                    virtual ~ConText()
                     {
                         try
                         {
@@ -120,7 +119,15 @@ namespace Unit {
             , _protocol(&protocol)
             { }
 
-            /** \brief Set up context before running a test.
+            /** @brief Sets the protocol.
+                @param protocol Protocol for the test
+            */
+            void setProtocol(TestProtocol* protocol)
+            {
+                _protocol = protocol;
+            }
+
+            /** \brief Set up conText before running a test.
 
                 This function is called before each registered tester function
                 is invoked. It is meant to initialize any required resources.
@@ -160,7 +167,7 @@ namespace Unit {
             */
             void runTest( const std::string& name, const Args& args = Args() )
             {
-                Context ctx(*this, name, args);
+                ConText ctx(*this, name, args);
                 ctx.run();
             }
 

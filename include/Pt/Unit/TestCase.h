@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,12 +16,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTCASE_H
-#define PT_UNIT_TESTCASE_H
+#ifndef PTV_UNIT_TESTCASE_H
+#define PTV_UNIT_TESTCASE_H
 
 #include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestContext.h>
 #include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestConText.h>
+
+#include <string>
 
 
 namespace Pt {
@@ -61,26 +63,26 @@ namespace Unit {
             };
         @endcode
 
-        Once the test is written it can be registered to an application by 
+        Once the test is written it can be registered to an application by
         using the RegisterTest class template.
     */
     class TestCase : public Test
     {
         public:
-            class Context : public TestContext
+            class ConText : public TestConText
             {
                 public:
-                    Context(TestCase& test)
-                    : TestContext(test)
+                    ConText(TestCase& test)
+                    : TestConText(test)
                     , _test(test)
                     , _setUp(false)
                     { }
 
-                    ~Context()
+                    ~ConText()
                     {
                         try
                         {
-                            if( _setUp ) 
+                            if( _setUp )
                                 _test.tearDown();
                         }
                         catch(...)
@@ -115,17 +117,17 @@ namespace Unit {
             { }
 
             /** @brief Runs the test
-                When the test is run, 'setUp' will be called first, then 
+                When the test is run, 'setUp' will be called first, then
                 'test' and finally 'tearDown'. Signals inherited from
                 Unit::Test are sent appropriatly.
             */
             virtual void run()
             {
-                Context ctx(*this);
+                ConText ctx(*this);
                 ctx.run();
             }
 
-            /** \brief Set up context before running a test.
+            /** \brief Set up conText before running a test.
 
                 This function is called before each registered tester function
                 is invoked. It is meant to initialize any required resources.
@@ -146,13 +148,13 @@ namespace Unit {
             /** @brief Performs the actual test
 
                 The implementor is supposed to override this method, which
-                is called between 'setUp' and 'tearDown'. Assertions may be 
+                is called between 'setUp' and 'tearDown'. Assertions may be
                 thrown to indicate failed test assertions.
             */
             virtual void test()
             { }
     };
-    
+
 } // namespace Unit
 
 } // namespace Pt

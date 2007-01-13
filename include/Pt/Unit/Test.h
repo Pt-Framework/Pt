@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,20 +16,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TEST_H
-#define PT_UNIT_TEST_H
+#ifndef PTV_UNIT_TEST_H
+#define PTV_UNIT_TEST_H
 
 #include <string>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Reflectable.h>
+#include <Pt/Unit/Assertion.h>
 
 
 namespace Pt {
 
-namespace Unit {	
+namespace Unit {
 
-    class TestContext;
+    class TestConText;
 
     /** @brief Test base class
 
@@ -49,14 +50,14 @@ namespace Unit {
             /** @brief Runs the test
 
                 Derived test classes are supposed to implement this method
-                to run the test procedure. A derived class should send the 
-                'started' signal at the begin of the test and send the 
-                'finished' signal at the end of the test. If the test was 
+                to run the test procedure. A derived class should send the
+                'started' signal at the begin of the test and send the
+                'finished' signal at the end of the test. If the test was
                 successful, the 'success' signal is sent, otheriwse one of the
                 signals indicating a failrue. In case of a failed assertion,
                 the signal 'assertion' is sent, if a regular std::exception was
                 the cause of the error the signal 'exception' is sent and and
-                the signal 'error' indicates an unknown exception or error. 
+                the signal 'error' indicates an unknown exception or error.
                 This method should not propagate any exceptions
             */
             virtual void run() = 0;
@@ -67,40 +68,40 @@ namespace Unit {
             /** @brief Start notification
 
                 This signal is sent when the test has started.
-                TODO: use TestContext as paramater
+                TODO: use TestConText as paramater
             */
-            Signal<const TestContext&> started;
+            Signal<const TestConText&> started;
 
             /** @brief Finished notification
 
                 This signal is sent when the test finished. It does not
                 indicate that the test was successful.
             */
-            Signal<const Test&> finished;
+            Signal<const TestConText&> finished;
 
             /** @brief Success notification
 
                 This signal is sent when the test was successful.
             */
-            Signal<const Test&> success;
+            Signal<const TestConText&> success;
 
             /** @brief Assertion notification
 
                 This signal is sent when a assertion failed.
             */
-            Signal<const Test&, const Assertion&> assertion;
+            Signal<const TestConText&, const Assertion&> assertion;
 
             /** @brief Exception notification
 
                 This signal is sent when a regular std::exception occured.
             */
-            Signal<const Test&, const std::exception&> exception;
+            Signal<const TestConText&, const std::exception&> exception;
 
             /** @brief Error notification
 
                 This signal is sent when an unknown error occured.
             */
-            Signal<const Test&> error;
+            Signal<const TestConText&> error;
 
             /** @brief Message notification
 
@@ -124,7 +125,7 @@ namespace Unit {
         private:
             std::string _name;
     };
-	
+
 } // namespace Unit
 
 } // namespace Pt

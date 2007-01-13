@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTCONTEXT_H
-#define PT_UNIT_TESTCONTEXT_H
+#ifndef PTV_UNIT_TESTCONTEXT_H
+#define PTV_UNIT_TESTCONTEXT_H
 
 #include <string>
 #include <Pt/Unit/Test.h>
@@ -25,14 +25,14 @@
 
 namespace Pt {
 
-namespace Unit {	
+namespace Unit {
 
-    class PT_API TestContext
+    class PT_API TestConText
     {
         public:
-            virtual ~TestContext()
+            virtual ~TestConText()
             {
-                _test.finished.send<const Test&>( _test );
+                _test.finished.send<const TestConText&>(*this);
             }
 
             virtual const std::string& testName() const
@@ -42,21 +42,21 @@ namespace Unit {
             {
                 try
                 {
-                    _test.started.send<const TestContext&>( *this );
+                    _test.started.send<const TestConText&>(*this);
                     this->_run();
-                    _test.success.send<const Test&>( _test );
+                    _test.success.send<const TestConText&>(*this);
                 }
                 catch(const Assertion& assertion)
                 {
-                    _test.assertion.send<const Test&, const Assertion&>(_test, assertion);
+                    _test.assertion.send<const TestConText&>(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    _test.exception.send<const Test&, const std::exception&>(_test, ex);
+                    _test.exception.send<const TestConText&>(*this, ex);
                 }
                 catch(...)
                 {
-                    _test.error.send<const Test&>(_test);
+                    _test.error.send<const TestConText&>(*this);
                 }
             }
 
@@ -64,14 +64,14 @@ namespace Unit {
             virtual void _run()
             {}
 
-            TestContext(Test& test)
+            TestConText(Test& test)
             : _test(test)
             {}
 
         private:
             Test& _test;
     };
-	
+
 } // namespace Unit
 
 } // namespace Pt

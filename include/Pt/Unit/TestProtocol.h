@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTPROTOCOL_H
-#define PT_UNIT_TESTPROTOCOL_H
+#ifndef PTV_UNIT_TESTPROTOCOL_H
+#define PTV_UNIT_TESTPROTOCOL_H
 
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
@@ -56,7 +56,7 @@ namespace Unit {
             */
             virtual void run(TestSuite& test);
 
-		protected:
+        protected:
             void runTest(TestSuite& suite, const std::string& name, const Args& args);
     };
 

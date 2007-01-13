@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,52 +25,52 @@
 
 int main(int argc, char** argv)
 {
-  // CppUnit(mini) test launcher
-  // command line option syntax:
-  // test [OPTIONS]
-  // where OPTIONS are
-  //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
-  //     -f=FILE           save output in file FILE instead of stdout
+    // CppUnit(mini) test launcher
+    // command line option syntax:
+    // test [OPTIONS]
+    // where OPTIONS are
+    //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
+    //     -f=FILE           save output in file FILE instead of stdout
 
-	Pt::Unit::Reporter reporter;
-	Pt::Unit::Application app;
-    app.setReporter(reporter);
+    Pt::Unit::Reporter reporter;
+    Pt::Unit::Application app;
+      app.setReporter(reporter);
 
-	//char* fileName = 0;
-	char* testName = "";
+    //char* fileName = 0;
+    char* testName = "";
 
-	for(int i = 1; i < argc; ++i)
-	{
-		if(argv[i][0] != '-')
-			break;
+    for(int i = 1; i < argc; ++i)
+    {
+        if(argv[i][0] != '-')
+            break;
 
-		if( !strncmp(argv[i], "--help", 6) )
-		{
-			std::cerr << "Available Tests:\n";
-			std::list<Pt::Unit::Test*>::const_iterator it;
-			for( it = app.tests().begin(); it != app.tests().end(); ++it)
-			{
-				std::cerr << "  - "<< (*it)->name() << std::endl;
-			}
-			return 0;
-		}
-		else if( !strncmp(argv[i], "-t", 2) )
-		{
-			testName = argv[++i];
-		}
-		//else if( !strncmp(argv[i], "-f=", 3) )
-		//{
-		//	fileName = argv[i] + 3;
-		//}
-	}
+        if( !strncmp(argv[i], "--help", 6) )
+        {
+            std::cerr << "Available Tests:\n";
+            std::list<Pt::Unit::Test*>::const_iterator it;
+            for( it = app.tests().begin(); it != app.tests().end(); ++it)
+            {
+                std::cerr << "  - "<< (*it)->name() << std::endl;
+            }
+            return 0;
+        }
+        else if( !strncmp(argv[i], "-t", 2) )
+        {
+            testName = argv[++i];
+        }
+        //else if( !strncmp(argv[i], "-f=", 3) )
+        //{
+        //  fileName = argv[i] + 3;
+        //}
+    }
 
-	try {
-		return app.run(testName);
-	}
-	catch(const std::exception& ex)
-	{
-		std::cerr << ex.what() << std::endl;
-	}
+    try {
+        return app.run(testName);
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+    }
 
-	return 1;
+    return 1;
 }

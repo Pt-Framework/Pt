@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_ASSERTION_H
-#define PT_UNIT_ASSERTION_H
+#ifndef PTV_UNIT_ASSERTION_H
+#define PTV_UNIT_ASSERTION_H
 
 #include <Pt/Exception.h>
 #include <iostream>
@@ -29,8 +29,8 @@ namespace Unit {
 
     /** @brief %Test %Assertion exception
 
-        Assertions are modeled as an exception type, which is thrown by unit
-        tests when an assertion has failed. It is recommended to use the 
+        Assertions are modeled as an exception type, which is thrown by Unit
+        tests when an assertion has failed. It is recommended to use the
         PT_UNIT_ASSERT for easy creation from a source info object.
 
         @code
@@ -47,7 +47,7 @@ namespace Unit {
             /** @brief Construct from a message and source info.
 
                 Constructs a assertion exception from a message string
-                and a source info object that describes where the 
+                and a source info object that describes where the
                 assertion failed. Use the PT_UNIT_ASSERT macro instead
                 of this constructor.
 
@@ -72,10 +72,10 @@ namespace Unit {
             {}
     };
 
-    #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion("Assertion", PT_SOURCEINFO);
+    #define PTV_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
 
 } // namespace Unit
 
 } // namespace Pt
 
-#endif
+#endif  // PTV_UNIT_ASSERTION_H
