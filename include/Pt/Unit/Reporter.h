@@ -25,7 +25,7 @@
 
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/Test.h>
-#include <Pt/Unit/TestConText.h>
+#include <Pt/Unit/TestContext.h>
 
 
 namespace Pt {
