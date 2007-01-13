@@ -16,7 +16,7 @@ namespace Pt {
 
         //! \brief A generic Rect class
         template<typename PointT, typename SizeT>
-        class PTV_API BasicRect {
+        class PT_API BasicRect {
             public:
                 //! Construct a BasicRect at a given position and BasicSize<SizeT>
                 BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(1, 1))
