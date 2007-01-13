@@ -14,199 +14,200 @@ namespace Pt {
 
 	namespace Math {
 
-		//! \brief A generic Rect class
-		template<typename T>
-		class PT_API BasicRect {
-			public:
-				//! Construct a BasicRect at a given position and BasicSize<T>
-				BasicRect(const BasicPoint<T>& p = BasicPoint<T>(0, 0), const BasicSize<T>& s = BasicSize<T>(1, 1))
-				: _p(p)
-				, _s(s)
-				{}
-				
-				BasicRect( const BasicPoint<T>& p1, const BasicPoint<T>& p2 )
-				: _p(p1)
-				, _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
-				{}
-				
-				//! Return the BasicSize<T> as a BasicSize<T>
-				void setSize(const BasicSize<T>& s)
-				{ _s = s; }
+        //! \brief A generic Rect class
+        template<typename PointT, typename SizeT>
+        class PTV_API BasicRect {
+            public:
+                //! Construct a BasicRect at a given position and BasicSize<SizeT>
+                BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(1, 1))
+                : _p(p)
+                , _s(s)
+                {}
 
-				const BasicSize<T>& size() const
-				{ return _s; }
+                BasicRect( const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2 )
+                : _p(p1)
+                , _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
+                {}
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setSize(const BasicSize<SizeT>& s)
+                { _s = s; }
 
 
-				T left() const
-				{ return _p.x(); }
+                const BasicSize<SizeT>& size() const
+                { return _s; }
 
 
-				T top() const
-				{ return _p.y(); }
+                PointT left() const
+                { return _p.x(); }
 
 
-				T x() const
-				{ return _p.x(); }
+                PointT top() const
+                { return _p.y(); }
 
 
-				T y() const
-				{ return _p.y(); }
+                PointT x() const
+                { return _p.x(); }
 
-                BasicRect& setX(T x)
+
+                PointT y() const
+                { return _p.y(); }
+
+                BasicRect& setX(PointT x)
                 {
                     _p.setX( x );
                     return *this;
                 }
-                
-                BasicRect& setY(T y)
+
+                BasicRect& setY(PointT y)
                 {
                     _p.setY( y );
                     return *this;
                 }
-                
-				T right() const
-				{ return _p.x() + _s.width() - 1; }
 
-				T bottom() const
-				{ 
-				    return _p.y() + _s.height() - 1; 
-                }
+                PointT right() const
+                { return _p.x() + _s.width() - 1; }
 
-				void setLeft(T value)
-				{ 
-				    _s.setWidth( _s.width() + _p.x() - value );
-				    _p.setX( value ); 				    
-				}
-
-				void setTop(T value)
-				{ 
-				    _s.setHeight( _p.y() - value  + _s.height());
-                    _p.setY( value ); 
-				}
-
-				void setRight( T value )
-				{ 
-				    _s.setWidth( width() + (value - right()) ); 
-				}
-				
-				void setBottom( T value )
-				{ 
-				    _s.setHeight( height() + value - this->bottom() ); 
+                PointT bottom() const
+                {
+                    return _p.y() + _s.height() - 1;
                 }
 
-                BasicRect& addLeft(T delta)
+                void setLeft(PointT value)
                 {
-                  setLeft( left() + delta);                  
+                    _s.setWidth( _s.width() + _p.x() - value );
+                    _p.setX( value );
+                }
+
+                void setTop(PointT value)
+                {
+                    _s.setHeight( _p.y() - value  + _s.height());
+                    _p.setY( value );
+                }
+
+                void setRight( PointT value )
+                {
+                    _s.setWidth( width() + (value - right()) );
+                }
+
+                void setBottom( PointT value )
+                {
+                    _s.setHeight( height() + value - this->bottom() );
+                }
+
+                BasicRect& addLeft(PointT delta)
+                {
+                  setLeft( left() + delta);
                   return *this;
                 }
-                
-                BasicRect& subLeft(T delta)
+
+                BasicRect& subLeft(PointT delta)
                 {
-                  setLeft( left() - delta); 
+                  setLeft( left() - delta);
                   return *this;
                 }
-                
-                BasicRect& addTop(T delta)
+
+                BasicRect& addTop(PointT delta)
                 {
-                  setTop( top() +  delta); 
+                  setTop( top() +  delta);
                   return *this;
                 }
-                
-                BasicRect& subTop(T delta)
+
+                BasicRect& subTop(PointT delta)
                 {
-                  setTop( top() -  delta); 
-                  return *this;
-                }       
-                     
-                BasicRect& addRight(T delta)
-                {
-                  setRight( right() +  delta); 
+                  setTop( top() -  delta);
                   return *this;
                 }
-                
-                BasicRect& subRight(T delta)
+
+                BasicRect& addRight(PointT delta)
                 {
-                  setRight( right() -  delta); 
+                  setRight( right() +  delta);
                   return *this;
                 }
-               
-                BasicRect& addBottom(T delta)
+
+                BasicRect& subRight(PointT delta)
                 {
-                  setBottom( bottom() +  delta); 
+                  setRight( right() -  delta);
                   return *this;
                 }
-                
-                BasicRect& subBottom(T delta)
+
+                BasicRect& addBottom(PointT delta)
                 {
-                  setBottom( bottom() -  delta); 
+                  setBottom( bottom() +  delta);
+                  return *this;
+                }
+
+                BasicRect& subBottom(PointT delta)
+                {
+                  setBottom( bottom() -  delta);
                   return * this;
-                }      
-                                            
-				T width() const
-				{ return _s.width(); }
+                }
 
-				T height() const
-				{ return _s.height(); }
+                SizeT width() const
+                { return _s.width(); }
 
-				BasicRect& setWidth(T w)
-				{
-				     _s.setWidth(w); 
-				     return *this;				
-				}
+                SizeT height() const
+                { return _s.height(); }
 
-				BasicRect& setHeight(T h)
-				{
-				    _s.setHeight(h); 
-				     return *this;			
-				}
+                BasicRect& setWidth(SizeT w)
+                {
+                     _s.setWidth(w);
+                     return *this;
+                }
 
-				BasicRect& setGeometry(const BasicPoint<T>& p, const BasicSize<T>& s)
-				{
-					_p = p;
-					_s = s;
-					return *this;
-				}
+                BasicRect& setHeight(SizeT h)
+                {
+                    _s.setHeight(h);
+                     return *this;
+                }
 
-				BasicRect& setGeometry(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
-				{
-					_p = p1;
-					_s.setWidth(p2.x() - p1.x() + 1);
-					_s.setHeight(p2.y() - p1.y() + 1);
-					return *this;
-				}
-				
-				bool isNull() const
-				{
-				    return (_s.width() == 0 || _s.height() == 0 );				         
-			    }			    	
+                BasicRect& setGeometry(const BasicPoint<PointT>& p, const BasicSize<SizeT>& s)
+                {
+                    _p = p;
+                    _s = s;
+                    return *this;
+                }
 
-				//! Return the top left coordinates as a const BasicPoint<T>
-				const BasicPoint<T>& topLeft() const
-				{ return _p; }
+                BasicRect& setGeometry(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
+                {
+                    _p = p1;
+                    _s.setWidth(p2.x() - p1.x() + 1);
+                    _s.setHeight(p2.y() - p1.y() + 1);
+                    return *this;
+                }
 
-				//! Return the top right coordinates as a const BasicPoint<T>
-				const BasicPoint<T> topRight() const
-				{ return BasicPoint<T>(_p.x() + _s.width(), _p.y()); }
+                bool isNull() const
+                {
+                    return (_s.width() == 0 || _s.height() == 0 );
+                }
 
-				//! Return the bottom left coordinates as a const BasicPoint<T>
-				const BasicPoint<T> bottomLeft() const
-				{ return BasicPoint<T>(_p.x(), _p.y() + _s.height()); }
+                //! Return the top left coordinates as a const BasicPoint<SizeT>
+                const BasicPoint<PointT>& topLeft() const
+                { return _p; }
 
-				//! Return the bottom right coordinates as a const BasicPoint<T>
-				const BasicPoint<T> bottomRight() const
-				{ return BasicPoint<T>(_p.x() + _s.width(), _p.y() + _s.height()); }
+                //! Return the top right coordinates as a const BasicPoint<SizeT>
+                const BasicPoint<PointT> topRight() const
+                { return BasicPoint<PointT>(_p.x() + _s.width(), _p.y()); }
 
-				bool operator==(const BasicRect& other) const
-				{ return _p == other._p && _s == other._s; }
+                //! Return the bottom left coordinates as a const BasicPoint<SizeT>
+                const BasicPoint<PointT> bottomLeft() const
+                { return BasicPoint<PointT>(_p.x(), _p.y() + _s.height()); }
 
-				bool operator!=(const BasicRect& other) const
-				{ return _p != other._p || _s != other._s; }
+                //! Return the bottom right coordinates as a const BasicPoint<SizeT>
+                const BasicPoint<PointT> bottomRight() const
+                { return BasicPoint<PointT>(_p.x() + _s.width(), _p.y() + _s.height()); }
 
-			protected:
-				BasicPoint<T> _p;
-				BasicSize<T>  _s;
-				
-		};
+                bool operator==(const BasicRect& other) const
+                { return _p == other._p && _s == other._s; }
+
+                bool operator!=(const BasicRect& other) const
+                { return _p != other._p || _s != other._s; }
+
+            protected:
+                BasicPoint<PointT> _p;
+                BasicSize<SizeT>  _s;
+
+        };
 
 	} // namespace Math
 
