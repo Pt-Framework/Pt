@@ -67,7 +67,7 @@ namespace Unit {
 
             @param test The started test
         */
-        virtual void started(const TestConText& test) = 0;
+        virtual void started(const TestContext& test) = 0;
 
         /** @brief Finished notification
 
@@ -76,7 +76,7 @@ namespace Unit {
 
             @param test The finished test
         */
-        virtual void finished(const TestConText& test) = 0;
+        virtual void finished(const TestContext& test) = 0;
 
         /** @brief Message notification
 
@@ -93,7 +93,7 @@ namespace Unit {
 
             @param test The succeeded test
         */
-        virtual void success(const TestConText& test) = 0;
+        virtual void success(const TestContext& test) = 0;
 
         /** @brief Assertion notification
 
@@ -102,7 +102,7 @@ namespace Unit {
 
             @param test The failed test
         */
-        virtual void assertion(const TestConText& test, const Assertion& a) = 0;
+        virtual void assertion(const TestContext& test, const Assertion& a) = 0;
 
         /** @brief Exception notification
 
@@ -112,7 +112,7 @@ namespace Unit {
 
             @param test The failed test
         */
-        virtual void exception(const TestConText& test, const std::exception& ex) = 0;
+        virtual void exception(const TestContext& test, const std::exception& ex) = 0;
 
         /** @brief Error notification
 
@@ -121,7 +121,7 @@ namespace Unit {
 
             @param test The failed test
         */
-        virtual void error(const TestConText& test) = 0;
+        virtual void error(const TestContext& test) = 0;
 
     protected:
         /** @brief Ostream to print output to
@@ -140,33 +140,33 @@ namespace Unit {
         virtual ~BriefTextReporter()
         {}
 
-        virtual void started(const TestConText& test)
+        virtual void started(const TestContext& test)
         {
             *_out << test.testName() << ": ";
         }
 
-        virtual void finished(const TestConText& test)
+        virtual void finished(const TestContext& test)
         {}
 
         virtual void message(const std::string& msg)
         {}
 
-        virtual void success(const TestConText& test)
+        virtual void success(const TestContext& test)
         {
             *_out << "OK" << std::endl;
         }
 
-        virtual void assertion(const TestConText& test, const Assertion& a)
+        virtual void assertion(const TestContext& test, const Assertion& a)
         {
             *_out << "ASSERTION" << std::endl;
         }
 
-        virtual void exception(const TestConText& test, const std::exception& ex)
+        virtual void exception(const TestContext& test, const std::exception& ex)
         {
             *_out << "EXCEPTION" << std::endl;
         }
 
-        virtual void error(const TestConText& test)
+        virtual void error(const TestContext& test)
         {
             *_out << "ERROR" << std::endl;
         }
@@ -183,13 +183,13 @@ namespace Unit {
         virtual ~TextReporter()
         {}
 
-        virtual void started(const TestConText& test)
+        virtual void started(const TestContext& test)
         {
             BriefTextReporter::started(test);
             *_out << std::endl;
         }
 
-        virtual void finished(const TestConText& test)
+        virtual void finished(const TestContext& test)
         {
             *_out << std::endl;
         }
@@ -199,25 +199,25 @@ namespace Unit {
             *_out << msg << std::endl;
         }
 
-        virtual void success(const TestConText& test)
+        virtual void success(const TestContext& test)
         {
             BriefTextReporter::success(test);
         }
 
-        virtual void assertion(const TestConText& test, const Assertion& a)
+        virtual void assertion(const TestContext& test, const Assertion& a)
         {
             BriefTextReporter::assertion(test, a);
             *_out << '\t' << "Condition: " << a.what() << std::endl;
             *_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
         }
 
-        virtual void exception(const TestConText& test, const std::exception& ex)
+        virtual void exception(const TestContext& test, const std::exception& ex)
         {
             BriefTextReporter::exception(test, ex);
             *_out << '\t' << ex.what() << std::endl;
         }
 
-        virtual void error(const TestConText& test)
+        virtual void error(const TestContext& test)
         {
             BriefTextReporter::error(test);
         }
@@ -244,12 +244,12 @@ namespace Unit {
             *_out << "</ComponentTester>" << std::endl;
         }
 
-        virtual void started(const TestConText& test)
+        virtual void started(const TestContext& test)
         {
             beginTag(std::string("test name=\"") + test.testName() + std::string("\""));
         }
 
-        virtual void finished(const TestConText& test)
+        virtual void finished(const TestContext& test)
         {
            endTag("test");
            *_out << std::endl;
@@ -262,14 +262,14 @@ namespace Unit {
             *_out << "-->" << std::endl;
         }
 
-        virtual void success(const TestConText& test)
+        virtual void success(const TestContext& test)
         {
             beginTag("success");
             writeData("OK");
             endTag("success");
         }
 
-        virtual void assertion(const TestConText& test, const Assertion& a)
+        virtual void assertion(const TestContext& test, const Assertion& a)
         {
             beginTag("assertion");
 
@@ -286,14 +286,14 @@ namespace Unit {
             endTag("assertion");
         }
 
-        virtual void exception(const TestConText& test, const std::exception& ex)
+        virtual void exception(const TestContext& test, const std::exception& ex)
         {
             beginTag("exception");
             writeData(ex.what());
             endTag("exception");
         }
 
-        virtual void error(const TestConText& test)
+        virtual void error(const TestContext& test)
         {
             beginTag("error");
             writeData("ERROR");
@@ -349,14 +349,14 @@ namespace Unit {
         virtual ~CSVReporter()
         {}
 
-        virtual void started(const TestConText& test)
+        virtual void started(const TestContext& test)
         {
             _performanceSaved = false;
             *_out << "\"" << "Time and Date" << "\"";
             *_out << ";\"" << test.testName() << "\"";
         }
 
-        virtual void finished(const TestConText& test)
+        virtual void finished(const TestContext& test)
         {
            *_out << std::endl;
         }
@@ -370,7 +370,7 @@ namespace Unit {
             }
         }
 
-        virtual void success(const TestConText& test)
+        virtual void success(const TestContext& test)
         {
             if(!_performanceSaved)
             {
@@ -380,7 +380,7 @@ namespace Unit {
             *_out << ";\"OK\"";
         }
 
-        virtual void assertion(const TestConText& test, const Assertion& a)
+        virtual void assertion(const TestContext& test, const Assertion& a)
         {
             if(!_performanceSaved)
             {
@@ -392,7 +392,7 @@ namespace Unit {
             *_out << ";\"" << a.sourceInfo().file() << ":" << a.sourceInfo().line() << "\"";
         }
 
-        virtual void exception(const TestConText& test, const std::exception& ex)
+        virtual void exception(const TestContext& test, const std::exception& ex)
         {
             if(!_performanceSaved)
             {
@@ -403,7 +403,7 @@ namespace Unit {
             *_out << ";\"" << ex.what() << "\"";
         }
 
-        virtual void error(const TestConText& test)
+        virtual void error(const TestContext& test)
         {
             if(!_performanceSaved)
             {
