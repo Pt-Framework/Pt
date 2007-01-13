@@ -78,7 +78,7 @@ class PT_API basic_string< Pt::Text::Char > {
 
 		basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a);
 
-		basic_string(ptv::text::Char* begin, ptv::text::Char* end);
+		basic_string(Pt::Text::Char* begin, Pt::Text::Char* end);
 
 		~basic_string();
 

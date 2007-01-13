@@ -87,7 +87,7 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type p
 }
 
 
-inline basic_string<ptv::Char>::basic_string(ptv::text::Char* begin, ptv::text::Char* end)
+inline basic_string<ptv::Char>::basic_string(Pt::Text::Char* begin, Pt::Text::Char* end)
 : _data( new StringData( begin, end - begin ) )
 {
 }
