@@ -149,13 +149,21 @@ WidgetImpl::~WidgetImpl()
 }
 
 
-void WidgetImpl::setTitle(const std::string& text)
+void WidgetImpl::setTitle(const Pt::Text::String& text)
 {
 	_title = text;
 	Display* display = X11EventLoop::instance().display();
 	XTextProperty tp;
-	const char* textAsPointer = text.c_str();
-	XmbTextListToTextProperty(display, (char**)&textAsPointer, 1, XStringStyle, &tp);
+
+	std::stringstream ss;
+	ptv::text::TextStream textStream(ss, new ptv::text::Utf16Codec());
+	textStream << text << Char(0); // Append extra \0 for proper line termination.
+	textStream.flush();
+
+	std::string textString = ss.str();
+	const char* addressOfTextString = textString.c_str();
+	XwcTextListToTextProperty(display, (wchar_t**)&addressOfTextString, 1, XStringStyle, &tp);
+
 	XSetWMName(display, _drawable, &tp);
 	XFree( tp.value );
 	XSync(display, false);

@@ -25,8 +25,11 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Painter.h>
+#include <Pt/Text/TextStream.h>
+#include <Pt/Text/Utf16Codec.h>
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 
@@ -115,18 +118,28 @@ WidgetImpl::~WidgetImpl()
 }
 
 
-void WidgetImpl::setTitle(const std::string& text)
+void WidgetImpl::setTitle(const Pt::Text::String& text)
 {
-	SetWindowText(_hwnd, win32::fromMultiByte(text).c_str());
+	std::stringstream ss;
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
+	textStream << text << Char(0); // Append extra \0 for proper line termination.
+	textStream.flush();
+
+	SetWindowTextW(_hwnd, (wchar_t*)ss.str().c_str());
 }
 
 
-std::string WidgetImpl::title()
+Pt::Text::String WidgetImpl::title()
 {
-	std::vector<TCHAR> buffer(255);
-	GetWindowText(_hwnd, &buffer[0], buffer.size());
+	std::vector<wchar_t> buffer(255);
+	GetWindowTextW(_hwnd, &buffer[0], buffer.size());
 
-	return win32::toMultiByte(&buffer[0]);
+	std::stringstream ss((char*)&buffer[0]);
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
+	Pt::Text::String result;
+	getline(textStream, result);
+
+	return result;
 }
 
 

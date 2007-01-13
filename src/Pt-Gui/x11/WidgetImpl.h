@@ -58,9 +58,9 @@ namespace Gui {
 
 			virtual ~WidgetImpl();
 
-			void setTitle(const std::string& text);
+			void setTitle(const Pt::Text::String& text);
 
-			std::string title() const
+			Pt::Text::String title() const
 			{ return _title; }
 
 			Painter painter();

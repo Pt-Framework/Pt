@@ -50,7 +50,7 @@ namespace Gui {
 
 Widget::Widget(Widget& parent, const Math::Point& at, const Math::Size& size)
 : _parent(&parent)
-, _rect(at, size)
+, _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -62,7 +62,7 @@ Widget::Widget(Widget& parent, const Math::Point& at, const Math::Size& size)
 
 Widget::Widget(const Math::Point& at, const Math::Size& size)
 : _parent(0)
-, _rect(at, size)
+, _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -73,7 +73,7 @@ Widget::Widget(const Math::Point& at, const Math::Size& size)
 
 Widget::Widget(Widget& parent)
 : _parent(&parent)
-, _rect(Math::Point(0, 0), Math::Size(0, 0))
+, _region(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -85,7 +85,7 @@ Widget::Widget(Widget& parent)
 
 Widget::Widget()
 : _parent(0)
-, _rect(Math::Point(0, 0), Math::Size(0, 0))
+, _region(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
@@ -110,12 +110,12 @@ Widget::~Widget()
 }
 
 
-void Widget::setTitle(const std::string& text)
+void Widget::setTitle(const Pt::Text::String& text)
 {
 	_impl->setTitle(text);
 }
 
-std::string Widget::title()
+Pt::Text::String Widget::title()
 {
 	return _impl->title();
 }
@@ -162,26 +162,27 @@ const Insets& Widget::insets() const
 }
 
 
-const Math::Rect& Widget::rect() const
+const Pt::Gfx::Region& Widget::region() const
 {
-	return _rect;
+	return _region;
 }
+
 
 const Math::Size& Widget::size() const
 {
-	return rect().size();
+	return region().size();
 }
 
 void Widget::move(ssize_t x, ssize_t y)
 {
-	if (x == _rect.x() && y == _rect.y()) {
+	if (x == _region.x() && y == _region.y()) {
 		return;
 	}
 
 	_impl->move(x, y);
-	
-	_rect.setX(x);
-	_rect.setY(y);
+
+	_region.setX(x);
+	_region.setY(y);
 
 	this->updateLayout();
 }
@@ -189,14 +190,14 @@ void Widget::move(ssize_t x, ssize_t y)
 
 void Widget::resize(ssize_t width, ssize_t height)
 {
-	if (width == _rect.width() && height == _rect.height()) {
+	if (width == _region.width() && height == _region.height()) {
 		return;
 	}
 
 	_impl->resize(width, height);
 
-	_rect.setWidth(width);
-	_rect.setHeight(height);
+	_region.setWidth(width);
+	_region.setHeight(height);
 
 	this->updateLayout();
 }
@@ -229,7 +230,7 @@ Math::Size Widget::preferredSize()
 	// TODO We can currently not check if the widget has no layout manager. Every widget has a layout manager, namely
 	// NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
 	// no layout manager set. Is this good?
-	
+
 	Math::Size preferredSize = layout().preferredSize();
 	if (preferredSize.width() == 0 && preferredSize.height() == 0) {
 		// No layout manager given. Use the current size as preferred size.
@@ -294,7 +295,7 @@ void Widget::reparent(Widget* newParent)
 	if (_parent == newParent) {
 		return; // Same parent as it is at the moment.
 	}
-		
+
 	if (_parent) {
 		_parent->removeChild(*this);
 	}
@@ -352,8 +353,8 @@ void Widget::mouseMoveEvent(const MouseMoveEvent& event)
 void Widget::moveEvent(const MoveEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::moveEvent" << std::endl;
-	_rect.setX(event.x());
-	_rect.setY(event.y());
+	_region.setX(event.x());
+	_region.setY(event.y());
 
 	this->_moveEvent(event);
 }
@@ -369,13 +370,13 @@ void Widget::paintEvent(const PaintEvent& event)
 void Widget::resizeEvent(const ResizeEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
-	if (event.width() == Pt::size_t( _rect.width() ) &&
-	    event.height() == Pt::size_t( _rect.height()) ) {
+	if (event.width() == Pt::size_t( _region.width() ) &&
+	    event.height() == Pt::size_t( _region.height()) ) {
 		return;
 	}
 
-	_rect.setWidth(event.width());
-	_rect.setHeight(event.height());
+	_region.setWidth(event.width());
+	_region.setHeight(event.height());
 
 	this->_resizeEvent(event);
 

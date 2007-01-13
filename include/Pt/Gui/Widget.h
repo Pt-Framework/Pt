@@ -11,6 +11,8 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Region.h>
+#include <Pt/Text/String.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gui/Insets.h>
 #include <cstddef>
@@ -225,14 +227,14 @@ namespace Gui {
 			 * @param text The new title for this widget.
 			 * @see title()
 			 */
-			void setTitle(const std::string& text);
+			void setTitle(const Pt::Text::String& text);
 
 			/**
 			 * @brief Returns the title of this widget.
 			 * @return The title of this widget.
 			 * @see setTitle()
 			 */
-			std::string title();
+			Pt::Text::String title();
 
 			/**
 			 * @brief Returns a reference to the color which is currently set as background color
@@ -303,7 +305,7 @@ namespace Gui {
 			/**
 			 * @brief Returns this widget's current bounding box (= position + size).
 			 *
-			 * A Rect object is returned which describes the widget's current bounds; the widget's
+			 * A Region object is returned which describes the widget's current bounds; the widget's
 			 * position and size. For top-level widgets the position is relative to the top-left
 			 * corner of the desktop. For child widgets the position is relative to the top-left
 			 * corner of the parent widget.
@@ -312,7 +314,7 @@ namespace Gui {
 			 * @see resize()
 			 * @see size()
 			 */
-			const Math::Rect& rect() const;
+			const Pt::Gfx::Region& region() const;
 
 			/**
 			 * @brief Returns this widget's current size.
@@ -830,7 +832,7 @@ namespace Gui {
 
 		private:
 			Widget* _parent;
-			Math::Rect _rect;
+			Pt::Gfx::Region _region;
 			Gfx::ARgbColor _foregroundColor;
 			Gfx::ARgbColor _backgroundColor;
 			std::list<Widget*> _childWidgets;
