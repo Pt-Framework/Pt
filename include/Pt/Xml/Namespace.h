@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_Namespace_h
-#define Pt_Xml_Namespace_h
+#ifndef PTV_Xml_Namespace_h
+#define PTV_Xml_Namespace_h
 
 #include <Pt/Api.h>
 #include <Pt/Text/String.h>
@@ -10,7 +10,7 @@
 namespace Pt {
 
 namespace Xml {
-	
+
 	/**
 	 * @brief A Namespace element (Node) of an XML document.
 	 *
@@ -58,7 +58,7 @@ namespace Xml {
 			 */
 			void setPrefix(const String& prefix)
 			{ _prefix = prefix; }
-			
+
 			/**
 			 * @brief Returns the URI of this namespace.
 			 *

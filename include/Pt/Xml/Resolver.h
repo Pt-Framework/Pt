@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_Resolver_h
-#define Pt_Xml_Resolver_h
+#ifndef PTV_Xml_Resolver_h
+#define PTV_Xml_Resolver_h
 
 #include <Pt/Text/String.h>
 #include <map>

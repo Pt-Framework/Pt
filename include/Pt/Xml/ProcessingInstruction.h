@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_ProcessingInstruction_h
-#define Pt_Xml_ProcessingInstruction_h
+#ifndef PTV_Xml_ProcessingInstruction_h
+#define PTV_Xml_ProcessingInstruction_h
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Text/String.h>
@@ -8,13 +8,13 @@
 namespace Pt {
 
 	namespace Xml {
-	
+
 		/**
 		 * @brief A ProcessingInstruction (PI) element (Node) of an XML document.
 		 *
 		 * A processing instruction can be used to add instructions to an XML document which is needed
 		 * and can be used by specific XML processing software. The data of a processing instruction
-		 * has no particular format and can contain plain text or XML-like attribute/value-associations.
+		 * has no particular format and can contain plain Text or XML-like attribute/value-associations.
 		 *
 		 * To access the target, which may for example be a identifier for a specific XML processor,
 		 * the method target() can be used. To access the data for this processor the method data()
@@ -69,7 +69,7 @@ namespace Pt {
 				 * @param data The data for this processing instruction.
 				 */
 				void setData(const String& data);
-	
+
 			private:
 				//! The target of this processing instruction.
 				String _target;
@@ -77,7 +77,7 @@ namespace Pt {
 				//! The data of this processing instruction.
 				String _data;
 		};
-	
+
 	}
 
 }

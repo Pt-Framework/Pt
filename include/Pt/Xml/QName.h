@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_QName_h
-#define Pt_Xml_QName_h
+#ifndef PTV_Xml_QName_h
+#define PTV_Xml_QName_h
 
 #include <Pt/Text/String.h>
 

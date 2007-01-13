@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_XmlDeclaration_h
-#define Pt_Xml_XmlDeclaration_h
+#ifndef PTV_Xml_XmlDeclaration_h
+#define PTV_Xml_XmlDeclaration_h
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Text/String.h>

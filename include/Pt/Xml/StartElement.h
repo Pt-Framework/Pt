@@ -183,7 +183,7 @@ namespace Xml {
 			 * This StartElement object holds a list of attributes, which consist of the attribute name
 			 * and the attribute value. This methods returns the value of a single attribute. To access
 			 * all attributes of this StartElement the method attributes() can be used.
-			 * 
+			 *
 			 * If no attribute with the given name exists, an empty string is returned.
 			 *
 			 * @param attributeName The value of the attribute with this name is returned.
@@ -204,25 +204,25 @@ namespace Xml {
 			bool hasAttribute(const String attributeName) const;
 
 			/**
-			 * @brief Returns the namespace context of this StartElement.
+			 * @brief Returns the namespace conText of this StartElement.
 			 *
-			 * @return NamespaceContext The namespace context of this StartElment.
+			 * @return NamespaceContext The namespace conText of this StartElment.
 			 * @see NamespaceContext
 			 */
 			const NamespaceContext& namespaceContext() const
 			{return _namespaceContext;}
 
 			/**
-			 * @brief Sets the namespace context for this StartElement.
+			 * @brief Sets the namespace conText for this StartElement.
 			 *
-			 * @param context The new namespace context for this StartElment.
+			 * @param conText The new namespace conText for this StartElment.
 			 * @see NamespaceContext
 			 */
-			void setNamespaceContext(const NamespaceContext& context)
-			{_namespaceContext = context;}
+			void setNamespaceContext(const NamespaceContext& conText)
+			{_namespaceContext = conText;}
 
 			/**
-			 * @brief Returns the namespace uri for the given tag prefix in this StartElments namespace context.
+			 * @brief Returns the namespace uri for the given tag prefix in this StartElments namespace conText.
 			 *
 			 * The namespace uri is determined using the method NamespaceContext::namespaceUri().
 			 * If no namespace uri exists for this prefix an empty string is returned.
@@ -252,7 +252,7 @@ namespace Xml {
 			//! The list which contains all attributes of the underlying tag.
 			std::list<Attribute> _attributes;
 
-			//! The namespace context of this StartElement.
+			//! The namespace conText of this StartElement.
 			NamespaceContext _namespaceContext;
 	};
 

@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_EndElement_h
-#define Pt_Xml_EndElement_h
+#ifndef PTV_Xml_EndElement_h
+#define PTV_Xml_EndElement_h
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Api.h>
@@ -90,7 +90,7 @@ namespace Pt {
 				//! The tag name of this end tag.
 				String _name;
 		};
-		
+
 	}
 
 }

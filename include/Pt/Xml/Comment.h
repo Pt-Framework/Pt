@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_Comment_h
-#define Pt_Xml_Comment_h
+#ifndef PTV_Xml_Comment_h
+#define PTV_Xml_Comment_h
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Text/String.h>
@@ -8,28 +8,28 @@
 namespace Pt {
 
 	namespace Xml {
-		
+
 		/**
 		 * @brief A Comment element (Node) of an XML document, containing the comment's content.
 		 *
 		 * A Comment element stores the content of a comment. There is no interpretation of the
-		 * comment's text before it is stored.
+		 * comment's Text before it is stored.
 		 *
-		 * Use text() to get the content/text of the comment element without the &lt;!-- and -->.
+		 * Use Text() to get the content/Text of the comment element without the &lt;!-- and -->.
 		 *
-		 * When parsing a comment %&lt;!-- This is a comment -->$ the following text will be
-		 * returned by text(): $This is a comment$
+		 * When parsing a comment %&lt;!-- This is a comment -->$ the following Text will be
+		 * returned by Text(): $This is a comment$
 		 *
 		 * @see Node
 		 */
 		class PT_API Comment : public Node {
 			public:
 				/**
-				 * @brief Constructs a new Comment object with the given string as content/text.
+				 * @brief Constructs a new Comment object with the given string as content/Text.
 				 *
-				 * @param text The content/text of the Comment object.
+				 * @param Text The content/Text of the Comment object.
 				 */
-				Comment(const String& text);
+				Comment(const String& Text);
 
 				//! Empty destructor
 				~Comment();
@@ -42,36 +42,36 @@ namespace Pt {
 				{return new Comment(*this);}
 
 				/**
-				 * @brief Returns the content/text of this Comment object.
+				 * @brief Returns the content/Text of this Comment object.
 				 *
 				 * The content includes everything that is between the start and end "tags" of the comment
 				 * without being parsed. When parsing a comment %&lt;!-- This is a comment -->$ the following
-				 * text will be returned: $This is a comment$
+				 * Text will be returned: $This is a comment$
 				 *
-				 * @return The text of this Comment object.
+				 * @return The Text of this Comment object.
 				 */
-				String& text();
+				String& Text();
 
 				/**
-				 * @brief Returns the content/text of this Comment object.
+				 * @brief Returns the content/Text of this Comment object.
 				 *
 				 * The content includes everything that is between the start and end "tags" of the comment
 				 * without being parsed. When parsing a comment %&lt;!-- This is a comment -->$ the following
-				 * text will be returned: $This is a comment$
+				 * Text will be returned: $This is a comment$
 				 *
-				 * @return The text of this Comment object.
+				 * @return The Text of this Comment object.
 				 */
-				const String& text() const;
+				const String& Text() const;
 
 				/**
-				 * @brief Sets the text of this Comment object.
-				 * @param content The new text for this Comment object.
+				 * @brief Sets the Text of this Comment object.
+				 * @param content The new Text for this Comment object.
 				 */
-				void setText(const String text);
-	
+				void setText(const String Text);
+
 			private:
-				//! The text of this Comment object.
-				String _text;
+				//! The Text of this Comment object.
+				String _Text;
 		};
 
 	}

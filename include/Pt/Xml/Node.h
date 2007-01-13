@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_Node_h
-#define Pt_Xml_Node_h
+#ifndef PTV_Xml_Node_h
+#define PTV_Xml_Node_h
 
 #include <Pt/Api.h>
 #include <Pt/Clonable.h>
@@ -8,7 +8,7 @@
 namespace Pt {
 
 	namespace Xml {
-		
+
 		/**
 		 * @brief The super-class for all specific Node type of an XML document.
 		 *
@@ -32,7 +32,7 @@ namespace Pt {
 				enum Type {
 					//! Unknown Node type (may not currently be supported)
 					Unknown,
-					//! Xml declaration (see class XmlDeclaration) 
+					//! Xml declaration (see class XmlDeclaration)
 					XmlDeclaration,
 					//! Doctype (see class DocType)
 					DocType,
@@ -96,7 +96,7 @@ namespace Pt {
 				//! The type of this Node.
 				Type _type;
 		};
-		
+
 	}
 
 }

@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_XmlStream_h
-#define Pt_Xml_XmlStream_h
+#ifndef PTV_Xml_XmlStream_h
+#define PTV_Xml_XmlStream_h
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/NamespaceContext.h>
@@ -85,7 +85,7 @@ namespace Xml {
 			void parseEndElement(const XmlToken& token, EndElement& element) throw(ParseError);
 			void parseComment(const XmlToken& token, Comment& comment) throw(ParseError);
 			void parseProcessingInstruction(const XmlToken& token, ProcessingInstruction& procInst) throw(ParseError);
-			void parseXmlDeclaration(const XmlToken& token, XmlDeclaration& xmlDecl) throw(ParseError);
+			void parseXmlDeclaration(const XmlToken& token, XmlDeclaration& XmlDecl) throw(ParseError);
 
 		private:
 			std::vector<Xml::Node*> _inputBuffer;

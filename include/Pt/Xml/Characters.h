@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_Characters_h
-#define Pt_Xml_Characters_h
+#ifndef PTV_Xml_Characters_h
+#define PTV_Xml_Characters_h
 
 #include <Pt/Api.h>
 #include <Pt/Text/String.h>
@@ -7,10 +7,10 @@
 
 namespace Pt {
 
-namespace Xml {
+	namespace Xml {
 
 		/**
-		 * @brief A Character element (Node) of an XML document, containing the body's text of a tag.
+		 * @brief A Character element (Node) of an XML document, containing the body's Text of a tag.
 		 *
 		 * A Character element stores the data of a tag's body. The data is interpreted before it
 		 * is set as content of a Character element. This means that entities were translated into
@@ -18,8 +18,8 @@ namespace Xml {
 		 *
 		 * Use content() to get the content of the CDATA element.
 		 *
-		 * When parsing a tag $&lt;a>This is the body's text&lt;/a>$ the following content will be
-		 * returned by content(): $This is the body's text$
+		 * When parsing a tag $&lt;a>This is the body's Text&lt;/a>$ the following content will be
+		 * returned by content(): $This is the body's Text$
 		 *
 		 * @see Node
 		 */
@@ -52,10 +52,10 @@ namespace Xml {
 				/**
 				 * @brief Returns the content of this Character object.
 				 *
-				 * The content includes the text inside a tag's body. The text is interpreted before it
+				 * The content includes the Text inside a tag's body. The Text is interpreted before it
 				 * is returned, this means that for example entities are translated into their corresponding
-				 * character sequence. When parsing a tag $<a>This is the body's text</a>$ the followin
-				 * content will be returned: $This is the body's text$
+				 * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
+				 * content will be returned: $This is the body's Text$
 				 *
 				 * @return The content of this Character object.
 				 */
@@ -64,10 +64,10 @@ namespace Xml {
 				/**
 				 * @brief Returns the content of this Character object.
 				 *
-				 * The content includes the text inside a tag's body. The text is interpreted before it
+				 * The content includes the Text inside a tag's body. The Text is interpreted before it
 				 * is returned, this means that for example entities are translated into their corresponding
-				 * character sequence. When parsing a tag $<a>This is the body's text</a>$ the followin
-				 * content will be returned: $This is the body's text$
+				 * character sequence. When parsing a tag $<a>This is the body's Text</a>$ the followin
+				 * content will be returned: $This is the body's Text$
 				 *
 				 * @return The content of this Character object.
 				 */
@@ -94,7 +94,6 @@ namespace Xml {
 				//! The content of this Character object.
 				String _content;
 		};
-
 
 	}
 

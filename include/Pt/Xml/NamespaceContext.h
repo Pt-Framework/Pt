@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_NamespaceContext_h
-#define Pt_Xml_NamespaceContext_h
+#ifndef PTV_Xml_NamespaceContext_h
+#define PTV_Xml_NamespaceContext_h
 
 #include <Pt/Xml/Namespace.h>
 #include <Pt/Text/String.h>
@@ -9,7 +9,7 @@
 namespace Pt {
 
 namespace Xml {
-	
+
 	/**
 	 * @brief Manages all namespaces which are valid for a specific XML document.
 	 *

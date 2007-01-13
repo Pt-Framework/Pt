@@ -1,5 +1,5 @@
-#ifndef Pt_Xml_ParseError_h
-#define Pt_Xml_ParseError_h
+#ifndef PTV_Xml_ParseError_h
+#define PTV_Xml_ParseError_h
 
 #include <Pt/Exception.h>
 

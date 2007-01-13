@@ -1,8 +1,12 @@
-#ifndef Pt_Xml_XmlStream_h
-#define Pt_Xml_XmlStream_h
+#ifndef PTV_Xml_XmlStream_h
+#define PTV_Xml_XmlStream_h
 
 #include <Pt/Text/String.h>
+
+#define IMPORT_TEST __declspec(dllimport)
+
 #include <Pt/Text/TextStream.h>
+#undef IMPORT_TEST
 
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
@@ -39,7 +43,7 @@ namespace Xml {
 	 * is called the next chunk of XML input data is parsed.
 	 *
 	 * To parse an XML-document an object of this class is created and passed the input stream
-	 * for the document. The constructor initializes the parser, already parses the xml-declaration
+	 * for the document. The constructor initializes the parser, already parses the Xml-declaration
 	 * and positions the internal cursor to the first actual element (Node) of the XML document.
 	 *
 	 * The current XML element (Node) can be read using get(). Every call to next() will parse the
@@ -119,7 +123,7 @@ namespace Xml {
 			void getUntil(String& buffer, const String& stop);
 
 		private:
-			std::basic_streambuf<Char>* _textBuffer;
+			std::basic_streambuf<Char>* _TextBuffer;
 			std::basic_streambuf<Char>* _buffer;
 			std::queue<Node*> _nodeBuffer;
 			Char _token[512];
