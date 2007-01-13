@@ -157,7 +157,7 @@ void WidgetImpl::setTitle(const Pt::Text::String& text)
 	XTextProperty tp;
 
 	std::stringstream ss;
-	ptv::text::TextStream textStream(ss, new ptv::text::Utf16Codec());
+	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
 	textStream << text << Char(0); // Append extra \0 for proper line termination.
 	textStream.flush();
 
