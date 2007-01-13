@@ -56,7 +56,7 @@ namespace Net
 
                     // some OS need char*, some void* for the value
                     if (::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR,
-                          (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
+                          reinterpret_cast<char*>(&reuseAddr), sizeof(reuseAddr)) < 0)
                         throw Exception("setsockopt", PT_SOURCEINFO); // TODO Exception
 
 					int ret = ::bind(handle(), it->ai_addr, it->ai_addrlen);
