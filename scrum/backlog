@@ -46,6 +46,7 @@ ITEM P7 S5 "The AtomicInt class implements atomic operations"
 	TASK "Write docs"
 
 ITEM P6 S8 "Blending is supported by all color classes in the new Gfx code"
+	TASK "Implement void blend(ColorT& dst, const& src, char alphaMask)"
 
 ITEM P6 S5 "Signals and Delegates are implemented"
 	TASK "Review code"
