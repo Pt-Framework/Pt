@@ -109,6 +109,10 @@ ITEM P0 S13 "The Db module has a postgres driver"
 
 ITEM P0 S13 "The Db module has a mysql driver"
 
+ITEM P0 S13 "The Db module has a oracle driver"
+
+ITEM P0 S13 "The Db module has a odbc driver"
+
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
 	TASK "Write Documentation"
