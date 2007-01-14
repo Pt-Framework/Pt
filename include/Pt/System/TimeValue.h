@@ -41,25 +41,25 @@ public:
     /**
         @param from Value to subtract.
     */    
-	TimeValue operator-( TimeValue& from );
+	TimeValue operator-( const TimeValue& from );
 	
 	//! @brief Reduce the time value.
     /**
         @param from Value to reduce.
     */    	
-	TimeValue operator-=( TimeValue& from );
+	TimeValue operator-=( const TimeValue& from );
 	
 	//! @brief Add the time value.
     /**
         @param with Value to add.
     */    	
-	TimeValue operator+( TimeValue& with );
+	TimeValue operator+( const TimeValue& with );
 	
 	//! @brief Increase the time value.
     /**
         @param with Value to increase.
     */    	
-	TimeValue operator+=( TimeValue& with );
+	TimeValue operator+=( const TimeValue& with );
 	
 	//! @brief Compare of egality.
     /**

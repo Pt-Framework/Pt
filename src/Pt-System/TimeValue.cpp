@@ -22,7 +22,7 @@ TimeValue::~TimeValue()
 {
 }
 
-TimeValue TimeValue::operator-( TimeValue& from )
+TimeValue TimeValue::operator-( const TimeValue& from )
 {
 	if( _seconds < from._seconds)
 		throw LogicError("Time to subtract is lesser!",PT_SOURCEINFO);
@@ -47,7 +47,7 @@ TimeValue TimeValue::operator-( TimeValue& from )
 	return diff;
 }
 
-TimeValue TimeValue::operator+( TimeValue& with )
+TimeValue TimeValue::operator+( const TimeValue& with )
 {
 	TimeValue sum;	
 	if( _microSeconds + with._microSeconds > 1000000)
@@ -79,13 +79,13 @@ bool TimeValue::operator>( TimeValue& with )
 	return ( ( _seconds > with._seconds ) || ( ( _seconds == with._seconds ) && ( _microSeconds > with._microSeconds ) ) );
 }
 
-TimeValue TimeValue::operator+=( TimeValue& with )
+TimeValue TimeValue::operator+=( const TimeValue& with )
 {
     *this = *this + with;
     return *this;   
 }
 
-TimeValue TimeValue::operator-=( TimeValue& with )
+TimeValue TimeValue::operator-=( const TimeValue& with )
 {
     *this = *this - with;
     return *this;
