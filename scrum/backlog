@@ -96,6 +96,17 @@ ITEM P1 S13 "The Image class supports several planar image formats, mostly compa
 
 
 
+ITEM P0 S13 "The Db module uses the sqlite library of the OS if possible"
+    TASK "Extend Jamrules.platinum"
+
+ITEM P0 S13 "The Db module has a dynamic driver API"
+    TASK "Review Pt::Plugin API"
+
+ITEM P0 S13 "The Db module has a sqlite driver"
+
+ITEM P0 S13 "The Db module has a postgres driver"
+
+ITEM P0 S13 "The Db module has a mysql driver"
 
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
