@@ -565,7 +565,7 @@ namespace Pt
     /** @brief Special handling for std::string.
 
         input-operator for std::string reads just the first word. This is
-        not, what we normally expect, so this is speialized here.
+        not, what we normally expect, so this is specialized here.
     */
     template <>
     class Arg<std::string>
