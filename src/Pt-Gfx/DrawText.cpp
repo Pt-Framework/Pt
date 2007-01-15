@@ -39,7 +39,7 @@ DrawText::DrawText()
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );
 
         FT_Attach_File( _face, "c:\\WINDOWS\\fonts\\tahoma" );
-*/      
+*/
 
     if( FT_Select_Charmap( _face, FT_ENCODING_UNICODE ) )
         FT_Select_Charmap( _face, FT_ENCODING_NONE );
@@ -61,15 +61,13 @@ void DrawText::setFont( const Font& font )
     FT_Set_Char_Size( _face, _font.size()<<6, _font.size()<<6, 72, 72 );
 
     //Setup the rotation matrix
-    if( _font.angle() != 0 )
-    {
-        double angle = (_font.angle()/3600.0) * 3.14159 * 2 ;
-        
-        _matrix.xx = (FT_Fixed) ( cos( angle )* 0x10000L );
-        _matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
-        _matrix.yx = (FT_Fixed) ( sin( angle )* 0x10000L );
-        _matrix.yy = (FT_Fixed) ( cos( angle )* 0x10000L );
-    }
+    double angle = (_font.angle()/3600.0) * 3.14159 * 2 ;
+
+    _matrix.xx = (FT_Fixed) ( cos( angle )* 0x10000L );
+    _matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
+    _matrix.yx = (FT_Fixed) ( sin( angle )* 0x10000L );
+    _matrix.yy = (FT_Fixed) ( cos( angle )* 0x10000L );
+
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )
@@ -79,54 +77,54 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
     FT_Vector       delta;
     FT_Glyph        glyph;
     FT_BBox         gbbox = {0,0,0,0};
-    FT_BBox         tbbox = {100000,100000,-100000,-100000};    
+    FT_BBox         tbbox = {100000,100000,-100000,-100000};
 
     int pen_x = 0;
-    int pen_y = 0;  
-    
+    int pen_y = 0;
+
     for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
-    {        
+    {
         FT_UInt glyph_index = FT_Get_Char_Index( _face, it->value() );
-        
+
         if( !glyph_index )
             continue;
-          
+
         if( FT_HAS_KERNING( _face ) && previous )
         {
             FT_Get_Kerning( _face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            pen_x += delta.x >> 6;
-            pen_y -= delta.y >> 6;
-        }            
-        
+            pen_x += (delta.x) >> 6;
+            pen_y -= (delta.y) >> 6;
+        }
+
         if( FT_Load_Glyph( _face, glyph_index, FT_LOAD_DEFAULT ) )
             continue;
 
         const int incX = slot->advance.x >> 6;
-        const int incY = slot->advance.y >> 6;    
-        
+        const int incY = slot->advance.y >> 6;
+
         if( FT_Get_Glyph( _face->glyph, &glyph ))
             continue;
-        
+
         FT_Glyph_Get_CBox( glyph, FT_GLYPH_BBOX_PIXELS, &gbbox );
-        
+
         gbbox.xMin += pen_x;
         gbbox.xMax += pen_x;
-        
+
         FT_Done_Glyph( glyph );
-        
+
         tbbox.xMin = std::min( gbbox.xMin, tbbox.xMin );
         tbbox.xMax = std::max( gbbox.xMax, tbbox.xMax );
 
         pen_x += incX;
         pen_y -= incY;
-        
+
         previous = glyph_index;
-    }    
-    
+    }
+
     return FontMetrics(_face->size->metrics.ascender>>6, (-_face->size->metrics.descender)>>6, tbbox.xMax - tbbox.xMin, _face->size->metrics.height>>6 );
 }
 
-void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround )
+void DrawText::_draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround )
 {
     FT_Vector       glyphPos;
     FT_Vector       delta;
@@ -136,8 +134,7 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
     glyphPos.x = pos.x();
     glyphPos.y = pos.y();
 
-    if( _font.angle() != 0 )
-        FT_Set_Transform( _face, &_matrix, &glyphPos );
+    FT_Set_Transform( _face, &_matrix, &glyphPos );
 
     FT_UInt glyph_index = 0;
 
@@ -147,8 +144,8 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
         FT_UInt glyph_index = FT_Get_Char_Index( _face, it->value() );
 
         if( !glyph_index )
-            continue; 
-            
+            continue;
+
         // 1.9e-05
         if( FT_HAS_KERNING( _face ) && previous )
         {
@@ -164,7 +161,7 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
         // 0.00025
         const int incX = slot->advance.x >> 6;
         const int incY = slot->advance.y >> 6;
-        
+
         if( backGround )
         {
             const int left      = glyphPos.x + slot->bitmap_left;
@@ -173,7 +170,7 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
             const int leftDown  = left - 1;
             const int topUp     = top + 1;
             const int topDown   = top - 1;
-        
+
             drawGlyph( image, *backGround, leftUp, top, slot->bitmap );
             drawGlyph( image, *backGround, leftDown, top, slot->bitmap );
             drawGlyph( image, *backGround, leftDown, topUp, slot->bitmap );
@@ -185,23 +182,18 @@ void DrawText::_drawText( ARgbImage& image, const Pen& pen, const Math::Point& p
         }
 
         drawGlyph( image, pen.color(), glyphPos.x + slot->bitmap_left, glyphPos.y - slot->bitmap_top, slot->bitmap );
-        
+
         glyphPos.x  += incX;
         glyphPos.y  -= incY;
         previous    = glyph_index;
 
-        // 0.00084        
+        // 0.00084
     }
 }
 
-void DrawText::draw( ARgbImage& image, const Pen& pen,  const Math::Point& pos, const Text::String& text )
+void DrawText::draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* outline )
 {
-    _drawText( image, pen, pos, text, 0 );
-}
-
-void DrawText::draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor& backGround )
-{
-    _drawText( image, pen,  pos, text, &backGround );
+    _draw( image, pen,  pos, text, outline );
 }
 
 void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm )
@@ -211,48 +203,68 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, i
     int                bmPitch      = bm.pitch;
     int                bmHeight     = bm.rows;
     int                bmStartX     = 0;
-    int                bmStartY     = 0;     
+    int                bmStartY     = 0;
     int                glyphPosX    = xpos;
     int                glyphPosY    = ypos;
+    
+    
+    Pt::ssize_t x1 = 0;
+    Pt::ssize_t x2 = image.width() - 1;
+    Pt::ssize_t y1 = 0;
+    Pt::ssize_t y2 = image.height() - 1;
+
 
     if( bmPitch < bmWidth)
         bmPitch += bmWidth;
-        
-    //Clipping left X        
+/*
+    //Clipping left X
     if( xpos < 0 )
     {
         bmStartX  = -xpos;
-        glyphPosX = 0;    
+        glyphPosX = 0;
     }
 
-    //Clipping right X           
+    //Clipping right X
     if( xpos + bmWidth > image.width() )
-        bmWidth -=  ( ( xpos + bmWidth ) - image.width() );      
+        bmWidth -=  ( ( xpos + bmWidth ) - image.width() );
 
-    //Clipping top Y    
+    //Clipping top Y
     if( ypos < 0 )
     {
         bmStartY  = -ypos;
         glyphPosY = 0;
-    }
-    
-    //Clipping bottom Y
+    }   
+
+     //Clipping bottom Y
     if( ypos + bmHeight > image.height() )
          bmHeight -=  ( ( ypos + bmHeight ) - image.height() );
 
+*/
     int dsy = glyphPosY;
     int dsx = 0;
-    
+
     for( Pt::int32_t y = bmStartY; y < bmHeight; ++y, ++dsy )
     {
         const Pt::uint32_t yOffset = y * bmPitch;
 
-        dsx = glyphPosX;
+        if( dsy < y1 )
+            continue;
         
+        if( dsy > y2 )
+            break;
+            
+        dsx = glyphPosX;
+
         for( Pt::int32_t x = bmStartX; x < bmWidth; ++x, ++dsx )
         {
+            if( dsx < x1 )
+                 continue;
+            
+            if( dsx > x2 )
+                break;
+            
             const Pt::uint8_t col = bitmap[ yOffset + x ];
-
+                
             if( col )
                 mixColor( image.pixel(dsx, dsy), color, col );
         }

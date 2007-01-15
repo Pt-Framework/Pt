@@ -135,17 +135,15 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
     _drawLine->draw( _image, _pen, from, to );
 }
 
-void ImagePainter::drawText(const  Math::Point& to, const Text::String& text)
+void ImagePainter::drawText( const Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline )
 {
-    static ARgbColor bkColor(0xffff,0xffff,0xffff);
-    
-    _drawText->draw( _image, _pen,  to, text, bkColor);
+    _drawText->draw( _image, _pen,  to, text, outline );   
 }
 
 void ImagePainter::drawRect(const  Math::Rect& rect)
 {
-
 }
+
 void ImagePainter::fillRect(const  Math::Rect& rect)
 {
 }

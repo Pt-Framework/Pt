@@ -46,19 +46,17 @@ class DrawText
         
         FontMetrics fontMetrics( const Text::String& text );
         
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text);
-       
-		// NOTE: Shouldn't we call "const ARgbColor& backGround" as
+    	// NOTE: Shouldn't we call "const ARgbColor& backGround" as
 		//       "const ARgbColor& outline" ???
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor& backGround );
-
+        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
+       
     private:
          void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
-         void _drawText( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
+         void _draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
 
         // We cast to uint32_t to avoid overflow
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
-        {
+        {                
              const uint32_t oF = factor;
              const uint32_t rF = 255 - oF;
 

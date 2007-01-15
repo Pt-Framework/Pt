@@ -62,7 +62,7 @@ class PT_API ImagePainter : public Painter
 	    virtual const std::list<std::string>& fontFamilyNames();
         virtual void drawPixel(const  Math::Point& to);
 	    virtual void drawLine(const  Math::Point& from, const  Math::Point& to);
-		virtual void drawText(const  Math::Point& to, const Text::String& text);
+		virtual void drawText(const  Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline = 0 );
 	    virtual void drawRect(const  Math::Rect& rect);
         virtual void fillRect(const  Math::Rect& rect);
 

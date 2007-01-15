@@ -36,6 +36,7 @@
 #include <fstream>
 
 
+
 class FontDemo : public Pt::Gui::Widget
 {
    public:
@@ -53,44 +54,47 @@ class FontDemo : public Pt::Gui::Widget
     {
         Pt::System::Clock clock;
 
-        
-        _imagePainter.setFont( Pt::Gfx::Font( "", 28, Pt::Gfx::Font::NormalStyle,-899) );
 
-        Pt::Gfx::FontMetrics metrics = _imagePainter.fontMetrics(L"Hallo Platinum!");
-                
+        _imagePainter.setFont( Pt::Gfx::Font( "", 9, Pt::Gfx::Font::NormalStyle,0) );   
+       
+
+        //Pt::Gfx::FontMetrics metrics = _imagePainter.fontMetrics(ss.str());
+
         clock.start();
-        _imagePainter.drawText(Math::Point( 40, 40), L"Hallo Platinum!");
-        
-        
+        _imagePainter.drawText(Math::Point( 22, 40),L"Hallo Platinum!", &Pt::Gfx::ARgbColor(0xffff,0xffff,0xffff) );
+
+
         Pt::System::TimeValue time = clock.stop();
-        
+
         std::cout<<" FreeType Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;
-        
-        painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
-  
-  
+
         //-------------------------GDI
-        
-//        painter().setBrush(Pt::Gfx::Brush(Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff )) );
-//        painter().fillRect( Pt::Math::Rect( Pt::Math::Point(0,0), this->size() ) ); 
 
-        this->painter().setFont( Pt::Gfx::Font( "Tahoma", 28, Pt::Gfx::Font::NormalStyle,-899) );
-        
+        /*
+        painter().setBrush(Pt::Gfx::Brush(Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff )) );
+        painter().fillRect( Pt::Math::Rect( Pt::Math::Point(0,0), this->size() ) );
+*/
+        painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+
+ /*       this->painter().setFont( Pt::Gfx::Font( "Tahoma", 28, Pt::Gfx::Font::NormalStyle) );
+
         this->painter().setPen( Pt::Gfx::Pen(1,  Pt::Gfx::ARgbColor( 0x0000,0xffff,0)));
-        metrics = this->painter().fontMetrics(L"Hallo PTV!");
-        
-        clock.start();       
+        metrics = this->painter().fontMetrics(ss.str());
 
-        this->painter().drawText( Math::Point( 42, 40), L"Hallo Platinum!" ) ;
+        
+        clock.start();
+
+        this->painter().drawText( Math::Point( 42, 40), ss.str() ) ;
         time = clock.stop();
 
-        std::cout<<" GDI Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;        
+
+        std::cout<<" GDI Text time: "<< ( time.seconds() + time.microSeconds() / 1000000.0 ) << std::endl;*/
     }
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
         _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor(  0xffff,0x0, 0x0 ) );
-        
+
         std::cout<<"Width: " << event.width() << "  Height: "<< event.height()<<std::endl;
     }
 

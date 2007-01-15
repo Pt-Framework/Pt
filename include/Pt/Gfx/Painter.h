@@ -195,8 +195,8 @@ namespace Gfx {
 			 */
 			virtual void drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to) = 0;
 
-			/**
-			 * @brief Draws a Text at the specified position.
+            /**
+			 * @brief Draws a Text at the specified position with an outline.
 			 *
 			 * The given Text is drawn at the given position (from) using the current font
 			 * and the current pen color of this painter. The specified point to which the
@@ -204,11 +204,12 @@ namespace Gfx {
 			 *
 			 * @param to Draws the Text at this position on the painter.
 			 * @param Text The Text to be drawn.
+			 * @param Outline The Text outline.
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText(const Pt::Math::Point& to, const Pt::Text::String& Text) = 0;
-
+			virtual void drawText( const Pt::Math::Point& to, const Pt::Text::String& Text, const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
+           
 			/**
 			 * @brief Draws a rectangle outline.
 			 *
