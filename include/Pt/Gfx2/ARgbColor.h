@@ -206,12 +206,43 @@ namespace Pt {
 			typedef typename TmpType< typename LargestType<T1, T2>::ResultT >::ValueT ValueT;
 		};
 
+
+        // Pure conceptional traits class
+        // it may contain much more than just a typedef for temporary color
+        // values
+        template <typename ColorT>
+        struct ColorTraits;
+
+
+        // Specialisation for ARgbColor
+        template <>
+        struct ColorTraits<ARgbColor>
+        {
+            typedef uint32_t TmpValue;
+        };
+
+
+        // Aloy, this is a pretty cool idea. I think I will move it to Pt core :)
+        template <typename A, typename B>
+        struct LargestSizeOf {
+            typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
+        };
+
+
 		/** @brief Mix two Color<ARgb>s using the given mixing factor
+
+            This could be the implementation detail for overloaded functions.
+            This would give us the ability to react to defect compilers that
+            are not very good with template specialisations. However we should
+            be pretty safe as long as we avoid partial specialisation.
 		 */
 		template <typename FactorT>
 		inline void mixColor(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
 		{
-			typedef typename ResultType< Color<ARgb>::ComponentT, FactorT >::ValueT ValueT;
+			//typedef typename ResultType< Color<ARgb>::ComponentT, FactorT >::ValueT ValueT;
+
+            typedef ColorTraits<ARgbColor> Traits;
+            typedef typename LargestSizeOf< Traits::TmpValue, FactorT >::Result ValueT;
 
 			assert(  std::numeric_limits<FactorT>::is_integer() );
 			assert( !std::numeric_limits<FactorT>::is_signed () );
