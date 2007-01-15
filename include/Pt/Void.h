@@ -39,13 +39,21 @@ namespace Pt {
         @ingroup Pt
 
         This is the type information for the type Void used by the CTTI system
-        in Pt. It implements the conceptional TypeTraits struct and extends to
-        check for 
+        in Pt. It specialises the conceptional TypeTraits struct.
     */
     template <>
     struct TypeTraits<Void>
     {
+        /** @brief Indicate the TypeTraits for Pt::Void exist
+
+            Specialisation of TypeTraits<>
+        */
+        static bool isSpecialized()
+        { return true; }
+
         /** @brief Get type name as string
+
+            Specialisation of TypeTraits<>
         */
         static const char* typeName()
         { return "Pt::Void"; }

@@ -21,19 +21,12 @@
 # Aloysius
 #
 
-
 ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"
 	TASK "Check if more warnings need to be disabled"
 	TASK "Look into other compiler attributes"
 
 ITEM P7 S5 "Object reflection API is documented"
-	TASK "Write Documentation"
-	TASK "Write test case"
-
-ITEM P7 S5 "A TypeTraits class exists"
-	TASK "Review TypeTraits template"
-	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 

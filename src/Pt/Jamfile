@@ -28,6 +28,10 @@ PtUnitTest AtomicTest : AtomicTest.cpp ;
 Main_LinkSharedLibraries AtomicTest : Pt ;
 Main_MakeLocate AtomicTest : bin ;
 
+PtUnitTest TypeTraitsTest : TypeTraitsTest.cpp ;
+Main_LinkSharedLibraries TypeTraitsTest : Pt ;
+Main_MakeLocate TypeTraitsTest : bin ;
+
 Main SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
