@@ -127,6 +127,9 @@ class PT_API SourceInfo {
         inline std::string str() const
         { return _file + ": '" + _func; }
 
+        operator std::string() const
+        { return this->str(); }
+
         /** @brief Returns the function signature
 
                 Returns the signature of the function where the exception

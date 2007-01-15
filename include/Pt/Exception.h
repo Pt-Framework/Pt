@@ -90,7 +90,6 @@ namespace Pt {
 			SourceInfo  _source;
 	};
 
-
 	/** @brief This is the base class for all runtime errors.
 	 *  @ingroup Pt
 	 *
