@@ -45,44 +45,83 @@ class DrawThickPolyline;
 class FillConvexPolygon;
 class DrawText;
 
+/**
+    \brief A painter to draw on an ARgbImage. 
+*/
 class PT_API ImagePainter : public Painter
 {
     public:
+    
+    	/** @brief Construct from target image
+    			 
+          All drawing operation will be performed on the given image.
+          Ownership is not taken by the ImagePainter.
+		  @param image The target image
+		*/		
         ImagePainter( ARgbImage& image );
+        
+        //! @brief Empty virtual destructor.
         ~ImagePainter();
 
+         //!@see Pt::Gfx::Painter
         virtual void setPen(const Pen& pen);
+        
+        //!@see Pt::Gfx::Painter
 	    virtual const Pen& pen() const;
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual void setBrush(const Brush& brush);
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual const Brush& brush() const;
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual void setFont(const Font& font);
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual const Font& font() const;
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual FontMetrics fontMetrics() const;
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual FontMetrics fontMetrics( Text::String text) const;
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual const std::list<std::string>& fontFamilyNames();
+	    
+	    //!@see Pt::Gfx::Painter
         virtual void drawPixel(const  Math::Point& to);
+        
+        //!@see Pt::Gfx::Painter
 	    virtual void drawLine(const  Math::Point& from, const  Math::Point& to);
+	    
+	    //!@see Pt::Gfx::Painter
 		virtual void drawText(const  Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline = 0 );
+		
+		//!@see Pt::Gfx::Painter
 	    virtual void drawRect(const  Math::Rect& rect);
+	    
+	    //!@see Pt::Gfx::Painter
         virtual void fillRect(const  Math::Rect& rect);
 
-	    inline void drawCircle(const  Math::Point& topLeft, size_t diameter)
-	    {
-    	    drawEllipse(topLeft, Math::Size(diameter, diameter));
-	    }
-
-	    inline void fillCircle(const Math::Point& topLeft, size_t diameter)
-	    {
-		    fillEllipse( topLeft, Math::Size(diameter, diameter));
-	    }
-
+        //!@see Pt::Gfx::Painter
 	    virtual void drawEllipse(const  Math::Point& topLeft, const  Math::Size& size);
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual void fillEllipse(const  Math::Point& topLeft, const  Math::Size& size);
+	    
+	    //!@see Pt::Gfx::Painter
         virtual void drawPolyline(const  Math::Point* points, const size_t pointCount);
+        
+        //!@see Pt::Gfx::Painter
 	    virtual void fillPolygon(const  Math::Point* points, const size_t pointCount);
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual void drawImage(const  Math::Point& to, const ARgbImage& image);
+	    
+	    //!@see Pt::Gfx::Painter
 	    virtual void drawImage(const  Math::Point& to, const ARgbImage& image, const  Region& imageRegion);
-
 
     private:        
         ARgbImage&                    		_image;
@@ -100,7 +139,7 @@ class PT_API ImagePainter : public Painter
         std::auto_ptr<DrawText>             _drawText;
 };
 
-}
-}
+} //namespace Gfx
+} //namespace Pt
 
 #endif

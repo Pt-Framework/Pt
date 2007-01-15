@@ -36,25 +36,52 @@
 namespace Pt{
 namespace Gfx{
 
+/**
+  @brief Draw .
+ */
 class DrawText
 {
     public:
+        /** @brief Default constructor
+        */
         DrawText();
+
+        /** @brief Destructor 
+        */
         ~DrawText();
 
+        /** @brief Sets the current font
+        
+            @param font The current font 
+        */
         void setFont( const Font& font );
         
-        FontMetrics fontMetrics( const Text::String& text );
+        /** @brief Calculate font metrics for text
         
-    	// NOTE: Shouldn't we call "const ARgbColor& backGround" as
-		//       "const ARgbColor& outline" ???
+            @param text The text to calculate
+        */
+        FontMetrics fontMetrics( const Text::String& text );      
+
+        /** @brief Draw text on the image
+        
+            The given Text is drawn at the given position (pos) using the given font
+			and the given pen color. The specified point to which the
+			Text is drawn is the base-line of the Text/font. If the outline color is set
+			to 0 no text outline is drawn.
+			
+			@param image The target image
+            @param pen The pen to be used
+            @param pos The position to draw
+            @param text The text to draw
+            @param outline The outline color
+        */
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
        
     private:
-         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
-         void _draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
+        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
+         
+        void _draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
 
-        // We cast to uint32_t to avoid overflow
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {                
              const uint32_t oF = factor;
@@ -73,12 +100,10 @@ class DrawText
              dst.setBlue ( (dB + sB) >> 8);
         }
 
-
-         FT_Library  _ft;
-         FT_Face     _face;
-         Font        _font;
-         FT_Matrix   _matrix;
-
+        FT_Library  _ft;
+        FT_Face     _face;
+        Font        _font;
+        FT_Matrix   _matrix;
 };
 
 } //namespace Gfx
