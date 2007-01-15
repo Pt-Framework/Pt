@@ -22,10 +22,17 @@
 #define Pt_Exception_h
 
 #include <exception>
-
+#include <stdexcept>
 #include <Pt/Api.h>
 #include <Pt/SourceInfo.h>
 
+#define PT_EXCEPTION_TEXT(what) __FILE__ + std::string(":") + PT_PRETTY_FUNCTION + what
+
+
+inline void Pt_demo_func()
+{
+    throw std::logic_error( PT_EXCEPTION_TEXT("test") );
+}
 
 namespace std {
 	class PT_API std::exception;

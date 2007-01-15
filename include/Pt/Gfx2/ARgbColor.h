@@ -217,7 +217,7 @@ namespace Pt {
 			assert( !std::numeric_limits<FactorT>::is_signed () );
 
 			const ValueT oF = factor;
-			const ValueT rF = std::numeric_limits<FactorT>::max - oF;
+			const ValueT rF = std::numeric_limits<FactorT>::max() - oF;
 
 			const ValueT dA = ValueT( dst.alpha() ) * rF;
 			const ValueT dR = ValueT( dst.red()   ) * rF;

@@ -27,26 +27,26 @@
 
 // GNU C++ compiler
 #ifdef __GNUC__
-	#define PT_PRETTY_FUNCTION __PRETTY_FUNCTION__
+    #define PT_PRETTY_FUNCTION __PRETTY_FUNCTION__
 // Borland C++
 #elif defined(__BORLANDC__)
-	#define PT_PRETTY_FUNCTION __FUNC__
+    #define PT_PRETTY_FUNCTION __FUNC__
 // Microsoft C++ compiler
 #elif defined(_MSC_VER)
-	// .NET 2003 support's demangled function names
-	#if _MSC_VER >= 1300
-		#define PT_PRETTY_FUNCTION __FUNCDNAME__
-	#else
-		#define PT_PRETTY_FUNCTION __FUNCTION__
-	#endif
+    // .NET 2003 support's demangled function names
+    #if _MSC_VER >= 1300
+        #define PT_PRETTY_FUNCTION __FUNCDNAME__
+    #else
+        #define PT_PRETTY_FUNCTION __FUNCTION__
+    #endif
 // otherwise use standard macro
 #else
-	#define PT_PRETTY_FUNCTION __FUNCTION__
+    #define PT_PRETTY_FUNCTION __FUNCTION__
 #endif
 
 
 /** @brief super macro to construct a Pt::SourceInfo object
-		@ingroup Pt
+    @ingroup Pt
 */
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__,__LINE__,PT_PRETTY_FUNCTION)
 
@@ -54,100 +54,103 @@
 namespace Pt {
 
 /** @brief Source code info class
-	@ingroup Pt
+    @ingroup Pt
 
-	This class is used by exception classes for storing information
-	about the location in the source code where the error occured.
-	The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
-	object conveniently.\n
-	\n
-	Example:
-	@code
-	int main()
-	{
-		try
-		{
-			const Pt::SourceInfo& si = PT_SOURCEINFO;
-			throw Pt::Exception("Some error occured", si);
+    This class is used by exception classes for storing information
+    about the location in the source code where the error occured.
+    The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
+    object conveniently.\n
+    \n
+    Example:
+    @code
+    int main()
+    {
+        try
+        {
+            const Pt::SourceInfo& si = PT_SOURCEINFO;
+            throw Pt::Exception("Some error occured", si);
 
-		}
-		catch(const Pt::Exception& e) {
-			cerr << "Error    : " << e.what() << endl;
-			cerr << "File     : " << e.sourceInfo().file() << endl;
-			cerr << "Line     : " << e.sourceInfo().line() << endl;
-			cerr << "Function : " << e.sourceInfo().func() << endl;
-			return 1;
-		}
-		return 0;
-	}
-	@endcode
+        }
+        catch(const Pt::Exception& e) {
+            cerr << "Error    : " << e.what() << endl;
+            cerr << "File     : " << e.sourceInfo().file() << endl;
+            cerr << "Line     : " << e.sourceInfo().line() << endl;
+            cerr << "Function : " << e.sourceInfo().func() << endl;
+            return 1;
+        }
+        return 0;
+    }
+    @endcode
 */
 class PT_API SourceInfo {
-	public:
-		/** @brief Copy constructor
-		*/
-		inline SourceInfo(const SourceInfo& si) throw()
-		: _file(si._file), _line(si._line), _func(si._func)
-		{ }
+    public:
+        /** @brief Copy constructor
+        */
+        inline SourceInfo(const SourceInfo& si) throw()
+        : _file(si._file), _line(si._line), _func(si._func)
+        { }
 
-		/** @brief Constructor
+        /** @brief Constructor
 
-				Do not use the constructor directly, but the PT_SOURCEINFO
-				macro to take advantage of compiler specific macros to
-				indicate the source file name, position and function name.
+                Do not use the constructor directly, but the PT_SOURCEINFO
+                macro to take advantage of compiler specific macros to
+                indicate the source file name, position and function name.
 
-				@param file filename of the source
-				@param line line number of the source
-				@param func function name of the source
-		*/
-		inline SourceInfo(const char* file, unsigned int line, const char* func) throw()
-		: _file(file), _line(line), _func(func)
-		{ }
+                @param file filename of the source
+                @param line line number of the source
+                @param func function name of the source
+        */
+        inline SourceInfo(const char* file, unsigned int line, const char* func) throw()
+        : _file(file), _line(line), _func(func)
+        { }
 
-		/**  @brief Returns the filename
+        /**  @brief Returns the filename
 
-				Returns the name of the file where the exception has
-				been thrown.
+                Returns the name of the file where the exception has
+                been thrown.
 
-				@return name of the file where the exception was thrown
-		*/
-		inline const char* file() const throw()
-		{ return _file.c_str(); }
+                @return name of the file where the exception was thrown
+        */
+        inline const char* file() const throw()
+        { return _file.c_str(); }
 
-		/** @brief Returns the line number
+        /** @brief Returns the line number
 
-				Returns the line number of the file where the exception
-				has been thrown.
+                Returns the line number of the file where the exception
+                has been thrown.
 
-				@return line number where the exception was thrown
-		*/
-		inline unsigned int line() const throw()
-		{ return _line; }
+                @return line number where the exception was thrown
+        */
+        inline unsigned int line() const throw()
+        { return _line; }
 
-		/** @brief Returns the function signature
+        inline std::string str() const
+        { return _file + ": '" + _func; }
 
-				Returns the signature of the function where the exception
-				has been thrown.
+        /** @brief Returns the function signature
 
-				@return the function signature
-		*/
-		inline const char* func() const throw()
-		{ return _func.c_str(); }
+                Returns the signature of the function where the exception
+                has been thrown.
 
-		/** @brief Assignment operator
-		*/
-		SourceInfo& operator=(const SourceInfo& si) throw()
-		{
-			_file = si._file;
-			_line = si._line;
-			_func = si._func;
-			return *this;
-		}
+                @return the function signature
+        */
+        inline const char* func() const throw()
+        { return _func.c_str(); }
 
-	private:
-		std::string  _file;
-		unsigned int _line;
-		std::string  _func;
+        /** @brief Assignment operator
+        */
+        SourceInfo& operator=(const SourceInfo& si) throw()
+        {
+            _file = si._file;
+            _line = si._line;
+            _func = si._func;
+            return *this;
+        }
+
+    private:
+        std::string  _file;
+        unsigned int _line;
+        std::string  _func;
 };
 
 } // namespace Pt
