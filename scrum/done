@@ -28,6 +28,9 @@
 # Aloysius
 #
 
+ITEM P8 S2 "A empty Void type exists"
+    TASK "Review Void.h" d-marc
+    TASK "Write Documentation d-marc
 
 ITEM P8 S8 "The color class interface is improved"
 	TASK "Remove the BasicColor<T> class"	blue_wind_25	2007-01-03

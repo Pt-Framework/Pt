@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 Marc Boris Dürner                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,30 +17,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
 
-#ifndef _Pt_Void_h_
-#define _Pt_Void_h_
+#ifndef Pt_Void_h
+#define Pt_Void_h
 
 #include <Pt/TypeTraits.h>
 
 
 namespace Pt {
 
-	struct PT_API Void
-	{};
+    /** @brief Void type
+        @ingroup Pt
+
+        The Void type is used as marker type for template specialisations,
+        where void is not enough to indicate an unused template parameter.
+    */
+    struct PT_API Void
+    {};
 
 
-	template <>
-	struct PT_API TypeTraits<Void> {
-		static const char* typeName()
-		{ return "Pt::Void"; }
+    /** @brief Void compile time type information
+        @ingroup Pt
 
-		template <typename T>
-		static bool isVoid(const T&)
-		{ return false; }
-
-		static bool isVoid(const Void&)
-		{ return true; }
-	};
+        This is the type information for the type Void used by the CTTI system
+        in Pt. It implements the conceptional TypeTraits struct and extends to
+        check for 
+    */
+    template <>
+    struct TypeTraits<Void>
+    {
+        /** @brief Get type name as string
+        */
+        static const char* typeName()
+        { return "Pt::Void"; }
+    };
 
 }
 
