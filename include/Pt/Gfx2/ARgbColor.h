@@ -20,6 +20,8 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
+#include <limits>
+#include <Pt/IfElse.h>
 #include <Pt/Gfx2/Color.h>
 
 
@@ -45,6 +47,9 @@ namespace Pt {
 		 */
 		template <>
 		class PT_API PT_PACKED Color<ARgb> {
+			public:
+				typedef uint16_t ComponentT;
+
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
@@ -183,6 +188,51 @@ namespace Pt {
 			to.setBlue (s);
 
 			return to;
+		}
+
+
+		template <typename Type1, typename Type2>
+		struct LargestType {
+			typedef typename IfElse< (sizeof(Type1) >= sizeof(Type2)), Type1, Type2 >::ResultT ResultT;
+		};
+
+		template <typename> struct TmpType;
+		template <> struct TmpType<uint8_t > { typedef uint16_t ValueT; };
+		template <> struct TmpType<uint16_t> { typedef uint32_t ValueT; };
+		template <> struct TmpType<uint32_t> { typedef uint64_t ValueT; };
+
+		template <typename T1, typename T2>
+		struct ResultType {
+			typedef typename TmpType< typename LargestType<T1, T2>::ResultT >::ValueT ValueT;
+		};
+
+		/** @brief Mix two Color<ARgb>s using the given mixing factor
+		 */
+		template <typename FactorT>
+		inline void mixColor(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
+		{
+			typedef typename ResultType< Color<ARgb>::ComponentT, FactorT >::ValueT ValueT;
+
+			assert(  std::numeric_limits<FactorT>::is_integer() );
+			assert( !std::numeric_limits<FactorT>::is_signed () );
+
+			const ValueT oF = factor;
+			const ValueT rF = std::numeric_limits<FactorT>::max - oF;
+
+			const ValueT dA = ValueT( dst.alpha() ) * rF;
+			const ValueT dR = ValueT( dst.red()   ) * rF;
+			const ValueT dG = ValueT( dst.green() ) * rF;
+			const ValueT dB = ValueT( dst.blue()  ) * rF;
+
+			const ValueT sA = ValueT( src.alpha() ) * oF;
+			const ValueT sR = ValueT( src.red()   ) * oF;
+			const ValueT sG = ValueT( src.green() ) * oF;
+			const ValueT sB = ValueT( src.blue()  ) * oF;
+
+			dst.setAlpha( (dA + sA) >> (8*sizeof(factor)) );
+			dst.setRed  ( (dR + sR) >> (8*sizeof(factor)) );
+			dst.setGreen( (dG + sG) >> (8*sizeof(factor)) );
+			dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
 		}
 
 	} // namespace Gfx
