@@ -34,11 +34,7 @@ namespace Pt {
 		 */
 		template <typename DstColorT, typename SrcColorT> inline
 		void assign(Color<DstColorT>& to, const Color<SrcColorT>& from)
-		{
-			uint16_t a, r, g, b;
-			toARgb(a, r, g, b, from);
-			fromARgb(to, a, r, g, b);
-		}
+		{ fromARgb( to, toARgb(from) ); }
 
 		/** @brief Partial specialization of assign() if both the color models are the same.
 		 *

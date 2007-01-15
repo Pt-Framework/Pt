@@ -144,21 +144,15 @@ namespace Pt {
 		typedef Color<ARgb> ARgbColor;
 
 
-		/** @brief Convert an Color<ARgb> to Color<ARgb>'s components.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Dummy function for the sake of completeness.
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgb>& from)
-		{ a = from.alpha(); r = from.red(); g = from.green(); b = from.blue(); }
+		inline const Color<ARgb> toARgb(const Color<ARgb>& from)
+		{ return from; }
 
-		/** @brief Convert Color<ARgb>'s components to an Color<ARgb>.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Dummy function for the sake of completeness.
 		 */
-		inline void fromARgb(Color<ARgb>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
-		{ to.setAlpha(a); to.setRed(r); to.setGreen(g); to.setBlue(b); }
+		inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
+		{ to = from; }
 
 
 		/** @brief Equality operator for Color<ARgb> comparison.

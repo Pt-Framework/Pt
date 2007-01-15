@@ -36,13 +36,8 @@ int main()
 	ARgbFColor     float_1, float_2;
 	ARgb8888Color  argb8888_1, argb8888_2;
 
-	Pt::uint16_t a, r, g, b;
-
-	toARgb(a, r, g, b, argb_1);
-	fromARgb(argb_2, a, r, g, b);
-
-	toARgb(a, r, g, b, argb8888_1);
-	fromARgb(argb8888_2, a, r, g, b);
+	fromARgb(argb_2, toARgb(argb_1));
+	fromARgb(argb8888_2, toARgb(argb8888_1));
 
 	assign(argb_1, argb_2);
 	assign(argb_1, argb8888_2);

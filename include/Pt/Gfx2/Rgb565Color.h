@@ -178,37 +178,31 @@ namespace Pt {
 		typedef Color<Rgb565> Rgb565Color;
 
 
-		/** @brief Convert an Color<Rgb565> to ARgbColor's components.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Convert a Color<Rgb565> to a Color<ARgb>.
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<Rgb565>& from)
+		inline const Color<ARgb> toARgb(const Color<Rgb565>& from)
 		{
 			const uint16_t tr = from.red();
 			const uint16_t tg = from.green();
 			const uint16_t tb = from.blue();
 
-			a = 0xFFFF;
-			r = ( (tr + !!tr) << 11 ) - !!tr; // Thanks to Mike Sharov for this algorithm
-			g = ( (tg + !!tg) << 10 ) - !!tg;
-			b = ( (tb + !!tb) << 11 ) - !!tb;
+			return Color<ARgb>( 0xFFFF,
+			                    ((tr + !!tr) << 11) - !!tr, // Thanks to Mike Sharov for this algorithm
+			                    ((tg + !!tg) << 10) - !!tg,
+			                    ((tb + !!tb) << 11) - !!tb );
 		}
 
-		/** @brief Convert ARgbColor's components to an ARgbColor.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Convert a Color<ARgb> to a Color<Rgb565>.
 		 */
-		inline void fromARgb(Color<Rgb565>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<Rgb565>& to, const Color<ARgb>& from)
 		{
 			// 1111111100000000
 			// 7654321076543210
 			// RRRRRGGGGGGBBBBB
 			// CCCCCCCCCCCCCCCC
-			const uint16_t val  =  uint16_t(r & 0xF800)        |
-			                      (uint16_t(g & 0xFC00) >>  5) |
-			                      (uint16_t(b)          >> 11);
+			const uint32_t val =   uint32_t(from.red  () & 0xF800)         |
+			                     ( uint32_t(from.green() & 0xFC00) >>  5 ) |
+			                     ( uint32_t(from.blue ()         ) >> 11 );
 			to.setValue(val);
 		}
 

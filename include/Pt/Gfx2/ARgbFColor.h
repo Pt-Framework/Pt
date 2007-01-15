@@ -149,35 +149,36 @@ namespace Pt {
 		typedef Color<ARgbF> ARgbFColor;
 
 
-		/** @brief Convert a Color<ARgbF> to ARgbColor's components.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Convert a Color<ARgbF> to a Color<ARgb>.
 		 */
-		inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b, const Color<ARgbF>& from)
+		inline const Color<ARgb> toARgb(const Color<ARgbF>& from)
 		{
-			const float fa = from.alpha();
-			const float fr = from.red();
-			const float fg = from.green();
-			const float fb = from.blue();
+// Try to make the compiler generate
+// the 'cmov' instruction if available
+#define Pt_Gfx2_ARgbFColor_h_convert(dVar, sVar, sChn) \
+	const float&      sChn = sVar.sChn();                \
+	register uint16_t dVar = 0;                          \
+	if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f);    \
+	if(sChn > 1.0f) dVar = 65535
 
-			a = fa<0.0f ? 0 : ( fa>1.0f ? 0xFFFF : uint16_t(fa*65535.0f) );
-			r = fr<0.0f ? 0 : ( fr>1.0f ? 0xFFFF : uint16_t(fr*65535.0f) );
-			g = fg<0.0f ? 0 : ( fg>1.0f ? 0xFFFF : uint16_t(fg*65535.0f) );
-			b = fb<0.0f ? 0 : ( fb>1.0f ? 0xFFFF : uint16_t(fb*65535.0f) );
+			Pt_Gfx2_ARgbFColor_h_convert(a, from, alpha);
+			Pt_Gfx2_ARgbFColor_h_convert(r, from, red  );
+			Pt_Gfx2_ARgbFColor_h_convert(g, from, green);
+			Pt_Gfx2_ARgbFColor_h_convert(b, from, blue );
+
+			return Color<ARgb>(a, r, g, b);
+
+#undef Pt_Gfx2_ARgbFColor_h_convert
 		}
 
-		/** @brief Convert ARgbColor's components to a Color<ARgbF>.
-		 *
-		 *  Valid range of the individual color components (a, r, g, and b) are
-		 *  from 0 to 65535 (0xFFFF).
+		/** @brief Convert a Color<ARgb> to a Color<ARgbF>.
 		 */
-		inline void fromARgb(Color<ARgbF>& to, const uint16_t a, const uint16_t r, const uint16_t g, const uint16_t b)
+		inline void fromARgb(Color<ARgbF>& to, const Color<ARgb>& from)
 		{
-			to.setAlpha( float(a) / 65535.0 );
-			to.setRed  ( float(r) / 65535.0 );
-			to.setGreen( float(g) / 65535.0 );
-			to.setBlue ( float(b) / 65535.0 );
+			to.setAlpha( float( from.alpha() ) / 65535.0f );
+			to.setRed  ( float( from.red  () ) / 65535.0f );
+			to.setGreen( float( from.green() ) / 65535.0f );
+			to.setBlue ( float( from.blue () ) / 65535.0f );
 		}
 
 
