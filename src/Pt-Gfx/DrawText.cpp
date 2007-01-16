@@ -67,7 +67,6 @@ void DrawText::setFont( const Font& font )
     _matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
     _matrix.yx = (FT_Fixed) ( sin( angle )* 0x10000L );
     _matrix.yy = (FT_Fixed) ( cos( angle )* 0x10000L );
-
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )

@@ -20,13 +20,16 @@
  ***************************************************************************/
 #include <string>
 #include <Pt/Main.h>
-#include <Pt/Gui/Application.h>
+
 #include <Pt/Exception.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gui/Application.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
+
 #include <Pt/Math/Point.h>
 #include <Pt/System/Clock.h>
 #include <iostream>
@@ -39,7 +42,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
     ImagePainterDemo()
     : _image( )
     , _imagePainter( _image )
-    { }
+    {}
 
     virtual ~ImagePainterDemo()
     {}
@@ -48,53 +51,30 @@ class ImagePainterDemo : public Pt::Gui::Widget
     {
         Pt::System::Clock clock;
 
-
-        std::vector<Pt::Math::Point> poly;
-
-        poly.push_back( Pt::Math::Point( 10, 10 ) );
-        poly.push_back( Pt::Math::Point( 100, 60 ) );
-        poly.push_back( Pt::Math::Point( 10, 130) );
-
         clock.start();
+
         _imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor(0xffff,0 ,0) ) );
 
+        _imagePainter.drawLine( Pt::Math::Point( 10,10 ),Pt::Math::Point (100,100 ) );
+        _imagePainter.drawLine( Pt::Math::Point( 100,10 ),Pt::Math::Point ( 10,100 ) );
+        _imagePainter.drawLine( Pt::Math::Point( 55,10 ),Pt::Math::Point ( 55,100 ) );
+        _imagePainter.drawLine( Pt::Math::Point( 10,55 ),Pt::Math::Point ( 100,55 ) );
 
-        for( int i = 0; i < 1; i++)
-        {
+        _imagePainter.setFont( Pt::Gfx::Font( "Vera", 28, Pt::Gfx::Font::NormalStyle, -300) );
+        _imagePainter.drawText(Math::Point( 22, 180), L"Hallo Platinum!", &Pt::Gfx::ARgbColor(0xffff,0xffff,0) );
 
-            //_imagePainter.drawPolyline( &poly[0], poly.size() );
-
-              _imagePainter.drawLine( Pt::Math::Point( 10,10 ),Pt::Math::Point (100,100 ) );
-              _imagePainter.drawLine( Pt::Math::Point( 100,10 ),Pt::Math::Point ( 10,100 ) );
-              _imagePainter.drawLine( Pt::Math::Point( 55,10 ),Pt::Math::Point ( 55,100 ) );
-              _imagePainter.drawLine( Pt::Math::Point( 10,55 ),Pt::Math::Point ( 100,55 ) );
-
-
-//            _imagePainter.drawLine( Pt::Math::Point( -2,20 ),Pt::Math::Point ( 200,40 ) );
-//            _imagePainter.drawLine( Pt::Math::Point( 20,20 ),Pt::Math::Point ( 20,400 ) );
-//            _imagePainter.drawLine( Pt::Math::Point( 20,400 ),Pt::Math::Point ( 20,20 ) );
-              //_imagePainter.drawLine( Pt::Math::Point( -2,-1 ), Pt::Math::Point ( 14,-10 ) );
-          /*
-            _imagePainter.drawLine( Pt::Math::Point( 200,20 ), Pt::Math::Point ( 20,200 ) );
-            _imagePainter.drawLine( Pt::Math::Point( 20,200 ), Pt::Math::Point ( 50,20 ) );
-            _imagePainter.drawLine( Pt::Math::Point( 20,200 ), Pt::Math::Point ( 20,20 ) );
-            _imagePainter.drawLine( Pt::Math::Point( 200,20 ), Pt::Math::Point ( 20,20 ) );*/
-
-           //_imagePainter.setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0,0xffff,0 ) ) );
-          //_imagePainter.drawPolyline( &poly[0], poly.size() );
-          //_imagePainter.drawLine( poly[2], poly[3]);
-        }
+        _imagePainter.setFont( Pt::Gfx::Font( "Vera", 28, Pt::Gfx::Font::NormalStyle, 100) );
+        _imagePainter.drawText(Math::Point( 220, 80), L"Hallo Platinum!");
 
         Pt::System::TimeValue delta = clock.stop();
-       std::cout<<"Time: " << (delta.seconds() + delta.microSeconds()/1000000.0) << std::endl;
+        std::cout<<"Draw time: " << (delta.seconds() + delta.microSeconds()/1000000.0) << std::endl;
+
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
     }
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
         _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) );
-        std::cout<<"Width: " << event.width() << "  Height: "<< event.height()<<std::endl;
-
     }
 
 private:
@@ -104,25 +84,25 @@ private:
 
 int main( int argc, char* argv[] )
 {
-	try
-	{
-		Pt::Gui::Application app;
+    try
+    {
+        Pt::Gui::Application app;
 
-		ImagePainterDemo imageTest;
-		connect( imageTest.closed, app, &Pt::Gui::Application::exit );
+        ImagePainterDemo imageTest;
+        connect( imageTest.closed, app, &Pt::Gui::Application::exit );
 
-		imageTest.show();
-		return app.run();
-	}
-	catch(const Pt::Exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << std::endl;
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << std::endl;
-		return 1;
-	}
+        imageTest.show();
+        return app.run();
+    }
+    catch(const Pt::Exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << std::endl;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
