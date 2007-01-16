@@ -27,8 +27,6 @@ namespace Gfx{
 DrawThickPolyline::DrawThickPolyline()
 { }
 
-DrawThickPolyline::~DrawThickPolyline()
-{ }
 
 void DrawThickPolyline::output( ARgbImage& image,  const Pen& pen, std::vector<RasterBuffer>& lineRasterBuffer)
 {

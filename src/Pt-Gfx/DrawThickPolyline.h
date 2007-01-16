@@ -26,16 +26,32 @@
 #include "RasterBuffer.h"
 
 namespace Pt{
+
 namespace Gfx{
 
+/** @brief Draw thick polylines on an image
+
+    This class implements DrawPolyline and is specialised for the drawing
+    of thick polylines.
+ */
 class DrawThickPolyline : public DrawPolyline
 {
     public:
+        /** @brief Default constructor
+        */
        DrawThickPolyline();
-       ~DrawThickPolyline();
 
-        void output( ARgbImage& image,  const Pen& pen, std::vector<RasterBuffer>& lineRasterBuffer);
-        void draw( ARgbImage& image,  const Pen& pen, const std::vector<Math::Point>& points );
+		/** @brief Draw buffer content on images
+		*/
+        void output( ARgbImage& image, const Pen& pen,
+                     std::vector<RasterBuffer>& lineRasterBuffer);
+
+		/** @brief Draw a polyline on an image
+
+			@see DrawPolyline::draw
+		*/
+        void draw( ARgbImage& image, const Pen& pen,
+                   const std::vector<Math::Point>& points );
 
     private:
         DrawThickLine               _drawThickLine;
@@ -44,6 +60,7 @@ class DrawThickPolyline : public DrawPolyline
 };
 
 } //namespace gfx
+
 } //namespace ptv
 
 #endif

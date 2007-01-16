@@ -25,13 +25,23 @@
 #include "DrawLine.h"
 #include "ClipLine.h"
 
+
 namespace Pt {
 
 namespace Gfx {
 
+/** @brief Draw thin polylines on an image
+
+    This class implements DrawPolyline and is specialised for the drawing
+    of thin polylines.
+ */
 class DrawThinLine : public DrawLine
 {
     public:
+		/** @brief Draw a polyline on an image
+
+			@see DrawPolyline::draw
+		*/
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
     private:
