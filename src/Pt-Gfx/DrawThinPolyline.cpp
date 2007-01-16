@@ -27,8 +27,6 @@ namespace Gfx{
 DrawThinPolyline::DrawThinPolyline()
 { }
 
-DrawThinPolyline::~DrawThinPolyline()
-{ }
 
 void DrawThinPolyline::draw( ARgbImage& image,  const Pen& pen, const std::vector<Math::Point>& points )
 {

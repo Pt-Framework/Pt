@@ -21,19 +21,31 @@
 #ifndef PT_GFX_DRAWTHINPOLYLINE_H
 #define PT_GFX_DRAWTHINPOLYLINE_H
 
+#include <vector>
 #include "DrawPolyline.h"
 #include "DrawThinLine.h"
-#include <vector>
 
-namespace Pt{
-namespace Gfx{
 
+namespace Pt {
+
+namespace Gfx {
+
+/** @brief Draw thin polylines on an image
+
+    This class implements DrawPolyline and is specialised for the drawing
+    of thin polylines.
+ */
 class DrawThinPolyline : public DrawPolyline
 {
     public:
+        /** @brief Default constructor
+        */
         DrawThinPolyline();
-        ~DrawThinPolyline();
 
+		/** @brief Draw a polyline on an image
+
+			@see DrawPolyline::draw
+		*/
         virtual void draw( ARgbImage& image,  const Pen& pen,
                            const std::vector<Math::Point>& points );
 
@@ -42,6 +54,7 @@ class DrawThinPolyline : public DrawPolyline
 };
 
 } //namespace gfx
+
 } //namespace Pt
 
 #endif
