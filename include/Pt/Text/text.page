@@ -1,0 +1,166 @@
+/** \dir
+This module offers classes and concepts for String and Char-operations, streaming,
+conversion using Codec-classes and a StringList.
+*/
+
+
+namespace ptv {
+
+/**
+ * @brief The text-module which provides classes for String, Char, streaming and character coding using Codecs.
+ */
+namespace text {
+
+/** \page "Tutorial - Usage of TextStream"
+!!!Tutorial - Usage of TextStream
+
+This tutorial will show how to use a TextStream object to read data from or write data to a stream while the character
+data is automatically decoded or encoded.
+
+!!Unicode character encoding
+
+One of the most common standards for character encoding is the ASCII-standard. Each character is encoded using 7 bits of
+a byte, so 128 different characters can be adressed. As those 128 characters are not enough to store most special characters
+of every language available and most computers use 8 bits to store an information unit the 8th bit of the byte is also used
+by the extended ASCII character table (8 bits - 256 different characters).
+
+Reading and writing a character of the ASCII character table is straight-forward as each character is stored in exactly
+one byte. No encoding or decoding is necesseray to write or read an ASCII text. All bytes can directly be read, stored to
+memory and then used.
+
+The draw-back of ASCII, of course, is the reduced character set of only 256 characters. There are a lot more characters than
+that in languages all around the world.
+
+This problem was addressed by the Unicode standard which was created to make every known character of the world available in
+a single character table. Each character has a defined position in the table and so can be used as needed.
+
+Unicode usually uses 16 bit to adress one character and so needs 2 bytes per character. This makes it possible to store
+65536 different characters. Currently there are over 100.000 characters defined by the Unicode standard, so using 32 bits
+becomes more common. This allows the storage of over 4 billion different characters. PPR uses a 32-bit value to store a single
+character with the class ptv::text::Char. So a 32-bit Unicode character can be stored directly using PPR.
+
+As most legacy systems can only store and handle 8-bit values there were several encodings introduced to store Unicode characters
+using only 8 bits. One character of Unicode is encoded into a character sequence of 1 or more bytes that will also function
+with older system. The most commonly known and used Unicode encoding format is UTF-8 which stores one 16-bit-Unicode character
+in a byte sequence of 1 to 4 characters, depending on which character is encoded.
+
+To avoid misfunction in legacy systems the first 128 bytes of ASCII have the same bit-sequence as the first 128 Unicode characters.
+The first 128 characters in the Unicode table can be stored in UTF8 using only 1 byte without any encoding or change in the bit
+order. One character in 7-bit-ASCII is the exact same as in UTF-8.
+
+Besides Unicode encoding a lot more encoders/decoders are common, for example for Base64, BCD, ... encoding/decoding.
+
+
+!!Codecs
+
+A character which was encoded using UTF-8 (or any other available encoding) can usually not used directly; a decoding has first to
+be performed to determine the original 32-bit value which describes the character's position in the Unicode table. The general
+term for encoding and decoding modules is "codec" which is an akronym for #co#der and #dec#oder. A codec is used to convert
+a signal or data stream from one format into another format or from one medium into another.
+
+PPR internally uses a 32-bit value to store a single character while many libraries still use 8-bit values to store character
+data. Thus encoding/decoding is needed to use these libraries. PPR offers a very flexible Codec handling mechanism. Basically
+PPR provides text streaming classes (TextStream) which use the instance of one of several special Codec-classes to encode or
+decode the character data. While reading from or writing to the stream the streaming class will automically decode or encode
+the character. Reading or writing encoded text is completely transparent to the PPR user and needs no extra work.
+
+Currently PPR provides codec classes for UTF8-, UTF16- and UTF32-encoding/decoding. The instance of one of those classes is simply
+passed to the constructor of the text stream class of PPR. The following code demonstrates how this can be done:
+
+\code
+	std::stringstream ss;
+	ptv::text::TextStream textStream(ss, new ptv::text::Utf8Codec());
+\endcode
+The text stream classes of PPR wrap another stream ($ss$), in this case a stringstream of the STL. Other streams like file-streams
+are supported as well. This stream is passed to the TextStream-constructor along with the codec (Utf8) to use for encoding/decoding.
+Reading a text will use this Codec to decode the read data. Writing will use this Codec for encoding.
+
+
+!!Example 1 - Reading ASCII using the UTF8-Codec
+
+This example demonstrates how to read 7-bit ASCII text. The Utf8Codec is used here although we only provide ASCII data. This is
+correct as ASCII is compatible to UTF8 as mentioned above. This code is supposed to only demonstrate the general TextStream and
+Codec usage in PPR. As we use an ASCII text the text will not be encoded/decoded as 7-bit ASCII und UTF8 is compatible.
+
+\code
+std::stringstream ss;
+ss << "abcdef";
+
+ptv::text::TextStream textStream(ss, new ptv::text::Utf8Codec());
+
+ptv::text::String s;
+getline(textStream, s);
+
+cout << s.str() << endl;
+\endcode
+
+First a stringstream is created and initialized with the string "abcdef". A PPR TextStream object is created for the stringstream
+using the UTF8-codec automatically. One line is read from this stream using the function getline(). While reading the line the data
+from the stringstream is decoded by the UTF8-codec. As the stringstream contains ASCII-data this will have do no real conversion.
+
+This code produces this output, which is the same text as was written into to textstream at the first 2 lines of the program:
+\code
+abcdef
+\endcode
+
+
+!!Example 2 - Reading UTF8 using the UTF8-Codec
+
+The usage of the TextStream class in combination with the Utf8Codec is more useful when reading real UTF8-data. The following
+example demonstrates this usage:
+
+\code
+char utf8Data[] = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char)0xb9, (char)0xcf, (char)0x83,
+                    (char)0xce, (char)0xbc, (char)0xce, (char)0xb5, (char)0x0 };
+
+std::stringstream ss(utf8Data);
+
+ptv::text::TextStream textStream(ss, new ptv::text::Utf8Codec());
+
+ptv::text::String s;
+getline(textStream, s);
+\endcode
+The first two lines of code create a char-array which contains a UTF8-encoded word (5 characters) using some greek characters.
+The Unicode character values before encoding are as follows: 954, 8057, 963, 956, 949, 0. These characters are stored in the
+stringstream $ss$. In a real world program this stream may more likely be a file input stream and the data may for example be
+a XML-file with UTF-8-encoding.
+
+In the 3rd line a TextStream object is created for the stringstream using a UTF8-codec. The following lines of code read one
+line from the TextStream and store the read data in a ptv::text::String which can handle 32-bit Unicode characters directly.
+While reading the UTF8 data it is decoded to Unicode data and stored into the String object.
+
+When printing the String $s$ to a device that supports the output of Unicode characters the following text will be visible:
+
+| \image ppr-text-tutorial1-Unicode_String.png
+
+
+!!Example 3 - Writing UTF8 using the UTF8-Codec
+
+Writing a Unicode String using UTF8-encoding is as simple as reading UTF8-data as demonstrates in example 2. Basically a TextStream
+object is created to which the wrapped output stream and the Codec object is passed. The following code demonstrates this behaviour:
+
+\code
+ptv::text::Char unicodeData[] = { 954, 8057, 963, 956, 949, 0 };
+
+std::stringstream ss;
+ptv::text::TextStream textStream(ss, new ptv::text::Utf8Codec());
+
+textStream << unicodeData;
+\endcode
+The Unicode character data to convert to UTF8 is written into a ptv::text::Char-array in the first line. This Char class
+uses 32-bit values to store Unicode characters and can thus store the Unicode characters directly without encoding. The
+Unicode-text is the same as used in example 2.
+
+A stringstream object is created which will function as wrapped stream to which the UTF8-encoded characters (byte) are
+written to. The stringstream is passed to the TextStream and the Utf8Codec is assigned to the TextStream for encoding.
+Writing Unicode data to this TextStream object will encode the data into UTF8 and write this data into $ss$.
+
+The Unicode data is written to the TextStream object in the last line. By doing this the Unicode data is converted to
+UTF8 and written to the stringstream $ss$. Reading the data in $ss$ will return the same character sequence as seen in the
+first line of the example code of example 2.
+
+*/
+
+
+}
+}
