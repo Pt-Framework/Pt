@@ -21,7 +21,6 @@
 # Aloysius
 #
 
-
 ITEM P8 S13 "The color class interface is improved"
 	TASK "Make brightness a free function"
 	TASK "Implement the not yet implemented color classes in Gfx2"
