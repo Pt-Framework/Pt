@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Text_num_get_h
-#define Pt_Text_num_get_h
+#ifndef PTV_Text_num_get_h
+#define PTV_Text_num_get_h
 
 #include <Pt/Text/Char.h>
 #include <Pt/Text/locale.h>

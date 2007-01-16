@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
 
-#ifndef Pt_StringList_h
-#define Pt_StringList_h
+#ifndef PTV_StringList_h
+#define PTV_StringList_h
 
 #include <Pt/TypeInfo.h>
 #include <Pt/AnyTraits.h>
@@ -31,10 +31,10 @@ namespace Pt {
 	namespace Text {
 
 		/**
-		 * @brief A specialized list-class for ptv::String objects.
+		 * @brief A specialized list-class for Pt::String objects.
 		 *
 		 * This class is a convenience class which is derived from std::list and specialized for
-		 * containing ptv::String.
+		 * containing Pt::String.
 		 *
 		 * See std::list for more details.
 		 */
@@ -42,12 +42,12 @@ namespace Pt {
 			public:
 				typedef std::list<Pt::String>::iterator Iterator;
 				typedef std::list<Pt::String>::const_iterator ConstIterator;
-	
+
 			public:
 				StringList();
 		};
 
-	}
+	} // namespace Text
 
 
 	//! Pt::Text::StringList is available as Pt::StringList
@@ -60,14 +60,6 @@ namespace Pt {
 		{ return "Pt::StringList"; }
 	};
 
-
-	/*
-	template <>
-	struct PT_API AnyTraits<Text::StringList> {
-		static void output(std::ostream& os, const StringList& value);
-		static void input(std::istream& is, StringList& value);
-	};
-	*/
-}
+} // namespace Pt
 
 #endif

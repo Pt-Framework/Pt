@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Text_Char_h
-#define Pt_Text_Char_h
+#ifndef PTV_TEXT_CHAR_H
+#define PTV_TEXT_CHAR_H
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
@@ -58,7 +58,7 @@ namespace Text {
 	class PT_API Char
 	{
 		public:
-			//! \brief General category
+			//! @brief General category
 			enum Category {
 				OtherNotAssigned     = 0,     // Cn Other, Not Assigned (no characters in the file have this property)
 				OtherControl         = 1,     // Cc Other, Control
@@ -92,7 +92,7 @@ namespace Text {
 				SymbolOther          = 29     // So Symbol, Other
 			};
 
-			//! \brief Bidirectional Class
+			//! @brief Bidirectional Class
 			enum BidiClass {
 				LeftToRight = 0,              // L
 				LeftToRightEmbedding = 1,     // LRE
@@ -115,7 +115,7 @@ namespace Text {
 				OtherNeutrals = 18             // ON
 			};
 
-			//! \brief Arabic Joining
+			//! @brief Arabic Joining
 			enum Joining {
 				NonJoining   = 0,
 				RightJoining = 1,
@@ -123,7 +123,7 @@ namespace Text {
 				JoinCausing  = 3
 			};
 
-			//! \brief Character Decomposition
+			//! @brief Character Decomposition
 			enum Decomposition {
 				NoDecomp  = 0,     // Non-decomposable
 				Font      = 1,     // A font variant (e.g. a blackletter form)
@@ -145,7 +145,8 @@ namespace Text {
 				Canonical = 17     // Canonical (equivalent)
 			};
 
-			//! \brief Canonical Combining
+
+			//! @brief Canonical Combining
 			enum Combining {
 				Spacing             = 0,
 				Overlays            = 1,
@@ -162,20 +163,20 @@ namespace Text {
 				AboveLeftAttached  = 212,     // Above left attached
 				AboveAttached      = 214,     // Above attached
 				AboveRightAttached = 216,     // Above right attached
-				BelowLeft     = 218,     // Below left
-				Below         = 220,     // Below
-				BelowRight    = 222,     // Below right
-				Left          = 224,     // Left (reordrant around single base character)
-				Right         = 226,     // Right
-				AboveLeft     = 228,     // Above left
-				Above         = 230,     // Above
-				AboveRight    = 232,     // Above right
-				DoubleBelow   = 233,     // Double below
-				DoubleAbove   = 234,     // Double above
-				IotaSub       = 240      // Below (iota subscript)
+				BelowLeft          = 218,     // Below left
+				Below              = 220,     // Below
+				BelowRight         = 222,     // Below right
+				Left               = 224,     // Left (reordrant around single base character)
+				Right              = 226,     // Right
+				AboveLeft          = 228,     // Above left
+				Above              = 230,     // Above
+				AboveRight         = 232,     // Above right
+				DoubleBelow        = 233,     // Double below
+				DoubleAbove        = 234,     // Double above
+				IotaSub            = 240      // Below (iota subscript)*/
 			};
 
-			//! \brief Line break
+			//! @brief Line break
 			enum LineBreak {
 				BreakUnknown         = 0,          /// XX Unknown
 				BreakMandatory       = 1,          /// BK Mandatory Break
@@ -187,11 +188,11 @@ namespace Text {
 				BreakWordJoiner      = 7,          /// WJ Word Joiner
 				BreakZWSpace         = 8,          /// ZW Zero Width Space
 				BreakGlue            = 9,          /// GL Non-breaking Glue
-				BreakContingent      = 10,         /// CB Contingent Break Opportunity
+				BreakContingent      = 10,         /// CB Contingent Break OpportUnity
 				BreakSpace           = 11,         /// SP Space
-				BreakBoth            = 12,         /// B2 Break Opportunity Before and After
-				BreakAfter           = 13,         /// BA Break Opportunity After
-				BreakBefore          = 14,         /// BB Break Opportunity Before
+				BreakBoth            = 12,         /// B2 Break OpportUnity Before and After
+				BreakAfter           = 13,         /// BA Break OpportUnity After
+				BreakBefore          = 14,         /// BB Break OpportUnity Before
 				BreakHyphen          = 15,         /// HY Hyphen
 				BreakOpen            = 16,         /// OP Opening Punctuation
 				BreakClose           = 17,         /// CL Closing Punctuation
@@ -206,11 +207,11 @@ namespace Text {
 				BreakSymbol          = 26,         /// SY Symbols Allowing Breaks
 				BreakOrdinary        = 27,         /// AL Ordinary Alphabetic and Symbol Characters
 				BreakIdeograph       = 28,         /// ID Ideographic
-				BreakComplex         = 29          /// SA Complex Context (South East Asian)
+				BreakComplex         = 29          /// SA Complex ConText (South East Asian)
 			};
 
 
-			//! \brief Scripts
+			//! @brief Scripts
 			enum {
 				Common             = 0,       /// Zyyy
 				Inherited          = 1,       /// Qaai
@@ -442,14 +443,39 @@ namespace Text {
 			 */
 			char narrow(char defaultValue) const;
 
+
+			static const Char& null()
+			{
+				static const Char c(0);
+				return c;
+			}
+
+			static const Char& replacement()
+			{
+				static const Char c(0xfffd);
+				return c;
+			}
+
+			static const Char& byteOrderMark()
+			{
+				static const Char c(0xfeff);
+				return c;
+			}
+
+			static const Char& byteOrderSwapped()
+			{
+				static const Char c(0xfffe);
+				return c;
+			}
+
 		public:
 			/**
-			 * @brief Assigns the given wchar_t as new value for this character.
-			 * @param ch The new wide-char value for this character.
+			 * @brief Assigns the given uint32_t as new value for this character.
+			 * @param ch The new 32-bit value for this character.
 			 * @return A reference to this object to allow concatination of operations.
 			 */
-			Char& operator=(wchar_t ch)
-			{ _value = ch; return *this; }
+			Char& operator=(uint32_t value)
+			{ _value = value; return *this; }
 
 			/**
 			 * @brief Returns the internal value (unsigned 32 bits) of this character.
@@ -505,31 +531,6 @@ namespace Text {
 			{
 				this->_value <<= value._value;
 				return *this;
-			}
-
-
-			static const Char& null()
-			{
-				static const Char c(0);
-				return c;
-			}
-
-			static const Char& replacement()
-			{
-				static const Char c(0xfffd);
-				return c;
-			}
-
-			static const Char& byteOrderMark()
-			{
-				static const Char c(0xfeff);
-				return c;
-			}
-
-			static const Char& byteOrderSwapped()
-			{
-				static const Char c(0xfffe);
-				return c;
 			}
 
 			//! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
@@ -619,108 +620,156 @@ namespace std {
 
 	/// @cond INTERNAL
 	template<>
-	struct char_traits<Pt::Text::Char>
+	struct PT_API char_traits<Pt::Char>
 	{
-		typedef Pt::Text::Char char_type;
+		typedef Pt::Char char_type;
 		typedef Pt::uint32_t int_type;
 		typedef streamoff off_type;
 		typedef streampos pos_type;
 		typedef mbstate_t state_type;
 
-		inline static void assign(char_type& c1, const char_type& c2)
-		{
-			c1 = c2;
-		}
+		inline static void assign(char_type& c1, const char_type& c2);
 
-		inline static bool eq(const char_type& c1, const char_type& c2)
-		{
-			return c1 == c2;
-		}
+		inline static bool eq(const char_type& c1, const char_type& c2);
 
-		inline static bool lt(const char_type& c1, const char_type& c2)
-		{
-			return c1 < c2;
-		}
+		inline static bool lt(const char_type& c1, const char_type& c2);
 
-		inline static int compare(const char_type* s1, const char_type* s2, size_t n)
-		{
-			while(n-- > 0)
-			{
-				if( !eq(*s1, *s2) )
-					return lt(*s1, *s2) ? -1 : +1;
+		inline static int compare(const char_type* c1, const char_type* c2, size_t n);
 
-				++s1;
-				++s2;
-			}
+		inline static size_t length(const char_type* s);
 
-			return 0;
-		}
+		inline static const char_type* find(const char_type* s, size_t n, const char_type& a);
 
-		inline static size_t length(const char_type* s)
-		{
-			static const Pt::Char term(0);
-			std::size_t n = 0;
-			while( !eq(s[n], term) )
-				++n;
+		inline static char_type* move(char_type* s1, const char_type* s2, int_type n);
 
-			return n;
-		}
+		inline static char_type* copy(char_type* s1, const char_type* s2, size_t n);
 
-		inline static const char_type* find(const char_type* s, size_t n, const char_type& a)
-		{
-			while(n-- > 0) {
-				if (*s == a)
-					return s;
-				++s;
-			}
+		inline static char_type* assign(char_type* s, size_t n, char_type a);
 
-			return 0;
-		}
+		inline static char_type to_char_type(const int_type& c);
 
-		inline static char_type* move(char_type* s1, const char_type* s2, int_type n)
-		{
-			return (Pt::Char*)memmove(s1, s2, n * sizeof(Pt::Char));
-		}
+		inline static int_type to_int_type(const char_type& c);
 
-		inline static char_type* copy(char_type* s1, const char_type* s2, size_t n)
-		{
-			return (Pt::Char*)memcpy(s1, s2, n * sizeof(Pt::Char));
-		}
+		inline static bool eq_int_type(const int_type& c1, const int_type& c2);
 
-		inline static char_type* assign(char_type* s, size_t n, char_type a)
-		{
-			while(n-- > 0) {
-				*(s++) = a;
-			}
+		inline static int_type eof();
 
-			return s;
-		}
-
-		inline static char_type to_char_type(const int_type& c)
-		{
-			return char_type(c);
-		}
-
-		inline static int_type to_int_type(const char_type& c)
-		{
-			return c.value();
-		}
-
-		inline static bool eq_int_type(const int_type& c1, const int_type& c2)
-		{
-			return c1 == c2;
-		}
-
-		inline static int_type eof()
-		{
-			return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
-		}
-
-		inline static int_type not_eof(const int_type& c)
-		{
-			return eq_int_type(c, eof()) ? 0 : c;
-		}
+		inline static int_type not_eof(const int_type& c);
 	};
+
+
+	inline void char_traits<Pt::Char>::assign(char_type& c1, const char_type& c2)
+	{
+		c1 = c2;
+	}
+
+
+	inline bool char_traits<Pt::Char>::eq(const char_type& c1, const char_type& c2)
+	{
+		return c1 == c2;
+	}
+
+
+	inline bool char_traits<Pt::Char>::lt(const char_type& c1, const char_type& c2)
+	{
+		return c1 < c2;
+	}
+
+
+	inline int char_traits<Pt::Char>::compare(const char_type* s1, const char_type* s2, size_t n)
+	{
+		while(n-- > 0)
+		{
+			if( !eq(*s1, *s2) )
+				return lt(*s1, *s2) ? -1 : +1;
+
+			++s1;
+			++s2;
+		}
+
+		return 0;
+	}
+
+
+	inline size_t char_traits<Pt::Char>::length(const char_type* s)
+	{
+		static const Pt::Char term(0);
+		std::size_t n = 0;
+		while( !eq(s[n], term) )
+			++n;
+
+		return n;
+	}
+
+
+	inline const char_traits<Pt::Char>::char_type*
+	char_traits<Pt::Char>::find(const char_type* s, size_t n, const char_type& a)
+	{
+		while(n-- > 0) {
+			if (*s == a)
+				return s;
+			++s;
+		}
+
+		return 0;
+	}
+
+
+	inline char_traits<Pt::Char>::char_type*
+	char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, int_type n)
+	{
+		return (Pt::Char*)memmove(s1, s2, n * sizeof(Pt::Char));
+	}
+
+
+	inline char_traits<Pt::Char>::char_type*
+	char_traits<Pt::Char>::copy(char_type* s1, const char_type* s2, size_t n)
+	{
+		return (Pt::Char*)memcpy(s1, s2, n * sizeof(Pt::Char));
+	}
+
+
+	inline char_traits<Pt::Char>::char_type*
+	char_traits<Pt::Char>::assign(char_type* s, size_t n, char_type a)
+	{
+		while(n-- > 0) {
+			*(s++) = a;
+		}
+
+		return s;
+	}
+
+
+	inline char_traits<Pt::Char>::char_type
+	char_traits<Pt::Char>::to_char_type(const int_type& c)
+	{
+		return char_type(c);
+	}
+
+
+	inline char_traits<Pt::Char>::int_type
+	char_traits<Pt::Char>::to_int_type(const char_type& c)
+	{
+		return c.value();
+	}
+
+
+	inline bool char_traits<Pt::Char>::eq_int_type(const int_type& c1, const int_type& c2)
+	{
+		return c1 == c2;
+	}
+
+
+	inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::eof()
+	{
+		return static_cast<char_traits<Pt::Char>::int_type>( Pt::uint32_t(-1) );
+	}
+
+
+	inline char_traits<Pt::Char>::int_type char_traits<Pt::Char>::not_eof(const int_type& c)
+	{
+		return eq_int_type(c, eof()) ? 0 : c;
+	}
 
 } // namespace std
 

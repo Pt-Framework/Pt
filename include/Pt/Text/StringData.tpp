@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,7 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 
 using namespace Pt;
 

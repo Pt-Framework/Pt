@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,9 +20,9 @@
 
  /**************************************************************************
  * Copyright 2001-2004 Unicode, Inc.
- * 
+ *
  * Disclaimer
- * 
+ *
  * This source code is provided as is by Unicode, Inc. No claims are
  * made as to fitness for any particular purpose. No warranties of any
  * kind are expressed or implied. The recipient agrees to determine
@@ -30,9 +30,9 @@
  * purchased on magnetic or optical media from Unicode, Inc., the
  * sole remedy for any claim will be exchange of defective media
  * within 90 days of receipt.
- * 
+ *
  * Limitations on Rights to Redistribute This Code
- * 
+ *
  * Unicode, Inc. hereby grants the right to freely use the information
  * supplied in this file in the creation of products supporting the
  * Unicode Standard, and to make copies of this file in any form
@@ -55,14 +55,14 @@
 
  **************************************************************************/
 
-#ifndef Pt_Text_Utf_h
-#define Pt_Text_Utf_h
+#ifndef PTV_Text_Utf_h
+#define PTV_Text_Utf_h
 
 #include <Pt/Text/Char.h>
 
 namespace Pt {
 
-namespace Utf {
+namespace utf {
 
 	const Pt::Char ReplacementChar = 0x0000FFFD;
 	const Pt::Char MaxBmp = 0x0000FFFF;
@@ -126,11 +126,25 @@ const uint8_t firstByteMark[7] = {
 	0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC
 };
 
-
+/**
+ * @brief Checks if the given character sequence is a valid UTF-8 character.
+ *
+ * The given array 8-bit-values is "parsed" and tried to be converted into a
+ * Unicode-character using UTF-decoding. If this is not possible $false$ is returned
+ * as the 8-bit-sequence is not a valid UTF-8 character. Otherwise $true$ is
+ * returned. Only the first number of characters as specified in 'length' is
+ * tried to converted.
+ *
+ * @param source An array of 8-bit values containing raw UTF-8 character data.
+ * @param length Number of characters of source which are checked if they are
+ * a valid UTF-8 character.
+ * @return $true$ if the given sequence is a UTF-8-encoded character, $false$
+ * otherwise.
+ */
 inline bool isLegalUTF8(const uint8_t *source, int length) {
 	uint8_t a;
 	const uint8_t *srcptr = source + length;
-	
+
 	switch (length) {
 		default:
 			return false;
@@ -156,7 +170,7 @@ inline bool isLegalUTF8(const uint8_t *source, int length) {
 	return true;
 }
 
-} // namespace Utf8
+} // namespace utf8
 
 } //namespace Pt
 

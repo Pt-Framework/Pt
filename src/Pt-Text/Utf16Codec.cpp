@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                                *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                         Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,7 @@ Utf16Codec::Utf16Codec(size_t ref)
 {}
 
 
-Utf16Codec::~Utf16Codec() 
+Utf16Codec::~Utf16Codec()
 {}
 
 
@@ -44,58 +44,58 @@ Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const 
 	uint16_t ch2;
 
 	while(fNext < fEnd) {
-		
+
 		ch = *fNext++;
-		
-		/// If we have a surrogate pair, convert to UTF32 first. 
+
+		/// If we have a surrogate pair, convert to UTF32 first.
 		if (ch >= 0xD800 && ch <= 0xDBFF) {
-			// If the 16 bits following the high surrogate are in the source buffer... 
+			// If the 16 bits following the high surrogate are in the source buffer...
 			if (fNext < fEnd) {
 				ch2 = *fNext;
-				// If it's a low surrogate, convert to UTF32. 
+				// If it's a low surrogate, convert to UTF32.
 					if (ch2 >= 0xDC00 && ch2 <= 0xDFFF) {
 						ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000UL;
 						++fNext;
 					} else {
-						--fNext; // return to the illegal value itself 
+						--fNext; // return to the illegal value itself
 						retstat = error;
 						break;
 					}
-			} else { // We don't have the 16 bits following the high surrogate (source exhausted) 
+			} else { // We don't have the 16 bits following the high surrogate (source exhausted)
 				fNext--;
 				retstat = partial;
 				break;
 			}
 		} else {
-			// UTF-16 surrogate values are illegal in UTF-32 
+			// UTF-16 surrogate values are illegal in UTF-32
 			if (ch >= 0xDC00 && ch <= 0xDFFF) {
-				--fNext; // return to the illegal value itself 
+				--fNext; // return to the illegal value itself
 				retstat = error;
 				break;
 			}
 		}
-	
+
 		if (toNext >= toEnd) {
 			--fNext;
 			toNext = toEnd;
 			retstat = partial;
 			break;
 		}
-		
+
 		*toNext++ = ch;
-		
+
 	} // while
 
-	// update pointers	
+	// update pointers
 	fromNext = (const char*)fNext;
-	
+
 	return retstat;
 }
 
 //! encodes UTF-32 to UTF-16
 Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
-{ 
+{
 	result retstat = ok;
 
 	fromNext = fromBegin;
@@ -104,7 +104,7 @@ Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, c
 	Pt::Char ch;
 
 	while (fromNext < fromEnd) {
-	
+
 		if (tNext >= tEnd) {
 			tNext = tEnd;
 			retstat = partial;
@@ -112,30 +112,30 @@ Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, c
 		}
 
 		ch = *fromNext++;
-		
-		if (ch <= Pt::Char(0xFFFF)) 
-		{ // Target is a character <= 0xFFFF 
-			// UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values 
-			if (ch >= Pt::Char(0xD800) && ch <= Pt::Char(0xDFFF)) 
+
+		if (ch <= Pt::Char(0xFFFF))
+		{ // Target is a character <= 0xFFFF
+			// UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values
+			if (ch >= Pt::Char(0xD800) && ch <= Pt::Char(0xDFFF))
 			{
-				--fromNext; // return to the illegal value itself 
+				--fromNext; // return to the illegal value itself
 				retstat = error;
 				break;
-			} 
-			else 
-			{
-				*tNext++ = ch; // normal case 
 			}
-		} 
-		else if (ch > Pt::Char(0x0010FFFF)) 
+			else
+			{
+				*tNext++ = ch; // normal case
+			}
+		}
+		else if (ch > Pt::Char(0x0010FFFF))
 		{
 				retstat = error;
 				*tNext++ = 0xFFFD;
-		} 
-		else 
+		}
+		else
 		{
-			// target is a character in range 0xFFFF - 0x10FFFF. 
-			if (tNext + 1 >= tEnd) 
+			// target is a character in range 0xFFFF - 0x10FFFF.
+			if (tNext + 1 >= tEnd)
 			{
 				fromNext--;
 				tNext = tEnd;
@@ -145,12 +145,12 @@ Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, c
 			*toNext++ = (((uint32_t)ch >> 10) + 0xD800);
 			*toNext++ = (((uint32_t)ch & 0x3FFUL) + 0xDC00);
 		}
-							
+
 	} // while
-	
-	// update pointers	
+
+	// update pointers
 	toNext = (char*)tNext;
-	
+
 	return retstat;
 }
 

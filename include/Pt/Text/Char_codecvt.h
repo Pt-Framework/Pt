@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,10 +15,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_Text_codecvt_h
-#define Pt_Text_codecvt_h
+#ifndef PTV_Text_codecvt_h
+#define PTV_Text_codecvt_h
 
 #include <Pt/Api.h>
 #include <Pt/Text/Char.h>
@@ -27,10 +27,11 @@
 // This class' filename was suffixed with "Char_" because using "codecvt.h" as filename confuses
 // the compiler/linker as there a STL-files of the same name.
 
-
 namespace std {
 
 #ifdef _MSC_VER
+
+	class PT_API codecvt_base;
 
 	template<>
 	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {

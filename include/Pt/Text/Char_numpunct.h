@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,10 +16,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Text_numpunct_h
-#define Pt_Text_numpunct_h
+#ifndef PTV_Text_numpunct_h
+#define PTV_Text_numpunct_h
 
 #include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char.h>
 #include <Pt/Text/String.h>
 #include <Pt/Text/locale.h>
@@ -27,11 +28,10 @@
 // This class' filename was suffixed with "Char_" because using "numpunct.h" as filename confuses
 // the compiler/linker as there a STL-files of the same name.
 
-
 namespace std {
 
 	template <>
-	class PT_API numpunct<Pt::Text::Char> : public locale::facet {
+	class PT_TEXT_API numpunct<Pt::Text::Char> : public locale::facet {
 		public:
 			typedef Pt::Char char_type;
 			typedef basic_string<Pt::Text::Char> string_type;
@@ -44,6 +44,7 @@ namespace std {
 			static locale::id id;
 
 		public:
+
 			explicit numpunct(size_t refs = 0);
 
 			virtual ~numpunct()

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,10 +15,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_Text_BasicTextStream_h
-#define Pt_Text_BasicTextStream_h
+#ifndef PT_Text_BasicTextStream_h
+#define PT_Text_BasicTextStream_h
 
 #include <Pt/Api.h>
 #include <Pt/Text/String.h>
@@ -223,3 +223,4 @@ namespace Text {
 } // namespace Pt
 
 #endif
+

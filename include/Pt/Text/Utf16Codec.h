@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                                *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                         Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,11 +21,11 @@
 /*************************************************************************
   !!! The algorithm used here was extracted from UTF* converter codes !!!
   !!! (from unicode.org) which carrying these notices:                !!!
- 
+
  * Copyright 2001-2004 Unicode, Inc.
- * 
+ *
  * Disclaimer
- * 
+ *
  * This source code is provided as is by Unicode, Inc. No claims are
  * made as to fitness for any particular purpose. No warranties of any
  * kind are expressed or implied. The recipient agrees to determine
@@ -33,9 +33,9 @@
  * purchased on magnetic or optical media from Unicode, Inc., the
  * sole remedy for any claim will be exchange of defective media
  * within 90 days of receipt.
- * 
+ *
  * Limitations on Rights to Redistribute This Code
- * 
+ *
  * Unicode, Inc. hereby grants the right to freely use the information
  * supplied in this file in the creation of products supporting the
  * Unicode Standard, and to make copies of this file in any form
@@ -91,7 +91,7 @@ namespace Text {
 			//! @brief Encodes UTF-32 to UTF-16.
 			virtual result do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
 												 char* toBegin, char* toEnd, char*& toNext) const;
-			
+
 			// inheritdoc
 			virtual bool do_always_no_conv() const throw();
 

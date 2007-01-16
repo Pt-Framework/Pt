@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,33 +17,32 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Text/Char_ctype.h"
-using namespace Pt;
+#include <Pt/Text/Char_ctype.h>
 
 #include <iostream>
 
 
 namespace std {
 
-std::locale::id ctype<Pt::Char>::id;
+std::locale::id ctype< Pt::Char >::id;
 
 
 #ifdef _MSC_VER
 
 ctype<Pt::Char>::ctype(size_t refs)
 : ctype_base(refs)
-{}
+{ }
 
 #else
 
 ctype<Pt::Char>::ctype(size_t refs)
 : locale::facet(refs)
-{}
+{ }
 
 #endif
 
 
-ctype<Pt::Char>::~ctype() 
+ctype<Pt::Char>::~ctype()
 {
 }
 
@@ -53,69 +52,69 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char c) const
 	ctype_base::mask m = 0;
 
 	switch( c.category() ) {
-		case Char::MarkNonSpacing:
+		case Pt::Char::MarkNonSpacing:
 			m |= ctype_base::print;
 			break;
 
-		case Char::MarkSpacingCombining:
+		case Pt::Char::MarkSpacingCombining:
 			m |= ctype_base::print;
 			break;
 
-		case Char::MarkEnclosing:
+		case Pt::Char::MarkEnclosing:
 			m |= ctype_base::print;
 			break;
 
-		case Char::NumberDecimal:
+		case Pt::Char::NumberDecimal:
 			m |= ctype_base::print;
 			m |= ctype_base::digit;
 			m |= ctype_base::alnum;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::NumberLetter:
+		case Pt::Char::NumberLetter:
 			m |= ctype_base::print;
 			//m |= ctype_base::alpha;
 			//m |= ctype_base::alnum;
 			//m |= ctype_base::graph;
 			break;
 
-		case Char::NumberOther:
+		case Pt::Char::NumberOther:
 			m |= ctype_base::print;
 			break;
 
-		case Char::SeparatorSpace:
+		case Pt::Char::SeparatorSpace:
 			m |= ctype_base::space;
 			break;
 
-		case Char::SeparatorLine:
+		case Pt::Char::SeparatorLine:
 			m |= ctype_base::space;
 			break;
 
-		case Char::SeparatorParagraph:
+		case Pt::Char::SeparatorParagraph:
 			m |= ctype_base::space;
 			break;
 
-		case Char::OtherControl:
+		case Pt::Char::OtherControl:
 			m |= ctype_base::cntrl;
 			break;
 
-		case Char::OtherFormat:
+		case Pt::Char::OtherFormat:
 			m |= ctype_base::cntrl;
 			break;
 
-		case Char::OtherSurrogate:
+		case Pt::Char::OtherSurrogate:
 			m |= ctype_base::cntrl;
 			break;
 
-		case Char::OtherPrivate:
+		case Pt::Char::OtherPrivate:
 			m |= ctype_base::cntrl;
 			break;
 
-		case Char::OtherNotAssigned:
+		case Pt::Char::OtherNotAssigned:
 			m |= ctype_base::cntrl;
 			break;
 
-		case Char::LetterUpper:
+		case Pt::Char::LetterUpper:
 			m |= ctype_base::print;
 			m |= ctype_base::upper;
 			m |= ctype_base::alpha;
@@ -123,7 +122,7 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char c) const
 			m |= ctype_base::graph;
 			break;
 
-		case Char::LetterLower:
+		case Pt::Char::LetterLower:
 			m |= ctype_base::print;
 			m |= ctype_base::lower;
 			m |= ctype_base::alpha;
@@ -131,7 +130,7 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char c) const
 			m |= ctype_base::graph;
 			break;
 
-		case Char::LetterTitle:
+		case Pt::Char::LetterTitle:
 			m |= ctype_base::print;
 			//m |= ctype_base::upper;
 			m |= ctype_base::alpha;
@@ -139,69 +138,69 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char c) const
 			m |= ctype_base::graph;
 			break;
 
-		case Char::LetterModifier:
+		case Pt::Char::LetterModifier:
 			m |= ctype_base::print;
 			break;
 
-		case Char::LetterOther:
+		case Pt::Char::LetterOther:
 			m |= ctype_base::print;
 			break;
 
-		case Char::PunctConnector:
-			m |= ctype_base::print;
-			m |= ctype_base::punct;
-			m |= ctype_base::graph;
-			break;
-
-		case Char::PunctDash:
+		case Pt::Char::PunctConnector:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::PunctOpen:
+		case Pt::Char::PunctDash:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::PunctClose:
+		case Pt::Char::PunctOpen:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::PunctInitial:
+		case Pt::Char::PunctClose:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::PunctFinal:
+		case Pt::Char::PunctInitial:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::PunctOther:
+		case Pt::Char::PunctFinal:
 			m |= ctype_base::print;
 			m |= ctype_base::punct;
 			m |= ctype_base::graph;
 			break;
 
-		case Char::SymbolMath:
+		case Pt::Char::PunctOther:
+			m |= ctype_base::print;
+			m |= ctype_base::punct;
+			m |= ctype_base::graph;
+			break;
+
+		case Pt::Char::SymbolMath:
 			m |= ctype_base::print;
 			break;
 
-		case Char::SymbolCurrency:
+		case Pt::Char::SymbolCurrency:
 			m |= ctype_base::print;
 			break;
 
-		case Char::SymbolModifier:
+		case Pt::Char::SymbolModifier:
 			m |= ctype_base::print;
 			break;
 
-		case Char::SymbolOther:
+		case Pt::Char::SymbolOther:
 			m |= ctype_base::print;
 			break;
 	}
@@ -210,13 +209,14 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char c) const
 }
 
 
-bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const 
+bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
 {
 	return m == this->lookup(c);
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) const 
+const Pt::Char*
+ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) const
 {
 	for( ; begin < end; ++begin) {
 		*vec = this->lookup(*begin);
@@ -227,7 +227,8 @@ const Pt::Char* ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* en
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const {
+const Pt::Char*
+ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const {
 	while( begin != end && !is(m,*begin)) {
 		++begin;
 	}
@@ -236,7 +237,8 @@ const Pt::Char* ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const {
+const Pt::Char*
+ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const {
 	while( begin != end && is(m,*begin)) {
 		++begin;
 	}
@@ -245,12 +247,14 @@ const Pt::Char* ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, cons
 }
 
 
-Pt::Char ctype<Pt::Char>::do_toupper(Pt::Char ch) const {
+Pt::Char
+ctype<Pt::Char>::do_toupper(Pt::Char ch) const {
 	return ch.toUpper();
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const {
+const Pt::Char*
+ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const {
 	for(; begin < end; ++begin) {
 		*begin = do_toupper(*begin);
 	}
@@ -259,12 +263,14 @@ const Pt::Char* ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end
 }
 
 
-Pt::Char ctype<Pt::Char>::do_tolower(Pt::Char ch) const {
+Pt::Char
+ctype<Pt::Char>::do_tolower(Pt::Char ch) const {
 	return ch.toLower();
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const {
+const Pt::Char*
+ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const {
 	for(; begin < end; ++begin) {
 		*begin = do_tolower(*begin);
 	}
@@ -293,7 +299,8 @@ char ctype<Pt::Char>::do_narrow(Pt::Char ch, char dfault) const {
 }
 
 
-const Pt::Char* ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const {
+const Pt::Char*
+ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const {
 	for(const Pt::Char* cur = begin; cur < end; ++cur) {
 		*dest = do_narrow(*cur, dfault);
 		++dest;
@@ -302,4 +309,6 @@ const Pt::Char* ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char
 	return end;
 }
 
+
 } // namespace std
+

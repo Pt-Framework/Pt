@@ -21,8 +21,8 @@
 *********************************************************************************
 * $Id: fxunicode.h,v 1.4 2006/05/25 14:35:50 fox Exp $                          *
 ********************************************************************************/
-#ifndef PT_TEXT_UNICODETABLE_H
-#define PT_TEXT_UNICODETABLE_H
+#ifndef PTV_TEXT_UNICODETABLE_H
+#define PTV_TEXT_UNICODETABLE_H
 
 #include <Pt/Types.h>
 

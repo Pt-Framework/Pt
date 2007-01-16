@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,29 +15,32 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_Text_TextStream_h
-#define Pt_Text_TextStream_h
+#ifndef PT_Text_TextStream_h
+#define PT_Text_TextStream_h
 
 #include <Pt/Api.h>
+#include <Pt/Text/Char_ctype.h>
+#include <Pt/Text/Char_numpunct.h>
 #include <Pt/Text/Char.h>
 #include <Pt/Text/BasicTextStream.h>
 
 
 namespace std {
-	class ios_base;
+	class PT_API ios_base;
 }
+
 
 namespace Pt {
 
 namespace Text {
 
 	/**
-	 * @brief Specialized class derived from BasicTextBuffer using ptv::text::Char and $char$
+	 * @brief Specialized class derived from BasicTextBuffer using Pt::Text::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is ptv::text::Char. The external type is $char$.
+	 * The internal type is Pt::Text::Char. The external type is $char$.
 	 *
 	 * See BasicTextBuffer for a more detailed description.
 	 */
@@ -60,10 +63,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextIStream using ptv::text::Char and $char$
+	 * @brief Specialized class derived from BasicTextIStream using Pt::Text::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is ptv::text::Char. The external type is $char$.
+	 * The internal type is Pt::Text::Char. The external type is $char$.
 	 *
 	 * See BasicTextIStream for a more detailed description.
 	 */
@@ -95,10 +98,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextOStream using ptv::text::Char and $char$
+	 * @brief Specialized class derived from BasicTextOStream using Pt::Text::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is ptv::text::Char. The external type is $char$.
+	 * The internal type is Pt::Text::Char. The external type is $char$.
 	 *
 	 * See BasicTextOStream for a more detailed description.
 	 */
@@ -124,10 +127,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextStream using ptv::text::Char and $char$
+	 * @brief Specialized class derived from BasicTextStream using Pt::Text::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is ptv::text::Char. The external type is $char$.
+	 * The internal type is Pt::Text::Char. The external type is $char$.
 	 *
 	 * See BasicTextStream for a more detailed description.
 	 */
@@ -156,3 +159,4 @@ namespace Text {
 } // namespace Pt
 
 #endif
+

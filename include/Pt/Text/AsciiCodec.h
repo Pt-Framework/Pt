@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,10 +16,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_AsciiCodec_h
-#define Pt_AsciiCodec_h
+#ifndef PTV_AsciiCodec_h
+#define PTV_AsciiCodec_h
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
@@ -34,16 +34,16 @@ namespace Text {
 	 * @brief This simple Codec class is able to convert from ASCII to UTF-32 and from UTF-32 to ASCII.
 	 *
 	 * The method do_in() converts an array of char containing ACSII-data into an array of
-	 * ptv::text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
 	 * 32-bit representation of the character.
 	 *
-	 * The method do_out() converts an array of ptv::text::Char objects (UTF-32/Unicode) into an
+	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in ASCII-encoding.
 	 */
 	class PT_API AsciiCodec : public TextCodec<Char, char> {
 		public:
 			/**
-			 * @brief Constructs a new AsciiCodec object with internal type of ptv::text::Char and
+			 * @brief Constructs a new AsciiCodec object with internal type of Pt::Text::Char and
 			 * external type of $char$.
 			 *
 			 * @param ref This parameter is passed to TextCodec. When ref == 0 the locale takes care
@@ -77,3 +77,4 @@ namespace Text {
 } //namespace Pt
 
 #endif
+

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,15 +18,14 @@
  ***************************************************************************/
 #define UEOF ((Pt::uint32_t)-1)
 
-#include "Pt/Text/Char.h"
+#include <Pt/Text/Char.h>
 #include "UnicodeTable.h"
-
-#include <iostream>
 
 
 namespace Pt {
 
 namespace Text {
+
 
 int Char::category() const
 {

@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_TEXT_STRING_H
-#define PT_TEXT_STRING_H
+#ifndef PTV_TEXT_STRING_H
+#define PTV_TEXT_STRING_H
 
 #include <Pt/Text/Char.h>
 #include <Pt/Text/StringData.h>
@@ -29,7 +28,6 @@
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
-#include <algorithm>
 
 
 
@@ -60,15 +58,15 @@ class PT_API basic_string< Pt::Text::Char > {
 	public:
 		explicit basic_string( const allocator_type& a = allocator_type() );
 
-		basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
+		basic_string(const Pt::Text::Char* str, const allocator_type& a = allocator_type());
 
 		basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
 
 		basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
 
-		basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
+		basic_string(const Pt::Text::Char* str, size_type n, const allocator_type& a = allocator_type());
 
-		basic_string(size_type n, Pt::Char c);
+		basic_string(size_type n, Pt::Text::Char c);
 
 		basic_string(const basic_string& str);
 
@@ -255,7 +253,7 @@ class PT_API basic_string< Pt::Text::Char > {
 		size_type find(const Pt::Char* str, size_type pos, size_type n) const;
 
 		size_type find(const Pt::Char* str, size_type pos = 0) const;
-
+//
 		size_type find(Pt::Char ch, size_type pos = 0) const;
 
 		size_type rfind(const basic_string& str, size_type pos = npos) const;

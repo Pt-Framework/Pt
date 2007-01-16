@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
- *                         Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,7 +15,7 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
 #include "Pt/Text/Utf8Codec.h"
 #include "Utf.h"
@@ -49,13 +48,13 @@ Utf8Codec::result Utf8Codec::do_in(mbstate_t& s, const char* fromBegin, const ch
 			break;
 		}
 
-		const size_t extraBytesToRead = Utf::trailingBytesForUTF8[*fnext];
+		const size_t extraBytesToRead = utf::trailingBytesForUTF8[*fnext];
 		if(fromNext + extraBytesToRead >= fromEnd) {
 			retstat = partial;
 			break;
 		}
 
-		if( !Utf::isLegalUTF8( (const uint8_t*)fnext, extraBytesToRead + 1 ) ) {
+		if( !utf::isLegalUTF8( (const uint8_t*)fnext, extraBytesToRead + 1 ) ) {
 			retstat = error;
 			break;
 		}
@@ -69,15 +68,15 @@ Utf8Codec::result Utf8Codec::do_in(mbstate_t& s, const char* fromBegin, const ch
 			case 1: *toNext += *fnext++; *toNext <<= 6;
 			case 0: *toNext += *fnext++;
 		}
-		*toNext -= Utf::offsetsFromUTF8[extraBytesToRead];
+		*toNext -= utf::offsetsFromUTF8[extraBytesToRead];
 
 		// UTF-16 surrogate values are illegal in UTF-32, and anything
 		// over Plane 17 (> 0x10FFFF) is illegal.
-		if(*toNext > Utf::MaxLegalUtf32) {
-			*toNext = Utf::ReplacementChar;
+		if(*toNext > utf::MaxLegalUtf32) {
+			*toNext = utf::ReplacementChar;
 		}
-		else if(*toNext >= Utf::SurHighStart && *toNext <= Utf::SurLowEnd) {
-			*toNext = Utf::ReplacementChar;
+		else if(*toNext >= utf::SurHighStart && *toNext <= utf::SurLowEnd) {
+			*toNext = utf::ReplacementChar;
 		}
 
 		++toNext;
@@ -100,7 +99,7 @@ Utf8Codec::result Utf8Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, con
 
 	while(fromNext < fromEnd) {
 		ch = *fromNext;
-		if (ch >= Utf::SurHighStart && ch <= Utf::SurLowEnd) {
+		if (ch >= utf::SurHighStart && ch <= utf::SurLowEnd) {
 			retstat = error;
 			break;
 		}
@@ -116,12 +115,12 @@ Utf8Codec::result Utf8Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, con
 		else if (ch < Pt::Char(0x10000)) {
 			bytesToWrite = 3;
 		}
-		else if (ch <= Utf::MaxLegalUtf32) {
+		else if (ch <= utf::MaxLegalUtf32) {
 			bytesToWrite = 4;
 		}
 		else {
 			bytesToWrite = 3;
-			ch = Utf::ReplacementChar;
+			ch = utf::ReplacementChar;
 		}
 
 		uint8_t* current = (uint8_t*)(toNext + bytesToWrite);
@@ -131,10 +130,10 @@ Utf8Codec::result Utf8Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, con
 		}
 
 		switch(bytesToWrite) { // note: everything falls through...
-			case 4: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6; 
-			case 3: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6; 
-			case 2: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6; 
-			case 1: *--current = (uint8_t) (ch.value() | Utf::firstByteMark[bytesToWrite]); 
+			case 4: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
+			case 3: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
+			case 2: *--current = (uint8_t)((ch | byteMark) & byteMask).value(); ch >>= 6;
+			case 1: *--current = (uint8_t) (ch.value() | utf::firstByteMark[bytesToWrite]);
 		}
 
 		toNext += bytesToWrite;
@@ -151,13 +150,13 @@ int Utf8Codec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEn
 	size_t counter = 0;
 
 	while(fromNext < fromEnd && counter <= max) {
-		int extraBytesToRead = Utf::trailingBytesForUTF8[ (unsigned char)*fromNext ]; // NOTE: check again...
+		int extraBytesToRead = utf::trailingBytesForUTF8[ (unsigned char)*fromNext ]; // NOTE: check again...
 
 		if(fromNext + extraBytesToRead >= fromEnd) {
 			break;
 		}
 
-		if(!Utf::isLegalUTF8( (const uint8_t*) fromNext, extraBytesToRead + 1 ) ) {
+		if(!utf::isLegalUTF8( (const uint8_t*) fromNext, extraBytesToRead + 1 ) ) {
 			break;
 		}
 

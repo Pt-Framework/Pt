@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,28 +16,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_ctype_h
-#define Pt_ctype_h
+
+#ifndef Ptv_Text_ctype_h
+#define Ptv_Text_ctype_h
 
 #include <Pt/Api.h>
-#include <Pt/Text/Char.h>
+#include <Pt/Text/Api.h>
+#include <Pt/Types.h>
 #include <Pt/Text/locale.h>
+#include <Pt/Text/Char.h>
 
-// This class' filename was suffixed with "Char_" because using "codecvt.h" as filename confuses
+// This class' filename was suffixed with "Char_" because using "ctype.h" as filename confuses
 // the compiler/linker as there a STL-files of the same name.
-
 
 
 namespace std {
 
-	class ios_base;
+	class PT_API ios_base;
 
 #ifdef _MSC_VER
 
-	class ctype_base;
+	//struct PT_API ctype_base;
 
 	template <>
-	class PT_API ctype<Pt::Char> : public ctype_base {
+	class PT_TEXT_API ctype< Pt::Char > : public ctype_base {
 
 #else
 

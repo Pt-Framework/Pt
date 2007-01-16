@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,15 +17,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_TEXT_LOCALE_H
-#define PT_TEXT_LOCALE_H
+#ifndef PTV_TEXT_LOCALE_H
+#define PTV_TEXT_LOCALE_H
 
 #include <Pt/Api.h>
 
 /**
  * This header files provides some basic dummy implementations for locale, locale::facet, ctype_base,
  * ctype, codecvt_base and codecvt for platforms which do not support the locale-classes of the STL.
- * The define PT_WITHOUT_STD_LOCALE is set for those classes which do not support locale etc.
+ * The define PTV_WITHOUT_STD_LOCALE is set for those classes which do not support locale etc.
  * For all other platform's the <locale>-header of the STL is includes in this header as usual.
  *
  * For platform-independent usage only this header-file (locale.h) should be used. Do not include
@@ -38,15 +37,15 @@
  * \endcode
  * But use this:
  * \code
- * #include "pt/text/locale.h"
+ * #include "Pt/Text/locale.h"
  * \endcode
  */
 
-	#ifdef PT_WITHOUT_STD_LOCALE
+	#ifdef PTV_WITHOUT_STD_LOCALE
 
 		namespace std {
 
-			class PT_API locale 
+			class PT_API locale
 			{
 				public:
 					class PT_API facet
@@ -122,7 +121,7 @@
 			};
 
 
-		template<class internT, class externT, class stateT> 
+		template<class internT, class externT, class stateT>
 		class codecvt : public codecvt_base
 		{
 			public:

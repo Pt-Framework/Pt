@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tobias Müller                                   *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,21 +15,50 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
 #include "Pt/Text/String.h"
 #include "Pt/Exception.h"
-#include "Pt/Main.h"
-#include <cassert>
-#include <vector>
+
+#include "cppunit/extensions/HelperMacros.h"
+#include "cppunit/TestMain.h"
 
 using namespace std;
 using namespace Pt::Text;
 
-class StringTest
+class StringTest : public CPPUNIT_NS::TestFixture
 {
+	CPPUNIT_TEST_SUITE( StringTest );
+	CPPUNIT_TEST( testConstructor );
+	CPPUNIT_TEST( testCompare );
+	CPPUNIT_TEST( testAssign );
+	CPPUNIT_TEST( testAppend );
+	CPPUNIT_TEST( testInsert );
+	CPPUNIT_TEST( testClear );
+	CPPUNIT_TEST( testErase );
+	CPPUNIT_TEST( testReplace );
+	CPPUNIT_TEST( testFind );
+	CPPUNIT_TEST( testRFind );
+	CPPUNIT_TEST( testFindFirstOf );
+	CPPUNIT_TEST( testFindLastOf );
+	CPPUNIT_TEST( testFindFirstNotOf );
+	CPPUNIT_TEST( testFindLastNotOf );
+	CPPUNIT_TEST( testCStr );
+	CPPUNIT_TEST( testSubstr );
+	CPPUNIT_TEST( testSwap );
+	CPPUNIT_TEST( testIndexOperator );
+	CPPUNIT_TEST( testAt );
+	CPPUNIT_TEST( testPushBack );
+	CPPUNIT_TEST( testCopy );
+	CPPUNIT_TEST( testReserve );
+	CPPUNIT_TEST( testLengthAndSize );
+
+	CPPUNIT_TEST_SUITE_END();
 
 public:
+
+
+protected:
 	void testConstructor();
 	void testCompare();
 	void testAssign();
@@ -51,92 +80,68 @@ public:
 	void testAt();
 	void testPushBack();
 	void testCopy();
+  void testReserve();
 	void testLengthAndSize();
 };
 
-int main(int argc, char* argv[])
-{
-	StringTest st;
-	st.testConstructor();
-	st.testCompare();
-	st.testAssign();
-	st.testAppend();
-	st.testInsert();
-	st.testClear();
-	st.testErase();
-	st.testReplace();
-	st.testFind();
-	st.testRFind();
-	st.testFindFirstOf();
-	st.testFindLastOf();
-	st.testFindFirstNotOf();
-	st.testFindLastNotOf();
-	st.testCStr();
-	st.testSubstr();
-	st.testSwap();
-	st.testIndexOperator();
-	st.testAt();
-	st.testPushBack();
-	st.testCopy();
-	st.testLengthAndSize();
-}
+CPPUNIT_TEST_SUITE_REGISTRATION( StringTest );
 
 
 void StringTest::testConstructor()
 {
-	Pt::String s1;
-	assert(s1 == Pt::String(L""));
+	String s1;
+	CPPUNIT_ASSERT(s1 == String(L""));
 
-	Pt::String s2(L"abcde");
-	assert(s2 == L"abcde");
+	String s2(L"abcde");
+	CPPUNIT_ASSERT(s2 == L"abcde");
 
-	Pt::String s3(L"abcde", 3);
-	assert(s3 == L"abc");
+	String s3(L"abcde", 3);
+	CPPUNIT_ASSERT(s3 == L"abc");
 
-	Pt::String s4(3, 'x');
-	assert(s4 == L"xxx");
+	String s4(3, 'x');
+	CPPUNIT_ASSERT(s4 == L"xxx");
 
-	Pt::String s5(s2);
-	assert(s5 == L"abcde");
+	String s5(s2);
+	CPPUNIT_ASSERT(s5 == L"abcde");
 
-	Pt::String s6(s2, 1);
-	assert(s6 == L"bcde");
+	String s6(s2, 1);
+	CPPUNIT_ASSERT(s6 == L"bcde");
 
-	Pt::String s7(s2, 1, 3);
-	assert(s7 == L"bcd");
+	String s7(s2, 1, 3);
+	CPPUNIT_ASSERT(s7 == L"bcd");
 
 
-	Pt::String s10;
-	assert(s10 == Pt::String(L""));
+	String s10;
+	CPPUNIT_ASSERT(s10 == String(L""));
 
 	const Char c11[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
-	Pt::String s11(c11);
-	assert(s11 == c11);
+	String s11(c11);
+	CPPUNIT_ASSERT(s11 == c11);
 
 	const Char c12[] = { 'a', 'b', 'c', '\0' };
-	Pt::String s12(L"abcde", 3);
-	assert(s12 == c12);
+	String s12(L"abcde", 3);
+	CPPUNIT_ASSERT(s12 == c12);
 
 	const Char c13[] = { 'x', 'x', 'x', '\0' };
-	Pt::String s13(3, 'x');
-	assert(s13 == c13);
+	String s13(3, 'x');
+	CPPUNIT_ASSERT(s13 == c13);
 
 	const Char c14[] = { 'a', 'b', 'c', 'd', 'e', '\0' };
-	Pt::String s14(s11);
-	assert(s14 == c14);
+	String s14(s11);
+	CPPUNIT_ASSERT(s14 == c14);
 
 	const Char c15[] = { 'b', 'c', 'd', 'e', '\0' };
-	Pt::String s15(s11, 1);
-	assert(s15 == c15);
+	String s15(s11, 1);
+	CPPUNIT_ASSERT(s15 == c15);
 
 	const Char c16[] = { 'b', 'c', 'd', '\0' };
-	Pt::String s16(s11, 1, 3);
-	assert(s16 == c16);
+	String s16(s11, 1, 3);
+	CPPUNIT_ASSERT(s16 == c16);
 
 
 //  TODO API not implemented yet.
-//	Pt::String s20(s2.begin(), s2.end());
-//	assert(s20 == L"abcde");
+//	String s20(s2.begin(), s2.end());
+//	CPPUNIT_ASSERT(s20 == L"abcde");
 }
 
 void StringTest::testCompare()
@@ -144,56 +149,56 @@ void StringTest::testCompare()
 	const Char abc[] = { 'a', 'b', 'c', '\0' };
 
 	const wchar_t* z = L"abcxyz";
-	Pt::String s(L"abcd");
-	Pt::String t(abc);
+	String s(L"abcd");
+	String t(abc);
 
-	assert(s.compare(s)                 == 0);
-	assert(s.compare(t)                 == 1);
-	assert(s.compare(z)                 == -1);
-	assert(s.compare(1, 3, t)           == 1);
-	assert(s.compare(1, 3, t, 1, 2)     == 1);
-	assert(s.compare(1, 3, z)           == 1);
-	assert(s.compare(1, 2, z + 1, 0, 2) == 0);
+	CPPUNIT_ASSERT(s.compare(s)                 == 0);
+	CPPUNIT_ASSERT(s.compare(t)                 == 1);
+	CPPUNIT_ASSERT(s.compare(z)                 == -1);
+	CPPUNIT_ASSERT(s.compare(1, 3, t)           == 1);
+	CPPUNIT_ASSERT(s.compare(1, 3, t, 1, 2)     == 1);
+	CPPUNIT_ASSERT(s.compare(1, 3, z)           == 1);
+	CPPUNIT_ASSERT(s.compare(1, 2, z + 1, 0, 2) == 0);
 
-	Pt::String x1(L"abc");
-	Pt::String x2(abc);
-	assert(x1 == x2);
-	assert(x1 == abc);
-	assert(x2 == abc);
+	String x1(L"abc");
+	String x2(abc);
+	CPPUNIT_ASSERT(x1 == x2);
+	CPPUNIT_ASSERT(x1 == abc);
+	CPPUNIT_ASSERT(x2 == abc);
 
 	const Char empty[] = { '\0' };
-	Pt::String y1(L"");
-	Pt::String y2(empty);
-	assert(y1 == y2);
-	assert(y1 == empty);
-	assert(y2 == empty);
+	String y1(L"");
+	String y2(empty);
+	CPPUNIT_ASSERT(y1 == y2);
+	CPPUNIT_ASSERT(y1 == empty);
+	CPPUNIT_ASSERT(y2 == empty);
 }
 
 void StringTest::testAssign()
 {
 	const wchar_t* z = L"abcde";
 	vector<wchar_t> v(z, z + 5);
-	Pt::String s;
-	Pt::String t(z);
+	String s;
+	String t(z);
 
 	s.assign(z);
-	assert(s == L"abcde");
+	CPPUNIT_ASSERT(s == L"abcde");
 
 	s.assign(z + 1, 0, 3);
-	assert(s == L"bcd");
+	CPPUNIT_ASSERT(s == L"bcd");
 
 	s.assign(3, 'x');
-	assert(s == L"xxx");
+	CPPUNIT_ASSERT(s == L"xxx");
 
 	s.assign(t);
-	assert(s == L"abcde");
+	CPPUNIT_ASSERT(s == L"abcde");
 
 	s.assign(t, 1, 3);
-	assert(s == L"bcd");
+	CPPUNIT_ASSERT(s == L"bcd");
 
 /*  TODO API not implemented yet.
 	s.assign(v.begin(), v.end());
-	assert(s == L"abcde");
+	CPPUNIT_ASSERT(s == L"abcde");
 */
 }
 
@@ -201,371 +206,371 @@ void StringTest::testAppend()
 {
 	const wchar_t* z = L"abcde";
 	vector<wchar_t> v(z, z + 5);
-	Pt::String s(L"ABC");
-	Pt::String t(z);
+	String s(L"ABC");
+	String t(z);
 
 	s.append(z);
-	assert(s == L"ABCabcde");
+	CPPUNIT_ASSERT(s == L"ABCabcde");
 
 	s = L"ABC";
 	s.append(z + 1, 0, 3);
-	assert(s == L"ABCbcd");
+	CPPUNIT_ASSERT(s == L"ABCbcd");
 
 	s = L"ABC";
 	s.append(3, 'x');
-	assert(s == L"ABCxxx");
+	CPPUNIT_ASSERT(s == L"ABCxxx");
 
 	s = L"ABC";
 	s.append(t);
-	assert(s == L"ABCabcde");
+	CPPUNIT_ASSERT(s == L"ABCabcde");
 
 	s = L"ABC";
 	s.append(t, 1, 3);
-	assert(s == L"ABCbcd");
+	CPPUNIT_ASSERT(s == L"ABCbcd");
 
 /*  TODO API not implemented yet.
 	s = L"ABC";
 	s.append(v.begin(), v.end());
-	assert(s == L"ABCabcde");
+	CPPUNIT_ASSERT(s == L"ABCabcde");
 */
 	// operator +=
 	s = L"ABC";
 	s += z;
-	assert(s == L"ABCabcde");
+	CPPUNIT_ASSERT(s == L"ABCabcde");
 
 	s = L"ABC";
 	s += 'x';
-	assert(s == L"ABCx");
+	CPPUNIT_ASSERT(s == L"ABCx");
 
 	s = L"ABC";
 	s += t;
-	assert(s == L"ABCabcde");
+	CPPUNIT_ASSERT(s == L"ABCabcde");
 
 	// operator +
 /*	s = L"ABC";
-	Pt::String u = s + t;
-	assert(u == L"ABCabcde");*/
+	String u = s + t;
+	CPPUNIT_ASSERT(u == L"ABCabcde");*/
 }
 
 void StringTest::testInsert()
 {
-	Pt::String::iterator i;
+	String::iterator i;
 	const wchar_t* z = L"abcde";
 	vector<wchar_t> v(z, z + 5);
-	Pt::String s(L"ABC");
-	Pt::String t(z);
+	String s(L"ABC");
+	String t(z);
 
 	s.insert(2, z);
-	assert(s == L"ABabcdeC");
+	CPPUNIT_ASSERT(s == L"ABabcdeC");
 
 	s = L"ABC";
 	s.insert(2, z + 1, 0, 3);
-	assert(s == L"ABbcdC");
+	CPPUNIT_ASSERT(s == L"ABbcdC");
 
 	s = L"ABC";
 	s.insert(2, 3, 'x');
-	assert(s == L"ABxxxC");
+	CPPUNIT_ASSERT(s == L"ABxxxC");
 
 	s = L"ABC";
 	s.insert(2, t);
-	assert(s == L"ABabcdeC");
+	CPPUNIT_ASSERT(s == L"ABabcdeC");
 
 	s = L"ABC";
 	s.insert(2, t, 1, 3);
-	assert(s == L"ABbcdC");
+	CPPUNIT_ASSERT(s == L"ABbcdC");
 
 	s = L"ABC";
 	i = s.begin() + 2;
 	s.insert(i, 'x');
-	assert(s == L"ABxC");
+	CPPUNIT_ASSERT(s == L"ABxC");
 
 	s = L"ABC";
 	i = s.begin() + 2;
 	s.insert(i, 3, 'x');
-	assert(s == L"ABxxxC");
+	CPPUNIT_ASSERT(s == L"ABxxxC");
 
 /*  TODO API not implemented yet.
 	s = L"ABC";
 	s.insert(i, v.begin(), v.end());
 	i = s.begin() + 2;
-	assert(s == L"ABabcdeC");*/
+	CPPUNIT_ASSERT(s == L"ABabcdeC");*/
 }
 
 void StringTest::testClear()
 {
-	Pt::String s(L"abcdefg");
+	String s(L"abcdefg");
 
 	s.clear();
-	assert(s == L"");
+	CPPUNIT_ASSERT(s == L"");
 }
 
 void StringTest::testErase()
 {
-	Pt::String s(L"abcdefg");
-	Pt::String::iterator p = s.begin() + 2;
-	Pt::String::iterator q = s.end() - 2;
+	String s(L"abcdefg");
+	String::iterator p = s.begin() + 2;
+	String::iterator q = s.end() - 2;
 
 	s.erase();
-	assert(s == L"");
+	CPPUNIT_ASSERT(s == L"");
 
 	s = L"abcdefg";
 	s.erase(2);
-	assert(s == L"ab");
+	CPPUNIT_ASSERT(s == L"ab");
 
 	s = L"abcdefg";
 	s.erase(2, 3);
-	assert(s == L"abfg");
+	CPPUNIT_ASSERT(s == L"abfg");
 
 	s = L"abcdefg";
 	p = s.begin() + 2;
 	s.erase(p);
-	assert(s == L"abdefg");
+	CPPUNIT_ASSERT(s == L"abdefg");
 
 	s = L"abcdefg";
 	p = s.begin() + 2;
 	q = s.end()   - 2;
 	s.erase(p, q);
-	assert(s == L"abfg");
+	CPPUNIT_ASSERT(s == L"abfg");
 }
 
 void StringTest::testReplace()
 {
 	const wchar_t* z = L"vwxyz";
 	vector<wchar_t> v(z, z + 5);
-	Pt::String s(L"ABCDEF");
-	Pt::String t(z);
-	Pt::String::iterator i1;
-	Pt::String::iterator i2;
+	String s(L"ABCDEF");
+	String t(z);
+	String::iterator i1;
+	String::iterator i2;
 
 	s.replace(1, 4, z);
-	assert(s == L"AvwxyzF");
+	CPPUNIT_ASSERT(s == L"AvwxyzF");
 
 	s = L"ABCDEF";
 	s.replace(1, 4, z + 1, 0, 3);
-	assert(s == L"AwxyF");
+	CPPUNIT_ASSERT(s == L"AwxyF");
 
 	s = L"ABCDEF";
 	s.replace(1, 4, 3, 'x');
-	assert(s == L"AxxxF");
+	CPPUNIT_ASSERT(s == L"AxxxF");
 
 	s = L"ABCDEF";
 	s.replace(1, 4, t);
-	assert(s == L"AvwxyzF");
+	CPPUNIT_ASSERT(s == L"AvwxyzF");
 
 	s = L"ABCDEF";
 	s.replace(1, 4, t, 1, 3);
-	assert(s == L"AwxyF");
+	CPPUNIT_ASSERT(s == L"AwxyF");
 
 	s = L"ABCDEF";
 	i1 = s.begin() + 1;
 	i2 = s.end() - 1;
 	s.replace(i1, i2, z);
-	assert(s == L"AvwxyzF");
+	CPPUNIT_ASSERT(s == L"AvwxyzF");
 
 	Char z2[] = { 'v', 'w', 'x', 'y'  };
 	i1 = s.begin() + 1;
 	i2 = s.end() - 1;
 	s.replace(i1, i2, z2 + 1, 3);
-	assert(s == L"AwxyF");
+	CPPUNIT_ASSERT(s == L"AwxyF");
 
 	s = L"ABCDEF";
 	i1 = s.begin() + 1;
 	i2 = s.end() - 1;
 	s.replace(i1, i2, 3, 'x');
-	assert(s == L"AxxxF");
+	CPPUNIT_ASSERT(s == L"AxxxF");
 
 	s = L"ABCDEF";
 	i1 = s.begin() + 1;
 	i2 = s.end() - 1;
 	s.replace(i1, i2, t);
-	assert(s == L"AvwxyzF");
+	CPPUNIT_ASSERT(s == L"AvwxyzF");
 
 /*  TODO API not implemented yet.
 	s = L"ABCDEF";
 	i1 = s.begin() + 1;
 	i2 = s.end() - 1;
 	s.replace(i1, i2, v.begin(), v.end());
-	assert(s == L"AvwxyzF");
+	CPPUNIT_ASSERT(s == L"AvwxyzF");
 */
 }
 
 void StringTest::testFind()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"bc");
+	String s(L"abc-abc");
+	String t(L"bc");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.find(t)          == 1);
-	assert(s.find(t, 2)       == 5);
-	assert(s.find(L"bc")      == 1);
-	assert(s.find(L"bc", 2)   == 5);
-	assert(s.find(abcd, 2, 3) == 4);
-	assert(s.find('b')        == 1);
-	assert(s.find('b', 2)     == 5);
+	CPPUNIT_ASSERT(s.find(t)          == 1);
+	CPPUNIT_ASSERT(s.find(t, 2)       == 5);
+	CPPUNIT_ASSERT(s.find(L"bc")      == 1);
+	CPPUNIT_ASSERT(s.find(L"bc", 2)   == 5);
+	CPPUNIT_ASSERT(s.find(abcd, 2, 3) == 4);
+	CPPUNIT_ASSERT(s.find('b')        == 1);
+	CPPUNIT_ASSERT(s.find('b', 2)     == 5);
 }
 
 void StringTest::testRFind()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"bc");
+	String s(L"abc-abc");
+	String t(L"bc");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.rfind(t)          == 5);
-	assert(s.rfind(t, 2)       == 1);
-	assert(s.rfind(L"bc")      == 5);
-	assert(s.rfind(L"bc", 2)   == 1);
-	assert(s.rfind(abcd, 2, 3) == 0);
-	assert(s.rfind('b')        == 5);
-	assert(s.rfind('b', 2)     == 1);
+	CPPUNIT_ASSERT(s.rfind(t)          == 5);
+	CPPUNIT_ASSERT(s.rfind(t, 2)       == 1);
+	CPPUNIT_ASSERT(s.rfind(L"bc")      == 5);
+	CPPUNIT_ASSERT(s.rfind(L"bc", 2)   == 1);
+	CPPUNIT_ASSERT(s.rfind(abcd, 2, 3) == 0);
+	CPPUNIT_ASSERT(s.rfind('b')        == 5);
+	CPPUNIT_ASSERT(s.rfind('b', 2)     == 1);
 }
 
 void StringTest::testFindFirstOf()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"a-x");
+	String s(L"abc-abc");
+	String t(L"a-x");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.find_first_of(t)          == 0);
-	assert(s.find_first_of(t, 2)       == 3);
-	assert(s.find_first_of(L"bc")      == 1);
-	assert(s.find_first_of(L"bc", 2)   == 2);
-	assert(s.find_first_of(abcd, 2, 3) == 2);
-	assert(s.find_first_of('b')        == 1);
-	assert(s.find_first_of('b', 2)     == 5);
+	CPPUNIT_ASSERT(s.find_first_of(t)          == 0);
+	CPPUNIT_ASSERT(s.find_first_of(t, 2)       == 3);
+	CPPUNIT_ASSERT(s.find_first_of(L"bc")      == 1);
+	CPPUNIT_ASSERT(s.find_first_of(L"bc", 2)   == 2);
+	CPPUNIT_ASSERT(s.find_first_of(abcd, 2, 3) == 2);
+	CPPUNIT_ASSERT(s.find_first_of('b')        == 1);
+	CPPUNIT_ASSERT(s.find_first_of('b', 2)     == 5);
 }
 
 void StringTest::testFindLastOf()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"a-x");
+	String s(L"abc-abc");
+	String t(L"a-x");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.find_last_of(t)          == 4);
-	assert(s.find_last_of(t, 2)       == 0);
-	assert(s.find_last_of(L"bc")      == 6);
-	assert(s.find_last_of(L"bc", 2)   == 2);
-	assert(s.find_last_of(abcd, 2, 3) == 2);
-	assert(s.find_last_of('b')        == 5);
-	assert(s.find_last_of('b', 2)     == 1);
+	CPPUNIT_ASSERT(s.find_last_of(t)          == 4);
+	CPPUNIT_ASSERT(s.find_last_of(t, 2)       == 0);
+	CPPUNIT_ASSERT(s.find_last_of(L"bc")      == 6);
+	CPPUNIT_ASSERT(s.find_last_of(L"bc", 2)   == 2);
+	CPPUNIT_ASSERT(s.find_last_of(abcd, 2, 3) == 2);
+	CPPUNIT_ASSERT(s.find_last_of('b')        == 5);
+	CPPUNIT_ASSERT(s.find_last_of('b', 2)     == 1);
 }
 
 void StringTest::testFindFirstNotOf()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"a-x");
+	String s(L"abc-abc");
+	String t(L"a-x");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.find_first_not_of(t)          == 1);
-	assert(s.find_first_not_of(t, 2)       == 2);
-	assert(s.find_first_not_of(L"bc")      == 0);
-	assert(s.find_first_not_of(L"bc", 2)   == 3);
-	assert(s.find_first_not_of(abcd, 2, 3) == 3);
-	assert(s.find_first_not_of('b')        == 0);
-	assert(s.find_first_not_of('b', 2)     == 2);
+	CPPUNIT_ASSERT(s.find_first_not_of(t)          == 1);
+	CPPUNIT_ASSERT(s.find_first_not_of(t, 2)       == 2);
+	CPPUNIT_ASSERT(s.find_first_not_of(L"bc")      == 0);
+	CPPUNIT_ASSERT(s.find_first_not_of(L"bc", 2)   == 3);
+	CPPUNIT_ASSERT(s.find_first_not_of(abcd, 2, 3) == 3);
+	CPPUNIT_ASSERT(s.find_first_not_of('b')        == 0);
+	CPPUNIT_ASSERT(s.find_first_not_of('b', 2)     == 2);
 }
 
 void StringTest::testFindLastNotOf()
 {
-	Pt::String s(L"abc-abc");
-	Pt::String t(L"a-x");
+	String s(L"abc-abc");
+	String t(L"a-x");
 	Char   abcd[] = { 'a', 'b', 'c', 'd', '\0' };
 
-	assert(s.find_last_not_of(t)          == 6);
-	assert(s.find_last_not_of(t, 2)       == 2);
-	assert(s.find_last_not_of(L"bc")      == 4);
-	assert(s.find_last_not_of(L"bc", 2)   == 0);
-	assert(s.find_last_not_of(abcd, 2, 3) == Pt::String::npos);
-	assert(s.find_last_not_of('b')        == 6);
-	assert(s.find_last_not_of('b', 2)     == 2);
+	CPPUNIT_ASSERT(s.find_last_not_of(t)          == 6);
+	CPPUNIT_ASSERT(s.find_last_not_of(t, 2)       == 2);
+	CPPUNIT_ASSERT(s.find_last_not_of(L"bc")      == 4);
+	CPPUNIT_ASSERT(s.find_last_not_of(L"bc", 2)   == 0);
+	CPPUNIT_ASSERT(s.find_last_not_of(abcd, 2, 3) == String::npos);
+	CPPUNIT_ASSERT(s.find_last_not_of('b')        == 6);
+	CPPUNIT_ASSERT(s.find_last_not_of('b', 2)     == 2);
 }
 
 void StringTest::testCStr()
 {
-	Pt::String s1(L"abc");
-	assert(s1.c_str()[0] == 'a' && s1.c_str()[1] == 'b' && s1.c_str()[2] == 'c' && s1.c_str()[3] == '\0');
+	String s1(L"abc");
+	CPPUNIT_ASSERT(s1.c_str()[0] == 'a' && s1.c_str()[1] == 'b' && s1.c_str()[2] == 'c' && s1.c_str()[3] == '\0');
 
-	Pt::String s2;
-	assert(s2.c_str()[0] == '\0');
+	String s2;
+	CPPUNIT_ASSERT(s2.c_str()[0] == '\0');
 
 	Char abc[] = { 'a', 'b', 'c', '\0' };
-	Pt::String s3(abc);
-	assert(s3.c_str()[0] == 'a' && s3.c_str()[1] == 'b' && s3.c_str()[2] == 'c' && s3.c_str()[3] == '\0');
+	String s3(abc);
+	CPPUNIT_ASSERT(s3.c_str()[0] == 'a' && s3.c_str()[1] == 'b' && s3.c_str()[2] == 'c' && s3.c_str()[3] == '\0');
 
 	Char zero[] = { '\0' };
-	Pt::String s4(zero);
-	assert(s4.c_str()[0] == '\0');
+	String s4(zero);
+	CPPUNIT_ASSERT(s4.c_str()[0] == '\0');
 }
 
 void StringTest::testSubstr()
 {
-	Pt::String s(L"abcdefg");
+	String s(L"abcdefg");
 
-	assert(s.substr()     == L"abcdefg");
-	assert(s.substr(2)    == L"cdefg");
-	assert(s.substr(2, 3) == L"cde");
+	CPPUNIT_ASSERT(s.substr()     == L"abcdefg");
+	CPPUNIT_ASSERT(s.substr(2)    == L"cdefg");
+	CPPUNIT_ASSERT(s.substr(2, 3) == L"cde");
 }
 
 void StringTest::testSwap()
 {
-	Pt::String s1(L"abc");
-	Pt::String s2(L"xyz");
+	String s1(L"abc");
+	String s2(L"xyz");
 
-	assert(s1 == L"abc");
-	assert(s2 == L"xyz");
+	CPPUNIT_ASSERT(s1 == L"abc");
+	CPPUNIT_ASSERT(s2 == L"xyz");
 
 	s1.swap(s2);
 
-	assert(s1 == L"xyz");
-	assert(s2 == L"abc");
+	CPPUNIT_ASSERT(s1 == L"xyz");
+	CPPUNIT_ASSERT(s2 == L"abc");
 
 	s2.swap(s1);
 
-	assert(s1 == L"abc");
-	assert(s2 == L"xyz");
+	CPPUNIT_ASSERT(s1 == L"abc");
+	CPPUNIT_ASSERT(s2 == L"xyz");
 }
 
 void StringTest::testIndexOperator()
 {
-	Pt::String s(L"abcdef");
+	String s(L"abcdef");
 
-	assert(s[0] == 'a');
-	assert(s[5] == 'f');
-	assert(s[6] == '\0');
+	CPPUNIT_ASSERT(s[0] == 'a');
+	CPPUNIT_ASSERT(s[5] == 'f');
+	CPPUNIT_ASSERT(s[6] == '\0');
 
 /*	bool exceptionOccured = false;
 	try {
 		s[10];
-	} catch (const ptv::Exception& e) {
+	} catch (const Pt::Exception& e) {
 		exceptionOccured = true;
 	}*/
 }
 
 void StringTest::testAt()
 {
-	Pt::String s(L"abcdef");
+	String s(L"abcdef");
 
-	assert(s.at(0) == 'a');
-	assert(s.at(5) == 'f');
+	CPPUNIT_ASSERT(s.at(0) == 'a');
+	CPPUNIT_ASSERT(s.at(5) == 'f');
 }
 
 void StringTest::testPushBack()
 {
-	Pt::String s(L"abc");
+	String s(L"abc");
 
 	s.push_back('d');
-	assert(s == L"abcd");
+	CPPUNIT_ASSERT(s == L"abcd");
 }
 
 void StringTest::testCopy()
 {
 	Char t1[3];
-	Pt::String s(L"abcd");
+	String s(L"abcd");
 
 	s.copy(t1, 2);
 	t1[2] = '\0';
 
 	const Char c1[] = { 'a', 'b', '\0' };
-	assert(char_traits<Char>::compare(t1, c1, 3) == 0);
+	CPPUNIT_ASSERT(char_traits<Char>::compare(t1, c1, 3) == 0);
 
 
 	Char t2[5];
@@ -573,7 +578,7 @@ void StringTest::testCopy()
 	t2[4] = '\0';
 
 	const Char c2[] = { 'a', 'b', 'c', 'd', '\0' };
-	assert(char_traits<Char>::compare(t2, c2, 5) == 0);
+	CPPUNIT_ASSERT(char_traits<Char>::compare(t2, c2, 5) == 0);
 
 
 	Char t3[3];
@@ -581,31 +586,49 @@ void StringTest::testCopy()
 	t3[2] = '\0';
 
 	const Char c3[] = { 'c', 'd', '\0' };
-	assert(char_traits<Char>::compare(t3, c3, 3) == 0);
+	CPPUNIT_ASSERT(char_traits<Char>::compare(t3, c3, 3) == 0);
 }
+
+
+void StringTest::testReserve()
+{
+    const Char c1[] = { 'a', 'b', 'c', 'd', '\0' };
+    String s(L"abcd");
+    String s2 = s;
+    s2.reserve(10);
+
+    CPPUNIT_ASSERT( s2.capacity() == 10 );
+    CPPUNIT_ASSERT( s2.size() == 4 );
+    CPPUNIT_ASSERT( char_traits<Char>::compare(s2.c_str(), c1, 4) == 0 );
+
+    CPPUNIT_ASSERT( s.capacity() == 4 );
+    CPPUNIT_ASSERT( s.size() == 4 );
+    CPPUNIT_ASSERT( char_traits<Char>::compare(s.c_str(), c1, 4) == 0 );
+}
+
 
 void StringTest::testLengthAndSize()
 {
-	Pt::String s1;
-	assert(s1.length() == 0);
-	assert(s1.size()   == 0);
+	String s1;
+	CPPUNIT_ASSERT(s1.length() == 0);
+	CPPUNIT_ASSERT(s1.size()   == 0);
 
-	Pt::String s2(L"ab");
-	assert(s2.length() == 2);
-	assert(s2.size()   == 2);
+	String s2(L"ab");
+	CPPUNIT_ASSERT(s2.length() == 2);
+	CPPUNIT_ASSERT(s2.size()   == 2);
 
 	s2 += L"cd";
-	assert(s2.length() == 4);
-	assert(s2.size()   == 4);
+	CPPUNIT_ASSERT(s2.length() == 4);
+	CPPUNIT_ASSERT(s2.size()   == 4);
 
 
 	Char ab[] = { 'a', 'b', '\0' };
-	Pt::String s3(ab);
-	assert(s3.length() == 2);
-	assert(s3.size()   == 2);
+	String s3(ab);
+	CPPUNIT_ASSERT(s3.length() == 2);
+	CPPUNIT_ASSERT(s3.size()   == 2);
 
 	Char cd[] = { 'c', 'd', '\0' };
 	s3 += cd;
-	assert(s3.length() == 4);
-	assert(s3.size()   == 4);
+	CPPUNIT_ASSERT(s3.length() == 4);
+	CPPUNIT_ASSERT(s3.size()   == 4);
 }

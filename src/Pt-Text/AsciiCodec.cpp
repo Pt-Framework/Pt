@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Drner                                *
+ *                         Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,12 +25,12 @@ namespace Pt {
 
 namespace Text {
 
-AsciiCodec::AsciiCodec(size_t ref) 
+AsciiCodec::AsciiCodec(size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
 
-AsciiCodec::~AsciiCodec() 
+AsciiCodec::~AsciiCodec()
 {}
 
 
@@ -54,7 +54,7 @@ AsciiCodec::result AsciiCodec::do_in(mbstate_t& s, const char* fromBegin,
 
 //! encodes UTF-32 to ASCII
 AsciiCodec::result AsciiCodec::do_out(mbstate_t& s, const Pt::Char* fromBegin,
-                                      const Pt::Char* fromEnd, const Pt::Char*& fromNext, 
+                                      const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
 {
 	toNext = toBegin;

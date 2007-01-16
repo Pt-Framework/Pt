@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tobias Müller                                   *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,134 +15,193 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#include <cassert>
+#include <string>
 #include <sstream>
+
+#include "cppunit/extensions/HelperMacros.h"
+#include "cppunit/TestMain.h"
+
 #include "Pt/Text/Utf8Codec.h"
+#include "Pt/Text/Utf16Codec.h"
 #include "Pt/Text/Utf32Codec.h"
 #include "Pt/Text/TextStream.h"
-#include "Pt/Main.h"
 
 
-
-using namespace std;
-using namespace Pt::Text;
-
-class TextStreamTest
+class TextStreamTest : public CPPUNIT_NS::TestFixture
 {
+	CPPUNIT_TEST_SUITE( TextStreamTest );
+
+	CPPUNIT_TEST( testTextStreamDirectFromUTF8ToUnicode );
+	CPPUNIT_TEST( testTextStreamGetLineFromUTF8ToUnicode );
+	CPPUNIT_TEST( testTextBufferFromUnicodeToUTF8 );
+	CPPUNIT_TEST( testTextStreamFromUnicodeToUTF8 );
+	CPPUNIT_TEST( testGetline );
+	CPPUNIT_TEST( testNum_get );
+	CPPUNIT_TEST( testNum_put );
+	CPPUNIT_TEST( testNumpunct );
+	// CPPUNIT_TEST( testTextStreamFromUTF32ToUnicode ); Byte-order handling not yet done.
+
+	CPPUNIT_TEST_SUITE_END();
 
 public:
-	static char _textUTF8[];
-	static Char _textUnicode[];
+	static char _TextUTF8[];
+	static Pt::Text::Char _TextUnicode[];
 
+protected:
 	void testTextStreamDirectFromUTF8ToUnicode();
 	void testTextStreamGetLineFromUTF8ToUnicode();
 	void testTextBufferFromUnicodeToUTF8();
 	void testTextStreamFromUnicodeToUTF8();
 	void testTextStreamFromUTF32ToUnicode();
+	void testGetline();
+	void testNum_get();
+	void testNum_put();
+	void testNumpunct();
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION( TextStreamTest );
 
-char TextStreamTest::_textUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char)0xb9, (char)0xcf, (char)0x83,
+
+char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char)0xb9, (char)0xcf, (char)0x83,
                                         (char)0xce, (char)0xbc, (char)0xce, (char)0xb5, (char)0x0 };
 
-Char TextStreamTest::_textUnicode[] = { 954, 8057, 963, 956, 949, 0 };
-
-
-int main(int argc, char* argv[])
-{
-	TextStreamTest tst;
-
-	tst.testTextStreamDirectFromUTF8ToUnicode();
-	tst.testTextStreamGetLineFromUTF8ToUnicode();
-	tst.testTextBufferFromUnicodeToUTF8();
-	tst.testTextStreamFromUnicodeToUTF8();
-	tst.testTextStreamFromUTF32ToUnicode();
-}
+Pt::Text::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
 
 void TextStreamTest::testTextStreamDirectFromUTF8ToUnicode()
 {
-	stringstream ss(_textUTF8);
+	std::stringstream ss(_TextUTF8);
 
-	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
 
-	assert(textStream.get() == _textUnicode[0].value());
-	assert(textStream.get() == _textUnicode[1].value());
-	assert(textStream.get() == _textUnicode[2].value());
-	assert(textStream.get() == _textUnicode[3].value());
-	assert(textStream.get() == _textUnicode[4].value());
+	CPPUNIT_ASSERT(TextStream.get() == _TextUnicode[0].value());
+	CPPUNIT_ASSERT(TextStream.get() == _TextUnicode[1].value());
+	CPPUNIT_ASSERT(TextStream.get() == _TextUnicode[2].value());
+	CPPUNIT_ASSERT(TextStream.get() == _TextUnicode[3].value());
+	CPPUNIT_ASSERT(TextStream.get() == _TextUnicode[4].value());
 }
 
 
 void TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode()
 {
-	stringstream ss;
-	ss << _textUTF8;
-	
-	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
+	std::stringstream ss;
+	ss << _TextUTF8;
 
-	Char c[6];
-	textStream.getline(c, 6);
-	
-	assert(c[0] == _textUnicode[0]);
-	assert(c[1] == _textUnicode[1]);
-	assert(c[2] == _textUnicode[2]);
-	assert(c[3] == _textUnicode[3]);
-	assert(c[4] == _textUnicode[4]);
-	assert(c[5] == _textUnicode[5]);
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+
+	Pt::Text::Char c[6];
+	TextStream.getline(c, 6);
+
+	CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
+	CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
+	CPPUNIT_ASSERT(c[2] == _TextUnicode[2]);
+	CPPUNIT_ASSERT(c[3] == _TextUnicode[3]);
+	CPPUNIT_ASSERT(c[4] == _TextUnicode[4]);
+	CPPUNIT_ASSERT(c[5] == _TextUnicode[5]);
 }
 
 
 
 void TextStreamTest::testTextBufferFromUnicodeToUTF8()
 {
-	stringstream ss;
+	std::stringstream ss;
 
-	Pt::Text::TextBuffer textBuffer(ss.rdbuf(), new Pt::Text::Utf8Codec());
-	textBuffer.sputn(_textUnicode, 5);
-	textBuffer.pubsync();
+	Pt::Text::TextBuffer TextBuffer(ss.rdbuf(), new Pt::Text::Utf8Codec());
+	TextBuffer.sputn(_TextUnicode, 5);
+	TextBuffer.pubsync();
 
-	string str = ss.str();
+	std::string str = ss.str();
 	for (unsigned int i = 0; i < str.size(); i++) {
-		assert(str[i] == _textUTF8[i]);
+		CPPUNIT_ASSERT(str[i] == _TextUTF8[i]);
 	}
 }
 
 
 void TextStreamTest::testTextStreamFromUnicodeToUTF8()
 {
-	stringstream ss;
+	std::stringstream ss;
 
-	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
-	textStream << _textUnicode;
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+	TextStream << _TextUnicode;
 
-	string str = ss.str();
+	std::string str = ss.str();
 	for (unsigned int i = 0; i < str.size(); i++) {
-		assert(str[i] == _textUTF8[i]);
+		CPPUNIT_ASSERT(str[i] == _TextUTF8[i]);
 	}
 }
 
 
 void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 {
-	stringstream ss;
+	std::stringstream ss;
 
-	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf32Codec());
-	textStream << _textUnicode;
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf32Codec());
+	TextStream << _TextUnicode;
 
-	Char c[6];
-	textStream.getline(c, 6);
+	Pt::Text::Char c[6];
+	TextStream.getline(c, 6);
 
-	cerr << c[0] << endl;
+	std::cerr << c[0] << std::endl;
 
-	assert(c[0] == _textUnicode[0]);
-	assert(c[1] == _textUnicode[1]);
-	assert(c[2] == _textUnicode[2]);
-	assert(c[3] == _textUnicode[3]);
-	assert(c[4] == _textUnicode[4]);
-	assert(c[5] == _textUnicode[5]);
+	CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
+	CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
+	CPPUNIT_ASSERT(c[2] == _TextUnicode[2]);
+	CPPUNIT_ASSERT(c[3] == _TextUnicode[3]);
+	CPPUNIT_ASSERT(c[4] == _TextUnicode[4]);
+	CPPUNIT_ASSERT(c[5] == _TextUnicode[5]);
 }
 
 
+
+void TextStreamTest::testGetline()
+{
+	stringstream ss("Hello world");
+
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+
+	Pt::Text::String s;
+	getline(TextStream, s);
+
+	CPPUNIT_ASSERT(s.narrow() == "Hello world");
+}
+
+
+void TextStreamTest::testNum_get()
+{
+	stringstream ss("3.1415");
+
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+
+	float f;
+	TextStream >> f;
+
+	CPPUNIT_ASSERT(f == 3.1415f);
+}
+
+
+void TextStreamTest::testNum_put()
+{
+	stringstream ss;
+
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+
+	TextStream << 3.1415f;
+	TextStream.flush();
+
+	CPPUNIT_ASSERT(ss.str() == "3.1415");
+}
+
+
+void TextStreamTest::testNumpunct()
+{
+	stringstream ss;
+
+	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
+
+	TextStream << 123456789L;
+	TextStream.flush();
+
+	CPPUNIT_ASSERT(ss.str() == "123456789");
+}

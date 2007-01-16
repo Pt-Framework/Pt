@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,10 +15,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef _Pt_Utf32Codec_h
-#define _Pt_Utf32Codec_h
+#ifndef Ptv_Utf32Codec_h
+#define Ptv_Utf32Codec_h
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
@@ -34,8 +34,8 @@ namespace Text {
 			/**
 			 * @brief Constructs a new Utf32Codec object.
 			 *
-			 * The internal type is ptv::text::Char and external type is $char$
-			 * 
+			 * The internal type is Pt::Text::Char and external type is $char$
+			 *
 			 * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
 			 * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
 			 */
@@ -66,3 +66,4 @@ namespace Text {
 } //namespace Pt
 
 #endif
+

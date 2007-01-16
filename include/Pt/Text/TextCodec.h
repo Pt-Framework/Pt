@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,10 +15,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_TextCodec_h
-#define Pt_TextCodec_h
+#ifndef PT_Text_TextCodec_h
+#define PT_Text_TextCodec_h
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
@@ -35,12 +35,12 @@ namespace Text {
 	 * This class contains default implementations for the methods do_unshift(), do_encoding()
 	 * and do_always_noconv() so sub-classes do not have to implement this default behaviour.
 	 *
-	 * Codecs are used to convert one text-encoding into another text-encoding. The internal
+	 * Codecs are used to convert one Text-encoding into another Text-encoding. The internal
 	 * and external data type can be specified using the template parameter 'I' (internal) and
 	 * 'E' (external).
 	 *
 	 * When used on a platform which supports locales and facets the conversion may use
-	 * locale-specific conversion of the text.
+	 * locale-specific conversion of the Text.
 	 *
 	 * This class derives from facet std::codecvt. Further documentation can be found there.
 	 *
@@ -62,7 +62,7 @@ namespace Text {
 			 * @brief Constructs a new TextCodec object.
 			 *
 			 * The internal and external type are specified by the template parameters of the class.
-			 * 
+			 *
 			 * @param ref This parameter is passed to std::codecvt. When ref == 0 the locale takes care
 			 * of deleting the facet. If ref == 1 the locale does not destroy the facet.
 			 */
@@ -95,3 +95,4 @@ using Text::TextCodec;
 } //namespace Pt
 
 #endif
+

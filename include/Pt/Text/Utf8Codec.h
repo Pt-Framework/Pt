@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *   Copyright (C) 2005 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,11 +21,11 @@
 /*************************************************************************
   !!! The algorithm used here was extracted from UTF* converter codes !!!
   !!! (from unicode.org) which carrying these notices:                !!!
- 
+
  * Copyright 2001-2004 Unicode, Inc.
- * 
+ *
  * Disclaimer
- * 
+ *
  * This source code is provided as is by Unicode, Inc. No claims are
  * made as to fitness for any particular purpose. No warranties of any
  * kind are expressed or implied. The recipient agrees to determine
@@ -33,9 +33,9 @@
  * purchased on magnetic or optical media from Unicode, Inc., the
  * sole remedy for any claim will be exchange of defective media
  * within 90 days of receipt.
- * 
+ *
  * Limitations on Rights to Redistribute This Code
- * 
+ *
  * Unicode, Inc. hereby grants the right to freely use the information
  * supplied in this file in the creation of products supporting the
  * Unicode Standard, and to make copies of this file in any form
@@ -58,8 +58,8 @@
 
  **************************************************************************/
 
-#ifndef Pt_Text_Utf8Codec_h
-#define Pt_Text_Utf8Codec_h
+#ifndef Ptv_Text_Utf8Codec_h
+#define Ptv_Text_Utf8Codec_h
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
@@ -75,10 +75,10 @@ namespace Text {
 	 * @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
 	 *
 	 * The method do_in() converts an array of char containing UTF-8-encoded data into an array
-	 * of ptv::text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * of Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
 	 * 32-bit representation of the character.
 	 *
-	 * The method do_out() converts an array of ptv::text::Char objects (UTF-32/Unicode) into an
+	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in UTF-8-encoding.
 	 */
 	class PT_API Utf8Codec : public TextCodec<Char, char> {
@@ -86,8 +86,8 @@ namespace Text {
 			/**
 			 * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.
 			 *
-			 * The internal type is ptv::text::Char and external type is $char$
-			 * 
+			 * The internal type is Pt::Text::Char and external type is $char$
+			 *
 			 * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
 			 * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
 			 */
@@ -97,22 +97,26 @@ namespace Text {
 			virtual ~Utf8Codec()
 			{}
 
-			//! decode UTF-8 to UTF-32
+			//! @brief Decodes UTF-8 to UTF-32.
 			virtual result do_in(mbstate_t& s, const char* fromBegin,
-			                                const char* fromEnd, const char*& fromNext, 
+			                                const char* fromEnd, const char*& fromNext,
 			                                Char* toBegin, Char* toEnd, Char*& toNext) const;
 
-			//! >encode UTF-32 to UTF-8
+			//! @brief Encodes UTF-32 to UTF-8.
 			virtual result do_out(mbstate_t& s, const Char* fromBegin,
-			                                 const Char* fromEnd, const Char*& fromNext, 
+			                                 const Char* fromEnd, const Char*& fromNext,
 			                                 char* toBegin, char* toEnd, char*& toNext) const;
 
+			// inheritdoc
 			virtual bool do_always_noconv() const throw();
 
+			// inheritdoc
 			virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
+			// inheritdoc
 			virtual int do_max_length() const throw();
 	};
+
 
 } //namespace Text
 

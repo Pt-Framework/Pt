@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,10 +15,10 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
-#ifndef Pt_Text_TextBuffer_h
-#define Pt_Text_TextBuffer_h
+#ifndef PT_Text_TextBuffer_h
+#define PT_Text_TextBuffer_h
 
 #include <Pt/Api.h>
 #include <Pt/Text/TextCodec.h>
@@ -32,7 +32,7 @@ namespace Pt {
 namespace Text {
 
 	/**
-	 * @brief Generic text-buffer which wraps a streaming buffer and converts its character
+	 * @brief Generic Text-buffer which wraps a streaming buffer and converts its character
 	 * data on-the-fly using a Codec.
 	 *
 	 * This class derives from std::basic_streambuf which is the super-class of all stream buffer
@@ -64,7 +64,7 @@ namespace Text {
 			/**
 			 * @brief Creates a BasicTextBuffer using the given stream buffer and codec.
 			 *
-			 * The given stream buffer is used as external device, buffered by this text buffer
+			 * The given stream buffer is used as external device, buffered by this Text buffer
 			 * and all input from and output to the external device is converted using the
 			 * given codec class.
 			 *
@@ -96,16 +96,16 @@ namespace Text {
 			{ return this->egptr(); }
 
 		protected:
-			//! @brief Initializes this text buffer by creating the internal buffer.
+			//! Initializes this Text buffer by creating the internal buffer.
 			void btinit();
 
-			//! inheritdoc - reimplemented from basic_streambuf
+			// inheritdoc - reimplemented from basic_streambuf
 			virtual int sync();
 
-			//! inheritdoc - reimplemented from basic_streambuf
+			// inheritdoc - reimplemented from basic_streambuf
 			virtual IntT overflow(IntT ch);
 
-			//! inheritdoc - reimplemented from basic_streambuf
+			// inheritdoc - reimplemented from basic_streambuf
 			virtual IntT underflow();
 
 		private:
@@ -237,7 +237,6 @@ namespace Text {
 		return TraitsT::to_int_type( *(this->gptr()) );
 	}
 
-
 	template <typename I, typename E>
 	typename BasicTextBuffer<I, E>::IntT BasicTextBuffer<I, E>::overflow(IntT ch)
 	{
@@ -269,7 +268,7 @@ namespace Text {
 
 		// unshift if EOF is reached
 		if( TraitsT::eq_int_type(ch, TraitsT::eof()) ) {
-			//typename CodecT::result r = 
+			//typename CodecT::result r =
 			_codec->unshift(_state, toNext, toEnd, toNext);
 		}
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -15,7 +15,7 @@
  *   License along with this program; if not, write to the                 *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- **************************************************************************/
+ ***************************************************************************/
 
 #include "Pt/Text/Utf32Codec.h"
 using namespace Pt::Text;
@@ -27,7 +27,7 @@ Utf32Codec::Utf32Codec(size_t ref)
 }
 
 
-Utf32Codec::~Utf32Codec() 
+Utf32Codec::~Utf32Codec()
 {
 }
 
@@ -41,7 +41,7 @@ Utf32Codec::result Utf32Codec::do_in(mbstate_t& s, const char* fromBegin,
 
 
 Utf32Codec::result Utf32Codec::do_out(mbstate_t& s, const Char* fromBegin,
-                                     const Char* fromEnd, const Char*& fromNext, 
+                                     const Char* fromEnd, const Char*& fromNext,
                                      char* toBegin, char* toEnd, char*& toNext) const
 {
 	return Utf32Codec::noconv;

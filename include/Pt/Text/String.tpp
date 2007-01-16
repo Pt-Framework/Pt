@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,6 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+using namespace Pt;
+
+using namespace std;
+
+
 
 namespace std {
 
@@ -86,11 +91,11 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type p
 {
 }
 
-
-inline basic_string<Pt::Char>::basic_string(Pt::Char* begin, Pt::Char* end)
+inline basic_string<Pt::Char>::basic_string(Pt::Text::Char* begin, Pt::Text::Char* end)
 : _data( new StringData( begin, end - begin ) )
 {
 }
+
 
 
 inline basic_string<Pt::Char>::~basic_string()
@@ -158,6 +163,26 @@ inline void basic_string<Pt::Char>::reserve(size_t n)
 
 	// mutation ends busy mode
 	_data->setInitial();
+}
+
+
+inline void basic_string<Pt::Char>::detach(size_type reserveSize)
+{
+    // shared, not busy - make copy
+    if( _data->shared() ) 
+    {
+        StringData* newBuffer = new StringData();
+        newBuffer->reserve( reserveSize );
+        newBuffer->assign( _data->str(), _data->length() );
+
+        _data->unref();
+        _data = newBuffer;
+    }
+    // just resizing
+    else
+    {
+        _data->reserve( reserveSize );
+    }
 }
 
 
@@ -902,24 +927,6 @@ basic_string<Pt::Char>::find_last_not_of(Pt::Char ch, size_type pos) const
 	}
 
 	return npos;
-}
-
-
-inline void basic_string<Pt::Char>::detach(size_type reserveSize)
-{
-	// shared, not busy - make copy
-	if( _data->shared() ) {
-		StringData* newBuffer = new StringData();
-		newBuffer->reserve( reserveSize );
-		newBuffer->assign( _data->str(), _data->length() );
-
-		_data->unref();
-		_data = newBuffer;
-	}
-	else
-	{
-		_data->reserve( reserveSize );
-	}
 }
 
 

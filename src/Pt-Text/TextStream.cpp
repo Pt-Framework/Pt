@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -30,19 +30,32 @@ namespace Pt {
 namespace Text {
 
 
+struct InitLocale
+{
+	InitLocale()
+	{
+	    #ifndef PTV_WITHOUT_STD_LOCALE
+		std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+		std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+		std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+		std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+		#endif
+	}
+} _initLocale;
+
 
 TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 : BasicTextBuffer<Pt::Char, char>(buffer, codec)
-{ 
-	#ifndef PT_WITHOUT_STD_LOCALE
-		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) 
+{
+	/*#ifndef PTV_WITHOUT_STD_LOCALE
+		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
 		{
 			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
 		}
-	#endif
+	#endif*/
 }
 
 
@@ -55,7 +68,7 @@ TextIStream::TextIStream(std::istream& is, CodecT* codec)
 
 
 TextIStream::~TextIStream()
-{ 
+{
 	delete _buffer;
 }
 
@@ -64,14 +77,14 @@ TextIStream::TextIStream(TextBuffer* buffer)
 : BasicTextIStream<Pt::Char, char>( buffer )
 , _buffer(0)
 {
-	#ifndef PT_WITHOUT_STD_LOCALE
+	/*#ifndef PTV_WITHOUT_STD_LOCALE
 		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
 			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
 		}
-	#endif
+	#endif*/
 }
 
 
@@ -90,7 +103,8 @@ TextOStream::~TextOStream()
 
 TextStream::TextStream(std::iostream& ios, CodecT* codec)
 : BasicTextStream<Char, char>( new TextBuffer(ios.rdbuf(), codec) )
-{}
+{
+}
 
 
 TextStream::~TextStream()

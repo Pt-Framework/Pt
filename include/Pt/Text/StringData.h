@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,9 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-#ifndef PT_TEXT_STRINGDATA_H
-#define PT_TEXT_STRINGDATA_H
+#ifndef PTV_TEXT_STRINGDATA_H
+#define PTV_TEXT_STRINGDATA_H
 
 #include <Pt/Text/Char.h>
 
@@ -38,7 +37,7 @@ class PT_API StringData {
 		typedef size_t size_type;
 		typedef Pt::Text::Char value_type;
 		typedef std::char_traits<Pt::Text::Char> traits_type;
-		typedef std::allocator<Pt::Text::Char> allocator_type;
+		typedef std::allocator<Pt::Char> allocator_type;
 
 	public:
 		StringData( const allocator_type& a = allocator_type() );
@@ -103,7 +102,7 @@ class PT_API StringData {
 	protected:
 		void allocate(size_type length);
 
-	private:
+	public:
 		// the allocated size is the capacity plus 1
 		Pt::Char* _str;
 		size_type _length;
