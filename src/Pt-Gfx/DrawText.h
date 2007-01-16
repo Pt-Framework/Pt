@@ -40,6 +40,12 @@ namespace Gfx{
 
     This class is a function object to draw text on an image. Additionally,
     text metrics can be determined for given strings.
+    TODO:
+    + Kerning for outline fonts
+    + Angle bug fixing
+    + Find a better solution for outline font
+    + Implemeting of a glyph cache
+    + Optimize glyph bitmap clipping ( use ClippRect )
  */
 class DrawText
 {
