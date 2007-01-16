@@ -128,19 +128,20 @@ class PT_API ImagePainter : public Painter
 	                           const  Region& imageRegion);
 
     private:
-        ARgbImage&                    		_image;
-        Pen                                 _pen;
-        Brush                               _brush;
+        ARgbImage&           _image;
+        Pen                  _pen;
+        Brush                _brush;
 
-        DrawLine*                           _drawLine;
-        std::auto_ptr<DrawThinLine>         _drawThinLine;
-        std::auto_ptr<DrawThickLine>        _drawThickLine;
+        DrawLine*            _drawLine;
+        DrawThinLine*        _drawThinLine;
+        DrawThickLine*       _drawThickLine;
 
-        DrawPolyline*                       _drawPolyline;
-        std::auto_ptr<DrawThinPolyline>     _drawThinPolyline;
-        std::auto_ptr<DrawThickPolyline>    _drawThickPolyline;
-        std::auto_ptr<FillConvexPolygon>    _fillConvexPolygon;
-        std::auto_ptr<DrawText>             _drawText;
+        DrawPolyline*        _drawPolyline;
+        DrawThinPolyline*    _drawThinPolyline;
+        DrawThickPolyline*   _drawThickPolyline;
+        
+        FillConvexPolygon*    _fillConvexPolygon;
+        DrawText*             _drawText;
 };
 
 } //namespace Gfx

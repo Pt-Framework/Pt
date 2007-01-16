@@ -49,20 +49,40 @@ namespace Gfx{
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
 , _drawLine( 0 )
-, _drawThinLine( new DrawThinLine() )
-, _drawThickLine( new DrawThickLine() )
+, _drawThinLine(0 )
+, _drawThickLine( 0)
 , _drawPolyline( 0 )
-, _drawThinPolyline( new DrawThinPolyline() )
-, _drawThickPolyline( new DrawThickPolyline() )
-, _fillConvexPolygon( new FillConvexPolygon() )
+, _drawThinPolyline( 0 )
+, _drawThickPolyline( 0 )
+, _fillConvexPolygon( 0 )
 , _drawText( new DrawText() )
 {
-     _drawLine      = _drawThinLine.get();
-     _drawPolyline  = _drawThinPolyline.get();
+    std::auto_ptr<DrawThinLine> dthin( new DrawThinLine );
+    std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );    
+    std::auto_ptr<DrawThinPolyline> dthinpoly( new DrawThinPolyline() );
+    std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );  
+    std::auto_ptr<FillConvexPolygon> fillconvexpoly( new FillConvexPolygon() );
+    std::auto_ptr<DrawText> dtext( new DrawText() );
+       
+    _drawThinLine       = dthin.release();
+    _drawThickLine      = dthick.release();
+    _drawLine           = _drawThinLine;
+    _drawThinPolyline   = dthinpoly.release();
+    _drawThickPolyline  = dthickpoly.release();
+    _drawPolyline       = _drawThinPolyline;
+    _fillConvexPolygon  = fillconvexpoly.release();
+    _drawText           = dtext.release();
 }
 
 ImagePainter::~ImagePainter()
-{ }
+{ 
+    delete _drawThinLine;
+    delete _drawThickLine;
+    delete _drawThinLine;
+    delete _drawThickPolyline;
+    delete _fillConvexPolygon;
+    delete _drawText;
+}
 
 void ImagePainter::setPen( const Pen& pen )
 {
@@ -70,16 +90,15 @@ void ImagePainter::setPen( const Pen& pen )
 
     if( _pen.size() == 1 )
     {
-        _drawLine       = _drawThinLine.get();
-        _drawPolyline   = _drawThinPolyline.get();
+        _drawLine       = _drawThinLine;
+        _drawPolyline   = _drawThinPolyline;
     }
     else
     {
-        _drawLine       = _drawThickLine.get();
-        _drawPolyline   = _drawThickPolyline.get();
+        _drawLine       = _drawThickLine;
+        _drawPolyline   = _drawThickPolyline;
     }
 }
-
 
 const Pen& ImagePainter::pen() const
 {
