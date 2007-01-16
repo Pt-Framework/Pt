@@ -37,15 +37,41 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 {
     public:
         ImagePainterTest()
-        : TestSuite("ImagePainterTest")
+        : TestSuite( "ImagePainterTest" )
         , _imagePainter( _image )
         , _bkColor( 0xffff, 0xffff, 0xffff )
         {
-            this->registerMethod("drawLineTest", *this, &ImagePainterTest::drawLineTest);
-            this->registerMethod("drawTextTest", *this, &ImagePainterTest::drawLineTest);
+            this->registerMethod("drawThinLineTest", *this, &ImagePainterTest::drawThinLineTest);
+            this->registerMethod("drawThickLineTest", *this, &ImagePainterTest::drawThickLineTest);
+            this->registerMethod("drawRectTest", *this, &ImagePainterTest::drawRectTest);
+            this->registerMethod("fillRectTest", *this, &ImagePainterTest::fillRectTest);
+            this->registerMethod("drawCircleTest", *this, &ImagePainterTest::drawCircleTest);
+            this->registerMethod("fillCircleTest", *this, &ImagePainterTest::fillCircleTest);
+            this->registerMethod("drawEllipseTest", *this, &ImagePainterTest::drawEllipseTest);
+            this->registerMethod("fillEllipseTest", *this, &ImagePainterTest::fillEllipseTest);
+            this->registerMethod("drawPolylineTest", *this, &ImagePainterTest::drawPolylineTest);
+            this->registerMethod("fillPolygonTest", *this, &ImagePainterTest::fillPolygonTest);
+            this->registerMethod("drawImageTest", *this, &ImagePainterTest::drawImageTest);            
+            this->registerMethod("fontMetricTest", *this, &ImagePainterTest::fontMetricTest);            
+            this->registerMethod("drawTextTest", *this, &ImagePainterTest::drawTextTest);
         }
+        
+        void drawThinLineTest()
+        {
+            _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 
-        void drawLineTest()
+            for( Pt::ssize_t size = 500; size >= 0; --size )
+            {
+                _image.resize(  size, size, _bkColor );
+
+                _imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point (100,100 ) );
+                _imagePainter.drawLine( Pt::Math::Point( 100,10 ), Pt::Math::Point ( 10,100 ) );
+                _imagePainter.drawLine( Pt::Math::Point( 55,10 ), Pt::Math::Point ( 55,100 ) );
+                _imagePainter.drawLine( Pt::Math::Point( 10,55 ), Pt::Math::Point ( 100,55 ) );
+            }      
+        }
+                
+        void drawThickLineTest()
         {
             _imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 
@@ -59,9 +85,48 @@ class ImagePainterTest : public Pt::Unit::TestSuite
                 _imagePainter.drawLine( Pt::Math::Point( 10,55 ), Pt::Math::Point ( 100,55 ) );
             }
         }
-
-        void drawTextTest()
+ 
+        void fillPolygonTest()
         {
+            _image.resize(  800, 600, _bkColor );
+            std::vector<Pt::Math::Point> polygon;
+        
+            polygon.push_back( Pt::Math::Point( 10,200 ) );
+            polygon.push_back( Pt::Math::Point( 40,10 ) );
+            polygon.push_back( Pt::Math::Point( 80,100 ) );
+            polygon.push_back( Pt::Math::Point( 160,10 ) );
+            polygon.push_back( Pt::Math::Point( 200,200 ) );
+        
+            _imagePainter.fillPolygon( &polygon[0], polygon.size() );   
+            PT_UNIT_ASSERT( checkImage() );         
+        }      
+                
+        void drawRectTest()
+        { }
+        
+        void fillRectTest()
+        { }
+        
+        void drawCircleTest()
+        { }
+        
+        void fillCircleTest()
+        { }
+        
+        void drawEllipseTest()
+        { }
+        
+        void fillEllipseTest()
+        { }
+        
+        void drawPolylineTest()
+        { }
+        
+        void drawImageTest()
+        { }
+        
+        void fontMetricTest()
+        {        
             Pt::Gfx::ARgbColor  outlineColor( 0, 0xffff, 0);
             Pt::Text::String    text( L"Hallo Platinum!" );
 
@@ -74,8 +139,14 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( metrics.descent() == 3 );
             PT_UNIT_ASSERT( metrics.width() > 75 );
             PT_UNIT_ASSERT( metrics.height() > 8 );
+        }
+        
+        void drawTextTest()
+        {
+            Pt::Gfx::ARgbColor  outlineColor( 0, 0xffff, 0);
+            Pt::Text::String    text( L"Hallo Platinum!" );
 
-            _imagePainter.setFont( Pt::Gfx::Font( "", 12, Pt::Gfx::Font::NormalStyle, 0) );
+            _imagePainter.setFont( Pt::Gfx::Font( "Vera", 12, Pt::Gfx::Font::NormalStyle, 0) );
 
             //No clipping
             _image.resize( 800, 600, _bkColor );
