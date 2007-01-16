@@ -66,10 +66,11 @@ class DrawText
 
         /** @brief Draw text on the image
 
-            The given Text is drawn at the given position (pos) using the given font
-			and the given pen color. The specified point to which the
-			Text is drawn is the base-line of the Text/font. If the outline color is set
-			to 0 no text outline is drawn.
+            The given Text is drawn at the given position (pos) using the given
+            font and the given pen color. The specified point to which the
+            text is	drawn is the base-line of the Text/font. If the outline
+            color is set to 0 no text outline is drawn. Clipping is performed
+            before the text is drawn.
 
 			@param image The target image
             @param pen The pen to be used

@@ -63,6 +63,7 @@ class DrawLine
 
 		    The line described by a two points will be drawn on an ARgbImage.
 		    The attributes for the line are taken from the passed Pen object.
+			Clipping has to be performed before the line is drawn.
 
 		    @param image Target image
 		    @param pen Pen to be used
