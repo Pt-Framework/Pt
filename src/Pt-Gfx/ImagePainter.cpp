@@ -78,7 +78,7 @@ ImagePainter::~ImagePainter()
 { 
     delete _drawThinLine;
     delete _drawThickLine;
-    delete _drawThinLine;
+    delete _drawThinPolyline;
     delete _drawThickPolyline;
     delete _fillConvexPolygon;
     delete _drawText;
