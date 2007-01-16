@@ -70,7 +70,7 @@ namespace Pt {
 		typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int x, int y)
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
-				throw RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
+				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
 			return(_buff[y*_width + x]);
 		}
@@ -79,7 +79,7 @@ namespace Pt {
 		const typename BasicImage<ColorSpaceT>::ColorT& BasicImage<ColorSpaceT>::at(int x, int y) const
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
-				throw RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
+				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
 			return(_buff[y*_width + x]);
 		}

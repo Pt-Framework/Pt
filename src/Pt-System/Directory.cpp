@@ -77,16 +77,18 @@ FileSystemNode& DirectoryIterator::operator*() const
 Directory::Directory(const std::string& path, mode m)
 : _path(path.c_str())
 {
+    // TODO: consider better exception type
 	switch(m) {
 		case UseExisting:
 			if (!DirectoryImpl::exists(path.c_str()))
-				throw IllegalArgument("Directory " + path + " does not exist.", PT_SOURCEINFO);
+				throw std::invalid_argument("Directory " + path + " does not exist." + PT_SOURCEINFO);
 			break;
 		case Create:
 			if (!DirectoryImpl::exists(path.c_str()))
 				DirectoryImpl::create(path.c_str());
 			break;
-		default: IllegalArgument("wrong mode for constructor", PT_SOURCEINFO);
+		default:
+             throw std::invalid_argument("wrong mode for constructor" + PT_SOURCEINFO);
 			 break;
 	}
 }

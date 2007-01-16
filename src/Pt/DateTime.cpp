@@ -76,7 +76,7 @@ namespace Pt
 	{
 		if (!isdigit(s[0])
 			|| !isdigit(s[1]))
-			throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+			throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
 		return (s[0] - '0') * 10
 			+ (s[1] - '0');
 	}
@@ -86,7 +86,7 @@ namespace Pt
 		if (!isdigit(s[0])
 			|| !isdigit(s[1])
 			|| !isdigit(s[2]))
-			throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+			throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
 		return (s[0] - '0') * 100
 			+ (s[1] - '0') * 10
 			+ (s[2] - '0');
@@ -98,7 +98,7 @@ namespace Pt
 			|| !isdigit(s[1])
 			|| !isdigit(s[2])
 			|| !isdigit(s[3]))
-			throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+			throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
 		return (s[0] - '0') * 1000
 			+ (s[1] - '0') * 100
 			+ (s[2] - '0') * 10
@@ -114,7 +114,7 @@ namespace Pt
 			|| s.at(13) != ':'
 			|| s.at(16) != ':'
 			|| s.at(19) != '.')
-			throw IllegalArgument("Invalid date-time iso string", PT_SOURCEINFO);
+			throw std::invalid_argument("Invalid date-time iso string" + PT_SOURCEINFO);
 			
 		const char* d = s.data();
 		

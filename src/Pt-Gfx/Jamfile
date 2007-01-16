@@ -45,7 +45,7 @@ Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt
 Main_MakeLocate ImagePainterDemo : bin ;
 
 PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
-Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-IO Pt-Gfx ;
 Main_MakeLocate ImagePainterTest : bin ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;

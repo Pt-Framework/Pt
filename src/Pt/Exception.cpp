@@ -75,46 +75,6 @@ LogicError::~LogicError() throw()
 
 
 
-RangeError::RangeError(const std::string & what, const SourceInfo& si) throw()
-: RuntimeError(what, si)
-{ }
-
-RangeError::~RangeError() throw()
-{ }
-
-
-
-
-OverflowError::OverflowError(const std::string & what, const SourceInfo& si) throw()
-: RuntimeError(what, si)
-{ }
-
-OverflowError::~OverflowError() throw()
-{ }
-
-
-
-
-UnderflowError::UnderflowError(const std::string & what, const SourceInfo& si) throw()
-: RuntimeError(what, si)
-{ }
-
-UnderflowError::~UnderflowError() throw()
-{ }
-
-
-
-
-IllegalArgument::IllegalArgument(const std::string& what, const SourceInfo& si) throw()
-: LogicError(what, si)
-{ }
-
-IllegalArgument::~IllegalArgument() throw()
-{ }
-
-
-
-
 AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 : LogicError(what, si)
 { }

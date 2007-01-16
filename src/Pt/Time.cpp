@@ -60,7 +60,7 @@ namespace Pt
   inline unsigned short getNumber2(const char* s)
   {
 		if (!isdigit(s[0]) || !isdigit(s[1]))
-			throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+			throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
 
 		return (s[0] - '0') * 10 + (s[1] - '0');
   }
@@ -70,7 +70,7 @@ namespace Pt
     if (!isdigit(s[0])
       || !isdigit(s[1])
       || !isdigit(s[2]))
-      throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+      throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
  
     return (s[0] - '0') * 100
          + (s[1] - '0') * 10
@@ -83,7 +83,7 @@ namespace Pt
       || s.at(2) != ':'
       || s.at(5) != ':'
       || s.at(8) != '.')
-      throw IllegalArgument("Not a digit.", PT_SOURCEINFO);
+      throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
       
     const char* d = s.data();
     return Time(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),

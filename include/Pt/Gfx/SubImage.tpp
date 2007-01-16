@@ -40,7 +40,7 @@ namespace Pt {
 			if(x1<0 || y1<0 || x2<0 ||y2<0 ||
 			   x1>=int(_image.width()) || y1>=int(_image.height()) ||
 			   x2>=int(_image.width()) || y2>=int(_image.height()))
-				throw RangeError("The given region covers invalid area in the given image ", PT_SOURCEINFO);
+				throw std::range_error("The given region covers invalid area in the given image " + PT_SOURCEINFO);
 		}
 
 
@@ -134,7 +134,8 @@ namespace Pt {
 		template <typename ColorSpaceT_>
 		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y)
 		{
-			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
+			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
+                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
@@ -142,7 +143,8 @@ namespace Pt {
 		template <typename ColorSpaceT_>
 		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y) const
 		{
-			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) RangeError("Either the image is empty or the (y,x) coordinate is invalid", PT_SOURCEINFO);
+			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
+                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 

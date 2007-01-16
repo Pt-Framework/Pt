@@ -28,18 +28,19 @@ namespace System {
 
 File::File(const std::string& path, mode mode)
 {
+    // TODO: consider better exception type
 	_impl = new FileImpl(path);
 	switch(mode) {
 		case UseExisting:
 			if ( !_impl->exists() )
-				throw IllegalArgument("File " + path + " does not exist.", PT_SOURCEINFO);
+				throw std::invalid_argument("File " + path + " does not exist." + PT_SOURCEINFO);
 			break;
 
 		case Create: 
 			if ( !_impl->exists() )
 				_impl->create();
 			break;
-		default: IllegalArgument("wrong mode for constructor", PT_SOURCEINFO);
+		default: std::invalid_argument("wrong mode for constructor" + PT_SOURCEINFO);
 			 break;
 
 	}

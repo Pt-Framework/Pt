@@ -26,13 +26,6 @@
 #include <Pt/Api.h>
 #include <Pt/SourceInfo.h>
 
-#define PT_EXCEPTION_TEXT(what) __FILE__ + std::string(":") + PT_PRETTY_FUNCTION + what
-
-
-inline void Pt_demo_func()
-{
-    throw std::logic_error( PT_EXCEPTION_TEXT("test") );
-}
 
 namespace std {
 	class PT_API std::exception;
@@ -123,79 +116,6 @@ namespace Pt {
 			/** @brief Destructor.
 			 */
 			~LogicError() throw();
-	};
-
-
-	/** @brief This class indicates an overflow error.
-	 *  @ingroup Pt
-	 *
-	 *  An exception of class OverflowError is used to report an arithmetic overflow.
-	 *  This class implements Exception.
-	 */
-	class PT_API OverflowError : public RuntimeError {
-		public:
-			/** @see Exception().
-			 */
-			OverflowError(const std::string & what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~OverflowError() throw();
-	};
-
-
-	/** @brief This class indicates an underflow error.
-	 *  @ingroup Pt
-	 *
-	 *  An exception of class UnderflowError is used to report an arithmetic underflow.
-	 *  This class implements Exception.
-	 */
-	class PT_API UnderflowError : public RuntimeError {
-		public:
-			/** @see Exception().
-			 */
-			UnderflowError(const std::string & what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~UnderflowError() throw();
-	};
-
-
-	/** @brief This class indicates a range error.
-	 *  @ingroup Pt
-	 *
-	 *  An exception of class RangeError is used to report a range error in internal
-	 *  computations. This class implements Exception.
-	 */
-	class PT_API RangeError : public RuntimeError {
-		public:
-			/** @see Exception().
-			 */
-			RangeError(const std::string & what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~RangeError() throw();
-	};
-
-
-	/** @brief This class indicates an illegal argument error.
-	 *  @ingroup Pt
-	 *
-	 *  An exception of class IllegalArgument is used to report invalid	arguments
-	 *  (e.g. if a bit set is initialized with a char other than '0' or '1').
-	 *  This class implements Exception.
-	 */
-	class PT_API IllegalArgument : public LogicError {
-		public:
-			/** @see Exception().
-			 */
-			IllegalArgument(const std::string& what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~IllegalArgument() throw();
 	};
 
 

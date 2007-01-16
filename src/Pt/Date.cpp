@@ -60,7 +60,7 @@ namespace Pt
 	{
 		if (!isdigit(s[0])
 		|| !isdigit(s[1]))
-		throw IllegalArgument("Illegal date format.", PT_SOURCEINFO);
+		throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
 		return (s[0] - '0') * 10
 			+ (s[1] - '0');
 	}
@@ -71,7 +71,7 @@ namespace Pt
 		|| !isdigit(s[1])
 		|| !isdigit(s[2])
 		|| !isdigit(s[3]))
-		throw IllegalArgument("Illegal date format.", PT_SOURCEINFO);
+		throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
 	  
 		return (s[0] - '0') * 1000
 			+ (s[1] - '0') * 100
@@ -84,7 +84,7 @@ namespace Pt
 		if (s.size() < 10
 		    || s.at(4) != '-'
 		    || s.at(7) != '-') {
-			throw IllegalArgument("Illegal date format.", PT_SOURCEINFO);
+			throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
 		}
 		
 		const char* d = s.data();

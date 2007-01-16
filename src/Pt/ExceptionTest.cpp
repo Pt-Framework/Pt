@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Aloysius Indrayanto                                *
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,35 +17,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <iostream>
-#include <sstream>
-using namespace std;
-
-#include "Pt/Exception.h"
-
+#include <stdexcept>
+#include "Pt/SourceInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
-#include "Pt/Unit/Application.h"
 #include "Pt/Unit/RegisterTest.h"
 
-
-template <typename ExceptionT>
-class ExceptionThrower {
-	public:
-		ExceptionThrower(const string& msg)
-		: _msg(msg)
-		{}
-
-		~ExceptionThrower()
-		{}
-
-		void throwIt() const
-		{ throw ExceptionT(_msg, PT_SOURCEINFO); }
-
-	private:
-		string _msg;
-};
 
 class ExceptionTest : public Pt::Unit::TestCase
 {
@@ -54,86 +32,17 @@ class ExceptionTest : public Pt::Unit::TestCase
 		: TestCase("ExceptionTest")
 		{}
 
-		template <typename ExceptionT>
-		void testException(const string &msg) const
-		{
-			stringstream ss;
-
-			ExceptionThrower<ExceptionT> et(msg);
-
-			try {
-				et.throwIt();
-			}
-			catch(const Pt::IllegalArgument& ) {
-				//ss << "Got Pt::IllegalArgument" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::RangeError& ) {
-				//ss << "Got Pt::RangeError" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::UnderflowError& ) {
-				//ss << "Got Pt::UnderflowError" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::OverflowError& ) {
-				//ss << "Got Pt::OverflowError" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::LogicError& ) {
-				//ss << "Got Pt::LogicError" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::RuntimeError& ) {
-				//ss << "Got Pt::RuntimeError" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const Pt::Exception& ) {
-				//ss << "Got Pt::Exception" << endl;
-				//ss << "  e.what()              = " << e.what()              << endl;
-				//ss << "  e.sourceInfo().file() = " << e.sourceInfo().file() << endl;
-				//ss << "  e.sourceInfo().line() = " << e.sourceInfo().line() << endl;
-				//ss << "  e.sourceInfo().func() = " << e.sourceInfo().func();
-			}
-			catch(const std::exception& ) {
-				//ss << "Got std::exception" << endl;
-				//ss << "  e.what() = " << e.what();
-			}
-			catch(...) {
-				//ss << "Got unknown exception" << endl;
-				PT_UNIT_ASSERT( false );
-			}
-
-			//if(!ss.str().empty()) Pt::Unit::Application::message( ss.str() );
-		}
-
 		void test()
 		{
-			testException<Pt::Exception>("Throwing Pt::Exception");
-			testException<Pt::RuntimeError>("Throwing Pt::RuntimeError");
-			testException<Pt::LogicError>("Throwing Pt::LogicError");
-			testException<Pt::OverflowError>("Throwing Pt::OverflowError");
-			testException<Pt::UnderflowError>("Throwing Pt::UnderflowError");
-			testException<Pt::RangeError>("Throwing Pt::RangeError");
-			testException<Pt::IllegalArgument>("Throwing Pt::IllegalArgument");
+            try {
+                throw std::invalid_argument( "test" + PT_SOURCEINFO);
+            }
+            catch(const std::exception& ex)
+            {
+                return;
+            }
+
+            PT_UNIT_ASSERT(false);
 		}
 };
 

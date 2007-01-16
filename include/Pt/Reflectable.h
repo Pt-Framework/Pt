@@ -62,7 +62,7 @@ class PT_API MethodProxy : public ICallable, private Method<R, C, A1, A2, A3, A4
 				case 4: return TypeTraits<A5>::typeName();
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		const std::type_info& argType(size_t index) const
@@ -76,7 +76,7 @@ class PT_API MethodProxy : public ICallable, private Method<R, C, A1, A2, A3, A4
 				case 4: return typeid(A5);
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		void call(const Args& a)
@@ -121,7 +121,7 @@ class PT_API MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
 				case 3: return TypeTraits<A4>::typeName();
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		const std::type_info& argType(size_t index) const
@@ -134,7 +134,7 @@ class PT_API MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
 				case 3: return typeid(A4);
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		void call(const Args& a)
@@ -176,7 +176,7 @@ class PT_API MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public ICallabl
 				case 2: return TypeTraits<A3>::typeName();
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		const std::type_info& argType(size_t index) const
@@ -188,7 +188,7 @@ class PT_API MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public ICallabl
 				case 2: return typeid(A3);
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		void call(const Args& a)
@@ -227,7 +227,7 @@ class PT_API MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public IC
 				case 1: return TypeTraits<A2>::typeName();
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		const std::type_info& argType(size_t index) const
@@ -238,7 +238,7 @@ class PT_API MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public IC
 				case 1: return typeid(A2);
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		void call(const Args& a)
@@ -274,7 +274,7 @@ class PT_API MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pub
 				case 0: return TypeTraits<A1>::typeName();
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		const std::type_info& argType(size_t index) const
@@ -284,7 +284,7 @@ class PT_API MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pub
 				case 0: return typeid(A1);
 			}
 
-			throw IllegalArgument("No such argument", PT_SOURCEINFO);
+			throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
 		}
 
 		void call(const Args& a)
@@ -312,10 +312,10 @@ class PT_API MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>
 		{ return 0; }
 
 		const char* argName(size_t index) const
-		{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+		{ throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
 
 		const std::type_info& argType(size_t index) const
-		{ throw IllegalArgument("No such argument", PT_SOURCEINFO); }
+		{ throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
 
 		void call(const Args& a)
 		{

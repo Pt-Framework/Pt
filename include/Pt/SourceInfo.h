@@ -125,7 +125,7 @@ class PT_API SourceInfo {
         { return _line; }
 
         inline std::string str() const
-        { return _file + ": '" + _func; }
+        { return _file + ": " + _func; }
 
         operator std::string() const
         { return this->str(); }
@@ -155,6 +155,12 @@ class PT_API SourceInfo {
         unsigned int _line;
         std::string  _func;
 };
+
+
+inline std::string operator+(const std::string& what, const SourceInfo& info)
+{
+    return what + "\n" + info.str();
+}
 
 } // namespace Pt
 
