@@ -137,8 +137,8 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( metrics.ascent() == 12 );
             PT_UNIT_ASSERT( metrics.descent() == 3 );
-            PT_UNIT_ASSERT( metrics.width() > 75 );
-            PT_UNIT_ASSERT( metrics.height() > 8 );
+            PT_UNIT_ASSERT( metrics.width() >= 84 && metrics.width() <= 86 );
+            PT_UNIT_ASSERT( metrics.height() >= 13 && metrics.height() <= 15 );
         }
         
         void drawTextTest()
