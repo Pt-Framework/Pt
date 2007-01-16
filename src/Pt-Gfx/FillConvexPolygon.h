@@ -25,19 +25,39 @@
 #include "ClipConvexPolygon.h"
 #include "RasterBuffer.h"
 
+
 namespace Pt {
+
 namespace Gfx {
 
+/** @brief Fill polygons on images
+
+    This class implements FillPolygon and is specialised for the filling
+    of convex polygons.
+ */
 class FillConvexPolygon : public FillPolygon
 {
     public:
         void clip( const Math::Rect& viewPort, std::vector<Math::Point>& points );
 
+		/** @brief Rasterizes a filles polygon
+
+			A polygon described by a vector of points is reasterized to
+			the given RasterBuffer. No clipping is performed
+		*/
         void rasterize( std::vector<Math::Point> points, RasterBuffer& rasterBuffer );
 
-        void output( ARgbImage& image, const Brush& brush, const RasterBuffer& rasterBuffer );
+		/** @brief Draw buffer content on images
+		*/
+        void output( ARgbImage& image, const Brush& brush,
+                     const RasterBuffer& rasterBuffer );
 
-        virtual void draw( ARgbImage& image, const Brush& brush, const std::vector<Math::Point>& points );
+		/** @brief Fill a polygon on an image
+
+		    @see FillPolygon::draw
+		*/
+        virtual void draw( ARgbImage& image, const Brush& brush,
+                           const std::vector<Math::Point>& points );
 
     private:
          ClipConvexPolygon       _clip;
@@ -45,7 +65,8 @@ class FillConvexPolygon : public FillPolygon
          std::vector<ARgbColor>  _colorBuffer;
 };
 
-} //namespace gfx
-} //namespace ptv
+} //namespace Gfx
+
+} //namespace Pt
 
 #endif

@@ -27,8 +27,14 @@
 
 
 namespace Pt{
+
 namespace Gfx{
 
+/** @brief Fill polygons on images
+
+    This class is an interface for all function objects that can
+    fill polygons.
+ */
 class FillPolygon
 {
     public:
@@ -38,10 +44,30 @@ class FillPolygon
         virtual ~FillPolygon()
         { }
 
-        virtual void draw( ARgbImage& image, const Brush& brush, const std::vector<Math::Point>& points ) = 0;
+		/** @brief Fill a polygon on an image
+
+			@see FillPolygon::draw
+		*/
+		void operator() ( ARgbImage& image, const Brush& brush,
+                          const std::vector<Math::Point>& points )
+		{ this->draw(image, brush, points); }
+
+		/** @brief Fill a polygon on an image
+
+		    The polygon described by a vector of points will be filled on an
+		    ARgbImage. The attributes for the fill operation are taken from
+		    the passed Brush object.
+
+		    @param image Target image
+		    @param pen Brush to be used
+		    @param points Polygon points
+		*/
+        virtual void draw( ARgbImage& image, const Brush& brush,
+                           const std::vector<Math::Point>& points ) = 0;
 };
 
 }
+
 }
 
 #endif
