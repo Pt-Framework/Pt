@@ -61,7 +61,8 @@ class FontDemo : public Pt::Gui::Widget
         //Pt::Gfx::FontMetrics metrics = _imagePainter.fontMetrics(ss.str());
 
         clock.start();
-        _imagePainter.drawText(Math::Point( 22, 40),L"Hallo Platinum!", &Pt::Gfx::ARgbColor(0xffff,0xffff,0xffff) );
+        Pt::Gfx::ARgbColor white(0xffff,0xffff,0xffff);
+        _imagePainter.drawText(Math::Point( 22, 40),L"Hallo Platinum!", &white );
 
 
         Pt::System::TimeValue time = clock.stop();
