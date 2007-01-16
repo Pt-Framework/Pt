@@ -26,29 +26,63 @@
 
 #include <vector>
 
+
 namespace Pt{
+
 namespace Gfx{
 
+/** @brief Convex polygon clipper
+
+    This class is a function object that can perform clipping
+    of a convex polygon against a specified area.
+ */
 class ClipConvexPolygon
 {
-public:
-    ClipConvexPolygon();
-    virtual ~ClipConvexPolygon();
+	public:
+		/** @brief Default constructor
+		    The default constructor does nothing.
+		*/
+		ClipConvexPolygon();
 
-    void clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea );
+		/** @brief Perform clipping
 
-private:
+			@see ClipConvexPolygon::clip
+		*/
+		void operator() (std::vector<Pt::Math::Point>& in,
+				         const Pt::Math::Rect& clippingArea )
+		{ this-> clip(in, clippingArea); }
 
-    enum Orientation{Left, Right, Top, Bottom} ;
+		/** @brief Perform clipping
 
-    void clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<Pt::Math::Point>& out,
-                     Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1);
+		    The polygon described by a vector of points is clipped
+		    against a clipping rectangle. The vector of points will
+		    be modified, thus the clipping results in a new polygon.
 
-    Pt::Math::Point intersect( const Pt::Math::Point& from, const Pt::Math::Point& to, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 );
-    bool inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 );
+		    @param in Polygon points
+		    @param clippingArea Rectangle to clip against
+
+		*/
+		void clip( std::vector<Pt::Math::Point>& in,
+				   const Pt::Math::Rect& clippingArea );
+
+	private:
+		enum Orientation{Left, Right, Top, Bottom} ;
+
+		void clipEdge( const std::vector<Pt::Math::Point>& in,
+					   std::vector<Pt::Math::Point>& out,
+					   Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1);
+
+		Pt::Math::Point intersect( const Pt::Math::Point& from,
+								   const Pt::Math::Point& to,
+								   const Pt::Math::Point& edge0,
+								   Pt::Math::Point& edge1 );
+
+		bool inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0,
+					 Pt::Math::Point& edge1 );
 };
 
 }
+
 }
 
 #endif

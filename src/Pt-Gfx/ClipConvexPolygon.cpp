@@ -21,14 +21,14 @@
 #include "ClipConvexPolygon.h"
 #include <cassert>
 
+
 namespace Pt{
+
 namespace Gfx{
 
 ClipConvexPolygon::ClipConvexPolygon()
-{ }
-
-ClipConvexPolygon::~ClipConvexPolygon()
 {}
+
 
 void ClipConvexPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )
 {
@@ -45,6 +45,7 @@ void ClipConvexPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::
     in.clear();
     clipEdge( buffer, in, clippingArea.topRight(), clippingArea.topLeft() );
 }
+
 
 void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::vector<Pt::Math::Point>& out,
                  Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1)
@@ -84,6 +85,7 @@ void ClipConvexPolygon::clipEdge( const std::vector<Pt::Math::Point>& in, std::v
     }
 }
 
+
 Pt::Math::Point ClipConvexPolygon::intersect( const Pt::Math::Point& from, const Pt::Math::Point& to, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
 {
     Pt::Math::Point p;
@@ -102,6 +104,7 @@ Pt::Math::Point ClipConvexPolygon::intersect( const Pt::Math::Point& from, const
 
     return p;
 }
+
 
 bool ClipConvexPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
 {
@@ -139,4 +142,5 @@ bool ClipConvexPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point&
 }
 
 }
+
 }

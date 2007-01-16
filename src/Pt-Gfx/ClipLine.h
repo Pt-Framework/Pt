@@ -23,106 +23,118 @@
 
 #include <Pt/Math/Point.h>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
+namespace Gfx {
+
+
+/** @brief Line clipper
+
+    This class is a function object that can perform clipping
+    of a line against x and y limits.
+ */
 class ClipLine
 {
+	public:
+		bool clip( Math::Point& from, Math::Point& to,
+		           Pt::ssize_t xmin, Pt::ssize_t xmax,
+		           Pt::ssize_t ymin, Pt::ssize_t ymax )
+		{ return this->operator()(from, to, xmin, xmax, ymin, ymax); }
 
-public:
+		bool operator()( Math::Point& from, Math::Point& to,
+						 Pt::ssize_t xmin, Pt::ssize_t xmax,
+						 Pt::ssize_t ymin, Pt::ssize_t ymax )
+		{
+			int outCode0 = outCode( from.x(), from.y(), xmin, xmax, ymin, ymax );
+			int outCode1 = outCode( to.x(), to.y(), xmin, xmax, ymin, ymax );
+			int outCodeOut;
 
-    enum{ Top=0x1, Bottom=0x2, Right=0x4, Left=0x8 };
+			while( true )
+			{
+				if( !(outCode0 | outCode1) )
+				{
+					return true;
+				}
+				else if( outCode0 & outCode1 )
+				{
+					return false;
+				}
+				else
+				{
+					Pt::ssize_t x, y;
+					outCodeOut = outCode0 ? outCode0 : outCode1;
 
-    int outCode( Pt::ssize_t x, Pt::ssize_t y, Pt::ssize_t xmin,
-                 Pt::ssize_t xmax, Pt::ssize_t ymin, Pt::ssize_t ymax )
-    {
-        int code = 0;
+					if( outCodeOut & Top )
+					{
+						x = from.x() + ( to.x() - from.x() ) * ( ymax - from.y() ) / ( to.y() -from.y() );
+						y = ymax;
+					}
+					else if( outCodeOut & Bottom )
+					{
+						x = from.x() + ( to.x() - from.x() ) * ( ymin - from.y() ) / (to.y() - from.y() );
+						y = ymin;
+					}
+					else if( outCodeOut & Right )
+					{
+						y = from.y() + ( to.y() - from.y() ) * ( xmax - from.x() ) / ( to.x() - from.x() );
+						x = xmax;
+					}
+					else
+					{
+						y = from.y() + ( to.y() - from.y() ) * ( xmin - from.x()) / ( to.x() - from.x() );
+						x = xmin;
+					}
 
-        if( y > ymax)
-        {
-          code |= Top;
-        }
-        else if( y < ymin )
-        {
-          code |= Bottom;
-        }
+					if( outCodeOut == outCode0 )
+					{
+						from.setX( x );
+						from.setY( y );
+						outCode0 = outCode( from.x(), from.y(), xmin, xmax, ymin, ymax );
+					}
+					else
+					{
+						to.setX( x );
+						to.setY( y );
+						outCode1 = outCode( to.x(), to.y(), xmin, xmax, ymin, ymax );
+					}
 
-        if( x > xmax )
-        {
-          code |= Right;
-        }
-        else if( x < xmin )
-        {
-          code |= Left;
-        }
+				}
+			}
+			return true;
+		}
 
-        return code;
-    }
+	private:
+		enum{ Top=0x1, Bottom=0x2, Right=0x4, Left=0x8 };
 
-    bool operator()( Math::Point& from, Math::Point& to,
-                     Pt::ssize_t xmin, Pt::ssize_t xmax,
-                     Pt::ssize_t ymin, Pt::ssize_t ymax )
-    {
-        int outCode0 = outCode( from.x(), from.y(), xmin, xmax, ymin, ymax );
-        int outCode1 = outCode( to.x(), to.y(), xmin, xmax, ymin, ymax );
-        int outCodeOut;
+		int outCode( Pt::ssize_t x, Pt::ssize_t y, Pt::ssize_t xmin,
+					 Pt::ssize_t xmax, Pt::ssize_t ymin, Pt::ssize_t ymax )
+		{
+			int code = 0;
 
-        while( true )
-        {
-            if( !(outCode0 | outCode1) )
-            {
-                return true;
-            }
-            else if( outCode0 & outCode1 )
-            {
-                return false;
-            }
-            else
-            {
-                Pt::ssize_t x, y;
-                outCodeOut = outCode0 ? outCode0 : outCode1;
+			if( y > ymax)
+			{
+			  code |= Top;
+			}
+			else if( y < ymin )
+			{
+			  code |= Bottom;
+			}
 
-                if( outCodeOut & Top )
-                {
-                    x = from.x() + ( to.x() - from.x() ) * ( ymax - from.y() ) / ( to.y() -from.y() );
-                    y = ymax;
-                }
-                else if( outCodeOut & Bottom )
-                {
-                    x = from.x() + ( to.x() - from.x() ) * ( ymin - from.y() ) / (to.y() - from.y() );
-                    y = ymin;
-                }
-                else if( outCodeOut & Right )
-                {
-                    y = from.y() + ( to.y() - from.y() ) * ( xmax - from.x() ) / ( to.x() - from.x() );
-                    x = xmax;
-                }
-                else
-                {
-                    y = from.y() + ( to.y() - from.y() ) * ( xmin - from.x()) / ( to.x() - from.x() );
-                    x = xmin;
-                }
+			if( x > xmax )
+			{
+			  code |= Right;
+			}
+			else if( x < xmin )
+			{
+			  code |= Left;
+			}
 
-                if( outCodeOut == outCode0 )
-                {
-                    from.setX( x );
-                    from.setY( y );
-                    outCode0 = outCode( from.x(), from.y(), xmin, xmax, ymin, ymax );
-                }
-                else
-                {
-                    to.setX( x );
-                    to.setY( y );
-                    outCode1 = outCode( to.x(), to.y(), xmin, xmax, ymin, ymax );
-                }
-
-            }
-        }
-        return true;
-    }
+			return code;
+		}
 };
 
 }
+
 }
 
 #endif
