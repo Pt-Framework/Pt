@@ -22,27 +22,56 @@
 #define PT_GFX_DRAWPOLYLINE_H
 
 #include <vector>
-#include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Pen.h>
-
-namespace Pt{
-namespace Gfx{
+#include <Pt/Gfx/ARgbImage.h>
 
 
+namespace Pt {
+
+namespace Gfx {
+
+/** @brief Draw polylines on an image
+
+    This class is an interface for all function objects that can
+    draw lines.
+ */
 class DrawPolyline
 {
-public:
-    DrawPolyline()
-    { }
+	public:
+    	/** @brief Default Constructor
+    	*/
+		DrawPolyline()
+		{ }
 
-    virtual ~DrawPolyline()
-    { }
+    	/** @brief Destructor
+    	*/
+		virtual ~DrawPolyline()
+		{ }
 
-    virtual void draw( ARgbImage& image,  const Pen& pen, const std::vector<Math::Point>& points ) = 0;
+		/** @brief Draw a polyline on an image
 
+			@see DrawPolyline::draw
+		*/
+		void operator() ( ARgbImage& image, const Pen& pen,
+                          const std::vector<Math::Point>& points )
+		{ this->draw(image, pen, points); }
+
+		/** @brief Draw a polyline on an image
+
+		    The polyline described by a vector of points will be drawn on an
+		    ARgbImage. The attributes for the lines are taken from the passed
+		    Pen object.
+
+		    @param image Target image
+		    @param pen Pen to be used
+		    @param points Polyline points
+		*/
+		virtual void draw( ARgbImage& image, const Pen& pen,
+						   const std::vector<Math::Point>& points ) = 0;
 };
 
 } //namespace Pt
+
 } //namespace Gfx
 
 #endif

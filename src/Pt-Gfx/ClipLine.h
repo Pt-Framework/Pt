@@ -36,11 +36,29 @@ namespace Gfx {
 class ClipLine
 {
 	public:
+		/** @brief Perform line clipping
+
+		    The line described by a two points is clipped against x ynd y
+		    limits. The points may be modified, thus the clipping can results
+		    in a new line.
+
+			@return true if clipping was perfomed
+		    @param from Begin of the line
+		    @param End of the line
+		    @param xmin Minimum x to clip against
+		    @param xmax Maximum x to clip against
+		    @param ymin Minimum y to clip against
+		    @param ymax Maximum y to clip against
+		*/
 		bool clip( Math::Point& from, Math::Point& to,
 		           Pt::ssize_t xmin, Pt::ssize_t xmax,
 		           Pt::ssize_t ymin, Pt::ssize_t ymax )
 		{ return this->operator()(from, to, xmin, xmax, ymin, ymax); }
 
+		/** @brief Perform clipping
+
+			@see ClipLine::clip
+		*/
 		bool operator()( Math::Point& from, Math::Point& to,
 						 Pt::ssize_t xmin, Pt::ssize_t xmax,
 						 Pt::ssize_t ymin, Pt::ssize_t ymax )
