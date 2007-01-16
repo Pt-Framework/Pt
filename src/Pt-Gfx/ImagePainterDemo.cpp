@@ -60,8 +60,10 @@ class ImagePainterDemo : public Pt::Gui::Widget
         _imagePainter.drawLine( Pt::Math::Point( 55,10 ),Pt::Math::Point ( 55,100 ) );
         _imagePainter.drawLine( Pt::Math::Point( 10,55 ),Pt::Math::Point ( 100,55 ) );
 
-        _imagePainter.setFont( Pt::Gfx::Font( "Vera", 28, Pt::Gfx::Font::NormalStyle, -300) );
-        _imagePainter.drawText(Math::Point( 22, 180), L"Hallo Platinum!", &Pt::Gfx::ARgbColor(0xffff,0xffff,0) );
+        Pt::Gfx::ARgbColor color( 0xffff,0xffff, 0);
+        
+        _imagePainter.setFont( Pt::Gfx::Font( "Vera", 10, Pt::Gfx::Font::NormalStyle, -300));
+        _imagePainter.drawText(Math::Point( 22, 180), L"Hallo Platinum!", &color  );
 
         _imagePainter.setFont( Pt::Gfx::Font( "Vera", 28, Pt::Gfx::Font::NormalStyle, 100) );
         _imagePainter.drawText(Math::Point( 220, 80), L"Hallo Platinum!");

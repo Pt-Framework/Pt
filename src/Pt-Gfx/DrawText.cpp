@@ -28,7 +28,6 @@ namespace Pt{
 namespace Gfx{
 
 DrawText::DrawText()
-: _font( "Vera", 12 )
 {
     FT_Init_FreeType( &_ft );
 
@@ -42,9 +41,7 @@ DrawText::DrawText()
 */
 
     if( FT_Select_Charmap( _face, FT_ENCODING_UNICODE ) )
-        FT_Select_Charmap( _face, FT_ENCODING_NONE );
-
-    this->setFont( _font );
+        FT_Select_Charmap( _face, FT_ENCODING_NONE );    
 }
 
 DrawText::~DrawText()
@@ -55,13 +52,11 @@ DrawText::~DrawText()
 
 void DrawText::setFont( const Font& font )
 {
-    _font = font;
-
     //Devide size by 64 because free type works with 1/64 pixel.
-    FT_Set_Char_Size( _face, _font.size()<<6, _font.size()<<6, 72, 72 );
+    FT_Set_Char_Size( _face, font.size()<<6, font.size()<<6, 72, 72 );
 
     //Setup the rotation matrix
-    double angle = (_font.angle()/3600.0) * 3.14159 * 2 ;
+    double angle = (font.angle()/3600.0) * 3.14159 * 2 ;
 
     _matrix.xx = (FT_Fixed) ( cos( angle )* 0x10000L );
     _matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
@@ -70,7 +65,7 @@ void DrawText::setFont( const Font& font )
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )
-{
+{   
     FT_UInt         previous    = 0;
     FT_GlyphSlot    slot        = _face->glyph;
     FT_Vector       delta;
@@ -123,7 +118,7 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
     return FontMetrics(_face->size->metrics.ascender>>6, (-_face->size->metrics.descender)>>6, tbbox.xMax - tbbox.xMin, _face->size->metrics.height>>6 );
 }
 
-void DrawText::_draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround )
+void DrawText::_draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround )
 {
     FT_Vector       glyphPos;
     FT_Vector       delta;
@@ -180,7 +175,7 @@ void DrawText::_draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, 
             drawGlyph( image, *backGround, leftDown, topUp, slot->bitmap );
         }
 
-        drawGlyph( image, pen.color(), glyphPos.x + slot->bitmap_left, glyphPos.y - slot->bitmap_top, slot->bitmap );
+        drawGlyph( image, color, glyphPos.x + slot->bitmap_left, glyphPos.y - slot->bitmap_top, slot->bitmap );
 
         glyphPos.x  += incX;
         glyphPos.y  -= incY;
@@ -190,9 +185,9 @@ void DrawText::_draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, 
     }
 }
 
-void DrawText::draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* outline )
+void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline)
 {
-    _draw( image, pen,  pos, text, outline );
+    _draw( image, color,  pos, text, outline );
 }
 
 void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm )

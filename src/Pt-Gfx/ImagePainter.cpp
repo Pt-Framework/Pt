@@ -56,6 +56,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThickPolyline( 0 )
 , _fillConvexPolygon( 0 )
 , _drawText( new DrawText() )
+, _font("Vera", 12)
 {
     std::auto_ptr<DrawThinLine> dthin( new DrawThinLine );
     std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );    
@@ -72,6 +73,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawPolyline       = _drawThinPolyline;
     _fillConvexPolygon  = fillconvexpoly.release();
     _drawText           = dtext.release();
+    
+    this->setFont( _font );
 }
 
 ImagePainter::~ImagePainter()
@@ -117,13 +120,13 @@ const Brush& ImagePainter::brush() const
 
 void ImagePainter::setFont(const Font& font)
 {
-    _drawText->setFont(font);
+    _font = font;
+    _drawText->setFont(_font);
 
 }
 const Font& ImagePainter::font() const
 {
-    static const Font font( "", 10 );
-    return font;
+    return _font;
 }
 
 FontMetrics ImagePainter::fontMetrics() const
@@ -156,7 +159,7 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 
 void ImagePainter::drawText( const Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline )
 {
-    _drawText->draw( _image, _pen,  to, text, outline );   
+    _drawText->draw( _image, _pen.color(),  to, text, outline );   
 }
 
 void ImagePainter::drawRect(const  Math::Rect& rect)

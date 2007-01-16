@@ -29,6 +29,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Region.h>
+#include <Pt/Gfx/Font.h>
 
 
 namespace Pt {
@@ -131,6 +132,7 @@ class PT_API ImagePainter : public Painter
         ARgbImage&           _image;
         Pen                  _pen;
         Brush                _brush;
+        Font                 _font;
 
         DrawLine*            _drawLine;
         DrawThinLine*        _drawThinLine;
@@ -142,6 +144,7 @@ class PT_API ImagePainter : public Painter
         
         FillConvexPolygon*    _fillConvexPolygon;
         DrawText*             _drawText;
+        
 };
 
 } //namespace Gfx

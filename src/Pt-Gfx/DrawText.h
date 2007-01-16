@@ -58,15 +58,18 @@ class DrawText
         */
         ~DrawText();
 
-        /** @brief Sets the current font
 
-            @param font The current font
-        */
+        /** @brief Sets the text font
+
+            @param font The text font
+        */        
         void setFont( const Font& font );
-
+        
+        
         /** @brief Calculate font metrics for text
 
-            @param text The text to calculate
+            @param font The text font
+            @param text The text to calculate            
         */
         FontMetrics fontMetrics( const Text::String& text );
 
@@ -79,17 +82,18 @@ class DrawText
             before the text is drawn.
 
 			@param image The target image
-            @param pen The pen to be used
+			@param font The text font
+            @param color The text color
             @param pos The position to draw
             @param text The text to draw
             @param outline The outline color
         */
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
+        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
 
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
 
-        void _draw( ARgbImage& image, const Pen& pen, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
+        void _draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
 
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
@@ -111,7 +115,6 @@ class DrawText
 
         FT_Library  _ft;
         FT_Face     _face;
-        Font        _font;
         FT_Matrix   _matrix;
 };
 
