@@ -2,6 +2,7 @@ SubDir TOP src Pt-Gui ;
 
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gui/$(GUI:L) ;
+SubDirC++Flags [ FDefines PT_TEXT_API_IMPORT ] ;
 
 SharedLibrary Pt-Gui :  Application.cpp
                         Pixmap.cpp
@@ -29,6 +30,7 @@ SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
 SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
 SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : bin ;
+
 
 Main Scribble : Scribble.cpp ;
 Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-IO Pt-Gfx Pt-Gui Pt-Text ;

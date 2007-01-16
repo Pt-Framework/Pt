@@ -20,7 +20,7 @@
 #ifndef PTV_Text_codecvt_h
 #define PTV_Text_codecvt_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char.h>
 #include <Pt/Text/locale.h>
 
@@ -34,7 +34,7 @@ namespace std {
 	class PT_API codecvt_base;
 
 	template<>
-	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
+	class PT_TEXT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
 
 #else
 
