@@ -2,7 +2,6 @@ SubDir TOP src Pt-Gui ;
 
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gui/$(GUI:L) ;
-SubDirC++Flags [ FDefines PT_TEXT_API_IMPORT ] ;
 
 SharedLibrary Pt-Gui :  Application.cpp
                         Pixmap.cpp

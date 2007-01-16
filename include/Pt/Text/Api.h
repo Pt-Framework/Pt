@@ -7,10 +7,10 @@
 
 #include <Pt/Api.h>
 
-#if defined(PT_TEXT_API_IMPORT)
-#    define PT_TEXT_API PT_IMPORT
-#  else
+#if defined(PT_TEXT_API_EXPORT)
 #    define PT_TEXT_API PT_EXPORT
+#  else
+#    define PT_TEXT_API PT_IMPORT
 #  endif
 
 #endif
