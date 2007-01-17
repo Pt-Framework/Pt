@@ -68,7 +68,7 @@ namespace Net
 					close();
 				}
 
-				throw Exception("connect", PT_SOURCEINFO);
+				throw std::runtime_error("connect" + PT_SOURCEINFO);
 			}
 			
             size_t read(char* buffer, size_t count, bool& eof)
@@ -86,7 +86,7 @@ namespace Net
 					if (this->lastError() == PT_ECONNRESET)
 						eof = true;
 					else if (n < 0)
-						throw Exception("read", PT_SOURCEINFO); // TODO
+						throw std::runtime_error("read" + PT_SOURCEINFO); // TODO
 				}
 				else
 				{
@@ -115,12 +115,12 @@ namespace Net
 							} while (n <= 0 && this->lastError() == PT_EINTR);
 
 							if (n < 0)
-								throw Exception("read", PT_SOURCEINFO); // TODO
+								throw std::runtime_error("read" + PT_SOURCEINFO); // TODO
 						}
 						else if (this->lastError() == PT_ECONNRESET)
 							eof = true;
 						else if (this->lastError() != 0)
-							throw Exception("read", PT_SOURCEINFO); // TODO
+							throw std::runtime_error("read" + PT_SOURCEINFO); // TODO
 					}
 
 				}
@@ -145,7 +145,7 @@ namespace Net
 						if (this->lastError() == PT_EAGAIN)
 							n = 0;
 						else
-							throw Exception("write", PT_SOURCEINFO); // TODO
+							throw std::runtime_error("write" + PT_SOURCEINFO); // TODO
 					}
 
 					buffer += n;

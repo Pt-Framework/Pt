@@ -21,6 +21,7 @@
 #ifndef Pt_Exception_h
 #define Pt_Exception_h
 
+#include <string>
 #include <exception>
 #include <stdexcept>
 #include <Pt/Api.h>
@@ -46,8 +47,8 @@ namespace Pt {
 	 *  error message, Exceptions can provide information about where the
 	 *  exception was raised in the source code through a SourceInfo object.
 	 */
-	class PT_API Exception : public std::exception {
-		public:
+	//class PT_API Exception : public std::exception {
+		//public:
 			/** @brief Construct an Exception from an error message and SourceInfo.
 			 *
 			 *  @param what the error message
@@ -59,32 +60,8 @@ namespace Pt {
 			 *  throw MyException( "dammit!", PT_SOURCEINFO );
 			 *  @endcode
 			 */
-			Exception(const std::string& what, const SourceInfo& si) throw();
+			//Exception(const std::string& what, const SourceInfo& si) throw();
 
-			/** @brief Copy constructor.
-			 */
-			Exception(const Exception& err) throw();
-
-			/** @brief Destructor.
-			 */
-			~Exception() throw();
-
-			/** @brief Returns the error message.
-			 */
-			const char* what() const throw();
-
-			/** @brief Returns information where the exception was raised.
-			 */
-			const SourceInfo& sourceInfo() const throw();
-
-			/** @brief Assigment operator.
-			 */
-			Exception& operator=(const Exception& err) throw();
-
-		protected:
-			std::string _what;
-			SourceInfo  _source;
-	};
 
     /** @brief This indicates that a resource could not be accessed.
         @ingroup ptv
@@ -92,7 +69,7 @@ namespace Pt {
         An exception of class AccessError is used to report failed access
         to a resource due to missing authorization, mising access rights
         or if a resource is in an otherwise inaccessible state.
-        This class implements Exception.
+        This class implements std::logic_error.
     */
     class PT_API AccessError : public std::logic_error {
         public:

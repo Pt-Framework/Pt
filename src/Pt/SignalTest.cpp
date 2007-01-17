@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Dürner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
  *   Copyright (C) 2005 Stephan Beal                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -119,7 +119,7 @@ void CopyTest()
 
 	signal2.send();
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -135,7 +135,7 @@ void methodTest0()
 	delete recv;
 	signal.send();
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
 	recv = new Receiver;
 	Connection connection = connect(signal, slot(recv, &Receiver::onSignal0) );
@@ -143,7 +143,7 @@ void methodTest0()
 	// test that a signal is really transmitted
 	signal.send();
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	recv->reset();
 
@@ -151,9 +151,9 @@ void methodTest0()
 	connection.close();
 	signal.send();
 	if(recv->called() == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -168,13 +168,13 @@ void methodTest1()
 	delete recv;
 	signal.send(1);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
 	recv = new Receiver;
 	connect(signal, *recv, &Receiver::onSignal1);
 	signal.send(1);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	recv->reset();
 
@@ -182,9 +182,9 @@ void methodTest1()
 	disconnect(signal, *recv, &Receiver::onSignal1);
 	signal.send(1);
 	if(recv->called() == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 
 	delete recv;
@@ -200,13 +200,13 @@ void methodTest2()
 	delete recv;
 	signal.send(1,2);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
 	recv = new Receiver;
 	connect(signal, *recv, &Receiver::onSignal2);
 	signal.send(1,2);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	recv->reset();
 
@@ -214,9 +214,9 @@ void methodTest2()
 	disconnect(signal, *recv, &Receiver::onSignal2);
 	signal.send(1,2);
 	if(recv->called() == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 	delete recv;
 }
@@ -231,13 +231,13 @@ void methodTest3()
 	delete recv;
 	signal.send(1,2,3);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
 	recv = new Receiver;
 	connect(signal, *recv, &Receiver::onSignal3);
 	signal.send(1,2,3);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	recv->reset();
 
@@ -245,9 +245,9 @@ void methodTest3()
 	disconnect(signal, *recv, &Receiver::onSignal3);
 	signal.send(1,2,3);
 	if(recv->called() == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 
 	delete recv;
@@ -265,7 +265,7 @@ void signalTest0()
 	// test that a signal is really transmitted
 	signal1.send();
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -282,7 +282,7 @@ void signalTest1()
 	// test that a signal is really transmitted
 	signal1.send(1);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -299,7 +299,7 @@ void signalTest2()
 	// test that a signal is really transmitted
 	signal1.send(1,2);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -316,7 +316,7 @@ void signalTest3()
 	// test that a signal is really transmitted
 	signal1.send(1,2,3);
 	if(recv->called() == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 	delete recv;
 }
@@ -331,16 +331,16 @@ void functionTest0()
 	connect(signal, testFunction0);
 	signal.send();
 	if(testFunction0Called == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 /*
 	testFunction0Called = false;
 	disconnect(signal, testFunction0);
 	signal.send();
 	if(testFunction0Called == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
@@ -354,15 +354,15 @@ void functionTest1()
 	connect(signal, testFunction1);
 	signal.send(1);
 	if(testFunction1Called == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
 	testFunction1Called = false;
 	disconnect(signal, testFunction1);
 	signal.send(1);
 	if(testFunction1Called == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
@@ -376,15 +376,15 @@ void functionTest2()
 	connect(signal, testFunction2);
 	signal.send(1, 2);
 	if(testFunction2Called == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
 	testFunction2Called = false;
 	disconnect(signal, testFunction2);
 	signal.send(1, 2);
 	if(testFunction2Called == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
@@ -398,15 +398,15 @@ void functionTest3()
 	connect(signal, testFunction3);
 	signal.send(1, 2, 3);
 	if(testFunction3Called == false)
-		throw Pt::Exception("Signal not sent to connected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
 	testFunction3Called = false;
 	disconnect(signal, testFunction3);
 	signal.send(1, 2, 3);
 	if(testFunction3Called == true)
-		throw Pt::Exception("Signal sent to disconnected slot.", PT_SOURCEINFO);
+		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
 	if(signal.connections().size() != 0)
-		throw Pt::Exception("Connections left after disconnect.", PT_SOURCEINFO);
+		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 

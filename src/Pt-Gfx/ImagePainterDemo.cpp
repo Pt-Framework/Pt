@@ -96,10 +96,6 @@ int main( int argc, char* argv[] )
         imageTest.show();
         return app.run();
     }
-    catch(const Pt::Exception& e)
-    {
-        std::cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << std::endl;
-    }
     catch(const std::exception& e)
     {
         std::cerr << "Exception: " << e.what() << std::endl;

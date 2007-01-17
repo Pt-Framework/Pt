@@ -96,10 +96,9 @@ void test()
 			}
 		}
 	}
-	catch(Pt::Exception& e)
+	catch(const std::exception& e)
 	{
-		cerr << e.sourceInfo().file() << " "
-		     << e.sourceInfo().line() << ": " << e.what() << endl;
+		cerr << e.what() << endl;
 	}
 }
 

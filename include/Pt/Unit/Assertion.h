@@ -41,7 +41,7 @@ namespace Unit {
             }
         @endcode
     */
-    class Assertion : public Pt::Exception
+    class Assertion : public std::exception
     {
         public:
             /** @brief Construct from a message and source info.
@@ -55,21 +55,32 @@ namespace Unit {
                 @param si Info where the assertion failed
             */
             Assertion(const std::string& what, const SourceInfo& si)
-            : Exception(what, si)
+            : _what(what)
+            , _sourceInfo(si)
             {}
 
             /** @brief Copy constructor.
 
                 @param a Other asstertion exception
             */
-            Assertion(const Assertion& a)
-            : Exception(a)
-            {}
+            //Assertion(const Assertion& a)
+            //: Exception(a)
+            //{}
+
+            const Pt::SourceInfo& sourceInfo() const
+            { return _sourceInfo; }
 
             /** @brief Destructor.
             */
             ~Assertion() throw()
             {}
+
+            const char* what() const throw()
+            { return (_what + _sourceInfo).c_str(); }
+
+        private:
+            std::string _what;
+            Pt::SourceInfo _sourceInfo;
     };
 
     #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);

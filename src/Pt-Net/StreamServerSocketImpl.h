@@ -57,7 +57,7 @@ namespace Net
                     // some OS need char*, some void* for the value
                     if (::setsockopt(handle(), SOL_SOCKET, SO_REUSEADDR,
                           reinterpret_cast<char*>(&reuseAddr), sizeof(reuseAddr)) < 0)
-                        throw Exception("setsockopt", PT_SOURCEINFO); // TODO Exception
+                        throw std::runtime_error("setsockopt" + PT_SOURCEINFO); // TODO Exception
 
 					int ret = ::bind(handle(), it->ai_addr, it->ai_addrlen);
 					if ( ret == 0 ) {
@@ -68,14 +68,14 @@ namespace Net
 					this->close();
 				}
 
-				throw Exception("bind", PT_SOURCEINFO); //TODO: Exception
+				throw std::runtime_error("bind" + PT_SOURCEINFO); //TODO: Exception
 			}	
 		
 			void listen(unsigned backlog)
 			{
 				int ret = ::listen(this->handle(), backlog);
 				if(ret == -1)
-					throw Exception("Could not listen on socket", PT_SOURCEINFO); //TODO: Exception
+					throw std::runtime_error("Could not listen on socket" + PT_SOURCEINFO); //TODO: Exception
 			}
 			
             StreamSocketImpl* accept()
@@ -86,7 +86,7 @@ namespace Net
 				SOCKET fd = ::accept(handle(), reinterpret_cast <struct sockaddr *> (&peeraddr), &peeraddr_len);
 
 				if (fd < 0)
-					throw Exception("accept", PT_SOURCEINFO); // TODO
+					throw std::runtime_error("accept" + PT_SOURCEINFO); // TODO
 
 				return new StreamSocketImpl(fd, peeraddr);
 			}

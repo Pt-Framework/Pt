@@ -17,43 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Exception.h"
-
-#include <string>
-using namespace std;
 
 
 namespace Pt {
-
-Exception::Exception(const std::string & what, const SourceInfo& si) throw()
-: _what(what), _source(si)
-{ }
-
-Exception::Exception(const Exception& err) throw()
-: _what(err._what), _source(err._source)
-{ }
-
-
-Exception::~Exception() throw()
-{ }
-
-const SourceInfo& Exception::sourceInfo() const throw()
-{ return _source; }
-
-
-const char* Exception::what() const throw()
-{ return _what.c_str(); }
-
-Exception& Exception::operator=(const Exception& err) throw()
-{
-	_what   = err._what;
-	_source = err._source;
-	return *this;
-}
-
-
-
 
 AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 : std::logic_error(what + si)

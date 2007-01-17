@@ -167,7 +167,7 @@ namespace System {
 	template <class IfaceT, typename PluginT >
 	void PluginManager<IfaceT, PluginT>::openDir(const std::string& dirPath)
 	{
-		throw Exception("PluginManager::openDir not implemented.", PT_SOURCEINFO);
+		throw std::runtime_error("PluginManager::openDir not implemented." + PT_SOURCEINFO);
 		/*try {
 			Directory dir(dirPath);
 			for(Directory::Iterator it = dir.begin(); it != dir.end(); ++it) {

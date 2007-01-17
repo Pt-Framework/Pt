@@ -31,10 +31,11 @@ namespace Pt {
 
 namespace IO {
 
-class PT_API InvalidUrl : public Exception {
+class PT_API InvalidUrl : public std::logic_error
+{
 public:
 	inline InvalidUrl(const char* _what, const SourceInfo& _si)
-	: Exception(_what,_si)
+	: std::logic_error(_what + _si)
 	{ }
 };
 

@@ -93,7 +93,7 @@ namespace sqlite {
 				throw std::logic_error("File opened that is not a database file" + srcInfo);
 		}
 
-		throw Exception("Unknown error in sqlite.", srcInfo);
+		throw std::runtime_error("Unknown error in sqlite." + srcInfo);
 	}
 
 } // namespace sqlite

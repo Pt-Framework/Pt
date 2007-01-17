@@ -200,10 +200,6 @@ int main(int argc, char* argv[])
 
 		return app.run();
 	}
-	catch(const Pt::Exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")\n";
-	}
 	catch(const std::exception& e)
 	{
 		std::cerr << "Exception: " << e.what() << std::endl;

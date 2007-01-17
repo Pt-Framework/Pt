@@ -139,7 +139,7 @@ namespace Net {
                     if(this->lastError() == PT_EINTR)
                         goto _select;
 
-                 throw Exception("Could not select on socket", PT_SOURCEINFO); //TODO
+                 throw std::runtime_error("Could not select on socket" + PT_SOURCEINFO); //TODO
                 }
         
                 // data available
