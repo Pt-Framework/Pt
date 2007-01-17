@@ -6,7 +6,7 @@ namespace Pt {
 namespace Xml {
 
 ParseError::ParseError(const std::string& what, const Pt::SourceInfo& info)
-: std::logic_error(what + info)
+: std::runtime_error(what + info)
 {
 }
 

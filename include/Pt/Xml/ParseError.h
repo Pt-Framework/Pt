@@ -8,7 +8,7 @@ namespace Pt {
 namespace Xml {
 
 	//! Exception that is thrown when a parse error occured.
-	class PT_API ParseError : public std::logic_error {
+	class PT_API ParseError : public std::runtime_error {
 		public:
 			/**
 			 * @brief Creates a new ParseError object using the given reason and source info.
