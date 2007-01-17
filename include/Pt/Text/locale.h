@@ -41,7 +41,7 @@
  * \endcode
  */
 
-	#ifdef PTV_WITHOUT_STD_LOCALE
+	#ifdef PT_WITHOUT_STD_LOCALE
 
 		namespace std {
 
