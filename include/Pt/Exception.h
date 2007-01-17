@@ -38,38 +38,14 @@ namespace std
 
 namespace Pt {
 
-	/** @brief This is the base Exception class for the Pt framework.
-	 *  @ingroup Pt
-	 *
-	 *  This is the base class for all Exceptions used in this framework. This
-	 *  class implements std::exception and overrides std::exception::what()
-	 *  to return the error message passed at construction time. Besides the
-	 *  error message, Exceptions can provide information about where the
-	 *  exception was raised in the source code through a SourceInfo object.
-	 */
-	//class PT_API Exception : public std::exception {
-		//public:
-			/** @brief Construct an Exception from an error message and SourceInfo.
-			 *
-			 *  @param what the error message
-			 *  @param si location where the exception was raised
-			 *
-			 *  Construction of an Exception object requires a SourceInfo object as
-			 *  argument. Use the PT_SOURCEINFO macro to pass SourceInfo to Exception:
-			 *  @code
-			 *  throw MyException( "dammit!", PT_SOURCEINFO );
-			 *  @endcode
-			 */
-			//Exception(const std::string& what, const SourceInfo& si) throw();
-
-
     /** @brief This indicates that a resource could not be accessed.
-        @ingroup ptv
+        @ingroup Pt
 
         An exception of class AccessError is used to report failed access
         to a resource due to missing authorization, mising access rights
-        or if a resource is in an otherwise inaccessible state.
-        This class implements std::logic_error.
+        or if a resource is in an otherwise inaccessible state. This class
+        implements std::logic_error. Use the PT_SOURCEINFO macro to pass
+        SourceInfo to Exception.
     */
     class PT_API AccessError : public std::logic_error {
         public:
@@ -79,6 +55,7 @@ namespace Pt {
             //! @brief Destructor.
             ~AccessError() throw();
     };
+
 } // namespace Pt
 
 #endif

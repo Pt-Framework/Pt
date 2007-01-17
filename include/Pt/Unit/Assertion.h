@@ -30,8 +30,12 @@ namespace Unit {
     /** @brief %Test %Assertion exception
 
         Assertions are modeled as an exception type, which is thrown by Unit
-        tests when an assertion has failed. It is recommended to use the
-        PT_UNIT_ASSERT for easy creation from a source info object.
+        tests when an assertion has failed. This class implements
+        std::exception and overrides std::exception::what() to return an
+        error message Besides the error message, Assertions can provide
+        information where the exception was raised in the source code through
+        a SourceInfo object. It is recommended to use the PT_UNIT_ASSERT
+        for easy creation from a source info object.
 
         @code
             void myTest()

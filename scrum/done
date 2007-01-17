@@ -28,7 +28,9 @@
 # Aloysius
 #
 
+
 ITEM P10 S5 "An common exception hierachy exits"
+    TASK "Review Exception.h"   blue_wind_25,d-marc
     TASK "Write Documentation"  blue_wind_25,d-marc
     TASK "Write test case"  blue_wind_25,d-marc
 
