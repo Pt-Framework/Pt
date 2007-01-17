@@ -160,7 +160,7 @@ namespace Gui {
 			void ensureActivePainter() const
 			{
 				if ( !_drawable.isPainting() ) {
-					throw LogicError("Painter is not currently active. Use painter() to activate painter.", PT_SOURCEINFO);
+					throw std::logic_error("Painter is not currently active. Use painter() to activate painter." + PT_SOURCEINFO);
 				}
 			}
 
