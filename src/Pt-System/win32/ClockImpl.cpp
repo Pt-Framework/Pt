@@ -18,17 +18,17 @@ ClockImpl::ClockImpl()
 #ifndef _WIN32_WCE
 
     if( !GetProcessAffinityMask( _currentProcessHandle,  &_procAffinity, &_sysAffinity ))
-        throw RuntimeError("GetProcessAffinityMask failed", PT_SOURCEINFO);
+        throw std::runtime_error("GetProcessAffinityMask failed" + PT_SOURCEINFO);
 
 	if( !SetProcessAffinityMask( _currentProcessHandle, 0x01 ) )
-		throw RuntimeError("SetProcessAffinityMask failed", PT_SOURCEINFO);
+		throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
 
 	if( !SetThreadAffinityMask( GetCurrentThread(), 0x01 ) )
-		throw RuntimeError("SetProcessAffinityMask failed", PT_SOURCEINFO);
+		throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
 #endif
 
 	if( !QueryPerformanceFrequency( &_frequency ) )
-		throw RuntimeError("QueryPerformanceFrequency failed", PT_SOURCEINFO);
+		throw std::runtime_error("QueryPerformanceFrequency failed" + PT_SOURCEINFO);
 }
 
 ClockImpl::~ClockImpl()
