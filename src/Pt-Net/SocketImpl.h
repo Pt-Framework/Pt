@@ -21,6 +21,8 @@
 #ifndef Pt_Net_SocketImpl_h
 #define Pt_Net_SocketImpl_h
 
+#include <Pt/Api.h>
+
 #if defined(WIN32) || defined(_WIN32)
 	#include <winsock2.h>
 	#define SHUT_RD   1

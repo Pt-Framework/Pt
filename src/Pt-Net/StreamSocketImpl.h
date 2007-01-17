@@ -22,6 +22,7 @@
 #define Pt_Net_StreamSocketImpl_h
 
 #include <string>
+#include <Pt/Api.h>
 #include "AddrInfo.h"
 #include "SocketImpl.h"
 #include "Pt/Types.h"

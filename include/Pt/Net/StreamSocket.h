@@ -21,6 +21,7 @@
 #ifndef Pt_Net_StreamSocket_h
 #define Pt_Net_StreamSocket_h
 
+#include <Pt/Api.h>
 #include <Pt/Net/Socket.h>
 
 
