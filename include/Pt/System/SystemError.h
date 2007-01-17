@@ -33,7 +33,7 @@ namespace System {
 
 	/** @brief Exception class indication a system error.
 	 */
-	class PT_API SystemError : public RuntimeError {
+	class PT_API SystemError : public std::runtime_error {
 		public:
 			SystemError(const std::string & what, const SourceInfo& si) throw();
 

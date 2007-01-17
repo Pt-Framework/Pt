@@ -30,10 +30,10 @@ AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinf
 	p << port;
 
 	if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-	  throw RuntimeError("invalid ipaddress " + ipaddr + ":" + p.str(), PT_SOURCEINFO); // TODO specify errortype
+	  throw std::runtime_error("invalid ipaddress " + ipaddr + ":" + p.str() + PT_SOURCEINFO); // TODO specify errortype
 
 	if (ai == 0)
-	  throw RuntimeError("unknown error in getaddrinfo", PT_SOURCEINFO); // TODO specify errortype
+	  throw std::runtime_error("unknown error in getaddrinfo" + PT_SOURCEINFO); // TODO specify errortype
 }
 
 AddrInfo::~AddrInfo()

@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace IO {
 
-	class PT_API IOError : public RuntimeError {
+	class PT_API IOError : public std::runtime_error {
 		public:
 			IOError(const std::string& what, const SourceInfo& si) throw();
 

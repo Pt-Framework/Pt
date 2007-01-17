@@ -841,12 +841,12 @@ X11EventLoop::X11EventLoop()
 	// Open a X11 display connection
 	_display = XOpenDisplay(NULL);
 	if(!_display)
-		throw RuntimeError("Could not open X11 display.", PT_SOURCEINFO);
+		throw std::runtime_error("Could not open X11 display." + PT_SOURCEINFO);
 	XSync(_display, false);
 
 	// Open a pipe to send wake up messages
 	if( ::pipe(_wakeFds) )
-		throw RuntimeError("Could not open pipe.", PT_SOURCEINFO);
+		throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
 
 	// Set X11 to sync mode. Slow, for debugging only.
 	//XSynchronize(_display, true);

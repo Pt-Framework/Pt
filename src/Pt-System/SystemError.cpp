@@ -27,7 +27,7 @@ namespace System {
 
 
 SystemError::SystemError(const std::string & what, const SourceInfo& si) throw()
-: RuntimeError(what, si)
+: std::runtime_error(what + si)
 { }
 
 

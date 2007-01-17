@@ -32,7 +32,7 @@ DrawText::DrawText()
     FT_Init_FreeType( &_ft );
 
     if( FT_New_Memory_Face( _ft, vera, veraSize, 0, &_face) )
-        throw RuntimeError( "FT_New_Memory_Face failed", PT_SOURCEINFO );
+        throw std::runtime_error( "FT_New_Memory_Face failed" + PT_SOURCEINFO );
 /*
     if( FT_New_Face( _ft, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, &_face ) )
         throw IllegalArgument( "FT_New_Face  error", PT_SOURCEINFO );

@@ -91,7 +91,7 @@ namespace Net {
             {  
                 _sd = ::socket(domain, type, protocol);
                 if (_sd < 0)
-                    throw RuntimeError("cannot create socket", PT_SOURCEINFO);
+                    throw std::runtime_error("cannot create socket" + PT_SOURCEINFO);
                     // TODO change exceptiontype
             }
         

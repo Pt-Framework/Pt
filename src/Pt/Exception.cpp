@@ -55,18 +55,6 @@ Exception& Exception::operator=(const Exception& err) throw()
 
 
 
-RuntimeError::RuntimeError(const std::string & what, const SourceInfo& si) throw()
-: Exception(what, si)
-{ }
-
-RuntimeError::~RuntimeError() throw()
-{ }
-
-
-
-
-
-
 AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 : std::logic_error(what + si)
 { }

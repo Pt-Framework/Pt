@@ -31,7 +31,7 @@ namespace Pt {
 namespace IO {
 
 IOError::IOError(const std::string& what, const SourceInfo& si) throw()
-: RuntimeError(what, si) 
+: std::runtime_error(what + si) 
 {
 }
 

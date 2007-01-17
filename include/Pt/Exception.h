@@ -86,26 +86,6 @@ namespace Pt {
 			SourceInfo  _source;
 	};
 
-	/** @brief This is the base class for all runtime errors.
-	 *  @ingroup Pt
-	 *
-	 *  This is the base class for all runtime errors used in this framework.
-	 *  This class implements Exception.
-	 */
-	class PT_API RuntimeError : public Exception {
-		public:
-			/** @see Exception().
-			 */
-			RuntimeError(const std::string & what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~RuntimeError() throw();
-	};
-
-
-
-
     /** @brief This indicates that a resource could not be accessed.
         @ingroup ptv
 
