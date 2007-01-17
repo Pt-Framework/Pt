@@ -151,7 +151,7 @@ namespace Db {
         return ctor.connect( url.substr(n + 1) );
     }
 
-    throw LogicError("No DB driver found for " + driverName, PT_SOURCEINFO);
+    throw std::logic_error("No DB driver found for " + driverName + PT_SOURCEINFO);
 
     /*std::string libraryUrl = url.substr(n + 1);
     //log_debug("driver \"" << driverName << "\" url=\"" << libraryUrl << '"');

@@ -65,18 +65,10 @@ RuntimeError::~RuntimeError() throw()
 
 
 
-LogicError::LogicError(const std::string & what, const SourceInfo& si) throw()
-: Exception(what, si)
-{ }
-
-LogicError::~LogicError() throw()
-{ }
-
-
 
 
 AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
-: LogicError(what, si)
+: std::logic_error(what + si)
 { }
 
 

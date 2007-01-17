@@ -41,7 +41,7 @@ namespace Pt {
                 , _size(size)
                 {
 					/*if (size.width() <= 0 || size.height() <= 0) {
-						throw LogicError("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
+						throw std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
 					}*/
 				}
 
@@ -144,7 +144,7 @@ namespace Pt {
                 Region& setWidth(size_t width)
                 {
 					/*if (width <= 0) {
-						throw LogicError("The width of a Region needs to be at least one pixel!", PT_SOURCEINFO);
+						throw std::logic_error("The width of a Region needs to be at least one pixel!", PT_SOURCEINFO);
 					}*/
 
 					_size.setWidth(width);
@@ -154,7 +154,7 @@ namespace Pt {
                 Region& setHeight(size_t height)
                 {
 					/*if (height <= 0) {
-						throw LogicError("The height of a Region needs to be at least one pixel!", PT_SOURCEINFO);
+						throw std::logic_error("The height of a Region needs to be at least one pixel!", PT_SOURCEINFO);
 					}*/
 
 					_size.setHeight(height);
@@ -164,7 +164,7 @@ namespace Pt {
                 Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
                 {
 					/*if (size.width() <= 0 || size.height() <= 0) {
-						throw new LogicError("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
+						throw new std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
 					}*/
 
 					_topLeft = topLeft;
@@ -175,7 +175,7 @@ namespace Pt {
                 Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Point& bottomRight)
                 {
 					if (topLeft.x() > bottomRight.x() || topLeft.y() > bottomRight.y()) {
-						throw LogicError("The bottom right point needs to be bottom-right from the top-left point!", PT_SOURCEINFO);
+						throw std::logic_error("The bottom right point needs to be bottom-right from the top-left point!" + PT_SOURCEINFO);
 					}
 
                     _topLeft = topLeft;

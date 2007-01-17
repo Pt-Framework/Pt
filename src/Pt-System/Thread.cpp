@@ -144,7 +144,7 @@ void Thread::sleep(unsigned int ms)
 void Thread::run()
 {
 	if(_runnable == 0)
-			throw LogicError("No runnable given to thread.", PT_SOURCEINFO);
+			throw std::logic_error("No runnable given to thread." + PT_SOURCEINFO);
 
 	_runnable->run();
 }

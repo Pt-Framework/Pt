@@ -68,7 +68,7 @@ void StreamSocket::accept(const StreamServerSocket& server)
 size_t StreamSocket::_read(char* buffer, size_t count, bool& eof)
 {
     if (!_impl)
-        throw LogicError("socket is not connected", PT_SOURCEINFO);
+        throw std::logic_error("socket is not connected" + PT_SOURCEINFO);
 
     return _impl->read(buffer, count, eof);
 }
@@ -77,7 +77,7 @@ size_t StreamSocket::_read(char* buffer, size_t count, bool& eof)
 size_t StreamSocket::_write(const char* buffer, size_t count)
 {
     if (!_impl)
-        throw LogicError("socket is not connected", PT_SOURCEINFO);
+        throw std::logic_error("socket is not connected" + PT_SOURCEINFO);
 
     return _impl->write(buffer, count);
 }

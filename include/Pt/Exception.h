@@ -101,22 +101,6 @@ namespace Pt {
 	};
 
 
-	/** @brief This is the base class for all logic errors.
-	 *  @ingroup Pt
-	 *
-	 *  This is the base class for all logic errors used in this framework.
-	 *  This class implements Exception.
-	 */
-	class PT_API LogicError : public Exception {
-		public:
-			/** @see Exception().
-			 */
-			LogicError(const std::string & what, const SourceInfo& si) throw();
-
-			/** @brief Destructor.
-			 */
-			~LogicError() throw();
-	};
 
 
     /** @brief This indicates that a resource could not be accessed.
@@ -127,7 +111,7 @@ namespace Pt {
         or if a resource is in an otherwise inaccessible state.
         This class implements Exception.
     */
-    class PT_API AccessError : public LogicError {
+    class PT_API AccessError : public std::logic_error {
         public:
             //! @see Exception()
             AccessError(const std::string& what, const SourceInfo& si) throw();

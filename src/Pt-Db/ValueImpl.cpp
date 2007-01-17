@@ -44,7 +44,7 @@ bool ValueImpl::isNull() const
 bool ValueImpl::getBool() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     if( _data.empty() )
         return false;
@@ -57,7 +57,7 @@ bool ValueImpl::getBool() const
 int ValueImpl::getInt() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     int ret = 0;
     _data.get(ret);
@@ -68,7 +68,7 @@ int ValueImpl::getInt() const
 unsigned ValueImpl::getUnsigned() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     unsigned ret = 0;
     _data.get(ret);
@@ -79,7 +79,7 @@ unsigned ValueImpl::getUnsigned() const
 float ValueImpl::getFloat() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     float ret = 0.0f;
     _data.get(ret);
@@ -90,7 +90,7 @@ float ValueImpl::getFloat() const
 double ValueImpl::getDouble() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     double ret = 0.0f;
     _data.get(ret);
@@ -101,7 +101,7 @@ double ValueImpl::getDouble() const
 char ValueImpl::getChar() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     return _data.str()[0];
 }
@@ -110,7 +110,7 @@ char ValueImpl::getChar() const
 void ValueImpl::getString(std::string& stringdata) const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     stringdata = _data.str();
 }
@@ -119,7 +119,7 @@ void ValueImpl::getString(std::string& stringdata) const
 Date ValueImpl::getDate() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     return Date::fromIsoString( _data.str() );
 }
@@ -128,7 +128,7 @@ Date ValueImpl::getDate() const
 Time ValueImpl::getTime() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     return Time::fromIsoString( _data.str() );
 }
@@ -137,7 +137,7 @@ Time ValueImpl::getTime() const
 DateTime ValueImpl::getDateTime() const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     return DateTime::fromIsoString( _data.str() );
 }
@@ -145,7 +145,7 @@ DateTime ValueImpl::getDateTime() const
 void ValueImpl::getBlob(Pt::Blob& blobdata) const
 {
     if (_null)
-        throw LogicError("Value is null.", PT_SOURCEINFO);
+        throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
     blobdata.assign(_data.str().data(), _data.str().length());
 }

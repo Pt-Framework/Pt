@@ -23,11 +23,11 @@ class PT_API AbstractProperty
 		virtual AbstractProperty* clone() const = 0;
 
 		virtual Pt::Any value()
-		{ throw LogicError("AbstractProperty is not readable", PT_SOURCEINFO); }
+		{ throw std::logic_error("AbstractProperty is not readable" + PT_SOURCEINFO); }
 
 		// Set value and notify all listeners
 		virtual void setValue(const Pt::Any& value)
-		{ throw LogicError("AbstractProperty is not writable", PT_SOURCEINFO); }
+		{ throw std::logic_error("AbstractProperty is not writable" + PT_SOURCEINFO); }
 
 		Signal<> onValueChanged;
 };

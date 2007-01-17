@@ -402,7 +402,7 @@ namespace sqlite {
         }
         else if(ret == SQLITE_DONE)
         {
-            throw LogicError("sqlite3_step reached 'SQLITE_DONE', but more data was expected", PT_SOURCEINFO);
+            throw std::logic_error("sqlite3_step reached 'SQLITE_DONE', but more data was expected" + PT_SOURCEINFO);
         }
 
         Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
@@ -423,7 +423,7 @@ namespace sqlite {
 
             if (count == 0)
             {
-                throw LogicError("Invalid query", PT_SOURCEINFO);
+                throw std::logic_error("Invalid query" + PT_SOURCEINFO);
             }
 
             //log_debug("sqlite3_column_text(" << _stmt << ", 0)");
@@ -438,7 +438,7 @@ namespace sqlite {
         }
         else if (ret == SQLITE_DONE)
         {
-            throw LogicError("sqlite3_step reached 'SQLITE_DONE', but more data was expected", PT_SOURCEINFO);
+            throw std::logic_error("sqlite3_step reached 'SQLITE_DONE', but more data was expected" + PT_SOURCEINFO);
         }
 
         Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);

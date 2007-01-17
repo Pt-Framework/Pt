@@ -59,7 +59,7 @@ void XmlIStream::init()
 	static const String xmlDeclStart(L"<?xml");
 	size_t pos = start.find(xmlDeclStart);
 	if(pos != 0)
-		throw LogicError("Invalid XML declaration.", PT_SOURCEINFO);
+		throw std::logic_error("Invalid XML declaration." + PT_SOURCEINFO);
 
 	// read the whole XML declaration
 	while( true )
@@ -67,7 +67,7 @@ void XmlIStream::init()
 		Char ch = _textBuffer->sbumpc();
 
 		if(ch.value() == eof)
-			throw LogicError("Invalid XML declaration.", PT_SOURCEINFO);
+			throw std::logic_error("Invalid XML declaration." + PT_SOURCEINFO);
 
 		if(ch == '>')
 			break;
@@ -149,7 +149,7 @@ const Node& XmlIStream::next()
 					break;
 
 				case '?':
-					throw LogicError("Processing instruction not yet supported", PT_SOURCEINFO);
+					throw std::logic_error("Processing instruction not yet supported" + PT_SOURCEINFO);
 					break;
 
 				default:
@@ -188,14 +188,14 @@ XmlIStream& XmlIStream::operator>>(StartElement& to)
 			return *this;
 		}
 
-		throw LogicError("Requested XML element is not a start element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
 	}
 
 	if( '<' != _textBuffer->sgetc() )
-		throw LogicError("Requested XML element is not a start element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
 
 	if( '/' != _textBuffer->snextc() )
-		throw LogicError("Requested XML element is not a start element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not a start element." + PT_SOURCEINFO);
 
 	_textBuffer->snextc();
 
@@ -219,14 +219,14 @@ XmlIStream& XmlIStream::operator>>(EndElement& to)
 			return *this;
 		}
 
-		throw LogicError("Requested XML element is not an end element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
 	}
 
 	if( '<' != _textBuffer->sgetc() )
-		throw LogicError("Requested XML element is not an end element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
 
 	if( '/' == _textBuffer->snextc() )
-		throw LogicError("Requested XML element is not an end element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
 
 	this->parseEndElement(to);
 	return *this;
@@ -247,11 +247,11 @@ XmlIStream& XmlIStream::operator>>(Characters& to)
 			return *this;
 		}
 
-		throw LogicError("Requested XML element is not a text element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not a text element." + PT_SOURCEINFO);
 	}
 
 	if( '<' == _textBuffer->sgetc() )
-		throw LogicError("Requested XML element is not text element.", PT_SOURCEINFO);
+		throw std::logic_error("Requested XML element is not text element." + PT_SOURCEINFO);
 
 	this->parseTextElement(to);
 	return *this;
@@ -265,7 +265,7 @@ void XmlIStream::onDocType()
 	String content(buffer, 7);
 
 	if( content != String(L"DOCTYPE") )
-		throw LogicError("Invalid DOCTYPE declaration.", PT_SOURCEINFO);
+		throw std::logic_error("Invalid DOCTYPE declaration." + PT_SOURCEINFO);
 
 	// read the whole DOCTYPE declaration
 	this->getUntil(content, L">");
@@ -327,13 +327,13 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 	this->getUntil(name, attributeNameEnd);
 
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
-		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
+		throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
 	}
 
 	static const String attributeValueBegin(L">/\"\'");
 	this->findOf(attributeValueBegin);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
-		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
+		throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
 	}
 
 	_textBuffer->snextc();
@@ -341,7 +341,7 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 	static const String attributeValueEnd(L"\"\'>/");
 	this->getUntil(value, attributeValueEnd);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/' ) {
-		throw  LogicError("Invalid XML attribute", PT_SOURCEINFO);
+		throw  std::logic_error("Invalid XML attribute" + PT_SOURCEINFO);
 	}
 
 	_textBuffer->snextc();
@@ -357,7 +357,7 @@ void XmlIStream::parseStartElement(StartElement& to)
 
 	this->findNotOf(startElementBegin);
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
-		throw LogicError("Invalid XML end element: no name", PT_SOURCEINFO);
+		throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
 	}
 
 	static const String startElementEnd(L"> \t/");
@@ -385,7 +385,7 @@ void XmlIStream::parseEndElement(EndElement& to)
 	this->findNotOf(endElementBegin);
 
 	if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
-		throw LogicError("Invalid XML end element: no name", PT_SOURCEINFO);
+		throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
 	}
 
 	static const String endElementEnd(L"> \t/");
@@ -412,7 +412,7 @@ const Char* XmlIStream::refill(const Char* current)
 	{
 		_textBuffer->in_bump( _textBuffer->in_avail() );
 		if( eof == _textBuffer->sgetc() )
-			throw LogicError("Reached EOF within elemwnt", PT_SOURCEINFO);
+			throw std::logic_error("Reached EOF within elemwnt" + PT_SOURCEINFO);
 
 		current = _textBuffer->in_begin();
 	}

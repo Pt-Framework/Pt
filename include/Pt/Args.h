@@ -62,8 +62,9 @@ class Args
 
         const Any& get(size_t n) const
         {
+            //TODO: different exception type?
             if( n >= _args.size() )
-                throw LogicError("No such argument", PT_SOURCEINFO);
+                throw std::out_of_range("No such argument" + PT_SOURCEINFO);
 
             return _args[n];
         }

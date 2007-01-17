@@ -25,10 +25,10 @@ TimeValue::~TimeValue()
 TimeValue TimeValue::operator-( const TimeValue& from )
 {
 	if( _seconds < from._seconds)
-		throw LogicError("Time to subtract is lesser!",PT_SOURCEINFO);
+		throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
 	
 	if( ( _seconds == from._seconds ) && ( _microSeconds < from._microSeconds ) )
-		throw LogicError("Time to subtract is lesser!",PT_SOURCEINFO);
+		throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
 	
 	TimeValue diff;
 	 

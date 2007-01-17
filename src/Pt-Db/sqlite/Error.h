@@ -21,7 +21,7 @@ namespace sqlite {
 				throw std::runtime_error("SQL error or missing database" + srcInfo);
 
 			case SQLITE_INTERNAL :
-				throw LogicError("NOT USED. Internal logic error in SQLite", srcInfo);
+				throw std::logic_error("NOT USED. Internal logic error in SQLite" + srcInfo);
 
 			case SQLITE_PERM :
 				throw AccessError("Access permission denied", srcInfo);
@@ -51,7 +51,7 @@ namespace sqlite {
 				throw std::runtime_error("The database disk image is malformed" + srcInfo);
 
 			case SQLITE_NOTFOUND :
-				throw LogicError("Table or record not found", srcInfo);
+				throw std::logic_error("Table or record not found" + srcInfo);
 
 			case SQLITE_FULL :
 				throw std::runtime_error("Insertion failed because database is full" + srcInfo);
@@ -63,16 +63,16 @@ namespace sqlite {
 				throw std::runtime_error("Database lock protocol error" + srcInfo);
 
 			case SQLITE_SCHEMA :
-				throw LogicError("The database schema changed", srcInfo);
+				throw std::logic_error("The database schema changed" + srcInfo);
 
 			case SQLITE_TOOBIG :
-				throw LogicError("Too much data for one row", srcInfo);
+				throw std::logic_error("Too much data for one row" + srcInfo);
 
 			case SQLITE_CONSTRAINT :
 				throw std::runtime_error("Abort due to contraint violation" + srcInfo);
 
 			case SQLITE_MISMATCH :
-				throw LogicError("Data type mismatch", srcInfo);
+				throw std::logic_error("Data type mismatch" + srcInfo);
 
 			case SQLITE_MISUSE :
 				throw std::runtime_error("Library used incorrectly" + srcInfo);
@@ -90,7 +90,7 @@ namespace sqlite {
 				throw std::range_error("2nd parameter to sqlite3_bind out of range" + srcInfo);
 
 			case SQLITE_NOTADB : // TODO
-				throw LogicError("File opened that is not a database file", srcInfo);
+				throw std::logic_error("File opened that is not a database file" + srcInfo);
 		}
 
 		throw Exception("Unknown error in sqlite.", srcInfo);
