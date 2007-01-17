@@ -31,7 +31,8 @@ if $(SYS:L) = "win32"
 		SYSLIBS = #$(MINGW)\\lib\\libwsock32.a
 		          $(MINGW)\\lib\\libversion.a
 		          $(MINGW)\\lib\\libwinmm.a ;
-		NETLIBS = $(MINGW)\\lib\\libwsock32.a ;
+		NETLIBS = $(MINGW)\\lib\\libwsock32.a 
+		          $(MINGW)\\lib\\libws2_32.a ;
 	}
 }
 if $(SYS:L) = "posix"
