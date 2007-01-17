@@ -19,7 +19,7 @@
 #ifndef Pt_System_Mutex_h
 #define Pt_System_Mutex_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 
 
@@ -35,7 +35,7 @@ namespace System {
 	///	same thread can lock a mutex multiple times without deadlocking.
 	///	When unlocking the mutex, unlock() must be called for each time
 	///	a thread has successfully called lock() or tryLock().
-	class PT_API Mutex : public NonCopyable {
+	class PT_SYSTEM_API Mutex : public NonCopyable {
 		friend class MutexImpl;
 
 		private:

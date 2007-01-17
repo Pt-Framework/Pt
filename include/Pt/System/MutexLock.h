@@ -20,7 +20,7 @@
 #ifndef Pt_System_MutexLock_h
 #define Pt_System_MutexLock_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
 
 
@@ -59,7 +59,7 @@ namespace System {
  			};
 		@endcode
     */
-    class PT_API MutexLock {
+    class MutexLock {
         public:
             //! Constructor
             /**

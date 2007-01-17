@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,39 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IO_StreamBuffer_h
-#define Pt_IO_StreamBuffer_h
+#ifndef PT_IO_API_H
+#define PT_IO_API_H
 
-#include <ios>
-#include <streambuf>
-#include <Pt/IO/Api.h>
+#include <Pt/Api.h>
 
-
-namespace Pt {
-
-namespace IO {
-
-	template <typename CharT>
-	class BasicStreamBuffer : public std::basic_streambuf<CharT> {
-		public:
-			typedef typename std::basic_streambuf<CharT>::int_type IntT;
-			typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;
-
-		public:
-			virtual std::streamsize peek(CharT* buffer, std::streamsize size)
-			{ return this->_peek(buffer, size); }
-
-		protected:
-			virtual std::streamsize _peek(CharT* buffer, std::streamsize size)
-			{ return 0; }
-	};
-
-	typedef BasicStreamBuffer<char> StreamBuffer;
-
-} // namespace IO
-
-} // namespace Pt
+#if defined(PT_IO_API_EXPORT)
+#    define PT_IO_API PT_EXPORT
+#  else
+#    define PT_IO_API PT_IMPORT
+#  endif
 
 #endif
-
-

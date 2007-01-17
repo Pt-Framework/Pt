@@ -22,12 +22,13 @@
 
 #include <Pt/NonCopyable.h>
 #include <Pt/IO/IODevice.h>
+#include <Pt/System/Api.h>
 
 namespace Pt {
 
 namespace System {
 
-	class PT_API FileDevice : public IO::IODevice {
+	class PT_SYSTEM_API FileDevice : public IO::IODevice {
 		private:
 			class FileDeviceImpl* _impl;
 

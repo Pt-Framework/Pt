@@ -20,7 +20,7 @@
 #ifndef Pt_IOManager_h
 #define Pt_IOManager_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/Singleton.h>
 #include <Pt/IO/IOHandler.h>
 #include <Pt/IO/Url.h>
@@ -31,7 +31,7 @@ namespace Pt {
 namespace IO {
 
 	//! IOManager for protocol transparent IO.
-	class PT_API IOManager : public Pt::Singleton<IOManager> {
+	class PT_IO_API IOManager : public Pt::Singleton<IOManager> {
 		friend class Pt::Singleton<IOManager>;
 
 		public:

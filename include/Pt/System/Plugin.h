@@ -1,7 +1,7 @@
 #ifndef Pt_Plugin_h
 #define Pt_Plugin_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/Directory.h>
@@ -16,7 +16,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API PluginId {
+	class PluginId {
 		public:
 			PluginId(const std::string& iface, const std::string& feature, const std::string& info = "")
 			: _iface(iface),
@@ -44,7 +44,7 @@ namespace System {
 
 
 	template <typename Iface>
-	class PT_API Plugin : public PluginId {
+	class Plugin : public PluginId {
 		public:
 			Plugin(const std::string& iface, const std::string& feature, const std::string& info)
 			: PluginId( iface, feature, info)
@@ -71,7 +71,7 @@ namespace System {
 	   </code>
 	*/
 	template <typename Class, typename Iface>
-	class PT_API BasicPlugin : public Plugin<Iface> {
+	class BasicPlugin : public Plugin<Iface> {
 		public:
 			BasicPlugin(const std::string& feature, const std::string& info)
 			: Plugin<Iface>( TypeInfo<Iface>::typeName(), feature, info)
@@ -89,7 +89,7 @@ namespace System {
 	};
 
 
-	class PT_API  PluginManagerBase {
+	class PT_SYSTEM_API PluginManagerBase {
 		public:
 			PluginManagerBase();
 
@@ -110,7 +110,7 @@ namespace System {
 
 
 	template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
-	class PT_API PluginManager : PluginManagerBase {
+	class PluginManager : PluginManagerBase {
 		public:
 			typedef typename std::map< std::string, PluginT* > PluginMap;
 			typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;

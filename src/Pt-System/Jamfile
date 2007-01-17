@@ -2,6 +2,7 @@ SubDir TOP src Pt-System ;
 
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
+SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]

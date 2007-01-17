@@ -22,6 +22,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
 
@@ -32,7 +33,7 @@ namespace System {
 
 /** Provides common operations on files.
  */
-class PT_API File : public FileSystemNode, public NonCopyable {
+class PT_SYSTEM_API File : public FileSystemNode, public NonCopyable {
 	private:
 		class FileImpl* _impl;
 

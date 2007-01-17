@@ -5,7 +5,7 @@
 #ifndef PT_SYSTEM_CONDITION_H
 #define PT_SYSTEM_CONDITION_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 #include <cstddef>
 
@@ -76,7 +76,7 @@ namespace System {
 		@endcode
 
 	 */
-	class PT_API Condition : public NonCopyable {
+	class PT_SYSTEM_API Condition : public NonCopyable {
 		public:
 			//! @brief Default Constructor.
 			Condition();

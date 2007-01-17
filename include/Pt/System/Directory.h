@@ -9,7 +9,7 @@
 #include <Pt/System/System.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 
 #include <string>
 #include <list>
@@ -33,7 +33,7 @@ namespace System {
 	}
 	\endcode
  	*/
-	class PT_API DirectoryIterator {
+	class PT_SYSTEM_API DirectoryIterator {
 		public:
 			DirectoryIterator();
 
@@ -72,7 +72,7 @@ while (it != d.end())
 }
 \endcode
 */
-	class PT_API Directory : public FileSystemNode {
+	class PT_SYSTEM_API Directory : public FileSystemNode {
 		public:
 			typedef DirectoryIterator Iterator;
 

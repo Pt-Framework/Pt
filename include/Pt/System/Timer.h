@@ -1,18 +1,19 @@
 #ifndef Pt_System_Timer_h
 #define Pt_System_Timer_h
 
+#include <vector>
+#include <Pt/Signal.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/Runnable.h>
 #include <Pt/System/Thread.h>
-#include <Pt/Signal.h>
 
-#include <vector>
 
 namespace Pt
 {
 namespace System
 {
 
-class PT_API Timer : public Runnable
+class PT_SYSTEM_API Timer : public Runnable
 {
 public:
 	Timer(void);

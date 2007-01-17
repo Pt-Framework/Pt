@@ -6,10 +6,9 @@
 #ifndef PT_SYSTEM_EVENTLOOP_H
 #define PT_SYSTEM_EVENTLOOP_H
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
-
+#include <Pt/System/Api.h>
 #include <Pt/System/Condition.h>
 #include <Pt/System/Event.h>
 #include <Pt/System/Mutex.h>
@@ -45,7 +44,7 @@ namespace System {
 	 *
 	 * This class is thread-safe, so any method may be called from any Thread.
 	 */
-	class PT_API EventLoop : public Connectable {
+	class PT_SYSTEM_API EventLoop : public Connectable {
 		public:
 			//! Constructs the EventLoop.
 			EventLoop();

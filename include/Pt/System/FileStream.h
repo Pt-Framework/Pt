@@ -20,7 +20,7 @@
 #ifndef Pt_System_FileStream_h
 #define Pt_System_FileStream_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/IO/IOBuffer.h>
 #include <Pt/IO/IOStream.h>
@@ -32,7 +32,7 @@ namespace Pt {
 namespace System {
 
 
-	class PT_API FileBuffer : public IO::IOBuffer {
+	class PT_SYSTEM_API FileBuffer : public IO::IOBuffer {
 		public:
 			FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 	
@@ -44,7 +44,7 @@ namespace System {
 	};
 
 
-	class PT_API FileStream : public IO::IOStream {
+	class PT_SYSTEM_API FileStream : public IO::IOStream {
 	public:
 			FileStream(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 	

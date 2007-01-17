@@ -21,7 +21,7 @@
 #ifndef Pt_ThreadKey_h
 #define Pt_ThreadKey_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/NonCopyable.h>
 
@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API ThreadKeyBase : public NonCopyable {
+	class PT_SYSTEM_API ThreadKeyBase : public NonCopyable {
 		public:
 			ThreadKeyBase() throw(SystemError);
 
@@ -49,7 +49,7 @@ namespace System {
 
 	//! Thread-specific storage template class
 	template <class T>
-	class PT_API ThreadKey: private ThreadKeyBase {
+	class ThreadKey: private ThreadKeyBase {
 		public:
 			ThreadKey() throw(SystemError)
 			: ThreadKeyBase()

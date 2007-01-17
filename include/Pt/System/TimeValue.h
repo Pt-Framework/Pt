@@ -1,15 +1,13 @@
 #ifndef PT_SYSTEM_TIMEVALUE_H
 #define PT_SYSTEM_TIMEVALUE_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Types.h>
 
 
-namespace Pt 
-{
+namespace Pt {
 
-namespace System 
-{
+namespace System {
 
 //! @brief TimeValue
 /**
@@ -17,7 +15,7 @@ namespace System
 *   and mili seconds part. To obtain the concrete time value you need to added
 *   the mili seconds part to the seconds part.
 */
-class PT_API TimeValue
+class PT_SYSTEM_API TimeValue
 {
 public:        
     //! @brief Default constructor

@@ -22,6 +22,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 
 
@@ -29,7 +30,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API SharedMemory: public NonCopyable {
+	class PT_SYSTEM_API SharedMemory: public NonCopyable {
 		private:
 			class SharedMemoryImpl* _impl;
 

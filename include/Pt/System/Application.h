@@ -5,10 +5,9 @@
 #ifndef PTV_SYSTEM_APPLICATION_H
 #define PTV_SYSTEM_APPLICATION_H
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Application.h>
-
+#include <Pt/System/Api.h>
 #include <Pt/System/Event.h>
 #include <Pt/System/EventLoop.h>
 
@@ -43,7 +42,7 @@ namespace System {
 	 * to EventLoop::processEvents() without making it necessary to first obtain the
 	 * event loop manually.
 	 */
-	class PT_API Application : public Pt::Application {
+	class PT_SYSTEM_API Application : public Pt::Application {
 		public:
 			Application();
 

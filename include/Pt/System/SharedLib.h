@@ -7,7 +7,7 @@
 #ifndef PT_SYSTEM_SHAREDLIB_H
 #define PT_SYSTEM_SHAREDLIB_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 
 #include <string>
@@ -35,7 +35,7 @@ namespace System {
     result = proc();
   @endcode
 */
-class PT_API SharedLib : private NonCopyable {
+class PT_SYSTEM_API SharedLib : private NonCopyable {
 	public:
 
 		//! @brief Default Constructor

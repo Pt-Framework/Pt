@@ -5,7 +5,7 @@
 #if !defined(PTV_Process_H)
 #define PTV_Process_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Exception.h>
 #include <Pt/System/SystemError.h>
@@ -17,7 +17,7 @@ namespace Pt {
 namespace System {
 
 //! Process Environment
-class PT_API Process {
+class PT_SYSTEM_API Process {
     public:
 	    //! Constructs a Process with a command
 	    /**

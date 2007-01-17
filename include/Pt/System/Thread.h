@@ -5,7 +5,7 @@
 #if !defined(PTV_Thread_H)
 #define PTV_Thread_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Runnable.h>
 
@@ -54,7 +54,7 @@ namespace System {
     *    A thread can give up CPU time either by calling Thread::yield() or
     *    Thread::sleep() to stop for a specified periode of time.
     */
-	class PT_API Thread : public NonCopyable
+	class PT_SYSTEM_API Thread : public NonCopyable
     {
 		friend class ThreadImpl;
 

@@ -23,7 +23,7 @@
 #ifndef Pt_System_SystemError_h
 #define Pt_System_SystemError_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Exception.h>
 
 
@@ -33,7 +33,7 @@ namespace System {
 
 	/** @brief Exception class indication a system error.
 	 */
-	class PT_API SystemError : public std::runtime_error {
+	class PT_SYSTEM_API SystemError : public std::runtime_error {
 		public:
 			SystemError(const std::string & what, const SourceInfo& si) throw();
 

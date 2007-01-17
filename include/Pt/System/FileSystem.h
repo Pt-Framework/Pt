@@ -23,6 +23,7 @@
 #include <Pt/Types.h>
 #include <Pt/Exception.h>
 #include <Pt/Singleton.h>
+#include <Pt/System/Api.h>
 
 
 namespace Pt {
@@ -32,7 +33,7 @@ namespace System {
 	class FileSystemNode;
 
 
-	class PT_API FileSystem : public Singleton<FileSystem> 
+	class PT_SYSTEM_API FileSystem : public Singleton<FileSystem> 
 	{
 		friend class Singleton<FileSystem>;
 

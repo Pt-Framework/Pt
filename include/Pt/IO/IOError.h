@@ -21,7 +21,7 @@
 #ifndef Pt_IO_IOError_h
 #define Pt_IO_IOError_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/Exception.h>
 
 
@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace IO {
 
-	class PT_API IOError : public std::runtime_error {
+	class PT_IO_API IOError : public std::runtime_error {
 		public:
 			IOError(const std::string& what, const SourceInfo& si) throw();
 

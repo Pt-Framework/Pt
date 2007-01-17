@@ -20,7 +20,7 @@
 #ifndef Pt_IODevice_h
 #define Pt_IODevice_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/IO/IOError.h>

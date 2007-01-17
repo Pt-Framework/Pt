@@ -5,7 +5,7 @@
 #ifndef PT_SYSTEM_SPINLOCK_H
 #define PT_SYSTEM_SPINLOCK_H
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/AtomicInt.h>
 #include <Pt/NonCopyable.h>
 
@@ -27,7 +27,7 @@ namespace System {
     *  usable in cases where resources need to be locked for a very short time, but in
     *  these cases a higher performance can be achieved.
     */
-	class PT_API Spinlock : public NonCopyable {
+	class Spinlock : public NonCopyable {
 		public:
 			//! Lock class for Spinlock.
 			class Lock {

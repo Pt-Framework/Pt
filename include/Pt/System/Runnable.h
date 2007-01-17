@@ -6,6 +6,7 @@
 #define PT_Runnable_H
 
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Api.h>
 
 
 namespace Pt {
@@ -23,7 +24,7 @@ namespace System {
     *   A class that implements Runnable can run without subclassing Thread
     *   by instantiating a Thread instance and passing itself in as the target.
     */
-    class PT_API Runnable : public NonCopyable
+    class Runnable : public NonCopyable
     {
         public:
 	        //! @brief Thread function
@@ -37,10 +38,12 @@ namespace System {
 
         protected:
              //! @brief Default constructor
-            Runnable(){};
+            Runnable()
+            {}
 
             //! @brief Destructor
-            virtual ~Runnable(){};
+            virtual ~Runnable()
+            {}
     };
 
 } // namespace System

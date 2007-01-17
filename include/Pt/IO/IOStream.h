@@ -19,7 +19,7 @@
 #ifndef Pt_IOStream_h
 #define Pt_IOStream_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/IO/IODevice.h>
 #include <Pt/IO/IOBuffer.h>
 
@@ -39,7 +39,7 @@ namespace IO {
 
 	//! @brief An istream with peeking capability.
 	template <typename CharT>
-	class PT_API BasicIStream : public std::basic_istream<CharT> {
+	class BasicIStream : public std::basic_istream<CharT> {
 		public:
 			~BasicIStream() throw()
 			{ }
@@ -70,7 +70,7 @@ namespace IO {
 
 	//! @brief An ostream with peeking capability.
 	template <typename CharT>
-	class PT_API BasicOStream : public std::basic_ostream<CharT> {
+	class BasicOStream : public std::basic_ostream<CharT> {
 		public:
 			~BasicOStream() throw()
 			{}
@@ -92,7 +92,7 @@ namespace IO {
 
 	//! @brief An iostream with peeking capability.
 	template <typename CharT>
-	class PT_API BasicIOStream : public std::basic_iostream<CharT> {
+	class BasicIOStream : public std::basic_iostream<CharT> {
 		public:
 			~BasicIOStream() throw()
 			{ }

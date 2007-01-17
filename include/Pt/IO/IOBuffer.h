@@ -19,11 +19,10 @@
 #ifndef Pt_IO_IOBuffer_h
 #define Pt_IO_IOBuffer_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/IO/IODevice.h>
 #include <Pt/IO/StreamBuffer.h>
 
-//#include <vector>
 
 namespace Pt {
 
@@ -31,7 +30,7 @@ namespace IO {
 
 	//! @brief a stream buffer for IODevices with linear buffer area.
 	template <typename CharT>
-	class PT_API BasicIOBuffer : public BasicStreamBuffer<CharT> {
+	class BasicIOBuffer : public BasicStreamBuffer<CharT> {
 		public:
 			typedef typename std::basic_streambuf<CharT>::int_type int_type;
 			typedef typename std::basic_streambuf<CharT>::traits_type traits_type;

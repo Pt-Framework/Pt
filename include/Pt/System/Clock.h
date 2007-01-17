@@ -1,9 +1,9 @@
 #ifndef PTV_SYSTEM_CLOCK_H
 #define PTV_SYSTEM_CLOCK_H
 
-#include <Pt/Api.h>
 #include <Pt/DateTime.h>
 #include <Pt/Types.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/TimeValue.h>
 
 
@@ -11,7 +11,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API Clock
+class PT_SYSTEM_API Clock
 {
 	public:
 		/** @brief Contructs a Clock

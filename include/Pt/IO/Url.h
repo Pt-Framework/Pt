@@ -21,7 +21,7 @@
 #ifndef Pt_Url_h
 #define Pt_Url_h
 
-#include <Pt/Api.h>
+#include <Pt/IO/Api.h>
 #include <Pt/Exception.h>
 #include <iostream>
 #include <map>
@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace IO {
 
-class PT_API InvalidUrl : public std::logic_error
+class PT_IO_API InvalidUrl : public std::logic_error
 {
 public:
 	inline InvalidUrl(const char* _what, const SourceInfo& _si)
@@ -47,7 +47,7 @@ public:
 	will not be printed out by the operator<< but can
 	be retrieved via password().
 */
-class PT_API Url {
+class PT_IO_API Url {
 	public:
 		typedef std::map<std::string, std::string> ArgumentMap;
 

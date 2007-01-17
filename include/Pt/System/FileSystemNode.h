@@ -22,13 +22,13 @@
 
 #include <string>
 #include <Pt/Types.h>
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 
 namespace Pt {
 
 namespace System {
 
-class PT_API FileSystemNode 
+class PT_SYSTEM_API FileSystemNode 
 {
 	public:
 		FileSystemNode()

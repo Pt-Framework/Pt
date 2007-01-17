@@ -20,14 +20,15 @@
 #ifndef Pt_Semaphore_h
 #define Pt_Semaphore_h
 
-#include <Pt/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
+
 
 namespace Pt {
 
 namespace System {
 
-class PT_API Semaphore : public NonCopyable {
+class PT_SYSTEM_API Semaphore : public NonCopyable {
 	friend class SemaphoreImpl;
 
 	public:
