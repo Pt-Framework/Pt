@@ -19,15 +19,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "Pt/Exception.h"
 #include "Pt/Db/Connection.h"
 #include "Pt/Db/Result.h"
 #include "Pt/Db/Row.h"
 #include "Pt/Db/Value.h"
 #include "Pt/Db/Statement.h"
-
 #include "sqlite/Connector.h"
-
-#include "Pt/Exception.h"
 
 
 namespace Pt {

@@ -45,18 +45,6 @@ namespace Pt {
 
 
 		template <typename ColorSpaceT_>
-		SubImage<ColorSpaceT_>& SubImage<ColorSpaceT_>::operator=(const typename SubImage<ColorSpaceT_>::ColorT& color)
-		{
-			for(size_t y = 0; y < _area.height(); y++) {
-				for(size_t x = 0; x < _area.width(); x++) {
-					_image.scanline(y)[x] = color;
-				}
-			}
-			return *this;
-		}
-
-
-		template <typename ColorSpaceT_>
 		bool SubImage<ColorSpaceT_>::operator==(const SubImageT& src)
 		{
 			for(size_t y = 0; y < _area.height(); y++) {

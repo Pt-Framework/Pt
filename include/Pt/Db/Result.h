@@ -22,6 +22,7 @@
 #ifndef PT_DB_RESULT_H
 #define PT_DB_RESULT_H
 
+#include <Pt/Db/Api.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IResult.h>
 #include <Pt/Db/Row.h>

@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *                                                                         *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,42 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PT_DB_API_H
+#define PT_DB_API_H
 
-#ifndef Pt_Net_Socket_h
-#define Pt_Net_Socket_h
+#include <Pt/Api.h>
 
-#include <Pt/Net/Api.h>
-#include <Pt/IO/IODevice.h>
-
-
-namespace Pt
-{
-
-namespace Net
-{
-
-	class PT_NET_API Socket : public IO::IODevice
-    {
-		public:
-			virtual ~Socket();
-
-			virtual void setTimeout(ssize_t msec)
-              { _timeout = msec; }
-
-            ssize_t getTimeout() const
-              { return _timeout; }
-
-		protected:
-            Socket();
-
-			bool _remote() const;
-
-        private:
-            ssize_t _timeout;
-	};
-
-} // !namespace Net
-
-} // !namespace Pt
+#if defined(PT_DB_API_EXPORT)
+#    define PT_DB_API PT_EXPORT
+#  else
+#    define PT_DB_API PT_IMPORT
+#  endif
 
 #endif

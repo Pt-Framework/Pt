@@ -16,15 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#undef PT_TEXT_API_EXPORT
 
+#include "Pt/Api.h"
 #include <string>
 #include <sstream>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/TestSchedule.h"
-
-#undef PT_TEXT_API_EXPORT
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Text/Utf16Codec.h"

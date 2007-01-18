@@ -22,6 +22,7 @@
 #ifndef PT_DB_VALUE_H
 #define PT_DB_VALUE_H
 
+#include <Pt/Db/Api.h>
 #include <Pt/Db/IValue.h>
 #include <Pt/Variant.h>
 #include <Pt/Blob.h>
@@ -38,7 +39,7 @@ namespace Db {
 
         The class Value represents a value, which is fetched from the database.
     */
-    class PT_API Value
+    class PT_DB_API Value
     {
         public:
             //! \brief The size-type used for the Value class.

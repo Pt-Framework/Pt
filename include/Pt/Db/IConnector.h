@@ -21,7 +21,7 @@
 #ifndef PT_DB_CONNECTOR_H
 #define PT_DB_CONNECTOR_H
 
-#include <Pt/Api.h>
+#include <Pt/Db/Api.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 
@@ -38,7 +38,7 @@ namespace Db {
 
 	class Connection;
 
-	class PT_API IConnector : private NonCopyable
+	class PT_DB_API IConnector : private NonCopyable
 	{
 		public:
 			virtual ~IConnector() { }

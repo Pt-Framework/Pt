@@ -26,6 +26,7 @@
 #include <Pt/RefCounted.h>
 #include <Pt/Blob.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Db/Api.h>
 
 
 namespace Pt {
@@ -40,7 +41,7 @@ namespace Db {
     /** \brief Interface for DB Values
         \see Db::Value
     */
-    class PT_API IValue : public RefCounted, private NonCopyable
+    class PT_DB_API IValue : public RefCounted, private NonCopyable
     {
         public:
             virtual bool isNull() const = 0;

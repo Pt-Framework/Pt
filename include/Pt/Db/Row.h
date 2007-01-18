@@ -22,6 +22,7 @@
 #ifndef PT_DB_ROW_H
 #define PT_DB_ROW_H
 
+#include <Pt/Db/Api.h>
 #include <Pt/Db/IRow.h>
 #include <Pt/Db/Value.h>
 #include <Pt/SmartPtr.h>

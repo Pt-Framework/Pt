@@ -34,7 +34,15 @@ namespace Gfx {
 				SubImage(ImageT& image, const Pt::Gfx::Region& area);
 
 				//! We can fill the sub image using a color
-				SubImage& operator=(const ColorT& color);
+				SubImage& operator=(const ColorT& color)
+				{
+					for(size_t y = 0; y < _area.height(); y++) {
+						for(size_t x = 0; x < _area.width(); x++) {
+							_image.scanline(y)[x] = color;
+						}
+					}
+					return *this;
+				}
 
 				//! We can fill the sub image using any other images
 				template <typename SrcColorSpaceT> inline

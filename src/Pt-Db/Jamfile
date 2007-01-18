@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Db ;
-
 SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 
 SharedLibrary Pt-Db : Connection.cpp
                       Result.cpp

@@ -21,7 +21,7 @@
 #ifndef Pt_Net_Timeout_h
 #define Pt_Net_Timeout_h
 
-#include <Pt/Api.h>
+#include <Pt/Net/Api.h>
 #include <exception>
 
 
@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_API Timeout : public std::exception
+	class PT_NET_API Timeout : public std::exception
 	{
 		public:
 			Timeout()

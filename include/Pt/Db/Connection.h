@@ -23,7 +23,7 @@
 #define PT_DB_Connection_H
 
 #include <string>
-#include <Pt/Api.h>
+#include <Pt/Db/Api.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IConnection.h>
 #include <Pt/Db/Statement.h>
@@ -45,7 +45,7 @@ namespace Db {
         you need. The connection will be closed if their are no further
         references to it. 
     */
-    class PT_API Connection
+    class PT_DB_API Connection
     {
         public:
             //! \brief The size-type used for the Connection class.

@@ -67,6 +67,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\include\Pt\Net\Api.h"
+			>
+		</File>
+		<File
 			RelativePath=".\src\Pt-Net\Jamfile"
 			>
 		</File>
@@ -76,6 +80,10 @@
 		</File>
 		<File
 			RelativePath=".\include\Pt\Net\Socket.h"
+			>
+		</File>
+		<File
+			RelativePath=".\src\Pt-Net\SocketImpl.cpp"
 			>
 		</File>
 		<File
@@ -100,6 +108,10 @@
 		</File>
 		<File
 			RelativePath=".\include\Pt\Net\StreamSocket.h"
+			>
+		</File>
+		<File
+			RelativePath=".\src\Pt-Net\StreamSocketImpl.cpp"
 			>
 		</File>
 		<File

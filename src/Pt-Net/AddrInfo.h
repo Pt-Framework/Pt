@@ -20,10 +20,12 @@
 #ifndef Pt_Net_AddrInfo_H
 #define Pt_Net_AddrInfo_H
 
+#include <Pt/Net/Api.h>
+
 #if defined(WIN32) || defined(_WIN32)
-	#ifdef __GNUC__
-	#define WINVER 0x501
-	#endif
+	//#ifdef __GNUC__
+	//#define WINVER 0x501
+	//#endif
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 #else

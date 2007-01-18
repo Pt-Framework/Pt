@@ -21,7 +21,7 @@
 #ifndef Pt_Net_StreamServerSocket_h
 #define Pt_Net_StreamServerSocket_h
 
-#include <Pt/Api.h>
+#include <Pt/Net/Api.h>
 #include <string>
 
 
@@ -31,7 +31,7 @@ namespace Net {
 	
     class StreamServerSocketImpl;
 
-    class PT_API StreamServerSocket
+    class PT_NET_API StreamServerSocket
     {
             friend class StreamSocket;
 

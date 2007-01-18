@@ -27,6 +27,7 @@
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>
+#include <Pt/Db/Api.h>
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/Row.h>

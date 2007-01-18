@@ -22,6 +22,7 @@
 #ifndef PT_DB_TRANSACTION_H
 #define PT_DB_TRANSACTION_H
 
+#include <Pt/Db/Api.h>
 #include <Pt/Db/Connection.h>
 #include <Pt/NonCopyable.h>
 

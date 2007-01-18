@@ -21,7 +21,7 @@
 #ifndef PT_DB_ICURSOR_H
 #define PT_DB_ICURSOR_H
 
-#include <Pt/Api.h>
+#include <Pt/Db/Api.h>
 #include <Pt/RefCounted.h>
 #include <Pt/NonCopyable.h>
 
@@ -32,7 +32,7 @@ namespace Db {
 
   class Row;
 
-  class PT_API ICursor : public RefCounted, private NonCopyable
+  class PT_DB_API ICursor : public RefCounted, private NonCopyable
   {
     public:
       virtual Row fetch() = 0;

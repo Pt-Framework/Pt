@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Db sqlite ;
-
 SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 
 # sqlite.org's codebase has a file for the OSm specific code.
 # On wince the file is identical to win32 and has lots of ifdefs.
