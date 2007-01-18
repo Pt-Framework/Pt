@@ -31,6 +31,6 @@ SharedLibrary_MakeLocate Pt-Text : bin ;
 #Main_LinkSharedLibraries StringTest : Pt-Text Pt ;
 #Main_MakeLocate StringTest : bin ;
 
-Main TextStreamTest : TextStreamTest.cpp ;
+PtUnitTest TextStreamTest : TextStreamTest.cpp ;
 Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt ;
 Main_MakeLocate TextStreamTest : bin ;

@@ -40,11 +40,17 @@ class TextStreamTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "testTextStreamDirectFromUTF8ToUnicode",
                                                  *this, &TextStreamTest::testTextStreamDirectFromUTF8ToUnicode );
-            //Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
-            //Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
-            //Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
+            Pt::Unit::TestSuite::registerMethod( "testTextStreamGetLineFromUTF8ToUnicode",
+                                                 *this, &TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode );
+            Pt::Unit::TestSuite::registerMethod( "testGetline",
+                                                 *this, &TextStreamTest::testGetline );
+            Pt::Unit::TestSuite::registerMethod( "testNum_put",
+                                                 *this, &TextStreamTest::testNum_put );
+            Pt::Unit::TestSuite::registerMethod( "testNum_get",
+                                                 *this, &TextStreamTest::testNum_get );
+            Pt::Unit::TestSuite::registerMethod( "testNumpunct",
+                                                 *this, &TextStreamTest::testNumpunct );                                                                                                
         }
-
 
 		void testTextStreamDirectFromUTF8ToUnicode();
 		void testTextStreamGetLineFromUTF8ToUnicode();
@@ -95,14 +101,13 @@ void TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode()
 	Pt::Text::Char c[6];
 	TextStream.getline(c, 6);
 
-	//CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
-	//CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
-	//CPPUNIT_ASSERT(c[2] == _TextUnicode[2]);
-	//CPPUNIT_ASSERT(c[3] == _TextUnicode[3]);
-	//CPPUNIT_ASSERT(c[4] == _TextUnicode[4]);
-	//CPPUNIT_ASSERT(c[5] == _TextUnicode[5]);
+	PT_UNIT_ASSERT(c[0] == _TextUnicode[0]);
+	PT_UNIT_ASSERT(c[1] == _TextUnicode[1]);
+	PT_UNIT_ASSERT(c[2] == _TextUnicode[2]);
+	PT_UNIT_ASSERT(c[3] == _TextUnicode[3]);
+	PT_UNIT_ASSERT(c[4] == _TextUnicode[4]);
+	PT_UNIT_ASSERT(c[5] == _TextUnicode[5]);
 }
-
 
 
 void TextStreamTest::testTextBufferFromUnicodeToUTF8()
@@ -165,7 +170,7 @@ void TextStreamTest::testGetline()
 	Pt::Text::String s;
 	getline(TextStream, s);
 
-	//CPPUNIT_ASSERT(s.narrow() == "Hello world");
+	PT_UNIT_ASSERT(s.narrow() == "Hello world");
 }
 
 
@@ -178,7 +183,7 @@ void TextStreamTest::testNum_get()
 	float f;
 	TextStream >> f;
 
-	//CPPUNIT_ASSERT(f == 3.1415f);
+	PT_UNIT_ASSERT(f == 3.1415f);
 }
 
 
@@ -191,7 +196,7 @@ void TextStreamTest::testNum_put()
 	TextStream << 3.1415f;
 	TextStream.flush();
 
-	//CPPUNIT_ASSERT(ss.str() == "3.1415");
+	PT_UNIT_ASSERT(ss.str() == "3.1415");
 }
 
 
@@ -204,5 +209,5 @@ void TextStreamTest::testNumpunct()
 	TextStream << 123456789L;
 	TextStream.flush();
 
-	//CPPUNIT_ASSERT(ss.str() == "123456789");
+	PT_UNIT_ASSERT(ss.str() == "123456789");
 }
