@@ -34,7 +34,7 @@ struct InitLocale
 {
 	InitLocale()
 	{
-	    #ifndef PTV_WITHOUT_STD_LOCALE
+	    #ifndef PT_WITHOUT_STD_LOCALE
 		std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
 		std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
 		std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
