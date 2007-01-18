@@ -47,7 +47,8 @@ struct InitLocale
 TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 : BasicTextBuffer<Pt::Char, char>(buffer, codec)
 {
-	/*#ifndef PTV_WITHOUT_STD_LOCALE
+	// When building a DLL under Visual studio, we need to imbue here
+	#ifndef PT_WITHOUT_STD_LOCALE
 		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
 		{
 			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
@@ -55,7 +56,7 @@ TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
 			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
 		}
-	#endif*/
+	#endif
 }
 
 

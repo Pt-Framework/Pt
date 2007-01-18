@@ -20,7 +20,7 @@
 #ifndef PT_Text_TextStream_h
 #define PT_Text_TextStream_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char_ctype.h>
 #include <Pt/Text/Char_numpunct.h>
 #include <Pt/Text/Char.h>
@@ -44,7 +44,7 @@ namespace Text {
 	 *
 	 * See BasicTextBuffer for a more detailed description.
 	 */
-	class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char> {
+	class PT_TEXT_API TextBuffer : public BasicTextBuffer<Pt::Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> Codec;
 
@@ -70,7 +70,7 @@ namespace Text {
 	 *
 	 * See BasicTextIStream for a more detailed description.
 	 */
-	class PT_API TextIStream : public BasicTextIStream<Char, char> {
+	class PT_TEXT_API TextIStream : public BasicTextIStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 
@@ -105,7 +105,7 @@ namespace Text {
 	 *
 	 * See BasicTextOStream for a more detailed description.
 	 */
-	class PT_API TextOStream : public BasicTextOStream<Char, char> {
+	class PT_TEXT_API TextOStream : public BasicTextOStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 
@@ -134,7 +134,7 @@ namespace Text {
 	 *
 	 * See BasicTextStream for a more detailed description.
 	 */
-	class PT_API TextStream : public BasicTextStream<Char, char> {
+	class PT_TEXT_API TextStream : public BasicTextStream<Char, char> {
 		public:
 			typedef TextCodec<Pt::Char, char> CodecT;
 

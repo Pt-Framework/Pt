@@ -183,7 +183,6 @@
 		} // namespace std
 
 	#else
-
 		#include <locale>
 
 	#endif

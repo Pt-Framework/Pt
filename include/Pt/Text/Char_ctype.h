@@ -20,7 +20,6 @@
 #ifndef Ptv_Text_ctype_h
 #define Ptv_Text_ctype_h
 
-#include <Pt/Api.h>
 #include <Pt/Text/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Text/locale.h>
@@ -32,12 +31,11 @@
 
 namespace std {
 
-	class PT_API ios_base;
+	class PT_TEXT_API ios_base;
 
 #ifdef _MSC_VER
 
-	//struct PT_API ctype_base;
-
+	struct PT_TEXT_API ctype_base;
 	template <>
 	class PT_TEXT_API ctype< Pt::Char > : public ctype_base {
 

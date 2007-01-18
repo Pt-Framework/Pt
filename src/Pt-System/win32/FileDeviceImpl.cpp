@@ -81,7 +81,7 @@ void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::I
 	if(mode & IODevice::NonBlock)
 	{
 		#ifdef _WIN32_WCE
-			throw RuntimeError("Overlapped I/O not supported under WinCE", PT_SOURCEINFO);
+			throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
 		#endif
 		flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
 		_readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
