@@ -44,7 +44,7 @@ class DrawPolyline;
 class DrawThinPolyline;
 class DrawThickPolyline;
 
-class FillConvexPolygon;
+class FillPolygon;
 class DrawText;
 
 /**
@@ -142,8 +142,8 @@ class PT_API ImagePainter : public Painter
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
         
-        FillConvexPolygon*    _fillConvexPolygon;
-        DrawText*             _drawText;
+        FillPolygon*         _fillPolygon;
+        DrawText*            _drawText;
         
 };
 

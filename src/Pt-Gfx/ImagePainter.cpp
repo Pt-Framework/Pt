@@ -37,7 +37,7 @@
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
 #include "DrawThickPolyline.h"
-#include "FillConvexPolygon.h"
+#include "FillPolygon.h"
 #include "DrawText.h"
 #include <cmath>
 #include <Pt/System/Clock.h>
@@ -54,7 +54,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawPolyline( 0 )
 , _drawThinPolyline( 0 )
 , _drawThickPolyline( 0 )
-, _fillConvexPolygon( 0 )
+, _fillPolygon( 0 ) 
 , _drawText( new DrawText() )
 , _font("Vera", 12)
 {
@@ -62,16 +62,16 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );    
     std::auto_ptr<DrawThinPolyline> dthinpoly( new DrawThinPolyline() );
     std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );  
-    std::auto_ptr<FillConvexPolygon> fillconvexpoly( new FillConvexPolygon() );
+    std::auto_ptr<FillPolygon> fillpolygon( new FillPolygon() );
     std::auto_ptr<DrawText> dtext( new DrawText() );
-       
+           
     _drawThinLine       = dthin.release();
     _drawThickLine      = dthick.release();
     _drawLine           = _drawThinLine;
     _drawThinPolyline   = dthinpoly.release();
     _drawThickPolyline  = dthickpoly.release();
     _drawPolyline       = _drawThinPolyline;
-    _fillConvexPolygon  = fillconvexpoly.release();
+    _fillPolygon        = fillpolygon.release();
     _drawText           = dtext.release();
     
     this->setFont( _font );
@@ -83,7 +83,7 @@ ImagePainter::~ImagePainter()
     delete _drawThickLine;
     delete _drawThinPolyline;
     delete _drawThickPolyline;
-    delete _fillConvexPolygon;
+    delete _fillPolygon;
     delete _drawText;
 }
 
@@ -199,7 +199,7 @@ void ImagePainter::fillPolygon(const  Math::Point* points, const size_t pointCou
     std::vector<Math::Point> p( pointCount );
     memcpy( &p[0], points, sizeof( Math::Point) * pointCount );
 
-    _fillConvexPolygon->draw( _image, _brush, p );
+    _fillPolygon->draw( _image, _brush, p );
 }
 
 void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image)

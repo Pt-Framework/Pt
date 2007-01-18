@@ -25,7 +25,7 @@ SharedLibrary Pt-Gfx :
 	DrawThickLine.cpp
 	ClipConvexPolygon.cpp
 	DrawText.cpp
-
+	FillPolygon.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;

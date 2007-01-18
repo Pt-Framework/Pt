@@ -24,11 +24,22 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Math/Point.h>
+#include "Edge.h"
+#include "EdgeTable.h"
+#include <algorithm>
 
 
 namespace Pt{
 
 namespace Gfx{
+
+struct CompareXValue
+{
+    bool operator()(const Edge& e1, const Edge& e2) const
+    {
+        return e1.x < e2.x;
+    }
+};
 
 /** @brief Fill polygons on images
 
@@ -38,9 +49,8 @@ namespace Gfx{
 class FillPolygon
 {
     public:
-        FillPolygon()
-        { }
-
+        FillPolygon();
+        
         virtual ~FillPolygon()
         { }
 
@@ -49,7 +59,7 @@ class FillPolygon
 			@see FillPolygon::draw
 		*/
 		void operator() ( ARgbImage& image, const Brush& brush,
-                          const std::vector<Math::Point>& points )
+                          std::vector<Math::Point>& points )
 		{ this->draw(image, brush, points); }
 
 		/** @brief Fill a polygon on an image
@@ -63,7 +73,62 @@ class FillPolygon
 		    @param points Polygon points
 		*/
         virtual void draw( ARgbImage& image, const Brush& brush,
-                           const std::vector<Math::Point>& points ) = 0;
+                           std::vector<Math::Point>& points );
+                           
+private:
+
+    void setupGlobalEdgeTable( const std::vector<Math::Point>& points );
+       
+    inline void removeEdgeAET( size_t ypos )
+    {
+
+        for( size_t i = 0; i < _activeEdgeTable.size(); i++ )
+        {
+           if( ypos >= _activeEdgeTable[i].ymax )
+           {
+                _activeEdgeTable.erase( _activeEdgeTable.begin() + i );
+                --i;
+           }
+        }          
+    }
+    
+    inline void recalcAETxValue()
+    {
+        for( size_t i = 0; i < _activeEdgeTable.size(); i++ )
+            _activeEdgeTable[i].x += _activeEdgeTable[i].rslope;
+    }
+    
+    inline bool addEdgeToEAT( size_t ypos )
+    {
+        bool ret = false;
+
+        if( _currentPos == _edgeSet.end())
+            return false;
+            
+        EdgeSet::iterator it = _currentPos;
+        
+        while( it != _edgeSet.end() && it->ymin == ypos)
+        {
+            _activeEdgeTable.push_back( *it );
+            ++it;
+        }
+            
+        _currentPos = it;
+        return ret;          
+    }    
+    
+    inline void sortEAT()
+    {
+        if( !_activeEdgeTable.empty() )
+            std::sort( _activeEdgeTable.begin(), _activeEdgeTable.end(), CompareXValue() );
+    }
+    
+
+   
+    EdgeSet                 _edgeSet;
+    ActiveEdgeTable         _activeEdgeTable;
+    EdgeSet::iterator       _currentPos;
+    std::vector<ARgbColor>  _colorBuffer;
 };
 
 }
