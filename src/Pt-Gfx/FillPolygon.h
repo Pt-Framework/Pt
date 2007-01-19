@@ -24,22 +24,14 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Math/Point.h>
+#include <Pt/System/Clock.h>
 #include "Edge.h"
 #include "EdgeTable.h"
-#include <algorithm>
 
 
 namespace Pt{
 
 namespace Gfx{
-
-struct CompareXValue
-{
-    bool operator()(const Edge& e1, const Edge& e2) const
-    {
-        return e1.x < e2.x;
-    }
-};
 
 /** @brief Fill polygons on images
 
@@ -54,85 +46,61 @@ class FillPolygon
         virtual ~FillPolygon()
         { }
 
-		/** @brief Fill a polygon on an image
+        /** @brief Fill a polygon on an image
 
-			@see FillPolygon::draw
-		*/
-		void operator() ( ARgbImage& image, const Brush& brush,
+            @see FillPolygon::draw
+        */
+        void operator() ( ARgbImage& image, const Brush& brush,
                           std::vector<Math::Point>& points )
-		{ this->draw(image, brush, points); }
+        { this->draw(image, brush, points); }
 
-		/** @brief Fill a polygon on an image
+        /** @brief Fill a polygon on an image
 
-		    The polygon described by a vector of points will be filled on an
-		    ARgbImage. The attributes for the fill operation are taken from
-		    the passed Brush object.
+            The polygon described by a vector of points will be filled on an
+            ARgbImage. The attributes for the fill operation are taken from
+            the passed Brush object.
 
-		    @param image Target image
-		    @param pen Brush to be used
-		    @param points Polygon points
-		*/
+            @param image Target image
+            @param pen Brush to be used
+            @param points Polygon points
+        */
         virtual void draw( ARgbImage& image, const Brush& brush,
                            std::vector<Math::Point>& points );
-                           
+
 private:
 
     void setupGlobalEdgeTable( const std::vector<Math::Point>& points );
-       
-    inline void removeEdgeAET( size_t ypos )
-    {
 
-        for( size_t i = 0; i < _activeEdgeTable.size(); i++ )
+    inline void output( Pt::Gfx::ARgbImage& image, size_t scanLine )
+    {
+        for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
         {
-           if( ypos >= _activeEdgeTable[i].ymax )
-           {
-                _activeEdgeTable.erase( _activeEdgeTable.begin() + i );
-                --i;
-           }
-        }          
-    }
-    
-    inline void recalcAETxValue()
-    {
-        for( size_t i = 0; i < _activeEdgeTable.size(); i++ )
-            _activeEdgeTable[i].x += _activeEdgeTable[i].rslope;
-    }
-    
-    inline bool addEdgeToEAT( size_t ypos )
-    {
-        bool ret = false;
+            const size_t        deltax  = ( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x );
 
-        if( _currentPos == _edgeSet.end())
-            return false;
-            
-        EdgeSet::iterator it = _currentPos;
-        
-        while( it != _edgeSet.end() && it->ymin == ypos)
-        {
-            _activeEdgeTable.push_back( *it );
-            ++it;
+            if( deltax == 0)
+                continue;
+
+            const size_t        size    = deltax * sizeof(ARgbColor) ;
+            const Pt::ssize_t   x       = (size_t) _activeEdgeTable[i-1].x;
+
+            memcpy( &image.pixel( x, scanLine ), &_colorBuffer[0], size );
         }
-            
-        _currentPos = it;
-        return ret;          
-    }    
-    
-    inline void sortEAT()
-    {
-        if( !_activeEdgeTable.empty() )
-            std::sort( _activeEdgeTable.begin(), _activeEdgeTable.end(), CompareXValue() );
     }
-    
 
-   
-    EdgeSet                 _edgeSet;
+    inline void addEdgeToActiveTable( EdgeSet::iterator& it, size_t scanLine )
+    {
+        for( ; it != _globalEdgeTable.end() && it->ymin == scanLine; ++it )
+            _activeEdgeTable.addEdge( *it );
+    }
+
+    EdgeSet                 _globalEdgeTable;
     ActiveEdgeTable         _activeEdgeTable;
     EdgeSet::iterator       _currentPos;
     std::vector<ARgbColor>  _colorBuffer;
+    Pt::System::Clock       _clock; 
 };
 
-}
-
-}
+} //namespace Gfx
+} //namespace Pt
 
 #endif

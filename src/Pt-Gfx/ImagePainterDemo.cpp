@@ -73,8 +73,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 */
         polygon.push_back( Pt::Math::Point( 50, 50 ));
-        polygon.push_back( Pt::Math::Point( 10, 150 ));
-        polygon.push_back( Pt::Math::Point( 100, 100 ));
+        polygon.push_back( Pt::Math::Point( 100, 250 ));
+        polygon.push_back( Pt::Math::Point( 300, 100 )); 
             
         _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0) ));
         Pt::System::Clock clock;
@@ -105,14 +105,15 @@ class ImagePainterDemo : public Pt::Gui::Widget
         Pt::System::TimeValue delta = clock.stop();
         std::cout<<"Draw time: " << (delta.seconds() + delta.microSeconds()/1000000.0) << std::endl;
 */
-        painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0xffff,0) ));
+        painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
         
         polygon.clear();
         
-        polygon.push_back( Pt::Math::Point( 50 + 100, 50 ));
-        polygon.push_back( Pt::Math::Point( 10+ 100, 150 ));
-        polygon.push_back( Pt::Math::Point( 100+ 100, 100 ));
+        polygon.push_back( Pt::Math::Point( 50 + 300, 50 ));
+        polygon.push_back( Pt::Math::Point( 100 + 300, 250 ));
+        polygon.push_back( Pt::Math::Point( 300 + 300, 100 )); 
+
   /*
         polygon.push_back( Pt::Math::Point( 10 + 50, 10 ));
         polygon.push_back( Pt::Math::Point( 10+ 50, 16 ));

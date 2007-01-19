@@ -1,4 +1,5 @@
 #include "FillPolygon.h"
+#include <iostream>
 
 
 namespace Pt{
@@ -6,9 +7,8 @@ namespace Gfx{
 
 
 FillPolygon::FillPolygon()
-: _colorBuffer( 10000 )
-{
-}
+: _colorBuffer( 3000 )
+{ }
 
 void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::Point>& points )
 {
@@ -17,34 +17,26 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
         points.push_back( points[0] );
 
     setupGlobalEdgeTable( points );
+    //6e-006
 
-    EdgeSet::iterator it = _edgeSet.begin();
+    EdgeSet::iterator   it       = _globalEdgeTable.begin();
+    size_t              scanLine = it->ymin;
 
-    _currentPos = it;
-    addEdgeToEAT( it->ymin);
-
-    size_t scanLine = it->ymin;
+    addEdgeToActiveTable( it, scanLine );
+    //1e-006
 
     do
     {
-        for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
-        {
-            memcpy( &image.pixel(int(_activeEdgeTable[i-1].x), scanLine),
-                   &_colorBuffer[0],
-                   size_t(_activeEdgeTable[i].x-_activeEdgeTable[i-1].x)*sizeof(ARgbColor) );
-
-/*            for( size_t xpos = _activeEdgeTable[i-1].x; xpos < _activeEdgeTable[i].x; ++xpos)
-                image.pixel( xpos, scanLine ) =  ARgbColor(0,0,0); */
-        }
-
-
+        output( image, scanLine );
         scanLine++;
-        removeEdgeAET( scanLine );
-        recalcAETxValue();
-        addEdgeToEAT( scanLine );
-        sortEAT();
+        _clock.start();
+        _activeEdgeTable.updateEdges( scanLine );
+        Pt::System::TimeValue time = _clock.stop();
+        std::cerr<<"Update Edges time : "<< (double) time.seconds() + time.microSeconds() / 1000000.0<<std:: endl;
 
+        addEdgeToActiveTable( it, scanLine );
 
+        _activeEdgeTable.sort();
     }
     while( !_activeEdgeTable.empty() );
 }
@@ -54,7 +46,7 @@ void FillPolygon::setupGlobalEdgeTable( const std::vector<Math::Point>& points )
     Edge        edge;
     Pt::ssize_t dy;
 
-    _edgeSet.clear();
+    _globalEdgeTable.clear();
 
     for( size_t i = 1; i < points.size(); ++i )
     {
@@ -78,8 +70,7 @@ void FillPolygon::setupGlobalEdgeTable( const std::vector<Math::Point>& points )
             edge.x    = points[i].x();
         }
 
-        _edgeSet.insert( edge );
-
+        _globalEdgeTable.insert( edge );
     }
 }
 
