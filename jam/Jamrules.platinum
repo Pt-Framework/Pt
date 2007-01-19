@@ -23,13 +23,12 @@ if $(TARGET_OS:L) = wince
 
 if $(SYS:L) = "win32"
 {
-	SYSLIBS = wsock32.lib version.lib Winmm.lib ;
-	NETLIBS = wsock32.lib ;
+	SYSLIBS = version.lib Winmm.lib ;
+	NETLIBS = wsock32.lib ws2_32.lib ;
 
 	if $(MINGW)
 	{
-		SYSLIBS = #$(MINGW)\\lib\\libwsock32.a
-		          $(MINGW)\\lib\\libversion.a
+		SYSLIBS = $(MINGW)\\lib\\libversion.a
 		          $(MINGW)\\lib\\libwinmm.a ;
 		NETLIBS = $(MINGW)\\lib\\libwsock32.a 
 		          $(MINGW)\\lib\\libws2_32.a ;
