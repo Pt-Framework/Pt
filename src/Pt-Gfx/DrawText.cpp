@@ -41,7 +41,7 @@ DrawText::DrawText()
 */
 
     if( FT_Select_Charmap( _face, FT_ENCODING_UNICODE ) )
-        FT_Select_Charmap( _face, FT_ENCODING_NONE );    
+        FT_Select_Charmap( _face, FT_ENCODING_NONE );
 }
 
 DrawText::~DrawText()
@@ -65,7 +65,7 @@ void DrawText::setFont( const Font& font )
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )
-{   
+{
     FT_UInt         previous    = 0;
     FT_GlyphSlot    slot        = _face->glyph;
     FT_Vector       delta;
@@ -130,7 +130,7 @@ void DrawText::_draw( ARgbImage& image, const ARgbColor& color, const Math::Poin
 
     FT_Set_Transform( _face, &_matrix, &glyphPos );
 
-    FT_UInt glyph_index = 0;
+    //FT_UInt glyph_index = 0;
 
     for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
@@ -200,8 +200,8 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, i
     int                bmStartY     = 0;
     int                glyphPosX    = xpos;
     int                glyphPosY    = ypos;
-    
-    
+
+
     Pt::ssize_t x1 = 0;
     Pt::ssize_t x2 = image.width() - 1;
     Pt::ssize_t y1 = 0;
@@ -227,7 +227,7 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, i
     {
         bmStartY  = -ypos;
         glyphPosY = 0;
-    }   
+    }
 
      //Clipping bottom Y
     if( ypos + bmHeight > image.height() )
@@ -243,22 +243,22 @@ void DrawText::drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, i
 
         if( dsy < y1 )
             continue;
-        
+
         if( dsy > y2 )
             break;
-            
+
         dsx = glyphPosX;
 
         for( Pt::int32_t x = bmStartX; x < bmWidth; ++x, ++dsx )
         {
             if( dsx < x1 )
                  continue;
-            
+
             if( dsx > x2 )
                 break;
-            
+
             const Pt::uint8_t col = bitmap[ yOffset + x ];
-                
+
             if( col )
                 mixColor( image.pixel(dsx, dsy), color, col );
         }

@@ -48,23 +48,23 @@ namespace Gfx{
 
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
+, _font("Vera", 12)
 , _drawLine( 0 )
 , _drawThinLine(0 )
 , _drawThickLine( 0)
 , _drawPolyline( 0 )
 , _drawThinPolyline( 0 )
 , _drawThickPolyline( 0 )
-, _fillPolygon( 0 ) 
+, _fillPolygon( 0 )
 , _drawText( new DrawText() )
-, _font("Vera", 12)
 {
     std::auto_ptr<DrawThinLine> dthin( new DrawThinLine );
-    std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );    
+    std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );
     std::auto_ptr<DrawThinPolyline> dthinpoly( new DrawThinPolyline() );
-    std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );  
+    std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );
     std::auto_ptr<FillPolygon> fillpolygon( new FillPolygon() );
     std::auto_ptr<DrawText> dtext( new DrawText() );
-           
+
     _drawThinLine       = dthin.release();
     _drawThickLine      = dthick.release();
     _drawLine           = _drawThinLine;
@@ -73,12 +73,12 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawPolyline       = _drawThinPolyline;
     _fillPolygon        = fillpolygon.release();
     _drawText           = dtext.release();
-    
+
     this->setFont( _font );
 }
 
 ImagePainter::~ImagePainter()
-{ 
+{
     delete _drawThinLine;
     delete _drawThickLine;
     delete _drawThinPolyline;
@@ -159,7 +159,7 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 
 void ImagePainter::drawText( const Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline )
 {
-    _drawText->draw( _image, _pen.color(),  to, text, outline );   
+    _drawText->draw( _image, _pen.color(),  to, text, outline );
 }
 
 void ImagePainter::drawRect(const  Math::Rect& rect)
