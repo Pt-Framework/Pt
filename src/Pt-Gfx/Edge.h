@@ -10,19 +10,21 @@ class Edge
         Edge()
         : ymin(0)
         , ymax(0)
-        , x(0.0)
-        , rslope(0.0)
+        , x(0)
+        , dx(0)
+        , dy(0)
+        , xaccu(0)
         {}
                 
 
-        Edge( size_t  ymin_, size_t ymax_, size_t x_, double rslope_ )
+        Edge( size_t  ymin_, size_t ymax_, size_t x_, size_t dx_, size_t dy_ )
         : ymin(ymin_)
         , ymax(ymax_)
         , x(x_)
-        , rslope(rslope_)
+        , dx(dx_)
+        , dy(dy_)
         {}
-        
-        
+                
         bool operator<(const Edge& edge) const
         {
             if( ymin == edge.ymin )
@@ -31,12 +33,12 @@ class Edge
             return ymin < edge.ymin;              
         }
         
-        size_t ymin;
-        size_t ymax;
-        double x;       
-        
-        /**@brief Reciprocal slope 1/m */
-        double  rslope;
+        Pt::ssize_t ymin;
+        Pt::ssize_t ymax;
+        Pt::ssize_t x;       
+        Pt::ssize_t dx;
+        Pt::ssize_t dy;
+        Pt::ssize_t xaccu; 
 };
 
 }

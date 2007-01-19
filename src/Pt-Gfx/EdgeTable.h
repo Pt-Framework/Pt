@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <Edge.h>
 #include <set>
-
+#include <iostream>
 
 namespace Pt{
 namespace Gfx{
@@ -22,6 +22,8 @@ class ActiveEdgeTable : public std::vector<Edge>
 
         inline void updateEdges( size_t ypos )
         {
+            size_t trueX;
+            
             for( size_t i = 0; i < size(); i++ )
             {
                if( ypos >= (*this)[i].ymax )
@@ -31,7 +33,60 @@ class ActiveEdgeTable : public std::vector<Edge>
                }
                else
                {//recalc the new x value
-                    (*this)[i].x += (*this)[i].rslope;
+                    //(*this)[i].x += (*this)[i].rslope;
+                    
+                    Edge& edge = (*this)[i];
+                    trueX = edge.x; 
+                               
+                    if( edge.dx > 0 && edge.dy > 0)
+                    {
+                        edge.xaccu += edge.dx;
+                        
+                        while( edge.xaccu > edge.dy )
+                        {
+                            trueX++;
+                            edge.xaccu -= edge.dy;
+                        }
+                        edge.x = trueX;
+                    }
+                    else if( edge.dx > 0 && edge.dy < 0)
+                    {
+                        edge.xaccu += edge.dx;
+                        while( edge.xaccu > -edge.dy )
+                        {
+                            trueX--;
+                            edge.xaccu += edge.dy;
+                        }
+                        
+                        if(  edge.xaccu == edge.dy )
+                            edge.x = trueX - 1;
+                        else
+                            edge.x = trueX;
+                            
+                    }
+                    else if( edge.dx < 0 && edge.dy > 0)
+                    {
+                        edge.xaccu -= edge.dx;
+                        while( edge.xaccu > edge.dy )
+                        {
+                            trueX--;
+                            edge.xaccu -= edge.dy;
+                        }
+                        edge.x = trueX;                    
+                    }
+                    else if( edge.dx < 0 && edge.dy < 0)
+                    {
+                        edge.xaccu -= edge.dx;
+                        while( edge.xaccu > -edge.dy )
+                        {
+                            trueX++;
+                            edge.xaccu += edge.dy;
+                        }
+                        if(  edge.xaccu == edge.dy )
+                            edge.x = trueX - 1;
+                        else
+                            edge.x = trueX;      
+                    }
                }
             }
         }
@@ -46,7 +101,7 @@ class ActiveEdgeTable : public std::vector<Edge>
             { return e1.x < e2.x; }
         };
 
-        LessXValue _lessXValue;
+        LessXValue _lessXValue;        
 };
 
 

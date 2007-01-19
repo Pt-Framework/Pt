@@ -62,8 +62,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
         polygon.push_back( Pt::Math::Point( 11, 10 ));
         polygon.push_back( Pt::Math::Point( 14, 10 ));
         polygon.push_back( Pt::Math::Point( 14, 1 ));
-        */
-        /*
+        
+/*        
         polygon.push_back( Pt::Math::Point( 10, 10 ));
         polygon.push_back( Pt::Math::Point( 10, 16 ));
         polygon.push_back( Pt::Math::Point( 16, 20 ));
@@ -72,10 +72,18 @@ class ImagePainterDemo : public Pt::Gui::Widget
         polygon.push_back( Pt::Math::Point( 22, 10 ));
 
 */
-        polygon.push_back( Pt::Math::Point( 50, 50 ));
-        polygon.push_back( Pt::Math::Point( 100, 250 ));
-        polygon.push_back( Pt::Math::Point( 300, 100 )); 
-            
+
+        polygon.push_back( Pt::Math::Point( 10, 100 -50 ));
+        polygon.push_back( Pt::Math::Point( 50, 10 -50));
+        polygon.push_back( Pt::Math::Point( 100, 80 -50));
+        polygon.push_back( Pt::Math::Point( 150, 10 -50)); 
+        polygon.push_back( Pt::Math::Point( 200, 100 -50));
+        polygon.push_back( Pt::Math::Point( 100, 300 -50));
+        polygon.push_back( Pt::Math::Point( 20, 250 -50));                
+  /*                
+        polygon.push_back( Pt::Math::Point( 20, 250 ));                                 
+        polygon.push_back( Pt::Math::Point( 90, 300 ));       
+        polygon.push_back( Pt::Math::Point( 100, 250 ));        */
         _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0) ));
         Pt::System::Clock clock;
         
@@ -109,10 +117,21 @@ class ImagePainterDemo : public Pt::Gui::Widget
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
         
         polygon.clear();
+
+        polygon.push_back( Pt::Math::Point( 10, 100 - 50));
+        polygon.push_back( Pt::Math::Point( 50, 10 - 50));
+        polygon.push_back( Pt::Math::Point( 100, 80 - 50));
+        polygon.push_back( Pt::Math::Point( 150, 10- 50));
+        polygon.push_back( Pt::Math::Point( 200, 100- 50));
+        polygon.push_back( Pt::Math::Point( 100, 300- 50));
+        polygon.push_back( Pt::Math::Point( 20, 250- 50));
+        /*
         
-        polygon.push_back( Pt::Math::Point( 50 + 300, 50 ));
-        polygon.push_back( Pt::Math::Point( 100 + 300, 250 ));
-        polygon.push_back( Pt::Math::Point( 300 + 300, 100 )); 
+        polygon.push_back( Pt::Math::Point( 20 + 300, 250 ));                                 
+        polygon.push_back( Pt::Math::Point( 90+ 300, 300 ));       
+        polygon.push_back( Pt::Math::Point( 100+ 300, 250 ));             
+        
+
 
   /*
         polygon.push_back( Pt::Math::Point( 10 + 50, 10 ));

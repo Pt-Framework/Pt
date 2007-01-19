@@ -27,6 +27,7 @@
 #include <Pt/System/Clock.h>
 #include "Edge.h"
 #include "EdgeTable.h"
+#include "ClipConvexPolygon.h"
 
 
 namespace Pt{
@@ -75,11 +76,8 @@ private:
     {
         for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
         {
-            const size_t deltax  = size_t( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x );
-
-            if( deltax == 0)
-                continue;
-
+            const size_t        deltax  = ( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x) + 1;            
+            
             const size_t        size    = deltax * sizeof(ARgbColor) ;
             const Pt::ssize_t   x       = (size_t) _activeEdgeTable[i-1].x;
 
@@ -98,6 +96,7 @@ private:
     EdgeSet::iterator       _currentPos;
     std::vector<ARgbColor>  _colorBuffer;
     Pt::System::Clock       _clock;
+    ClipConvexPolygon       _clipper;
 };
 
 } //namespace Gfx
