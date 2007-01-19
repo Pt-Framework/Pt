@@ -18,41 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Net_StreamSocket_h
-#define Pt_Net_StreamSocket_h
+#ifndef Pt_Net_TcpSocket_h
+#define Pt_Net_TcpSocket_h
 
-#include <Pt/Net/Api.h>
+#include <Pt/NetApi.h>
 #include <Pt/Net/Socket.h>
-
+#include <Pt/IO/IODevice.h>
 
 namespace Pt {
 
 namespace Net {
 
-    class StreamSocketImpl;
-    class StreamServerSocket;
+    class TcpSocketImpl;
+    class TcpServerSocket;
 
-    class PT_NET_API StreamSocket : public Socket
+    class PT_NET_API TcpSocket : public Socket, public IO::IODevice
     {
         public:
-            StreamSocket()
+            TcpSocket()
             : _impl(0)
             { }
 
-            StreamSocket(const std::string& ipaddr, unsigned short int port)
+            TcpSocket(const std::string& ipaddr, unsigned short int port)
             : _impl(0)
             { connect(ipaddr, port); }
 
-            StreamSocket(const StreamServerSocket& server)
+            TcpSocket(const TcpServerSocket& server)
             : _impl(0)
             { accept(server); }
 
-            ~StreamSocket();
+            ~TcpSocket();
 
             void setTimeout(ssize_t msec);
 
             void connect(const std::string& ipaddr, unsigned short int port);
-            void accept(const StreamServerSocket& server);
+            void accept(const TcpServerSocket& server);
 
         protected:
             size_t _read(char* buffer, size_t count, bool& eof);
@@ -62,7 +62,7 @@ namespace Net {
             void _close();
 
         private:
-            StreamSocketImpl* _impl;
+            TcpSocketImpl* _impl;
     };
 
 } // !namespace Net

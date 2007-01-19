@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Net_StreamServerSocket_h
-#define Pt_Net_StreamServerSocket_h
+#ifndef Pt_Net_TcpServerSocket_h
+#define Pt_Net_TcpServerSocket_h
 
 #include <Pt/Net/Api.h>
 #include <string>
@@ -28,27 +28,27 @@
 namespace Pt {
 
 namespace Net {
-	
-    class StreamServerSocketImpl;
 
-    class PT_NET_API StreamServerSocket
+    class TcpServerSocketImpl;
+
+    class PT_NET_API TcpServerSocket
     {
-            friend class StreamSocket;
+            friend class TcpSocket;
 
         private:
-            class StreamServerSocketImpl* _impl;
-        
+            class TcpServerSocketImpl* _impl;
+
         public:
-            StreamServerSocket()
+            TcpServerSocket()
             : _impl(0)
             { }
 
-            StreamServerSocket(const std::string& ipaddr, unsigned short int port, unsigned backlog = 16)
+            TcpServerSocket(const std::string& ipaddr, unsigned short int port, unsigned backlog = 16)
             : _impl(0)
             { listen(ipaddr, port, backlog); }
-            
-            ~StreamServerSocket();
-            
+
+            ~TcpServerSocket();
+
             void listen(const std::string& ipaddr, unsigned short int port, unsigned backlog = 16);
     };
 
