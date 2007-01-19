@@ -21,7 +21,7 @@
 #ifndef Pt_Net_TcpSocket_h
 #define Pt_Net_TcpSocket_h
 
-#include <Pt/NetApi.h>
+#include <Pt/Net/Api.h>
 #include <Pt/Net/Socket.h>
 #include <Pt/IO/IODevice.h>
 

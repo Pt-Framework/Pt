@@ -22,7 +22,7 @@
 #define Pt_Net_Socket_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/IO/IODevice.h>
+// #include <Pt/IO/IODevice.h>
 
 
 namespace Pt
@@ -31,15 +31,15 @@ namespace Pt
 namespace Net
 {
 
-	class PT_NET_API Socket : public IO::IODevice
+	class PT_API Socket // : public IO::IODevice
     {
 		public:
 			virtual ~Socket();
 
-			virtual void setTimeout(ssize_t msec)
+			virtual void setTimeout(size_t msec)
               { _timeout = msec; }
 
-            ssize_t getTimeout() const
+            size_t getTimeout() const
               { return _timeout; }
 
 		protected:
@@ -48,7 +48,7 @@ namespace Net
 			bool _remote() const;
 
         private:
-            ssize_t _timeout;
+            size_t _timeout;
 	};
 
 } // !namespace Net
