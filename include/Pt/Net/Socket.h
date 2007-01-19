@@ -22,6 +22,7 @@
 #define Pt_Net_Socket_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/Types.h>
 // #include <Pt/IO/IODevice.h>
 
 

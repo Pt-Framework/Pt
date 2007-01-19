@@ -12,6 +12,6 @@ SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-IO Pt-System ;
 SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
 SharedLibrary_MakeLocate Pt-Net : bin ;
 
-PtUnitTest StreamSocketTest : StreamSocketTest.cpp ;
-Main_LinkSharedLibraries StreamSocketTest : Pt Pt-IO Pt-Net Pt-System ;
-Main_MakeLocate StreamSocketTest : bin ;
+PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
+Main_LinkSharedLibraries TcpSocketTest : Pt Pt-IO Pt-Net Pt-System ;
+Main_MakeLocate TcpSocketTest : bin ;
