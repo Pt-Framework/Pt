@@ -28,7 +28,7 @@
 
 
 namespace std {
-	class ios_base;
+	class PT_TEXT_API ios_base;
 }
 
 

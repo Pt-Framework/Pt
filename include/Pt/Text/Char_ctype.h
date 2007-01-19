@@ -31,12 +31,11 @@
 
 namespace std {
 
-	// class PT_TEXT_API ios_base; // Don't put PT_TEXT_API here, since it is not usefull
-	class ios_base;
+	class PT_TEXT_API ios_base;
 
 #ifdef _MSC_VER
 
-	struct ctype_base;
+	struct PT_TEXT_API ctype_base;
 
 	template <>
 	class PT_TEXT_API ctype< Pt::Char > : public ctype_base {
