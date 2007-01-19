@@ -42,7 +42,7 @@ class FillPolygon
 {
     public:
         FillPolygon();
-        
+
         virtual ~FillPolygon()
         { }
 
@@ -75,7 +75,7 @@ private:
     {
         for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
         {
-            const size_t        deltax  = ( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x );
+            const size_t deltax  = size_t( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x );
 
             if( deltax == 0)
                 continue;
@@ -97,7 +97,7 @@ private:
     ActiveEdgeTable         _activeEdgeTable;
     EdgeSet::iterator       _currentPos;
     std::vector<ARgbColor>  _colorBuffer;
-    Pt::System::Clock       _clock; 
+    Pt::System::Clock       _clock;
 };
 
 } //namespace Gfx
