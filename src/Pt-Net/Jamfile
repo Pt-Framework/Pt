@@ -3,12 +3,9 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 
 SharedLibrary Pt-Net : AddrInfo.cpp
-					   Socket.cpp
-                       StreamSocket.cpp
-                       StreamServerSocket.cpp
-                       #SocketImpl.$(SYS).cpp
-                       #StreamServerSocketImpl.$(SYS).cpp
-                       #StreamSocketImpl.$(SYS).cpp 
+                       Socket.cpp
+                       TcpSocket.cpp
+                       TcpServerSocket.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-IO Pt-System ;
