@@ -16,14 +16,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PTV_UNIT_TEST_H
-#define PTV_UNIT_TEST_H
+#ifndef PT_UNIT_TEST_H
+#define PT_UNIT_TEST_H
 
-#include <string>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Reflectable.h>
+#include <Pt/Unit/Api.h>
 #include <Pt/Unit/Assertion.h>
+
+#include <string>
 
 
 namespace Pt {

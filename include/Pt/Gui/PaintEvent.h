@@ -20,9 +20,9 @@
 #ifndef Ptv_PaintEvent_h
 #define Ptv_PaintEvent_h
 
-#include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Gfx/Region.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 
 #include <cstddef>
@@ -51,7 +51,7 @@ namespace Gui {
 	 * Paint events are usually only used internally by widget or one of its sub-classes
 	 * to do a (re)paint of the widget area.
 	 */
-	class PT_API PaintEvent : public Event
+	class PT_GUI_API PaintEvent : public Event
 	{
 		public:
 			//! @brief The type information object (type_info) of this event class.

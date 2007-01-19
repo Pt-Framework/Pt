@@ -49,7 +49,7 @@ namespace Pt {
 		 *  to use this color model to minimize rounding error propagation.
 		 */
 		template <>
-		class PT_API PT_PACKED Color<ARgbF> {
+		class PT_PACKED Color<ARgbF> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */

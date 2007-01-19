@@ -20,6 +20,7 @@
 #ifndef Pt_Algorithm_h
 #define Pt_Algorithm_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicImage.h>
 
 #include <iostream>

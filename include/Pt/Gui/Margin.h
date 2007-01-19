@@ -5,9 +5,8 @@
 #ifndef PTV_GUI_MARGIN_H
 #define PTV_GUI_MARGIN_H
 
-#include <Pt/Api.h>
 #include <Pt/Types.h>
-
+#include <Pt/Gui/Api.h>
 
 namespace Pt {
 
@@ -22,7 +21,7 @@ namespace Gui {
 	 *
 	 * This class is immutable, its margin values can not be changed after their initialization.
 	 */
-	class PT_API Margin
+	class Margin
 	{
 		public:
 			/**

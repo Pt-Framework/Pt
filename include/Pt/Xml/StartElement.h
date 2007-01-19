@@ -1,10 +1,10 @@
 #ifndef Xml_StartElement_h
 #define Xml_StartElement_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/Xml/NamespaceContext.h>
-#include <Pt/Api.h>
 #include <Pt/Text/String.h>
 
 #include <list>
@@ -26,7 +26,7 @@ namespace Xml {
 	 * is parsed. The attributes are stored in a StartElement object from where they
 	 * can be retrieved.
 	 */
-	class PT_API Attribute
+	class PT_XML_API Attribute
 	{
 		public:
 			//! Constructs a new Attribute object with an empty name and value.
@@ -98,7 +98,7 @@ namespace Xml {
 	 * @see Node
 	 * @see Attribute
 	 */
-	class PT_API StartElement : public Node
+	class PT_XML_API StartElement : public Node
 	{
 		public:
 			//! Constructs a new StartElement object with no name and an empty attribute list.

@@ -6,7 +6,7 @@
 #define PT_MATH_SIZE_H
 
 #include <Pt/Types.h>
-#include <Pt/Api.h>
+#include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 
 
@@ -16,7 +16,7 @@ namespace Pt {
 
 		//! \brief The Size class describes the heigth and width of an object
 		template<typename T>
-		class PT_API BasicSize {
+		class BasicSize {
 			public:
 				//! @brief Construct a BasicSize of (w,h)
 				inline BasicSize(T w = 0, T h = 0)

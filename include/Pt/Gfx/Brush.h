@@ -5,7 +5,7 @@
 #ifndef PT_GFX_PRUSH_H
 #define PT_GFX_PRUSH_H
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/ARgbImage.h>
@@ -17,7 +17,7 @@ namespace Gfx {
 
 	class BrushData;
 
-	class PT_API Brush
+	class PT_GFX_API Brush
 	{
 		public:
 			enum FillStyle {

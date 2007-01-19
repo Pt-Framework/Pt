@@ -5,8 +5,8 @@
 #ifndef PT_GUI_INSETS_H
 #define PT_GUI_INSETS_H
 
-#include <Pt/Api.h>
 #include <Pt/Types.h>
+#include <Pt/Gui/Api.h>
 
 
 namespace Pt {
@@ -27,7 +27,7 @@ namespace Gui {
 	 *
 	 * This class is immutable, its inset values can not be changed after their initialization.
 	 */
-	class PT_API Insets
+	class Insets
 	{
 		friend bool operator!=(const Insets& a, const Insets& b);
 

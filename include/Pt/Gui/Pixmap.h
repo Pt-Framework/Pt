@@ -20,8 +20,8 @@
 #ifndef Ptv_Gui_Pixmap_h
 #define Ptv_Gui_Pixmap_h
 
-#include <Pt/Api.h>
 #include <Pt/Math/Size.h>
+#include <Pt/Gui/Api.h>
 #include <cstddef>
 
 
@@ -49,7 +49,7 @@ namespace Gui {
 	 * because the widget was hidden, the backbuffer-pixmap can be drawn directly to the widget
 	 * instead of doing a (probably complex) redraw by painting all graphic primitives again.
 	 */
-	class PT_API Pixmap
+	class PT_GUI_API Pixmap
 	{
 		private:
 			//! @brief The platform-specific implementation of the Pixmap object.

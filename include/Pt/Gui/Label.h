@@ -16,14 +16,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_GUI_LABEL_H
 #define PT_GUI_LABEL_H
 
-#include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Painter.h>
+
 
 namespace Pt {
 
@@ -41,7 +41,7 @@ namespace Gui {
 	 * the label. This is everything that is not text. The foreground color is used to as color
 	 * for the text of the label.
 	 */
-	class PT_API Label : public Widget
+	class PT_GUI_API Label : public Widget
 	{
 		public:
 			/**

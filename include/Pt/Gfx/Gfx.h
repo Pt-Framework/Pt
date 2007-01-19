@@ -6,6 +6,7 @@
 #define PT_GFX_H
 
 #include <Pt/Types.h>
+#include <Pt/Gfx/Api.h>
 
 namespace Pt {
 

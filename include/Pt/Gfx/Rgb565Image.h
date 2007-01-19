@@ -20,6 +20,7 @@
 #ifndef Pt_Rgb565Image_h
 #define Pt_Rgb565Image_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Rgb565Color.h>
 #include <Pt/Gfx/SubImage.h>
 

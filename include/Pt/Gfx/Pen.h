@@ -5,7 +5,7 @@
 #ifndef PTV_GFX_PEN_H
 #define PTV_GFX_PEN_H
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 
 
@@ -28,7 +28,7 @@ namespace Gfx {
 	 * The Pen object is immutable. Thus a new object has to be created when a pen with
 	 * other attributes is needed.
 	 */
-	class PT_API Pen
+	class PT_GFX_API Pen
 	{
 		friend bool operator==(const Pen& a, const Pen& b);
 

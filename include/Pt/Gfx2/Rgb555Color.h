@@ -45,7 +45,7 @@ namespace Pt {
 		 *  </TABLE>
 		 */
 		template <>
-		class PT_API PT_PACKED Color<Rgb555> {
+		class PT_PACKED Color<Rgb555> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */

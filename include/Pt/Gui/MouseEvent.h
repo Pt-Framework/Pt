@@ -20,7 +20,7 @@
 #ifndef Pt_Gui_MouseEvent_h
 #define Pt_Gui_MouseEvent_h
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 
 #include <cstddef>
@@ -53,7 +53,7 @@ namespace Gui {
 	 * this event can be determined using the methods x() and y(). This position is relative
 	 * to the top-left edge of the widget for which this mouse event was created.
 	 */
-	class PT_API MouseEvent : public Event {
+	class PT_GUI_API MouseEvent : public Event {
 		public:
 			//! @brief The button or mouse wheel this event was created for.
 			enum Button {

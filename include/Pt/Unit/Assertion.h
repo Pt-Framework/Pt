@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,10 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PTV_UNIT_ASSERTION_H
-#define PTV_UNIT_ASSERTION_H
+#ifndef PT_UNIT_ASSERTION_H
+#define PT_UNIT_ASSERTION_H
 
 #include <Pt/Exception.h>
+#include <Pt/Unit/Api.h>
+
 #include <iostream>
 
 

@@ -1,5 +1,6 @@
 SubDir TOP src Pt-Xml ;
 SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 
 SharedLibrary Pt-Xml : CData.cpp
                        Characters.cpp

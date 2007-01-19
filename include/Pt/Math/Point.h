@@ -6,7 +6,7 @@
 #define PT_MATH_POINT_H
 
 #include <Pt/Types.h>
-#include <Pt/Api.h>
+#include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 
 
@@ -17,7 +17,7 @@ namespace Pt {
 		/** \brief BasicPoint class
 		*/
 		template<typename T>
-		class PT_API BasicPoint {
+		class BasicPoint {
 			public:
 				BasicPoint()
 				: _x(0)

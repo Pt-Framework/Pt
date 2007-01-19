@@ -20,7 +20,7 @@
 #ifndef Pt_MoveEvent_h
 #define Pt_MoveEvent_h
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 #include <cstddef>
 
@@ -41,7 +41,7 @@ namespace Gui {
 	 * its parent. For a top-level-windows this parent is the desktop. For child widgets
 	 * this parent is the direct ancestor of the widget.
 	 */
-	class PT_API MoveEvent : public Event
+	class PT_GUI_API MoveEvent : public Event
 	{
 		public:
 			//! @brief The type information object (type_info) of this event class.

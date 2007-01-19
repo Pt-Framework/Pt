@@ -27,13 +27,15 @@
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Size.h>
 #include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Api.h>
+
 
 namespace Pt {
 
     namespace Gfx {
 
         //! \brief 
-        class PT_API Region
+        class Region
 		{
             public:
 				Region(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)

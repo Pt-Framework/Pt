@@ -5,13 +5,14 @@
 #ifndef PT_GUI_HorizontalLayout_H
 #define PT_GUI_HorizontalLayout_H
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/LayoutManager.h>
 #include <Pt/Gui/LayoutData.h>
 
 #include <map>
+
 
 namespace Pt {
 
@@ -40,7 +41,7 @@ namespace Gui {
 	 *
 	 * @see HorizontalLayout
 	 */
-	class PT_API HorizontalLayoutData : public LayoutData
+	class PT_GUI_API HorizontalLayoutData : public LayoutData
 	{
 		public:
 			//! @brief The orienation of the widget if there is more vertical space available than needed.

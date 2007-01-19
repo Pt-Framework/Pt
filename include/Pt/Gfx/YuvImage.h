@@ -20,6 +20,7 @@
 #ifndef Pt_YuvImage_h
 #define Pt_YuvImage_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/YuvColor.h>
 #include <Pt/Gfx/SubImage.h>
 

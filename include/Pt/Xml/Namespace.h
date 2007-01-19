@@ -1,7 +1,7 @@
 #ifndef PTV_Xml_Namespace_h
 #define PTV_Xml_Namespace_h
 
-#include <Pt/Api.h>
+#include <Pt/Xml/Api.h>
 #include <Pt/Text/String.h>
 
 #include <iosfwd>
@@ -23,7 +23,7 @@ namespace Xml {
 	 * @see Node
 	 * @see NamespaceContext
 	 */
-	class PT_API Namespace {
+	class PT_XML_API Namespace {
 		public:
 			/**
 			 * @brief Constructs a new Namespace object with the given namespace URI and prefix.

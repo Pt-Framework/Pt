@@ -5,9 +5,9 @@
 #ifndef PT_GUI_VERTICALLAYOUT_H
 #define PT_GUI_VERTICALLAYOUT_H
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/LayoutManager.h>
 #include <Pt/Gui/LayoutData.h>
 
@@ -52,7 +52,7 @@ namespace Gui {
 	 *
 	 * @see HorizontalLayoutData
 	 */
-	class PT_API VerticalLayout : public Layout
+	class PT_GUI_API VerticalLayout : public Layout
 	{
 		public:
 			enum Mode {

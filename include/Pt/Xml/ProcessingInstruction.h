@@ -1,6 +1,7 @@
 #ifndef PTV_Xml_ProcessingInstruction_h
 #define PTV_Xml_ProcessingInstruction_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Text/String.h>
 
@@ -22,7 +23,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_API ProcessingInstruction : public Node {
+		class PT_XML_API ProcessingInstruction : public Node {
 			public:
 				//! Constructs a new ProcessingInstruction.
 				ProcessingInstruction();

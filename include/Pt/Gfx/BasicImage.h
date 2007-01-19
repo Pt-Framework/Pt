@@ -21,6 +21,7 @@
 #define Pt_BasicImage_h
 
 #include <Pt/Exception.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicColor.h>
 #include <Pt/Math/Rect.h>
 
@@ -72,7 +73,7 @@ namespace Pt {
 		//!   typedef BasicImage<MyColorSpace> MyImageType;
 		//!
 		template <typename C>
-		class PT_API BasicImage {
+		class BasicImage {
 			public:
 				typedef C                       ColorSpaceT;
 				typedef BasicColor<ColorSpaceT> ColorT;

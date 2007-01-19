@@ -20,7 +20,7 @@
 #ifndef PT_GUI_KEYEVENT_H
 #define PT_GUI_KEYEVENT_H
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 
 #include <cstddef>
@@ -62,7 +62,7 @@ namespace Gui {
 	 * Shift key is released, there will also ge a key event with a keyCode of ShiftL (or ShiftR) and
 	 * no character text.
 	 */
-	class PT_API KeyEvent : public Event {
+	class PT_GUI_API KeyEvent : public Event {
 		public:
 			/**
 			 * @brief The type of KeyEvent, either Press or Release as a result of a pressed or released key.

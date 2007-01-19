@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx_ARgb8888Color_h
 #define Pt_Gfx_ARgb8888Color_h
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 
 
@@ -40,7 +40,7 @@ namespace Pt {
 		//!    Green : 0 to 255\n
 		//!    Blue  : 0 to 255
 		template <>
-		class PT_API PT_PACKED BasicColor<ARgb8888> {
+		class PT_GFX_API PT_PACKED BasicColor<ARgb8888> {
 			public:
 				typedef ARgb8888 ColorSpaceT;
 

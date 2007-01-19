@@ -1,6 +1,7 @@
 #ifndef PTV_Xml_Comment_h
 #define PTV_Xml_Comment_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Text/String.h>
 
@@ -22,7 +23,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_API Comment : public Node {
+		class PT_XML_API Comment : public Node {
 			public:
 				/**
 				 * @brief Constructs a new Comment object with the given string as content/Text.

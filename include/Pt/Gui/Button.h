@@ -5,10 +5,9 @@
 #ifndef Ptv_Gui_Button_h
 #define Ptv_Gui_Button_h
 
-#include <Pt/Api.h>
 #include <Pt/Text/String.h>
 #include <Pt/Gfx/Gfx.h>
-
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Pixmap.h>
 #include <Pt/Gui/Widget.h>
 
@@ -44,7 +43,7 @@ namespace Gui {
 	 *
 	 * \image Button-default_cancel_button.png A default cancel button
 	 */
-	class PT_API Button : public Widget
+	class PT_GUI_API Button : public Widget
 	{
 		public:
 			/**

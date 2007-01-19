@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,25 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_ARgb8888Image_h
-#define Pt_ARgb8888Image_h
+#ifndef PT_MATH_API_H
+#define PT_MATH_API_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ARgb8888Color.h>
-#include <Pt/Gfx/SubImage.h>
+#include <Pt/Math/Api.h>
 
-
-namespace Pt {
-	namespace Gfx {
-
-		//!
-		//! \brief ARgb8888 image class
-		typedef BasicImage<ARgb8888> ARgb8888Image;
-
-		//!
-		//! \brief ARgb8888 sub image class
-		typedef SubImage<ARgb8888> ARgb8888SubImage;
-	}
-}
+#if defined(PT_MATH_API_EXPORT)
+#    define PT_MATH_API PT_EXPORT
+#  else
+#    define PT_MATH_API PT_IMPORT
+#  endif
 
 #endif

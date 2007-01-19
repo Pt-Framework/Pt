@@ -2,13 +2,14 @@
 #define PTV_Xml_QName_h
 
 #include <Pt/Text/String.h>
+#include <Pt/Xml/Api.h>
 
 
 namespace Pt {
 
 	namespace Xml {
 
-		class PT_API QName {
+		class PT_XML_API QName {
 			public:
 				QName();
 

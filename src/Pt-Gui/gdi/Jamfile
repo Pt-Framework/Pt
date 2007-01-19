@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Gui gdi ;
-
 SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 Library Pt-Gui-gdi : ApplicationImpl.cpp
                      PainterImpl.cpp

@@ -20,6 +20,7 @@
 #ifndef Pt_Gfx_CmykColor_h
 #define Pt_Gfx_CmykColor_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 
 
@@ -44,7 +45,7 @@ namespace Pt {
 		//!    Yellow  : 0 - 0xFFFF\n
 		//!    Black   : 0 - 0xFFFF
 		template <>
-		class PT_API BasicColor<Cmyk> {
+		class PT_GFX_API BasicColor<Cmyk> {
 			public:
 				typedef Cmyk ColorSpaceT;
 

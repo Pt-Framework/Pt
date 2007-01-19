@@ -20,10 +20,10 @@
 #ifndef Pt_Gfx_XRgb1555Color_h
 #define Pt_Gfx_XRgb1555Color_h
 
-#include <assert.h>
-
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
+
+#include <cassert>
 
 
 namespace Pt {
@@ -43,7 +43,7 @@ namespace Pt {
 		//!    Green : 0 to 31 \n
 		//!    Blue  : 0 to 31
 		template <>
-		class PT_API PT_PACKED BasicColor<XRgb1555> {
+		class PT_GFX_API PT_PACKED BasicColor<XRgb1555> {
 			public:
 				typedef XRgb1555 ColorSpaceT;
 

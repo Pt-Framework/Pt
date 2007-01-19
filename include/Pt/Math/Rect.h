@@ -5,6 +5,7 @@
 #ifndef PT_MATH_RECT_H
 #define PT_MATH_RECT_H
 
+#include <Pt/Math/Api.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Size.h>
 #include <Pt/Math/Math.h>
@@ -16,7 +17,7 @@ namespace Pt {
 
         //! \brief A generic Rect class
         template<typename PointT, typename SizeT>
-        class PT_API BasicRect {
+        class BasicRect {
             public:
                 //! Construct a BasicRect at a given position and BasicSize<SizeT>
                 BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(1, 1))

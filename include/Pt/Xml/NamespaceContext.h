@@ -1,6 +1,7 @@
 #ifndef PTV_Xml_NamespaceContext_h
 #define PTV_Xml_NamespaceContext_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/Text/String.h>
 #include <map>
@@ -21,7 +22,7 @@ namespace Xml {
 	 *
 	 * @see Namespace
 	 */
-	class PT_API NamespaceContext {
+	class PT_XML_API NamespaceContext {
 		public:
 			//! Creates a new NamespaceContext object which manages the namespaces of an XML document.
 			NamespaceContext();

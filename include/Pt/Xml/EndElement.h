@@ -1,8 +1,8 @@
 #ifndef PTV_Xml_EndElement_h
 #define PTV_Xml_EndElement_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
-#include <Pt/Api.h>
 #include <Pt/Text/String.h>
 
 
@@ -27,7 +27,7 @@ namespace Pt {
 		 * @see StartElement
 		 * @see Node
 		 */
-		class PT_API EndElement : public Node {
+		class PT_XML_API EndElement : public Node {
 			public:
 				/**
 				 * @brief Constructs a new EndElement object with the given (optional) string as tag name.

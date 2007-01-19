@@ -20,8 +20,8 @@
 #ifndef PT_GUI_PAINTER_H
 #define PT_GUI_PAINTER_H
 
-#include <Pt/Api.h>
 #include <Pt/Types.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/IPainter.h>
 #include <Pt/Gfx/Gfx.h>
 #include "Pt/Gfx/Region.h"
@@ -32,7 +32,7 @@ namespace Pt {
 namespace Gui {
 	class PainterImpl;
 
-	class PT_API Painter : public IPainter
+	class PT_GUI_API Painter : public IPainter
 	{
 		public:
 			/**

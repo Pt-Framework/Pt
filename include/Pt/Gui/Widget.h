@@ -5,7 +5,6 @@
 #ifndef PT_GUI_WIDGET_H
 #define PT_GUI_WIDGET_H
 
-#include <Pt/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
@@ -14,6 +13,7 @@
 #include <Pt/Gfx/Region.h>
 #include <Pt/Text/String.h>
 #include <Pt/Gfx/ARgbColor.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Insets.h>
 #include <cstddef>
 
@@ -136,7 +136,7 @@ namespace Gui {
 	 * @see Insets
 	 * @see LayoutManager
 	 */
-	class PT_API Widget : public Connectable, public NonCopyable
+	class PT_GUI_API Widget : public Connectable, public NonCopyable
 	{
 		private:
 			//! @brief A pointer to the platform-specific Widget implementation.

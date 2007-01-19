@@ -1,7 +1,7 @@
 #ifndef PTV_Xml_CData_h
 #define PTV_Xml_CData_h
 
-#include <Pt/Api.h>
+#include <Pt/Xml/Api.h>
 #include <Pt/Text/String.h>
 #include <Pt/Xml/Node.h>
 
@@ -22,7 +22,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_API CData : public Node {
+		class PT_XML_API CData : public Node {
 			public:
 				/**
 				 * @brief Constructs a new CData object with the given (optional) string as content.

@@ -2,13 +2,15 @@
 #define PTV_Xml_ParseError_h
 
 #include <Pt/Exception.h>
+#include <Pt/Xml/Api.h>
+
 
 namespace Pt {
 
 namespace Xml {
 
 	//! Exception that is thrown when a parse error occured.
-	class PT_API ParseError : public std::runtime_error {
+	class PT_XML_API ParseError : public std::runtime_error {
 		public:
 			/**
 			 * @brief Creates a new ParseError object using the given reason and source info.

@@ -16,9 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PTV_UNIT_TESTPROTOCOL_H
-#define PTV_UNIT_TESTPROTOCOL_H
+#ifndef PT_UNIT_TESTPROTOCOL_H
+#define PT_UNIT_TESTPROTOCOL_H
 
+#include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
 

@@ -20,6 +20,7 @@
 #ifndef Pt_CmykImage_h
 #define Pt_CmykImage_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/CmykColor.h>
 #include <Pt/Gfx/SubImage.h>
 

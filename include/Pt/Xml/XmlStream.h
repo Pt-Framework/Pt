@@ -1,19 +1,21 @@
 #ifndef PTV_Xml_XmlStream_h
 #define PTV_Xml_XmlStream_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/NamespaceContext.h>
 #include <Pt/Xml/ParseError.h>
 #include <Pt/Xml/Resolver.h>
-
 #include <Pt/Text/TextStream.h>
 #include <Pt/Text/Utf8Codec.h>
 
 #include <memory>
 
+
 namespace Pt {
 
 namespace Xml {
+
 	class Node;
 	class XmlDeclaration;
 	class StartElement;
@@ -24,7 +26,7 @@ namespace Xml {
 	class CData;
 
 
-	class PT_API XmlToken {
+	class PT_XML_API XmlToken {
 		public:
 			enum Type {
 				Unknown,
@@ -52,7 +54,7 @@ namespace Xml {
 	};
 
 
-	class PT_API XmlStreamBuffer : public Pt::TextStreamBuffer {
+	class PT_XML_API XmlStreamBuffer : public Pt::TextStreamBuffer {
 		public:
 			XmlStreamBuffer(std::streambuf* endpoint)
 			: TextStreamBuffer( endpoint, new Utf8Codec() )
@@ -92,7 +94,7 @@ namespace Xml {
 	};
 
 
-	class PT_API XmlStreamBase {
+	class PT_XML_API XmlStreamBase {
 		public:
 			enum Flags {
 				Normal = 0x00,
@@ -135,7 +137,7 @@ namespace Xml {
 	};
 
 
-	class PT_API XmlIStream : virtual public XmlStreamBase, protected std::basic_istream<Char> {
+	class PT_XML_API XmlIStream : virtual public XmlStreamBase, protected std::basic_istream<Char> {
 		public:
 			XmlIStream(std::istream& is, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase( new XmlStreamBuffer(is), flags ),
@@ -173,7 +175,7 @@ namespace Xml {
 	};
 
 
-	class PT_API XmlOStream : virtual public XmlStreamBase, protected std::basic_ostream<Char> {
+	class PT_XML_API XmlOStream : virtual public XmlStreamBase, protected std::basic_ostream<Char> {
 		public:
 			XmlOStream(std::ostream& os, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase( new XmlStreamBuffer(os), flags ),
@@ -226,10 +228,10 @@ namespace Xml {
 			std::auto_ptr<XmlStreamBuffer> _buffer;
 	};
 
-	PT_API XmlOStream& operator<<(XmlOStream&, const Pt::Xml::StartElement& element);
+	PT_XML_API XmlOStream& operator<<(XmlOStream&, const Pt::Xml::StartElement& element);
 
 
-	class PT_API XmlIOStream : public XmlIStream, public XmlOStream {
+	class PT_XML_API XmlIOStream : public XmlIStream, public XmlOStream {
 		public:
 			XmlIOStream(std::iostream& ios, int flags = Normal) throw(IO::IOError)
 			: XmlStreamBase(new XmlStreamBuffer(ios), flags),

@@ -5,12 +5,13 @@
 #ifndef PT_GUI_SIMPLEGRIDLAYOUT_H
 #define PT_GUI_SIMPLEGRIDLAYOUT_H
 
-#include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/LayoutManager.h>
 #include <Pt/Gui/LayoutData.h>
 
 #include <map>
+
 
 namespace Pt {
 
@@ -21,7 +22,7 @@ namespace Gui {
 	 * LayoutManager are only inofficially supported by now. Use them at your own risk.
 	 * The documentation is not completed yet.
 	 */
-	class PT_API SimpleGridLayoutData : public LayoutData
+	class PT_GUI_API SimpleGridLayoutData : public LayoutData
 	{
 		public:
 			SimpleGridLayoutData(size_t x, size_t y, const Margin& margin = Margin(0, 0, 0, 0));
@@ -46,7 +47,7 @@ namespace Gui {
 	 * LayoutManager are only inofficially supported by now. Use them at your own risk.
 	 * The documentation is not completed yet.
 	 */
-	class PT_API SimpleGridLayout : public Layout
+	class PT_GUI_API SimpleGridLayout : public Layout
 	{
 		public:
 			void setLayoutData(Widget& widget, const SimpleGridLayoutData& layoutData);

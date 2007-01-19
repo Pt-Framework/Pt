@@ -1,7 +1,8 @@
 #ifndef PTV_Xml_Node_h
 #define PTV_Xml_Node_h
 
-#include <Pt/Api.h>
+
+#include <Pt/Xml/Api.h>
 #include <Pt/Clonable.h>
 
 
@@ -27,7 +28,7 @@ namespace Pt {
 		 *
 		 * @see Type
 		 */
-		class PT_API Node : public Clonable<Node> {
+		class PT_XML_API Node : public Clonable<Node> {
 			public:
 				enum Type {
 					//! Unknown Node type (may not currently be supported)

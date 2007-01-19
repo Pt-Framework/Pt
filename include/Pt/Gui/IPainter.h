@@ -20,9 +20,9 @@
 #ifndef PT_GUI_IPAINTER_H
 #define PT_GUI_IPAINTER_H
 
-#include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gui/Api.h>
 #include <cstddef>
 
 
@@ -44,7 +44,7 @@ namespace Gui {
 	 *
 	 * @see Gfx::Painter
 	 */
-	class PT_API IPainter : public Gfx::Painter {
+	class PT_GUI_API IPainter : public Gfx::Painter {
 		public:
 			/**
 			 * @brief Draws a sub-segment of a pixmap at the specified point on the painter's drawing area.

@@ -1,7 +1,7 @@
 #ifndef PTV_Xml_EndDocument_h
 #define PTV_Xml_EndDocument_h
 
-#include <Pt/Api.h>
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 
 
@@ -18,7 +18,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_API EndDocument : public Node {
+		class PT_XML_API EndDocument : public Node {
 			public:
 				//! Creates an EndDocument object.
 				EndDocument()

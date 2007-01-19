@@ -6,6 +6,8 @@
 #define PT_MATH_H
 
 #include <Pt/Types.h>
+#include <Pt/Math/Api.h>
+
 
 namespace Pt {
 

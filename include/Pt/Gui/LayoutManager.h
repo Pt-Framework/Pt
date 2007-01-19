@@ -5,10 +5,10 @@
 #ifndef PTV_GUI_LAYOUT_H
 #define PTV_GUI_LAYOUT_H
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/Math/Size.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 
 
 namespace Pt {
@@ -64,7 +64,7 @@ namespace Gui {
 	 * LayoutManagers can be nested by adding a container widget to a container widget. The
 	 * inner container widget can be assigned to another LayoutManager.
 	 */
-	class PT_API Layout : public Connectable
+	class PT_GUI_API Layout : public Connectable
 	{
 		public:
 			//! Empty destructor for the label widget.

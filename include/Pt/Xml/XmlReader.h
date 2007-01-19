@@ -2,12 +2,8 @@
 #define PTV_Xml_XmlStream_h
 
 #include <Pt/Text/String.h>
-
-#define IMPORT_TEST __declspec(dllimport)
-
 #include <Pt/Text/TextStream.h>
-#undef IMPORT_TEST
-
+#include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
 
@@ -63,7 +59,7 @@ namespace Xml {
 	 *
 	 * @see Node
 	 */
-	class PT_API XmlIStream
+	class PT_XML_API XmlIStream
 	{
 		public:
 			static const EndDocument& documentEnd()
@@ -131,7 +127,7 @@ namespace Xml {
 	};
 
 
-	class PT_API XmlStreamIterator
+	class XmlStreamIterator
 	{
 		public:
 			XmlStreamIterator()

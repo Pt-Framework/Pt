@@ -20,7 +20,7 @@
 #ifndef Pt_CloseEvent_h
 #define Pt_CloseEvent_h
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
 
 
@@ -37,7 +37,7 @@ namespace Gui {
 	 * the Widget object was deleted. The widget, which was closed, can be accessed using
 	 * the method widget().
 	 */
-	class PT_API CloseEvent : public Event
+	class PT_GUI_API CloseEvent : public Event
 	{
 		public:
 			//! @brief The type information object (type_info) of this event class.

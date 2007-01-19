@@ -5,8 +5,9 @@
 #ifndef PTV_GUI_LAYOUTDATA_H
 #define PTV_GUI_LAYOUTDATA_H
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Margin.h>
+
 
 namespace Pt {
 
@@ -28,7 +29,7 @@ namespace Gui {
 	 *
 	 * @see Layout
 	 */
-	class PT_API LayoutData
+	class PT_GUI_API LayoutData
 	{
 		public:
 			/**

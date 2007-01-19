@@ -20,6 +20,7 @@
 #ifndef Pt_ARgbImage_h
 #define Pt_ARgbImage_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/SubImage.h>
 

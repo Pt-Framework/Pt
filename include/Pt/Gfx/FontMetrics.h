@@ -5,7 +5,7 @@
 #ifndef PT_GFX_FONTMETRICS_H
 #define PT_GFX_FONTMETRICS_H
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 
 
@@ -13,7 +13,7 @@ namespace Pt {
 
 namespace Gfx {
 
-	class PT_API FontMetrics
+	class PT_GFX_API FontMetrics
 	{
 		public:
 			FontMetrics(size_t ascent, size_t descent, size_t width, size_t height);

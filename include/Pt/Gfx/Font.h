@@ -5,7 +5,7 @@
 #ifndef PT_GFX_FONT_H
 #define PT_GFX_FONT_H
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 
 #include <Pt/Text/String.h>
@@ -14,7 +14,7 @@ namespace Pt {
 
 namespace Gfx {
 
-	class PT_API Font
+	class PT_GFX_API Font
 	{
 		friend bool operator==(const Font& a, const Font& b);
 

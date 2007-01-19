@@ -16,10 +16,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PTV_UNIT_REGISTERTEST_H
-#define PTV_UNIT_REGISTERTEST_H
+#ifndef PT_UNIT_REGISTERTEST_H
+#define PT_UNIT_REGISTERTEST_H
 
-#include<Pt/Unit/Application.h>
+#include <Pt/Unit/Api.h>
+#include <Pt/Unit/Application.h>
 
 
 namespace Pt {

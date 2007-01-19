@@ -20,9 +20,10 @@
 #ifndef PT_GUI_PANEL_H
 #define PT_GUI_PANEL_H
 
-#include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Widget.h>
+
 
 namespace Pt {
 
@@ -41,7 +42,7 @@ namespace Gui {
 	 * Usually a panel should be completely transparent. In the current implementation
 	 * a panel's background is always painted, though.
 	 */
-	class PT_API Panel : public Widget
+	class PT_GUI_API Panel : public Widget
 	{
 		public:
 			/**

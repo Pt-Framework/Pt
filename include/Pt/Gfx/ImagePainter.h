@@ -21,8 +21,7 @@
 #ifndef PT_GFX_IMAGE_PAINTER_H
 #define PT_GFX_IMAGE_PAINTER_H
 
-#include <memory>
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Text/String.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/ARgbImage.h>
@@ -30,7 +29,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/Font.h>
-
+#include <memory>
 
 namespace Pt {
 

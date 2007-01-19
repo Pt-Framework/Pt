@@ -5,6 +5,7 @@
 #ifndef PT_GFX_SUBIMAGE_H
 #define PT_GFX_SUBIMAGE_H
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/BasicImage.h>
 #include <assert.h>
@@ -15,7 +16,7 @@ namespace Gfx {
 
 		//! \brief SubImage class
 		template <typename ColorSpaceT_>
-		class PT_API SubImage {
+		class SubImage {
 			public:
 				typedef BasicImage<ColorSpaceT_>     ImageT;
 				typedef SubImage<ColorSpaceT_>       SubImageT;

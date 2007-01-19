@@ -1,8 +1,8 @@
 SubDir TOP src Pt-Gui x11 ;
-
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs /usr/include/freetype2 ;
 SubDirHdrs /usr/include/X11 ;
+SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 Library Pt-Gui-x11 : ApplicationImpl.cpp
                       Drawable.cpp

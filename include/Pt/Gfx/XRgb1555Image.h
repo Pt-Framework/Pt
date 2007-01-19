@@ -20,6 +20,7 @@
 #ifndef Pt_XRgb1555Image_h
 #define Pt_XRgb1555Image_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/XRgb1555Color.h>
 #include <Pt/Gfx/SubImage.h>
 

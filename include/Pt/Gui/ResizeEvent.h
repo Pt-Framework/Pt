@@ -20,8 +20,9 @@
 #ifndef Pt_ResizeEvent_h
 #define Pt_ResizeEvent_h
 
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
+
 #include <cstddef>
 
 
@@ -48,7 +49,7 @@ namespace Gui {
 	 *
 	 * The ResizeEvent stores the new width and height of the widget.
 	 */
-	class PT_API ResizeEvent : public Event
+	class PT_GUI_API ResizeEvent : public Event
 	{
 		public:
 			//! The resize types of this Resize Event, either Reizse, Minimized, Maximized or Restored.

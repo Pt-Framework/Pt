@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/BasicColor.h>
 
 
@@ -35,7 +35,7 @@ namespace Pt {
 
 		//! \brief ARgb color
 		template <>
-		class PT_API BasicColor<ARgb> {
+		class PT_GFX_API BasicColor<ARgb> {
 			public:
 				typedef ARgb ColorSpaceT;
 

@@ -20,6 +20,7 @@
 #ifndef Pt_Gfx_YuvColor_h
 #define Pt_Gfx_YuvColor_h
 
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <algorithm>
 
@@ -41,7 +42,7 @@ namespace Gfx {
 	//!    U-Chrominance : -16384 to 16384\n
 	//!    V-Chrominance : -16384 to 16384
 	template <>
-	class PT_API BasicColor<Yuv> {
+	class PT_GFX_API BasicColor<Yuv> {
 		public:
 			typedef Yuv ColorSpaceT;
 

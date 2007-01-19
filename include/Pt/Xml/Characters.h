@@ -1,9 +1,10 @@
 #ifndef PTV_Xml_Characters_h
 #define PTV_Xml_Characters_h
 
-#include <Pt/Api.h>
+#include <Pt/Xml/Api.h>
 #include <Pt/Text/String.h>
 #include <Pt/Xml/Node.h>
+
 
 namespace Pt {
 
@@ -23,7 +24,7 @@ namespace Pt {
 		 *
 		 * @see Node
 		 */
-		class PT_API Characters : public Node {
+		class PT_XML_API Characters : public Node {
 			public:
 				/**
 				 * @brief Constructs a new Character object with the given (optional) string as content.

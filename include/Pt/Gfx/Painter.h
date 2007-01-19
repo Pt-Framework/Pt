@@ -5,7 +5,7 @@
 #ifndef PT_GFX_PAINTER_H
 #define PT_GFX_PAINTER_H
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Math/Size.h>
 #include <Pt/Text/String.h>
@@ -56,7 +56,7 @@ namespace Gfx {
 	 * top-left corner of the drawing area the painter was created for. All drawing or writing is done
 	 * in the current color, using the current paint mode, and in the current font.
 	 */
-	class PT_API Painter
+	class PT_GFX_API Painter
 	{
 		public:
 			//! @brief Empty virtual destructor.

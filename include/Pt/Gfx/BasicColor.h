@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx_BasicColor_h
 #define Pt_Gfx_BasicColor_h
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 
 

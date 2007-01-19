@@ -5,8 +5,8 @@
 #ifndef PT_GUI_NULLLAYOUT_H
 #define PT_GUI_NULLLAYOUT_H
 
-#include <Pt/Api.h>
 #include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/LayoutManager.h>
 
 
@@ -29,7 +29,7 @@ namespace Gui {
 	 * widgets will not be changed by the layout manager after they were positioned
 	 * manually using pixel-coordinates.
 	 */
-	class PT_API NullLayout : public Layout
+	class PT_GUI_API NullLayout : public Layout
 	{
 		public:
 			//! @brief Does no layouting, as this is the null layout manager.

@@ -16,20 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_Gui_Application_h
+#define Pt_Gui_Application_h
 
-#ifndef Ptv_Gui_Application_h
-#define Ptv_Gui_Application_h
-
-#include <Pt/Api.h>
 #include <Pt/Application.h>
+#include <Pt/Gui/Api.h>
 
 #include <typeinfo>
+
 
 namespace Pt {
 
 namespace Gui {
 
-	class PT_API Application : public Pt::Application
+	class PT_GUI_API Application : public Pt::Application
 	{
 		private:
 			//! Pointer to the implementation of Application.

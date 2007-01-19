@@ -1,7 +1,9 @@
 #ifndef PTV_Xml_Resolver_h
 #define PTV_Xml_Resolver_h
 
+#include <Pt/Xml/Api.h>
 #include <Pt/Text/String.h>
+
 #include <map>
 
 
@@ -16,7 +18,7 @@ namespace Xml {
  * the entity and the resolved entity value. To resolve the resolves value for an entity
  * the method resolveEntity() can be used.
  */
-class PT_API Resolver {
+class PT_XML_API Resolver {
 	public:
 		/**
 		 * @brief Constructs a new Resolver object and initializes the entity list using the XML default entities.

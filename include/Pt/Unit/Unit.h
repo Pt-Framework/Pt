@@ -1,5 +1,5 @@
-#ifndef PTV_UNIT_UNIT_H
-#define PTV_UNIT_UNIT_H
+#ifndef PT_UNIT_UNIT_H
+#define PT_UNIT_UNIT_H
 
 /** \dir
 !!! Pt::Unit (module)

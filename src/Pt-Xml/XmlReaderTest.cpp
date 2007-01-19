@@ -1,3 +1,5 @@
+#undef PT_XML_API_EXPORT
+
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Comment.h"
