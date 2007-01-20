@@ -28,10 +28,15 @@
 # Aloysius
 #
 
+ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
+	TASK "Introduce PT_API macro" d-marc
+	TASK "Check if more warnings need to be disabled" d-marc
+	TASK "Look into other compiler attributes" d-marc
+
 ITEM P10 S5 "An common exception hierachy exits"
-    TASK "Review Exception.h"	blue_wind_25, d-marc	2007-01-19
-    TASK "Write Documentation"	blue_wind_25, d-marc	2007-01-19
-    TASK "Write test case"	blue_wind_25, d-marc	2007-01-19
+    TASK "Review Exception.h"	blue_wind_25,d-marc	2007-01-19
+    TASK "Write Documentation"	blue_wind_25,d-marc	2007-01-19
+    TASK "Write test case"	blue_wind_25,d-marc	2007-01-19
 
 ITEM P7 S5 "A TypeTraits class exists"
     TASK "Review TypeTraits template"	d-marc	2007-01-16
