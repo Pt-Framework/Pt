@@ -16,7 +16,7 @@ namespace Pt {
 		friend T any_cast(const Any&);
 
 		public:
-			class PT_API Value : public Pt::Clonable<Value> {
+			class Value : public Pt::Clonable<Value> {
 				public:
 					virtual ~Value() {}
 					virtual const char* typeName() const = 0;
@@ -28,7 +28,7 @@ namespace Pt {
 			};
 
 			template <typename T>
-			class PT_API BasicValue : public Value {
+			class BasicValue : public Value {
 				public:
 					BasicValue(const T& value = T())
 					: _value(value)
