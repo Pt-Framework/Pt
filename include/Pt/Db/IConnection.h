@@ -23,7 +23,6 @@
 
 #include <Pt/Db/Api.h>
 #include <Pt/RefCounted.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/SmartPtr.h>
 
 #include <string>
@@ -43,7 +42,7 @@ namespace Db {
     /** \brief Interface for database connection
 		\see Db::Connection
 	*/
-    class PT_DB_API IConnection : public RefCounted, private NonCopyable
+    class PT_DB_API IConnection : public RefCounted
     {
         public:
             typedef size_t size_type;

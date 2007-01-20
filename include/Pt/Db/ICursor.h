@@ -23,7 +23,6 @@
 
 #include <Pt/Db/Api.h>
 #include <Pt/RefCounted.h>
-#include <Pt/NonCopyable.h>
 
 
 namespace Pt {
@@ -32,7 +31,7 @@ namespace Db {
 
   class Row;
 
-  class PT_DB_API ICursor : public RefCounted, private NonCopyable
+  class PT_DB_API ICursor : public RefCounted
   {
     public:
       virtual Row fetch() = 0;

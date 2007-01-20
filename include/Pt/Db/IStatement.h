@@ -26,7 +26,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/RefCounted.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Db/Api.h>
 
 
@@ -43,7 +42,7 @@ namespace Db {
 	class Value;
 	class ICursor;
 
-	class PT_DB_API IStatement : public RefCounted, public NonCopyable
+	class PT_DB_API IStatement : public RefCounted
 	{
 	public:
 		typedef size_t size_type;

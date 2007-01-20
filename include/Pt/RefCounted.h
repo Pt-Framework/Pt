@@ -21,11 +21,12 @@
 #define PT_REFCOUNTED_H
 
 #include <Pt/Types.h>
+#include <Pt/NonCopyable.h>
 
 
 namespace Pt
 {
-	class PT_API RefCounted
+	class PT_API RefCounted : private NonCopyable
 	{
 		public:
 			RefCounted()

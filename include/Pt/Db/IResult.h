@@ -25,7 +25,6 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <Pt/RefCounted.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Db/Api.h>
 
 
@@ -38,7 +37,7 @@ namespace Db {
 	/** \brief Interface for DB Values
 		\see Db::Result
 	*/
-	class PT_DB_API IResult : public RefCounted, private NonCopyable
+	class PT_DB_API IResult : public RefCounted
 	{
 	public:
 		typedef size_t size_type;

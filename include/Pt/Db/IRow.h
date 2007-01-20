@@ -23,7 +23,6 @@
 #define PT_DB_IROW_H
 
 #include <Pt/RefCounted.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Db/Api.h>
 
 
@@ -36,7 +35,7 @@ namespace Db {
 	/** \brief Interface for DB Rows
 		\see Db::Rows
 	*/
-	class PT_DB_API IRow : public RefCounted, private NonCopyable
+	class PT_DB_API IRow : public RefCounted
 	{
 		public:
 			typedef size_t size_type;
