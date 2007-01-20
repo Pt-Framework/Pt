@@ -20,3 +20,8 @@
 # regards,
 # Aloysius
 #
+
+ITEM P7 S5 "Any class is implemented"
+	TASK "Review code" d-marc
+	TASK "Write Documentation" d-marc
+	TASK "Write test case" d-marc

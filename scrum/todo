@@ -24,8 +24,3 @@
 ITEM P7 S5 "Object reflection API is documented"
 	TASK "Write Documentation"
 	TASK "Write test case"
-
-ITEM P7 S5 "Any class is implemented"
-	TASK "Review code"
-	TASK "Write Documentation"
-	TASK "Write test case"
