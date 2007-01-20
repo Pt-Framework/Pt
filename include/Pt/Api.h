@@ -27,7 +27,12 @@
     //http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
     #pragma warning( disable : 4996 ) // deprectated stdc++ functions
     #pragma warning( disable : 4251 ) // dll-linkage
-    #pragma warning( disable : 4290 ) // exception sepcification ignored
+
+    //non dll-interface base class
+    //#pragma warning( disable : 4275 )
+
+    // exception sepcification ignored
+    #pragma warning( disable : 4290 ) 
 #endif
 
 #ifdef _WIN32_WCE
