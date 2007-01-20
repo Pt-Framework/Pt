@@ -48,7 +48,7 @@
 			class PT_TEXT_API locale
 			{
 				public:
-					class PT_API facet
+					class PT_TEXT_API facet
 					{
 						public:
 							facet(size_t refs)
