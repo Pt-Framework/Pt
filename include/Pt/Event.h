@@ -26,7 +26,7 @@ namespace Pt {
 	 * The method clone() is abstract and needs to be defined by subclasses to
 	 * allow cloning of the specific Event object.
 	 */
-	class PT_API Event {
+	class PT_EXPORT Event {
 		public:
 			/**
 			 * \brief Constructor to initialize the Event class.

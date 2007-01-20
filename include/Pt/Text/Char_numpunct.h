@@ -19,7 +19,6 @@
 #ifndef PTV_Text_numpunct_h
 #define PTV_Text_numpunct_h
 
-#include <Pt/Api.h>
 #include <Pt/Text/Api.h>
 #include <Pt/Text/Char.h>
 #include <Pt/Text/String.h>

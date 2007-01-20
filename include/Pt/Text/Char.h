@@ -20,7 +20,7 @@
 #ifndef PTV_TEXT_CHAR_H
 #define PTV_TEXT_CHAR_H
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Types.h>
 
 #include <string>
@@ -55,7 +55,7 @@ namespace Text {
 	 *
 	 * @see Category
 	 */
-	class PT_API Char
+	class PT_TEXT_API Char
 	{
 		public:
 			//! @brief General category
@@ -620,7 +620,7 @@ namespace std {
 
 	/// @cond INTERNAL
 	template<>
-	struct PT_API char_traits<Pt::Char>
+	struct char_traits<Pt::Char>
 	{
 		typedef Pt::Char char_type;
 		typedef Pt::uint32_t int_type;

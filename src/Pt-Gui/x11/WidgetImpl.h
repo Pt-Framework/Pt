@@ -50,7 +50,7 @@ namespace Gui {
 	class WidgetPainterImpl;
 	class ResizeEvent;
 
-	class PT_API WidgetImpl : public Drawable
+	class WidgetImpl : public Drawable
 	{
 		public:
 			WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at = Math::Point(0, 0),

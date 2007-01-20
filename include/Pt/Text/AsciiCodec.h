@@ -21,7 +21,7 @@
 #ifndef PTV_AsciiCodec_h
 #define PTV_AsciiCodec_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Text/TextCodec.h>
 #include <Pt/Text/Char.h>
@@ -40,7 +40,7 @@ namespace Text {
 	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in ASCII-encoding.
 	 */
-	class PT_API AsciiCodec : public TextCodec<Char, char> {
+	class PT_TEXT_API AsciiCodec : public TextCodec<Char, char> {
 		public:
 			/**
 			 * @brief Constructs a new AsciiCodec object with internal type of Pt::Text::Char and

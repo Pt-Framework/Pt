@@ -67,11 +67,10 @@
 	#error "Unknown compiler, can't continue"
 #endif
 
-#ifdef PT_API_IMPORT
-#define PT_API PT_IMPORT
-#else
-#define PT_API PT_EXPORT
-#endif
-
+#if defined(PT_API_EXPORT)
+#    define PT_API PT_EXPORT
+#  else
+#    define PT_API PT_IMPORT
+#  endif
 
 #endif

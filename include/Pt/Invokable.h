@@ -36,7 +36,7 @@ namespace Pt {
 	            typename A3 = Pt::Void,
 	            typename A4 = Pt::Void,
 	            typename A5 = Pt::Void >
-	class PT_API Invokable {
+	class Invokable {
 		public:
 			virtual ~Invokable()
 			{}
@@ -51,7 +51,7 @@ namespace Pt {
 	           typename A2,
 	           typename A3,
 	           typename A4 >
-	class PT_API Invokable<A1, A2, A3, A4, Pt::Void> {
+	class Invokable<A1, A2, A3, A4, Pt::Void> {
 		public:
 			virtual ~Invokable()
 			{}
@@ -65,7 +65,7 @@ namespace Pt {
 	template < typename A1,
 	            typename A2,
 	            typename A3 >
-	class PT_API Invokable<A1, A2, A3, Pt::Void, Pt::Void> {
+	class Invokable<A1, A2, A3, Pt::Void, Pt::Void> {
 		public:
 			virtual ~Invokable()
 			{}
@@ -78,7 +78,7 @@ namespace Pt {
 
 	template < typename A1,
 	            typename A2 >
-	class PT_API Invokable<A1, A2, Pt::Void, Pt::Void, Pt::Void> {
+	class Invokable<A1, A2, Pt::Void, Pt::Void, Pt::Void> {
 		public:
 			virtual ~Invokable()
 			{}
@@ -90,7 +90,7 @@ namespace Pt {
 
 
 	template <typename A1>
-	class PT_API Invokable<A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
+	class Invokable<A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
 		public:
 			virtual ~Invokable()
 			{}

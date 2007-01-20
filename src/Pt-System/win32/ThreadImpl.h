@@ -23,7 +23,7 @@ namespace System {
 	typedef  unsigned threadid_t;
 #endif
 
-	class PT_API ThreadImpl {
+	class ThreadImpl {
 		public:
 			enum Priority
             {

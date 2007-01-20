@@ -87,7 +87,7 @@ namespace Gui {
 	 *
 	 * @see VerticalLayout
 	 */
-	 class PT_API LayoutData : public Gui::LayoutData
+	 class PT_GUI_API LayoutData : public Gui::LayoutData
 			{
 				public:
 					LayoutData( Orientation orientation = Left, const Margin& margin = Margin(0, 0, 0, 0) )

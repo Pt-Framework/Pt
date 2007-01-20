@@ -61,7 +61,7 @@ namespace Gui {
 	 * method of this singleton class. It creates the essential association between the
 	 * Windows' HWND and the application's widget.
 	 */
-	class PT_API GDIRegistry : public Pt::Singleton<GDIRegistry>
+	class GDIRegistry : public Pt::Singleton<GDIRegistry>
 	{
 		public:
 			//! @brief Initializes the instance handle and registers the window classes.
@@ -177,7 +177,7 @@ namespace Gui {
 	 * slot.
 	 *
 	 */
-	class PT_API GDIEventLoop : public Pt::Singleton<GDIEventLoop>
+	class GDIEventLoop : public Pt::Singleton<GDIEventLoop>
 	{
 		public:
 			//! @brief Empty constructor
@@ -461,7 +461,7 @@ namespace Gui {
 	 * All events, which are sent by GDIEventLoop are tranfered to Gui::Application::event by
 	 * connecting the signal GDIEventLoop::eventQueueSignal to the Gui::Application::event slot.
 	 */
-	class PT_API ApplicationImpl
+	class ApplicationImpl
 	{
 		public:
 			//! Connects the event signal to Application::event and stores the Application object.

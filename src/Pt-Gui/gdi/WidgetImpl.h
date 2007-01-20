@@ -42,7 +42,7 @@ namespace Gui {
 	class ResizeEvent;
 	class GDIPainter;
 
-	class PT_API WidgetImpl : public Drawable
+	class WidgetImpl : public Drawable
 	{
 		public:
 			WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size);

@@ -21,7 +21,7 @@
 #ifndef Pt_Text_Base64Codec_h
 #define Pt_Text_Base64Codec_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Text/TextCodec.h>
 #include <locale>
@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-	class PT_API Base64Codec : public TextCodec<char, char> {
+	class PT_TEXT_API Base64Codec : public TextCodec<char, char> {
 		public:
 			explicit Base64Codec(size_t ref = 0);
 

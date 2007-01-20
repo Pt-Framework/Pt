@@ -37,7 +37,7 @@ namespace Unit {
         test of the test suite without passing it any data. Implementors
         need to override the method TestProtocol::run.
     */
-    class PT_API TestProtocol
+    class TestProtocol
     {
         public:
             /** @brief Destructor

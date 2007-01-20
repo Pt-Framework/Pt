@@ -32,7 +32,7 @@ namespace Gui {
 
 	class PixmapImpl;
 
-	class PT_API PixmapPainter : public PainterImpl
+	class PixmapPainter : public PainterImpl
 	{
 		public:
 			PixmapPainter(PixmapImpl& pixmapImpl);

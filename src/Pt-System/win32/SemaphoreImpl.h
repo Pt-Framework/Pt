@@ -21,7 +21,7 @@ namespace System {
 		of the Semaphore class. It is used as delegate from the common
 		Semaphore class.
 	*/
-	class PT_API SemaphoreImpl {
+	class SemaphoreImpl {
 		public:
 			//! @brief Default Constructor
 			SemaphoreImpl(unsigned int initial = 0);

@@ -43,7 +43,7 @@ namespace Gfx {
 	};
 
 
-	class PT_API BrushData
+	class PT_GFX_API BrushData
 	{
 		public:
 			BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture);

@@ -32,7 +32,7 @@ namespace Pt {
 	 * Events can be committed by calling commitEvent(). Long running operations
 	 * can call processEvents() to keep the application responsive.
 	 */
-	class PT_API Application : public Connectable {
+	class PT_EXPORT Application : public Connectable {
 		public:
 			Application()
 			{ }

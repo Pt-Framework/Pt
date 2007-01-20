@@ -52,7 +52,7 @@ class PT_API PropertyValue : public AbstractProperty
 
 
 template <typename T>
-class PT_API ReadProperty : public PropertyValue
+class ReadProperty : public PropertyValue
 {
 	public:
 		ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
@@ -71,7 +71,7 @@ class PT_API ReadProperty : public PropertyValue
 
 
 template <typename T>
-class PT_API WriteProperty : public PropertyValue
+class WriteProperty : public PropertyValue
 {
 	public:
 		WriteProperty( const std::string& name, Reflectable* parent, const T& value = T() )
@@ -93,7 +93,7 @@ class PT_API WriteProperty : public PropertyValue
 
 
 template <typename T>
-class PT_API Property : public PropertyValue
+class Property : public PropertyValue
 {
 	public:
 		Property( const std::string& name, Reflectable* parent, const T& value = T() )

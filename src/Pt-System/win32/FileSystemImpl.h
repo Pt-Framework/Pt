@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API FileSystemImpl {
+	class FileSystemImpl {
 		public:
 			FileSystemImpl()
 			{}

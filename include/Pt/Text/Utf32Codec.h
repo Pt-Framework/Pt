@@ -20,7 +20,7 @@
 #ifndef Ptv_Utf32Codec_h
 #define Ptv_Utf32Codec_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Text/Char.h>
 #include <Pt/Text/TextCodec.h>
@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Text {
 
-	class PT_API Utf32Codec : public TextCodec<Char, char> {
+	class PT_TEXT_API Utf32Codec : public TextCodec<Char, char> {
 		public:
 			/**
 			 * @brief Constructs a new Utf32Codec object.

@@ -49,7 +49,7 @@ class DrawText;
 /**
     \brief A painter to draw on an ARgbImage.
 */
-class PT_API ImagePainter : public Painter
+class PT_GFX_API ImagePainter : public Painter
 {
     public:
 

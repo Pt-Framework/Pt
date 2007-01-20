@@ -22,6 +22,7 @@
 
 #include <Pt/TypeInfo.h>
 #include <Pt/AnyTraits.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/String.h>
 #include <list>
 
@@ -38,7 +39,7 @@ namespace Pt {
 		 *
 		 * See std::list for more details.
 		 */
-		class PT_API StringList : public std::list<Pt::String> {
+		class PT_TEXT_API StringList : public std::list<Pt::String> {
 			public:
 				typedef std::list<Pt::String>::iterator Iterator;
 				typedef std::list<Pt::String>::const_iterator ConstIterator;

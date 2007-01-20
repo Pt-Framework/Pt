@@ -248,7 +248,7 @@ namespace Pt {
 	template < typename A1 = Pt::Void,
 	            typename A2 = Pt::Void,
 	            typename A3 = Pt::Void >
-	class PT_API SignalSlot : public BasicSlot<void, A1, A2, A3> {
+	class SignalSlot : public BasicSlot<void, A1, A2, A3> {
 		public:
 			SignalSlot(Pt::Signal<A1, A2, A3>& signal)
 			: _method( &signal, &Signal<A1, A2, A3>::send )

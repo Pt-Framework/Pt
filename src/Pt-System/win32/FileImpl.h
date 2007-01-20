@@ -26,7 +26,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API FileImpl {
+class FileImpl {
 	public:
 		FileImpl(const std::string& path);
 

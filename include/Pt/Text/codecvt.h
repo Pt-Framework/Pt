@@ -20,7 +20,7 @@
 #ifndef PTV_Text_codecvt_h
 #define PTV_Text_codecvt_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char.h>
 
 #include <Pt/Text/locale.h>
@@ -31,14 +31,14 @@ namespace std {
 #ifdef _MSC_VER
 
 	template<>
-	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
+	class PT_TEXT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
 
 #else
 
 	// Most implementations of codecvt do not derive from locale::facet, altough the
 	// STL specifies this.
 	template<>
-	class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base, public locale::facet {
+	class PT_TEXT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base, public locale::facet {
 #endif
 
 		public:

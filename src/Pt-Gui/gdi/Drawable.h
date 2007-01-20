@@ -28,7 +28,7 @@ namespace Pt {
 
 namespace Gui {
 
-	class PT_API Drawable
+	class Drawable
 	{
 		public:
 			virtual ~Drawable()

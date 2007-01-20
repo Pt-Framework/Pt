@@ -12,7 +12,7 @@ namespace Pt {
 
 namespace System {
 		//! @brief MS Windows specific implementation of the Condition class.
-		class PT_API ConditionImpl {
+		class ConditionImpl {
 		public:
 			//! @brief Default Constructor
 			/**

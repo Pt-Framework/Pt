@@ -32,7 +32,7 @@ namespace Gui {
 
 	class WidgetImpl;
 
-	class PT_API WidgetPainter : public PainterImpl {
+	class WidgetPainter : public PainterImpl {
 		public:
 			WidgetPainter(WidgetImpl& widgetImpl);
 

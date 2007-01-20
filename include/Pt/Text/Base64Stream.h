@@ -20,7 +20,7 @@
 #ifndef Pt_Text_Base64Stream_h
 #define Pt_Text_Base64Stream_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/BasicTextStream.h>
 #include <Pt/Text/Base64Codec.h>
 
@@ -29,13 +29,13 @@ namespace Pt {
 
 namespace Text {
 
-	class PT_API  Base64Buffer :  public BasicTextBuffer<char, char> {
+	class PT_TEXT_API  Base64Buffer :  public BasicTextBuffer<char, char> {
 		public:
 			Base64Buffer(std::streambuf* buffer, Base64Codec* codec);
 	};
 
 
-	class PT_API Base64IStream : public BasicTextIStream<char, char> {
+	class PT_TEXT_API Base64IStream : public BasicTextIStream<char, char> {
 		public:
 			Base64IStream(std::istream& is);
 
@@ -43,7 +43,7 @@ namespace Text {
 	};
 
 
-	class PT_API Base64OStream : public BasicTextOStream<char, char> {
+	class PT_TEXT_API Base64OStream : public BasicTextOStream<char, char> {
 		public:
 			Base64OStream(std::ostream& os);
 
@@ -51,7 +51,7 @@ namespace Text {
 	};
 
 
-	class PT_API Base64Stream : public BasicTextStream<char, char> {
+	class PT_TEXT_API Base64Stream : public BasicTextStream<char, char> {
 		public:
 			Base64Stream(std::iostream& ios);
 

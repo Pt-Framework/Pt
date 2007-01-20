@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Gui {
 
-	class PT_API PixmapImpl : public Drawable
+	class PixmapImpl : public Drawable
 	{
 		public:
 			PixmapImpl(size_t width, size_t height);

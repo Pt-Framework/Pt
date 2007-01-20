@@ -26,7 +26,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API DirectoryIteratorImpl {
+class DirectoryIteratorImpl {
 	public:
 		DirectoryIteratorImpl();
 
@@ -55,7 +55,7 @@ class PT_API DirectoryIteratorImpl {
 };
 
 
-class PT_API DirectoryImpl {
+class DirectoryImpl {
 	public:
 		DirectoryImpl();
 		~DirectoryImpl();

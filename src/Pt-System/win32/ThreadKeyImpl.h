@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API ThreadKeyImpl {
+class ThreadKeyImpl {
 	public:
 		ThreadKeyImpl() throw(SystemError)
 		{

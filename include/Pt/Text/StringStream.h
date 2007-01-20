@@ -20,7 +20,7 @@
 #ifndef PTV_TEXT_STRINGSTREAM_H
 #define PTV_TEXT_STRINGSTREAM_H
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char_ctype.h>
 #include <Pt/Text/Char_numpunct.h>
 

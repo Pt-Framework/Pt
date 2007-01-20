@@ -338,7 +338,7 @@ namespace Pt {
 
 
 	template <>
-	class Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<> {
+	class PT_API Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<> {
 		public:
 			typedef void ReturnT;
 			typedef Pt::Void Arg1T;

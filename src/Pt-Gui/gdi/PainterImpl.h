@@ -45,7 +45,7 @@ namespace Gui {
 	class WidgetImpl;
 	class Pixmap;
 
-	class PT_EXPORT PainterImpl {
+	class PainterImpl {
 		public:
 			PainterImpl(Drawable& drawable);
 

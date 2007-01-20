@@ -20,7 +20,7 @@
 #ifndef PT_Text_TextBuffer_h
 #define PT_Text_TextBuffer_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/TextCodec.h>
 
 #include <iostream>

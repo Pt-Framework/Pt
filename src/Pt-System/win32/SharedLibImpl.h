@@ -16,7 +16,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API SharedLibImpl {
+class SharedLibImpl {
 	public:
 		//! @brief default Constructor
 		SharedLibImpl()

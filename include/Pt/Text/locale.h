@@ -20,7 +20,7 @@
 #ifndef PTV_TEXT_LOCALE_H
 #define PTV_TEXT_LOCALE_H
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 
 /**
  * This header files provides some basic dummy implementations for locale, locale::facet, ctype_base,
@@ -45,7 +45,7 @@
 
 		namespace std {
 
-			class PT_API locale
+			class PT_TEXT_API locale
 			{
 				public:
 					class PT_API facet
@@ -68,7 +68,7 @@
 			};
 
 
-			class PT_API ctype_base
+			class PT_TEXT_API ctype_base
 			{
 				public:
 					enum {
@@ -102,7 +102,7 @@
 
 			//typedef int mbstate_t;
 
-			class PT_API codecvt_base
+			class PT_TEXT_API codecvt_base
 			{
 				public:
 					enum {

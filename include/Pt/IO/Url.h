@@ -142,10 +142,10 @@ class PT_IO_API Url {
 		//! Url-decodes the given string
 		static std::string decode(const std::string& str);
 
-		friend PT_API std::ostream& operator<<(std::ostream& os,
+		friend std::ostream& operator<<(std::ostream& os,
 			const Url& url);
 
-		friend PT_API std::istream& operator>>(std::istream& is, Url& url);
+		friend std::istream& operator>>(std::istream& is, Url& url);
 
 		//! Returns a ArgumentMap for given Url-encoded argument-string
 		static ArgumentMap fromString(const std::string& args);

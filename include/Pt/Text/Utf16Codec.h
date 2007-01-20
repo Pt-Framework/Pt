@@ -62,6 +62,7 @@
 #define Ptv_IO_Utf16Codec_h
 
 #include <Pt/Exception.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Text/TextCodec.h>
 
 
@@ -79,7 +80,7 @@ namespace Text {
 	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in UTF-16-encoding.
 	 */
-	class PT_API Utf16Codec : public TextCodec<Char, char> {
+	class PT_TEXT_API Utf16Codec : public TextCodec<Char, char> {
 		public:
 			explicit Utf16Codec(size_t ref = 0);
 			virtual ~Utf16Codec();

@@ -20,7 +20,7 @@
 #ifndef PT_Text_TextCodec_h
 #define PT_Text_TextCodec_h
 
-#include <Pt/Api.h>
+#include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Text/Char_codecvt.h>
 
@@ -52,7 +52,7 @@ namespace Text {
 	 * @see Utf32Codec
 	 */
 	template <typename I, typename E>
-	class PT_API TextCodec : public std::codecvt<I, E, mbstate_t> {
+	class PT_TEXT_API TextCodec : public std::codecvt<I, E, mbstate_t> {
 		public:
 			typedef I InternT;
 			typedef E ExternT;

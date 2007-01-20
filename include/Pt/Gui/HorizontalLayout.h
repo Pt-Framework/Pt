@@ -121,7 +121,7 @@ namespace Gui {
 	 *
 	 * @see HorizontalLayoutData
 	 */
-	class PT_API HorizontalLayout : public Layout
+	class PT_GUI_API HorizontalLayout : public Layout
 	{
 		public:
 			/**

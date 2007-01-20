@@ -16,10 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PTV_TEXT_STRINGDATA_H
 #define PTV_TEXT_STRINGDATA_H
 
+#include <Pt/Text/Api.h>
 #include <Pt/Text/Char.h>
 
 #include <string>
@@ -32,7 +32,7 @@ namespace Pt {
 typedef unsigned int AtomicInt;
 
 
-class PT_API StringData {
+class PT_TEXT_API StringData {
 	public:
 		typedef size_t size_type;
 		typedef Pt::Text::Char value_type;

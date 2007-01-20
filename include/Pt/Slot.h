@@ -12,7 +12,7 @@ namespace Pt {
 	class Connection;
 
 
-	class PT_API Slot {
+	class PT_EXPORT Slot {
 		public:
 			virtual ~Slot() {}
 
@@ -32,7 +32,7 @@ namespace Pt {
 	            typename A3 = Pt::Void,
 	            typename A4 = Pt::Void,
 	            typename A5 = Pt::Void >
-	class PT_API BasicSlot : public Slot {
+	class BasicSlot : public Slot {
 		public:
 			virtual Slot* clone() const = 0;
 	};

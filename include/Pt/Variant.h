@@ -27,7 +27,7 @@
 
 namespace Pt {
 
-	class PT_API Variant {
+	class Variant {
 		public:
 			Variant() throw()
 			{}

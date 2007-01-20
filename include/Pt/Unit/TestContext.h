@@ -29,7 +29,7 @@ namespace Pt {
 
 namespace Unit {
 
-    class PT_API TestContext
+    class TestContext
     {
         public:
             virtual ~TestContext()

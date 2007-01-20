@@ -22,7 +22,7 @@ namespace System {
 		of the Mutex class. It is used as delegate from the common
 		Mutex class.
 	*/
-	class PT_API MutexImpl {
+	class MutexImpl {
 		public:
 			//! @brief Default Constructor
 			MutexImpl(Mutex& mutex);

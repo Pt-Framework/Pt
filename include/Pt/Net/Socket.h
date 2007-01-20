@@ -32,7 +32,7 @@ namespace Pt
 namespace Net
 {
 
-	class PT_API Socket // : public IO::IODevice
+	class PT_NET_API Socket // : public IO::IODevice
     {
 		public:
 			virtual ~Socket();
