@@ -1,6 +1,5 @@
 SubDir TOP src Pt-Text ;
 SubDirHdrs $(TOP)/include ;
-
 SubDirC++Flags [ FDefines PT_TEXT_API_EXPORT ] ;
 
 SharedLibrary Pt-Text : AsciiCodec.cpp

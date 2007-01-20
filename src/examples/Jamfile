@@ -1,6 +1,0 @@
-SubDir TOP src examples ;
-SubDirHdrs $(TOP)/include ;
-
-Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt Pt-IO Pt-Gfx Pt-Gui Pt-System ;
-Main_MakeLocate Scribble : bin ;

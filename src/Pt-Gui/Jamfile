@@ -10,6 +10,7 @@ SharedLibrary Pt-Gui :  Application.cpp
                         Button.cpp
                         Event.cpp
                         HorizontalLayout.cpp
+                        ImageButton.cpp
                         KeyEvent.cpp
                         Label.cpp
                         LayoutManager.cpp
