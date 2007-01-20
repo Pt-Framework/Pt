@@ -22,9 +22,12 @@
 
 
 #ifdef _MSC_VER
-	#pragma warning( disable : 4996 ) // deprectated stdc++ functions
-	#pragma warning( disable : 4251 ) // dll-linkage
-	#pragma warning( disable : 4290 ) // exception sepcification ignored
+    //http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
+    //http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
+    //http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
+    #pragma warning( disable : 4996 ) // deprectated stdc++ functions
+    #pragma warning( disable : 4251 ) // dll-linkage
+    #pragma warning( disable : 4290 ) // exception sepcification ignored
 #endif
 
 #ifdef _WIN32_WCE
