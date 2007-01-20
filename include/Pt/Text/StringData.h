@@ -32,7 +32,7 @@ namespace Pt {
 typedef unsigned int AtomicInt;
 
 
-class PT_TEXT_API StringData {
+class StringData {
 	public:
 		typedef size_t size_type;
 		typedef Pt::Text::Char value_type;

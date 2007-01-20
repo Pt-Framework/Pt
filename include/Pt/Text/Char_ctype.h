@@ -43,7 +43,7 @@ namespace std {
 #else
 
 	template <>
-	class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
+	class PT_TEXT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
 
 #endif
 
