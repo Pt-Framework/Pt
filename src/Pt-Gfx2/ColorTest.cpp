@@ -35,6 +35,9 @@ int main()
 	ARgbColor      argb_1, argb_2;
 	ARgbFColor     float_1, float_2;
 	ARgb8888Color  argb8888_1, argb8888_2;
+	Rgb888Color    rgb888_1, rgb888_2;
+	Rgb565Color    rgb565_1, rgb565_2;
+	Rgb555Color    rgb555_1, rgb555_2;
 
 	fromARgb(argb_2, toARgb(argb_1));
 	fromARgb(argb8888_2, toARgb(argb8888_1));

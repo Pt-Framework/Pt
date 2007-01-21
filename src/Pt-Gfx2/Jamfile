@@ -22,4 +22,3 @@ Main_MakeLocate ColorTest : bin ;
 Main ImageTest : ImageTest.cpp ;
 Main_LinkSharedLibraries ImageTest : Pt Pt-Gfx2 ;
 Main_MakeLocate ImageTest : bin ;
-
