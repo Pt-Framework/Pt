@@ -32,10 +32,12 @@ namespace Pt {
     /** Contains any type
 
         Any can contain any other type that is default- and copy constructible
-        and less-than and equality comparable. When a value is assigne to an
-        Any a copy is made, just like when a type is inserted in a standard C++
-        container. The contained type can be accessed via Pt::any_cast<>. It
-        is only possible to get the contained value if the type matches
+        and less-than and equality comparable. The behaviour of types used in
+        Anys can be refined by specialising AnyTraits for the type. When a
+        value is assigne to an Any a copy is made, just like when a type is
+        inserted in a standard C++ container. The contained type can be
+        accessed via Pt::any_cast<>. It is only possible to get the contained
+        value if the type matches
 
         @code
             Any a = 5;
@@ -68,11 +70,11 @@ namespace Pt {
             d \< c;
         @endcode
 
-        Any supports named initialisation from a typename string. Before
-        this feature can be used all required types must be bound to typenames.
-        This can be done conveniently with Any::Bind objects. By default the
-        C++ built in types are bound already, as well as std::string and the
-        types of the Pt framework.
+        Any supports named initialisation from a typename string or a type.
+        Before this feature can be used all required types must be bound to
+        typenames. This can be done conveniently with Any::Bind objects. By
+        default the C++ built-in types are bound already, as well as
+        std::string and the types of the Pt framework.
 
         @code
             Any::Bind bindMyType<MyType>("MyType");
@@ -80,17 +82,34 @@ namespace Pt {
             // An empty Any
             Any a;
 
+            // Any will contain a default constructed int
+            a.init<int>();
+
             // Any will contain a default constructed MyType
-            a.init("MyType");                  // contains a default constructed MyType
+            a.init("MyType");
 
             // any_cast will return the contained MyType
             MyType mt = any_cast<MyType>( a ); 
         @endcode
 
-        The behaviour of types used in Anys can be refined by specialising
-        AnyTraits for the type.
+        Anys can be written to streams easily, however reading from a stream
+        into an Any requires initialisation if the Any. If the Any is not
+        initialised to a type nothing will be read. If the Any is initalised
+        the contained type will be tried to read from the stream.
 
-        @sa Pt::AnyTraits
+        @code
+            std::istringstream ss("5");
+            Any a;
+
+            // This reads nothing
+            ss >> i;
+
+            // Set Any to hold an int
+            a.init<int>();
+
+            // Now read from the stream
+            ss >> a;
+        @endcode
     */
     class PT_API Any
     {

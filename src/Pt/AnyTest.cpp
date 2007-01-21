@@ -45,6 +45,9 @@ class AnyTest : public Pt::Unit::TestSuite
 
             a.init("int");
             PT_UNIT_ASSERT( a.typeName() == "int" );
+
+            a.init<float>();
+            PT_UNIT_ASSERT( a.typeName() == "float" );
         }
 
         void IntTest()
