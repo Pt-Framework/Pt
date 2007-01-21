@@ -214,12 +214,12 @@ namespace Pt {
 
 		// Pure conceptional traits class. Later it may contain much more than just
 		// a typedef for temporary color values
-		template <typename ColorT>
-		struct ColorTraits;
+		template <typename TagT>
+		struct TagTraits;
 
 		// Full specialisation for ARgbColor
 		template <>
-		struct ColorTraits<ARgbColor> {
+		struct TagTraits<ARgbColor> {
 			typedef uint32_t TmpValue;
 		};
 
@@ -237,7 +237,7 @@ namespace Pt {
 			assert(  std::numeric_limits<FactorT>::is_integer() );
 			assert( !std::numeric_limits<FactorT>::is_signed () );
 
-			typedef ColorTraits<ARgbColor> Traits;
+			typedef TagTraits<ARgbColor> Traits;
 			typedef typename LargestSizeOf< Traits::TmpValue, FactorT >::Result ValueT;
 
 			const ValueT oF = factor;

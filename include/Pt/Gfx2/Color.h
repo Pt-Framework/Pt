@@ -31,7 +31,7 @@ namespace Pt {
 		/** @brief Basic template declaration of all color model classes.
 		 *  @ingroup Gfx
 		 */
-		template <typename ColorT>
+		template <typename TagT>
 		class Color;
 
 
@@ -42,8 +42,8 @@ namespace Pt {
 		 *  A color model implementor should implement the full specialization of
 		 *  this function for better performance.
 		 */
-		template <typename ColorT> inline
-		bool operator>(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		bool operator>(const Color<TagT>& c1, const Color<TagT>& c2)
 		{ return !(c1==c2) && !(c1<c2); }
 
 		/** @brief Inequality operator for any color model comparison.
@@ -53,8 +53,8 @@ namespace Pt {
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
-		template <typename ColorT> inline
-		bool operator!=(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		bool operator!=(const Color<TagT>& c1, const Color<TagT>& c2)
 		{ return !(c1==c2); }
 
 		/** @brief Less-than-or-equal operator for any color model comparison.
@@ -64,8 +64,8 @@ namespace Pt {
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
-		template <typename ColorT> inline
-		bool operator<=(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		bool operator<=(const Color<TagT>& c1, const Color<TagT>& c2)
 		{ return (c1==c2) || (c1<c2); }
 
 		/** @brief Greater-than-or-equal operator for color comparison.
@@ -75,8 +75,8 @@ namespace Pt {
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
-		template <typename ColorT> inline
-		bool operator>=(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		bool operator>=(const Color<TagT>& c1, const Color<TagT>& c2)
 		{ return !(c1<c2); }
 
 
@@ -87,10 +87,10 @@ namespace Pt {
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
-		template <typename ColorT> inline
-		const Color<ColorT>& operator+(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		const Color<TagT>& operator+(const Color<TagT>& c1, const Color<TagT>& c2)
 		{
-			ColorT rs = c1;
+			TagT rs = c1;
 			rs += c2;
 			return(rs);
 		}
@@ -102,10 +102,10 @@ namespace Pt {
 		 *  A color model implementor can implement the full specialization of
 		 *  this function if better performance can be achieved by doing so.
 		 */
-		template <typename ColorT> inline
-		const Color<ColorT>& operator-(const Color<ColorT>& c1, const Color<ColorT>& c2)
+		template <typename TagT> inline
+		const Color<TagT>& operator-(const Color<TagT>& c1, const Color<TagT>& c2)
 		{
-			ColorT rs = c1;
+			TagT rs = c1;
 			rs -= c2;
 			return(rs);
 		}
