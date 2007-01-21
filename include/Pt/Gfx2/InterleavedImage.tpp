@@ -72,7 +72,7 @@ namespace Pt {
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
 				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-			return(_buff[y*_width + x]);
+			return _buff[y*_width + x];
 		}
 
 		template <typename ColorTagT>
@@ -81,14 +81,14 @@ namespace Pt {
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
 				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-			return(_buff[y*_width + x]);
+			return _buff[y*_width + x];
 		}
 
 		template <typename ColorTagT>
 		const typename InterleavedImage<ColorTagT>::ColorT& InterleavedImage<ColorTagT>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
-			return(_buff[y*_width + x]);
+			return _buff[y*_width + x];
 		}
 
 		template <typename ColorTagT>
