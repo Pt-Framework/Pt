@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Aloysius Indrayanto                                *
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,39 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_Rgb555InterleavedImage_h
+#define Pt_Rgb555InterleavedImage_h
 
-#include <Pt/Gfx2/ARgbColor.h>
-#include <Pt/Gfx2/ARgbFColor.h>
-#include <Pt/Gfx2/ARgb8888Color.h>
-#include <Pt/Gfx2/Rgb888Color.h>
 #include <Pt/Gfx2/Rgb555Color.h>
-#include <Pt/Gfx2/Rgb565Color.h>
-#include <Pt/Gfx2/ColorAlgo.h>
-
-using namespace Pt;
-using namespace Pt::Gfx;
+#include <Pt/Gfx2/InterleavedImage.h>
 
 
-int main()
-{
-	ARgbColor      argb_1, argb_2;
-	ARgbFColor     float_1, float_2;
-	ARgb8888Color  argb8888_1, argb8888_2;
+namespace Pt {
+	namespace Gfx {
 
-	fromARgb(argb_2, toARgb(argb_1));
-	fromARgb(argb8888_2, toARgb(argb8888_1));
+		/** @brief Rgb555 image class.
+		 */
+		typedef InterleavedImage<Rgb555> Rgb555InterleavedImage;
 
-	assign(argb_1, argb_2);
-	assign(argb_1, argb8888_2);
-	assign(argb8888_1, argb_2);
-
-	assign(float_1, argb_1);
-	assign(argb_2, float_1);
-
-	greyscale(argb_1, argb_2);
-	greyscale(argb_1, argb_1);
-	greyscale(argb8888_1);
-	greyscale(float_1);
-
-	return 0;
+	}
 }
+
+#endif

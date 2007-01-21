@@ -18,13 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Gfx2/ARgbColor.h>
-#include <Pt/Gfx2/ARgbFColor.h>
-#include <Pt/Gfx2/ARgb8888Color.h>
-#include <Pt/Gfx2/Rgb888Color.h>
-#include <Pt/Gfx2/Rgb555Color.h>
-#include <Pt/Gfx2/Rgb565Color.h>
-#include <Pt/Gfx2/ColorAlgo.h>
+#include <Pt/Gfx2/ARgbInterleavedImage.h>
+#include <Pt/Gfx2/ARgbFInterleavedImage.h>
+#include <Pt/Gfx2/ARgb8888InterleavedImage.h>
+#include <Pt/Gfx2/Rgb888InterleavedImage.h>
+#include <Pt/Gfx2/Rgb555InterleavedImage.h>
+#include <Pt/Gfx2/Rgb565InterleavedImage.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;
@@ -32,24 +31,5 @@ using namespace Pt::Gfx;
 
 int main()
 {
-	ARgbColor      argb_1, argb_2;
-	ARgbFColor     float_1, float_2;
-	ARgb8888Color  argb8888_1, argb8888_2;
-
-	fromARgb(argb_2, toARgb(argb_1));
-	fromARgb(argb8888_2, toARgb(argb8888_1));
-
-	assign(argb_1, argb_2);
-	assign(argb_1, argb8888_2);
-	assign(argb8888_1, argb_2);
-
-	assign(float_1, argb_1);
-	assign(argb_2, float_1);
-
-	greyscale(argb_1, argb_2);
-	greyscale(argb_1, argb_1);
-	greyscale(argb8888_1);
-	greyscale(float_1);
-
 	return 0;
 }
