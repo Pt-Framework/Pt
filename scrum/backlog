@@ -95,6 +95,9 @@ ITEM P1 S13 "The Image class supports several planar image formats, mostly compa
 	TASK "Implement the needed image conversion from and to the YV12 image"
 
 
+ITEM P0 S13 "Header files can be installed with jam"
+    TASK "Write InstallHeaders rule"
+    TASK "Write INstallAllHaders rule"
 
 ITEM P0 S13 "The Db module uses the sqlite library of the OS if possible"
     TASK "Extend Jamrules.platinum"
