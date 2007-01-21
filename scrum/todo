@@ -21,6 +21,16 @@
 # Aloysius
 #
 
+ITEM P9 S8 "The color class' interface is improved"
+	TASK "Make brightness a free function"
+	TASK "Remove all non-maintained color classes in the old Gfx"
+	TASK "Move all Gfx2 color classes back to the original Gfx"
+
+ITEM P9 S13 "The image classes' interfaces are improved"
+	TASK "Convert the SubImage<T> class to use the new color model implementation"
+	TASK "Move all Gfx2 image classes back to the original Gfx"
+	TASK "Fix all important image algorithm so that they work with the new color model imlpementation"
+
 ITEM P7 S5 "Object reflection API is documented"
 	TASK "Write Documentation"
 	TASK "Write test case"

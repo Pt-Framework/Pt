@@ -28,6 +28,14 @@
 # Aloysius
 #
 
+ITEM P8 S3 "The color class interface is improved"
+	TASK "Review all color classes in Gfx2"	blue_wind_25	2007-01-21
+
+ITEM P7 S5 "The BasicImage<T> class interface is improved"
+	TASK "Convert the BasicImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-21
+	TASK "Review the interface of the BasicImage<T> class"	blue_wind_25	2007-01-21
+	TASK "Review all image classes in Gfx2"	blue_wind_25	2007-01-21
+
 ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Introduce PT_API macro"	d-marc	2007-01-20
 	TASK "Check if more warnings need to be disabled"	d-marc	2007-01-20
