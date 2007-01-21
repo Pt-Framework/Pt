@@ -33,7 +33,11 @@ class AnyTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("AnyTest")
         {
             this->registerMethod( "InitTest", *this, &AnyTest::InitTest );
+            this->registerMethod( "BoolTest", *this, &AnyTest::BoolTest );
+            this->registerMethod( "CharTest", *this, &AnyTest::CharTest );
             this->registerMethod( "IntTest", *this, &AnyTest::IntTest );
+            this->registerMethod( "FloatTest", *this, &AnyTest::FloatTest );
+            this->registerMethod( "DoubleTest", *this, &AnyTest::DoubleTest );
             this->registerMethod( "StdStringTest", *this, &AnyTest::StdStringTest );
         }
 
@@ -48,6 +52,31 @@ class AnyTest : public Pt::Unit::TestSuite
 
             a.init<float>();
             PT_UNIT_ASSERT( a.typeName() == "float" );
+
+            Pt::Any b(a);
+            PT_UNIT_ASSERT( a == b );
+        }
+
+        void BoolTest()
+        {
+            Pt::Any a = true;
+            bool b = Pt::any_cast<bool>(a);
+            PT_UNIT_ASSERT( b == true );
+
+            std::istringstream ss("1");
+            ss >> a;
+            PT_UNIT_ASSERT( a == true );
+        }
+
+        void CharTest()
+        {
+            Pt::Any a = 'c';
+            char c = Pt::any_cast<char>(a);
+            PT_UNIT_ASSERT( c == 'c' );
+
+            std::istringstream ss("c");
+            ss >> a;
+            PT_UNIT_ASSERT( a == 'c' );
         }
 
         void IntTest()
@@ -59,6 +88,28 @@ class AnyTest : public Pt::Unit::TestSuite
             std::istringstream ss("7");
             ss >> a;
             PT_UNIT_ASSERT( a == 7 );
+        }
+
+        void FloatTest()
+        {
+            Pt::Any a = 1.5f;
+            float f = Pt::any_cast<float>(a);
+            PT_UNIT_ASSERT( f == 1.5 );
+
+            std::istringstream ss("1.5");
+            ss >> a;
+            PT_UNIT_ASSERT( a == 1.5f );
+        }
+
+        void DoubleTest()
+        {
+            Pt::Any a = 1.5;
+            double d = Pt::any_cast<double>(a);
+            PT_UNIT_ASSERT( d == 1.5 );
+
+            std::istringstream ss("1.5");
+            ss >> a;
+            PT_UNIT_ASSERT( a == 1.5 );
         }
 
         void StdStringTest()

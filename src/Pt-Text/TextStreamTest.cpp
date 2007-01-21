@@ -49,7 +49,7 @@ class TextStreamTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "testNum_get",
                                                  *this, &TextStreamTest::testNum_get );
             Pt::Unit::TestSuite::registerMethod( "testNumpunct",
-                                                 *this, &TextStreamTest::testNumpunct );                                                                                                
+                                                 *this, &TextStreamTest::testNumpunct );
         }
 
 		void testTextStreamDirectFromUTF8ToUnicode();
@@ -148,8 +148,6 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 
 	Pt::Text::Char c[6];
 	TextStream.getline(c, 6);
-
-	std::cerr << c[0] << std::endl;
 
 	//CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
 	//CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
