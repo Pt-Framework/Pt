@@ -28,6 +28,11 @@
 # Aloysius
 #
 
+ITEM P7 S5 "Any class is implemented"
+    TASK "Review code" d-marc 2007-01-21
+    TASK "Write Documentation" d-marc 2007-01-21
+    TASK "Write test case" d-marc 2007-01-21
+
 ITEM P8 S3 "The color class interface is improved"
 	TASK "Review all color classes in Gfx2"	blue_wind_25	2007-01-21
 
