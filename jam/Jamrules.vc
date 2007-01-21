@@ -69,7 +69,6 @@ rule SetProgramDataBase
 	LINKFLAGS on $(2) += /PDB:$(PROGRAMDATABASE) $(LINKFLAGS) ;
 	
 	DEPENDS obj : $(1) ;
-	
 }
 
 
@@ -106,6 +105,8 @@ rule SharedLibraryFromObjects
 	# Add library name decorations <name><.dll/.so>
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
 
+	PDB on $(_sources) = $(_target:S=.pdb) ;
+
 	# setup dependencies
 	Depends exe : $(_target) ;
 	Depends lib : $(_target) ;
@@ -139,13 +140,12 @@ rule SharedLibrary_MakeLocate
 {
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
 
-	
 	MakeLocate $(_target) : $(>) ;
 	MakeLocate $(_target:S=.lib) : $(>) ;
 	MakeLocate $(_target:S=.exp) : $(>) ;
 	MakeLocate $(_target:S=.pdb) : $(>) ;
 	MakeLocate $(_target:S=.ilk) : $(>) ;
-	
+
 	SEARCH_SHLIB += $(>) ;
 }
 
@@ -183,17 +183,19 @@ set PATH=$(VISUALC)\Common7/IDE;%PATH%
 }
 
 
-actions C++
+actions C++ bind PDB
 {	
+	echo PDB $(PDB)
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
 actions together Link bind NEEDLIBS
 {
+	echo PDB $(<:S=.pdb)
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
 	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
-	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+	"$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
 }
 
 
