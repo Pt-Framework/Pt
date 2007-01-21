@@ -29,9 +29,9 @@
 #
 
 ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
-	TASK "Introduce PT_API macro" d-marc
-	TASK "Check if more warnings need to be disabled" d-marc
-	TASK "Look into other compiler attributes" d-marc
+	TASK "Introduce PT_API macro"	d-marc	2007-01-20
+	TASK "Check if more warnings need to be disabled"	d-marc	2007-01-20
+	TASK "Look into other compiler attributes"	d-marc	2007-01-20
 
 ITEM P10 S5 "An common exception hierachy exits"
     TASK "Review Exception.h"	blue_wind_25,d-marc	2007-01-19
