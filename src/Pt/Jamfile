@@ -25,6 +25,10 @@ Main ReflectableTest : ReflectableTest.cpp ;
 Main_LinkSharedLibraries ReflectableTest : Pt ;
 Main_MakeLocate ReflectableTest : bin ;
 
+PtUnitTest AnyTest : AnyTest.cpp ;
+Main_LinkSharedLibraries AnyTest : Pt ;
+Main_MakeLocate AnyTest : bin ;
+
 PtUnitTest AtomicTest : AtomicTest.cpp ;
 Main_LinkSharedLibraries AtomicTest : Pt ;
 Main_MakeLocate AtomicTest : bin ;

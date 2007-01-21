@@ -1,3 +1,21 @@
+/***************************************************************************
+ *   Copyright (C) 2004-2007 by Marc Boris Dürner                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 #ifndef Pt_Any_h
 #define Pt_Any_h
 
@@ -11,6 +29,69 @@
 
 namespace Pt {
 
+    /** Contains any type
+
+        Any can contain any other type that is default- and copy constructible
+        and less-than and equality comparable. When a value is assigne to an
+        Any a copy is made, just like when a type is inserted in a standard C++
+        container. The contained type can be accessed via Pt::any_cast<>. It
+        is only possible to get the contained value if the type matches
+
+        @code
+            Any a = 5;
+            int i = any_cast<int>( a );    // i is 5 now
+            float f = any_cast<float>( a ) // throws std::bad_cast
+        @endcode
+
+        Anys can be compared by the contained types and values. Two Anys are
+        considered equal when the contained values are equal and of the same
+        type. A special case is less-than comparison, when the contained
+        types are different. std::type_info::before will be used to decide
+        which Any is less.
+
+        @code
+            Any a = 6;
+            Any b = 6;
+            Any c = '6';
+            Any d = 1;
+
+            // true, same type, same value
+            a == b;
+
+            // false, different types
+            b == c;
+
+            // true, same type and less
+            d \< a;
+
+            // implementation dependent
+            d \< c;
+        @endcode
+
+        Any supports named initialisation from a typename string. Before
+        this feature can be used all required types must be bound to typenames.
+        This can be done conveniently with Any::Bind objects. By default the
+        C++ built in types are bound already, as well as std::string and the
+        types of the Pt framework.
+
+        @code
+            Any::Bind bindMyType<MyType>("MyType");
+
+            // An empty Any
+            Any a;
+
+            // Any will contain a default constructed MyType
+            a.init("MyType");                  // contains a default constructed MyType
+
+            // any_cast will return the contained MyType
+            MyType mt = any_cast<MyType>( a ); 
+        @endcode
+
+        The behaviour of types used in Anys can be refined by specialising
+        AnyTraits for the type.
+
+        @sa Pt::AnyTraits
+    */
     class PT_API Any
     {
         template <typename T>
@@ -108,7 +189,7 @@ namespace Pt {
                 @param val Value to assign
             */
             template <typename T>
-            explicit Any(const T& val);
+            Any(const T& val);
 
             /** @brief Copy constructor
 
@@ -123,7 +204,8 @@ namespace Pt {
 
             /** @brief Destructor
 
-                Deallocates the memory needed to hold the value.
+                Deallocates the memory needed to hold the value. This will
+                also destruct the contained type.
             */
             ~Any();
 
@@ -242,6 +324,16 @@ namespace Pt {
 
             /** @brief Check if equal
 
+                Returns true if the contained type and the passed type are
+                equal and have equal values.
+
+                @return True if equal
+            */
+            template <typename T>
+            bool operator==(const T& a) const;
+
+            /** @brief Check if equal
+
                 Returns true if the contained types are equal and have
                 equal values.
 
@@ -268,23 +360,47 @@ namespace Pt {
             */
             bool operator<(const Any& a) const;
 
+            /** @brief Type binder for types used in Any
+
+                If you want to use the named type initialisation of Any,
+                you can bind your types to typenames. Your types need to
+                be bound to a name before Any::init(const std::string&) is
+                going to work.
+
+                /sa Any
+            */
             template <typename T>
-            struct Bind {
+            struct Bind
+            {
+                /** @brief Binds a type to a name
+
+                    With the use of Any::Bind objects you can bind your types
+                    at static initialisation time. By default the typename
+                    will be taken from the TypeTraits of the to be bound type.
+                */
                 Bind( const std::string& typeName = TypeTraits<T>::typeName() )
                 { Any::bind<T>( typeName ); }
             };
 
         protected:
+            /** @brief Binds a type to a name
+
+                With this function you can bind your types to be used under
+                a typename  by Any. This function is not thread-safe, do not
+                call it from threads other than the main thread. a better
+                approach would be to register your types with Any::Bind.
+            */
             template <typename T>
             static void bind(const std::string& typeName)
             { Any::initMap().insert( std::make_pair<std::string, void (Any::*)()>(typeName, &Any::init<T>) ); }
 
+        private:
+            /** @internal */
             static std::map<std::string, void (Any::*)()>& initMap();
 
-        private:
+            /** @internal */
             Value* _value;
     };
-
 
     /** @brief Read value from stream
 
@@ -296,7 +412,6 @@ namespace Pt {
     */
     PT_API std::ostream& operator<<(std::ostream& os, const Pt::Any& val);
 
-
     /** @brief Read value from stream
 
         @sa Any::input
@@ -307,7 +422,18 @@ namespace Pt {
     */
     PT_API std::istream& operator>>(std::istream& is, Pt::Any& val);
 
+    /** @brief Get contained value
 
+        This function is used to get the contained value from an Any. It is
+        not possible to get a float out of an Any if the contained value is
+        an int, but the typeid's must match. It is, however, possible to
+        get a const reference ton the contained type.
+
+        @param any
+        @param val Any to read to
+        @return contained value
+        @throw std::bad_cast on type mismatch
+    */
     template <typename T>
     inline T any_cast(const Any& any)
     {
@@ -327,27 +453,36 @@ namespace Pt {
 
 namespace Pt {
 
-	template <typename T>
-	Any::Any(const T& type)
-	: _value(0)
-	{ (*this) = type; }
+    template <typename T>
+    Any::Any(const T& type)
+    : _value(0)
+    { (*this) = type; }
 
-	template <typename T>
-	Any& Any::operator=(const T& rhs)
-	{
-		Any::Value* tmp = new BasicValue<T>(rhs);
-		delete _value;
-		_value = tmp;
-		return *this;
-	}
 
-	template <typename T>
-	void Any::init()
-	{
-		Any::Value* tmp = new BasicValue<T>;
-		delete _value;
+    template <typename T>
+    Any& Any::operator=(const T& rhs)
+    {
+        Any::Value* tmp = new BasicValue<T>(rhs);
+        delete _value;
         _value = tmp;
-	}
+        return *this;
+    }
+
+
+    template <typename T>
+    void Any::init()
+    {
+        Any::Value* tmp = new BasicValue<T>;
+        delete _value;
+        _value = tmp;
+    }
+
+
+    template <typename T>
+    bool Any::operator==(const T& value) const
+    {
+        return _value->equal( BasicValue<T>(value) );
+    }
 
 }
 
