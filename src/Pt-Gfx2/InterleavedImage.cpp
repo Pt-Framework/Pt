@@ -18,12 +18,25 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Gfx2/ARgbColor.h>
+#include <Pt/Gfx2/ARgbFColor.h>
+#include <Pt/Gfx2/ARgb8888Color.h>
+#include <Pt/Gfx2/Rgb888Color.h>
+#include <Pt/Gfx2/Rgb555Color.h>
+#include <Pt/Gfx2/Rgb565Color.h>
+#include <Pt/Gfx2/InterleavedImage.h>
+
 namespace Pt {
 
 	namespace Gfx {
 
-		// Explicit instantiation of the image classes
-		// Explicit instantiation of the subimage classes
+		// Explicit instantiation of the interleaved image classes
+		template class InterleavedImage<ARgb>;
+		template class InterleavedImage<ARgbF>;
+		template class InterleavedImage<ARgb8888>;
+		template class InterleavedImage<Rgb888>;
+		template class InterleavedImage<Rgb565>;
+		template class InterleavedImage<Rgb555>;
 
 	} // namespace Gfx
 

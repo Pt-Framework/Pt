@@ -9,7 +9,7 @@ SharedLibrary Pt-Gfx2 :
 	Rgb888Color.cpp
 	Rgb565Color.cpp
 	Rgb555Color.cpp
-	BasicImage.cpp
+	InterleavedImage.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx2 : Pt ;
