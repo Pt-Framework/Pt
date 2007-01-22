@@ -14,7 +14,7 @@ class ActiveEdgeTable : public std::vector<Edge>
 {
     public:
         ActiveEdgeTable()
-        : std::vector<Edge>( 20 )
+        : std::vector<Edge>( 0 )
         { }
 
         inline void addEdge( const Edge& edge )
@@ -48,7 +48,7 @@ class ActiveEdgeTable : public std::vector<Edge>
                             edge.xaccu -= edge.dy;
                         }
                         edge.x = trueX;
-                    }
+                    }                    
                     else if( edge.dx > 0 && edge.dy < 0)
                     {
                         edge.xaccu += edge.dx;

@@ -70,27 +70,12 @@ class FillPolygon
 
 private:
 
-    void setupGlobalEdgeTable( const std::vector<Math::Point>& points );
+    void setupGlobalEdgeTable( std::vector<Math::Point>& points );
 
-    inline void output( Pt::Gfx::ARgbImage& image, size_t scanLine )
-    {
-        for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
-        {
-            const size_t        deltax  = ( _activeEdgeTable[i].x - _activeEdgeTable[i-1].x) + 1;            
-            
-            const size_t        size    = deltax * sizeof(ARgbColor) ;
-            const Pt::ssize_t   x       = (size_t) _activeEdgeTable[i-1].x;
+    void output( Pt::Gfx::ARgbImage& image, size_t scanLine );
 
-            memcpy( &image.pixel( x, scanLine ), &_colorBuffer[0], size );
-        }
-    }
-
-    inline void addEdgeToActiveTable( EdgeSet::iterator& it, size_t scanLine )
-    {
-        for( ; it != _globalEdgeTable.end() && it->ymin == scanLine; ++it )
-            _activeEdgeTable.addEdge( *it );
-    }
-
+    void addEdgeToActiveTable( EdgeSet::iterator& it, size_t scanLine );   
+   
     EdgeSet                 _globalEdgeTable;
     ActiveEdgeTable         _activeEdgeTable;
     EdgeSet::iterator       _currentPos;
