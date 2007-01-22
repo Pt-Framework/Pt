@@ -94,8 +94,8 @@ namespace Pt {
 				//! Fill the sub image with the given image.
 				SubImageT& operator=(const ImageT& src);
 
-				//! Fill the sub image with the sub given image.
-				SubImageT& operator=(SubImageT& src);
+				//! Fill the sub image with the given sub image.
+				SubImageT& operator=(const SubImageT& src);
 
 				//! Scanline access without range check
 				inline Scanline scanline(int y)

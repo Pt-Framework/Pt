@@ -25,34 +25,14 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/*
-		SubImage(ImageT& image, const Pt::Gfx::Region& area);
-
-		bool operator==(const SubImageT& src);
-
-		SubImageT& operator=(const ImageT& src);
-		SubImageT& operator=(SubImageT& src);
-
-		ColorT& at(int x, int y);
-		const ColorT& at(int x, int y) const;
-		const ColorT& color(int x, int y, const ColorT& invalid = ColorT()) const;
-		void setColor(int x, int y, const ColorT& color_);
-
-		*/
-
 		//
 		// SubImage<ImageT_> implementation
 		//
 
-#if 0
-		//
-		// IMPL: SubImage<ColorSpaceT>
-		//
-		template <typename ColorSpaceT_>
-		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Pt::Gfx::Region& area)
+		template <typename ImageT_>
+		SubImage<ImageT_>::SubImage(ImageT& image, const Region& area)
 		: _image(image), _area(area)
 		{
-			// Validate the area
 			int x1 = area.x();
 			int y1 = area.y();
 			int x2 = x1 + area.width() - 1;
@@ -65,21 +45,22 @@ namespace Pt {
 		}
 
 
-		template <typename ColorSpaceT_>
-		bool SubImage<ColorSpaceT_>::operator==(const SubImageT& src)
+		template <typename ImageT_>
+		bool SubImage<ImageT_>::operator==(const SubImageT& src)
 		{
 			for(size_t y = 0; y < _area.height(); y++) {
-				if ( 0 != memcmp(this->scanline(y), src.scanline(y), sizeof(SubImageT) * _area.width()) ) {
+				if( memcmp(scanline(y), src.scanline(y),
+					         sizeof(SubImageT) * _area.width()) )
 					return false;
-				}
 			}
 			return true;
 		}
 
-		template <typename ColorSpaceT_>
-		template <typename SrcColorSpaceT>
-		void SubImage<ColorSpaceT_>::_assign(const BasicImage<SrcColorSpaceT>& src)
+
+		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ImageT& src)
 		{
+			/*
 			// If the size is not the same, we need to scale convert first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
 				BasicImage<ColorSpaceT_> tmp;
@@ -94,13 +75,14 @@ namespace Pt {
 					for(uint x = 0; x < _area.width(); x++)
 						convert(_image[y+_area.y()][x+_area.x()], src[y][x]);
 			}
+			*/
+			return *this;
 		}
 
-
-		template <typename ColorSpaceT_>
-		template <typename SrcColorSpaceT>
-		void SubImage<ColorSpaceT_>::_assign(SubImage<SrcColorSpaceT>& src)
+		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImageT& src)
 		{
+			/*
 			// If the size is not the same, we need to convert scale first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
 				BasicImage<SrcColorSpaceT> tmp(src.width(), src.height());
@@ -137,42 +119,43 @@ namespace Pt {
 							convert(_image[y+_area.y()][x+_area.x()], src._image[y+src._area.y()][x+src._area.x()]);
 				}
 			}
+			*/
+			return *this;
 		}
 
 
-		template <typename ColorSpaceT_>
-		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y)
+		template <typename ImageT_>
+		typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
-                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y) const
+		template <typename ImageT_>
+		const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
-                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::color(int x, int y, const ColorT& invalid) const
+		template <typename ImageT_>
+		const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return invalid;
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		void SubImage<ColorSpaceT_>::setColor(int x, int y, const ColorT& color_)
+		template <typename ImageT_>
+		void SubImage<ImageT_>::setColor(int x, int y, const ColorT& color_)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return;
 			_image.data()[(y+_area.y())*_image.width() + x+_area.x()] = color_;
 		}
-#endif
 
 	} // namespace Gfx
 
