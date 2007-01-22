@@ -68,7 +68,7 @@ namespace Pt {
 					for(uint x = 0; x < _area.width(); x++)
 						_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
 			}
-			// If the size is the same, we just need to copy convert
+			// If the size is the same, we just need to copy
 			else {
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
@@ -80,44 +80,45 @@ namespace Pt {
 		template <typename ImageT_>
 		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImageT& src)
 		{
-			/*
-			// If the size is not the same, we need to convert scale first then copy
+			// If the size is not the same, we need to scale it first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
-				BasicImage<SrcColorSpaceT> tmp(src.width(), src.height());
-				// Copy convert the source pixels to the temporary image
+				// Copy the source pixels to a temporary image
+				ImageT tmp1(src.width(), src.height());
 				for(uint y = 0; y < src.height(); y++)
 					for(uint x = 0; x < src.width(); x++)
-						convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
-				// Scale the temporary image
-				cubicScale(tmp, _area.width(), _area.height());
+						tmp1.pixel(x, y) = src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
+				// Scale the temporary image to another temporary image
+				ImageT tmp2;
+				blockScale(tmp2, tmp1, _area.width(), _area.height()); // TODO: Later, user should be able to
+				                                                       //       choose the scalling algorithm
 				// Copy the pixels to this sub image
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+						_image.pixel(x+_area.x(), y+_area.y()) = tmp2.pixel(x, y); // TODO: Optimize it !!!
 			}
 			// If the size is the same, we just need to copy convert
 			else {
 				// If the source and destination image are the same
 				// we must use temporary image
 				if(&_image == &src._image) {
-					BasicImage<SrcColorSpaceT> tmp(_area.width(), _area.height());
-					// Copy convert the source pixels to the temporary image
+					// Copy the source pixels to the temporary image
+					ImageT tmp(_area.width(), _area.height());
 					for(uint y = 0; y < src.height(); y++)
 						for(uint x = 0; x < src.width(); x++)
-							convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
+							tmp.pixel(x, y) = src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
 					// Copy the pixels to this sub image
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+							_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
 				}
-				// If the source and destination image are different, just copy convert
+				// If the source and destination image are different, just copy
 				else {
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							convert(_image[y+_area.y()][x+_area.x()], src._image[y+src._area.y()][x+src._area.x()]);
+							_image.pixel(x+_area.x(), y+_area.y()) =
+									src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
 				}
 			}
-			*/
 			return *this;
 		}
 

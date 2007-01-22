@@ -20,6 +20,7 @@
 #ifndef Pt_Gfx2_ColorAlgo_h
 #define Pt_Gfx2_ColorAlgo_h
 
+#include <Pt/Gfx2/BasicAlgo.h>
 #include <Pt/Gfx2/ARgbColor.h>
 
 

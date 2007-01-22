@@ -24,7 +24,7 @@
 #include <Pt/Gfx2/Rgb888Color.h>
 #include <Pt/Gfx2/Rgb555Color.h>
 #include <Pt/Gfx2/Rgb565Color.h>
-#include <Pt/Gfx2/ColorAlgo.h>
+#include <Pt/Gfx2/Algorithm.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;

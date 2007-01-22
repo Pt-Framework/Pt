@@ -24,6 +24,7 @@
 #include <Pt/Gfx2/Rgb888InterleavedImage.h>
 #include <Pt/Gfx2/Rgb555InterleavedImage.h>
 #include <Pt/Gfx2/Rgb565InterleavedImage.h>
+#include <Pt/Gfx2/Algorithm.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;

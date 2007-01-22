@@ -20,6 +20,7 @@
 #ifndef Pt_Gfx2_ImageAlgo_h
 #define Pt_Gfx2_ImageAlgo_h
 
+#include <Pt/Gfx2/BasicAlgo.h>
 #include <Pt/Gfx2/ARgbInterleavedImage.h>
 
 
@@ -44,17 +45,35 @@ namespace Pt {
 		{ to = from; }
 
 
-		/** @brief Block-scale an image
+		/** @brief Greyscale a pixel range using iterators.
+		 */
+		template <typename In, typename Out> inline
+		void greyscale(In begin, In end, Out to)
+		{ for(; begin != end; ++begin, ++to) greyscale(*begin, *to); }
 
-		    @param srcImage  Source image
-		    @param dstImage  Destination image
-		    @param newWidth  Wanted width of the destination image
-		    @param newHeight Wanted height of the destination image
+		/** @brief Greyscales an image using its iterators.
+		 */
+		template<typename IteratorT> inline
+		void greyscale(IteratorT begin, IteratorT end)
+		{ for(; begin != end; ++begin) greyscale(*begin); }
+
+		/** @brief Greyscales an image using its iterators.
+		 */
+		template<typename ImageT> inline
+		void greyscale(ImageT& image)
+		{ greyscale(image.begin(), image.end); }
+
+
+		/** @brief Block-scale an image.
+		 *
+		 *  @param srcImage  Source image
+		 *  @param dstImage  Destination image
+		 *  @param newWidth  Wanted width of the destination image
+		 *  @param newHeight Wanted height of the destination image
 		 */
 		template <typename DstColorTagT, typename SrcColorTagT>
 		void blockScale(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from,
 		                uint newWidth, uint newHeight);
-
 
 	} // namespace Gfx
 

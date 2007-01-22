@@ -17,10 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx2_Algorithm_h
-#define Pt_Gfx2_Algorithm_h
+#ifndef Pt_Gfx2_BasicAlgo_h
+#define Pt_Gfx2_BasicAlgo_h
 
-#include <Pt/Gfx2/ColorAlgo.h>
-#include <Pt/Gfx2/ImageAlgo.h>
+namespace Pt {
+
+	namespace Gfx {
+
+		/** @brief Transform one sequence into another.
+		 */
+		template <typename In, typename Out, typename Op> inline
+		Op transform(In begin, In end, Out dest, Op op)
+		{
+			for(; begin != end; ++begin, ++dest) op(*dest, *begin);
+			return op;
+		}
+
+		/** @brief Transform one sequence into another.
+		 */
+		template <typename Iter, typename Op> inline
+		Op transform(Iter begin, Iter end, Op op)
+		{
+			for(; begin != end; ++begin) op(*begin);
+			return op;
+		}
+
+
+		/** @brief Assign one iterator range to another
+		 */
+		template <typename InputIteratorT, typename OutputIteratorT> inline
+		OutputIteratorT assign(InputIteratorT begin, InputIteratorT end, OutputIteratorT to)
+		{
+			for(; begin != end; ++to, ++begin) assign(*to, *begin);
+			return to;
+		}
+
+	} // namespace Gfx
+
+} // namespace Pt
 
 #endif
