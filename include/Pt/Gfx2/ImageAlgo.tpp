@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,54 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx2_ImageAlgo_h
-#define Pt_Gfx2_ImageAlgo_h
-
-#include <Pt/Gfx2/ARgbInterleavedImage.h>
+#ifndef Pt_Gfx2_ImageAlgo_tpp
+#define Pt_Gfx2_ImageAlgo_tpp
 
 
 namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief Assign an image to another image with a different color model.
-		 *
-		 *  An image classes implementor should specialize this function as needed if
-		 *  faster implementation for the two classes is exist.
-		 */
 		template <typename DstColorTagT, typename SrcColorTagT>
-		void assign(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from);
+		void assign(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from)
+		{
+			if(from.empty()) {
+				to.clear();
+				return;
+			}
 
-		/** @brief Partial specialization of assign() if both the color models are the same.
-		 *
-		 *  This function will just copy the value from the source to the destiantion.
-		 */
-		template <typename ColorTagT> inline
-		void assign(InterleavedImage<ColorTagT>& to, const InterleavedImage<ColorTagT>& from)
-		{ to = from; }
+			if(to.width()!=from.width() || to.height()!=from.height())
+				to.resize(from.width(), from.height());
+
+			for(uint y = 0; y < to.height(); y++)
+				for(uint x = 0; x < to.width(); x++)
+					assign(to.pixel(x, y), from.pixel(x, y)); // TODO: Optimize it !!!
+		}
 
 
-		/** @brief Block-scale an image
-
-		    @param srcImage  Source image
-		    @param dstImage  Destination image
-		    @param newWidth  Wanted width of the destination image
-		    @param newHeight Wanted height of the destination image
-		 */
 		template <typename DstColorTagT, typename SrcColorTagT>
 		void blockScale(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from,
-		                uint newWidth, uint newHeight);
-
+		                uint newWidth, uint newHeight)
+		{
+			// TODO: WRITE IT ASAP !!!
+		}
 
 	} // namespace Gfx
 
 } // namespace Pt
 
 #endif
-
-
-//
-// Include the implementation header
-//
-#include "ImageAlgo.tpp"
-

@@ -30,6 +30,14 @@ namespace Pt {
 		//
 
 		template <typename ColorTagT>
+		void InterleavedImage<ColorTagT>::resize(uint width_, uint height_)
+		{
+			_buff.resize(width_ * height_);
+			_width  = width_;
+			_height = height_;
+		}
+
+		template <typename ColorTagT>
 		void InterleavedImage<ColorTagT>::resize(uint width_, uint height_, const ColorT& fill)
 		{
 			_buff.resize(width_ * height_);

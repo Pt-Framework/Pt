@@ -99,9 +99,13 @@ namespace Pt {
 				{ _buff.clear(); _width = 0; _height = 0; }
 
 
-				/** @brief Resizes the image to a new width and height and fill it with thye given color.
+				/** @brief Resizes the image to a new width and height and let it be initialized using the default color.
 				 */
-				void resize(uint width_, uint height_, const ColorT& fill = ColorT());
+				void resize(uint width_, uint height_);
+
+				/** @brief Resizes the image to a new width and height and fill it with the given color.
+				 */
+				void resize(uint width_, uint height_, const ColorT& fill);
 
 
 				/** @brief Assigns a color to all pixels.

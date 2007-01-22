@@ -60,22 +60,20 @@ namespace Pt {
 		template <typename ImageT_>
 		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ImageT& src)
 		{
-			/*
-			// If the size is not the same, we need to scale convert first then copy
+			// If the size is not the same, we need to scale it first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
-				BasicImage<ColorSpaceT_> tmp;
-				cubicScale(tmp, src, _area.width(), _area.height());
-				for(uint y = 0; y < _area.height(); y++)
+				ImageT tmp;
+				blockScale(tmp, src, _area.width(), _area.height()); // TODO: Later, user should be able to
+				for(uint y = 0; y < _area.height(); y++)             //       choose the scalling algorithm
 					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+						_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
 			}
 			// If the size is the same, we just need to copy convert
 			else {
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						convert(_image[y+_area.y()][x+_area.x()], src[y][x]);
+						_image.pixel(x+_area.x(), y+_area.y()) = src.pixel(x, y); // TODO: Optimize it !!!
 			}
-			*/
 			return *this;
 		}
 

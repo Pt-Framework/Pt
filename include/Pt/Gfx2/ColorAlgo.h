@@ -29,7 +29,7 @@ namespace Pt {
 
 		/** @brief Assign a color model to another color model.
 		 *
-		 *  A color model implementor should specialize this function as needed if
+		 *  A color models implementor should specialize this function as needed if
 		 *  faster implementation for the two colors is exist.
 		 */
 		template <typename DstTagT, typename SrcTagT> inline
