@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_InterleavedImage_tpp
-#define Pt_InterleavedImage_tpp
+#ifndef Pt_Gfx2_InterleavedImage_tpp
+#define Pt_Gfx2_InterleavedImage_tpp
 
 
 namespace Pt {

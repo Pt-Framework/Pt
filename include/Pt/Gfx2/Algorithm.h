@@ -21,4 +21,4 @@
 #define Pt_Gfx2_Algorithm_h
 
 #include <Pt/Gfx2/ColorAlgo.h>
-//#include <Pt/Gfx2/ImageAlgo.h>
+#include <Pt/Gfx2/ImageAlgo.h>

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_InterleavedImage_h
-#define Pt_InterleavedImage_h
+#ifndef Pt_Gfx2_InterleavedImage_h
+#define Pt_Gfx2_InterleavedImage_h
 
 #include <Pt/Exception.h>
 #include <Pt/Gfx2/ARgbFColor.h>
@@ -66,7 +66,7 @@ namespace Pt {
 
 				/** @brief Copy constructor.
 				 */
-				inline InterleavedImage(const InterleavedImage<ColorT>& src)
+				inline InterleavedImage(const ImageT& src)
 				: _width(0), _height(0)
 				{ *this = src; }
 
@@ -106,11 +106,11 @@ namespace Pt {
 
 				/** @brief Assigns a color to all pixels.
 				 */
-				InterleavedImage<ColorTagT>& operator=(const ColorT& fill);
+				ImageT& operator=(const ColorT& fill);
 
 				/** @brief Assignment operator from the same image type.
 				 */
-				InterleavedImage<ColorTagT>& operator=(const ImageT& src);
+				ImageT& operator=(const ImageT& src);
 
 
 				/** @brief Raw data access.
@@ -308,8 +308,6 @@ namespace Pt {
 	} // namespace Gfx
 
 } // namespace Pt
-
-#include <Pt/Gfx2/InterleavedImage.tpp>
 
 #endif
 

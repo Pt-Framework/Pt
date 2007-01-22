@@ -25,6 +25,9 @@
 #include <Pt/Gfx2/Rgb555Color.h>
 #include <Pt/Gfx2/Rgb565Color.h>
 #include <Pt/Gfx2/InterleavedImage.h>
+#include <Pt/Gfx2/InterleavedImage.tpp>
+#include <Pt/Gfx2/SubImage.h>
+#include <Pt/Gfx2/SubImage.tpp>
 
 namespace Pt {
 
@@ -37,6 +40,14 @@ namespace Pt {
 		template class InterleavedImage<Rgb888>;
 		template class InterleavedImage<Rgb565>;
 		template class InterleavedImage<Rgb555>;
+
+		// Explicit instantiation of the sub image classes of the above image classes
+		template class SubImage< InterleavedImage<ARgb> >;
+		template class SubImage< InterleavedImage<ARgbF> >;
+		template class SubImage< InterleavedImage<ARgb8888> >;
+		template class SubImage< InterleavedImage<Rgb888> >;
+		template class SubImage< InterleavedImage<Rgb565> >;
+		template class SubImage< InterleavedImage<Rgb555> >;
 
 	} // namespace Gfx
 
