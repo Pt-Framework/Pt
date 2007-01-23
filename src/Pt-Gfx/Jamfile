@@ -8,14 +8,12 @@ SharedLibrary Pt-Gfx :
 	ARgbColor.cpp
 	BasicImage.cpp
 	Brush.cpp
-	CmykColor.cpp
 	Font.cpp
 	FontMetrics.cpp
 	Pen.cpp
 	Rgb565Color.cpp
 	XRgb1555Color.cpp
 	XRgb8888Color.cpp
-	YuvColor.cpp
 
 	ImagePainter.cpp
 	FillConvexPolygon.cpp
