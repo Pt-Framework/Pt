@@ -67,7 +67,6 @@ class TextStreamTest : public Pt::Unit::TestSuite
 		static Pt::Text::Char _TextUnicode[];
 };
 
-
 Pt::Unit::RegisterTest<TextStreamTest> _registerTestStreamTest;
 
 

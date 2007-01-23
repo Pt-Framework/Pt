@@ -16,286 +16,287 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#undef PT_TEXT_API_EXPORT
 
+#include "Pt/Api.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/TestSchedule.h"
+#include "Pt/Unit/RegisterTest.h"
 #include "Pt/Text/Char.h"
-#include "Pt/Exception.h"
 
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
+#include <string>
+#include <sstream>
 
-#include "Pt/Types.h"
 
-using namespace std;
-using namespace Pt::Text;
-
-class CharTest : public CPPUNIT_NS::TestFixture
+class CharTest : public Pt::Unit::TestSuite
 {
-	CPPUNIT_TEST_SUITE( CharTest );
-	CPPUNIT_TEST( testConstructor );
-	CPPUNIT_TEST( testAssign );
-	CPPUNIT_TEST( testCategory );
-	CPPUNIT_TEST( testCompare );
-	CPPUNIT_TEST( testOperators );
+	public:
+        CharTest()
+        : Pt::Unit::TestSuite("CharTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &CharTest::testConstructor  );
+            Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
+            Pt::Unit::TestSuite::registerMethod( "testCategory", *this, &CharTest::testCategory  );
+            Pt::Unit::TestSuite::registerMethod( "testCompare", *this, &CharTest::testCompare  );
+            Pt::Unit::TestSuite::registerMethod( "testOperators", *this, &CharTest::testOperators  );
+        }
 
-	CPPUNIT_TEST_SUITE_END();
-
-public:
-
-
-protected:
-	void testConstructor();
-	void testAssign();
-	void testCategory();
-	void testCompare();
-	void testOperators();
+    protected:
+        void testConstructor();
+        void testAssign();
+        void testCategory();
+        void testCompare();
+        void testOperators();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( CharTest );
+Pt::Unit::RegisterTest<CharTest> _registerCharTest;
 
 
 void CharTest::testConstructor()
 {
-	Char p1;
-	CPPUNIT_ASSERT(p1.value() == 0);
+	Pt::Text::Char p1;
+	PT_UNIT_ASSERT(p1.value() == 0);
 
-	Char p2((char)'a');
-	CPPUNIT_ASSERT(p2.value() == 97);
+	Pt::Text::Char p2((char)'a');
+	PT_UNIT_ASSERT(p2.value() == 97);
 
-	Char p3((wchar_t)'a');
-	CPPUNIT_ASSERT(p3.value() == 97);
+	Pt::Text::Char p3((wchar_t)'a');
+	PT_UNIT_ASSERT(p3.value() == 97);
 
-	Char p4((unsigned char)'a');
-	CPPUNIT_ASSERT(p4.value() == 97);
+	Pt::Text::Char p4((unsigned char)'a');
+	PT_UNIT_ASSERT(p4.value() == 97);
 
-	Char p5((Pt::int16_t)'a');
-	CPPUNIT_ASSERT(p5.value() == 97);
+	Pt::Text::Char p5((Pt::int16_t)'a');
+	PT_UNIT_ASSERT(p5.value() == 97);
 
-	Char p6((Pt::uint16_t)'a');
-	CPPUNIT_ASSERT(p6.value() == 97);
+	Pt::Text::Char p6((Pt::uint16_t)'a');
+	PT_UNIT_ASSERT(p6.value() == 97);
 
-	Char p7((Pt::int32_t)'a');
-	CPPUNIT_ASSERT(p7.value() == 97);
+	Pt::Text::Char p7((Pt::int32_t)'a');
+	PT_UNIT_ASSERT(p7.value() == 97);
 
-	Char p8((Pt::uint32_t)'a');
-	CPPUNIT_ASSERT(p8.value() == 97);
+	Pt::Text::Char p8((Pt::uint32_t)'a');
+	PT_UNIT_ASSERT(p8.value() == 97);
 
-	Char p9((long)'a');
-	CPPUNIT_ASSERT(p9.value() == 97);
+	Pt::Text::Char p9((long)'a');
+	PT_UNIT_ASSERT(p9.value() == 97);
 
-	Char p10((unsigned long)'a');
-	CPPUNIT_ASSERT(p10.value() == 97);
+	Pt::Text::Char p10((unsigned long)'a');
+	PT_UNIT_ASSERT(p10.value() == 97);
 }
 
 void CharTest::testAssign()
 {
-	Char p;
-	CPPUNIT_ASSERT(p.value() == 0);
+	Pt::Text::Char p;
+	PT_UNIT_ASSERT(p.value() == 0);
 
 	p = (char)'a';
-	CPPUNIT_ASSERT(p.value() == 97);
+	PT_UNIT_ASSERT(p.value() == 97);
 
 	p = (wchar_t)('b');
-	CPPUNIT_ASSERT(p.value() == 98);
+	PT_UNIT_ASSERT(p.value() == 98);
 
 	p = (unsigned char)'c';
-	CPPUNIT_ASSERT(p.value() == 99);
+	PT_UNIT_ASSERT(p.value() == 99);
 
 	p = (Pt::int16_t)'d';
-	CPPUNIT_ASSERT(p.value() == 100);
+	PT_UNIT_ASSERT(p.value() == 100);
 
 	p = (Pt::uint16_t)'e';
-	CPPUNIT_ASSERT(p.value() == 101);
+	PT_UNIT_ASSERT(p.value() == 101);
 
 	p = (Pt::int32_t)'f';
-	CPPUNIT_ASSERT(p.value() == 102);
+	PT_UNIT_ASSERT(p.value() == 102);
 
 	p = (Pt::uint32_t)'g';
-	CPPUNIT_ASSERT(p.value() == 103);
+	PT_UNIT_ASSERT(p.value() == 103);
 
 	p = (long)'h';
-	CPPUNIT_ASSERT(p.value() == 104);
+	PT_UNIT_ASSERT(p.value() == 104);
 
 	p = (unsigned long)'i';
-	CPPUNIT_ASSERT(p.value() == 105);
+	PT_UNIT_ASSERT(p.value() == 105);
 }
 
 void CharTest::testCategory()
 {
-	Char p;
+	Pt::Text::Char p;
 
 	p = 'a';
-	CPPUNIT_ASSERT( p.isAlpha());
-	CPPUNIT_ASSERT( p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT( p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT( p.isAlpha());
+	PT_UNIT_ASSERT( p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT( p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
 	p = p.toUpper();  // A
-	CPPUNIT_ASSERT( p.isAlpha());
-	CPPUNIT_ASSERT( p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT( p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT( p.isAlpha());
+	PT_UNIT_ASSERT( p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT( p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
 	p = wchar_t(248);
-	CPPUNIT_ASSERT( p.isAlpha());
-	CPPUNIT_ASSERT( p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT( p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT( p.isAlpha());
+	PT_UNIT_ASSERT( p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT( p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
 
-	p = p.toUpper();  // Ö
-	CPPUNIT_ASSERT( p.isAlpha());
-	CPPUNIT_ASSERT( p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT( p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	p = p.toUpper();  // ï¿½
+	PT_UNIT_ASSERT( p.isAlpha());
+	PT_UNIT_ASSERT( p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT( p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
 	p = '1';
-	CPPUNIT_ASSERT(!p.isAlpha());
-	CPPUNIT_ASSERT( p.isAlnum());
-	CPPUNIT_ASSERT( p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT(!p.isAlpha());
+	PT_UNIT_ASSERT( p.isAlnum());
+	PT_UNIT_ASSERT( p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
-	CPPUNIT_ASSERT(p.toUpper() == p);
+	PT_UNIT_ASSERT(p.toUpper() == p);
 
 	p = '\t';
-	CPPUNIT_ASSERT(!p.isAlpha());
-	CPPUNIT_ASSERT(!p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT( p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT(!p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT(!p.isAlpha());
+	PT_UNIT_ASSERT(!p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT( p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT(!p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
-	CPPUNIT_ASSERT(p.toUpper() == p);
+	PT_UNIT_ASSERT(p.toUpper() == p);
 
 	p = ' ';
-	CPPUNIT_ASSERT(!p.isAlpha());
-	CPPUNIT_ASSERT(!p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT( p.isSpace());
+	PT_UNIT_ASSERT(!p.isAlpha());
+	PT_UNIT_ASSERT(!p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT( p.isSpace());
 
-	CPPUNIT_ASSERT(p.toUpper() == p);
+	PT_UNIT_ASSERT(p.toUpper() == p);
 
 	p = ':';
-	CPPUNIT_ASSERT(!p.isAlpha());
-	CPPUNIT_ASSERT(!p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT(!p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT( p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT(!p.isAlpha());
+	PT_UNIT_ASSERT(!p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT(!p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT( p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
-	CPPUNIT_ASSERT(p.toUpper() == p);
+	PT_UNIT_ASSERT(p.toUpper() == p);
 
 	p = '+';
-	CPPUNIT_ASSERT(!p.isAlpha());
-	CPPUNIT_ASSERT(!p.isAlnum());
-	CPPUNIT_ASSERT(!p.isDigit());
-	CPPUNIT_ASSERT(!p.isLower());
-	CPPUNIT_ASSERT(!p.isUpper());
-	CPPUNIT_ASSERT(!p.isControl());
-	CPPUNIT_ASSERT( p.isGraph());
-	CPPUNIT_ASSERT( p.isPrint());
-	CPPUNIT_ASSERT(!p.isPunctuation());
-	CPPUNIT_ASSERT(!p.isSpace());
+	PT_UNIT_ASSERT(!p.isAlpha());
+	PT_UNIT_ASSERT(!p.isAlnum());
+	PT_UNIT_ASSERT(!p.isDigit());
+	PT_UNIT_ASSERT(!p.isLower());
+	PT_UNIT_ASSERT(!p.isUpper());
+	PT_UNIT_ASSERT(!p.isControl());
+	PT_UNIT_ASSERT( p.isGraph());
+	PT_UNIT_ASSERT( p.isPrint());
+	PT_UNIT_ASSERT(!p.isPunctuation());
+	PT_UNIT_ASSERT(!p.isSpace());
 
-	CPPUNIT_ASSERT(p.toUpper() == p);
+	PT_UNIT_ASSERT(p.toUpper() == p);
 }
 
 void CharTest::testCompare()
 {
-	Char a1('a');
-	Char a2('a');
-	Char b('b');
+	Pt::Text::Char a1('a');
+	Pt::Text::Char a2('a');
+	Pt::Text::Char b('b');
 
-	CPPUNIT_ASSERT(a1 == a2);
-	CPPUNIT_ASSERT(a1 == 'a');
-	CPPUNIT_ASSERT(a1 == 97);
+	PT_UNIT_ASSERT(a1 == a2);
+	PT_UNIT_ASSERT(a1 == 'a');
+	PT_UNIT_ASSERT(a1 == 97);
 
-	CPPUNIT_ASSERT(b != a1);
-	CPPUNIT_ASSERT(a1 < b);
-	CPPUNIT_ASSERT(b > a1);
+	PT_UNIT_ASSERT(b != a1);
+	PT_UNIT_ASSERT(a1 < b);
+	PT_UNIT_ASSERT(b > a1);
 }
 
 
 void CharTest::testOperators()
 {
-	Char a('a'); // 97
-	Char z('z'); // 122
-	Char r;
+	Pt::Text::Char a('a'); // 97
+	Pt::Text::Char z('z'); // 122
+	Pt::Text::Char r;
 
 	r = z - a;
-	CPPUNIT_ASSERT(r == 25);
+	PT_UNIT_ASSERT(r == 25);
 
 	r = z - 'a';
-	CPPUNIT_ASSERT(r == 25);
+	PT_UNIT_ASSERT(r == 25);
 
 	r = z + a;
-	CPPUNIT_ASSERT(r == 219);
+	PT_UNIT_ASSERT(r == 219);
 
 	r = z + 'a';
-	CPPUNIT_ASSERT(r == 219);
+	PT_UNIT_ASSERT(r == 219);
 
 	r = z;
 	r -= a;
-	CPPUNIT_ASSERT(r == 25);
+	PT_UNIT_ASSERT(r == 25);
 
 	r = a;
 	r += z;
-	CPPUNIT_ASSERT(r == 219);
+	PT_UNIT_ASSERT(r == 219);
 
 
-	Char v1(0x1E0); // 111100000
-	Char v2(0x10F); // 100001111
+	Pt::Text::Char v1(0x1E0); // 111100000
+	Pt::Text::Char v2(0x10F); // 100001111
 
 	r = v1 | v2;
-	CPPUNIT_ASSERT(r == 0x1EF); // 111101111
+	PT_UNIT_ASSERT(r == 0x1EF); // 111101111
 
 
-	Char v3(0x3C); // 000111100
-	Char v4(0x0F); // 000001111
+	Pt::Text::Char v3(0x3C); // 000111100
+	Pt::Text::Char v4(0x0F); // 000001111
 
 	r = v3 & v4;
-	CPPUNIT_ASSERT(r == 0x0C); // 000001100
+	PT_UNIT_ASSERT(r == 0x0C); // 000001100
 }

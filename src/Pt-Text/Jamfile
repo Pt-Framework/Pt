@@ -22,13 +22,13 @@ SharedLibrary Pt-Text : AsciiCodec.cpp
 SharedLibrary_LinkSharedLibraries Pt-Text : Pt ;
 SharedLibrary_MakeLocate Pt-Text : bin ;
 
-#Main CharTest : CharTest.cpp ;
-#Main_LinkSharedLibraries CharTest : Pt-Text Pt ;
-#Main_MakeLocate CharTest : bin ;
+PtUnitTest CharTest : CharTest.cpp ;
+Main_LinkSharedLibraries CharTest : Pt-Text Pt ;
+Main_MakeLocate CharTest : bin ;
 
-#Main StringTest : StringTest.cpp ;
-#Main_LinkSharedLibraries StringTest : Pt-Text Pt ;
-#Main_MakeLocate StringTest : bin ;
+PtUnitTest StringTest : StringTest.cpp ;
+Main_LinkSharedLibraries StringTest : Pt-Text Pt ;
+Main_MakeLocate StringTest : bin ;
 
 PtUnitTest TextStreamTest : TextStreamTest.cpp ;
 Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt ;
