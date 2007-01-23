@@ -28,11 +28,20 @@ namespace Pt {
 
 	namespace Gfx {
 
+		//
+		// Foward declarations of drawing classes
+		//
+
 		class Pen;
 		class Brush;
 		class Font;
 		class FontMetrics;
 		class Region;
+
+
+		//
+		// Foward declarations of color classes
+		//
 
 		struct ARgb;
 		struct ARgbF;
@@ -51,6 +60,11 @@ namespace Pt {
 		typedef Color<Rgb565>   Rgb565Color;
 		typedef Color<Rgb555>   Rgb555Color;
 
+
+		//
+		// Foward declarations of interleaved image classes
+		//
+
 		template <typename ColorTagT>
 		class InterleavedImage;
 
@@ -61,6 +75,11 @@ namespace Pt {
 		typedef InterleavedImage<Rgb565>   Rgb565InterleavedImage;
 		typedef InterleavedImage<Rgb555>   Rgb555InterleavedImage;
 
+
+		//
+		// Foward declarations of interleaved subimage classes
+		//
+
 		template <typename ImageT_>
 		class SubImage;
 
@@ -70,6 +89,12 @@ namespace Pt {
 		typedef SubImage< InterleavedImage<Rgb888> >   Rgb888InterleavedSubImage;
 		typedef SubImage< InterleavedImage<Rgb565> >   Rgb565InterleavedSubImage;
 		typedef SubImage< InterleavedImage<Rgb555> >   Rgb555InterleavedSubImage;
+
+
+		//
+		// Interleaved images and subimages will be the most used types
+		// and so typedefs them for convenience
+		//
 
 		typedef ARgbInterleavedImage     ARgbImage;
 		typedef ARgbFInterleavedImage    ARgbFImage;

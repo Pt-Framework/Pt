@@ -28,11 +28,12 @@
 namespace Pt {
 	namespace Gfx {
 
-		/** @brief Rgb555 image class.
+		/** @brief Interleaved Rgb555 image class.
 		 */
 		typedef InterleavedImage<Rgb555> Rgb555InterleavedImage;
 
-		/** @brief Rgb555 subimage class.
+
+		/** @brief Interleaved Rgb555 subimage class.
 		 */
 		typedef SubImage< InterleavedImage<Rgb555> > Rgb555InterleavedSubImage;
 
