@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Aloysius Indrayanto                                *
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Gfx2/Gfx.h>
 #include <Pt/Gfx2/ARgbInterleavedImage.h>
 #include <Pt/Gfx2/ARgbFInterleavedImage.h>
 #include <Pt/Gfx2/ARgb8888InterleavedImage.h>

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -26,8 +26,8 @@ namespace Pt {
 
 		/** @brief Transform one sequence into another.
 		 */
-		template <typename InIteratorT, typename OutIteratorT, typename OpT> inline
-		OpT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OpT op)
+		template <typename InIteratorT, typename OutIteratorT, typename OperationT> inline
+		OperationT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OperationT op)
 		{
 			for(; begin != end; ++begin, ++dest) op(*dest, *begin);
 			return op;
@@ -35,15 +35,15 @@ namespace Pt {
 
 		/** @brief Transform one sequence into another.
 		 */
-		template <typename IteratorT, typename OpT> inline
-		OpT transform(IteratorT begin, IteratorT end, OpT op)
+		template <typename IteratorT, typename OperationT> inline
+		OperationT transform(IteratorT begin, IteratorT end, OperationT op)
 		{
 			for(; begin != end; ++begin) op(*begin);
 			return op;
 		}
 
 
-		/** @brief Assign one iterator range to another
+		/** @brief Assign one iterator range to another.
 		 */
 		template <typename InputIteratorT, typename OutputIteratorT> inline
 		OutputIteratorT assign(InputIteratorT begin, InputIteratorT end, OutputIteratorT to)

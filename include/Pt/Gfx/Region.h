@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C)                                                         *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_GFX_REGION_H
 #define PT_GFX_REGION_H
 
@@ -34,7 +32,7 @@ namespace Pt {
 
     namespace Gfx {
 
-        //! \brief 
+        //! \brief
         class Region
 		{
             public:

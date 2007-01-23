@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,10 +27,12 @@ namespace Pt {
 
 	namespace Gfx {
 
+		/** @brief An empty structure used for tagging packed 32-bit RGB color class.
+		 */
 		struct Rgb888 {};
 
 
-		/** @brief 32-Bit RGB color model.
+		/** @brief Packed 32-bit RGB color class.
 		 *  @ingroup Gfx
 		 *
 		 *  This class is exist so that the raw memory buffer of an image implementation
@@ -155,11 +157,6 @@ namespace Pt {
 				inline void setBlue(uint8_t b)
 				{ _val = _val & 0xFFFFFF00 | uint32_t(b); }
 
-			public:
-				//friend bool operator==(const Color& c1, const Color& c2);
-				//friend bool operator<(const Color& c1, const Color& c2);
-				//friend bool operator>(const Color& c1, const Color& c2);
-
 			protected:
 				uint32_t _val;
 		};
@@ -169,6 +166,14 @@ namespace Pt {
 		 *  @ingroup Gfx
 		 */
 		typedef Color<Rgb888> Rgb888Color;
+
+
+		/** @brief Full specialisation of the color traits class for Rgb888Color.
+		 */
+		template <>
+		struct ColorTraits<Rgb888Color> {
+			typedef uint16_t TmpValueT;
+		};
 
 
 		/** @brief Convert a Color<Rgb888> to a Color<ARgb>.
@@ -244,6 +249,15 @@ namespace Pt {
 			to.setValue( (s<<24) | (s<<16) | s );
 
 			return to;
+		}
+
+
+		/** @brief Mix two Color<Rgb888>s using the given mixing factor.
+		 */
+		template <typename FactorT>
+		inline void mixColor(Color<Rgb888>& dst, const Color<Rgb888>& src, const FactorT& factor)
+		{
+			// TODO: Write it !!!
 		}
 
 	} // namespace Gfx

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,10 +27,12 @@ namespace Pt {
 
 	namespace Gfx {
 
+		/** @brief An empty structure used for tagging floated ARGB color class.
+		 */
 		struct ARgbF {};
 
 
-		/** @brief Floated ARGB color model.
+		/** @brief Floated ARGB color class.
 		 *  @ingroup Gfx
 		 *
 		 *  This is the temporary color model for Pt::Gfx.
@@ -133,11 +135,6 @@ namespace Pt {
 				inline void setBlue(float b)
 				{ _b = b; }
 
-			public:
-				//friend bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-				//friend bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-				//friend bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2);
-
 			protected:
 				float _a, _r, _g, _b;
 		};
@@ -147,6 +144,14 @@ namespace Pt {
 		 *  @ingroup Gfx
 		 */
 		typedef Color<ARgbF> ARgbFColor;
+
+
+		/** @brief Full specialisation of the color traits class for ARgbFColor.
+		 */
+		template <>
+		struct ColorTraits<ARgbFColor> {
+			typedef float TmpValueT;
+		};
 
 
 		/** @brief Convert a Color<ARgbF> to a Color<ARgb>.
@@ -210,6 +215,15 @@ namespace Pt {
 			to.setBlue (s);
 
 			return to;
+		}
+
+
+		/** @brief Mix two Color<ARgbF>s using the given mixing factor.
+		 */
+		template <typename FactorT>
+		inline void mixColor(Color<ARgbF>& dst, const Color<ARgbF>& src, const FactorT& factor)
+		{
+			// TODO: Write it !!!
 		}
 
 	} // namespace Gfx

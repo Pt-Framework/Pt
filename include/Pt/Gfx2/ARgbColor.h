@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,8 +20,6 @@
 #ifndef Pt_Gfx2_ARgbColor_h
 #define Pt_Gfx2_ARgbColor_h
 
-#include <limits>
-#include <Pt/IfElse.h>
 #include <Pt/Gfx2/Color.h>
 
 
@@ -29,10 +27,12 @@ namespace Pt {
 
 	namespace Gfx {
 
+		/** @brief An empty structure used for tagging 64-bit ARGB color class.
+		 */
 		struct ARgb {};
 
 
-		/** @brief 64-Bit ARGB color model.
+		/** @brief 64-Bit ARGB color class.
 		 *  @ingroup Gfx
 		 *
 		 *  This is the master color model for Pt::Gfx.
@@ -130,11 +130,6 @@ namespace Pt {
 				inline void setBlue(uint16_t b)
 				{ _b = b; }
 
-			public:
-				//friend bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2);
-				//friend bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2);
-				//friend bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2);
-
 			protected:
 				uint16_t _a, _r, _g, _b;
 		};
@@ -144,6 +139,14 @@ namespace Pt {
 		 *  @ingroup Gfx
 		 */
 		typedef Color<ARgb> ARgbColor;
+
+
+		/** @brief Full specialisation of the color traits class for ARgbColor.
+		 */
+		template <>
+		struct ColorTraits<ARgbColor> {
+			typedef uint32_t TmpValueT;
+		};
 
 
 		/** @brief Dummy function for the sake of completeness.
@@ -188,57 +191,16 @@ namespace Pt {
 		}
 
 
-		template <typename Type1, typename Type2>
-		struct LargestType {
-			typedef typename IfElse< (sizeof(Type1) >= sizeof(Type2)), Type1, Type2 >::ResultT ResultT;
-		};
-
-		template <typename> struct TmpType;
-		template <> struct TmpType<uint8_t > { typedef uint16_t ValueT; };
-		template <> struct TmpType<uint16_t> { typedef uint32_t ValueT; };
-		template <> struct TmpType<uint32_t> { typedef uint64_t ValueT; };
-
-		template <typename T1, typename T2>
-		struct ResultType {
-			typedef typename TmpType< typename LargestType<T1, T2>::ResultT >::ValueT ValueT;
-		};
-
-
-		/** @brief Choose the type which has greater size (from the two given types).
-		 */
-		template <typename A, typename B>
-		struct LargestSizeOf {
-			typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
-		};
-
-
-		// Pure conceptional traits class. Later it may contain much more than just
-		// a typedef for temporary color values
-		template <typename TagT>
-		struct TagTraits;
-
-		// Full specialisation for ARgbColor
-		template <>
-		struct TagTraits<ARgbColor> {
-			typedef uint32_t TmpValue;
-		};
-
-
-		/** @brief Mix two Color<ARgb>s using the given mixing factor
-		 *
-		 *  This could be the implementation detail for overloaded functions.
-		 *  This would give us the ability to react to defect compilers that
-		 *  are not very good with template specialisations. However we should
-		 *  be pretty safe as long as we avoid partial specialisation.
+		/** @brief Mix two Color<ARgb>s using the given mixing factor.
 		 */
 		template <typename FactorT>
 		inline void mixColor(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
 		{
-			assert(  std::numeric_limits<FactorT>::is_integer() );
-			assert( !std::numeric_limits<FactorT>::is_signed () );
+			assert(  std::numeric_limits<FactorT>::is_integer );
+			assert( !std::numeric_limits<FactorT>::is_signed  );
 
-			typedef TagTraits<ARgbColor> Traits;
-			typedef typename LargestSizeOf< Traits::TmpValue, FactorT >::Result ValueT;
+			typedef ColorTraits<ARgbColor> Traits;
+			typedef typename LargestSizeOf< Traits::TmpValueT, FactorT >::Result ValueT;
 
 			const ValueT oF = factor;
 			const ValueT rF = std::numeric_limits<FactorT>::max() - oF;

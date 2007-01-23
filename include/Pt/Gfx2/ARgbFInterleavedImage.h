@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,6 +22,7 @@
 
 #include <Pt/Gfx2/ARgbFColor.h>
 #include <Pt/Gfx2/InterleavedImage.h>
+#include <Pt/Gfx2/SubImage.h>
 
 
 namespace Pt {
@@ -30,6 +31,10 @@ namespace Pt {
 		/** @brief ARgbF image class.
 		  */
 		typedef InterleavedImage<ARgbF> ARgbFInterleavedImage;
+
+		/** @brief ARgbF subimage class.
+		 */
+		typedef SubImage< InterleavedImage<ARgbF> > ARgbFInterleavedSubImage;
 
 	}
 }

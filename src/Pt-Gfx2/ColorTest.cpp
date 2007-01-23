@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Aloysius Indrayanto                                *
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Gfx2/Gfx.h>
 #include <Pt/Gfx2/ARgbColor.h>
 #include <Pt/Gfx2/ARgbFColor.h>
 #include <Pt/Gfx2/ARgb8888Color.h>
@@ -38,6 +39,9 @@ int main()
 	Rgb888Color    rgb888_1, rgb888_2;
 	Rgb565Color    rgb565_1, rgb565_2;
 	Rgb555Color    rgb555_1, rgb555_2;
+
+	const Pt::uint8_t factor = 128;
+	mixColor(argb_1, argb_2, factor);
 
 	fromARgb(argb_2, toARgb(argb_1));
 	fromARgb(argb8888_2, toARgb(argb8888_1));

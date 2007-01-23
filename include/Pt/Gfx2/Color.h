@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,7 +20,11 @@
 #ifndef Pt_Gfx2_Color_h
 #define Pt_Gfx2_Color_h
 
+#include <limits>
+#include <assert.h>
+
 #include <Pt/Api.h>
+#include <Pt/IfElse.h>
 #include <Pt/Types.h>
 
 
@@ -28,11 +32,25 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief Basic template declaration of all color model classes.
+		/** @brief Basic template declaration of color classes.
 		 *  @ingroup Gfx
 		 */
 		template <typename TagT>
 		class Color;
+
+
+		/** @brief Basic template declaration of color traits classes.
+		 */
+		template <typename ColorT>
+		struct ColorTraits;
+
+
+		/** @brief Choose the type which has greater size (from the two given types).
+		 */
+		template <typename A, typename B>
+		struct LargestSizeOf {
+			typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
+		};
 
 
 		/** @brief Greater-than operator for any color model comparison.

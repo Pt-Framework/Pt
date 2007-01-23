@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,8 +22,8 @@
 #include <Pt/Gfx2/ARgbFColor.h>
 #include <Pt/Gfx2/ARgb8888Color.h>
 #include <Pt/Gfx2/Rgb888Color.h>
-#include <Pt/Gfx2/Rgb555Color.h>
 #include <Pt/Gfx2/Rgb565Color.h>
+#include <Pt/Gfx2/Rgb555Color.h>
 #include <Pt/Gfx2/InterleavedImage.h>
 #include <Pt/Gfx2/InterleavedImage.tpp>
 #include <Pt/Gfx2/SubImage.h>

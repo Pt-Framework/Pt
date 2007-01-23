@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -140,10 +140,10 @@ class PT_GFX_API ImagePainter : public Painter
         DrawPolyline*        _drawPolyline;
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
-        
+
         FillPolygon*         _fillPolygon;
         DrawText*            _drawText;
-        
+
 };
 
 } //namespace Gfx
