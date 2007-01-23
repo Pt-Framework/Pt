@@ -41,7 +41,7 @@ namespace Pt {
 				typedef ColorT*       Scanline;
 				typedef const ColorT* ConstScanline;
 
-			protected:
+			public:
 				class PixelIterator;
 				class ConstPixelIterator;
 
@@ -173,7 +173,7 @@ namespace Pt {
 				ImageT& _image;
 				Region  _area;
 
-			protected:
+			public:
 				/** @brief Pixel-based iterator class.
 				 *  @ingroup Gfx
 				 */

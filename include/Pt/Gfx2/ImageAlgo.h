@@ -77,23 +77,33 @@ namespace Pt {
 		 *  (both ranges are specified using an input iterator, width and height).
 		 */
 		template<typename InIteratorT, typename OutIteratorT>
-		void blockScale(InIteratorT  from, uint fromiWdth, uint fromHeight,
+		void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
 		                OutIteratorT to,   uint toWidth,   uint toHeight);
 
 		/** @brief Block-scale a pixel range.
 		 *
 		 *  @param from    Begin of the source range
-		 *  @param fromEnd End of the source range
 		 *  @param to      Begin of the destination range
+		 *  @param fromEnd End of the source range
 		 *  @param toEnd   End of the destination range
 		 *
 		 *  This algorithm block-scales the source range [from, fromEnd] to the
 		 *  destination range [to, toEnd].
 		 */
-		/*template<typename In, typename Out> inline
-		void blockScale(In from, In fromEnd, Out to, Out toEnd)
+		template <typename InIteratorT, typename OutIteratorT> inline
+		void blockScale(InIteratorT from,    OutIteratorT to,
+		                InIteratorT fromEnd, OutIteratorT toEnd)
 		{
-	  }*/
+			const Math::Size fromSize   = fromEnd - from;
+			const uint       fromWidth  = fromSize.width();
+			const uint       fromHeight = fromSize.height();
+
+			const Math::Size toSize   = toEnd - to;
+			const uint       toWidth  = toSize.width();
+			const uint       toHeight = toSize.height();
+
+			blockScale(from, fromWidth, fromHeight, to, toWidth, toHeight);
+		}
 
 		/** @brief Block-scale an image.
 		 *
@@ -107,6 +117,7 @@ namespace Pt {
 		                uint newWidth, uint newHeight)
 		{
 			to.resize(newWidth, newHeight);
+			blockScale(from.begin(), to.begin(), from.end(), to.end());
 			blockScale(from.begin(), from.width(), from.height(), to.begin(), newWidth, newHeight);
 		}
 
