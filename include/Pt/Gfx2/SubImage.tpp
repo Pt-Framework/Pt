@@ -74,7 +74,7 @@ namespace Pt {
 			// If the size is not the same, we need to scale it first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
 				ImageT tmp;
-				blockScale(tmp, src, _area.width(), _area.height()); // TODO: Later, user should be able to
+				blockScale(src, tmp, _area.width(), _area.height()); // TODO: Later, user should be able to
 				for(uint y = 0; y < _area.height(); y++)             //       choose the scalling algorithm
 					for(uint x = 0; x < _area.width(); x++)
 						_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
@@ -100,7 +100,7 @@ namespace Pt {
 						tmp1.pixel(x, y) = src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
 				// Scale the temporary image to another temporary image
 				ImageT tmp2;
-				blockScale(tmp2, tmp1, _area.width(), _area.height()); // TODO: Later, user should be able to
+				blockScale(tmp1, tmp2, _area.width(), _area.height()); // TODO: Later, user should be able to
 				                                                       //       choose the scalling algorithm
 				// Copy the pixels to this sub image
 				for(uint y = 0; y < _area.height(); y++)

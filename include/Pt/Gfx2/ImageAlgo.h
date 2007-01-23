@@ -20,7 +20,7 @@
 #ifndef Pt_Gfx2_ImageAlgo_h
 #define Pt_Gfx2_ImageAlgo_h
 
-#include <Pt/Gfx2/BasicAlgo.h>
+#include <Pt/Gfx2/ColorAlgo.h>
 #include <Pt/Gfx2/ARgbInterleavedImage.h>
 
 
@@ -47,8 +47,8 @@ namespace Pt {
 
 		/** @brief Greyscale a pixel range using iterators.
 		 */
-		template <typename In, typename Out> inline
-		void greyscale(In begin, In end, Out to)
+		template <typename InIteratorT, typename OutIteratorT> inline
+		void greyscale(InIteratorT begin, InIteratorT end, OutIteratorT to)
 		{ for(; begin != end; ++begin, ++to) greyscale(*begin, *to); }
 
 		/** @brief Greyscales an image using its iterators.
@@ -64,16 +64,51 @@ namespace Pt {
 		{ greyscale(image.begin(), image.end); }
 
 
+		/** @brief Block-scale a pixel range.
+		 *
+		 *  @param from       Begin of the source range
+		 *  @param fromWidth  Width of the source range
+		 *  @param fromHeight Height of the source range
+		 *  @param to         Begin of the destination range
+		 *  @param fromWidth  Width of the destination range
+		 *  @param fromHeight Height of the destination range
+		 *
+		 *  This algorithm block-scales the source range to the destination range
+		 *  (both ranges are specified using an input iterator, width and height).
+		 */
+		template<typename InIteratorT, typename OutIteratorT>
+		void blockScale(InIteratorT  from, uint fromiWdth, uint fromHeight,
+		                OutIteratorT to,   uint toWidth,   uint toHeight);
+
+		/** @brief Block-scale a pixel range.
+		 *
+		 *  @param from    Begin of the source range
+		 *  @param fromEnd End of the source range
+		 *  @param to      Begin of the destination range
+		 *  @param toEnd   End of the destination range
+		 *
+		 *  This algorithm block-scales the source range [from, fromEnd] to the
+		 *  destination range [to, toEnd].
+		 */
+		/*template<typename In, typename Out> inline
+		void blockScale(In from, In fromEnd, Out to, Out toEnd)
+		{
+	  }*/
+
 		/** @brief Block-scale an image.
 		 *
-		 *  @param srcImage  Source image
-		 *  @param dstImage  Destination image
+		 *  @param from      Source image
+		 *  @param to        Destination image
 		 *  @param newWidth  Wanted width of the destination image
 		 *  @param newHeight Wanted height of the destination image
 		 */
-		template <typename DstColorTagT, typename SrcColorTagT>
-		void blockScale(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from,
-		                uint newWidth, uint newHeight);
+		template <typename DstColorTagT, typename SrcColorTagT> inline
+		void blockScale(const InterleavedImage<SrcColorTagT>& from, InterleavedImage<DstColorTagT>& to,
+		                uint newWidth, uint newHeight)
+		{
+			to.resize(newWidth, newHeight);
+			blockScale(from.begin(), from.width(), from.height(), to.begin(), newWidth, newHeight);
+		}
 
 	} // namespace Gfx
 

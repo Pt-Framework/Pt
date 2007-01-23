@@ -42,11 +42,32 @@ namespace Pt {
 		}
 
 
-		template <typename DstColorTagT, typename SrcColorTagT>
-		void blockScale(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from,
-		                uint newWidth, uint newHeight)
+		template<typename InIteratorT, typename OutIteratorT>
+		void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
+		                OutIteratorT to,   uint toWidth,   uint toHeight)
 		{
-			// TODO: WRITE IT ASAP !!!
+			size_t dh = 0;
+			size_t y  = 0;
+
+			while(y < toHeight) {
+				InIteratorT pos = from;
+				do {
+					size_t dw = 0;
+					for(size_t x = 0; x < toWidth; ++x) {
+						assign(*to, *from);
+						++to;
+						for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
+					}
+					from = pos;
+					y++;
+				}
+				while( (dh += fromHeight) < toHeight );
+
+				while(dh >= toHeight) {
+					from += fromWidth;
+					dh -= toHeight;
+				}
+			}
 		}
 
 	} // namespace Gfx

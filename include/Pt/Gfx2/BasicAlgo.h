@@ -26,8 +26,8 @@ namespace Pt {
 
 		/** @brief Transform one sequence into another.
 		 */
-		template <typename In, typename Out, typename Op> inline
-		Op transform(In begin, In end, Out dest, Op op)
+		template <typename InIteratorT, typename OutIteratorT, typename OpT> inline
+		OpT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OpT op)
 		{
 			for(; begin != end; ++begin, ++dest) op(*dest, *begin);
 			return op;
@@ -35,8 +35,8 @@ namespace Pt {
 
 		/** @brief Transform one sequence into another.
 		 */
-		template <typename Iter, typename Op> inline
-		Op transform(Iter begin, Iter end, Op op)
+		template <typename IteratorT, typename OpT> inline
+		OpT transform(IteratorT begin, IteratorT end, OpT op)
 		{
 			for(; begin != end; ++begin) op(*begin);
 			return op;
