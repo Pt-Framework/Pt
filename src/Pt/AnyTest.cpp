@@ -48,10 +48,10 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( a.empty() );
 
             a.init("int");
-            PT_UNIT_ASSERT( a.typeName() == "int" );
+            PT_UNIT_ASSERT( a.typeName() == std::string("int") );
 
             a.init<float>();
-            PT_UNIT_ASSERT( a.typeName() == "float" );
+            PT_UNIT_ASSERT( a.typeName() == std::string("float") );
 
             Pt::Any b(a);
             PT_UNIT_ASSERT( a == b );

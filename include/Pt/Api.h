@@ -34,22 +34,35 @@
 #define Pt_Api_h
 
 
-#ifdef _MSC_VER
-    //http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
-    //http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
-    //http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
-    #pragma warning( disable : 4996 ) // deprectated stdc++ functions
-    #pragma warning( disable : 4251 ) // dll-linkage
+#if defined(_MSC_VER) || defined(_WIN32)
+    	//http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
+    	//http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
+    	//http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
 
-    //non dll-interface base class
-    //#pragma warning( disable : 4275 )
+    	// deprectated stdc++ functions
+    	#pragma warning( disable : 4996 ) 
 
-    // exception sepcification ignored
-    #pragma warning( disable : 4290 ) 
+    	// dll-linkage
+    	#pragma warning( disable : 4251 ) 
+
+    	//non dll-interface base class
+    	//#pragma warning( disable : 4275 )
+
+    	// exception sepcification ignored
+    	#pragma warning( disable : 4290 ) 
+#endif
+
+#if defined (__INTEL_COMPILER)
+	// field of class type without a DLL interface used in a class with a DLL interface
+    	#pragma warning( disable : 1744 ) 
+
+	//base class dllexport/dllimport specification differs from that of the derived class
+	#pragma warning( disable : 1738 )
 #endif
 
 #ifdef _WIN32_WCE
-	#define PT_WITHOUT_STD_LOCALE  // WinCE does not provide locale-classes
+	// WinCE does not provide locale-classes
+	#define PT_WITHOUT_STD_LOCALE  
 #endif
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)

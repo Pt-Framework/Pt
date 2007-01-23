@@ -119,7 +119,7 @@ namespace Pt {
         public:
             /** @internal
             */
-            class Value
+            class PT_API Value
             {
                 public:
                     virtual ~Value() {}

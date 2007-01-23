@@ -1,0 +1,112 @@
+#
+# Intel C++ is mostly compatible to MSVC compiler options 
+#
+JamInclude Jamrules.vc ;
+
+#
+# Set Path to Visual Studio 2005 installation from envvar if 
+# not set by user
+#
+INTELC ?= $(ICPP_COMPILER91:J=" ")\\IA32 ;
+
+#
+# Set Path to Visual Studio 2005 installation from envvar if 
+# not set by user
+#
+VISUALC ?= $(VSINSTALLDIR:J=" ") ;
+
+#
+# Path to VC/C++ module of visual studio installation 
+#
+VCDIR = $(VCINSTALLDIR:J=" ") ;
+
+#
+# Set Path to platform sdk
+#
+PLATFORMSDK ?= $(MSSdk:J=" ") ;
+
+#
+# Tools
+#
+AR		= lib /nologo ;
+AS		= masm386 ;
+CC		= icl /nologo ;
+LINK		= link ;
+C++		= $(CC) ;
+UNDEFFLAG	= "/u _" ;
+
+#
+# Linker options
+#
+LINKFLAGS += /LIBPATH:"\"$(MSSDK)\\lib"\" ;
+LINKLIBS += advapi32.lib
+	    gdi32.lib
+	    user32.lib
+	    kernel32.lib ;
+
+#
+# Compiler options
+#
+CCFLAGS += /DWIN32 /D_CRT_SECURE_NO_DEPRECATE ;
+
+if $(CONFIG:L) = debug 
+{
+	CCFLAGS += /MDd /Zi /MDd /Od /RTC1 ;
+	LINKFLAGS += /DEBUG ;
+}
+else
+{
+	CCFLAGS += /MD /Ox /Ot /Oy /D "NDEBUG" ;
+}
+
+C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /W3  ;
+
+#
+# set directories to standard header 
+#
+STDHDRS = \"$(VISUALC)\\vc\\include\" 
+	  \"$(PLATFORMSDK)\\include\" ;
+
+	
+actions updated together piecemeal Archive
+{
+	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
+
+	set _inputfile_=archive.cmd
+	echo "$(>)" > %_inputfile_%
+
+	if exist $(<) set _$(<:B)_=$(<)
+
+	"$(AR)" /out:$(<) %_$(<:B)_% @%_inputfile_%
+
+	del %_inputfile_%
+}
+
+
+actions As
+{
+	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
+	"$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc
+{
+	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
+	"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++ bind PDB
+{	
+	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
+	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
+
+actions together Link bind NEEDLIBS
+{
+	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
+	set LIB=$(INTELC)\lib;$(VCDIR)\lib;$(PLATFORMSDK)\lib\;%LIB%
+	"$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
