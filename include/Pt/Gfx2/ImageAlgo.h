@@ -116,7 +116,6 @@ namespace Pt {
 		                uint newWidth, uint newHeight)
 		{
 			to.resize(newWidth, newHeight);
-			blockScale(from.begin(), to.begin(), from.end(), to.end());
 			blockScale(from.begin(), from.width(), from.height(), to.begin(), newWidth, newHeight);
 		}
 
