@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/CmykColor.h>
 #include <Pt/Gfx/Rgb565Color.h>
 #include <Pt/Gfx/XRgb1555Color.h>
 #include <Pt/Gfx/ARgb8888Color.h>
@@ -33,14 +32,12 @@ namespace Pt {
 
 		// Explicit instantiation of the image classes
 		template class BasicImage<ARgb>;
-		template class BasicImage<Cmyk>;
 		template class BasicImage<Rgb565>;
 		template class BasicImage<XRgb1555>;
 		template class BasicImage<ARgb8888>;
 
 		// Explicit instantiation of the subimage classes
 		template class SubImage<ARgb>;
-		template class SubImage<Cmyk>;
 		template class SubImage<Rgb565>;
 		template class SubImage<XRgb1555>;
 		template class SubImage<ARgb8888>;
