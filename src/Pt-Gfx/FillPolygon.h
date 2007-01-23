@@ -69,13 +69,8 @@ class FillPolygon
                            std::vector<Math::Point>& points );
 
 private:
-
-    void setupGlobalEdgeTable( std::vector<Math::Point>& points );
-
     void output( Pt::Gfx::ARgbImage& image, size_t scanLine );
 
-    void addEdgeToActiveTable( EdgeSet::iterator& it, size_t scanLine );   
-   
     EdgeSet                 _globalEdgeTable;
     ActiveEdgeTable         _activeEdgeTable;
     EdgeSet::iterator       _currentPos;

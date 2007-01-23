@@ -42,7 +42,9 @@ class ImagePainterDemo : public Pt::Gui::Widget
     ImagePainterDemo()
     : _image( )
     , _imagePainter( _image )
-    {}
+    {
+        this->setTitle(L"ImagePainterDemo");
+    }
 
     virtual ~ImagePainterDemo()
     {}
@@ -56,10 +58,10 @@ class ImagePainterDemo : public Pt::Gui::Widget
         polygon.push_back( Pt::Math::Point( 10, 100 ));
         polygon.push_back( Pt::Math::Point( 50, 10));
         polygon.push_back( Pt::Math::Point( 100, 80));
-        polygon.push_back( Pt::Math::Point( 150, 10)); 
+        polygon.push_back( Pt::Math::Point( 150, 10));
         polygon.push_back( Pt::Math::Point( 200, 100));
         polygon.push_back( Pt::Math::Point( 100, 300));
-        polygon.push_back( Pt::Math::Point( 20, 250));                
+        polygon.push_back( Pt::Math::Point( 20, 250));
 
 /*
         polygon.push_back( Pt::Math::Point( 50, 20 ));        
@@ -69,12 +71,12 @@ class ImagePainterDemo : public Pt::Gui::Widget
         */        
         
         _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0) ));
-        Pt::System::Clock clock;
+        //Pt::System::Clock clock;
         
-        clock.start();
+        //clock.start();
         _imagePainter.fillPolygon( &polygon[0], polygon.size() );
-        Pt::System::TimeValue time = clock.stop();
-        std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+        //Pt::System::TimeValue time = clock.stop();
+        //std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
         
         
 /*        
@@ -102,21 +104,21 @@ class ImagePainterDemo : public Pt::Gui::Widget
         
         polygon.clear();
     
-        polygon.push_back( Pt::Math::Point( 10 , 100 ));
-        polygon.push_back( Pt::Math::Point( 50, 10));
-        polygon.push_back( Pt::Math::Point( 100, 80));
-        polygon.push_back( Pt::Math::Point( 150, 10)); 
-        polygon.push_back( Pt::Math::Point( 200, 100));
-        polygon.push_back( Pt::Math::Point( 100, 300));
-        polygon.push_back( Pt::Math::Point( 20, 250));                
+        polygon.push_back( Pt::Math::Point( 10  + 50 , 100 ));
+        polygon.push_back( Pt::Math::Point( 50 + 50 , 10));
+        polygon.push_back( Pt::Math::Point( 100 + 50 , 80));
+        polygon.push_back( Pt::Math::Point( 150 + 50 , 10));
+        polygon.push_back( Pt::Math::Point( 200 + 50 , 100));
+        polygon.push_back( Pt::Math::Point( 100 + 50 , 300));
+        polygon.push_back( Pt::Math::Point( 20 + 50 , 250));
 
   
         
-        clock.start();
+        //clock.start();
         painter().fillPolygon( &polygon[0], polygon.size() );
        
-        time = clock.stop();
-        std::cerr<<"GDI Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+        //time = clock.stop();
+        //std::cerr<<"System Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
 
         
     }

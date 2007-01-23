@@ -1,44 +1,198 @@
+/***************************************************************************
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 #include "FillPolygon.h"
 #include "Pt/Math/Rect.h"
+#include "Pt/System/Clock.h"
+
 #include <iostream>
+#include <algorithm>
 
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
+namespace Gfx {
 
 FillPolygon::FillPolygon()
 : _colorBuffer( 3000 )
 { }
 
+
 void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::Point>& points )
 {
+    //Pt::System::Clock clock;
+    //clock.start();
+
     if( points.end() != points.begin() )
         points.push_back( points[0] );
-                      
-     _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width() - 1, image.height() - 1 )) );
-        
+
+    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width() - 1, image.height() - 1 )) );
+
+    // Time: 8e-06
+
     if( points.empty())
-        return;         
-            
-    setupGlobalEdgeTable( points );
+        return;
 
-    EdgeSet::iterator   it       = _globalEdgeTable.begin();
-    size_t              scanLine = it->ymin;
+    // might as well create a new table here...
+    _globalEdgeTable.clear();
 
-    addEdgeToActiveTable( it, scanLine );
+    //
+    // Fill the global edge table. Two points yield an edge.
+    //
+    Edge edge;
+    Pt::Math::Point* bottom = 0;
+    Pt::Math::Point* top = 0;
+    for( size_t i = 1; i < points.size(); ++i )
+    {
+        //
+        // Find out which point is above and which is below
+        //
+        if ( points[i-1].y() > points[i].y() )
+        {
+            bottom = &( points[i-1] );
+            top = &( points[i] );
+        }
+        else
+        {
+            bottom = &(points[i]);
+            top = &(points[i-1]);
+        }
+
+        //
+        // Omit horizontal edges, add others to global edge table. The GET
+        // is sorted by primarily by the edges ymin and secondarily by
+        // the x value of the edge
+        //
+        if( top->y() != bottom->y() )
+        {
+            const int dy   = bottom->y() - top->y();
+            const int dx   = bottom->x() - top->x();
+
+            edge.ymax = bottom->y();  //- 1;   -1 so we don't get last scanline */
+            edge.ymin = top->y();
+            edge.x    = top->x();
+
+            //
+            // Bresenham stuff...
+            //
+            if (dx < 0)
+            {
+                edge.m = dx / dy;
+                edge.m1 = edge.m - 1; 
+                edge.incr1 = -2 * dx + 2 * dy * edge.m1;
+                edge.incr2 = -2 * dx + 2 * dy * edge.m;
+                edge.d = 2 * edge.m * dy - 2 * dx - 2 * dy;
+            }
+            else
+            {
+                edge.m = dx / dy;
+                edge.m1 = edge.m + 1;
+                edge.incr1 = 2 * dx - 2 * dy * edge.m1;
+                edge.incr2 = 2 * dx - 2 * dy * edge.m;
+                edge.d = -2 * edge.m * dy + 2 * dx;
+            }
+
+            _globalEdgeTable.insert( edge );
+        }
+    }
+
+    // Time: 1.5e-05
+
+    //
+    // Start at ymin of the first entry in the GET.
+    //
+    size_t scanLine = _globalEdgeTable.begin()->ymin;
+
+    //
+    // move active edges to AET for current scanline. Keep iterator where
+    // we stopped for later use.
+    //
+    EdgeSet::iterator it = _globalEdgeTable.begin();
+    for( ; it != _globalEdgeTable.end() && it->ymin == scanLine; ++it )
+        _activeEdgeTable.addEdge( *it );
+
+    // Time: 1.9e-05
 
     do
     {
-        output( image, scanLine );
+        //
+        // Fill all spans in the target image
+        //
+        this->output( image, scanLine );
+
+        //
+        // now we are done with the current active edges and can update
+        // them for the next scanline.
+        //
         scanLine++;
-        _activeEdgeTable.updateEdges( scanLine );
-        addEdgeToActiveTable( it, scanLine );
+        _activeEdgeTable.update( scanLine );
+
+        //
+        // move active edges to AET for current scanline
+        //
+        for( ; it != _globalEdgeTable.end() && it->ymin == scanLine; ++it )
+            _activeEdgeTable.addEdge( *it );
+
+        //
+        // Need to resort the AET, because of update and new edges
+        //
         _activeEdgeTable.sort();
     }
     while( !_activeEdgeTable.empty() );
+
+    // Time             : 0.000458
+    // Time( no output ): 0.000102
+
+    //Pt::System::TimeValue time = clock.stop();
+    //std::cerr << "Image Time: " << time.seconds() + time.microSeconds() / 1000000.0 << std::endl;
 }
 
+
+void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
+{
+    //
+    // fill every even span, starting at even (even-odd-rule)
+    //
+    for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
+    {
+        // TODO: Investigate why we need max/min out the x values. :-/
+        const size_t xmax   = std::max(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+        const size_t xmin   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+        const size_t length = (xmax - xmin);
+        const size_t size   = length * sizeof(ARgbColor);
+        if(length)
+            memcpy( &image.pixel( xmin, scanLine ), &_colorBuffer[0], size );
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+/* OLD
 void FillPolygon::setupGlobalEdgeTable(  std::vector<Math::Point>& points )
 {
     Edge edge;
@@ -48,22 +202,22 @@ void FillPolygon::setupGlobalEdgeTable(  std::vector<Math::Point>& points )
     for( size_t i = 1; i < points.size(); ++i )
     {
         edge.dy = points[i].y() - points[i-1].y();
-        
+
         if( edge.dy == 0 )
             continue;
 
         edge.dx     = points[i].x() - points[i-1].x();
-        edge.xaccu  = edge.dx;       
-        
+        edge.xaccu  = edge.dx;
+
         if( points[i-1].y() < points[i].y() )
         {
-            edge.ymin = points[i-1].y();                            
+            edge.ymin = points[i-1].y();
             edge.ymax = points[i].y() ;
-            edge.x    = points[i-1].x();            
+            edge.x    = points[i-1].x();
         }
         else
         {
-            edge.ymin = points[i].y();                
+            edge.ymin = points[i].y();
             edge.ymin = points[i].y();
             edge.ymax = points[i-1].y() ;
             edge.x    = points[i].x();
@@ -72,28 +226,9 @@ void FillPolygon::setupGlobalEdgeTable(  std::vector<Math::Point>& points )
         _globalEdgeTable.insert( edge );
     }
 }
+*/
 
-void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
-{
-    for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
-    {
-        const size_t deltax  = (_activeEdgeTable[i].x - _activeEdgeTable[i-1].x);
-        
-        if( deltax == 0 )
-            continue; 
-        
-        const size_t        size    = deltax * sizeof(ARgbColor) ;
-        const Pt::ssize_t   x       = (size_t) _activeEdgeTable[i-1].x;
 
-        memcpy( &image.pixel( x, scanLine ), &_colorBuffer[0], size );
-    }
-}
-
-void FillPolygon::addEdgeToActiveTable( EdgeSet::iterator& it, size_t scanLine )
-{
-    for( ; it != _globalEdgeTable.end() && it->ymin == scanLine; ++it )
-        _activeEdgeTable.addEdge( *it );
-}
 
 }//namespace Pt
 }//namespace Gfx

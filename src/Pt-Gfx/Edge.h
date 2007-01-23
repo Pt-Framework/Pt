@@ -11,34 +11,27 @@ class Edge
         : ymin(0)
         , ymax(0)
         , x(0)
-        , dx(0)
-        , dy(0)
-        , xaccu(0)
+        , m(0)
+        , m1(0)
+        , incr1(0)
+        , incr2(0)
+        , d(0)
         {}
-                
 
-        Edge( size_t  ymin_, size_t ymax_, size_t x_, size_t dx_, size_t dy_ )
-        : ymin(ymin_)
-        , ymax(ymax_)
-        , x(x_)
-        , dx(dx_)
-        , dy(dy_)
-        {}
-                
         bool operator<(const Edge& edge) const
         {
             if( ymin == edge.ymin )
                 return x < edge.x;
-                
-            return ymin < edge.ymin;              
+
+            return ymin < edge.ymin;
         }
-        
-        Pt::ssize_t ymin;
-        Pt::ssize_t ymax;
-        Pt::ssize_t x;       
-        Pt::ssize_t dx;
-        Pt::ssize_t dy;
-        Pt::ssize_t xaccu; 
+
+        Pt::ssize_t ymin;  // minimum y of the edge
+        Pt::ssize_t ymax;  // maxinum y of the edge
+        int x;             // current x value
+        int m, m1;         // slope and slope + 1
+        int incr1, incr2;  // error increments
+        int d;             // decision variable
 };
 
 }

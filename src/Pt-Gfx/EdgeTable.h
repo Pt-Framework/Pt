@@ -14,78 +14,51 @@ class ActiveEdgeTable : public std::vector<Edge>
 {
     public:
         ActiveEdgeTable()
-        : std::vector<Edge>( 0 )
         { }
 
         inline void addEdge( const Edge& edge )
         {  push_back( edge ); }
 
-        inline void updateEdges( size_t ypos )
+
+        inline void update( ssize_t ypos )
         {
-            size_t trueX;
-            
             for( size_t i = 0; i < size(); i++ )
             {
-               if( ypos >= (*this)[i].ymax )
-               {//remove
+                if( ypos >= (*this)[i].ymax )
+                {
+                    //
+                    // remove finished edge
+                    //
                     erase( begin() + i );
                     --i;
-               }
-               else
-               {//recalc the new x value
-                    //(*this)[i].x += (*this)[i].rslope;
-                    
+                }
+                else
+                {
+                    //
+                    // recalc new x value for the scanline
+                    //
+                    // NOTE: Yes, Laurentiu, it can really be that simple... ;)
+                    //
                     Edge& edge = (*this)[i];
-                    trueX = edge.x; 
-                               
-                    if( edge.dx > 0 && edge.dy > 0)
-                    {
-                        edge.xaccu += edge.dx;
-                        
-                        while( edge.xaccu > edge.dy )
-                        {
-                            trueX++;
-                            edge.xaccu -= edge.dy;
+
+                    if (edge.m1 > 0) {
+                        if (edge.d > 0) {
+                            edge.x += edge.m1;
+                            edge.d += edge.incr1;
                         }
-                        edge.x = trueX;
-                    }                    
-                    else if( edge.dx > 0 && edge.dy < 0)
-                    {
-                        edge.xaccu += edge.dx;
-                        while( edge.xaccu > -edge.dy )
-                        {
-                            trueX--;
-                            edge.xaccu += edge.dy;
+                        else {
+                            edge.x += edge.m;
+                            edge.d += edge.incr2;
                         }
-                        
-                        if(  edge.xaccu == edge.dy )
-                            edge.x = trueX - 1;
-                        else
-                            edge.x = trueX;
-                            
-                    }
-                    else if( edge.dx < 0 && edge.dy > 0)
-                    {
-                        edge.xaccu -= edge.dx;
-                        while( edge.xaccu > edge.dy )
-                        {
-                            trueX--;
-                            edge.xaccu -= edge.dy;
+                    } else {
+                        if (edge.d >= 0) {
+                            edge.x += edge.m1;
+                            edge.d += edge.incr1;
                         }
-                        edge.x = trueX;                    
-                    }
-                    else if( edge.dx < 0 && edge.dy < 0)
-                    {
-                        edge.xaccu -= edge.dx;
-                        while( edge.xaccu > -edge.dy )
-                        {
-                            trueX++;
-                            edge.xaccu += edge.dy;
+                        else {
+                            edge.x += edge.m;
+                            edge.d += edge.incr2;
                         }
-                        if(  edge.xaccu == edge.dy )
-                            edge.x = trueX - 1;
-                        else
-                            edge.x = trueX;      
                     }
                }
             }
@@ -101,13 +74,11 @@ class ActiveEdgeTable : public std::vector<Edge>
             { return e1.x < e2.x; }
         };
 
-        LessXValue _lessXValue;        
+        LessXValue _lessXValue;
 };
 
-
-//typedef std::vector<Edge>      ActiveEdgeTable;
-
 }
+
 }
 
 #endif
