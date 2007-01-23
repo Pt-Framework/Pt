@@ -82,12 +82,12 @@ namespace Pt {
 				inline bool empty() const
 				{ return _buff.empty(); }
 
-				/** @brief Returns the width of the image.
+				/** @brief Return the width of the image.
 				 */
 				inline uint width() const
 				{ return _width; }
 
-				/** @brief Returns the height of the image.
+				/** @brief Return the height of the image.
 				 */
 				inline uint height() const
 				{ return _height; }
@@ -155,7 +155,7 @@ namespace Pt {
 				 */
 				const ColorT& at(int x, int y) const;
 
-				/** @brief Returns the color at the specified coordinates.
+				/** @brief Return the color at the specified coordinates.
 				  *
 				  * If the coordinates are out of range, the given 'invalid' color
 				  * will be returned instead.
@@ -167,34 +167,32 @@ namespace Pt {
 				void setColor(int x, int y, const ColorT& color_);
 
 
-				/** @brief Returns an iterator indicating the position of the first pixel in the image.
+				/** @brief Return an iterator indicating the position of the first pixel in the image.
 				 */
 				inline PixelIterator begin()
 				{ return PixelIterator(*this); }
 
-				/** @brief Returns an iterator indicating the position after the last pixel in the image.
+				/** @brief Return an iterator indicating the position after the last pixel in the image.
 				 */
 				inline PixelIterator end()
 				{ return PixelIterator(*this, this->width(), this->height()-1); }
 
-				/** @brief Returns an iterator indicating the position of a pixel at(x,y).
+				/** @brief Return an iterator indicating the position of a pixel at(x,y).
 				 */
 				inline PixelIterator iterator(uint y, uint x)
 				{ return PixelIterator(*this, y, x); }
 
-				/** @brief Returns a constant iterator indicating the position of the first pixel in the image.
+				/** @brief Return a constant iterator indicating the position of the first pixel in the image.
 				 */
 				inline ConstPixelIterator begin() const
 				{ return ConstPixelIterator(*this); }
 
-				/** @brief Returns a constant iterator indicating the position after the last pixel in the image.
+				/** @brief Return a constant iterator indicating the position after the last pixel in the image.
 				 */
 				inline ConstPixelIterator end() const
 				{ return ConstPixelIterator(*this, this->width(), this->height()-1); }
 
-				//! Returns a const iterator indicating the position
-				//! of a pixel at(x,y)
-				/** @brief Bla
+				/** @brief Return a constant iterator indicating the position of a pixel at(x,y).
 				 */
 				inline ConstPixelIterator iterator(uint y, uint x) const
 				{ return ConstPixelIterator( *this, y, x ); }
@@ -207,8 +205,8 @@ namespace Pt {
 
 			protected:
 				/** @brief Pixel-based iterator class.
-				  * @ingroup Gfx
-				  */
+				 *  @ingroup Gfx
+				 */
 				class PixelIterator
 				{
 					public:

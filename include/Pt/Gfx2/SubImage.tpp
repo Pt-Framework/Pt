@@ -58,6 +58,17 @@ namespace Pt {
 
 
 		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ColorT& color)
+		{
+			for(size_t y = 0; y < _area.height(); y++) {
+				for(size_t x = 0; x < _area.width(); x++) {
+					_image.scanline(y)[x] = color;
+				}
+			}
+			return *this;
+		}
+
+		template <typename ImageT_>
 		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ImageT& src)
 		{
 			// If the size is not the same, we need to scale it first then copy

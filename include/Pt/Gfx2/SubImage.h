@@ -28,7 +28,7 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief Sub image class.
+		/** @brief Subimage class.
 		 *  @ingroup Gfx
 		 */
 		template <typename ImageT_>
@@ -46,113 +46,126 @@ namespace Pt {
 				class ConstPixelIterator;
 
 			public:
-				//! Construct a subimage using the given image and area.
+				/** @brief Construct a subimage using the given image and area.
+				 */
 				SubImage(ImageT& image, const Pt::Gfx::Region& area);
 
 
-				//! Comparison based on the pixels' color values.
+				/** @brief Comparison based on the pixels' color values.
+				 */
 				bool operator==(const SubImageT& src);
 
 
-				//! Check if the image is empty or not
+				/** @brief Check if the image is empty or not.
+				 */
 				inline bool empty() const
 				{ return _image.empty(); }
 
 
-				//! Return the area of the subimage (in the term of the main/full image)
+				/** @brief Return the area of the subimage (in the term of the main/full image).
+				 */
 				inline const Pt::Gfx::Region& region() const
 				{ return _area; }
 
-				//! Return the width of the subimage
+				/** @brief Return the width of the subimage.
+				 */
 				inline uint width () const
 				{ return _area.width(); }
 
-				//! Return the height of the subimage
+				/** @brief Return the height of the subimage.
+				 */
 				inline uint height() const
 				{ return _area.height(); }
 
-				//! Access to the full image
+				/** @brief Access to the full image.
+				 */
 				inline ImageT& fullImage()
 				{ return _image; }
 
-				//! Access to the full image
+				/** @brief Access to the full image.
+				 */
 				inline const ImageT& fullImage() const
 				{ return _image; }
 
 
-				//! Fill the sub image with the given color.
-				SubImage& operator=(const ColorT& color)
-				{
-					for(size_t y = 0; y < _area.height(); y++) {
-						for(size_t x = 0; x < _area.width(); x++) {
-							_image.scanline(y)[x] = color;
-						}
-					}
-					return *this;
-				}
+				/** @brief Fill the subimage with the given color.
+				 */
+				SubImage& operator=(const ColorT& color);
 
-				//! Fill the sub image with the given image.
+				/** @brief Fill the subimage with the given image.
+				 */
 				SubImageT& operator=(const ImageT& src);
 
-				//! Fill the sub image with the given sub image.
+				/** @brief Fill the subimage with the given subimage.
+				 */
 				SubImageT& operator=(const SubImageT& src);
 
-				//! Scanline access without range check
+
+				/** @brief Scanline access without range check.
+				 */
 				inline Scanline scanline(int y)
 				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
-				//! Scanline access without range check
+				/** @brief Scanline access without range check.
+				 */
 				inline ConstScanline scanline(int y) const
 				{ return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
-				//! Random access without range check
+				/** @brief Random access without range check.
+				 */
 				inline ColorT& pixel(int x, int y)
 				{ return _image.data()[(y+_area.y())*_image.width() + x+_area.x()]; }
 
-				//! Random access without range check
+				/** @brief Random access without range check.
+				 */
 				inline const ColorT& pixel(int x, int y) const
 				{ return _image.data()[(y+_area.y())*_image.width() + x+_area.x()]; }
 
-				//! Random access with range check
+				/** @brief Random access with range check.
+				 */
 				ColorT& at(int x, int y);
 
-				//! Random access with range check
+				/** @brief Random access with range check.
+				 */
 				const ColorT& at(int x, int y) const;
 
-				//! Returns the color at the specified coordinates
+				/** @brief Return the color at the specified coordinates.
+				 */
 				const ColorT& color(int x, int y, const ColorT& invalid = ColorT()) const;
 
-				//! Returns the color at the specified coordinates
+				//!
+				/** @brief Return the color at the specified coordinates.
+				 */
 				void setColor(int x, int y, const ColorT& color_);
 
 
-				//! Returns an iterator indicating the position
-				//! of the first pixel in this image
+				/** @brief Return an iterator indicating the position of the first pixel in this image.
+				 */
 				inline PixelIterator begin()
 				{ return PixelIterator(*this); }
-				//!
-				//! Returns an iterator indicating the position
-				//! after the last pixel in this image
+
+				/** @brief Return an iterator indicating the position after the last pixel in this image.
+				 */
 				inline PixelIterator end()
 				{ return PixelIterator(*this, 1, _area.height() + 1); }
 
-				//! Returns an iterator indicating the position
-				//! of a pixel at(x,y)
+				/** @brief Return an iterator indicating the position of a pixel at(x,y).
+				 */
 				inline PixelIterator iterator(uint y, uint x)
 				{ return PixelIterator(*this, _area.x()+y, _area.y()+x); }
 
-				//! Returns a const iterator indicating the position
-				//! of the first pixel in this image
+				/** @brief Return a const antiterator indicating the position of the first pixel in this image.
+				 */
 				inline ConstPixelIterator begin() const
 				{ return ConstPixelIterator(*this); }
 
-				//! Returns a const iterator indicating the position
-				//! after the last pixel in this image
+				/** @brief Return a constant iterator indicating the position after the last pixel in this image.
+				 */
 				inline ConstPixelIterator end() const
 				{ return ConstPixelIterator(*this, 1, _area.height() + 1 ); }
 
-				//! Returns a const iterator indicating the position
-				//! of a pixel at(x,y)
+				/** @brief Return a constant iterator indicating the position of a pixel at(x,y).
+				 */
 				inline ConstPixelIterator iterator(uint y, uint x) const
 				{ return ConstPixelIterator(*this, _area.x()+y, _area.y()+x); }
 
@@ -162,8 +175,8 @@ namespace Pt {
 
 			protected:
 				/** @brief Pixel-based iterator class.
-				  * @ingroup Gfx
-				  */
+				 *  @ingroup Gfx
+				 */
 				class PixelIterator {
 					public:
 						typedef typename ImageT_::ColorT ColorT;
@@ -211,8 +224,8 @@ namespace Pt {
 				};
 
 				/** @brief Pixel-based constant iterator class.
-				  * @ingroup Gfx
-				  */
+				 *  @ingroup Gfx
+				 */
 				class ConstPixelIterator {
 					public:
 						typedef typename ImageT_::ColorT ColorT;
