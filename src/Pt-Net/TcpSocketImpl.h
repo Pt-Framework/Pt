@@ -108,7 +108,7 @@ namespace Net
 							if (getTimeout() == 0)
 							  return 0;
 
-							this->wait(WaitInput, getTimeout());
+							this->wait(Socket::WaitInput, getTimeout());
 
 							do
 							{
@@ -158,7 +158,7 @@ namespace Net
 					if (getTimeout() == 0)
 						return count - s;
 
-					this->wait(WaitOutput, getTimeout());
+					this->wait(Socket::WaitOutput, getTimeout());
 				}
 
 				return count;

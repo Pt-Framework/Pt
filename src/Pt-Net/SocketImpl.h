@@ -44,6 +44,7 @@
 #endif
 
 #include <Pt/Exception.h>
+#include <Pt/Net/Socket.h>
 
 
 namespace Pt {
@@ -52,12 +53,6 @@ namespace Net {
 
     class SocketImpl
     {
-        public:
-            enum WaitMode
-            {
-                WaitInput = 0x1, WaitOutput = 0x2
-            };
-
         public:
             SocketImpl()
             : _sd(PT_INVALID_SOCKET)
@@ -69,17 +64,17 @@ namespace Net {
                 }
                 #endif
             }
-        
+
             explicit SocketImpl(SOCKET sd)
             : _sd(sd)
             { }
-        
+
             ~SocketImpl()
             {
                 if (_sd != PT_INVALID_SOCKET)
                     this->close();
             }
-        
+
             static int lastError()
             {
                 #ifdef WIN32
@@ -88,53 +83,53 @@ namespace Net {
                     return errno;
                 #endif
             }
-			
+
             void create(int domain, int type, int protocol)
             {  
                 _sd = ::socket(domain, type, protocol);
-                if (_sd < 0)
+                if (_sd == PT_INVALID_SOCKET)
                     throw std::runtime_error("cannot create socket" + PT_SOURCEINFO);
                     // TODO change exceptiontype
             }
-        
+
             void close()
             {
                 ::shutdown(_sd, SHUT_RDWR);
-                
+
                 #ifdef WIN32
                 ::closesocket(_sd);
                 #else
                 ::close(_sd);
                 #endif
-                
+
                 _sd = PT_INVALID_SOCKET;
             }
 
 
-            bool wait(SocketImpl::WaitMode mode, int msec) const
+            bool wait(Socket::WaitMode mode, int msec) const
             {
                 fd_set rfds;
                 FD_ZERO(&rfds);
                 FD_SET(_sd, &rfds);
-        
+
                 struct timeval tv;
                 tv.tv_sec = msec / 1000;
                 tv.tv_usec = (msec % 1000) * 1000;
-        
+
                 _select:
                 int ret = -1;
-        
+
                 switch(mode)
                 {
-                    case SocketImpl::WaitInput:
+                    case Socket::WaitInput:
                         ret = select(_sd + 1, &rfds, 0, 0, &tv);
                         break;
-            
-                    case SocketImpl::WaitOutput:
+
+                    case Socket::WaitOutput:
                         ret = select(_sd + 1, 0, &rfds, 0, &tv);
                         break;
                 }
-        
+
                 // error
                 if(ret == -1)
                 {
@@ -143,11 +138,11 @@ namespace Net {
 
                  throw std::runtime_error("Could not select on socket" + PT_SOURCEINFO); //TODO
                 }
-        
+
                 // data available
                 if(ret == 1)
                     return true;
-        
+
                 // no data available
                 return false;
             }

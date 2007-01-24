@@ -57,7 +57,9 @@ namespace Net {
         protected:
             size_t _read(char* buffer, size_t count, bool& eof);
 
-		    size_t _write(const char* buffer, size_t count);
+            size_t _write(const char* buffer, size_t count);
+
+            bool _wait(Socket::WaitMode, unsigned int);
 
             void _close();
 

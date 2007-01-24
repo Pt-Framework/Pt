@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -32,25 +32,46 @@ namespace Pt
 namespace Net
 {
 
-	class PT_NET_API Socket // : public IO::IODevice
+    class PT_NET_API Socket // : public IO::IODevice
     {
-		public:
-			virtual ~Socket();
+        public:
+            enum WaitMode
+            {
+                WaitInput  = 0x1,
+                WaitOutput = 0x2
+            };
 
-			virtual void setTimeout(size_t msec)
-              { _timeout = msec; }
+            virtual ~Socket();
+
+            virtual void setTimeout(size_t msec)
+            { _timeout = msec; }
 
             size_t getTimeout() const
-              { return _timeout; }
+            { return _timeout; }
 
-		protected:
+            /** @brief Waits for I/O
+
+                If the socket is in asynchronous mode, this function waits
+                for I/O events. It can be waited for input or outut events.
+
+                \param mode WaitInput or WaitOutput.
+                \param msec time interval to wait
+                \return true if an I/O operatin has occured.
+                \throw IOError
+            */
+            bool wait(WaitMode mode, unsigned int msec)
+            { return this->_wait(mode, msec); }
+
+        protected:
             Socket();
 
-			bool _remote() const;
+            //! @brief Waits until data is available
+            virtual bool _wait(WaitMode, unsigned int)
+            { return false; }
 
         private:
             size_t _timeout;
-	};
+    };
 
 } // !namespace Net
 

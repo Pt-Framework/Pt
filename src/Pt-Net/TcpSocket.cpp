@@ -82,6 +82,16 @@ size_t TcpSocket::_write(const char* buffer, size_t count)
     return _impl->write(buffer, count);
 }
 
+
+bool TcpSocket::_wait(Socket::WaitMode mode, unsigned int msec)
+{
+    if (!_impl)
+        throw std::logic_error("socket is not connected" + PT_SOURCEINFO);
+
+    return _impl->wait(mode, msec);
+}
+
+
 void TcpSocket::_close()
 {
   if (_impl)

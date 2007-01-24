@@ -31,12 +31,6 @@ Socket::Socket()
 Socket::~Socket()
 {}
 
-
-bool Socket::_remote() const
-{
-	return true;
-}
-
 } // namespace Net
 
 } // namespace Pt
