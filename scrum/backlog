@@ -110,6 +110,9 @@ ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
+ITEM P0 S13 "The IODevice class is implemented"
+    TASK "Remove async IO stuff"
+
 ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
 
