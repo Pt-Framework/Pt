@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,18 +20,19 @@
 #ifndef Pt_Gfx_SubImage_tpp
 #define Pt_Gfx_SubImage_tpp
 
+
 namespace Pt {
 
 	namespace Gfx {
 
 		//
-		// IMPL: SubImage<ColorSpaceT>
+		// SubImage<ImageT_> implementation
 		//
-		template <typename ColorSpaceT_>
-		SubImage<ColorSpaceT_>::SubImage(ImageT& image, const Pt::Gfx::Region& area)
+
+		template <typename ImageT_>
+		SubImage<ImageT_>::SubImage(ImageT& image, const Region& area)
 		: _image(image), _area(area)
 		{
-			// Validate the area
 			int x1 = area.x();
 			int y1 = area.y();
 			int x2 = x1 + area.width() - 1;
@@ -44,109 +45,123 @@ namespace Pt {
 		}
 
 
-		template <typename ColorSpaceT_>
-		bool SubImage<ColorSpaceT_>::operator==(const SubImageT& src)
+		template <typename ImageT_>
+		bool SubImage<ImageT_>::operator==(const SubImageT& src)
 		{
 			for(size_t y = 0; y < _area.height(); y++) {
-				if ( 0 != memcmp(this->scanline(y), src.scanline(y), sizeof(SubImageT) * _area.width()) ) {
+				if( memcmp(scanline(y), src.scanline(y),
+					         sizeof(SubImageT) * _area.width()) )
 					return false;
-				}
 			}
 			return true;
 		}
 
-		template <typename ColorSpaceT_>
-		template <typename SrcColorSpaceT>
-		void SubImage<ColorSpaceT_>::_assign(const BasicImage<SrcColorSpaceT>& src)
+
+		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ColorT& color)
 		{
-			// If the size is not the same, we need to scale convert first then copy
-			if(_area.width()!=src.width() || _area.height()!=src.height()) {
-				BasicImage<ColorSpaceT_> tmp;
-				cubicScale(tmp, src, _area.width(), _area.height());
-				for(uint y = 0; y < _area.height(); y++)
-					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+			for(size_t y = 0; y < _area.height(); y++) {
+				for(size_t x = 0; x < _area.width(); x++) {
+					_image.scanline(y)[x] = color;
+				}
 			}
-			// If the size is the same, we just need to copy convert
+			return *this;
+		}
+
+		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ImageT& src)
+		{
+			// If the size is not the same, we need to scale it first then copy
+			if(_area.width()!=src.width() || _area.height()!=src.height()) {
+				ImageT tmp;
+				blockScale(src, tmp, _area.width(), _area.height()); // TODO: Later, user should be able to
+				for(uint y = 0; y < _area.height(); y++)             //       choose the scalling algorithm
+					for(uint x = 0; x < _area.width(); x++)
+						_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
+			}
+			// If the size is the same, we just need to copy
 			else {
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						convert(_image[y+_area.y()][x+_area.x()], src[y][x]);
+						_image.pixel(x+_area.x(), y+_area.y()) = src.pixel(x, y); // TODO: Optimize it !!!
 			}
+			return *this;
 		}
 
-
-		template <typename ColorSpaceT_>
-		template <typename SrcColorSpaceT>
-		void SubImage<ColorSpaceT_>::_assign(SubImage<SrcColorSpaceT>& src)
+		template <typename ImageT_>
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImageT& src)
 		{
-			// If the size is not the same, we need to convert scale first then copy
+			// If the size is not the same, we need to scale it first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {
-				BasicImage<SrcColorSpaceT> tmp(src.width(), src.height());
-				// Copy convert the source pixels to the temporary image
+				// Copy the source pixels to a temporary image
+				ImageT tmp1(src.width(), src.height());
 				for(uint y = 0; y < src.height(); y++)
 					for(uint x = 0; x < src.width(); x++)
-						convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
-				// Scale the temporary image
-				cubicScale(tmp, _area.width(), _area.height());
+						tmp1.pixel(x, y) = src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
+				// Scale the temporary image to another temporary image
+				ImageT tmp2;
+				blockScale(tmp1, tmp2, _area.width(), _area.height()); // TODO: Later, user should be able to
+				                                                       //       choose the scalling algorithm
 				// Copy the pixels to this sub image
 				for(uint y = 0; y < _area.height(); y++)
 					for(uint x = 0; x < _area.width(); x++)
-						_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+						_image.pixel(x+_area.x(), y+_area.y()) = tmp2.pixel(x, y); // TODO: Optimize it !!!
 			}
 			// If the size is the same, we just need to copy convert
 			else {
 				// If the source and destination image are the same
 				// we must use temporary image
 				if(&_image == &src._image) {
-					BasicImage<SrcColorSpaceT> tmp(_area.width(), _area.height());
-					// Copy convert the source pixels to the temporary image
+					// Copy the source pixels to the temporary image
+					ImageT tmp(_area.width(), _area.height());
 					for(uint y = 0; y < src.height(); y++)
 						for(uint x = 0; x < src.width(); x++)
-							convert(tmp[y][x], src._image[y+src._area.y()][x+src._area.x()]);
+							tmp.pixel(x, y) = src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
 					// Copy the pixels to this sub image
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							_image[y+_area.y()][x+_area.x()] = tmp[y][x];
+							_image.pixel(x+_area.x(), y+_area.y()) = tmp.pixel(x, y); // TODO: Optimize it !!!
 				}
-				// If the source and destination image are different, just copy convert
+				// If the source and destination image are different, just copy
 				else {
 					for(uint y = 0; y < _area.height(); y++)
 						for(uint x = 0; x < _area.width(); x++)
-							convert(_image[y+_area.y()][x+_area.x()], src._image[y+src._area.y()][x+src._area.x()]);
+							_image.pixel(x+_area.x(), y+_area.y()) =
+									src._image.pixel(x+src._area.x(), y+src._area.y()); // TODO: Optimize it !!!
 				}
 			}
+			return *this;
 		}
 
 
-		template <typename ColorSpaceT_>
-		typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y)
+		template <typename ImageT_>
+		typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
-                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::at(int x, int y) const
+		template <typename ImageT_>
+		const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
-                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		const typename SubImage<ColorSpaceT_>::ColorT& SubImage<ColorSpaceT_>::color(int x, int y, const ColorT& invalid) const
+		template <typename ImageT_>
+		const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::color(int x, int y, const ColorT& invalid) const
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return invalid;
 			return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
 		}
 
 
-		template <typename ColorSpaceT_>
-		void SubImage<ColorSpaceT_>::setColor(int x, int y, const ColorT& color_)
+		template <typename ImageT_>
+		void SubImage<ImageT_>::setColor(int x, int y, const ColorT& color_)
 		{
 			if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return;
 			_image.data()[(y+_area.y())*_image.width() + x+_area.x()] = color_;

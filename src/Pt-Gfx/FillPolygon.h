@@ -21,7 +21,8 @@
 #ifndef PT_GFX_FILLPOLYGON_H
 #define PT_GFX_FILLPOLYGON_H
 
-#include <Pt/Gfx/ARgbImage.h>
+#include "Pt/Gfx/Gfx.h"
+#include "Pt/Gfx/ARgbInterleavedImage.h"
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Math/Point.h>
 #include <Pt/System/Clock.h>

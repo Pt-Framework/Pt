@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,26 +17,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Rgb565Image_h
-#define Pt_Rgb565Image_h
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Rgb565Color.h>
-#include <Pt/Gfx/SubImage.h>
-
-
-namespace Pt {
-	namespace Gfx {
-
-		//!
-		//! \brief RgbGB565 image class
-		typedef BasicImage<Rgb565> Rgb565Image;
-
-		//!
-		//! \brief RgbGB565 sub image class
-		typedef SubImage<Rgb565> Rgb565SubImage;
-
-	}
-}
-
-#endif
+#include <Pt/Gfx2/Rgb888Color.h>

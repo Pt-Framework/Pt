@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,28 +17,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_ARgbImage_h
-#define Pt_ARgbImage_h
+#ifndef Pt_Gfx_Rgb888InterleavedImage_h
+#define Pt_Gfx_Rgb888InterleavedImage_h
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ARgbColor.h>
+#include <Pt/Gfx/Rgb888Color.h>
+#include <Pt/Gfx/InterleavedImage.h>
 #include <Pt/Gfx/SubImage.h>
 
 
 namespace Pt {
 	namespace Gfx {
 
-		//!
-		//! \brief ARgb image class
-		//!
-		//! <B>This is the master image model</B>
-		typedef BasicImage<ARgb> ARgbImage;
+		/** @brief Interleaved Rgb888 image class.
+		 */
+		typedef InterleavedImage<Rgb888> Rgb888InterleavedImage;
 
-		//!
-		//! \brief ARgb sub image class
-		//!
-		//! <B>This is the master sub image model</B>
-		typedef SubImage<ARgb> ARgbSubImage;
+
+		/** @brief Interleaved Rgb888 subimage class.
+		 */
+		typedef SubImage< InterleavedImage<Rgb888> > Rgb888InterleavedSubImage;
 
 	}
 }

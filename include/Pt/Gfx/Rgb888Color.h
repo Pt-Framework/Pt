@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgb8888Color_h
-#define Pt_Gfx_ARgb8888Color_h
+#ifndef Pt_Gfx_Rgb888Color_h
+#define Pt_Gfx_Rgb888Color_h
 
 #include <Pt/Gfx/ARgbFColor.h>
 
@@ -27,33 +27,32 @@ namespace Pt {
 
 	namespace Gfx {
 
-		/** @brief An empty structure used for tagging packed 32-bit ARGB color class.
+		/** @brief An empty structure used for tagging packed 32-bit RGB color class.
 		 */
-		struct ARgb8888 {};
+		struct Rgb888 {};
 
 
-		/** @brief Packed 32-bit ARGB color class.
+		/** @brief Packed 32-bit RGB color class.
 		 *  @ingroup Gfx
 		 *
 		 *  This class is exist so that the raw memory buffer of an image implementation
 		 *  which use this color model could be casted directly to hardware image buffer
-		 *  with format AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB.
+		 *  with format XXXXXXXXRRRRRRRRGGGGGGGGBBBBBBBB.
 		 *  \n\n
 		 *  Valid range of the color components for this color model:
 		 *  <TABLE>
-		 *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>
 		 *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>
 		 *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>
 		 *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>255 (0xFF)</TD> </TR>
 		 *  </TABLE>
 		 */
 		template <>
-		class PT_PACKED Color<ARgb8888> {
+		class PT_PACKED Color<Rgb888> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
 				inline Color()
-				: _val(0xFF000000)
+				: _val(0x00000000)
 				{}
 
 				/** @brief Copy constructor.
@@ -70,24 +69,13 @@ namespace Pt {
 
 				/** @brief Construct color using the given components.
 				 */
-				inline Color(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
-				: _val(uint32_t(a) << 24)
+				inline Color(uint8_t r, uint8_t g, uint8_t b)
+				: _val(uint32_t(r) << 16)
 				{
 					// 33333333222222221111111100000000
 					// 76543210765432107654321076543210
-					// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
-					_val |= (uint32_t(r) << 16);
-					_val |= (uint32_t(g) <<  8);
-					_val |=  uint32_t(b);
-				}
-
-				/** @brief Construct color using the given components.
-				 */
-				inline Color(uint8_t r, uint8_t g, uint8_t b)
-				: _val(0xFF000000)
-				{
-					_val |= (uint32_t(r) << 16);
-					_val |= (uint32_t(g) <<  8);
+					// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
+					_val |= (uint32_t(g) << 8);
 					_val |=  uint32_t(b);
 				}
 
@@ -101,13 +89,11 @@ namespace Pt {
 				 */
 				inline Color& operator+=(const Color& c)
 				{
-					const uint16_t a = alpha() + c.alpha();
 					const uint16_t r = red()   + c.red();
 					const uint16_t g = green() + c.green();
 					const uint16_t b = blue()  + c.blue();
 
-					_val  =  uint32_t(a) << 24;
-					_val |= (uint32_t(r) << 16);
+					_val  = (uint32_t(r) << 16);
 					_val |= (uint32_t(g) <<  8);
 					_val |=  uint32_t(b);
 
@@ -118,13 +104,11 @@ namespace Pt {
 				 */
 				inline Color& operator-=(const Color& c)
 				{
-					const uint16_t a = alpha() - c.alpha();
 					const uint16_t r = red()   - c.red();
 					const uint16_t g = green() - c.green();
 					const uint16_t b = blue()  - c.blue();
 
-					_val  =  uint32_t(a) << 24;
-					_val |= (uint32_t(r) << 16);
+					_val  = (uint32_t(r) << 16);
 					_val |= (uint32_t(g) <<  8);
 					_val |=  uint32_t(b);
 
@@ -136,11 +120,6 @@ namespace Pt {
 				 */
 				inline uint32_t value() const
 				{ return _val; }
-
-				/** @brief Return the alpha component of this color (range 0 to 255).
-				 */
-				inline uint8_t alpha() const
-				{ return _val >> 24; }
 
 				/** @brief Return the red component of this color (range 0 to 255).
 				 */
@@ -162,11 +141,6 @@ namespace Pt {
 				 */
 				void setValue(uint32_t c)
 				{ _val = c; }
-
-				/** @brief Set the alpha component of this color (range 0 to 255).
-				 */
-				inline void setAlpha(uint8_t a)
-				{ _val = _val & 0x00FFFFFF | (uint32_t(a) << 24); }
 
 				/** @brief Set the red component of this color (range 0 to 255).
 				 */
@@ -191,78 +165,76 @@ namespace Pt {
 		/** @brief Convenience access to the 32-Bit ARGB color model.
 		 *  @ingroup Gfx
 		 */
-		typedef Color<ARgb8888> ARgb8888Color;
+		typedef Color<Rgb888> Rgb888Color;
 
 
-		/** @brief Full specialisation of the color traits class for ARgb8888Color.
+		/** @brief Full specialisation of the color traits class for Rgb888Color.
 		 */
 		template <>
-		struct ColorTraits<ARgb8888Color> {
+		struct ColorTraits<Rgb888Color> {
 			typedef uint16_t TmpValueT;
 		};
 
 
-		/** @brief Convert a Color<ARgb8888> to a Color<ARgb>.
+		/** @brief Convert a Color<Rgb888> to a Color<ARgb>.
 		 */
-		inline const Color<ARgb> toARgb(const Color<ARgb8888>& from)
+		inline const Color<ARgb> toARgb(const Color<Rgb888>& from)
 		{
-			const uint16_t ta = from.alpha();
 			const uint16_t tr = from.red();
 			const uint16_t tg = from.green();
 			const uint16_t tb = from.blue();
 
-			return Color<ARgb>( ((ta + !!ta) << 8) - !!ta, // Thanks to Mike Sharov for this algorithm
-			                    ((tr + !!tr) << 8) - !!tr,
+			return Color<ARgb>( 0xFFFF,
+			                    ((tr + !!tr) << 8) - !!tr, // Thanks to Mike Sharov for this algorithm
 			                    ((tg + !!tg) << 8) - !!tg,
 			                    ((tb + !!tb) << 8) - !!tb );
 		}
 
-		/** @brief Convert a Color<ARgb> to a Color<ARgb8888>.
+		/** @brief Convert a Color<ARgb> to a Color<Rgb888>.
 		 */
-		inline void fromARgb(Color<ARgb8888>& to, const Color<ARgb>& from)
+		inline void fromARgb(Color<Rgb888>& to, const Color<ARgb>& from)
 		{
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
-			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
+			// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
 			//                 CCCCCCCCCCCCCCCC
-			const uint32_t val = ( uint32_t(from.alpha() & 0xFF00) << 16 ) |
-			                     ( uint32_t(from.red  () & 0xFF00) <<  8 ) |
+			const uint32_t val = ( uint32_t(from.red  () & 0xFF00) <<  8 ) |
 			                       uint32_t(from.green() & 0xFF00)         |
 			                     ( uint32_t(from.blue ()         ) >>  8 );
 			to.setValue(val);
 		}
 
 
-		/** @brief Assign an Color<ARgb8888> to an ARgbFColor.
+		/** @brief Assign an Color<Rgb888> to an ARgbFColor.
 		 */
-		inline void assign(ARgbFColor& to, const Color<ARgb8888>& from)
+		inline void assign(ARgbFColor& to, const Color<Rgb888>& from)
 		{
-			to.setAlpha( float(from.alpha()) / 255.0f );
+			to.setAlpha( 1.0f                         );
 			to.setRed  ( float(from.red  ()) / 255.0f );
 			to.setGreen( float(from.green()) / 255.0f );
 			to.setBlue ( float(from.blue ()) / 255.0f );
 		}
 
 
-		/** @brief Equality operator for Color<ARgb8888> comparison.
+		/** @brief Equality operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator==(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
+		inline bool operator==(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1.value()==c2.value(); }
 
-		/** @brief Less-than operator for Color<ARgb8888> comparison.
+		/** @brief Less-than operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator<(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
+		inline bool operator<(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1.value()<c2.value(); }
 
-		/** @brief Greater-than operator for Color<ARgb8888> comparison.
+		/** @brief Greater-than operator for Color<Rgb888> comparison.
 		 */
-		inline bool operator>(const Color<ARgb8888>& c1, const Color<ARgb8888>& c2)
+		inline bool operator>(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
 		{ return c1.value()>c2.value(); }
 
 
-		/** @brief Make the greyscale version of the source Color<ARgb8888> color.
+		/** @brief Make the greyscale version of the source Color<Rgb888> color.
 		 */
-		inline Color<ARgb8888>& greyscale(Color<ARgb8888>& to, const Color<ARgb8888>& from)
+		inline Color<Rgb888>& greyscale(Color<Rgb888>& to, const Color<Rgb888>& from)
 		{
 			const uint32_t r = from.red();
 			const uint32_t g = from.green();
@@ -272,18 +244,18 @@ namespace Pt {
 
 			// 33333333222222221111111100000000
 			// 76543210765432107654321076543210
-			// AAAAAAAARRRRRRRRGGGGGGGGBBBBBBBB
+			// 00000000RRRRRRRRGGGGGGGGBBBBBBBB
 			//                         SSSSSSSS
-			to.setValue( (from.value()&0xFF000000) | (s<<24) | (s<<16) | s );
+			to.setValue( (s<<24) | (s<<16) | s );
 
 			return to;
 		}
 
 
-		/** @brief Mix two Color<ARgb8888>s using the given mixing factor.
+		/** @brief Mix two Color<Rgb888>s using the given mixing factor.
 		 */
 		template <typename FactorT>
-		inline void mixColor(Color<ARgb8888>& dst, const Color<ARgb8888>& src, const FactorT& factor)
+		inline void mixColor(Color<Rgb888>& dst, const Color<Rgb888>& src, const FactorT& factor)
 		{
 			// TODO: Write it !!!
 		}

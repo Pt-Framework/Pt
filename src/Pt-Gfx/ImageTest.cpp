@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,26 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_XRgb1555Image_h
-#define Pt_XRgb1555Image_h
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/XRgb1555Color.h>
-#include <Pt/Gfx/SubImage.h>
+#include <Pt/Gfx2/Gfx.h>
+#include <Pt/Gfx2/ARgbInterleavedImage.h>
+#include <Pt/Gfx2/ARgbFInterleavedImage.h>
+#include <Pt/Gfx2/ARgb8888InterleavedImage.h>
+#include <Pt/Gfx2/Rgb888InterleavedImage.h>
+#include <Pt/Gfx2/Rgb555InterleavedImage.h>
+#include <Pt/Gfx2/Rgb565InterleavedImage.h>
+#include <Pt/Gfx2/ImageAlgo.h>
+
+using namespace Pt;
+using namespace Pt::Gfx;
 
 
-namespace Pt {
-	namespace Gfx {
+int main()
+{
+	ARgbInterleavedImage     argb_1;
+	ARgbFInterleavedImage    argbf_1;
+	ARgb8888InterleavedImage argb8888_1;
+	Rgb888InterleavedImage   rgb888_1;
+	Rgb565InterleavedImage   rgb565_1;
+	Rgb555InterleavedImage   rgb555_1;
 
-		//!
-		//! \brief XRgb1555 image class
-		typedef BasicImage<XRgb1555> XRgb1555Image;
-
-		//!
-		//! \brief XRgb1555 sub image class
-		typedef SubImage<XRgb1555> XRgb1555SubImage;
-
-	}
+	return 0;
 }
-
-#endif

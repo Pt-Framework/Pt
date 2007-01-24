@@ -1,6 +1,6 @@
 /***************************************************************************
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
  *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,15 +17,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_H
-#define PT_GFX_H
+#ifndef Pt_Gfx_Gfx_h
+#define Pt_Gfx_Gfx_h
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Api.h>
 
+
 namespace Pt {
 
 	namespace Gfx {
+
+		//
+		// Foward declarations of drawing classes
+		//
 
 		class Pen;
 		class Brush;
@@ -33,39 +38,80 @@ namespace Pt {
 		class FontMetrics;
 		class Region;
 
+
+		//
+		// Foward declarations of color classes
+		//
+
 		struct ARgb;
+		struct ARgbF;
+		struct ARgb8888;
+		struct Rgb888;
 		struct Rgb565;
-		struct XRgb1555;
-		struct XRgb8888;
+		struct Rgb555;
 
-		template <typename ColorSpaceT>
-		class BasicColor;
+		template <typename TagT>
+		class Color;
 
-		typedef BasicColor<ARgb>     ARgbColor;
-		typedef BasicColor<Rgb565>   Rgb565Color;
-		typedef BasicColor<XRgb1555> XRgb1555Color;
-		typedef BasicColor<XRgb8888> XRgb8888Color;
+		typedef Color<ARgb>     ARgbColor;
+		typedef Color<ARgbF>    ARgbFColor;
+		typedef Color<ARgb8888> ARgb8888Color;
+		typedef Color<Rgb888>   Rgb888Color;
+		typedef Color<Rgb565>   Rgb565Color;
+		typedef Color<Rgb555>   Rgb555Color;
 
-		template <typename ColorSpaceT>
-		class BasicImage;
 
-		typedef BasicImage<ARgb>     ARgbImage;
-		typedef BasicImage<Rgb565>   Rgb565Image;
-		typedef BasicImage<XRgb1555> XRgb1555Image;
-		typedef BasicImage<XRgb8888> XRgb8888Image;
+		//
+		// Foward declarations of interleaved image classes
+		//
 
-		template <typename ColorSpaceT>
+		template <typename ColorTagT>
+		class InterleavedImage;
+
+		typedef InterleavedImage<ARgb>     ARgbInterleavedImage;
+		typedef InterleavedImage<ARgbF>    ARgbFInterleavedImage;
+		typedef InterleavedImage<ARgb8888> ARgb8888InterleavedImage;
+		typedef InterleavedImage<Rgb888>   Rgb888InterleavedImage;
+		typedef InterleavedImage<Rgb565>   Rgb565InterleavedImage;
+		typedef InterleavedImage<Rgb555>   Rgb555InterleavedImage;
+
+
+		//
+		// Foward declarations of interleaved subimage classes
+		//
+
+		template <typename ImageT_>
 		class SubImage;
 
-		typedef SubImage<ARgb>     ARgbSubImage;
-		typedef SubImage<Rgb565>   Rgb565SubImage;
-		typedef SubImage<XRgb1555> XRgb1555SubImage;
-		typedef SubImage<XRgb8888> XRgb8888SubImage;
+		typedef SubImage< InterleavedImage<ARgb> >     ARgbInterleavedSubImage;
+		typedef SubImage< InterleavedImage<ARgbF> >    ARgbFInterleavedSubImage;
+		typedef SubImage< InterleavedImage<ARgb8888> > ARgb8888InterleavedSubImage;
+		typedef SubImage< InterleavedImage<Rgb888> >   Rgb888InterleavedSubImage;
+		typedef SubImage< InterleavedImage<Rgb565> >   Rgb565InterleavedSubImage;
+		typedef SubImage< InterleavedImage<Rgb555> >   Rgb555InterleavedSubImage;
 
+
+		//
+		// Interleaved images and subimages will be the most used types
+		// and so typedefs them for convenience
+		//
+
+		typedef ARgbInterleavedImage     ARgbImage;
+		typedef ARgbFInterleavedImage    ARgbFImage;
+		typedef ARgb8888InterleavedImage ARgb8888Image;
+		typedef Rgb888InterleavedImage   Rgb888Image;
+		typedef Rgb565InterleavedImage   Rgb565Image;
+		typedef Rgb555InterleavedImage   Rgb555Image;
+
+		typedef ARgbInterleavedSubImage     ARgbSubImage;
+		typedef ARgbFInterleavedSubImage    ARgbFSubImage;
+		typedef ARgb8888InterleavedSubImage ARgb8888SubImage;
+		typedef Rgb888InterleavedSubImage   Rgb888SubImage;
+		typedef Rgb565InterleavedSubImage   Rgb565SubImage;
+		typedef Rgb555InterleavedSubImage   Rgb555SubImage;
 
 	} // namespace Gfx
 
 } // namespace Pt
 
 #endif
-

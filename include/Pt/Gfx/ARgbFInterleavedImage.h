@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Aloysius Indrayanto                             *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,5 +17,27 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_Gfx_ARgbFInterleavedImage_h
+#define Pt_Gfx_ARgbFInterleavedImage_h
 
-#include <Pt/Gfx2/ARgbColor.h>
+#include <Pt/Gfx/ARgbFColor.h>
+#include <Pt/Gfx/InterleavedImage.h>
+#include <Pt/Gfx/SubImage.h>
+
+
+namespace Pt {
+	namespace Gfx {
+
+		/** @brief Interleaved ARgbF image class.
+		  */
+		typedef InterleavedImage<ARgbF> ARgbFInterleavedImage;
+
+
+		/** @brief Interleaved ARgbF subimage class.
+		 */
+		typedef SubImage< InterleavedImage<ARgbF> > ARgbFInterleavedSubImage;
+
+	}
+}
+
+#endif

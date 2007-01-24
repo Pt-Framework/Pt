@@ -22,9 +22,10 @@
 #define PT_GFX_DRAWLINE_H
 
 #include <vector>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Math/Point.h>
 
 
 namespace Pt {

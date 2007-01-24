@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,30 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/Rgb565Color.h>
-#include <Pt/Gfx/XRgb1555Color.h>
-#include <Pt/Gfx/ARgb8888Color.h>
 
-#include <Pt/Gfx/BasicImage.h>
-#include <Pt/Gfx/SubImage.h>
-
+#include <Pt/Gfx2/ARgbColor.h>
+#include <Pt/Gfx2/ARgbFColor.h>
+#include <Pt/Gfx2/ARgb8888Color.h>
+#include <Pt/Gfx2/Rgb888Color.h>
+#include <Pt/Gfx2/Rgb565Color.h>
+#include <Pt/Gfx2/Rgb555Color.h>
+#include <Pt/Gfx2/InterleavedImage.h>
+#include <Pt/Gfx2/InterleavedImage.tpp>
+#include <Pt/Gfx2/SubImage.h>
+#include <Pt/Gfx2/SubImage.tpp>
 
 namespace Pt {
 
 	namespace Gfx {
 
-		// Explicit instantiation of the image classes
-		template class BasicImage<ARgb>;
-		template class BasicImage<Rgb565>;
-		template class BasicImage<XRgb1555>;
-		template class BasicImage<ARgb8888>;
+		// Explicit instantiation of the interleaved image classes
+		template class InterleavedImage<ARgb>;
+		template class InterleavedImage<ARgbF>;
+		template class InterleavedImage<ARgb8888>;
+		template class InterleavedImage<Rgb888>;
+		template class InterleavedImage<Rgb565>;
+		template class InterleavedImage<Rgb555>;
 
-		// Explicit instantiation of the subimage classes
-		template class SubImage<ARgb>;
-		template class SubImage<Rgb565>;
-		template class SubImage<XRgb1555>;
-		template class SubImage<ARgb8888>;
+		// Explicit instantiation of the sub image classes of the above image classes
+		template class SubImage< InterleavedImage<ARgb> >;
+		template class SubImage< InterleavedImage<ARgbF> >;
+		template class SubImage< InterleavedImage<ARgb8888> >;
+		template class SubImage< InterleavedImage<Rgb888> >;
+		template class SubImage< InterleavedImage<Rgb565> >;
+		template class SubImage< InterleavedImage<Rgb555> >;
 
-	}
-}
+	} // namespace Gfx
+
+} // namespace Pt
+

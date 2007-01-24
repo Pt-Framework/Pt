@@ -37,10 +37,10 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/XRgb8888Image.h>
-#include <Pt/Gfx/XRgb1555Color.h>
-#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/Rgb888InterleavedImage.h>
+#include <Pt/Gfx/Rgb565InterleavedImage.h>
+#include <Pt/Gfx/Rgb555InterleavedImage.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Text/String.h>
 
@@ -121,22 +121,22 @@ namespace Gui {
 					case 32:
 					case 24:
 					{
-						Gfx::XRgb8888Image rgb24Image( width, height );
+						Gfx::Rgb888Image rgb24Image( width, height );
 						assign( begin, end, rgb24Image.begin() );
 						this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
 						break;
 					}
 
-					case 16: 
+					case 16:
 					{
 						Gfx::Rgb565Image rgb16Image( width, height );
 						assign( begin, end, rgb16Image.begin() );
 						this->drawImage( x, y, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height() );
 						break;
 					}
-					case 15: 
+					case 15:
 					{
-						Gfx::XRgb1555Image rgb15Image( width, height );
+						Gfx::Rgb555Image rgb15Image( width, height );
 						assign( begin, end, rgb15Image.begin() );
 						this->drawImage( x, y, (char*)rgb15Image.data(), rgb15Image.width(), rgb15Image.height() );
 						break;

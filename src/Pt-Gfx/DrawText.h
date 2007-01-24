@@ -25,7 +25,8 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include "Pt/Gfx/ARgbImage.h"
+#include "Pt/Gfx/Gfx.h"
+#include "Pt/Gfx/ARgbInterleavedImage.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Text/String.h"
 #include "Pt/Gfx/ARgbColor.h"
@@ -62,14 +63,14 @@ class DrawText
         /** @brief Sets the text font
 
             @param font The text font
-        */        
+        */
         void setFont( const Font& font );
-        
-        
+
+
         /** @brief Calculate font metrics for text
 
             @param font The text font
-            @param text The text to calculate            
+            @param text The text to calculate
         */
         FontMetrics fontMetrics( const Text::String& text );
 

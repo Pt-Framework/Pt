@@ -21,8 +21,8 @@
 //#include <ctime>
 
 #include <Pt/Main.h>
-#include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/ARgbInterleavedImage.h>
 #include <Pt/Gfx/Algorithm.h>
 
 
@@ -42,7 +42,7 @@ void ScaleARgbImageTest()
 
 	//clock_t begin = clock();
 	//for(int i = 0; i < 1000; ++i)
-		blockScale(image.begin(), image.end(), image2.begin(), image2.end());
+	blockScale(image.begin(), image2.begin(), image.end(), image2.end());
 	//std::cerr << "PixelIterator: " << clock() - begin << std::endl;
 }
 
@@ -51,7 +51,7 @@ void ScaleVectorTest()
 {
 	std::vector<Pt::Gfx::ARgbColor> from(100*100);
 	std::vector<Pt::Gfx::ARgbColor> to(400*300);
-	
+
 	//clock_t begin = clock();
 	//for(int i = 0; i < 1000; ++i)
 		blockScale(from.begin(), 100, 100, to.begin(), 400, 300);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 {
 	for(int n = 0; n < 100; ++n)
 		ScaleARgbImageTest();
-	
+
 	ScaleVectorTest();
 	return 0;
 }

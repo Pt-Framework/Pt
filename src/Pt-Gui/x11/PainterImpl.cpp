@@ -22,6 +22,8 @@
 #include "ApplicationImpl.h"
 #include "PixmapImpl.h"
 
+#include <math.h>
+
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Math/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
@@ -453,20 +455,23 @@ long PainterImpl::toXColor(const Gfx::ARgbColor& color)
 		case 32:
 		case 24:
 		{
-			Gfx::XRgb8888Color rgb8888 = color;
-			return reinterpret_cast<long&>(rgb8888);
+			Gfx::Rgb888Color rgb888;
+			assign(rgb888, color);
+			return reinterpret_cast<long&>(rgb888);
 		}
 
 		case 16:
 		{
-			Gfx::Rgb565Color rgb565 = color;
+			Gfx::Rgb565Color rgb565;
+			assign(rgb565, color);
 			return reinterpret_cast<long&>(rgb565);
 		}
 
 		case 15:
 		{
-			Gfx::XRgb1555Color rgb1555 = color;
-			return reinterpret_cast<long&>(rgb1555);
+			Gfx::Rgb555Color rgb555;
+			assign(rgb555, color);
+			return reinterpret_cast<long&>(rgb555);
 		}
 
 		default:

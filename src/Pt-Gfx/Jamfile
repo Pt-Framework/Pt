@@ -4,26 +4,28 @@ SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 
 SharedLibrary Pt-Gfx :
-	ARgb8888Color.cpp
-	ARgbColor.cpp
-	BasicImage.cpp
+	Pen.cpp
 	Brush.cpp
 	Font.cpp
 	FontMetrics.cpp
-	Pen.cpp
+
+	ARgbColor.cpp
+	ARgbFColor.cpp
+	ARgb8888Color.cpp
+	Rgb888Color.cpp
 	Rgb565Color.cpp
-	XRgb1555Color.cpp
-	XRgb8888Color.cpp
+	Rgb555Color.cpp
+	InterleavedImage.cpp
 
 	ImagePainter.cpp
-	FillConvexPolygon.cpp
+	DrawText.cpp
 	DrawThinPolyline.cpp
 	DrawThinLine.cpp
 	DrawThickPolyline.cpp
 	DrawThickLine.cpp
-	ClipConvexPolygon.cpp
-	DrawText.cpp
 	FillPolygon.cpp
+	FillConvexPolygon.cpp
+	ClipConvexPolygon.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;

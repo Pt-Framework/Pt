@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,48 +17,5 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Exception.h>
-#include <Pt/Gfx/ARgb8888Color.h>
-using namespace Pt;
-using namespace Pt::Gfx;
 
-
-Pt::uint8_t Pt::Gfx::BasicColor<ARgb8888>::brightness() const
-{
-	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
-	Pt::uint8_t b = blue();
-	return((r>=g && r>=b) ? r : ((g>=r && g>=b) ? g : b));
-}
-
-
-void Pt::Gfx::BasicColor<ARgb8888>::setBrightness(Pt::uint8_t l)
-{
-	if(l == 0) {
-		_val = 0;
-		return;
-	}
-
-	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
-	Pt::uint8_t b = blue();
-
-	if(r>=g && r>=b) {
-		float o = r;
-		setRed  (l);
-		setGreen(Pt::uint8_t(g * l / o));
-		setBlue (Pt::uint8_t(b * l / o));
-	}
-	else if (g>=r && g>=b) {
-		float o = g;
-		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(l);
-		setBlue (Pt::uint8_t(b * l / o));
-	}
-	else {
-		float o = b;
-		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(Pt::uint8_t(g * l / o));
-		setBlue (l);
-	}
-}
+#include <Pt/Gfx2/ARgb8888Color.h>

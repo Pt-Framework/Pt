@@ -30,9 +30,11 @@
 
 ITEM P9 S8 "The color class' interface is improved"
 	TASK "Remove all non-maintained color classes in the old Gfx"	blue_wind_25	2007-01-23
+	TASK "Move all Gfx2 color classes back to the original Gfx"	blue_wind_25	2007-01-24
 
 ITEM P9 S13 "The image classes' interfaces are improved"
 	TASK "Convert the SubImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-23
+	TASK "Move all Gfx2 image classes back to the original Gfx"	blue_wind_25	2007-01-24
 
 ITEM P7 S5 "Any class is implemented"
 	TASK "Review code"	d-marc	2007-01-21

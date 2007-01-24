@@ -20,10 +20,10 @@
 #ifndef PT_GFX_PRUSH_H
 #define PT_GFX_PRUSH_H
 
-#include <Pt/Gfx/Api.h>
 #include <Pt/SmartPtr.h>
-#include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/ARgbImage.h>
+
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/ARgbInterleavedImage.h>
 
 
 namespace Pt {

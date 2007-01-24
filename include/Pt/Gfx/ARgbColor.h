@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,179 +20,206 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicColor.h>
+#include <Pt/Gfx/Color.h>
 
 
 namespace Pt {
 
 	namespace Gfx {
 
-		//! \brief ARgb color space
+		/** @brief An empty structure used for tagging 64-bit ARGB color class.
+		 */
 		struct ARgb {};
 
-    #pragma pack(push ,1)
 
-		//! \brief ARgb color
+		/** @brief 64-Bit ARGB color class.
+		 *  @ingroup Gfx
+		 *
+		 *  This is the master color model for Pt::Gfx.
+		 *  \n\n
+		 *  Valid range of the color components for this color model:
+		 *  <TABLE>
+		 *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+		 *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+		 *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+		 *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+		 *  </TABLE>
+		 */
 		template <>
-		class PT_GFX_API BasicColor<ARgb> {
+		class PT_EXPORT PT_PACKED Color<ARgb> {
 			public:
-				typedef ARgb ColorSpaceT;
-
-			public:
-				//! Default ctor, will generate default color (black)
-				inline BasicColor()
-				: _a(0), _r(0), _g(0), _b(0)
+				/** @brief The default constructor, will generate the default color (black).
+				 */
+				inline Color()
+				: _a(0xFFFF), _r(0), _g(0), _b(0)
 				{}
 
-				//! Copy ctor
-				inline BasicColor(const BasicColor<ARgb>& c)
+				/** @brief Copy constructor.
+				 */
+				inline Color(const Color<ARgb>& c)
 				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
 				{}
 
-				//! Construct color using the given source color (from any color space)
-				template <typename SrcColorSpaceT>
-				inline BasicColor(const BasicColor<SrcColorSpaceT>& c)
-				: _a(0), _r(0), _g(0), _b(0)
-				{ assign(*this, c); }
+				/** @brief Construct color using the given components.
+				 */
+				inline Color(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
+				: _a(a), _r(r), _g(g), _b(b)
+				{}
 
-				//! Construct color using the given components
-				inline BasicColor(uint16_t r, uint16_t g, uint16_t b)
-				: _a(0xFFFF), _r(0), _g(0), _b(0)
-				{
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
-				}
+				/** @brief Construct color using the given components.
+				 */
+				inline Color(uint16_t r, uint16_t g, uint16_t b)
+				: _a(0xFFFF), _r(r), _g(g), _b(b)
+				{}
 
-				//! Construct color using the given components
-				inline BasicColor(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
-				: _a(0), _r(0), _g(0), _b(0)
-				{
-					setAlpha(a);
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
-				}
 
-				//! Convert this color to ARGB components of the master color model
-				//! (destinations range from 0 to 0xFFFF)
-				inline void toARgb(uint16_t& a, uint16_t& r, uint16_t& g, uint16_t& b) const
-				{ a = _a; r = _r; g = _g; b = _b; }
-
-				//! Set this color from the given ARGB components of the master color model
-				//! (sources range from 0 to 0xFFFF)
-				inline void fromARgb(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
-				{
-					setAlpha(a);
-					setRed(r);
-					setGreen(g);
-					setBlue(b);
-				}
-
-				//! Assignment operator from the same color space
-				inline BasicColor<ARgb>& operator=(const BasicColor<ARgb>& c)
+				/** @brief Assignment operator.
+				 */
+				inline Color<ARgb>& operator=(const Color<ARgb>& c)
 				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
-				//! Assignment operator from different color space
-				template <typename SrcColorSpaceT> inline
-				BasicColor<ARgb>& operator=(const BasicColor<SrcColorSpaceT>& c)
-				{ assign(*this, c); return *this; }
+				/** @brief Assignment-addition operator (beware of overflow).
+				 */
+				inline Color<ARgb>& operator+=(const Color<ARgb>& c)
+				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
-				//! Equality comparison operator
-				inline bool eq(const BasicColor<ColorSpaceT>& c) const
-				{ return _a==c._a && _r==c._r && _g==c._g && _b==c._b; }
+				/** @brief Assignment-substraction operator (beware of underflow).
+				 */
+				inline Color<ARgb>& operator-=(const Color<ARgb>& c)
+				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
-				//! Lessthan comparison operator
-				bool lt(const BasicColor<ColorSpaceT>& c) const;
 
-				//! Greaterthan comparison operator
-				bool gt(const BasicColor<ColorSpaceT>& c) const;
-
-				//! Return the alpha component of this color
+				/** @brief Return the alpha component of this color (range 0 to 65535).
+				 */
 				inline uint16_t alpha() const
 				{ return _a; }
 
-				//! Return the red component of this color
+				/** @brief Return the red component of this color (range 0 to 65535).
+				 */
 				inline uint16_t red() const
 				{ return _r; }
 
-				//! Return the green component of this color
+				/** @brief Return the green component of this color (range 0 to 65535).
+				 */
 				inline uint16_t green() const
 				{ return _g; }
 
-				//! Return the blue component of this color
+				/** @brief Return the blue component of this color (range 0 to 65535).
+				 */
 				inline uint16_t blue() const
 				{ return _b; }
 
-				//! Set the alpha component of this color
+
+				/** @brief Set the alpha component of this color (range 0 to 65535).
+				 */
 				inline void setAlpha(uint16_t a)
 				{ _a = a; }
 
-				//! Set the red component of this color
+				/** @brief Set the red component of this color (range 0 to 65535).
+				 */
 				inline void setRed(uint16_t r)
 				{ _r = r; }
 
-				//! Set the green component of this color
+				/** @brief Set the green component of this color (range 0 to 65535).
+				 */
 				inline void setGreen(uint16_t g)
 				{ _g = g; }
 
-				//! Set the blue component of this color
+				/** @brief Set the blue component of this color (range 0 to 65535).
+				 */
 				inline void setBlue(uint16_t b)
 				{ _b = b; }
-
-				//! Get brightness
-				inline uint16_t brightness() const
-				{ return (_r>=_g && _r>=_b) ? _r : ((_g>=_r && _g>=_b) ? _g : _b); }
-
-				//! Set brightness
-				void setBrightness(uint16_t l);
 
 			protected:
 				uint16_t _a, _r, _g, _b;
 		};
 
-    #pragma pack(pop)
+
+		/** @brief Convenience access to the 64-Bit ARGB color model.
+		 *  @ingroup Gfx
+		 */
+		typedef Color<ARgb> ARgbColor;
 
 
-		typedef BasicColor<ARgb> ARgbColor;
+		/** @brief Full specialisation of the color traits class for ARgbColor.
+		 */
+		template <>
+		struct ColorTraits<ARgbColor> {
+			typedef uint32_t TmpValueT;
+		};
 
 
-		inline void greyscale(ARgbColor& color)
+		/** @brief Dummy function for the sake of completeness.
+		 */
+		inline const Color<ARgb> toARgb(const Color<ARgb>& from)
+		{ return from; }
+
+		/** @brief Dummy function for the sake of completeness.
+		 */
+		inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
+		{ to = from; }
+
+
+		/** @brief Equality operator for Color<ARgb> comparison.
+		 */
+		inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
+		{ return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
+
+		/** @brief Less-than operator for Color<ARgb> comparison.
+		 */
+		inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
+		{ return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
+
+		/** @brief Greater-than operator for Color<ARgb> comparison.
+		 */
+		inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
+		{ return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
+
+
+		/** @brief Make the greyscale version of the source Color<ARgb>.
+		 */
+		inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
 		{
-			const Pt::uint16_t _f = static_cast<uint16_t>( color.red()*0.3f +
-			                                               color.green()*0.5f +
-			                                               color.blue()*0.2f );
-			color.setAlpha( color.alpha() );
-			color.setRed(_f);
-			color.setGreen(_f);
-			color.setBlue(_f);
+			const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
+
+			to.setAlpha(from.alpha());
+			to.setRed  (s);
+			to.setGreen(s);
+			to.setBlue (s);
+
+			return to;
 		}
 
 
-		//! \brief Full specialization for Greyscale<T> to be used with ARgb color space
-		template<>
-		struct Greyscale<ARgb>
+		/** @brief Mix two Color<ARgb>s using the given mixing factor.
+		 */
+		template <typename FactorT>
+		inline void mixColor(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
 		{
-			public:
-				typedef BasicColor<ARgb> Color;
+			assert(  std::numeric_limits<FactorT>::is_integer );
+			assert( !std::numeric_limits<FactorT>::is_signed  );
 
-				inline void operator()(Color& color) const
-				{
-					this->operator()(color, color);
-				}
+			typedef ColorTraits<ARgbColor> Traits;
+			typedef typename LargestSizeOf< Traits::TmpValueT, FactorT >::Result ValueT;
 
-				inline void operator()(Color& to, const Color& from) const
-				{
-					const Pt::uint16_t _f = static_cast<uint16_t>(from.red()*0.3f +
-					                                              from.green()*0.5f +
-					                                              from.blue()*0.2f);
-					to.setAlpha( from.alpha() );
-					to.setRed(_f);
-					to.setGreen(_f);
-					to.setBlue(_f);
-				}
-		};
+			const ValueT oF = factor;
+			const ValueT rF = std::numeric_limits<FactorT>::max() - oF;
+
+			const ValueT dA = ValueT( dst.alpha() ) * rF;
+			const ValueT dR = ValueT( dst.red()   ) * rF;
+			const ValueT dG = ValueT( dst.green() ) * rF;
+			const ValueT dB = ValueT( dst.blue()  ) * rF;
+
+			const ValueT sA = ValueT( src.alpha() ) * oF;
+			const ValueT sR = ValueT( src.red()   ) * oF;
+			const ValueT sG = ValueT( src.green() ) * oF;
+			const ValueT sB = ValueT( src.blue()  ) * oF;
+
+			dst.setAlpha( (dA + sA) >> (8*sizeof(factor)) );
+			dst.setRed  ( (dR + sR) >> (8*sizeof(factor)) );
+			dst.setGreen( (dG + sG) >> (8*sizeof(factor)) );
+			dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
+		}
 
 	} // namespace Gfx
 

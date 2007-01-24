@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,48 +17,27 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Exception.h>
-#include <Pt/Gfx/XRgb1555Color.h>
-using namespace Pt;
-using namespace Pt::Gfx;
+#ifndef Pt_Gfx_Rgb555InterleavedImage_h
+#define Pt_Gfx_Rgb555InterleavedImage_h
+
+#include <Pt/Gfx/Rgb555Color.h>
+#include <Pt/Gfx/InterleavedImage.h>
+#include <Pt/Gfx/SubImage.h>
 
 
-Pt::uint8_t Pt::Gfx::BasicColor<XRgb1555>::brightness() const
-{
-	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
-	Pt::uint8_t b = blue();
-	return((r>=g && r>=b) ? r : ((g>=r && g>=b) ? g : b));
-}
+namespace Pt {
+	namespace Gfx {
+
+		/** @brief Interleaved Rgb555 image class.
+		 */
+		typedef InterleavedImage<Rgb555> Rgb555InterleavedImage;
 
 
-void Pt::Gfx::BasicColor<XRgb1555>::setBrightness(Pt::uint8_t l)
-{
-	if(l == 0) {
-		_val = 0;
-		return;
-	}
+		/** @brief Interleaved Rgb555 subimage class.
+		 */
+		typedef SubImage< InterleavedImage<Rgb555> > Rgb555InterleavedSubImage;
 
-	Pt::uint8_t r = red();
-	Pt::uint8_t g = green();
-	Pt::uint8_t b = blue();
-
-	if(r>=g && r>=b) {
-		float o = r;
-		setRed  (l);
-		setGreen(Pt::uint8_t(g * l / o));
-		setBlue (Pt::uint8_t(b * l / o));
-	}
-	else if (g>=r && g>=b) {
-		float o = g;
-		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(l);
-		setBlue (Pt::uint8_t(b * l / o));
-	}
-	else {
-		float o = b;
-		setRed  (Pt::uint8_t(r * l / o));
-		setGreen(Pt::uint8_t(g * l / o));
-		setBlue (l);
 	}
 }
+
+#endif

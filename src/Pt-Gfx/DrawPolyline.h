@@ -22,8 +22,9 @@
 #define PT_GFX_DRAWPOLYLINE_H
 
 #include <vector>
+#include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/ARgbInterleavedImage.h>
 
 
 namespace Pt {

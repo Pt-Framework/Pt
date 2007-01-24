@@ -23,8 +23,9 @@
 #include FT_GLYPH_H
 
 #include "Vera.h"
+#include "Pt/Gfx/Gfx.h"
 #include "Pt/Gfx/ImagePainter.h"
-#include "Pt/Gfx/ARgbImage.h"
+#include "Pt/Gfx/ARgbInterleavedImage.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Gfx/Brush.h"

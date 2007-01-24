@@ -17,10 +17,61 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_Algorithm_h
-#define Pt_Gfx_Algorithm_h
+#ifndef Pt_Gfx_ImageAlgo_tpp
+#define Pt_Gfx_ImageAlgo_tpp
 
-#include <Pt/Gfx/ColorAlgo.h>
-#include <Pt/Gfx/ImageAlgo.h>
+
+namespace Pt {
+
+	namespace Gfx {
+
+		template <typename DstColorTagT, typename SrcColorTagT>
+		void assign(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from)
+		{
+			if(from.empty()) {
+				to.clear();
+				return;
+			}
+
+			if(to.width()!=from.width() || to.height()!=from.height())
+				to.resize(from.width(), from.height());
+
+			for(uint y = 0; y < to.height(); y++)
+				for(uint x = 0; x < to.width(); x++)
+					assign(to.pixel(x, y), from.pixel(x, y)); // TODO: Optimize it !!!
+		}
+
+
+		template<typename InIteratorT, typename OutIteratorT>
+		void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
+		                OutIteratorT to,   uint toWidth,   uint toHeight)
+		{
+			size_t dh = 0;
+			size_t y  = 0;
+
+			while(y < toHeight) {
+				InIteratorT pos = from;
+				do {
+					size_t dw = 0;
+					for(size_t x = 0; x < toWidth; ++x) {
+						assign(*to, *from);
+						++to;
+						for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
+					}
+					from = pos;
+					y++;
+				}
+				while( (dh += fromHeight) < toHeight );
+
+				while(dh >= toHeight) {
+					from += fromWidth;
+					dh -= toHeight;
+				}
+			}
+		}
+
+	} // namespace Gfx
+
+} // namespace Pt
 
 #endif
