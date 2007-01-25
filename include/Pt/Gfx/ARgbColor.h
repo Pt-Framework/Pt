@@ -21,6 +21,7 @@
 #define Pt_Gfx_ARgbColor_h
 
 #include <Pt/Gfx/Color.h>
+#include <limits>
 
 
 namespace Pt {

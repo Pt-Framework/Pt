@@ -311,5 +311,7 @@ namespace Pt {
 
 } // namespace Pt
 
+#include "InterleavedImage.tpp"
+
 #endif
 

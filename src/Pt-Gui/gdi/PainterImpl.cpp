@@ -25,7 +25,7 @@
 #include "Pt/Math/Rect.h"
 #include "Pt/Gfx/Region.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Gfx/XRgb8888Color.h"
+#include "Pt/Gfx/Rgb888Color.h"
 #include "win32.h"
 #include <windows.h>
 
@@ -88,7 +88,8 @@ void PainterImpl::updatePen()
 		return;
 	}
 
-	Gfx::XRgb8888Color penCol = _pen.color();
+	Gfx::Rgb888Color penCol;
+	assign( penCol, _pen.color() );
 
 #ifdef _WIN32_WCE
 	HPEN newPen = CreatePen(PS_SOLID, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()));
@@ -134,7 +135,8 @@ void PainterImpl::updateBrush()
 	switch (_brush.fillStyle()) {
 
 		case Gfx::Brush::SolidFill: {
-			Gfx::XRgb8888Color col = _brush.color();
+			Gfx::Rgb888Color col;
+			assign( col, _brush.color() );
 			newBrushHandle = CreateSolidBrush(RGB(col.red(), col.green(), col.blue()));
 			break;
 		}
@@ -145,7 +147,7 @@ void PainterImpl::updateBrush()
 			if (!texture.empty())
 			{
 				// Convert our generic format to a 32 bit image format which Windows can understand.
-				Gfx::XRgb8888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
+				Gfx::Rgb888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
 				assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
 
 				// Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
@@ -387,12 +389,12 @@ void PainterImpl::drawPixel(const Pt::Math::Point& to)
 {
 	ensureActivePainter();
 
-	Gfx::XRgb8888Color col = _pen.color();
-	SetPixel(
-		_drawable.deviceContext(),
-		to.x(),
-		to.y(),
-		RGB(col.red(), col.green(), col.blue())
+	Gfx::Rgb888Color col;
+	assign( col, _pen.color() );
+	SetPixel( _drawable.deviceContext(),
+	          to.x(),
+	          to.y(),
+	          RGB(col.red(), col.green(), col.blue())
 	);
 }
 

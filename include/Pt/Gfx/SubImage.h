@@ -280,4 +280,6 @@ namespace Pt {
 
 } // namespace Pt
 
+#include "SubImage.tpp"
+
 #endif

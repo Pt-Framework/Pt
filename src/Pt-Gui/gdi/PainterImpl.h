@@ -30,9 +30,9 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/XRgb8888Image.h>
+#include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Gfx/Rgb565Image.h>
-#include <Pt/Gfx/XRgb1555Color.h>
+#include <Pt/Gfx/Rgb555Color.h>
 #include <Pt/Gfx/Region.h>
 
 #include "Drawable.h"
@@ -115,7 +115,7 @@ namespace Gui {
 				switch (depth()) {
 					case 32:
 					case 24: {
-						Gfx::XRgb8888Image rgb32Image(width, height);
+						Gfx::Rgb888Image rgb32Image(width, height);
 						assign(begin, end, rgb32Image.begin());
 						drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
 						break;
@@ -130,14 +130,14 @@ namespace Gui {
 
 
 					case 15: {
-						Gfx::XRgb1555Image rgb16Image(width, height);
+						Gfx::Rgb555Image rgb16Image(width, height);
 						assign(begin, end, rgb16Image.begin());
 						drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
 						break;
 					}
 
 					default: { // Below 16 bit or anything inbetween
-						Gfx::XRgb8888Image rgb32Image(width, height);
+						Gfx::Rgb888Image rgb32Image(width, height);
 						assign(begin, end, rgb32Image.begin());
 						drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
 						break;

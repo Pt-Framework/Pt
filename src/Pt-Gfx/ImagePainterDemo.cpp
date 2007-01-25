@@ -64,22 +64,26 @@ class ImagePainterDemo : public Pt::Gui::Widget
         polygon.push_back( Pt::Math::Point( 20, 250));
 
 /*
-        polygon.push_back( Pt::Math::Point( 50, 20 ));        
+        polygon.push_back( Pt::Math::Point( 50, 20 ));
         polygon.push_back( Pt::Math::Point( 70, 40 ));
-        polygon.push_back( Pt::Math::Point( 50, 60 )); 
-        polygon.push_back( Pt::Math::Point( 30, 40 ));        
-        */        
-        
-        _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0) ));
+        polygon.push_back( Pt::Math::Point( 50, 60 ));
+        polygon.push_back( Pt::Math::Point( 30, 40 ));
+        */
+		Pt::Gfx::ARgbColor outline(0xffff,0,0);
+		Pt::Gfx::Font f("Vera", 60);
+		_imagePainter.setFont(f);
+		_imagePainter.drawText( Pt::Math::Point(300, 200), L"Hello PTV!" );
+		_imagePainter.drawText( Pt::Math::Point(300, 270), L"Hello PTV!", &outline );
+        _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0xffff,0xffff,0xffff) ));
         //Pt::System::Clock clock;
-        
+
         //clock.start();
         _imagePainter.fillPolygon( &polygon[0], polygon.size() );
         //Pt::System::TimeValue time = clock.stop();
         //std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
-        
-        
-/*        
+
+
+/*
         _imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor(0xffff,0 ,0) ) );
 
         _imagePainter.drawLine( Pt::Math::Point( 10,10 ),Pt::Math::Point (15,15 ) );
@@ -89,7 +93,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
         _imagePainter.drawLine( Pt::Math::Point( 10,55 ),Pt::Math::Point ( 100,55 ) );
 
         Pt::Gfx::ARgbColor color( 0xffff,0xffff, 0);
-        
+
         _imagePainter.setFont( Pt::Gfx::Font( "Vera", 10, Pt::Gfx::Font::NormalStyle, -300));
         _imagePainter.drawText(Math::Point( 22, 180), L"Hallo Platinum!", &color  );
 
@@ -101,9 +105,9 @@ class ImagePainterDemo : public Pt::Gui::Widget
 */
         painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
-        
+
         polygon.clear();
-    
+
         polygon.push_back( Pt::Math::Point( 10  + 50 , 100 ));
         polygon.push_back( Pt::Math::Point( 50 + 50 , 10));
         polygon.push_back( Pt::Math::Point( 100 + 50 , 80));
@@ -112,15 +116,15 @@ class ImagePainterDemo : public Pt::Gui::Widget
         polygon.push_back( Pt::Math::Point( 100 + 50 , 300));
         polygon.push_back( Pt::Math::Point( 20 + 50 , 250));
 
-  
-        
+
+
         //clock.start();
         painter().fillPolygon( &polygon[0], polygon.size() );
-       
+
         //time = clock.stop();
         //std::cerr<<"System Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
 
-        
+
     }
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
