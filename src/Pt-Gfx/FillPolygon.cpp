@@ -40,16 +40,20 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //Pt::System::Clock clock;
     //clock.start();
 
+    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width() - 1, image.height() - 1 )) );
+
     if( points.end() != points.begin() )
         points.push_back( points[0] );
 
-    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width() - 1, image.height() - 1 )) );
 
     // Time: 8e-06
 
     if( points.empty())
         return;
 
+    if( _colorBuffer.size() < image.width() || _colorBuffer[0] != brush.color() )
+        _colorBuffer.assign( image.width(), brush.color() );
+        
     // might as well create a new table here...
     _globalEdgeTable.clear();
 
@@ -113,6 +117,12 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
         }
     }
 
+	//
+	// if all polygon points are on one line the GET will be empty
+	// 
+	if( _globalEdgeTable.empty() )
+		return;
+		
     // Time: 1.5e-05
 
     //

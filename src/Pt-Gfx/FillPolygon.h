@@ -28,7 +28,7 @@
 #include <Pt/System/Clock.h>
 #include "Edge.h"
 #include "EdgeTable.h"
-#include "ClipConvexPolygon.h"
+#include "ClipPolygon.h"
 
 
 namespace Pt{
@@ -77,7 +77,7 @@ private:
     EdgeSet::iterator       _currentPos;
     std::vector<ARgbColor>  _colorBuffer;
     Pt::System::Clock       _clock;
-    ClipConvexPolygon       _clipper;
+    ClipPolygon				_clipper;
 };
 
 } //namespace Gfx

@@ -22,7 +22,7 @@
 #define PT_GFX_FILLCONVEXPOLYGON_H
 
 #include "FillPolygon.h"
-#include "ClipConvexPolygon.h"
+#include "ClipPolygon.h"
 #include "RasterBuffer.h"
 
 
@@ -60,7 +60,7 @@ class FillConvexPolygon : public FillPolygon
                            const std::vector<Math::Point>& points );
 
     private:
-         ClipConvexPolygon       _clip;
+         ClipPolygon		     _clip;
          RasterBuffer            _rasterBuffer;
          std::vector<ARgbColor>  _colorBuffer;
 };
