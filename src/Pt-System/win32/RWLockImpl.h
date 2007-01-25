@@ -31,6 +31,7 @@ class RWLockImpl
 {
     public:
         RWLockImpl()
+        : _readers(0), _writers(0)
         {
             _mutex = CreateMutex(NULL, FALSE, NULL);
 
