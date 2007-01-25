@@ -33,6 +33,10 @@ namespace Pt {
 
 	namespace Gfx {
 
+// With GCC we should be able to use explicit template instantiation correctly
+// and thus we instantiate all the interleaved image and subimage classes here
+#ifdef __GNUC__
+
 		// Explicit instantiation of the interleaved image classes
 		template class InterleavedImage<ARgb>;
 		template class InterleavedImage<ARgbF>;
@@ -48,6 +52,8 @@ namespace Pt {
 		template class SubImage< InterleavedImage<Rgb888> >;
 		template class SubImage< InterleavedImage<Rgb565> >;
 		template class SubImage< InterleavedImage<Rgb555> >;
+
+#endif
 
 	} // namespace Gfx
 

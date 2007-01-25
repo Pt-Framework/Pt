@@ -280,6 +280,11 @@ namespace Pt {
 
 } // namespace Pt
 
+
+// With GCC we should be able to use explicit template instantiation correctly
+// and thus including this file is not needed
+#ifndef __GNUC__
 #include "SubImage.tpp"
+#endif
 
 #endif
