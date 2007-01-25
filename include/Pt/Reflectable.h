@@ -332,12 +332,9 @@ typedef std::multimap<std::string, ICallable*> MethodMap;
 
 class PT_API Reflectable {
 	public:
-		Reflectable(const std::string& typeName = "Reflectable");
+		Reflectable();
 
 		virtual ~Reflectable();
-
-		//const std::string& name() const
-		//{ return _typeName; }
 
 		Pt::Any property(const std::string& name);
 
@@ -426,10 +423,7 @@ class PT_API Reflectable {
 		void call(const std::string& name, const Args& args);
 
 	private:
-		//std::string _typeName;
-
 		MethodMap _methods;
-
 		PropertyMap _properties;
 };
 

@@ -22,10 +22,9 @@
 
 namespace Pt {
 
-Reflectable::Reflectable(const std::string& typeName)
-//: _typeName(typeName)
+Reflectable::Reflectable()
 {
-	//this->registerProperty( "name", this, &Reflectable::name );
+
 }
 
 

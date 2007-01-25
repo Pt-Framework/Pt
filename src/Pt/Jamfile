@@ -21,7 +21,7 @@ SharedLibrary Pt : Any.cpp
 SharedLibrary_MakeLocate Pt : bin ;
 SharedLibrary_Install Pt ;
 
-Main ReflectableTest : ReflectableTest.cpp ;
+PtUnitTest ReflectableTest : ReflectableTest.cpp ;
 Main_LinkSharedLibraries ReflectableTest : Pt ;
 Main_MakeLocate ReflectableTest : bin ;
 
