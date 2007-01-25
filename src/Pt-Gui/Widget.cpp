@@ -188,7 +188,7 @@ void Widget::move(ssize_t x, ssize_t y)
 }
 
 
-void Widget::resize(ssize_t width, ssize_t height)
+void Widget::resize(size_t width, size_t height)
 {
 	if (width == _region.width() && height == _region.height()) {
 		return;

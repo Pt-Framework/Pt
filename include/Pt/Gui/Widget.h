@@ -355,7 +355,7 @@ namespace Gui {
 			 * @see move()
 			 * @see size()
 			 */
-			virtual void resize(ssize_t width, ssize_t height);
+			virtual void resize(size_t width, size_t height);
 
 			/**
 			 * @brief Makes this widget visible.
