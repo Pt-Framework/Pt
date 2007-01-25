@@ -30,6 +30,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           MutexLock.cpp
                           Plugin.cpp
                           Process.cpp
+                          RWLock.cpp
                           Semaphore.cpp
                           SharedLib.cpp
                           SharedMemory.cpp
