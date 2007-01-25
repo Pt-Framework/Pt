@@ -33,11 +33,11 @@ SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 SharedLibrary_MakeLocate Pt-Gfx : bin ;
 
 Main GreyscaleTest : GreyscaleTest.cpp ;
-Main_LinkSharedLibraries GreyscaleTest : Pt Pt-Text Pt-System Pt-IO Pt-Gfx ;
+Main_LinkSharedLibraries GreyscaleTest : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
 Main_MakeLocate GreyscaleTest : bin ;
 
 Main BlockscaleTest : BlockscaleTest.cpp ;
-Main_LinkSharedLibraries BlockscaleTest : Pt Pt-Text Pt-System Pt-IO Pt-Gfx ;
+Main_LinkSharedLibraries BlockscaleTest : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : bin ;
 
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
@@ -45,10 +45,18 @@ Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt
 Main_MakeLocate ImagePainterDemo : bin ;
 
 PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
-Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-IO Pt-Gfx ;
+Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
 Main_MakeLocate ImagePainterTest : bin ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
 Main_MakeLocate MakeFontHeader : bin ;
+
+Main ColorTest : ColorTest.cpp ;
+Main_LinkSharedLibraries ColorTest : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
+Main_MakeLocate ColorTest : bin ;
+
+Main ImageTest : ImageTest.cpp ;
+Main_LinkSharedLibraries ImageTest : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
+Main_MakeLocate ImageTest : bin ;
 
 SubInclude TOP src Pt-Gfx freetype ;

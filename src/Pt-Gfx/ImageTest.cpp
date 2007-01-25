@@ -18,14 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Gfx2/Gfx.h>
-#include <Pt/Gfx2/ARgbInterleavedImage.h>
-#include <Pt/Gfx2/ARgbFInterleavedImage.h>
-#include <Pt/Gfx2/ARgb8888InterleavedImage.h>
-#include <Pt/Gfx2/Rgb888InterleavedImage.h>
-#include <Pt/Gfx2/Rgb555InterleavedImage.h>
-#include <Pt/Gfx2/Rgb565InterleavedImage.h>
-#include <Pt/Gfx2/ImageAlgo.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/ARgbFImage.h>
+#include <Pt/Gfx/ARgb8888Image.h>
+#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Gfx/Rgb555Image.h>
+#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/ImageAlgo.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;

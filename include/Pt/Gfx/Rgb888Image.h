@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbImage_h
-#define Pt_Gfx_ARgbImage_h
+#ifndef Pt_Gfx_Rgb888Image_h
+#define Pt_Gfx_Rgb888Image_h
 
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/Rgb888InterleavedImage.h>
 
 
 namespace Pt {
@@ -32,9 +32,9 @@ namespace Pt {
 		// and so typedefs them for convenience
 		//
 
-		typedef ARgbInterleavedImage     ARgbImage;
+		typedef Rgb888InterleavedImage     Rgb888Image;
 
-		typedef ARgbInterleavedSubImage  ARgbSubImage;
+		typedef Rgb888InterleavedSubImage  Rgb888SubImage;
 
 	}
 
