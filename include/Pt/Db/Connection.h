@@ -212,7 +212,7 @@ namespace Db {
 		\throw LogicError
 		\throw RuntimeError
 	*/
-	Connection connect(const std::string& url);
+	PT_DB_API Connection connect(const std::string& url);
 
 	/** \brief Fetch a connection from a pool or create a new one.
 	
