@@ -37,6 +37,9 @@
 
 #include "Drawable.h"
 
+#include <sstream>
+#include "Pt/Text/Utf16Codec.h"
+#include "Pt/Text/TextStream.h"
 
 namespace Pt {
 
@@ -171,6 +174,9 @@ namespace Gui {
 			Gfx::Pen   _pen;
 			Gfx::Brush _brush;
 			Gfx::Font  _font;
+
+			mutable std::stringstream    _stringStream;
+			mutable Pt::Text::TextStream _textStream;
 
 			std::list<std::string> _fontNamesList;
 	};
