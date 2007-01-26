@@ -93,9 +93,49 @@ class DrawText
         void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
 
     private:
-        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FTC_SBit& bm );
+        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FTC_SBit& bm )
+        {
+            int							bmPitch = bm->pitch;
+            Pt::uint32_t				yOffset = 0;
+            int							dsy		= ypos;
+            int							dsx		= 0;
+            const Pt::ssize_t			x2		= image.width() - 1;
+            const Pt::ssize_t			y2		= image.height() - 1;
+            ARgbImage::PixelIterator	pixel;
 
-        void _draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
+            if( bmPitch < bm->width )
+                bmPitch += bm->width;
+
+            for( Pt::int32_t y = 0; y < bm->height; ++y, ++dsy )
+            {
+                yOffset = y * bmPitch;
+
+                if( dsy < 0 )
+                    continue;
+
+                if( dsy > y2 )
+                    break;
+
+                dsx		= xpos;
+                pixel   = image.iterator( dsx, dsy );
+
+                for( Pt::int32_t x = 0; x < bm->width; ++x, ++dsx )
+                {
+                    if( dsx < 0 )
+                        continue;
+
+                    if( dsx > x2 )
+                        break;
+
+                    const int px = yOffset + x ;
+
+                    if( bm->buffer[ px ] )
+                        mixColor( *pixel, color, bm->buffer[ px ] );
+
+                    ++pixel;
+                }
+            }
+        }
 
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
@@ -114,7 +154,7 @@ class DrawText
              dst.setGreen( (dG + sG) >> 8);
              dst.setBlue ( (dB + sB) >> 8);
         }
-        
+
         static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
 
         FT_Library		_ft;

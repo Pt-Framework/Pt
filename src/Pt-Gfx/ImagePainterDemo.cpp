@@ -67,17 +67,21 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		polygon.push_back( Pt::Math::Point( 50, -50 ));
 		polygon.push_back( Pt::Math::Point( 50, 100 ));
 		polygon.push_back( Pt::Math::Point( -50, 100 )); 
-*/		
-		Pt::Gfx::ARgbColor outline( 0, 0, 0xffff );
-		
-		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 18 /*,Pt::Gfx::Font::NormalStyle, 450*/ ));		
-		
-		Pt::System::Clock clock;		
-		clock.start();
+*/
 
-		_imagePainter.drawText( Pt::Math::Point(10, 100), L"Hello PTV!" );
-		Pt::System::TimeValue time = clock.stop();
+
+
+		Pt::Gfx::ARgbColor outline( 0, 0, 0xffff );
+		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 18 /*,Pt::Gfx::Font::NormalStyle, 450*/ ));
+        Pt::System::TimeValue time;
+        Pt::System::Clock clock;
+
+        clock.start();
+		_imagePainter.drawText( Pt::Math::Point(10, 100), L"Hello PTV1!" );
+		time = clock.stop();
+
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+
 
 /*		
 		_imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
@@ -117,13 +121,14 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		
 		
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
-		painter().setFont(Pt::Gfx::Font( "Tahoma", 18));
-		
+		painter().setFont(Pt::Gfx::Font( "Vera", 18));
 
-		clock.start();		
-		painter().drawText(Pt::Math::Point(10, 130), L"Hello PTV!" ); 
-		time = clock.stop();
-		std::cerr<<"System Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+		Pt::System::TimeValue time2;
+		Pt::System::Clock clock2;
+		clock2.start();
+		painter().drawText(Pt::Math::Point(10, 130), L"Hello PTV2!" );
+		time2 = clock2.stop();
+		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
 		
 /*
 		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
