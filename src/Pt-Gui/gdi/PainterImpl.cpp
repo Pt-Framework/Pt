@@ -30,12 +30,9 @@
 #include <windows.h>
 
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 #include <Pt/system/Clock.h>
 
-#include "Pt/Text/Utf16Codec.h"
-#include "Pt/Text/TextStream.h"
 
 #include <windows.h>
 
@@ -49,7 +46,8 @@ PainterImpl::PainterImpl(Drawable& drawable)
 : _drawable(drawable),
   _pen(Gfx::Pen(1)),
   _brush(Gfx::Brush(Gfx::ARgbColor(0, 0, 0))),
-  _font(Gfx::Font(determinePlatformDefaultFontName()))
+  _font(Gfx::Font(determinePlatformDefaultFontName())),
+  _textStream(_stringStream, new Pt::Text::Utf16Codec())
 {
 }
 
@@ -296,7 +294,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(Pt::Text::String Text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(Pt::Text::String text) const
 {
 	ensureActivePainter();
 
@@ -305,16 +303,20 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::Text::String Text) const
 	GetTextMetrics(_drawable.deviceContext(), &basicMetrics);
 
 	// Convert the 32-bit string into 16 bit (using UTF-16).
-	std::stringstream ss;
-	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf16Codec());
-	TextStream << Text << Char(0); // Append extra \0 for proper line termination.
-	TextStream.flush();
+    _textStream.clear();
+	_stringStream.str("");
+	_textStream << text;
+	_textStream.flush();
 
-	// Calculate the width and height for the Text.
-	SIZE TextSize;
-	GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)ss.str().c_str(), Text.length(), &TextSize);
+	// Calculate the width and height for the text.
+	SIZE textSize;
+	std::string utf16Text = _stringStream.str();
+	
+	// Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
+	size_t utf16Length = utf16Text.length() / 2;
+	GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)utf16Text.c_str(), utf16Length, &textSize);
 
-	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, TextSize.cx, TextSize.cy);
+	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
 }
 
 
@@ -417,18 +419,20 @@ void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& 
 }
 
 
-void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::Text::String& Text)
+void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::Text::String& text)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	std::stringstream ss;
-	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf16Codec());
-	TextStream << Text << Char(0); // Append extra \0 for proper line termination.
-	TextStream.flush();
+    _textStream.clear();
+	_stringStream.str("");
+	_textStream << text << Char(0); // Append extra \0 for proper line termination.
+	_textStream.flush();
 
-	RECT rectangle;
+    RECT rectangle;
 	SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
-	DrawTextW(_drawable.deviceContext(), (wchar_t*)ss.str().c_str(), -1, &rectangle, DT_NOCLIP);
+
+	// Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
+	DrawTextW(_drawable.deviceContext(), (wchar_t*)_stringStream.str().c_str(), -1, &rectangle, DT_NOCLIP);
 }
 
 
