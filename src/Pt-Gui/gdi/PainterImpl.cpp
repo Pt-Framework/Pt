@@ -519,12 +519,19 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
 
     Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
     */
-    HDC hdc = _drawable.deviceContext();
+	ensureActivePainter();
 
-    MoveToEx( hdc, points[0].x(), points[0].y(), 0 );
+	if (_pen.size() == 0) {
+		return;
+	}
 
-    for( size_t i = 1; i <  pointCount; i++)
-        LineTo( hdc, points[i].x(), points[i].y() );
+	HDC hdc = _drawable.deviceContext();
+
+	MoveToEx(hdc, points[0].x(), points[0].y(), 0);
+
+	for (size_t i = 1; i <  pointCount; i++) {
+		LineTo(hdc, points[i].x(), points[i].y());
+	}
 }
 
 
