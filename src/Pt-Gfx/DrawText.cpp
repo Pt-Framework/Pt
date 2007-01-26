@@ -164,7 +164,6 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
 	FTC_Manager_LookupFace( _manager, 0, &face );
 
     FT_UInt         previous    = 0;
-    //FT_GlyphSlot    slot        = face->glyph;
     FT_Vector       delta;
     FT_Glyph        glyph;
     FT_BBox         gbbox = {0,0,0,0};
@@ -177,7 +176,6 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
     imageType.width		= _fontSize;
     imageType.height	= _fontSize;
     imageType.flags		= FT_RENDER_MODE_NORMAL;
-
 
     int pen_x = 0;
     int pen_y = 0;
@@ -263,30 +261,33 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
         const int incX = ( glyph->advance.x >> 6 ) / 1000;
         const int incY = glyph->advance.y >> 6;
 
-        FTC_SBitCache_Lookup( _bitmapCache, &imageType, glyph_index, &glyphBitmap, &node );
-        // Time 1e-006
-
-        const int left      = glyphPos.x + glyphBitmap->left;
-        const int top       = glyphPos.y - glyphBitmap->top;
-
-        if( backGround )
+        if( false  == it->isSpace() )
         {
-            const int leftUp    = left + 1;
-            const int leftDown  = left - 1;
-            const int topUp     = top + 1;
-            const int topDown   = top - 1;
+            FTC_SBitCache_Lookup( _bitmapCache, &imageType, glyph_index, &glyphBitmap, &node );
+            // Time 1e-006
 
-            drawGlyph( image, *backGround, leftUp, top, glyphBitmap );
-            drawGlyph( image, *backGround, leftDown, top, glyphBitmap );
-            drawGlyph( image, *backGround, leftDown, topUp, glyphBitmap );
-            drawGlyph( image, *backGround, leftDown, topDown, glyphBitmap );
-            drawGlyph( image, *backGround, leftUp, topDown, glyphBitmap );
-            drawGlyph( image, *backGround, leftUp, topUp, glyphBitmap );
-            drawGlyph( image, *backGround, leftDown, topDown, glyphBitmap );
-            drawGlyph( image, *backGround, leftDown, topUp, glyphBitmap );
+            const int left      = glyphPos.x + glyphBitmap->left;
+            const int top       = glyphPos.y - glyphBitmap->top;
+
+            if( backGround )
+            {
+                const int leftUp    = left + 1;
+                const int leftDown  = left - 1;
+                const int topUp     = top + 1;
+                const int topDown   = top - 1;
+
+                drawGlyph( image, *backGround, leftUp, top, glyphBitmap );
+                drawGlyph( image, *backGround, leftDown, top, glyphBitmap );
+                drawGlyph( image, *backGround, leftDown, topUp, glyphBitmap );
+                drawGlyph( image, *backGround, leftDown, topDown, glyphBitmap );
+                drawGlyph( image, *backGround, leftUp, topDown, glyphBitmap );
+                drawGlyph( image, *backGround, leftUp, topUp, glyphBitmap );
+                drawGlyph( image, *backGround, leftDown, topDown, glyphBitmap );
+                drawGlyph( image, *backGround, leftDown, topUp, glyphBitmap );
+            }
+
+            drawGlyph( image, color, left, top, glyphBitmap );
         }
-
-        drawGlyph( image, color, left, top, glyphBitmap );
 
         glyphPos.x   += incX;
         glyphPos.y   -= incY;
