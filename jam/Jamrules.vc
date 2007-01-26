@@ -185,14 +185,12 @@ set PATH=$(VISUALC)\Common7/IDE;%PATH%
 
 actions C++ bind PDB
 {	
-	echo PDB $(PDB)
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
 	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
 actions together Link bind NEEDLIBS
 {
-	echo PDB $(<:S=.pdb)
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
 	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
 	"$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
