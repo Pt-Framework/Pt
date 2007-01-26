@@ -44,6 +44,10 @@
 #include <Pt/Gui/Painter.h>
 #include <Pt/Text/String.h>
 
+#include <sstream>
+#include "Pt/Text/Utf16Codec.h"
+#include "Pt/Text/TextStream.h"
+
 struct _XftFont;
 struct _XftDraw;
 
@@ -162,6 +166,9 @@ namespace Gui {
 			_XftDraw* _xftDraw;
 			_XftFont* _xftFont;
 			std::list<std::string> _fontList;
+			
+			mutable std::stringstream    _stringStream;
+			mutable Pt::Text::TextStream _textStream;
 	};
 
 } // namespace Gui
