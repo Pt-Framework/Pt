@@ -24,6 +24,7 @@
 #include "freetype/include/ft2build.h"
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#include FT_CACHE_H
 
 #include "Pt/Gfx/Gfx.h"
 #include "Pt/Gfx/ARgbInterleavedImage.h"
@@ -92,7 +93,7 @@ class DrawText
         void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
 
     private:
-        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FT_Bitmap& bm );
+        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FTC_SBit& bm );
 
         void _draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround = 0);
 
@@ -113,10 +114,17 @@ class DrawText
              dst.setGreen( (dG + sG) >> 8);
              dst.setBlue ( (dB + sB) >> 8);
         }
+        
+        static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
 
-        FT_Library  _ft;
-        FT_Face     _face;
-        FT_Matrix   _matrix;
+        FT_Library		_ft;
+        FT_Matrix		_matrix;
+        FTC_Manager		_manager;	
+        FTC_ImageCache  _imageChace;
+        FT_Size			_size;
+        FTC_CMapCache	_charMapCache;
+        FTC_SBitCache	_bitmapCache;
+        size_t			_fontSize;
 };
 
 } //namespace Gfx

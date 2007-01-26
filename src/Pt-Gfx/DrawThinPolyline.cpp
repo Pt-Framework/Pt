@@ -30,10 +30,114 @@ DrawThinPolyline::DrawThinPolyline()
 
 void DrawThinPolyline::draw( ARgbImage& image,  const Pen& pen, const std::vector<Math::Point>& points )
 {
-    assert( points.size() > 1 );
+	if( points.size() == 0 )
+		return;
+/*        
+	int		xstart;
+	int		ystart;
+	int		x1;
+	int		x2;
+	int		y1; 
+	int		y2;
+	size_t	npt = points.size();
+	
+	std::vector<Math::Point>::iterator ppt = points.begin();
+			
+	xstart = ppt->x();
+	ystart = ppt->y();
+	
+	x2 = xstart;
+	y2 = ystart;
+	
+	while( --npt )
+	{
+		x1 = x2;
+		y1 = y2;
+		++ppt;
+		
+		if( x1 == x2 ) // Vertical case
+		{
+			// Vertical lines are always drawn top to bottom (y-increasing).  
+		    // This requires adding one to the y-coordinate of each endpoint 
+		    // after swapping.
+			
+			if( y1 > y2 )
+			{
+				const int tmp = y2;
+				y2 = y1 + 1;
+				y1 = tmp + 1;
+			}
+			
+			if( y1 != y2 )			
+				image.pixel( x1, y1 ) = pen.color();
+		
+			//Restore final point	
+			y2 = ppt->y();
+		}
+		else if( y1 == y2 ) // Horizontal case
+		{
+			// Horizontal lines are always drawn left to right; we have to move the
+			// endpoints right by one after they're swapped.
 
-    for( size_t i = 1; i < points.size(); ++i )
-        _drawThinLine.draw( image, pen, points[i-1], points[i] );
+			if( x1 > x2 )
+			{
+				const int tmp = x2;
+				x2 = x1 + 1;
+				x1 = tmp + 1;
+			}
+			
+			if( x1 == x2 )
+				image.pixel( x1, y1 ) = pen.color();
+			
+			//restore final point
+			x2 = ppt->x();								
+		}
+		else //Slope
+		{
+			int adx			= x2 - x1;
+			int ady			= y2 - y1;
+			int signdx		= 1;
+			int signdy		= 1;
+			int e, e1, e2;
+			bool xaxis = true;
+			int len;
+			
+			if( adx < 0)     
+			{ 
+				adx	   = -adx; 
+				signdx = -1; 
+			}
+			
+			if( ady < 0 )
+			{
+				ady    = - ady;
+				signdy = -1;
+			}
+			
+			if( adx > ady )
+			{
+				xaxis	= true;
+				e1		= ady << 1;
+				e2		= e1 - ( adx << 1 );
+				e		= e1 - adx;				
+				e		-= (_signdx < 0 ) ;				
+				len		= adx;
+			}
+			else
+			{
+				xaxis	= false;
+				e1		= adx << 1;
+				e2		= e1 - ( ady << 1 );
+				e		= e1 - ady;				
+				e		-= (_signdy < 0 ) ;							
+				len		= ady;
+			}
+			
+			
+		}
+
+	*/
+	
 }
 
 }

@@ -72,16 +72,16 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
             std::swap( y0, y1 );
         }
 
-        const int       deltax = x1 - x0 ;
+        const int       deltax = ( x1 - x0 ) ;
         const int       deltay = std::abs( y1 - y0 );
         int             error  = 0;
         int             ystep  = -1;
-        int             y      = y0;
-
+        int             y      = y0 ;
+	
         if( y0 < y1 )
-            ystep = 1;
+            ystep = 1;            
 
-        for( ssize_t x = x0; x < x1; ++x )
+        for( ssize_t x = x0; x <= x1; ++x )
         {
             image.pixel( y, x ) = _colorBuffer[0];
 
@@ -92,7 +92,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
                 y += ystep;
                 error -= deltax;
             }
-        }
+        }                
     }
     else
     {//Flat
@@ -108,9 +108,12 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
         int y      = y0;
 
         if( y0 < y1 )
+        {
             ystep = 1;
+            error  = -dx;
+        }
 
-        for( ssize_t x = x0; x < x1; ++x )
+        for( ssize_t x = x0; x <= x1; ++x )
         {
             image.pixel( x, y ) = _colorBuffer[0];
             error += dy;

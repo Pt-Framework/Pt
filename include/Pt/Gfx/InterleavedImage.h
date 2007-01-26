@@ -214,6 +214,11 @@ namespace Pt {
 						typedef typename ImageT::ColorT     ColorT;
 
 					public:
+						inline PixelIterator()
+						 : _image( 0 )
+						 , _pixel( 0 )
+						{ }
+						
 						inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
 						: _image(&image), _pixel(&image.scanline(y)[x])
 						{}
@@ -265,6 +270,11 @@ namespace Pt {
 						typedef typename ImageT::ColorT     ColorT;
 
 					public:
+						inline ConstPixelIterator()
+						: _image( 0 )
+						, _pixel( 0 )
+						{}
+
 						inline ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
 						: _image(&image), _pixel(&image.scanline(y)[x])
 						{}

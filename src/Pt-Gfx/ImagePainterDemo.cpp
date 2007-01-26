@@ -51,7 +51,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-
+/*
 		std::vector<Pt::Math::Point> polygon;
 
 
@@ -62,30 +62,37 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		polygon.push_back( Pt::Math::Point( 200- 50, 100 - 80));
 		polygon.push_back( Pt::Math::Point( 100- 50, 300 - 80));
 		polygon.push_back( Pt::Math::Point( 20- 50, 250- 80));
-/*
+
 		polygon.push_back( Pt::Math::Point( -50, -50 ));
 		polygon.push_back( Pt::Math::Point( 50, -50 ));
 		polygon.push_back( Pt::Math::Point( 50, 100 ));
 		polygon.push_back( Pt::Math::Point( -50, 100 )); 
-*/
+*/		
+		Pt::Gfx::ARgbColor outline( 0, 0, 0xffff );
+		
+		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 18 /*,Pt::Gfx::Font::NormalStyle, 450*/ ));		
+		
+		Pt::System::Clock clock;		
+		clock.start();
 
+		_imagePainter.drawText( Pt::Math::Point(10, 100), L"Hello PTV!" );
+		Pt::System::TimeValue time = clock.stop();
+		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
 
-		Pt::Gfx::ARgbColor outline(0xffff,0,0);
-		Pt::Gfx::Font f("Vera", 60);
-		_imagePainter.setFont(f);
-		_imagePainter.drawText( Pt::Math::Point(300, 200), L"Hello PTV!" );
-		_imagePainter.drawText( Pt::Math::Point(300, 270), L"Hello PTV!", &outline );
-
-		//Pt::System::Clock clock;
-
-		//clock.start();
+/*		
 		_imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
 		_imagePainter.fillPolygon( &polygon[0], polygon.size() );
-		//Pt::System::TimeValue time = clock.stop();
-		//std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+		
+		_imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0,0,0xffff) ));
+		
+		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 10, 10 ));
+//		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 75, 10 ));
+		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 10 ));
+		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 60, 10 ));
+		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 60 ));
+		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 100 ));
+		
 
-
-/*
 		_imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor(0xffff,0 ,0) ) );
 
 		_imagePainter.drawLine( Pt::Math::Point( 10,10 ),Pt::Math::Point (15,15 ) );
@@ -105,8 +112,22 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::System::TimeValue delta = clock.stop();
 		std::cout<<"Draw time: " << (delta.seconds() + delta.microSeconds()/1000000.0) << std::endl;
 */
-		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+
+		
+		
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
+		painter().setFont(Pt::Gfx::Font( "Tahoma", 18));
+		
+
+		clock.start();		
+		painter().drawText(Pt::Math::Point(10, 130), L"Hello PTV!" ); 
+		time = clock.stop();
+		std::cerr<<"System Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+		
+/*
+		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
+		
 
 		polygon.clear();
 
@@ -120,9 +141,16 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 		//clock.start();
 		//painter().fillPolygon( &polygon[0], polygon.size() );
-
-		//time = clock.stop();
-		//std::cerr<<"System Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
+	
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff,0,0) ));		
+		
+		painter().drawLine( Pt::Math::Point( 10 + 4, 100  + 4), Pt::Math::Point( 10 + 4, 10 + 4));
+//		painter().drawLine( Pt::Math::Point( 10 + 4, 100 + 4), Pt::Math::Point( 75 + 4, 10 ));
+		painter().drawLine( Pt::Math::Point( 10 + 4, 100 + 4), Pt::Math::Point( 100 + 4, 10+ 4 ));
+		painter().drawLine( Pt::Math::Point( 10 + 4, 100+ 4 ), Pt::Math::Point( 60 + 4, 10 + 4));
+		painter().drawLine( Pt::Math::Point( 10 + 4, 100+ 4 ), Pt::Math::Point( 100 + 4, 60 + 4));
+		painter().drawLine( Pt::Math::Point( 10 + 4, 100 + 4), Pt::Math::Point( 100 + 4, 100 + 4));
+	*/
 	}
 
 	virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
