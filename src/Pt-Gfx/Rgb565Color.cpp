@@ -18,4 +18,4 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Gfx2/Rgb565Color.h>
+#include <Pt/Gfx/Rgb565Color.h>
