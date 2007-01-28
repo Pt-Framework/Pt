@@ -43,16 +43,6 @@ namespace Pt {
 			return op;
 		}
 
-
-		/** @brief Assign one iterator range to another.
-		 */
-		template <typename InputIteratorT, typename OutputIteratorT> inline
-		OutputIteratorT assign(InputIteratorT begin, InputIteratorT end, OutputIteratorT to)
-		{
-			for(; begin != end; ++to, ++begin) assign(*to, *begin);
-			return to;
-		}
-
 	} // namespace Gfx
 
 } // namespace Pt

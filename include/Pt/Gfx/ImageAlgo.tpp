@@ -23,54 +23,54 @@
 
 namespace Pt {
 
-	namespace Gfx {
+namespace Gfx {
 
-		template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
-		void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from)
-		{
-			if(from.empty()) {
-				to.clear();
-				return;
-			}
+    template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
+    void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from)
+    {
+        if(from.empty()) {
+            to.clear();
+            return;
+        }
 
-			if(to.width()!=from.width() || to.height()!=from.height())
-				to.resize(from.width(), from.height());
+        if( to.width() != from.width() || to.height() != from.height() )
+            to.resize( from.width(), from.height() );
 
-			for(uint y = 0; y < to.height(); y++)
-				for(uint x = 0; x < to.width(); x++)
-					assign(to.pixel(x, y), from.pixel(x, y)); // TODO: Optimize it !!!
-		}
+        for(uint y = 0; y < to.height(); y++)
+            for(uint x = 0; x < to.width(); x++)
+                assign(to.pixel(x, y), from.pixel(x, y)); // TODO: Optimize it !!!
+    }
 
 
-		template<typename InIteratorT, typename OutIteratorT>
-		void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
-		                OutIteratorT to,   uint toWidth,   uint toHeight)
-		{
-			size_t dh = 0;
-			size_t y  = 0;
+    template<typename InIteratorT, typename OutIteratorT>
+    void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
+                    OutIteratorT to,   uint toWidth,   uint toHeight)
+    {
+        size_t dh = 0;
+        size_t y  = 0;
 
-			while(y < toHeight) {
-				InIteratorT pos = from;
-				do {
-					size_t dw = 0;
-					for(size_t x = 0; x < toWidth; ++x) {
-						assign(*to, *from);
-						++to;
-						for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
-					}
-					from = pos;
-					y++;
-				}
-				while( (dh += fromHeight) < toHeight );
+        while(y < toHeight) {
+            InIteratorT pos = from;
+            do {
+                size_t dw = 0;
+                for(size_t x = 0; x < toWidth; ++x) {
+                    assign(*to, *from);
+                    ++to;
+                    for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
+                }
+                from = pos;
+                y++;
+            }
+            while( (dh += fromHeight) < toHeight );
 
-				while(dh >= toHeight) {
-					from += fromWidth;
-					dh -= toHeight;
-				}
-			}
-		}
+            while(dh >= toHeight) {
+                from += fromWidth;
+                dh -= toHeight;
+            }
+        }
+    }
 
-	} // namespace Gfx
+} // namespace Gfx
 
 } // namespace Pt
 
