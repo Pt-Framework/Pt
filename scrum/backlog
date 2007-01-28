@@ -21,12 +21,15 @@
 # Aloysius
 #
 
+ITEM P9 S8 "The subimage class support better generic pixel iterator"
+	TASK "Implement PtrT helper class in ColorTraits"
+	TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"
+
 ITEM P8 S13 "The image-related algorithms are improved"
 	TASK "Write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
-	TASK "Write iterator based algorithm greyscale"
-	TASK "Write iterator based algorithm brighten/darken"
 	TASK "Write iterator based algorithm assign"
 	TASK "Write iterator based algorithm blockScale"
+	TASK "Write iterator based algorithm brighten/darken"
 
 ITEM P7 S5 "The AtomicInt class implements atomic operations"
 	TASK "Add fallback version that uses pthreads"
