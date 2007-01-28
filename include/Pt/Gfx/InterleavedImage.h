@@ -197,7 +197,6 @@ namespace Pt {
 				inline ConstPixelIterator iterator(uint y, uint x) const
 				{ return ConstPixelIterator( *this, y, x ); }
 
-
 			protected:
 				std::vector<ColorT> _buff;
 				size_t              _width;
