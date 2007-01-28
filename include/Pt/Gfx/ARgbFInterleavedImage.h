@@ -37,6 +37,14 @@ namespace Pt {
 		 */
 		typedef SubImage< InterleavedImage<ARgbF> > ARgbFInterleavedSubImage;
 
+
+		//
+		// Interleaved images and subimages will be the most used types
+		// and so typedefs them for convenience
+		//
+		typedef ARgbFInterleavedImage    ARgbFImage;
+		typedef ARgbFInterleavedSubImage ARgbFSubImage;
+
 	}
 }
 
