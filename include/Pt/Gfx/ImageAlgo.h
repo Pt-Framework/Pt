@@ -56,11 +56,13 @@ namespace Pt {
 		void greyscale(InIteratorT begin, InIteratorT end, OutIteratorT to)
 		{ for(; begin != end; ++begin, ++to) greyscale(*begin, *to); }
 
+
 		/** @brief Greyscales an image using its iterators.
 		 */
 		template<typename IteratorT> inline
 		void greyscale(IteratorT begin, IteratorT end)
 		{ for(; begin != end; ++begin) greyscale(*begin); }
+
 
 		/** @brief Greyscales an image using its iterators.
 		 */

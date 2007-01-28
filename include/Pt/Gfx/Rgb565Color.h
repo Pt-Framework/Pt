@@ -214,6 +214,32 @@ namespace Pt {
 		}
 
 
+        /** @brief Assign a Color<Rgb565> to a Color<ARgb>.
+        */
+        inline void assign( Color<ARgb>& to, const Color<Rgb565>& from)
+        {
+            const uint16_t tr = from.red();
+            const uint16_t tg = from.green();
+            const uint16_t tb = from.blue();
+
+            to.setAlpha(0xFFFF);
+            to.setRed( ((tr + !!tr) << 11) - !!tr );
+            to.setGreen( ((tg + !!tg) << 10) - !!tg );
+            to.setBlue( ((tb + !!tb) << 11) - !!tb );
+        }
+
+
+        /** @brief Assign a Color<ARgb> to a Color<Rgb565>.
+        */
+        inline void assign(Color<Rgb565>& to, const Color<ARgb>& from)
+        {
+            const uint32_t val =  uint32_t(from.red  () & 0xF800)         |
+                                ( uint32_t(from.green() & 0xFC00) >>  5 ) |
+                                ( uint32_t(from.blue ()         ) >> 11 );
+            to.setValue(val);
+        }
+
+
 		/** @brief Assign an Color<Rgb565> to an ARgbFColor.
 		 */
 		inline void assign(ARgbFColor& to, const Color<Rgb565>& from)

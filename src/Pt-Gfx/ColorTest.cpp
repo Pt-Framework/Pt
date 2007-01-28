@@ -41,7 +41,7 @@ int main()
 	Rgb555Color    rgb555_1, rgb555_2;
 
 	const Pt::uint8_t factor = 128;
-	mixColor(argb_1, argb_2, factor);
+	blend(argb_1, argb_2, factor);
 
 	fromARgb(argb_2, toARgb(argb_1));
 	fromARgb(argb8888_2, toARgb(argb8888_1));

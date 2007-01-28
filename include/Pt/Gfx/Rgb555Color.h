@@ -212,15 +212,41 @@ namespace Pt {
 		}
 
 
-		/** @brief Assign an Color<Rgb555> to an ARgbFColor.
-		 */
-		inline void assign(ARgbFColor& to, const Color<Rgb555>& from)
-		{
-			to.setAlpha( 1.0f                        );
-			to.setRed  ( float(from.red  ()) / 31.0f );
-			to.setGreen( float(from.green()) / 31.0f );
-			to.setBlue ( float(from.blue ()) / 31.0f );
-		}
+        /** @brief Convert a Color<Rgb555> to a Color<ARgb>.
+        */
+        inline void assign(Color<ARgb>& to, const Color<Rgb555>& from)
+        {
+            const uint16_t tr = from.red();
+            const uint16_t tg = from.green();
+            const uint16_t tb = from.blue();
+
+            to.setAlpha(0xFFFF);
+            to.setRed(   ((tr + !!tr) << 11) - !!tr );
+            to.setGreen( ((tg + !!tg) << 11) - !!tg );
+            to.setBlue(  ((tb + !!tb) << 11) - !!tb );
+        }
+
+
+        /** @brief Convert a Color<ARgb> to a Color<Rgb555>.
+        */
+        inline void assign(Color<Rgb555>& to, const Color<ARgb>& from)
+        {
+            const uint32_t val = ( uint32_t(from.red  () & 0xF800) >>  1 ) |
+                                ( uint32_t(from.green() & 0xF800) >>  6 ) |
+                                ( uint32_t(from.blue ()         ) >> 11 );
+            to.setValue(val);
+        }
+
+
+        /** @brief Assign an Color<Rgb555> to an ARgbFColor.
+        */
+        inline void assign(ARgbFColor& to, const Color<Rgb555>& from)
+        {
+            to.setAlpha( 1.0f                        );
+            to.setRed  ( float(from.red  ()) / 31.0f );
+            to.setGreen( float(from.green()) / 31.0f );
+            to.setBlue ( float(from.blue ()) / 31.0f );
+        }
 
 
 		/** @brief Equality operator for Color<Rgb555> comparison.

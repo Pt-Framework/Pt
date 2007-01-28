@@ -26,217 +26,219 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief An empty structure used for tagging 64-bit ARGB color class.
-		*/
-		struct ARgb {};
+        /** @brief An empty structure used for tagging 64-bit ARGB color class.
+        */
+        struct ARgb {};
 
 
 #pragma pack(push, 1)
-		/** @brief 64-Bit ARGB color class.
-		*  @ingroup Gfx
-		*
-		*  This is the master color model for Pt::Gfx.
-		*  \n\n
-		*  Valid range of the color components for this color model:
-		*  <TABLE>
-		*    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-		*    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-		*    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-		*    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-		*  </TABLE>
-		*/
-		template <>
-		class PT_GFX_API Color<ARgb> {
-			public:
-				/** @brief The default constructor, will generate the default color (black).
-				*/
-				inline Color()
-				: _a(0xFFFF), _r(0), _g(0), _b(0)
-				{}
+        /** @brief 64-Bit ARGB color class.
+        *  @ingroup Gfx
+        *
+        *  This is the master color model for Pt::Gfx.
+        *  \n\n
+        *  Valid range of the color components for this color model:
+        *  <TABLE>
+        *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+        *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+        *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+        *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
+        *  </TABLE>
+        */
+        template <>
+        class PT_GFX_API Color<ARgb> {
+            public:
+                /** @brief The default constructor, will generate the default color (black).
+                */
+                inline Color()
+                : _a(0xFFFF), _r(0), _g(0), _b(0)
+                {}
 
-				/** @brief Copy constructor.
-				*/
-				inline Color(const Color<ARgb>& c)
-				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
-				{}
+                /** @brief Copy constructor.
+                */
+                inline Color(const Color<ARgb>& c)
+                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
+                {}
 
-				/** @brief Construct color using the given components.
-				*/
-				inline Color(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
-				: _a(a), _r(r), _g(g), _b(b)
-				{}
+                /** @brief Construct color using the given components.
+                */
+                inline Color(uint16_t a, uint16_t r, uint16_t g, uint16_t b)
+                : _a(a), _r(r), _g(g), _b(b)
+                {}
 
-				/** @brief Construct color using the given components.
-				*/
-				inline Color(uint16_t r, uint16_t g, uint16_t b)
-				: _a(0xFFFF), _r(r), _g(g), _b(b)
-				{}
+                /** @brief Construct color using the given components.
+                */
+                inline Color(uint16_t r, uint16_t g, uint16_t b)
+                : _a(0xFFFF), _r(r), _g(g), _b(b)
+                {}
 
-				/** @brief Assignment operator.
-				*/
-				inline Color<ARgb>& operator=(const Color<ARgb>& c)
-				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
+                /** @brief Assignment operator.
+                */
+                inline Color<ARgb>& operator=(const Color<ARgb>& c)
+                { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
-				/** @brief Assignment operator.
+                /** @brief Assignment operator.
 
-						This assigns another color to this one by calling toARgb().
-						toARgb() can be specialised to allow other color types
-						to be assigne to this one,
-				*/
-				template <typename ColorT>
-				inline Color<ARgb>& operator=(const ColorT& color)
-				{
-						(*this) = toARgb(color);
-						return *this;
-				}
+                        This assigns another color to this one by calling toARgb().
+                        toARgb() can be specialised to allow other color types
+                        to be assigne to this one,
+                */
+                template <typename ColorT>
+                inline Color<ARgb>& operator=(const ColorT& color)
+                {
+                        assign(*this, color);
+                        return *this;
+                }
 
-				/** @brief Assignment-addition operator (beware of overflow).
-				*/
-				inline Color<ARgb>& operator+=(const Color<ARgb>& c)
-				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
+                /** @brief Assignment-addition operator (beware of overflow).
+                */
+                inline Color<ARgb>& operator+=(const Color<ARgb>& c)
+                { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
-				/** @brief Assignment-substraction operator (beware of underflow).
-				*/
-				inline Color<ARgb>& operator-=(const Color<ARgb>& c)
-				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
-
-
-				/** @brief Return the alpha component of this color (range 0 to 65535).
-				*/
-				inline uint16_t alpha() const
-				{ return _a; }
-
-				/** @brief Return the red component of this color (range 0 to 65535).
-				*/
-				inline uint16_t red() const
-				{ return _r; }
-
-				/** @brief Return the green component of this color (range 0 to 65535).
-				*/
-				inline uint16_t green() const
-				{ return _g; }
-
-				/** @brief Return the blue component of this color (range 0 to 65535).
-				*/
-				inline uint16_t blue() const
-				{ return _b; }
+                /** @brief Assignment-substraction operator (beware of underflow).
+                */
+                inline Color<ARgb>& operator-=(const Color<ARgb>& c)
+                { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
-				/** @brief Set the alpha component of this color (range 0 to 65535).
-				*/
-				inline void setAlpha(uint16_t a)
-				{ _a = a; }
+                /** @brief Return the alpha component of this color (range 0 to 65535).
+                */
+                inline uint16_t alpha() const
+                { return _a; }
 
-				/** @brief Set the red component of this color (range 0 to 65535).
-				*/
-				inline void setRed(uint16_t r)
-				{ _r = r; }
+                /** @brief Return the red component of this color (range 0 to 65535).
+                */
+                inline uint16_t red() const
+                { return _r; }
 
-				/** @brief Set the green component of this color (range 0 to 65535).
-				*/
-				inline void setGreen(uint16_t g)
-				{ _g = g; }
+                /** @brief Return the green component of this color (range 0 to 65535).
+                */
+                inline uint16_t green() const
+                { return _g; }
 
-				/** @brief Set the blue component of this color (range 0 to 65535).
-				*/
-				inline void setBlue(uint16_t b)
-				{ _b = b; }
+                /** @brief Return the blue component of this color (range 0 to 65535).
+                */
+                inline uint16_t blue() const
+                { return _b; }
 
-			protected:
-				uint16_t _a, _r, _g, _b;
-		};
+
+                /** @brief Set the alpha component of this color (range 0 to 65535).
+                */
+                inline void setAlpha(uint16_t a)
+                { _a = a; }
+
+                /** @brief Set the red component of this color (range 0 to 65535).
+                */
+                inline void setRed(uint16_t r)
+                { _r = r; }
+
+                /** @brief Set the green component of this color (range 0 to 65535).
+                */
+                inline void setGreen(uint16_t g)
+                { _g = g; }
+
+                /** @brief Set the blue component of this color (range 0 to 65535).
+                */
+                inline void setBlue(uint16_t b)
+                { _b = b; }
+
+            protected:
+                uint16_t _a, _r, _g, _b;
+        };
 #pragma pack(pop)
 
 
-		/** @brief Convenience access to the 64-Bit ARGB color model.
-		*  @ingroup Gfx
-		*/
-		typedef Color<ARgb> ARgbColor;
+        /** @brief Convenience access to the 64-Bit ARGB color model.
+        *  @ingroup Gfx
+        */
+        typedef Color<ARgb> ARgbColor;
 
 
-		/** @brief Full specialisation of the color traits class for ARgbColor.
-		*/
-		template <>
-		struct ColorTraits<ARgbColor> {
-			typedef uint32_t TmpValueT;
-		};
+        /** @brief Full specialisation of the color traits class for ARgbColor.
+        */
+        template <>
+        struct ColorTraits<ARgbColor> {
+            typedef uint32_t TmpValueT;
+        };
 
 
-		/** @brief Dummy function for the sake of completeness.
-		*/
-		inline const Color<ARgb> toARgb(const Color<ARgb>& from)
-		{ return from; }
+        /** @brief Dummy function for the sake of completeness.
+        */
+        inline const Color<ARgb> toARgb(const Color<ARgb>& from)
+        { return from; }
 
-		/** @brief Dummy function for the sake of completeness.
-		*/
-		inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
-		{ to = from; }
-
-
-		/** @brief Equality operator for Color<ARgb> comparison.
-		*/
-		inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
-		{ return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
-
-		/** @brief Less-than operator for Color<ARgb> comparison.
-		*/
-		inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
-		{ return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
-
-		/** @brief Greater-than operator for Color<ARgb> comparison.
-		*/
-		inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
-		{ return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
+        /** @brief Dummy function for the sake of completeness.
+        */
+        inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
+        { to = from; }
 
 
-		/** @brief Make the greyscale version of the source Color<ARgb>.
-		*/
-		inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
-		{
-			const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
-
-			to.setAlpha(from.alpha());
-			to.setRed  (s);
-			to.setGreen(s);
-			to.setBlue (s);
-
-			return to;
-		}
+        /** @brief Equality operator for Color<ARgb> comparison.
+        */
+        inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
 
-		/** @brief Mix two Color<ARgb>s using the given mixing factor.
-		*/
-		template <typename FactorT>
-		inline void mixColor(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
-		{
-			assert(  std::numeric_limits<FactorT>::is_integer );
-			assert( !std::numeric_limits<FactorT>::is_signed  );
+        /** @brief Less-than operator for Color<ARgb> comparison.
+        */
+        inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
-			typedef ColorTraits<ARgbColor> Traits;
-			typedef typename LargestSizeOf< Traits::TmpValueT, FactorT >::Result ValueT;
 
-			const ValueT oF = factor;
-			const ValueT rF = std::numeric_limits<FactorT>::max() - oF;
+        /** @brief Greater-than operator for Color<ARgb> comparison.
+        */
+        inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
-			const ValueT dA = ValueT( dst.alpha() ) * rF;
-			const ValueT dR = ValueT( dst.red()   ) * rF;
-			const ValueT dG = ValueT( dst.green() ) * rF;
-			const ValueT dB = ValueT( dst.blue()  ) * rF;
 
-			const ValueT sA = ValueT( src.alpha() ) * oF;
-			const ValueT sR = ValueT( src.red()   ) * oF;
-			const ValueT sG = ValueT( src.green() ) * oF;
-			const ValueT sB = ValueT( src.blue()  ) * oF;
+        /** @brief Make the greyscale version of the source Color<ARgb>.
+        */
+        inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
+        {
+            const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
 
-			dst.setAlpha( (dA + sA) >> (8*sizeof(factor)) );
-			dst.setRed  ( (dR + sR) >> (8*sizeof(factor)) );
-			dst.setGreen( (dG + sG) >> (8*sizeof(factor)) );
-			dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
-		}
+            to.setAlpha(from.alpha());
+            to.setRed  (s);
+            to.setGreen(s);
+            to.setBlue (s);
 
-	} // namespace Gfx
+            return to;
+        }
+
+
+        /** @brief Mix two Color<ARgb>s using the given mixing factor.
+        */
+        template <typename FactorT>
+        inline void blend(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
+        {
+            assert(  std::numeric_limits<FactorT>::is_integer );
+            assert( !std::numeric_limits<FactorT>::is_signed  );
+
+            typedef ColorTraits<ARgbColor> Traits;
+            typedef typename LargestSizeOf< Traits::TmpValueT, FactorT >::Result ValueT;
+
+            const ValueT oF = factor;
+            const ValueT rF = std::numeric_limits<FactorT>::max() - oF;
+
+            const ValueT dA = ValueT( dst.alpha() ) * rF;
+            const ValueT dR = ValueT( dst.red()   ) * rF;
+            const ValueT dG = ValueT( dst.green() ) * rF;
+            const ValueT dB = ValueT( dst.blue()  ) * rF;
+
+            const ValueT sA = ValueT( src.alpha() ) * oF;
+            const ValueT sR = ValueT( src.red()   ) * oF;
+            const ValueT sG = ValueT( src.green() ) * oF;
+            const ValueT sB = ValueT( src.blue()  ) * oF;
+
+            dst.setAlpha( (dA + sA) >> (8*sizeof(factor)) );
+            dst.setRed  ( (dR + sR) >> (8*sizeof(factor)) );
+            dst.setGreen( (dG + sG) >> (8*sizeof(factor)) );
+            dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
+        }
+
+    } // namespace Gfx
 
 } // namespace Pt
 

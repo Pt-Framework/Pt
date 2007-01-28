@@ -235,6 +235,34 @@ namespace Pt {
 		}
 
 
+		/** @brief Convert a Color<ARgb8888> to a Color<ARgb>.
+		 */
+		inline void toARgb(Color<ARgb>& to,  const Color<ARgb8888>& from)
+		{
+			const uint16_t ta = from.alpha();
+			const uint16_t tr = from.red();
+			const uint16_t tg = from.green();
+			const uint16_t tb = from.blue();
+
+            to.setAlpha( ((ta + !!ta) << 8) - !!ta );
+            to.setRed( ((tr + !!tr) << 8) - !!tr );
+            to.setGreen( ((tg + !!tg) << 8) - !!tg );
+            to.setBlue( ((tb + !!tb) << 8) - !!tb );
+		}
+
+
+		/** @brief Convert a Color<ARgb> to a Color<ARgb8888>.
+		 */
+		inline void assign(Color<ARgb8888>& to, const Color<ARgb>& from)
+		{
+			const uint32_t val = ( uint32_t(from.alpha() & 0xFF00) << 16 ) |
+			                     ( uint32_t(from.red  () & 0xFF00) <<  8 ) |
+			                       uint32_t(from.green() & 0xFF00)         |
+			                     ( uint32_t(from.blue ()         ) >>  8 );
+			to.setValue(val);
+		}
+
+
 		/** @brief Assign an Color<ARgb8888> to an ARgbFColor.
 		 */
 		inline void assign(ARgbFColor& to, const Color<ARgb8888>& from)
