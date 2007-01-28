@@ -56,7 +56,7 @@ namespace Pt {
 		}
 
 		template <typename ColorT_, typename ColorTraitsT_>
-		InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const ImageT& src)
+				InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const InterleavedImage& src)
 		{
 			if(src.empty()) {
 				clear();

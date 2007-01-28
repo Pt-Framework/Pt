@@ -23,7 +23,7 @@
 #include <limits>
 #include <assert.h>
 
-#include <Pt/Api.h>
+#include <Pt/Gfx/Api.h>
 #include <Pt/IfElse.h>
 #include <Pt/Types.h>
 

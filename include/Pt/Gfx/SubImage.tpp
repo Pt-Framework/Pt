@@ -46,11 +46,11 @@ namespace Pt {
 
 
 		template <typename ImageT_>
-		bool SubImage<ImageT_>::operator==(const SubImageT& src)
+		bool SubImage<ImageT_>::operator==(const SubImage& src)
 		{
 			for(size_t y = 0; y < _area.height(); y++) {
 				if( memcmp(scanline(y), src.scanline(y),
-					         sizeof(SubImageT) * _area.width()) )
+					         sizeof(SubImage) * _area.width()) )
 					return false;
 			}
 			return true;
@@ -89,7 +89,7 @@ namespace Pt {
 		}
 
 		template <typename ImageT_>
-		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImageT& src)
+		SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImage& src)
 		{
 			// If the size is not the same, we need to scale it first then copy
 			if(_area.width()!=src.width() || _area.height()!=src.height()) {

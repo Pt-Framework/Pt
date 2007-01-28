@@ -50,8 +50,6 @@ namespace Pt {
 				typedef ColorT_       ColorT;
 				typedef ColorTraitsT_ ColorTraitsT;
 
-				typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
-
 				typedef ColorT*       Scanline;
 				typedef const ColorT* ConstScanline;
 
@@ -68,7 +66,7 @@ namespace Pt {
 
 				/** @brief Copy constructor.
 				 */
-				inline InterleavedImage(const ImageT& src)
+				inline InterleavedImage(const InterleavedImage& src)
 				: _width(0), _height(0)
 				{ *this = src; }
 
@@ -112,11 +110,11 @@ namespace Pt {
 
 				/** @brief Assigns a color to all pixels.
 				 */
-				ImageT& operator=(const ColorT& fill);
+				InterleavedImage& operator=(const ColorT& fill);
 
 				/** @brief Assignment operator from the same image type.
 				 */
-				ImageT& operator=(const ImageT& src);
+				InterleavedImage& operator=(const InterleavedImage& src);
 
 
 				/** @brief Raw data access.
@@ -214,6 +212,7 @@ namespace Pt {
 					public:
 						typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
 						typedef typename ImageT::ColorT                  ColorT;
+						typedef typename ImageT::ColorTraitsT            ColorTraitsT;
 
 					public:
 						inline PixelIterator()
@@ -270,6 +269,7 @@ namespace Pt {
 					public:
 						typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
 						typedef typename ImageT::ColorT                  ColorT;
+						typedef typename ImageT::ColorTraitsT            ColorTraitsT;
 
 					public:
 						inline ConstPixelIterator()

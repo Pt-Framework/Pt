@@ -71,12 +71,12 @@ namespace Pt {
 		template <typename ColorT_, typename ColorTraitsT_>
 		class InterleavedImage;
 
-		typedef InterleavedImage< ARgbColor    , ColorTraits<ARgbColor>     > ARgbInterleavedImage;
-		typedef InterleavedImage< ARgbFColor   , ColorTraits<ARgbFColor>    > ARgbFInterleavedImage;
-		typedef InterleavedImage< ARgb8888Color, ColorTraits<ARgb8888Color> > ARgb8888InterleavedImage;
-		typedef InterleavedImage< Rgb888Color  , ColorTraits<Rgb888Color >  > Rgb888InterleavedImage;
-		typedef InterleavedImage< Rgb565Color  , ColorTraits<Rgb565Color>   > Rgb565InterleavedImage;
-		typedef InterleavedImage< Rgb555Color  , ColorTraits<Rgb555Color>   > Rgb555InterleavedImage;
+		typedef InterleavedImage<ARgbColor,     ColorTraits<ARgbColor> >     ARgbInterleavedImage;
+		typedef InterleavedImage<ARgbFColor,    ColorTraits<ARgbFColor> >    ARgbFInterleavedImage;
+		typedef InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> > ARgb8888InterleavedImage;
+		typedef InterleavedImage<Rgb888Color,   ColorTraits<Rgb888Color> >   Rgb888InterleavedImage;
+		typedef InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >   Rgb565InterleavedImage;
+		typedef InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >   Rgb555InterleavedImage;
 
 
 		//
@@ -86,12 +86,12 @@ namespace Pt {
 		template <typename ImageT_>
 		class SubImage;
 
-		typedef SubImage< ARgbInterleavedImage    > ARgbInterleavedSubImage;
-		typedef SubImage< ARgbFInterleavedImage   > ARgbFInterleavedSubImage;
-		typedef SubImage< ARgb8888InterleavedImage> ARgb8888InterleavedSubImage;
-		typedef SubImage< Rgb888InterleavedImage  > Rgb888InterleavedSubImage;
-		typedef SubImage< Rgb565InterleavedImage  > Rgb565InterleavedSubImage;
-		typedef SubImage< Rgb555InterleavedImage  > Rgb555InterleavedSubImage;
+		typedef SubImage<ARgbInterleavedImage>     ARgbInterleavedSubImage;
+		typedef SubImage<ARgbFInterleavedImage>    ARgbFInterleavedSubImage;
+		typedef SubImage<ARgb8888InterleavedImage> ARgb8888InterleavedSubImage;
+		typedef SubImage<Rgb888InterleavedImage>   Rgb888InterleavedSubImage;
+		typedef SubImage<Rgb565InterleavedImage>   Rgb565InterleavedSubImage;
+		typedef SubImage<Rgb555InterleavedImage>   Rgb555InterleavedSubImage;
 
 
 		//

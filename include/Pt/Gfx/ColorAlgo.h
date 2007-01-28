@@ -65,7 +65,7 @@ namespace Pt {
 			return to;
 		}
 
-		/** @brief Make the given TagT become greyscale.
+		/** @brief Make the given Color<TagT> become greyscale.
 		 */
 		template <typename TagT> inline
 		Color<TagT>& greyscale(Color<TagT>& c)

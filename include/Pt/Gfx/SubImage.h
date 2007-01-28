@@ -34,9 +34,9 @@ namespace Pt {
 		template <typename ImageT_>
 		class SubImage {
 			public:
-				typedef typename ImageT_::ColorT ColorT;
-				typedef ImageT_                  ImageT;
-				typedef SubImage<ImageT_>        SubImageT;
+				typedef typename ImageT_::ColorT       ColorT;
+				typedef typename ImageT_::ColorTraitsT ColorTraitsT;
+				typedef ImageT_                        ImageT;
 
 				typedef ColorT*       Scanline;
 				typedef const ColorT* ConstScanline;
@@ -53,7 +53,7 @@ namespace Pt {
 
 				/** @brief Comparison based on the pixels' color values.
 				 */
-				bool operator==(const SubImageT& src);
+				bool operator==(const SubImage& src);
 
 
 				/** @brief Check if the image is empty or not.
@@ -94,11 +94,11 @@ namespace Pt {
 
 				/** @brief Fill the subimage with the given image.
 				 */
-				SubImageT& operator=(const ImageT& src);
+				SubImage& operator=(const ImageT& src);
 
 				/** @brief Fill the subimage with the given subimage.
 				 */
-				SubImageT& operator=(const SubImageT& src);
+				SubImage& operator=(const SubImage& src);
 
 
 				/** @brief Scanline access without range check.
@@ -179,17 +179,18 @@ namespace Pt {
 				 */
 				class PixelIterator {
 					public:
-						typedef typename ImageT_::ColorT ColorT;
-						typedef ImageT_                  ImageT;
+						typedef typename ImageT_::ColorT       ColorT;
+						typedef typename ImageT_::ColorTraitsT ColorTraitsT;
+						typedef ImageT_                        ImageT;
 
 					public:
-						inline PixelIterator(SubImageT& image)
+						inline PixelIterator(SubImage& image)
 						: _pixel(&image.scanline(0)[0]),
 						  _offsetX(0), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1)
 						{}
 
-						inline PixelIterator(SubImageT& image, uint x, uint y)
+						inline PixelIterator(SubImage& image, uint x, uint y)
 						: _pixel(&image.scanline(y-1)[x-1]),
 						  _offsetX(x), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1)
@@ -228,18 +229,19 @@ namespace Pt {
 				 */
 				class ConstPixelIterator {
 					public:
-						typedef typename ImageT_::ColorT ColorT;
-						typedef ImageT_                  ImageT;
+						typedef typename ImageT_::ColorT       ColorT;
+						typedef typename ImageT_::ColorTraitsT ColorTraitsT;
+						typedef ImageT_                        ImageT;
 
 					public:
-						inline ConstPixelIterator(const SubImageT& image)
+						inline ConstPixelIterator(const SubImage& image)
 						: _pixel(&image.scanline(0)[0]),
 						  _offsetX(0), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1)
 						{
 						}
 
-						inline ConstPixelIterator(const SubImageT& image, uint x, uint y)
+						inline ConstPixelIterator(const SubImage& image, uint x, uint y)
 						: _pixel(&image.scanline(y-1)[x-1]),
 						  _offsetX(x), _currentX(0), _width(image.width()),
 						  _incr(image.fullImage().width() - image.width() + 1)

@@ -22,9 +22,9 @@
 #include <Pt/Api.h>
 
 #if defined(PT_GFX_API_EXPORT)
-#    define PT_GFX_API PT_EXPORT
-#  else
-#    define PT_GFX_API PT_IMPORT
-#  endif
+#  define PT_GFX_API PT_EXPORT
+#else
+#  define PT_GFX_API PT_IMPORT
+#endif
 
 #endif
