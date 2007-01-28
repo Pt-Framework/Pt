@@ -28,15 +28,16 @@
 # Aloysius
 #
 
-ITEM P9 S5 "The color class' interface is improved"
+ITEM P9 S8 "The color class' interface is improved"
 	TASK "Remove all non-maintained color classes in the old Gfx"	blue_wind_25	2007-01-23
 	TASK "Move all Gfx2 color classes back to the original Gfx"	blue_wind_25	2007-01-24
 
-ITEM P9 S8 "The image classes' interfaces are improved"
+ITEM P9 S13 "The image classes' interfaces are improved"
 	TASK "Convert the SubImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-23
 	TASK "Move all Gfx2 image classes back to the original Gfx"	blue_wind_25	2007-01-24
+	TASK "Fix/write all important image algorithm so that they work with the new color model implementation"	blue_wind_25	2007-01-28
 
-ITEM P8 S1 "The merge of Gfx2 to Gfx is finalished"
+ITEM P8 S13 "The merge of Gfx2 to Gfx is finalished"
 	TASK "Delete the Gfx2 directory after all have been done"	blue_wind_25	2007-01-28
 
 ITEM P7 S5 "Any class is implemented"
@@ -58,9 +59,9 @@ ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
 	TASK "Look into other compiler attributes"	d-marc	2007-01-20
 
 ITEM P10 S5 "An common exception hierachy exits"
-    TASK "Review Exception.h"	blue_wind_25,d-marc	2007-01-19
-    TASK "Write Documentation"	blue_wind_25,d-marc	2007-01-19
-    TASK "Write test case"	blue_wind_25,d-marc	2007-01-19
+    TASK "Review Exception.h"	blue_wind_25, d-marc	2007-01-19
+    TASK "Write Documentation"	blue_wind_25, d-marc	2007-01-19
+    TASK "Write test case"	blue_wind_25, d-marc	2007-01-19
 
 ITEM P7 S5 "A TypeTraits class exists"
     TASK "Review TypeTraits template"	d-marc	2007-01-16
@@ -103,8 +104,8 @@ ITEM P0 S3 "All Gfx image classes accept (x,y) as coordinate"
 	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"	blue_wind_25	2006-10-04
 	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
 	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04
-	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25,d-marc	2006-11-19
-	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25,d-marc	2006-11-19
+	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25, d-marc	2006-11-19
+	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25, d-marc	2006-11-19
 
 ITEM P0 S2 "XRgb8888Color was changed to ARgb888Color"
 	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
@@ -121,7 +122,7 @@ ITEM P0 S3 "An API for byte-order conversion exists"
 	TASK "Review Byteorder.h"	blue_wind_25	2006-11-10
 	TASK "Remove swap() template function"	blue_wind_25	2006-11-10
 	TASK "Write test cases"	blue_wind_25	2006-11-10
-	TASK "Improve swabUnaligned() function"	blue_wind_25,d-marc	2006-11-19
+	TASK "Improve swabUnaligned() function"	blue_wind_25, d-marc	2006-11-19
 	TASK "Add function to swap float and double correctly"	blue_wind_25	2006-11-20
 
 ITEM P0 S3 "A SourceInfo class exits"
@@ -135,8 +136,8 @@ ITEM P0 S3 "A NonCopyable base class exits"
 
 ITEM P0 S3 "A Singleton base class exits"
 	TASK "Write test case"	blue_wind_25	2006-11-05
-	TASK "Review Singleton.h"	blue_wind_25,d-marc	2006-11-19
-	TASK "Write Documentation"	blue_wind_25,d-marc	2006-11-19
+	TASK "Review Singleton.h"	blue_wind_25, d-marc	2006-11-19
+	TASK "Write Documentation"	blue_wind_25, d-marc	2006-11-19
 
 ITEM P0 S13 "The Pt::Unit module exists"
 	TASK "Review ccpunit code"	d-marc	2006-10-24
