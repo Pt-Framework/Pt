@@ -98,6 +98,19 @@ namespace Pt {
 				inline Color& operator=(const Color& c)
 				{ _val = c._val; return *this; }
 
+                /** @brief Assignment operator.
+
+                        This assigns another color to this one by calling
+                        assign(), which can be overloaded to allow other
+                        color types to be assigned to this one,
+                */
+                template <typename ColorT>
+                inline Color<ARgb>& operator=(const ColorT& color)
+                {
+                        assign(*this, color);
+                        return *this;
+                }
+
 				/** @brief Assignment-addition operator (beware of overflow).
 				 */
 				inline Color& operator+=(const Color& c)

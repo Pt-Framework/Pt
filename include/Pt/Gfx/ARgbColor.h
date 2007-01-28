@@ -81,9 +81,9 @@ namespace Pt {
 
                 /** @brief Assignment operator.
 
-                        This assigns another color to this one by calling toARgb().
-                        toARgb() can be specialised to allow other color types
-                        to be assigne to this one,
+                        This assigns another color to this one by calling
+                        assign(), which can be overloaded to allow other
+                        color types to be assigned to this one,
                 */
                 template <typename ColorT>
                 inline Color<ARgb>& operator=(const ColorT& color)
