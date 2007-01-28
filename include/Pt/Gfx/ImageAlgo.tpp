@@ -25,8 +25,8 @@ namespace Pt {
 
 	namespace Gfx {
 
-		template <typename DstColorTagT, typename SrcColorTagT>
-		void assign(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from)
+		template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
+		void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from)
 		{
 			if(from.empty()) {
 				to.clear();

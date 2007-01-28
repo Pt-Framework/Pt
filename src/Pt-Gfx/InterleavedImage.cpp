@@ -18,13 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/ARgbFColor.h>
-#include <Pt/Gfx/ARgb8888Color.h>
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb565Color.h>
-#include <Pt/Gfx/Rgb555Color.h>
-#include <Pt/Gfx/InterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/ARgbFImage.h>
+#include <Pt/Gfx/ARgb8888Image.h>
+#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/Gfx/InterleavedImage.tpp>
 #include <Pt/Gfx/SubImage.h>
 #include <Pt/Gfx/SubImage.tpp>
@@ -37,21 +36,21 @@ namespace Pt {
 // and thus we instantiate all the interleaved image and subimage classes here
 #ifdef __GNUC__
 
-		// Explicit instantiation of the interleaved image classes
-		template class InterleavedImage<ARgb>;
-		template class InterleavedImage<ARgbF>;
-		template class InterleavedImage<ARgb8888>;
-		template class InterleavedImage<Rgb888>;
-		template class InterleavedImage<Rgb565>;
-		template class InterleavedImage<Rgb555>;
+		// Explicit instantiation of the standard interleaved image classes
+		template class InterleavedImage<ARgbColor    , ColorTraits<ARgbColor> >;
+		template class InterleavedImage<ARgbFColor   , ColorTraits<ARgbFColor> >;
+		template class InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> >;
+		template class InterleavedImage<Rgb888Color  , ColorTraits<Rgb888Color> >;
+		template class InterleavedImage<Rgb565Color  , ColorTraits<Rgb565Color> >;
+		template class InterleavedImage<Rgb555Color  , ColorTraits<Rgb555Color> >;
 
-		// Explicit instantiation of the sub image classes of the above image classes
-		template class SubImage< InterleavedImage<ARgb> >;
-		template class SubImage< InterleavedImage<ARgbF> >;
-		template class SubImage< InterleavedImage<ARgb8888> >;
-		template class SubImage< InterleavedImage<Rgb888> >;
-		template class SubImage< InterleavedImage<Rgb565> >;
-		template class SubImage< InterleavedImage<Rgb555> >;
+		// Explicit instantiation of the standard  subimage classes of the above image classes
+		template class SubImage<ARgbInterleavedImage>;
+		template class SubImage<ARgbFInterleavedImage>;
+		template class SubImage<ARgb8888InterleavedImage>;
+		template class SubImage<Rgb888InterleavedImage>;
+		template class SubImage<Rgb565InterleavedImage>;
+		template class SubImage<Rgb555InterleavedImage>;
 
 #endif
 

@@ -32,15 +32,15 @@ namespace Pt {
 		 *  An image classes implementor should specialize this function as needed if
 		 *  faster implementation for the two classes is exist.
 		 */
-		template <typename DstColorTagT, typename SrcColorTagT>
-		void assign(InterleavedImage<DstColorTagT>& to, const InterleavedImage<SrcColorTagT>& from);
+		template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
+		void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from);
 
 		/** @brief Partial specialization of assign() if both the color models are the same.
 		 *
 		 *  This function will just copy the value from the source to the destiantion.
 		 */
-		template <typename ColorTagT> inline
-		void assign(InterleavedImage<ColorTagT>& to, const InterleavedImage<ColorTagT>& from)
+		template <typename ColorT, typename ColorTraitsT> inline
+		void assign(InterleavedImage<ColorT, ColorTraitsT>& to, const InterleavedImage<ColorT, ColorTraitsT>& from)
 		{ to = from; }
 
 
@@ -111,8 +111,8 @@ namespace Pt {
 		 *  @param newWidth  Wanted width of the destination image
 		 *  @param newHeight Wanted height of the destination image
 		 */
-		template <typename DstColorTagT, typename SrcColorTagT> inline
-		void blockScale(const InterleavedImage<SrcColorTagT>& from, InterleavedImage<DstColorTagT>& to,
+		template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT> inline
+		void blockScale(const InterleavedImage<SrcColorT, SrcColorTraitsT>& from, InterleavedImage<DstColorT, DstColorTraitsT>& to,
 		                uint newWidth, uint newHeight)
 		{
 			to.resize(newWidth, newHeight);

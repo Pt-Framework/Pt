@@ -53,6 +53,9 @@ namespace Pt {
 		template <typename TagT>
 		class Color;
 
+		template <typename ColorT>
+		struct ColorTraits;
+
 		typedef Color<ARgb>     ARgbColor;
 		typedef Color<ARgbF>    ARgbFColor;
 		typedef Color<ARgb8888> ARgb8888Color;
@@ -62,33 +65,33 @@ namespace Pt {
 
 
 		//
-		// Foward declarations of interleaved image classes
+		// Foward declarations of standards interleaved image classes
 		//
 
-		template <typename ColorTagT>
+		template <typename ColorT_, typename ColorTraitsT_>
 		class InterleavedImage;
 
-		typedef InterleavedImage<ARgb>     ARgbInterleavedImage;
-		typedef InterleavedImage<ARgbF>    ARgbFInterleavedImage;
-		typedef InterleavedImage<ARgb8888> ARgb8888InterleavedImage;
-		typedef InterleavedImage<Rgb888>   Rgb888InterleavedImage;
-		typedef InterleavedImage<Rgb565>   Rgb565InterleavedImage;
-		typedef InterleavedImage<Rgb555>   Rgb555InterleavedImage;
+		typedef InterleavedImage< ARgbColor    , ColorTraits<ARgbColor>     > ARgbInterleavedImage;
+		typedef InterleavedImage< ARgbFColor   , ColorTraits<ARgbFColor>    > ARgbFInterleavedImage;
+		typedef InterleavedImage< ARgb8888Color, ColorTraits<ARgb8888Color> > ARgb8888InterleavedImage;
+		typedef InterleavedImage< Rgb888Color  , ColorTraits<Rgb888Color >  > Rgb888InterleavedImage;
+		typedef InterleavedImage< Rgb565Color  , ColorTraits<Rgb565Color>   > Rgb565InterleavedImage;
+		typedef InterleavedImage< Rgb555Color  , ColorTraits<Rgb555Color>   > Rgb555InterleavedImage;
 
 
 		//
-		// Foward declarations of interleaved subimage classes
+		// Foward declarations of standards interleaved subimage classes
 		//
 
 		template <typename ImageT_>
 		class SubImage;
 
-		typedef SubImage< InterleavedImage<ARgb> >     ARgbInterleavedSubImage;
-		typedef SubImage< InterleavedImage<ARgbF> >    ARgbFInterleavedSubImage;
-		typedef SubImage< InterleavedImage<ARgb8888> > ARgb8888InterleavedSubImage;
-		typedef SubImage< InterleavedImage<Rgb888> >   Rgb888InterleavedSubImage;
-		typedef SubImage< InterleavedImage<Rgb565> >   Rgb565InterleavedSubImage;
-		typedef SubImage< InterleavedImage<Rgb555> >   Rgb555InterleavedSubImage;
+		typedef SubImage< ARgbInterleavedImage    > ARgbInterleavedSubImage;
+		typedef SubImage< ARgbFInterleavedImage   > ARgbFInterleavedSubImage;
+		typedef SubImage< ARgb8888InterleavedImage> ARgb8888InterleavedSubImage;
+		typedef SubImage< Rgb888InterleavedImage  > Rgb888InterleavedSubImage;
+		typedef SubImage< Rgb565InterleavedImage  > Rgb565InterleavedSubImage;
+		typedef SubImage< Rgb555InterleavedImage  > Rgb555InterleavedSubImage;
 
 
 		//

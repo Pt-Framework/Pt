@@ -28,18 +28,18 @@
 namespace Pt {
 	namespace Gfx {
 
-		/** @brief Interleaved ARgb image class.
+		/** @brief Standard interleaved ARgb image class.
 		 *
 		 *  <B>This is the master interleaved image model</B>
 		 */
-		typedef InterleavedImage<ARgb> ARgbInterleavedImage;
+		typedef InterleavedImage< ARgbColor, ColorTraits<ARgbColor> > ARgbInterleavedImage;
 
 
-		/** @brief Interleaved ARgb subimage class.
+		/** @brief Standard interleaved ARgb subimage class.
 		 *
 		 *  <B>This is the master interleaved subimage model</B>
 		 */
-		typedef SubImage< InterleavedImage<ARgb> >     ARgbInterleavedSubImage;
+		typedef SubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
 
 
 		//

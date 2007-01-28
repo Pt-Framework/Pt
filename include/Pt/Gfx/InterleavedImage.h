@@ -41,14 +41,16 @@ namespace Pt {
 		 *      color planes (blocks of memory). One block to the other blocks may or
 		 *      may not be in contiguous memory address.
 		 *
-		 *  This InterleavedImage<ColorTagT> class is meant to be used for implementing
-		 *  interleaved images.
+		 *  This InterleavedImage<typename ColorT, typename ColorTraitsT> class is
+		 *  meant to be used for implementing interleaved images.
 		 */
-		template <typename ColorTagT>
+		template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
 		class InterleavedImage {
 			public:
-				typedef Color<ColorTagT>            ColorT;
-				typedef InterleavedImage<ColorTagT> ImageT;
+				typedef ColorT_       ColorT;
+				typedef ColorTraitsT_ ColorTraitsT;
+
+				typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
 
 				typedef ColorT*       Scanline;
 				typedef const ColorT* ConstScanline;
@@ -210,15 +212,15 @@ namespace Pt {
 				class PixelIterator
 				{
 					public:
-						typedef InterleavedImage<ColorTagT> ImageT;
-						typedef typename ImageT::ColorT     ColorT;
+						typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
+						typedef typename ImageT::ColorT                  ColorT;
 
 					public:
 						inline PixelIterator()
 						 : _image( 0 )
 						 , _pixel( 0 )
 						{ }
-						
+
 						inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
 						: _image(&image), _pixel(&image.scanline(y)[x])
 						{}
@@ -266,8 +268,8 @@ namespace Pt {
 				class ConstPixelIterator
 				{
 					public:
-						typedef InterleavedImage<ColorTagT> ImageT;
-						typedef typename ImageT::ColorT     ColorT;
+						typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
+						typedef typename ImageT::ColorT                  ColorT;
 
 					public:
 						inline ConstPixelIterator()
