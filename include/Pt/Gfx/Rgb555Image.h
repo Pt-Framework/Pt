@@ -30,7 +30,7 @@ namespace Pt {
 
 		/** @brief Standard interleaved Rgb555 image class.
 		 */
-		typedef InterleavedImage< Rgb555Color, ColorTraits< Rgb555Color > > Rgb555InterleavedImage;
+		typedef InterleavedImage<Rgb555Color, ColorTraits<Rgb555Color> > Rgb555InterleavedImage;
 
 
 		/** @brief Standard interleaved Rgb555 subimage class.
