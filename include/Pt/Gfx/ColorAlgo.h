@@ -20,8 +20,6 @@
 #ifndef Pt_Gfx_ColorAlgo_h
 #define Pt_Gfx_ColorAlgo_h
 
-#include <Pt/Gfx/BasicAlgo.h>
-
 
 namespace Pt {
 

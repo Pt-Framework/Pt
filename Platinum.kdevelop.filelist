@@ -127,3 +127,12 @@ include/Pt/Gfx/Region.h
 include/Pt/Gfx/ARgb8888Image.h
 include/Pt/Gfx/ARgb8888Color.h
 include/Pt/Gfx/Api.h
+include/Pt/Gfx/ARgbFColor.h
+include/Pt/Gfx/ARgbFImage.h
+include/Pt/Gfx/Color.h
+include/Pt/Gfx/InterleavedImage.h
+include/Pt/Gfx/InterleavedImage.tpp
+include/Pt/Gfx/Rgb555Color.h
+include/Pt/Gfx/Rgb555Image.h
+include/Pt/Gfx/Rgb888Color.h
+include/Pt/Gfx/Rgb888Image.h
