@@ -17,10 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbInterleavedImage_h
-#define Pt_Gfx_ARgbInterleavedImage_h
+#ifndef Pt_Gfx_Rgb555Image_h
+#define Pt_Gfx_Rgb555Image_h
 
-#include <Pt/Gfx/ARgbFColor.h>
+#include <Pt/Gfx/Rgb555Color.h>
 #include <Pt/Gfx/InterleavedImage.h>
 #include <Pt/Gfx/SubImage.h>
 
@@ -28,26 +28,22 @@
 namespace Pt {
 	namespace Gfx {
 
-		/** @brief Interleaved ARgb image class.
-		 *
-		 *  <B>This is the master interleaved image model</B>
+		/** @brief Interleaved Rgb555 image class.
 		 */
-		typedef InterleavedImage<ARgb> ARgbInterleavedImage;
+		typedef InterleavedImage<Rgb555> Rgb555InterleavedImage;
 
 
-		/** @brief Interleaved ARgb subimage class.
-		 *
-		 *  <B>This is the master interleaved subimage model</B>
+		/** @brief Interleaved Rgb555 subimage class.
 		 */
-		typedef SubImage< InterleavedImage<ARgb> >     ARgbInterleavedSubImage;
+		typedef SubImage< InterleavedImage<Rgb555> > Rgb555InterleavedSubImage;
 
 
 		//
 		// Interleaved images and subimages will be the most used types
 		// and so typedefs them for convenience
 		//
-		typedef ARgbInterleavedImage    ARgbImage;
-		typedef ARgbInterleavedSubImage ARgbSubImage;
+		typedef Rgb555InterleavedImage    Rgb555Image;
+		typedef Rgb555InterleavedSubImage Rgb555SubImage;
 
 	}
 }

@@ -6,8 +6,7 @@
 #define Ptv_Gui_ImageButton_h
 
 #include <Pt/Text/String.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gui/Pixmap.h>
 #include <Pt/Gui/Widget.h>
 

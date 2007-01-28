@@ -24,8 +24,7 @@
 #include <memory>
 #include <Pt/Text/String.h>
 
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>

@@ -22,8 +22,7 @@
 
 #include <Pt/SmartPtr.h>
 
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 
 
 namespace Pt {

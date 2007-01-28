@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbFInterleavedImage_h
-#define Pt_Gfx_ARgbFInterleavedImage_h
+#ifndef Pt_Gfx_ARgbFImage_h
+#define Pt_Gfx_ARgbFImage_h
 
 #include <Pt/Gfx/ARgbFColor.h>
 #include <Pt/Gfx/InterleavedImage.h>

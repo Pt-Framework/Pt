@@ -23,9 +23,8 @@
 #include FT_GLYPH_H
 
 #include "Vera.h"
-#include "Pt/Gfx/Gfx.h"
 #include "Pt/Gfx/ImagePainter.h"
-#include "Pt/Gfx/ARgbInterleavedImage.h"
+#include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Gfx/Brush.h"
@@ -157,7 +156,7 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 
     //_drawLine->draw( _image, _pen, from, to );
     std::vector<Pt::Math::Point> points;
-    
+
     points.push_back( from );
     points.push_back( to );
     //_drawPolyline->draw( _image, _pen, points );

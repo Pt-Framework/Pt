@@ -32,15 +32,14 @@
 #undef Below
 
 #include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
-#include <Pt/Gfx/Rgb888InterleavedImage.h>
-#include <Pt/Gfx/Rgb565InterleavedImage.h>
-#include <Pt/Gfx/Rgb555InterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Text/String.h>
 
@@ -166,7 +165,7 @@ namespace Gui {
 			_XftDraw* _xftDraw;
 			_XftFont* _xftFont;
 			std::list<std::string> _fontList;
-			
+
 			mutable std::stringstream    _stringStream;
 			mutable Pt::Text::TextStream _textStream;
 	};

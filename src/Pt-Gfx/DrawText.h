@@ -26,8 +26,7 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
-#include "Pt/Gfx/Gfx.h"
-#include "Pt/Gfx/ARgbInterleavedImage.h"
+#include <Pt/Gfx/ARgbImage.h>
 #include "Pt/Math/Point.h"
 #include "Pt/Text/String.h"
 #include "Pt/Gfx/ARgbColor.h"
@@ -159,7 +158,7 @@ class DrawText
 
         FT_Library		_ft;
         FT_Matrix		_matrix;
-        FTC_Manager		_manager;	
+        FTC_Manager		_manager;
         FTC_ImageCache  _imageChace;
         FT_Size			_size;
         FTC_CMapCache	_charMapCache;

@@ -21,8 +21,7 @@
 //#include <ctime>
 
 #include <Pt/Main.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Algorithm.h>
 
 

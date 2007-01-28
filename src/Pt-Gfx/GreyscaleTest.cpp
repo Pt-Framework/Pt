@@ -17,8 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Main.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbInterleavedImage.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Algorithm.h>
 
 #include <vector>
