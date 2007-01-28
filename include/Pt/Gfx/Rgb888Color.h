@@ -32,6 +32,7 @@ namespace Pt {
 		struct Rgb888 {};
 
 
+#pragma pack(push, 1)
 		/** @brief Packed 32-bit RGB color class.
 		 *  @ingroup Gfx
 		 *
@@ -47,7 +48,7 @@ namespace Pt {
 		 *  </TABLE>
 		 */
 		template <>
-		class PT_PACKED Color<Rgb888> {
+		class PT_GFX_API Color<Rgb888> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
@@ -160,6 +161,7 @@ namespace Pt {
 			protected:
 				uint32_t _val;
 		};
+#pragma pack(pop)
 
 
 		/** @brief Convenience access to the 32-Bit ARGB color model.

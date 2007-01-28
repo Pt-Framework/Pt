@@ -32,6 +32,7 @@ namespace Pt {
 		struct ARgbF {};
 
 
+#pragma pack(push, 1)
 		/** @brief Floated ARGB color class.
 		 *  @ingroup Gfx
 		 *
@@ -51,7 +52,7 @@ namespace Pt {
 		 *  to use this color model to minimize rounding error propagation.
 		 */
 		template <>
-		class PT_PACKED Color<ARgbF> {
+		class PT_GFX_API Color<ARgbF> {
 			public:
 				/** @brief The default constructor, will generate the default color (black).
 				 */
@@ -138,6 +139,7 @@ namespace Pt {
 			protected:
 				float _a, _r, _g, _b;
 		};
+#pragma pack(pop)
 
 
 		/** @brief Convenience access to the Floated ARGB color model.

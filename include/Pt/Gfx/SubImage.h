@@ -32,7 +32,7 @@ namespace Pt {
 		 *  @ingroup Gfx
 		 */
 		template <typename ImageT_>
-		class SubImage {
+		class PT_GFX_API SubImage {
 			public:
 				typedef typename ImageT_::ColorT       ColorT;
 				typedef typename ImageT_::ColorTraitsT ColorTraitsT;

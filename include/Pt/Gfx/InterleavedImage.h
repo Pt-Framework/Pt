@@ -45,7 +45,7 @@ namespace Pt {
 		 *  meant to be used for implementing interleaved images.
 		 */
 		template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
-		class InterleavedImage {
+		class PT_GFX_API InterleavedImage {
 			public:
 				typedef ColorT_       ColorT;
 				typedef ColorTraitsT_ ColorTraitsT;
