@@ -27,6 +27,12 @@ namespace Pt {
 
 	namespace Gfx {
 
+        template <typename InIteratorT, typename OutIteratorT>
+        void assignImage(InIteratorT begin, InIteratorT end, OutIteratorT to)
+        {
+            // TODO
+        }
+
 		/** @brief Assign an image to another image with a different color model.
 		 *
 		 *  An image classes implementor should specialize this function as needed if
