@@ -105,13 +105,21 @@ ITEM P0 S13 "The Db module has a oracle driver"
 
 ITEM P0 S13 "The Db module has a odbc driver"
 
+ITEM P0 S13 "The IOError class is removed"
+    TASK "Remove IOError class"
+    TASK "Replace IOError with ios_base::failure"
+
+ITEM P0 S13 "The IODevice class is implemented"
+    TASK "Remove async IO stuff"
+    TASK "Replace IODevice flags with std::ios flags"
+
+ITEM P0 S13 "The IOManager supports async IO"
+    TASK "Implement async IO as special stream type"
+
 ITEM P0 S13 "The system module supports WinCE and QNX"
 	TASK "Update changes from ppr"
 	TASK "Write Documentation"
 	TASK "Write test case"
-
-ITEM P0 S13 "The IODevice class is implemented"
-    TASK "Remove async IO stuff"
 
 ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
 	TASK "Implement the helper application so that we won't need to edit the text files manually"
