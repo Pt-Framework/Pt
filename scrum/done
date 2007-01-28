@@ -12,7 +12,7 @@
 #
 # One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
 #
-# In the (near) future when we want to have a front-end for this SCRUM files or
+# In the (near) future when we want to have a front-end for these SCRUM files or
 # want to display their contents in our web, we must write a parser for the files.
 # So, please ensure that the formatting is correct so that we won't get any problem
 # when we want to parse the files later.
@@ -28,13 +28,16 @@
 # Aloysius
 #
 
-ITEM P9 S8 "The color class' interface is improved"
+ITEM P9 S5 "The color class' interface is improved"
 	TASK "Remove all non-maintained color classes in the old Gfx"	blue_wind_25	2007-01-23
 	TASK "Move all Gfx2 color classes back to the original Gfx"	blue_wind_25	2007-01-24
 
-ITEM P9 S13 "The image classes' interfaces are improved"
+ITEM P9 S8 "The image classes' interfaces are improved"
 	TASK "Convert the SubImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-23
 	TASK "Move all Gfx2 image classes back to the original Gfx"	blue_wind_25	2007-01-24
+
+ITEM P8 S1 "The merge of Gfx2 to Gfx is finalished"
+	TASK "Delete the Gfx2 directory after all have been done"	blue_wind_25	2007-01-28
 
 ITEM P7 S5 "Any class is implemented"
 	TASK "Review code"	d-marc	2007-01-21

@@ -6,7 +6,6 @@ SubInclude TOP src Pt-System ;
 SubInclude TOP src Pt-Net ;
 SubInclude TOP src Pt-Db ;
 SubInclude TOP src Pt-Gfx ;
-SubInclude TOP src Pt-Gfx2 ;
 SubInclude TOP src Pt-Gui ;
 SubInclude TOP src Pt-Text ;
 

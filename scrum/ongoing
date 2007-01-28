@@ -12,7 +12,7 @@
 #
 # One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
 #
-# In the (near) future when we want to have a front-end for this SCRUM files or
+# In the (near) future when we want to have a front-end for these SCRUM files or
 # want to display their contents in our web, we must write a parser for the files.
 # So, please ensure that the formatting is correct so that we won't get any problem
 # when we want to parse the files later.
@@ -21,13 +21,12 @@
 # Aloysius
 #
 
-ITEM P9 S8 "The color class' interface is improved"
+ITEM P9 S3 "The color class' interface is improved"
 	TASK "Make brightness a free function"	blue_wind_25
 
-ITEM P9 S13 "The image classes' interfaces are improved"
+ITEM P9 S5 "The image classes' interfaces are improved"
 	TASK "Fix/write all important image algorithm so that they work with the new color model implementation"	blue_wind_25
 
-ITEM P8 S5 "The merge of Gfx2 to Gfx is finalished"
+ITEM P8 S8 "The merge of Gfx2 to Gfx is finalished"
 	TASK "Make sure that all are well merged correctly"	blue_wind_25
 	TASK "Perform code cleanups"	blue_wind_25
-	TASK "Delete the Gfx2 directory after all have been done"	blue_wind_25

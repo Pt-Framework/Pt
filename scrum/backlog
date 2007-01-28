@@ -12,7 +12,7 @@
 #
 # One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
 #
-# In the (near) future when we want to have a front-end for this SCRUM files or
+# In the (near) future when we want to have a front-end for these SCRUM files or
 # want to display their contents in our web, we must write a parser for the files.
 # So, please ensure that the formatting is correct so that we won't get any problem
 # when we want to parse the files later.
