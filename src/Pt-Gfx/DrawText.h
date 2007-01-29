@@ -92,9 +92,8 @@ class DrawText
         void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
 
     private:
-        void drawGlyph( ARgbImage& image, const ARgbColor& color,  int xpos, int ypos, FTC_SBit& bm )
+        void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer ) 
         {
-            int							bmPitch = bm->pitch;
             Pt::uint32_t				yOffset = 0;
             int							dsy		= ypos;
             int							dsx		= 0;
@@ -102,10 +101,10 @@ class DrawText
             const Pt::ssize_t			y2		= image.height() - 1;
             ARgbImage::PixelIterator	pixel;
 
-            if( bmPitch < bm->width )
-                bmPitch += bm->width;
+            if( bmPitch < width )
+                bmPitch += width;
 
-            for( Pt::int32_t y = 0; y < bm->height; ++y, ++dsy )
+            for( Pt::int32_t y = 0; y < height; ++y, ++dsy )
             {
                 yOffset = y * bmPitch;
 
@@ -115,27 +114,26 @@ class DrawText
                 if( dsy > y2 )
                     break;
 
-                dsx		= xpos;
+				dsx		= xpos;
                 pixel   = image.iterator( dsx, dsy );
 
-                for( Pt::int32_t x = 0; x < bm->width; ++x, ++dsx )
+                for( Pt::int32_t x = 0; x < width; ++x, ++dsx, ++pixel )
                 {
                     if( dsx < 0 )
                         continue;
-
+                     
                     if( dsx > x2 )
                         break;
 
                     const int px = yOffset + x ;
 
-                    if( bm->buffer[ px ] )
-                        mixColor( *pixel, color, bm->buffer[ px ] );
+                    if( buffer[ px ] )
+                        mixColor( *pixel, color, buffer[ px ] );
 
-                    ++pixel;
                 }
             }
         }
-
+        
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
              const uint32_t oF = factor;
@@ -164,6 +162,7 @@ class DrawText
         FTC_CMapCache	_charMapCache;
         FTC_SBitCache	_bitmapCache;
         size_t			_fontSize;
+        Pt::ssize_t		_fontAngle;
 };
 
 } //namespace Gfx

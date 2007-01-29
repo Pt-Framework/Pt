@@ -42,6 +42,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 	ImagePainterDemo()
 	: _image( )
 	, _imagePainter( _image )
+	, _angle( -450 )
 	{
 		this->setTitle(L"ImagePainterDemo");
 	}
@@ -71,13 +72,13 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 
 
-		Pt::Gfx::ARgbColor outline( 0, 0, 0xffff );
-		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 18 /*,Pt::Gfx::Font::NormalStyle, 450*/ ));
+		Pt::Gfx::ARgbColor outline( 0xffff, 0xffff, 0xffff );
+		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 18 ,Pt::Gfx::Font::NormalStyle, _angle ));
         Pt::System::TimeValue time;
         Pt::System::Clock clock;
 
         clock.start();
-		_imagePainter.drawText( Pt::Math::Point(10, 100), L"Hello PTV1!" );
+		_imagePainter.drawText( Pt::Math::Point(10, 100), L"Hallo PTV!", &outline );
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
@@ -121,12 +122,15 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		
 		
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
-		painter().setFont(Pt::Gfx::Font( "Vera", 18));
+		painter().setFont(Pt::Gfx::Font( "Tahoma", 18, Pt::Gfx::Font::NormalStyle, _angle));
+		
+		_angle += 10;
+			
 
 		Pt::System::TimeValue time2;
 		Pt::System::Clock clock2;
 		clock2.start();
-		painter().drawText(Pt::Math::Point(10, 130), L"Hello PTV2!" );
+		painter().drawText(Pt::Math::Point(10, 130), L"Hallo PTV!" );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
 		
@@ -160,12 +164,13 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
 	{
-		_image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) );
+		_image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
 	}
 
 private:
 	Pt::Gfx::ARgbImage		_image;
 	Pt::Gfx::ImagePainter	_imagePainter;
+	Pt::ssize_t				_angle;
 };
 
 

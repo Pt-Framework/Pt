@@ -27,7 +27,8 @@ Library Pt-Gfx-freetype :
 	cache/ftcache.c
 	gzip/ftgzip.c
 	lzw/ftlzw.c
-	smooth/smooth.c
+	smooth/ftsmooth.c
+	smooth/ftgrays.c
 	pcf/pcf.c
 	pfr/pfr.c
 	psaux/psaux.c
