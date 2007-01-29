@@ -22,6 +22,8 @@ Library Pt-Gfx-freetype :
 	base/ftsynth.c
 	base/fttype1.c
 	base/ftwinfnt.c
+	base/ftlcdfil.c
+	base/ftgasp.c
 	cache/ftcache.c
 	gzip/ftgzip.c
 	lzw/ftlzw.c
