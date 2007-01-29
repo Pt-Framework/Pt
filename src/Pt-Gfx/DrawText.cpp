@@ -58,30 +58,27 @@ DrawText::~DrawText()
 
 FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface )
 {
-//    FT_Error error = FT_New_Memory_Face( library, vera, veraSize, 0, aface );
+    FT_Error error = FT_New_Memory_Face( library, vera, veraSize, 0, aface );
 
-     FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
-     FT_Attach_File( *aface, "c:\\WINDOWS\\fonts\\tahoma" );
-     
-/*    if( FT_Select_Charmap( _face, FT_ENCODING_UNICODE ) )
-        FT_Select_Charmap( _face, FT_ENCODING_NONE );  */   
+/*     FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
+     FT_Attach_File( *aface, "c:\\WINDOWS\\fonts\\tahoma" );*/
 
 	return error;
 }
 
 void DrawText::setFont( const Font& font )
 {
-    // Devide size by 64 because free type works with 1/64 pixel.
-	_fontSize = font.size();
+	_fontSize  = font.size();
 	_fontAngle = font.angle();
 
     //Setup the rotation matrix
-    double angle = ( _fontAngle / 36000.0 ) * 3.14159 * 2 ;
-
+    const double pi2 = 3.1415926535 * 2;     
+    const double angle = ( _fontAngle / 3600.0 ) * pi2;
+    
     _matrix.xx = (FT_Fixed) ( cos( angle ) * 0x10000L );
     _matrix.xy = (FT_Fixed) ( -sin( angle )* 0x10000L );
     _matrix.yx = (FT_Fixed) ( sin( angle ) * 0x10000L );
-    _matrix.yy = (FT_Fixed) ( cos( angle ) * 0x10000L );
+    _matrix.yy = (FT_Fixed) ( cos( angle ) * 0x10000L );   
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )
@@ -93,16 +90,12 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
     FT_Vector       delta;
     FT_Glyph        glyph;
     FT_BBox         gbbox = {0,0,0,0};
-    FT_BBox         tbbox = {100000,100000,-100000,-100000};
+    FT_BBox         tbbox = { 100000, 100000, -100000, -100000 };
     FTC_Node        node;
     FT_UInt			glyph_index;
 
-    FTC_ImageTypeRec	imageType;
-    imageType.face_id	= 0;
-    imageType.width		= _fontSize;
-    imageType.height	= _fontSize;
-    imageType.flags		= FT_RENDER_MODE_NORMAL;
-
+    FTC_ImageTypeRec	imageType = { 0, _fontSize, _fontSize, FT_RENDER_MODE_NORMAL };
+    
     int pen_x = 0;
     int pen_y = 0;
 
@@ -123,8 +116,8 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
         if(  FTC_ImageCache_Lookup( _imageChace, &imageType, glyph_index, &glyph, &node ) )
             continue;
 
-        const int incX = ( glyph->advance.x >> 6 ) / 1000;
-        const int incY = glyph->advance.y >> 6;
+        const int incX = ( glyph->advance.x >> 6 ) / 1024;
+        const int incY = ( glyph->advance.y >> 6 ) / 1024;
 
         FT_Glyph_Get_CBox( glyph, FT_GLYPH_BBOX_PIXELS, &gbbox );
 
@@ -172,7 +165,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
 
     for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        glyph_index = FTC_CMapCache_Lookup(  _charMapCache,  0, 0,  it->value() );
+        glyph_index = FTC_CMapCache_Lookup(  _charMapCache,  0, 1 , it->value());
         
         if( !glyph_index )
             continue;
@@ -180,8 +173,9 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
         if( FT_HAS_KERNING( face ) && previous )
         {
             FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            glyphPos.x += ( delta.x >> 6);
-            glyphPos.y -= ( delta.y >> 6);
+            
+			glyphPos.x += ( delta.x >> 6);
+			glyphPos.y -= ( delta.y >> 6);
         }
 		
         if( false  == it->isSpace() )
@@ -205,12 +199,15 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
 		        FTC_ImageCache_Lookup( _imageChace, &imageType, glyph_index, &glyph, &node ) ;
 		        
 				FT_Glyph_Copy( glyph, &glyphCopy );
+				
 				FT_Glyph_Transform( glyphCopy, &_matrix, 0 );
 				FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1 );
 				
-				glyphBitmap = (FT_BitmapGlyph) glyphCopy;     				
-				incX		= ( glyphCopy->advance.x >> 6 ) / 1024;
-				incY		= ( glyphCopy->advance.y >> 6 ) / 1024;
+				glyphBitmap = (FT_BitmapGlyph) glyphCopy;     			
+				
+				incX		= ( glyphCopy->advance.x >> 16);
+				incY		= ( glyphCopy->advance.y >> 16);
+		
 	            left		= glyphPos.x + glyphBitmap->left;
 		        top			= glyphPos.y - glyphBitmap->top;
 		        pitch		= glyphBitmap->bitmap.pitch;
