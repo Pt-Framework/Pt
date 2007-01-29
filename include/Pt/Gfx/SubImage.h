@@ -32,7 +32,7 @@ namespace Pt {
 		 *  @ingroup Gfx
 		 */
 		template <typename ImageT_>
-		class PT_GFX_API SubImage {
+		class /*PT_GFX_API*/ SubImage {
 			public:
 				typedef typename ImageT_::ColorT       ColorT;
 				typedef typename ImageT_::ColorTraitsT ColorTraitsT;
@@ -282,11 +282,6 @@ namespace Pt {
 
 } // namespace Pt
 
-
-// With GCC we should be able to use explicit template instantiation correctly
-// and thus including this file is not needed
-#ifndef __GNUC__
 #include "SubImage.tpp"
-#endif
 
 #endif
