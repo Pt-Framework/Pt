@@ -53,13 +53,6 @@ namespace Math {
                 m_x = entPt.z - startPt.z;
             }
 
-            BasicVector3d(const BasicPoint3d& point)
-            {
-                m_x = point.m_x;
-                m_y = point.m_y;
-                m_z = point.m_z;
-            }
-
             void set(const BasicPoint3d& startPt, const BasicPoint3d& endPt)
             {
                 m_x = entPt.x - startPt.x;
@@ -67,21 +60,7 @@ namespace Math {
                 m_x = entPt.z - startPt.z;
             }
 
-            void set(const BasicPoint3d& point)
-            {
-                m_x = point.m_x;
-                m_y = point.m_y;
-                m_z = point.m_z;
-            }
 */
-
-            void set(const T& x, const T& y, const T& z)
-            {
-                this->m_x = x;
-                this->m_y = y;
-                this->m_z = z;
-            }
-
 
             void normalize()
             {
@@ -236,7 +215,13 @@ namespace Math {
             {
                 this->m_z = z;
             }
-
+            
+            void set(const T& x, const T& y, const T& z)
+            {
+                this->m_x = x;
+                this->m_y = y;
+                this->m_z = z;
+            }
 
         protected:
             T m_x;
