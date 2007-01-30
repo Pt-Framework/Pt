@@ -82,6 +82,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 		Pt::Gfx::FontMetrics metrics =  _imagePainter.fontMetrics( text );
 				
+		clock.start();
   		_imagePainter.drawText( Pt::Math::Point(100, 500), text );
 		time = clock.stop();
 

@@ -26,6 +26,7 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
+#include "FreeType.h"
 #include <Pt/Gfx/ARgbImage.h>
 #include "Pt/Math/Point.h"
 #include "Pt/Text/String.h"
@@ -42,10 +43,6 @@ namespace Gfx{
     This class is a function object to draw text on an image. Additionally,
     text metrics can be determined for given strings.
     TODO:
-    + Kerning for outline fonts
-    + Angle bug fixing
-    + Find a better solution for outline font
-    + Implemeting of a glyph cache
     + Optimize glyph bitmap clipping ( use ClippRect )
  */
 class DrawText
@@ -83,13 +80,12 @@ class DrawText
             before the text is drawn.
 
 			@param image The target image
-			@param font The text font
             @param color The text color
             @param pos The position to draw
             @param text The text to draw
-            @param outline The outline color
+            @param background The background color of the font
         */
-        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* outline = 0 );
+        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* background = 0 );
 
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer ) 
@@ -151,18 +147,21 @@ class DrawText
              dst.setGreen( (dG + sG) >> 8);
              dst.setBlue ( (dB + sB) >> 8);
         }
-
-        static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
-
-        FT_Library		_ft;
-        FT_Matrix		_matrix;
-        FTC_Manager		_manager;
-        FTC_ImageCache  _imageChace;
-        FT_Size			_size;
-        FTC_CMapCache	_charMapCache;
-        FTC_SBitCache	_bitmapCache;
-        size_t			_fontSize;
-        Pt::ssize_t		_fontAngle;
+        
+        inline FTC_FaceID faceId() const
+        { return (FTC_FaceID) &_faceId ; }
+        
+		static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
+		
+        FT_Matrix			_matrix;
+        FTC_Manager			_manager;
+        FTC_ImageCache		_imageChace;
+        FTC_CMapCache		_charMapCache;
+        FTC_SBitCache		_bitmapCache;
+        Pt::ssize_t			_fontAngle;
+        FTC_ImageTypeRec	_imageType;
+        size_t				_faceId;
+        size_t				_charMapId;
 };
 
 } //namespace Gfx

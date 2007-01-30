@@ -26,6 +26,8 @@ SharedLibrary Pt-Gfx :
 	FillPolygon.cpp
 	ClipPolygon.cpp
 	FillConvexPolygon.cpp
+	FreeType.cpp
+	Exception.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;
