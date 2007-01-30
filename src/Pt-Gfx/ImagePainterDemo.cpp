@@ -67,7 +67,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		polygon.push_back( Pt::Math::Point( -50, -50 ));
 		polygon.push_back( Pt::Math::Point( 50, -50 ));
 		polygon.push_back( Pt::Math::Point( 50, 100 ));
-		polygon.push_back( Pt::Math::Point( -50, 100 )); 
+		polygon.push_back( Pt::Math::Point( -50, 100 ));
 */
 
 
@@ -78,25 +78,25 @@ class ImagePainterDemo : public Pt::Gui::Widget
         Pt::System::Clock clock;
 
         clock.start();
-		_imagePainter.drawText( Pt::Math::Point(200, 100), L"Hällöchen PTV!", &outline );
+		_imagePainter.drawText( Pt::Math::Point(200, 100), L"Hello PTV!", &outline );
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
 
 
-/*		
+/*
 		_imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
 		_imagePainter.fillPolygon( &polygon[0], polygon.size() );
-		
+
 		_imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0,0,0xffff) ));
-		
+
 		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 10, 10 ));
 //		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 75, 10 ));
 		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 10 ));
 		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 60, 10 ));
 		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 60 ));
 		_imagePainter.drawLine( Pt::Math::Point( 10, 100 ), Pt::Math::Point( 100, 100 ));
-		
+
 
 		_imagePainter.setPen( Pt::Gfx::Pen( 10, Pt::Gfx::ARgbColor(0xffff,0 ,0) ) );
 
@@ -119,27 +119,27 @@ class ImagePainterDemo : public Pt::Gui::Widget
 */
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
-		
-		
+
+
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 		painter().setFont(Pt::Gfx::Font( "Tahoma", 12, Pt::Gfx::Font::NormalStyle, _angle));
-		
+
 		_angle += 10;
 		if( _angle >= 3600 )
 			_angle = 0;
-			
-			
+
+
 
 		Pt::System::TimeValue time2;
 		Pt::System::Clock clock2;
 		clock2.start();
-		painter().drawText(Pt::Math::Point(200, 130), L"Hällöchen PTV!" );
+		painter().drawText(Pt::Math::Point(200, 130), L"Hello PTV!" );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
-		
+
 /*
 		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
-		
+
 
 		polygon.clear();
 
@@ -153,9 +153,9 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 		//clock.start();
 		//painter().fillPolygon( &polygon[0], polygon.size() );
-	
-		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff,0,0) ));		
-		
+
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff,0,0) ));
+
 		painter().drawLine( Pt::Math::Point( 10 + 4, 100  + 4), Pt::Math::Point( 10 + 4, 10 + 4));
 //		painter().drawLine( Pt::Math::Point( 10 + 4, 100 + 4), Pt::Math::Point( 75 + 4, 10 ));
 		painter().drawLine( Pt::Math::Point( 10 + 4, 100 + 4), Pt::Math::Point( 100 + 4, 10+ 4 ));
