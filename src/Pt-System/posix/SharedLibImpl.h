@@ -67,7 +67,7 @@ class SharedLibImpl {
 			//since lazy loading is not supported by every target platform
 			int flags = RTLD_NOW;
 
-			_handle = ::dlopen(path, flags);
+			_handle = ::dlopen(path.c_str(), flags);
 			if( !_handle ) {
 				throw SystemError(dlerror(), PT_SOURCEINFO);
 			}
@@ -111,9 +111,9 @@ class SharedLibImpl {
 			@param the resolved symbol or 0 if the loading of the shared
 			library has failed
 		*/
-		static void* openResolve(const std::string&, const char* symbol)
+		static void* openResolve(const std::string& path, const char* symbol)
 		{
-			void* handle = ::dlopen(path, RTLD_NOW);
+			void* handle = ::dlopen(path.c_str(), RTLD_NOW);
 			if(handle)
 				return ::dlsym(handle, symbol);
 

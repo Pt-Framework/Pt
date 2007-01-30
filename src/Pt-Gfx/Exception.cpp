@@ -7,7 +7,7 @@ InvalidFont::InvalidFont(const std::string& what)
 : invalid_argument( what )
 { }
 
-InvalidFont::~InvalidFont()
+InvalidFont::~InvalidFont() throw()
 { }
 
 }
