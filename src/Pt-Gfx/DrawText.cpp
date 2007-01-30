@@ -58,11 +58,11 @@ DrawText::~DrawText()
 
 FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface )
 {
-    //return  FT_New_Memory_Face( library, vera, veraSize, 0, aface );
+    return  FT_New_Memory_Face( library, vera, veraSize, 0, aface );
 
-	 FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
+	/* FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
     FT_Attach_File( *aface, "c:\\WINDOWS\\fonts\\tahoma" ); 
-	 return error;
+	 return error;*/
 }
 
 void DrawText::setFont( const Font& font )
@@ -99,7 +99,7 @@ void DrawText::setFont( const Font& font )
 	{
 		if( face->charmap[i].encoding == FT_ENCODING_UNICODE ) 
 		{			
-			_charMapId = i;
+			_charMapId = face->charmap[i].encoding_id;
 			charMapFound = true;
 			break;
 		}
