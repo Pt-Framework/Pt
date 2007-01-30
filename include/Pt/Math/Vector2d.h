@@ -42,38 +42,17 @@ namespace Math {
             {
             }
 
-/*
-            BasicVector2d(const BasicPoint2d& startPt, const BasicPoint2d& endPt)
+            BasicVector2d(const BasicPoint<T>& startPt, const BasicPoint<T>& endPt)
+            : m_x( endPt.x() - startPt.x() )
+            , m_y( endPt.y() - startPt.y() )
             {
-                m_x = entPt.x - startPt.x;
-                m_x = entPt.y - startPt.y;
             }
 
-            BasicVector2d(const BasicPoint2d& point)
+            inline void set(const BasicPoint<T>& startPt, const BasicPoint<T>& endPt)
             {
-                m_x = point.m_x;
-                m_y = point.m_y;
+                m_x = endPt.x() - startPt.x();
+                m_y = endPt.y() - startPt.y();
             }
-
-            void set(const BasicPoint2d& startPt, const BasicPoint2d& endPt)
-            {
-                m_x = entPt.x - startPt.x;
-                m_x = entPt.y - startPt.y;
-            }
-
-            void set(const BasicPoint2d& point)
-            {
-                m_x = point.m_x;
-                m_y = point.m_y;
-            }
-*/
-
-			void set(const T& x, const T& y)
-            {
-				this->m_x = x;
-                this->m_y = y;
-            }
-
 
             void normalize()
             {
@@ -87,7 +66,7 @@ namespace Math {
             }
 
 
-            const BasicVector2d<T>& operator=(const BasicVector2d<T>& vector)
+            inline const BasicVector2d<T>& operator=(const BasicVector2d<T>& vector)
             {
                 this->m_x = vector.m_x;
                 this->m_y = vector.m_y;
@@ -95,19 +74,19 @@ namespace Math {
 			}
 
 
-            bool operator==(const BasicVector2d<T>& vector) const
+            inline bool operator==(const BasicVector2d<T>& vector) const
 			{
                 return (this->m_x == vector.m_x) && (this->m_y == vector.m_y);
             }
 
 
-            bool operator!=(const BasicVector2d<T>& vector) const
+            inline bool operator!=(const BasicVector2d<T>& vector) const
 			{
                 return (this->m_x != vector.m_x) || (this->m_y != vector.m_y);
             }
 
 
-            const BasicVector2d<T>& operator+=(const BasicVector2d<T>& vector)
+            inline const BasicVector2d<T>& operator+=(const BasicVector2d<T>& vector)
             {
                 this->m_x += vector.m_x;
                 this->m_y += vector.m_y;
@@ -115,14 +94,14 @@ namespace Math {
 			}
 
 
-            BasicVector2d<T> operator+(const BasicVector2d<T>& vector)
+            inline BasicVector2d<T> operator+(const BasicVector2d<T>& vector)
             {
                 BasicVector2d<T> resVector(*this);
                 resVector += vector;
 				return resVector;
 			}
 
-            const BasicVector2d<T>& operator-=(const BasicVector2d<T>& vector)
+            inline const BasicVector2d<T>& operator-=(const BasicVector2d<T>& vector)
             {
                 this->m_x -= vector.m_x;
                 this->m_y -= vector.m_y;
@@ -130,7 +109,7 @@ namespace Math {
 			}
 
 
-            BasicVector2d<T> operator-(const BasicVector2d<T>& vector)
+            inline BasicVector2d<T> operator-(const BasicVector2d<T>& vector)
             {
                 BasicVector2d<T> resVector(*this);
                 resVector -= vector;
@@ -148,7 +127,7 @@ namespace Math {
 
 
             template <typename valT>
-            BasicVector2d<T> operator*(const valT& factor)
+            inline BasicVector2d<T> operator*(const valT& factor)
             {
                 BasicVector2d<T> resVector(*this);
                 resVector *= factor;
@@ -160,48 +139,81 @@ namespace Math {
                 \param
                 \return
 			*/
-            double operator*(const BasicVector2d<T>& vector)
+            inline double operator*(const BasicVector2d<T>& vector)
             {
                 return this->m_x * vector.m_x + this->m_y * vector.m_y;
 			}
 
 
-            double length() const
+            inline const BasicVector2d<T> operator+=(const BasicPoint<T>& point)
+            {
+                m_x += point.x();
+                m_y += point.y();
+			    return *this;
+		    }
+
+
+            inline BasicVector2d<T>& operator+(const BasicPoint<T>& point) const
+			{
+                return BasicVector2d<T>( (m_x+point.x()), (m_y+point.y()) );
+            }
+
+
+            inline const BasicVector2d<T> operator-=(const BasicPoint<T>& point)
+            {
+                m_x -= point.x();
+                m_y -= point.y();
+			    return *this;
+		    }
+
+
+            inline BasicVector2d<T>& operator-(const BasicPoint<T>& point) const
+			{
+                return BasicVector2d<T>( (m_x-point.x()), (m_y-point.y()) );
+            }
+
+
+            inline double length() const
             {
                 double val = (double)(this->m_x * this->m_x + this->m_y * this->m_y);
                 return sqrt(val);
             }
 
 
-            double sqrtLength() const
+            inline double sqrtLength() const
             {
                 return (double)(this->m_x * this->m_x + this->m_y * this->m_y);
             }
 
 
-            T x() const
+            inline T x() const
             {
                 return this->m_x;
             }
 
 
-            T y() const
+            inline T y() const
             {
                 return this->m_y;
             }
 
 
-            void setX(const T& x)
+            inline void setX(const T& x)
             {
                 this->m_x = x;
             }
 
 
-            void setY(const T& y)
+            inline void setY(const T& y)
             {
                 this->m_y = y;
             }
 
+            inline void set(const T& x, const T& y)
+            {
+				this->m_x = x;
+                this->m_y = y;
+            }
 
         protected:
             T m_x;
