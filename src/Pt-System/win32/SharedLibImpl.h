@@ -28,7 +28,7 @@ class SharedLibImpl {
 			@see SharedLib#SharedLib()
 			@param path the shared library to load implicitely
 		*/
-		SharedLibImpl(const char* path)
+		SharedLibImpl(const std::string& path)
 		: _handle(0)
 		{
 			this->open(path);
@@ -51,7 +51,7 @@ class SharedLibImpl {
 			@param path the shared library to load
 		*/
 
-		void open(const char* path)
+		void open(const std::string& path)
 		{
 			if(_handle != 0) {
 				return;
@@ -106,7 +106,7 @@ class SharedLibImpl {
 			@param the resolved symbol or 0 if the loading of the shared
 			library has failed
 		*/
-		static void* openResolve(const char* path, const char* symbol)
+		static void* openResolve(const std::string& path, const char* symbol)
 		{
 			std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 			HMODULE handle = ::LoadLibrary( tpath.c_str() );

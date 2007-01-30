@@ -1,7 +1,20 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
  *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
 #ifndef PT_SYSTEM_SHAREDLIB_H
@@ -48,7 +61,7 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 
 			@param path the path to the shared library
 		*/
-		SharedLib(const char* path);
+		SharedLib(const std::string& path);
 
 		//! @brief Destructor
 		/**
@@ -62,7 +75,7 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 
 			@param path the path to the shared library
 		*/
-		SharedLib& open(const char* path);
+		SharedLib& open(const std::string& path);
 
 		//! @brief Resolve symbol from shared library
 		/**
@@ -103,8 +116,11 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 			@param symbol the name of the symbol to be resolved.
 			@return the address of the symbol or NULL if it was not found
 		*/
-		static void* openResolve(const char* path, const char* symbol);
-
+		static void* openResolve(const std::string& path, const char* symbol);
+		
+	private:
+		static std::string addSharedLibraryExtension(const std::string& path);
+		
 	private:
 		class SharedLibImpl* _impl;
 };
