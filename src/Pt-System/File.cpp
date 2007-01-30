@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/System/File.h"
+#include "Pt/System/Directory.h"
 
 #include "FileImpl.h"
 
@@ -86,6 +87,24 @@ void File::move(const std::string& newname)
 {
 	return _impl->move(newname);
 }
+
+
+std::string File::name()
+{
+	const std::string& path = _impl->path();
+	
+	size_t separatorPos = path.rfind(Pt::System::Directory::separator());
+	
+	if (separatorPos != -1)
+	{
+		return path.substr(separatorPos + 1);
+	}
+	else
+	{
+		return path;
+	}
+}
+
 
 } // namespace System
 

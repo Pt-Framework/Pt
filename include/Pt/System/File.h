@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris DÃ¼rner                                  *
+ *   Copyright (C) 2006 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -56,6 +56,8 @@ class PT_SYSTEM_API File : public FileSystemNode, public NonCopyable {
 		//void copy(const char* to) const;
 
 		virtual void move(const std::string& newname);
+		
+		std::string name();
 };
 
 } // namespace System

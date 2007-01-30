@@ -22,11 +22,15 @@
 #include <windows.h>
 
 
-namespace Pt {
+namespace Pt
+{
 
-namespace System {
+namespace System
+{
 
-class FileImpl {
+class FileImpl
+{
+
 	public:
 		FileImpl(const std::string& path);
 
