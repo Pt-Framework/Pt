@@ -73,12 +73,12 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 
 		Pt::Gfx::ARgbColor outline( 0xffff, 0xffff, 0xffff );
-		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 12 ,Pt::Gfx::Font::NormalStyle, _angle ));
+		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 10 ,Pt::Gfx::Font::NormalStyle, _angle ));
         Pt::System::TimeValue time;
         Pt::System::Clock clock;
 
         clock.start();
-		_imagePainter.drawText( Pt::Math::Point(200, 100), L"Hello PTV!", &outline );
+		_imagePainter.drawText( Pt::Math::Point(100, 500), L"Hallo Platinum!", &outline );
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
@@ -121,8 +121,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 
 
-		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
-		painter().setFont(Pt::Gfx::Font( "Tahoma", 12, Pt::Gfx::Font::NormalStyle, _angle));
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
+		painter().setFont(Pt::Gfx::Font( "Tahoma", 10, Pt::Gfx::Font::NormalStyle, _angle));
 
 		_angle += 10;
 		if( _angle >= 3600 )
@@ -133,7 +133,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::System::TimeValue time2;
 		Pt::System::Clock clock2;
 		clock2.start();
-		painter().drawText(Pt::Math::Point(200, 130), L"Hello PTV!" );
+		painter().drawText(Pt::Math::Point(500, 500), L"Hallo Platinum!" );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
 
