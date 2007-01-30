@@ -24,6 +24,7 @@
 #include <Pt/Exception.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
@@ -52,6 +53,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
+		Pt::Text::String text = L"Hallo Platinum!";
+		size_t fontSize = 14;
 /*
 		std::vector<Pt::Math::Point> polygon;
 
@@ -73,12 +76,13 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 
 		Pt::Gfx::ARgbColor outline( 0xffff, 0xffff, 0xffff );
-		_imagePainter.setFont(Pt::Gfx::Font("Vera" , 10 ,Pt::Gfx::Font::NormalStyle, _angle ));
+		_imagePainter.setFont(Pt::Gfx::Font("Vera" , fontSize ,Pt::Gfx::Font::NormalStyle, _angle ));
         Pt::System::TimeValue time;
         Pt::System::Clock clock;
 
-        clock.start();
-		_imagePainter.drawText( Pt::Math::Point(100, 500), L"Hallo Platinum!", &outline );
+		Pt::Gfx::FontMetrics metrics =  _imagePainter.fontMetrics( text );
+				
+  		_imagePainter.drawText( Pt::Math::Point(100, 500), text );
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
@@ -121,8 +125,10 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 
 
-		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
-		painter().setFont(Pt::Gfx::Font( "Tahoma", 10, Pt::Gfx::Font::NormalStyle, _angle));
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
+		painter().setFont(Pt::Gfx::Font( "Tahoma", fontSize, Pt::Gfx::Font::NormalStyle, _angle));
+		
+		metrics =  painter().fontMetrics( text );
 
 		_angle += 10;
 		if( _angle >= 3600 )
@@ -133,7 +139,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::System::TimeValue time2;
 		Pt::System::Clock clock2;
 		clock2.start();
-		painter().drawText(Pt::Math::Point(500, 500), L"Hallo Platinum!" );
+		painter().drawText(Pt::Math::Point(100, 540), text );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
 
