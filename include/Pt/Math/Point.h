@@ -46,6 +46,12 @@ namespace Pt {
 				void setY(T y_)
 				{_y = y_; }
 
+                void set(T x_, T y_)
+                {
+                    _x = x_;
+                    _y = y_;
+                }
+
                 const BasicPoint& addX(T x)
                 {
                   _x +=  x;
@@ -98,6 +104,30 @@ namespace Pt {
 						return false;
 
 					return ( pt != (*this) );
+				}
+
+                inline const BasicPoint operator+=(const BasicVector2d<T>& vec)
+                {
+                    _x += vec.x();
+                    _y += vec.y();
+				    return *this;
+			    }
+
+                inline BasicPoint& operator+(const BasicVector2d<T>& vec) const
+				{
+                    return BasicPoint( (_x+vec.x()), (_y+vec.y()) );
+				}
+
+                inline const BasicPoint operator-=(const BasicVector2d<T>& vec)
+                {
+                    _x -= vec.x();
+                    _y -= vec.y();
+				    return *this;
+			    }
+
+                inline BasicPoint& operator-(const BasicVector2d<T>& vec) const
+				{
+                    return BasicPoint( (_x-vec.x()), (_y-vec.y()) );
 				}
 
 			protected:
