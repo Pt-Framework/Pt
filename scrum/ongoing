@@ -21,9 +21,3 @@
 # Aloysius
 #
 
-ITEM P9 S8 "The color class' interface is improved"
-	TASK "Make brightness a free function"	blue_wind_25
-
-ITEM P8 S13 "The merge of Gfx2 to Gfx is finalished"
-	TASK "Make sure that all are well merged correctly"	blue_wind_25, d-marc
-	TASK "Perform code cleanups"	blue_wind_25, d-marc
