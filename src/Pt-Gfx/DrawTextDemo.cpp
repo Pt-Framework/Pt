@@ -116,6 +116,9 @@ class DrawTextDemo : public Pt::Gui::Widget
     {
         Pt::Text::String text = L"P T V";
         _angle += 10;
+        Pt::System::TimeValue time;
+        Pt::System::Clock clock;
+        clock.start();
 
         Pt::Gfx::Brush blueBrush( Pt::Gfx::ARgbColor(0,0, 0xcccc) );
         _imagePainter.setBrush( blueBrush );
@@ -137,11 +140,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
         Pt::Gfx::ARgbColor yellow( 0xcccc, 0xbbbb, 0x0 );
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 44 ,Pt::Gfx::Font::NormalStyle, _angle ) );
-        //Pt::System::TimeValue time;
-        //Pt::System::Clock clock;
-        //clock.start();
         _imagePainter.drawText( Pt::Math::Point(200, 135), text, &yellow );
-        //time = clock.stop();
 
         if( --_tickerTextPos < -_tickerTextWidth )
         {
@@ -153,6 +152,8 @@ class DrawTextDemo : public Pt::Gui::Widget
         _imagePainter.drawText( Pt::Math::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
 
         this->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+        time = clock.stop();
+        std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }
 
 private:
