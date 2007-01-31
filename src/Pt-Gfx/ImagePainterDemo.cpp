@@ -81,9 +81,9 @@ class ImagePainterDemo : public Pt::Gui::Widget
         Pt::System::Clock clock;
 
 		Pt::Gfx::FontMetrics metrics =  _imagePainter.fontMetrics( text );
-				
+
 		clock.start();
-  		_imagePainter.drawText( Pt::Math::Point(100, 500), text );
+  		_imagePainter.drawText( Pt::Math::Point(150, 150), text );
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
@@ -128,7 +128,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 		painter().setFont(Pt::Gfx::Font( "Tahoma", fontSize, Pt::Gfx::Font::NormalStyle, _angle));
-		
+
 		metrics =  painter().fontMetrics( text );
 
 		_angle += 10;
@@ -140,7 +140,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::System::TimeValue time2;
 		Pt::System::Clock clock2;
 		clock2.start();
-		painter().drawText(Pt::Math::Point(100, 540), text );
+		painter().drawText(Pt::Math::Point(250, 250), text );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
 
