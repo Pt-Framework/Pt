@@ -27,6 +27,7 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
+#include <Pt/Gui/Pixmap.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
 
@@ -89,6 +90,7 @@ class DrawTextDemo : public Pt::Gui::Widget
     public:
     DrawTextDemo()
     : _image()
+    , _pixmap(0)
     , _imagePainter( _image )
     , _angle(0)
     , _tickerText( L"+++ Can bees think? A new study confirms: No, they can not! +++")
@@ -98,6 +100,8 @@ class DrawTextDemo : public Pt::Gui::Widget
         this->setTitle(L"DrawTextDemo");
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 28) );
         _tickerTextWidth =  _imagePainter.fontMetrics( _tickerText ).width();
+
+        _pixmap = new Pt::Gui::Pixmap(10, 10);
     }
 
     virtual ~DrawTextDemo()
@@ -109,6 +113,8 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
+		delete _pixmap;
+		_pixmap = new Pt::Gui::Pixmap( event.width(), event.height() );
         _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0, 0, 0xcccc ) );
     }
 
@@ -151,13 +157,15 @@ class DrawTextDemo : public Pt::Gui::Widget
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 28) );
         _imagePainter.drawText( Pt::Math::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
 
-        this->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+        _pixmap->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+        this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
         time = clock.stop();
         std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }
 
 private:
     Pt::Gfx::ARgbImage _image;
+    Pt::Gui::Pixmap* _pixmap;
     Pt::Gfx::ImagePainter _imagePainter;
     Pt::ssize_t _angle;
     Pt::Text::String _tickerText;
@@ -183,6 +191,7 @@ int main( int argc, char* argv[] )
         connect( app.event, demo, &DrawTextDemo::nextFrame);
 
         demo.show();
+        demo.resize(400, 300);
         return app.run();
     }
     catch(const std::exception& e)
