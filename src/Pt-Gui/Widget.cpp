@@ -370,10 +370,12 @@ void Widget::paintEvent(const PaintEvent& event)
 void Widget::resizeEvent(const ResizeEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
-	if (event.width() == Pt::size_t( _region.width() ) &&
-	    event.height() == Pt::size_t( _region.height()) ) {
-		return;
-	}
+
+    // Can this really happen, and if yes is it worth to filter it?
+	// if (event.width() == Pt::size_t( _region.width() ) &&
+	//    event.height() == Pt::size_t( _region.height()) ) {
+	// 	return;
+	//}
 
 	_region.setWidth(event.width());
 	_region.setHeight(event.height());

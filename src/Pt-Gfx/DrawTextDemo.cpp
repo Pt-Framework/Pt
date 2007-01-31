@@ -113,6 +113,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
+        std::cerr << "resizeEvent: " << event.width() << std::endl;
 		delete _pixmap;
 		_pixmap = new Pt::Gui::Pixmap( event.width(), event.height() );
         _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0, 0, 0xcccc ) );
@@ -160,7 +161,7 @@ class DrawTextDemo : public Pt::Gui::Widget
         _pixmap->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
         this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
         time = clock.stop();
-        std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
+        //std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }
 
 private:
