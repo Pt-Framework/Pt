@@ -14,7 +14,7 @@ namespace Gfx{
 class FreeType : public Pt::Singleton<FreeType>
 {
 	friend class Pt::Singleton<FreeType>;
-	
+
 	public:
 		struct Init
 		{
@@ -26,16 +26,16 @@ class FreeType : public Pt::Singleton<FreeType>
 		{ return _ft; }
 
 		~FreeType();
-		
+
 	protected:
 		FreeType();
-	
+
 	private:
 		FT_Library _ft;
 };
- 
+
  static FreeType::Init initFreeType;
- 
+
 }
 }
 
