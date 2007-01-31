@@ -37,7 +37,7 @@ ITEM P9 S13 "The image classes' interfaces are improved"
 	TASK "Move all Gfx2 image classes back to the original Gfx"	blue_wind_25	2007-01-24
 	TASK "Fix/write all important image algorithm so that they work with the new color model implementation"	blue_wind_25	2007-01-28
 
-ITEM P8 S13 "The merge of Gfx2 to Gfx is finalished"
+ITEM P8 S8 "The merge of Gfx2 to Gfx is finalished"
 	TASK "Delete the Gfx2 directory after all have been done"	blue_wind_25	2007-01-28
 	TASK "Make sure that all are well merged correctly"	blue_wind_25, d-marc	2007-01-31
 	TASK "Perform code cleanups"	blue_wind_25, d-marc	2007-01-31

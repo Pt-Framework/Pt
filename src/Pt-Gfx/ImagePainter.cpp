@@ -218,3 +218,4 @@ void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image, con
 
 }
 }
+
