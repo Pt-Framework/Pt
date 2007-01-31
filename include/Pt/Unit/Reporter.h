@@ -233,7 +233,7 @@ namespace Unit {
         , _indentWidth(indentWidth)
         , _indent(0)
         {
-            *_out << "<?Xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+            *_out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             *_out << std::endl;
             *_out << "<ComponentTester>" << std::endl;
             *_out << std::endl;
