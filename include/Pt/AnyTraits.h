@@ -21,6 +21,7 @@
 
 #include <Pt/Api.h>
 #include <iosfwd>
+#include <string>
 
 
 namespace Pt {
@@ -88,6 +89,14 @@ namespace Pt {
     struct PT_API AnyTraits<double> {
         static void output(std::ostream& os, const double& value);
         static void input(std::istream& is, double& value);
+    };
+
+
+    /** @internal */
+    template <>
+    struct PT_API AnyTraits<std::string> {
+        static void output(std::ostream& os, const std::string& value);
+        static void input(std::istream& is, std::string& value);
     };
 
 }

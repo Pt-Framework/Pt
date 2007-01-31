@@ -7,13 +7,13 @@ using namespace std;
 
 void Pt::AnyTraits<bool>::output(std::ostream& os, const bool& value)
 {
-	os << std::boolalpha << value;
+    os << std::boolalpha << value;
 }
 
 
 void Pt::AnyTraits<bool>::input(std::istream& is, bool& value)
 {
-	is >> std::boolalpha >> value;
+    is >> std::boolalpha >> value;
 }
 
 
@@ -21,13 +21,13 @@ void Pt::AnyTraits<bool>::input(std::istream& is, bool& value)
 
 void Pt::AnyTraits<int>::output(std::ostream& os, const int& value)
 {
-	os  << value;
+    os  << value;
 }
 
 
 void Pt::AnyTraits<int>::input(std::istream& is, int& value)
 {
-	is >> value;
+    is >> value;
 }
 
 
@@ -35,26 +35,38 @@ void Pt::AnyTraits<int>::input(std::istream& is, int& value)
 
 void Pt::AnyTraits<float>::output(std::ostream& os, const float& value)
 {
-	os << value;
+    os << value;
 }
 
 
 void Pt::AnyTraits<float>::input(std::istream& is, float& value)
 {
-	is >> value;
+    is >> value;
 }
 
 
 
 void Pt::AnyTraits<double>::output(std::ostream& os, const double& value)
 {
-	os << value;
+    os << value;
 }
 
 
 void Pt::AnyTraits<double>::input(std::istream& is, double& value)
 {
-	is >> value;
+    is >> value;
 }
 
 
+
+void Pt::AnyTraits<std::string>::output(std::ostream& os, const std::string& value)
+{
+    os << value;
+}
+
+
+void Pt::AnyTraits<std::string>::input(std::istream& is, std::string& value)
+{
+    getline(is, value, '\"');
+    getline(is, value, '\"');
+}
