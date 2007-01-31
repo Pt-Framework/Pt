@@ -113,40 +113,36 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
     {
-		delete _pixmap;
-		_pixmap = new Pt::Gui::Pixmap( event.width(), event.height() );
+        delete _pixmap;
+        _pixmap = new Pt::Gui::Pixmap( event.width(), event.height() );
         _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0, 0, 0xcccc ) );
+
+        Pt::Gfx::Brush blueBrush( Pt::Gfx::ARgbColor(0,0, 0xcccc) );
+        _pixmap->painter().setBrush( blueBrush );
+        _pixmap->painter().fillRect( Pt::Math::Rect( Pt::Math::Point(0,0), this->size() ) );
     }
 
     void nextFrame(const Pt::Event& event)
     {
         Pt::Text::String text = L"P T V";
         _angle += 10;
-        Pt::System::TimeValue time;
-        Pt::System::Clock clock;
-        clock.start();
+        //Pt::System::TimeValue time;
+        //Pt::System::Clock clock;
+        //clock.start();
 
         Pt::Gfx::Brush blueBrush( Pt::Gfx::ARgbColor(0,0, 0xcccc) );
         _imagePainter.setBrush( blueBrush );
-
-        std::vector<Pt::Math::Point> points(4);
-        points[0] = Pt::Math::Point( 0, 0 );
-        points[1] = Pt::Math::Point( this->size().width(), 0 );
-        points[2] = Pt::Math::Point( this->size().width(), this->size().height() );
-        points[3] = Pt::Math::Point( 0, this->size().height() );
-        _imagePainter.fillPolygon( &points[0], points.size() );
-
-        Pt::Gfx::Brush redBrush( Pt::Gfx::ARgbColor(0xdddd,0, 0) );
-        _imagePainter.setBrush( redBrush );
-        points[0] = Pt::Math::Point( 0, this->size().height() - 40 );
-        points[1] = Pt::Math::Point( this->size().width() + 1, this->size().height() - 40 );
-        points[2] = Pt::Math::Point( this->size().width() + 1, this->size().height() );
-        points[3] = Pt::Math::Point( 0, this->size().height() );
-        _imagePainter.fillPolygon( &points[0], points.size() );
+        _imagePainter.fillRect( Pt::Math::Rect(Pt::Math::Point(80, 0), Pt::Math::Size(280, 260)) );
 
         Pt::Gfx::ARgbColor yellow( 0xcccc, 0xbbbb, 0x0 );
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 44 ,Pt::Gfx::Font::NormalStyle, _angle ) );
         _imagePainter.drawText( Pt::Math::Point(200, 135), text, &yellow );
+
+        Pt::Gfx::Brush redBrush( Pt::Gfx::ARgbColor(0xdddd,0, 0) );
+        _imagePainter.setBrush( redBrush );
+
+        _imagePainter.fillRect( Pt::Math::Rect( Pt::Math::Point( 0, this->size().height() - 40 ),
+                                                Pt::Math::Size( this->size().width(), 40) ) );
 
         if( --_tickerTextPos < -_tickerTextWidth )
         {
@@ -157,9 +153,18 @@ class DrawTextDemo : public Pt::Gui::Widget
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 28) );
         _imagePainter.drawText( Pt::Math::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
 
-        _pixmap->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+        _pixmap->painter().drawImage( Pt::Math::Point( 80, 0 ),
+                                      _image,
+                                      Pt::Gfx::Region( Pt::Math::Point(80,0),
+                                                       Pt::Math::Size(280, 260) ) );
+
+        _pixmap->painter().drawImage( Pt::Math::Point( 0, this->size().height() - 40 ),
+                                      _image,
+                                      Pt::Gfx::Region(  Pt::Math::Point( 0, this->size().height() - 40 ),
+                                                        Pt::Math::Size(this->size().width(), 40) ) );
+
         this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
-        time = clock.stop();
+        //time = clock.stop();
         //std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }
 

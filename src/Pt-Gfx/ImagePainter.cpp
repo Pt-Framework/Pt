@@ -174,6 +174,12 @@ void ImagePainter::drawRect(const  Math::Rect& rect)
 
 void ImagePainter::fillRect(const  Math::Rect& rect)
 {
+    std::vector<Pt::Math::Point> points(4);
+    points[0] = rect.topLeft();
+    points[1] = rect.topRight();
+    points[2] = rect.bottomRight();
+    points[3] = rect.bottomLeft();
+    this->fillPolygon( &points[0], points.size() );
 }
 
 void ImagePainter::drawEllipse(const  Math::Point& topLeft, const  Math::Size& size)
