@@ -61,7 +61,7 @@ namespace Unit {
                 @param si Info where the assertion failed
             */
             Assertion(const std::string& what, const SourceInfo& si)
-            : _what(what)
+            : _what(what/* + si*/)
             , _sourceInfo(si)
             {}
 
@@ -82,7 +82,9 @@ namespace Unit {
             {}
 
             const char* what() const throw()
-            { return (_what + _sourceInfo).c_str(); }
+            {
+                return _what.c_str();
+            }
 
         private:
             std::string _what;
