@@ -9,6 +9,8 @@
 namespace Pt {
 
 namespace System {
+
+xxx
 
 class ClockImpl
 {
