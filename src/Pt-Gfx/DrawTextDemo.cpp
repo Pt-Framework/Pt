@@ -195,8 +195,9 @@ int main( int argc, char* argv[] )
         connect( demo.closed, app, &Pt::Gui::Application::exit );
         connect( app.event, demo, &DrawTextDemo::nextFrame);
 
-        demo.show();
         demo.resize(400, 300);
+        demo.show();
+
         return app.run();
     }
     catch(const std::exception& e)

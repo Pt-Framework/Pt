@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,8 +33,8 @@ namespace System {
 //! @ingroup ptv-system
 //! @brief Shared library loader
 /**
-  A class that can be used to dynamically load shared libraries
-  to resolve symbols from it. The example below shows how to retrieve
+  This class can be used to dynamically load shared libraries and
+  resolve symbols from it. The example below shows how to retrieve
   the address of the myProcedure function in the MySharedLib library:
 
   @code
@@ -117,10 +117,7 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 			@return the address of the symbol or NULL if it was not found
 		*/
 		static void* openResolve(const std::string& path, const char* symbol);
-		
-	private:
-		static std::string addSharedLibraryExtension(const std::string& path);
-		
+
 	private:
 		class SharedLibImpl* _impl;
 };
@@ -132,7 +129,7 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 extern "C" {
 
 	/// \exclude
-	PT_API void pt_system_testSharedLib();
+	PT_SYSTEM_API void pt_system_testSharedLib();
 
 }
 
