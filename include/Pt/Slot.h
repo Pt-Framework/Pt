@@ -3,7 +3,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
-#include <Pt/Clonable.h>
 
 
 //! \addtogroup Pt

@@ -1,9 +1,7 @@
 #ifndef PTV_Xml_Node_h
 #define PTV_Xml_Node_h
 
-
 #include <Pt/Xml/Api.h>
-#include <Pt/Clonable.h>
 
 
 namespace Pt {
@@ -28,7 +26,7 @@ namespace Pt {
 		 *
 		 * @see Type
 		 */
-		class PT_XML_API Node : public Clonable<Node> {
+		class PT_XML_API Node {
 			public:
 				enum Type {
 					//! Unknown Node type (may not currently be supported)
@@ -92,6 +90,8 @@ namespace Pt {
 				 */
 				virtual bool operator==(const Node& node) const
 				{ return false; }
+
+                virtual Node* clone() const = 0;
 
 			private:
 				//! The type of this Node.

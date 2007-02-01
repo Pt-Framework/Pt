@@ -22,7 +22,6 @@
 
 #include <Pt/Exception.h>
 #include <Pt/TypeInfo.h>
-#include <Pt/Clonable.h>
 #include <Pt/Any.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
@@ -32,7 +31,6 @@
 
 
 namespace Pt {
-
 
 class PT_API PropertyValue : public AbstractProperty
 {
@@ -115,7 +113,6 @@ class Property : public PropertyValue
 		AbstractProperty* clone() const
 		{ return new Property<T>(*this); }
 };
-
 
 } // namespace Pt
 
