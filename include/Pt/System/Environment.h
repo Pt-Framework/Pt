@@ -33,8 +33,6 @@ namespace System {
 
 	class PT_SYSTEM_API Environment
 	{
-        friend class EnvironmentImpl;
-
 		private:
 			class EnvironmentImpl* _impl;
 
