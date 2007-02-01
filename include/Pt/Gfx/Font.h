@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2006-2007 by Tobias Müller                              *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,12 +45,12 @@ namespace Gfx {
 
 		public:
 			Font(
-				std::string name,
-				size_t      size = 12,
-				FontStyle   fontStyle = NormalStyle,
-				ssize_t     angle     = 0,
-				Direction   direction = LeftToRightDirection
-
+				const std::string& name,
+				size_t             size = 12,
+				FontStyle          fontStyle = NormalStyle,
+				ssize_t            angle     = 0,
+				Direction          direction = LeftToRightDirection
+				
 			);
 
 			std::string name() const;
