@@ -46,6 +46,8 @@ namespace Pt {
         or if a resource is in an otherwise inaccessible state. This class
         implements std::logic_error. Use the PT_SOURCEINFO macro to pass
         SourceInfo to Exception.
+
+        TODO: rename AccessDenied
     */
     class PT_API AccessError : public std::logic_error {
         public:

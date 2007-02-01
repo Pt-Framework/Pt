@@ -136,3 +136,5 @@ include/Pt/Gfx/Rgb555Color.h
 include/Pt/Gfx/Rgb555Image.h
 include/Pt/Gfx/Rgb888Color.h
 include/Pt/Gfx/Rgb888Image.h
+include/Pt/Main.h
+include/Pt/Blob.h

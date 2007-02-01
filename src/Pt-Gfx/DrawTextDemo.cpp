@@ -135,7 +135,7 @@ class DrawTextDemo : public Pt::Gui::Widget
         _imagePainter.fillRect( Pt::Math::Rect(Pt::Math::Point(80, 0), Pt::Math::Size(280, 260)) );
 
         Pt::Gfx::ARgbColor yellow( 0xcccc, 0xbbbb, 0x0 );
-        _imagePainter.setFont( Pt::Gfx::Font("Vera", 44 ,Pt::Gfx::Font::NormalStyle, _angle ) );
+        _imagePainter.setFont( Pt::Gfx::Font("Vera", 42 ,Pt::Gfx::Font::NormalStyle, _angle ) );
         _imagePainter.drawText( Pt::Math::Point(200, 135), text, &yellow );
 
         Pt::Gfx::Brush redBrush( Pt::Gfx::ARgbColor(0xdddd,0, 0) );

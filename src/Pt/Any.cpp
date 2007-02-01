@@ -83,7 +83,14 @@ Any& Any::operator=(const Any& rhs)
 
 bool Any::operator==(const Any& a) const
 {
-	return _value->equal( *(a._value) );
+    if(_value && a._value)
+    {
+	   return _value->equal( *(a._value) );
+    }
+
+    // if one or both of the Anys is not initialised
+    // they are considered equal if both have NULL values.
+    return _value == a._value;
 }
 
 
@@ -95,7 +102,14 @@ bool Any::operator!=(const Any& a) const
 
 bool Any::operator<(const Any& a) const
 {
-	return _value->lt( *(a._value) );
+    if(_value && a._value)
+    {
+	   return _value->lt( *(a._value) );
+    }
+
+    // if one of the Anys is not initialised the
+    //one having a NULL valueis considered less.
+    return _value < a._value;
 }
 
 
