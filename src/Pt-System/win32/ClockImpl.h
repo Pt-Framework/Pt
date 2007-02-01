@@ -8,8 +8,6 @@
 
 namespace Pt {
 
-yyyzzz
-
 namespace System {
 
 class ClockImpl
