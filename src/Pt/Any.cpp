@@ -1,7 +1,6 @@
 #include "Pt/Any.h"
 using namespace Pt;
 
-#include <sstream>
 #include <iostream>
 using namespace std;
 
@@ -20,9 +19,8 @@ Any::Any()
 
 
 Any::Any(const Any& val)
-: _value(0)
+: _value(val._value ? val._value->clone() : 0)
 {
-    _value = val._value ? val._value->clone() : 0;
 }
 
 
@@ -51,7 +49,7 @@ void  Any::init(const std::string& typeName)
 		return;
 	}
 
-	( this->*(it->second) )();
+	(this->*(it->second))();
 }
 
 
@@ -115,12 +113,12 @@ std::istream& Pt::operator>>(std::istream& is, Pt::Any& any)
 }
 
 
+
+
 static Pt::Any::Bind<bool> bind_bool;
-static Pt::Any::Bind<char> bind_char;
 static Pt::Any::Bind<int> bind_int;
 static Pt::Any::Bind<float> bind_float;
-static Pt::Any::Bind<double> bind_double;
-static Pt::Any::Bind<std::string> bind_std_string;
+
 
 
 
