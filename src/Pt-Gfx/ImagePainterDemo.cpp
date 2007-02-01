@@ -74,7 +74,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 */
 
 
-
+/*
 		Pt::Gfx::ARgbColor outline( 0xffff, 0xffff, 0xffff );
 		_imagePainter.setFont(Pt::Gfx::Font("Vera" , fontSize ,Pt::Gfx::Font::NormalStyle, _angle ));
         Pt::System::TimeValue time;
@@ -87,7 +87,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		time = clock.stop();
 
 		std::cerr<<"Image Time: "<< time.seconds()+ time.microSeconds() / 1000000.0<<std::endl;
-
+*/
 
 /*
 		_imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
@@ -122,10 +122,46 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::System::TimeValue delta = clock.stop();
 		std::cout<<"Draw time: " << (delta.seconds() + delta.microSeconds()/1000000.0) << std::endl;
 */
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 50, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 3, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 60, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 4, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 30, 10 ), Pt::Math::Point( 70, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 5, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 40, 10 ), Pt::Math::Point( 80, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 6, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 52, 10 ), Pt::Math::Point( 92, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 7, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 65, 10 ), Pt::Math::Point( 105, 50 ));
+
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
 
+        painter().setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 55, 55 ), Pt::Math::Point( 100, 100 ));
 
+        painter().setPen( Pt::Gfx::Pen( 3, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 65, 55 ), Pt::Math::Point( 110, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 4, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 75, 55 ), Pt::Math::Point( 120, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 5, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 85, 55 ), Pt::Math::Point( 130, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 6, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 97, 55 ), Pt::Math::Point( 142, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 7, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 110, 55 ), Pt::Math::Point( 155, 100 ));
+/*
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 		painter().setFont(Pt::Gfx::Font( "Tahoma", fontSize, Pt::Gfx::Font::NormalStyle, _angle));
 
@@ -143,6 +179,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		painter().drawText(Pt::Math::Point(250, 250), text );
 		time2 = clock2.stop();
 		std::cerr<<"System Time: "<< time2.seconds()+ time2.microSeconds() / 1000000.0<<std::endl;
+*/
 
 /*
 		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0,0,0xffff) ));
