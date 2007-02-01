@@ -9,7 +9,7 @@
 namespace Pt {
 
 yyyzzz
-
+ggg
 namespace System {
 
 class ClockImpl
