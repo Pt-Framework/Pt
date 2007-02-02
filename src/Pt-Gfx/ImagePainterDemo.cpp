@@ -141,7 +141,26 @@ class ImagePainterDemo : public Pt::Gui::Widget
         _imagePainter.setPen( Pt::Gfx::Pen( 7, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
         _imagePainter.drawLine( Pt::Math::Point( 65, 10 ), Pt::Math::Point( 105, 50 ));
 
-		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 50, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 60, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 30, 10 ), Pt::Math::Point( 70, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 40, 10 ), Pt::Math::Point( 80, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 52, 10 ), Pt::Math::Point( 92, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0xffff, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 65, 10 ), Pt::Math::Point( 105, 50 ));
+
+        painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
 
         painter().setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
@@ -161,6 +180,26 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
         painter().setPen( Pt::Gfx::Pen( 7, Pt::Gfx::ARgbColor(0, 0, 0xffff) ));
         painter().drawLine( Pt::Math::Point( 110, 55 ), Pt::Math::Point( 155, 100 ));
+
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 55, 55 ), Pt::Math::Point( 100, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 65, 55 ), Pt::Math::Point( 110, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 75, 55 ), Pt::Math::Point( 120, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 85, 55 ), Pt::Math::Point( 130, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 97, 55 ), Pt::Math::Point( 142, 100 ));
+
+        painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0xffff, 0, 0xffff) ));
+        painter().drawLine( Pt::Math::Point( 110, 55 ), Pt::Math::Point( 155, 100 ));
+
 /*
 		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
 		painter().setFont(Pt::Gfx::Font( "Tahoma", fontSize, Pt::Gfx::Font::NormalStyle, _angle));

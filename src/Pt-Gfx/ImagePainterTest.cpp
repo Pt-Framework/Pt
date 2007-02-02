@@ -118,21 +118,19 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         
         void fillEllipseTest()
         { }
-        
+
         void drawPolylineTest()
         { }
-        
+
         void drawImageTest()
         { }
-        
+
         void fontMetricTest()
-        {        
+        {
             Pt::Gfx::ARgbColor  outlineColor( 0, 0xffff, 0);
             Pt::Text::String    text( L"Hallo Platinum!" );
 
-            //Font metrics
             _imagePainter.setFont( Pt::Gfx::Font("Vera", 12, Pt::Gfx::Font::NormalStyle, 340 ) );
-
             Pt::Gfx::FontMetrics metrics  = _imagePainter.fontMetrics( text );
 
             PT_UNIT_ASSERT( metrics.ascent() == 12 );
@@ -140,7 +138,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( metrics.width() >= 93 && metrics.width() <= 97 );
             PT_UNIT_ASSERT( metrics.height() >= 13 && metrics.height() <= 15 );
         }
-        
+
         void drawTextTest()
         {
             Pt::Gfx::ARgbColor  outlineColor( 0, 0xffff, 0);

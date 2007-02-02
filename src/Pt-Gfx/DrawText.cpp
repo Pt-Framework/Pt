@@ -136,8 +136,8 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
         if( FT_HAS_KERNING( face ) && previous )
         {
             FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            pen_x += ( delta.x << 16 );
-            pen_y -= ( delta.y << 16 );
+            pen_x += delta.x; // << 16;
+            pen_y -= delta.y; // << 16;
         }
 
         if(  FTC_ImageCache_Lookup( _imageChace, &_imageType, glyph_index, &glyph, &node ) )
