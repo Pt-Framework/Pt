@@ -110,7 +110,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
         if( y0 < y1 )
             ystep = 1;
 
-        for( ssize_t x = x0; x <= x1; ++x )
+        for( ssize_t x = x0; x < x1; ++x )
         {
             image.pixel( x, y ) = _colorBuffer[0];
             error += dy;
