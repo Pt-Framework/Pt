@@ -9,12 +9,18 @@ namespace Pt {
 
 namespace Gfx {
 
+FontMetrics::FontMetrics()
+: _ascent( 0)
+, _descent(0)
+, _width(0)
+, _height(0)
+{ }
 
 FontMetrics::FontMetrics(size_t ascent, size_t descent, size_t width, size_t height)
-: _ascent(ascent),
-  _descent(descent),
-  _width(width),
-  _height(height)
+: _ascent(ascent)
+, _descent(descent)
+, _width(width)
+, _height(height)
 {
 }
 

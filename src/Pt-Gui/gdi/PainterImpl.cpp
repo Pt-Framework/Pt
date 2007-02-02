@@ -96,7 +96,7 @@ void PainterImpl::updatePen()
 	brush.lbStyle = BS_SOLID ;
 	brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
 
-	HPEN newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | /*PS_ENDCAP_FLAT*/PS_ENDCAP_ROUND | PS_JOIN_BEVEL, _pen.size(), &brush, 0, NULL);
+	HPEN newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT /*PS_ENDCAP_ROUND | PS_JOIN_BEVEL*/, _pen.size(), &brush, 0, NULL);
 #endif
 
 	HPEN oldPen = (HPEN)SelectObject(_drawable.deviceContext(), newPen);

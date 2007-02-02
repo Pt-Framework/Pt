@@ -31,6 +31,12 @@ ClipPolygon::ClipPolygon()
 
 void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )
 {
+	if( clippingArea.isNull())
+	{
+		in.clear();
+		return;		
+	}
+	
     std::vector<Pt::Math::Point> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );

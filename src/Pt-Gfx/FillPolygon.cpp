@@ -40,7 +40,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //Pt::System::Clock clock;
     //clock.start();
 
-    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width() - 1, image.height() - 1 )) );
+    _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width(), image.height() )) );
 
     if( points.end() != points.begin() )
         points.push_back( points[0] );

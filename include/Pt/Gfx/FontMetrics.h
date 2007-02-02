@@ -31,6 +31,8 @@ namespace Gfx {
 	class PT_GFX_API FontMetrics
 	{
 		public:
+			FontMetrics();
+			
 			FontMetrics(size_t ascent, size_t descent, size_t width, size_t height);
 
 			size_t ascent() const;

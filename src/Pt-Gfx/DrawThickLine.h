@@ -26,6 +26,7 @@
 
 #include "DrawLine.h"
 #include "Span.h"
+#include "FillPolygon.h"
 #include "FillConvexPolygon.h"
 #include "RasterBuffer.h"
 
@@ -61,9 +62,10 @@ class DrawThickLine : public DrawLine
 		*/
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
-    private:
-        FillConvexPolygon _fillConvexPolygon;
-        RasterBuffer      _rasterBuffer;
+    private:	 
+        FillPolygon			_fillPolygon;
+        FillConvexPolygon	_fillConvexPolygon;
+        RasterBuffer		_rasterBuffer;
 };
 
 } // namespace Gfx

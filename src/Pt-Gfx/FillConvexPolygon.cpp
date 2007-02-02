@@ -125,7 +125,7 @@ void FillConvexPolygon::output( ARgbImage& image, const Brush& brush, const Rast
         inc = -1;
     }
 
-    while( miny != maxy )
+    while( miny != (maxy + 1) )
     {
         memcpy( &image.pixel( spans[miny].begin(), miny ), &_colorBuffer[0],
                 ( spans[miny].end() - spans[miny].begin())* sizeof(ARgbColor) );

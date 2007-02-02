@@ -38,9 +38,11 @@
 #include "DrawThinPolyline.h"
 #include "DrawThickPolyline.h"
 #include "FillPolygon.h"
+#include "FillConvexPolygon.h"
 #include "DrawText.h"
 #include <cmath>
 #include <Pt/System/Clock.h>
+#include <Pt/Math/MathUtils.h>
 
 namespace Pt{
 namespace Gfx{
@@ -56,6 +58,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThinPolyline( 0 )
 , _drawThickPolyline( 0 )
 , _fillPolygon( 0 )
+, _fillConvexPolygon( 0 )
 , _drawText( new DrawText() )
 {
     std::auto_ptr<DrawThinLine> dthin( new DrawThinLine );
@@ -63,6 +66,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThinPolyline> dthinpoly( new DrawThinPolyline() );
     std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );
     std::auto_ptr<FillPolygon> fillpolygon( new FillPolygon() );
+    std::auto_ptr<FillConvexPolygon> fillConvexpolygon( new FillConvexPolygon() );
     std::auto_ptr<DrawText> dtext( new DrawText() );
 
     _drawThinLine       = dthin.release();
@@ -72,6 +76,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawThickPolyline  = dthickpoly.release();
     _drawPolyline       = _drawThinPolyline;
     _fillPolygon        = fillpolygon.release();
+    _fillConvexPolygon	= fillConvexpolygon.release();
     _drawText           = dtext.release();
 
     this->setFont( _font );
@@ -84,6 +89,7 @@ ImagePainter::~ImagePainter()
     delete _drawThinPolyline;
     delete _drawThickPolyline;
     delete _fillPolygon;
+    delete _fillConvexPolygon;
     delete _drawText;
 }
 
@@ -152,14 +158,8 @@ void ImagePainter::drawPixel(const  Math::Point& to)
 void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 {
     if( _pen.size()  == 0 )
-        return;
-
-    //_drawLine->draw( _image, _pen, from, to );
-    std::vector<Pt::Math::Point> points;
-
-    points.push_back( from );
-    points.push_back( to );
-    //_drawPolyline->draw( _image, _pen, points );
+        return;    			
+	
     _drawLine->draw(_image, _pen, from, to );
 }
 
@@ -212,6 +212,7 @@ void ImagePainter::fillPolygon(const  Math::Point* points, const size_t pointCou
     memcpy( &p[0], points, sizeof( Math::Point) * pointCount );
 
     _fillPolygon->draw( _image, _brush, p );
+    //_fillConvexPolygon->draw( _image, _brush, p );
 }
 
 void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image)

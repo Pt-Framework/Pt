@@ -29,7 +29,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
     Math::Point clippedFrom( from );
     Math::Point clippedTo( to );
 
-    if( !_clipLine( clippedFrom, clippedTo , 0, image.width() - 1, 0, image.height() - 1 ) )
+    if( !_clipLine( clippedFrom, clippedTo , 0, image.width() -1, 0, image.height()- 1 ) )
         return;
 
     if( _colorBuffer.size() < image.width() || _colorBuffer[0] != pen.color() )
