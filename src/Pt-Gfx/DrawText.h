@@ -88,7 +88,7 @@ class DrawText
         void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* background = 0 );
 
     private:
-        void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer ) 
+        void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
         {
             Pt::uint32_t				yOffset = 0;
             int							dsy		= ypos;
@@ -117,11 +117,16 @@ class DrawText
                 {
                     if( dsx < 0 )
                         continue;
-                     
+
                     if( dsx > x2 )
                         break;
 
                     const int px = yOffset + x ;
+
+										void *p = &(*pixel);
+										void *b = &(*image.begin());
+										void *e = &(*image.end());
+										assert(p>=b && p<=e);
 
                     if( buffer[ px ] )
                         mixColor( *pixel, color, buffer[ px ] );
@@ -129,7 +134,7 @@ class DrawText
                 }
             }
         }
-        
+
         inline void mixColor(ARgbColor& dst, const ARgbColor& src, const uint8_t& factor)
         {
              const uint32_t oF = factor;
@@ -147,12 +152,12 @@ class DrawText
              dst.setGreen( (dG + sG) >> 8);
              dst.setBlue ( (dB + sB) >> 8);
         }
-        
+
         inline FTC_FaceID faceId() const
         { return (FTC_FaceID) &_faceId ; }
-        
+
 		static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
-		
+
         FT_Matrix			_matrix;
         FTC_Manager			_manager;
         FTC_ImageCache		_imageChace;
