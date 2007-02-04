@@ -1,7 +1,0 @@
-/** \dir
-This module offers classes and concepts for String and Char-operations, streaming,
-conversion using Codec-classes and a StringList.
-*/
-
-
-
