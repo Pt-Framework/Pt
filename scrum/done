@@ -4,8 +4,8 @@
 # When editing ITEMs and TASKs in this DONE file, please format them as follows:
 #
 # ITEM P? S? "Item's description"
-# <TAB> TASK "Task's description" <TAB> developer1[,developer2]... <TAB> finish_date
-# <TAB> TASK "Task's description" <TAB> developer1[,developer2]... <TAB> finish_date
+#     TASK "Task's description" developer1[,developer2]... finish_date
+#     TASK "Task's description" developer1[,developer2]... finish_date
 #
 # Priority is from 1 (lowest) to 10 (highest)
 # Size is a Fibonacci numbers 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
@@ -31,133 +31,133 @@
 ########################################################################################
 
 ITEM P9 S8 "The color class' interface is improved"
-	TASK "Remove all non-maintained color classes in the old Gfx"	blue_wind_25	2007-01-23
-	TASK "Move all Gfx2 color classes back to the original Gfx"	blue_wind_25	2007-01-24
+    TASK "Remove all non-maintained color classes in the old Gfx" blue_wind_25 2007-01-23
+    TASK "Move all Gfx2 color classes back to the original Gfx" blue_wind_25 2007-01-24
 
 ITEM P9 S13 "The image classes' interfaces are improved"
-	TASK "Convert the SubImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-23
-	TASK "Move all Gfx2 image classes back to the original Gfx"	blue_wind_25	2007-01-24
-	TASK "Fix/write all important image algorithm so that they work with the new color model implementation"	blue_wind_25	2007-01-28
+    TASK "Convert the SubImage<T> class to use the new color model implementation" blue_wind_25 2007-01-23
+    TASK "Move all Gfx2 image classes back to the original Gfx" blue_wind_25 2007-01-24
+    TASK "Fix/write all important image algorithm so that they work with the new color model implementation" blue_wind_25 2007-01-28
 
 ITEM P8 S8 "The merge of Gfx2 to Gfx is finalished"
-	TASK "Delete the Gfx2 directory after all have been done"	blue_wind_25	2007-01-28
-	TASK "Make sure that all are well merged correctly"	blue_wind_25, d-marc	2007-01-31
-	TASK "Perform code cleanups"	blue_wind_25, d-marc	2007-01-31
+    TASK "Delete the Gfx2 directory after all have been done" blue_wind_25 2007-01-28
+    TASK "Make sure that all are well merged correctly" blue_wind_25,d-marc 2007-01-31
+    TASK "Perform code cleanups" blue_wind_25,d-marc 2007-01-31
 
 ITEM P7 S5 "Any class is implemented"
-	TASK "Review code"	d-marc	2007-01-21
-	TASK "Write Documentation"	d-marc	2007-01-21
-	TASK "Write test case"	d-marc	2007-01-21
+    TASK "Review code" d-marc 2007-01-21
+    TASK "Write Documentation" d-marc 2007-01-21
+    TASK "Write test case" d-marc 2007-01-21
 
 ITEM P8 S3 "The color class interface is improved"
-	TASK "Review all color classes in Gfx2"	blue_wind_25	2007-01-21
+    TASK "Review all color classes in Gfx2" blue_wind_25 2007-01-21
 
 ITEM P7 S5 "The BasicImage<T> class interface is improved"
-	TASK "Convert the BasicImage<T> class to use the new color model implementation"	blue_wind_25	2007-01-21
-	TASK "Review the interface of the BasicImage<T> class"	blue_wind_25	2007-01-21
-	TASK "Review all image classes in Gfx2"	blue_wind_25	2007-01-21
+    TASK "Convert the BasicImage<T> class to use the new color model implementation" blue_wind_25 2007-01-21
+    TASK "Review the interface of the BasicImage<T> class" blue_wind_25 2007-01-21
+    TASK "Review all image classes in Gfx2" blue_wind_25 2007-01-21
 
 ITEM P10 S5 "Compiler attributes and pragmas are abstracted"
-	TASK "Introduce PT_API macro"	d-marc	2007-01-20
-	TASK "Check if more warnings need to be disabled"	d-marc	2007-01-20
-	TASK "Look into other compiler attributes"	d-marc	2007-01-20
+    TASK "Introduce PT_API macro" d-marc 2007-01-20
+    TASK "Check if more warnings need to be disabled" d-marc 2007-01-20
+    TASK "Look into other compiler attributes" d-marc 2007-01-20
 
 ITEM P10 S5 "An common exception hierachy exits"
-    TASK "Review Exception.h"	blue_wind_25, d-marc	2007-01-19
-    TASK "Write Documentation"	blue_wind_25, d-marc	2007-01-19
-    TASK "Write test case"	blue_wind_25, d-marc	2007-01-19
+    TASK "Review Exception.h" blue_wind_25,d-marc 2007-01-19
+    TASK "Write Documentation" blue_wind_25,d-marc 2007-01-19
+    TASK "Write test case" blue_wind_25,d-marc 2007-01-19
 
 ITEM P7 S5 "A TypeTraits class exists"
-    TASK "Review TypeTraits template"	d-marc	2007-01-16
-    TASK "Review code"	d-marc	2007-01-16
-    TASK "Write Documentation"	d-marc	2007-01-16
-    TASK "Write test case"	d-marc	2007-01-16
+    TASK "Review TypeTraits template" d-marc 2007-01-16
+    TASK "Review code" d-marc 2007-01-16
+    TASK "Write Documentation" d-marc 2007-01-16
+    TASK "Write test case" d-marc 2007-01-16
 
 ITEM P8 S2 "A empty Void type exists"
-    TASK "Review Void.h"	d-marc	2007-01-16
-    TASK "Write Documentation	d-marc	2007-01-16
+    TASK "Review Void.h" d-marc 2007-01-16
+    TASK "Write Documentation d-marc 2007-01-16
 
 ITEM P8 S8 "The color class interface is improved"
-	TASK "Remove the BasicColor<T> class"	blue_wind_25	2007-01-03
-	TASK "Reimplement the color classes as simple wrapper for POD"	blue_wind_25	2007-01-03
-	TASK "Implement all needed operators overload like ==, <, +, etc" for the color classes"	blue_wind_25	2007-01-03
-	TASK "Make toARgb and from ARgb as free functions"	blue_wind_25	2007-01-03
-	TASK "Write assign functions for color classes"	blue_wind_25	2007-01-03
-	TASK "Make greyscale a free function"	blue_wind_25	2007-01-03
+    TASK "Remove the BasicColor<T> class" blue_wind_25 2007-01-03
+    TASK "Reimplement the color classes as simple wrapper for POD" blue_wind_25 2007-01-03
+    TASK "Implement all needed operators overload like ==, <, +, etc" for the color classes" blue_wind_25 2007-01-03
+    TASK "Make toARgb and from ARgb as free functions" blue_wind_25 2007-01-03
+    TASK "Write assign functions for color classes" blue_wind_25 2007-01-03
+    TASK "Make greyscale a free function" blue_wind_25 2007-01-03
 
 ITEM P9 S5 "The Pt::Unit module is documented"
-	TASK "Write docs"	d-marc	2006-12-28
-	TASK "Write tutorial"	d-marc	2006-12-28
+    TASK "Write docs" d-marc 2006-12-28
+    TASK "Write tutorial" d-marc 2006-12-28
 
 ITEM P8 S2 "All classes of the Pt module are forward declared in a dedicated header"
-	TASK "Add missing declarations to Pt.h" d-marc	2006-12-20
+    TASK "Add missing declarations to Pt.h" d-marc 2006-12-20
 
 ITEM P10 S1 "The scrum files have been improved"
-	TASK "Remove item numbering"	blue_wind_25	2006-12-05
-	TASK "Improve the format"	blue_wind_25	2006-12-05
+    TASK "Remove item numbering" blue_wind_25 2006-12-05
+    TASK "Improve the format" blue_wind_25 2006-12-05
 
 ########################################################################################
 
 ITEM P0 S2 "Compiler attributes and pragmas are abstracted"
-	TASK "Review PT_PACKED macro"	blue_wind_25	2006-09-26
-	TASK "Review PT_ALIGN macro"	blue_wind_25	2006-09-26
+    TASK "Review PT_PACKED macro" blue_wind_25 2006-09-26
+    TASK "Review PT_ALIGN macro" blue_wind_25 2006-09-26
 
 ITEM P0 S3 "All Gfx image classes accept (x,y) as coordinate"
-	TASK "Convert current access mode from (y,x) to (x,y)"	blue_wind_25	2006-10-04
-	TASK "Implement 'ColorT& pixel(int x, int y)' as the 'unchecked' version of at() and color()"	blue_wind_25	2006-10-04
-	TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above"	blue_wind_25	2006-10-04
-	TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)"	blue_wind_25	2006-10-04
-	TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]"	blue_wind_25	2006-10-04
-	TASK "Review 'ColorT& pixel(int x, int y)'"	blue_wind_25, d-marc	2006-11-19
-	TASK "Review 'Scanline scanline(int y)'"	blue_wind_25, d-marc	2006-11-19
+    TASK "Convert current access mode from (y,x) to (x,y)" blue_wind_25 2006-10-04
+    TASK "Implement 'ColorT& pixel(int x, int y)' as the 'unchecked' version of at() and color()" blue_wind_25 2006-10-04
+    TASK "Remove 'ColorT* operator[] (int y)' since it violates the specification above" blue_wind_25 2006-10-04
+    TASK "Implement a helper data type 'Scanline' for easier improvement later (when adding support for planar images)" blue_wind_25 2006-10-04
+    TASK "Implement 'Scanline scanline(int y)' to replace the removed operator[]" blue_wind_25 2006-10-04
+    TASK "Review 'ColorT& pixel(int x, int y)'" blue_wind_25,d-marc 2006-11-19
+    TASK "Review 'Scanline scanline(int y)'" blue_wind_25,d-marc 2006-11-19
 
 ITEM P0 S2 "XRgb8888Color was changed to ARgb888Color"
-	TASK "Add getters/setters for alpha channel"	blue_wind_25	2006-10-08
-	TASK "Include alpha channel in conversion"	blue_wind_25	2006-10-08
-	TASK "Verify the getters/setters for alpha channel"	blue_wind_25	2006-10-15
-	TASK "Verify the alpha channel conversion"	blue_wind_25	2006-10-15
+    TASK "Add getters/setters for alpha channel" blue_wind_25 2006-10-08
+    TASK "Include alpha channel in conversion" blue_wind_25 2006-10-08
+    TASK "Verify the getters/setters for alpha channel" blue_wind_25 2006-10-15
+    TASK "Verify the alpha channel conversion" blue_wind_25 2006-10-15
 
 ITEM P0 S5 "POD types of fixed size are defined"
-	TASK "Review Types.h"	blue_wind_25	2006-10-21
-	TASK "Write test case"	blue_wind_25	2006-10-21
-	TASK "Verify the method of how to enable 64 bit types under linux/gcc"	d-marc	2006-11-19
+    TASK "Review Types.h" blue_wind_25 2006-10-21
+    TASK "Write test case" blue_wind_25 2006-10-21
+    TASK "Verify the method of how to enable 64 bit types under linux/gcc" d-marc 2006-11-19
 
 ITEM P0 S3 "An API for byte-order conversion exists"
-	TASK "Review Byteorder.h"	blue_wind_25	2006-11-10
-	TASK "Remove swap() template function"	blue_wind_25	2006-11-10
-	TASK "Write test cases"	blue_wind_25	2006-11-10
-	TASK "Improve swabUnaligned() function"	blue_wind_25, d-marc	2006-11-19
-	TASK "Add function to swap float and double correctly"	blue_wind_25	2006-11-20
+    TASK "Review Byteorder.h" blue_wind_25 2006-11-10
+    TASK "Remove swap() template function" blue_wind_25 2006-11-10
+    TASK "Write test cases" blue_wind_25 2006-11-10
+    TASK "Improve swabUnaligned() function" blue_wind_25,d-marc 2006-11-19
+    TASK "Add function to swap float and double correctly" blue_wind_25 2006-11-20
 
 ITEM P0 S3 "A SourceInfo class exits"
-	TASK "Review SourceInfo.h"	blue_wind_25	2006-10-21
-	TASK "Write test case"	blue_wind_25	2006-10-21
-	TASK "Write Documentation"	blue_wind_25	2006-10-21
+    TASK "Review SourceInfo.h" blue_wind_25 2006-10-21
+    TASK "Write test case" blue_wind_25 2006-10-21
+    TASK "Write Documentation" blue_wind_25 2006-10-21
 
 ITEM P0 S3 "A NonCopyable base class exits"
-	TASK "Review NonCopyable.h"	blue_wind_25	2006-11-05
-	TASK "Write Documentation"	blue_wind_25	2006-11-05
+    TASK "Review NonCopyable.h" blue_wind_25 2006-11-05
+    TASK "Write Documentation" blue_wind_25 2006-11-05
 
 ITEM P0 S3 "A Singleton base class exits"
-	TASK "Write test case"	blue_wind_25	2006-11-05
-	TASK "Review Singleton.h"	blue_wind_25, d-marc	2006-11-19
-	TASK "Write Documentation"	blue_wind_25, d-marc	2006-11-19
+    TASK "Write test case" blue_wind_25 2006-11-05
+    TASK "Review Singleton.h" blue_wind_25,d-marc 2006-11-19
+    TASK "Write Documentation" blue_wind_25,d-marc 2006-11-19
 
 ITEM P0 S13 "The Pt::Unit module exists"
-	TASK "Review ccpunit code"	d-marc	2006-10-24
-	TASK "Review qt-unit code"	d-marc	2006-10-24
-	TASK "Review boost unittest framework"	d-marc	2006-10-24
-	TASK "Review mini-cppunit from STLport code"	d-marc	2006-10-24
-	TASK "Write Test interface"	d-marc	2006-10-25
-	TASK "Write TestFixture"	d-marc	2006-10-25
-	TASK "Write TestCase class"	d-marc	2006-10-25
-	TASK "Write Assertion handling"	d-marc	2006-10-25
-	TASK "Write TestSuite class"	d-marc	2006-10-25
-	TASK "Write Application class"	d-marc	2006-10-25
-	TASK "Write reporter"	d-marc	2006-10-05
-	TASK "Write logger"	d-marc	2006-10-05
+    TASK "Review ccpunit code" d-marc 2006-10-24
+    TASK "Review qt-unit code" d-marc 2006-10-24
+    TASK "Review boost unittest framework" d-marc 2006-10-24
+    TASK "Review mini-cppunit from STLport code" d-marc 2006-10-24
+    TASK "Write Test interface" d-marc 2006-10-25
+    TASK "Write TestFixture" d-marc 2006-10-25
+    TASK "Write TestCase class" d-marc 2006-10-25
+    TASK "Write Assertion handling" d-marc 2006-10-25
+    TASK "Write TestSuite class" d-marc 2006-10-25
+    TASK "Write Application class" d-marc 2006-10-25
+    TASK "Write reporter" d-marc 2006-10-05
+    TASK "Write logger" d-marc 2006-10-05
 
 ITEM P0 S5 "Object reflection API is implemented"
-	TASK "Split property in property and property proxy"	Laurentiu	2006-10-05
-	TASK "Specialize property for Reflectable"	Laurentiu	2006-10-05
-	TASk "Add signal changed to property"	Laurentiu	2006-10-05
+    TASK "Split property in property and property proxy" Laurentiu 2006-10-05
+    TASK "Specialize property for Reflectable" Laurentiu 2006-10-05
+ TASk "Add signal changed to property" Laurentiu 2006-10-05
