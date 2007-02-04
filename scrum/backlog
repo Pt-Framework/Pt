@@ -21,48 +21,6 @@
 # Aloysius
 #
 
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Add fallback version that uses pthreads"
-    TASK "Review asm"
-    TASK "Write test case"
-    TASK "Write docs"
-
-ITEM P10 S5 "Variant class is implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "SmartPtr class is implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "Signals and Delegates are implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "Object reflection API is documented"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "CTTI system is implemented"
-    TASK "Review IfElse template"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "Event based Application class is implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
-    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
-    TASK "Implement ARgbPlanarImage"
-    TASK "Implement PtrT helper class in ColorTraits"
-    TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"
-
 ITEM P8 S13 "The image-related algorithms are improved"
     TASK "Write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
     TASK "Write iterator based algorithm assign"
@@ -96,18 +54,9 @@ ITEM P1 S13 "The Image class supports planar, sub-sampled YUV image formats"
     TASK "Implement YV12 image as template specialisation"
     TASK "Implement the needed image conversion from and to the YV12 image"
 
-
-
-
 ITEM P0 S13 "Header files can be installed with jam"
     TASK "Write InstallHeaders rule"
     TASK "Write INstallAllHaders rule"
-
-ITEM P0 S13 "The Db module uses the sqlite library of the OS if possible"
-    TASK "Extend Jamrules.platinum"
-
-ITEM P0 S13 "The Db module has a dynamic driver API"
-    TASK "Review Pt::Plugin API"
 
 ITEM P0 S13 "The Db module has a sqlite driver"
 
@@ -129,11 +78,6 @@ ITEM P0 S13 "The IODevice class is implemented"
 
 ITEM P0 S13 "The IOManager supports async IO"
     TASK "Implement async IO as special stream type"
-
-ITEM P0 S13 "The system module supports WinCE and QNX"
-    TASK "Update changes from ppr"
-    TASK "Write Documentation"
-    TASK "Write test case"
 
 ITEM P0 S13 "An easy CLI based (or maybe ncurses based) application for managing BACKLOG, TODO, ONGOING, DONE and BUGS exist"
     TASK "Implement the helper application so that we won't need to edit the text files manually"

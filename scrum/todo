@@ -20,3 +20,51 @@
 # regards,
 # Aloysius
 #
+
+ITEM P10 S5 "The AtomicInt class implements atomic operations"
+    TASK "Add fallback version that uses pthreads"
+    TASK "Review asm"
+    TASK "Write test case"
+    TASK "Write docs"
+
+ITEM P10 S5 "Variant class is implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P10 S5 "SmartPtr class is implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P10 S5 "Signals and Delegates are implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P10 S5 "Object reflection API is documented"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P10 S5 "CTTI system is implemented"
+    TASK "Review IfElse template"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P10 S5 "Event based Application class is implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
+    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
+    TASK "Implement ARgbPlanarImage"
+    TASK "Implement PtrT helper class in ColorTraits"
+    TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"
+
+ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
+    TASK "Extend Jamrules.platinum"
+
+ITEM P5 S8 "The Db module has a dynamic driver API"
+    TASK "Review Pt::Plugin API"
