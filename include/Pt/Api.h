@@ -34,7 +34,7 @@
 #define Pt_Api_h
 
 
-#if defined(_MSC_VER) || defined(_WIN32)
+#if defined(_MSC_VER)
     	//http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
     	//http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
     	//http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
