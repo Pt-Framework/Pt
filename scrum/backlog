@@ -21,10 +21,6 @@
 # Aloysius
 #
 
-ITEM P7 S5 "Object reflection API is documented"
-	TASK "Write Documentation"
-	TASK "Write test case"
-
 ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
 	TASK "Implement ARgbPlanarImage"
 	TASK "Implement PtrT helper class in ColorTraits"
@@ -35,6 +31,10 @@ ITEM P8 S13 "The image-related algorithms are improved"
 	TASK "Write iterator based algorithm assign"
 	TASK "Write iterator based algorithm blockScale"
 	TASK "Write iterator based algorithm brighten/darken (using uniform scalling)"
+
+ITEM P7 S5 "Object reflection API is documented"
+	TASK "Write Documentation"
+	TASK "Write test case"
 
 ITEM P7 S8 "New color models and algorithms are implemented"
 	TASK "Implement YUV color model"
