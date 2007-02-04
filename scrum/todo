@@ -20,7 +20,3 @@
 # regards,
 # Aloysius
 #
-
-ITEM P7 S5 "Object reflection API is documented"
-	TASK "Write Documentation"
-	TASK "Write test case"

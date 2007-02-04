@@ -21,6 +21,10 @@
 # Aloysius
 #
 
+ITEM P7 S5 "Object reflection API is documented"
+	TASK "Write Documentation"
+	TASK "Write test case"
+
 ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
 	TASK "Implement ARgbPlanarImage"
 	TASK "Implement PtrT helper class in ColorTraits"
