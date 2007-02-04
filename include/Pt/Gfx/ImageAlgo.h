@@ -103,8 +103,8 @@ namespace Gfx {
     *  destination range [to, toEnd].
     */
     template <typename InIteratorT, typename OutIteratorT> inline
-    void blockScale(InIteratorT from,    OutIteratorT to,
-                    InIteratorT fromEnd, OutIteratorT toEnd)
+    void blockScale(InIteratorT  from, InIteratorT  fromEnd,
+                    OutIteratorT to,   OutIteratorT toEnd)
     {
         const Math::Size fromSize   = fromEnd - from;
         const uint       fromWidth  = fromSize.width();
@@ -117,6 +117,7 @@ namespace Gfx {
         blockScale(from, fromWidth, fromHeight, to, toWidth, toHeight);
     }
 
+#if 0
     /** @brief Block-scale an image.
     *
     *  @param from      Source image
@@ -131,6 +132,7 @@ namespace Gfx {
         to.resize(newWidth, newHeight);
         blockScale(from.begin(), from.width(), from.height(), to.begin(), newWidth, newHeight);
     }
+#endif
 
 } // namespace Gfx
 

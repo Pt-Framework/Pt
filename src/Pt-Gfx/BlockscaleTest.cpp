@@ -41,7 +41,7 @@ void ScaleARgbImageTest()
 
 	//clock_t begin = clock();
 	//for(int i = 0; i < 1000; ++i)
-	blockScale(image.begin(), image2.begin(), image.end(), image2.end());
+	blockScale(image.begin(), image.begin(), image2.end(), image2.end());
 	//std::cerr << "PixelIterator: " << clock() - begin << std::endl;
 }
 

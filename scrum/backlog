@@ -22,6 +22,7 @@
 #
 
 ITEM P10 S13 "The image, subimage and their related iterator classes are improved"
+	TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
 	TASK "Implement ARgbPlanarImage"
 	TASK "Implement PtrT helper class in ColorTraits"
 	TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"
