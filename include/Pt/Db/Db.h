@@ -11,12 +11,6 @@ in the Pt namespace.
 
 namespace Pt {
 
-	/** The DB Module.
-	This module provides abstract access to sql-based databases. Backends exist for
-	sqlite, postgresql and mysql.
-	All classes and functions are in the namespace Db, which is nested
-	in the Pt namespace.
-	 */
 	namespace Db {
 		class Connection;
         class Statement;

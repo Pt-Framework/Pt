@@ -5,16 +5,16 @@ event queue, functionality for delivery of high-level events, creation of
 widgets, windows and pixmaps, layouting and painting on widget and pixmaps.
 */
 
+namespace Pt {
 
-namespace ptv {
+namespace Gui {
 
-/**
-@brief The GUI module to create applications with graphical user-interface.
-*/
-namespace gui {
+}
 
-/** \page "Tutorial - Simple application"
-!!!Tutorial - A simple application
+}
+
+/** \page "Simple applications"
+!!!A simple application
 
 This tutorial demonstrates how to create a basic graphical application using PPR.
 
@@ -475,7 +475,7 @@ As stated above, we just have to override $_mouseEvent(const MouseEvent& event)$
 virtual void _mouseEvent(const MouseEvent& event)
 {
 	// Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
-	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton) 
+	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
 	{
 		// Get the painter of the widget.
 		gui::Painter widgetPainter = painter();
@@ -518,7 +518,7 @@ A key-code specifies a key which has no real character-representation, like for 
 key, the enter key or the 'Page up' key.
 
 Character keys, on the other hand, have a character representation. Those keys are the ones which
-usually will create some output on the screen when typed, like a, b, c, 1, 2, 3 or !, ", §.
+usually will create some output on the screen when typed, like a, b, c, 1, 2, 3 or !, ", .
 
 To handle key events we have to override the method Widget::_keyEvent(const KeyEvent& event) in our
 TutorialWindow-class and add the event-handling code.
@@ -659,7 +659,7 @@ class TutorialWindow : public ptv::gui::Widget
 		virtual void _mouseEvent(const MouseEvent& event)
 		{
 			// Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
-			if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton) 
+			if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
 			{
 				// Get the painter of the widget.
 				gui::Painter widgetPainter = painter();
@@ -756,6 +756,3 @@ TODO
                      even be stored inside the graphics card's memory) the usage of pixmap is
                      the fastest way to draw complex graphics on a graphical device.            |
 */
-
-}
-}

@@ -1,6 +1,5 @@
-#ifndef PT_SYSTEM_H
-#define PT_SYSTEM_H
-
+#ifndef PT_Text_Text_H
+#define PT_Text_Text_H
 
 /** \dir
 This module offers classes and concepts for String and Char-operations, streaming,
@@ -13,6 +12,7 @@ namespace Pt {
 
     }
 }
+
 /** \page "Using TextStreams"
 !!! Using TextStreams
 

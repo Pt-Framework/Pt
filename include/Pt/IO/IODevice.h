@@ -30,9 +30,10 @@ namespace Pt {
 
 namespace IO {
 
-//! @ingroup Pt
-//! @brief I/O Device base class
-/**
+
+/** @brief I/O Device base class
+    @ingroup Pt
+
     This class serves as the base class for all kinds of I/O devices. The
     interface supports synchronous and asynchronous I/O operations. Some
     I/O buffers and I/O streams within use IODevices as endpoints. At

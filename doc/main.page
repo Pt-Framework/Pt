@@ -30,8 +30,11 @@ develops PPR and determines its future.
 
 !!! News
 \n
+| #05-02-2007, }Sprint Results}#\n
+This slightly longer development sprint has lead to the TR-1 release. Many improvements have been made to the core module and the %Gfx module. A new module for network programming was added (%Pt::Net). %Pt can now be built wit the intel compiler on win32. The code is available as a tarball in the download section or as a tag in the subversion repository (tags/tr1).
+
 | #01-12-2006, }Sprint Results}#\n
-During the last sprint, enhancements have been made to the Gfx module and the core module, most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
+During the last sprint, enhancements have been made to the %Gfx module and the core module, Most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
 
 | #01-11-2006, }Scrum project management introduced}#\n
 The scrum system can now be used by developers to coordinate their efforts to
