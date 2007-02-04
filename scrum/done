@@ -28,6 +28,8 @@
 # Aloysius
 #
 
+########################################################################################
+
 ITEM P9 S8 "The color class' interface is improved"
 	TASK "Remove all non-maintained color classes in the old Gfx"	blue_wind_25	2007-01-23
 	TASK "Move all Gfx2 color classes back to the original Gfx"	blue_wind_25	2007-01-24
