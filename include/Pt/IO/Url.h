@@ -37,6 +37,9 @@ public:
 	inline InvalidUrl(const char* _what, const SourceInfo& _si)
 	: std::logic_error(_what + _si)
 	{ }
+
+	~InvalidUrl() throw()
+	{}
 };
 
 
