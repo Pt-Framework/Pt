@@ -46,7 +46,7 @@
     	#pragma warning( disable : 4251 ) 
 
     	//non dll-interface base class
-    	//#pragma warning( disable : 4275 )
+    	#pragma warning( disable : 4275 )
 
     	// exception sepcification ignored
     	#pragma warning( disable : 4290 ) 
