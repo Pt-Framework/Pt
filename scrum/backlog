@@ -37,50 +37,48 @@ ITEM P7 S5 "Object reflection API is documented"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM P7 S8 "New color models and algorithms are implemented"
-	TASK "Implement YUV color model"
-	TASK "Implement HSV color model"
-	TASK "Implement CMY color model"
-	TASK "Implement CMYK color model"
-
 ITEM P7 S5 "The AtomicInt class implements atomic operations"
 	TASK "Add fallback version that uses pthreads"
 	TASK "Review asm"
 	TASK "Write test case"
 	TASK "Write docs"
 
-ITEM P6 S8 "Blending is supported by all color classes in the new Gfx code"
-	TASK "Implement void blend(ColorT& dst, const& src, char alphaMask)"
-
-ITEM P6 S5 "Signals and Delegates are implemented"
+ITEM P7 S5 "Signals and Delegates are implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM P0 S13 "The Image class has a block iterator"
-	TASK "Write BlockIterator"
-	TASK "Write BlockIterator based algorithm for scale"
-
-ITEM P5 S5 "Variant class is implemented"
+ITEM P7 S5 "Variant class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM P5 S5 "SmartPtr class is implemented"
+ITEM P7 S5 "SmartPtr class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM P5 S5 "Event based Application class is implemented"
+ITEM P7 S5 "Event based Application class is implemented"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
 
-ITEM P2 S5 "CTTI system is implemented"
+ITEM P7 S5 "CTTI system is implemented"
 	TASK "Review IfElse template"
 	TASK "Review code"
 	TASK "Write Documentation"
 	TASK "Write test case"
+
+ITEM P5 S8 "New color models and algorithms are implemented"
+	TASK "Implement void blend(ColorT& dst, const& src, char alphaMask)"
+	TASK "Implement YUV color model"
+	TASK "Implement HSV color model"
+	TASK "Implement CMY color model"
+	TASK "Implement CMYK color model"
+
+ITEM P4 S13 "The Image class has a block iterator"
+	TASK "Write BlockIterator"
+	TASK "Write BlockIterator based algorithm for scale"
 
 ITEM P1 S8 "Byteorder API has ASM optimisation"
 	TASK "Look at ffmpeg code"
@@ -98,6 +96,8 @@ ITEM P1 S13 "The Image class supports several planar image formats, mostly compa
 	TASK "Find out which YUV formats are used for movie playback on linux and win32"
 	TASK "Implement YV12 image as template specialisation"
 	TASK "Implement the needed image conversion from and to the YV12 image"
+
+
 
 
 ITEM P0 S13 "Header files can be installed with jam"
