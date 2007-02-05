@@ -46,6 +46,10 @@ Main ImagePainterDemo : ImagePainterDemo.cpp ;
 Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate ImagePainterDemo : bin ;
 
+Main DrawWideLineDemo : DrawWideLineDemo.cpp ;
+Main_LinkSharedLibraries DrawWideLineDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate DrawWideLineDemo : bin ;
+
 Main DrawTextDemo : DrawTextDemo.cpp ;
 Main_LinkSharedLibraries DrawTextDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawTextDemo : bin ;
