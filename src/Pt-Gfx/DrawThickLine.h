@@ -35,6 +35,104 @@ namespace Pt {
 
 namespace Gfx {
 
+class LineEdge
+{
+	public:
+		LineEdge()
+		: _height(0), _x(0)
+		, _stepx(0), _signdx(0)
+		, _e(0), _dx(0), _dy(0)
+		{}
+
+		unsigned int height() const
+		{ return _height; }
+
+		int x() const
+		{ return _x; }
+
+		int stepx() const
+		{ return _stepx; }
+
+		int signdx() const
+		{ return _signdx; }
+
+		int e() const
+		{ return _e; }
+
+		int dx() const
+		{ return _dx; }
+
+		int dy() const
+		{ return _dy; }
+
+	private:
+		// number of scanlines in edge
+		unsigned int _height;
+
+		// starting x coordinate of edge
+		int _x;
+
+		// fixed integer dx (usually 0)
+		int _stepx;
+
+		// additional (optional) integer dx
+		int _signdx;
+
+		// initial value for decision variable
+		int _e;
+
+		// dy/dx is (rational) slope of edge
+		int _dy;
+		int _dx;
+};
+
+
+class LineFace
+{
+	public:
+		LineFace()
+		: _xa(0.0), _ya(0.0)
+		, _dx(0), _dy(0)
+		, _x(0), _y(0)
+		, _k(0.0)
+		{}
+
+		double xa() const
+		{ return _xa; }
+
+		double ya() const
+		{ return _ya; }
+
+		int dx() const
+		{ return _dx; }
+
+		int dy() const
+		{ return _dy; }
+
+		int x() const
+		{ return _x; }
+
+		int y() const
+		{ return _y; }
+
+		double k() const
+		{ return _k; }
+
+	private:
+		// endpoint of line face (rel. to (x,y))
+		double _xa, _ya;
+
+		// (dx,dy) points into line (a convention)
+		int _dx, _dy;
+
+		// line end, i.e. center of face
+		int _x, _y;
+
+		// xa * dy - ya * dx
+		double _k;
+};
+
+
 /** @brief Draw thick lines on an image
 
     This class implements DrawLine and is specialised for the  drawing
@@ -62,7 +160,10 @@ class DrawThickLine : public DrawLine
 		*/
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
-    private:	 
+		void drawSegment(Pt::Math::Point& from, Pt::Math::Point& to,
+		                 bool projectLeft, bool projectRight,
+		                 LineFace& leftFace, LineFace& rightFace);
+    private:
         FillPolygon			_fillPolygon;
         FillConvexPolygon	_fillConvexPolygon;
         RasterBuffer		_rasterBuffer;
