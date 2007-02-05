@@ -42,16 +42,18 @@ namespace Math {
             {
             }
 
-            BasicVector2d(const BasicPoint<T>& startPt, const BasicPoint<T>& endPt)
-            : m_x( endPt.x() - startPt.x() )
-            , m_y( endPt.y() - startPt.y() )
+            template<typename PointType>
+            BasicVector2d(const BasicPoint<PointType>& startPt, const BasicPoint<PointType>& endPt)
+            : m_x( (T)(endPt.x() - startPt.x()) )
+            , m_y( (T)(endPt.y() - startPt.y()) )
             {
             }
 
-            inline void set(const BasicPoint<T>& startPt, const BasicPoint<T>& endPt)
+            template<typename PointType>
+            inline void set(const BasicPoint<PointType>& startPt, const BasicPoint<PointType>& endPt)
             {
-                m_x = endPt.x() - startPt.x();
-                m_y = endPt.y() - startPt.y();
+                m_x = (T)(endPt.x() - startPt.x());
+                m_y = (T)(endPt.y() - startPt.y());
             }
 
             void normalize()
@@ -144,7 +146,7 @@ namespace Math {
                 return this->m_x * vector.m_x + this->m_y * vector.m_y;
 			}
 
-
+            
             inline const BasicVector2d<T> operator+=(const BasicPoint<T>& point)
             {
                 m_x += point.x();
@@ -152,10 +154,11 @@ namespace Math {
 			    return *this;
 		    }
 
-
-            inline BasicVector2d<T>& operator+(const BasicPoint<T>& point) const
+            
+            inline BasicVector2d<T> operator+(const BasicPoint<T>& point) const
 			{
-                return BasicVector2d<T>( (m_x+point.x()), (m_y+point.y()) );
+                BasicVector2d<T> newVector( (m_x+point.x()), (m_y+point.y()) );
+                return newVector;
             }
 
 
@@ -166,10 +169,11 @@ namespace Math {
 			    return *this;
 		    }
 
-
-            inline BasicVector2d<T>& operator-(const BasicPoint<T>& point) const
+            
+            inline BasicVector2d<T> operator-(const BasicPoint<T>& point) const
 			{
-                return BasicVector2d<T>( (m_x-point.x()), (m_y-point.y()) );
+                BasicVector2d<T> newVector( (m_x-point.x()), (m_y-point.y()) );
+                return newVector;
             }
 
 
