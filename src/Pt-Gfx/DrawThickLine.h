@@ -37,114 +37,114 @@ namespace Gfx {
 
 class LineEdge
 {
-	public:
-		LineEdge()
-		: _height(0), _x(0)
-		, _stepx(0), _signdx(0)
-		, _e(0), _dx(0), _dy(0)
-		{}
+    public:
+        LineEdge()
+        : _height(0), _x(0)
+        , _stepx(0), _signdx(0)
+        , _e(0), _dx(0), _dy(0)
+        {}
 
-		unsigned int height() const
-		{ return _height; }
+        unsigned int height() const
+        { return _height; }
 
-		int x() const
-		{ return _x; }
+        int x() const
+        { return _x; }
 
-		int stepx() const
-		{ return _stepx; }
+        int stepx() const
+        { return _stepx; }
 
-		int signdx() const
-		{ return _signdx; }
+        int signdx() const
+        { return _signdx; }
 
-		int e() const
-		{ return _e; }
+        int e() const
+        { return _e; }
 
-		int dx() const
-		{ return _dx; }
+        int dx() const
+        { return _dx; }
 
-		int dy() const
-		{ return _dy; }
+        int dy() const
+        { return _dy; }
 
-	private:
-		// number of scanlines in edge
-		unsigned int _height;
+    private:
+        // number of scanlines in edge
+        unsigned int _height;
 
-		// starting x coordinate of edge
-		int _x;
+        // starting x coordinate of edge
+        int _x;
 
-		// fixed integer dx (usually 0)
-		int _stepx;
+        // fixed integer dx (usually 0)
+        int _stepx;
 
-		// additional (optional) integer dx
-		int _signdx;
+        // additional (optional) integer dx
+        int _signdx;
 
-		// initial value for decision variable
-		int _e;
+        // initial value for decision variable
+        int _e;
 
-		// dy/dx is (rational) slope of edge
-		int _dy;
-		int _dx;
+        // dy/dx is (rational) slope of edge
+        int _dy;
+        int _dx;
 };
 
 
 class LineFace
 {
-	public:
-		LineFace()
-		: _xa(0.0), _ya(0.0)
-		, _dx(0), _dy(0)
-		, _x(0), _y(0)
-		, _k(0.0)
-		{}
+    public:
+        LineFace()
+        : _xa(0.0), _ya(0.0)
+        , _dx(0), _dy(0)
+        , _x(0), _y(0)
+        , _k(0.0)
+        {}
 
-		double xa() const
-		{ return _xa; }
+        double xa() const
+        { return _xa; }
 
-		double ya() const
-		{ return _ya; }
+        double ya() const
+        { return _ya; }
 
-		int dx() const
-		{ return _dx; }
+        int dx() const
+        { return _dx; }
 
-		void setDX(int dx)
-		{ _dx = dx; }
+        void setDX(int dx)
+        { _dx = dx; }
 
-		int dy() const
-		{ return _dy; }
+        int dy() const
+        { return _dy; }
 
-		void setDY(int dy)
-		{ _dy = dy; }
+        void setDY(int dy)
+        { _dy = dy; }
 
-		int x() const
-		{ return _x; }
+        int x() const
+        { return _x; }
 
-		void setX(int x)
-		{ _x = x; }
+        void setX(int x)
+        { _x = x; }
 
-		int y() const
-		{ return _y; }
+        int y() const
+        { return _y; }
 
-		void setY(int y)
-		{ _y = y; }
+        void setY(int y)
+        { _y = y; }
 
-		double k() const
-		{ return _k; }
+        double k() const
+        { return _k; }
 
-		void setK(double k_)
-		{ _k = k_; }
+        void setK(double k_)
+        { _k = k_; }
 
-	private:
-		// endpoint of line face (rel. to (x,y))
-		double _xa, _ya;
+    private:
+        // endpoint of line face (rel. to (x,y))
+        double _xa, _ya;
 
-		// (dx,dy) points into line (a convention)
-		int _dx, _dy;
+        // (dx,dy) points into line (a convention)
+        int _dx, _dy;
 
-		// line end, i.e. center of face
-		int _x, _y;
+        // line end, i.e. center of face
+        int _x, _y;
 
-		// xa * dy - ya * dx
-		double _k;
+        // xa * dy - ya * dx
+        double _k;
 };
 
 
@@ -160,28 +160,28 @@ class DrawThickLine : public DrawLine
         */
         DrawThickLine();
 
-		/** @brief Rasterizes a thick line
+        /** @brief Rasterizes a thick line
 
-			A line described by two points is reasterized to the given
-			RasterBuffer. Attributes for the line are taken from the pen.
-			Clipping is performed before the line is drawn.
-		*/
+            A line described by two points is reasterized to the given
+            RasterBuffer. Attributes for the line are taken from the pen.
+            Clipping is performed before the line is drawn.
+        */
         void rasterize( ARgbImage& image, const Pen& pen, const Math::Point& from,
                         const Math::Point to, RasterBuffer& rasterBuffer );
 
-		/** @brief Draw a line on an image
+        /** @brief Draw a line on an image
 
-			@see DrawLine::draw
-		*/
+            @see DrawLine::draw
+        */
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
-		void drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math::Point& to,
-		                 bool projectLeft, bool projectRight,
-		                 LineFace* leftFace, LineFace* rightFace);
+        void drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math::Point& to,
+                        bool projectLeft, bool projectRight,
+                        LineFace* leftFace, LineFace* rightFace);
     private:
-        FillPolygon			_fillPolygon;
-        FillConvexPolygon	_fillConvexPolygon;
-        RasterBuffer		_rasterBuffer;
+        FillPolygon _fillPolygon;
+        FillConvexPolygon _fillConvexPolygon;
+        RasterBuffer _rasterBuffer;
 };
 
 } // namespace Gfx

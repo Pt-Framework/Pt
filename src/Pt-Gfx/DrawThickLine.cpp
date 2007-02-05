@@ -122,49 +122,59 @@ void DrawThickLine::drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math:
                                 bool projectLeft, bool projectRight,
                                 LineFace* leftFace, LineFace* rightFace)
 {
-	double	  l, L, r;
-	double	  xa, ya;
-	double	  projectXoff = 0.0, projectYoff = 0.0;
-	double	  k;
-	double	  maxy;
-	int		  x, y;
-	int		  finaly;
-	LineEdge* left;
-	LineEdge* right;
-	LineEdge* top;
-	LineEdge* bottom;
-	int		  lefty, righty, topy, bottomy;
-	LineEdge  lefts[2], rights[2];
-	int		  lw = pen.size();
+    double	  r;
+    double	  xa, ya;
+    double	  projectXoff = 0.0, projectYoff = 0.0;
+    double	  k;
+    double	  maxy;
+    int		  x, y;
+    int		  finaly;
+    LineEdge* left;
+    LineEdge* right;
+    LineEdge* top;
+    LineEdge* bottom;
+    int		  lefty, righty, topy, bottomy;
+    LineEdge  lefts[2], rights[2];
+    int		  lw = pen.size();
 
-	//
-	// draw from top to bottom or from keft to right
-	//
-	if( to.y() <  from.y() ||
-	  ( to.y() == from.y() && to.x() < from.x() ) )
-	{
-		std::swap(from, to);
-		std::swap(projectLeft, projectRight);
-		std::swap(leftFace, rightFace);
-	}
+    //
+    // draw from top to bottom or from keft to right
+    //
+    if( to.y() <  from.y() ||
+    ( to.y() == from.y() && to.x() < from.x() ) )
+    {
+        std::swap(from, to);
+        std::swap(projectLeft, projectRight);
+        std::swap(leftFace, rightFace);
+    }
 
-	int dy = to.y() - from.y();
-	int signdx = 1;
-	int dx = to.x() - from.x();
+    int dy = to.y() - from.y();
+    int signdx = 1;
+    int dx = to.x() - from.x();
 
-	if (dx < 0)
-		signdx = -1;
+    if (dx < 0)
+        signdx = -1;
 
-	leftFace->setX( from.x() );
-	leftFace->setY( from.y() );
-	leftFace->setDX( dx );
-	leftFace->setDY( dy );
+    leftFace->setX( from.x() );
+    leftFace->setY( from.y() );
+    leftFace->setDX( dx );
+    leftFace->setDY( dy );
 
-	// for faces, (dx, dy) points into the line
-	rightFace->setX( to.x() );
-	rightFace->setY( to.y() );
-	rightFace->setDX( -dx );
-	rightFace->setDY( -dy );
+    // for faces, (dx, dy) points into the line
+    rightFace->setX( to.x() );
+    rightFace->setY( to.y() );
+    rightFace->setDX( -dx );
+    rightFace->setDY( -dy );
+
+    //
+    // TODO: horizontal and vertical cases
+    //
+
+    //
+    // neither horizontal nor vertical
+    //
+    double l = 0.5 * ((double) lw);
+    double L = hypot ((double) dx, (double) dy);
 }
 
 } // namespace Gfx
