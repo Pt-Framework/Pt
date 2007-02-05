@@ -53,12 +53,16 @@ class DrawWideLineDemo : public Pt::Gui::Widget
 	{
 		//
 		// draw wide lines of varying widths using the ImagePainter
-		//
-        _imagePainter.setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
-        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 50, 50 ));
+		//          
+		_imagePainter.setPen( Pt::Gfx::Pen( 30, Pt::Gfx::ARgbColor(0, 0xffff,0 ) ));
+        _imagePainter.drawLine( Pt::Math::Point( -400, -20 ), Pt::Math::Point( -500, -20 ));
+		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );        
+                
+/*		_imagePainter.setPen( Pt::Gfx::Pen( 2, Pt::Gfx::ARgbColor(0, 0xffff,0 ) ));
+        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 55, -155 ));
 
         _imagePainter.setPen( Pt::Gfx::Pen( 3, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
-        _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 60, 50 ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 160, 150 ));
 
         _imagePainter.setPen( Pt::Gfx::Pen( 4, Pt::Gfx::ARgbColor(0, 0xffff, 0) ));
         _imagePainter.drawLine( Pt::Math::Point( 30, 10 ), Pt::Math::Point( 70, 50 ));
@@ -76,7 +80,7 @@ class DrawWideLineDemo : public Pt::Gui::Widget
 		// draw thin lines over the wide lines to mark center using the ImagePainter
 		//
         _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
-        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 50, 50 ));
+        _imagePainter.drawLine( Pt::Math::Point( 10, 10 ), Pt::Math::Point( 150, 150 ));
         _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 60, 50 ));
         _imagePainter.drawLine( Pt::Math::Point( 30, 10 ), Pt::Math::Point( 70, 50 ));
         _imagePainter.drawLine( Pt::Math::Point( 40, 10 ), Pt::Math::Point( 80, 50 ));
@@ -116,7 +120,7 @@ class DrawWideLineDemo : public Pt::Gui::Widget
         painter().drawLine( Pt::Math::Point( 75, 55 ), Pt::Math::Point( 120, 100 ));
         painter().drawLine( Pt::Math::Point( 85, 55 ), Pt::Math::Point( 130, 100 ));
         painter().drawLine( Pt::Math::Point( 97, 55 ), Pt::Math::Point( 142, 100 ));
-        painter().drawLine( Pt::Math::Point( 110, 55 ), Pt::Math::Point( 155, 100 ));
+        painter().drawLine( Pt::Math::Point( 110, 55 ), Pt::Math::Point( 155, 100 ));*/
     }
 
 	virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)

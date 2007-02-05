@@ -28,6 +28,7 @@ SharedLibrary Pt-Gfx :
 	FillConvexPolygon.cpp
 	FreeType.cpp
 	Exception.cpp
+	DrawEllipse.cpp
 	;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;

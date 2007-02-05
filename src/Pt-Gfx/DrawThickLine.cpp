@@ -93,7 +93,29 @@ static int buildLineEdge (double x0, double y0, double k, int dx, int dy, int xi
 }
 
 
-static void fillLine(ARgbImage& image, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
+static void fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h)
+{
+	
+	Pt::ssize_t xbegin = std::max( 0, x );
+	
+	Pt::ssize_t xend = 0;
+	
+	if( (x + (int)w)  >= 0 )
+		xend = std::min( image.width(), x + w ) ;
+	
+	Pt::ssize_t ypos = std::max( 0, y );	
+
+	Pt::ssize_t yend = 0;
+	
+	if( (y + (int) h) > 0 )
+		yend = std::min( image.height(), y + h ) ;
+		
+	for( ; ypos < yend; ypos++ )
+		for( size_t xpos = xbegin; xpos < xend; xpos++ )		
+			image.pixel( xpos, ypos) = pen.color();
+}
+
+static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
 
 {
     int left_x = 0, left_e = 0;
@@ -107,16 +129,6 @@ static void fillLine(ARgbImage& image, int y, unsigned int overall_height, LineE
     int right_dy = 0, right_dx = 0;
 
     unsigned int left_height = 0, right_height = 0;
-
-    //miPoint 	*ppt;
-    //miPoint 	*pptInit = (miPoint *)NULL;
-    unsigned int* pwidth;
-    unsigned int* pwidthInit = (unsigned int *)NULL;
-
-    //pptInit = (miPoint *)mi_xmalloc(overall_height * sizeof(miPoint));
-    //pwidthInit = (unsigned int *)mi_xmalloc(overall_height * sizeof(unsigned int));
-    //ppt = pptInit;
-    //pwidth = pwidthInit;
 
     while ((left_count || left_height) && (right_count || right_height))
     {
@@ -157,17 +169,22 @@ static void fillLine(ARgbImage& image, int y, unsigned int overall_height, LineE
         // walk down to end of left or right edge, whichever comes first
         while (height--)
         {
-            // generate a span (omitting point on right end, see above)
-            if (right_x >= left_x)
-            {
-                //ppt->x = left_x;
-                //ppt->y = y;
-                //ppt++;
-                //*pwidth++ = (unsigned int)(right_x - left_x + 1);
-                //std::cerr << "SPAN at: " << left_x << ", " << y << " , length: " << (unsigned int)(right_x - left_x + 1) << "\n";
-                for(int xpos = left_x; xpos <= right_x; ++xpos)
-                    image.pixel(xpos, y) = ARgbColor(0,0,0xffff);
-            }
+			
+			if( y >= 0 &&  y < image.height())
+			{
+	            // generate a span (omitting point on right end, see above)
+		        if (right_x >= left_x)
+			    {
+				    int xpos = std::max( left_x, 0 );                
+					const int endx = std::min<int>( right_x, image.width() -1);
+                
+					for(; xpos <= endx; ++xpos)
+					{					 
+						image.pixel(xpos, y) = pen.color();
+					}
+				}
+			}
+			
             y++;
 
             // update left_x, right_x by stepping along left and right edges,
@@ -189,8 +206,6 @@ static void fillLine(ARgbImage& image, int y, unsigned int overall_height, LineE
             }
         }
     }
-
-  // MI_PAINT_SPANS(paintedSet, pixel, ppt - pptInit, pptInit, pwidthInit)
 }
 
 
@@ -280,6 +295,9 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
     //this->rasterize( image, pen, from, to , _rasterBuffer );
     //_fillConvexPolygon.output( image, brush, _rasterBuffer );
 
+	if( image.height() == 0 || image.width() == 0 )
+		return;
+		
     LineFace leftFace;
     LineFace rightFace;
     this->drawSegment(image, pen, from, to, false, false, &leftFace, &rightFace);
@@ -333,135 +351,180 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
     rightFace->setDY( -dy );
 
     //
-    // TODO: horizontal and vertical cases
-    //
-
-    //
     // neither horizontal nor vertical
     //
-    double l = 0.5 * ((double) lw);
-    double L = hypot ((double) dx, (double) dy);
-
-    if (dx < 0)
+	if (dy == 0)
+    /* segment is horizontal */
     {
-        right = &rights[1];
-        left = &lefts[0];
-        top = &rights[0];
-        bottom = &lefts[1];
+		rightFace->setXA( 0 );
+		rightFace->setYA( 0.5 * (double)lw );
+		rightFace->setK( -0.5 * (double)(lw * dx)); /* k = xa * dy - ya * dx */
+		leftFace->setXA( 0 );
+		leftFace->setYA( -rightFace->ya() );
+		leftFace->setK( rightFace->k() ); /* k = xa * dy - ya * dx */
+		x = from.x();
+
+		if( projectLeft )
+			x -= (lw >> 1);
+			
+		y = from.y() - (lw >> 1);
+		dx = to.x() - x;
+
+		if( projectRight )
+			dx += ((lw + 1) >> 1);
+			
+		dy = lw;
+		fillRect( image, pen,  x, y, (unsigned int)dx, (unsigned int)dy );
     }
-        else
+	else if (dx == 0)
+    /* segment is vertical */
     {
-        right = &rights[0];
-        left = &lefts[1];
-        top = &lefts[0];
-        bottom = &rights[1];
+		leftFace->setXA( 0.5 * (double)lw );
+		leftFace->setYA( 0 );
+		leftFace->setK( 0.5 * (double)(lw * dy) ); /* k = xa * dy - ya * dx */
+		rightFace->setXA( -leftFace->xa() );
+		rightFace->setYA( 0 );
+		rightFace->setK( leftFace->k() ); /* k = xa * dy - ya * dx */
+		y = from.y();
+
+		if( projectLeft )
+			y -= lw >> 1;
+			
+		x = from.x() - (lw >> 1);
+		dy = to.y() - y;
+
+		if( projectRight )
+		dy += ((lw + 1) >> 1);
+
+		dx = lw;
+		fillRect( image, pen, x, y, (unsigned int)dx, (unsigned int)dy);
     }
+	else    
+	{
+		double l = 0.5 * ((double) lw);
+		double L = hypot ((double) dx, (double) dy);
 
-    double r = l / L;
-    double ya = -r * dx;
-    double xa = r * dy;
+		if (dx < 0)
+		{
+			right = &rights[1];
+			left = &lefts[0];
+			top = &rights[0];
+			bottom = &lefts[1];
+		}
+			else
+		{
+			right = &rights[0];
+			left = &lefts[1];
+			top = &lefts[0];
+			bottom = &rights[1];
+		}
 
-    if( projectLeft | projectRight )
-    {
-        projectXoff = -ya;
-        projectYoff = xa;
-    }
+		double r = l / L;
+		double ya = -r * dx;
+		double xa = r * dy;
 
-    double k = l * L;
+		if( projectLeft | projectRight )
+		{
+			projectXoff = -ya;
+			projectYoff = xa;
+		}
 
-    leftFace->setXA(xa);
-    leftFace->setYA(ya);
-    leftFace->setK(k);
+		double k = l * L;
 
-    rightFace->setXA(-xa);
-    rightFace->setYA(-ya);
-    rightFace->setK(k);
+		leftFace->setXA(xa);
+		leftFace->setYA(ya);
+		leftFace->setK(k);
+
+		rightFace->setXA(-xa);
+		rightFace->setYA(-ya);
+		rightFace->setK(k);
 
 
-    if(projectLeft)
-        righty = buildLineEdge(xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), false, right);
-    else
-        righty = buildLineEdge(xa, ya, k, dx, dy, from.x(), from.y(), false, right);
+		if(projectLeft)
+			righty = buildLineEdge(xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), false, right);
+		else
+			righty = buildLineEdge(xa, ya, k, dx, dy, from.x(), from.y(), false, right);
 
-    //
-    // first long edge
-    //
-    if(projectRight)
-    {
-        double xap = xa + projectXoff;
-        double yap = ya + projectYoff;
-        bottomy = buildLineEdge(xap, yap, xap * dx + yap * dy, -dy, dx,  to.x(), to.y(), (dx < 0 ? true : false), bottom);
-        maxy = -ya + projectYoff;
-    }
-    else
-    {
-        bottomy = buildLineEdge(xa, ya, 0.0, -dy, dx,to.x(), to.y(), (dx < 0 ? true : false), bottom);
-        maxy = -ya;
-    }
+		//
+		// first long edge
+		//
+		if(projectRight)
+		{
+			double xap = xa + projectXoff;
+			double yap = ya + projectYoff;
+			bottomy = buildLineEdge(xap, yap, xap * dx + yap * dy, -dy, dx,  to.x(), to.y(), (dx < 0 ? true : false), bottom);
+			maxy = -ya + projectYoff;
+		}
+		else
+		{
+			bottomy = buildLineEdge(xa, ya, 0.0, -dy, dx,to.x(), to.y(), (dx < 0 ? true : false), bottom);
+			maxy = -ya;
+		}
 
-    //
-    // second long edge
-    //
-    ya = -ya;
-    xa = -xa;
-    k = -k;
+		//
+		// second long edge
+		//
+		ya = -ya;
+		xa = -xa;
+		k = -k;
 
-    if (projectLeft)
-        lefty = buildLineEdge (xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), true, left);
-    else
-        lefty = buildLineEdge (xa, ya, k, dx, dy, from.x(), from.y(), true, left);
+		if (projectLeft)
+			lefty = buildLineEdge (xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), true, left);
+		else
+			lefty = buildLineEdge (xa, ya, k, dx, dy, from.x(), from.y(), true, left);
 
-    //
-    // first short edge on left end
-    //
-    if (signdx > 0)
-    {
-        ya = -ya;
-        xa = -xa;
-    }
+		//
+		// first short edge on left end
+		//
+		if (signdx > 0)
+		{
+			ya = -ya;
+			xa = -xa;
+		}
 
-    if (projectLeft)
-    {
-        double xap = xa - projectXoff;
-        double yap = ya - projectYoff;
-        topy = buildLineEdge (xap, yap, xap * dx + yap * dy, -dy, dx, from.x(), from.y(), (dx > 0 ? true : false), top);
-    }
-    else
-        topy = buildLineEdge (xa, ya, 0.0, -dy, dx, from.x(), from.y(), (dx > 0 ? true : false), top);
+		if (projectLeft)
+		{
+			double xap = xa - projectXoff;
+			double yap = ya - projectYoff;
+			topy = buildLineEdge (xap, yap, xap * dx + yap * dy, -dy, dx, from.x(), from.y(), (dx > 0 ? true : false), top);
+		}
+		else
+			topy = buildLineEdge (xa, ya, 0.0, -dy, dx, from.x(), from.y(), (dx > 0 ? true : false), top);
 
-    //
-    // first short edge on right end
-    //
-    if (projectRight)
-    {
-        double xap = xa + projectXoff;
-        double yap = ya + projectYoff;
-        bottomy = buildLineEdge (xap, yap, xap * dx + yap * dy, -dy, dx,  to.x(), to.y(), (dx < 0 ? true : false), bottom);
-        maxy = -ya + projectYoff;
-    }
-    else
-    {
-        bottomy = buildLineEdge (xa, ya, 0.0, -dy, dx, to.x(), to.y(), (dx < 0 ? true : false), bottom);
-        maxy = -ya;
-    }
+		//
+		// first short edge on right end
+		//
+		if (projectRight)
+		{
+			double xap = xa + projectXoff;
+			double yap = ya + projectYoff;
+			bottomy = buildLineEdge (xap, yap, xap * dx + yap * dy, -dy, dx,  to.x(), to.y(), (dx < 0 ? true : false), bottom);
+			maxy = -ya + projectYoff;
+		}
+		else
+		{
+			bottomy = buildLineEdge (xa, ya, 0.0, -dy, dx, to.x(), to.y(), (dx < 0 ? true : false), bottom);
+			maxy = -ya;
+		}
 
-    finaly = ( (int) ceil(maxy) ) + to.y();
+		finaly = ( (int) ceil(maxy) ) + to.y();
 
-    if (dx < 0)
-    {
-        left->setHeight( (unsigned int)(bottomy - lefty) );
-        right->setHeight( (unsigned int)(finaly - righty) );
-        top->setHeight( (unsigned int)(righty - topy) );
-    }
-    else
-    {
-        right->setHeight( (unsigned int)(bottomy - righty) );
-        left->setHeight( (unsigned int)(finaly - lefty) );
-        top->setHeight( (unsigned int)(lefty - topy) );
-    }
-    bottom->setHeight( (unsigned int)(finaly - bottomy) );
+		if (dx < 0)
+		{
+			left->setHeight( (unsigned int)(bottomy - lefty) );
+			right->setHeight( (unsigned int)(finaly - righty) );
+			top->setHeight( (unsigned int)(righty - topy) );
+		}
+		else
+		{
+			right->setHeight( (unsigned int)(bottomy - righty) );
+			left->setHeight( (unsigned int)(finaly - lefty) );
+			top->setHeight( (unsigned int)(lefty - topy) );
+		}
+		bottom->setHeight( (unsigned int)(finaly - bottomy) );
 
-    fillLine(image, topy, (unsigned int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2);
+		fillLine(image, pen, topy, (unsigned int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2);
+	}
 }
 
 } // namespace Gfx

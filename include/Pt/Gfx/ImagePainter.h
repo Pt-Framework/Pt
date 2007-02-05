@@ -31,7 +31,6 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Region.h>
 
-
 namespace Pt {
 
 namespace Gfx {
@@ -43,6 +42,7 @@ class DrawThickLine;
 class DrawPolyline;
 class DrawThinPolyline;
 class DrawThickPolyline;
+class DrawEllipse;
 
 class FillPolygon;
 class FillConvexPolygon;
@@ -142,9 +142,11 @@ class PT_GFX_API ImagePainter : public Painter
         DrawPolyline*        _drawPolyline;
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
+        
+        DrawEllipse*		 _drawEllipse;
 
         FillPolygon*         _fillPolygon;
-        FillConvexPolygon*   _fillConvexPolygon;
+        FillConvexPolygon*   _fillConvexPolygon;        
         DrawText*            _drawText;
 
 };

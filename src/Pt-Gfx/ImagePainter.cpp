@@ -40,6 +40,7 @@
 #include "FillPolygon.h"
 #include "FillConvexPolygon.h"
 #include "DrawText.h"
+#include "DrawEllipse.h"
 #include <cmath>
 #include <Pt/System/Clock.h>
 #include <Pt/Math/MathUtils.h>
@@ -60,14 +61,16 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _fillPolygon( 0 )
 , _fillConvexPolygon( 0 )
 , _drawText( new DrawText() )
+, _drawEllipse( new DrawEllipse )
 {
-    std::auto_ptr<DrawThinLine> dthin( new DrawThinLine );
-    std::auto_ptr<DrawThickLine> dthick( new DrawThickLine );
-    std::auto_ptr<DrawThinPolyline> dthinpoly( new DrawThinPolyline() );
-    std::auto_ptr<DrawThickPolyline> dthickpoly( new DrawThickPolyline() );
-    std::auto_ptr<FillPolygon> fillpolygon( new FillPolygon() );
-    std::auto_ptr<FillConvexPolygon> fillConvexpolygon( new FillConvexPolygon() );
-    std::auto_ptr<DrawText> dtext( new DrawText() );
+    std::auto_ptr<DrawThinLine>			dthin( new DrawThinLine );
+    std::auto_ptr<DrawThickLine>		dthick( new DrawThickLine );
+    std::auto_ptr<DrawThinPolyline>		dthinpoly( new DrawThinPolyline() );
+    std::auto_ptr<DrawThickPolyline>	dthickpoly( new DrawThickPolyline() );
+    std::auto_ptr<FillPolygon>			fillpolygon( new FillPolygon() );
+    std::auto_ptr<FillConvexPolygon>	fillConvexpolygon( new FillConvexPolygon() );
+    std::auto_ptr<DrawText>				dtext( new DrawText() );
+	std::auto_ptr<DrawEllipse>			dellipse( new DrawEllipse() );
 
     _drawThinLine       = dthin.release();
     _drawThickLine      = dthick.release();
@@ -78,6 +81,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _fillPolygon        = fillpolygon.release();
     _fillConvexPolygon	= fillConvexpolygon.release();
     _drawText           = dtext.release();
+    _drawEllipse		= dellipse.release();
 
     this->setFont( _font );
 }
@@ -91,6 +95,7 @@ ImagePainter::~ImagePainter()
     delete _fillPolygon;
     delete _fillConvexPolygon;
     delete _drawText;
+    delete _drawEllipse;
 }
 
 void ImagePainter::setPen( const Pen& pen )
@@ -184,6 +189,7 @@ void ImagePainter::fillRect(const  Math::Rect& rect)
 
 void ImagePainter::drawEllipse(const  Math::Point& topLeft, const  Math::Size& size)
 {
+	_drawEllipse->draw( _image, _pen, topLeft, size );
 }
 
 void ImagePainter::fillEllipse(const  Math::Point& topLeft, const  Math::Size& size)
