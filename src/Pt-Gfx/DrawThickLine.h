@@ -47,23 +47,44 @@ class LineEdge
         unsigned int height() const
         { return _height; }
 
+        void setHeight(int height_)
+        { _height = height_; }
+
         int x() const
         { return _x; }
+
+        void setX(int x_)
+        { _x = x_; }
 
         int stepx() const
         { return _stepx; }
 
+        void setStepX(int sdx)
+        { _stepx = sdx; }
+
         int signdx() const
         { return _signdx; }
+
+        void setSignDX(int sdx)
+        { _signdx = sdx; }
 
         int e() const
         { return _e; }
 
+        void setE(int e_)
+        { _e = e_; }
+
         int dx() const
         { return _dx; }
 
+        void setDX(int dx_)
+        { _dx = dx_; }
+
         int dy() const
         { return _dy; }
+
+        void setDY(int dy_)
+        { _dy = dy_; }
 
     private:
         // number of scanlines in edge
@@ -82,8 +103,8 @@ class LineEdge
         int _e;
 
         // dy/dx is (rational) slope of edge
-        int _dy;
         int _dx;
+        int _dy;
 };
 
 
@@ -100,8 +121,14 @@ class LineFace
         double xa() const
         { return _xa; }
 
+        void setXA(double xa_)
+        { _xa = xa_; }
+
         double ya() const
         { return _ya; }
+
+        void setYA(double ya_)
+        { _ya = ya_; }
 
         int dx() const
         { return _dx; }
@@ -175,9 +202,10 @@ class DrawThickLine : public DrawLine
         */
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
-        void drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math::Point& to,
-                        bool projectLeft, bool projectRight,
-                        LineFace* leftFace, LineFace* rightFace);
+        void drawSegment(ARgbImage& image, const Pen& pen,
+                         Pt::Math::Point from, Pt::Math::Point to,
+                         bool projectLeft, bool projectRight,
+                         LineFace* leftFace, LineFace* rightFace);
     private:
         FillPolygon _fillPolygon;
         FillConvexPolygon _fillConvexPolygon;
