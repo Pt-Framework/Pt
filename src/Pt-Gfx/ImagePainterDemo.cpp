@@ -59,8 +59,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 	void drawEllipse()
 	{
 		size_t pens = 1;
-		Pt::Math::Point point( 100 ,50 );
-		Pt::Math::Size	size( 50, 100 );
+		Pt::Math::Point point( 40 ,50 );
+		Pt::Math::Size	size( 700, 10 );
 		
 		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0)));		
 		_imagePainter.drawEllipse( point, size ) ;
