@@ -106,17 +106,32 @@ class LineFace
 		int dx() const
 		{ return _dx; }
 
+		void setDX(int dx)
+		{ _dx = dx; }
+
 		int dy() const
 		{ return _dy; }
+
+		void setDY(int dy)
+		{ _dy = dy; }
 
 		int x() const
 		{ return _x; }
 
+		void setX(int x)
+		{ _x = x; }
+
 		int y() const
 		{ return _y; }
 
+		void setY(int y)
+		{ _y = y; }
+
 		double k() const
 		{ return _k; }
+
+		void setK(double k_)
+		{ _k = k_; }
 
 	private:
 		// endpoint of line face (rel. to (x,y))
@@ -160,9 +175,9 @@ class DrawThickLine : public DrawLine
 		*/
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
-		void drawSegment(Pt::Math::Point& from, Pt::Math::Point& to,
+		void drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math::Point& to,
 		                 bool projectLeft, bool projectRight,
-		                 LineFace& leftFace, LineFace& rightFace);
+		                 LineFace* leftFace, LineFace* rightFace);
     private:
         FillPolygon			_fillPolygon;
         FillConvexPolygon	_fillConvexPolygon;

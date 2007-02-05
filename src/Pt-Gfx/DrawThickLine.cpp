@@ -24,6 +24,8 @@
 #include "DrawThickLine.h"
 #include "DrawThinLine.h"
 
+#include <algorithm>
+
 
 namespace Pt {
 
@@ -116,11 +118,53 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
 }
 
 
-void DrawThickLine::drawSegment(Pt::Math::Point& from, Pt::Math::Point& to,
+void DrawThickLine::drawSegment(const Pen& pen, Pt::Math::Point& from, Pt::Math::Point& to,
                                 bool projectLeft, bool projectRight,
-                                LineFace& leftFace, LineFace& rightFace)
+                                LineFace* leftFace, LineFace* rightFace)
 {
+	double	  l, L, r;
+	double	  xa, ya;
+	double	  projectXoff = 0.0, projectYoff = 0.0;
+	double	  k;
+	double	  maxy;
+	int		  x, y;
+	int		  finaly;
+	LineEdge* left;
+	LineEdge* right;
+	LineEdge* top;
+	LineEdge* bottom;
+	int		  lefty, righty, topy, bottomy;
+	LineEdge  lefts[2], rights[2];
+	int		  lw = pen.size();
 
+	//
+	// draw from top to bottom or from keft to right
+	//
+	if( to.y() <  from.y() ||
+	  ( to.y() == from.y() && to.x() < from.x() ) )
+	{
+		std::swap(from, to);
+		std::swap(projectLeft, projectRight);
+		std::swap(leftFace, rightFace);
+	}
+
+	int dy = to.y() - from.y();
+	int signdx = 1;
+	int dx = to.x() - from.x();
+
+	if (dx < 0)
+		signdx = -1;
+
+	leftFace->setX( from.x() );
+	leftFace->setY( from.y() );
+	leftFace->setDX( dx );
+	leftFace->setDY( dy );
+
+	// for faces, (dx, dy) points into the line
+	rightFace->setX( to.x() );
+	rightFace->setY( to.y() );
+	rightFace->setDX( -dx );
+	rightFace->setDY( -dy );
 }
 
 } // namespace Gfx
