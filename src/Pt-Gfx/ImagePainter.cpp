@@ -41,6 +41,7 @@
 #include "FillConvexPolygon.h"
 #include "DrawText.h"
 #include "DrawEllipse.h"
+#include "FillEllipse.h"
 #include <cmath>
 #include <Pt/System/Clock.h>
 #include <Pt/Math/MathUtils.h>
@@ -71,7 +72,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillConvexPolygon>	fillConvexpolygon( new FillConvexPolygon() );
     std::auto_ptr<DrawText>				dtext( new DrawText() );
 	std::auto_ptr<DrawEllipse>			dellipse( new DrawEllipse() );
-
+	std::auto_ptr<FillEllipse>			fillellipse( new FillEllipse() );
+	
     _drawThinLine       = dthin.release();
     _drawThickLine      = dthick.release();
     _drawLine           = _drawThinLine;
@@ -82,6 +84,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _fillConvexPolygon	= fillConvexpolygon.release();
     _drawText           = dtext.release();
     _drawEllipse		= dellipse.release();
+    _fillEllipse        = fillellipse.release();
 
     this->setFont( _font );
 }
@@ -96,6 +99,7 @@ ImagePainter::~ImagePainter()
     delete _fillConvexPolygon;
     delete _drawText;
     delete _drawEllipse;
+    delete _fillEllipse;
 }
 
 void ImagePainter::setPen( const Pen& pen )
@@ -194,6 +198,7 @@ void ImagePainter::drawEllipse(const  Math::Point& topLeft, const  Math::Size& s
 
 void ImagePainter::fillEllipse(const  Math::Point& topLeft, const  Math::Size& size)
 {
+    _fillEllipse->draw( _image, _brush, topLeft, size );
 }
 
 void ImagePainter::drawPolyline(const  Math::Point* points, const size_t pointCount)

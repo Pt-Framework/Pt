@@ -18,25 +18,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_DRAWELLIPSE_H
-#define PT_DRAWELLIPSE_H
+#ifndef PT_GFX_FILLELLIPSE_H
+#define PT_GFX_FILLELLIPSE_H
 
 #include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
 
 namespace Pt{
 namespace Gfx{
 
-class DrawEllipse
+class FillEllipse
 {
-	public:
-		DrawEllipse();
-		~ DrawEllipse();
+    public:
+        FillEllipse();
+        ~FillEllipse();
 
-		void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
-    private:        
+        void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
+        
+    private:
+        void outputSpan( ARgbImage& image, const Brush& brush, int x, int y, unsigned int width );
 };
+
 }
 }
 
-#endif
+ #endif
+ 

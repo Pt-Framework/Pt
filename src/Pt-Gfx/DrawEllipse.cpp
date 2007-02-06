@@ -31,63 +31,65 @@ DrawEllipse::~DrawEllipse()
 
 void DrawEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 { 
-	int a  = size.width() /2;
-	int b  = size.height() /2;
+    int  a      = size.width()  /2;
+    int  b      = size.height() /2;
 
-	int xc = topLeft.x() + a;
-	int yc = topLeft.y() + b;
-	
-	int x = 0, y = b;
-	long a2		= (long)a*a, b2 = (long)b*b;
-	long crit1	= -(a2/4 + a%2 + b2);
-	long crit2	= -(b2/4 + b%2 + a2);
-	long crit3	= -(b2/4 + b%2);
-	long t		= -a2*y; /* e(x+1/2,y-1/2) - (a^2+b^2)/4 */
-	long dxt	= 2*b2*x, dyt = -2*a2*y;
-	long d2xt	= 2*b2, d2yt = 2*a2;
+    int  xc     = topLeft.x() + a;
+    int  yc     = topLeft.y() + b;
 
-	while (y>=0 && x<=a) {
-		
-		image.pixel(xc+x - 1, yc+y - 1) = pen.color();
-		
-		if (x!=0 || y!=0)
-			image.pixel(xc-x, yc-y) = pen.color();
-			
-		if (x!=0 && y!=0) 
-		{
-			image.pixel(xc+x - 1, yc-y) = pen.color();
-			image.pixel(xc-x, yc+y - 1) = pen.color();
-		}		
-		
-		if (t + b2*x <= crit1 ||   /* e(x+1,y-1/2) <= 0 */
-		    t + a2*y <= crit3)     /* e(x+1/2,y) <= 0 */
-		{	
-			//inc x		
-			x++;
-			dxt += d2xt;
-			t += dxt;		
-		}
-		else if (t - a2*y > crit2) /* e(x+1/2,y-1) > 0 */
-		{
-			//inc y
-			y--; 
-			dyt += d2yt;
-			t += dyt;
-		}
-		else 
-		{
-			//inc x
-			x++;
-			dxt += d2xt;
-			t += dxt;		
+    int  x      = 0;
+    int  y      = b;
+    long a2     = (long) a*a;
+    long b2     = (long) b*b;
+    long crit1  = -( a2/4 + a%2 + b2 );
+    long crit2  = -( b2/4 + b%2 + a2 );
+    long crit3  = -( b2/4 + b%2 );
+    long t      = -a2*y; /* e(x+1/2,y-1/2) - (a^2+b^2)/4 */
+    long dxt    = 2*b2*x;
+    long dyt    = -2*a2*y;
+    long d2xt   = 2*b2;
+    long d2yt   = 2*a2;
 
-			//inc y
-			y--; 
-			dyt += d2yt;
-			t += dyt;
-		}
-	}
+    while( y >= 0 && x <= a ) 
+    {
+        image.pixel( xc+x - 1, yc+y - 1 ) = pen.color();
 
+        if( x!=0 || y!=0 )
+            image.pixel( xc-x, yc-y ) = pen.color();
+
+        if( x!=0 && y!=0 ) 
+        {
+            image.pixel( xc+x - 1, yc-y ) = pen.color();
+            image.pixel( xc-x, yc+y - 1 ) = pen.color();
+        }
+
+        if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */)
+        {
+            //inc x
+            x++;
+            dxt += d2xt;
+            t   += dxt;
+        }
+        else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
+        {
+            //inc y
+            y--; 
+            dyt += d2yt;
+            t   += dyt;
+        }
+        else
+        {
+            //inc x
+            x++;
+            dxt += d2xt;
+            t   += dxt;
+
+            //inc y
+            y--; 
+            dyt += d2yt;
+            t   += dyt;
+        }
+    }
 }
 
 } //namespace Gfx
