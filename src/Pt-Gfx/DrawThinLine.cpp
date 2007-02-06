@@ -103,7 +103,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
             std::swap( y0, y1 );
         }
 
-        int error  = 0;
+        int error  = -(dx>>2);
         int ystep  = -1;
         int y      = y0;
 

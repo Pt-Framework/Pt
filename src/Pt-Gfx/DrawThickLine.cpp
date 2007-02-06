@@ -373,7 +373,7 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 		fillRect( image, pen, x, y, (unsigned int)dx, (unsigned int)dy);
     }
     //
-	// neither horizontal nor vertical
+    // neither horizontal nor vertical
     //
 	else
 	{

@@ -57,6 +57,19 @@ class DrawLineDemo : public Pt::Gui::Widget
         _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
         _imagePainter.drawLine( Pt::Math::Point( 20, 10 ), Pt::Math::Point( 160, 30 ));
 
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 4, Pt::Gfx::ARgbColor(0, 0xdddd, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 20 ), Pt::Math::Point( 160, 40 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 20 ), Pt::Math::Point( 160, 40 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 5, Pt::Gfx::ARgbColor(0, 0xdddd, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 30 ), Pt::Math::Point( 160, 50 ));
+
+        _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
+        _imagePainter.drawLine( Pt::Math::Point( 20, 30 ), Pt::Math::Point( 160, 50 ));
+
         painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
 /*
