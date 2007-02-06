@@ -53,7 +53,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-		drawEllipse();	
+		drawEllipse();
 	}
 
 	void drawEllipse()
@@ -61,40 +61,40 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		size_t pens = 1;
 		Pt::Math::Point point( 40 ,50 );
 		Pt::Math::Size	size( 700, 10 );
-		
-		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0)));		
+
+		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0)));
 		_imagePainter.drawEllipse( point, size ) ;
-		
+
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 		painter().setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0, 0xffff, 0)));
 		painter().drawEllipse( point, size ) ;
 
 	}
-		
+
 	void drawLines()
-	{	
+	{
 		size_t pens = 11;
 		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0xffff,0,0)));
 		Pt::System::Clock  clock;
-		
-		clock.start();		
+
+		clock.start();
 		_imagePainter.drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));
 		Pt::System::TimeValue time = clock.stop();
-		std::cerr<<"Image time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ; 
+		std::cerr<<"Image time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ;
 
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 		painter().setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0xffff)));
-		
-		clock.start();		
+
+		clock.start();
 		painter().drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));
 		time = clock.stop();
-		std::cerr<<"System time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ; 
-		
+		std::cerr<<"System time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ;
+
 		painter().setPen(Pt::Gfx::Pen(1, Pt::Gfx::ARgbColor( 0,0xffff,0)));
-		painter().drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));	
-		
+		painter().drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));
+
 	}
-	
+
 	void drawMap()
 	{
 		std::vector<Pt::Math::Point> points;
@@ -6124,13 +6124,21 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		color.setGreen(0);
 		color.setBlue(0);
 		_imagePainter.setPen(Pt::Gfx::Pen(1,color));
-		_imagePainter.drawText(Pt::Math::Point(66,143),L"Seminarstraße");
+		// Please don't use other char-set except ISO and UTF-8, seems
+		// when I check out, the text become incomplete multibyte or wide character
+		// which cause compilation to fail
+		//_imagePainter.drawText(Pt::Math::Point(66,143),L"Seminarstraï¿½");
+		_imagePainter.drawText(Pt::Math::Point(66,143),L"Test 1");
 		_imagePainter.setFont(Pt::Gfx::Font("Vera",10,Pt::Gfx::Font::NormalStyle,860));
 		color.setRed(0);
 		color.setGreen(0);
 		color.setBlue(0);
 		_imagePainter.setPen(Pt::Gfx::Pen(1,color));
-		_imagePainter.drawText(Pt::Math::Point(135,133),L"Wörthstraße");
+		// Please don't use other char-set except ISO and UTF-8, seems
+		// when I check out, the text become incomplete multibyte or wide character
+		// which cause compilation to fail
+		//_imagePainter.drawText(Pt::Math::Point(135,133),L"Wï¿½thstraï¿½");
+		_imagePainter.drawText(Pt::Math::Point(135,133),L"Test2");
 		_imagePainter.setFont(Pt::Gfx::Font("Vera",10,Pt::Gfx::Font::NormalStyle,840));
 		_imagePainter.setFont(Pt::Gfx::Font("Vera",10,Pt::Gfx::Font::NormalStyle,60));
 		_imagePainter.setFont(Pt::Gfx::Font("Vera",10,Pt::Gfx::Font::NormalStyle,2970));
@@ -6156,22 +6164,22 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		_imagePainter.drawLine(Pt::Math::Point(44,-380),Pt::Math::Point(44,345));
 		_imagePainter.setFont(Pt::Gfx::Font("Vera",9,Pt::Gfx::Font::NormalStyle,0));
 		_imagePainter.drawText(Pt::Math::Point(245,-22),L"ID: 1123823981 x: 17148 y: 12653");
-		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );	
-				
+		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+
 	}
 
 	virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
 	{
 		_image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) );
 	}
-	
+
 	void drawTextBoundingRect()
 	{
 		Pt::Gfx::Pen					pen( 10,  Pt::Gfx::ARgbColor( 0, 0, 0xffff ) );
 		Pt::Gfx::FontMetrics			metrics;
 		std::vector<Pt::Math::Point>	polygon;
-		Pt::Text::String				text = L"WürzbuqeÄÖÜ?$§$§s";
-		
+		Pt::Text::String				text = L"Wrzbuqeï¿½ï¿½$$s";
+
 		_imagePainter.drawText( Pt::Math::Point(50,50), text );
 		metrics = _imagePainter.fontMetrics( text );
 
@@ -6180,12 +6188,12 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		polygon.push_back( Pt::Math::Point( 50 + metrics.width(),  50 - metrics.height() ) );
 		polygon.push_back( Pt::Math::Point( 50 + metrics.width(),  50  + metrics.descent()));
 		polygon.push_back( Pt::Math::Point( 50, 50 + metrics.descent() ) );
-		 
-		_imagePainter.drawPolyline( &polygon[0], polygon.size() );		 
-		
-		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );		
+
+		_imagePainter.drawPolyline( &polygon[0], polygon.size() );
+
+		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 	}
-	
+
 	void perfTest()
 	{/*
 		Pt::System::Clock				clock;
@@ -6203,8 +6211,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		polygon.push_back( Pt::Math::Point( 150, 10 ));
 		polygon.push_back( Pt::Math::Point( 200, 100 ));
 		polygon.push_back( Pt::Math::Point( 100, 300 ));
-		polygon.push_back( Pt::Math::Point( 20, 250));		
-		
+		polygon.push_back( Pt::Math::Point( 20, 250));
+
 		//Draw line
 =======
 
@@ -6220,12 +6228,12 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		clock.start();
 <<<<<<< .mine
 		_imagePainter.setPen( pen );
-		_imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40, 100 ));		
+		_imagePainter.drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40, 100 ));
 =======
   		_imagePainter.drawText( Pt::Math::Point(150, 150), text );
 >>>>>>> .r679
 		time = clock.stop();
-		
+
 		_out<<"ImagePainter::drawLine : "<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
 
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
@@ -6234,74 +6242,74 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		painter().setPen( pen );
 		painter().drawLine( Pt::Math::Point( 10,10 ), Pt::Math::Point( 40, 100 ));
 		time = clock.stop();
-		
-		_out<<"Native::drawLine :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
-		
+
+		_out<<"Native::drawLine :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
 		_out<<"----------------------------------------------------------------"<<std::endl;
 		//Draw polyline
 	     clock.start();
 		_imagePainter.setPen( pen );
-		_imagePainter.drawPolyline( &polygon[0], polygon.size() );		
+		_imagePainter.drawPolyline( &polygon[0], polygon.size() );
 		time = clock.stop();
-		
+
 		_out<<"ImagePainter::drawPolyline : "<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
-		
+
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
-		
+
 		clock.start();
 		painter().setPen( pen );
-		painter().drawPolyline( &polygon[0], polygon.size() );		
+		painter().drawPolyline( &polygon[0], polygon.size() );
 		time = clock.stop();
-		
-		_out<<"Native::drawPolyline :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;	
-		
+
+		_out<<"Native::drawPolyline :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
 		_out<<"----------------------------------------------------------------"<<std::endl;
-		//Fill polygon		
+		//Fill polygon
 		clock.start();
 		_imagePainter.setBrush( brush );
 		_imagePainter.fillPolygon( &polygon[0], polygon.size() );
 		time = clock.stop();
-		
-		_out<<"ImagePainter::fillPolygon :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
-				
+
+		_out<<"ImagePainter::fillPolygon :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
 		clock.start();
 		painter().setBrush( brush );
 		painter().fillPolygon( &polygon[0], polygon.size() );
 		time = clock.stop();
-		
-		_out<<"Native::fillPolygon :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
-		
+
+		_out<<"Native::fillPolygon :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
 		_out<<"----------------------------------------------------------------"<<std::endl;
-		
+
 		//Draw text
 		clock.start();
 		_imagePainter.drawText(Pt::Math::Point( 10,30 ), text );
 		time = clock.stop();
-		
-		_out<<"ImagePainter::drawText :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
-		
+
+		_out<<"ImagePainter::drawText :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
 		clock.start();
 		painter().drawText(Pt::Math::Point( 10,30 ), text );
 		time = clock.stop();
-		
-		_out<<"Native::drawText :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
+
+		_out<<"Native::drawText :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
 		_out<<"----------------------------------------------------------------"<<std::endl;
-		
-		//Font metrics		
-		clock.start();		
+
+		//Font metrics
+		clock.start();
 		metrics = _imagePainter.fontMetrics( text );
 		time = clock.stop();
-		
-		_out<<"ImagePainter::fontMetrics :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
-		
-		clock.start();		
+
+		_out<<"ImagePainter::fontMetrics :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
+
+		clock.start();
 		metrics = painter().fontMetrics( text );
 		time = clock.stop();
-		
-		_out<<"Native::fontMetrics :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;		
+
+		_out<<"Native::fontMetrics :"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl;
 
 <<<<<<< .mine
-		_out<<"----------------------------------------------------------------"<<std::endl;	
+		_out<<"----------------------------------------------------------------"<<std::endl;
 =======
 		_angle += 10;
 		if( _angle >= 3600 )
