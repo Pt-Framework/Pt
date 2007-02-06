@@ -267,36 +267,6 @@ void DrawThickLine::rasterize( ARgbImage& image, const Pen& pen,
 void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
                           const Math::Point& from, const Math::Point& to )
 {
-    Brush brush( pen.color() );
-
-	/*std::vector<Math::Point>   polygon;
-
-    const int   dx      = to.x() - from.x();
-    const int   dy      = to.y() - from.y() ;
-    const float halfPen = pen.size() / 2.0;
-    const float L       = float(Math::hypot( dx,  dy ));
-    const float r       = halfPen / L;
-    const float ya		= -r * dx;
-    const float xa		=  r * dy;
-
-    polygon.push_back( Math::Point( ssize_t( from.x() - xa), ssize_t( from.y() - ya )) );
-    polygon.push_back( Math::Point( ssize_t( to.x() - xa), ssize_t( to.y() - ya )) );
-    polygon.push_back( Math::Point( ssize_t( to.x() + xa), ssize_t( to.y() + ya)) );
-    polygon.push_back( Math::Point( ssize_t( from.x() + xa), ssize_t( from.y() + ya)) );
-
-    Math::Rect clippingRect( Math::Point( 0, 0 ), Math::Size( image.width() - 1, image.height()- 1 ) );
-
-    _fillConvexPolygon.clip( clippingRect, polygon );
-
-	if( polygon.empty() )
-		return;
-
-	_fillPolygon.draw( image,   brush,  polygon ); */
-
-    // This works currently...
-    //this->rasterize( image, pen, from, to , _rasterBuffer );
-    //_fillConvexPolygon.output( image, brush, _rasterBuffer );
-
 	if( image.height() == 0 || image.width() == 0 )
 		return;
 
@@ -324,7 +294,7 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
     int		  lw = pen.size();
 
     //
-    // draw from top to bottom or from keft to right
+    // draw from top to bottom or from left to right
     //
     if( to.y() <  from.y() ||
     ( to.y() == from.y() && to.x() < from.x() ) )
@@ -353,17 +323,16 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
     rightFace->setDY( -dy );
 
     //
-    // neither horizontal nor vertical
+    // neither horizontal
     //
 	if (dy == 0)
-    /* segment is horizontal */
     {
 		rightFace->setXA( 0 );
 		rightFace->setYA( 0.5 * (double)lw );
-		rightFace->setK( -0.5 * (double)(lw * dx)); /* k = xa * dy - ya * dx */
+		rightFace->setK( -0.5 * (double)(lw * dx));
 		leftFace->setXA( 0 );
 		leftFace->setYA( -rightFace->ya() );
-		leftFace->setK( rightFace->k() ); /* k = xa * dy - ya * dx */
+		leftFace->setK( rightFace->k() );
 		x = from.x();
 
 		if( projectLeft )
@@ -378,15 +347,17 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 		dy = lw;
 		fillRect( image, pen,  x, y, (unsigned int)dx, (unsigned int)dy );
     }
+    //
+	// vertical
+    //
 	else if (dx == 0)
-    /* segment is vertical */
     {
 		leftFace->setXA( 0.5 * (double)lw );
 		leftFace->setYA( 0 );
-		leftFace->setK( 0.5 * (double)(lw * dy) ); /* k = xa * dy - ya * dx */
+		leftFace->setK( 0.5 * (double)(lw * dy) );
 		rightFace->setXA( -leftFace->xa() );
 		rightFace->setYA( 0 );
-		rightFace->setK( leftFace->k() ); /* k = xa * dy - ya * dx */
+		rightFace->setK( leftFace->k() );
 		y = from.y();
 
 		if( projectLeft )
@@ -401,6 +372,9 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 		dx = lw;
 		fillRect( image, pen, x, y, (unsigned int)dx, (unsigned int)dy);
     }
+    //
+	// neither horizontal nor vertical
+    //
 	else
 	{
 		double l = 0.5 * ((double) lw);
