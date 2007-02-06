@@ -149,7 +149,7 @@ FontMetrics ImagePainter::fontMetrics() const
     return fontMetrics(L"");
 }
 
-FontMetrics ImagePainter::fontMetrics( Text::String text) const
+FontMetrics ImagePainter::fontMetrics( Text::String text ) const
 {
     return _drawText->fontMetrics( text );
 }
@@ -178,8 +178,7 @@ void ImagePainter::drawText( const Math::Point& to, const Text::String& text, co
 }
 
 void ImagePainter::drawRect(const  Math::Rect& rect)
-{
-}
+{ }
 
 void ImagePainter::fillRect(const  Math::Rect& rect)
 {
@@ -227,12 +226,10 @@ void ImagePainter::fillPolygon(const  Math::Point* points, const size_t pointCou
 }
 
 void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image)
-{
-}
+{ }
 
 void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image, const Region& imageRegion)
-{
-}
+{ }
 
 }
 }

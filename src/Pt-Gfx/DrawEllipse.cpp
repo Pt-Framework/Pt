@@ -29,6 +29,7 @@ DrawEllipse::DrawEllipse()
 DrawEllipse::~DrawEllipse()
 { }
 
+
 void DrawEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 { 
     int  a      = size.width()  /2;
@@ -52,15 +53,15 @@ void DrawEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point&
 
     while( y >= 0 && x <= a ) 
     {
-        image.pixel( xc+x - 1, yc+y - 1 ) = pen.color();
+        outputPixel( image, pen, xc+x - 1, yc+y - 1 );
 
         if( x!=0 || y!=0 )
-            image.pixel( xc-x, yc-y ) = pen.color();
+            outputPixel( image, pen, xc-x, yc-y );
 
         if( x!=0 && y!=0 ) 
         {
-            image.pixel( xc+x - 1, yc-y ) = pen.color();
-            image.pixel( xc-x, yc+y - 1 ) = pen.color();
+            outputPixel( image, pen, xc+x - 1, yc-y );
+            outputPixel( image, pen, xc-x, yc+y - 1 );
         }
 
         if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */)

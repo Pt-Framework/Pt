@@ -36,7 +36,7 @@ class FillEllipse
         void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
         
     private:
-        void outputSpan( ARgbImage& image, const Brush& brush, int x, int y, unsigned int width );
+        void outputSpan( ARgbImage& image, const Brush& brush, int x, int y, int width );
 };
 
 }

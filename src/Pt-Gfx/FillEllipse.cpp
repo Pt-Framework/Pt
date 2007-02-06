@@ -29,17 +29,20 @@ FillEllipse::FillEllipse()
 FillEllipse::~FillEllipse()
 { }
 
-void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, int x, int y, unsigned int width )
+void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, int x, int y, int width )
 {//Should be reinplemented!
     
-    if( y >= static_cast<int>( image.height() ) )
+    const int imageWidth = static_cast<int>( image.width() );
+    const int imageHeight = static_cast<int>( image.height() );
+    
+    if( y >= imageHeight )
         return;
     
     if( y < 0 )
         return;
 
-    const size_t xend = std::min( x + width, image.width() );
-    size_t       xpos = std::max( 0, x );    
+    const ssize_t xend = std::min( x + width, imageWidth );
+    ssize_t       xpos = std::max( 0, x );    
                  
     for( ; xpos < xend; xpos++ )
         image.pixel( xpos, y ) = brush.color();
@@ -66,7 +69,7 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
     long            d2xt   = 2*b2;
     long            d2yt   = 2*a2;
 
-    while( y>=0 && x<=a ) 
+    while( y >= 0 && x <= a ) 
     {
 	    if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
         {
@@ -91,9 +94,9 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
 	    }
 	    else 
 	    {
-		    outputSpan( image, brush, xc-x, yc-y, width );
+		    outputSpan( image, brush, xc-x, yc-y, width -1 );
 		    
-		    if( y!=0 )
+		    if( y != 0 )
 			    outputSpan( image, brush, xc-x, yc+y -1, width - 1 );
 			    
 		     //Increment x

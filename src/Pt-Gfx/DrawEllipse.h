@@ -35,6 +35,18 @@ class DrawEllipse
 
 		void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
     private:        
+    
+    inline void outputPixel( ARgbImage& image, const Pen& pen, int x, int y )
+    {
+        if( x >= int(image.width()) || x < 0)
+            return;        
+
+        if( y >= int(image.height()) || y < 0)
+            return;        
+            
+        image.pixel( x, y ) = pen.color();                        
+    }
+    
 };
 }
 }
