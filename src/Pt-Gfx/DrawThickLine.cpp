@@ -24,6 +24,8 @@
 #include "DrawThickLine.h"
 #include "DrawThinLine.h"
 
+#include "Pt/Math/MathUtils.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -95,23 +97,23 @@ static int buildLineEdge (double x0, double y0, double k, int dx, int dy, int xi
 
 static void fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h)
 {
-	
+
 	Pt::ssize_t xbegin = std::max( 0, x );
-	
+
 	Pt::ssize_t xend = 0;
-	
+
 	if( (x + (int)w)  >= 0 )
 		xend = std::min( image.width(), x + w ) ;
-	
-	Pt::ssize_t ypos = std::max( 0, y );	
+
+	Pt::ssize_t ypos = std::max( 0, y );
 
 	Pt::ssize_t yend = 0;
-	
+
 	if( (y + (int) h) > 0 )
 		yend = std::min( image.height(), y + h ) ;
-		
+
 	for( ; ypos < yend; ypos++ )
-		for( size_t xpos = xbegin; xpos < xend; xpos++ )		
+		for( size_t xpos = xbegin; xpos < xend; xpos++ )
 			image.pixel( xpos, ypos) = pen.color();
 }
 
@@ -169,22 +171,22 @@ static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overa
         // walk down to end of left or right edge, whichever comes first
         while (height--)
         {
-			
+
 			if( y >= 0 &&  y < image.height())
 			{
 	            // generate a span (omitting point on right end, see above)
 		        if (right_x >= left_x)
 			    {
-				    int xpos = std::max( left_x, 0 );                
+				    int xpos = std::max( left_x, 0 );
 					const int endx = std::min<int>( right_x, image.width() -1);
-                
+
 					for(; xpos <= endx; ++xpos)
-					{					 
+					{
 						image.pixel(xpos, y) = pen.color();
 					}
 				}
 			}
-			
+
             y++;
 
             // update left_x, right_x by stepping along left and right edges,
@@ -297,7 +299,7 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
 
 	if( image.height() == 0 || image.width() == 0 )
 		return;
-		
+
     LineFace leftFace;
     LineFace rightFace;
     this->drawSegment(image, pen, from, to, false, false, &leftFace, &rightFace);
@@ -366,13 +368,13 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 
 		if( projectLeft )
 			x -= (lw >> 1);
-			
+
 		y = from.y() - (lw >> 1);
 		dx = to.x() - x;
 
 		if( projectRight )
 			dx += ((lw + 1) >> 1);
-			
+
 		dy = lw;
 		fillRect( image, pen,  x, y, (unsigned int)dx, (unsigned int)dy );
     }
@@ -389,7 +391,7 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 
 		if( projectLeft )
 			y -= lw >> 1;
-			
+
 		x = from.x() - (lw >> 1);
 		dy = to.y() - y;
 
@@ -399,7 +401,7 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 		dx = lw;
 		fillRect( image, pen, x, y, (unsigned int)dx, (unsigned int)dy);
     }
-	else    
+	else
 	{
 		double l = 0.5 * ((double) lw);
 		double L = hypot ((double) dx, (double) dy);
