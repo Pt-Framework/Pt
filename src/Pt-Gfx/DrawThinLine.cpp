@@ -74,12 +74,12 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
 
         const int       deltax = ( x1 - x0 ) ;
         const int       deltay = std::abs( y1 - y0 );
-        int             error  = 0;
+        int             error  = -(deltax>>2);
         int             ystep  = -1;
         int             y      = y0 ;
-	
+
         if( y0 < y1 )
-            ystep = 1;            
+            ystep = 1;
 
         for( ssize_t x = x0; x <= x1; ++x )
         {
@@ -92,7 +92,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
                 y += ystep;
                 error -= deltax;
             }
-        }                
+        }
     }
     else
     {//Flat
