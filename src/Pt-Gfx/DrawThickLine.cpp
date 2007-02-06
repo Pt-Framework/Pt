@@ -404,7 +404,7 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 	else
 	{
 		double l = 0.5 * ((double) lw);
-		double L = hypot ((double) dx, (double) dy);
+		double L = Math::hypot ((double) dx, (double) dy);
 
 		if (dx < 0)
 		{
