@@ -18,37 +18,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_H
-#define PT_ATOMICINT_H
+#ifndef PT_ATOMICINT_GCC_MIPS_H
+#define PT_ATOMICINT_GCC_MIPS_H
+
+#error "Not implemented yet !!!"
+
+#include <csignal>
 
 
-#ifdef _MSC_VER
+namespace Pt {
 
-    #include "AtomicInt.msc.h"
+    typedef std::sig_atomic_t atomic_t;
 
-#elif __GNUC__
+    class AtomicInt
+    {
+        public:
+            inline AtomicInt(atomic_t value = 0)
+            : _value(value)
+            {}
 
-    #if defined( _i386_     ) || defined( __i386__ ) || \
-        defined( __x86_64__ ) || defined( _M_IX86  )
+            inline atomic_t value() const
+            { return _value;  }
 
-        #include "AtomicInt.gcc.x86.h"
+            inline void operator+=(atomic_t n)
+            {
+            }
 
-    #elif defined( __arm__ )
+            inline void operator-=(atomic_t n)
+            {
+            }
 
-        #include "AtomicInt.gcc.arm.h"
+            inline void operator=(atomic_t n)
+            {
+            }
 
-    #elif defined( _M_PPC  ) || defined( PPC         ) || \
-          defined( ppc     ) || defined( __powerpc__ ) || \
-          defined( __ppc__ )
+            inline bool compareExchange(atomic_t oldval, atomic_t newval)
+            {
+            }
 
-        #include "AtomicInt.gcc.ppc.h"
+        private:
+            volatile atomic_t _value;
+    };
 
-    #elif defined( __mips__ )
-
-        #include "AtomicInt.gcc.mips.h"
-
-    #endif
-
-#endif
+} // namespace Pt
 
 #endif
