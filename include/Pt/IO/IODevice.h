@@ -25,6 +25,8 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/IO/IOError.h>
 
+#include <ios>
+
 
 namespace Pt {
 
@@ -48,11 +50,11 @@ class BasicIODevice : public NonCopyable {
 
 	public:
 		enum OpenMode {
-			Read = 1,
-			Write = 2,
-			Trunc = 4,
-			AtEnd = 8,
-			NonBlock = 16
+			Read = std::ios::in,
+			Write = std::ios::out,
+			Trunc = std::ios::trunc,
+			AtEnd = std::ios::ate
+			//NonBlock = 16
 		};
 
 		enum SeekMode {
