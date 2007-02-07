@@ -73,7 +73,7 @@ class FillPolygonDemo : public Pt::Gui::Widget
             this->setTitle(L"FillPolygonDemo");
 
             Pt::Gfx::ARgbImage texture(21, 21, Pt::Gfx::ARgbColor(0,0,0xdddd));
-            std::copy( texture_data, texture_data + (21*21), texture.begin() );
+            std::copy( texture_data, texture_data + (21*21), texture.data() );
 
             _brush = Pt::Gfx::Brush(&texture);
         }
