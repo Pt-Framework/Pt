@@ -50,7 +50,34 @@ class DrawEllipseDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-		size_t pens = 1;
+		size_t pens = 10;
+		Pt::Math::Point point( 10, 50 );
+		Pt::Math::Size	size( 70, 70 );
+		
+		Pt::Math::Point point1( 10 ,50 );
+		Pt::Math::Size	size1( 40,40);
+		
+
+    	_imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0,0xffff,0 ) ) );		
+//		_imagePainter.fillEllipse( point, size );
+
+		_imagePainter.setPen( Pt::Gfx::Pen( pens, Pt::Gfx::ARgbColor( 0,0,0 ) ) );				
+		_imagePainter.drawEllipse( point, size ) ;
+
+		_imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0,0xffff,0 ) ) );				
+		_imagePainter.drawEllipse( point, size ) ;
+
+		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+		painter().setPen( Pt::Gfx::Pen( pens, Pt::Gfx::ARgbColor( 0, 0, 0 ) ) );
+		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
+//		painter().fillEllipse( point2, size2 );
+		painter().drawEllipse( point1, size1 ) ;		
+		
+		painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0, 0xFFFF, 0 ) ) );
+		painter().drawEllipse( point1, size1 ) ;
+		
+		
+/*		size_t pens = 1;
 		Pt::Math::Point point( 10 ,50 );
 		Pt::Math::Point point2( 50 ,50 );
 		Pt::Math::Size	size( 40, 60 );
@@ -76,9 +103,8 @@ class DrawEllipseDemo : public Pt::Gui::Widget
         _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0,0,0 ) ) );		
 		_imagePainter.fillEllipse( point4, size2 );
 
+*/		
 		
-		
-		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 //		painter().setPen( Pt::Gfx::Pen( pens, Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
 //		painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
 //		painter().drawEllipse( point, size ) ;

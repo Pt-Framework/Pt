@@ -18,28 +18,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_DRAWELLIPSE_H
-#define PT_DRAWELLIPSE_H
+#ifndef PT_GFX_DRAWTHINELLIPSE_H
+#define PT_GFX_DRAWTHINELLIPSE_H
 
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Pen.h>
+#include "DrawEllipse.h"
 
 namespace Pt{
 namespace Gfx{
 
-class DrawEllipse
+class DrawThinEllipse : public DrawEllipse
 {
-	public:
-		DrawEllipse()
-		{};
-		
-		virtual ~ DrawEllipse()
-		{};
-		
-		virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
+    public:
+        DrawThinEllipse();
+        virtual ~DrawThinEllipse();
+        
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
+
+    private:
+        inline void outputPixel( ARgbImage& image, const Pen& pen, int x, int y )
+        {
+            //Pixel clipping
+            if( x >= int(image.width()) || x < 0)
+                return;        
+
+            if( y >= int(image.height()) || y < 0)
+                return;        
+                
+            image.pixel( x, y ) = pen.color();                        
+        }
 };
 
-}//namespace Gfx
-}//namepsace Pt
+}
+}
 
 #endif

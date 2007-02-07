@@ -116,6 +116,9 @@ namespace Pt {
 				return ::hypot(x, y);
 			#endif
 		}
+		
+		inline int round(double d) 
+        {  return static_cast<int>(d<0?d-.5:d+.5);  }
 
 	} // namespace Math
 

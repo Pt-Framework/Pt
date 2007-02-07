@@ -18,11 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "freetype/include/ft2build.h"
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-
-#include "Vera.h"
 #include "Pt/Gfx/ImagePainter.h"
 #include "Pt/Gfx/ARgbImage.h"
 #include "Pt/Gfx/Pen.h"
@@ -31,24 +26,24 @@
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/String.h"
+#include "Pt/System/Clock.h"
+#include "Pt/Math/MathUtils.h"
 
 #include "DrawThinLine.h"
 #include "DrawThickLine.h"
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
 #include "DrawThickPolyline.h"
+#include "DrawEllipse.h"
+#include "DrawThinEllipse.h"
+#include "DrawThickEllipse.h"
+#include "DrawText.h"
+#include "FillEllipse.h"
 #include "FillPolygon.h"
 #include "FillConvexPolygon.h"
-#include "DrawText.h"
-#include "DrawEllipse.h"
-#include "FillEllipse.h"
-#include <cmath>
-#include <Pt/System/Clock.h>
-#include <Pt/Math/MathUtils.h>
 
 namespace Pt{
 namespace Gfx{
-
 
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
@@ -61,30 +56,40 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThickPolyline( 0 )
 , _fillPolygon( 0 )
 , _fillConvexPolygon( 0 )
-, _drawText( new DrawText() )
-, _drawEllipse( new DrawEllipse )
+, _drawText( 0 )
+, _drawEllipse( 0 )
+, _drawThinEllipse( 0 )
+, _drawThickEllipse( 0 )
 {
-    std::auto_ptr<DrawThinLine>			dthin( new DrawThinLine );
-    std::auto_ptr<DrawThickLine>		dthick( new DrawThickLine );
-    std::auto_ptr<DrawThinPolyline>		dthinpoly( new DrawThinPolyline() );
-    std::auto_ptr<DrawThickPolyline>	dthickpoly( new DrawThickPolyline() );
-    std::auto_ptr<FillPolygon>			fillpolygon( new FillPolygon() );
-    std::auto_ptr<FillConvexPolygon>	fillConvexpolygon( new FillConvexPolygon() );
-    std::auto_ptr<DrawText>				dtext( new DrawText() );
-	std::auto_ptr<DrawEllipse>			dellipse( new DrawEllipse() );
-	std::auto_ptr<FillEllipse>			fillellipse( new FillEllipse() );
-	
-    _drawThinLine       = dthin.release();
-    _drawThickLine      = dthick.release();
+    std::auto_ptr<DrawThinLine>         dThinLine( new DrawThinLine );
+    std::auto_ptr<DrawThickLine>        dThickLine( new DrawThickLine );
+    std::auto_ptr<DrawThinPolyline>     dThinPolyline( new DrawThinPolyline() );
+    std::auto_ptr<DrawThickPolyline>    dThickPolyline( new DrawThickPolyline() );
+    std::auto_ptr<DrawText>             dText( new DrawText() );
+    std::auto_ptr<DrawThinEllipse>      dThinEllipse( new DrawThinEllipse() );
+    std::auto_ptr<DrawThickEllipse>     dThickEllipse( new DrawThickEllipse() );
+
+    std::auto_ptr<FillPolygon>          fillPolygon( new FillPolygon() );
+    std::auto_ptr<FillConvexPolygon>    fillConvexPolygon( new FillConvexPolygon() );
+    std::auto_ptr<FillEllipse>          fillEllipse( new FillEllipse() );
+
+    _drawThinLine       = dThinLine.release();
+    _drawThickLine      = dThickLine.release();
     _drawLine           = _drawThinLine;
-    _drawThinPolyline   = dthinpoly.release();
-    _drawThickPolyline  = dthickpoly.release();
+
+    _drawThinPolyline   = dThinPolyline.release();
+    _drawThickPolyline  = dThickPolyline.release();
     _drawPolyline       = _drawThinPolyline;
-    _fillPolygon        = fillpolygon.release();
-    _fillConvexPolygon	= fillConvexpolygon.release();
-    _drawText           = dtext.release();
-    _drawEllipse		= dellipse.release();
-    _fillEllipse        = fillellipse.release();
+
+    _drawText           = dText.release();
+
+    _drawThinEllipse	= dThinEllipse.release();
+    _drawThickEllipse	= dThickEllipse.release();
+    _drawEllipse        = _drawThinEllipse;
+
+    _fillEllipse        = fillEllipse.release();
+    _fillPolygon        = fillPolygon.release();
+    _fillConvexPolygon	= fillConvexPolygon.release();// At time unused!
 
     this->setFont( _font );
 }
@@ -98,7 +103,8 @@ ImagePainter::~ImagePainter()
     delete _fillPolygon;
     delete _fillConvexPolygon;
     delete _drawText;
-    delete _drawEllipse;
+    delete _drawThinEllipse;
+    delete _drawThickEllipse;
     delete _fillEllipse;
 }
 
@@ -110,48 +116,50 @@ void ImagePainter::setPen( const Pen& pen )
     {
         _drawLine       = _drawThinLine;
         _drawPolyline   = _drawThinPolyline;
+        _drawEllipse    = _drawThinEllipse;
     }
     else
     {
         _drawLine       = _drawThickLine;
         _drawPolyline   = _drawThickPolyline;
+        _drawEllipse    = _drawThickEllipse;
     }
 }
 
 const Pen& ImagePainter::pen() const
 {
-    return _pen;
+    return _pen; 
 }
 
 void ImagePainter::setBrush(const Brush& brush)
 {
-    _brush = brush;
+    _brush = brush; 
 }
 
 const Brush& ImagePainter::brush() const
 {
-    return _brush;
+    return _brush; 
 }
 
 void ImagePainter::setFont(const Font& font)
 {
     _font = font;
     _drawText->setFont(_font);
-
 }
+
 const Font& ImagePainter::font() const
 {
-    return _font;
+    return _font; 
 }
 
 FontMetrics ImagePainter::fontMetrics() const
 {
-    return fontMetrics(L"");
+    return fontMetrics(L""); 
 }
 
-FontMetrics ImagePainter::fontMetrics( Text::String text ) const
+FontMetrics ImagePainter::fontMetrics( Text::String text) const
 {
-    return _drawText->fontMetrics( text );
+    return _drawText->fontMetrics( text ); 
 }
 
 const std::list<std::string>& ImagePainter::fontFamilyNames()
@@ -162,13 +170,14 @@ const std::list<std::string>& ImagePainter::fontFamilyNames()
 
 void ImagePainter::drawPixel(const  Math::Point& to)
 {
+    _image.pixel( to.x(), to.y()) = _pen.color();
 }
 
 void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
 {
     if( _pen.size()  == 0 )
-        return;    			
-	
+        return;
+
     _drawLine->draw(_image, _pen, from, to );
 }
 
@@ -178,7 +187,15 @@ void ImagePainter::drawText( const Math::Point& to, const Text::String& text, co
 }
 
 void ImagePainter::drawRect(const  Math::Rect& rect)
-{ }
+{
+    std::vector<Pt::Math::Point> points(4);
+    points[0] = rect.topLeft();
+    points[1] = rect.topRight();
+    points[2] = rect.bottomRight();
+    points[3] = rect.bottomLeft();
+
+    drawPolyline( &points[0], points.size() );
+}
 
 void ImagePainter::fillRect(const  Math::Rect& rect)
 {
@@ -190,46 +207,40 @@ void ImagePainter::fillRect(const  Math::Rect& rect)
     this->fillPolygon( &points[0], points.size() );
 }
 
-void ImagePainter::drawEllipse(const  Math::Point& topLeft, const  Math::Size& size)
+void ImagePainter::drawEllipse( const  Math::Point& topLeft, const  Math::Size& size )
 {
-	_drawEllipse->draw( _image, _pen, topLeft, size );
+    _drawEllipse->draw( _image, _pen, topLeft, size );
 }
 
-void ImagePainter::fillEllipse(const  Math::Point& topLeft, const  Math::Size& size)
+void ImagePainter::fillEllipse( const  Math::Point& topLeft, const  Math::Size& size )
 {
     _fillEllipse->draw( _image, _brush, topLeft, size );
 }
 
-void ImagePainter::drawPolyline(const  Math::Point* points, const size_t pointCount)
+void ImagePainter::drawPolyline( const  Math::Point* points, const size_t pointCount )
 {
     if( _pen.size()  == 0 )
         return;
 
     for( size_t i = 1; i < pointCount; ++i)
         _drawLine->draw( _image, _pen, points[ i - 1], points[i] );
-
-/*
-    std::vector<Math::Point> p( pointCount );
-    memcpy( &p[0], points, sizeof( Math::Point) * pointCount );
-
-    _drawPolyline->draw(_image, _pen, p );
-    */
 }
 
-void ImagePainter::fillPolygon(const  Math::Point* points, const size_t pointCount)
+void ImagePainter::fillPolygon( const  Math::Point* points, const size_t pointCount )
 {
     std::vector<Math::Point> p( pointCount );
     memcpy( &p[0], points, sizeof( Math::Point) * pointCount );
 
     _fillPolygon->draw( _image, _brush, p );
-    //_fillConvexPolygon->draw( _image, _brush, p );
 }
 
-void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image)
-{ }
+void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image )
+{
+}
 
-void ImagePainter::drawImage(const  Math::Point& to, const ARgbImage& image, const Region& imageRegion)
-{ }
+void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image, const Region& imageRegion )
+{
+}
 
 }
 }

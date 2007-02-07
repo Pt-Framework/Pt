@@ -18,28 +18,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_DRAWELLIPSE_H
-#define PT_DRAWELLIPSE_H
+#ifndef PT_GFX_DRAWTHICKELLIPSE_H
+#define PT_GFX_DRAWTHICKELLIPSE_H
 
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Pen.h>
+#include <vector>
+#include "DrawEllipse.h"
 
 namespace Pt{
 namespace Gfx{
 
-class DrawEllipse
+class DrawThickEllipse : public DrawEllipse
 {
-	public:
-		DrawEllipse()
-		{};
-		
-		virtual ~ DrawEllipse()
-		{};
-		
-		virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
+    public:
+        DrawThickEllipse();
+        
+        virtual ~DrawThickEllipse();
+        
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
+
+    private:
+        class EllipseSpan
+        {
+            public:
+                EllipseSpan()
+                : x1( 0 )
+                , len1( 0 )
+                , x2( 0 )
+                , len2( 0 )
+                {}
+                
+                ~EllipseSpan()
+                { }
+                
+                int x1;            
+                int len1;
+                int x2;            
+                int len2;
+                
+        };
+        
+        void fillEllipse(  const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
+        void outputSpan( int x, int y, unsigned len );
+        
+        std::vector<EllipseSpan> _spans;
+        
+        
 };
 
 }//namespace Gfx
-}//namepsace Pt
+}//namespace Pt
 
 #endif

@@ -18,19 +18,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "DrawEllipse.h"
+#include "DrawThinEllipse.h"
 
 namespace Pt{
 namespace Gfx{
 
-DrawEllipse::DrawEllipse()
+DrawThinEllipse::DrawThinEllipse()
 { }
 
-DrawEllipse::~DrawEllipse()
+DrawThinEllipse::~DrawThinEllipse()
 { }
 
-
-void DrawEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
+void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 { 
     int  a      = size.width()  /2;
     int  b      = size.height() /2;
@@ -93,5 +92,5 @@ void DrawEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point&
     }
 }
 
-} //namespace Gfx
-} //namespace Pt
+}//namespace Gfx
+}//namespace Pt

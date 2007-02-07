@@ -43,6 +43,8 @@ class DrawPolyline;
 class DrawThinPolyline;
 class DrawThickPolyline;
 class DrawEllipse;
+class DrawThinEllipse;
+class DrawThickEllipse;
 
 class FillPolygon;
 class FillConvexPolygon;
@@ -145,6 +147,8 @@ class PT_GFX_API ImagePainter : public Painter
         DrawThickPolyline*   _drawThickPolyline;
         
         DrawEllipse*		 _drawEllipse;
+        DrawThinEllipse*     _drawThinEllipse;
+        DrawThickEllipse*    _drawThickEllipse;
         FillEllipse*         _fillEllipse;
 
         FillPolygon*         _fillPolygon;
