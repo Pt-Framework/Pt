@@ -54,6 +54,10 @@ Main DrawLineDemo : DrawLineDemo.cpp ;
 Main_LinkSharedLibraries DrawLineDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawLineDemo : bin ;
 
+Main FillPolygonDemo : FillPolygonDemo.cpp ;
+Main_LinkSharedLibraries FillPolygonDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate FillPolygonDemo : bin ;
+
 Main DrawEllipseDemo : DrawEllipseDemo.cpp ;
 Main_LinkSharedLibraries DrawEllipseDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawEllipseDemo : bin ;

@@ -70,13 +70,14 @@ class FillPolygon
 
 private:
     void output( Pt::Gfx::ARgbImage& image, size_t scanLine );
+    void outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t xmin, size_t scanLine );
 
     EdgeSet                 _globalEdgeTable;
     ActiveEdgeTable         _activeEdgeTable;
     EdgeSet::iterator       _currentPos;
     std::vector<ARgbColor>  _colorBuffer;
     Pt::System::Clock       _clock;
-    ClipPolygon				_clipper;
+    ClipPolygon             _clipper;
 };
 
 } //namespace Gfx

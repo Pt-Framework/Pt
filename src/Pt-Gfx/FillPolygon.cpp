@@ -53,7 +53,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
 
     if( _colorBuffer.size() < image.width() || _colorBuffer[0] != brush.color() )
         _colorBuffer.assign( image.width(), brush.color() );
-        
+
     // might as well create a new table here...
     _globalEdgeTable.clear();
 
@@ -63,6 +63,8 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     Edge edge;
     Pt::Math::Point* bottom = 0;
     Pt::Math::Point* top = 0;
+    Pt::ssize_t xmin = std::numeric_limits<Pt::ssize_t>::max();
+    Pt::ssize_t ymin = std::numeric_limits<Pt::ssize_t>::max();
     for( size_t i = 1; i < points.size(); ++i )
     {
         //
@@ -78,6 +80,11 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
             bottom = &(points[i]);
             top = &(points[i-1]);
         }
+
+        xmin = std::min( xmin, top->x() );
+        xmin = std::min( xmin, bottom->x() );
+        ymin = std::min( ymin, top->y() );
+        ymin = std::min( ymin, bottom->y() );
 
         //
         // Omit horizontal edges, add others to global edge table. The GET
@@ -145,7 +152,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
         //
         // Fill all spans in the target image
         //
-        this->output( image, scanLine );
+        this->outputTexture( image, brush, xmin, ymin, scanLine );
 
         //
         // now we are done with the current active edges and can update
@@ -190,9 +197,60 @@ void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
         if(length)
             memcpy( &image.pixel( xmin, scanLine ), &_colorBuffer[0], size );
     }
-
 }
 
+
+void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t ymin, size_t scanLine )
+{
+    // texture to copy to image
+    const Pt::Gfx::ARgbImage& texture = brush.texture();
+
+    // determine the scanline of the texture to copy
+    const size_t textureYPos = (scanLine-ymin) % texture.height();
+
+    for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
+    {
+        // start and length of the span to fill
+        const size_t xmax  = std::max(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+        size_t xpos   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+        size_t length = (xmax - xpos);
+
+        if(length)
+        {
+            // x position in the texture to copy from
+            const size_t textureXPos = (xpos - xmin) % texture.width();
+
+            // number of pixels to copy from texture
+            const size_t fillLength = std::min( length, texture.width() - textureXPos );
+
+            if(fillLength)
+            {
+                std::memcpy( &image.pixel( xpos, scanLine ),
+                             &texture.pixel(textureXPos, textureYPos),
+                             fillLength * sizeof(ARgbColor) );
+            }
+
+            length -= fillLength;
+            xpos   += fillLength;
+        }
+
+        // copy source texture scanline until end of target span
+        while(length)
+        {
+            const size_t fillLength = std::min(texture.width(), length);
+
+            if(fillLength)
+            {
+                std::memcpy( &image.pixel( xpos, scanLine ),
+                             &texture.pixel(0, textureYPos),
+                             fillLength * sizeof(ARgbColor) );
+            }
+
+            length -= fillLength;
+            xpos   += fillLength;
+        }
+    }
+}
 
 
 

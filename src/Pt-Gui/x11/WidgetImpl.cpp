@@ -238,7 +238,6 @@ void WidgetImpl::move(size_t x, size_t y)
 
 void WidgetImpl::resize(size_t width, size_t height)
 {
-    std::cerr << "resize: " << width << " " << height << std::endl;
 	width = std::max(size_t(1), width);
 	height = std::max(size_t(1), height);
 
