@@ -78,15 +78,15 @@ void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::I
 	if(mode & IODevice::Trunc)
 		create |= TRUNCATE_EXISTING;
 
-	if(mode & IODevice::NonBlock)
-	{
-		#ifdef _WIN32_WCE
-			throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
-		#endif
-		flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
-		_readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
-		_writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	}
+	//if(mode & IODevice::NonBlock)
+	//{
+	//	#ifdef _WIN32_WCE
+	//		throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
+	//	#endif
+	//	flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
+	//	_readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
+	//	_writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	//}
 
 	std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 	_handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
