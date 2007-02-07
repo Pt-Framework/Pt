@@ -21,12 +21,6 @@
 # Aloysius
 #
 
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Add fallback version that uses pthreads"
-    TASK "Review asm"
-    TASK "Write test case"
-    TASK "Write docs"
-
 ITEM P10 S5 "Variant class is implemented"
     TASK "Review code"
     TASK "Write Documentation"

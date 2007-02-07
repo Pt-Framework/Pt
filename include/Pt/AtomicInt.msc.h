@@ -18,33 +18,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_H
-#define PT_ATOMICINT_H
+#ifndef PT_ATOMICINT_MSC_H
+#define PT_ATOMICINT_MSC_H
+
+#include <windows.h>
 
 
-#ifdef _MSC_VER
+namespace Pt {
 
-    #include "AtomicInt.msc.h"
+    typedef long atomic_t;
 
-#elif __GNUC__
+    class AtomicInt
+    {
+        public:
+            inline AtomicInt(atomic_t value = 0)
+            : _value(value)
+            {}
 
-    #if defined( _i386_     ) || defined( __i386__ ) || \
-        defined( __x86_64__ ) || defined( _M_IX86  )
+            inline atomic_t value() const
+            { return _value; }
 
-        #include "AtomicInt.gcc.x86.h"
+            inline void operator+=(atomic_t n)
+            { ::InterlockedExchangeAdd(const_cast<long*>(&_value), n); }
 
-    #elif defined( __arm__ )
+            inline void operator-=(atomic_t n)
+            { ::InterlockedExchangeAdd(const_cast<long*>(&_value), -n); }
 
-        #include "AtomicInt.gcc.arm.h"
+            inline void operator=(atomic_t n)
+            { ::InterlockedExchange(const_cast<long*>(&_value), n); }
 
-    #elif defined( _M_PPC  ) || defined( PPC         ) || \
-          defined( ppc     ) || defined( __powerpc__ ) || \
-          defined( __ppc__ )
+            inline bool compareExchange(atomic_t cmp, atomic_t ex)
+            { return (::InterlockedCompareExchange(const_cast<long*>(&_value), ex, cmp) == 1); }
 
-        #include "AtomicInt.gcc.ppc.h"
+        private:
+            volatile atomic_t _value;
+    };
 
-    #endif
-
-#endif
+} // namespace Pt
 
 #endif
