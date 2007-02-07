@@ -110,14 +110,14 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         }      
                 
         void drawRectTest()
-        { 
+        {
             _imagePainter.setPen( Pen( 1, ARgbColor( 0,0,0) ) );
-            
-            _image.resize(  800, 600, _bkColor );                            
-            _imagePainter.drawRect( Rect( Point( 10, 10), Size( 100,100) ) );            
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.drawRect( Rect( Point( 10, 10), Size( 100,100) ) );
             PT_UNIT_ASSERT( checkImage() );
-            
-            _image.resize(  800, 600, _bkColor );                            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,1000) ) );
             PT_UNIT_ASSERT( !checkImage() );
 
@@ -125,7 +125,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,10) ) );
             PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void fillRectTest()
         {             
             _imagePainter.setBrush( Brush( ARgbColor( 0,0,0) ) );
@@ -219,7 +219,20 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 
             _imagePainter.setFont( Font("Vera", 12, Font::NormalStyle, 340 ) );
             FontMetrics metrics  = _imagePainter.fontMetrics( text );
+            PT_UNIT_ASSERT( metrics.ascent() == 12 );
+            PT_UNIT_ASSERT( metrics.descent() == 3 );
+            PT_UNIT_ASSERT( metrics.width() >= 93 && metrics.width() <= 97 );
+            PT_UNIT_ASSERT( metrics.height() >= 13 && metrics.height() <= 15 );
 
+            _imagePainter.setFont( Font("Vera", 14, Font::NormalStyle, 340 ) );
+            metrics  = _imagePainter.fontMetrics( text );
+            PT_UNIT_ASSERT( metrics.ascent() == 13 );
+            PT_UNIT_ASSERT( metrics.descent() == 4 );
+            PT_UNIT_ASSERT( metrics.width() >= 114 && metrics.width() <= 116 );
+            PT_UNIT_ASSERT( metrics.height() >= 15 && metrics.height() <= 17 );
+
+            _imagePainter.setFont( Font("Vera", 12, Font::NormalStyle, 340 ) );
+            metrics  = _imagePainter.fontMetrics( text );
             PT_UNIT_ASSERT( metrics.ascent() == 12 );
             PT_UNIT_ASSERT( metrics.descent() == 3 );
             PT_UNIT_ASSERT( metrics.width() >= 93 && metrics.width() <= 97 );

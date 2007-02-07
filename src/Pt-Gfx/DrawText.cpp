@@ -67,62 +67,73 @@ FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Point
 
 void DrawText::setFont( const Font& font )
 {
-	//Setup the image type.
-	_imageType.face_id	= faceId();
-	_imageType.width	= font.size();
+    //Setup the image type.
+    _imageType.face_id	= faceId();
+    _imageType.width	= font.size();
     _imageType.height	= font.size();
     _imageType.flags	= FT_RENDER_MODE_NORMAL;
 
-	//Setup the rotation matrix.
-	_fontAngle = font.angle() % 3600;
+    //Setup the rotation matrix.
+    _fontAngle = font.angle() % 3600;
 
-	if ( _fontAngle < 0 )
-		_fontAngle += 3600;
+    if ( _fontAngle < 0 )
+        _fontAngle += 3600;
 
-	const double angle	 = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
-	const double cosinus = cos( angle ) * 0x10000L;
-	const double sinus   = sin( angle ) * 0x10000L;
+    const double angle	 = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
+    const double cosinus = cos( angle ) * 0x10000L;
+    const double sinus   = sin( angle ) * 0x10000L;
 
-	_matrix.xx = (FT_Fixed) ceil( cosinus );
-	_matrix.xy = (FT_Fixed) ceil( -sinus );
-	_matrix.yx = (FT_Fixed) ceil( sinus );
-	_matrix.yy = (FT_Fixed) ceil( cosinus );
+    _matrix.xx = (FT_Fixed) ceil( cosinus );
+    _matrix.xy = (FT_Fixed) ceil( -sinus );
+    _matrix.yx = (FT_Fixed) ceil( sinus );
+    _matrix.yy = (FT_Fixed) ceil( cosinus );
 
-	//Search the unicode charmap.
-	FT_Face	face;
+    //Search the unicode charmap.
+    FT_Face	face;
 
-	FTC_Manager_LookupFace( _manager, faceId(), &face );
+    FTC_Manager_LookupFace( _manager, faceId(), &face );
 
-	bool charMapFound = false;
+    bool charMapFound = false;
 
-	for( int i = 0; i < face->num_charmaps; ++i )
-	{
-		if( face->charmap[i].encoding == FT_ENCODING_UNICODE )
-		{
-			_charMapId = face->charmap[i].encoding_id;
-			charMapFound = true;
-			break;
-		}
-	}
+    for( int i = 0; i < face->num_charmaps; ++i )
+    {
+        if( face->charmap[i].encoding == FT_ENCODING_UNICODE )
+        {
+        _charMapId = face->charmap[i].encoding_id;
+        charMapFound = true;
+        break;
+        }
+    }
 
-	if( !charMapFound )
-		throw InvalidFont( "No unicode charmap found" + PT_SOURCEINFO );
+    if( !charMapFound )
+        throw InvalidFont( "No unicode charmap found" + PT_SOURCEINFO );
 }
 
 FontMetrics DrawText::fontMetrics( const Text::String& text )
 {
-	FT_Face				face;
     FT_UInt				previous    = 0;
     FT_Vector			delta;
     FT_Glyph			glyph;
     FT_BBox				gbbox = { 0 ,0 , 0, 0 };
     FT_BBox				tbbox = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max(),
-                                  std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
+                            std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
     FTC_Node			node;
     FT_UInt				glyph_index;
 
-	FTC_Manager_LookupFace( _manager, faceId(), &face );
+    //
+    // Lookup global data of the face be getting a Size struct from the 
+    // manager.
+    //
+    FT_Size size;
+    FTC_ScalerRec_ scaler;
+    scaler.face_id = _imageType.face_id;
+    scaler.width = _imageType.width;
+    scaler.height = _imageType.height;
+    scaler.pixel = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
+    FTC_Manager_LookupSize( _manager, &scaler, &size );
 
+    FT_Face face;
+    FTC_Manager_LookupFace( _manager, faceId(), &face );
     int pen_x = 0;
     int pen_y = 0;
 
@@ -157,7 +168,8 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
         previous = glyph_index;
     }
 
-    return FontMetrics(face->size->metrics.ascender>>6, (-face->size->metrics.descender)>>6, tbbox.xMax - tbbox.xMin, face->size->metrics.height>>6 );
+    return FontMetrics(size->metrics.ascender >> 6, (-size->metrics.descender) >> 6, 
+                       tbbox.xMax - tbbox.xMin, size->metrics.height >> 6 );
 }
 
 

@@ -208,7 +208,8 @@ void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
 }
 
 
-void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xorigin, Pt::ssize_t yorigin, size_t scanLine )
+void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
+                                 Pt::ssize_t xorigin, Pt::ssize_t yorigin, size_t scanLine )
 {
     // texture to copy to image
     const Pt::Gfx::ARgbImage& texture = brush.texture();
@@ -223,7 +224,7 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
         size_t xpos   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
         size_t length = (xmax - xpos);
 
-        if(length)
+        while(length)
         {
             // x position in the texture to copy from
             const size_t textureXPos = (xpos - xorigin) % texture.width();
@@ -241,10 +242,11 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
             length -= fillLength;
             xpos   += fillLength;
         }
-
+/*
         // copy source texture scanline until end of target span
         while(length)
         {
+            // number of pixels to copy from texture
             const size_t fillLength = std::min(texture.width(), length);
 
             if(fillLength)
@@ -257,6 +259,7 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
             length -= fillLength;
             xpos   += fillLength;
         }
+*/
     }
 }
 

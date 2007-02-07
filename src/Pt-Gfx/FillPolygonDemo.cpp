@@ -27,6 +27,7 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
+#include <Pt/Gui/MouseMoveEvent.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
 
@@ -77,22 +78,27 @@ class FillPolygonDemo : public Pt::Gui::Widget
             _brush = Pt::Gfx::Brush(&texture);
         }
 
-        virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
+        void drawContent(int x, int y)
         {
             std::vector<Pt::Math::Point> points(5);
-            points[0] = Pt::Math::Point(10 + _f, 10+ _f);
-            points[1] = Pt::Math::Point(100+ _f, 10+ _f);
-            points[2] = Pt::Math::Point(100+ _f, 100+ _f);
-            points[3] = Pt::Math::Point(50+ _f, 150+ _f);
-            points[4] = Pt::Math::Point(10+ _f, 100+ _f);
-
-            --_f;
-            //if(++_f > 200) _f = 0;
+            points[0] = Pt::Math::Point( x-50, y-50);
+            points[1] = Pt::Math::Point(100+ x, y -50);
+            points[2] = Pt::Math::Point(100+ x, 100+ y);
+            points[3] = Pt::Math::Point(50+ x, 150+ y);
+            points[4] = Pt::Math::Point(x, 100+ y);
 
             _imagePainter.setBrush(_brush);
             _imagePainter.fillPolygon( &points[0], points.size() );
 
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
+        }
+
+        virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
+        {
+            this->drawContent(-30, -30);
+            this->drawContent(150, 100);
+            this->drawContent(400, 200);
+            this->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
         }
 
         virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
