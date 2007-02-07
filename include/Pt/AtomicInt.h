@@ -47,6 +47,11 @@
 
         #include "AtomicInt.gcc.mips.h"
 
+    #else
+
+       #warning "Using fallback version of AtomicInt (using pthread) !!!"
+       #include "AtomicInt.gcc.pthread.h"
+
     #endif
 
 #endif

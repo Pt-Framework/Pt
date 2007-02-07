@@ -18,10 +18,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_GCC_X86_H
-#define PT_ATOMICINT_GCC_X86_H
+#ifndef PT_ATOMICINT_GCC_PTHREAD_H
+#define PT_ATOMICINT_GCC_PTHREAD_H
 
 #include <csignal>
+#include <pthread.h>
 
 
 namespace Pt {
@@ -36,54 +37,42 @@ namespace Pt {
             {}
 
             inline atomic_t value() const
-            { return _value; }
+            { return _value;  }
 
             inline void operator+=(atomic_t n)
             {
-                register int result;
-
-                asm volatile (
-                    "lock; xadd{l} {%0,%1|%1,%0}"
-                    : "=r" (result), "=m" (_value)
-                    : "0" (n), "m" (_value)
-                );
+                pthread_mutex_lock(&_mutex);
+                _value += n;
+                pthread_mutex_unlock(&_mutex);
             }
 
             inline void operator-=(atomic_t n)
             {
-                register int result;
-
-                asm volatile (
-                    "lock; xadd{l} {%0,%1|%1,%0}"
-                    : "=r" (result), "=m" (_value)
-                    : "0" (-n), "m" (_value)
-                );
+                pthread_mutex_lock(&_mutex);
+                _value -= n;
+                pthread_mutex_unlock(&_mutex);
             }
 
             inline void operator=(atomic_t n)
             {
-                register volatile int ret;
-
-                asm volatile (
-                    "xchgl %0, %1"
-                    : "=r"(ret), "=m"(_value)
-                    : "0"(n), "m"(_value)
-                    : "memory"
-                );
+                pthread_mutex_lock(&_mutex);
+                _value = n;
+                pthread_mutex_unlock(&_mutex);
             }
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
-                asm volatile (
-                    "lock; cmpxchgl %2, %1"
-                    : "=a" (oldval), "=m" (_value)
-                    : "r" (newval), "m" (_value), "0" (oldval)
-                );
+
+                pthread_mutex_lock(&_mutex);
+                oldval = _value;
+                _value = newval;
+                pthread_mutex_unlock(&_mutex);
 
                 return oldval;
             }
 
         private:
+            pthread_mutex_t   _mutex;
             volatile atomic_t _value;
     };
 
