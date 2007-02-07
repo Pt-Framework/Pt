@@ -70,7 +70,7 @@ class FillPolygon
 
 private:
     void output( Pt::Gfx::ARgbImage& image, size_t scanLine );
-    void outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t xmin, size_t scanLine );
+    void outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t ymin, size_t scanLine );
 
     EdgeSet                 _globalEdgeTable;
     ActiveEdgeTable         _activeEdgeTable;

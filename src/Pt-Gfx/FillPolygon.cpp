@@ -152,7 +152,10 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
         //
         // Fill all spans in the target image
         //
-        this->outputTexture( image, brush, xmin, ymin, scanLine );
+        if( brush.fillStyle() == Brush::SolidFill )
+            this->output( image, scanLine );
+        else        
+            this->outputTexture( image, brush, xmin, ymin, scanLine );
 
         //
         // now we are done with the current active edges and can update
