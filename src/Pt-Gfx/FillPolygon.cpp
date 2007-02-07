@@ -40,6 +40,17 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //Pt::System::Clock clock;
     //clock.start();
 
+    //
+    // find unclipped origin coordinates
+    //
+    Pt::ssize_t xmin = std::numeric_limits<Pt::ssize_t>::max();
+    Pt::ssize_t ymin = std::numeric_limits<Pt::ssize_t>::max();
+    for(size_t n = 0; n < points.size(); ++n)
+    {
+        xmin = std::min( xmin, points[n].x() );
+        ymin = std::min( ymin, points[n].y() );
+    }
+
     _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width(), image.height() )) );
 
     if( points.end() != points.begin() )
@@ -63,8 +74,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     Edge edge;
     Pt::Math::Point* bottom = 0;
     Pt::Math::Point* top = 0;
-    Pt::ssize_t xmin = std::numeric_limits<Pt::ssize_t>::max();
-    Pt::ssize_t ymin = std::numeric_limits<Pt::ssize_t>::max();
+
     for( size_t i = 1; i < points.size(); ++i )
     {
         //
@@ -80,11 +90,6 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
             bottom = &(points[i]);
             top = &(points[i-1]);
         }
-
-        xmin = std::min( xmin, top->x() );
-        xmin = std::min( xmin, bottom->x() );
-        ymin = std::min( ymin, top->y() );
-        ymin = std::min( ymin, bottom->y() );
 
         //
         // Omit horizontal edges, add others to global edge table. The GET
@@ -203,13 +208,13 @@ void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
 }
 
 
-void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t ymin, size_t scanLine )
+void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xorigin, Pt::ssize_t yorigin, size_t scanLine )
 {
     // texture to copy to image
     const Pt::Gfx::ARgbImage& texture = brush.texture();
 
     // determine the scanline of the texture to copy
-    const size_t textureYPos = (scanLine-ymin) % texture.height();
+    const size_t textureYPos = (scanLine-yorigin) % texture.height();
 
     for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
     {
@@ -221,7 +226,7 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
         if(length)
         {
             // x position in the texture to copy from
-            const size_t textureXPos = (xpos - xmin) % texture.width();
+            const size_t textureXPos = (xpos - xorigin) % texture.width();
 
             // number of pixels to copy from texture
             const size_t fillLength = std::min( length, texture.width() - textureXPos );

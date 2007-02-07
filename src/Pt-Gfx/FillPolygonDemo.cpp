@@ -86,7 +86,8 @@ class FillPolygonDemo : public Pt::Gui::Widget
             points[3] = Pt::Math::Point(50+ _f, 150+ _f);
             points[4] = Pt::Math::Point(10+ _f, 100+ _f);
 
-            if(++_f > 200) _f = 0;
+            --_f;
+            //if(++_f > 200) _f = 0;
 
             _imagePainter.setBrush(_brush);
             _imagePainter.fillPolygon( &points[0], points.size() );
