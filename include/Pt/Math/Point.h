@@ -135,6 +135,27 @@ namespace Pt {
 				T _y;
 		};
 
+
+        /** @brief functor to compare to points.
+
+            First point is smaller as second if the x value
+            is smaller or the x values are equal and the 
+            y value of first point is smaller.
+        */
+        class PointCompareFunctorXY
+        {
+        public:
+            bool operator()(const Pt::Math::Point& pt1, const Pt::Math::Point& pt2)
+            {   
+                if( (pt1.x() < pt2.x()) ||
+                    ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) )
+                {
+                        return true;
+                }
+                return false;
+            }
+        };
+
 	} // namespace Math
 
 } // namespace Pt
