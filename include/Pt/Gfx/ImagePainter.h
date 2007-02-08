@@ -52,7 +52,7 @@ class FillEllipse;
 class DrawText;
 
 
-class FillSpan
+class PT_GFX_API FillSpan
 {
     public:
         virtual ~FillSpan()
@@ -63,7 +63,7 @@ class FillSpan
                             size_t xpos, size_t ypos, size_t length ) = 0;
 };
 
-class FillTexture : public FillSpan
+class PT_GFX_API FillTexture : public FillSpan
 {
     public:
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
@@ -71,7 +71,7 @@ class FillTexture : public FillSpan
                             size_t xpos, size_t ypos, size_t length );
 };
 
-class FillSolid : public FillSpan
+class PT_GFX_API FillSolid : public FillSpan
 {
     public:
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
