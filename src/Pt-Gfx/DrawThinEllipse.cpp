@@ -31,11 +31,26 @@ DrawThinEllipse::~DrawThinEllipse()
 
 void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 { 
-    int  a      = size.width()  /2;
-    int  b      = size.height() /2;
-
+    if( size.width() == 0 || size.height() == 0 )
+        return;
+    
+    if( size.width() == 1 && size.height() == 1 )
+        return;
+        
+    int errorx = 1;
+    int errory = 1;
+    
+    if( size.width()%2 != 0 )
+        errorx  =  0;
+    
+    if( size.height()%2 != 0)
+        errory  = 0;
+        
+    int  a      = size.width()/2;
+    int  b      = size.height()/2;
+    
     int  xc     = topLeft.x() + a;
-    int  yc     = topLeft.y() + b;
+    int  yc     = topLeft.y() + b; 
 
     int  x      = 0;
     int  y      = b;
@@ -52,15 +67,15 @@ void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Po
 
     while( y >= 0 && x <= a ) 
     {
-        outputPixel( image, pen, xc+x - 1, yc+y - 1 );
+        outputPixel( image, pen, xc+x -errorx, yc+y - errory );
 
         if( x!=0 || y!=0 )
             outputPixel( image, pen, xc-x, yc-y );
 
         if( x!=0 && y!=0 ) 
         {
-            outputPixel( image, pen, xc+x - 1, yc-y );
-            outputPixel( image, pen, xc-x, yc+y - 1 );
+            outputPixel( image, pen, xc+x -errorx, yc-y );
+            outputPixel( image, pen, xc-x, yc+y -errory );
         }
 
         if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */)
