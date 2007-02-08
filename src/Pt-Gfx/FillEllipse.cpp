@@ -20,33 +20,36 @@
  ***************************************************************************/
 #include "FillEllipse.h"
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
+
+namespace Gfx {
 
 FillEllipse::FillEllipse()
+: _fillSpan(0)
 { }
+
 
 FillEllipse::~FillEllipse()
 { }
 
-void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, int x, int y, int width )
-{//Should be reinplemented!
-    
+
+void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, int x, int y, int width )
+{
     const int imageWidth = static_cast<int>( image.width() );
     const int imageHeight = static_cast<int>( image.height() );
-    
+
     if( y >= imageHeight )
         return;
-    
+
     if( y < 0 )
         return;
 
     const ssize_t xend = std::min( x + width, imageWidth );
-    ssize_t       xpos = std::max( 0, x );    
-                 
-    for( ; xpos < xend; xpos++ )
-        image.pixel( xpos, y ) = brush.color();
+    ssize_t       xpos = std::max( 0, x );
+
+    _fillSpan->fill(image, brush, topLeft.x(), topLeft.y(), xpos, y, xend-xpos);
 }
+
 
 void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 {	
@@ -56,18 +59,17 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
 	
 	if( size.width() ==  1 && size.height() == 1 )
 	    return;
-	    
-	
+
 	/* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */	  
     int errorx = 1;
     int errory = 1;
-    
+
     if( size.width()%2 != 0 )
         errorx  =  0;
-    
+
     if( size.height()%2 != 0)
         errory  = 0;
-        
+
 	const int       a      = size.width() /2;
 	const int       b      = size.height() /2;
 	const int       xc     = topLeft.x() + a;
@@ -99,10 +101,10 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
 	    }
 	    else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
 	    {
-		    outputSpan(image, brush,  xc-x, yc-y, width  - errorx);
+		    outputSpan(image, brush, topLeft, xc-x, yc-y, width  - errorx);
 		    
 		    if( y!=0 )
-			    outputSpan(image, brush, xc-x, yc+y - errory, width  - errorx);
+			    outputSpan(image, brush, topLeft, xc-x, yc+y - errory, width  - errorx);
 			    
 		     //Increment Y
 		    y--; 
@@ -111,10 +113,10 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
 	    }
 	    else 
 	    {
-		    outputSpan( image, brush, xc-x, yc-y, width -errorx );
+		    outputSpan( image, brush, topLeft, xc-x, yc-y, width -errorx );
 		    
 		    if( y != 0 )
-			    outputSpan( image, brush, xc-x, yc+y -errory, width - errorx );
+			    outputSpan( image, brush, topLeft, xc-x, yc+y -errory, width - errorx );
 			    
 		     //Increment x
 		    x++; 
@@ -131,7 +133,9 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
     }
 
     if( b == 0 )
-        outputSpan( image, brush, xc-a, yc, 2*a );
+        outputSpan( image, brush, topLeft, xc-a, yc, 2*a );
 }
+
 }//namespace Gfx
+
 }//namespace Pt

@@ -21,7 +21,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>bin/FillPolygonDemod</mainprogram>
+      <mainprogram>bin/DrawEllipseDemod</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>

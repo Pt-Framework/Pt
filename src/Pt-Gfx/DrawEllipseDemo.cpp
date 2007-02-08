@@ -37,61 +37,93 @@ using namespace Pt;
 using namespace Pt::Gfx;
 using namespace Pt::Math;
 
+Pt::Gfx::ARgbColor G(158*255, 158*255, 158*255);
+Pt::Gfx::ARgbColor A(188*255, 188*255, 188*255);
+Pt::Gfx::ARgbColor W(0xffff, 0xffff, 0xffff);
+
+Pt::Gfx::ARgbColor texture_data[]  =   {W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W};
+
+
 class DrawEllipseDemo : public Pt::Gui::Widget
 {
-	public:
-	DrawEllipseDemo()
-	: _image( )
-	, _imagePainter( _image )
-	, _angle(0 )
-	{
-		this->setTitle(L"DrawEllipseDemo");
-	}
+    public:
+        DrawEllipseDemo()
+        : _texture( 21, 21, Pt::Gfx::ARgbColor(0,0,0xdddd) )
+        , _image( )
+        , _imagePainter( _image )
+        , _angle(0 )
+        {
+            this->setTitle(L"DrawEllipseDemo");
 
-	virtual ~DrawEllipseDemo()
-	{}
+            std::copy( texture_data, texture_data + (21*21), _texture.data() );
+        }
 
-	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
-	{		
-		size_t pens = 1;
+        virtual ~DrawEllipseDemo()
+        {}
 
-		Size  size1( 40, 60 );
-		Size  size2( 10, 10 );
+    virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
+    {
+        size_t pens = 1;
 
-		Point point1( 10 ,50 );
-		Point point2( 50 ,50 );
-		Point point3( 20 ,80 );
-		Point point4( 60 ,80 );
-				
-    	_imagePainter.setBrush( Brush( ARgbColor( 0,0xffff,0 ) ) );		
-		_imagePainter.fillEllipse( point1, size1 );
+        Size  size1( 40, 60 );
+        Size  size2( 10, 10 );
 
-		_imagePainter.setPen( Pen( pens, ARgbColor( 0,0,0 ) ) );				
-		_imagePainter.drawEllipse( point1, size1 ) ;
-	
-  	    _imagePainter.setBrush( Brush( ARgbColor( 0,0xffff,0 ) ) );		
-		_imagePainter.fillEllipse( point2, size1 );
+        Point point1( 10 ,50 );
+        Point point2( 50 ,50 );
+        Point point3( 20 ,80 );
+        Point point4( 60 ,80 );
 
-		_imagePainter.setPen( Pen( pens, ARgbColor( 0,0,0 ) ) );				
-		_imagePainter.drawEllipse( point2, size1 ) ;	
-		
-		_imagePainter.setBrush( Brush( ARgbColor( 0,0,0 ) ) );		
-		_imagePainter.fillEllipse( point3, size2 );
+        _imagePainter.setBrush( Brush( ARgbColor( 0,0xffff,0 ) ) );
+        _imagePainter.fillEllipse( point1, size1 );
 
-        _imagePainter.setBrush( Brush( ARgbColor( 0,0,0 ) ) );		
-		_imagePainter.fillEllipse( point4, size2 );
+        _imagePainter.setPen( Pen( pens, ARgbColor( 0,0,0 ) ) );
+        _imagePainter.drawEllipse( point1, size1 ) ;
+
+        _imagePainter.setBrush( Brush( &_texture ) );
+        _imagePainter.fillEllipse( point2, size1 );
+
+        _imagePainter.setPen( Pen( pens, ARgbColor( 0,0,0 ) ) );
+        _imagePainter.drawEllipse( point2, size1 ) ;
+
+        _imagePainter.setBrush( Brush( &_texture ) );
+        _imagePainter.fillEllipse( point3, size2 );
+
+        _imagePainter.setBrush( Brush( ARgbColor( 0,0,0 ) ) );
+        _imagePainter.fillEllipse( point4, size2 );
+
         painter().drawImage( Point( 0, 0 ), _image );
     }
 
-	virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
-	{
-		_image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
-	}
+    virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
+    {
+        _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
+    }
 
-private:
-	Pt::Gfx::ARgbImage		_image;
-	Pt::Gfx::ImagePainter	_imagePainter;
-	Pt::ssize_t				_angle;
+    private:
+        Pt::Gfx::ARgbImage _texture;
+        Pt::Gfx::ARgbImage		_image;
+        Pt::Gfx::ImagePainter	_imagePainter;
+        Pt::ssize_t				_angle;
 };
 
 

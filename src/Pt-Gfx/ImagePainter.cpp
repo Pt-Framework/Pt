@@ -42,8 +42,51 @@
 #include "FillPolygon.h"
 #include "FillConvexPolygon.h"
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
+
+namespace Gfx {
+
+void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                        Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                        size_t xpos, size_t ypos, size_t length )
+{
+    const Pt::Gfx::ARgbImage& texture = brush.texture();
+
+    while(length)
+    {
+        // x position in the texture to copy from
+        const size_t textureXPos = (xpos - xorigin) % texture.width();
+
+        // determine the scanline of the texture to copy from
+        const size_t textureYPos = (ypos-yorigin) % texture.height();
+
+        // number of pixels to copy from texture
+        const size_t fillLength = std::min( length, texture.width() - textureXPos );
+
+        // Copy pixels from textrure to image
+        if(fillLength)
+        {
+            std::memcpy( &image.pixel( xpos, ypos ),
+                            &texture.pixel(textureXPos, textureYPos),
+                            fillLength * sizeof(ARgbColor) );
+        }
+
+        // Remaining unfilled pixels of the span
+        length -= fillLength;
+        xpos   += fillLength;
+    }
+}
+
+
+void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                      Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                      size_t xpos, size_t ypos, size_t length )
+{
+    std::fill_n( &image.pixel( xpos, ypos ), length, brush.color() );
+    //if(length)
+    //    memcpy( &image.pixel( xpos, ypos ), &_colorBuffer[0], length * sizeof(ARgbColor) );
+}
+
 
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
@@ -70,6 +113,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThickEllipse>     dThickEllipse( new DrawThickEllipse() );
 
     std::auto_ptr<FillPolygon>          fillPolygon( new FillPolygon() );
+    fillPolygon->setOutput( _fillSolid );
+
     std::auto_ptr<FillConvexPolygon>    fillConvexPolygon( new FillConvexPolygon() );
     std::auto_ptr<FillEllipse>          fillEllipse( new FillEllipse() );
 
@@ -134,6 +179,17 @@ const Pen& ImagePainter::pen() const
 void ImagePainter::setBrush(const Brush& brush)
 {
     _brush = brush;
+
+    if(_brush.fillStyle() == Brush::TextureFill)
+    {
+        _fillPolygon->setOutput( _fillTexture );
+        _fillEllipse->setOutput( _fillTexture );
+    }
+    else
+    {
+        _fillPolygon->setOutput( _fillSolid );
+        _fillEllipse->setOutput( _fillSolid );
+    }
 }
 
 const Brush& ImagePainter::brush() const
@@ -250,5 +306,6 @@ void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image, co
 }
 
 }
+
 }
 

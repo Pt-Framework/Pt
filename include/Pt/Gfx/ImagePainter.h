@@ -51,6 +51,34 @@ class FillConvexPolygon;
 class FillEllipse;
 class DrawText;
 
+
+class FillSpan
+{
+    public:
+        virtual ~FillSpan()
+        {}
+
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                            size_t xpos, size_t ypos, size_t length ) = 0;
+};
+
+class FillTexture : public FillSpan
+{
+    public:
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                            size_t xpos, size_t ypos, size_t length );
+};
+
+class FillSolid : public FillSpan
+{
+    public:
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                            size_t xpos, size_t ypos, size_t length );
+};
+
 /**
     \brief A painter to draw on an ARgbImage.
 */
@@ -145,16 +173,18 @@ class PT_GFX_API ImagePainter : public Painter
         DrawPolyline*        _drawPolyline;
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
-        
+
         DrawEllipse*		 _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;
         FillEllipse*         _fillEllipse;
 
         FillPolygon*         _fillPolygon;
-        FillConvexPolygon*   _fillConvexPolygon;        
+        FillConvexPolygon*   _fillConvexPolygon;
         DrawText*            _drawText;
 
+        FillSolid _fillSolid;
+        FillTexture _fillTexture;
 };
 
 } //namespace Gfx

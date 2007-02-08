@@ -31,7 +31,7 @@ namespace Pt {
 namespace Gfx {
 
 FillPolygon::FillPolygon()
-: _colorBuffer( 3000 )
+: _fillSpan(0)
 { }
 
 
@@ -43,12 +43,12 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //
     // find unclipped origin coordinates
     //
-    Pt::ssize_t xmin = std::numeric_limits<Pt::ssize_t>::max();
-    Pt::ssize_t ymin = std::numeric_limits<Pt::ssize_t>::max();
+    Pt::ssize_t xorig = std::numeric_limits<Pt::ssize_t>::max();
+    Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
     for(size_t n = 0; n < points.size(); ++n)
     {
-        xmin = std::min( xmin, points[n].x() );
-        ymin = std::min( ymin, points[n].y() );
+        xorig = std::min( xorig, points[n].x() );
+        yorig = std::min( yorig, points[n].y() );
     }
 
     _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width(), image.height() )) );
@@ -61,9 +61,6 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
 
     if( points.empty())
         return;
-
-    if( _colorBuffer.size() < image.width() || _colorBuffer[0] != brush.color() )
-        _colorBuffer.assign( image.width(), brush.color() );
 
     // might as well create a new table here...
     _globalEdgeTable.clear();
@@ -155,12 +152,17 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     do
     {
         //
-        // Fill all spans in the target image
+        // fill every even span, starting at even (even-odd-rule)
         //
-        if( brush.fillStyle() == Brush::SolidFill )
-            this->output( image, scanLine );
-        else        
-            this->outputTexture( image, brush, xmin, ymin, scanLine );
+        for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
+        {
+            const size_t xend   = std::max(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+            const size_t xbegin   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
+            const size_t length = (xend - xbegin);
+
+            if(_fillSpan)
+                _fillSpan->fill(image, brush, xorig, yorig, xbegin, scanLine, length);
+        }
 
         //
         // now we are done with the current active edges and can update
@@ -187,64 +189,6 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
 
     //Pt::System::TimeValue time = clock.stop();
     //std::cerr << "Image Time: " << time.seconds() + time.microSeconds() / 1000000.0 << std::endl;
-}
-
-
-void FillPolygon::output( Pt::Gfx::ARgbImage& image, size_t scanLine )
-{
-    //
-    // fill every even span, starting at even (even-odd-rule)
-    //
-    for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
-    {
-        // TODO: Investigate why we need max/min out the x values. :-/
-        const size_t xmax   = std::max(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
-        const size_t xmin   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
-        const size_t length = (xmax - xmin);
-        const size_t size   = length * sizeof(ARgbColor);
-        if(length)
-            memcpy( &image.pixel( xmin, scanLine ), &_colorBuffer[0], size );
-    }
-}
-
-
-void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, 
-                                 Pt::ssize_t xorigin, Pt::ssize_t yorigin, size_t scanLine )
-{
-    // texture to copy to image
-    const Pt::Gfx::ARgbImage& texture = brush.texture();
-
-    // determine the scanline of the texture to copy from
-    const size_t textureYPos = (scanLine-yorigin) % texture.height();
-
-    for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
-    {
-        // start and length of the span to fill
-        const size_t xmax  = std::max(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
-        size_t xpos   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
-        size_t length = (xmax - xpos);
-
-        while(length)
-        {
-            // x position in the texture to copy from
-            const size_t textureXPos = (xpos - xorigin) % texture.width();
-
-            // number of pixels to copy from texture
-            const size_t fillLength = std::min( length, texture.width() - textureXPos );
-
-            // Copy pixels from textrure to image
-            if(fillLength)
-            {
-                std::memcpy( &image.pixel( xpos, scanLine ),
-                             &texture.pixel(textureXPos, textureYPos),
-                             fillLength * sizeof(ARgbColor) );
-            }
-
-            // Remaining unfilled pixels of the span
-            length -= fillLength;
-            xpos   += fillLength;
-        }
-    }
 }
 
 }//namespace Pt

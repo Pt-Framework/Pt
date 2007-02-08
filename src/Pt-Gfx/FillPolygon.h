@@ -21,6 +21,7 @@
 #ifndef PT_GFX_FILLPOLYGON_H
 #define PT_GFX_FILLPOLYGON_H
 
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Math/Point.h>
@@ -47,6 +48,9 @@ class FillPolygon
         virtual ~FillPolygon()
         { }
 
+        void setOutput(FillSpan& fs)
+        { _fillSpan = & fs; };
+
         /** @brief Fill a polygon on an image
 
             @see FillPolygon::draw
@@ -68,16 +72,13 @@ class FillPolygon
         virtual void draw( ARgbImage& image, const Brush& brush,
                            std::vector<Math::Point>& points );
 
-private:
-    void output( Pt::Gfx::ARgbImage& image, size_t scanLine );
-    void outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush, Pt::ssize_t xmin, Pt::ssize_t ymin, size_t scanLine );
-
-    EdgeSet                 _globalEdgeTable;
-    ActiveEdgeTable         _activeEdgeTable;
-    EdgeSet::iterator       _currentPos;
-    std::vector<ARgbColor>  _colorBuffer;
-    Pt::System::Clock       _clock;
-    ClipPolygon             _clipper;
+    private:
+        FillSpan* _fillSpan;
+        ClipPolygon             _clipper;
+        EdgeSet                 _globalEdgeTable;
+        ActiveEdgeTable         _activeEdgeTable;
+        EdgeSet::iterator       _currentPos;
+        Pt::System::Clock       _clock;
 };
 
 } //namespace Gfx

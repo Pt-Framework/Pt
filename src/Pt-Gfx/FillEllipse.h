@@ -21,26 +21,34 @@
 #ifndef PT_GFX_FILLELLIPSE_H
 #define PT_GFX_FILLELLIPSE_H
 
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Brush.h>
 
+
 namespace Pt{
+
 namespace Gfx{
 
 class FillEllipse
 {
     public:
         FillEllipse();
+
         ~FillEllipse();
 
+        void setOutput(FillSpan& fs)
+        { _fillSpan = & fs; }
+
         void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
-        
+
     private:
-        void outputSpan( ARgbImage& image, const Brush& brush, int x, int y, int width );
+        FillSpan* _fillSpan;
+        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, int x, int y, int width );
 };
 
 }
+
 }
 
- #endif
- 
+#endif

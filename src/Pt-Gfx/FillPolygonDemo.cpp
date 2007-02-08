@@ -75,7 +75,8 @@ class FillPolygonDemo : public Pt::Gui::Widget
             Pt::Gfx::ARgbImage texture(21, 21, Pt::Gfx::ARgbColor(0,0,0xdddd));
             std::copy( texture_data, texture_data + (21*21), texture.data() );
 
-            _brush = Pt::Gfx::Brush(&texture);
+            _textureBrush = Pt::Gfx::Brush(&texture);
+            _solidBrush = Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0, 0xdddd, 0) );
         }
 
         void drawContent(int x, int y)
@@ -87,7 +88,6 @@ class FillPolygonDemo : public Pt::Gui::Widget
             points[3] = Pt::Math::Point(50+ x, 150+ y);
             points[4] = Pt::Math::Point(x, 100+ y);
 
-            _imagePainter.setBrush(_brush);
             _imagePainter.fillPolygon( &points[0], points.size() );
 
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
@@ -95,9 +95,14 @@ class FillPolygonDemo : public Pt::Gui::Widget
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
+            _imagePainter.setBrush(_textureBrush);
             this->drawContent(-30, -30);
-            this->drawContent(150, 100);
-            this->drawContent(400, 200);
+            this->drawContent(150, 90);
+            this->drawContent(350, 140);
+
+            _imagePainter.setBrush(_solidBrush);
+            this->drawContent(-30, 200);
+            this->drawContent(250, 300);
             this->painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
         }
 
@@ -108,7 +113,8 @@ class FillPolygonDemo : public Pt::Gui::Widget
 
     private:
         Pt::size_t _f;
-        Pt::Gfx::Brush _brush;
+        Pt::Gfx::Brush _textureBrush;
+        Pt::Gfx::Brush _solidBrush;
         Pt::Gfx::ARgbImage _image;
         Pt::Gfx::ImagePainter _imagePainter;
         Pt::ssize_t _angle;

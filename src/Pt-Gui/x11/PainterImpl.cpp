@@ -125,9 +125,9 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 		
 		switch( _pen.style() )
 		{
-		    case SolidStyle:		        
+		    case Pen::SolidStyle:		        
 		    break;
-            case DashStyle:
+            case Pen::DashStyle:
                 lineStyle = LineOnOffDash;
             break;
 		}
