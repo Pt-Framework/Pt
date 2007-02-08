@@ -75,8 +75,7 @@ class UpdateThread : public Pt::System::Thread, public Pt::Connectable
 
             while(!_stop)
             {
-                //Thread::yield();
-                Thread::sleep(10);
+                Thread::sleep(50);
                 nextEvent.send<const Pt::Event&>( UpdateEvent() );
             }
         }
@@ -109,6 +108,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
     {
+        this->painter().drawPixmap(Pt::Math::Point(0,0), *_pixmap);
     }
 
     virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
@@ -153,17 +153,17 @@ class DrawTextDemo : public Pt::Gui::Widget
         _imagePainter.setFont( Pt::Gfx::Font("Vera", 28) );
         _imagePainter.drawText( Pt::Math::Point( _tickerTextPos, this->size().height()-10 ), _tickerText, &white );
 
-        this->painter().drawImage( Pt::Math::Point( 80, 0 ),
+        _pixmap->painter().drawImage( Pt::Math::Point( 0, 0 ),
                                       _image,
                                       Pt::Gfx::Region( Pt::Math::Point(80,0),
                                                        Pt::Math::Size(280, 260) ) );
 
-        this->painter().drawImage( Pt::Math::Point( 0, this->size().height() - 40 ),
+        _pixmap->painter().drawImage( Pt::Math::Point( 0, this->size().height() - 40 ),
                                       _image,
                                       Pt::Gfx::Region(  Pt::Math::Point( 0, this->size().height() - 40 ),
                                                         Pt::Math::Size(this->size().width(), 40) ) );
 
-        //this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
+        this->painter().drawPixmap(Pt::Math::Point( 0, 0 ), *_pixmap);
         //time = clock.stop();
         //std::cerr << "Time per frame: " << time.seconds() + time.microSeconds() / 1000000.0 << " seconds" << std::endl;
     }
