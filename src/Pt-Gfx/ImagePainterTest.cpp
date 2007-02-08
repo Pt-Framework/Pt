@@ -122,7 +122,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( !checkImage() );
 
             _image.resize(  800, 600, _bkColor );
-            _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,10) ) );
+            _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,40) ) );
             PT_UNIT_ASSERT( checkImage() );
         }
 
