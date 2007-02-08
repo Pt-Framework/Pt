@@ -188,13 +188,20 @@ void ImagePainter::drawText( const Math::Point& to, const Text::String& text, co
 
 void ImagePainter::drawRect(const  Math::Rect& rect)
 {
-    std::vector<Pt::Math::Point> points(4);
-    points[0] = rect.topLeft();
-    points[1] = rect.topRight();
-    points[2] = rect.bottomRight();
-    points[3] = rect.bottomLeft();
+    //
+    // Emulate ImagePainter::drawRect with four calls to
+    // ImagePainter::drawLine and correct corner coordinates.
+    //
+    this->drawLine(rect.topLeft(), rect.topRight() );
 
-    drawPolyline( &points[0], points.size() );
+    this->drawLine(rect.topRight(),
+                   Pt::Math::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ) );
+
+    this->drawLine(Pt::Math::Point( rect.bottomRight().x() + 1, rect.bottomRight().y() -1 ),
+                   Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ) );
+
+    this->drawLine(Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ),
+                   rect.topLeft() );
 }
 
 void ImagePainter::fillRect(const  Math::Rect& rect)

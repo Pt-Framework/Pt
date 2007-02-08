@@ -129,12 +129,12 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
         }
     }
 
-	//
-	// if all polygon points are on one line the GET will be empty
-	// 
-	if( _globalEdgeTable.empty() )
-		return;
-		
+    //
+    // if all polygon points are on one line the GET will be empty
+    //
+    if( _globalEdgeTable.empty() )
+        return;
+
     // Time: 1.5e-05
 
     //
@@ -214,7 +214,7 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush,
     // texture to copy to image
     const Pt::Gfx::ARgbImage& texture = brush.texture();
 
-    // determine the scanline of the texture to copy
+    // determine the scanline of the texture to copy from
     const size_t textureYPos = (scanLine-yorigin) % texture.height();
 
     for( size_t i = 1; i < _activeEdgeTable.size(); i += 2 )
@@ -232,6 +232,7 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush,
             // number of pixels to copy from texture
             const size_t fillLength = std::min( length, texture.width() - textureXPos );
 
+            // Copy pixels from textrure to image
             if(fillLength)
             {
                 std::memcpy( &image.pixel( xpos, scanLine ),
@@ -239,77 +240,15 @@ void FillPolygon::outputTexture( Pt::Gfx::ARgbImage& image, const Brush& brush,
                              fillLength * sizeof(ARgbColor) );
             }
 
+            // Remaining unfilled pixels of the span
             length -= fillLength;
             xpos   += fillLength;
         }
-/*
-        // copy source texture scanline until end of target span
-        while(length)
-        {
-            // number of pixels to copy from texture
-            const size_t fillLength = std::min(texture.width(), length);
-
-            if(fillLength)
-            {
-                std::memcpy( &image.pixel( xpos, scanLine ),
-                             &texture.pixel(0, textureYPos),
-                             fillLength * sizeof(ARgbColor) );
-            }
-
-            length -= fillLength;
-            xpos   += fillLength;
-        }
-*/
     }
 }
-
-
-
-
-
-
-
-
-
-/* OLD
-void FillPolygon::setupGlobalEdgeTable(  std::vector<Math::Point>& points )
-{
-    Edge edge;
-
-    _globalEdgeTable.clear();
-
-    for( size_t i = 1; i < points.size(); ++i )
-    {
-        edge.dy = points[i].y() - points[i-1].y();
-
-        if( edge.dy == 0 )
-            continue;
-
-        edge.dx     = points[i].x() - points[i-1].x();
-        edge.xaccu  = edge.dx;
-
-        if( points[i-1].y() < points[i].y() )
-        {
-            edge.ymin = points[i-1].y();
-            edge.ymax = points[i].y() ;
-            edge.x    = points[i-1].x();
-        }
-        else
-        {
-            edge.ymin = points[i].y();
-            edge.ymin = points[i].y();
-            edge.ymax = points[i-1].y() ;
-            edge.x    = points[i].x();
-        }
-
-        _globalEdgeTable.insert( edge );
-    }
-}
-*/
-
-
 
 }//namespace Pt
+
 }//namespace Gfx
 
 
