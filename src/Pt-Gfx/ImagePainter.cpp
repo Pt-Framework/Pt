@@ -128,17 +128,17 @@ void ImagePainter::setPen( const Pen& pen )
 
 const Pen& ImagePainter::pen() const
 {
-    return _pen; 
+    return _pen;
 }
 
 void ImagePainter::setBrush(const Brush& brush)
 {
-    _brush = brush; 
+    _brush = brush;
 }
 
 const Brush& ImagePainter::brush() const
 {
-    return _brush; 
+    return _brush;
 }
 
 void ImagePainter::setFont(const Font& font)
@@ -149,17 +149,17 @@ void ImagePainter::setFont(const Font& font)
 
 const Font& ImagePainter::font() const
 {
-    return _font; 
+    return _font;
 }
 
 FontMetrics ImagePainter::fontMetrics() const
 {
-    return fontMetrics(L""); 
+    return fontMetrics(L"");
 }
 
 FontMetrics ImagePainter::fontMetrics( Text::String text) const
 {
-    return _drawText->fontMetrics( text ); 
+    return _drawText->fontMetrics( text );
 }
 
 const std::list<std::string>& ImagePainter::fontFamilyNames()
@@ -194,10 +194,10 @@ void ImagePainter::drawRect(const  Math::Rect& rect)
     //
     this->drawLine(rect.topLeft(), rect.topRight() );
 
-    this->drawLine(rect.topRight(),
-                   Pt::Math::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ) );
+    this->drawLine(Pt::Math::Point( rect.topRight().x() - 1, rect.topRight().y()),
+                   Pt::Math::Point( rect.bottomRight().x() - 1, rect.bottomRight().y() -1 ) );
 
-    this->drawLine(Pt::Math::Point( rect.bottomRight().x() + 1, rect.bottomRight().y() -1 ),
+    this->drawLine(Pt::Math::Point( rect.bottomRight().x(), rect.bottomRight().y() -1 ),
                    Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ) );
 
     this->drawLine(Pt::Math::Point( rect.bottomLeft().x(), rect.bottomLeft().y() -1 ),
