@@ -25,25 +25,13 @@ namespace Pt {
 
 namespace Gfx {
 
-Pen::Pen(size_t size, const ARgbColor& color)
+Pen::Pen(size_t size, const ARgbColor& color, PenStyle style)
 : _size(size)
 , _color(color)
+, _style(style)
 {
 
 }
-
-
-size_t Pen::size() const
-{
-	return _size;
-}
-
-
-const ARgbColor& Pen::color() const
-{
-	return _color;
-}
-
 
 } // namespace Gfx
 

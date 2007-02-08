@@ -95,14 +95,27 @@ void PainterImpl::updatePen()
 	LOGBRUSH brush;
 	brush.lbStyle = BS_SOLID ;
 	brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
+	
+	DWORD penStyle = PS_GEOMETRIC | PS_ENDCAP_FLAT;
+	
+//	penStsle |= PS_ENDCAP_ROUND;
+//	penStyle |= PS_JOIN_BEVEL;
 
-	HPEN newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT /*PS_ENDCAP_ROUND | PS_JOIN_BEVEL*/, _pen.size(), &brush, 0, NULL);
+    switch( _pen.style() )
+    {
+        case Gfx::Pen::SolidStyle:
+            penStyle |= PS_SOLID;
+        break;
+        case Gfx::Pen::DashStyle:
+            penStyle |= PS_DASH;        
+    }
+    
+	HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
 #endif
 
 	HPEN oldPen = (HPEN)SelectObject(_drawable.deviceContext(), newPen);
 
 	DeleteObject(oldPen);
-
 
 	// Set the Text color to the pen color.
 	SetTextColor(_drawable.deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));

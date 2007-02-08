@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Laurentiu-Gheorghe Crisan                  *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -47,7 +48,10 @@ namespace Gfx {
 	{
 		friend bool operator==(const Pen& a, const Pen& b);
 
-		public:
+		public:		    
+				
+		    enum PenStyle{	SolidStyle, DashStyle };
+		    		    
 			/**
 			 * @brief Creates a new Pen object using the specified size and color.
 			 *
@@ -57,25 +61,36 @@ namespace Gfx {
 			 * @param size The size of the pen. This parameter is optional. The default is 1.
 			 * @param color The color of the pen. This parameter is optional. The default is black.
 			 */
-			Pen(size_t size = 1, const ARgbColor& color = ARgbColor(0, 0, 0));
+			Pen( size_t size = 1, const ARgbColor& color = ARgbColor( 0, 0, 0), PenStyle style = SolidStyle );
 
 			/**
 			 * @brief Returns the size of the pen as specified when created.
 			 *
 			 * @return The size of the pen.
 			 */
-			size_t size() const;
+			inline size_t size() const
+			{ return _size; }
 
 			/**
 			 * @brief Returns a reference to the color of the pen as specified when created.
 			 *
 			 * @return The color of the pen.
 			 */
-			const ARgbColor& color() const;
+			inline const ARgbColor& color() const
+			{ return _color; }
+			
+			/**
+			 * @brief Returns a reference to the color of the pen as specified when created.
+			 *
+			 * @return The color of the pen.
+			 */
+			inline PenStyle style() const
+			{ return _style; }
 
 		private:
-			size_t    _size;
-			ARgbColor _color;
+			size_t      _size;
+			ARgbColor   _color;
+			PenStyle    _style;
 	};
 
 	/**

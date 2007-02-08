@@ -122,6 +122,15 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 		int lineStyle = LineSolid;
 		int capStyle  = CapButt;
 		int joinStyle = JoinBevel;
+		
+		switch( _pen.style() )
+		{
+		    case SolidStyle:		        
+		    break;
+            case DashStyle:
+                lineStyle = LineOnOffDash;
+            break;
+		}
 
 		Display* display = X11EventLoop::instance().display();
 		XSetLineAttributes( display, _penGc, pen.size(), lineStyle, capStyle, joinStyle );
