@@ -47,18 +47,18 @@ class DrawRectDemo : public Pt::Gui::Widget
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
-            Pt::Math::Rect rect1( Pt::Math::Point(10, 10), Pt::Math::Size(40, 40) );
+            Pt::Math::Rect rect1( Pt::Math::Point(10, 10), Pt::Math::Size(40, 14) );
             _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
             _imagePainter.fillRect( rect1 ) ;
-            _imagePainter.drawRect( rect1 ) ;
+            //_imagePainter.drawRect( rect1 ) ;
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
-            Pt::Math::Rect rect2( Pt::Math::Point(55, 10), Pt::Math::Size(40, 40) );
+            Pt::Math::Rect rect2( Pt::Math::Point(55, 10), Pt::Math::Size(40, 14) );
             this->painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             this->painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
             this->painter().fillRect( rect2 ) ;
-            this->painter().drawRect( rect2 ) ;
+            //this->painter().drawRect( rect2 ) ;
         }
 
         virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
