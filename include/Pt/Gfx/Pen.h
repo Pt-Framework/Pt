@@ -106,7 +106,9 @@ namespace Gfx {
 	 */
 	inline bool operator==(const Pen& a, const Pen& b)
 	{
-		return a._size == b._size && a._color == b._color;
+		return a._size == b._size && 
+		       a._color == b._color && 
+		       a._style == b._style;
 	}
 
 } // namespace Gfx

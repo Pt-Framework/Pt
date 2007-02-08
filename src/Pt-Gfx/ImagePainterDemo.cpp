@@ -36,6 +36,10 @@
 #include <iostream>
 #include <fstream>
 
+using namespace Pt;
+using namespace Pt::Gfx;
+using namespace Pt::Math;
+
 class ImagePainterDemo : public Pt::Gui::Widget
 {
 	public:
@@ -53,7 +57,20 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-		drawEllipse();
+	    Pen pen( 1, ARgbColor( 0,0,0), Pen::DashStyle );
+	    
+		_imagePainter.setPen( pen );
+		_imagePainter.drawLine( Point(100,55), Point( 10, 10 ) );
+		//_imagePainter.drawLine( Point(100,10), Point( 100, 511 ) );		
+		//_imagePainter.drawLine( Point(10,10), Point( 100, 15 ) );		
+		
+		painter().drawImage( Point(0,0), _image );
+		painter().setPen( Pen(3, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle)  ); 
+		//painter().drawLine( Point(100,100), Point( 10, 10 ) );		
+		//painter().drawLine( Point(20,20), Point( 80, 80 ) );
+		painter().drawLine( Point(10,10), Point( 100, 100 ) );		
+		//painter().drawLine( Point(101,10), Point( 101, 200 ) );		
+		//painter().drawLine( Point(11,10), Point( 501, 500 ) );		
 	}
 
 	void drawEllipse()

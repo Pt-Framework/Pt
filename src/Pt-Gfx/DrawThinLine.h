@@ -38,6 +38,9 @@ namespace Gfx {
 class DrawThinLine : public DrawLine
 {
     public:
+    
+        DrawThinLine();
+        ~DrawThinLine();
 		/** @brief Draw a line on an image
 
 			@see DrawLine::draw
@@ -46,6 +49,21 @@ class DrawThinLine : public DrawLine
 
     private:
         ClipLine _clipLine;
+        void drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
+        void drawPatter( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to, const std::vector<bool>& patter );
+        
+        inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t len )
+        {
+           memcpy( &image.pixel( x,  y ), &_colorBuffer[0], len * sizeof( ARgbColor)  );
+        }
+        
+        inline void outputPixel( ARgbImage& image, const Pen& pen, size_t x, size_t y )
+        {
+            image.pixel( x,  y ) = pen.color();
+        }
+        
+        std::vector<bool> _patter;
+        
 };
 
 } // namespace gfx
