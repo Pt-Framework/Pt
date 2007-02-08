@@ -53,9 +53,9 @@ Main SingletonTest : SingletonTest.cpp ;
 Main_LinkSharedLibraries SingletonTest : Pt ;
 Main_MakeLocate SingletonTest : bin ;
 
-#Main ByteorderTest : ByteorderTest.cpp ;
-#Main_LinkSharedLibraries ByteorderTest : Pt ;
-#Main_MakeLocate ByteorderTest : bin ;
+PtUnitTest ByteorderTest : ByteorderTest.cpp ;
+Main_LinkSharedLibraries ByteorderTest : Pt ;
+Main_MakeLocate ByteorderTest : bin ;
 
 PtUnitTest ExceptionTest : ExceptionTest.cpp ;
 Main_LinkSharedLibraries ExceptionTest : Pt ;

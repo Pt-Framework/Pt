@@ -38,6 +38,55 @@ class ByteorderTest : public Pt::Unit::TestCase
 
 		virtual void test()
 		{
+			//
+			// This is the real testing code
+			//
+			#ifdef PT_LE
+				Pt::uint16_t a = 0xaabb;
+				PT_UNIT_ASSERT( Pt::uint16_t(0xbbaa) == Pt::hostToBe(a) );
+
+				Pt::int16_t b = (Pt::int16_t)(0xaabb);
+				PT_UNIT_ASSERT( Pt::int16_t(0xbbaa) == Pt::hostToBe(b) );
+
+				Pt::uint32_t c = 0xaabbccdd;
+				PT_UNIT_ASSERT( Pt::uint32_t(0xddccbbaa) == Pt::hostToBe(c) );
+
+				Pt::int32_t d = 0xaabbccdd;
+				PT_UNIT_ASSERT( Pt::int32_t(0xddccbbaa) == Pt::hostToBe(d) );
+
+			   #ifdef PTV_64BIT
+				Pt::uint64_t e = 0x1122334455667788ULL;
+				PT_UNIT_ASSERT( Pt::uint64_t(0x8877665544332211ULL) == Pt::hostToBe(e) );
+
+				Pt::int64_t f = 0x1122334455667788LL;
+				PT_UNIT_ASSERT( Pt::int64_t(0x8877665544332211LL) == Pt::hostToBe(f) );
+			   #endif
+			#elif PT_BE
+				Pt::uint16_t a = 0xaabb;
+				PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToBe(a) );
+
+				Pt::int16_t b = (Pt::int16_t)(0xaabb);
+				PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToBe(b) );
+
+				Pt::uint32_t c = 0xaabbccdd;
+				PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToBe(c) );
+
+				Pt::int32_t d = 0xaabbccdd;
+				PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToBe(d) );
+
+			   #ifdef PTV_64BIT
+				Pt::uint64_t e = 0x1122334455667788ULL;
+				PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToBe(e) );
+
+				Pt::int64_t f = 0x1122334455667788LL;
+				PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToBe(f) );
+			   #endif
+			#endif
+
+			//
+			// ???
+			//
+/*
 			const Pt::uint8_t  val8u  = 0x10;
 			const Pt::uint16_t val16u = 0x1020;
 			const Pt::uint32_t val32u = 0x10203040;
@@ -103,7 +152,9 @@ class ByteorderTest : public Pt::Unit::TestCase
 #endif
 			PT_UNIT_ASSERT( valf   == svalf   );
 			PT_UNIT_ASSERT( vald   == svald   );
+*/
 		}
+
 	};
 
 Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;
