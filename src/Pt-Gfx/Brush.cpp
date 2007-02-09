@@ -3,7 +3,7 @@
  ***************************************************************************/
 
 #include "Pt/Gfx/Brush.h"
-
+#include <algorithm>
 
 
 namespace Pt {
@@ -11,13 +11,13 @@ namespace Pt {
 namespace Gfx {
 
 Brush::Brush(const ARgbColor& color)
-: _brushData(new BrushData(SolidFill, color, 0))
+: _brushData( new BrushData(SolidFill, color, 0) )
 {
 }
 
 
 Brush::Brush(const ARgbImage* texture)
-: _brushData(new BrushData(TextureFill, ARgbColor(0, 0, 0), texture))
+: _brushData( new BrushData(TextureFill, ARgbColor(0, 0, 0), texture) )
 {
 }
 
@@ -45,9 +45,15 @@ BrushData::BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const A
 , _color(color)
 , _texture(0)
 {
-	if (texture != 0) {
-		_texture = new ARgbImage(*texture);
-	}
+    //std::fill_n(_colorBuffer, colorBufferSize, color);
+
+    if (texture != 0) {
+        _texture = new ARgbImage(*texture);
+    }
+    else
+    {
+        _texture = new ARgbImage(64, 1, color);
+    }
 }
 
 
@@ -73,25 +79,6 @@ const ARgbImage& BrushData::texture() const
 {
 	return *_texture;
 }
-
-
-void BrushData::setFillStyle(Brush::FillStyle fillStyle)
-{
-	_fillStyle = fillStyle;
-}
-
-
-void BrushData::setColor(const ARgbColor& color)
-{
-	_color = color;
-}
-
-
-void BrushData::setTexture(const ARgbImage& texture)
-{
-	_texture = new ARgbImage(texture);
-}
-
 
 } // namespace Gfx
 

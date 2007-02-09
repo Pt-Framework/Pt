@@ -27,7 +27,6 @@
 #include "DrawLine.h"
 #include "Span.h"
 #include "FillPolygon.h"
-#include "FillConvexPolygon.h"
 #include "RasterBuffer.h"
 
 
@@ -187,15 +186,6 @@ class DrawThickLine : public DrawLine
         */
         DrawThickLine();
 
-        /** @brief Rasterizes a thick line
-
-            A line described by two points is reasterized to the given
-            RasterBuffer. Attributes for the line are taken from the pen.
-            Clipping is performed before the line is drawn.
-        */
-        void rasterize( ARgbImage& image, const Pen& pen, const Math::Point& from,
-                        const Math::Point to, RasterBuffer& rasterBuffer );
-
         /** @brief Draw a line on an image
 
             @see DrawLine::draw
@@ -216,7 +206,7 @@ class DrawThickLine : public DrawLine
         
     private:
         FillPolygon _fillPolygon;
-        FillConvexPolygon _fillConvexPolygon;
+        ClipPolygon _clipPolygon;
         RasterBuffer _rasterBuffer;
         std::vector<bool> _dashPaterrn;
 };

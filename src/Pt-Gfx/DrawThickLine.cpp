@@ -237,38 +237,6 @@ Pt::ssize_t round(double x)
 }
 
 
-void DrawThickLine::rasterize( ARgbImage& image, const Pen& pen,
-                               const Math::Point& from, const Math::Point to,
-                               RasterBuffer& rasterBuffer )
-{
-    const int   dx = to.x() - from.x() ;
-    const int   dy = to.y() - from.y() ;
-    const double halfPen = ( 0.5 * (double) ( pen.size()) );
-    const double L = Math::hypot( (double)dx,  (double) dy );
-    const double r1 = halfPen / L;
-    Pt::ssize_t xa = Pt::ssize_t(r1 * dy) ;
-    Pt::ssize_t ya = Pt::ssize_t(-r1 * dx) ;
-
-    std::vector<Math::Point> polygon;
-    polygon.push_back( Math::Point(from.x() - xa, from.y() - ya) ); // leftTop
-    polygon.push_back( Math::Point(from.x() + xa, from.y() + ya) ); // rightTop
-    polygon.push_back( Math::Point(to.x()   + xa, to.y()   + ya) ); // rightBottom
-    polygon.push_back( Math::Point(to.x()   - xa, to.y()   - ya) ); // leftBottom
-
-    Math::Rect clippingRect( Math::Point( 0, 0 ), Math::Size( image.width() - 1, image.height() - 1 ) );
-
-    _fillConvexPolygon.clip( clippingRect, polygon );
-
-    rasterBuffer.clear();
-    rasterBuffer.spans().resize( image.height() );
-
-    if( polygon.size() == 0 )
-        return;
-
-    _fillConvexPolygon.rasterize(  polygon, rasterBuffer );
-}
-
-
 void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
                           const Math::Point& from, const Math::Point& to )
 {

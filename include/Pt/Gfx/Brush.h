@@ -39,7 +39,7 @@ namespace Gfx {
 			};
 
 		public:
-			Brush(const ARgbColor& color = ARgbColor(0,0,0));
+			Brush( const ARgbColor& color = ARgbColor(0,0,0) );
 
 			Brush(const ARgbImage* texture);
 
@@ -48,9 +48,6 @@ namespace Gfx {
 			const ARgbColor& color() const;
 
 			const ARgbImage& texture() const;
-
-			bool isSame(const Brush& b) const
-			{ return _brushData == b._brushData; }
 
 		private:
 			SmartPtr<BrushData> _brushData;
@@ -70,18 +67,11 @@ namespace Gfx {
 
 			const ARgbImage& texture() const;
 
-			void setFillStyle(Brush::FillStyle fillStyle);
-
-			void setColor(const ARgbColor& color);
-
-			void setTexture(const ARgbImage& texture);
-
 		private:
 			Brush::FillStyle _fillStyle;
 			ARgbColor        _color;
 			ARgbImage*       _texture;
 	};
-
 
 } // namespace Gfx
 

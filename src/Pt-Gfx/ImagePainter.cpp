@@ -82,9 +82,22 @@ void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                       const Math::Point& origin,
                       size_t xpos, size_t ypos, size_t length )
 {
-    std::fill_n( &image.pixel( xpos, ypos ), length, brush.color() );
-    //if(length)
-    //    memcpy( &image.pixel( xpos, ypos ), &_colorBuffer[0], length * sizeof(ARgbColor) );
+    const Pt::Gfx::ARgbImage& texture = brush.texture();
+
+    while(length)
+    {
+        const size_t fillLength = std::min( length, texture.width() );
+
+        if(fillLength)
+        {
+            std::memcpy( &image.pixel( xpos, ypos ),
+                         brush.texture().data(),
+                         fillLength * sizeof(ARgbColor) );
+        }
+
+        length -= fillLength;
+        xpos   += fillLength;
+    }
 }
 
 
@@ -113,7 +126,6 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThickEllipse>     dThickEllipse( new DrawThickEllipse() );
     std::auto_ptr<FillPolygon>          fillPolygon( new FillPolygon() );
     fillPolygon->setOutput( _fillSolid );
-    std::auto_ptr<FillConvexPolygon>    fillConvexPolygon( new FillConvexPolygon() );
     std::auto_ptr<FillEllipse>          fillEllipse( new FillEllipse() );
 
     _drawThinLine       = dThinLine.release();

@@ -3,33 +3,31 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 
-SharedLibrary Pt-Gfx :
-	Pen.cpp
-	Brush.cpp
-	Font.cpp
-	FontMetrics.cpp
-	ARgbColor.cpp
-	ARgbFColor.cpp
-	ARgb8888Color.cpp
-	Rgb888Color.cpp
-	Rgb565Color.cpp
-	Rgb555Color.cpp
-	InterleavedImage.cpp
-	ImagePainter.cpp
-	DrawText.cpp
-	DrawThinPolyline.cpp
-	DrawThinLine.cpp
-	DrawThickPolyline.cpp
-	DrawThickLine.cpp
-	FillPolygon.cpp
-	ClipPolygon.cpp
-	FreeType.cpp
-	Exception.cpp
-	DrawThinEllipse.cpp
-	DrawThickEllipse.cpp
-	FillEllipse.cpp
-	
-	;
+SharedLibrary Pt-Gfx : Pen.cpp
+                       Brush.cpp
+                       Font.cpp
+                       FontMetrics.cpp
+                       ARgbColor.cpp
+                       ARgbFColor.cpp
+                       ARgb8888Color.cpp
+                       Rgb888Color.cpp
+                       Rgb565Color.cpp
+                       Rgb555Color.cpp
+                       InterleavedImage.cpp
+                       ImagePainter.cpp
+                       DrawText.cpp
+                       DrawThinPolyline.cpp
+                       DrawThinLine.cpp
+                       DrawThickPolyline.cpp
+                       DrawThickLine.cpp
+                       FillPolygon.cpp
+                       ClipPolygon.cpp
+                       FreeType.cpp
+                       Exception.cpp
+                       DrawThinEllipse.cpp
+                       DrawThickEllipse.cpp
+                       FillEllipse.cpp
+                       ;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;
 SharedLibrary_LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;

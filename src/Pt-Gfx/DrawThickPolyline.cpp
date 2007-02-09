@@ -65,12 +65,12 @@ void DrawThickPolyline::draw( ARgbImage& image,  const Pen& pen, const std::vect
 {
     _lineRasterBuffer.resize( (points.size() / 2 ) + 1);
 
-    size_t line = 0;
+    //size_t line = 0;
 
     for( size_t i = 1; i < points.size(); ++i )
     {
-        _drawThickLine.rasterize(image, pen, points[i-1], points[i], _lineRasterBuffer[line] );
-        line++;
+        //_drawThickLine.rasterize(image, pen, points[i-1], points[i], _lineRasterBuffer[line] );
+        //line++;
     }
 
     output( image, pen, _lineRasterBuffer );
