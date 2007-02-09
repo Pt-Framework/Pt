@@ -40,7 +40,7 @@
 #include "DrawText.h"
 #include "FillEllipse.h"
 #include "FillPolygon.h"
-#include "FillConvexPolygon.h"
+//#include "FillConvexPolygon.h"
 
 namespace Pt {
 
@@ -101,7 +101,6 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
 , _fillPolygon( 0 )
-, _fillConvexPolygon( 0 )
 , _drawText( 0 )
 {
     std::auto_ptr<DrawThinLine>         dThinLine( new DrawThinLine );
@@ -109,48 +108,42 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThinPolyline>     dThinPolyline( new DrawThinPolyline() );
     std::auto_ptr<DrawThickPolyline>    dThickPolyline( new DrawThickPolyline() );
     std::auto_ptr<DrawText>             dText( new DrawText() );
+    dText->setFont(_font);
     std::auto_ptr<DrawThinEllipse>      dThinEllipse( new DrawThinEllipse() );
     std::auto_ptr<DrawThickEllipse>     dThickEllipse( new DrawThickEllipse() );
-
     std::auto_ptr<FillPolygon>          fillPolygon( new FillPolygon() );
     fillPolygon->setOutput( _fillSolid );
-
     std::auto_ptr<FillConvexPolygon>    fillConvexPolygon( new FillConvexPolygon() );
     std::auto_ptr<FillEllipse>          fillEllipse( new FillEllipse() );
 
     _drawThinLine       = dThinLine.release();
     _drawThickLine      = dThickLine.release();
     _drawLine           = _drawThinLine;
-
     _drawThinPolyline   = dThinPolyline.release();
     _drawThickPolyline  = dThickPolyline.release();
     _drawPolyline       = _drawThinPolyline;
-
     _drawText           = dText.release();
-
     _drawThinEllipse	= dThinEllipse.release();
     _drawThickEllipse	= dThickEllipse.release();
     _drawEllipse        = _drawThinEllipse;
-
     _fillEllipse        = fillEllipse.release();
     _fillPolygon        = fillPolygon.release();
-    _fillConvexPolygon	= fillConvexPolygon.release();// At time unused!
-
-    this->setFont( _font );
 }
 
 ImagePainter::~ImagePainter()
 {
-    delete _drawThinLine;
-    delete _drawThickLine;
-    delete _drawThinPolyline;
-    delete _drawThickPolyline;
-    delete _fillPolygon;
-    delete _fillConvexPolygon;
-    delete _drawText;
-    delete _drawThinEllipse;
-    delete _drawThickEllipse;
-    delete _fillEllipse;
+    try {
+        delete _drawThinLine;
+        delete _drawThickLine;
+        delete _drawThinPolyline;
+        delete _drawThickPolyline;
+        delete _fillPolygon;
+        delete _drawText;
+        delete _drawThinEllipse;
+        delete _drawThickEllipse;
+        delete _fillEllipse;
+   }
+   catch(...) {}
 }
 
 void ImagePainter::setPen( const Pen& pen )

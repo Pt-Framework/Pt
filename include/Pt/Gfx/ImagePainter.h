@@ -38,16 +38,13 @@ namespace Gfx {
 class DrawLine;
 class DrawThinLine;
 class DrawThickLine;
-
 class DrawPolyline;
 class DrawThinPolyline;
 class DrawThickPolyline;
 class DrawEllipse;
 class DrawThinEllipse;
 class DrawThickEllipse;
-
 class FillPolygon;
-class FillConvexPolygon;
 class FillEllipse;
 class DrawText;
 
@@ -165,26 +162,20 @@ class PT_GFX_API ImagePainter : public Painter
         Pen                  _pen;
         Brush                _brush;
         Font                 _font;
-
         DrawLine*            _drawLine;
         DrawThinLine*        _drawThinLine;
         DrawThickLine*       _drawThickLine;
-
         DrawPolyline*        _drawPolyline;
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
-
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;
         FillEllipse*         _fillEllipse;
-
         FillPolygon*         _fillPolygon;
-        FillConvexPolygon*   _fillConvexPolygon;
         DrawText*            _drawText;
-
-        FillSolid _fillSolid;
-        FillTexture _fillTexture;
+        FillSolid            _fillSolid;
+        FillTexture          _fillTexture;
 };
 
 } //namespace Gfx
