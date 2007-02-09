@@ -3,7 +3,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Namespace.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <map>
 
 

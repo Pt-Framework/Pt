@@ -5,7 +5,7 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/Namespace.h>
 #include <Pt/Xml/NamespaceContext.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 #include <list>
 #include <iostream>

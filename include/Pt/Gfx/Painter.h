@@ -17,13 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #ifndef PT_GFX_PAINTER_H
 #define PT_GFX_PAINTER_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Math/Size.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 #include <cstddef>
 #include <string>
@@ -170,7 +171,7 @@ namespace Gfx {
 			 * @return The font metrics of the currently selected font.
 			 * @see fontMetrics(std::string)
 			 */
-			virtual FontMetrics fontMetrics(Pt::Text::String Text) const = 0;
+			virtual FontMetrics fontMetrics(Pt::String Text) const = 0;
 
 			/**
 			 * @brief Returns a list of installed font (family) names on the current platform and device.
@@ -223,8 +224,7 @@ namespace Gfx {
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText( const Pt::Math::Point& to, const Pt::Text::String& Text,
-			                       const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
+			virtual void drawText( const Pt::Math::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
 
 			/**
 			 * @brief Draws a rectangle outline.

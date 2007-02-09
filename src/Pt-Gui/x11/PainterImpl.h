@@ -27,7 +27,7 @@
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
-// X11 defines these two globally, which conflicts with enum values in Pt/text/Char.h
+// X11 defines these two globally, which conflicts with enum values in Pt/Char.h
 #undef Above
 #undef Below
 
@@ -41,7 +41,7 @@
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/Gui/Painter.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 #include <sstream>
 #include "Pt/Text/Utf16Codec.h"
@@ -84,7 +84,7 @@ namespace Gui {
 
 			Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(const Text::String& text) const;
+			Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
 			const std::list<std::string>& fontFamilyNames();
 
@@ -94,7 +94,7 @@ namespace Gui {
 
 			void drawLine(const Math::Point& from, const Math::Point& to);
 
-			void drawText(const Math::Point& to, const Text::String& text);
+			void drawText(const Math::Point& to, const Pt::String& text);
 
 			void drawRect(const Math::Rect& rect);
 

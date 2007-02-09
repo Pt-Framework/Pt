@@ -25,7 +25,7 @@
 #include "Pt/Gfx/Brush.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 #include "Pt/System/Clock.h"
 #include "Pt/Math/MathUtils.h"
 
@@ -162,7 +162,7 @@ FontMetrics ImagePainter::fontMetrics() const
     return fontMetrics(L"");
 }
 
-FontMetrics ImagePainter::fontMetrics( Text::String text) const
+FontMetrics ImagePainter::fontMetrics( String text) const
 {
     return _drawText->fontMetrics( text );
 }
@@ -186,7 +186,7 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
     _drawLine->draw(_image, _pen, from, to );
 }
 
-void ImagePainter::drawText( const Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline )
+void ImagePainter::drawText( const Math::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
 {
     _drawText->draw( _image, _pen.color(),  to, text, outline );
 }

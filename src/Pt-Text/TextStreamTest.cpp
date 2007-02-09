@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#undef PT_TEXT_API_EXPORT
+#undef PT_API_EXPORT
 
 #include "Pt/Api.h"
 #include <string>
@@ -39,9 +39,9 @@ class Utf8Converter
         : _ts( _in, new Pt::Text::Utf8Codec() )
         {}
 
-        void convert(const char* from, std::basic_string<Pt::Text::Char>& to)
+        void convert(const char* from, std::basic_string<Pt::Char>& to)
         {
-            static const Pt::Text::Char _eof = std::char_traits<Pt::Text::Char>::eof();
+            static const Pt::Char _eof = std::char_traits<Pt::Char>::eof();
             _ts.clear();
             _in.clear();
             _in.str(from);
@@ -86,8 +86,9 @@ class TextStreamTest : public Pt::Unit::TestSuite
 
 	public:
 		static char _TextUTF8[];
-		static Pt::Text::Char _TextUnicode[];
+		static Pt::Char _TextUnicode[];
 };
+
 
 Pt::Unit::RegisterTest<TextStreamTest> _registerTestStreamTest;
 
@@ -95,7 +96,7 @@ Pt::Unit::RegisterTest<TextStreamTest> _registerTestStreamTest;
 char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (char)0xbd, (char)0xb9, (char)0xcf, (char)0x83,
                                         (char)0xce, (char)0xbc, (char)0xce, (char)0xb5, (char)0x0 };
 
-Pt::Text::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
+Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
 
 
 void TextStreamTest::testTextStreamDirectFromUTF8ToUnicode()
@@ -119,7 +120,7 @@ void TextStreamTest::testTextStreamGetLineFromUTF8ToUnicode()
 
 	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
 
-	Pt::Text::Char c[6];
+	Pt::Char c[6];
 	TextStream.getline(c, 6);
 
 	PT_UNIT_ASSERT(c[0] == _TextUnicode[0]);
@@ -167,8 +168,10 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf32Codec());
 	TextStream << _TextUnicode;
 
-	Pt::Text::Char c[6];
+	Pt::Char c[6];
 	TextStream.getline(c, 6);
+
+	//std::cerr << c[0] << std::endl;
 
 	//CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
 	//CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
@@ -186,7 +189,7 @@ void TextStreamTest::testGetline()
 
 	Pt::Text::TextStream TextStream(ss, new Pt::Text::Utf8Codec());
 
-	Pt::Text::String s;
+	Pt::String s;
 	getline(TextStream, s);
 
 	PT_UNIT_ASSERT(s.narrow() == "Hello world");

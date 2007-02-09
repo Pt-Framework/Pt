@@ -110,12 +110,12 @@ Widget::~Widget()
 }
 
 
-void Widget::setTitle(const Pt::Text::String& text)
+void Widget::setTitle(const Pt::String& text)
 {
 	_impl->setTitle(text);
 }
 
-Pt::Text::String Widget::title()
+Pt::String Widget::title()
 {
 	return _impl->title();
 }
@@ -370,12 +370,6 @@ void Widget::paintEvent(const PaintEvent& event)
 void Widget::resizeEvent(const ResizeEvent& event)
 {
 	//std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
-
-    // Can this really happen, and if yes is it worth to filter it?
-	// if (event.width() == Pt::size_t( _region.width() ) &&
-	//    event.height() == Pt::size_t( _region.height()) ) {
-	// 	return;
-	//}
 
 	_region.setWidth(event.width());
 	_region.setHeight(event.height());

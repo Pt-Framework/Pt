@@ -24,7 +24,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/TestSchedule.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 
 #include <string>
 #include <sstream>

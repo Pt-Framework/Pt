@@ -5,8 +5,10 @@
 #ifndef Ptv_Gui_ImageButton_h
 #define Ptv_Gui_ImageButton_h
 
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gui/Pixmap.h>
 #include <Pt/Gui/Widget.h>
 

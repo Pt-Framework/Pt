@@ -74,7 +74,7 @@ namespace Gui {
 			virtual Gfx::FontMetrics fontMetrics() const;
 
 			// inerhit doc
-			virtual Gfx::FontMetrics fontMetrics( Text::String text) const;
+			virtual Gfx::FontMetrics fontMetrics(Pt::String text) const;
 
 			// inerhit doc
 			virtual const std::list<std::string>& fontFamilyNames();
@@ -86,7 +86,7 @@ namespace Gui {
 			virtual void drawLine(const Math::Point& from, const Math::Point& to);
 
 			// inerhit doc
-            virtual void drawText( const Pt::Math::Point& to, const Pt::Text::String& Text, const Pt::Gfx::ARgbColor* outline = 0 );
+			virtual void drawText(const Pt::Math::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0);
 
 			// inerhit doc
 			virtual void drawRect(const Math::Rect& rect);

@@ -124,7 +124,7 @@ class DrawTextDemo : public Pt::Gui::Widget
 
     void nextFrame(const Pt::Event& event)
     {
-        Pt::Text::String text = L"P T V";
+        Pt::String text = L"P T V";
         _angle += 10;
         //Pt::System::TimeValue time;
         //Pt::System::Clock clock;
@@ -173,7 +173,7 @@ private:
     Pt::Gui::Pixmap* _pixmap;
     Pt::Gfx::ImagePainter _imagePainter;
     Pt::ssize_t _angle;
-    Pt::Text::String _tickerText;
+    Pt::String _tickerText;
     Pt::ssize_t _tickerTextPos;
     Pt::ssize_t _tickerTextWidth;
 };

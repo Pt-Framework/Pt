@@ -24,6 +24,7 @@
 #include "Pt/Gfx/Font.h"
 #include "Vera.h"
 #include <Pt/System/Clock.h>
+#include "Pt/Unicode.h"
 
 namespace Pt {
 namespace Gfx {
@@ -109,7 +110,7 @@ void DrawText::setFont( const Font& font )
         throw InvalidFont( "No unicode charmap found" + PT_SOURCEINFO );
 }
 
-FontMetrics DrawText::fontMetrics( const Text::String& text )
+FontMetrics DrawText::fontMetrics( const String& text )
 {
     FT_UInt				previous    = 0;
     FT_Vector			delta;
@@ -137,7 +138,7 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
     int pen_x = 0;
     int pen_y = 0;
 
-    for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
+    for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
         glyph_index = FTC_CMapCache_Lookup(  _charMapCache,  faceId(), _charMapId,  it->value() );
 
@@ -173,7 +174,7 @@ FontMetrics DrawText::fontMetrics( const Text::String& text )
 }
 
 
-void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* backGround )
+void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const String& text, const ARgbColor* backGround )
 {
     FT_Vector			glyphPos;
     FT_Vector			delta;
@@ -201,7 +202,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
 	glyphPos.x = pos.x() << 16;
 	glyphPos.y = pos.y() << 16;
 
-    for( Text::String::const_iterator it = text.begin(); it != text.end(); ++it )
+    for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
         glyph_index = FTC_CMapCache_Lookup(  _charMapCache,  faceId(), _charMapId , it->value());
 
@@ -252,7 +253,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
 			buffer		= glyphBitmap->bitmap.buffer;
 		}
 
-		if( false  == it->isSpace() )
+		if( false == Pt::Text::Unicode::isSpace(*it) )
 		{
 
 //			 FT_Glyph_Get_CBox( image, ft_glyph_bbox_pixels, &bbox );

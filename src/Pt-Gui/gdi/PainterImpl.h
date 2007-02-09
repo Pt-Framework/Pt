@@ -72,7 +72,7 @@ namespace Gui {
 
 			Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(Pt::Text::String Text) const;
+			Gfx::FontMetrics fontMetrics(Pt::String Text) const;
 
 			const std::list<std::string>& fontFamilyNames();
 
@@ -82,7 +82,7 @@ namespace Gui {
 
 			void drawLine(const Pt::Math::Point& from, const Pt::Math::Point& to);
 
-			void drawText(const Pt::Math::Point& to, const Pt::Text::String& Text);
+			void drawText(const Pt::Math::Point& to, const Pt::String& Text);
 
 			void drawRect(const Pt::Math::Rect& rectangle);
 

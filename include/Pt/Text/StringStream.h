@@ -24,12 +24,12 @@
 #include <Pt/Text/Char_ctype.h>
 #include <Pt/Text/Char_numpunct.h>
 
-#include <Pt/Text/Char.h>
+#include <Pt/Char.h>
 #include <sstream>
 
 namespace Pt {
 	namespace Text {
-		typedef std::basic_stringstream<Pt::Text::Char> StringStream;
+		typedef std::basic_stringstream<Pt::Char> StringStream;
 	}
 }
 

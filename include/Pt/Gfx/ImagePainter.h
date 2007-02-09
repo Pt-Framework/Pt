@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,15 +21,15 @@
 #ifndef PT_GFX_IMAGE_PAINTER_H
 #define PT_GFX_IMAGE_PAINTER_H
 
-#include <Pt/Text/String.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/Api.h>
+#include <Pt/String.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Region.h>
-
+#include <Pt/Gfx/Font.h>
 #include <memory>
+
 
 namespace Pt {
 
@@ -91,7 +91,7 @@ class PT_GFX_API ImagePainter : public Painter
 	    virtual FontMetrics fontMetrics() const;
 
 	    //!@see Pt::Gfx::Painter
-	    virtual FontMetrics fontMetrics( Text::String text) const;
+	    virtual FontMetrics fontMetrics( Pt::String text) const;
 
 	    //!@see Pt::Gfx::Painter
 	    virtual const std::list<std::string>& fontFamilyNames();
@@ -103,7 +103,7 @@ class PT_GFX_API ImagePainter : public Painter
 	    virtual void drawLine(const  Math::Point& from, const  Math::Point& to);
 
 	    //!@see Pt::Gfx::Painter
-		virtual void drawText(const  Math::Point& to, const Text::String& text,
+		virtual void drawText(const  Math::Point& to, const Pt::String& text,
 		                      const Pt::Gfx::ARgbColor* outline = 0 );
 
 		//!@see Pt::Gfx::Painter

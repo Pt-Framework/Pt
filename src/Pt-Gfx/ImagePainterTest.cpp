@@ -35,7 +35,6 @@
 using namespace Pt;
 using namespace Pt::Gfx;
 using namespace Pt::Math;
-using namespace Pt::Text;
 
 
 Pt::Gfx::ARgbColor G(158*255, 158*255, 158*255);

@@ -18,13 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 #ifndef PT_GFX_FONT_H
 #define PT_GFX_FONT_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 namespace Pt {
 

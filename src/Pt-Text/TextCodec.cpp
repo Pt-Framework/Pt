@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/Api.h"
-#include "Pt/Text/locale.h"
+#include "Pt/locale.h"
 #include "Pt/Text/TextCodec.h"
 
 using namespace std;

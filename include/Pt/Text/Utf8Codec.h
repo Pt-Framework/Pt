@@ -65,7 +65,7 @@
 #include <Pt/Types.h>
 #include <Pt/Text/Api.h>
 #include <Pt/Text/TextCodec.h>
-#include <Pt/Text/Char.h>
+#include <Pt/Char.h>
 
 
 namespace Pt {
@@ -76,10 +76,10 @@ namespace Text {
 	 * @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
 	 *
 	 * The method do_in() converts an array of char containing UTF-8-encoded data into an array
-	 * of Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
 	 * 32-bit representation of the character.
 	 *
-	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
+	 * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in UTF-8-encoding.
 	 */
 	class PT_TEXT_API Utf8Codec : public TextCodec<Char, char> {
@@ -87,7 +87,7 @@ namespace Text {
 			/**
 			 * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.
 			 *
-			 * The internal type is Pt::Text::Char and external type is $char$
+			 * The internal type is Pt::Char and external type is $char$
 			 *
 			 * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
 			 * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.

@@ -37,7 +37,7 @@
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Rect.h>
 #include <Pt/Gui/Painter.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 #include <list>
 
@@ -58,9 +58,9 @@ namespace Gui {
 
 			virtual ~WidgetImpl();
 
-			void setTitle(const Pt::Text::String& text);
+			void setTitle(const Pt::String& text);
 
-			Pt::Text::String title() const
+			Pt::String title() const
 			{ return _title; }
 
 			Painter painter();
@@ -84,7 +84,7 @@ namespace Gui {
 
 			WidgetPainterImpl* _painter;
 
-			Pt::Text::String _title;
+			Pt::String _title;
 	};
 
 } // namespace Gui

@@ -1,7 +1,7 @@
 #ifndef PTV_Xml_QName_h
 #define PTV_Xml_QName_h
 
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Xml/Api.h>
 
 

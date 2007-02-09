@@ -22,7 +22,7 @@
 
 #include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
-#include <Pt/Text/Char_codecvt.h>
+#include <Pt/Char_codecvt.h>
 
 
 namespace Pt {

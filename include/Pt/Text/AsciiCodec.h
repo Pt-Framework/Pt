@@ -24,7 +24,7 @@
 #include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Text/TextCodec.h>
-#include <Pt/Text/Char.h>
+#include <Pt/Char.h>
 
 namespace Pt {
 
@@ -34,16 +34,16 @@ namespace Text {
 	 * @brief This simple Codec class is able to convert from ASCII to UTF-32 and from UTF-32 to ASCII.
 	 *
 	 * The method do_in() converts an array of char containing ACSII-data into an array of
-	 * Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
 	 * 32-bit representation of the character.
 	 *
-	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
+	 * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in ASCII-encoding.
 	 */
 	class PT_TEXT_API AsciiCodec : public TextCodec<Char, char> {
 		public:
 			/**
-			 * @brief Constructs a new AsciiCodec object with internal type of Pt::Text::Char and
+			 * @brief Constructs a new AsciiCodec object with internal type of Pt::Char and
 			 * external type of $char$.
 			 *
 			 * @param ref This parameter is passed to TextCodec. When ref == 0 the locale takes care

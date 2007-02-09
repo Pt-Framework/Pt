@@ -21,7 +21,7 @@
 #define PT_Text_BasicTextStream_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Text/BasicTextBuffer.h>
 
 #include <iostream>

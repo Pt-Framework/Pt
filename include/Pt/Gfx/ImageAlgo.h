@@ -43,7 +43,7 @@ namespace Gfx {
     *  faster implementation for the two classes is exist.
     */
     template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
-    void PT_GFX_API assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from);
+    void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from);
 
 
     /** @brief Partial specialization of assign() if both the color models are the same.
@@ -89,7 +89,7 @@ namespace Gfx {
     *  (both ranges are specified using an input iterator, width and height).
     */
     template<typename InIteratorT, typename OutIteratorT>
-    void PT_GFX_API blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
+    void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
                                OutIteratorT to,   uint toWidth,   uint toHeight);
 
     /** @brief Block-scale a pixel range.

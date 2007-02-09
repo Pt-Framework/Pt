@@ -307,7 +307,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(Pt::Text::String text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
 	ensureActivePainter();
 
@@ -432,7 +432,7 @@ void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& 
 }
 
 
-void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::Text::String& text)
+void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
 {
     ensureActivePainter();
 
@@ -537,7 +537,7 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
     Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
     */
 	ensureActivePainter();
-
+	
 	if (_pen.size() == 0) {
 		return;
 	}
@@ -546,7 +546,7 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
 
 	MoveToEx(hdc, points[0].x(), points[0].y(), 0);
 
-	for (size_t i = 1; i <  pointCount; i++) {
+	for( size_t i = 1; i <  pointCount; i++) {
 		LineTo(hdc, points[i].x(), points[i].y());
 	}
 }

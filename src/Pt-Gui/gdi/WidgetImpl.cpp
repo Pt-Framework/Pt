@@ -118,7 +118,7 @@ WidgetImpl::~WidgetImpl()
 }
 
 
-void WidgetImpl::setTitle(const Pt::Text::String& text)
+void WidgetImpl::setTitle(const Pt::String& text)
 {
 	std::stringstream ss;
 	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
@@ -129,14 +129,14 @@ void WidgetImpl::setTitle(const Pt::Text::String& text)
 }
 
 
-Pt::Text::String WidgetImpl::title()
+Pt::String WidgetImpl::title()
 {
 	std::vector<wchar_t> buffer(255);
 	GetWindowTextW(_hwnd, &buffer[0], buffer.size());
 
 	std::stringstream ss((char*)&buffer[0]);
 	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
-	Pt::Text::String result;
+	Pt::String result;
 	getline(textStream, result);
 
 	return result;

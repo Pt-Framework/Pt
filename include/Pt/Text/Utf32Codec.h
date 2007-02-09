@@ -22,7 +22,7 @@
 
 #include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
-#include <Pt/Text/Char.h>
+#include <Pt/Char.h>
 #include <Pt/Text/TextCodec.h>
 
 namespace Pt {
@@ -34,7 +34,7 @@ namespace Text {
 			/**
 			 * @brief Constructs a new Utf32Codec object.
 			 *
-			 * The internal type is Pt::Text::Char and external type is $char$
+			 * The internal type is Pt::Char and external type is $char$
 			 *
 			 * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
 			 * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.

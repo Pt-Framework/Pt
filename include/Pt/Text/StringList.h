@@ -23,7 +23,7 @@
 #include <Pt/TypeInfo.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/Text/Api.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <list>
 
 
@@ -51,14 +51,10 @@ namespace Pt {
 	} // namespace Text
 
 
-	//! Pt::Text::StringList is available as Pt::StringList
-	using Text::StringList;
-
-
 	template <>
-	struct PT_API TypeTraits<Text::StringList> {
+	struct PT_API TypeTraits<Pt::Text::StringList> {
 		static const char* typeName()
-		{ return "Pt::StringList"; }
+		{ return "Pt::Text::StringList"; }
 	};
 
 } // namespace Pt

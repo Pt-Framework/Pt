@@ -1,7 +1,7 @@
 #ifndef PTV_Xml_XmlStream_h
 #define PTV_Xml_XmlStream_h
 
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Text/TextStream.h>
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
@@ -106,7 +106,7 @@ namespace Xml {
 
 			bool parseAttribute(String& name, String& value);
 
-			void parseStartElement(StartElement& to);
+			bool parseStartElement(StartElement& to);
 
 			void parseEndElement(EndElement& to);
 

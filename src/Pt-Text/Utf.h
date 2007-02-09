@@ -58,7 +58,7 @@
 #ifndef PTV_Text_Utf_h
 #define PTV_Text_Utf_h
 
-#include <Pt/Text/Char.h>
+#include <Pt/Char.h>
 
 namespace Pt {
 
@@ -73,6 +73,8 @@ namespace utf {
 	const Pt::Char SurHighEnd = 0xDBFF;
 	const Pt::Char SurLowStart = 0xDC00;
 	const Pt::Char SurLowEnd = 0xDFFF;
+	const Pt::Char ByteOrderMark = 0xFEFF;
+	const Pt::Char ByteOrderSwapped = 0xFFFE;
 
 #define halfShift uint32_t(10)
 #define halfBase Pt::Char(0x0010000)

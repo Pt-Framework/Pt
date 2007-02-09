@@ -2,7 +2,7 @@
 #define PTV_Xml_Resolver_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 
 #include <map>
 

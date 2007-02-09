@@ -10,7 +10,7 @@
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/EndDocument.h"
 
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
 
@@ -278,8 +278,16 @@ void XmlIStream::onDocType()
 void XmlIStream::onStartElement()
 {
 	std::auto_ptr<Xml::StartElement> elem( new Xml::StartElement() );
-	this->parseStartElement(*elem);
-	_nodeBuffer.push( elem.release() );
+	bool isStandalone = this->parseStartElement(*elem);
+	
+	_nodeBuffer.push( elem.get() );
+
+	if (isStandalone)
+	{
+		_nodeBuffer.push( new Xml::EndElement(elem->name()) );
+	}
+	
+	elem.release();
 }
 
 
@@ -351,8 +359,10 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 
 
 
-void XmlIStream::parseStartElement(StartElement& to)
+bool XmlIStream::parseStartElement(StartElement& to)
 {
+	bool isStandalone = false;
+
 	static const String startElementBegin(L">/ \t");
 
 	this->findNotOf(startElementBegin);
@@ -373,9 +383,14 @@ void XmlIStream::parseStartElement(StartElement& to)
 	}
 
 	if( _textBuffer->sgetc() == '/' )
+	{
+		isStandalone = true;
 		_textBuffer->snextc();
+	}
 
 	_textBuffer->snextc();
+	
+	return isStandalone;
 }
 
 

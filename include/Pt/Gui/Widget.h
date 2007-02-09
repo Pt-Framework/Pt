@@ -11,7 +11,7 @@
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Rect.h>
 #include <Pt/Gfx/Region.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Insets.h>
@@ -227,14 +227,14 @@ namespace Gui {
 			 * @param text The new title for this widget.
 			 * @see title()
 			 */
-			void setTitle(const Pt::Text::String& text);
+			void setTitle(const Pt::String& text);
 
 			/**
 			 * @brief Returns the title of this widget.
 			 * @return The title of this widget.
 			 * @see setTitle()
 			 */
-			Pt::Text::String title();
+			Pt::String title();
 
 			/**
 			 * @brief Returns a reference to the color which is currently set as background color

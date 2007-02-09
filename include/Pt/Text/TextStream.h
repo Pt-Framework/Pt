@@ -21,9 +21,9 @@
 #define PT_Text_TextStream_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Text/Char_ctype.h>
-#include <Pt/Text/Char_numpunct.h>
-#include <Pt/Text/Char.h>
+#include <Pt/Char_ctype.h>
+#include <Pt/Char_numpunct.h>
+#include <Pt/Char.h>
 #include <Pt/Text/BasicTextStream.h>
 
 
@@ -37,10 +37,10 @@ namespace Pt {
 namespace Text {
 
 	/**
-	 * @brief Specialized class derived from BasicTextBuffer using Pt::Text::Char and $char$
+	 * @brief Specialized class derived from BasicTextBuffer using Pt::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is Pt::Text::Char. The external type is $char$.
+	 * The internal type is Pt::Char. The external type is $char$.
 	 *
 	 * See BasicTextBuffer for a more detailed description.
 	 */
@@ -63,10 +63,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextIStream using Pt::Text::Char and $char$
+	 * @brief Specialized class derived from BasicTextIStream using Pt::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is Pt::Text::Char. The external type is $char$.
+	 * The internal type is Pt::Char. The external type is $char$.
 	 *
 	 * See BasicTextIStream for a more detailed description.
 	 */
@@ -98,10 +98,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextOStream using Pt::Text::Char and $char$
+	 * @brief Specialized class derived from BasicTextOStream using Pt::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is Pt::Text::Char. The external type is $char$.
+	 * The internal type is Pt::Char. The external type is $char$.
 	 *
 	 * See BasicTextOStream for a more detailed description.
 	 */
@@ -127,10 +127,10 @@ namespace Text {
 
 
 	/**
-	 * @brief Specialized class derived from BasicTextStream using Pt::Text::Char and $char$
+	 * @brief Specialized class derived from BasicTextStream using Pt::Char and $char$
 	 * as internal and external type.
 	 *
-	 * The internal type is Pt::Text::Char. The external type is $char$.
+	 * The internal type is Pt::Char. The external type is $char$.
 	 *
 	 * See BasicTextStream for a more detailed description.
 	 */

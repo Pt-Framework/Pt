@@ -29,7 +29,7 @@
 #include "FreeType.h"
 #include <Pt/Gfx/ARgbImage.h>
 #include "Pt/Math/Point.h"
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 #include "Pt/Gfx/ARgbColor.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/Pen.h"
@@ -69,7 +69,7 @@ class DrawText
             @param font The text font
             @param text The text to calculate
         */
-        FontMetrics fontMetrics( const Text::String& text );
+        FontMetrics fontMetrics( const String& text );
 
         /** @brief Draw text on the image
 
@@ -85,7 +85,7 @@ class DrawText
             @param text The text to draw
             @param background The background color of the font
         */
-        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const Text::String& text, const ARgbColor* background = 0 );
+        void draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const String& text, const ARgbColor* background = 0 );
 
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )

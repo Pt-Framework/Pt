@@ -2,7 +2,7 @@
 #define PTV_Xml_Characters_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/Text/String.h>
+#include <Pt/String.h>
 #include <Pt/Xml/Node.h>
 
 

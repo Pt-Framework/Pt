@@ -251,7 +251,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(const Text::String& text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
 	if(!_xftFont)
 		return Gfx::FontMetrics(0, 0, 0, 0);
@@ -328,7 +328,7 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 }
 
 
-void PainterImpl::drawText(const Math::Point& to, const Text::String& text)
+void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 {
 	XftColor xftColor;
 	xftColor.pixel = 0; // this would be input for XftColorAllocValue

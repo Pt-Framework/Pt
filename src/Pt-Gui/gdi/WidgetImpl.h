@@ -51,9 +51,9 @@ namespace Gui {
 
 			virtual ~WidgetImpl();
 
-			void setTitle(const Pt::Text::String& text);
+			void setTitle(const Pt::String& text);
 
-			Pt::Text::String title();
+			Pt::String title();
 
 			void move(size_t x, size_t y);
 

@@ -16,7 +16,12 @@ SharedLibrary Pt : Any.cpp
                    PropertyProxy.cpp
                    Signal.cpp
                    Time.cpp
-                   TypeInfo.cpp ;
+                   TypeInfo.cpp
+                   codecvt.cpp
+                   ctype.cpp
+                   num_get.cpp
+                   numpunct.cpp
+                   Unicode.cpp ;
 
 SharedLibrary_MakeLocate Pt : bin ;
 SharedLibrary_Install Pt ;

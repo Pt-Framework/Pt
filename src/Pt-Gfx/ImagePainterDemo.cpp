@@ -6195,7 +6195,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::Gfx::Pen					pen( 10,  Pt::Gfx::ARgbColor( 0, 0, 0xffff ) );
 		Pt::Gfx::FontMetrics			metrics;
 		std::vector<Pt::Math::Point>	polygon;
-		Pt::Text::String				text = L"Wrzbuqe��$$s";
+		Pt::String						text = L"Wrzbuqe��$$s";
 
 		_imagePainter.drawText( Pt::Math::Point(50,50), text );
 		metrics = _imagePainter.fontMetrics( text );

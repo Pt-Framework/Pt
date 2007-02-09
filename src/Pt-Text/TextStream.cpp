@@ -18,8 +18,8 @@
  ***************************************************************************/
 
 #include "Pt/Text/TextStream.h"
-#include "Pt/Text/Char_numpunct.h"
-#include "Pt/Text/Char_ctype.h"
+#include "Pt/Char_numpunct.h"
+#include "Pt/Char_ctype.h"
 
 #include <iostream>
 using namespace std;

@@ -152,7 +152,7 @@ WidgetImpl::~WidgetImpl()
 }
 
 
-void WidgetImpl::setTitle(const Pt::Text::String& text)
+void WidgetImpl::setTitle(const Pt::String& text)
 {
 	_title = text;
 	Display* display = X11EventLoop::instance().display();

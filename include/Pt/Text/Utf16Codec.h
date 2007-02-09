@@ -74,10 +74,10 @@ namespace Text {
 	 * @brief This Codec class is able to convert from UTF-16 to UTF-32 and from UTF-32 to UTF-16.
 	 *
 	 * The method do_in() converts an array of char containing UTF-16-encoded data into an array
-	 * of Pt::Text::Char which is UTF-32-encoded, which means that the data is a direct readable
+	 * of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
 	 * 32-bit representation of the character.
 	 *
-	 * The method do_out() converts an array of Pt::Text::Char objects (UTF-32/Unicode) into an
+	 * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
 	 * array of char which contains the same sequence of characters in UTF-16-encoding.
 	 */
 	class PT_TEXT_API Utf16Codec : public TextCodec<Char, char> {

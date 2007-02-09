@@ -10,7 +10,7 @@
 #include "Pt/Xml/EndDocument.h"
 using namespace Pt::Xml;
 
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
 using namespace Pt;

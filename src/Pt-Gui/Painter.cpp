@@ -92,7 +92,7 @@ FontMetrics Painter::fontMetrics() const
 }
 
 
-FontMetrics Painter::fontMetrics(Text::String text) const 
+FontMetrics Painter::fontMetrics(Pt::String text) const 
 {
 	this->begin();
 	return _painterImpl->fontMetrics(text);
@@ -119,7 +119,7 @@ void Painter::drawLine(const Math::Point& from, const Math::Point& to)
 	_painterImpl->drawLine(from, to);
 }
 
-void Painter::drawText( const Math::Point& to, const Text::String& text, const Pt::Gfx::ARgbColor* outline )
+void Painter::drawText( const Math::Point& to, const Pt::String& text, const Pt::Gfx::ARgbColor* outline )
 {
 	this->begin();
 	_painterImpl->drawText(to, text);

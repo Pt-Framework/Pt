@@ -1,5 +1,5 @@
 #include "Pt/Xml/NamespaceContext.h"
-#include "Pt/Text/String.h"
+#include "Pt/String.h"
 
 #include <iostream>
 using namespace std;
