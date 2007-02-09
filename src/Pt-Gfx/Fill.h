@@ -28,32 +28,68 @@ namespace Pt {
 
 namespace Gfx {
 
-class Brush;
+/** @brief Fill Pixel Buffer
 
+    This class is the base class for function object that fill pixels of an
+    image. Derived classes implement special filling algorithms such as
+    filling with textures or solid fills.
+
+ */
 class PT_GFX_API Fill
 {
     public:
+        /** @brief Destructor
+        */
         virtual ~Fill()
         {}
 
+        /** @brief Fill Pixels on an Image
+
+            The pixels at the given X and y position are filles using the
+            given brush. The origin of the geometric figure is also given
+            for the algorithms that need a relative point.
+
+            @param image The target image
+            @param brush Brush for filling
+            @param origin Origin of the whole figure
+            @param xpos X cooridnate of the pixels to fill
+            @param ypos Y coorinate of the pixels tro fill
+            @param length number of pixels to fill
+        */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                             const Math::Point& origin,
                             size_t xpos, size_t ypos, size_t length ) = 0;
 };
 
 
+/** @brief Texture Filling
+
+    This class implements Fill and is specialised for filling pixels with
+    the texture of a Brush.
+
+ */
 class PT_GFX_API FillTexture : public Fill
 {
     public:
+        /** @sa Fill::fill
+        */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                            const Math::Point& origin,
                            size_t xpos, size_t ypos, size_t length );
 };
 
 
+/** @brief Solid Filling
+
+    This class implements Fill and is specialised for filling pixels with
+    the color of a Brush.
+
+ */
 class PT_GFX_API FillSolid : public Fill
 {
     public:
+        /** @sa Fill::fill
+        */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                            const Math::Point& origin,
                            size_t xpos, size_t ypos, size_t length );

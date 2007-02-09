@@ -69,6 +69,7 @@ void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();
 
+    // copy pixels blockwise to the target image
     while(length)
     {
         const size_t fillLength = std::min( length, texture.width() );

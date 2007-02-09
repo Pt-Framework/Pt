@@ -37,14 +37,45 @@ using namespace Pt::Gfx;
 using namespace Pt::Math;
 using namespace Pt::Text;
 
+
+Pt::Gfx::ARgbColor G(158*255, 158*255, 158*255);
+Pt::Gfx::ARgbColor A(188*255, 188*255, 188*255);
+Pt::Gfx::ARgbColor W(0xffff, 0xffff, 0xffff);
+
+Pt::Gfx::ARgbColor texture_data[]  =   {W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,W,W,W,W,W,W,W,W,W,W,W,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,W,W,W,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+                                        W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W};
+
+
 class ImagePainterTest : public Pt::Unit::TestSuite
 {
     public:
         ImagePainterTest()
         : TestSuite( "ImagePainterTest" )
         , _imagePainter( _image )
+        , _texture( 21, 21, Pt::Gfx::ARgbColor(0,0,0xdddd) )
         , _bkColor( 0xffff, 0xffff, 0xffff )
         {
+            std::copy( texture_data, texture_data + (21*21), _texture.data() );
+
             this->registerMethod("drawThinLineTest", *this, &ImagePainterTest::drawThinLineTest);
             this->registerMethod("drawThickLineTest", *this, &ImagePainterTest::drawThickLineTest);
             this->registerMethod("drawRectTest", *this, &ImagePainterTest::drawRectTest);
@@ -55,13 +86,13 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             this->registerMethod("drawImageTest", *this, &ImagePainterTest::drawImageTest);            
             this->registerMethod("fontMetricTest", *this, &ImagePainterTest::fontMetricTest);            
             this->registerMethod("drawTextTest", *this, &ImagePainterTest::drawTextTest);
-            
+
             this->registerMethod("fillEllipseTest", *this, &ImagePainterTest::fillEllipseTest);
             this->registerMethod("fillCircleTest", *this, &ImagePainterTest::fillCircleTest);
             this->registerMethod("fillPolygonTest", *this, &ImagePainterTest::fillPolygonTest);            
             this->registerMethod("fillRectTest", *this, &ImagePainterTest::fillRectTest);
         }
-        
+
         void drawThinLineTest()
         {
             _imagePainter.setPen( Pen( 1, ARgbColor( 0, 0, 0 ) ) );
@@ -101,19 +132,25 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         {
             _image.resize(  800, 600, _bkColor );
             std::vector<Point> polygon;
-            
+
             _imagePainter.setBrush( Brush( ARgbColor( 0, 0, 0 )));
-            
+
             polygon.push_back( Point( 10,200 ) );
             polygon.push_back( Point( 40,10 ) );
             polygon.push_back( Point( 80,100 ) );
             polygon.push_back( Point( 160,10 ) );
             polygon.push_back( Point( 200,200 ) );
-        
-            _imagePainter.fillPolygon( &polygon[0], polygon.size() );   
-            PT_UNIT_ASSERT( checkImage() );         
-        }      
-                
+
+            _imagePainter.fillPolygon( &polygon[0], polygon.size() );
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.clear();
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.setBrush( Brush( &_texture ) );
+            _imagePainter.fillPolygon( &polygon[0], polygon.size() );
+            PT_UNIT_ASSERT( checkImage() );
+        }
+
         void drawRectTest()
         {
             _imagePainter.setPen( Pen( 1, ARgbColor( 0,0,0) ) );
@@ -195,20 +232,27 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         }
         
         void fillEllipseTest()
-        { 
+        {
             _imagePainter.setBrush( Brush( ARgbColor( 0, 0, 0 ) ) );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.fillEllipse( Point( 10,10), Size( 100,100) );
-            PT_UNIT_ASSERT( checkImage() );            
-            
-            _image.resize(  800, 600, _bkColor );            
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.fillEllipse( Point( -10,10), Size( 100,100) );
-            PT_UNIT_ASSERT( checkImage() );                        
-            
-            _image.resize(  800, 600, _bkColor );            
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.fillEllipse( Point( -10,10), Size( 1000,100) );
-            PT_UNIT_ASSERT( checkImage() );                              
+            PT_UNIT_ASSERT( checkImage() );
+            _image.resize(  800, 600, _bkColor );
+
+            _image.clear();
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.setBrush( Brush(&_texture) );
+            _imagePainter.fillEllipse( Point( -10,10), Size( 1000,100) );
+            PT_UNIT_ASSERT( checkImage() );
         }
 
         void drawPolylineTest()
@@ -296,6 +340,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 
     ARgbImage     _image;
     ImagePainter  _imagePainter;
+    Pt::Gfx::ARgbImage _texture;
     ARgbColor     _bkColor;
 };
 
