@@ -32,6 +32,28 @@
 #include "Pt/Text/TextStream.h"
 
 
+class Utf8Converter
+{
+    public:
+        Utf8Converter()
+        : _ts( _in, new Pt::Text::Utf8Codec() )
+        {}
+
+        void convert(const char* from, std::basic_string<Pt::Text::Char>& to)
+        {
+            static const Pt::Text::Char _eof = std::char_traits<Pt::Text::Char>::eof();
+            _ts.clear();
+            _in.clear();
+            _in.str(from);
+            std::getline( _ts, to, _eof );
+        }
+
+    private:
+        std::istringstream    _in;
+        Pt::Text::TextIStream _ts;
+};
+
+
 class TextStreamTest : public Pt::Unit::TestSuite
 {
 	public:
