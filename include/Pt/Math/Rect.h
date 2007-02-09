@@ -20,7 +20,8 @@ namespace Pt {
         class BasicRect {
             public:
                 //! Construct a BasicRect at a given position and BasicSize<SizeT>
-                BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0), const BasicSize<SizeT>& s = BasicSize<SizeT>(1, 1))
+                BasicRect(const BasicPoint<PointT>& p = BasicPoint<PointT>(0, 0),
+                          const BasicSize<SizeT>& s = BasicSize<SizeT>(1, 1))
                 : _p(p)
                 , _s(s)
                 {}
