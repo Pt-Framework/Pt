@@ -97,12 +97,12 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawPolyline( 0 )
 , _drawThinPolyline( 0 )
 , _drawThickPolyline( 0 )
-, _fillPolygon( 0 )
-, _fillConvexPolygon( 0 )
-, _drawText( 0 )
 , _drawEllipse( 0 )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
+, _fillPolygon( 0 )
+, _fillConvexPolygon( 0 )
+, _drawText( 0 )
 {
     std::auto_ptr<DrawThinLine>         dThinLine( new DrawThinLine );
     std::auto_ptr<DrawThickLine>        dThickLine( new DrawThickLine );

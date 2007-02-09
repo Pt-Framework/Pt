@@ -1168,8 +1168,8 @@ void X11EventLoop::noExpose(Widget& widget, XEvent& xev)
 
 void X11EventLoop::configureNotify(Widget& widget, XEvent& xev)
 {
-	const ssize_t width = xev.xconfigure.width;
-	const ssize_t height = xev.xconfigure.height;
+	const size_t width = xev.xconfigure.width;
+	const size_t height = xev.xconfigure.height;
 	const ssize_t x = xev.xconfigure.x;
 	const ssize_t y = xev.xconfigure.y;
 

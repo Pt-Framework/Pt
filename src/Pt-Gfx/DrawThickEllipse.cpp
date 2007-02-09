@@ -20,10 +20,10 @@
  ***************************************************************************/
 #include "DrawThickEllipse.h"
 #include "DrawThinEllipse.h"
- 
+
 namespace Pt{
 namespace Gfx{
- 
+
 DrawThickEllipse::DrawThickEllipse()
 { }
 
@@ -37,11 +37,11 @@ void DrawThickEllipse::outputSpan( int x, int y, unsigned len )
 
 void DrawThickEllipse::fillEllipse(  const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 {
- 	/* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */	
+ 	/* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */
 	const int       a      = size.width() /2;
 	const int       b      = size.height() /2;
 	const int       xc     = topLeft.x() + a;
-	const int       yc     = topLeft.y() + b;		
+	const int       yc     = topLeft.y() + b;
     int             x      = 0;
     int             y      = b;
     unsigned int    width  = 1;
@@ -56,46 +56,46 @@ void DrawThickEllipse::fillEllipse(  const Pt::Math::Point& topLeft, const Pt::M
     long            d2xt   = 2*b2;
     long            d2yt   = 2*a2;
 
-    while( y >= 0 && x <= a ) 
+    while( y >= 0 && x <= a )
     {
 	    if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
         {
 		    //Increment x
-		    x++; 
-		    dxt += d2xt; 
+		    x++;
+		    dxt += d2xt;
 		    t   += dxt;
-		    
+
 		    width += 2;
 	    }
 	    else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
 	    {
 		    outputSpan(xc-x, yc-y, width  - 1);
-		    
+
 		    if( y!=0 )
 			    outputSpan(xc-x, yc+y - 1, width  - 1);
-			    
+
 		     //Increment Y
-		    y--; 
-		    dyt += d2yt; 
+		    y--;
+		    dyt += d2yt;
 		    t   += dyt;
 	    }
-	    else 
+	    else
 	    {
 		    outputSpan(xc-x, yc-y, width -1 );
-		    
+
 		    if( y != 0 )
 			    outputSpan(xc-x, yc+y -1, width - 1 );
-			    
+
 		     //Increment x
-		    x++; 
-		    dxt += d2xt; 
+		    x++;
+		    dxt += d2xt;
 		    t   += dxt;
-		    
+
 		    //Increment Y
-		    y--; 
-		    dyt += d2yt; 
+		    y--;
+		    dyt += d2yt;
 		    t   += dyt;
-		    
+
 		    width += 2;
 	    }
     }
@@ -107,9 +107,10 @@ void DrawThickEllipse::fillEllipse(  const Pt::Math::Point& topLeft, const Pt::M
 void DrawThickEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
 {
 //    _outterEllispe.clear();
-//    _innerEllispe.clear();  
-    
+//    _innerEllispe.clear();
+
 }
- 
+
 }//namespace Gfx
 }//namespace Pt
+

@@ -46,14 +46,14 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
 
     if( _colorBuffer.size() < image.width() || _colorBuffer[0] != pen.color() )
         _colorBuffer.assign( image.width(), pen.color() );
-        
+
     switch( pen.style() )
     {
         case Pen::SolidStyle:
             drawSolid( image, pen, clippedFrom, clippedTo );
         break;
         case Pen::DashStyle:
-            drawPatter( image, pen, clippedFrom, clippedTo, _patter );        
+            drawPatter( image, pen, clippedFrom, clippedTo, _patter );
         break;
     }
 }
@@ -67,26 +67,26 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
 
     ssize_t dx = std::abs( x1 - x0 );
     ssize_t dy = std::abs( y1 - y0 );
-    
-    
+
+
     if( y0 == y1 )
     {//Horizontal
         ssize_t xmin = std::min( x0, x1 );
-        
-        for( size_t x  = 0; x < dx; ++x )     
+
+        for( ssize_t x  = 0; x < dx; ++x )
             if( patter[ x % patter.size() ] )
                 outputPixel( image, pen, xmin+ x, y0 );
-                
+
         return;
     }
 
     if( x0 == x1 )
     {//Vertical
 
-        ssize_t ymin = std::min( y0, y1 );        
-        
+        ssize_t ymin = std::min( y0, y1 );
+
         for( ssize_t y = 0; y < dy; ++y )
-        {            
+        {
             if( patter[y%patter.size()] )
                 outputPixel( image, pen, x0, ymin+ y );
         }
@@ -149,7 +149,7 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
         {
             if( patter[ x%patter.size()] )
                 outputPixel(image, pen, x, y);
-             
+
             error += dy;
 
             if( (  error<<2 ) >= dx )

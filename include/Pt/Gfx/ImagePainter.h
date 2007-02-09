@@ -174,7 +174,7 @@ class PT_GFX_API ImagePainter : public Painter
         DrawThinPolyline*    _drawThinPolyline;
         DrawThickPolyline*   _drawThickPolyline;
 
-        DrawEllipse*		 _drawEllipse;
+        DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;
         FillEllipse*         _fillEllipse;

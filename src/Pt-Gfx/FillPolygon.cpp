@@ -108,7 +108,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
             if (dx < 0)
             {
                 edge.m = dx / dy;
-                edge.m1 = edge.m - 1; 
+                edge.m1 = edge.m - 1;
                 edge.incr1 = -2 * dx + 2 * dy * edge.m1;
                 edge.incr2 = -2 * dx + 2 * dy * edge.m;
                 edge.d = 2 * edge.m * dy - 2 * dx - 2 * dy;
@@ -137,7 +137,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //
     // Start at ymin of the first entry in the GET.
     //
-    size_t scanLine = _globalEdgeTable.begin()->ymin;
+    ssize_t scanLine = _globalEdgeTable.begin()->ymin;
 
     //
     // move active edges to AET for current scanline. Keep iterator where
