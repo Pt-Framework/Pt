@@ -21,15 +21,15 @@
 #ifndef PT_GFX_IMAGE_PAINTER_H
 #define PT_GFX_IMAGE_PAINTER_H
 
-#include <memory>
 #include <Pt/Text/String.h>
-
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Region.h>
+
+#include <memory>
 
 namespace Pt {
 
@@ -40,7 +40,6 @@ class DrawThinLine;
 class DrawThickLine;
 class DrawPolyline;
 class DrawThinPolyline;
-class DrawThickPolyline;
 class DrawEllipse;
 class DrawThinEllipse;
 class DrawThickEllipse;
@@ -167,7 +166,6 @@ class PT_GFX_API ImagePainter : public Painter
         DrawThickLine*       _drawThickLine;
         DrawPolyline*        _drawPolyline;
         DrawThinPolyline*    _drawThinPolyline;
-        DrawThickPolyline*   _drawThickPolyline;
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;

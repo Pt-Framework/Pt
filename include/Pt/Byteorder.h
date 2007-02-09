@@ -65,29 +65,9 @@ namespace Pt
 		u.b[0] = b1;
 		u.b[1] = b0;
 		return(u.v);
-	/*
-		movl	8(%ebp), %edx
-		movl	%edx, %eax
-		movzbl	%dh, %ecx
-		movb	%cl, %al
-		movb	%dl, %ah
-		movzwl	%ax, %eax
-		leave
-		ret
-	*/
 #else
 		return ( (value & 0x00FF) << 8 ) |
 					 ( (value & 0xFF00) >> 8 );
-	/*
-		movzwl	8(%ebp), %edx
-		movl	%edx, %eax
-		sall	$8, %eax
-		shrl	$8, %edx
-		orl	%edx, %eax
-		movzwl	%ax, %eax
-		leave
-		ret
-	*/
 #endif
 	}
 
@@ -108,45 +88,15 @@ namespace Pt
 		w[2] = w1;
 		w[3] = w0;
 		return(value);
-	/*
-		movb	8(%ebp), %cl
-		movb	9(%ebp), %dl
-		movb	11(%ebp), %al
-		movb	%al, 8(%ebp)
-		movb	10(%ebp), %al
-		movb	%al, 9(%ebp)
-		movb	%dl, 10(%ebp)
-		movb	%cl, 11(%ebp)
-		movl	8(%ebp), %eax
-		leave
-		ret
-	*/
 #else
 		return ( (value & 0x000000FF) << 24 ) |
 					 ( (value & 0x0000FF00) <<  8 ) |
 					 ( (value & 0x00FF0000) >>  8 ) |
 					 ( (value & 0xFF000000) >> 24 );
-	/*
-		movl	8(%ebp), %ecx
-		movl	%ecx, %eax
-		sall	$24, %eax
-		movl	%ecx, %edx
-		andl	$65280, %edx
-		sall	$8, %edx
-		orl	%edx, %eax
-		movl	%ecx, %edx
-		andl	$16711680, %edx
-		shrl	$8, %edx
-		shrl	$24, %ecx
-		orl	%ecx, %edx
-		orl	%edx, %eax
-		leave
-		ret
-	*/
 #endif
 	}
 
-	#ifdef PT_64BIT
+#ifdef PT_64BIT
 	/** @brief Swaps the byteorder of the given 64-bit value.
 	 *  @internal
 	 */
@@ -172,111 +122,18 @@ namespace Pt
 		w[6] = w1;
 		w[7] = w0;
 		return(value);
-	/*
-		movl	8(%ebp), %eax
-		movl	%eax, -16(%ebp)
-		movl	12(%ebp), %eax
-		movl	%eax, -12(%ebp)
-		movb	-16(%ebp), %al
-		movb	%al, -17(%ebp)
-		movb	-15(%ebp), %bl
-		movb	-14(%ebp), %cl
-		movb	-13(%ebp), %dl
-		movb	-9(%ebp), %al
-		movb	%al, -16(%ebp)
-		movb	-10(%ebp), %al
-		movb	%al, -15(%ebp)
-		movb	-11(%ebp), %al
-		movb	%al, -14(%ebp)
-		movb	-12(%ebp), %al
-		movb	%al, -13(%ebp)
-		movb	%dl, -12(%ebp)
-		movb	%cl, -11(%ebp)
-		movb	%bl, -10(%ebp)
-		movb	-17(%ebp), %al
-		movb	%al, -9(%ebp)
-		movl	-16(%ebp), %eax
-		movl	-12(%ebp), %edx
-		addl	$20, %esp
-		popl	%ebx
-		leave
-		ret
-	*/
 #else
 		return ( (value & 0x00000000000000FFULL) << 56 ) |
-					 ( (value & 0x000000000000FF00ULL) << 40 ) |
-					 ( (value & 0x0000000000FF0000ULL) << 24 ) |
-					 ( (value & 0x00000000FF000000ULL) <<  8 ) |
-					 ( (value & 0x000000FF00000000ULL) >>  8 ) |
-					 ( (value & 0x0000FF0000000000ULL) >> 24 ) |
-					 ( (value & 0x00FF000000000000ULL) >> 40 ) |
-					 ( (value & 0xFF00000000000000ULL) >> 56 );
-	/*
-		movzbl	8(%ebp),%eax
-		xorl	%edx, %edx
-		movl	%eax, %edx
-		movl	$0, %eax
-		sall	$24, %edx
-		movl	8(%ebp), %ecx
-		andl	$65280, %ecx
-		xorl	%ebx, %ebx
-		movl	%ecx, %ebx
-		movl	$0, %ecx
-		sall	$8, %ebx
-		orl	%ecx, %eax
-		orl	%ebx, %edx
-		xorl	%ecx, %ecx
-		movzbl	12(%ebp),%ebx
-		shrdl	$8, %ebx, %ecx
-		shrl	$8, %ebx
-		orl	%ecx, %eax
-		orl	%ebx, %edx
-		xorl	%ecx, %ecx
-		movl	12(%ebp), %ebx
-		andl	$16711680, %ebx
-		movl	%ebx, %ecx
-		xorl	%ebx, %ebx
-		shrl	$8, %ecx
-		orl	%ecx, %eax
-		orl	%ebx, %edx
-		movl	8(%ebp), %ecx
-		andl	$16711680, %ecx
-		xorl	%ebx, %ebx
-		shldl	$24, %ecx, %ebx
-		sall	$24, %ecx
-		movl	8(%ebp), %esi
-		andl	$-16777216, %esi
-		xorl	%edi, %edi
-		shldl	$8, %esi, %edi
-		sall	$8, %esi
-		orl	%esi, %ecx
-		orl	%edi, %ebx
-		xorl	%esi, %esi
-		movl	12(%ebp), %edi
-		andl	$65280, %edi
-		shrdl	$24, %edi, %esi
-		shrl	$24, %edi
-		orl	%esi, %ecx
-		orl	%edi, %ebx
-		xorl	%esi, %esi
-		movl	12(%ebp), %edi
-		andl	$-16777216, %edi
-		movl	%edi, %esi
-		xorl	%edi, %edi
-		shrl	$24, %esi
-		orl	%esi, %ecx
-		orl	%edi, %ebx
-		orl	%ecx, %eax
-		orl	%ebx, %edx
-		popl	%ebx
-		popl	%esi
-		popl	%edi
-		leave
-		ret
-	*/
+				( (value & 0x000000000000FF00ULL) << 40 ) |
+				( (value & 0x0000000000FF0000ULL) << 24 ) |
+				( (value & 0x00000000FF000000ULL) <<  8 ) |
+				( (value & 0x000000FF00000000ULL) >>  8 ) |
+				( (value & 0x0000FF0000000000ULL) >> 24 ) |
+				( (value & 0x00FF000000000000ULL) >> 40 ) |
+				( (value & 0xFF00000000000000ULL) >> 56 );
 #endif
 	}
-	#endif
+#endif
 
 
 
@@ -285,14 +142,14 @@ namespace Pt
 	 *
 	 *  Just for the sake of completeness.
 	 */
-	inline int8_t swap(int8_t value)
+	inline int8_t swab(int8_t value)
 	{ return value; }
 
 	/** @brief Dummy function which does nothing.
 	 *
 	 *  Just for the sake of completeness.
 	 */
-	inline uint8_t swap(uint8_t value)
+	inline uint8_t swab(uint8_t value)
 	{ return value; }
 
 
@@ -303,7 +160,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline int16_t swap(int16_t value)
+	inline int16_t swab(int16_t value)
 	{ return swab16(value); }
 
 	/** @brief Swaps the byteorder of a uint16_t.
@@ -313,7 +170,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline uint16_t swap(uint16_t value)
+	inline uint16_t swab(uint16_t value)
 	{ return swab16(value); }
 
 
@@ -324,7 +181,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline int32_t swap(int32_t value)
+	inline int32_t swab(int32_t value)
 	{ return swab32(value); }
 
 	/** @brief Swaps the byteorder of a uint32_t.
@@ -334,7 +191,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline uint32_t swap(uint32_t value)
+	inline uint32_t swab(uint32_t value)
 	{ return swab32(value); }
 
 
@@ -346,7 +203,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline int64_t swap(int64_t value)
+	inline int64_t swab(int64_t value)
 	{ return swab64(value); }
 
 	/** @brief Swaps the byteorder of a uint64t.
@@ -356,7 +213,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline uint64_t swap(uint64_t value)
+	inline uint64_t swab(uint64_t value)
 	{ return swab64(value); }
 #endif
 
@@ -368,7 +225,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline float swap(float value)
+	inline float swab(float value)
 	{
 		const uint32_t &p = *reinterpret_cast<const uint32_t*>(&value);
 		const uint32_t  s = swab32(p);
@@ -382,7 +239,7 @@ namespace Pt
 	 *
 	 *  Overloads the generic swap().
 	 */
-	inline double swap(double value)
+	inline double swab(double value)
 	{
 		const uint64_t &p = *reinterpret_cast<const uint64_t*>(&value);
 		const uint64_t  s = swab64(p);
@@ -408,7 +265,7 @@ namespace Pt
 #ifdef PT_LE
 		return value;
 #else
-		return swap(value);
+		return swab(value);
 #endif
 	}
 
@@ -428,7 +285,7 @@ namespace Pt
 #ifdef PT_LE
 		return value;
 #else
-		return swap(value);
+		return swab(value);
 #endif
 	}
 
@@ -447,7 +304,7 @@ namespace Pt
 	inline T hostToBe(const T& value)
 	{
 #ifdef PT_LE
-		return swap(value);
+		return swab(value);
 #else
 		return value;
 #endif
@@ -467,7 +324,7 @@ namespace Pt
 	inline T beToHost(const T& value)
 	{
 #ifdef PT_LE
-		return swap(value);
+		return swab(value);
 #else
 		return value;
 #endif

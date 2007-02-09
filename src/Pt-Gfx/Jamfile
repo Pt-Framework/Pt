@@ -18,7 +18,6 @@ SharedLibrary Pt-Gfx : Pen.cpp
                        DrawText.cpp
                        DrawThinPolyline.cpp
                        DrawThinLine.cpp
-                       DrawThickPolyline.cpp
                        DrawThickLine.cpp
                        FillPolygon.cpp
                        ClipPolygon.cpp

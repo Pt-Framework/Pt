@@ -33,14 +33,13 @@
 #include "DrawThickLine.h"
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
-#include "DrawThickPolyline.h"
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
 #include "DrawThickEllipse.h"
 #include "DrawText.h"
 #include "FillEllipse.h"
 #include "FillPolygon.h"
-//#include "FillConvexPolygon.h"
+
 
 namespace Pt {
 
@@ -109,7 +108,6 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawThickLine( 0)
 , _drawPolyline( 0 )
 , _drawThinPolyline( 0 )
-, _drawThickPolyline( 0 )
 , _drawEllipse( 0 )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
@@ -119,7 +117,6 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThinLine>         dThinLine( new DrawThinLine );
     std::auto_ptr<DrawThickLine>        dThickLine( new DrawThickLine );
     std::auto_ptr<DrawThinPolyline>     dThinPolyline( new DrawThinPolyline() );
-    std::auto_ptr<DrawThickPolyline>    dThickPolyline( new DrawThickPolyline() );
     std::auto_ptr<DrawText>             dText( new DrawText() );
     dText->setFont(_font);
     std::auto_ptr<DrawThinEllipse>      dThinEllipse( new DrawThinEllipse() );
@@ -132,7 +129,6 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawThickLine      = dThickLine.release();
     _drawLine           = _drawThinLine;
     _drawThinPolyline   = dThinPolyline.release();
-    _drawThickPolyline  = dThickPolyline.release();
     _drawPolyline       = _drawThinPolyline;
     _drawText           = dText.release();
     _drawThinEllipse	= dThinEllipse.release();
@@ -148,7 +144,6 @@ ImagePainter::~ImagePainter()
         delete _drawThinLine;
         delete _drawThickLine;
         delete _drawThinPolyline;
-        delete _drawThickPolyline;
         delete _fillPolygon;
         delete _drawText;
         delete _drawThinEllipse;
@@ -171,7 +166,6 @@ void ImagePainter::setPen( const Pen& pen )
     else
     {
         _drawLine       = _drawThickLine;
-        _drawPolyline   = _drawThickPolyline;
         _drawEllipse    = _drawThickEllipse;
     }
 }

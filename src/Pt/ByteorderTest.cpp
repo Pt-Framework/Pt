@@ -38,9 +38,6 @@ class ByteorderTest : public Pt::Unit::TestCase
 
 		virtual void test()
 		{
-			//
-			// This is the real testing code
-			//
 			#ifdef PT_LE
 				Pt::uint16_t a = 0xaabb;
 				PT_UNIT_ASSERT( Pt::uint16_t(0xbbaa) == Pt::hostToBe(a) );
@@ -81,80 +78,10 @@ class ByteorderTest : public Pt::Unit::TestCase
 				Pt::int64_t f = 0x1122334455667788LL;
 				PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToBe(f) );
 			   #endif
+			#else
+                #error "Neither PT_BE not PT_LE is defined"
 			#endif
-
-			//
-			// ???
-			//
-/*
-			const Pt::uint8_t  val8u  = 0x10;
-			const Pt::uint16_t val16u = 0x1020;
-			const Pt::uint32_t val32u = 0x10203040;
-#ifdef PT_64BIT
-			const Pt::uint64_t val64u = 0x1020304050607080ULL;
-#endif
-			const float        valf   = -754.0f;
-			const double       vald   = -754.0;
-
-			cerr << "Before swap()s:" << endl;
-			cerr << hex         << (void*) val8u  << endl;
-			cerr << hex << "0x" <<         val16u << endl;
-			cerr << hex << "0x" <<         val32u << endl;
-#ifdef PT_64BIT
-			cerr << hex << "0x" <<         val64u << endl;
-#endif
-			cerr << valf << hex << " (0x" << *reinterpret_cast<const Pt::uint32_t*>(&valf) << ")" << endl;
-			cerr << vald << hex << " (0x" << *reinterpret_cast<const Pt::uint64_t*>(&vald) << ")" << endl;
-
-			cerr << endl;
-			Pt::uint8_t  sval8u  = Pt::swap(val8u);
-			Pt::uint16_t sval16u = Pt::swap(val16u);
-			Pt::uint32_t sval32u = swap(val32u);
-#ifdef PT_64BIT
-			Pt::uint64_t sval64u = swap(val64u);
-#endif
-			float        svalf   = swap(valf);
-			double       svald   = swap(vald);
-
-			cerr << "After swap()s:" << endl;
-			cerr << hex         << (void*) sval8u  << endl;
-			cerr << hex << "0x" <<         sval16u << endl;
-			cerr << hex << "0x" <<         sval32u << endl;
-#ifdef PT_64BIT
-			cerr << hex << "0x" <<         sval64u << endl;
-#endif
-			cerr << svalf << hex << " (0x" << *reinterpret_cast<const Pt::uint32_t*>(&svalf) << ")" << endl;
-			cerr << svald << hex << " (0x" << *reinterpret_cast<const Pt::uint64_t*>(&svald) << ")" << endl;
-
-			cerr << endl;
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval16u), sizeof(sval16u));
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval32u), sizeof(sval32u));
-#ifdef PT_64BIT
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&sval64u), sizeof(sval64u));
-#endif
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&svalf),   sizeof(svalf));
-			swabUnaligned(reinterpret_cast<Pt::uint8_t*>(&svald),   sizeof(svald));
-
-			cerr << "After swabUnaligned()s:" << endl;
-			cerr << hex << "0x" << sval16u << endl;
-			cerr << hex << "0x" << sval32u << endl;
-#ifdef PT_64BIT
-			cerr << hex << "0x" << sval64u << endl;
-#endif
-			cerr << svalf << hex << " (0x" << *reinterpret_cast<const Pt::uint32_t*>(&svalf) << ")" << endl;
-			cerr << svald << hex << " (0x" << *reinterpret_cast<const Pt::uint64_t*>(&svald) << ")" << endl;
-
-			PT_UNIT_ASSERT( val8u  == sval8u  );
-			PT_UNIT_ASSERT( val16u == sval16u );
-			PT_UNIT_ASSERT( val32u == sval32u );
-#ifdef PT_64BIT
-			PT_UNIT_ASSERT( val64u == sval64u );
-#endif
-			PT_UNIT_ASSERT( valf   == svalf   );
-			PT_UNIT_ASSERT( vald   == svald   );
-*/
 		}
-
 	};
 
 Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;
