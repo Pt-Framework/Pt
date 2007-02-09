@@ -5,6 +5,7 @@ SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 
 SharedLibrary Pt-Gfx : Pen.cpp
                        Brush.cpp
+                       Fill.cpp
                        Font.cpp
                        FontMetrics.cpp
                        ARgbColor.cpp

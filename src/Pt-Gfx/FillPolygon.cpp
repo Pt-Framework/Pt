@@ -31,7 +31,7 @@ namespace Pt {
 namespace Gfx {
 
 FillPolygon::FillPolygon()
-: _fillSpan(0)
+: _fill(0)
 { }
 
 
@@ -161,8 +161,8 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
             const size_t xbegin   = std::min(_activeEdgeTable[i].x, _activeEdgeTable[i-1].x);
             const size_t length = (xend - xbegin);
 
-            if(_fillSpan)
-                _fillSpan->fill(image, brush, origin, xbegin, scanLine, length);
+            if(_fill)
+                _fill->fill(image, brush, origin, xbegin, scanLine, length);
         }
 
         //

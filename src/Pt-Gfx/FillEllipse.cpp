@@ -19,13 +19,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FillEllipse.h"
+#include "Fill.h"
+
 
 namespace Pt {
 
 namespace Gfx {
 
 FillEllipse::FillEllipse()
-: _fillSpan(0)
+: _fill(0)
 { }
 
 
@@ -47,7 +49,7 @@ void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Ma
     const ssize_t xend = std::min( x + width, imageWidth );
     ssize_t       xpos = std::max( 0, x );
 
-    _fillSpan->fill(image, brush, topLeft, xpos, y, xend-xpos);
+    _fill->fill(image, brush, topLeft, xpos, y, xend-xpos);
 }
 
 

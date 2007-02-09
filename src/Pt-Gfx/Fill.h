@@ -18,39 +18,49 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_FILLELLIPSE_H
-#define PT_GFX_FILLELLIPSE_H
+#ifndef PT_GFX_FILL_H
+#define PT_GFX_FILL_H
 
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Brush.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Gfx/Gfx.h>
 
+namespace Pt {
 
-namespace Pt{
+namespace Gfx {
 
-namespace Gfx{
+class Brush;
 
-class Fill;
-
-class FillEllipse
+class PT_GFX_API Fill
 {
     public:
-        FillEllipse();
+        virtual ~Fill()
+        {}
 
-        ~FillEllipse();
-
-        void setOutput(Fill& f)
-        { _fill = & f; }
-
-        void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
-
-    private:
-        Fill* _fill;
-        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, int x, int y, int width );
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                            const Math::Point& origin,
+                            size_t xpos, size_t ypos, size_t length ) = 0;
 };
 
-}
 
-}
+class PT_GFX_API FillTexture : public Fill
+{
+    public:
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                           const Math::Point& origin,
+                           size_t xpos, size_t ypos, size_t length );
+};
+
+
+class PT_GFX_API FillSolid : public Fill
+{
+    public:
+        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
+                           const Math::Point& origin,
+                           size_t xpos, size_t ypos, size_t length );
+};
+
+} // namespace Gfx
+
+} // namespace Pt
 
 #endif

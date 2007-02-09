@@ -29,6 +29,7 @@
 #include "Edge.h"
 #include "EdgeTable.h"
 #include "ClipPolygon.h"
+#include "Fill.h"
 
 
 namespace Pt{
@@ -48,8 +49,8 @@ class FillPolygon
         virtual ~FillPolygon()
         { }
 
-        void setOutput(FillSpan& fs)
-        { _fillSpan = & fs; };
+        void setOutput(Fill& f)
+        { _fill = &f; };
 
         /** @brief Fill a polygon on an image
 
@@ -73,12 +74,12 @@ class FillPolygon
                            std::vector<Math::Point>& points );
 
     private:
-        FillSpan* _fillSpan;
-        ClipPolygon             _clipper;
-        EdgeSet                 _globalEdgeTable;
-        ActiveEdgeTable         _activeEdgeTable;
-        EdgeSet::iterator       _currentPos;
-        Pt::System::Clock       _clock;
+        Fill*             _fill;
+        ClipPolygon       _clipper;
+        EdgeSet           _globalEdgeTable;
+        ActiveEdgeTable   _activeEdgeTable;
+        EdgeSet::iterator _currentPos;
+        Pt::System::Clock _clock;
 };
 
 } //namespace Gfx

@@ -39,66 +39,12 @@
 #include "DrawText.h"
 #include "FillEllipse.h"
 #include "FillPolygon.h"
+#include "Fill.h"
 
 
 namespace Pt {
 
 namespace Gfx {
-
-void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                        const Math::Point& origin,
-                        size_t xpos, size_t ypos, size_t length )
-{
-    const Pt::Gfx::ARgbImage& texture = brush.texture();
-
-    while(length)
-    {
-        // x position in the texture to copy from
-        const size_t textureXPos = ( xpos - origin.x() ) % texture.width();
-
-        // determine the scanline of the texture to copy from
-        const size_t textureYPos = ( ypos-origin.y() ) % texture.height();
-
-        // number of pixels to copy from texture
-        const size_t fillLength = std::min( length, texture.width() - textureXPos );
-
-        // Copy pixels from textrure to image
-        if(fillLength)
-        {
-            std::memcpy( &image.pixel( xpos, ypos ),
-                         &texture.pixel(textureXPos, textureYPos),
-                         fillLength * sizeof(ARgbColor) );
-        }
-
-        // Remaining unfilled pixels of the span
-        length -= fillLength;
-        xpos   += fillLength;
-    }
-}
-
-
-void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                      const Math::Point& origin,
-                      size_t xpos, size_t ypos, size_t length )
-{
-    const Pt::Gfx::ARgbImage& texture = brush.texture();
-
-    while(length)
-    {
-        const size_t fillLength = std::min( length, texture.width() );
-
-        if(fillLength)
-        {
-            std::memcpy( &image.pixel( xpos, ypos ),
-                         brush.texture().data(),
-                         fillLength * sizeof(ARgbColor) );
-        }
-
-        length -= fillLength;
-        xpos   += fillLength;
-    }
-}
-
 
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
@@ -114,16 +60,18 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _fillPolygon( 0 )
 , _drawText( 0 )
 {
-    std::auto_ptr<DrawThinLine>         dThinLine( new DrawThinLine );
-    std::auto_ptr<DrawThickLine>        dThickLine( new DrawThickLine );
-    std::auto_ptr<DrawThinPolyline>     dThinPolyline( new DrawThinPolyline() );
-    std::auto_ptr<DrawText>             dText( new DrawText() );
+    std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
+    std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
+    std::auto_ptr<DrawThinLine>           dThinLine( new DrawThinLine );
+    std::auto_ptr<DrawThickLine>          dThickLine( new DrawThickLine );
+    std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline() );
+    std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
-    std::auto_ptr<DrawThinEllipse>      dThinEllipse( new DrawThinEllipse() );
-    std::auto_ptr<DrawThickEllipse>     dThickEllipse( new DrawThickEllipse() );
-    std::auto_ptr<FillPolygon>          fillPolygon( new FillPolygon() );
-    fillPolygon->setOutput( _fillSolid );
-    std::auto_ptr<FillEllipse>          fillEllipse( new FillEllipse() );
+    std::auto_ptr<DrawThinEllipse>        dThinEllipse( new DrawThinEllipse() );
+    std::auto_ptr<DrawThickEllipse>       dThickEllipse( new DrawThickEllipse() );
+    std::auto_ptr<FillPolygon>            fillPolygon( new FillPolygon() );
+    fillPolygon->setOutput( *fillSolid );
+    std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
 
     _drawThinLine       = dThinLine.release();
     _drawThickLine      = dThickLine.release();
@@ -136,6 +84,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawEllipse        = _drawThinEllipse;
     _fillEllipse        = fillEllipse.release();
     _fillPolygon        = fillPolygon.release();
+    _fillSolid          = fillSolid.release();
+    _fillTexture        = fillTexture.release();
 }
 
 ImagePainter::~ImagePainter()
@@ -181,13 +131,13 @@ void ImagePainter::setBrush(const Brush& brush)
 
     if(_brush.fillStyle() == Brush::TextureFill)
     {
-        _fillPolygon->setOutput( _fillTexture );
-        _fillEllipse->setOutput( _fillTexture );
+        _fillPolygon->setOutput( *_fillTexture );
+        _fillEllipse->setOutput( *_fillTexture );
     }
     else
     {
-        _fillPolygon->setOutput( _fillSolid );
-        _fillEllipse->setOutput( _fillSolid );
+        _fillPolygon->setOutput( *_fillSolid );
+        _fillEllipse->setOutput( *_fillSolid );
     }
 }
 

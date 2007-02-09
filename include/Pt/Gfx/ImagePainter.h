@@ -46,34 +46,9 @@ class DrawThickEllipse;
 class FillPolygon;
 class FillEllipse;
 class DrawText;
+class FillSolid;
+class FillTexture;
 
-
-class PT_GFX_API FillSpan
-{
-    public:
-        virtual ~FillSpan()
-        {}
-
-        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            const Math::Point& origin,
-                            size_t xpos, size_t ypos, size_t length ) = 0;
-};
-
-class PT_GFX_API FillTexture : public FillSpan
-{
-    public:
-        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Math::Point& origin,
-                           size_t xpos, size_t ypos, size_t length );
-};
-
-class PT_GFX_API FillSolid : public FillSpan
-{
-    public:
-        virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Math::Point& origin,
-                           size_t xpos, size_t ypos, size_t length );
-};
 
 /**
     \brief A painter to draw on an ARgbImage.
@@ -172,8 +147,8 @@ class PT_GFX_API ImagePainter : public Painter
         FillEllipse*         _fillEllipse;
         FillPolygon*         _fillPolygon;
         DrawText*            _drawText;
-        FillSolid            _fillSolid;
-        FillTexture          _fillTexture;
+        FillSolid*           _fillSolid;
+        FillTexture*         _fillTexture;
 };
 
 } //namespace Gfx
