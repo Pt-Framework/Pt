@@ -198,17 +198,15 @@ class DrawThickLine : public DrawLine
                          LineFace* leftFace, LineFace* rightFace);
                          
         
-        void drawPattern(ARgbImage& image, const Pen& pen,
+        void drawDashSegment(ARgbImage& image, const Pen& pen,
                          Pt::Math::Point from, Pt::Math::Point to,
                          bool projectLeft, bool projectRight,
-                         LineFace* leftFace, LineFace* rightFace, 
-                         const std::vector<bool>& pattern );                          
+                         LineFace* leftFace, LineFace* rightFace );                          
         
     private:
         FillPolygon _fillPolygon;
         ClipPolygon _clipPolygon;
         RasterBuffer _rasterBuffer;
-        std::vector<bool> _dashPaterrn;
 };
 
 } // namespace Gfx

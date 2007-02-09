@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cmath>
 
+using namespace Pt::Math;
 
 namespace Pt {
 
@@ -172,7 +173,7 @@ static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overa
         while (height--)
         {
 
-                    if( y >= 0 &&  y < (int)image.height())
+            if( y >= 0 &&  y < (int)image.height())
             {
                 // generate a span (omitting point on right end, see above)
                 if (right_x >= left_x)
@@ -212,30 +213,7 @@ static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overa
 
 
 DrawThickLine::DrawThickLine()
-{
-    _dashPaterrn.push_back( true );
-    _dashPaterrn.push_back( true );
-    _dashPaterrn.push_back( true );
-    _dashPaterrn.push_back( false);
-}
-
-
-Pt::ssize_t round(double x)
-{
-    double _x = x;
-    int _i;
-
-    if( _x >= INT_MAX )
-        _i = INT_MAX;
-
-    else if( _x <= -(INT_MAX))
-        _i = -(INT_MAX);
-    else
-        _i = (_x > 0.0 ? (int)(_x + 0.5) : (int)(_x - 0.5));
-
-    return _i;
-}
-
+{ }
 
 void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
                           const Math::Point& from, const Math::Point& to )
@@ -252,20 +230,54 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
             this->drawSegment(image, pen, from, to, false, false, &leftFace, &rightFace);
         break;
         case Pen::DashStyle:
-            this->drawPattern( image, pen, from, to, false, false, &leftFace, &rightFace, _dashPaterrn );
+            this->drawDashSegment( image, pen, from, to, false, false, &leftFace, &rightFace);
         break;
     }
 }
 
-void DrawThickLine::drawPattern( ARgbImage& image, const Pen& pen,
-                                 Pt::Math::Point from, Pt::Math::Point to,
-                                 bool projectLeft, bool projectRight,
-                                LineFace* leftFace, LineFace* rightFace, 
-                                const std::vector<bool>& pattern )
+void DrawThickLine::drawDashSegment( ARgbImage& image, const Pen& pen,
+                                    Pt::Math::Point from, Pt::Math::Point to,
+                                    bool projectLeft, bool projectRight,
+                                    LineFace* leftFace, LineFace* rightFace )
 {
+    const size_t  dashLength       = pen.size() * 3;
+    const size_t  spaceLength      = pen.size();
+    const size_t  segmentLenght    = dashLength + spaceLength;
+    const ssize_t dx               = to.x() - from.x();
+    const ssize_t dy               = to.y() - from.y();    
+    const double  lineLength       = Math::hypot( dx , dy );
+    const double  xincdashspace    = dx / (lineLength / segmentLenght);
+    const double  yincdashspace    = dy / (lineLength / segmentLenght);
+    const double  noOfDashes       = lineLength / dashLength;
+    const double  xincdash         = dx / noOfDashes;
+    const double  yincdash         = dy / noOfDashes;
+        
+    size_t  counter = 0;
+    Point   segFrom;
+    Point   segTo;
 
-   
-
+    for( size_t i = 0; i < lineLength - dashLength; i += segmentLenght )
+    {    
+        segFrom.setX( ssize_t( from.x() + xincdashspace * counter ) );
+        segFrom.setY( ssize_t( from.y() + yincdashspace * counter ) );
+        
+        segTo.setX( ssize_t( from.x() + xincdashspace * counter + xincdash ) );
+        segTo.setY( ssize_t( from.y() + yincdashspace * counter + yincdash ) );
+        
+        drawSegment( image, pen, segFrom,  segTo, false, false, leftFace, rightFace );
+        counter++;
+    }
+    
+    if( ( dashLength + spaceLength ) * counter <= lineLength )
+    {    
+        segFrom.setX( ssize_t( from.x() + xincdashspace * counter ) );
+        segFrom.setY( ssize_t( from.y() + yincdashspace * counter ) );
+        
+        segTo.setX( to.x() );
+        segTo.setY( to.y() );
+                
+        drawSegment( image, pen, segFrom, segTo, false, false, leftFace, rightFace );
+    }
 }
 
 
