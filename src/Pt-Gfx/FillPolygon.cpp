@@ -43,12 +43,13 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
     //
     // find unclipped origin coordinates
     //
-    Pt::ssize_t xorig = std::numeric_limits<Pt::ssize_t>::max();
-    Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
+    Math::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
+    //Pt::ssize_t xorig = ;
+    //Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
     for(size_t n = 0; n < points.size(); ++n)
     {
-        xorig = std::min( xorig, points[n].x() );
-        yorig = std::min( yorig, points[n].y() );
+        origin.setX( std::min( origin.x(), points[n].x() ) );
+        origin.setY( std::min( origin.y(), points[n].y() ) );
     }
 
     _clipper(points, Pt::Math::Rect( Pt::Math::Point(0,0), Pt::Math::Size( image.width(), image.height() )) );
@@ -161,7 +162,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::
             const size_t length = (xend - xbegin);
 
             if(_fillSpan)
-                _fillSpan->fill(image, brush, xorig, yorig, xbegin, scanLine, length);
+                _fillSpan->fill(image, brush, origin, xbegin, scanLine, length);
         }
 
         //

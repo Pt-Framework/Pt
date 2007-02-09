@@ -47,7 +47,7 @@ void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Ma
     const ssize_t xend = std::min( x + width, imageWidth );
     ssize_t       xpos = std::max( 0, x );
 
-    _fillSpan->fill(image, brush, topLeft.x(), topLeft.y(), xpos, y, xend-xpos);
+    _fillSpan->fill(image, brush, topLeft, xpos, y, xend-xpos);
 }
 
 

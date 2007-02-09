@@ -47,7 +47,7 @@ namespace Pt {
 namespace Gfx {
 
 void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                        Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                        const Math::Point& origin,
                         size_t xpos, size_t ypos, size_t length )
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();
@@ -55,10 +55,10 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
     while(length)
     {
         // x position in the texture to copy from
-        const size_t textureXPos = (xpos - xorigin) % texture.width();
+        const size_t textureXPos = ( xpos - origin.x() ) % texture.width();
 
         // determine the scanline of the texture to copy from
-        const size_t textureYPos = (ypos-yorigin) % texture.height();
+        const size_t textureYPos = ( ypos-origin.y() ) % texture.height();
 
         // number of pixels to copy from texture
         const size_t fillLength = std::min( length, texture.width() - textureXPos );
@@ -67,8 +67,8 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
         if(fillLength)
         {
             std::memcpy( &image.pixel( xpos, ypos ),
-                            &texture.pixel(textureXPos, textureYPos),
-                            fillLength * sizeof(ARgbColor) );
+                         &texture.pixel(textureXPos, textureYPos),
+                         fillLength * sizeof(ARgbColor) );
         }
 
         // Remaining unfilled pixels of the span
@@ -79,7 +79,7 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
 
 
 void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                      Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                      const Math::Point& origin,
                       size_t xpos, size_t ypos, size_t length )
 {
     std::fill_n( &image.pixel( xpos, ypos ), length, brush.color() );

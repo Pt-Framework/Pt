@@ -59,7 +59,7 @@ class PT_GFX_API FillSpan
         {}
 
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
+                            const Math::Point& origin,
                             size_t xpos, size_t ypos, size_t length ) = 0;
 };
 
@@ -67,16 +67,16 @@ class PT_GFX_API FillTexture : public FillSpan
 {
     public:
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
-                            size_t xpos, size_t ypos, size_t length );
+                           const Math::Point& origin,
+                           size_t xpos, size_t ypos, size_t length );
 };
 
 class PT_GFX_API FillSolid : public FillSpan
 {
     public:
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            Pt::ssize_t xorigin, Pt::ssize_t yorigin,
-                            size_t xpos, size_t ypos, size_t length );
+                           const Math::Point& origin,
+                           size_t xpos, size_t ypos, size_t length );
 };
 
 /**
