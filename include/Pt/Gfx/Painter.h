@@ -223,7 +223,8 @@ namespace Gfx {
 			 * @see setPen()
 			 * @see setFont()
 			 */
-			virtual void drawText( const Pt::Math::Point& to, const Pt::Text::String& Text, const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
+			virtual void drawText( const Pt::Math::Point& to, const Pt::Text::String& Text,
+			                       const Pt::Gfx::ARgbColor* outline = 0 ) = 0;
 
 			/**
 			 * @brief Draws a rectangle outline.
