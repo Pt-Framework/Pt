@@ -28,6 +28,11 @@
 # Aloysius
 #
 
+ITEM P10 S5 "SmartPtr class is implemented"
+    TASK "Review code" d-marc
+    TASK "Write Documentation" d-marc
+    TASK "Write test case" d-marc
+
 ########################################################################################
 
 ITEM P9 S8 "The color class' interface is improved"

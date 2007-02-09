@@ -21,11 +21,6 @@
 # Aloysius
 #
 
-ITEM P10 S5 "SmartPtr class is implemented"
-    TASK "Review code" d-marc
-    TASK "Write Documentation" d-marc
-    TASK "Write test case" d-marc
-
 ITEM P10 S5 "The AtomicInt class implements atomic operations"
     TASK "Add fallback version that uses pthreads" blue_wind_25
     TASK "Review asm" blue_wind_25
