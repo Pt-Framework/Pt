@@ -23,7 +23,6 @@ SharedLibrary Pt-Gfx :
 	DrawThickLine.cpp
 	FillPolygon.cpp
 	ClipPolygon.cpp
-	FillConvexPolygon.cpp
 	FreeType.cpp
 	Exception.cpp
 	DrawThinEllipse.cpp
