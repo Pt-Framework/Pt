@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -159,12 +159,12 @@ namespace Unit {
 
         virtual void assertion(const TestContext& test, const Assertion& a)
         {
-            *_out << "ASSERTION" << std::endl;
+            *_out << "ASSERTION: " << a.what() << std::endl;
         }
 
         virtual void exception(const TestContext& test, const std::exception& ex)
         {
-            *_out << "EXCEPTION" << std::endl;
+            *_out << "EXCEPTION: " << ex.what() << std::endl;
         }
 
         virtual void error(const TestContext& test)

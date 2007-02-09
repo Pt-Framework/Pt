@@ -39,6 +39,7 @@ class ExceptionTest : public Pt::Unit::TestCase
             }
             catch(const std::exception& ex)
             {
+                PT_UNIT_ASSERT(std::string( ex.what() ).find("test") != std::string::npos);
                 return;
             }
 

@@ -34,6 +34,14 @@ PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt ;
 Main_MakeLocate AnyTest : bin ;
 
+PtUnitTest DateTest : DateTest.cpp ;
+Main_LinkSharedLibraries DateTest : Pt ;
+Main_MakeLocate DateTest : bin ;
+
+PtUnitTest SmartPtrTest : SmartPtrTest.cpp ;
+Main_LinkSharedLibraries SmartPtrTest : Pt ;
+Main_MakeLocate SmartPtrTest : bin ;
+
 PtUnitTest AtomicTest : AtomicTest.cpp ;
 Main_LinkSharedLibraries AtomicTest : Pt ;
 Main_MakeLocate AtomicTest : bin ;

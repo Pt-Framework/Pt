@@ -61,7 +61,7 @@ namespace Unit {
                 @param si Info where the assertion failed
             */
             Assertion(const std::string& what, const SourceInfo& si)
-            : _what(what/* + si*/)
+            : _what(what + si)
             , _sourceInfo(si)
             {}
 

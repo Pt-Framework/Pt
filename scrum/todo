@@ -26,11 +26,6 @@ ITEM P10 S5 "Variant class is implemented"
     TASK "Write Documentation"
     TASK "Write test case"
 
-ITEM P10 S5 "SmartPtr class is implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
 ITEM P10 S5 "Signals and Delegates are implemented"
     TASK "Review code"
     TASK "Write Documentation"

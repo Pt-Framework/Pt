@@ -138,3 +138,5 @@ include/Pt/Gfx/Rgb888Color.h
 include/Pt/Gfx/Rgb888Image.h
 src/Pt-Gfx/DrawThickLine.h
 src/Pt-Gfx/DrawThickLine.cpp
+include/Pt/Unit/TestContext.h
+include/Pt/Unit/PerformanceTest.h

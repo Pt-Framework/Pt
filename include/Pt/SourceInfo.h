@@ -159,7 +159,7 @@ class SourceInfo {
 
 inline std::string operator+(const std::string& what, const SourceInfo& info)
 {
-    return what + "\n" + info.str();
+    return info.str() + ": " + what;
 }
 
 } // namespace Pt
