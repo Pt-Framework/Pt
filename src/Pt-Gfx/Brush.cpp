@@ -45,8 +45,6 @@ BrushData::BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const A
 , _color(color)
 , _texture(0)
 {
-    //std::fill_n(_colorBuffer, colorBufferSize, color);
-
     if (texture != 0) {
         _texture = new ARgbImage(*texture);
     }
