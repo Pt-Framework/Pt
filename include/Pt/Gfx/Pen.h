@@ -50,18 +50,50 @@ namespace Gfx {
 
 		public:		    
 				
-		    enum PenStyle{	SolidStyle, DashStyle };
-		    		    
+		    enum PenStyle{ SolidStyle, DashStyle };
+
+            
 			/**
-			 * @brief Creates a new Pen object using the specified size and color.
+			 * @brief Create Pen by style.
 			 *
-			 * The pen size and color are optional. The default pen size is 1. The
-			 * default pen color is black.
+			 * Creates a new pen object with the given style. The pen size will be 1 
+			 * and the pen color black. 
+			 *
+			 * @param style The pen style.
+			 */
+            Pen(  PenStyle style );
+                
+			/**
+			 * @brief Creates Pen by color.
+			 *
+			 * Creates a new pen with the given color. The pen size will be 1 and the pen style solid.
+			 *
+			 * @param color The color of the pen.
+			 */
+            Pen( const ARgbColor& color );
+            
+			/**
+			 * @brief Creates a new Pen object.
+			 *
+			 * The pen size and style are optional. The default pen size is 1. The
+			 * default pen style is solid.
+			 *
+			 * @param size The size of the pen. This parameter is optional. The default is 1.
+			 * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
+			 */
+            Pen( size_t size = 1 , PenStyle style = SolidStyle );		    		                
+                        
+			/**
+			 * @brief Creates a new Pen object using the specified size, color and style.
+			 *
+			 * The pen size, color and style are optional. The default pen size is 1. The
+			 * default pen color is black and the default style is solid.
 			 *
 			 * @param size The size of the pen. This parameter is optional. The default is 1.
 			 * @param color The color of the pen. This parameter is optional. The default is black.
+			 * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
 			 */
-			Pen( size_t size = 1, const ARgbColor& color = ARgbColor( 0, 0, 0), PenStyle style = SolidStyle );
+			Pen( size_t size, const ARgbColor& color, PenStyle style = SolidStyle );
 
 			/**
 			 * @brief Returns the size of the pen as specified when created.

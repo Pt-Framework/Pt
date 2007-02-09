@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Laurentiu-Gheorghe Crisan                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,23 +17,31 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Gfx/Pen.h"
 
-
-
 namespace Pt {
-
 namespace Gfx {
 
-Pen::Pen(size_t size, const ARgbColor& color, PenStyle style)
-: _size(size)
-, _color(color)
-, _style(style)
-{
+Pen::Pen(  PenStyle style )
+: _size( 1 )
+, _style( style )
+{ }                
 
-}
+Pen::Pen( const ARgbColor& color )
+: _size( 1 )
+, _color( color )
+{ }
+
+Pen::Pen( size_t size, PenStyle style )
+: _size( size )
+, _style( style )
+{ }
+
+Pen::Pen( size_t size, const ARgbColor& color, PenStyle style )
+: _size( size )
+, _color( color )
+, _style( style )
+{ }
 
 } // namespace Gfx
-
 } // namespace Pt

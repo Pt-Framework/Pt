@@ -20,17 +20,15 @@
  ***************************************************************************/
 #include "DrawThinLine.h"
 
-
-namespace Pt {
-namespace Gfx {
+namespace Pt{
+namespace Gfx{
 
 DrawThinLine::DrawThinLine()
 {
-    //Defauld dashed.
-    _patter.push_back(true);
-    _patter.push_back(true);
-    _patter.push_back(true);
-    _patter.push_back(false);
+    _dashPattern.push_back(true);
+    _dashPattern.push_back(true);
+    _dashPattern.push_back(true);
+    _dashPattern.push_back(false);
 }
 
 DrawThinLine::~DrawThinLine()
@@ -41,7 +39,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
     Math::Point clippedFrom( from );
     Math::Point clippedTo( to );
 
-    if( !_clipLine( clippedFrom, clippedTo , 0, image.width(), 0, image.height()) )
+    if( !_clipLine( clippedFrom, clippedTo , 0, image.width(), 0, image.height() ) )
         return;
 
     if( _colorBuffer.size() < image.width() || _colorBuffer[0] != pen.color() )
@@ -53,12 +51,13 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
             drawSolid( image, pen, clippedFrom, clippedTo );
         break;
         case Pen::DashStyle:
-            drawPatter( image, pen, clippedFrom, clippedTo, _patter );
+            drawPattern( image, pen, clippedFrom, clippedTo, _dashPattern );
         break;
     }
 }
 
-void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to, const std::vector<bool>& patter )
+void DrawThinLine::drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, 
+                               const Math::Point& to, const std::vector<bool>& pattern )
 {
     ssize_t     x0      = from.x();
     ssize_t     y0      = from.y();
@@ -68,13 +67,12 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
     ssize_t dx = std::abs( x1 - x0 );
     ssize_t dy = std::abs( y1 - y0 );
 
-
     if( y0 == y1 )
     {//Horizontal
         ssize_t xmin = std::min( x0, x1 );
 
         for( ssize_t x  = 0; x < dx; ++x )
-            if( patter[ x % patter.size() ] )
+            if( pattern[ x % pattern.size() ] )
                 outputPixel( image, pen, xmin+ x, y0 );
 
         return;
@@ -87,7 +85,7 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
 
         for( ssize_t y = 0; y < dy; ++y )
         {
-            if( patter[y%patter.size()] )
+            if( pattern[y%pattern.size()] )
                 outputPixel( image, pen, x0, ymin+ y );
         }
 
@@ -117,7 +115,7 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
 
         for( ssize_t x = x0; x <= x1; ++x )
         {
-            if( patter[ x%patter.size()] )
+            if( pattern[ x%pattern.size()] )
                 outputPixel( image, pen, y,x);
 
             error += deltay;
@@ -147,7 +145,7 @@ void DrawThinLine::drawPatter( ARgbImage& image, const Pen& pen, const Math::Poi
 
         for( ssize_t x = x0; x < x1; ++x )
         {
-            if( patter[ x%patter.size()] )
+            if( pattern[ x%pattern.size()] )
                 outputPixel(image, pen, x, y);
 
             error += dy;
@@ -253,5 +251,4 @@ void DrawThinLine::drawSolid( ARgbImage& image, const Pen& pen, const Math::Poin
 }
 
 } // namespace Gfx
-
 } // namespace Pt

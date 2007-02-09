@@ -18,16 +18,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_GFX_DRAWTHINLINE_H
 #define PT_GFX_DRAWTHINLINE_H
 
 #include "DrawLine.h"
 #include "ClipLine.h"
 
-
 namespace Pt {
-
 namespace Gfx {
 
 /** @brief Draw thin lines on an image
@@ -38,32 +35,31 @@ namespace Gfx {
 class DrawThinLine : public DrawLine
 {
     public:
-    
+
         DrawThinLine();
         ~DrawThinLine();
-		/** @brief Draw a line on an image
+        /** @brief Draw a line on an image
 
-			@see DrawLine::draw
-		*/
+            @see DrawLine::draw
+        */
         void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
 
     private:
         ClipLine _clipLine;
         void drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
-        void drawPatter( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to, const std::vector<bool>& patter );
-        
-        inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t len )
+        void drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to, const std::vector<bool>& pattern );
+
+        inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t length )
         {
-           memcpy( &image.pixel( x,  y ), &_colorBuffer[0], len * sizeof( ARgbColor)  );
+            memcpy( &image.pixel( x,  y ), &_colorBuffer[0], length * sizeof( ARgbColor)  );
         }
-        
+
         inline void outputPixel( ARgbImage& image, const Pen& pen, size_t x, size_t y )
         {
             image.pixel( x,  y ) = pen.color();
         }
-        
-        std::vector<bool> _patter;
-        
+
+        std::vector<bool> _dashPattern;
 };
 
 } // namespace gfx

@@ -212,7 +212,12 @@ static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overa
 
 
 DrawThickLine::DrawThickLine()
-{}
+{
+    _dashPaterrn.push_back( true );
+    _dashPaterrn.push_back( true );
+    _dashPaterrn.push_back( true );
+    _dashPaterrn.push_back( false);
+}
 
 
 Pt::ssize_t round(double x)
@@ -272,7 +277,27 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
 
     LineFace leftFace;
     LineFace rightFace;
-    this->drawSegment(image, pen, from, to, false, false, &leftFace, &rightFace);
+    
+    switch( pen.style() )
+    {
+        case Pen::SolidStyle:
+            this->drawSegment(image, pen, from, to, false, false, &leftFace, &rightFace);
+        break;
+        case Pen::DashStyle:
+            this->drawPattern( image, pen, from, to, false, false, &leftFace, &rightFace, _dashPaterrn );
+        break;
+    }
+}
+
+void DrawThickLine::drawPattern( ARgbImage& image, const Pen& pen,
+                                 Pt::Math::Point from, Pt::Math::Point to,
+                                 bool projectLeft, bool projectRight,
+                                LineFace* leftFace, LineFace* rightFace, 
+                                const std::vector<bool>& pattern )
+{
+
+   
+
 }
 
 

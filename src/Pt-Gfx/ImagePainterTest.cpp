@@ -88,8 +88,13 @@ class ImagePainterTest : public Pt::Unit::TestSuite
                 _imagePainter.drawLine( Point( 10,10 ), Point (100,100 ) );
                 _imagePainter.drawLine( Point( 100,10 ), Point ( 10,100 ) );
                 _imagePainter.drawLine( Point( 55,10 ), Point ( 55,100 ) );
-                _imagePainter.drawLine( Point( 10,55 ), Point ( 100,55 ) );
+                _imagePainter.drawLine( Point( 10,55 ), Point ( 100,55 ) );                
             }
+            
+            _image.resize(  300, 300, _bkColor );
+            _imagePainter.setPen( Pen( Pen::DashStyle ) );
+            _imagePainter.drawLine( Point( 55,10 ), Point ( 55,100 ) );
+            PT_UNIT_ASSERT( checkImage() );                   
         }
  
         void fillPolygonTest()
