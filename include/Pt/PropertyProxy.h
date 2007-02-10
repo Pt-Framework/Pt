@@ -20,7 +20,7 @@ class PT_API AbstractProperty
 		virtual ~AbstractProperty()
 		{}
 
-		virtual AbstractProperty* clone() const = 0;
+		//virtual AbstractProperty* clone() const = 0;
 
 		virtual Pt::Any value()
 		{ throw std::logic_error("AbstractProperty is not readable" + PT_SOURCEINFO); }
