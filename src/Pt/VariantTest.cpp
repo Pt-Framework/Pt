@@ -1,91 +1,105 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Stefan Büder                                    *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
+#include "Pt/Variant.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
 
 #include <string>
 #include <iostream>
-using namespace std;
-
-#include "Pt/Variant.h"
-using namespace Pt;
 
 
-class VariantTest : public CPPUNIT_NS::TestFixture
+class VariantTest : public Pt::Unit::TestSuite
 {
-	CPPUNIT_TEST_SUITE( VariantTest );
-	CPPUNIT_TEST( testAssignInt );
-	CPPUNIT_TEST( testGetInt );
-	CPPUNIT_TEST( testCompareInt );
+    public:
+        VariantTest()
+        : Pt::Unit::TestSuite("TimeTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "AssignInt", *this, &VariantTest::AssignInt );
+            Pt::Unit::TestSuite::registerMethod( "GetInt", *this, &VariantTest::GetInt );
+            Pt::Unit::TestSuite::registerMethod( "CompareInt", *this, &VariantTest::CompareInt );
+            Pt::Unit::TestSuite::registerMethod( "AssignVariant", *this, &VariantTest::AssignVariant );
+            Pt::Unit::TestSuite::registerMethod( "CompareVariant", *this, &VariantTest::CompareVariant );
+        }
 
-	CPPUNIT_TEST( testAssignVariant );
-	CPPUNIT_TEST( testCompareVariant );
-
-	CPPUNIT_TEST_SUITE_END();
-
-protected:
-	void testAssignInt();
-	void testGetInt();
-	void testCompareInt();
-
-	void testAssignVariant();
-	void testCompareVariant();
+    protected:
+        void AssignInt();
+        void GetInt();
+        void CompareInt();
+        void AssignVariant();
+        void CompareVariant();
 };
 
+Pt::Unit::RegisterTest<VariantTest> register_VariantTest;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( VariantTest );
 
-
-void VariantTest::testAssignInt()
+void VariantTest::AssignInt()
 {
-	Variant v(5);
-	CPPUNIT_ASSERT( v.str() == "5" );
+	Pt::Variant v(5);
+	PT_UNIT_ASSERT( v.str() == "5" );
 
 	v = 10;
-	CPPUNIT_ASSERT( v.str() == "10" );
+	PT_UNIT_ASSERT( v.str() == "10" );
 }
 
 
-void VariantTest::testGetInt()
+void VariantTest::GetInt()
 {
-	Variant v(5);
+	Pt::Variant v(5);
 	int n = 0;
 	v.get(n);
 
-	CPPUNIT_ASSERT( n == 5 );
+	PT_UNIT_ASSERT( n == 5 );
 }
 
 
-void VariantTest::testCompareInt()
+void VariantTest::CompareInt()
 {
-	Variant v(5);
-	CPPUNIT_ASSERT( v == 5 );
-	CPPUNIT_ASSERT( v < 6 );
-	CPPUNIT_ASSERT( v > 4 );
+	Pt::Variant v(5);
+	PT_UNIT_ASSERT( v == 5 );
+	PT_UNIT_ASSERT( v < 6 );
+	PT_UNIT_ASSERT( v > 4 );
 }
 
 
-void VariantTest::testAssignVariant()
+void VariantTest::AssignVariant()
 {
-	Variant v(5);
-	Variant v2( v );
-	CPPUNIT_ASSERT( v2.str() == "5" );
+	Pt::Variant v(5);
+	Pt::Variant v2( v );
+	PT_UNIT_ASSERT( v2.str() == "5" );
 
-	Variant v3;
+	Pt::Variant v3;
 	v3 = v;
-	CPPUNIT_ASSERT( v.str() == "5" );
+	PT_UNIT_ASSERT( v.str() == "5" );
 }
 
 
-void VariantTest::testCompareVariant()
+void VariantTest::CompareVariant()
 {
-	Variant v(5);
-	Variant v2(5);
-	Variant v3(6);
+	Pt::Variant v(5);
+	Pt::Variant v2(5);
+	Pt::Variant v3(6);
 
-	CPPUNIT_ASSERT( v == v2 );
-	CPPUNIT_ASSERT( v2 < v3 );
-	CPPUNIT_ASSERT( v3 > v );
+	PT_UNIT_ASSERT( v == v2 );
+	PT_UNIT_ASSERT( v2 < v3 );
+	PT_UNIT_ASSERT( v3 > v );
 }

@@ -34,9 +34,25 @@ PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt ;
 Main_MakeLocate AnyTest : bin ;
 
+PtUnitTest VariantTest : VariantTest.cpp ;
+Main_LinkSharedLibraries VariantTest : Pt ;
+Main_MakeLocate VariantTest : bin ;
+
+PtUnitTest PoolTest : PoolTest.cpp ;
+Main_LinkSharedLibraries PoolTest : Pt ;
+Main_MakeLocate PoolTest : bin ;
+
 PtUnitTest DateTest : DateTest.cpp ;
 Main_LinkSharedLibraries DateTest : Pt ;
 Main_MakeLocate DateTest : bin ;
+
+PtUnitTest DateTimeTest : DateTimeTest.cpp ;
+Main_LinkSharedLibraries DateTimeTest : Pt ;
+Main_MakeLocate DateTimeTest : bin ;
+
+PtUnitTest TimeTest : TimeTest.cpp ;
+Main_LinkSharedLibraries TimeTest : Pt ;
+Main_MakeLocate TimeTest : bin ;
 
 PtUnitTest SmartPtrTest : SmartPtrTest.cpp ;
 Main_LinkSharedLibraries SmartPtrTest : Pt ;

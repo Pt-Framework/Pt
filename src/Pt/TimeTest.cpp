@@ -1,71 +1,89 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Stefan Büder                                    *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
 #include "Pt/Time.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
+
 #include <string>
 #include <iostream>
 
-using namespace Pt;
-using namespace std;
 
-
-class TimeTest : public CPPUNIT_NS::TestFixture
+class TimeTest : public Pt::Unit::TestSuite
 {
-	CPPUNIT_TEST_SUITE( TimeTest );
-	CPPUNIT_TEST( testNull );
-	CPPUNIT_TEST( testAssign );
-	CPPUNIT_TEST( testIsoConvert );
+    public:
+        TimeTest()
+        : Pt::Unit::TestSuite("TimeTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "Null", *this, &TimeTest::Null );
+            Pt::Unit::TestSuite::registerMethod( "Assign", *this, &TimeTest::Assign );
+            Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &TimeTest::IsoConvert );
+        }
 
-	CPPUNIT_TEST_SUITE_END();
-
-protected:
-	void testNull();
-	void testAssign();
-	void testIsoConvert();
+    protected:
+        void Null();
+        void Assign();
+        void IsoConvert();
 };
 
+Pt::Unit::RegisterTest<TimeTest> register_TimeTest;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( TimeTest );
 
-
-void TimeTest::testNull()
+void TimeTest::Null()
 {
-	Time time;
-	CPPUNIT_ASSERT( time.isNull() );
+	Pt::Time time;
+	PT_UNIT_ASSERT( time.isNull() );
 }
 
-void TimeTest::testAssign()
+void TimeTest::Assign()
 {
-	Time time(12, 45, 23, 956);
-	CPPUNIT_ASSERT( !time.isNull() );
-	CPPUNIT_ASSERT( time.hours() == 12 );
-	CPPUNIT_ASSERT( time.minutes() == 45 );
-	CPPUNIT_ASSERT( time.seconds() == 23 );
-	CPPUNIT_ASSERT( time.msecs() == 956 );
+	Pt::Time time(12, 45, 23, 956);
+	PT_UNIT_ASSERT( !time.isNull() );
+	PT_UNIT_ASSERT( time.hours() == 12 );
+	PT_UNIT_ASSERT( time.minutes() == 45 );
+	PT_UNIT_ASSERT( time.seconds() == 23 );
+	PT_UNIT_ASSERT( time.msecs() == 956 );
 
 	time.set(23, 59, 59, 999);
-	CPPUNIT_ASSERT( !time.isNull() );
-	CPPUNIT_ASSERT( time.hours() == 23 );
-	CPPUNIT_ASSERT( time.minutes() == 59 );
-	CPPUNIT_ASSERT( time.seconds() == 59 );
-	CPPUNIT_ASSERT( time.msecs() == 999 );
+	PT_UNIT_ASSERT( !time.isNull() );
+	PT_UNIT_ASSERT( time.hours() == 23 );
+	PT_UNIT_ASSERT( time.minutes() == 59 );
+	PT_UNIT_ASSERT( time.seconds() == 59 );
+	PT_UNIT_ASSERT( time.msecs() == 999 );
 }
 
 
-void TimeTest::testIsoConvert()
+void TimeTest::IsoConvert()
 {
-	Time time(12, 45, 23, 956);
+	Pt::Time time(12, 45, 23, 956);
 	std::string isoString = time.toIsoString();
-	CPPUNIT_ASSERT( isoString == "12:45:23.956" );
+	PT_UNIT_ASSERT( isoString == "12:45:23.956" );
 
-	time = Time::fromIsoString("23:59:59.999");
-	CPPUNIT_ASSERT( !time.isNull() );
-	CPPUNIT_ASSERT( time.hours() == 23 );
-	CPPUNIT_ASSERT( time.minutes() == 59 );
-	CPPUNIT_ASSERT( time.seconds() == 59 );
-	CPPUNIT_ASSERT( time.msecs() == 999 );
+	time = Pt::Time::fromIsoString("23:59:59.999");
+	PT_UNIT_ASSERT( !time.isNull() );
+	PT_UNIT_ASSERT( time.hours() == 23 );
+	PT_UNIT_ASSERT( time.minutes() == 59 );
+	PT_UNIT_ASSERT( time.seconds() == 59 );
+	PT_UNIT_ASSERT( time.msecs() == 999 );
 }
 

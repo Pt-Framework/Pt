@@ -1,89 +1,106 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
+ *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Stefan Büder                                    *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
 #include "Pt/DateTime.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
+
 #include <string>
 #include <iostream>
 
-using namespace Pt;
-using namespace std;
 
-
-class DateTimeTest : public CPPUNIT_NS::TestFixture
+class DateTimeTest : public Pt::Unit::TestSuite
 {
-	CPPUNIT_TEST_SUITE( DateTimeTest );
-	CPPUNIT_TEST( testNull );
-	CPPUNIT_TEST( testAssign );
-	CPPUNIT_TEST( testIsoConvert );
+    public:
+        DateTimeTest()
+        : Pt::Unit::TestSuite("DateTimeTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "Null", *this, &DateTimeTest::Null );
+            Pt::Unit::TestSuite::registerMethod( "Assign", *this, &DateTimeTest::Assign );
+            Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &DateTimeTest::IsoConvert );
+        }
 
-	CPPUNIT_TEST_SUITE_END();
-
-protected:
-	void testNull();
-	void testAssign();
-	void testIsoConvert();
+    protected:
+        void Null();
+        void Assign();
+        void IsoConvert();
 };
 
+Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( DateTimeTest );
 
-
-void DateTimeTest::testNull()
+void DateTimeTest::Null()
 {
-	DateTime dt;
-	CPPUNIT_ASSERT( dt.isNull() );
+	Pt::DateTime dt;
+	PT_UNIT_ASSERT( dt.isNull() );
 
-	Date date;
-	Time time;
-	DateTime dt2(date, time);
-	CPPUNIT_ASSERT( dt.isNull() );
+	Pt::Date date;
+	Pt::Time time;
+	Pt::DateTime dt2(date, time);
+	PT_UNIT_ASSERT( dt.isNull() );
 }
 
-void DateTimeTest::testAssign()
+void DateTimeTest::Assign()
 {
-	Date date(2001, 11, 15);
-	Time time(12, 45, 23, 956);
-	DateTime dt(date, time);
-	CPPUNIT_ASSERT( !dt.isNull() );
-	CPPUNIT_ASSERT( dt.years() == 2001 );
-	CPPUNIT_ASSERT( dt.months() == 11 );
-	CPPUNIT_ASSERT( dt.days() == 15 );
-	CPPUNIT_ASSERT( dt.hours() == 12 );
-	CPPUNIT_ASSERT( dt.minutes() == 45 );
-	CPPUNIT_ASSERT( dt.seconds() == 23 );
-	CPPUNIT_ASSERT( dt.msecs() == 956 );
+	Pt::Date date(2001, 11, 15);
+	Pt::Time time(12, 45, 23, 956);
+	Pt::DateTime dt(date, time);
+	PT_UNIT_ASSERT( !dt.isNull() );
+	PT_UNIT_ASSERT( dt.years() == 2001 );
+	PT_UNIT_ASSERT( dt.months() == 11 );
+	PT_UNIT_ASSERT( dt.days() == 15 );
+	PT_UNIT_ASSERT( dt.hours() == 12 );
+	PT_UNIT_ASSERT( dt.minutes() == 45 );
+	PT_UNIT_ASSERT( dt.seconds() == 23 );
+	PT_UNIT_ASSERT( dt.msecs() == 956 );
 
 	dt.set(1789, 5, 12, 23, 59, 59, 999);
-	CPPUNIT_ASSERT( !dt.isNull() );
-	CPPUNIT_ASSERT( dt.years() == 1789 );
-	CPPUNIT_ASSERT( dt.months() == 5 );
-	CPPUNIT_ASSERT( dt.days() == 12 );
-	CPPUNIT_ASSERT( dt.hours() == 23 );
-	CPPUNIT_ASSERT( dt.minutes() == 59 );
-	CPPUNIT_ASSERT( dt.seconds() == 59 );
-	CPPUNIT_ASSERT( dt.msecs() == 999 );
+	PT_UNIT_ASSERT( !dt.isNull() );
+	PT_UNIT_ASSERT( dt.years() == 1789 );
+	PT_UNIT_ASSERT( dt.months() == 5 );
+	PT_UNIT_ASSERT( dt.days() == 12 );
+	PT_UNIT_ASSERT( dt.hours() == 23 );
+	PT_UNIT_ASSERT( dt.minutes() == 59 );
+	PT_UNIT_ASSERT( dt.seconds() == 59 );
+	PT_UNIT_ASSERT( dt.msecs() == 999 );
 }
 
 
-void DateTimeTest::testIsoConvert()
+void DateTimeTest::IsoConvert()
 {
-	Date date(2001, 11, 15);
-	Time time(12, 45, 23, 956);
-	DateTime dt(date, time);
+	Pt::Date date(2001, 11, 15);
+	Pt::Time time(12, 45, 23, 956);
+	Pt::DateTime dt(date, time);
 	std::string isoString = dt.toIsoString();
-	CPPUNIT_ASSERT( isoString == "2001-11-15 12:45:23.956" );
+	PT_UNIT_ASSERT( isoString == "2001-11-15 12:45:23.956" );
 
-	dt = DateTime::fromIsoString("1789-05-12 23:59:59.999");
-	CPPUNIT_ASSERT( !dt.isNull() );
-	CPPUNIT_ASSERT( dt.years() == 1789 );
-	CPPUNIT_ASSERT( dt.months() == 5 );
-	CPPUNIT_ASSERT( dt.days() == 12 );
-	CPPUNIT_ASSERT( dt.hours() == 23 );
-	CPPUNIT_ASSERT( dt.minutes() == 59 );
-	CPPUNIT_ASSERT( dt.seconds() == 59 );
-	CPPUNIT_ASSERT( dt.msecs() == 999 );
+	dt = Pt::DateTime::fromIsoString("1789-05-12 23:59:59.999");
+	PT_UNIT_ASSERT( !dt.isNull() );
+	PT_UNIT_ASSERT( dt.years() == 1789 );
+	PT_UNIT_ASSERT( dt.months() == 5 );
+	PT_UNIT_ASSERT( dt.days() == 12 );
+	PT_UNIT_ASSERT( dt.hours() == 23 );
+	PT_UNIT_ASSERT( dt.minutes() == 59 );
+	PT_UNIT_ASSERT( dt.seconds() == 59 );
+	PT_UNIT_ASSERT( dt.msecs() == 999 );
 }
 

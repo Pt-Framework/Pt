@@ -1,36 +1,38 @@
+#include "Pt/Pool.h"
+
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
+
 #include <fstream>
 #include <cassert>
-using namespace std;
-
-#include "Pt/Pool.h"
-using namespace Pt;
-
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
 
 
-class PoolTest : public CPPUNIT_NS::TestFixture
+class PoolTest : public Pt::Unit::TestSuite
 {
-	CPPUNIT_TEST_SUITE( PoolTest );
-	CPPUNIT_TEST( test );
-	CPPUNIT_TEST_SUITE_END();
+    public:
+        PoolTest()
+        : Pt::Unit::TestSuite("TimeTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "AllocRelease", *this, &PoolTest::AllocRelease );
+        }
 
-protected:
-	void test();
+    protected:
+        void AllocRelease();
 };
 
+Pt::Unit::RegisterTest<PoolTest> register_PoolTest;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( PoolTest );
 
-
-void PoolTest::test()
+void PoolTest::AllocRelease()
 {
-    Pool<std::string> pool(2);
+    Pt::Pool<std::string> pool(2);
 
     std::string* str1 = pool.alloc();
     std::string* str2 = pool.alloc();
 
-    CPPUNIT_ASSERT ( str1 );
+    PT_UNIT_ASSERT ( str1 );
 
     *str1 = "test";
 
@@ -49,7 +51,6 @@ void PoolTest::test()
     pool.release( str1 );
     pool.release( str2 );
     pool.release( str3 );
-
-	  CPPUNIT_ASSERT( pool.size() == 3 );
+    PT_UNIT_ASSERT( pool.size() == 3 );
 }
 
