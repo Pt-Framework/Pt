@@ -1,1 +1,7 @@
 SubDir TOP include Pt Gfx ;
+
+DEPENDS InterleavedImage.h : InterleavedImage.tpp ;
+
+DEPENDS SubImage.h : SubImage.tpp ;
+
+DEPENDS ImageAlgo.h : ImageAlgo.tpp ;

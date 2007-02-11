@@ -40,8 +40,8 @@ namespace Pt {
 
             inline void operator+=(atomic_t n)
             {
-                register volatile unsigned long tmp;
-                register volatile sig_atomic_t result;
+                volatile register atomic_t tmp;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "@ atomic_add_return      \n\t"
@@ -58,8 +58,8 @@ namespace Pt {
 
             inline void operator-=(atomic_t n)
             {
-                register volatile unsigned long tmp;
-                register volatile sig_atomic_t result;
+                volatile register atomic_t tmp;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "@ atomic_sub_return     \n\t"
@@ -76,7 +76,7 @@ namespace Pt {
 
             inline void operator=(atomic_t n)
             {
-                register volatile unsigned long tmp;
+                volatile register atomic_t tmp;
 
                 asm volatile (
                     "@ atomic_set            \n\t"
@@ -92,7 +92,8 @@ namespace Pt {
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
-                std::sig_atomic_t result, tmp;
+                volatile register atomic_t tmp;
+                volatile register atomic_t result;
 
                 asm volatile (
                         "0:    ldr   %1,[%2]   \n\t"

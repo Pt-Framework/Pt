@@ -40,7 +40,7 @@ namespace Pt {
 
             inline void operator+=(atomic_t n)
             {
-                register atomic_t result;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "lock; xadd{l} {%0,%1|%1,%0}"
@@ -51,7 +51,7 @@ namespace Pt {
 
             inline void operator-=(atomic_t n)
             {
-                register atomic_t result;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "lock; xadd{l} {%0,%1|%1,%0}"
@@ -62,11 +62,11 @@ namespace Pt {
 
             inline void operator=(atomic_t n)
             {
-                register atomic_t ret;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "xchgl %0, %1"
-                    : "=r"(ret), "=m"(_value)
+                    : "=r"(result), "=m"(_value)
                     : "0"(n), "m"(_value)
                     : "memory"
                 );
@@ -74,15 +74,15 @@ namespace Pt {
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
-                register atomic_t ret;
+                volatile register atomic_t result;
 
                 asm volatile (
                     "lock; cmpxchgl %2, %1"
-                    : "=a" (ret), "=m" (_value)
+                    : "=a" (result), "=m" (_value)
                     : "r" (newval), "m" (_value), "0" (oldval)
                 );
 
-                return ret == oldval;
+                return result == oldval;
             }
 
         private:
