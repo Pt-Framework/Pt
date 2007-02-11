@@ -24,21 +24,6 @@
 #include <Pt/System/MutexLock.h>
 #include <iostream>
 
-#ifndef EV_SYN
-#define EV_SYN 0
-#endif
-
-/*
-char *events[EV_MAX + 1]; = {
-
-	[EV_SYN] = "Sync",			[EV_KEY] = "Key",
-	[EV_REL] = "Relative",			[EV_ABS] = "Absolute",
-	[EV_MSC] = "Misc",			[EV_LED] = "LED",
-	[EV_SND] = "Sound",			[EV_REP] = "Repeat",
-	[EV_FF] = "ForceFeedback",		[EV_PWR] = "Power",
-	[EV_FF_STATUS] = "ForceFeedbackStatus",
-};
-*/
 
 namespace Pt {
 
@@ -68,6 +53,7 @@ void KeyboardHandler::run()
 {
     struct input_event ev[64];
 
+    // TODO: make non-blocking and use select
     while( !_exit )
     {
         int rd = read(_fd, ev, sizeof(struct input_event) * 64);
