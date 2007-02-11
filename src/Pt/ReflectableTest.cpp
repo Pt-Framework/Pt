@@ -64,9 +64,9 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
     protected:
         void PropertyTest()
         {
-            TestReflectable	refl;
-            int	value = 0;
-            Pt::Any	any;
+            TestReflectable    refl;
+            int    value = 0;
+            Pt::Any    any;
 
             //Test the getter.
             value = refl.intProperty.get();;

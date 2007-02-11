@@ -78,7 +78,7 @@ Pt::Unit::RegisterTest<SmartPtrTest> register_SmartPtrTest;
 
 void SmartPtrTest::setUp()
 {
-	Object::objectRefs = 0;
+    Object::objectRefs = 0;
 }
 
 

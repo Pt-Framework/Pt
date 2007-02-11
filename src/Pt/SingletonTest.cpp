@@ -33,32 +33,32 @@ using namespace Pt;
 
 class TestSingleton : public Singleton<TestSingleton> 
 {
-	friend class Singleton<TestSingleton>;
+    friend class Singleton<TestSingleton>;
 
-	public:
-		TestSingleton()
-		{}
+    public:
+        TestSingleton()
+        {}
 
-		~TestSingleton()
-		{}
+        ~TestSingleton()
+        {}
 };
 
 
 class SingletonTest : public Pt::Unit::TestSuite
 {
-	public:
-		SingletonTest()
-		: TestSuite("SingletonTest")
-		{
-			this->registerMethod("testEqualInstance", *this, &SingletonTest::testEqualInstance);
-		}
+    public:
+        SingletonTest()
+        : TestSuite("SingletonTest")
+        {
+            this->registerMethod("testEqualInstance", *this, &SingletonTest::testEqualInstance);
+        }
 
-		virtual void testEqualInstance()
-		{
-			TestSingleton* _inst1 = &( TestSingleton::instance() );
-			TestSingleton* _inst2 = &( TestSingleton::instance() );
-			PT_UNIT_ASSERT( _inst1 == _inst2 );
-		}
+        virtual void testEqualInstance()
+        {
+            TestSingleton* _inst1 = &( TestSingleton::instance() );
+            TestSingleton* _inst2 = &( TestSingleton::instance() );
+            PT_UNIT_ASSERT( _inst1 == _inst2 );
+        }
 
 };
 

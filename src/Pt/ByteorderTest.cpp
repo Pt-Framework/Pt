@@ -57,24 +57,24 @@ class ByteorderTest : public Pt::Unit::TestCase
                 PT_UNIT_ASSERT( Pt::int64_t(0x8877665544332211LL) == Pt::hostToBe(f) );
                #endif
             #elif PT_BE
-                Pt::uint16_t a = 0xaabb;
-                PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToBe(a) );
+                Pt::uint16_t a = 0xbbaa;
+                PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToLe(a) );
 
-                Pt::int16_t b = (Pt::int16_t)(0xaabb);
-                PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToBe(b) );
+                Pt::int16_t b = (Pt::int16_t)(0xbbaa);
+                PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToLe(b) );
 
-                Pt::uint32_t c = 0xaabbccdd;
-                PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToBe(c) );
+                Pt::uint32_t c = 0xddccbbaa;
+                PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToLe(c) );
 
-                Pt::int32_t d = 0xaabbccdd;
-                PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToBe(d) );
+                Pt::int32_t d = 0xddccbbaa;
+                PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToLe(d) );
 
                #ifdef PTV_64BIT
-                Pt::uint64_t e = 0x1122334455667788ULL;
-                PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToBe(e) );
+                Pt::uint64_t e = 0x8877665544332211ULL;
+                PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToLe(e) );
 
-                Pt::int64_t f = 0x1122334455667788LL;
-                PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToBe(f) );
+                Pt::int64_t f = 0x8877665544332211LL;
+                PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToLe(f) );
                #endif
             #else
                 #error "Neither PT_BE not PT_LE is defined"

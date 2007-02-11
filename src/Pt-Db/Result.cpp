@@ -26,31 +26,31 @@ namespace Pt {
 
 namespace Db {
 
-	Row Result::getRow(size_type tup_num) const
-	{
-		return _result->getRow(tup_num);
-	}
+    Row Result::getRow(size_type tup_num) const
+    {
+        return _result->getRow(tup_num);
+    }
 
-	Value Result::getValue(size_type tup_num, size_type field_num) const
-	{
-		return getRow(tup_num).getValue(field_num);
-	}
+    Value Result::getValue(size_type tup_num, size_type field_num) const
+    {
+        return getRow(tup_num).getValue(field_num);
+    }
 
-	Row Result::operator[] (size_type row_num) const
-	{
-		return getRow(row_num);
-	}
+    Row Result::operator[] (size_type row_num) const
+    {
+        return getRow(row_num);
+    }
 
-	Result::ConstIterator Result::begin() const
-	{
-		return ConstIterator(*this, 0);
-	}
+    Result::ConstIterator Result::begin() const
+    {
+        return ConstIterator(*this, 0);
+    }
 
-	Result::ConstIterator Result::end() const
-	{
-		size_type s = size();
-		return ConstIterator(*this, s);
-	}
+    Result::ConstIterator Result::end() const
+    {
+        size_type s = size();
+        return ConstIterator(*this, s);
+    }
 
 } // namespace Db
 

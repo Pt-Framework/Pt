@@ -24,11 +24,11 @@
 
 namespace std {
 
-	locale::id numpunct<Pt::Char>::id;
+    locale::id numpunct<Pt::Char>::id;
 
-	numpunct<Pt::Char>::numpunct(size_t refs)
-	: locale::facet(refs)
-	{ }
+    numpunct<Pt::Char>::numpunct(size_t refs)
+    : locale::facet(refs)
+    { }
 
 } // namespace std
 

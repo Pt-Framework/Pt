@@ -51,364 +51,364 @@ void testFunction3(int, int, int)
 
 
 class Receiver : public Pt::Connectable {
-	public:
-		Receiver()
-		: _called(false)
-		{}
+    public:
+        Receiver()
+        : _called(false)
+        {}
 
-		void onSignal0()
-		{ _called = true; }
+        void onSignal0()
+        { _called = true; }
 
-		void onSignal1(int)
-		{ _called = true; }
+        void onSignal1(int)
+        { _called = true; }
 
-		void onSignal2(int, int)
-		{ _called = true; }
+        void onSignal2(int, int)
+        { _called = true; }
 
-		void onSignal3(int, int, int)
-		{ _called = true; }
+        void onSignal3(int, int, int)
+        { _called = true; }
 
-		bool called() const
-		{ return _called; }
+        bool called() const
+        { return _called; }
 
-		void reset()
-		{ _called = false; }
+        void reset()
+        { _called = false; }
 
-	private:
-		bool _called;
+    private:
+        bool _called;
 };
 
 /*
 void performanceTest()
 {
-		clock_t begin, end;
-		Receiver receiver;
+        clock_t begin, end;
+        Receiver receiver;
 
-		std::cerr << "\n------- Performance Test --------" << std::endl;
+        std::cerr << "\n------- Performance Test --------" << std::endl;
 
-		Signal<> signal;
-		connect(signal, receiver, &Receiver::onSignal0);
-		std::cerr << "Signal benchmark... ";
-		begin = clock();
-		for(long i = 0; i < 100000000; ++i) {
-			signal();
-		}
-		end = clock();
-		std::cerr << "Duration: " << (end - begin) << std::endl;
+        Signal<> signal;
+        connect(signal, receiver, &Receiver::onSignal0);
+        std::cerr << "Signal benchmark... ";
+        begin = clock();
+        for(long i = 0; i < 100000000; ++i) {
+            signal();
+        }
+        end = clock();
+        std::cerr << "Duration: " << (end - begin) << std::endl;
 
-		cerr << "mem_fun_t benchmark... ";
-		begin = clock();
-		mem_fun_t<void, Receiver> mf( &Receiver::onSignal0 );
-		for(long i = 0; i < 100000000; ++i) {
-			mf(&receiver);
-		}
-		end = clock();
-		std::cerr << "Duration: " << (end - begin) << std::endl;
-		std::cerr << "---------------------------------\n\n";
+        cerr << "mem_fun_t benchmark... ";
+        begin = clock();
+        mem_fun_t<void, Receiver> mf( &Receiver::onSignal0 );
+        for(long i = 0; i < 100000000; ++i) {
+            mf(&receiver);
+        }
+        end = clock();
+        std::cerr << "Duration: " << (end - begin) << std::endl;
+        std::cerr << "---------------------------------\n\n";
 }
 */
 
 void CopyTest()
 {
-	Receiver* recv = new Receiver;
-	Signal<> signal1;
-	Signal<> signal2;
+    Receiver* recv = new Receiver;
+    Signal<> signal1;
+    Signal<> signal2;
 
-	Connection connection = connect(signal1, *recv, &Receiver::onSignal0);
-	signal2 = signal1;
+    Connection connection = connect(signal1, *recv, &Receiver::onSignal0);
+    signal2 = signal1;
 
-	connection.close();
+    connection.close();
 
-	signal2.send();
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    signal2.send();
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void methodTest0()
 {
-	Receiver* recv = new Receiver;
-	Signal<> signal;
-	connect( signal, slot(recv, &Receiver::onSignal0) );
+    Receiver* recv = new Receiver;
+    Signal<> signal;
+    connect( signal, slot(recv, &Receiver::onSignal0) );
 
-	// test that a deleted receiver removes itself from a sender
-	delete recv;
-	signal.send();
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    // test that a deleted receiver removes itself from a sender
+    delete recv;
+    signal.send();
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
-	recv = new Receiver;
-	Connection connection = connect(signal, slot(recv, &Receiver::onSignal0) );
+    recv = new Receiver;
+    Connection connection = connect(signal, slot(recv, &Receiver::onSignal0) );
 
-	// test that a signal is really transmitted
-	signal.send();
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    // test that a signal is really transmitted
+    signal.send();
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	recv->reset();
+    recv->reset();
 
-	// test disconnecting a signal/slot
-	connection.close();
-	signal.send();
-	if(recv->called() == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    // test disconnecting a signal/slot
+    connection.close();
+    signal.send();
+    if(recv->called() == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void methodTest1()
 {
-	Receiver* recv = new Receiver;
-	Signal<int> signal;
+    Receiver* recv = new Receiver;
+    Signal<int> signal;
 
-	connect(signal, *recv, &Receiver::onSignal1);
-	delete recv;
-	signal.send(1);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    connect(signal, *recv, &Receiver::onSignal1);
+    delete recv;
+    signal.send(1);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
-	recv = new Receiver;
-	connect(signal, *recv, &Receiver::onSignal1);
-	signal.send(1);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    recv = new Receiver;
+    connect(signal, *recv, &Receiver::onSignal1);
+    signal.send(1);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	recv->reset();
+    recv->reset();
 
 /*
-	disconnect(signal, *recv, &Receiver::onSignal1);
-	signal.send(1);
-	if(recv->called() == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    disconnect(signal, *recv, &Receiver::onSignal1);
+    signal.send(1);
+    if(recv->called() == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 
-	delete recv;
+    delete recv;
 }
 
 
 void methodTest2()
 {
-	Receiver* recv = new Receiver;
-	Signal<int, int> signal;
+    Receiver* recv = new Receiver;
+    Signal<int, int> signal;
 
-	connect(signal, *recv, &Receiver::onSignal2);
-	delete recv;
-	signal.send(1,2);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    connect(signal, *recv, &Receiver::onSignal2);
+    delete recv;
+    signal.send(1,2);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
-	recv = new Receiver;
-	connect(signal, *recv, &Receiver::onSignal2);
-	signal.send(1,2);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    recv = new Receiver;
+    connect(signal, *recv, &Receiver::onSignal2);
+    signal.send(1,2);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	recv->reset();
+    recv->reset();
 
 /*
-	disconnect(signal, *recv, &Receiver::onSignal2);
-	signal.send(1,2);
-	if(recv->called() == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    disconnect(signal, *recv, &Receiver::onSignal2);
+    signal.send(1,2);
+    if(recv->called() == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
-	delete recv;
+    delete recv;
 }
 
 
 void methodTest3()
 {
-	Receiver* recv = new Receiver;
-	Signal<int, int, int> signal;
+    Receiver* recv = new Receiver;
+    Signal<int, int, int> signal;
 
-	connect(signal, *recv, &Receiver::onSignal3);
-	delete recv;
-	signal.send(1,2,3);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    connect(signal, *recv, &Receiver::onSignal3);
+    delete recv;
+    signal.send(1,2,3);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
-	recv = new Receiver;
-	connect(signal, *recv, &Receiver::onSignal3);
-	signal.send(1,2,3);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    recv = new Receiver;
+    connect(signal, *recv, &Receiver::onSignal3);
+    signal.send(1,2,3);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	recv->reset();
+    recv->reset();
 
 /*
-	disconnect(signal, *recv, &Receiver::onSignal3);
-	signal.send(1,2,3);
-	if(recv->called() == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    disconnect(signal, *recv, &Receiver::onSignal3);
+    signal.send(1,2,3);
+    if(recv->called() == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 
-	delete recv;
+    delete recv;
 }
 
 
 void signalTest0()
 {
-	Receiver* recv = new Receiver;
-	Signal<> signal1;
-	Signal<> signal2;
-	connect( signal1, slot(signal2) );
-	connect( signal2, slot(recv, &Receiver::onSignal0) );
+    Receiver* recv = new Receiver;
+    Signal<> signal1;
+    Signal<> signal2;
+    connect( signal1, slot(signal2) );
+    connect( signal2, slot(recv, &Receiver::onSignal0) );
 
-	// test that a signal is really transmitted
-	signal1.send();
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    // test that a signal is really transmitted
+    signal1.send();
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void signalTest1()
 {
-	Receiver* recv = new Receiver;
-	Signal<int> signal1;
-	Signal<int> signal2;
-	connect( signal1, slot(signal2) );
-	connect( signal2, slot(recv, &Receiver::onSignal1) );
+    Receiver* recv = new Receiver;
+    Signal<int> signal1;
+    Signal<int> signal2;
+    connect( signal1, slot(signal2) );
+    connect( signal2, slot(recv, &Receiver::onSignal1) );
 
-	// test that a signal is really transmitted
-	signal1.send(1);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    // test that a signal is really transmitted
+    signal1.send(1);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void signalTest2()
 {
-	Receiver* recv = new Receiver;
-	Signal<int, int> signal1;
-	Signal<int, int> signal2;
-	connect( signal1, slot(signal2) );
-	connect( signal2, slot(recv, &Receiver::onSignal2) );
+    Receiver* recv = new Receiver;
+    Signal<int, int> signal1;
+    Signal<int, int> signal2;
+    connect( signal1, slot(signal2) );
+    connect( signal2, slot(recv, &Receiver::onSignal2) );
 
-	// test that a signal is really transmitted
-	signal1.send(1,2);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    // test that a signal is really transmitted
+    signal1.send(1,2);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void signalTest3()
 {
-	Receiver* recv = new Receiver;
-	Signal<int, int, int> signal1;
-	Signal<int, int, int> signal2;
-	connect( signal1, slot(signal2) );
-	connect( signal2, slot(recv, &Receiver::onSignal3) );
+    Receiver* recv = new Receiver;
+    Signal<int, int, int> signal1;
+    Signal<int, int, int> signal2;
+    connect( signal1, slot(signal2) );
+    connect( signal2, slot(recv, &Receiver::onSignal3) );
 
-	// test that a signal is really transmitted
-	signal1.send(1,2,3);
-	if(recv->called() == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    // test that a signal is really transmitted
+    signal1.send(1,2,3);
+    if(recv->called() == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-	delete recv;
+    delete recv;
 }
 
 
 void functionTest0()
 {
-	testFunction0Called = false;
-	Signal<> signal;
+    testFunction0Called = false;
+    Signal<> signal;
 
-	testFunction0Called = false;
-	connect(signal, testFunction0);
-	signal.send();
-	if(testFunction0Called == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    testFunction0Called = false;
+    connect(signal, testFunction0);
+    signal.send();
+    if(testFunction0Called == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
 /*
-	testFunction0Called = false;
-	disconnect(signal, testFunction0);
-	signal.send();
-	if(testFunction0Called == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    testFunction0Called = false;
+    disconnect(signal, testFunction0);
+    signal.send();
+    if(testFunction0Called == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
 
 void functionTest1()
 {
-	testFunction1Called = false;
-	Signal<int> signal;
+    testFunction1Called = false;
+    Signal<int> signal;
 
-	testFunction1Called = false;
-	connect(signal, testFunction1);
-	signal.send(1);
-	if(testFunction1Called == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    testFunction1Called = false;
+    connect(signal, testFunction1);
+    signal.send(1);
+    if(testFunction1Called == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
-	testFunction1Called = false;
-	disconnect(signal, testFunction1);
-	signal.send(1);
-	if(testFunction1Called == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    testFunction1Called = false;
+    disconnect(signal, testFunction1);
+    signal.send(1);
+    if(testFunction1Called == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
 
 void functionTest2()
 {
-	testFunction2Called = false;
-	Signal<int, int> signal;
+    testFunction2Called = false;
+    Signal<int, int> signal;
 
-	testFunction2Called = false;
-	connect(signal, testFunction2);
-	signal.send(1, 2);
-	if(testFunction2Called == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    testFunction2Called = false;
+    connect(signal, testFunction2);
+    signal.send(1, 2);
+    if(testFunction2Called == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
-	testFunction2Called = false;
-	disconnect(signal, testFunction2);
-	signal.send(1, 2);
-	if(testFunction2Called == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    testFunction2Called = false;
+    disconnect(signal, testFunction2);
+    signal.send(1, 2);
+    if(testFunction2Called == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
 
 void functionTest3()
 {
-	testFunction3Called = false;
-	Signal<int, int, int> signal;
+    testFunction3Called = false;
+    Signal<int, int, int> signal;
 
-	testFunction3Called = false;
-	connect(signal, testFunction3);
-	signal.send(1, 2, 3);
-	if(testFunction3Called == false)
-		throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
+    testFunction3Called = false;
+    connect(signal, testFunction3);
+    signal.send(1, 2, 3);
+    if(testFunction3Called == false)
+        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 /*
-	testFunction3Called = false;
-	disconnect(signal, testFunction3);
-	signal.send(1, 2, 3);
-	if(testFunction3Called == true)
-		throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-	if(signal.connections().size() != 0)
-		throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+    testFunction3Called = false;
+    disconnect(signal, testFunction3);
+    signal.send(1, 2, 3);
+    if(testFunction3Called == true)
+        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+    if(signal.connections().size() != 0)
+        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 */
 }
 
@@ -416,121 +416,121 @@ void functionTest3()
 class DeleteTest : public Pt::Connectable
 {
 public:
-	Signal<> signal;
+    Signal<> signal;
 
-	DeleteTest()
-	: _caller(0), _callee(0)
-	{}
+    DeleteTest()
+    : _caller(0), _callee(0)
+    {}
 
-	~DeleteTest()
-	{
-		//cerr << "SelfDisconnectTest::~SelfDisconnectTest" << endl;
-	}
+    ~DeleteTest()
+    {
+        //cerr << "SelfDisconnectTest::~SelfDisconnectTest" << endl;
+    }
 
-	void deleteCaller()
-	{
-		//cerr << "SelfDisconnectTest::deleteCaller" << endl;
-		delete _caller;
-		_caller = 0;
-	}
+    void deleteCaller()
+    {
+        //cerr << "SelfDisconnectTest::deleteCaller" << endl;
+        delete _caller;
+        _caller = 0;
+    }
 
 
-	void deleteCallee()
-	{
-		//cerr << "SelfDisconnectTest::deleteCallee" << endl;
-		delete _callee;
-		_callee = 0;
-	}
+    void deleteCallee()
+    {
+        //cerr << "SelfDisconnectTest::deleteCallee" << endl;
+        delete _callee;
+        _callee = 0;
+    }
 
-	void operator()()
-	{
-		_caller = new Signal<>;
-		_callee = new DeleteTest;
+    void operator()()
+    {
+        _caller = new Signal<>;
+        _callee = new DeleteTest;
 
-		connect(*_caller, *this, &DeleteTest::deleteCallee );
-		_caller->send();
+        connect(*_caller, *this, &DeleteTest::deleteCallee );
+        _caller->send();
 
-		connect(*_caller, *this, &DeleteTest::deleteCaller);
-		_caller->send();
-	}
+        connect(*_caller, *this, &DeleteTest::deleteCaller);
+        _caller->send();
+    }
 
-	Signal<>* _caller;
-	DeleteTest* _callee;
+    Signal<>* _caller;
+    DeleteTest* _callee;
 };
 
 
 
 int main(int argc, char* argv[])
 {
-	std::cerr << "----- SignalTest -----" << std::endl;
+    std::cerr << "----- SignalTest -----" << std::endl;
 
-	try
-	{
-		std::cerr << "  DeleteTest: ";
-		DeleteTest delTest;
-		delTest();
-		std::cerr << "ok." << std::endl;
+    try
+    {
+        std::cerr << "  DeleteTest: ";
+        DeleteTest delTest;
+        delTest();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  CopyTest: ";
-		CopyTest();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  CopyTest: ";
+        CopyTest();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  MethodTest0: ";
-		methodTest0();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  MethodTest0: ";
+        methodTest0();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  MethodTest1: ";
-		methodTest1();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  MethodTest1: ";
+        methodTest1();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  MethodTest2: ";
-		methodTest2();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  MethodTest2: ";
+        methodTest2();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  MethodTest3: ";
-		methodTest3();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  MethodTest3: ";
+        methodTest3();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  SignalTest0: ";
-		signalTest0();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  SignalTest0: ";
+        signalTest0();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  SignalTest1: ";
-		signalTest1();
+        std::cerr << "  SignalTest1: ";
+        signalTest1();
 
-		std::cerr << "ok." << std::endl;
-		std::cerr << "  SignalTest2: ";
-		signalTest2();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "ok." << std::endl;
+        std::cerr << "  SignalTest2: ";
+        signalTest2();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  SignalTest3: ";
-		signalTest3();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  SignalTest3: ";
+        signalTest3();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  FunctionTest0: ";
-		functionTest0();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  FunctionTest0: ";
+        functionTest0();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  FunctionTest1: ";
-		functionTest1();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  FunctionTest1: ";
+        functionTest1();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  FunctionTest2: ";
-		functionTest2();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  FunctionTest2: ";
+        functionTest2();
+        std::cerr << "ok." << std::endl;
 
-		std::cerr << "  FunctionTest3: ";
-		functionTest3();
-		std::cerr << "ok." << std::endl;
+        std::cerr << "  FunctionTest3: ";
+        functionTest3();
+        std::cerr << "ok." << std::endl;
 
-		//performanceTest();
+        //performanceTest();
 
-	}
-	catch(const std::exception& e) {
-		std::cerr << "failed. " << e.what() << std::endl;
-		return 1;
-	}
+    }
+    catch(const std::exception& e) {
+        std::cerr << "failed. " << e.what() << std::endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 

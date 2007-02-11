@@ -26,7 +26,7 @@ using namespace std;
 
 /*Slot::~Slot()
 {
-	//cerr << "Callable::~Callable()" << endl;
+    //cerr << "Callable::~Callable()" << endl;
 }*/
 
 

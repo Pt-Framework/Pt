@@ -32,31 +32,31 @@ namespace Db {
  
 namespace sqlite {
 
-	Cursor::Cursor(Statement* statement, sqlite3_stmt* stmt)
-		: _statement(statement)
-		, _stmt(stmt)
-	{ }
+    Cursor::Cursor(Statement* statement, sqlite3_stmt* stmt)
+        : _statement(statement)
+        , _stmt(stmt)
+    { }
 
-	Cursor::~Cursor()
-	{
-		_statement->putback(_stmt);
-	}
+    Cursor::~Cursor()
+    {
+        _statement->putback(_stmt);
+    }
 
-	Row Cursor::fetch()
-	{
-		//log_debug("sqlite3_step(" << stmt << ')');
-		int ret = ::sqlite3_step(_stmt);
-		if (ret == SQLITE_DONE)
-		{
-			return Row();
-		}
-		else if (ret != SQLITE_ROW)
-		{
-			Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
-		}
+    Row Cursor::fetch()
+    {
+        //log_debug("sqlite3_step(" << stmt << ')');
+        int ret = ::sqlite3_step(_stmt);
+        if (ret == SQLITE_DONE)
+        {
+            return Row();
+        }
+        else if (ret != SQLITE_ROW)
+        {
+            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+        }
 
-		return Row(new StmtRow(getStmt()));
-	}
+        return Row(new StmtRow(getStmt()));
+    }
 
 } //namespace sqlite
 

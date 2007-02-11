@@ -1449,11 +1449,11 @@ struct TriggerStep {
   Trigger *pTrig;      /* The trigger that this step is a part of */
 
   Select *pSelect;     /* Valid for SELECT and sometimes
-			  INSERT steps (when pExprList == 0) */
+              INSERT steps (when pExprList == 0) */
   Token target;        /* Valid for DELETE, UPDATE, INSERT steps */
   Expr *pWhere;        /* Valid for DELETE, UPDATE steps */
   ExprList *pExprList; /* Valid for UPDATE statements and sometimes
-			   INSERT steps (when pSelect == 0)         */
+               INSERT steps (when pSelect == 0)         */
   IdList *pIdList;     /* Valid for INSERT statements only */
   TriggerStep *pNext;  /* Next in the link-list */
   TriggerStep *pLast;  /* Last element in link-list. Valid for 1st elem only */

@@ -27,13 +27,13 @@
 
 class ExceptionTest : public Pt::Unit::TestCase
 {
-	public:
-		ExceptionTest()
-		: TestCase("ExceptionTest")
-		{}
+    public:
+        ExceptionTest()
+        : TestCase("ExceptionTest")
+        {}
 
-		void test()
-		{
+        void test()
+        {
             try {
                 throw std::invalid_argument( "test" + PT_SOURCEINFO);
             }
@@ -44,7 +44,7 @@ class ExceptionTest : public Pt::Unit::TestCase
             }
 
             PT_UNIT_ASSERT(false);
-		}
+        }
 };
 
 Pt::Unit::RegisterTest<ExceptionTest> register_ExceptionTest;

@@ -37,19 +37,19 @@ namespace sqlite {
     /// Row of a statement
     class StmtRow : public IRow
     {
-		sqlite3_stmt* _stmt;
+        sqlite3_stmt* _stmt;
 
-		public:
-			StmtRow(sqlite3_stmt* stmt)
-			: _stmt(stmt)
-			{ }
+        public:
+            StmtRow(sqlite3_stmt* stmt)
+            : _stmt(stmt)
+            { }
 
-		size_t size() const;
-		Value getValue(size_type field_num) const;
+        size_t size() const;
+        Value getValue(size_type field_num) const;
 
-		// specific methods of sqlite-driver
-		sqlite3_stmt* getStmt() const   
-		{ return _stmt; }
+        // specific methods of sqlite-driver
+        sqlite3_stmt* getStmt() const   
+        { return _stmt; }
     };
 
 } // namespace sqlite

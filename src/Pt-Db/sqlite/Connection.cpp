@@ -35,26 +35,26 @@
 
 namespace {
   
-	int select_callback(void *pArg, int argc, char ** argv, char **columnNames)
-	{
-		Pt::Db::ResultImpl* res = static_cast<Pt::Db::ResultImpl*>(pArg);
+    int select_callback(void *pArg, int argc, char ** argv, char **columnNames)
+    {
+        Pt::Db::ResultImpl* res = static_cast<Pt::Db::ResultImpl*>(pArg);
 
-		Pt::Db::RowImpl::data_type data;
+        Pt::Db::RowImpl::data_type data;
 
-		for (int i = 0; i < argc; ++i)
-		{
-			Pt::Db::Value v;
-			if (argv[i])
-			{
-				v = Pt::Db::Value(new Pt::Db::ValueImpl(argv[i]));
-			}
-			data.push_back(v);
-		}
+        for (int i = 0; i < argc; ++i)
+        {
+            Pt::Db::Value v;
+            if (argv[i])
+            {
+                v = Pt::Db::Value(new Pt::Db::ValueImpl(argv[i]));
+            }
+            data.push_back(v);
+        }
 
-		res->add( Pt::Db::Row( new Pt::Db::RowImpl(data) ) );
+        res->add( Pt::Db::Row( new Pt::Db::RowImpl(data) ) );
 
-		return SQLITE_OK;
-	}
+        return SQLITE_OK;
+    }
 }
 
 
@@ -64,81 +64,81 @@ namespace Db {
 
 namespace sqlite {
 
-	Connection::Connection(const char* conninfo)
-	{
-		int ret = ::sqlite3_open(conninfo, &_Db);
-		if(ret != SQLITE_OK)
-		{
-			Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
-		}
-	}
+    Connection::Connection(const char* conninfo)
+    {
+        int ret = ::sqlite3_open(conninfo, &_Db);
+        if(ret != SQLITE_OK)
+        {
+            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+        }
+    }
 
-	Connection::~Connection()
-	{
-		if (_Db)
-		{
-			this->clearStatementCache();
-			::sqlite3_close(_Db);
-		}
-	}
+    Connection::~Connection()
+    {
+        if (_Db)
+        {
+            this->clearStatementCache();
+            ::sqlite3_close(_Db);
+        }
+    }
 
-	void Connection::beginTransaction()
-	{
-		this->execute("BEGIN TRANSACTION");
-	}
+    void Connection::beginTransaction()
+    {
+        this->execute("BEGIN TRANSACTION");
+    }
 
-	void Connection::commitTransaction()
-	{
-		this->execute("COMMIT TRANSACTION");
-	}
+    void Connection::commitTransaction()
+    {
+        this->execute("COMMIT TRANSACTION");
+    }
 
-	void Connection::rollbackTransaction()
-	{
-		this->execute("ROLLBACK TRANSACTION");
-	}
+    void Connection::rollbackTransaction()
+    {
+        this->execute("ROLLBACK TRANSACTION");
+    }
 
-	Connection::size_type Connection::execute(const std::string& query)
-	{
-		char* errmsg;
+    Connection::size_type Connection::execute(const std::string& query)
+    {
+        char* errmsg;
 
-		//log_debug("sqlite_exec(" << Db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
+        //log_debug("sqlite_exec(" << Db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
 
-		int ret = ::sqlite3_exec(_Db, query.c_str(), 0, 0, &errmsg);
-		if(ret != SQLITE_OK)
-		{
-			Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
-		}
-		
-		//log_debug("sqlite_exec ret=" << ret);
-		
-		return ::sqlite3_changes(_Db);
-	}
+        int ret = ::sqlite3_exec(_Db, query.c_str(), 0, 0, &errmsg);
+        if(ret != SQLITE_OK)
+        {
+            Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+        }
+        
+        //log_debug("sqlite_exec ret=" << ret);
+        
+        return ::sqlite3_changes(_Db);
+    }
 
-	Result Connection::select(const std::string& query)
-	{
-		return prepare(query).select();
-	}
+    Result Connection::select(const std::string& query)
+    {
+        return prepare(query).select();
+    }
 
-	Row Connection::selectRow(const std::string& query)
-	{
-		return prepare(query).selectRow();
-	}
+    Row Connection::selectRow(const std::string& query)
+    {
+        return prepare(query).selectRow();
+    }
 
-	Value Connection::selectValue(const std::string& query)
-	{
-		return prepare(query).selectValue();
-	}
+    Value Connection::selectValue(const std::string& query)
+    {
+        return prepare(query).selectValue();
+    }
 
-	Pt::Db::Statement Connection::prepare(const std::string& query)
-	{
-		//log_debug("prepare(\"" << query << "\")");
-		return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
-	}
+    Pt::Db::Statement Connection::prepare(const std::string& query)
+    {
+        //log_debug("prepare(\"" << query << "\")");
+        return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
+    }
 
     long long Connection::insertId()
-	{
-		return sqlite3_last_insert_rowid( this->_Db );
-	}
+    {
+        return sqlite3_last_insert_rowid( this->_Db );
+    }
 
 } //namespace sqlite
 

@@ -26,15 +26,15 @@ namespace Pt {
 
 namespace Db {
 
-	Row::ConstIterator Row::begin() const
-	{
-		return ConstIterator(*this, 0);
-	}
+    Row::ConstIterator Row::begin() const
+    {
+        return ConstIterator(*this, 0);
+    }
 
-	Row::ConstIterator Row::end() const
-	{
-		return ConstIterator(*this, size());
-	}
+    Row::ConstIterator Row::end() const
+    {
+        return ConstIterator(*this, size());
+    }
 
 } // namespace Db
 

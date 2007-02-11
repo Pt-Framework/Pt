@@ -32,64 +32,64 @@ namespace Pt {
 
 namespace Db {
 
-	Statement::size_type Statement::execute()
-	{
-		return _stmt->execute();
-	}
+    Statement::size_type Statement::execute()
+    {
+        return _stmt->execute();
+    }
 
-	Result Statement::select()
-	{
-		return _stmt->select();
-	}
+    Result Statement::select()
+    {
+        return _stmt->select();
+    }
 
-	Row Statement::selectRow()
-	{
-		return _stmt->selectRow();
-	}
+    Row Statement::selectRow()
+    {
+        return _stmt->selectRow();
+    }
 
-	Value Statement::selectValue()
-	{
-		return _stmt->selectValue();
-	}
+    Value Statement::selectValue()
+    {
+        return _stmt->selectValue();
+    }
 
-	Statement::ConstIterator Statement::begin() const
-	{
-		return ConstIterator( _stmt->createCursor() );
-	}
+    Statement::ConstIterator Statement::begin() const
+    {
+        return ConstIterator( _stmt->createCursor() );
+    }
 
-	Statement::ConstIterator Statement::end() const
-	{
-		return ConstIterator();
-	}
-
-
-	Statement::ConstIterator::ConstIterator(ICursor* cursor)
-	{
-		if (cursor)
-		{
-			_current = cursor->fetch();
-			if (!_current) {
-				//clog << "No row fetched" << endl;
-			}
-			else {
-				_cursor = cursor;
-			}
-		}
-	}
+    Statement::ConstIterator Statement::end() const
+    {
+        return ConstIterator();
+    }
 
 
-	Statement::ConstIterator& Statement::ConstIterator::operator++()
-	{
-		_current = _cursor->fetch();
+    Statement::ConstIterator::ConstIterator(ICursor* cursor)
+    {
+        if (cursor)
+        {
+            _current = cursor->fetch();
+            if (!_current) {
+                //clog << "No row fetched" << endl;
+            }
+            else {
+                _cursor = cursor;
+            }
+        }
+    }
 
-		if (!_current) {
-			//clog << "No row fetched" << endl;
-			_cursor = 0;
-		}
 
-		return *this;
-	}
-	
+    Statement::ConstIterator& Statement::ConstIterator::operator++()
+    {
+        _current = _cursor->fetch();
+
+        if (!_current) {
+            //clog << "No row fetched" << endl;
+            _cursor = 0;
+        }
+
+        return *this;
+    }
+    
 } // namespace Db
 
 } // namespace Pt

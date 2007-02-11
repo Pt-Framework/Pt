@@ -59,10 +59,10 @@ namespace Pt
 
   inline unsigned short getNumber2(const char* s)
   {
-		if (!isdigit(s[0]) || !isdigit(s[1]))
-			throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
+        if (!isdigit(s[0]) || !isdigit(s[1]))
+            throw std::invalid_argument("Not a digit." + PT_SOURCEINFO);
 
-		return (s[0] - '0') * 10 + (s[1] - '0');
+        return (s[0] - '0') * 10 + (s[1] - '0');
   }
 
   inline unsigned short getNumber3(const char* s)

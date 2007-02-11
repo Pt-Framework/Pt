@@ -30,29 +30,29 @@ namespace Pt {
 
 namespace Db {
 
-	class ResultImpl : public IResult
-	{
-		public:
-			typedef std::vector<Row> data_type;
+    class ResultImpl : public IResult
+    {
+        public:
+            typedef std::vector<Row> data_type;
 
-		private:
-			data_type _data;
+        private:
+            data_type _data;
 
-		public:
-			ResultImpl()
-			{ }
+        public:
+            ResultImpl()
+            { }
 
-			explicit ResultImpl(const data_type& data)
-				: _data(data)
-			{ }
+            explicit ResultImpl(const data_type& data)
+                : _data(data)
+            { }
 
-			// methods from IResult
-			virtual Row getRow(size_type tup_num) const;
-			virtual size_type size() const;
-			virtual size_type getFieldCount() const;
+            // methods from IResult
+            virtual Row getRow(size_type tup_num) const;
+            virtual size_type size() const;
+            virtual size_type getFieldCount() const;
 
-			// specific methods
-			void add(const Row& row)   { _data.push_back(row); }
+            // specific methods
+            void add(const Row& row)   { _data.push_back(row); }
   };
   
 } // namespace Db

@@ -43,37 +43,37 @@ class TypeTraitsTest : public Pt::Unit::TestSuite
     protected:
         void VoidTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<void>::typeName() == std::string("void") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<void>::typeName() == std::string("void") );
         }
 
         void BoolTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<bool>::typeName() == std::string("bool") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<bool>::typeName() == std::string("bool") );
         }
 
         void CharTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<char>::typeName() == std::string("char") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<char>::typeName() == std::string("char") );
         }
 
         void IntTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<int>::typeName() == std::string("int") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<int>::typeName() == std::string("int") );
         }
 
         void FloatTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<float>::typeName() == std::string("float") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<float>::typeName() == std::string("float") );
         }
 
         void DoubleTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<double>::typeName() == std::string("double") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<double>::typeName() == std::string("double") );
         }
 
         void StdStringTest()
         {
-			PT_UNIT_ASSERT( Pt::TypeTraits<std::string>::typeName() == std::string("std::string") );
+            PT_UNIT_ASSERT( Pt::TypeTraits<std::string>::typeName() == std::string("std::string") );
         }
 };
 

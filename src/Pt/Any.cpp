@@ -8,8 +8,8 @@ using namespace std;
 //map<string, void (Any::*)()> Any::_initMap;
 std::map<std::string, void (Any::*)()>& Any::initMap()
 {
-	static std::map<std::string, void (Any::*)()>* _initMap = new std::map<std::string, void (Any::*)()>();
-	return *_initMap;
+    static std::map<std::string, void (Any::*)()>* _initMap = new std::map<std::string, void (Any::*)()>();
+    return *_initMap;
 }
 
 
@@ -26,58 +26,58 @@ Any::Any(const Any& val)
 
 Any::~Any()
 {
-	if(_value)
-		delete _value;
+    if(_value)
+        delete _value;
 }
 
 
 void Any::clear()
 {
-	if(_value) {
-		delete _value;
-		_value = 0;
-	}
+    if(_value) {
+        delete _value;
+        _value = 0;
+    }
 }
 
 
 void  Any::init(const std::string& typeName)
 {
-	std::map<std::string, void (Any::*)()>::iterator it;
-	it = initMap().find(typeName);
+    std::map<std::string, void (Any::*)()>::iterator it;
+    it = initMap().find(typeName);
 
-	if( it == initMap().end() ) {
-		return;
-	}
+    if( it == initMap().end() ) {
+        return;
+    }
 
-	(this->*(it->second))();
+    (this->*(it->second))();
 }
 
 
 Any& Any::swap(Any& rhs)
 {
-	std::swap(_value, rhs._value);
-	return *this;
+    std::swap(_value, rhs._value);
+    return *this;
 }
 
 
 void Any::output(std::ostream& os) const
 {
-	if(_value)
-		_value->output(os);
+    if(_value)
+        _value->output(os);
 }
 
 
 void Any::input(std::istream& is)
 {
-	if(_value)
-		_value->input(is);
+    if(_value)
+        _value->input(is);
 }
 
 
 Any& Any::operator=(const Any& rhs)
 {
-	Any(rhs).swap(*this);
-	return *this;
+    Any(rhs).swap(*this);
+    return *this;
 }
 
 
@@ -85,7 +85,7 @@ bool Any::operator==(const Any& a) const
 {
     if(_value && a._value)
     {
-	   return _value->equal( *(a._value) );
+       return _value->equal( *(a._value) );
     }
 
     // if one or both of the Anys is not initialised
@@ -96,7 +96,7 @@ bool Any::operator==(const Any& a) const
 
 bool Any::operator!=(const Any& a) const
 {
-	return !( this->operator==(a) );
+    return !( this->operator==(a) );
 }
 
 
@@ -104,7 +104,7 @@ bool Any::operator<(const Any& a) const
 {
     if(_value && a._value)
     {
-	   return _value->lt( *(a._value) );
+       return _value->lt( *(a._value) );
     }
 
     // if one of the Anys is not initialised the
@@ -115,15 +115,15 @@ bool Any::operator<(const Any& a) const
 
 std::ostream& Pt::operator<<(std::ostream& os, const Pt::Any& any)
 {
-	any.output(os);
-	return os;
+    any.output(os);
+    return os;
 }
 
 
 std::istream& Pt::operator>>(std::istream& is, Pt::Any& any)
 {
-	any.input(is);
-	return is;
+    any.input(is);
+    return is;
 }
 
 

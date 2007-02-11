@@ -32,30 +32,30 @@ namespace Pt {
 
 namespace Db {
 
-	class RowImpl : public IRow
-	{
-		public:
-			typedef std::vector<Value> data_type;
+    class RowImpl : public IRow
+    {
+        public:
+            typedef std::vector<Value> data_type;
 
-		private:
-			data_type _data;
+        private:
+            data_type _data;
 
-		public:
-			RowImpl()
-			{ }
+        public:
+            RowImpl()
+            { }
 
-			explicit RowImpl(const data_type& data)
-				: _data(data)
-			{ }
+            explicit RowImpl(const data_type& data)
+                : _data(data)
+            { }
 
-			// methods from IResult
-			virtual size_type size() const;
-			virtual Value getValue(size_type field_num) const;
+            // methods from IResult
+            virtual size_type size() const;
+            virtual Value getValue(size_type field_num) const;
 
-			// specific methods
-			void add(const Value& value)   
-			{ _data.push_back(value); }
-	};
+            // specific methods
+            void add(const Value& value)   
+            { _data.push_back(value); }
+    };
 
 } // namespace Db
 

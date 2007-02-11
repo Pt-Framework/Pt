@@ -29,68 +29,68 @@ namespace Pt {
 
 Connection::Connection()
 {
-	_data = new ConnectionData();
+    _data = new ConnectionData();
 }
 
 
 Connection::Connection(Connectable& sender, Slot* slot)
 {
-	_data = new ConnectionData(sender, slot);
-	sender.opened(*this);
-	slot->opened(*this);
+    _data = new ConnectionData(sender, slot);
+    sender.opened(*this);
+    slot->opened(*this);
 }
 
 
 Connection::Connection(const Connection& connection)
 {
-	_data = connection._data;
-	_data->ref();
+    _data = connection._data;
+    _data->ref();
 }
 
 
 Connection::~Connection()
 {
-	if( _data->unref() > 0) {
-		return;
-	}
+    if( _data->unref() > 0) {
+        return;
+    }
 
-	// close the connection if its still valid
-	if( this->valid() ) {
-		this->close();
-	}
+    // close the connection if its still valid
+    if( this->valid() ) {
+        this->close();
+    }
 
-	// delete the shared data
-	delete _data;
-	_data = 0;
+    // delete the shared data
+    delete _data;
+    _data = 0;
 }
 
 
 void Connection::close()
 {
-	_data->setValid(false);
-	_data->slot().closed( *this );
-	_data->sender().closed( *this );
+    _data->setValid(false);
+    _data->slot().closed( *this );
+    _data->sender().closed( *this );
 }
 
 
 Connection& Connection::operator=(const Connection& connection)
 {
-	if( 0 == _data->unref() && this->valid() ) {
-		this->close();
-	}
+    if( 0 == _data->unref() && this->valid() ) {
+        this->close();
+    }
 
-	delete _data;
+    delete _data;
 
-	_data = connection._data;
-	_data->ref();
-	return (*this);
+    _data = connection._data;
+    _data->ref();
+    return (*this);
 }
 
 
 bool Connection::operator==(const Connection& connection) const
 {
-	// compare pointers or callable?
-	return _data == connection._data;
+    // compare pointers or callable?
+    return _data == connection._data;
 }
 
 } //namespace Pt

@@ -28,20 +28,20 @@ namespace Pt {
 
 namespace Db {
 
-	Row ResultImpl::getRow(size_type tup_num) const
-	{
-		return _data[tup_num];
-	}
+    Row ResultImpl::getRow(size_type tup_num) const
+    {
+        return _data[tup_num];
+    }
 
-	ResultImpl::size_type ResultImpl::size() const
-	{
-		return _data.size();
-	}
+    ResultImpl::size_type ResultImpl::size() const
+    {
+        return _data.size();
+    }
 
-	ResultImpl::size_type ResultImpl::getFieldCount() const
-	{
-		return _data.empty() ? 0 : _data.begin()->size();
-	}
+    ResultImpl::size_type ResultImpl::getFieldCount() const
+    {
+        return _data.empty() ? 0 : _data.begin()->size();
+    }
 
 } // namespace Db
 

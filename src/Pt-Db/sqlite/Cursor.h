@@ -33,23 +33,23 @@ namespace Db {
 
 namespace sqlite {
 
-	class Statement;
+    class Statement;
 
-	class Cursor : public ICursor
-	{
-		SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
-		sqlite3_stmt* _stmt;
+    class Cursor : public ICursor
+    {
+        SmartPtr<Statement, InternalRefCounted<Statement> > _statement;
+        sqlite3_stmt* _stmt;
 
-		public:
-			Cursor(Statement* statement, sqlite3_stmt* stmt);
-			~Cursor();
+        public:
+            Cursor(Statement* statement, sqlite3_stmt* stmt);
+            ~Cursor();
 
-			// method for ICursor
-			Row fetch();
+            // method for ICursor
+            Row fetch();
 
-			// specific methods of sqlite-driver
-			sqlite3_stmt* getStmt() const { return _stmt; }
-	};
+            // specific methods of sqlite-driver
+            sqlite3_stmt* getStmt() const { return _stmt; }
+    };
 
 } //namespace sqlite
 

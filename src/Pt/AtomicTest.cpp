@@ -64,8 +64,8 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
     protected:
         void ConstructorTest()
         {
-			Pt::AtomicInt a(5);
-			PT_UNIT_ASSERT( a.value() == 5 );
+            Pt::AtomicInt a(5);
+            PT_UNIT_ASSERT( a.value() == 5 );
 
 
         }

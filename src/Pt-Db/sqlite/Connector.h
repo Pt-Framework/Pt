@@ -30,10 +30,10 @@ namespace Db {
 
 namespace sqlite {
 
-	class Connector : public IConnector
+    class Connector : public IConnector
     {
-		public:
-			Connection connect(const std::string& url);
+        public:
+            Connection connect(const std::string& url);
     };
 
 } //namespace sqlite

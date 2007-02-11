@@ -26,15 +26,15 @@ namespace Pt {
 
 namespace Db {
 
-	RowImpl::size_type RowImpl::size() const
-	{
-		return _data.size();
-	}
+    RowImpl::size_type RowImpl::size() const
+    {
+        return _data.size();
+    }
 
-	Value RowImpl::getValue(size_type field_num) const
-	{
-		return _data[field_num];
-	}
+    Value RowImpl::getValue(size_type field_num) const
+    {
+        return _data[field_num];
+    }
 
  
 } // namespace Db

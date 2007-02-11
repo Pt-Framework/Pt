@@ -29,47 +29,47 @@
 
 class TypesTest : public Pt::Unit::TestCase
 {
-	public:
-		TypesTest()
-		: TestCase("TypesTest")
-		{}
+    public:
+        TypesTest()
+        : TestCase("TypesTest")
+        {}
 
-	protected:
-		void test()
-		{
-			PT_UNIT_ASSERT( sizeof(Pt::int8_t) == 1 );
-			PT_UNIT_ASSERT( sizeof(Pt::uint8_t) == 1 );
-			PT_UNIT_ASSERT( sizeof(Pt::int16_t) == 2 );
-			PT_UNIT_ASSERT( sizeof(Pt::uint16_t) == 2 );
-			PT_UNIT_ASSERT( sizeof(Pt::int32_t) == 4 );
-			PT_UNIT_ASSERT( sizeof(Pt::uint32_t) == 4 );
+    protected:
+        void test()
+        {
+            PT_UNIT_ASSERT( sizeof(Pt::int8_t) == 1 );
+            PT_UNIT_ASSERT( sizeof(Pt::uint8_t) == 1 );
+            PT_UNIT_ASSERT( sizeof(Pt::int16_t) == 2 );
+            PT_UNIT_ASSERT( sizeof(Pt::uint16_t) == 2 );
+            PT_UNIT_ASSERT( sizeof(Pt::int32_t) == 4 );
+            PT_UNIT_ASSERT( sizeof(Pt::uint32_t) == 4 );
 
-			PT_UNIT_ASSERT( sizeof(float) == 4 );
-			PT_UNIT_ASSERT( sizeof(double) == 8 );
+            PT_UNIT_ASSERT( sizeof(float) == 4 );
+            PT_UNIT_ASSERT( sizeof(double) == 8 );
 
-			//stringstream ss;
-			//ss << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
-			//ss << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
-			//ss << "sizeof(Pt::uint    ) = " << sizeof(Pt::uint    ) << endl;
-			//ss << "sizeof(Pt::ulong   ) = " << sizeof(Pt::ulong   ) << endl;
-			//ss << "sizeof(Pt::size_t  ) = " << sizeof(Pt::size_t  ) << endl;
-			//ss << "sizeof(Pt::ssize_t ) = " << sizeof(Pt::ssize_t ) << endl;
-			//ss << "sizeof(Pt::int8_t  ) = " << sizeof(Pt::int8_t  ) << endl;
-			//ss << "sizeof(Pt::uint8_t ) = " << sizeof(Pt::uint8_t ) << endl;
-			//ss << "sizeof(Pt::int16_t ) = " << sizeof(Pt::int16_t ) << endl;
-			//ss << "sizeof(Pt::uint16_t) = " << sizeof(Pt::uint16_t) << endl;
-			//ss << "sizeof(Pt::int32_t ) = " << sizeof(Pt::int32_t ) << endl;
-			//ss << "sizeof(Pt::uint32_t) = " << sizeof(Pt::uint32_t) << endl;
+            //stringstream ss;
+            //ss << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
+            //ss << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
+            //ss << "sizeof(Pt::uint    ) = " << sizeof(Pt::uint    ) << endl;
+            //ss << "sizeof(Pt::ulong   ) = " << sizeof(Pt::ulong   ) << endl;
+            //ss << "sizeof(Pt::size_t  ) = " << sizeof(Pt::size_t  ) << endl;
+            //ss << "sizeof(Pt::ssize_t ) = " << sizeof(Pt::ssize_t ) << endl;
+            //ss << "sizeof(Pt::int8_t  ) = " << sizeof(Pt::int8_t  ) << endl;
+            //ss << "sizeof(Pt::uint8_t ) = " << sizeof(Pt::uint8_t ) << endl;
+            //ss << "sizeof(Pt::int16_t ) = " << sizeof(Pt::int16_t ) << endl;
+            //ss << "sizeof(Pt::uint16_t) = " << sizeof(Pt::uint16_t) << endl;
+            //ss << "sizeof(Pt::int32_t ) = " << sizeof(Pt::int32_t ) << endl;
+            //ss << "sizeof(Pt::uint32_t) = " << sizeof(Pt::uint32_t) << endl;
 #ifdef PT_64BIT
-			PT_UNIT_ASSERT( sizeof(Pt::int64_t) == 8 );
-			PT_UNIT_ASSERT( sizeof(Pt::uint64_t) == 8 );
-			//ss << "sizeof(Pt::int64_t ) = " << sizeof(Pt::int64_t ) << endl;
-			//ss << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
+            PT_UNIT_ASSERT( sizeof(Pt::int64_t) == 8 );
+            PT_UNIT_ASSERT( sizeof(Pt::uint64_t) == 8 );
+            //ss << "sizeof(Pt::int64_t ) = " << sizeof(Pt::int64_t ) << endl;
+            //ss << "sizeof(Pt::uint64_t) = " << sizeof(Pt::uint64_t) << endl;
 #endif
-			//ss << "sizeof(float       ) = " << sizeof(float       ) << endl;
-			//ss << "sizeof(double      ) = " << sizeof(double      ) << endl;
-			//Pt::Unit::Application::message( ss.str() );
-		}
+            //ss << "sizeof(float       ) = " << sizeof(float       ) << endl;
+            //ss << "sizeof(double      ) = " << sizeof(double      ) << endl;
+            //Pt::Unit::Application::message( ss.str() );
+        }
 };
 
 Pt::Unit::RegisterTest<TypesTest> register_TypesTest;

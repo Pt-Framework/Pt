@@ -37,44 +37,44 @@ Connectable::Connectable(const Connectable& c)
 
 Connectable::~Connectable()
 {
-	this->clear();
+    this->clear();
 }
 
 
 void Connectable::clear()
 {
-	while( !_connections.empty() ) {
-		Connection connection = _connections.front();
-		connection.close();
-	}
+    while( !_connections.empty() ) {
+        Connection connection = _connections.front();
+        connection.close();
+    }
 }
 
 
 Connectable& Connectable::operator=(const Connectable& other)
 {
-	this->clear();
+    this->clear();
 
-	std::list<Connection>::const_iterator it = other.connections().begin();
-	std::list<Connection>::const_iterator end = other.connections().end();
+    std::list<Connection>::const_iterator it = other.connections().begin();
+    std::list<Connection>::const_iterator end = other.connections().end();
 
-	for( ; it != end; ++it) {
-		const Slot& slot = it->slot();
-		Connection connection( *this, slot.clone()  );
-	}
+    for( ; it != end; ++it) {
+        const Slot& slot = it->slot();
+        Connection connection( *this, slot.clone()  );
+    }
 
-	return (*this);
+    return (*this);
 }
 
 
 void Connectable::opened(const Connection& c)
 {
-	_connections.push_back(c);
+    _connections.push_back(c);
 }
 
 
 void Connectable::closed(const Connection& c)
 {
-	_connections.remove(c);
+    _connections.remove(c);
 }
 
 } // namespace Pt
@@ -85,11 +85,11 @@ void Connectable::closed(const Connection& c)
 
 /*const Connection* Connectable::connection(const Slot& slot) const
 {
-	for(std::list<Connection>::const_iterator it = _connections.begin(); it != _connections.end(); ++it) {
-		if( it->slot() == slot ) {
-			return &(*it);
-		}
-	}
+    for(std::list<Connection>::const_iterator it = _connections.begin(); it != _connections.end(); ++it) {
+        if( it->slot() == slot ) {
+            return &(*it);
+        }
+    }
 
-	return 0;
+    return 0;
 }*/

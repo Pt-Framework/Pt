@@ -31,37 +31,37 @@ namespace Db {
 
 namespace sqlite {
 
-	class Connection : public IStmtCacheConnection
-	{
-		sqlite3* _Db;
+    class Connection : public IStmtCacheConnection
+    {
+        sqlite3* _Db;
 
-		public:
-			explicit Connection(const char* conninfo);
+        public:
+            explicit Connection(const char* conninfo);
 
-			~Connection();
+            ~Connection();
 
-			void beginTransaction();
+            void beginTransaction();
 
-			void commitTransaction();
+            void commitTransaction();
 
-			void rollbackTransaction();
+            void rollbackTransaction();
 
-			size_type execute(const std::string& query);
+            size_type execute(const std::string& query);
 
-			Result select(const std::string& query);
+            Result select(const std::string& query);
 
-			Row selectRow(const std::string& query);
+            Row selectRow(const std::string& query);
 
-			Value selectValue(const std::string& query);
+            Value selectValue(const std::string& query);
 
-			Pt::Db::Statement prepare(const std::string& query);
+            Pt::Db::Statement prepare(const std::string& query);
 
             long long insertId();
 
-			sqlite3* getSqlite3() const
-			{ return _Db; }
+            sqlite3* getSqlite3() const
+            { return _Db; }
 
-	};
+    };
 
 } //namespace sqlite
 

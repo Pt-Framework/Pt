@@ -54,52 +54,52 @@ Pt::Unit::RegisterTest<VariantTest> register_VariantTest;
 
 void VariantTest::AssignInt()
 {
-	Pt::Variant v(5);
-	PT_UNIT_ASSERT( v.str() == "5" );
+    Pt::Variant v(5);
+    PT_UNIT_ASSERT( v.str() == "5" );
 
-	v = 10;
-	PT_UNIT_ASSERT( v.str() == "10" );
+    v = 10;
+    PT_UNIT_ASSERT( v.str() == "10" );
 }
 
 
 void VariantTest::GetInt()
 {
-	Pt::Variant v(5);
-	int n = 0;
-	v.get(n);
+    Pt::Variant v(5);
+    int n = 0;
+    v.get(n);
 
-	PT_UNIT_ASSERT( n == 5 );
+    PT_UNIT_ASSERT( n == 5 );
 }
 
 
 void VariantTest::CompareInt()
 {
-	Pt::Variant v(5);
-	PT_UNIT_ASSERT( v == 5 );
-	PT_UNIT_ASSERT( v < 6 );
-	PT_UNIT_ASSERT( v > 4 );
+    Pt::Variant v(5);
+    PT_UNIT_ASSERT( v == 5 );
+    PT_UNIT_ASSERT( v < 6 );
+    PT_UNIT_ASSERT( v > 4 );
 }
 
 
 void VariantTest::AssignVariant()
 {
-	Pt::Variant v(5);
-	Pt::Variant v2( v );
-	PT_UNIT_ASSERT( v2.str() == "5" );
+    Pt::Variant v(5);
+    Pt::Variant v2( v );
+    PT_UNIT_ASSERT( v2.str() == "5" );
 
-	Pt::Variant v3;
-	v3 = v;
-	PT_UNIT_ASSERT( v.str() == "5" );
+    Pt::Variant v3;
+    v3 = v;
+    PT_UNIT_ASSERT( v.str() == "5" );
 }
 
 
 void VariantTest::CompareVariant()
 {
-	Pt::Variant v(5);
-	Pt::Variant v2(5);
-	Pt::Variant v3(6);
+    Pt::Variant v(5);
+    Pt::Variant v2(5);
+    Pt::Variant v3(6);
 
-	PT_UNIT_ASSERT( v == v2 );
-	PT_UNIT_ASSERT( v2 < v3 );
-	PT_UNIT_ASSERT( v3 > v );
+    PT_UNIT_ASSERT( v == v2 );
+    PT_UNIT_ASSERT( v2 < v3 );
+    PT_UNIT_ASSERT( v3 > v );
 }

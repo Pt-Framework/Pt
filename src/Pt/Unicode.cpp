@@ -1068,8 +1068,8 @@ const unsigned char category_data[13935]={
 
 int category(const Char& ch)
 {
-	const uint32_t ucs = ch.value();
-	return category_data[category_block[category_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    const uint32_t ucs = ch.value();
+    return category_data[category_block[category_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 
@@ -3480,19 +3480,19 @@ const uint32_t decompose_info[15460]={
 
 unsigned decomposition(uint32_t ucs)
 {
-	return decompose_info[decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
+    return decompose_info[decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
 }
 
 
 unsigned numDecomposition(uint32_t ucs)
 {
-	return decompose_info[1+decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
+    return decompose_info[1+decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
 }
 
 
 const uint32_t* charDecomposition(uint32_t ucs)
 {
-	return &decompose_info[2+decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
+    return &decompose_info[2+decompose_data[decompose_block[decompose_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)]];
 }
 
 
@@ -3986,7 +3986,7 @@ const unsigned char combining_data[2563]={
 
 unsigned combining(uint32_t ucs)
 {
-	return combining_data[combining_block[combining_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    return combining_data[combining_block[combining_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 
@@ -5195,8 +5195,8 @@ const short upper_data[2242]={
 
 Char toUpper(const Char& ch)
 {
-	const uint32_t ucs = ch.value();
-	return ucs+upper_data[upper_block[upper_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    const uint32_t ucs = ch.value();
+    return ucs+upper_data[upper_block[upper_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 
@@ -5397,8 +5397,8 @@ const short lower_data[2084]={
 
 Char toLower(const Pt::Char& ch)
 {
-	const uint32_t ucs = ch.value();
-	return ucs + lower_data[lower_block[lower_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
+    const uint32_t ucs = ch.value();
+    return ucs + lower_data[lower_block[lower_plane[ucs>>14]+((ucs>>7)&127)]+(ucs&127)];
 }
 
 
