@@ -25,67 +25,67 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief An empty structure used for tagging packed 16-bit RGB color class.
-		 */
-		struct Rgb565 {};
+        /** @brief An empty structure used for tagging packed 16-bit RGB color class.
+         */
+        struct Rgb565 {};
 
 
 #pragma pack(push, 1)
-		/** @brief Packed 16-bit RGB color class.
-		 *  @ingroup Gfx
-		 *
-		 *  This class is exist so that the raw memory buffer of an image implementation
-		 *  which use this color model could be casted directly to hardware image buffer
-		 *  with format RRRRRGGGGGGBBBBB
-		 *  \n\n
-		 *  Valid range of the color components for this color model:
-		 *  <TABLE>
-		 *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>31 (0x1F)</TD> </TR>
-		 *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>63 (0x3F)</TD> </TR>
-		 *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>31 (0x1F)</TD> </TR>
-		 *  </TABLE>
-		 */
-		template <>
-		class PT_GFX_API Color<Rgb565> {
-			public:
-				/** @brief The default constructor, will generate the default color (black).
-				 */
-				inline Color()
-				: _val(0x0000)
-				{}
+        /** @brief Packed 16-bit RGB color class.
+         *  @ingroup Gfx
+         *
+         *  This class is exist so that the raw memory buffer of an image implementation
+         *  which use this color model could be casted directly to hardware image buffer
+         *  with format RRRRRGGGGGGBBBBB
+         *  \n\n
+         *  Valid range of the color components for this color model:
+         *  <TABLE>
+         *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>31 (0x1F)</TD> </TR>
+         *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>63 (0x3F)</TD> </TR>
+         *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>31 (0x1F)</TD> </TR>
+         *  </TABLE>
+         */
+        template <>
+        class PT_GFX_API Color<Rgb565> {
+            public:
+                /** @brief The default constructor, will generate the default color (black).
+                 */
+                inline Color()
+                : _val(0x0000)
+                {}
 
-				/** @brief Copy constructor.
-				 */
-				inline Color(const Color& c)
-				: _val(c._val)
-				{}
+                /** @brief Copy constructor.
+                 */
+                inline Color(const Color& c)
+                : _val(c._val)
+                {}
 
-				/** @brief Construct color using the given packed color constant.
-				 */
-				inline Color(uint16_t val)
-				: _val(val)
-				{}
+                /** @brief Construct color using the given packed color constant.
+                 */
+                inline Color(uint16_t val)
+                : _val(val)
+                {}
 
-				/** @brief Construct color using the given components.
-				 */
-				inline Color(uint8_t r, uint8_t g, uint8_t b)
-				: _val(uint16_t(r & 0xF8) << 8)
-				{
-					// 1111111100000000
-					// 7654321076543210
-					// RRRRRGGGGGGBBBBB
-					//         CCCCCCCC
-					_val |= (uint16_t(g & 0xFC) << 3);
-					_val |=  uint16_t(b       ) >> 3;
-				}
+                /** @brief Construct color using the given components.
+                 */
+                inline Color(uint8_t r, uint8_t g, uint8_t b)
+                : _val(uint16_t(r & 0xF8) << 8)
+                {
+                    // 1111111100000000
+                    // 7654321076543210
+                    // RRRRRGGGGGGBBBBB
+                    //         CCCCCCCC
+                    _val |= (uint16_t(g & 0xFC) << 3);
+                    _val |=  uint16_t(b       ) >> 3;
+                }
 
 
-				/** @brief Assignment operator.
-				 */
-				inline Color& operator=(const Color& c)
-				{ _val = c._val; return *this; }
+                /** @brief Assignment operator.
+                 */
+                inline Color& operator=(const Color& c)
+                { _val = c._val; return *this; }
 
                 /** @brief Assignment operator.
 
@@ -100,131 +100,131 @@ namespace Pt {
                         return *this;
                 }
 
-				/** @brief Assignment-addition operator (beware of overflow).
-				 */
-				inline Color& operator+=(const Color& c)
-				{
-					const uint16_t r = red()   + c.red();
-					const uint16_t g = green() + c.green();
-					const uint16_t b = blue()  + c.blue();
+                /** @brief Assignment-addition operator (beware of overflow).
+                 */
+                inline Color& operator+=(const Color& c)
+                {
+                    const uint16_t r = red()   + c.red();
+                    const uint16_t g = green() + c.green();
+                    const uint16_t b = blue()  + c.blue();
 
-					// 1111111100000000
-					// 7654321076543210
-					// RRRRRGGGGGGBBBBB
-					//            CCCCC
-					// and
-					//           CCCCCC
-					_val  = (uint16_t(r) << 11);
-					_val |= (uint16_t(g) <<  5);
-					_val |=  uint16_t(b);
+                    // 1111111100000000
+                    // 7654321076543210
+                    // RRRRRGGGGGGBBBBB
+                    //            CCCCC
+                    // and
+                    //           CCCCCC
+                    _val  = (uint16_t(r) << 11);
+                    _val |= (uint16_t(g) <<  5);
+                    _val |=  uint16_t(b);
 
-					return *this;
-				}
+                    return *this;
+                }
 
-				/** @brief Assignment-substraction operator (beware of underflow).
-				 */
-				inline Color& operator-=(const Color& c)
-				{
-					const uint16_t r = red()   - c.red();
-					const uint16_t g = green() - c.green();
-					const uint16_t b = blue()  - c.blue();
+                /** @brief Assignment-substraction operator (beware of underflow).
+                 */
+                inline Color& operator-=(const Color& c)
+                {
+                    const uint16_t r = red()   - c.red();
+                    const uint16_t g = green() - c.green();
+                    const uint16_t b = blue()  - c.blue();
 
-					_val  = (uint16_t(r) << 11);
-					_val |= (uint16_t(g) <<  5);
-					_val |=  uint16_t(b);
+                    _val  = (uint16_t(r) << 11);
+                    _val |= (uint16_t(g) <<  5);
+                    _val |=  uint16_t(b);
 
-					return *this;
-				}
-
-
-				/** @brief Return the packed color value of this color.
-				 */
-				inline uint16_t value() const
-				{ return _val; }
-
-				/** @brief Return the red component of this color (range 0 to 31).
-				 */
-				inline uint8_t red() const
-				{ return (_val & 0xF800) >> 11; }
-
-				/** @brief Return the green component of this color (range 0 to 63).
-				 */
-				inline uint8_t green() const
-				{ return (_val & 0x07E0) >> 5; }
-
-				/** @brief Return the blue component of this color (range 0 to 31).
-				 */
-				inline uint8_t blue() const
-				{ return _val & 0x001F; }
+                    return *this;
+                }
 
 
-				/** @brief Set the packed color value of this color.
-				 */
-				void setValue(uint16_t c)
-				{ _val = c; }
+                /** @brief Return the packed color value of this color.
+                 */
+                inline uint16_t value() const
+                { return _val; }
 
-				/** @brief Set the red component of this color (range 0 to 31).
-				 */
-				inline void setRed(uint8_t r)
-				{ _val = _val & 0x07FF | (uint16_t(r & 0xF8) << 8); }
+                /** @brief Return the red component of this color (range 0 to 31).
+                 */
+                inline uint8_t red() const
+                { return (_val & 0xF800) >> 11; }
 
-				/** @brief Set the green component of this color (range 0 to 63).
-				 */
-				inline void setGreen(uint8_t g)
-				{ _val = _val & 0xF81F | (uint16_t(g & 0xFC) << 3); }
+                /** @brief Return the green component of this color (range 0 to 63).
+                 */
+                inline uint8_t green() const
+                { return (_val & 0x07E0) >> 5; }
 
-				/** @brief Set the blue component of this color (range 0 to 31).
-				 */
-				inline void setBlue(uint8_t b)
-				{ _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }
+                /** @brief Return the blue component of this color (range 0 to 31).
+                 */
+                inline uint8_t blue() const
+                { return _val & 0x001F; }
 
-			protected:
-				uint16_t _val;
-		};
+
+                /** @brief Set the packed color value of this color.
+                 */
+                void setValue(uint16_t c)
+                { _val = c; }
+
+                /** @brief Set the red component of this color (range 0 to 31).
+                 */
+                inline void setRed(uint8_t r)
+                { _val = _val & 0x07FF | (uint16_t(r & 0xF8) << 8); }
+
+                /** @brief Set the green component of this color (range 0 to 63).
+                 */
+                inline void setGreen(uint8_t g)
+                { _val = _val & 0xF81F | (uint16_t(g & 0xFC) << 3); }
+
+                /** @brief Set the blue component of this color (range 0 to 31).
+                 */
+                inline void setBlue(uint8_t b)
+                { _val = _val & 0xFFE0 | (uint16_t(b) >> 3); }
+
+            protected:
+                uint16_t _val;
+        };
 #pragma pack(pop)
 
 
-		/** @brief Convenience access to the 32-Bit ARGB color model.
-		 *  @ingroup Gfx
-		 */
-		typedef Color<Rgb565> Rgb565Color;
+        /** @brief Convenience access to the 32-Bit ARGB color model.
+         *  @ingroup Gfx
+         */
+        typedef Color<Rgb565> Rgb565Color;
 
 
-		/** @brief Full specialisation of the color traits class for Rgb565Color.
-		 */
-		template <>
-		struct ColorTraits<Rgb565Color> {
-			typedef uint16_t TmpValueT;
-		};
+        /** @brief Full specialisation of the color traits class for Rgb565Color.
+         */
+        template <>
+        struct ColorTraits<Rgb565Color> {
+            typedef uint16_t TmpValueT;
+        };
 
 
-		/** @brief Convert a Color<Rgb565> to a Color<ARgb>.
-		 */
-		inline const Color<ARgb> toARgb(const Color<Rgb565>& from)
-		{
-			const uint16_t tr = from.red();
-			const uint16_t tg = from.green();
-			const uint16_t tb = from.blue();
+        /** @brief Convert a Color<Rgb565> to a Color<ARgb>.
+         */
+        inline const Color<ARgb> toARgb(const Color<Rgb565>& from)
+        {
+            const uint16_t tr = from.red();
+            const uint16_t tg = from.green();
+            const uint16_t tb = from.blue();
 
-			return Color<ARgb>( 0xFFFF,
-			                    ((tr + !!tr) << 11) - !!tr, // Thanks to Mike Sharov for this algorithm
-			                    ((tg + !!tg) << 10) - !!tg,
-			                    ((tb + !!tb) << 11) - !!tb );
-		}
+            return Color<ARgb>( 0xFFFF,
+                                ((tr + !!tr) << 11) - !!tr, // Thanks to Mike Sharov for this algorithm
+                                ((tg + !!tg) << 10) - !!tg,
+                                ((tb + !!tb) << 11) - !!tb );
+        }
 
-		/** @brief Convert a Color<ARgb> to a Color<Rgb565>.
-		 */
-		inline void fromARgb(Color<Rgb565>& to, const Color<ARgb>& from)
-		{
-			// 1111111100000000
-			// 7654321076543210
-			// RRRRRGGGGGGBBBBB
-			// CCCCCCCCCCCCCCCC
-			const uint32_t val =   uint32_t(from.red  () & 0xF800)         |
-			                     ( uint32_t(from.green() & 0xFC00) >>  5 ) |
-			                     ( uint32_t(from.blue ()         ) >> 11 );
-			to.setValue(val);
-		}
+        /** @brief Convert a Color<ARgb> to a Color<Rgb565>.
+         */
+        inline void fromARgb(Color<Rgb565>& to, const Color<ARgb>& from)
+        {
+            // 1111111100000000
+            // 7654321076543210
+            // RRRRRGGGGGGBBBBB
+            // CCCCCCCCCCCCCCCC
+            const uint32_t val =   uint32_t(from.red  () & 0xF800)         |
+                                 ( uint32_t(from.green() & 0xFC00) >>  5 ) |
+                                 ( uint32_t(from.blue ()         ) >> 11 );
+            to.setValue(val);
+        }
 
 
         /** @brief Assign a Color<Rgb565> to a Color<ARgb>.
@@ -253,65 +253,65 @@ namespace Pt {
         }
 
 
-		/** @brief Assign an Color<Rgb565> to an ARgbFColor.
-		 */
-		inline void assign(ARgbFColor& to, const Color<Rgb565>& from)
-		{
-			to.setAlpha( 1.0f                        );
-			to.setRed  ( float(from.red  ()) / 31.0f );
-			to.setGreen( float(from.green()) / 63.0f );
-			to.setBlue ( float(from.blue ()) / 31.0f );
-		}
+        /** @brief Assign an Color<Rgb565> to an ARgbFColor.
+         */
+        inline void assign(ARgbFColor& to, const Color<Rgb565>& from)
+        {
+            to.setAlpha( 1.0f                        );
+            to.setRed  ( float(from.red  ()) / 31.0f );
+            to.setGreen( float(from.green()) / 63.0f );
+            to.setBlue ( float(from.blue ()) / 31.0f );
+        }
 
 
-		/** @brief Equality operator for Color<Rgb565> comparison.
-		 */
-		inline bool operator==(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1.value()==c2.value(); }
+        /** @brief Equality operator for Color<Rgb565> comparison.
+         */
+        inline bool operator==(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
+        { return c1.value()==c2.value(); }
 
-		/** @brief Less-than operator for Color<Rgb565> comparison.
-		 */
-		inline bool operator<(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1.value()<c2.value(); }
+        /** @brief Less-than operator for Color<Rgb565> comparison.
+         */
+        inline bool operator<(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
+        { return c1.value()<c2.value(); }
 
-		/** @brief Greater-than operator for Color<Rgb565> comparison.
-		 */
-		inline bool operator>(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
-		{ return c1.value()>c2.value(); }
-
-
-		/** @brief Make the greyscale version of the source Color<Rgb565> color.
-		 */
-		inline Color<Rgb565>& greyscale(Color<Rgb565>& to, const Color<Rgb565>& from)
-		{
-			const uint16_t r = from.red();
-			const uint16_t g = from.green();
-			const uint16_t b = from.blue();
-
-			const uint16_t h = (r*77 + g*128 + b*51) >> 7;
-			const uint16_t s = h >> 1;
-
-			// 1111111100000000
-			// 7654321076543210
-			// RRRRRGGGGGGBBBBB
-			//            CCCCC
-			// and
-			//           CCCCCC
-			to.setValue( (s<<11) | (h<<5) | s );
-
-			return to;
-		}
+        /** @brief Greater-than operator for Color<Rgb565> comparison.
+         */
+        inline bool operator>(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
+        { return c1.value()>c2.value(); }
 
 
-		/** @brief Mix two Color<Rgb565>s using the given mixing factor.
-		 */
-		template <typename FactorT>
-		inline void mixColor(Color<Rgb565>& dst, const Color<Rgb565>& src, const FactorT& factor)
-		{
-			// TODO: Write it !!!
-		}
+        /** @brief Make the greyscale version of the source Color<Rgb565> color.
+         */
+        inline Color<Rgb565>& greyscale(Color<Rgb565>& to, const Color<Rgb565>& from)
+        {
+            const uint16_t r = from.red();
+            const uint16_t g = from.green();
+            const uint16_t b = from.blue();
 
-	} // namespace Gfx
+            const uint16_t h = (r*77 + g*128 + b*51) >> 7;
+            const uint16_t s = h >> 1;
+
+            // 1111111100000000
+            // 7654321076543210
+            // RRRRRGGGGGGBBBBB
+            //            CCCCC
+            // and
+            //           CCCCCC
+            to.setValue( (s<<11) | (h<<5) | s );
+
+            return to;
+        }
+
+
+        /** @brief Mix two Color<Rgb565>s using the given mixing factor.
+         */
+        template <typename FactorT>
+        inline void mixColor(Color<Rgb565>& dst, const Color<Rgb565>& src, const FactorT& factor)
+        {
+            // TODO: Write it !!!
+        }
+
+    } // namespace Gfx
 
 } // namespace Pt
 

@@ -36,14 +36,14 @@ namespace Pt {
 
 namespace Db {
 
-	class Connection;
+    class Connection;
 
-	class PT_DB_API IConnector : private NonCopyable
-	{
-		public:
-			virtual ~IConnector() { }
-			virtual Connection connect(const std::string& url) = 0;
-	};
+    class PT_DB_API IConnector : private NonCopyable
+    {
+        public:
+            virtual ~IConnector() { }
+            virtual Connection connect(const std::string& url) = 0;
+    };
 
 } // namespace Db
 

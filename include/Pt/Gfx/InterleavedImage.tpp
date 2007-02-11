@@ -23,89 +23,89 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		//
-		// InterleavedImage<ColorT> implementation
-		//
+        //
+        // InterleavedImage<ColorT> implementation
+        //
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		void InterleavedImage<ColorT_, ColorTraitsT_>::resize(uint width_, uint height_)
-		{
-			_buff.resize(width_ * height_);
-			_width  = width_;
-			_height = height_;
-		}
+        template <typename ColorT_, typename ColorTraitsT_>
+        void InterleavedImage<ColorT_, ColorTraitsT_>::resize(uint width_, uint height_)
+        {
+            _buff.resize(width_ * height_);
+            _width  = width_;
+            _height = height_;
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		void InterleavedImage<ColorT_, ColorTraitsT_>::resize(uint width_, uint height_, const ColorT& fill)
-		{
-			_buff.resize(width_ * height_);
-			_width  = width_;
-			_height = height_;
+        template <typename ColorT_, typename ColorTraitsT_>
+        void InterleavedImage<ColorT_, ColorTraitsT_>::resize(uint width_, uint height_, const ColorT& fill)
+        {
+            _buff.resize(width_ * height_);
+            _width  = width_;
+            _height = height_;
 
-			for(uint i = 0; i < _width*_height; i++) _buff[i] = fill;
-		}
+            for(uint i = 0; i < _width*_height; i++) _buff[i] = fill;
+        }
 
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const ColorT& fill)
-		{
-			for(uint i = 0; i < _width*_height; i++) _buff[i] = fill;
-			return *this;
-		}
+        template <typename ColorT_, typename ColorTraitsT_>
+        InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const ColorT& fill)
+        {
+            for(uint i = 0; i < _width*_height; i++) _buff[i] = fill;
+            return *this;
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-				InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const InterleavedImage& src)
-		{
-			if(src.empty()) {
-				clear();
-				return *this;
-			}
+        template <typename ColorT_, typename ColorTraitsT_>
+                InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const InterleavedImage& src)
+        {
+            if(src.empty()) {
+                clear();
+                return *this;
+            }
 
-			if(_width!=src._width || _height!=src._height) {
-				_buff.resize(src._width * src._height);
-				_width  = src._width;
-				_height = src._height;
-			};
-			memcpy(&_buff[0], &src._buff[0], _width * _height * sizeof(ColorT));
+            if(_width!=src._width || _height!=src._height) {
+                _buff.resize(src._width * src._height);
+                _width  = src._width;
+                _height = src._height;
+            };
+            memcpy(&_buff[0], &src._buff[0], _width * _height * sizeof(ColorT));
 
-			return *this;
-		}
+            return *this;
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y)
-		{
-			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
-				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        template <typename ColorT_, typename ColorTraitsT_>
+        typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y)
+        {
+            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
+                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-			return _buff[y*_width + x];
-		}
+            return _buff[y*_width + x];
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y) const
-		{
-			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
-				throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
+        template <typename ColorT_, typename ColorTraitsT_>
+        const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y) const
+        {
+            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
+                throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-			return _buff[y*_width + x];
-		}
+            return _buff[y*_width + x];
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
-		{
-			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
-			return _buff[y*_width + x];
-		}
+        template <typename ColorT_, typename ColorTraitsT_>
+        const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
+        {
+            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
+            return _buff[y*_width + x];
+        }
 
-		template <typename ColorT_, typename ColorTraitsT_>
-		void InterleavedImage<ColorT_, ColorTraitsT_>::setColor(int x, int y, const ColorT& color_)
-		{
-			if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
-			_buff[y*_width + x] = color_;
-		}
+        template <typename ColorT_, typename ColorTraitsT_>
+        void InterleavedImage<ColorT_, ColorTraitsT_>::setColor(int x, int y, const ColorT& color_)
+        {
+            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
+            _buff[y*_width + x] = color_;
+        }
 
-	} // namespace Gfx
+    } // namespace Gfx
 
 } // namespace Pt
 

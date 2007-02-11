@@ -23,53 +23,53 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief Assign a color model to another color model.
-		 *
-		 *  A color models implementor should specialize this function as needed if
-		 *  faster implementation for the two colors is exist.
-		 */
-		template <typename DstTagT, typename SrcTagT> inline
-		void assign(Color<DstTagT>& to, const Color<SrcTagT>& from)
-		{ fromARgb( to, toARgb(from) ); }
+        /** @brief Assign a color model to another color model.
+         *
+         *  A color models implementor should specialize this function as needed if
+         *  faster implementation for the two colors is exist.
+         */
+        template <typename DstTagT, typename SrcTagT> inline
+        void assign(Color<DstTagT>& to, const Color<SrcTagT>& from)
+        { fromARgb( to, toARgb(from) ); }
 
-		/** @brief Partial specialization of assign() if both the color models are the same.
-		 *
-		 *  This function will just copy the value from the source to the destiantion.
-		 */
-		template <typename TagT> inline
-		void assign(Color<TagT>& to, const Color<TagT>& from)
-		{ to = from; }
+        /** @brief Partial specialization of assign() if both the color models are the same.
+         *
+         *  This function will just copy the value from the source to the destiantion.
+         */
+        template <typename TagT> inline
+        void assign(Color<TagT>& to, const Color<TagT>& from)
+        { to = from; }
 
 
-		/** @brief Make the greyscale version of the source color.
-		 *
-		 *  This is a fallback version in case the color model implementor does not
-		 *  implement the specific version of greyscale() for the color model.
-		 *  \n\n
-		 *  A color implementor must not rely on this function since this function
-		 *  will cause some overhead because of the conversion to and from ARgbColor.
-		 */
-		template <typename TagT> inline
-		Color<TagT>& greyscale(Color<TagT>& to, const Color<TagT>& from)
-		{
-			ARgbColor tmp;
+        /** @brief Make the greyscale version of the source color.
+         *
+         *  This is a fallback version in case the color model implementor does not
+         *  implement the specific version of greyscale() for the color model.
+         *  \n\n
+         *  A color implementor must not rely on this function since this function
+         *  will cause some overhead because of the conversion to and from ARgbColor.
+         */
+        template <typename TagT> inline
+        Color<TagT>& greyscale(Color<TagT>& to, const Color<TagT>& from)
+        {
+            ARgbColor tmp;
 
-			assign(tmp, from);
-			greyscale(tmp, tmp);
-			assign(to, tmp);
+            assign(tmp, from);
+            greyscale(tmp, tmp);
+            assign(to, tmp);
 
-			return to;
-		}
+            return to;
+        }
 
-		/** @brief Make the given Color<TagT> become greyscale.
-		 */
-		template <typename TagT> inline
-		Color<TagT>& greyscale(Color<TagT>& c)
-		{ return greyscale(c, c); }
+        /** @brief Make the given Color<TagT> become greyscale.
+         */
+        template <typename TagT> inline
+        Color<TagT>& greyscale(Color<TagT>& c)
+        { return greyscale(c, c); }
 
-	} // namespace Gfx
+    } // namespace Gfx
 
 } // namespace Pt
 

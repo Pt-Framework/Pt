@@ -25,210 +25,210 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief An empty structure used for tagging floated ARGB color class.
-		 */
-		struct ARgbF {};
+        /** @brief An empty structure used for tagging floated ARGB color class.
+         */
+        struct ARgbF {};
 
 
 #pragma pack(push, 1)
-		/** @brief Floated ARGB color class.
-		 *  @ingroup Gfx
-		 *
-		 *  This is the temporary color model for Pt::Gfx.
-		 *  \n\n
-		 *  Valid range of the color components for this color model:
-		 *  <TABLE>
-		 *    <TR> <TD>Alpha</TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
-		 *    <TR> <TD>Red  </TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
-		 *    <TR> <TD>Green</TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
-		 *    <TR> <TD>Blue </TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
-		 *  </TABLE>
-		 *  However, values <0.0f and >1.0f are allowed exist for temporal calculation
-		 *  results.
-		 *  \n\n
-		 *  Complex color algorithms such as cubic-scale, dithering, etc. are suggested
-		 *  to use this color model to minimize rounding error propagation.
-		 */
-		template <>
-		class PT_GFX_API Color<ARgbF> {
-			public:
-				/** @brief The default constructor, will generate the default color (black).
-				 */
-				inline Color()
-				: _a(1.0f), _r(0.0f), _g(0.0f), _b(0.0f)
-				{}
+        /** @brief Floated ARGB color class.
+         *  @ingroup Gfx
+         *
+         *  This is the temporary color model for Pt::Gfx.
+         *  \n\n
+         *  Valid range of the color components for this color model:
+         *  <TABLE>
+         *    <TR> <TD>Alpha</TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
+         *    <TR> <TD>Red  </TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
+         *    <TR> <TD>Green</TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
+         *    <TR> <TD>Blue </TD> <TD>0.0f</TD> <TD>to</TD> <TD>1.0f</TD> </TR>
+         *  </TABLE>
+         *  However, values <0.0f and >1.0f are allowed exist for temporal calculation
+         *  results.
+         *  \n\n
+         *  Complex color algorithms such as cubic-scale, dithering, etc. are suggested
+         *  to use this color model to minimize rounding error propagation.
+         */
+        template <>
+        class PT_GFX_API Color<ARgbF> {
+            public:
+                /** @brief The default constructor, will generate the default color (black).
+                 */
+                inline Color()
+                : _a(1.0f), _r(0.0f), _g(0.0f), _b(0.0f)
+                {}
 
-				/** @brief Copy constructor.
-				 */
-				inline Color(const Color<ARgbF>& c)
-				: _a(c._a), _r(c._r), _g(c._g), _b(c._b)
-				{}
+                /** @brief Copy constructor.
+                 */
+                inline Color(const Color<ARgbF>& c)
+                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
+                {}
 
-				/** @brief Construct color using the given components.
-				 */
-				inline Color(float a, float r, float g, float b)
-				: _a(a), _r(r), _g(g), _b(b)
-				{}
+                /** @brief Construct color using the given components.
+                 */
+                inline Color(float a, float r, float g, float b)
+                : _a(a), _r(r), _g(g), _b(b)
+                {}
 
-				/** @brief Construct color using the given components.
-				 */
-				inline Color(float r, float g, float b)
-				: _a(1.0f), _r(r), _g(g), _b(b)
-				{}
-
-
-				/** @brief Assignment operator.
-				 */
-				inline Color<ARgbF>& operator=(const Color<ARgbF>& c)
-				{ _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
-
-				/** @brief Assignment-addition operator.
-				 */
-				inline Color<ARgbF>& operator+=(const Color<ARgbF>& c)
-				{ _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
-
-				/** @brief Assignment-substraction operator.
-				 */
-				inline Color<ARgbF>& operator-=(const Color<ARgbF>& c)
-				{ _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
+                /** @brief Construct color using the given components.
+                 */
+                inline Color(float r, float g, float b)
+                : _a(1.0f), _r(r), _g(g), _b(b)
+                {}
 
 
-				/** @brief Return the alpha component of this color (range 0.0f to 1.0f).
-				 */
-				inline float alpha() const
-				{ return _a; }
+                /** @brief Assignment operator.
+                 */
+                inline Color<ARgbF>& operator=(const Color<ARgbF>& c)
+                { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
-				/** @brief Return the red component of this color (range 0.0f to 1.0f).
-				 */
-				inline float red() const
-				{ return _r; }
+                /** @brief Assignment-addition operator.
+                 */
+                inline Color<ARgbF>& operator+=(const Color<ARgbF>& c)
+                { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
-				/** @brief Return the green component of this color (range 0.0f to 1.0f).
-				 */
-				inline float green() const
-				{ return _g; }
-
-				/** @brief Return the blue component of this color (range 0.0f to 1.0f).
-				 */
-				inline float blue() const
-				{ return _b; }
+                /** @brief Assignment-substraction operator.
+                 */
+                inline Color<ARgbF>& operator-=(const Color<ARgbF>& c)
+                { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
-				/** @brief Set the alpha component of this color (range 0.0f to 1.0f).
-				 */
-				inline void setAlpha(float a)
-				{ _a = a; }
+                /** @brief Return the alpha component of this color (range 0.0f to 1.0f).
+                 */
+                inline float alpha() const
+                { return _a; }
 
-				/** @brief Set the red component of this color (range 0.0f to 1.0f).
-				 */
-				inline void setRed(float r)
-				{ _r = r; }
+                /** @brief Return the red component of this color (range 0.0f to 1.0f).
+                 */
+                inline float red() const
+                { return _r; }
 
-				/** @brief Set the green component of this color (range 0.0f to 1.0f).
-				 */
-				inline void setGreen(float g)
-				{ _g = g; }
+                /** @brief Return the green component of this color (range 0.0f to 1.0f).
+                 */
+                inline float green() const
+                { return _g; }
 
-				/** @brief Set the blue component of this color (range 0.0f to 1.0f).
-				 */
-				inline void setBlue(float b)
-				{ _b = b; }
+                /** @brief Return the blue component of this color (range 0.0f to 1.0f).
+                 */
+                inline float blue() const
+                { return _b; }
 
-			protected:
-				float _a, _r, _g, _b;
-		};
+
+                /** @brief Set the alpha component of this color (range 0.0f to 1.0f).
+                 */
+                inline void setAlpha(float a)
+                { _a = a; }
+
+                /** @brief Set the red component of this color (range 0.0f to 1.0f).
+                 */
+                inline void setRed(float r)
+                { _r = r; }
+
+                /** @brief Set the green component of this color (range 0.0f to 1.0f).
+                 */
+                inline void setGreen(float g)
+                { _g = g; }
+
+                /** @brief Set the blue component of this color (range 0.0f to 1.0f).
+                 */
+                inline void setBlue(float b)
+                { _b = b; }
+
+            protected:
+                float _a, _r, _g, _b;
+        };
 #pragma pack(pop)
 
 
-		/** @brief Convenience access to the Floated ARGB color model.
-		 *  @ingroup Gfx
-		 */
-		typedef Color<ARgbF> ARgbFColor;
+        /** @brief Convenience access to the Floated ARGB color model.
+         *  @ingroup Gfx
+         */
+        typedef Color<ARgbF> ARgbFColor;
 
 
-		/** @brief Full specialisation of the color traits class for ARgbFColor.
-		 */
-		template <>
-		struct ColorTraits<ARgbFColor> {
-			typedef float TmpValueT;
-		};
+        /** @brief Full specialisation of the color traits class for ARgbFColor.
+         */
+        template <>
+        struct ColorTraits<ARgbFColor> {
+            typedef float TmpValueT;
+        };
 
 
-		/** @brief Convert a Color<ARgbF> to a Color<ARgb>.
-		 */
-		inline const Color<ARgb> toARgb(const Color<ARgbF>& from)
-		{
+        /** @brief Convert a Color<ARgbF> to a Color<ARgb>.
+         */
+        inline const Color<ARgb> toARgb(const Color<ARgbF>& from)
+        {
 // Try to make the compiler generate
 // the 'cmov' instruction if available
 #define Pt_Gfx_ARgbFColor_h_convert(dVar, sVar, sChn) \
-	const float&      sChn = sVar.sChn();                \
-	register uint16_t dVar = 0;                          \
-	if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f);    \
-	if(sChn > 1.0f) dVar = 65535
+    const float&      sChn = sVar.sChn();                \
+    register uint16_t dVar = 0;                          \
+    if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f);    \
+    if(sChn > 1.0f) dVar = 65535
 
-			Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
-			Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
-			Pt_Gfx_ARgbFColor_h_convert(g, from, green);
-			Pt_Gfx_ARgbFColor_h_convert(b, from, blue );
+            Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
+            Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
+            Pt_Gfx_ARgbFColor_h_convert(g, from, green);
+            Pt_Gfx_ARgbFColor_h_convert(b, from, blue );
 
-			return Color<ARgb>(a, r, g, b);
+            return Color<ARgb>(a, r, g, b);
 
 #undef Pt_Gfx_ARgbFColor_h_convert
-		}
+        }
 
-		/** @brief Convert a Color<ARgb> to a Color<ARgbF>.
-		 */
-		inline void fromARgb(Color<ARgbF>& to, const Color<ARgb>& from)
-		{
-			to.setAlpha( float( from.alpha() ) / 65535.0f );
-			to.setRed  ( float( from.red  () ) / 65535.0f );
-			to.setGreen( float( from.green() ) / 65535.0f );
-			to.setBlue ( float( from.blue () ) / 65535.0f );
-		}
-
-
-		/** @brief Equality operator for Color<ARgbF> comparison.
-		 */
-		inline bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
-
-		/** @brief Less-than operator for Color<ARgbF> comparison.
-		 */
-		inline bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
-
-		/** @brief Greater-than operator for Color<ARgbF> comparison.
-		 */
-		inline bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
-		{ return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
+        /** @brief Convert a Color<ARgb> to a Color<ARgbF>.
+         */
+        inline void fromARgb(Color<ARgbF>& to, const Color<ARgb>& from)
+        {
+            to.setAlpha( float( from.alpha() ) / 65535.0f );
+            to.setRed  ( float( from.red  () ) / 65535.0f );
+            to.setGreen( float( from.green() ) / 65535.0f );
+            to.setBlue ( float( from.blue () ) / 65535.0f );
+        }
 
 
-		/** @brief Make the greyscale version of the source Color<ARgbF> color.
-		 */
-		inline Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
-		{
-			const float s = from.red()*0.3f + from.green()*0.5f + from.blue()*0.2f;
+        /** @brief Equality operator for Color<ARgbF> comparison.
+         */
+        inline bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
-			to.setAlpha(from.alpha());
-			to.setRed  (s);
-			to.setGreen(s);
-			to.setBlue (s);
+        /** @brief Less-than operator for Color<ARgbF> comparison.
+         */
+        inline bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
-			return to;
-		}
+        /** @brief Greater-than operator for Color<ARgbF> comparison.
+         */
+        inline bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
 
-		/** @brief Mix two Color<ARgbF>s using the given mixing factor.
-		 */
-		template <typename FactorT>
-		inline void mixColor(Color<ARgbF>& dst, const Color<ARgbF>& src, const FactorT& factor)
-		{
-			// TODO: Write it !!!
-		}
+        /** @brief Make the greyscale version of the source Color<ARgbF> color.
+         */
+        inline Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
+        {
+            const float s = from.red()*0.3f + from.green()*0.5f + from.blue()*0.2f;
 
-	} // namespace Gfx
+            to.setAlpha(from.alpha());
+            to.setRed  (s);
+            to.setGreen(s);
+            to.setBlue (s);
+
+            return to;
+        }
+
+
+        /** @brief Mix two Color<ARgbF>s using the given mixing factor.
+         */
+        template <typename FactorT>
+        inline void mixColor(Color<ARgbF>& dst, const Color<ARgbF>& src, const FactorT& factor)
+        {
+            // TODO: Write it !!!
+        }
+
+    } // namespace Gfx
 
 } // namespace Pt
 

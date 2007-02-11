@@ -29,49 +29,49 @@ namespace Pt {
 
 namespace Gfx {
 
-	class BrushData;
+    class BrushData;
 
-	class PT_GFX_API Brush
-	{
-		public:
-			enum FillStyle {
-				SolidFill, TextureFill
-			};
+    class PT_GFX_API Brush
+    {
+        public:
+            enum FillStyle {
+                SolidFill, TextureFill
+            };
 
-		public:
-			Brush( const ARgbColor& color = ARgbColor(0,0,0) );
+        public:
+            Brush( const ARgbColor& color = ARgbColor(0,0,0) );
 
-			Brush(const ARgbImage* texture);
+            Brush(const ARgbImage* texture);
 
-			FillStyle fillStyle() const;
+            FillStyle fillStyle() const;
 
-			const ARgbColor& color() const;
+            const ARgbColor& color() const;
 
-			const ARgbImage& texture() const;
+            const ARgbImage& texture() const;
 
-		private:
-			SmartPtr<BrushData> _brushData;
-	};
+        private:
+            SmartPtr<BrushData> _brushData;
+    };
 
 
-	class PT_GFX_API BrushData
-	{
-		public:
-			BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture);
+    class PT_GFX_API BrushData
+    {
+        public:
+            BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture);
 
-			~BrushData();
+            ~BrushData();
 
-			Brush::FillStyle fillStyle() const;
+            Brush::FillStyle fillStyle() const;
 
-			const ARgbColor& color() const;
+            const ARgbColor& color() const;
 
-			const ARgbImage& texture() const;
+            const ARgbImage& texture() const;
 
-		private:
-			Brush::FillStyle _fillStyle;
-			ARgbColor        _color;
-			ARgbImage*       _texture;
-	};
+        private:
+            Brush::FillStyle _fillStyle;
+            ARgbColor        _color;
+            ARgbImage*       _texture;
+    };
 
 } // namespace Gfx
 

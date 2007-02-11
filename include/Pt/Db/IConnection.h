@@ -40,8 +40,8 @@ namespace Db {
     class IStatement;
 
     /** \brief Interface for database connection
-		\see Db::Connection
-	*/
+        \see Db::Connection
+    */
     class PT_DB_API IConnection : public RefCounted
     {
         public:
@@ -65,8 +65,8 @@ namespace Db {
     //---------------------------------------------------------------------------------
 
     /** \brief Interface for a statement cached connection
-		\see Db::Connection
-	*/
+        \see Db::Connection
+    */
     class IStmtCacheConnection : public IConnection
     {
         typedef SmartPtr<IStatement, InternalRefCounted<IStatement> > StatementPtr;

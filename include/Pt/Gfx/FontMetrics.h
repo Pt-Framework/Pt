@@ -28,27 +28,27 @@ namespace Pt {
 
 namespace Gfx {
 
-	class PT_GFX_API FontMetrics
-	{
-		public:
-			FontMetrics();
-			
-			FontMetrics(size_t ascent, size_t descent, size_t width, size_t height);
+    class PT_GFX_API FontMetrics
+    {
+        public:
+            FontMetrics();
+            
+            FontMetrics(size_t ascent, size_t descent, size_t width, size_t height);
 
-			size_t ascent() const;
+            size_t ascent() const;
 
-			size_t descent() const;
+            size_t descent() const;
 
-			size_t width() const;
+            size_t width() const;
 
-			size_t height() const;
+            size_t height() const;
 
-		private:
-			size_t _ascent;
-			size_t _descent;
-			size_t _width;
-			size_t _height;
-	};
+        private:
+            size_t _ascent;
+            size_t _descent;
+            size_t _width;
+            size_t _height;
+    };
 
 } // namespace Gfx
 

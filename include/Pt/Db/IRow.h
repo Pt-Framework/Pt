@@ -32,17 +32,17 @@ namespace Db {
 
   class Value;
 
-	/** \brief Interface for DB Rows
-		\see Db::Rows
-	*/
-	class PT_DB_API IRow : public RefCounted
-	{
-		public:
-			typedef size_t size_type;
+    /** \brief Interface for DB Rows
+        \see Db::Rows
+    */
+    class PT_DB_API IRow : public RefCounted
+    {
+        public:
+            typedef size_t size_type;
 
-			virtual size_type size() const = 0;
-			virtual Value getValue(size_type field_num) const = 0;
-	};
+            virtual size_type size() const = 0;
+            virtual Value getValue(size_type field_num) const = 0;
+    };
   
 } // namespace Db
 

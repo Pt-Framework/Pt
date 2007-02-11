@@ -63,9 +63,9 @@ namespace Db {
             Connection() { }
             
             /** \brief Construct a Connection from a special implementation.
-				
-				\param conn Implementation of a Connection.
-			*/
+                
+                \param conn Implementation of a Connection.
+            */
             Connection(IConnection* conn)
                 : _connection(conn)
             { }
@@ -195,50 +195,50 @@ namespace Db {
             const IConnection* getImpl() const { return &*_connection; }
     };
 
-	/** \brief Establish a connection to a database.
-	
-		The url is prefixed with a drivername followed by a colon and a driver-
-		specific part. If the connection can't be established, an exception is thrown.
-		
-		Examples:
-		
-		\code
-		tntDb::Connection myConn = tntDb::connect("mysql:Db=DS2;user=web;passwd=web");
-		tntDb::Connection pgConn = tntDb::connect("postgresql:Dbname=DS2 user=web passwd=web");
-		\endcode
-		
-		\param url the url of the database to connect to
-		\return the established connection
-		\throw LogicError
-		\throw RuntimeError
-	*/
-	PT_DB_API Connection connect(const std::string& url);
+    /** \brief Establish a connection to a database.
+    
+        The url is prefixed with a drivername followed by a colon and a driver-
+        specific part. If the connection can't be established, an exception is thrown.
+        
+        Examples:
+        
+        \code
+        tntDb::Connection myConn = tntDb::connect("mysql:Db=DS2;user=web;passwd=web");
+        tntDb::Connection pgConn = tntDb::connect("postgresql:Dbname=DS2 user=web passwd=web");
+        \endcode
+        
+        \param url the url of the database to connect to
+        \return the established connection
+        \throw LogicError
+        \throw RuntimeError
+    */
+    PT_DB_API Connection connect(const std::string& url);
 
-	/** \brief Fetch a connection from a pool or create a new one.
-	
-		A static pool of connections is kept in memory. The function looks
-		in this pool, if there is a connection, which matches the url. If found
-		the connection is removed from the pool and returned. When the returned
-		connection-object is destroyed (and all copies of it), the actual
-		connection is put back into the pool.
-		
-		When there is no connections in the pool, which match the url, a new
-		connection is established.
-	*/
-	//Connection connectCached(const std::string& url);
+    /** \brief Fetch a connection from a pool or create a new one.
+    
+        A static pool of connections is kept in memory. The function looks
+        in this pool, if there is a connection, which matches the url. If found
+        the connection is removed from the pool and returned. When the returned
+        connection-object is destroyed (and all copies of it), the actual
+        connection is put back into the pool.
+        
+        When there is no connections in the pool, which match the url, a new
+        connection is established.
+    */
+    //Connection connectCached(const std::string& url);
 
-	/** \brief Releases unused connections
-	
-		Keeps the given number of connections.
-	*/
-	//void dropCached(unsigned keep = 0);
+    /** \brief Releases unused connections
+    
+        Keeps the given number of connections.
+    */
+    //void dropCached(unsigned keep = 0);
 
-	/** \brief Releases unused connections.
-	
-		Releases unused connections, which match the given url. Keeps
-		the given number of connections
-	*/
-	//void dropCached(const std::string& url, unsigned keep = 0);
+    /** \brief Releases unused connections.
+    
+        Releases unused connections, which match the given url. Keeps
+        the given number of connections
+    */
+    //void dropCached(const std::string& url, unsigned keep = 0);
 
 } // namespace Db
 

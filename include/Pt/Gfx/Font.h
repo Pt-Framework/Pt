@@ -31,56 +31,56 @@ namespace Pt {
 
 namespace Gfx {
 
-	class PT_GFX_API Font
-	{
-		friend bool operator==(const Font& a, const Font& b);
+    class PT_GFX_API Font
+    {
+        friend bool operator==(const Font& a, const Font& b);
 
-		public:
-			enum FontStyle {
-				NormalStyle, BoldStyle, ItalicStyle, BoldItalicStyle
-			};
+        public:
+            enum FontStyle {
+                NormalStyle, BoldStyle, ItalicStyle, BoldItalicStyle
+            };
 
-			enum Direction {
-				LeftToRightDirection, RightToLeftDirection
-			};
+            enum Direction {
+                LeftToRightDirection, RightToLeftDirection
+            };
 
-		public:
-			Font(
-				const std::string& name,
-				size_t             size = 12,
-				FontStyle          fontStyle = NormalStyle,
-				ssize_t            angle     = 0,
-				Direction          direction = LeftToRightDirection
-				
-			);
+        public:
+            Font(
+                const std::string& name,
+                size_t             size = 12,
+                FontStyle          fontStyle = NormalStyle,
+                ssize_t            angle     = 0,
+                Direction          direction = LeftToRightDirection
+                
+            );
 
-			std::string name() const;
+            std::string name() const;
 
-			size_t size() const;
+            size_t size() const;
 
-			FontStyle fontStyle() const;
+            FontStyle fontStyle() const;
 
-			ssize_t angle() const;
+            ssize_t angle() const;
 
-			Direction direction() const;
+            Direction direction() const;
 
-		private:
-			std::string _name;
-			size_t      _size;
-			FontStyle   _fontStyle;
-			ssize_t     _angle;
-			Direction   _direction;
-	};
+        private:
+            std::string _name;
+            size_t      _size;
+            FontStyle   _fontStyle;
+            ssize_t     _angle;
+            Direction   _direction;
+    };
 
-	inline bool operator==(const Font& a, const Font& b)
-	{
-		return
-			   a._name.compare(b._name) == 0
-			&& a._fontStyle             == b._fontStyle
-			&& a._size                  == b._size
-			&& a._angle                 == b._angle
-			&& a._direction             == b._direction;
-	}
+    inline bool operator==(const Font& a, const Font& b)
+    {
+        return
+               a._name.compare(b._name) == 0
+            && a._fontStyle             == b._fontStyle
+            && a._size                  == b._size
+            && a._angle                 == b._angle
+            && a._direction             == b._direction;
+    }
 
 } // namespace Gfx
 

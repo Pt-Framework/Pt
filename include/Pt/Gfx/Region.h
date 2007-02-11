@@ -34,46 +34,46 @@ namespace Pt {
 
         //! \brief
         class Region
-		{
+        {
             public:
-				Region(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
+                Region(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
                 : _topLeft(topLeft)
                 , _size(size)
                 {
-					/*if (size.width() <= 0 || size.height() <= 0) {
-						throw std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
-					}*/
-				}
+                    /*if (size.width() <= 0 || size.height() <= 0) {
+                        throw std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
+                    }*/
+                }
 
                 void setSize(const Pt::Math::Size& size)
                 {
-					_size = size;
-				}
+                    _size = size;
+                }
 
                 const Pt::Math::Size& size() const
                 {
-					return _size;
-				}
+                    return _size;
+                }
 
                 ssize_t left() const
                 {
-					return _topLeft.x();
-				}
+                    return _topLeft.x();
+                }
 
                 ssize_t top() const
                 {
-					return _topLeft.y();
-				}
+                    return _topLeft.y();
+                }
 
                 ssize_t x() const
                 {
-					return _topLeft.x();
-				}
+                    return _topLeft.x();
+                }
 
                 ssize_t y() const
                 {
-					return _topLeft.y();
-				}
+                    return _topLeft.y();
+                }
 
                 Region& setX(ssize_t x)
                 {
@@ -89,8 +89,8 @@ namespace Pt {
 
                 ssize_t right() const
                 {
-					return _topLeft.x() + _size.width() - 1;
-				}
+                    return _topLeft.x() + _size.width() - 1;
+                }
 
                 ssize_t bottom() const
                 {
@@ -133,50 +133,50 @@ namespace Pt {
 
                 size_t width() const
                 {
-					return _size.width();
-				}
+                    return _size.width();
+                }
 
                 size_t height() const
                 {
-					return _size.height();
-				}
+                    return _size.height();
+                }
 
                 Region& setWidth(size_t width)
                 {
-					/*if (width <= 0) {
-						throw std::logic_error("The width of a Region needs to be at least one pixel!", PT_SOURCEINFO);
-					}*/
+                    /*if (width <= 0) {
+                        throw std::logic_error("The width of a Region needs to be at least one pixel!", PT_SOURCEINFO);
+                    }*/
 
-					_size.setWidth(width);
-					return *this;
+                    _size.setWidth(width);
+                    return *this;
                 }
 
                 Region& setHeight(size_t height)
                 {
-					/*if (height <= 0) {
-						throw std::logic_error("The height of a Region needs to be at least one pixel!", PT_SOURCEINFO);
-					}*/
+                    /*if (height <= 0) {
+                        throw std::logic_error("The height of a Region needs to be at least one pixel!", PT_SOURCEINFO);
+                    }*/
 
-					_size.setHeight(height);
-					return *this;
+                    _size.setHeight(height);
+                    return *this;
                 }
 
                 Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
                 {
-					/*if (size.width() <= 0 || size.height() <= 0) {
-						throw new std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
-					}*/
+                    /*if (size.width() <= 0 || size.height() <= 0) {
+                        throw new std::logic_error("The size for a Region needs to be at least one pixel in each dimension!", PT_SOURCEINFO);
+                    }*/
 
-					_topLeft = topLeft;
-					_size = size;
-					return *this;
+                    _topLeft = topLeft;
+                    _size = size;
+                    return *this;
                 }
 
                 Region& setGeometry(const Pt::Math::Point& topLeft, const Pt::Math::Point& bottomRight)
                 {
-					if (topLeft.x() > bottomRight.x() || topLeft.y() > bottomRight.y()) {
-						throw std::logic_error("The bottom right point needs to be bottom-right from the top-left point!" + PT_SOURCEINFO);
-					}
+                    if (topLeft.x() > bottomRight.x() || topLeft.y() > bottomRight.y()) {
+                        throw std::logic_error("The bottom right point needs to be bottom-right from the top-left point!" + PT_SOURCEINFO);
+                    }
 
                     _topLeft = topLeft;
 
@@ -187,26 +187,26 @@ namespace Pt {
 
                 Pt::Math::Point topLeft() const
                 {
-					return _topLeft;
-				}
+                    return _topLeft;
+                }
 
-				Pt::Math::Rect toRect() const
-				{
-					return Pt::Math::Rect(_topLeft, _size);
-				}
+                Pt::Math::Rect toRect() const
+                {
+                    return Pt::Math::Rect(_topLeft, _size);
+                }
 
                 bool operator==(const Region& other) const
                 {
-					return _topLeft == other._topLeft && _size == other._size;
-				}
+                    return _topLeft == other._topLeft && _size == other._size;
+                }
 
                 bool operator!=(const Region& other) const
                 {
-					return _topLeft != other._topLeft || _size != other._size;
-				}
+                    return _topLeft != other._topLeft || _size != other._size;
+                }
 
             protected:
-				Pt::Math::Point _topLeft;
+                Pt::Math::Point _topLeft;
                 Pt::Math::Size  _size;
         };
 

@@ -11,14 +11,14 @@ in the Pt namespace.
 
 namespace Pt {
 
-	namespace Db {
-		class Connection;
+    namespace Db {
+        class Connection;
         class Statement;
         class Transacion;
         class Value;
         class Resilt;
         class Row;
-	}
+    }
 
 }
 

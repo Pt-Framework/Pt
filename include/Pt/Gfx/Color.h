@@ -30,105 +30,105 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief Basic template declaration of color classes.
-		 *  @ingroup Gfx
-		 */
-		template <typename TagT>
-		class Color;
-
-
-		/** @brief Basic template declaration of color traits classes.
-		 */
-		template <typename ColorT>
-		struct ColorTraits;
+        /** @brief Basic template declaration of color classes.
+         *  @ingroup Gfx
+         */
+        template <typename TagT>
+        class Color;
 
 
-		/** @brief Choose the type which has greater size (from the two given types).
-		 */
-		template <typename A, typename B>
-		struct LargestSizeOf {
-			typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
-		};
+        /** @brief Basic template declaration of color traits classes.
+         */
+        template <typename ColorT>
+        struct ColorTraits;
 
 
-		/** @brief Greater-than operator for any color model comparison.
-		 *
-		 *  Note that by default, this function will use operator==() and operator<().
-		 *  \n\n
-		 *  A color model implementor should implement the full specialization of
-		 *  this function for better performance.
-		 */
-		template <typename TagT> inline
-		bool operator>(const Color<TagT>& c1, const Color<TagT>& c2)
-		{ return !(c1==c2) && !(c1<c2); }
-
-		/** @brief Inequality operator for any color model comparison.
-		 *
-		 *  Note that by default, this function will call operator==().
-		 *  \n\n
-		 *  A color model implementor can implement the full specialization of
-		 *  this function if better performance can be achieved by doing so.
-		 */
-		template <typename TagT> inline
-		bool operator!=(const Color<TagT>& c1, const Color<TagT>& c2)
-		{ return !(c1==c2); }
-
-		/** @brief Less-than-or-equal operator for any color model comparison.
-		 *
-		 *  Note that by default, this function will call operator==() and operator<().
-		 *  \n\n
-		 *  A color model implementor can implement the full specialization of
-		 *  this function if better performance can be achieved by doing so.
-		 */
-		template <typename TagT> inline
-		bool operator<=(const Color<TagT>& c1, const Color<TagT>& c2)
-		{ return (c1==c2) || (c1<c2); }
-
-		/** @brief Greater-than-or-equal operator for color comparison.
-		 *
-		 *  Note that by default, this function will call operator<().
-		 *  \n\n
-		 *  A color model implementor can implement the full specialization of
-		 *  this function if better performance can be achieved by doing so.
-		 */
-		template <typename TagT> inline
-		bool operator>=(const Color<TagT>& c1, const Color<TagT>& c2)
-		{ return !(c1<c2); }
+        /** @brief Choose the type which has greater size (from the two given types).
+         */
+        template <typename A, typename B>
+        struct LargestSizeOf {
+            typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
+        };
 
 
-		/** @brief Addition operator for any color model mathematics (beware of overflow).
-		 *
-		 *  Note that by default, this function will call operator=() and operator+=().
-		 *  \n\n
-		 *  A color model implementor can implement the full specialization of
-		 *  this function if better performance can be achieved by doing so.
-		 */
-		template <typename TagT> inline
-		const Color<TagT>& operator+(const Color<TagT>& c1, const Color<TagT>& c2)
-		{
-			TagT rs = c1;
-			rs += c2;
-			return(rs);
-		}
+        /** @brief Greater-than operator for any color model comparison.
+         *
+         *  Note that by default, this function will use operator==() and operator<().
+         *  \n\n
+         *  A color model implementor should implement the full specialization of
+         *  this function for better performance.
+         */
+        template <typename TagT> inline
+        bool operator>(const Color<TagT>& c1, const Color<TagT>& c2)
+        { return !(c1==c2) && !(c1<c2); }
 
-		/** @brief Addition operator for any color model mathematics (beware of underflow).
-		 *
-		 *  Note that by default, this function will call operator=() and operator-=().
-		 *  \n\n
-		 *  A color model implementor can implement the full specialization of
-		 *  this function if better performance can be achieved by doing so.
-		 */
-		template <typename TagT> inline
-		const Color<TagT>& operator-(const Color<TagT>& c1, const Color<TagT>& c2)
-		{
-			TagT rs = c1;
-			rs -= c2;
-			return(rs);
-		}
+        /** @brief Inequality operator for any color model comparison.
+         *
+         *  Note that by default, this function will call operator==().
+         *  \n\n
+         *  A color model implementor can implement the full specialization of
+         *  this function if better performance can be achieved by doing so.
+         */
+        template <typename TagT> inline
+        bool operator!=(const Color<TagT>& c1, const Color<TagT>& c2)
+        { return !(c1==c2); }
 
-	} // namespace Gfx
+        /** @brief Less-than-or-equal operator for any color model comparison.
+         *
+         *  Note that by default, this function will call operator==() and operator<().
+         *  \n\n
+         *  A color model implementor can implement the full specialization of
+         *  this function if better performance can be achieved by doing so.
+         */
+        template <typename TagT> inline
+        bool operator<=(const Color<TagT>& c1, const Color<TagT>& c2)
+        { return (c1==c2) || (c1<c2); }
+
+        /** @brief Greater-than-or-equal operator for color comparison.
+         *
+         *  Note that by default, this function will call operator<().
+         *  \n\n
+         *  A color model implementor can implement the full specialization of
+         *  this function if better performance can be achieved by doing so.
+         */
+        template <typename TagT> inline
+        bool operator>=(const Color<TagT>& c1, const Color<TagT>& c2)
+        { return !(c1<c2); }
+
+
+        /** @brief Addition operator for any color model mathematics (beware of overflow).
+         *
+         *  Note that by default, this function will call operator=() and operator+=().
+         *  \n\n
+         *  A color model implementor can implement the full specialization of
+         *  this function if better performance can be achieved by doing so.
+         */
+        template <typename TagT> inline
+        const Color<TagT>& operator+(const Color<TagT>& c1, const Color<TagT>& c2)
+        {
+            TagT rs = c1;
+            rs += c2;
+            return(rs);
+        }
+
+        /** @brief Addition operator for any color model mathematics (beware of underflow).
+         *
+         *  Note that by default, this function will call operator=() and operator-=().
+         *  \n\n
+         *  A color model implementor can implement the full specialization of
+         *  this function if better performance can be achieved by doing so.
+         */
+        template <typename TagT> inline
+        const Color<TagT>& operator-(const Color<TagT>& c1, const Color<TagT>& c2)
+        {
+            TagT rs = c1;
+            rs -= c2;
+            return(rs);
+        }
+
+    } // namespace Gfx
 
 } // namespace Pt
 

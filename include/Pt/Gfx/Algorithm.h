@@ -26,27 +26,27 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief Transform one sequence into another.
-		 */
-		template <typename InIteratorT, typename OutIteratorT, typename OperationT> inline
-		OperationT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OperationT op)
-		{
-			for(; begin != end; ++begin, ++dest) op(*dest, *begin);
-			return op;
-		}
+        /** @brief Transform one sequence into another.
+         */
+        template <typename InIteratorT, typename OutIteratorT, typename OperationT> inline
+        OperationT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OperationT op)
+        {
+            for(; begin != end; ++begin, ++dest) op(*dest, *begin);
+            return op;
+        }
 
-		/** @brief Transform one sequence into another.
-		 */
-		template <typename IteratorT, typename OperationT> inline
-		OperationT transform(IteratorT begin, IteratorT end, OperationT op)
-		{
-			for(; begin != end; ++begin) op(*begin);
-			return op;
-		}
+        /** @brief Transform one sequence into another.
+         */
+        template <typename IteratorT, typename OperationT> inline
+        OperationT transform(IteratorT begin, IteratorT end, OperationT op)
+        {
+            for(; begin != end; ++begin) op(*begin);
+            return op;
+        }
 
-	} // namespace Gfx
+    } // namespace Gfx
 
 } // namespace Pt
 

@@ -26,26 +26,26 @@
 
 
 namespace Pt {
-	namespace Gfx {
+    namespace Gfx {
 
-		/** @brief Standard interleaved Rgb888 image class.
-		 */
-		typedef InterleavedImage<Rgb888Color, ColorTraits<Rgb888Color> > Rgb888InterleavedImage;
-
-
-		/** @brief Standard interleaved Rgb888 subimage class.
-		 */
-		typedef SubImage<Rgb888InterleavedImage> Rgb888InterleavedSubImage;
+        /** @brief Standard interleaved Rgb888 image class.
+         */
+        typedef InterleavedImage<Rgb888Color, ColorTraits<Rgb888Color> > Rgb888InterleavedImage;
 
 
-		//
-		// Interleaved images and subimages will be the most used types
-		// and so typedefs them for convenience
-		//
-		typedef Rgb888InterleavedImage    Rgb888Image;
-		typedef Rgb888InterleavedSubImage Rgb888SubImage;
+        /** @brief Standard interleaved Rgb888 subimage class.
+         */
+        typedef SubImage<Rgb888InterleavedImage> Rgb888InterleavedSubImage;
 
-	}
+
+        //
+        // Interleaved images and subimages will be the most used types
+        // and so typedefs them for convenience
+        //
+        typedef Rgb888InterleavedImage    Rgb888Image;
+        typedef Rgb888InterleavedSubImage Rgb888SubImage;
+
+    }
 }
 
 #endif

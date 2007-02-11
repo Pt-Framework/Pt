@@ -31,43 +31,43 @@
 
 namespace Pt {
 
-	class Date;
-	class Time;
-	class DateTime;
-	
+    class Date;
+    class Time;
+    class DateTime;
+    
 namespace Db {
 
-	class Result;
-	class Row;
-	class Value;
-	class ICursor;
+    class Result;
+    class Row;
+    class Value;
+    class ICursor;
 
-	class PT_DB_API IStatement : public RefCounted
-	{
-	public:
-		typedef size_t size_type;
+    class PT_DB_API IStatement : public RefCounted
+    {
+    public:
+        typedef size_t size_type;
 
-		virtual void clear() = 0;
+        virtual void clear() = 0;
 
         
-		virtual void setNull(const std::string& col) = 0;
-		virtual void setBool(const std::string& col, bool data) = 0;
-		virtual void setInt(const std::string& col, int data) = 0;
-		virtual void setUnsigned(const std::string& col, unsigned data) = 0;
-		virtual void setFloat(const std::string& col, float data) = 0;
-		virtual void setDouble(const std::string& col, double data) = 0;
-		virtual void setChar(const std::string& col, char data) = 0;
-		virtual void setString(const std::string& col, const std::string& data) = 0;
-		virtual void setDate(const std::string& col, const Date& data) = 0;
-		virtual void setTime(const std::string& col, const Time& data) = 0;
-		virtual void setDatetime(const std::string& col, const DateTime& data) = 0;
+        virtual void setNull(const std::string& col) = 0;
+        virtual void setBool(const std::string& col, bool data) = 0;
+        virtual void setInt(const std::string& col, int data) = 0;
+        virtual void setUnsigned(const std::string& col, unsigned data) = 0;
+        virtual void setFloat(const std::string& col, float data) = 0;
+        virtual void setDouble(const std::string& col, double data) = 0;
+        virtual void setChar(const std::string& col, char data) = 0;
+        virtual void setString(const std::string& col, const std::string& data) = 0;
+        virtual void setDate(const std::string& col, const Date& data) = 0;
+        virtual void setTime(const std::string& col, const Time& data) = 0;
+        virtual void setDatetime(const std::string& col, const DateTime& data) = 0;
 
-		virtual size_type execute() = 0;
-		virtual Result select() = 0;
-		virtual Row selectRow() = 0;
-		virtual Value selectValue() = 0;
-		virtual ICursor* createCursor() = 0;
-	};
+        virtual size_type execute() = 0;
+        virtual Result select() = 0;
+        virtual Row selectRow() = 0;
+        virtual Value selectValue() = 0;
+        virtual ICursor* createCursor() = 0;
+    };
 
 } // namespace Db
 
