@@ -18,21 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_x11_PainterImpl_h
-#define Pt_x11_PainterImpl_h
+#ifndef Pt_linux_fb_PainterImpl_h
+#define Pt_linux_fb_PainterImpl_h
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <linux/fb.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-// X11 defines these two globally, which conflicts with enum values in Pt/Char.h
-#undef Above
-#undef Below
-
-#include <Pt/Api.h>
+#include <Pt/Gui/Api.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -44,24 +41,14 @@
 #include <Pt/Gui/Painter.h>
 #include <Pt/String.h>
 
-#include <sstream>
-#include "Pt/Text/Utf16Codec.h"
-#include "Pt/Text/TextStream.h"
-
-struct _XftFont;
-struct _XftDraw;
-
 
 namespace Pt {
 
 namespace Gui {
 
-    class Drawable;
-    class Pixmap;
-
     class PainterImpl {
         public:
-            PainterImpl(Gui::Drawable& drawable);
+            PainterImpl();
 
             virtual ~PainterImpl();
 
@@ -69,7 +56,14 @@ namespace Gui {
 
             void end();
 
-            Gui::Drawable& drawable() const;
+            Pt::ssize_t depth() const
+            { return _screenInfo.bits_per_pixel;}
+
+            Pt::ssize_t width() const
+            { return _screenInfo.xres;}
+
+            Pt::ssize_t height() const
+            { return _screenInfo.yres;}
 
             void setPen(const Gfx::Pen& pen);
 
@@ -88,8 +82,6 @@ namespace Gui {
             Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
             const std::list<std::string>& fontFamilyNames();
-
-            int depth() const;
 
             void drawPixel(const Math::Point& to);
 
@@ -118,57 +110,57 @@ namespace Gui {
             void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
                            const Gfx::Region& imageRegion);
 
+        protected:
             template <typename Iterator>
-            void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
+            void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
             {
-                switch( this->depth() ) {
+                const char* imageData = 0;
+
+                switch( this->depth() )
+                {
                     case 32:
-                    case 24:
                     {
-                        Gfx::Rgb888Image rgb24Image( width, height );
-                        assign( begin, end, rgb24Image.begin() );
-                        this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
+                        Gfx::Rgb888Image rgbImage( width, height );
+                        assign( begin, end, rgbImage.begin() );
+                        this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );
                         break;
                     }
-
                     case 16:
                     {
-                        Gfx::Rgb565Image rgb16Image( width, height );
-                        assign( begin, end, rgb16Image.begin() );
-                        this->drawImage( x, y, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height() );
+                        Gfx::Rgb565Image rgbImage( width, height );
+                        assign( begin, end, rgbImage.begin() );
+                        imageData = (char*)( rgbImage.data() );
+                        this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );
                         break;
                     }
-                    case 15:
-                    {
-                        Gfx::Rgb555Image rgb15Image( width, height );
-                        assign( begin, end, rgb15Image.begin() );
-                        this->drawImage( x, y, (char*)rgb15Image.data(), rgb15Image.width(), rgb15Image.height() );
-                        break;
-                    }
-
                     default:
-                        break;
+                        imageData = 0;
                 }
             }
 
-        protected:
-            long toXColor(const Gfx::ARgbColor& color);
+            void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
+            {
+                size_t pixelSize = this->depth() / 8;
+                unsigned bufferOffset = toX + ( toY * this->width() );
+                char* bufferData = (char*)( _buffer) + ( bufferOffset * pixelSize);
 
-            void drawImage(size_t toX, size_t toY, const char* data, size_t width, size_t height);
+                for(size_t n = 0; n < fromHeight; ++n)
+                {
+                    memcpy(bufferData, data, fromWidth * pixelSize);
+                    bufferData += this->width() * pixelSize;
+                    data += fromWidth * pixelSize;
+                }
+            }
 
         private:
-            Gui::Drawable* _drawable;
+            int _fd;
+            fb_var_screeninfo _screenInfo;
+            fb_fix_screeninfo _fixedInfo;
+            void* _buffer;
+            Pt::size_t _bufferSize;
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-            GC _penGc;
-            GC _brushGc;
-            _XftDraw* _xftDraw;
-            _XftFont* _xftFont;
-            std::list<std::string> _fontList;
-
-            mutable std::stringstream    _stringStream;
-            mutable Pt::Text::TextStream _textStream;
     };
 
 } // namespace Gui
