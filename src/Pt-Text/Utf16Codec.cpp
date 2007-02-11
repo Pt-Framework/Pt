@@ -35,141 +35,141 @@ Utf16Codec::~Utf16Codec()
 Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
                                      Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
 {
-	result retstat = ok;
+    result retstat = ok;
 
-	fromNext = fromBegin;
-	uint16_t* fNext = (uint16_t*)fromBegin;
-	uint16_t* fEnd  = (uint16_t*)fromEnd;
-	uint16_t ch;
-	uint16_t ch2;
+    fromNext = fromBegin;
+    uint16_t* fNext = (uint16_t*)fromBegin;
+    uint16_t* fEnd  = (uint16_t*)fromEnd;
+    uint16_t ch;
+    uint16_t ch2;
 
-	while(fNext < fEnd) {
+    while(fNext < fEnd) {
 
-		ch = *fNext++;
+        ch = *fNext++;
 
-		/// If we have a surrogate pair, convert to UTF32 first.
-		if (ch >= 0xD800 && ch <= 0xDBFF) {
-			// If the 16 bits following the high surrogate are in the source buffer...
-			if (fNext < fEnd) {
-				ch2 = *fNext;
-				// If it's a low surrogate, convert to UTF32.
-					if (ch2 >= 0xDC00 && ch2 <= 0xDFFF) {
-						ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000UL;
-						++fNext;
-					} else {
-						--fNext; // return to the illegal value itself
-						retstat = error;
-						break;
-					}
-			} else { // We don't have the 16 bits following the high surrogate (source exhausted)
-				fNext--;
-				retstat = partial;
-				break;
-			}
-		} else {
-			// UTF-16 surrogate values are illegal in UTF-32
-			if (ch >= 0xDC00 && ch <= 0xDFFF) {
-				--fNext; // return to the illegal value itself
-				retstat = error;
-				break;
-			}
-		}
+        /// If we have a surrogate pair, convert to UTF32 first.
+        if (ch >= 0xD800 && ch <= 0xDBFF) {
+            // If the 16 bits following the high surrogate are in the source buffer...
+            if (fNext < fEnd) {
+                ch2 = *fNext;
+                // If it's a low surrogate, convert to UTF32.
+                    if (ch2 >= 0xDC00 && ch2 <= 0xDFFF) {
+                        ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000UL;
+                        ++fNext;
+                    } else {
+                        --fNext; // return to the illegal value itself
+                        retstat = error;
+                        break;
+                    }
+            } else { // We don't have the 16 bits following the high surrogate (source exhausted)
+                fNext--;
+                retstat = partial;
+                break;
+            }
+        } else {
+            // UTF-16 surrogate values are illegal in UTF-32
+            if (ch >= 0xDC00 && ch <= 0xDFFF) {
+                --fNext; // return to the illegal value itself
+                retstat = error;
+                break;
+            }
+        }
 
-		if (toNext >= toEnd) {
-			--fNext;
-			toNext = toEnd;
-			retstat = partial;
-			break;
-		}
+        if (toNext >= toEnd) {
+            --fNext;
+            toNext = toEnd;
+            retstat = partial;
+            break;
+        }
 
-		*toNext++ = ch;
+        *toNext++ = ch;
 
-	} // while
+    } // while
 
-	// update pointers
-	fromNext = (const char*)fNext;
+    // update pointers
+    fromNext = (const char*)fNext;
 
-	return retstat;
+    return retstat;
 }
 
 //! encodes UTF-32 to UTF-16
 Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
 {
-	result retstat = ok;
+    result retstat = ok;
 
-	fromNext = fromBegin;
-	uint16_t* tNext = (uint16_t*)toBegin;
-	uint16_t* tEnd  = (uint16_t*)toEnd;
-	Pt::Char ch;
+    fromNext = fromBegin;
+    uint16_t* tNext = (uint16_t*)toBegin;
+    uint16_t* tEnd  = (uint16_t*)toEnd;
+    Pt::Char ch;
 
-	while (fromNext < fromEnd) {
+    while (fromNext < fromEnd) {
 
-		if (tNext >= tEnd) {
-			tNext = tEnd;
-			retstat = partial;
-			break;
-		}
+        if (tNext >= tEnd) {
+            tNext = tEnd;
+            retstat = partial;
+            break;
+        }
 
-		ch = *fromNext++;
+        ch = *fromNext++;
 
-		if (ch <= Pt::Char(0xFFFF))
-		{ // Target is a character <= 0xFFFF
-			// UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values
-			if (ch >= Pt::Char(0xD800) && ch <= Pt::Char(0xDFFF))
-			{
-				--fromNext; // return to the illegal value itself
-				retstat = error;
-				break;
-			}
-			else
-			{
-				*tNext++ = ch; // normal case
-			}
-		}
-		else if (ch > Pt::Char(0x0010FFFF))
-		{
-				retstat = error;
-				*tNext++ = 0xFFFD;
-		}
-		else
-		{
-			// target is a character in range 0xFFFF - 0x10FFFF.
-			if (tNext + 1 >= tEnd)
-			{
-				fromNext--;
-				tNext = tEnd;
-				retstat = partial;
-			}
-			ch -= 0x0010000UL;
-			*toNext++ = (((uint32_t)ch >> 10) + 0xD800);
-			*toNext++ = (((uint32_t)ch & 0x3FFUL) + 0xDC00);
-		}
+        if (ch <= Pt::Char(0xFFFF))
+        { // Target is a character <= 0xFFFF
+            // UTF-16 surrogate values are illegal in UTF-32; 0xffff or 0xfffe are both reserved values
+            if (ch >= Pt::Char(0xD800) && ch <= Pt::Char(0xDFFF))
+            {
+                --fromNext; // return to the illegal value itself
+                retstat = error;
+                break;
+            }
+            else
+            {
+                *tNext++ = ch; // normal case
+            }
+        }
+        else if (ch > Pt::Char(0x0010FFFF))
+        {
+                retstat = error;
+                *tNext++ = 0xFFFD;
+        }
+        else
+        {
+            // target is a character in range 0xFFFF - 0x10FFFF.
+            if (tNext + 1 >= tEnd)
+            {
+                fromNext--;
+                tNext = tEnd;
+                retstat = partial;
+            }
+            ch -= 0x0010000UL;
+            *toNext++ = (((uint32_t)ch >> 10) + 0xD800);
+            *toNext++ = (((uint32_t)ch & 0x3FFUL) + 0xDC00);
+        }
 
-	} // while
+    } // while
 
-	// update pointers
-	toNext = (char*)tNext;
+    // update pointers
+    toNext = (char*)tNext;
 
-	return retstat;
+    return retstat;
 }
 
 
 int Utf16Codec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
-	return fromEnd-fromBegin;
+    return fromEnd-fromBegin;
 }
 
 
 int Utf16Codec::do_max_length() const throw()
 {
-	return 2; // Should be only 2 UTF-16 chars (= 4 bytes)
-	          // Question: what we should actually return here ?
-						// The number of UTF-16 chars? Or the bytes?
+    return 2; // Should be only 2 UTF-16 chars (= 4 bytes)
+              // Question: what we should actually return here ?
+                        // The number of UTF-16 chars? Or the bytes?
 }
 
 bool Utf16Codec::do_always_no_conv() const throw()
 {
-	return false;
+    return false;
 }
 

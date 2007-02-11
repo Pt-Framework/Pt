@@ -24,23 +24,23 @@
 #include <Pt/Api.h>
 
 #if defined(WIN32) || defined(_WIN32)
-	#include <winsock2.h>
-	#define SHUT_RD   1
-	#define SHUT_RDWR 2
-	#define PT_INVALID_SOCKET INVALID_SOCKET
-	#define PT_EINTR WSAEINTR
-	#define PT_ECONNRESET WSAECONNRESET
-	#define PT_EAGAIN WSAEWOULDBLOCK
+    #include <winsock2.h>
+    #define SHUT_RD   1
+    #define SHUT_RDWR 2
+    #define PT_INVALID_SOCKET INVALID_SOCKET
+    #define PT_EINTR WSAEINTR
+    #define PT_ECONNRESET WSAECONNRESET
+    #define PT_EAGAIN WSAEWOULDBLOCK
 #else
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <sys/poll.h>
-	#include <cerrno>
-	typedef int SOCKET;
-	#define PT_INVALID_SOCKET -1
-	#define PT_EINTR EINTR
-	#define PT_ECONNRESET ECONNRESET
-	#define PT_EAGAIN EAGAIN
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <sys/poll.h>
+    #include <cerrno>
+    typedef int SOCKET;
+    #define PT_INVALID_SOCKET -1
+    #define PT_EINTR EINTR
+    #define PT_ECONNRESET ECONNRESET
+    #define PT_EAGAIN EAGAIN
 #endif
 
 #include <Pt/Exception.h>

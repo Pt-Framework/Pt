@@ -23,15 +23,15 @@
 #include <Pt/Net/Api.h>
 
 #if defined(WIN32) || defined(_WIN32)
-	//#ifdef __GNUC__
-	//#define WINVER 0x501
-	//#endif
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
+    //#ifdef __GNUC__
+    //#define WINVER 0x501
+    //#endif
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
 #else
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netdb.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
 #endif
 
 #include <Pt/Exception.h>
@@ -44,55 +44,55 @@ namespace Pt {
 
 namespace Net {
 
-	class AddrInfo
+    class AddrInfo
     {
-		private:
+        private:
             ::addrinfo* ai;
 
-		public:  
-			class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
-			{
-				private:
-					::addrinfo* current;
+        public:  
+            class const_iterator : public std::iterator<std::forward_iterator_tag, addrinfo>
+            {
+                private:
+                    ::addrinfo* current;
 
-				public:
-					explicit const_iterator(struct addrinfo* ai = 0)
-					: current(ai)
-					{ }
+                public:
+                    explicit const_iterator(struct addrinfo* ai = 0)
+                    : current(ai)
+                    { }
 
-					bool operator== (const const_iterator& it) const
-					{ return current == it.current; }
+                    bool operator== (const const_iterator& it) const
+                    { return current == it.current; }
 
-					bool operator!= (const const_iterator& it) const
-					{ return current != it.current; }
+                    bool operator!= (const const_iterator& it) const
+                    { return current != it.current; }
 
-					const_iterator& operator++ ()
-					{ current = current->ai_next; return *this; }
+                    const_iterator& operator++ ()
+                    { current = current->ai_next; return *this; }
 
-					const_iterator operator++ (int)
-					{
-					  const_iterator ret(current);
-					  current = current->ai_next;
-					  return ret;
-					}
+                    const_iterator operator++ (int)
+                    {
+                      const_iterator ret(current);
+                      current = current->ai_next;
+                      return ret;
+                    }
 
-					reference operator* () const
-					{ return *current; }
+                    reference operator* () const
+                    { return *current; }
 
-					pointer operator-> () const
-					{ return current; }
-			};
+                    pointer operator-> () const
+                    { return current; }
+            };
 
-		public:
-			AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
+        public:
+            AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints);
 
-			~AddrInfo();  
+            ~AddrInfo();  
 
-			const_iterator begin() const  
-			{ return const_iterator(ai); }
+            const_iterator begin() const  
+            { return const_iterator(ai); }
 
-			const_iterator end() const    
-			{ return const_iterator(); }
+            const_iterator end() const    
+            { return const_iterator(); }
     };
 
 }

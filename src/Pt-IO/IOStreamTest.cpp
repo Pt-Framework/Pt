@@ -11,12 +11,12 @@ using namespace std;
 
 class IOStreamTest : public CPPUNIT_NS::TestFixture
 {
-	CPPUNIT_TEST_SUITE( IOStreamTest );
-	CPPUNIT_TEST( test );
-	CPPUNIT_TEST_SUITE_END();
+    CPPUNIT_TEST_SUITE( IOStreamTest );
+    CPPUNIT_TEST( test );
+    CPPUNIT_TEST_SUITE_END();
 
-	protected:
-		void test();
+    protected:
+        void test();
 };
 
 
@@ -25,7 +25,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( IOStreamTest );
 void IOStreamTest::test()
 {
 
-	//CPPUNIT_ASSERT();
+    //CPPUNIT_ASSERT();
 }
 
 

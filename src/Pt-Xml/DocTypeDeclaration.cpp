@@ -18,13 +18,13 @@ DocTypeDeclaration::~DocTypeDeclaration() {
 
 const String& DocTypeDeclaration::content() const
 {
-	return _content;
+    return _content;
 }
 
 
 void DocTypeDeclaration::setContent(const String& content)
 {
-	_content = content;
+    _content = content;
 }
 
 } // namespace Xml

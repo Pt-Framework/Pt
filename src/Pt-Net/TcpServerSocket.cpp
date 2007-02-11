@@ -27,19 +27,19 @@ namespace Net {
 
 TcpServerSocket::~TcpServerSocket()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 void TcpServerSocket::listen(const std::string& ipaddr, unsigned short int port, unsigned backlog)
 {
-	if(!_impl)
-	{
-		_impl = new TcpServerSocketImpl;
-	}
-	
-	_impl->bind(ipaddr, port);
-	_impl->listen(backlog);
+    if(!_impl)
+    {
+        _impl = new TcpServerSocketImpl;
+    }
+    
+    _impl->bind(ipaddr, port);
+    _impl->listen(backlog);
 }
 
 } // namespace Net

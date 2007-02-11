@@ -39,16 +39,16 @@ AsciiCodec::result AsciiCodec::do_in(mbstate_t& s, const char* fromBegin,
                                      const char* fromEnd, const char*& fromNext,
                                      Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
 {
-	toNext = toBegin;
-	for(fromNext = fromBegin; fromNext < fromEnd; ++fromNext) {
-		if(toNext == toEnd)
-			return AsciiCodec::partial;
+    toNext = toBegin;
+    for(fromNext = fromBegin; fromNext < fromEnd; ++fromNext) {
+        if(toNext == toEnd)
+            return AsciiCodec::partial;
 
-		*toNext = Char( *(fromNext) );
-		++toNext;
-	}
+        *toNext = Char( *(fromNext) );
+        ++toNext;
+    }
 
-	return AsciiCodec::ok;
+    return AsciiCodec::ok;
 }
 
 
@@ -57,38 +57,38 @@ AsciiCodec::result AsciiCodec::do_out(mbstate_t& s, const Pt::Char* fromBegin,
                                       const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
 {
-	toNext = toBegin;
-	for(fromNext = fromBegin; fromNext < fromEnd; ++fromNext) {
-		if(toNext == toEnd)
-			return AsciiCodec::partial;
+    toNext = toBegin;
+    for(fromNext = fromBegin; fromNext < fromEnd; ++fromNext) {
+        if(toNext == toEnd)
+            return AsciiCodec::partial;
 
-		*toNext = fromNext->narrow('*');
-		if( *toNext < 0x00 ) {
-			*toNext = '*';
-		}
+        *toNext = fromNext->narrow('*');
+        if( *toNext < 0x00 ) {
+            *toNext = '*';
+        }
 
-		++toNext;
-	}
+        ++toNext;
+    }
 
-	return AsciiCodec::ok;
+    return AsciiCodec::ok;
 }
 
 
 int AsciiCodec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
-	return fromEnd-fromBegin;
+    return fromEnd-fromBegin;
 }
 
 
 int AsciiCodec::do_max_length() const throw()
 {
-	return 1;
+    return 1;
 }
 
 
 bool AsciiCodec::do_always_no_conv() const throw()
 {
-	return false;
+    return false;
 }
 
 } // namespace Text

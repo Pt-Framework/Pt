@@ -23,19 +23,19 @@ Comment::~Comment()
 
 String& Comment::text()
 {
-	return _text;
+    return _text;
 }
 
 
 const String& Comment::text() const
 {
-	return _text;
+    return _text;
 }
 
 
 void Comment::setText(const String text)
 {
-	_text = text;
+    _text = text;
 }
 
 } // namespace Xml

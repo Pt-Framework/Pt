@@ -32,31 +32,31 @@ namespace Text {
 
 struct InitLocale
 {
-	InitLocale()
-	{
-	    #ifndef PT_WITHOUT_STD_LOCALE
-		std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-		std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-		#endif
-	}
+    InitLocale()
+    {
+        #ifndef PT_WITHOUT_STD_LOCALE
+        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+        #endif
+    }
 } _initLocale;
 
 
 TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 : BasicTextBuffer<Pt::Char, char>(buffer, codec)
 {
-	// When building a DLL under Visual studio, we need to imbue here
-	#ifndef PT_WITHOUT_STD_LOCALE
-		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
-		{
-			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-		}
-	#endif
+    // When building a DLL under Visual studio, we need to imbue here
+    #ifndef PT_WITHOUT_STD_LOCALE
+        if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
+        {
+            std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+        }
+    #endif
 }
 
 
@@ -64,13 +64,13 @@ TextIStream::TextIStream(std::istream& is, CodecT* codec)
 : BasicTextIStream<Char, char>( new TextBuffer(is.rdbuf(), codec) )
 , _buffer(0)
 {
-	_buffer = (TextBuffer*)( this->rdbuf() );
+    _buffer = (TextBuffer*)( this->rdbuf() );
 }
 
 
 TextIStream::~TextIStream()
 {
-	delete _buffer;
+    delete _buffer;
 }
 
 
@@ -78,14 +78,14 @@ TextIStream::TextIStream(TextBuffer* buffer)
 : BasicTextIStream<Pt::Char, char>( buffer )
 , _buffer(0)
 {
-	/*#ifndef PTV_WITHOUT_STD_LOCALE
-		if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
-			std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-			std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-		}
-	#endif*/
+    /*#ifndef PTV_WITHOUT_STD_LOCALE
+        if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
+            std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+            std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+        }
+    #endif*/
 }
 
 
@@ -98,7 +98,7 @@ TextOStream::TextOStream(std::ostream& os, CodecT* codec)
 
 TextOStream::~TextOStream()
 {
-	delete this->rdbuf();
+    delete this->rdbuf();
 }
 
 
@@ -110,7 +110,7 @@ TextStream::TextStream(std::iostream& ios, CodecT* codec)
 
 TextStream::~TextStream()
 {
-	delete this->rdbuf();
+    delete this->rdbuf();
 }
 
 

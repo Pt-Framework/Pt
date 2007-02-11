@@ -38,7 +38,7 @@ Utf32Codec::result Utf32Codec::do_in(mbstate_t& s, const char* fromBegin,
                                     const char* fromEnd, const char*& fromNext,
                                     Char* toBegin, Char* toEnd, Char*& toNext) const
 {
-	return Utf32Codec::noconv;
+    return Utf32Codec::noconv;
 }
 
 
@@ -46,23 +46,23 @@ Utf32Codec::result Utf32Codec::do_out(mbstate_t& s, const Char* fromBegin,
                                      const Char* fromEnd, const Char*& fromNext,
                                      char* toBegin, char* toEnd, char*& toNext) const
 {
-	return Utf32Codec::noconv;
+    return Utf32Codec::noconv;
 }
 
 
 int Utf32Codec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
-	return (fromEnd - fromBegin)/4;
+    return (fromEnd - fromBegin)/4;
 }
 
 
 int Utf32Codec::do_max_length() const throw()
 {
-	return 4;
+    return 4;
 }
 
 
 bool Utf32Codec::do_always_no_conv() const throw()
 {
-	return true;
+    return true;
 }

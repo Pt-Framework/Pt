@@ -64,17 +64,17 @@ namespace Pt {
 
 namespace utf {
 
-	const Pt::Char ReplacementChar = 0x0000FFFD;
-	const Pt::Char MaxBmp = 0x0000FFFF;
-	const Pt::Char MaxUtf16 = 0x0010FFFF;
-	const Pt::Char MaxUtf32 = 0x7FFFFFFF;
-	const Pt::Char MaxLegalUtf32 = 0x0010FFFF;
-	const Pt::Char SurHighStart = 0xD800;
-	const Pt::Char SurHighEnd = 0xDBFF;
-	const Pt::Char SurLowStart = 0xDC00;
-	const Pt::Char SurLowEnd = 0xDFFF;
-	const Pt::Char ByteOrderMark = 0xFEFF;
-	const Pt::Char ByteOrderSwapped = 0xFFFE;
+    const Pt::Char ReplacementChar = 0x0000FFFD;
+    const Pt::Char MaxBmp = 0x0000FFFF;
+    const Pt::Char MaxUtf16 = 0x0010FFFF;
+    const Pt::Char MaxUtf32 = 0x7FFFFFFF;
+    const Pt::Char MaxLegalUtf32 = 0x0010FFFF;
+    const Pt::Char SurHighStart = 0xD800;
+    const Pt::Char SurHighEnd = 0xDBFF;
+    const Pt::Char SurLowStart = 0xDC00;
+    const Pt::Char SurLowEnd = 0xDFFF;
+    const Pt::Char ByteOrderMark = 0xFEFF;
+    const Pt::Char ByteOrderSwapped = 0xFFFE;
 
 #define halfShift uint32_t(10)
 #define halfBase Pt::Char(0x0010000)
@@ -91,14 +91,14 @@ namespace utf {
  * allowed in earlier algorithms.
  */
 const char trailingBytesForUTF8[256] = {
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
 };
 
 
@@ -108,12 +108,12 @@ const char trailingBytesForUTF8[256] = {
  * in a UTF-8 sequence.
  */
 const Char offsetsFromUTF8[6] = {
-	0x00000000UL,
-	0x00003080UL,
-	0x000E2080UL,
-	0x03C82080UL,
-	0xFA082080UL,
-	0x82082080UL
+    0x00000000UL,
+    0x00003080UL,
+    0x000E2080UL,
+    0x03C82080UL,
+    0xFA082080UL,
+    0x82082080UL
 };
 
 
@@ -125,7 +125,7 @@ const Char offsetsFromUTF8[6] = {
  * for *legal* UTF-8 will be 4 or fewer bytes total.
  */
 const uint8_t firstByteMark[7] = {
-	0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC
+    0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC
 };
 
 /**
@@ -144,32 +144,32 @@ const uint8_t firstByteMark[7] = {
  * otherwise.
  */
 inline bool isLegalUTF8(const uint8_t *source, int length) {
-	uint8_t a;
-	const uint8_t *srcptr = source + length;
+    uint8_t a;
+    const uint8_t *srcptr = source + length;
 
-	switch (length) {
-		default:
-			return false;
+    switch (length) {
+        default:
+            return false;
 
-		// Everything else falls through when "true"...
-		case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-		case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
-		case 2: if ((a = (*--srcptr)) > 0xBF) return false;
-			switch (*source) {
-				// no fall-through in this inner switch
-				case 0xE0: if (a < 0xA0) return false; break;
-				case 0xED: if (a > 0x9F) return false; break;
-				case 0xF0: if (a < 0x90) return false; break;
-				case 0xF4: if (a > 0x8F) return false; break;
-				default:   if (a < 0x80) return false;
-			}
-	case 1: if (*source >= 0x80 && *source < 0xC2) return false;
-	}
+        // Everything else falls through when "true"...
+        case 4: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+        case 3: if ((a = (*--srcptr)) < 0x80 || a > 0xBF) return false;
+        case 2: if ((a = (*--srcptr)) > 0xBF) return false;
+            switch (*source) {
+                // no fall-through in this inner switch
+                case 0xE0: if (a < 0xA0) return false; break;
+                case 0xED: if (a > 0x9F) return false; break;
+                case 0xF0: if (a < 0x90) return false; break;
+                case 0xF4: if (a > 0x8F) return false; break;
+                default:   if (a < 0x80) return false;
+            }
+    case 1: if (*source >= 0x80 && *source < 0xC2) return false;
+    }
 
-	if (*source > 0xF4)
-		return false;
+    if (*source > 0xF4)
+        return false;
 
-	return true;
+    return true;
 }
 
 } // namespace utf8

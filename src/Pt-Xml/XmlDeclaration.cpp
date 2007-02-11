@@ -23,32 +23,32 @@ XmlDeclaration::~XmlDeclaration() {
 
 
 const String& XmlDeclaration::version() const {
-	return _version;
+    return _version;
 }
 
 
 void XmlDeclaration::setVersion(const String& version) {
-	_version = version;
+    _version = version;
 }
 
 
 const String& XmlDeclaration::encoding() const {
-	return _encoding;
+    return _encoding;
 }
 
 
 void XmlDeclaration::setEncoding(const String& encoding) {
-	_encoding = encoding;
+    _encoding = encoding;
 }
 
 
 bool XmlDeclaration::standalone() const {
-	return _standalone;
+    return _standalone;
 }
 
 
 void XmlDeclaration::setStandalone(bool standalone) {
-	_standalone = standalone;
+    _standalone = standalone;
 }
 
 

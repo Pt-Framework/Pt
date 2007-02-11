@@ -39,32 +39,32 @@ QName::~QName()
 
 const String& QName::prefix() const
 {
-	return _prefix;
+    return _prefix;
 }
 
 
 void QName::setPrefix(const String& prefix) {
-	_prefix = prefix;
+    _prefix = prefix;
 }
 
 
 const String& QName::localPart() const {
-	return _localPart;
+    return _localPart;
 }
 
 
 void QName::setLocalPart(const String& localPart) {
-	_localPart = localPart;
+    _localPart = localPart;
 }
 
 
 const String& QName::namespaceUri() const {
-	return _namespaceUri;
+    return _namespaceUri;
 }
 
 
 void QName::setNamespaceUri(const String& namespaceUri) {
-	_namespaceUri = namespaceUri;
+    _namespaceUri = namespaceUri;
 }
 
 } // namespace Xml

@@ -24,25 +24,25 @@ using namespace std;
 
 void Pt::Text::tokenize(vector<string> &tokens, const string &source, const string &delimiters)
 {
-	// Skip delimiters at beginning
-	string::size_type lastPos = source.find_first_not_of(delimiters, 0);
+    // Skip delimiters at beginning
+    string::size_type lastPos = source.find_first_not_of(delimiters, 0);
 
-	// Find first "non-delimiter"
-	string::size_type pos = source.find_first_of(delimiters, lastPos);
+    // Find first "non-delimiter"
+    string::size_type pos = source.find_first_of(delimiters, lastPos);
 
-	// Clear the destination vector first
-	tokens.clear();
+    // Clear the destination vector first
+    tokens.clear();
 
-	// Tokenize it
-	while((pos != string::npos) || (lastPos != string::npos))
-	{
-		// Found a token, add it to the vector
-		tokens.push_back(source.substr(lastPos, pos - lastPos));
+    // Tokenize it
+    while((pos != string::npos) || (lastPos != string::npos))
+    {
+        // Found a token, add it to the vector
+        tokens.push_back(source.substr(lastPos, pos - lastPos));
 
-		// Skip delimiters
-		lastPos = source.find_first_not_of(delimiters, pos);
+        // Skip delimiters
+        lastPos = source.find_first_not_of(delimiters, pos);
 
-		// Find next "non-delimiter"
-		pos = source.find_first_of(delimiters, lastPos);
-	}
+        // Find next "non-delimiter"
+        pos = source.find_first_of(delimiters, lastPos);
+    }
 }

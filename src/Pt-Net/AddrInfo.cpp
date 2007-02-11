@@ -26,20 +26,20 @@ namespace Net {
 AddrInfo::AddrInfo(const std::string& ipaddr, unsigned short port, const addrinfo& hints)
 : ai(0)
 {
-	std::ostringstream p;
-	p << port;
+    std::ostringstream p;
+    p << port;
 
-	if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
-	  throw std::runtime_error("invalid ipaddress " + ipaddr + ":" + p.str() + PT_SOURCEINFO); // TODO specify errortype
+    if (0 != ::getaddrinfo(ipaddr.c_str(), p.str().c_str(), &hints, &ai))
+      throw std::runtime_error("invalid ipaddress " + ipaddr + ":" + p.str() + PT_SOURCEINFO); // TODO specify errortype
 
-	if (ai == 0)
-	  throw std::runtime_error("unknown error in getaddrinfo" + PT_SOURCEINFO); // TODO specify errortype
+    if (ai == 0)
+      throw std::runtime_error("unknown error in getaddrinfo" + PT_SOURCEINFO); // TODO specify errortype
 }
 
 AddrInfo::~AddrInfo()
 {
-	if (ai)
-		::freeaddrinfo(ai);
+    if (ai)
+        ::freeaddrinfo(ai);
 }
 
 }

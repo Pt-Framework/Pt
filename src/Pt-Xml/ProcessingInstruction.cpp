@@ -22,25 +22,25 @@ ProcessingInstruction::~ProcessingInstruction()
 
 const String& ProcessingInstruction::target() const
 {
-	return _target;
+    return _target;
 }
 
 
 void ProcessingInstruction::setTarget(const String& target)
 {
-	_target = target;
+    _target = target;
 }
 
 
 const String& ProcessingInstruction::data() const
 {
-	return _data;
+    return _data;
 }
 
 
 void ProcessingInstruction::setData(const String& data)
 {
-	_data = data;
+    _data = data;
 }
 
 } // namespace Xml
