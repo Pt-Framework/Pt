@@ -2,8 +2,12 @@ SubDir TOP src Pt-Gui linux-fb ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
-Library Pt-Gui-linux-fb : PainterImpl.cpp
+Library Pt-Gui-linux-fb : ApplicationImpl.cpp
+                          PainterImpl.cpp
+                          WidgetImpl.cpp
+                          PixmapImpl.cpp
                           ;
+
 Main LfbTest : LfbTest.cpp ;
 Main_LinkSharedLibraries LfbTest : Pt-Gui Pt-Gfx Pt-Text Pt-IO Pt-System Pt ;
 Main_LinkLibraries LfbTest : Pt-Gui-linux-fb ;

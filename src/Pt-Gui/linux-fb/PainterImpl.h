@@ -17,17 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_linux_fb_PainterImpl_h
 #define Pt_linux_fb_PainterImpl_h
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <linux/fb.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include "ApplicationImpl.h"
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Gfx/Pen.h>
@@ -46,6 +39,7 @@ namespace Pt {
 
 namespace Gui {
 
+
     class PainterImpl {
         public:
             PainterImpl();
@@ -55,15 +49,6 @@ namespace Gui {
             void begin();
 
             void end();
-
-            Pt::ssize_t depth() const
-            { return _screenInfo.bits_per_pixel;}
-
-            Pt::ssize_t width() const
-            { return _screenInfo.xres;}
-
-            Pt::ssize_t height() const
-            { return _screenInfo.yres;}
 
             void setPen(const Gfx::Pen& pen);
 
@@ -114,9 +99,10 @@ namespace Gui {
             template <typename Iterator>
             void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
             {
+                Screen& screen = Screen::instance();
                 const char* imageData = 0;
 
-                switch( this->depth() )
+                switch( screen.depth() )
                 {
                     case 32:
                     {
@@ -138,26 +124,9 @@ namespace Gui {
                 }
             }
 
-            void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
-            {
-                size_t pixelSize = this->depth() / 8;
-                unsigned bufferOffset = toX + ( toY * this->width() );
-                char* bufferData = (char*)( _buffer) + ( bufferOffset * pixelSize);
-
-                for(size_t n = 0; n < fromHeight; ++n)
-                {
-                    memcpy(bufferData, data, fromWidth * pixelSize);
-                    bufferData += this->width() * pixelSize;
-                    data += fromWidth * pixelSize;
-                }
-            }
+            void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
 
         private:
-            int _fd;
-            fb_var_screeninfo _screenInfo;
-            fb_fix_screeninfo _fixedInfo;
-            void* _buffer;
-            Pt::size_t _bufferSize;
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;

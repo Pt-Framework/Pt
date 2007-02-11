@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "ApplicationImpl.h"
 #include "PainterImpl.h"
 
 #include "Pt/Gui/Pixmap.h"
@@ -35,63 +36,16 @@ namespace Pt {
 namespace Gui {
 
 
-PainterImpl::PainterImpl()
-: _fd(-1)
-, _buffer(0)
-, _bufferSize(0)
-, _font("sans-serif")
+PainterImpl::PainterImpl( )
+: _font("sans-serif")
 {
-    // Open the frame buffer device
-    _fd = open ("/dev/fb0", O_RDWR);
-    if(_fd < 0)
-        throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
 
-/*
-    if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
-
-    _screenInfo.bits_per_pixel = 16;
-    _screenInfo.xres           = 640;
-    _screenInfo.yres           = 480;
-
-    if( 0 > ioctl(_fd, FBIOPUT_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOPUT_VSCREENINFO failed" + PT_SOURCEINFO);
-*/
-
-    if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
-
-    // Get the fixed state
-    //if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-    //    throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
-
-    //_fixedInfo.type;   // 0 -> Packed pixels
-                         // 1 -> Non interleaved planes
-                         // 2 -> Interleaved planes
-                         // 3 -> Text/attributes
-                         // 4 -> EGA/VGA planes
-
-    //_fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
-                         // 1 -> Mono (1=white, 0=black)
-                         // 2 -> True color
-                         // 3 -> Pseudo color (like atari)
-                         // 4 -> Direct color
-                         // 5 -> Pseudo color readonly
-
-    // Memory map the display
-    unsigned _pitch = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
-    _bufferSize     = _pitch * _screenInfo.yres;
-    _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
 }
 
 
 PainterImpl::~PainterImpl()
 {
-    if(_buffer)
-        munmap(_buffer, _bufferSize);
 
-    if(_fd > 0)
-        close(_fd);
 }
 
 
@@ -240,6 +194,22 @@ void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
 
 }
 
+
+void PainterImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
+{
+    char* buffer = Screen::instance().frameBuffer();
+
+    size_t pixelSize = Screen::instance().depth() / 8;
+    unsigned bufferOffset = toX + ( toY * Screen::instance().width() );
+    char* bufferData = (char*)( buffer) + ( bufferOffset * pixelSize);
+
+    for(size_t n = 0; n < fromHeight; ++n)
+    {
+        memcpy(bufferData, data, fromWidth * pixelSize);
+        bufferData += Screen::instance().width() * pixelSize;
+        data += fromWidth * pixelSize;
+    }
+}
 
 } // namespace Gui
 

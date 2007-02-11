@@ -18,11 +18,96 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PainterImpl.h"
+#include "WidgetImpl.h"
+#include "ApplicationImpl.h"
+
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gui/Painter.h>
+#include <Pt/Gui/Widget.h>
+#include <Pt/Gui/KeyEvent.h>
 #include <Pt/System/Thread.h>
 
 #include <iostream>
+
+
+class DemoWidget : public Pt::Gui::Widget
+{
+    public:
+        DemoWidget()
+        : _pos(50, 50)
+        {}
+
+    protected:
+        void _paintEvent(const Pt::Gui::PaintEvent& pev)
+        {
+            this->refresh();
+        }
+
+        void _keyEvent(const Pt::Gui::KeyEvent& kev)
+        {
+            if(kev.type() == Pt::Gui::KeyEvent::Release)
+                return;
+
+            switch( kev.code() )
+            {
+                case Pt::Gui::KeyEvent::Left:
+                    this->erase();
+                    _pos = Pt::Math::Point(_pos.x() - 10, _pos. y());
+                    this->refresh();
+                    break;
+                case Pt::Gui::KeyEvent::Right:
+                    this->erase();
+                    _pos = Pt::Math::Point(_pos.x() + 10, _pos. y());
+                    this->refresh();
+                    break;
+                case Pt::Gui::KeyEvent::Up:
+                    this->erase();
+                    _pos = Pt::Math::Point(_pos.x(), _pos. y() -10);
+                    this->refresh();
+                    break;
+                case Pt::Gui::KeyEvent::Down:
+                    this->erase();
+                    _pos = Pt::Math::Point(_pos.x(), _pos. y()+ 10);
+                    this->refresh();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        void erase()
+        {
+            // erase old "sprite"
+            Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(0, 0, 0) );
+            Pt::Gfx::ImagePainter imagePainter(image);
+            Pt::Gui::Painter painter = this->painter();
+            painter.drawImage(_pos, image);
+        }
+
+        void refresh()
+        {
+            Pt::Gfx::ARgbColor white(0xffff, 0xffff, 0xffff);
+            Pt::Gfx::Font font24("Vera", 24);
+
+            for(unsigned n = 0; n < 50; ++n)
+            {
+                Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(n*1200, 0, 0) );
+
+                Pt::Gfx::ImagePainter imagePainter(image);
+                imagePainter.setFont(font24);
+                imagePainter.drawText(Pt::Math::Point(32, 33), L"Hello World!", &white);
+
+                Pt::Gui::Painter painter = this->painter();
+                painter.drawImage(_pos, image);
+                Pt::System::Thread::sleep(10);
+            }
+        }
+
+    private:
+        Pt::Math::Point _pos;
+};
 
 
 int main(int argc, char** argv)
@@ -30,20 +115,11 @@ int main(int argc, char** argv)
     Pt::Gfx::ARgbColor white(0xffff, 0xffff, 0xffff);
     Pt::Gfx::Font font24("Vera", 24);
 
-    Pt::Gui::PainterImpl painter;
-    std::cerr << "Opened Device: " << painter.width() << "x" << painter.height() << "@" << painter.depth() << std::endl;
+    Pt::Gui::Application app;
 
-    for(unsigned n = 0; n < 100000; ++n)
-    {
-        Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(n*640, 0, 0) );
+    DemoWidget widget;
+    connect(widget.closed, app, &Pt::Gui::Application::exit);
 
-        Pt::Gfx::ImagePainter imagePainter(image);
-        imagePainter.setFont(font24);
-        imagePainter.drawText(Pt::Math::Point(32, 33), L"Hello World!", &white);
-        painter.drawImage(Pt::Math::Point(10,10), image);
-        Pt::System::Thread::sleep(10);
-    }
-
-    cerr << "Done." << std::endl;
-    return 0;
+    widget.show();
+    return app.run();
 }
