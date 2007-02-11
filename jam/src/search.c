@@ -92,7 +92,7 @@ search(
     char **another_target
 )
 {
-	PATHNAME f[1];
+    PATHNAME f[1];
     LIST    *varlist;
     string    buf[1];
     int     found = 0;
@@ -110,7 +110,7 @@ search(
     string_new( buf );
     /* Parse the filename */
 
-	path_parse( target, f );
+    path_parse( target, f );
 
     f->f_grist.ptr = 0;
     f->f_grist.len = 0;
@@ -120,7 +120,7 @@ search(
         f->f_root.ptr = varlist->string;
         f->f_root.len = strlen( varlist->string );
 
-	    path_build( f, buf, 1 );
+        path_build( f, buf, 1 );
 
         if( DEBUG_SEARCH )
             printf( "locate %s: %s\n", target, buf->value );

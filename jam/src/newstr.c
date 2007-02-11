@@ -110,28 +110,28 @@ static char* allocate(size_t n)
 char *
 newstr( char *string )
 {
-	STRING str, *s = &str;
+    STRING str, *s = &str;
 
-	if( !strhash )
-	    strhash = hashinit( sizeof( STRING ), "strings" );
+    if( !strhash )
+        strhash = hashinit( sizeof( STRING ), "strings" );
 
-	*s = string;
+    *s = string;
 
-	if( hashenter( strhash, (HASHDATA **)&s ) )
-	{
-	    int l = strlen( string );
-	    char *m = (char *)allocate( l + 1 );
+    if( hashenter( strhash, (HASHDATA **)&s ) )
+    {
+        int l = strlen( string );
+        char *m = (char *)allocate( l + 1 );
 
-	    strtotal += l + 1;
-	    memcpy( m, string, l + 1 );
-	    *s = m;
+        strtotal += l + 1;
+        memcpy( m, string, l + 1 );
+        *s = m;
 
         if ( DEBUG_PROFILE )
             profile_memory( l+1 );
-	}
+    }
 
     strcount_in += 1;
-	return *s;
+    return *s;
 }
 
 /*
@@ -142,7 +142,7 @@ char *
 copystr( char *s )
 {
     strcount_in += 1;
-	return s;
+    return s;
 }
 
 /*

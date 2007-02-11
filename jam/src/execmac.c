@@ -17,7 +17,7 @@
  * If $(JAMSHELL) is defined, uses that to formulate execvp().
  * The default is:
  *
- *	/bin/sh -c %
+ *    /bin/sh -c %
  *
  * Each word must be an individual element in a jam variable value.
  *
@@ -29,11 +29,11 @@
  * Don't just set JAMSHELL to /bin/sh - it won't work!
  *
  * External routines:
- *	execcmd() - launch an async command execution
- * 	execwait() - wait and drive at most one execution completion
+ *    execcmd() - launch an async command execution
+ *     execwait() - wait and drive at most one execution completion
  *
  * Internal routines:
- *	onintr() - bump intr to note command interruption
+ *    onintr() - bump intr to note command interruption
  *
  * 04/08/94 (seiwald) - Coherent/386 support added.
  * 05/04/94 (seiwald) - async multiprocess interface
@@ -46,14 +46,14 @@
 
 void
 execcmd( 
-	char *string,
-	void (*func)( void *closure, int status ),
-	void *closure,
-	LIST *shell )
+    char *string,
+    void (*func)( void *closure, int status ),
+    void *closure,
+    LIST *shell )
 {
-	
-	printf( "%s", string );
-	(*func)( closure, EXEC_CMD_OK );
+    
+    printf( "%s", string );
+    (*func)( closure, EXEC_CMD_OK );
 }
 
 /*
@@ -63,7 +63,7 @@ execcmd(
 int
 execwait()
 {
-	return 0;
+    return 0;
 }
 
 # endif /* OS_MAC */

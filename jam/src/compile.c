@@ -39,7 +39,7 @@
  * External routines:
  *
  *  compile_append() - append list results of two statements
- *	compile_eval() - evaluate if to determine which leg to compile
+ *    compile_eval() - evaluate if to determine which leg to compile
  *  compile_foreach() - compile the "for x in y" statement
  *  compile_if() - compile 'if' rule
  *  compile_while() - compile 'while' rule
@@ -133,115 +133,115 @@ compile_append(
  * compile_eval() - evaluate if to determine which leg to compile
  *
  * Returns:
- *	list 	if expression true - compile 'then' clause
- *	L0	if expression false - compile 'else' clause
+ *    list     if expression true - compile 'then' clause
+ *    L0    if expression false - compile 'else' clause
  */
 
 static int
 lcmp( LIST *t, LIST *s )
 {
-	int status = 0;
+    int status = 0;
 
-	while( !status && ( t || s ) )
-	{
-	    char *st = t ? t->string : "";
-	    char *ss = s ? s->string : "";
+    while( !status && ( t || s ) )
+    {
+        char *st = t ? t->string : "";
+        char *ss = s ? s->string : "";
 
-	    status = strcmp( st, ss );
+        status = strcmp( st, ss );
 
-	    t = t ? list_next( t ) : t;
-	    s = s ? list_next( s ) : s;
-	}
+        t = t ? list_next( t ) : t;
+        s = s ? list_next( s ) : s;
+    }
 
-	return status;
+    return status;
 }
 
 LIST *
 compile_eval(
-	PARSE	*parse,
-	FRAME	*frame )
+    PARSE    *parse,
+    FRAME    *frame )
 {
-	LIST *ll, *lr, *s, *t;
-	int status = 0;
+    LIST *ll, *lr, *s, *t;
+    int status = 0;
 
-	/* Short circuit lr eval for &&, ||, and 'in' */
+    /* Short circuit lr eval for &&, ||, and 'in' */
 
-	ll = parse_evaluate( parse->left, frame );
-	lr = 0;
+    ll = parse_evaluate( parse->left, frame );
+    lr = 0;
 
-	switch( parse->num )
-	{
-	case EXPR_AND: 
-	case EXPR_IN: 	if( ll ) goto eval; break;
-	case EXPR_OR: 	if( !ll ) goto eval; break;
-	default: eval: 	lr = parse_evaluate( parse->right, frame );
-	}
+    switch( parse->num )
+    {
+    case EXPR_AND: 
+    case EXPR_IN:     if( ll ) goto eval; break;
+    case EXPR_OR:     if( !ll ) goto eval; break;
+    default: eval:     lr = parse_evaluate( parse->right, frame );
+    }
 
-	/* Now eval */
+    /* Now eval */
 
-	switch( parse->num )
-	{
-	case EXPR_NOT:	
-		if( !ll ) status = 1;
-		break;
+    switch( parse->num )
+    {
+    case EXPR_NOT:    
+        if( !ll ) status = 1;
+        break;
 
-	case EXPR_AND:
-		if( ll && lr ) status = 1;
-		break;
+    case EXPR_AND:
+        if( ll && lr ) status = 1;
+        break;
 
-	case EXPR_OR:
-		if( ll || lr ) status = 1;
-		break;
+    case EXPR_OR:
+        if( ll || lr ) status = 1;
+        break;
 
-	case EXPR_IN:
-		/* "a in b": make sure each of */
-		/* ll is equal to something in lr. */
+    case EXPR_IN:
+        /* "a in b": make sure each of */
+        /* ll is equal to something in lr. */
 
-		for( t = ll; t; t = list_next( t ) )
-		{
-		    for( s = lr; s; s = list_next( s ) )
-			if( !strcmp( t->string, s->string ) )
-			    break;
-		    if( !s ) break;
-		}
+        for( t = ll; t; t = list_next( t ) )
+        {
+            for( s = lr; s; s = list_next( s ) )
+            if( !strcmp( t->string, s->string ) )
+                break;
+            if( !s ) break;
+        }
 
-		/* No more ll? Success */
+        /* No more ll? Success */
 
-		if( !t ) status = 1;
+        if( !t ) status = 1;
 
-		break;
+        break;
 
-	case EXPR_EXISTS:       if( lcmp( ll, L0 ) != 0 ) status = 1; break;
-	case EXPR_EQUALS:	if( lcmp( ll, lr ) == 0 ) status = 1; break;
-	case EXPR_NOTEQ:	if( lcmp( ll, lr ) != 0 ) status = 1; break;
-	case EXPR_LESS:		if( lcmp( ll, lr ) < 0  ) status = 1; break;
-	case EXPR_LESSEQ:	if( lcmp( ll, lr ) <= 0 ) status = 1; break;
-	case EXPR_MORE:		if( lcmp( ll, lr ) > 0  ) status = 1; break;
-	case EXPR_MOREEQ:	if( lcmp( ll, lr ) >= 0 ) status = 1; break;
+    case EXPR_EXISTS:       if( lcmp( ll, L0 ) != 0 ) status = 1; break;
+    case EXPR_EQUALS:    if( lcmp( ll, lr ) == 0 ) status = 1; break;
+    case EXPR_NOTEQ:    if( lcmp( ll, lr ) != 0 ) status = 1; break;
+    case EXPR_LESS:        if( lcmp( ll, lr ) < 0  ) status = 1; break;
+    case EXPR_LESSEQ:    if( lcmp( ll, lr ) <= 0 ) status = 1; break;
+    case EXPR_MORE:        if( lcmp( ll, lr ) > 0  ) status = 1; break;
+    case EXPR_MOREEQ:    if( lcmp( ll, lr ) >= 0 ) status = 1; break;
 
-	}
+    }
 
-	if( DEBUG_IF )
-	{
-	    debug_compile( 0, "if", frame );
-	    list_print( ll );
-	    printf( "(%d) ", status );
-	    list_print( lr );
-	    printf( "\n" );
-	}
+    if( DEBUG_IF )
+    {
+        debug_compile( 0, "if", frame );
+        list_print( ll );
+        printf( "(%d) ", status );
+        list_print( lr );
+        printf( "\n" );
+    }
 
-	/* Find something to return. */
-	/* In odd circumstances (like "" = "") */
-	/* we'll have to return a new string. */
+    /* Find something to return. */
+    /* In odd circumstances (like "" = "") */
+    /* we'll have to return a new string. */
 
-	if( !status ) t = 0;
-	else if( ll ) t = ll, ll = 0;
-	else if( lr ) t = lr, lr = 0;
-	else t = list_new( L0, newstr( "1" ) );
+    if( !status ) t = 0;
+    else if( ll ) t = ll, ll = 0;
+    else if( lr ) t = lr, lr = 0;
+    else t = list_new( L0, newstr( "1" ) );
 
-	if( ll ) list_free( ll );
-	if( lr ) list_free( lr );
-	return t;
+    if( ll ) list_free( ll );
+    if( lr ) list_free( lr );
+    return t;
 }
 
 
@@ -525,40 +525,40 @@ compile_null(
 /*
  * compile_on() - run rule under influence of on-target variables
  *
- * 	parse->left	list of files to include (can only do 1)
- *	parse->right	rule to run
+ *     parse->left    list of files to include (can only do 1)
+ *    parse->right    rule to run
  *
  * EXPERIMENTAL!
  */
 
 LIST *
 compile_on(
-	PARSE	*parse,
-	FRAME	*frame )
+    PARSE    *parse,
+    FRAME    *frame )
 {
-	LIST    *nt = parse_evaluate( parse->left, frame );
-	LIST	*result = 0;
+    LIST    *nt = parse_evaluate( parse->left, frame );
+    LIST    *result = 0;
 
-	if( DEBUG_COMPILE )
-	{
-	    debug_compile( 0, "on", frame );
-	    list_print( nt );
-	    printf( "\n" );
-	}
+    if( DEBUG_COMPILE )
+    {
+        debug_compile( 0, "on", frame );
+        list_print( nt );
+        printf( "\n" );
+    }
 
-	if( nt )
-	{
-	    TARGET *t = bindtarget( nt->string );
-	    pushsettings( t->settings );
+    if( nt )
+    {
+        TARGET *t = bindtarget( nt->string );
+        pushsettings( t->settings );
 
-	    result = parse_evaluate( parse->right, frame );
+        result = parse_evaluate( parse->right, frame );
 
-	    popsettings( t->settings );
-	}
+        popsettings( t->settings );
+    }
 
-	list_free( nt );
+    list_free( nt );
 
-	return result;
+    return result;
 }
 
 
@@ -705,7 +705,7 @@ type_check( char* type_name, LIST *values, FRAME* caller, RULE* called, LIST* ar
             argument_error( error->string, called, caller, arg_name );
 
         frame_free( frame );
-		values = values->next;
+        values = values->next;
     }
 
     enter_module( caller->module );
@@ -1097,8 +1097,8 @@ LIST *call_rule( char *rulename, FRAME* caller_frame, ...)
 /*
  * compile_rules() - compile a chain of rules
  *
- *	parse->left	single rule
- *	parse->right	more compile_rules() by right-recursion
+ *    parse->left    single rule
+ *    parse->right    more compile_rules() by right-recursion
  */
 
 LIST *
@@ -1107,7 +1107,7 @@ compile_rules(
     FRAME *frame )
 {
     /* Ignore result from first statement; return the 2nd. */
-	/* Optimize recursion on the right by looping. */
+    /* Optimize recursion on the right by looping. */
 
     do list_free( parse_evaluate( parse->left, frame ) );
     while( (parse = parse->right)->func == compile_rules );

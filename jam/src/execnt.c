@@ -23,7 +23,7 @@
 # ifdef USE_EXECNT
 
 # define WIN32_LEAN_AND_MEAN
-# include <windows.h>		/* do the ugly deed */
+# include <windows.h>        /* do the ugly deed */
 # include <process.h>
 # if !defined( __BORLANDC__ )
 # include <tlhelp32.h>
@@ -40,8 +40,8 @@ static int my_wait( int *status );
  * If $(JAMSHELL) is defined, uses that to formulate execvp()/spawnvp().
  * The default is:
  *
- *	/bin/sh -c %		[ on UNIX/AmigaOS ]
- *	cmd.exe /c %		[ on Windows NT ]
+ *    /bin/sh -c %        [ on UNIX/AmigaOS ]
+ *    cmd.exe /c %        [ on Windows NT ]
  *
  * Each word must be an individual element in a jam variable value.
  *
@@ -53,11 +53,11 @@ static int my_wait( int *status );
  * Don't just set JAMSHELL to /bin/sh or cmd.exe - it won't work!
  *
  * External routines:
- *	execcmd() - launch an async command execution
- * 	execwait() - wait and drive at most one execution completion
+ *    execcmd() - launch an async command execution
+ *     execwait() - wait and drive at most one execution completion
  *
  * Internal routines:
- *	onintr() - bump intr to note command interruption
+ *    onintr() - bump intr to note command interruption
  *
  * 04/08/94 (seiwald) - Coherent/386 support added.
  * 05/04/94 (seiwald) - async multiprocess interface
@@ -79,10 +79,10 @@ static int  is_winxp  = 0;
 
 static struct
 {
-	int	pid; /* on win32, a real process handle */
-	void	(*func)( void *closure, int status, timing_info* );
-	void 	*closure;
-	char	*tempfile;
+    int    pid; /* on win32, a real process handle */
+    void    (*func)( void *closure, int status, timing_info* );
+    void     *closure;
+    char    *tempfile;
 
 } cmdtab[ MAXJOBS ] = {{0}};
 
@@ -103,37 +103,37 @@ set_is_win95( void )
     /* this is later used to limit the system call command length */
 
   is_nt_351 = (os_info.dwPlatformId ==  VER_PLATFORM_WIN32_NT)
-    			&& (os_info.dwMajorVersion == 3);
+                && (os_info.dwMajorVersion == 3);
 
   is_winnt = (os_info.dwPlatformId == VER_PLATFORM_WIN32_NT)
-  					&& (os_info.dwMajorVersion == 4)
-  					&& (os_info.dwMinorVersion == 0) ;
+                      && (os_info.dwMajorVersion == 4)
+                      && (os_info.dwMinorVersion == 0) ;
 
   is_win2000 = (os_info.dwPlatformId == VER_PLATFORM_WIN32_NT)
-  					&& (os_info.dwMajorVersion == 5)
-  					&& (os_info.dwMinorVersion == 0) ;
+                      && (os_info.dwMajorVersion == 5)
+                      && (os_info.dwMinorVersion == 0) ;
 
   is_winxp = (os_info.dwPlatformId == VER_PLATFORM_WIN32_NT)
-  					&& (os_info.dwMajorVersion == 5)
-  					&& (os_info.dwMinorVersion == 1) ;
+                      && (os_info.dwMajorVersion == 5)
+                      && (os_info.dwMinorVersion == 1) ;
 
 
 }
 
 int maxline()
 {
-	int retVal = 996;;
+    int retVal = 996;;
     if (!is_win95_defined)
         set_is_win95();
 
     /* Set the maximum command line length according to the OS */
 
     if (is_win95)
-    	retVal = 1023;
+        retVal = 1023;
     else if ((is_win2000) || (is_winnt))
         retVal = 2047;
     else if (is_winxp)
-    	retVal = 8192;
+        retVal = 8192;
 
     return retVal;
 }
@@ -222,7 +222,7 @@ string_to_args( const char*  string )
 
     argv[1] = dst;
 
-	/* Copy the rest of the arguments verbatim */
+    /* Copy the rest of the arguments verbatim */
 
     src_len -= src - string;
 
@@ -351,8 +351,8 @@ process_del( char*  command )
 void
 onintr( int disp )
 {
-	intr++;
-	printf( "...interrupted\n" );
+    intr++;
+    printf( "...interrupted\n" );
 }
 
 /*
@@ -531,15 +531,15 @@ record_times(int pid, timing_info* time)
 
 void
 execcmd(
-	char *string,
-	void (*func)( void *closure, int status, timing_info* ),
-	void *closure,
-	LIST *shell )
+    char *string,
+    void (*func)( void *closure, int status, timing_info* ),
+    void *closure,
+    LIST *shell )
 {
     int pid;
     int slot;
     int raw_cmd = 0 ;
-    char *argv_static[ MAXARGC + 1 ];	/* +1 for NULL */
+    char *argv_static[ MAXARGC + 1 ];    /* +1 for NULL */
     char **argv = argv_static;
     char *p;
 
@@ -651,9 +651,9 @@ execcmd(
         {
             switch( shell->string[0] )
             {
-            case '%':	argv[i] = string; gotpercent++; break;
-            case '!':	argv[i] = jobno; break;
-            default:	argv[i] = shell->string;
+            case '%':    argv[i] = string; gotpercent++; break;
+            case '!':    argv[i] = jobno; break;
+            default:    argv[i] = shell->string;
             }
             if( DEBUG_EXECCMD )
                 printf( "argv[%d] = '%s'\n", i, argv[i] );
@@ -672,7 +672,7 @@ execcmd(
     {
         /* don't worry, this is ignored on Win95/98, see later.. */
         argv[0] = "cmd.exe";
-        argv[1] = "/Q/C";		/* anything more is non-portable */
+        argv[1] = "/Q/C";        /* anything more is non-portable */
         argv[2] = string;
         argv[3] = 0;
     }
@@ -806,71 +806,71 @@ execcmd(
 int
 execwait()
 {
-	int i;
-	int status, w;
-	int rstat;
+    int i;
+    int status, w;
+    int rstat;
     timing_info time;
 
-	/* Handle naive make1() which doesn't know if cmds are running. */
+    /* Handle naive make1() which doesn't know if cmds are running. */
 
-	if( !cmdsrunning )
-	    return 0;
+    if( !cmdsrunning )
+        return 0;
 
     if ( is_win95 )
         return 0;
 
-	/* Pick up process pid and status */
+    /* Pick up process pid and status */
 
     while( ( w = wait( &status ) ) == -1 && errno == EINTR )
         ;
 
-	if( w == -1 )
-	{
-	    printf( "child process(es) lost!\n" );
-	    perror("wait");
-	    exit( EXITBAD );
-	}
+    if( w == -1 )
+    {
+        printf( "child process(es) lost!\n" );
+        perror("wait");
+        exit( EXITBAD );
+    }
 
-	/* Find the process in the cmdtab. */
+    /* Find the process in the cmdtab. */
 
-	for( i = 0; i < MAXJOBS; i++ )
-	    if( w == cmdtab[ i ].pid )
-		break;
+    for( i = 0; i < MAXJOBS; i++ )
+        if( w == cmdtab[ i ].pid )
+        break;
 
-	if( i == MAXJOBS )
-	{
-	    printf( "waif child found!\n" );
-	    exit( EXITBAD );
-	}
+    if( i == MAXJOBS )
+    {
+        printf( "waif child found!\n" );
+        exit( EXITBAD );
+    }
 
     record_times(cmdtab[i].pid, &time);
 
-	/* Clear the temp file */
+    /* Clear the temp file */
     if ( cmdtab[i].tempfile )
         unlink( cmdtab[ i ].tempfile );
 
-	/* Drive the completion */
+    /* Drive the completion */
 
-	if( !--cmdsrunning )
-	    signal( SIGINT, istat );
+    if( !--cmdsrunning )
+        signal( SIGINT, istat );
 
-	if( intr )
-	    rstat = EXEC_CMD_INTR;
-	else if( w == -1 || status != 0 )
-	    rstat = EXEC_CMD_FAIL;
-	else
-	    rstat = EXEC_CMD_OK;
+    if( intr )
+        rstat = EXEC_CMD_INTR;
+    else if( w == -1 || status != 0 )
+        rstat = EXEC_CMD_FAIL;
+    else
+        rstat = EXEC_CMD_OK;
 
-	cmdtab[ i ].pid = 0;
-	/* SVA don't leak temp files */
-	if(cmdtab[i].tempfile != NULL)
-	{
+    cmdtab[ i ].pid = 0;
+    /* SVA don't leak temp files */
+    if(cmdtab[i].tempfile != NULL)
+    {
             free(cmdtab[i].tempfile);
             cmdtab[i].tempfile = NULL;
-	}
-	(*cmdtab[ i ].func)( cmdtab[ i ].closure, rstat, &time );
+    }
+    (*cmdtab[ i ].func)( cmdtab[ i ].closure, rstat, &time );
 
-	return 1;
+    return 1;
 }
 
 # if !defined( __BORLANDC__ )
@@ -1026,18 +1026,18 @@ kill_all(DWORD pid, HANDLE process)
 static int
 my_wait( int *status )
 {
-	int i, num_active = 0;
-	DWORD exitcode, waitcode;
-	HANDLE active_handles[MAXJOBS];
+    int i, num_active = 0;
+    DWORD exitcode, waitcode;
+    HANDLE active_handles[MAXJOBS];
 
-	/* first see if any non-waited-for processes are dead,
-	 * and return if so.
-	 */
-	for ( i = 0; i < globs.jobs; i++ )
+    /* first see if any non-waited-for processes are dead,
+     * and return if so.
+     */
+    for ( i = 0; i < globs.jobs; i++ )
     {
         int pid = cmdtab[i].pid;
 
-	    if ( pid )
+        if ( pid )
         {
             process_state state
                 = check_process_exit((HANDLE)pid, status, active_handles, &num_active);
@@ -1046,15 +1046,15 @@ my_wait( int *status )
                 goto FAILED;
             else if ( state == process_finished )
                 return pid;
-	    }
-	}
+        }
+    }
 
-	/* if a child exists, wait for it to die */
-	if ( !num_active )
+    /* if a child exists, wait for it to die */
+    if ( !num_active )
     {
-	    errno = ECHILD;
-	    return -1;
-	}
+        errno = ECHILD;
+        return -1;
+    }
 
     if ( globs.timeout > 0 )
     {
@@ -1085,21 +1085,21 @@ my_wait( int *status )
         /* no timeout, so just wait indefinately for something to finish */
         waitcode = WaitForMultipleObjects( num_active, active_handles, FALSE, INFINITE );
     }
-	if ( waitcode != WAIT_FAILED )
+    if ( waitcode != WAIT_FAILED )
     {
-	    if ( waitcode >= WAIT_ABANDONED_0
+        if ( waitcode >= WAIT_ABANDONED_0
              && waitcode < WAIT_ABANDONED_0 + num_active )
             i = waitcode - WAIT_ABANDONED_0;
-	    else
+        else
             i = waitcode - WAIT_OBJECT_0;
 
         if ( check_process_exit(active_handles[i], status, 0, 0) == process_finished )
             return (int)active_handles[i];
-	}
+    }
 
 FAILED:
-	errno = GetLastError();
-	return -1;
+    errno = GetLastError();
+    return -1;
 
 }
 

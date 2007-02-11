@@ -76,7 +76,7 @@ enter_rule( char *rulename, module_t *target_module )
 
     if ( hashenter( demand_rules( target_module ), (HASHDATA **)&r ) )
     {
-        r->name = newstr( rulename );	/* never freed */
+        r->name = newstr( rulename );    /* never freed */
         r->procedure = (PARSE *)0;
         r->module = 0;
         r->actions = 0;
@@ -117,11 +117,11 @@ rule_free( RULE* r )
     r->name = "";
     parse_free( r->procedure );
     r->procedure = 0;
-	if ( r->arguments )
-	    args_free( r->arguments );
+    if ( r->arguments )
+        args_free( r->arguments );
     r->arguments = 0;
     if ( r->actions )
-		actions_free( r->actions );
+        actions_free( r->actions );
     r->actions = 0;
 }
 
@@ -132,22 +132,22 @@ rule_free( RULE* r )
 TARGET *
 bindtarget( const char *targetname )
 {
-	TARGET target, *t = &target;
+    TARGET target, *t = &target;
 
-	if( !targethash )
-	    targethash = hashinit( sizeof( TARGET ), "targets" );
+    if( !targethash )
+        targethash = hashinit( sizeof( TARGET ), "targets" );
 
     /* Perforce added const everywhere. No time to merge that change. */
-	t->name = (char*)targetname;
+    t->name = (char*)targetname;
 
-	if( hashenter( targethash, (HASHDATA **)&t ) )
-	{
-	    memset( (char *)t, '\0', sizeof( *t ) );
-	    t->name = newstr( (char*)targetname );	/* never freed */
-	    t->boundname = t->name;		/* default for T_FLAG_NOTFILE */
-	}
+    if( hashenter( targethash, (HASHDATA **)&t ) )
+    {
+        memset( (char *)t, '\0', sizeof( *t ) );
+        t->name = newstr( (char*)targetname );    /* never freed */
+        t->boundname = t->name;        /* default for T_FLAG_NOTFILE */
+    }
 
-	return t;
+    return t;
 }
 
 
@@ -195,7 +195,7 @@ TARGET* search_for_target ( char * name, LIST* search_path )
 
     string_new( buf );
 
-	path_parse( name, f );
+    path_parse( name, f );
 
     f->f_grist.ptr = 0;
     f->f_grist.len = 0;
@@ -263,18 +263,18 @@ TARGET* search_for_target ( char * name, LIST* search_path )
 TARGET *
 copytarget( const TARGET *ot )
 {
-	TARGET *t;
+    TARGET *t;
 
-	t = (TARGET *)malloc( sizeof( *t ) );
+    t = (TARGET *)malloc( sizeof( *t ) );
     if ( DEBUG_PROFILE )
         profile_memory( sizeof( *t ) );
-	memset( (char *)t, '\0', sizeof( *t ) );
-	t->name = copystr( ot->name );
-	t->boundname = t->name;
+    memset( (char *)t, '\0', sizeof( *t ) );
+    t->name = copystr( ot->name );
+    t->boundname = t->name;
 
-	t->flags |= T_FLAG_NOTFILE | T_FLAG_INTERNAL;
+    t->flags |= T_FLAG_NOTFILE | T_FLAG_INTERNAL;
 
-	return t;
+    return t;
 }
 
 /*
@@ -284,80 +284,80 @@ copytarget( const TARGET *ot )
 void
 touchtarget( char *t )
 {
-	bindtarget( t )->flags |= T_FLAG_TOUCHED;
+    bindtarget( t )->flags |= T_FLAG_TOUCHED;
 }
 
 /*
  * targetlist() - turn list of target names into a TARGET chain
  *
  * Inputs:
- *	chain	existing TARGETS to append to
- *	targets	list of target names
+ *    chain    existing TARGETS to append to
+ *    targets    list of target names
  */
 
 TARGETS *
 targetlist( 
-	TARGETS	*chain,
-	LIST 	*targets )
+    TARGETS    *chain,
+    LIST     *targets )
 {
-	for( ; targets; targets = list_next( targets ) )
-	    chain = targetentry( chain, bindtarget( targets->string ) );
+    for( ; targets; targets = list_next( targets ) )
+        chain = targetentry( chain, bindtarget( targets->string ) );
 
-	return chain;
+    return chain;
 }
 
 /*
  * targetentry() - add a TARGET to a chain of TARGETS
  *
  * Inputs:
- *	chain	exisitng TARGETS to append to
- *	target	new target to append
+ *    chain    exisitng TARGETS to append to
+ *    target    new target to append
  */
 
 TARGETS *
 targetentry( 
-	TARGETS	*chain,
-	TARGET	*target )
+    TARGETS    *chain,
+    TARGET    *target )
 {
-	TARGETS *c;
+    TARGETS *c;
 
-	c = (TARGETS *)malloc( sizeof( TARGETS ) );
+    c = (TARGETS *)malloc( sizeof( TARGETS ) );
     if ( DEBUG_PROFILE )
         profile_memory( sizeof( TARGETS ) );
-	c->target = target;
+    c->target = target;
 
-	if( !chain ) chain = c;
-	else chain->tail->next = c;
-	chain->tail = c;
-	c->next = 0;
+    if( !chain ) chain = c;
+    else chain->tail->next = c;
+    chain->tail = c;
+    c->next = 0;
 
-	return chain;
+    return chain;
 }
 
 /*
  * targetchain() - append two TARGET chains
  *
  * Inputs:
- *	chain	exisitng TARGETS to append to
- *	target	new target to append
+ *    chain    exisitng TARGETS to append to
+ *    target    new target to append
  */
 
 TARGETS *
 targetchain( 
-	TARGETS	*chain,
-	TARGETS	*targets )
+    TARGETS    *chain,
+    TARGETS    *targets )
 {
-	TARGETS *c;
+    TARGETS *c;
 
-	if( !targets )
-	    return chain;
-	else if( !chain )
-	    return targets;
+    if( !targets )
+        return chain;
+    else if( !chain )
+        return targets;
 
-	chain->tail->next = targets;
-	chain->tail = targets->tail;
+    chain->tail->next = targets;
+    chain->tail = targets->tail;
 
-	return chain;
+    return chain;
 }
 
 /*
@@ -366,21 +366,21 @@ targetchain(
 
 ACTIONS *
 actionlist(
-	ACTIONS	*chain,
-	ACTION	*action )
+    ACTIONS    *chain,
+    ACTION    *action )
 {
-	ACTIONS *actions = (ACTIONS *)malloc( sizeof( ACTIONS ) );
+    ACTIONS *actions = (ACTIONS *)malloc( sizeof( ACTIONS ) );
     if ( DEBUG_PROFILE )
         profile_memory( sizeof( ACTIONS ) );
 
-	actions->action = action;
+    actions->action = action;
 
-	if( !chain ) chain = actions;
-	else chain->tail->next = actions;
-	chain->tail = actions;
-	actions->next = 0;
+    if( !chain ) chain = actions;
+    else chain->tail->next = actions;
+    chain->tail = actions;
+    actions->next = 0;
 
-	return chain;
+    return chain;
 }
 
 static SETTINGS* settings_freelist;
@@ -396,25 +396,25 @@ static SETTINGS* settings_freelist;
 
 SETTINGS *
 addsettings(
-	SETTINGS *head,
-	int	append,
-	char	*symbol,
-	LIST	*value )
+    SETTINGS *head,
+    int    append,
+    char    *symbol,
+    LIST    *value )
 {
-	SETTINGS *v;
-	
-	/* Look for previous setting */
+    SETTINGS *v;
+    
+    /* Look for previous setting */
 
-	for( v = head; v; v = v->next )
-	    if( !strcmp( v->symbol, symbol ) )
-		break;
+    for( v = head; v; v = v->next )
+        if( !strcmp( v->symbol, symbol ) )
+        break;
 
-	/* If not previously set, alloc a new. */
-	/* If appending, do so. */
-	/* Else free old and set new. */
+    /* If not previously set, alloc a new. */
+    /* If appending, do so. */
+    /* Else free old and set new. */
 
-	if( !v )
-	{
+    if( !v )
+    {
         v = settings_freelist;
         
         if ( v )
@@ -426,24 +426,24 @@ addsettings(
                 profile_memory( sizeof( *v ) );
         }
         
-	    v->symbol = newstr( symbol );
-	    v->value = value;
-	    v->next = head;
-	    head = v;
-	}
-	else if( append )
-	{
-	    v->value = list_append( v->value, value );
-	}
-	else
-	{
-	    list_free( v->value );
-	    v->value = value;
-	} 
+        v->symbol = newstr( symbol );
+        v->value = value;
+        v->next = head;
+        head = v;
+    }
+    else if( append )
+    {
+        v->value = list_append( v->value, value );
+    }
+    else
+    {
+        list_free( v->value );
+        v->value = value;
+    } 
 
-	/* Return (new) head of list. */
+    /* Return (new) head of list. */
 
-	return head;
+    return head;
 }
 
 /*
@@ -453,8 +453,8 @@ addsettings(
 void
 pushsettings( SETTINGS *v )
 {
-	for( ; v; v = v->next )
-	    v->value = var_swap( v->symbol, v->value );
+    for( ; v; v = v->next )
+        v->value = var_swap( v->symbol, v->value );
 }
 
 /*
@@ -464,7 +464,7 @@ pushsettings( SETTINGS *v )
 void
 popsettings( SETTINGS *v )
 {
-	pushsettings( v );	/* just swap again */
+    pushsettings( v );    /* just swap again */
 }
 
 /*
@@ -476,7 +476,7 @@ copysettings( SETTINGS *head )
     SETTINGS *copy = 0, *v;
 
     for (v = head; v; v = v->next)
-	copy = addsettings(copy, 0, v->symbol, list_copy(0, v->value));
+    copy = addsettings(copy, 0, v->symbol, list_copy(0, v->value));
 
     return copy;
 }
@@ -515,17 +515,17 @@ void freeactions( ACTIONS *chain )
 void
 freesettings( SETTINGS *v )
 {
-	while( v )
-	{
-	    SETTINGS *n = v->next;
+    while( v )
+    {
+        SETTINGS *n = v->next;
 
-	    freestr( v->symbol );
-	    list_free( v->value );
+        freestr( v->symbol );
+        list_free( v->value );
         v->next = settings_freelist;
         settings_freelist = v;
 
-	    v = n;
-	}
+        v = n;
+    }
 }
 
 static void freetarget( void *xt, void *data )
@@ -549,7 +549,7 @@ void
 donerules()
 {
      hashenumerate( targethash, freetarget, 0 );
-	hashdone( targethash );
+    hashdone( targethash );
     while ( settings_freelist )
     {
         SETTINGS* n = settings_freelist->next;

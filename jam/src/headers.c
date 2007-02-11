@@ -31,7 +31,7 @@
  * headers() searches a file for #include files and phonies up a
  * rule invocation:
  * 
- *	$(HDRRULE) <target> : <include files> ;
+ *    $(HDRRULE) <target> : <include files> ;
  *
  * External routines:
  *    headers() - scan a target for include files and call HDRRULE
@@ -41,8 +41,8 @@
  *
  * 04/13/94 (seiwald) - added shorthand L0 for null list pointer
  * 09/10/00 (seiwald) - replaced call to compile_rule with evaluate_rule,
- *		so that headers() doesn't have to mock up a parse structure
- *		just to invoke a rule.
+ *        so that headers() doesn't have to mock up a parse structure
+ *        just to invoke a rule.
  */
 
 #ifndef OPT_HEADER_CACHE_EXT
@@ -58,11 +58,11 @@ static LIST *headers1( LIST *l, char *file, int rec, regexp *re[]);
 void
 headers( TARGET *t )
 {
-    LIST	*hdrscan;
-    LIST	*hdrrule;
-    LIST	*headlist = 0;
-    regexp	*re[ MAXINC ];
-    int	rec = 0;
+    LIST    *hdrscan;
+    LIST    *hdrrule;
+    LIST    *headlist = 0;
+    regexp    *re[ MAXINC ];
+    int    rec = 0;
         
     if( !( hdrscan = var_get( "HDRSCAN" ) ) || 
         !( hdrrule = var_get( "HDRRULE" ) ) )
@@ -82,7 +82,7 @@ headers( TARGET *t )
     /* Doctor up call to HDRRULE rule */
     /* Call headers1() to get LIST of included files. */
     {
-        FRAME	frame[1];
+        FRAME    frame[1];
         frame_init( frame );
         lol_add( frame->args, list_new( L0, t->name ) );
 #ifdef OPT_HEADER_CACHE_EXT
@@ -116,22 +116,22 @@ LIST *
 static LIST *
 #endif
 headers1( 
-	LIST	*l,
-	char	*file,
-	int	rec,
-	regexp	*re[] )
+    LIST    *l,
+    char    *file,
+    int    rec,
+    regexp    *re[] )
 {
-	FILE	*f;
-	char	buf[ 1024 ];
-	int		i;
+    FILE    *f;
+    char    buf[ 1024 ];
+    int        i;
         static regexp *re_macros = 0;
 
         
 #ifdef OPT_IMPROVED_PATIENCE_EXT
-	static int count = 0;
-	++count;
-	if ( ((count == 100) || !( count % 1000 )) && DEBUG_MAKE )
-	    printf("...patience...\n");
+    static int count = 0;
+    ++count;
+    if ( ((count == 100) || !( count % 1000 )) && DEBUG_MAKE )
+        printf("...patience...\n");
 #endif
         
         /* the following regexp is used to detect cases where a  */
@@ -139,25 +139,25 @@ headers1(
         if ( re_macros == 0 )
         {
             re_macros = regex_compile(
-                "^[ 	]*#[ 	]*include[ 	]*([A-Za-z][A-Za-z0-9_]*).*$" );
+                "^[     ]*#[     ]*include[     ]*([A-Za-z][A-Za-z0-9_]*).*$" );
         }
 
 
-	if( !( f = fopen( file, "r" ) ) )
-	    return l;
+    if( !( f = fopen( file, "r" ) ) )
+        return l;
 
-	while( fgets( buf, sizeof( buf ), f ) )
-	{
-	    for( i = 0; i < rec; i++ )
-		if( regexec( re[i], buf ) && re[i]->startp[1] )
-	    {
-		re[i]->endp[1][0] = '\0';
+    while( fgets( buf, sizeof( buf ), f ) )
+    {
+        for( i = 0; i < rec; i++ )
+        if( regexec( re[i], buf ) && re[i]->startp[1] )
+        {
+        re[i]->endp[1][0] = '\0';
 
-		if( DEBUG_HEADER )
-		    printf( "header found: %s\n", re[i]->startp[1] );
+        if( DEBUG_HEADER )
+            printf( "header found: %s\n", re[i]->startp[1] );
 
-		l = list_new( l, newstr( re[i]->startp[1] ) );
-	    }
+        l = list_new( l, newstr( re[i]->startp[1] ) );
+        }
             
             /* special treatment for #include MACRO */
             if ( regexec( re_macros, buf ) && re_macros->startp[1] )
@@ -172,25 +172,25 @@ headers1(
               header_filename = macro_header_get( re_macros->startp[1] );
               if (header_filename)
               {
-	        if ( DEBUG_HEADER )
+            if ( DEBUG_HEADER )
                   printf( " resolved to '%s'\n", header_filename );
                 l = list_new( l, newstr( header_filename ) );
               }
               else
               {
-	        if ( DEBUG_HEADER )
+            if ( DEBUG_HEADER )
                   printf( " ignored !!\n" );
               }
             }
-	}
+    }
 
-	fclose( f );
+    fclose( f );
 
-	return l;
+    return l;
 }
 
 void
 regerror( char *s )
 {
-	printf( "re error %s\n", s );
+    printf( "re error %s\n", s );
 }

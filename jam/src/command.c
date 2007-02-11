@@ -32,11 +32,11 @@
 
 CMD *
 cmd_new(
-	RULE	*rule,
-	LIST	*targets,
-	LIST	*sources,
+    RULE    *rule,
+    LIST    *targets,
+    LIST    *sources,
      LIST    *logFile,
-	LIST	*shell )
+    LIST    *shell )
 {
     char commandBuffer[1024];
     CMD *cmd = (CMD *)malloc( sizeof( CMD ) );
@@ -117,8 +117,8 @@ cmd_new(
 void
 cmd_free( CMD *cmd )
 {
-	lol_free( &cmd->args );
-	list_free( cmd->shell );
+    lol_free( &cmd->args );
+    list_free( cmd->shell );
     free( cmd->buf );
-	free( (char *)cmd );
+    free( (char *)cmd );
 }

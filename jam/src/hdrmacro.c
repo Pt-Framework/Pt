@@ -31,7 +31,7 @@
  *
  *  we then phony up a rule invocation like:
  *
- *	$(HDRRULE) <target> : <resolved included files> ;
+ *    $(HDRRULE) <target> : <resolved included files> ;
  *
  * External routines:
  *    headers1() - scan a target for "#include MACRO" lines and try
@@ -42,8 +42,8 @@
  *
  * 04/13/94 (seiwald) - added shorthand L0 for null list pointer
  * 09/10/00 (seiwald) - replaced call to compile_rule with evaluate_rule,
- *		so that headers() doesn't have to mock up a parse structure
- *		just to invoke a rule.
+ *        so that headers() doesn't have to mock up a parse structure
+ *        just to invoke a rule.
  */
 
 static LIST *header_macros1( LIST *l, char *file, int rec, regexp *re[] );
@@ -68,8 +68,8 @@ void
 macro_headers( TARGET *t )
 {
     static regexp *re = 0;
-    FILE	*f;
-    char	buf[ 1024 ];
+    FILE    *f;
+    char    buf[ 1024 ];
     
     if ( DEBUG_HEADER )
         printf( "macro header scan for %s\n", t->name );
@@ -80,7 +80,7 @@ macro_headers( TARGET *t )
     if ( re == 0 )
     {
         re = regex_compile(
-            "^[ 	]*#[ 	]*define[ 	]*([A-Za-z][A-Za-z0-9_]*)[ 	]*"
+            "^[     ]*#[     ]*define[     ]*([A-Za-z][A-Za-z0-9_]*)[     ]*"
             "[<\"]([^\">]*)[\">].*$" );
     }
     

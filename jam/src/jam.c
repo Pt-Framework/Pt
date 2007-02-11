@@ -1,6 +1,6 @@
 /*
  * /+\
- * +\	Copyright 1993-2002 Christopher Seiwald and Perforce Software, Inc.
+ * +\    Copyright 1993-2002 Christopher Seiwald and Perforce Software, Inc.
  * \+/
  *
  * This file is part of jam.
@@ -69,32 +69,32 @@
  *
  * Roughly, the modules are:
  *
- *	builtins.c - jam's built-in rules
- *	command.c - maintain lists of commands
- *	compile.c - compile parsed jam statements
- *	execunix.c - execute a shell script on UNIX
- *	execvms.c - execute a shell script, ala VMS
- *	expand.c - expand a buffer, given variable values
- *	file*.c - scan directories and archives on *
- *	hash.c - simple in-memory hashing routines 
+ *    builtins.c - jam's built-in rules
+ *    command.c - maintain lists of commands
+ *    compile.c - compile parsed jam statements
+ *    execunix.c - execute a shell script on UNIX
+ *    execvms.c - execute a shell script, ala VMS
+ *    expand.c - expand a buffer, given variable values
+ *    file*.c - scan directories and archives on *
+ *    hash.c - simple in-memory hashing routines 
  *  hdrmacro.c - handle header file parsing for filename macro definitions
- *	headers.c - handle #includes in source files
- *	jambase.c - compilable copy of Jambase
- *	jamgram.y - jam grammar
- *	lists.c - maintain lists of strings
- *	make.c - bring a target up to date, once rules are in place
- *	make1.c - execute command to bring targets up to date
- *	newstr.c - string manipulation routines
- *	option.c - command line option processing
- *	parse.c - make and destroy parse trees as driven by the parser
- *	path*.c - manipulate file names on *
- *	hash.c - simple in-memory hashing routines 
- *	regexp.c - Henry Spencer's regexp
- *	rules.c - access to RULEs, TARGETs, and ACTIONs
- *	scan.c - the jam yacc scanner
- *	search.c - find a target along $(SEARCH) or $(LOCATE) 
- *	timestamp.c - get the timestamp of a file or archive member
- *	variable.c - handle jam multi-element variables
+ *    headers.c - handle #includes in source files
+ *    jambase.c - compilable copy of Jambase
+ *    jamgram.y - jam grammar
+ *    lists.c - maintain lists of strings
+ *    make.c - bring a target up to date, once rules are in place
+ *    make1.c - execute command to bring targets up to date
+ *    newstr.c - string manipulation routines
+ *    option.c - command line option processing
+ *    parse.c - make and destroy parse trees as driven by the parser
+ *    path*.c - manipulate file names on *
+ *    hash.c - simple in-memory hashing routines 
+ *    regexp.c - Henry Spencer's regexp
+ *    rules.c - access to RULEs, TARGETs, and ACTIONs
+ *    scan.c - the jam yacc scanner
+ *    search.c - find a target along $(SEARCH) or $(LOCATE) 
+ *    timestamp.c - get the timestamp of a file or archive member
+ *    variable.c - handle jam multi-element variables
  *
  * 05/04/94 (seiwald) - async multiprocess (-j) support
  * 02/08/95 (seiwald) - -n implies -d2.
@@ -137,16 +137,16 @@
 # endif
 
 struct globs globs = {
-	0,			/* noexec */
-	1,			/* jobs */
-	0,			/* quitquick */
-	0,			/* newestfirst */
+    0,            /* noexec */
+    1,            /* jobs */
+    0,            /* quitquick */
+    0,            /* newestfirst */
 # ifdef OS_MAC
-	{ 0, 0 },		/* debug - suppress tracing output */
+    { 0, 0 },        /* debug - suppress tracing output */
 # else
-	{ 0, 1 }, 		/* debug ... */
+    { 0, 1 },         /* debug ... */
 # endif
-	0,			/* output commands, not run them */
+    0,            /* output commands, not run them */
     0 /* action timeout */
 } ;
 
@@ -155,8 +155,8 @@ struct globs globs = {
 static char *othersyms[] = { OSMAJOR, OSMINOR, OSPLAT, JAMVERSYM, 0 } ;
 
 /* Known for sure: 
- *	mac needs arg_enviro
- *	OS2 needs extern environ
+ *    mac needs arg_enviro
+ *    OS2 needs extern environ
  */
 
 # ifdef OS_MAC
@@ -209,12 +209,12 @@ static void run_unit_tests()
 
 int  main( int argc, char **argv, char **arg_environ )
 {
-    int		n;
-    char		*s;
-    struct option	optv[N_OPTS];
-    const char	*all = "all";
-    int		anyhow = 0;
-    int		status;
+    int        n;
+    char        *s;
+    struct option    optv[N_OPTS];
+    const char    *all = "all";
+    int        anyhow = 0;
+    int        status;
     int arg_c = argc;
     char ** arg_v = argv;
     const char *progname = argv[0];
@@ -232,12 +232,12 @@ int  main( int argc, char **argv, char **arg_environ )
         printf( "-a      Build all targets, even if they are current.\n" );
         printf( "-dx     Set the debug level to x (0-9).\n" );
         printf( "-fx     Read x instead of Jambase.\n" );
-	    /* printf( "-g   Build from newest sources first.\n" ); */
+        /* printf( "-g   Build from newest sources first.\n" ); */
         printf( "-jx     Run up to x shell commands concurrently.\n" );
         printf( "-lx     Limit actions to x number of seconds after which they are stopped.\n" );
         printf( "-n      Don't actually execute the updating actions.\n" );
         printf( "-ox     Write the updating actions to file x.\n" );
-		printf( "-q      Quit quickly as soon as a target fails.\n" );
+        printf( "-q      Quit quickly as soon as a target fails.\n" );
         printf( "-rx     Record output of compiler, linker, etc. into files in directory 'x'.\n" );
         printf( "-sx=y   Set variable x=y, overriding environment.\n" );
         printf( "-tx     Rebuild x, even if it is up-to-date.\n" );
@@ -253,7 +253,7 @@ int  main( int argc, char **argv, char **arg_environ )
     {
         printf( "Boost.Jam  " );
         printf( "Version %s. %s.\n", VERSION, OSMINOR );
-	    printf( "   Copyright 1993-2002 Christopher Seiwald and Perforce Software, Inc.  \n" );
+        printf( "   Copyright 1993-2002 Christopher Seiwald and Perforce Software, Inc.  \n" );
         printf( "   Copyright 2001 David Turner.\n" );
         printf( "   Copyright 2001-2004 David Abrahams.\n" );
         printf( "   Copyright 2002-2005 Rene Rivera.\n" );
@@ -267,16 +267,16 @@ int  main( int argc, char **argv, char **arg_environ )
     if( ( s = getoptval( optv, 'n', 0 ) ) )
         globs.noexec++, globs.debug[2] = 1;
 
-	if( ( s = getoptval( optv, 'q', 0 ) ) )
- 	    globs.quitquick = 1;
+    if( ( s = getoptval( optv, 'q', 0 ) ) )
+         globs.quitquick = 1;
     if( ( s = getoptval( optv, 'a', 0 ) ) )
         anyhow++;
 
     if( ( s = getoptval( optv, 'j', 0 ) ) )
         globs.jobs = atoi( s );
 
-	if( ( s = getoptval( optv, 'g', 0 ) ) )
-	    globs.newestfirst = 1;
+    if( ( s = getoptval( optv, 'g', 0 ) ) )
+        globs.newestfirst = 1;
 
     if( ( s = getoptval( optv, 'l', 0 ) ) )
         globs.timeout = atoi( s );
@@ -398,12 +398,12 @@ int  main( int argc, char **argv, char **arg_environ )
     var_defines( use_environ, 0 );
     exit_module( bindmodule(".ENVIRON") );
 
-	/*
-	 * Jam defined variables OS, OSPLAT
+    /*
+     * Jam defined variables OS, OSPLAT
      * We load them after environment, so that
      * setting OS in environment does not 
      * change Jam notion of the current platform.
-	 */
+     */
 
     var_defines( othersyms, 1 );
 
@@ -425,9 +425,9 @@ int  main( int argc, char **argv, char **arg_environ )
         var_set( "ARGV", list_new( L0, newstr( arg_v[n] ) ), VAR_APPEND );
     }
 
-	/* Initialize built-in rules */
+    /* Initialize built-in rules */
 
-	load_builtins();
+    load_builtins();
 
     /* Add the targets in the command line to update list */
 
@@ -450,23 +450,23 @@ int  main( int argc, char **argv, char **arg_environ )
     {
         FRAME frame[1];
         frame_init( frame );
-		for( n = 0; s = getoptval( optv, 'f', n ); n++ )
-			parse_file( s, frame );
+        for( n = 0; s = getoptval( optv, 'f', n ); n++ )
+            parse_file( s, frame );
 
-		if( !n ){
-			/* if no Jambase is explicitly specified with '-f', try to open a Jambase
-			 * file in the current dir or use the built in Jambase
-			 */
-			FILE *fp_jambase=fopen( "Jambase" , "r" );
-			if( fp_jambase != NULL )
-			{
-				fclose(fp_jambase);
-				parse_file("Jambase",frame);
-			}else{
-				parse_file( "+", frame );
-			}
-		}
-	}
+        if( !n ){
+            /* if no Jambase is explicitly specified with '-f', try to open a Jambase
+             * file in the current dir or use the built in Jambase
+             */
+            FILE *fp_jambase=fopen( "Jambase" , "r" );
+            if( fp_jambase != NULL )
+            {
+                fclose(fp_jambase);
+                parse_file("Jambase",frame);
+            }else{
+                parse_file( "+", frame );
+            }
+        }
+    }
 
     status = yyanyerrors();
 
