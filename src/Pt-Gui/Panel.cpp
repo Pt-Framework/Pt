@@ -49,35 +49,35 @@ Panel::~Panel()
 
 void Panel::update()
 {
-	Brush brush(backgroundColor());
+    Brush brush(backgroundColor());
 
-	Painter p = painter();
-	p.setBrush(brush);
-	p.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    Painter p = painter();
+    p.setBrush(brush);
+    p.fillRect(Math::Rect(Math::Point(0, 0), size()));
 }
 
 
 Math::Size Panel::minimumSize()
 {
-	return layout().minimumSize();
+    return layout().minimumSize();
 }
 
 
 Math::Size Panel::preferredSize()
 {
-	return layout().preferredSize();
+    return layout().preferredSize();
 }
 
 
 void Panel::_resizeEvent(const ResizeEvent& event)
 {
-	this->update();
+    this->update();
 }
 
 
 void Panel::_paintEvent(const PaintEvent& event)
 {
-	this->update();
+    this->update();
 }
 
 

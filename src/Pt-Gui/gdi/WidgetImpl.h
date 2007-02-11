@@ -38,62 +38,62 @@ namespace Pt {
 
 namespace Gui {
 
-	class Widget;
-	class ResizeEvent;
-	class GDIPainter;
+    class Widget;
+    class ResizeEvent;
+    class GDIPainter;
 
-	class WidgetImpl : public Drawable
-	{
-		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size);
+    class WidgetImpl : public Drawable
+    {
+        public:
+            WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size);
 
-			WidgetImpl(Widget& widget, Widget* parent);
+            WidgetImpl(Widget& widget, Widget* parent);
 
-			virtual ~WidgetImpl();
+            virtual ~WidgetImpl();
 
-			void setTitle(const Pt::String& text);
+            void setTitle(const Pt::String& text);
 
-			Pt::String title();
+            Pt::String title();
 
-			void move(size_t x, size_t y);
+            void move(size_t x, size_t y);
 
-			void resize(size_t width, size_t height);
+            void resize(size_t width, size_t height);
 
-			void show();
+            void show();
 
-			void hide();
+            void hide();
 
-			void setParent(Widget* parent);
+            void setParent(Widget* parent);
 
-			HWND hwnd();
+            HWND hwnd();
 
-			Painter painter();
+            Painter painter();
 
-			virtual HDC beginPaint();
+            virtual HDC beginPaint();
 
-			virtual void endPaint();
+            virtual void endPaint();
 
-			virtual HDC deviceContext() const;
+            virtual HDC deviceContext() const;
 
-			virtual bool isPainting() const;
+            virtual bool isPainting() const;
 
-		private:
-			void init(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size);
+        private:
+            void init(Widget& widget, Widget* parent, const Math::Point& at, const Math::Size& size);
 
-		private:
-			HWND           _hwnd;
-			HDC            _deviceContext;
-			WidgetPainter* _painter;
-			size_t         _deviceContextUsageCount;
+        private:
+            HWND           _hwnd;
+            HDC            _deviceContext;
+            WidgetPainter* _painter;
+            size_t         _deviceContextUsageCount;
 
-			Widget&     _widget;
+            Widget&     _widget;
 
-			DWORD       _windowStyle;
+            DWORD       _windowStyle;
 
-			HPEN   _oldPen;
-			HBRUSH _oldBrush;
-			HFONT  _oldFont;
-	};
+            HPEN   _oldPen;
+            HBRUSH _oldBrush;
+            HFONT  _oldFont;
+    };
 
 } // namespace Gui
 

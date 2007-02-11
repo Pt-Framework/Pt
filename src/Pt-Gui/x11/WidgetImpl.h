@@ -46,46 +46,46 @@ namespace Pt {
 
 namespace Gui {
 
-	class Widget;
-	class WidgetPainterImpl;
-	class ResizeEvent;
+    class Widget;
+    class WidgetPainterImpl;
+    class ResizeEvent;
 
-	class WidgetImpl : public Drawable
-	{
-		public:
-			WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at = Math::Point(0, 0),
-			                                              const Math::Size& size = Math::Size(400, 300));
+    class WidgetImpl : public Drawable
+    {
+        public:
+            WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at = Math::Point(0, 0),
+                                                          const Math::Size& size = Math::Size(400, 300));
 
-			virtual ~WidgetImpl();
+            virtual ~WidgetImpl();
 
-			void setTitle(const Pt::String& text);
+            void setTitle(const Pt::String& text);
 
-			Pt::String title() const
-			{ return _title; }
+            Pt::String title() const
+            { return _title; }
 
-			Painter painter();
+            Painter painter();
 
-			void setParent(Widget* parent);
+            void setParent(Widget* parent);
 
-			void move(size_t x, size_t y);
+            void move(size_t x, size_t y);
 
-			void resize(size_t width, size_t height);
+            void resize(size_t width, size_t height);
 
-			void show();
+            void show();
 
-			void hide();
+            void hide();
 
-		private:
-			//! The X11 root window.
-			Window _root;
+        private:
+            //! The X11 root window.
+            Window _root;
 
-			//! the X11 parent window id
-			Widget* _parent;
+            //! the X11 parent window id
+            Widget* _parent;
 
-			WidgetPainterImpl* _painter;
+            WidgetPainterImpl* _painter;
 
-			Pt::String _title;
-	};
+            Pt::String _title;
+    };
 
 } // namespace Gui
 

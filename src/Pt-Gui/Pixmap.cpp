@@ -29,31 +29,31 @@ namespace Gui {
 
 Pixmap::Pixmap(size_t width, size_t height)
 {
-	_impl = new PixmapImpl(width, height);
+    _impl = new PixmapImpl(width, height);
 }
 
 
 Pixmap::Pixmap(const Pixmap& pixmap)
 {
-	_impl = new PixmapImpl( pixmap.impl() );
+    _impl = new PixmapImpl( pixmap.impl() );
 }
 
 
 Pixmap::~Pixmap()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 const Math::Size& Pixmap::size() const
 {
-	return _impl->size();
+    return _impl->size();
 }
 
 
 Painter Pixmap::painter()
 {
-	return _impl->painter();
+    return _impl->painter();
 }
 
 

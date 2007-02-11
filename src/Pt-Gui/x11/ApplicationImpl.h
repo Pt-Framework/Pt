@@ -46,118 +46,118 @@ namespace Pt {
 
 namespace Gui {
 
-	class Application;
-	class Widget;
+    class Application;
+    class Widget;
 
 
-	class X11EventLoop : public Pt::Singleton<X11EventLoop>
-	{
-		friend class Pt::Singleton<X11EventLoop>;
+    class X11EventLoop : public Pt::Singleton<X11EventLoop>
+    {
+        friend class Pt::Singleton<X11EventLoop>;
 
-		public:
-			Atom AtomAppWake;
-			Atom AtomWindowResize;
-			Atom AtomWindowMove;
-			Atom AtomWindowClosed;
-			Atom AtomWMProtocols;
+        public:
+            Atom AtomAppWake;
+            Atom AtomWindowResize;
+            Atom AtomWindowMove;
+            Atom AtomWindowClosed;
+            Atom AtomWMProtocols;
 
-		public:
-			~X11EventLoop();
+        public:
+            ~X11EventLoop();
 
-			Display* display()
-			{ return _display; }
+            Display* display()
+            { return _display; }
 
-			void registerWidget(Window winId, Widget& widget);
+            void registerWidget(Window winId, Widget& widget);
 
-			void unregisterWidget(Window winId);
+            void unregisterWidget(Window winId);
 
-			Widget* findWidget(Window winId);
+            Widget* findWidget(Window winId);
 
-			int run();
+            int run();
 
-			void wake();
+            void wake();
 
-			void commitEvent(const Pt::Event& event);
+            void commitEvent(const Pt::Event& event);
 
-			void queueEvent(const Pt::Event& event);
+            void queueEvent(const Pt::Event& event);
 
-			void processX11Events();
+            void processX11Events();
 
-			void processEvents();
+            void processEvents();
 
-			void exit();
+            void exit();
 
-		public:
-			Signal<const Pt::Event&> event;
+        public:
+            Signal<const Pt::Event&> event;
 
-		protected:
-			X11EventLoop();
+        protected:
+            X11EventLoop();
 
-			//! @brief Creates CloseEvents from X11 ClientMessage events
-			void clientMessage(Widget& widget, XEvent& xev);
+            //! @brief Creates CloseEvents from X11 ClientMessage events
+            void clientMessage(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 ButtonPress
-			void keyEvent(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 ButtonPress
+            void keyEvent(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 MotionNotify
-			void motionNotify(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 MotionNotify
+            void motionNotify(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 ButtonPress
-			void buttonPress(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 ButtonPress
+            void buttonPress(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 ButtonRelease
-			void buttonRelease(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 ButtonRelease
+            void buttonRelease(Widget& widget, XEvent& xev);
 
-			//! @brief Creates PaintEvents from X11 Expose
-			void expose(Widget& widget, XEvent& xev);
+            //! @brief Creates PaintEvents from X11 Expose
+            void expose(Widget& widget, XEvent& xev);
 
-			//! @brief Creates PaintEvents from X11 Expose
-			void noExpose(Widget& widget, XEvent& xev);
+            //! @brief Creates PaintEvents from X11 Expose
+            void noExpose(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 ButtonRelease
-			void configureNotify(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 ButtonRelease
+            void configureNotify(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 EnterNotify
-			void enterNotify(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 EnterNotify
+            void enterNotify(Widget& widget, XEvent& xev);
 
-			//! @brief Creates a MouseEvent from an X11 LeaveNotify
-			void leaveNotify(Widget& widget, XEvent& xev);
+            //! @brief Creates a MouseEvent from an X11 LeaveNotify
+            void leaveNotify(Widget& widget, XEvent& xev);
 
-			//! @brief Converts the X11 key symbol to a unicode character.
-			wchar_t keysymToUtf(int sym);
+            //! @brief Converts the X11 key symbol to a unicode character.
+            wchar_t keysymToUtf(int sym);
 
-		private:
-			bool _stop;
-			Display* _display;
-			int _wakeFds[2];
-			XEvent _xev;
-			std::list<Pt::Event*> _eventQueue;
-			System::Mutex _queueMutex;
-			std::map<Window, Widget*> _widgets;
-	};
+        private:
+            bool _stop;
+            Display* _display;
+            int _wakeFds[2];
+            XEvent _xev;
+            std::list<Pt::Event*> _eventQueue;
+            System::Mutex _queueMutex;
+            std::map<Window, Widget*> _widgets;
+    };
 
 
-	class PT_API ApplicationImpl : public Pt::Connectable
-	{
-		friend class Gui::Application;
+    class PT_API ApplicationImpl : public Pt::Connectable
+    {
+        friend class Gui::Application;
 
-		public:
-			ApplicationImpl(Application& app);
+        public:
+            ApplicationImpl(Application& app);
 
-			~ApplicationImpl();
+            ~ApplicationImpl();
 
-			void commitEvent(const Pt::Event& event);
+            void commitEvent(const Pt::Event& event);
 
-			void queueEvent(const Pt::Event& event);
+            void queueEvent(const Pt::Event& event);
 
-			void processEvents();
+            void processEvents();
 
-			int run();
+            int run();
 
-			void wake();
+            void wake();
 
-			void exit();
-	};
+            void exit();
+    };
 
 } // namespace Gui
 

@@ -56,74 +56,74 @@ Label::~Label()
 
 void Label::setText(const Pt::String& text)
 {
-	_text = text;
-	this->update();
+    _text = text;
+    this->update();
 }
 
 
 const Pt::String& Label::text() const
 {
-	return _text;
+    return _text;
 }
 
 
 void Label::update()
 {
-	Painter widgetPainter     = painter();
-	Painter backbufferPainter = _backbuffer->painter();
+    Painter widgetPainter     = painter();
+    Painter backbufferPainter = _backbuffer->painter();
 
-	Brush brush(backgroundColor());
+    Brush brush(backgroundColor());
 
-	widgetPainter.setBrush(brush);
-	widgetPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    widgetPainter.setBrush(brush);
+    widgetPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
 
-	backbufferPainter.setBrush(brush);
-	backbufferPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    backbufferPainter.setBrush(brush);
+    backbufferPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
 
-	if( !_text.empty() ) {
-		Pen pen(1, foregroundColor());
-		widgetPainter.setPen(pen);
-		backbufferPainter.setPen(pen);
+    if( !_text.empty() ) {
+        Pen pen(1, foregroundColor());
+        widgetPainter.setPen(pen);
+        backbufferPainter.setPen(pen);
 
-		widgetPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
-		backbufferPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
-	}
+        widgetPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+        backbufferPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
+    }
 }
 
 
 Math::Size Label::minimumSize()
 {
-	return Math::Size(0, 0);
+    return Math::Size(0, 0);
 }
 
 
 Math::Size Label::preferredSize()
 {
-	FontMetrics metrics = painter().fontMetrics(_text);
-	return Math::Size(metrics.width(), metrics.height());
+    FontMetrics metrics = painter().fontMetrics(_text);
+    return Math::Size(metrics.width(), metrics.height());
 }
 
 
 void Label::_resizeEvent(const ResizeEvent& event)
 {
-	_backbuffer.reset(new Pixmap(event.width(), event.height()));
+    _backbuffer.reset(new Pixmap(event.width(), event.height()));
 
-	this->update();
+    this->update();
 }
 
 
 void Label::_paintEvent(const PaintEvent& event)
 {
-	painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
+    painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 
 
 void Label::_mouseEvent(const MouseEvent& event)
 {
-	if( event.button() == MouseEvent::LeftButton )
-	{
-		clicked.send();
-	}
+    if( event.button() == MouseEvent::LeftButton )
+    {
+        clicked.send();
+    }
 }
 
 

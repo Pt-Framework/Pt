@@ -44,25 +44,25 @@ ResizeEvent::~ResizeEvent()
 
 size_t ResizeEvent::width() const
 {
-	return _width;
+    return _width;
 }
 
 
 size_t ResizeEvent::height() const
 {
-	return _height;
+    return _height;
 }
 
 ResizeEvent::Type ResizeEvent::resizeType() const
 {
-	return _resizeType;
+    return _resizeType;
 }
 
 
 const std::type_info& ResizeEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(ResizeEvent);
-	return ti;
+    static const std::type_info& ti = typeid(ResizeEvent);
+    return ti;
 }
 
 } // namespace Gui

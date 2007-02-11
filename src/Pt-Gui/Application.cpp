@@ -40,59 +40,59 @@ namespace Gui {
 
 Application::Application()
 {
-	_impl = new ApplicationImpl(*this);
-	connect(event, *this, &Application::dispatchEvent);
+    _impl = new ApplicationImpl(*this);
+    connect(event, *this, &Application::dispatchEvent);
 }
 
 
 Application::~Application()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 ApplicationImpl& Application::impl()
 {
-	return *_impl;
+    return *_impl;
 }
 
 
 int Application::run()
 {
-	return _impl->run();
+    return _impl->run();
 }
 
 void Application::exit()
 {
-	_impl->exit();
+    _impl->exit();
 }
 
 
 void Application::commitEvent(const Pt::Event& event)
 {
-	_impl->commitEvent(event);
+    _impl->commitEvent(event);
 }
 
 
 void Application::queueEvent(const Pt::Event& event)
 {
-	_impl->queueEvent(event);
+    _impl->queueEvent(event);
 }
 
 
 void Application::processEvents()
 {
-	_impl->processEvents();
+    _impl->processEvents();
 }
 
 
 void Application::dispatchEvent(const Pt::Event& e) const
 {
-	const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
+    const Pt::Gui::Event* guiEvent = dynamic_cast<const Pt::Gui::Event*>(&e);
 
-	if (guiEvent) {
-		guiEvent->widget().event(*guiEvent);
-	}
+    if (guiEvent) {
+        guiEvent->widget().event(*guiEvent);
+    }
 }
 
 } // namespace Gui

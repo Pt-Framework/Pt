@@ -44,37 +44,37 @@ MouseEvent::~MouseEvent()
 
 size_t MouseEvent::x() const
 {
-	return _x;
+    return _x;
 }
 
 
 size_t MouseEvent::y() const
 {
-	return _y;
+    return _y;
 }
 
 
 MouseEvent::Button MouseEvent::button() const
 {
-	return _button;
+    return _button;
 }
 
 
 MouseEvent::Action MouseEvent::action() const
 {
-	return _action;
+    return _action;
 }
 
 unsigned int MouseEvent::modifiers() const
 {
-	return _modifiers;
+    return _modifiers;
 }
 
 
 const std::type_info& MouseEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(MouseEvent);
-	return ti;
+    static const std::type_info& ti = typeid(MouseEvent);
+    return ti;
 }
 
 } // namespace Gui

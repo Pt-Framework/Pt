@@ -35,31 +35,31 @@ NullLayout::NullLayout(Widget& widget)
 
 void NullLayout::update()
 {
-	// Null layout. Don't do anything.
+    // Null layout. Don't do anything.
 }
 
 
 void NullLayout::remove(Widget& widget)
 {
-	// Null layout. Don't do anyhting.
+    // Null layout. Don't do anyhting.
 }
 
 
 Math::Size NullLayout::minimumSize()
 {
-	return Math::Size(0, 0);
+    return Math::Size(0, 0);
 }
 
 
 Math::Size NullLayout::preferredSize()
 {
-	return Math::Size(0, 0);
+    return Math::Size(0, 0);
 }
 
 
 NullLayout* NullLayout::createFor(Widget& widget)
 {
-	return new NullLayout(widget);
+    return new NullLayout(widget);
 }
 
 

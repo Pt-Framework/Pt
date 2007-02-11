@@ -28,12 +28,12 @@ namespace Pt {
 
 namespace Gui {
 
-	class WidgetImpl;
+    class WidgetImpl;
 
-	class WidgetPainterImpl : public PainterImpl {
-		public:
-			WidgetPainterImpl(WidgetImpl& wimpl);
-	};
+    class WidgetPainterImpl : public PainterImpl {
+        public:
+            WidgetPainterImpl(WidgetImpl& wimpl);
+    };
 
 } // namespace Gui
 

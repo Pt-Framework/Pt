@@ -42,25 +42,25 @@ WidgetPainter::~WidgetPainter()
 
 void WidgetPainter::begin()
 {
-	bool firstUse = !_widgetImpl.isPainting();
+    bool firstUse = !_widgetImpl.isPainting();
 
-	_widgetImpl.beginPaint();
+    _widgetImpl.beginPaint();
 
-	if (firstUse) {
-		// Send default settings to GDI.
-		updatePen();
-		updateFont();
-		updateBrush();
+    if (firstUse) {
+        // Send default settings to GDI.
+        updatePen();
+        updateFont();
+        updateBrush();
 
-		// Initialize default Device Context settings.
-		SetBkMode(_widgetImpl.deviceContext(), TRANSPARENT);
-	}
+        // Initialize default Device Context settings.
+        SetBkMode(_widgetImpl.deviceContext(), TRANSPARENT);
+    }
 }
 
 
 void WidgetPainter::end()
 {
-	_widgetImpl.endPaint();
+    _widgetImpl.endPaint();
 }
 
 } // namespace Gui

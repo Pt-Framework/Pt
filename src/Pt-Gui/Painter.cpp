@@ -37,187 +37,187 @@ namespace Gui {
 Painter::Painter(PainterImpl* painterImpl)
 : _active(false)
 {
-	_painterImpl = painterImpl;
+    _painterImpl = painterImpl;
 }
 
 
 Painter::~Painter()
 {
-	if (!_active) {
-		_painterImpl->end();
-	}
+    if (!_active) {
+        _painterImpl->end();
+    }
 }
 
 
 void Painter::setPen(const Pen& pen)
 {
-	_painterImpl->setPen(pen);
+    _painterImpl->setPen(pen);
 }
 
 
 const Pen& Painter::pen() const
 {
-	return _painterImpl->pen();
+    return _painterImpl->pen();
 }
 
 
 void Painter::setBrush(const Brush& brush)
 {
-	_painterImpl->setBrush(brush);
+    _painterImpl->setBrush(brush);
 }
 
 
 const Brush& Painter::brush() const
 {
-	return _painterImpl->brush();
+    return _painterImpl->brush();
 }
 
 
 void Painter::setFont(const Gfx::Font& font)
 {
-	_painterImpl->setFont(font);
+    _painterImpl->setFont(font);
 }
 
 
 const Gfx::Font& Painter::font() const
 {
-	return _painterImpl->font();
+    return _painterImpl->font();
 }
 
 
 FontMetrics Painter::fontMetrics() const
 {
-	this->begin();
-	return _painterImpl->fontMetrics();
+    this->begin();
+    return _painterImpl->fontMetrics();
 }
 
 
 FontMetrics Painter::fontMetrics(Pt::String text) const 
 {
-	this->begin();
-	return _painterImpl->fontMetrics(text);
+    this->begin();
+    return _painterImpl->fontMetrics(text);
 }
 
 
 const std::list<std::string>& Painter::fontFamilyNames()
 {
-	this->begin();
-	return _painterImpl->fontFamilyNames();
+    this->begin();
+    return _painterImpl->fontFamilyNames();
 }
 
 
 void Painter::drawPixel(const Math::Point& to)
 {
-	this->begin();
-	_painterImpl->drawPixel(to);
+    this->begin();
+    _painterImpl->drawPixel(to);
 }
 
 
 void Painter::drawLine(const Math::Point& from, const Math::Point& to)
 {
-	this->begin();
-	_painterImpl->drawLine(from, to);
+    this->begin();
+    _painterImpl->drawLine(from, to);
 }
 
 void Painter::drawText( const Math::Point& to, const Pt::String& text, const Pt::Gfx::ARgbColor* outline )
 {
-	this->begin();
-	_painterImpl->drawText(to, text);
+    this->begin();
+    _painterImpl->drawText(to, text);
 
 }
 
 void Painter::drawRect(const Math::Rect& rect)
 {
-	this->begin();
-	_painterImpl->drawRect(rect);
+    this->begin();
+    _painterImpl->drawRect(rect);
 }
 
 
 void Painter::fillRect(const Math::Rect& rect)
 {
-	this->begin();
-	_painterImpl->fillRect(rect);
+    this->begin();
+    _painterImpl->fillRect(rect);
 }
 
 
 void Painter::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
-	this->begin();
-	_painterImpl->drawEllipse(topLeft, size);
+    this->begin();
+    _painterImpl->drawEllipse(topLeft, size);
 }
 
 
 void Painter::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
-	this->begin();
-	_painterImpl->fillEllipse(topLeft, size);
+    this->begin();
+    _painterImpl->fillEllipse(topLeft, size);
 }
 
 
 void Painter::drawPolyline(const Math::Point* points, const size_t pointCount)
 {
-	this->begin();
-	_painterImpl->drawPolyline(points, pointCount);
+    this->begin();
+    _painterImpl->drawPolyline(points, pointCount);
 }
 
 
 void Painter::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
-	this->begin();
-	_painterImpl->fillPolygon(points, pointCount);
+    this->begin();
+    _painterImpl->fillPolygon(points, pointCount);
 }
 
 
 void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 {
-	if (image.empty()) {
-		return;  // Don't try to draw empty images.
-	}
+    if (image.empty()) {
+        return;  // Don't try to draw empty images.
+    }
 
-	this->begin();
-	_painterImpl->drawImage(to, image);
+    this->begin();
+    _painterImpl->drawImage(to, image);
 }
 
 
 void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Gfx::Region& imageRect)
 {
-	if (image.empty()) {
-		return;  // Don't try to draw empty images.
-	}
+    if (image.empty()) {
+        return;  // Don't try to draw empty images.
+    }
 
-	this->begin();
-	_painterImpl->drawImage(to, image, imageRect);
+    this->begin();
+    _painterImpl->drawImage(to, image, imageRect);
 }
 
 
 void Painter::drawPixmap(const Math::Point& to, Pixmap& from, const Gfx::Region& fromRect)
 {
-	if (from.size().width() == 0 || from.size().height() == 0) {
-		return;  // Don't try to draw empty pixmaps.
-	}
+    if (from.size().width() == 0 || from.size().height() == 0) {
+        return;  // Don't try to draw empty pixmaps.
+    }
 
-	this->begin();
-	_painterImpl->drawPixmap(to, from, fromRect);
+    this->begin();
+    _painterImpl->drawPixmap(to, from, fromRect);
 }
 
 
 void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
-	if (pm.size().width() == 0 || pm.size().height() == 0) {
-		return;  // Don't try to draw empty pixmaps.
-	}
+    if (pm.size().width() == 0 || pm.size().height() == 0) {
+        return;  // Don't try to draw empty pixmaps.
+    }
 
-	this->begin();
-	_painterImpl->drawPixmap(to, pm);
+    this->begin();
+    _painterImpl->drawPixmap(to, pm);
 }
 
 
 void Painter::begin() const
 {
-	if (!_active) {
-		_painterImpl->begin();
-		_active = true;
-	}
+    if (!_active) {
+        _painterImpl->begin();
+        _active = true;
+    }
 }
 
 

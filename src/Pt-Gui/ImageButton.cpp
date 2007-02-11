@@ -54,8 +54,8 @@ ImageButton::ImageButton(Widget& parent, const  Pt::Math::Point& at, const  Pt::
 , _backbuffer(new Pixmap(size.width(), size.height()))
 , _image(image)
 {
-	setForegroundColor(ARgbColor(0, 0, 0));
-	setBackgroundColor(ARgbColor(0xffff, 0xffff, 0xffff));
+    setForegroundColor(ARgbColor(0, 0, 0));
+    setBackgroundColor(ARgbColor(0xffff, 0xffff, 0xffff));
 }
 
 
@@ -65,91 +65,91 @@ ImageButton::~ImageButton()
 
 void ImageButton::update()
 {
-	Painter widgetPainter = painter();
-	Painter backbufferPainter = _backbuffer->painter();
+    Painter widgetPainter = painter();
+    Painter backbufferPainter = _backbuffer->painter();
 
-	if (_pressed) {
-		drawPressed(widgetPainter);
-		drawPressed(backbufferPainter);
-	} else {
-		drawNormal(widgetPainter, false);
-		drawNormal(backbufferPainter, false);
-	}
+    if (_pressed) {
+        drawPressed(widgetPainter);
+        drawPressed(backbufferPainter);
+    } else {
+        drawNormal(widgetPainter, false);
+        drawNormal(backbufferPainter, false);
+    }
 }
 
 
 void ImageButton::drawPressed(Painter& painter)
 {
-	painter.setBrush(Brush(backgroundColor()));
-	painter.fillRect(Rect(Point(0, 0), this->size()));
+    painter.setBrush(Brush(backgroundColor()));
+    painter.fillRect(Rect(Point(0, 0), this->size()));
 
-	ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
-	ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
-	painter.drawImage(Point(x + 1, y + 1), _image);
+    ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
+    ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
+    painter.drawImage(Point(x + 1, y + 1), _image);
 }
 
 
 void ImageButton::drawNormal(Painter& painter, bool focused)
 {
-	painter.setBrush(Brush(backgroundColor()));
-	painter.fillRect(Rect(Point(0, 0), this->size()));
+    painter.setBrush(Brush(backgroundColor()));
+    painter.fillRect(Rect(Point(0, 0), this->size()));
 
-	ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
-	ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
-	painter.drawImage(Point(x, y), _image);
+    ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
+    ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
+    painter.drawImage(Point(x, y), _image);
 }
 
 
 
 Pt::Math::Size ImageButton::minimumSize()
 {
-	return Size(_image.width(), _image.height());
+    return Size(_image.width(), _image.height());
 }
 
 
 Pt::Math::Size ImageButton::preferredSize()
 {
-	return Pt::Math::Size(_image.width() + insets().left() + insets().right(),
-	                       _image.height() + insets().top()  + insets().bottom());
+    return Pt::Math::Size(_image.width() + insets().left() + insets().right(),
+                           _image.height() + insets().top()  + insets().bottom());
 }
 
 
 void ImageButton::_resizeEvent(const ResizeEvent& event)
 {
-	_backbuffer.reset( new Pixmap( event.width(), event.height() ) );
+    _backbuffer.reset( new Pixmap( event.width(), event.height() ) );
 
-	Painter backbufferPainter = _backbuffer->painter();
-	this->update();
+    Painter backbufferPainter = _backbuffer->painter();
+    this->update();
 }
 
 
 void ImageButton::_paintEvent(const PaintEvent& event)
 {
-	painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
+    painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 
 
 void ImageButton::_mouseEvent(const MouseEvent& event)
 {
-	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton )
-	{
-		_pressed = true;
-		this->update();
-	}
-	else if (event.action() == MouseEvent::Release && event.button() == MouseEvent::LeftButton && _pressed)
-	{
-		_pressed = false;
-		this->update();
-		clicked.send();
-	}
+    if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton )
+    {
+        _pressed = true;
+        this->update();
+    }
+    else if (event.action() == MouseEvent::Release && event.button() == MouseEvent::LeftButton && _pressed)
+    {
+        _pressed = false;
+        this->update();
+        clicked.send();
+    }
 }
 
 void ImageButton::_mouseMoveEvent(const MouseMoveEvent& event)
 {
-	if (_pressed && event.action() == MouseMoveEvent::Exited) {
-		_pressed = false;
-		this->update();
-	}
+    if (_pressed && event.action() == MouseMoveEvent::Exited) {
+        _pressed = false;
+        this->update();
+    }
 }
 
 

@@ -44,20 +44,20 @@ MoveEvent::~MoveEvent()
 
 size_t MoveEvent::x() const
 {
-	return _x;
+    return _x;
 }
 
 
 size_t MoveEvent::y() const
 {
-	return _y;
+    return _y;
 }
 
 
 const std::type_info& MoveEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(MoveEvent);
-	return ti;
+    static const std::type_info& ti = typeid(MoveEvent);
+    return ti;
 }
 
 } // namespace Gui

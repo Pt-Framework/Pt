@@ -42,232 +42,232 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 : _parent(parent)
 , _painter(0)
 {
-	// Display and Screen are inited in Application
-	Display* display = X11EventLoop::instance().display();
-	unsigned int screen = DefaultScreen(display);
+    // Display and Screen are inited in Application
+    Display* display = X11EventLoop::instance().display();
+    unsigned int screen = DefaultScreen(display);
 
-	XSetWindowAttributes wattr;
-	memset(&wattr, 0, sizeof(wattr));
-	wattr.colormap = DefaultColormap(display, screen);
+    XSetWindowAttributes wattr;
+    memset(&wattr, 0, sizeof(wattr));
+    wattr.colormap = DefaultColormap(display, screen);
 
-	// The events we want to receive
-	wattr.event_mask = StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|
-	                   LeaveWindowMask|KeyPressMask|KeyReleaseMask|KeymapStateMask|
-	                   ButtonPressMask|ButtonReleaseMask|PointerMotionMask;
+    // The events we want to receive
+    wattr.event_mask = StructureNotifyMask|ExposureMask|PropertyChangeMask|EnterWindowMask|
+                       LeaveWindowMask|KeyPressMask|KeyReleaseMask|KeymapStateMask|
+                       ButtonPressMask|ButtonReleaseMask|PointerMotionMask;
 
-	// Propagate these events?
-	// NOTE (blue_wind_25): * It will depends on how we will send event to our controls,
-	//                        normally, we just let our our controls draw/do whatever
-	//                        they need based on the event (so just give the controls
-	//                        the event the main window just got)
-	//                      * However, for performance, seems that emulating the event
-	//                        propagation will be better (thats is propagate the event
-	//                        via Pt's internal event managament instead of asking the
-	//                        X server to do this automatically). Isn't it what the
-	//                        current implementation does?
-	wattr.do_not_propagate_mask = KeyPressMask|KeyReleaseMask|ButtonPressMask|
-	                              ButtonReleaseMask|PointerMotionMask|ButtonMotionMask;
+    // Propagate these events?
+    // NOTE (blue_wind_25): * It will depends on how we will send event to our controls,
+    //                        normally, we just let our our controls draw/do whatever
+    //                        they need based on the event (so just give the controls
+    //                        the event the main window just got)
+    //                      * However, for performance, seems that emulating the event
+    //                        propagation will be better (thats is propagate the event
+    //                        via Pt's internal event managament instead of asking the
+    //                        X server to do this automatically). Isn't it what the
+    //                        current implementation does?
+    wattr.do_not_propagate_mask = KeyPressMask|KeyReleaseMask|ButtonPressMask|
+                                  ButtonReleaseMask|PointerMotionMask|ButtonMotionMask;
 
-	// Border
-	wattr.border_pixel = 0; // Needed for OpenGL
-	wattr.border_pixmap = CopyFromParent;
+    // Border
+    wattr.border_pixel = 0; // Needed for OpenGL
+    wattr.border_pixmap = CopyFromParent;
 
-	// Background
-	wattr.background_pixmap = None ;
-	//wattr.background_pixel = XWhitePixel(display, screen);
+    // Background
+    wattr.background_pixmap = None ;
+    //wattr.background_pixel = XWhitePixel(display, screen);
 
-	// Backing store
-	// NOTE (blue_wind_25): IMO, it is not too useful and just eating up
-	//                      server's and/or clients' memory
-	wattr.backing_store = None;//Always;
-	wattr.save_under = False;//True;
+    // Backing store
+    // NOTE (blue_wind_25): IMO, it is not too useful and just eating up
+    //                      server's and/or clients' memory
+    wattr.backing_store = None;//Always;
+    wattr.save_under = False;//True;
 
-	// Gravity
-	wattr.bit_gravity = ForgetGravity; // Region to be retained on resize
-	wattr.win_gravity = NorthWestGravity; // How to to reposition when parent resizes
+    // Gravity
+    wattr.bit_gravity = ForgetGravity; // Region to be retained on resize
+    wattr.win_gravity = NorthWestGravity; // How to to reposition when parent resizes
 
-	wattr.cursor = None; // None means parents cursor
+    wattr.cursor = None; // None means parents cursor
 
-	wattr.override_redirect = False; // no WM interaction if True
-	/*if(_parent) {
-		wattr.override_redirect = True;
-	}*/
+    wattr.override_redirect = False; // no WM interaction if True
+    /*if(_parent) {
+        wattr.override_redirect = True;
+    }*/
 
-	// Determines which fields from XSetWindowAttributes are used
-	unsigned long winMask = CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
-	                        CWCursor|CWOverrideRedirect|CWColormap|CWBackingStore|CWSaveUnder|CWBackPixmap;
+    // Determines which fields from XSetWindowAttributes are used
+    unsigned long winMask = CWWinGravity|CWBitGravity|CWBorderPixmap|CWBorderPixel|CWEventMask|CWDontPropagate|
+                            CWCursor|CWOverrideRedirect|CWColormap|CWBackingStore|CWSaveUnder|CWBackPixmap;
 
-	Window parentId;
-	// Top level window
-	if(!_parent)
-		parentId = RootWindow(display, screen);
-	// Subwindow
-	else
-		parentId = _parent->impl().x11Drawable();
+    Window parentId;
+    // Top level window
+    if(!_parent)
+        parentId = RootWindow(display, screen);
+    // Subwindow
+    else
+        parentId = _parent->impl().x11Drawable();
 
-	unsigned int borderWidth = 0;
+    unsigned int borderWidth = 0;
 
-	// Create the X11 window
-	_drawable = XCreateWindow(display,
-	                          parentId,
-	                          at.x(),
-	                          at.y(),
-	                          std::max(size_t(1), size.width() ), // at least 1
-	                          std::max(size_t(1), size.height() ), // at least 1
-	                          borderWidth,
-	                          DefaultDepth(display, screen),
-	                          InputOutput,
-	                          DefaultVisual(display, screen),
-	                          winMask,
-	                          &wattr);
+    // Create the X11 window
+    _drawable = XCreateWindow(display,
+                              parentId,
+                              at.x(),
+                              at.y(),
+                              std::max(size_t(1), size.width() ), // at least 1
+                              std::max(size_t(1), size.height() ), // at least 1
+                              borderWidth,
+                              DefaultDepth(display, screen),
+                              InputOutput,
+                              DefaultVisual(display, screen),
+                              winMask,
+                              &wattr);
 
-	XSync(display, false);
+    XSync(display, false);
 
-	// Closing a window generates a ClientMessage, which we convert to a close event.
-	Atom atomWMDeleteWindow = X11EventLoop::instance().AtomWindowClosed;
-	XSetWMProtocols(display, _drawable, &atomWMDeleteWindow, 1);
+    // Closing a window generates a ClientMessage, which we convert to a close event.
+    Atom atomWMDeleteWindow = X11EventLoop::instance().AtomWindowClosed;
+    XSetWMProtocols(display, _drawable, &atomWMDeleteWindow, 1);
 
-	// Child windows are visible by default
-	if(parent) {
-		XMapWindow(display, _drawable);
-	}
+    // Child windows are visible by default
+    if(parent) {
+        XMapWindow(display, _drawable);
+    }
 
-	XSync(display, false);
+    XSync(display, false);
 
-	// Store for X11 window Id to C++ object mapping
-	X11EventLoop::instance().registerWidget(_drawable, apiWidget);
+    // Store for X11 window Id to C++ object mapping
+    X11EventLoop::instance().registerWidget(_drawable, apiWidget);
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-	delete _painter;
+    delete _painter;
 
-	// Remove this window from widget map
-	X11EventLoop::instance().unregisterWidget(_drawable);
+    // Remove this window from widget map
+    X11EventLoop::instance().unregisterWidget(_drawable);
 
-	Display* display = X11EventLoop::instance().display();
-	XDestroyWindow(display, _drawable);
-	XSync(display, false);
+    Display* display = X11EventLoop::instance().display();
+    XDestroyWindow(display, _drawable);
+    XSync(display, false);
 }
 
 
 void WidgetImpl::setTitle(const Pt::String& text)
 {
-	_title = text;
-	Display* display = X11EventLoop::instance().display();
-	XTextProperty tp;
+    _title = text;
+    Display* display = X11EventLoop::instance().display();
+    XTextProperty tp;
 
-	std::stringstream ss;
-	Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
-	textStream << text << Char(0); // Append extra \0 for proper line termination.
-	textStream.flush();
+    std::stringstream ss;
+    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
+    textStream << text << Char(0); // Append extra \0 for proper line termination.
+    textStream.flush();
 
-	std::string textString = ss.str();
-	const char* addressOfTextString = textString.c_str();
-	XwcTextListToTextProperty(display, (wchar_t**)&addressOfTextString, 1, XStringStyle, &tp);
+    std::string textString = ss.str();
+    const char* addressOfTextString = textString.c_str();
+    XwcTextListToTextProperty(display, (wchar_t**)&addressOfTextString, 1, XStringStyle, &tp);
 
-	XSetWMName(display, _drawable, &tp);
-	XFree( tp.value );
-	XSync(display, false);
+    XSetWMName(display, _drawable, &tp);
+    XFree( tp.value );
+    XSync(display, false);
 }
 
 
 Painter WidgetImpl::painter()
 {
-	if (!_painter) _painter = new WidgetPainterImpl(*this);
+    if (!_painter) _painter = new WidgetPainterImpl(*this);
 
-	return Painter(_painter);
+    return Painter(_painter);
 }
 
 
 void WidgetImpl::show()
 {
-	Display* display = X11EventLoop::instance().display();
-	XMapWindow(display, _drawable);
+    Display* display = X11EventLoop::instance().display();
+    XMapWindow(display, _drawable);
 
-	XSync(display, false);
+    XSync(display, false);
 }
 
 
 void WidgetImpl::hide()
 {
-	Display* display = X11EventLoop::instance().display();
-	XUnmapWindow(display, _drawable);
-	XSync(display, false);
+    Display* display = X11EventLoop::instance().display();
+    XUnmapWindow(display, _drawable);
+    XSync(display, false);
 }
 
 
 void WidgetImpl::setParent(Widget* parent)
 {
-	Window parentId;
-	Display* display = X11EventLoop::instance().display();
-	unsigned int screen = XDefaultScreen(display);
+    Window parentId;
+    Display* display = X11EventLoop::instance().display();
+    unsigned int screen = XDefaultScreen(display);
 
-	if(!parent)
-		parentId = XRootWindow(display, screen);
-	else
-		parentId = parent->impl().x11Drawable();
+    if(!parent)
+        parentId = XRootWindow(display, screen);
+    else
+        parentId = parent->impl().x11Drawable();
 
-	XReparentWindow(display, _drawable, parentId, 0, 0);
-	XSync(display, false);
+    XReparentWindow(display, _drawable, parentId, 0, 0);
+    XSync(display, false);
 }
 
 
 void WidgetImpl::move(size_t x, size_t y)
 {
-	Display* display = X11EventLoop::instance().display();
-	XMoveWindow(display, _drawable, x, y);
+    Display* display = X11EventLoop::instance().display();
+    XMoveWindow(display, _drawable, x, y);
 
-	// X11 does not create move events, when we resize ourselves
-	// so we report it directly to the X11 event loop.
-	XClientMessageEvent event;
-	event.send_event = False;
-	event.type = ClientMessage;
-	event.display = display;
-	event.window = _drawable;
-	event.message_type = X11EventLoop::instance().AtomWindowMove;
-	event.format = 32;
-	event.data.l[0] = x;
-	event.data.l[1] = y;
+    // X11 does not create move events, when we resize ourselves
+    // so we report it directly to the X11 event loop.
+    XClientMessageEvent event;
+    event.send_event = False;
+    event.type = ClientMessage;
+    event.display = display;
+    event.window = _drawable;
+    event.message_type = X11EventLoop::instance().AtomWindowMove;
+    event.format = 32;
+    event.data.l[0] = x;
+    event.data.l[1] = y;
 
-	XPutBackEvent(display, (XEvent*)&event);
-	XSync(display, false);
+    XPutBackEvent(display, (XEvent*)&event);
+    XSync(display, false);
 }
 
 
 void WidgetImpl::resize(size_t width, size_t height)
 {
-	width = std::max(size_t(1), width);
-	height = std::max(size_t(1), height);
+    width = std::max(size_t(1), width);
+    height = std::max(size_t(1), height);
 
-	Display* display = X11EventLoop::instance().display();
-	XResizeWindow( display, _drawable, width, height );
+    Display* display = X11EventLoop::instance().display();
+    XResizeWindow( display, _drawable, width, height );
 
-	// X11 does not create resize events, when we resize ourselves
-	// so we report it directly to the X11 event loop.
-	XClientMessageEvent event;
-	event.send_event = False;
-	event.type = ClientMessage;
-	event.display = display;
-	event.window = _drawable;
-	event.message_type = X11EventLoop::instance().AtomWindowResize;
-	event.format = 32;
-	event.data.l[0] = width;
-	event.data.l[1] = height;
+    // X11 does not create resize events, when we resize ourselves
+    // so we report it directly to the X11 event loop.
+    XClientMessageEvent event;
+    event.send_event = False;
+    event.type = ClientMessage;
+    event.display = display;
+    event.window = _drawable;
+    event.message_type = X11EventLoop::instance().AtomWindowResize;
+    event.format = 32;
+    event.data.l[0] = width;
+    event.data.l[1] = height;
 
-	XPutBackEvent(display, (XEvent*)&event);
-	XSync(display, false);
+    XPutBackEvent(display, (XEvent*)&event);
+    XSync(display, false);
 }
 
 
 //setMinimumSize:
-//	XSizeHints sh;
-//	memset(&sh, 0, sizeof(sh));
-//	sh.flags = PMinSize | PMaxSize;
-//	sh.min_width  = sh.max_width  = width;
-//	sh.min_height = sh.max_height = height;
-//	XSetStandardProperties(display, window, window_name, icon_name, icon_pixmap, argv, argc, hints)
+//    XSizeHints sh;
+//    memset(&sh, 0, sizeof(sh));
+//    sh.flags = PMinSize | PMaxSize;
+//    sh.min_width  = sh.max_width  = width;
+//    sh.min_height = sh.max_height = height;
+//    XSetStandardProperties(display, window, window_name, icon_name, icon_pixmap, argv, argc, hints)
 
 
 } // namespace Gui

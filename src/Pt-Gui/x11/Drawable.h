@@ -28,18 +28,18 @@ namespace Pt {
 
 namespace Gui {
 
-	class Drawable {
-		public:
-			Drawable();
+    class Drawable {
+        public:
+            Drawable();
 
-			virtual ~Drawable();
+            virtual ~Drawable();
 
-			::Drawable x11Drawable() const
-			{ return _drawable; }
+            ::Drawable x11Drawable() const
+            { return _drawable; }
 
-		protected:
-			::Drawable _drawable;
-	};
+        protected:
+            ::Drawable _drawable;
+    };
 
 } // namespace Gui
 

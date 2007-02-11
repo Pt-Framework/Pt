@@ -53,9 +53,9 @@ Button::Button(Widget& parent, const Math::Point& at, const Math::Size& size, co
 , _backbuffer(new Pixmap(size.width(), size.height()))
 , _text(text)
 {
-	setForegroundColor(ARgbColor(0, 0, 0));
-	setBackgroundColor(ARgbColor(54272, 53248, 51200));
-	setInsets(Insets(3, 5, 3, 5));
+    setForegroundColor(ARgbColor(0, 0, 0));
+    setBackgroundColor(ARgbColor(54272, 53248, 51200));
+    setInsets(Insets(3, 5, 3, 5));
 }
 
 
@@ -66,172 +66,172 @@ Button::~Button()
 
 void Button::setText(const Pt::String& text)
 {
-	_text = text;
-	this->update();
+    _text = text;
+    this->update();
 }
 
 
 const Pt::String& Button::text() const
 {
-	return _text;
+    return _text;
 }
 
 
 void Button::update()
 {
-	Painter widgetPainter = painter();
-	Painter backbufferPainter = _backbuffer->painter();
+    Painter widgetPainter = painter();
+    Painter backbufferPainter = _backbuffer->painter();
 
-	if (_pressed) {
-		drawPressed(widgetPainter);
-		drawPressed(backbufferPainter);
-	} else {
-		drawNormal(widgetPainter, false);
-		drawNormal(backbufferPainter, false);
-	}
+    if (_pressed) {
+        drawPressed(widgetPainter);
+        drawPressed(backbufferPainter);
+    } else {
+        drawNormal(widgetPainter, false);
+        drawNormal(backbufferPainter, false);
+    }
 }
 
 
 void Button::drawPressed(Painter& painter)
 {
-	// Draw backround and border. First paint the background in the button's background color...
-	Brush brush(this->backgroundColor());
+    // Draw backround and border. First paint the background in the button's background color...
+    Brush brush(this->backgroundColor());
 
-	painter.setBrush(brush);
-	painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
+    painter.setBrush(brush);
+    painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
-	// ... then draw the border around the button.
-	Pen borderPen(1, ARgbColor(16384, 16384, 16384));
+    // ... then draw the border around the button.
+    Pen borderPen(1, ARgbColor(16384, 16384, 16384));
 
-	painter.setPen(borderPen);
-	painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
-	painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
+    painter.setPen(borderPen);
+    painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
+    painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
-	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
-	painter.setPen(borderPen);
+    borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+    painter.setPen(borderPen);
 
-	painter.drawLine(Math::Point(1, 1), Math::Point(size().width() - 2, 1));
-	painter.drawLine(Math::Point(1, 1), Math::Point(1, size().height() - 2));
+    painter.drawLine(Math::Point(1, 1), Math::Point(size().width() - 2, 1));
+    painter.drawLine(Math::Point(1, 1), Math::Point(1, size().height() - 2));
 
-	borderPen = Pen(1, ARgbColor(65535, 65535, 65535));
-	painter.setPen(borderPen);
+    borderPen = Pen(1, ARgbColor(65535, 65535, 65535));
+    painter.setPen(borderPen);
 
-	painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
-	painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
+    painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
+    painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
 
-	// Draw button's text.
-	Pen pen(4, this->foregroundColor());
-	painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
-	painter.setPen(pen);
+    // Draw button's text.
+    Pen pen(4, this->foregroundColor());
+    painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
+    painter.setPen(pen);
 
-	if( !_text.empty() ) {
-		// Calculate the position of the text to center it inside the button.
-		FontMetrics metrics = painter.fontMetrics(_text);
-		ssize_t x = (size().width()  - metrics.width())  / 2;
-		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
+    if( !_text.empty() ) {
+        // Calculate the position of the text to center it inside the button.
+        FontMetrics metrics = painter.fontMetrics(_text);
+        ssize_t x = (size().width()  - metrics.width())  / 2;
+        ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
 
-		// Draw the button's text.
-		painter.drawText( Math::Point(x + 1, y + 1), _text.c_str() );
-	}
+        // Draw the button's text.
+        painter.drawText( Math::Point(x + 1, y + 1), _text.c_str() );
+    }
 }
 
 
 void Button::drawNormal(Painter& painter, bool focused)
 {
-	// Draw backround and border. First paint the background in the button's background color...
-	Brush brush(this->backgroundColor());
+    // Draw backround and border. First paint the background in the button's background color...
+    Brush brush(this->backgroundColor());
 
-	painter.setBrush(brush);
-	painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
+    painter.setBrush(brush);
+    painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
-	// ... then draw the border around the button.
-	Pen borderPen(1, ARgbColor(65535, 65535, 65535));
+    // ... then draw the border around the button.
+    Pen borderPen(1, ARgbColor(65535, 65535, 65535));
 
-	painter.setPen(borderPen);
-	painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
-	painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
+    painter.setPen(borderPen);
+    painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
+    painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
-	borderPen = Pen(1, ARgbColor(16384, 16384, 16384));
-	painter.setPen(borderPen);
+    borderPen = Pen(1, ARgbColor(16384, 16384, 16384));
+    painter.setPen(borderPen);
 
-	painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
-	painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
+    painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
+    painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
 
-	borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
-	painter.setPen(borderPen);
+    borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+    painter.setPen(borderPen);
 
-	painter.drawLine(Math::Point(size().width() - 2, 1), Math::Point(size().width() - 2, size().height() - 1));
-	painter.drawLine(Math::Point(1, size().height() - 2), Math::Point(size().width() - 1, size().height() - 2));
+    painter.drawLine(Math::Point(size().width() - 2, 1), Math::Point(size().width() - 2, size().height() - 1));
+    painter.drawLine(Math::Point(1, size().height() - 2), Math::Point(size().width() - 1, size().height() - 2));
 
-	// Draw button's text.
-	Pen pen(4, this->foregroundColor());
-	painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
-	painter.setPen(pen);
+    // Draw button's text.
+    Pen pen(4, this->foregroundColor());
+    painter.setFont(Font("Tahoma", 11, Font::NormalStyle)); // TODO Font name
+    painter.setPen(pen);
 
-	if( !_text.empty() ) {
-		// Calculate the position of the text to center it inside the button.
-		FontMetrics metrics = painter.fontMetrics(_text);
-		ssize_t x = (size().width()  - metrics.width())  / 2;
-		ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
+    if( !_text.empty() ) {
+        // Calculate the position of the text to center it inside the button.
+        FontMetrics metrics = painter.fontMetrics(_text);
+        ssize_t x = (size().width()  - metrics.width())  / 2;
+        ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
 
-		// Draw the button's text.
-		painter.drawText( Math::Point(x, y), _text.c_str() );
-	}
+        // Draw the button's text.
+        painter.drawText( Math::Point(x, y), _text.c_str() );
+    }
 }
 
 
 
 Math::Size Button::minimumSize()
 {
-	return Math::Size(0, 0);
+    return Math::Size(0, 0);
 }
 
 
 Math::Size Button::preferredSize()
 {
-	FontMetrics metrics = painter().fontMetrics(_text);
+    FontMetrics metrics = painter().fontMetrics(_text);
 
-	return Math::Size(metrics.width()  + insets().left() + insets().right(),
-	            metrics.height() + insets().top()  + insets().bottom());
+    return Math::Size(metrics.width()  + insets().left() + insets().right(),
+                metrics.height() + insets().top()  + insets().bottom());
 }
 
 
 void Button::_resizeEvent(const ResizeEvent& event)
 {
-	_backbuffer.reset( new Pixmap( event.width(), event.height() ) );
+    _backbuffer.reset( new Pixmap( event.width(), event.height() ) );
 
-	Painter backbufferPainter = _backbuffer->painter();
-	this->update();
+    Painter backbufferPainter = _backbuffer->painter();
+    this->update();
 }
 
 
 void Button::_paintEvent(const PaintEvent& event)
 {
-	painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
+    painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 
 
 void Button::_mouseEvent(const MouseEvent& event)
 {
-	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton )
-	{
-		_pressed = true;
-		this->update();
-	}
-	else if (event.action() == MouseEvent::Release && event.button() == MouseEvent::LeftButton && _pressed)
-	{
-		_pressed = false;
-		this->update();
-		clicked.send();
-	}
+    if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton )
+    {
+        _pressed = true;
+        this->update();
+    }
+    else if (event.action() == MouseEvent::Release && event.button() == MouseEvent::LeftButton && _pressed)
+    {
+        _pressed = false;
+        this->update();
+        clicked.send();
+    }
 }
 
 void Button::_mouseMoveEvent(const MouseMoveEvent& event)
 {
-	if (_pressed && event.action() == MouseMoveEvent::Exited) {
-		_pressed = false;
-		this->update();
-	}
+    if (_pressed && event.action() == MouseMoveEvent::Exited) {
+        _pressed = false;
+        this->update();
+    }
 }
 
 

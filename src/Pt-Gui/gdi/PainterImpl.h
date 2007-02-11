@@ -45,141 +45,141 @@ namespace Pt {
 
 namespace Gui {
 
-	class WidgetImpl;
-	class Pixmap;
+    class WidgetImpl;
+    class Pixmap;
 
-	class PainterImpl {
-		public:
-			PainterImpl(Drawable& drawable);
+    class PainterImpl {
+        public:
+            PainterImpl(Drawable& drawable);
 
-			virtual ~PainterImpl();
+            virtual ~PainterImpl();
 
-			virtual void begin() = 0;
+            virtual void begin() = 0;
 
-			virtual void end() = 0;
+            virtual void end() = 0;
 
-			void setPen(const Gfx::Pen& pen);
+            void setPen(const Gfx::Pen& pen);
 
-			const Gfx::Pen& pen() const;
+            const Gfx::Pen& pen() const;
 
-			void setBrush(const Gfx::Brush& brush);
+            void setBrush(const Gfx::Brush& brush);
 
-			const Gfx::Brush& brush() const;
+            const Gfx::Brush& brush() const;
 
-			void setFont(const Gfx::Font& font);
+            void setFont(const Gfx::Font& font);
 
-			const Gfx::Font& font() const;
+            const Gfx::Font& font() const;
 
-			Gfx::FontMetrics fontMetrics() const;
+            Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(Pt::String Text) const;
+            Gfx::FontMetrics fontMetrics(Pt::String Text) const;
 
-			const std::list<std::string>& fontFamilyNames();
+            const std::list<std::string>& fontFamilyNames();
 
-			int depth() const;
+            int depth() const;
 
-			void drawPixel(const Pt::Math::Point& to);
+            void drawPixel(const Pt::Math::Point& to);
 
-			void drawLine(const Pt::Math::Point& from, const Pt::Math::Point& to);
+            void drawLine(const Pt::Math::Point& from, const Pt::Math::Point& to);
 
-			void drawText(const Pt::Math::Point& to, const Pt::String& Text);
+            void drawText(const Pt::Math::Point& to, const Pt::String& Text);
 
-			void drawRect(const Pt::Math::Rect& rectangle);
+            void drawRect(const Pt::Math::Rect& rectangle);
 
-			void fillRect(const Pt::Math::Rect& rectangle);
+            void fillRect(const Pt::Math::Rect& rectangle);
 
-			void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
+            void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
-			void fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
+            void fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
-			void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const;
+            void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const;
 
-			void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const;
+            void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const;
 
-			void drawPixmap(const Pt::Math::Point& to, Pixmap& pm, const Pt::Gfx::Region& pmRegion);
+            void drawPixmap(const Pt::Math::Point& to, Pixmap& pm, const Pt::Gfx::Region& pmRegion);
 
-			void drawPixmap(const Pt::Math::Point& to, Pixmap& pm);
+            void drawPixmap(const Pt::Math::Point& to, Pixmap& pm);
 
-			void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image);
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
 
-			template <typename Iterator>
-			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
-			{
-				if (width == 0 || height == 0) {
-					return; // Don't draw empty images.
-				}
+            template <typename Iterator>
+            void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
+            {
+                if (width == 0 || height == 0) {
+                    return; // Don't draw empty images.
+                }
 
-				// Try to convert our generic image format (ARgbImage) to an image format that is compatible
-				// with the current device settings. If this is not possible, convert it to a 32-bit
-				// device-independent image that windows has to convert to the current device settings
-				// when we bit-blit it.
-				switch (depth()) {
-					case 32:
-					case 24: {
-						Gfx::Rgb888Image rgb32Image(width, height);
-						assign(begin, end, rgb32Image.begin());
-						drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
-						break;
-					}
+                // Try to convert our generic image format (ARgbImage) to an image format that is compatible
+                // with the current device settings. If this is not possible, convert it to a 32-bit
+                // device-independent image that windows has to convert to the current device settings
+                // when we bit-blit it.
+                switch (depth()) {
+                    case 32:
+                    case 24: {
+                        Gfx::Rgb888Image rgb32Image(width, height);
+                        assign(begin, end, rgb32Image.begin());
+                        drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
+                        break;
+                    }
 
-					case 16: {
-						Gfx::Rgb565Image rgb16Image(width, height);
-						assign(begin, end, rgb16Image.begin());
-						drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
-						break;
-					}
-
-
-					case 15: {
-						Gfx::Rgb555Image rgb16Image(width, height);
-						assign(begin, end, rgb16Image.begin());
-						drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
-						break;
-					}
-
-					default: { // Below 16 bit or anything inbetween
-						Gfx::Rgb888Image rgb32Image(width, height);
-						assign(begin, end, rgb32Image.begin());
-						drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
-						break;
-					}
-				}
-			}
-
-			void addFontName(const std::string& fontName);
-
-		protected:
-			void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
-			void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-
-			std::string determinePlatformDefaultFontName();
-
-			void updatePen();
-			void updateFont();
-			void updateBrush();
-
-			void ensureActivePainter() const
-			{
-				if ( !_drawable.isPainting() ) {
-					throw std::logic_error("Painter is not currently active. Use painter() to activate painter." + PT_SOURCEINFO);
-				}
-			}
+                    case 16: {
+                        Gfx::Rgb565Image rgb16Image(width, height);
+                        assign(begin, end, rgb16Image.begin());
+                        drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
+                        break;
+                    }
 
 
-		protected:
-			Drawable&  _drawable;
+                    case 15: {
+                        Gfx::Rgb555Image rgb16Image(width, height);
+                        assign(begin, end, rgb16Image.begin());
+                        drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
+                        break;
+                    }
 
-			Gfx::Pen   _pen;
-			Gfx::Brush _brush;
-			Gfx::Font  _font;
+                    default: { // Below 16 bit or anything inbetween
+                        Gfx::Rgb888Image rgb32Image(width, height);
+                        assign(begin, end, rgb32Image.begin());
+                        drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
+                        break;
+                    }
+                }
+            }
 
-			mutable std::stringstream    _stringStream;
-			mutable Pt::Text::TextStream _textStream;
+            void addFontName(const std::string& fontName);
 
-			std::list<std::string> _fontNamesList;
-	};
+        protected:
+            void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
+            void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
+
+            std::string determinePlatformDefaultFontName();
+
+            void updatePen();
+            void updateFont();
+            void updateBrush();
+
+            void ensureActivePainter() const
+            {
+                if ( !_drawable.isPainting() ) {
+                    throw std::logic_error("Painter is not currently active. Use painter() to activate painter." + PT_SOURCEINFO);
+                }
+            }
+
+
+        protected:
+            Drawable&  _drawable;
+
+            Gfx::Pen   _pen;
+            Gfx::Brush _brush;
+            Gfx::Font  _font;
+
+            mutable std::stringstream    _stringStream;
+            mutable Pt::Text::TextStream _textStream;
+
+            std::list<std::string> _fontNamesList;
+    };
 
 } // namespace Gui
 

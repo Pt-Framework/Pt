@@ -30,21 +30,21 @@ namespace Pt {
 
 namespace Gui {
 
-	class WidgetImpl;
+    class WidgetImpl;
 
-	class WidgetPainter : public PainterImpl {
-		public:
-			WidgetPainter(WidgetImpl& widgetImpl);
+    class WidgetPainter : public PainterImpl {
+        public:
+            WidgetPainter(WidgetImpl& widgetImpl);
 
-			virtual ~WidgetPainter();
+            virtual ~WidgetPainter();
 
-			virtual void begin();
+            virtual void begin();
 
-			virtual void end();
+            virtual void end();
 
-		private:
-			WidgetImpl& _widgetImpl;
-	};
+        private:
+            WidgetImpl& _widgetImpl;
+    };
 
 } // namespace Gui
 

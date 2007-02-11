@@ -35,9 +35,9 @@ namespace Gui {
 
 VerticalLayout& VerticalLayout::create(Widget& widget, Mode mode, size_t gap)
 {
-	// The layout will be deleted by the owning widget
-	VerticalLayout* layout = new VerticalLayout(widget, mode, gap);
-	return *layout;
+    // The layout will be deleted by the owning widget
+    VerticalLayout* layout = new VerticalLayout(widget, mode, gap);
+    return *layout;
 }
 
 
@@ -51,164 +51,164 @@ VerticalLayout::VerticalLayout(Widget& widget, Mode mode, size_t gap)
 
 void VerticalLayout::set(Widget& widget, Orientation orient, const Margin& margin)
 {
-	WidgetMap::iterator it = _widgets.find(&widget);
+    WidgetMap::iterator it = _widgets.find(&widget);
 
-	if (it == _widgets.end()) {
-		connect(widget.destroyed, *this, &VerticalLayout::remove);
-	}
+    if (it == _widgets.end()) {
+        connect(widget.destroyed, *this, &VerticalLayout::remove);
+    }
 
-	VerticalLayout::LayoutData data(orient, margin);
-	_widgets[&widget] = data;
+    VerticalLayout::LayoutData data(orient, margin);
+    _widgets[&widget] = data;
 }
 
 
 void VerticalLayout::remove(Widget& widget)
 {
-	_widgets.erase(&widget);
+    _widgets.erase(&widget);
 
-	// TODO disconnect ???
+    // TODO disconnect ???
 }
 
 
 ssize_t VerticalLayout::maximumHeight() const
 {
-	const std::list<Widget*>& children = this->widget().childWidgets();
-	list<Widget*>::const_iterator childrenIter;
-	ssize_t maxHeight = 0;
+    const std::list<Widget*>& children = this->widget().childWidgets();
+    list<Widget*>::const_iterator childrenIter;
+    ssize_t maxHeight = 0;
 
-	// If the mode is "uniform height" then the heighest widget's height is used.
-	if (_mode == UniformHeight)
-	{
-		for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) 
-		{
-			Widget* w = *childrenIter;
-			maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
-		}
-	}
+    // If the mode is "uniform height" then the heighest widget's height is used.
+    if (_mode == UniformHeight)
+    {
+        for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) 
+        {
+            Widget* w = *childrenIter;
+            maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
+        }
+    }
 
-	return maxHeight;
+    return maxHeight;
 }
 
 
 void VerticalLayout::update()
 {
-	ssize_t maxHeight = this->maximumHeight();
-	size_t  widgetWidth  = this->widget().size().width();
-	ssize_t y = 0;
+    ssize_t maxHeight = this->maximumHeight();
+    size_t  widgetWidth  = this->widget().size().width();
+    ssize_t y = 0;
 
-	// Calculate the position for each widget according to the order 
-	// they were added to the layout.
-	for(WidgetMap::const_iterator it = _widgets.begin(); it != _widgets.end(); it++) 
-	{
-		Widget* w = it->first;
-		const LayoutData& layoutData = it->second;
+    // Calculate the position for each widget according to the order 
+    // they were added to the layout.
+    for(WidgetMap::const_iterator it = _widgets.begin(); it != _widgets.end(); it++) 
+    {
+        Widget* w = it->first;
+        const LayoutData& layoutData = it->second;
 
-		// Determine x-position and width according to the orientation 
-		// (left, right, center, grab).
-		size_t x     = 0;
-		size_t width = 0;
-		switch( layoutData.orientation() )
-		{
-			case VerticalLayout::Grab:
-				x     = 0;
-				width = widgetWidth;
-				break;
+        // Determine x-position and width according to the orientation 
+        // (left, right, center, grab).
+        size_t x     = 0;
+        size_t width = 0;
+        switch( layoutData.orientation() )
+        {
+            case VerticalLayout::Grab:
+                x     = 0;
+                width = widgetWidth;
+                break;
 
-			case VerticalLayout::Left:
-				x     = 0;
-				width = w->preferredSize().width();
-				break;
+            case VerticalLayout::Left:
+                x     = 0;
+                width = w->preferredSize().width();
+                break;
 
-			case VerticalLayout::Right:
-				x     = widgetWidth - w->preferredSize().width();
-				width = w->preferredSize().width();
-				break;
+            case VerticalLayout::Right:
+                x     = widgetWidth - w->preferredSize().width();
+                width = w->preferredSize().width();
+                break;
 
-			case VerticalLayout::Center:
-				x     = ((ssize_t)widgetWidth - w->preferredSize().width()) / 2;
-				width = w->preferredSize().width();
-				break;
-		};
+            case VerticalLayout::Center:
+                x     = ((ssize_t)widgetWidth - w->preferredSize().width()) / 2;
+                width = w->preferredSize().width();
+                break;
+        };
 
-		// The height of the specific widget is either all the same (uniform) or specific (varying).
-		size_t height = (_mode == UniformHeight) ? maxHeight : w->preferredSize().height();
+        // The height of the specific widget is either all the same (uniform) or specific (varying).
+        size_t height = (_mode == UniformHeight) ? maxHeight : w->preferredSize().height();
 
-		// Add margins to x-position and width.
-		x      += layoutData.margin().left();
-		width  -= (layoutData.margin().left() + layoutData.margin().right());
+        // Add margins to x-position and width.
+        x      += layoutData.margin().left();
+        width  -= (layoutData.margin().left() + layoutData.margin().right());
 
-		// Set the widget's calculated position and size.
-		w->move  (x,     y + layoutData.margin().top());
-		w->resize(width, height - layoutData.margin().top() - layoutData.margin().bottom());
+        // Set the widget's calculated position and size.
+        w->move  (x,     y + layoutData.margin().top());
+        w->resize(width, height - layoutData.margin().top() - layoutData.margin().bottom());
 
-		// Go to next y-position.
-		y += height + _gap;
-	}
+        // Go to next y-position.
+        y += height + _gap;
+    }
 }
 
 Math::Size VerticalLayout::minimumSize()
 {
-	return calculateSize(this->widget(), false);
+    return calculateSize(this->widget(), false);
 }
 
 
 Math::Size VerticalLayout::preferredSize()
 {
-	return calculateSize(this->widget(), true);
+    return calculateSize(this->widget(), true);
 }
 
 
 Math::Size VerticalLayout::calculateSize(Widget& parent, bool forPreferredSize)
 {
-	const std::list<Widget*>& children = parent.childWidgets();
-	ssize_t maxWidth  = 0;
-	ssize_t maxHeight = 0;
-	ssize_t allHeight = 0;
+    const std::list<Widget*>& children = parent.childWidgets();
+    ssize_t maxWidth  = 0;
+    ssize_t maxHeight = 0;
+    ssize_t allHeight = 0;
 
-	if (_mode == VaryingHeight)
-	{
-		// Sum all heights and find widest width.
-		list<Widget*>::const_iterator child;
+    if (_mode == VaryingHeight)
+    {
+        // Sum all heights and find widest width.
+        list<Widget*>::const_iterator child;
 
-		for(child = children.begin(); child != children.end(); child++) {
-			Widget* w = *child;
+        for(child = children.begin(); child != children.end(); child++) {
+            Widget* w = *child;
 
-			if (forPreferredSize)
-			{
-				maxWidth  =  max<size_t>(maxWidth,  w->preferredSize().width());
-				allHeight += w->preferredSize().height();
-			}
-			else {
-				maxWidth  =  max<size_t>(maxWidth,  w->minimumSize().width());
-				allHeight += w->minimumSize().height();
-			}
-		}
+            if (forPreferredSize)
+            {
+                maxWidth  =  max<size_t>(maxWidth,  w->preferredSize().width());
+                allHeight += w->preferredSize().height();
+            }
+            else {
+                maxWidth  =  max<size_t>(maxWidth,  w->minimumSize().width());
+                allHeight += w->minimumSize().height();
+            }
+        }
 
-		allHeight += (children.size() - 1) * _gap;
-		return Math::Size(maxWidth, allHeight);
+        allHeight += (children.size() - 1) * _gap;
+        return Math::Size(maxWidth, allHeight);
 
-	}
-	else
-	{
-		// Findet heighest height and widest width.
-		list<Widget*>::const_iterator child = children.begin();
+    }
+    else
+    {
+        // Findet heighest height and widest width.
+        list<Widget*>::const_iterator child = children.begin();
 
-		for(child = children.begin(); child != children.end(); child++) {
-			Widget* w = *child;
+        for(child = children.begin(); child != children.end(); child++) {
+            Widget* w = *child;
 
-			if (forPreferredSize)
-			{
-				maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
-				maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
-			}
-			else {
-				maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
-				maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
-			}
-		}
+            if (forPreferredSize)
+            {
+                maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
+                maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
+            }
+            else {
+                maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
+                maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
+            }
+        }
 
-		return Math::Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
-	}
+        return Math::Size(maxWidth, maxHeight * children.size() + _gap * (children.size() - 1));
+    }
 }
 
 } // namespace Gui

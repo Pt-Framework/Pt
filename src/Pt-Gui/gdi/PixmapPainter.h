@@ -30,23 +30,23 @@ namespace Pt {
 
 namespace Gui {
 
-	class PixmapImpl;
+    class PixmapImpl;
 
-	class PixmapPainter : public PainterImpl
-	{
-		public:
-			PixmapPainter(PixmapImpl& pixmapImpl);
+    class PixmapPainter : public PainterImpl
+    {
+        public:
+            PixmapPainter(PixmapImpl& pixmapImpl);
 
-			virtual ~PixmapPainter();
+            virtual ~PixmapPainter();
 
-			virtual void begin();
+            virtual void begin();
 
-			virtual void end();
+            virtual void end();
 
 
-		private:
-			PixmapImpl& _pixmapImpl;
-	};
+        private:
+            PixmapImpl& _pixmapImpl;
+    };
 
 } // namespace Gui
 

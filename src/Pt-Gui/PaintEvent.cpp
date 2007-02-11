@@ -49,8 +49,8 @@ PaintEvent::~PaintEvent()
 
 const std::type_info& PaintEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(PaintEvent);
-	return ti;
+    static const std::type_info& ti = typeid(PaintEvent);
+    return ti;
 }
 
 } // namespace Gui

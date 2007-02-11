@@ -28,12 +28,12 @@ namespace Pt {
 
 namespace Gui {
 
-	class PixmapImpl;
+    class PixmapImpl;
 
-	class PixmapPainterImpl : public PainterImpl {
-		public:
-			PixmapPainterImpl(PixmapImpl& pimpl);
-	};
+    class PixmapPainterImpl : public PainterImpl {
+        public:
+            PixmapPainterImpl(PixmapImpl& pimpl);
+    };
 
 } // namespace Gui
 

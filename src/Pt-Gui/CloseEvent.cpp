@@ -44,8 +44,8 @@ CloseEvent::~CloseEvent()
 
 const std::type_info& CloseEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(CloseEvent);
-	return ti;
+    static const std::type_info& ti = typeid(CloseEvent);
+    return ti;
 }
 
 } // namespace Gui

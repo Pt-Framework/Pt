@@ -43,8 +43,8 @@ KeyEvent::~KeyEvent()
 
 const std::type_info& KeyEvent::typeInfo() const
 {
-	static const std::type_info& ti = typeid(KeyEvent);
-	return ti;
+    static const std::type_info& ti = typeid(KeyEvent);
+    return ti;
 }
 
 } // namespace gui

@@ -55,120 +55,120 @@ namespace Pt {
 
 namespace Gui {
 
-	class Drawable;
-	class Pixmap;
+    class Drawable;
+    class Pixmap;
 
-	class PainterImpl {
-		public:
-			PainterImpl(Gui::Drawable& drawable);
+    class PainterImpl {
+        public:
+            PainterImpl(Gui::Drawable& drawable);
 
-			virtual ~PainterImpl();
+            virtual ~PainterImpl();
 
-			void begin();
+            void begin();
 
-			void end();
+            void end();
 
-			Gui::Drawable& drawable() const;
+            Gui::Drawable& drawable() const;
 
-			void setPen(const Gfx::Pen& pen);
+            void setPen(const Gfx::Pen& pen);
 
-			const Gfx::Pen& pen() const;
+            const Gfx::Pen& pen() const;
 
-			void setBrush(const Gfx::Brush& brush);
+            void setBrush(const Gfx::Brush& brush);
 
-			const Gfx::Brush& brush() const;
+            const Gfx::Brush& brush() const;
 
-			const Gfx::Font& font() const;
+            const Gfx::Font& font() const;
 
-			void setFont(const Gfx::Font& font);
+            void setFont(const Gfx::Font& font);
 
-			Gfx::FontMetrics fontMetrics() const;
+            Gfx::FontMetrics fontMetrics() const;
 
-			Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+            Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-			const std::list<std::string>& fontFamilyNames();
+            const std::list<std::string>& fontFamilyNames();
 
-			int depth() const;
+            int depth() const;
 
-			void drawPixel(const Math::Point& to);
+            void drawPixel(const Math::Point& to);
 
-			void drawLine(const Math::Point& from, const Math::Point& to);
+            void drawLine(const Math::Point& from, const Math::Point& to);
 
-			void drawText(const Math::Point& to, const Pt::String& text);
+            void drawText(const Math::Point& to, const Pt::String& text);
 
-			void drawRect(const Math::Rect& rect);
+            void drawRect(const Math::Rect& rect);
 
-			void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-			void drawPolyline(const Math::Point* points, const size_t pointCount);
+            void drawPolyline(const Math::Point* points, const size_t pointCount);
 
-			void fillRect(const Math::Rect& rect);
+            void fillRect(const Math::Rect& rect);
 
-			void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-			void fillPolygon(const Math::Point* points, const size_t pointCount);
+            void fillPolygon(const Math::Point* points, const size_t pointCount);
 
-			void drawPixmap(const Math::Point& to, Pixmap& pm);
+            void drawPixmap(const Math::Point& to, Pixmap& pm);
 
-			void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
-			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
-			void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
-			               const Gfx::Region& imageRegion);
+            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+                           const Gfx::Region& imageRegion);
 
-			template <typename Iterator>
-			void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
-			{
-				switch( this->depth() ) {
-					case 32:
-					case 24:
-					{
-						Gfx::Rgb888Image rgb24Image( width, height );
-						assign( begin, end, rgb24Image.begin() );
-						this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
-						break;
-					}
+            template <typename Iterator>
+            void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
+            {
+                switch( this->depth() ) {
+                    case 32:
+                    case 24:
+                    {
+                        Gfx::Rgb888Image rgb24Image( width, height );
+                        assign( begin, end, rgb24Image.begin() );
+                        this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
+                        break;
+                    }
 
-					case 16:
-					{
-						Gfx::Rgb565Image rgb16Image( width, height );
-						assign( begin, end, rgb16Image.begin() );
-						this->drawImage( x, y, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height() );
-						break;
-					}
-					case 15:
-					{
-						Gfx::Rgb555Image rgb15Image( width, height );
-						assign( begin, end, rgb15Image.begin() );
-						this->drawImage( x, y, (char*)rgb15Image.data(), rgb15Image.width(), rgb15Image.height() );
-						break;
-					}
+                    case 16:
+                    {
+                        Gfx::Rgb565Image rgb16Image( width, height );
+                        assign( begin, end, rgb16Image.begin() );
+                        this->drawImage( x, y, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height() );
+                        break;
+                    }
+                    case 15:
+                    {
+                        Gfx::Rgb555Image rgb15Image( width, height );
+                        assign( begin, end, rgb15Image.begin() );
+                        this->drawImage( x, y, (char*)rgb15Image.data(), rgb15Image.width(), rgb15Image.height() );
+                        break;
+                    }
 
-					default:
-						break;
-				}
-			}
+                    default:
+                        break;
+                }
+            }
 
-		protected:
-			long toXColor(const Gfx::ARgbColor& color);
+        protected:
+            long toXColor(const Gfx::ARgbColor& color);
 
-			void drawImage(size_t toX, size_t toY, const char* data, size_t width, size_t height);
+            void drawImage(size_t toX, size_t toY, const char* data, size_t width, size_t height);
 
-		private:
-			Gui::Drawable* _drawable;
-			Gfx::Pen _pen;
-			Gfx::Brush _brush;
-			Gfx::Font  _font;
-			GC _penGc;
-			GC _brushGc;
-			_XftDraw* _xftDraw;
-			_XftFont* _xftFont;
-			std::list<std::string> _fontList;
+        private:
+            Gui::Drawable* _drawable;
+            Gfx::Pen _pen;
+            Gfx::Brush _brush;
+            Gfx::Font  _font;
+            GC _penGc;
+            GC _brushGc;
+            _XftDraw* _xftDraw;
+            _XftFont* _xftFont;
+            std::list<std::string> _fontList;
 
-			mutable std::stringstream    _stringStream;
-			mutable Pt::Text::TextStream _textStream;
-	};
+            mutable std::stringstream    _stringStream;
+            mutable Pt::Text::TextStream _textStream;
+    };
 
 } // namespace Gui
 

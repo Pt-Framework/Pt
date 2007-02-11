@@ -32,44 +32,44 @@ namespace Pt {
 
 namespace Gui {
 
-	class PixmapImpl : public Drawable
-	{
-		public:
-			PixmapImpl(size_t width, size_t height);
+    class PixmapImpl : public Drawable
+    {
+        public:
+            PixmapImpl(size_t width, size_t height);
 
-			PixmapImpl(const PixmapImpl& oldPixmap);
+            PixmapImpl(const PixmapImpl& oldPixmap);
 
-			virtual ~PixmapImpl();
+            virtual ~PixmapImpl();
 
-			const Math::Size& size() const
-			{ return _size; }
+            const Math::Size& size() const
+            { return _size; }
 
-			Painter painter();
+            Painter painter();
 
-			HBITMAP bitmapHandle() const;
+            HBITMAP bitmapHandle() const;
 
-			virtual HDC beginPaint();
+            virtual HDC beginPaint();
 
-			virtual void endPaint();
+            virtual void endPaint();
 
-			virtual HDC deviceContext() const;
+            virtual HDC deviceContext() const;
 
-			virtual bool isPainting() const;
+            virtual bool isPainting() const;
 
 
-		private:
-			void setupDeviceContext();
+        private:
+            void setupDeviceContext();
 
-		private:
-			Math::Size      _size;
-			HDC            _deviceContext;
-			HBITMAP        _bitmapHandle;
-			PixmapPainter* _painter;
+        private:
+            Math::Size      _size;
+            HDC            _deviceContext;
+            HBITMAP        _bitmapHandle;
+            PixmapPainter* _painter;
 
-			HPEN   _oldPen;
-			HBRUSH _oldBrush;
-			HFONT  _oldFont;
-	};
+            HPEN   _oldPen;
+            HBRUSH _oldBrush;
+            HFONT  _oldFont;
+    };
 
 } // namespace Gui
 

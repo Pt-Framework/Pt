@@ -28,36 +28,36 @@ namespace Pt {
 
 namespace Gui {
 
-	class Drawable
-	{
-		public:
-			virtual ~Drawable()
-			{ }
+    class Drawable
+    {
+        public:
+            virtual ~Drawable()
+            { }
 
-			virtual HDC beginPaint() = 0;
+            virtual HDC beginPaint() = 0;
 
-			virtual void endPaint() = 0;
+            virtual void endPaint() = 0;
 
-			/**
-			 * @brief Returns the current device context.
-			 *
-			 * If there is no currently active device context, 0 is returned. The device context is
-			 * not activated in this method.
-			 */
-			virtual HDC deviceContext() const = 0;
+            /**
+             * @brief Returns the current device context.
+             *
+             * If there is no currently active device context, 0 is returned. The device context is
+             * not activated in this method.
+             */
+            virtual HDC deviceContext() const = 0;
 
-			/**
-			 * @brief Returns the current painting state.
-			 *
-			 * Return the current painting state. Returns true if the drawable is currently activated
-			 * for painting. It's the case when beginPaint() was called at least one time more often
-			 * than endPaint(). False is returned when the drawable is not currently activated for
-			 * painting.
-			 *
-			 * @return The current painting state (true/false).
-			 */
-			virtual bool isPainting() const = 0;
-	};
+            /**
+             * @brief Returns the current painting state.
+             *
+             * Return the current painting state. Returns true if the drawable is currently activated
+             * for painting. It's the case when beginPaint() was called at least one time more often
+             * than endPaint(). False is returned when the drawable is not currently activated for
+             * painting.
+             *
+             * @return The current painting state (true/false).
+             */
+            virtual bool isPainting() const = 0;
+    };
 
 } // namespace Gui
 

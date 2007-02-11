@@ -59,47 +59,47 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::begin()
 {
-	_drawable.beginPaint();
+    _drawable.beginPaint();
 }
 
 
 void PainterImpl::end()
 {
-	_drawable.endPaint();
+    _drawable.endPaint();
 }
 
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
-	if (pen == _pen) {
-		return;
-	}
+    if (pen == _pen) {
+        return;
+    }
 
-	_pen = pen;
-	updatePen();
+    _pen = pen;
+    updatePen();
 }
 
 
 void PainterImpl::updatePen()
 {
-	if (!_drawable.isPainting()) {
-		return;
-	}
+    if (!_drawable.isPainting()) {
+        return;
+    }
 
-	Gfx::Rgb888Color penCol;
-	assign( penCol, _pen.color() );
+    Gfx::Rgb888Color penCol;
+    assign( penCol, _pen.color() );
 
 #ifdef _WIN32_WCE
-	HPEN newPen = CreatePen(PS_SOLID, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()));
+    HPEN newPen = CreatePen(PS_SOLID, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()));
 #else
-	LOGBRUSH brush;
-	brush.lbStyle = BS_SOLID ;
-	brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
-	
-	DWORD penStyle = PS_GEOMETRIC | PS_ENDCAP_FLAT;
-	
-//	penStsle |= PS_ENDCAP_ROUND;
-//	penStyle |= PS_JOIN_BEVEL;
+    LOGBRUSH brush;
+    brush.lbStyle = BS_SOLID ;
+    brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
+    
+    DWORD penStyle = PS_GEOMETRIC | PS_ENDCAP_FLAT;
+    
+//    penStsle |= PS_ENDCAP_ROUND;
+//    penStyle |= PS_JOIN_BEVEL;
 
     switch( _pen.style() )
     {
@@ -110,325 +110,325 @@ void PainterImpl::updatePen()
             penStyle |= PS_DASH;        
     }
     
-	HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
+    HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
 #endif
 
-	HPEN oldPen = (HPEN)SelectObject(_drawable.deviceContext(), newPen);
+    HPEN oldPen = (HPEN)SelectObject(_drawable.deviceContext(), newPen);
 
-	DeleteObject(oldPen);
+    DeleteObject(oldPen);
 
-	// Set the Text color to the pen color.
-	SetTextColor(_drawable.deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));
+    // Set the Text color to the pen color.
+    SetTextColor(_drawable.deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));
 }
 
 
 const Gfx::Pen& PainterImpl::pen() const
 {
-	return _pen;
+    return _pen;
 }
 
 
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
-	_brush = brush;
-	updateBrush();
+    _brush = brush;
+    updateBrush();
 }
 
 
 void PainterImpl::updateBrush()
 {
-	if (!_drawable.isPainting()) {
-		return;
-	}
+    if (!_drawable.isPainting()) {
+        return;
+    }
 
-	HBRUSH newBrushHandle;
+    HBRUSH newBrushHandle;
 
-	switch (_brush.fillStyle()) {
+    switch (_brush.fillStyle()) {
 
-		case Gfx::Brush::SolidFill: {
-			Gfx::Rgb888Color col;
-			assign( col, _brush.color() );
-			newBrushHandle = CreateSolidBrush(RGB(col.red(), col.green(), col.blue()));
-			break;
-		}
+        case Gfx::Brush::SolidFill: {
+            Gfx::Rgb888Color col;
+            assign( col, _brush.color() );
+            newBrushHandle = CreateSolidBrush(RGB(col.red(), col.green(), col.blue()));
+            break;
+        }
 
-		case Gfx::Brush::TextureFill: {
-			const Gfx::ARgbImage& texture = _brush.texture();
+        case Gfx::Brush::TextureFill: {
+            const Gfx::ARgbImage& texture = _brush.texture();
 
-			if (!texture.empty())
-			{
-				// Convert our generic format to a 32 bit image format which Windows can understand.
-				Gfx::Rgb888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
-				assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
+            if (!texture.empty())
+            {
+                // Convert our generic format to a 32 bit image format which Windows can understand.
+                Gfx::Rgb888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
+                assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
 
-				// Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
-				BITMAPINFO bitmapInfo;
-				ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+                // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
+                BITMAPINFO bitmapInfo;
+                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-				bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
-				bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
-				bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
-				bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
-				bitmapInfo.bmiHeader.biBitCount    = 32;                          // We internally use a 32-bit bitmap.
-				bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
-				bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
-				bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
-				bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
+                bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
+                bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
+                bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
+                bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
+                bitmapInfo.bmiHeader.biBitCount    = 32;                          // We internally use a 32-bit bitmap.
+                bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
+                bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
+                bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
+                bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
 
-				// Create the device-independent bitmap that will be filled with the texture
-				// and used as brush.
-				VOID* imageBits;
-				HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+                // Create the device-independent bitmap that will be filled with the texture
+                // and used as brush.
+                VOID* imageBits;
+                HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-				// Copy image data from the texture to the Windows bitmap.
-				memcpy(imageBits, rgb32Image.data(), texture.width() * texture.height() * 4);
+                // Copy image data from the texture to the Windows bitmap.
+                memcpy(imageBits, rgb32Image.data(), texture.width() * texture.height() * 4);
 
-				// Create the actual brush from this bitmap.
-				newBrushHandle = CreatePatternBrush(bitmap);
+                // Create the actual brush from this bitmap.
+                newBrushHandle = CreatePatternBrush(bitmap);
 
-				// Free the bitmap again.
-				DeleteObject(bitmap);
-			}
-			else // texture.empty() == true
-			{
-				// Use the empty brush for empty textures.
-				newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
-			}
+                // Free the bitmap again.
+                DeleteObject(bitmap);
+            }
+            else // texture.empty() == true
+            {
+                // Use the empty brush for empty textures.
+                newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
+            }
 
-			break;
-		}
+            break;
+        }
 
-		default:
-			// TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
-			return;
-	}
+        default:
+            // TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
+            return;
+    }
 
-	HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_drawable.deviceContext(), newBrushHandle);
+    HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_drawable.deviceContext(), newBrushHandle);
 
-	DeleteObject(oldBrushHandle);
+    DeleteObject(oldBrushHandle);
 }
 
 
 const Gfx::Brush& PainterImpl::brush() const
 {
-	return _brush;
+    return _brush;
 }
 
 void PainterImpl::setFont(const Gfx::Font& font)
 {
-	if (font == _font) {
-		return;
-	}
+    if (font == _font) {
+        return;
+    }
 
-	_font = font;
-	updateFont();
+    _font = font;
+    updateFont();
 }
 
 
 void PainterImpl::updateFont()
 {
-	if (!_drawable.isPainting()) {
-		return;
-	}
+    if (!_drawable.isPainting()) {
+        return;
+    }
 
-	// General font settings, independent of given font settings.
-	SetTextAlign(_drawable.deviceContext(), TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
+    // General font settings, independent of given font settings.
+    SetTextAlign(_drawable.deviceContext(), TA_BASELINE | TA_LEFT | TA_NOUPDATECP);
 
-	int fontWeight;
-	switch (_font.fontStyle()) {
-		case Gfx::Font::NormalStyle:
-		case Gfx::Font::ItalicStyle:
-			fontWeight = FW_NORMAL;
-			break;
+    int fontWeight;
+    switch (_font.fontStyle()) {
+        case Gfx::Font::NormalStyle:
+        case Gfx::Font::ItalicStyle:
+            fontWeight = FW_NORMAL;
+            break;
 
-		case Gfx::Font::BoldStyle:
-		case Gfx::Font::BoldItalicStyle:
-			fontWeight = FW_BOLD;
-			break;
-	}
+        case Gfx::Font::BoldStyle:
+        case Gfx::Font::BoldItalicStyle:
+            fontWeight = FW_BOLD;
+            break;
+    }
 
-	BYTE italic = (_font.fontStyle() == Gfx::Font::ItalicStyle || _font.fontStyle() == Gfx::Font::BoldItalicStyle);
+    BYTE italic = (_font.fontStyle() == Gfx::Font::ItalicStyle || _font.fontStyle() == Gfx::Font::BoldItalicStyle);
 
-	LOGFONT fontDescription;
-	fontDescription.lfHeight         = -((int)_font.size()); // negative value -> Value is converted to device units.
-	fontDescription.lfWidth          = 0;                    // width - Default width of the font.
-	fontDescription.lfEscapement     = _font.angle();        // escapement angle
-	fontDescription.lfOrientation    = 0;                    // orientation
-	fontDescription.lfWeight         = fontWeight;           // font weight
-	fontDescription.lfItalic         = italic;               // italic
-	fontDescription.lfUnderline      = FALSE;                // underline
-	fontDescription.lfStrikeOut      = FALSE;                // strikeout
-	fontDescription.lfCharSet        = DEFAULT_CHARSET;      // charset - use the default charset
-	fontDescription.lfOutPrecision   = OUT_DEFAULT_PRECIS;   // output precision - default output precision
-	fontDescription.lfClipPrecision  = CLIP_DEFAULT_PRECIS;  // clipping behaviour - default clipping behaviour
-	fontDescription.lfQuality        = DEFAULT_QUALITY;      // quality - default quality
-	fontDescription.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // font pitch and family - default
-	memset(fontDescription.lfFaceName, 0, LF_FACESIZE * sizeof(TCHAR));
-	memcpy(fontDescription.lfFaceName,
-	       _font.name().c_str(),
-	       std::min<size_t>( LF_FACESIZE - 1, _font.name().size() + 1)
-	      );
+    LOGFONT fontDescription;
+    fontDescription.lfHeight         = -((int)_font.size()); // negative value -> Value is converted to device units.
+    fontDescription.lfWidth          = 0;                    // width - Default width of the font.
+    fontDescription.lfEscapement     = _font.angle();        // escapement angle
+    fontDescription.lfOrientation    = 0;                    // orientation
+    fontDescription.lfWeight         = fontWeight;           // font weight
+    fontDescription.lfItalic         = italic;               // italic
+    fontDescription.lfUnderline      = FALSE;                // underline
+    fontDescription.lfStrikeOut      = FALSE;                // strikeout
+    fontDescription.lfCharSet        = DEFAULT_CHARSET;      // charset - use the default charset
+    fontDescription.lfOutPrecision   = OUT_DEFAULT_PRECIS;   // output precision - default output precision
+    fontDescription.lfClipPrecision  = CLIP_DEFAULT_PRECIS;  // clipping behaviour - default clipping behaviour
+    fontDescription.lfQuality        = DEFAULT_QUALITY;      // quality - default quality
+    fontDescription.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // font pitch and family - default
+    memset(fontDescription.lfFaceName, 0, LF_FACESIZE * sizeof(TCHAR));
+    memcpy(fontDescription.lfFaceName,
+           _font.name().c_str(),
+           std::min<size_t>( LF_FACESIZE - 1, _font.name().size() + 1)
+          );
 
-	HFONT newFont = CreateFontIndirect(&fontDescription);
+    HFONT newFont = CreateFontIndirect(&fontDescription);
 
-	HFONT oldFont = (HFONT)SelectObject(_drawable.deviceContext(), newFont);
+    HFONT oldFont = (HFONT)SelectObject(_drawable.deviceContext(), newFont);
 
-	DeleteObject(oldFont);
+    DeleteObject(oldFont);
 }
 
 
 
 std::string PainterImpl::determinePlatformDefaultFontName()
 {
-	HFONT defaultFont = (HFONT)GetStockObject(SYSTEM_FONT);
-	SelectObject(_drawable.deviceContext(), defaultFont);
+    HFONT defaultFont = (HFONT)GetStockObject(SYSTEM_FONT);
+    SelectObject(_drawable.deviceContext(), defaultFont);
 
-	std::vector<TCHAR> buffer(32);
-	GetTextFace(_drawable.deviceContext(), buffer.size(), &buffer[0]);
+    std::vector<TCHAR> buffer(32);
+    GetTextFace(_drawable.deviceContext(), buffer.size(), &buffer[0]);
 
-	return win32::toMultiByte(&buffer[0]);
+    return win32::toMultiByte(&buffer[0]);
 }
 
 
 const Gfx::Font& PainterImpl::font() const
 {
-	return _font;
+    return _font;
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	TEXTMETRIC metrics;
-	GetTextMetrics(_drawable.deviceContext(), &metrics);
+    TEXTMETRIC metrics;
+    GetTextMetrics(_drawable.deviceContext(), &metrics);
 
-	return Gfx::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
+    return Gfx::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	// Basic font metrics without the Text-specific width.
-	TEXTMETRIC basicMetrics;
-	GetTextMetrics(_drawable.deviceContext(), &basicMetrics);
+    // Basic font metrics without the Text-specific width.
+    TEXTMETRIC basicMetrics;
+    GetTextMetrics(_drawable.deviceContext(), &basicMetrics);
 
-	// Convert the 32-bit string into 16 bit (using UTF-16).
+    // Convert the 32-bit string into 16 bit (using UTF-16).
     _textStream.clear();
-	_stringStream.str("");
-	_textStream << text;
-	_textStream.flush();
+    _stringStream.str("");
+    _textStream << text;
+    _textStream.flush();
 
-	// Calculate the width and height for the text.
-	SIZE textSize;
-	std::string utf16Text = _stringStream.str();
-	
-	// Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
-	size_t utf16Length = utf16Text.length() / 2;
-	GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)utf16Text.c_str(), utf16Length, &textSize);
+    // Calculate the width and height for the text.
+    SIZE textSize;
+    std::string utf16Text = _stringStream.str();
+    
+    // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
+    size_t utf16Length = utf16Text.length() / 2;
+    GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)utf16Text.c_str(), utf16Length, &textSize);
 
-	return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
+    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
 }
 
 
 void PainterImpl::addFontName(const std::string& fontName)
 {
-	_fontNamesList.push_back(fontName);
+    _fontNamesList.push_back(fontName);
 }
 
 
 #ifdef _WIN32_WCE
 
-	static int CALLBACK EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD type, LPARAM param)
-	{
-		WCHAR* faceName = logFont->lfFaceName;
+    static int CALLBACK EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD type, LPARAM param)
+    {
+        WCHAR* faceName = logFont->lfFaceName;
 
-		if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
-			((PainterImpl*)param)->addFontName(win32::toMultiByte(faceName));
-		}
+        if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
+            ((PainterImpl*)param)->addFontName(win32::toMultiByte(faceName));
+        }
 
-		return 1;
-	}
+        return 1;
+    }
 
 #else
 
-	static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *physFont, DWORD type, LPARAM param)
-	{
-		char* faceName = logFont->elfLogFont.lfFaceName;
+    static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *physFont, DWORD type, LPARAM param)
+    {
+        char* faceName = logFont->elfLogFont.lfFaceName;
 
-		if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
-			((PainterImpl*)param)->addFontName(faceName);
-		}
+        if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
+            ((PainterImpl*)param)->addFontName(faceName);
+        }
 
-		return 1;
-	}
+        return 1;
+    }
 
 #endif
 
 
 const std::list<std::string>& PainterImpl::fontFamilyNames()
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	if (_fontNamesList.empty()) {
+    if (_fontNamesList.empty()) {
 
-		#ifdef _WIN32_WCE
-			EnumFonts(_drawable.deviceContext(), 0, (FONTENUMPROC)&EnumFontsProc, (LPARAM)this);
-		#else
-			LOGFONT logFont;
-			logFont.lfCharSet = DEFAULT_CHARSET;
-			logFont.lfFaceName[0] = '\0';
-			logFont.lfPitchAndFamily = 0;
+        #ifdef _WIN32_WCE
+            EnumFonts(_drawable.deviceContext(), 0, (FONTENUMPROC)&EnumFontsProc, (LPARAM)this);
+        #else
+            LOGFONT logFont;
+            logFont.lfCharSet = DEFAULT_CHARSET;
+            logFont.lfFaceName[0] = '\0';
+            logFont.lfPitchAndFamily = 0;
 
-			EnumFontFamiliesEx(_drawable.deviceContext(), &logFont,	(FONTENUMPROC)&EnumFontFamExProc, (LPARAM)this,	0);
-		#endif
+            EnumFontFamiliesEx(_drawable.deviceContext(), &logFont,    (FONTENUMPROC)&EnumFontFamExProc, (LPARAM)this,    0);
+        #endif
 
-		_fontNamesList.unique();
-	}
+        _fontNamesList.unique();
+    }
 
-	return _fontNamesList;
+    return _fontNamesList;
 }
 
 
 int PainterImpl::depth() const
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	return GetDeviceCaps(_drawable.deviceContext(), BITSPIXEL);
+    return GetDeviceCaps(_drawable.deviceContext(), BITSPIXEL);
 }
 
 
 void PainterImpl::drawPixel(const Pt::Math::Point& to)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	Gfx::Rgb888Color col;
-	assign( col, _pen.color() );
-	SetPixel( _drawable.deviceContext(),
-	          to.x(),
-	          to.y(),
-	          RGB(col.red(), col.green(), col.blue())
-	);
+    Gfx::Rgb888Color col;
+    assign( col, _pen.color() );
+    SetPixel( _drawable.deviceContext(),
+              to.x(),
+              to.y(),
+              RGB(col.red(), col.green(), col.blue())
+    );
 }
 
 
 void PainterImpl::drawLine(const Pt::Math::Point& from, const  Pt::Math::Point& to)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	if (_pen.size() == 0) {
-		return; // Draw nothing if the pen size is 0.
-	}
+    if (_pen.size() == 0) {
+        return; // Draw nothing if the pen size is 0.
+    }
 
-	POINT points[2];
-	points[0].x = from.x();
-	points[0].y = from.y();
-	points[1].x = to.x();
-	points[1].y = to.y();
+    POINT points[2];
+    points[0].x = from.x();
+    points[0].y = from.y();
+    points[1].x = to.x();
+    points[1].y = to.y();
 
-	Polyline(_drawable.deviceContext(), points, 2);
+    Polyline(_drawable.deviceContext(), points, 2);
 }
 
 
@@ -437,90 +437,90 @@ void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
     ensureActivePainter();
 
     _textStream.clear();
-	_stringStream.str("");
-	_textStream << text << Char(0); // Append extra \0 for proper line termination.
-	_textStream.flush();
+    _stringStream.str("");
+    _textStream << text << Char(0); // Append extra \0 for proper line termination.
+    _textStream.flush();
 
     RECT rectangle;
-	SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
+    SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
 
-	// Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
-	DrawTextW(_drawable.deviceContext(), (wchar_t*)_stringStream.str().c_str(), -1, &rectangle, DT_NOCLIP);
+    // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
+    DrawTextW(_drawable.deviceContext(), (wchar_t*)_stringStream.str().c_str(), -1, &rectangle, DT_NOCLIP);
 }
 
 
 void PainterImpl::fillRect(const Pt::Math::Rect& rect)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	RECT rectangle;
-	const Pt::Math::Point topLeft     = rect.topLeft();
-	const Pt::Math::Point bottomRight = rect.bottomRight();
-	SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+    RECT rectangle;
+    const Pt::Math::Point topLeft     = rect.topLeft();
+    const Pt::Math::Point bottomRight = rect.bottomRight();
+    SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
-	HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_drawable.deviceContext(), OBJ_BRUSH);
-	FillRect(_drawable.deviceContext(), &rectangle, currentBrush);
+    HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_drawable.deviceContext(), OBJ_BRUSH);
+    FillRect(_drawable.deviceContext(), &rectangle, currentBrush);
 }
 
 
 void PainterImpl::drawRect(const Pt::Math::Rect& rect)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	if (rect.size().width() == 1 && rect.size().height() == 1) {
-		// Windows does not paint outline rectangles with a size of 1,1. For compatibility
-		// to other windowing systems we draw a pixel (1|1) instead.
-		drawPixel(rect.topLeft());
-		return;
-	}
+    if (rect.size().width() == 1 && rect.size().height() == 1) {
+        // Windows does not paint outline rectangles with a size of 1,1. For compatibility
+        // to other windowing systems we draw a pixel (1|1) instead.
+        drawPixel(rect.topLeft());
+        return;
+    }
 
-	// Temporarily select the empty brush to only draw the outline.
-	HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
+    // Temporarily select the empty brush to only draw the outline.
+    HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
 
-	const Pt::Math::Point topLeft     = rect.topLeft();
-	const Pt::Math::Point bottomRight = rect.bottomRight();
-	Rectangle(_drawable.deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+    const Pt::Math::Point topLeft     = rect.topLeft();
+    const Pt::Math::Point bottomRight = rect.bottomRight();
+    Rectangle(_drawable.deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
-	// Select the original brush again.
-	SelectObject(_drawable.deviceContext(), originalBrush);
+    // Select the original brush again.
+    SelectObject(_drawable.deviceContext(), originalBrush);
 }
 
 
 void PainterImpl::drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	// Temporarily select the empty brush to only draw the outline.
-	HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
+    // Temporarily select the empty brush to only draw the outline.
+    HBRUSH originalBrush = (HBRUSH)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_BRUSH));
 
-	Ellipse(_drawable.deviceContext(),
-	        topLeft.x(),
-	        topLeft.y(),
-	        topLeft.x() + size.width(),
-	        topLeft.y() + size.height()
-	);
+    Ellipse(_drawable.deviceContext(),
+            topLeft.x(),
+            topLeft.y(),
+            topLeft.x() + size.width(),
+            topLeft.y() + size.height()
+    );
 
-	// Select the original brush again.
-	SelectObject(_drawable.deviceContext(), originalBrush);
+    // Select the original brush again.
+    SelectObject(_drawable.deviceContext(), originalBrush);
 }
 
 
 void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	// Temporarily select the empty pen to only draw the filling.
-	HPEN originalPen = (HPEN)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_PEN));
+    // Temporarily select the empty pen to only draw the filling.
+    HPEN originalPen = (HPEN)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_PEN));
 
-	Ellipse(_drawable.deviceContext(),
-	        topLeft.x(),
-	        topLeft.y(),
-	        topLeft.x() + size.width() + 1,
-	        topLeft.y() + size.height() + 1
-	);
+    Ellipse(_drawable.deviceContext(),
+            topLeft.x(),
+            topLeft.y(),
+            topLeft.x() + size.width() + 1,
+            topLeft.y() + size.height() + 1
+    );
 
-	// Select the original pen again.
-	SelectObject(_drawable.deviceContext(), originalPen);
+    // Select the original pen again.
+    SelectObject(_drawable.deviceContext(), originalPen);
 }
 
 
@@ -529,154 +529,154 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
 /*
     std::vector<POINT> winPoints(pointCount);
 
-	for (size_t i = 0; i < pointCount; i++) {
-		winPoints[i].x = points[i].x();
-		winPoints[i].y = points[i].y();
+    for (size_t i = 0; i < pointCount; i++) {
+        winPoints[i].x = points[i].x();
+        winPoints[i].y = points[i].y();
     }
 
     Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
     */
-	ensureActivePainter();
-	
-	if (_pen.size() == 0) {
-		return;
-	}
+    ensureActivePainter();
+    
+    if (_pen.size() == 0) {
+        return;
+    }
 
-	HDC hdc = _drawable.deviceContext();
+    HDC hdc = _drawable.deviceContext();
 
-	MoveToEx(hdc, points[0].x(), points[0].y(), 0);
+    MoveToEx(hdc, points[0].x(), points[0].y(), 0);
 
-	for( size_t i = 1; i <  pointCount; i++) {
-		LineTo(hdc, points[i].x(), points[i].y());
-	}
+    for( size_t i = 1; i <  pointCount; i++) {
+        LineTo(hdc, points[i].x(), points[i].y());
+    }
 }
 
 
 void PainterImpl::fillPolygon(const Pt::Math::Point* points, const size_t pointCount) const
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	// Temporarily select the empty pen to only draw the filling.
-	HPEN originalPen = (HPEN)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_PEN));
+    // Temporarily select the empty pen to only draw the filling.
+    HPEN originalPen = (HPEN)SelectObject(_drawable.deviceContext(), GetStockObject(NULL_PEN));
 
 
-	std::vector<POINT> winPoints(pointCount);
+    std::vector<POINT> winPoints(pointCount);
 
-	for (size_t i = 0; i < pointCount; i++) {
-		winPoints[i].x = points[i].x();
-		winPoints[i].y = points[i].y();
-	}
+    for (size_t i = 0; i < pointCount; i++) {
+        winPoints[i].x = points[i].x();
+        winPoints[i].y = points[i].y();
+    }
 
     Polygon(_drawable.deviceContext(), &(winPoints[0]), pointCount);
 
 
-   	// Select the original pen again.
-	SelectObject(_drawable.deviceContext(), originalPen);
+       // Select the original pen again.
+    SelectObject(_drawable.deviceContext(), originalPen);
 }
 
 
 void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap, const  Pt::Gfx::Region& pixmapRegion)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	pixmap.impl().beginPaint();
+    pixmap.impl().beginPaint();
 
-	// Copy contents from the source bitmap to the destination (=new) bitmap.
-	BitBlt(
-		_drawable.deviceContext(),
-		to.x(),	to.y(),
-		pixmapRegion.width(), pixmapRegion.height(),
-		pixmap.impl().deviceContext(),
-		pixmapRegion.x(), pixmapRegion.y(),
-		SRCCOPY
-	);
+    // Copy contents from the source bitmap to the destination (=new) bitmap.
+    BitBlt(
+        _drawable.deviceContext(),
+        to.x(),    to.y(),
+        pixmapRegion.width(), pixmapRegion.height(),
+        pixmap.impl().deviceContext(),
+        pixmapRegion.x(), pixmapRegion.y(),
+        SRCCOPY
+    );
 
-	pixmap.impl().endPaint();
+    pixmap.impl().endPaint();
 }
 
 void PainterImpl::drawPixmap(const Pt::Math::Point& to, Pixmap& pixmap)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	pixmap.impl().beginPaint();
+    pixmap.impl().beginPaint();
 
-	// Copy contents from the source bitmap to the destination (=new) bitmap.
-	BitBlt(
-		_drawable.deviceContext(),
-		to.x(),	to.y(),
-		pixmap.size().width(), pixmap.size().height(),
-		pixmap.impl().deviceContext(),
-		0, 0,
-		SRCCOPY
-	);
+    // Copy contents from the source bitmap to the destination (=new) bitmap.
+    BitBlt(
+        _drawable.deviceContext(),
+        to.x(),    to.y(),
+        pixmap.size().width(), pixmap.size().height(),
+        pixmap.impl().deviceContext(),
+        0, 0,
+        SRCCOPY
+    );
 
-	pixmap.impl().endPaint();
+    pixmap.impl().endPaint();
 }
 
 
 void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
+    this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
 void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
 {
-	ensureActivePainter();
+    ensureActivePainter();
 
-	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
-	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
+    Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
+    this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
 }
 
 
 void PainterImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
 {
-	BITMAPINFO bitmapInfo;
-	ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-	bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
-	bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
-	bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-	bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
-	bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
-	bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
-	bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
-	bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
-	bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
+    bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
+    bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
+    bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
+    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
+    bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
+    bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
+    bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
+    bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
 
-	VOID* imageBits;
-	HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+    VOID* imageBits;
+    HBITMAP bitmap = CreateDIBSection(_drawable.deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-	memcpy(imageBits, data, width * height * 4);
+    memcpy(imageBits, data, width * height * 4);
 
-	HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
-	SelectObject(bitmapDeviceConText, bitmap);
+    HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDeviceConText, bitmap);
 
-	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
+    BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
 
-	DeleteDC(bitmapDeviceConText);
-	DeleteObject(bitmap);
+    DeleteDC(bitmapDeviceConText);
+    DeleteObject(bitmap);
 }
 
 
 void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height)
 {
-	HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
+    HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
 
-	if (bitmap == NULL) {
-		drawIndependentImage(x, y, data, width, height);
-		return;
-	}
+    if (bitmap == NULL) {
+        drawIndependentImage(x, y, data, width, height);
+        return;
+    }
 
-	HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
-	SelectObject(bitmapDeviceConText, bitmap);
+    HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDeviceConText, bitmap);
 
-	BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
+    BitBlt(_drawable.deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
 
-	DeleteDC(bitmapDeviceConText);
-	DeleteObject(bitmap);
+    DeleteDC(bitmapDeviceConText);
+    DeleteObject(bitmap);
 }
 
 

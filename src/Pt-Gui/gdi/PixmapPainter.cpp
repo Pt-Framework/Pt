@@ -31,13 +31,13 @@ PixmapPainter::PixmapPainter(PixmapImpl& pixmapImpl)
 : PainterImpl(pixmapImpl)
 , _pixmapImpl(pixmapImpl)
 {
-	// Send default settings to GDI.
-	updatePen();
-	updateFont();
-	updateBrush();
+    // Send default settings to GDI.
+    updatePen();
+    updateFont();
+    updateBrush();
 
-	// Initialize default Device Context settings.
-	SetBkMode(pixmapImpl.deviceContext(), TRANSPARENT);
+    // Initialize default Device Context settings.
+    SetBkMode(pixmapImpl.deviceContext(), TRANSPARENT);
 }
 
 
@@ -49,13 +49,13 @@ PixmapPainter::~PixmapPainter()
 
 void PixmapPainter::begin()
 {
-	// Nothing.
+    // Nothing.
 }
 
 
 void PixmapPainter::end()
 {
-	// Nothing.
+    // Nothing.
 }
 
 

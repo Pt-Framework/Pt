@@ -34,29 +34,29 @@
 namespace Pt {
 
 namespace Gui {
-	class PixmapPainterImpl;
+    class PixmapPainterImpl;
 
-	class PixmapImpl : public Drawable {
-		public:
-			PixmapImpl(size_t width, size_t height);
+    class PixmapImpl : public Drawable {
+        public:
+            PixmapImpl(size_t width, size_t height);
 
-			PixmapImpl(const PixmapImpl& pimpl);
+            PixmapImpl(const PixmapImpl& pimpl);
 
-			virtual ~PixmapImpl();
+            virtual ~PixmapImpl();
 
-			const Math::Size& size() const
-			{ return _size; }
+            const Math::Size& size() const
+            { return _size; }
 
-			Painter painter();
+            Painter painter();
 
-			//bool isPainting() const
-			//{ return true; }
+            //bool isPainting() const
+            //{ return true; }
 
-		private:
-			::Pixmap _x11Pixmap;
-			Math::Size _size;
-			PixmapPainterImpl* _painter;
-	};
+        private:
+            ::Pixmap _x11Pixmap;
+            Math::Size _size;
+            PixmapPainterImpl* _painter;
+    };
 
 } // namespace Gui
 

@@ -28,7 +28,7 @@ namespace Gui {
 Layout::Layout(Widget& widget)
 : _widget(widget)
 {
-	widget.setLayout(this);
+    widget.setLayout(this);
 }
 
 } // namespace Gui

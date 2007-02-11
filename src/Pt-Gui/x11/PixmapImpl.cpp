@@ -37,59 +37,59 @@ PixmapImpl::PixmapImpl(size_t width, size_t height)
 : _size( std::max(width, size_t(1)), std::max(height, size_t(1)) )
 , _painter(0)
 {
-	//X11Context::instance().lock();
+    //X11Context::instance().lock();
 
-	Display* display = X11EventLoop::instance().display();
-	unsigned int depth = DefaultDepth( display, DefaultScreen(display) );
-	_drawable = XCreatePixmap(display, XDefaultRootWindow(display), _size.width(), _size.height(), depth);
-	XSync(display, false);
+    Display* display = X11EventLoop::instance().display();
+    unsigned int depth = DefaultDepth( display, DefaultScreen(display) );
+    _drawable = XCreatePixmap(display, XDefaultRootWindow(display), _size.width(), _size.height(), depth);
+    XSync(display, false);
 
-	//X11Context::instance().unlock();
+    //X11Context::instance().unlock();
 }
 
 
 PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 : _size( pimpl.size() )
 {
-	//X11Context::instance().lock();
+    //X11Context::instance().lock();
 
-	Display* display = X11EventLoop::instance().display();
-	unsigned int screen = DefaultScreen(display);
-	unsigned int depth = DefaultDepth( display, screen );
+    Display* display = X11EventLoop::instance().display();
+    unsigned int screen = DefaultScreen(display);
+    unsigned int depth = DefaultDepth( display, screen );
 
-	_drawable = XCreatePixmap(display, XDefaultRootWindow(display), _size.width(), _size.height(), depth);
+    _drawable = XCreatePixmap(display, XDefaultRootWindow(display), _size.width(), _size.height(), depth);
 
-	// copy contents to the pixmap
-	XCopyArea( display,
-	           pimpl.x11Drawable(), // source
-	           _drawable, // destination
-	           DefaultGC(display, screen),
-	           0, 0,
-	           _size.width(),
-	           _size.height(),
-	           0, 0);
+    // copy contents to the pixmap
+    XCopyArea( display,
+               pimpl.x11Drawable(), // source
+               _drawable, // destination
+               DefaultGC(display, screen),
+               0, 0,
+               _size.width(),
+               _size.height(),
+               0, 0);
 
-	XSync(display, false);
+    XSync(display, false);
 
-	//X11Context::instance().unlock();
+    //X11Context::instance().unlock();
 }
 
 
 PixmapImpl::~PixmapImpl()
 {
-	// Destroy the painter (in case we created one).
-	delete _painter;
+    // Destroy the painter (in case we created one).
+    delete _painter;
 
-	Display* display = X11EventLoop::instance().display();
-	XFreePixmap(display, _drawable);
+    Display* display = X11EventLoop::instance().display();
+    XFreePixmap(display, _drawable);
 }
 
 
 Painter PixmapImpl::painter()
 {
-	if (!_painter) _painter = new PixmapPainterImpl(*this);
+    if (!_painter) _painter = new PixmapPainterImpl(*this);
 
-	return Painter(_painter);
+    return Painter(_painter);
 }
 
 

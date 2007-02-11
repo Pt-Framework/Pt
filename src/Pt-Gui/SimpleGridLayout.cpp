@@ -42,159 +42,159 @@ SimpleGridLayoutData::SimpleGridLayoutData(size_t x, size_t y, const Margin& mar
 
 //SimpleGridLayoutData* SimpleGridLayoutData::clone() const
 //{
-//	return new SimpleGridLayoutData(*this);
+//    return new SimpleGridLayoutData(*this);
 //}
 
 
 void SimpleGridLayoutData::setX(size_t x)
 {
-	_x = x;
+    _x = x;
 }
 
 
 void SimpleGridLayoutData::setY(size_t y)
 {
-	_y = y;
+    _y = y;
 }
 
 
 size_t SimpleGridLayoutData::x() const
 {
-	return _x;
+    return _x;
 }
 
 
 size_t SimpleGridLayoutData::y() const
 {
-	return _y;
+    return _y;
 }
 
 
 
 
 SimpleGridLayout::SimpleGridLayout(
-	Widget& widget,
-	size_t  columnCount,
-	size_t  rowCount,
-	ssize_t horizontalGap,
-	ssize_t verticalGap
+    Widget& widget,
+    size_t  columnCount,
+    size_t  rowCount,
+    ssize_t horizontalGap,
+    ssize_t verticalGap
 )
 : Layout(widget)
 , _columnCount(columnCount)
 , _rowCount(rowCount)
 , _horizontalGap(horizontalGap)
 , _verticalGap(verticalGap)
-{	
+{    
 }
 
 
 
 void SimpleGridLayout::setLayoutData(Widget& widget, const SimpleGridLayoutData& layoutData)
 {
-	_widget2LayoutData.insert(std::make_pair(&widget, layoutData));
-	connect(widget.destroyed, *this, &SimpleGridLayout::remove);
+    _widget2LayoutData.insert(std::make_pair(&widget, layoutData));
+    connect(widget.destroyed, *this, &SimpleGridLayout::remove);
 }
 
 
 void SimpleGridLayout::remove(Widget& widget)
 {
-	_widget2LayoutData.erase(const_cast<Widget*>(&widget));
+    _widget2LayoutData.erase(const_cast<Widget*>(&widget));
 }
 
 
 void SimpleGridLayout::update()
 {
-	// TODO This is still a little bit buggy as all cells are the same size and depending on the
-	// size of the parent container the width of all cells + the width of all gaps will not sum up
-	// to the width of the container. A border is visible.
+    // TODO This is still a little bit buggy as all cells are the same size and depending on the
+    // size of the parent container the width of all cells + the width of all gaps will not sum up
+    // to the width of the container. A border is visible.
 
-	const std::list<Widget*>& children = this->widget().childWidgets();
+    const std::list<Widget*>& children = this->widget().childWidgets();
 
-	size_t cellWidth  = (this->widget().size().width()  - (_horizontalGap * (_columnCount - 1))) / _columnCount;
-	size_t cellHeight = (this->widget().size().height() - (_verticalGap   * (_rowCount    - 1))) / _rowCount;
+    size_t cellWidth  = (this->widget().size().width()  - (_horizontalGap * (_columnCount - 1))) / _columnCount;
+    size_t cellHeight = (this->widget().size().height() - (_verticalGap   * (_rowCount    - 1))) / _rowCount;
 
 
-	list<Widget*>::const_iterator childrenIter;
-	for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) {
+    list<Widget*>::const_iterator childrenIter;
+    for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) {
 
-		Widget* w = *childrenIter;
-		map<Widget*, SimpleGridLayoutData>::const_iterator findIter = _widget2LayoutData.find(w);
-		if (findIter == _widget2LayoutData.end()) {
-			// We have no Layout Data for this widget. Just don't layout it.
-			continue;
-		}
+        Widget* w = *childrenIter;
+        map<Widget*, SimpleGridLayoutData>::const_iterator findIter = _widget2LayoutData.find(w);
+        if (findIter == _widget2LayoutData.end()) {
+            // We have no Layout Data for this widget. Just don't layout it.
+            continue;
+        }
 
-		const SimpleGridLayoutData& data = findIter->second;
+        const SimpleGridLayoutData& data = findIter->second;
 
-		size_t x = data.x() * cellWidth  + data.x() * _horizontalGap + data.margin().left();
-		size_t y = data.y() * cellHeight + data.y() * _verticalGap   + data.margin().top();
+        size_t x = data.x() * cellWidth  + data.x() * _horizontalGap + data.margin().left();
+        size_t y = data.y() * cellHeight + data.y() * _verticalGap   + data.margin().top();
 
-		size_t leftRightMargin = data.margin().left() + data.margin().right();
-		size_t topBottomMargin = data.margin().top()  + data.margin().bottom();
+        size_t leftRightMargin = data.margin().left() + data.margin().right();
+        size_t topBottomMargin = data.margin().top()  + data.margin().bottom();
 
-		w->move(x, y);
-		w->resize(cellWidth - leftRightMargin, cellHeight - topBottomMargin);
-	}
+        w->move(x, y);
+        w->resize(cellWidth - leftRightMargin, cellHeight - topBottomMargin);
+    }
 }
 
 
 Math::Size SimpleGridLayout::minimumSize()
 {
-	const std::list<Widget*>& children = this->widget().childWidgets();
+    const std::list<Widget*>& children = this->widget().childWidgets();
 
-	ssize_t maxWidth = 0;
-	ssize_t maxHeight = 0;
+    ssize_t maxWidth = 0;
+    ssize_t maxHeight = 0;
 
-	// Find widest and heighest widget.
-	list<Widget*>::const_iterator childrenIter = children.begin();
+    // Find widest and heighest widget.
+    list<Widget*>::const_iterator childrenIter = children.begin();
 
-	while (childrenIter != children.end()) {
-		Widget* w = *childrenIter;
+    while (childrenIter != children.end()) {
+        Widget* w = *childrenIter;
 
-		maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
-		maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
+        maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
+        maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
 
-		childrenIter++;
-	}
+        childrenIter++;
+    }
 
-	return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
-	                 _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
+    return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
+                     _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
 }
 
 
 Math::Size SimpleGridLayout::preferredSize()
 {
-	const std::list<Widget*>& children = this->widget().childWidgets();
+    const std::list<Widget*>& children = this->widget().childWidgets();
 
-	ssize_t maxWidth = 0;
-	ssize_t maxHeight = 0;
+    ssize_t maxWidth = 0;
+    ssize_t maxHeight = 0;
 
-	// Find widest and heighest widget.
-	list<Widget*>::const_iterator childrenIter = children.begin();
+    // Find widest and heighest widget.
+    list<Widget*>::const_iterator childrenIter = children.begin();
 
-	while (childrenIter != children.end()) {
-		Widget* w = *childrenIter;
+    while (childrenIter != children.end()) {
+        Widget* w = *childrenIter;
 
-		maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
-		maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
+        maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
+        maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
 
-		childrenIter++;
-	}
+        childrenIter++;
+    }
 
-	return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
-	                 _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
+    return Math::Size(_columnCount * maxWidth  + (_columnCount - 1) * _horizontalGap,
+                     _rowCount    * maxHeight + (_rowCount    - 1) * _verticalGap);
 }
 
 
 SimpleGridLayout& SimpleGridLayout::create(
-	Widget& widget,
-	size_t  columnCount,
-	size_t  rowCount,
-	ssize_t horizontalGap,
-	ssize_t verticalGap)
+    Widget& widget,
+    size_t  columnCount,
+    size_t  rowCount,
+    ssize_t horizontalGap,
+    ssize_t verticalGap)
 {
-	SimpleGridLayout* layout = new SimpleGridLayout(widget, columnCount, rowCount, horizontalGap, verticalGap);
-	return *layout;
+    SimpleGridLayout* layout = new SimpleGridLayout(widget, columnCount, rowCount, horizontalGap, verticalGap);
+    return *layout;
 }
 
 

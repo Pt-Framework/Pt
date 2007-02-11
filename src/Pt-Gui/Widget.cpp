@@ -54,9 +54,9 @@ Widget::Widget(Widget& parent, const Math::Point& at, const Math::Size& size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
-	parent.addChild(*this);
-	_impl = new WidgetImpl( *this, &parent, at, size );
-	_layout.reset(NullLayout::createFor(*this));
+    parent.addChild(*this);
+    _impl = new WidgetImpl( *this, &parent, at, size );
+    _layout.reset(NullLayout::createFor(*this));
 }
 
 
@@ -66,8 +66,8 @@ Widget::Widget(const Math::Point& at, const Math::Size& size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
-	_impl = new WidgetImpl( *this, 0, at, size );
-	_layout.reset(NullLayout::createFor(*this));
+    _impl = new WidgetImpl( *this, 0, at, size );
+    _layout.reset(NullLayout::createFor(*this));
 }
 
 
@@ -77,9 +77,9 @@ Widget::Widget(Widget& parent)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
-	parent.addChild(*this);
-	_impl = new WidgetImpl(*this, &parent);
-	_layout.reset(NullLayout::createFor(*this));
+    parent.addChild(*this);
+    _impl = new WidgetImpl(*this, &parent);
+    _layout.reset(NullLayout::createFor(*this));
 }
 
 
@@ -89,381 +89,381 @@ Widget::Widget()
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
 {
-	_impl = new WidgetImpl(*this, 0);
-	_layout.reset(NullLayout::createFor(*this));
+    _impl = new WidgetImpl(*this, 0);
+    _layout.reset(NullLayout::createFor(*this));
 }
 
 
 Widget::~Widget()
 {
-	// Unparent this widget from its parent.
-	this->unparent();
+    // Unparent this widget from its parent.
+    this->unparent();
 
-	// Unparent all children of this widget. Children remove themselves from the child list of this widget.
-	while (!_childWidgets.empty()) {
-		Widget* w = _childWidgets.front();
-		w->unparent();
-	}
+    // Unparent all children of this widget. Children remove themselves from the child list of this widget.
+    while (!_childWidgets.empty()) {
+        Widget* w = _childWidgets.front();
+        w->unparent();
+    }
 
-	destroyed.send<Widget&>(*this);
-	delete _impl;
+    destroyed.send<Widget&>(*this);
+    delete _impl;
 }
 
 
 void Widget::setTitle(const Pt::String& text)
 {
-	_impl->setTitle(text);
+    _impl->setTitle(text);
 }
 
 Pt::String Widget::title()
 {
-	return _impl->title();
+    return _impl->title();
 }
 
 
 const Gfx::ARgbColor& Widget::backgroundColor() const
 {
-	return _backgroundColor;
+    return _backgroundColor;
 }
 
 
 void Widget::setBackgroundColor(const Gfx::ARgbColor& color)
 {
-	_backgroundColor = color;
-	this->update();
+    _backgroundColor = color;
+    this->update();
 }
 
 
 const Gfx::ARgbColor& Widget::foregroundColor() const
 {
-	return _foregroundColor;
+    return _foregroundColor;
 }
 
 
 void Widget::setForegroundColor(const Gfx::ARgbColor& color)
 {
-	_foregroundColor = color;
-	this->update();
+    _foregroundColor = color;
+    this->update();
 }
 
 
 void Widget::setInsets(const Insets& insets)
 {
-	if (_insets != insets) {
-		_insets = insets;
-		this->update();
-	}
+    if (_insets != insets) {
+        _insets = insets;
+        this->update();
+    }
 }
 
 
 const Insets& Widget::insets() const
 {
-	return _insets;
+    return _insets;
 }
 
 
 const Pt::Gfx::Region& Widget::region() const
 {
-	return _region;
+    return _region;
 }
 
 
 const Math::Size& Widget::size() const
 {
-	return region().size();
+    return region().size();
 }
 
 void Widget::move(ssize_t x, ssize_t y)
 {
-	if (x == _region.x() && y == _region.y()) {
-		return;
-	}
+    if (x == _region.x() && y == _region.y()) {
+        return;
+    }
 
-	_impl->move(x, y);
+    _impl->move(x, y);
 
-	_region.setX(x);
-	_region.setY(y);
+    _region.setX(x);
+    _region.setY(y);
 
-	this->updateLayout();
+    this->updateLayout();
 }
 
 
 void Widget::resize(size_t width, size_t height)
 {
-	if (width == _region.width() && height == _region.height()) {
-		return;
-	}
+    if (width == _region.width() && height == _region.height()) {
+        return;
+    }
 
-	_impl->resize(width, height);
+    _impl->resize(width, height);
 
-	_region.setWidth(width);
-	_region.setHeight(height);
+    _region.setWidth(width);
+    _region.setHeight(height);
 
-	this->updateLayout();
+    this->updateLayout();
 }
 
 
 void Widget::show()
 {
-	_impl->show();
-	this->updateLayout();
+    _impl->show();
+    this->updateLayout();
 }
 
 
 void Widget::hide()
 {
-	_impl->hide();
+    _impl->hide();
 }
 
 
 Math::Size Widget::minimumSize()
 {
-	return Math::Size(0, 0); // TODO
+    return Math::Size(0, 0); // TODO
 }
 
 
 Math::Size Widget::preferredSize()
 {
-	// Non-top-level widgets that are not containers should override this method to provide a specific preferred size.
-	// Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
-	// If they don't have a layout manager they return the current size.
-	// TODO We can currently not check if the widget has no layout manager. Every widget has a layout manager, namely
-	// NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
-	// no layout manager set. Is this good?
+    // Non-top-level widgets that are not containers should override this method to provide a specific preferred size.
+    // Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
+    // If they don't have a layout manager they return the current size.
+    // TODO We can currently not check if the widget has no layout manager. Every widget has a layout manager, namely
+    // NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
+    // no layout manager set. Is this good?
 
-	Math::Size preferredSize = layout().preferredSize();
-	if (preferredSize.width() == 0 && preferredSize.height() == 0) {
-		// No layout manager given. Use the current size as preferred size.
-		return size();
-	}
+    Math::Size preferredSize = layout().preferredSize();
+    if (preferredSize.width() == 0 && preferredSize.height() == 0) {
+        // No layout manager given. Use the current size as preferred size.
+        return size();
+    }
 
-	// A layout manager returns a useful preferred size. Use it as preferred size.
-	return preferredSize;
+    // A layout manager returns a useful preferred size. Use it as preferred size.
+    return preferredSize;
 }
 
 
 void Widget::updateLayout()
 {
-	if (_layout.get() != 0) {
-		_layout->update();
-	}
+    if (_layout.get() != 0) {
+        _layout->update();
+    }
 }
 
 
 void Widget::pack()
 {
-	if (parent() != 0) {
-		return; // This method has a parent, so is not a top-level widget. Thus it can not be packed.
-	}
+    if (parent() != 0) {
+        return; // This method has a parent, so is not a top-level widget. Thus it can not be packed.
+    }
 
-	resize(preferredSize().width(), preferredSize().height());
+    resize(preferredSize().width(), preferredSize().height());
 }
 
 
 void Widget::setLayout(Layout* layout)
 {
-	_layout.reset(layout);
+    _layout.reset(layout);
 }
 
 
 Layout& Widget::layout() const
 {
-	return *_layout.get();
+    return *_layout.get();
 }
 
 
 const std::list<Widget*>& Widget::childWidgets()
 {
-	return _childWidgets;
+    return _childWidgets;
 }
 
 
 const std::list<Widget*>& Widget::childWidgets() const
 {
-	return _childWidgets;
+    return _childWidgets;
 }
 
 
 void Widget::unparent()
 {
-	this->reparent(0);
+    this->reparent(0);
 }
 
 
 void Widget::reparent(Widget* newParent)
 {
-	if (_parent == newParent) {
-		return; // Same parent as it is at the moment.
-	}
+    if (_parent == newParent) {
+        return; // Same parent as it is at the moment.
+    }
 
-	if (_parent) {
-		_parent->removeChild(*this);
-	}
+    if (_parent) {
+        _parent->removeChild(*this);
+    }
 
-	if (newParent) {
-		_parent = newParent;
-		_impl->setParent(newParent);
-		newParent->addChild(*this);
-	} else {
-		_parent = 0;
-		_impl->setParent(0);
-	}
+    if (newParent) {
+        _parent = newParent;
+        _impl->setParent(newParent);
+        newParent->addChild(*this);
+    } else {
+        _parent = 0;
+        _impl->setParent(0);
+    }
 }
 
 
 Widget* Widget::parent() const
 {
-	return _parent;
+    return _parent;
 }
 
 Painter Widget::painter()
 {
-	return _impl->painter();
+    return _impl->painter();
 }
 
 
 void Widget::event(const Event& event)
 {
-	this->_event(event);
+    this->_event(event);
 }
 
 
 void Widget::closeEvent(const CloseEvent& event)
 {
-	//std::clog << "Widget::closeEvent" << std::endl;
-	this->_closeEvent(event);
+    //std::clog << "Widget::closeEvent" << std::endl;
+    this->_closeEvent(event);
 }
 
 
 void Widget::mouseEvent(const MouseEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::mouseEvent" << std::endl;
-	this->_mouseEvent(event);
+    //std::clog << "[" << this << "] Widget::mouseEvent" << std::endl;
+    this->_mouseEvent(event);
 }
 
 
 void Widget::mouseMoveEvent(const MouseMoveEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::mouseEvent" << std::endl;
-	this->_mouseMoveEvent(event);
+    //std::clog << "[" << this << "] Widget::mouseEvent" << std::endl;
+    this->_mouseMoveEvent(event);
 }
 
 
 
 void Widget::moveEvent(const MoveEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::moveEvent" << std::endl;
-	_region.setX(event.x());
-	_region.setY(event.y());
+    //std::clog << "[" << this << "] Widget::moveEvent" << std::endl;
+    _region.setX(event.x());
+    _region.setY(event.y());
 
-	this->_moveEvent(event);
+    this->_moveEvent(event);
 }
 
 
 void Widget::paintEvent(const PaintEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::paintEvent" << std::endl;
-	this->_paintEvent(event);
+    //std::clog << "[" << this << "] Widget::paintEvent" << std::endl;
+    this->_paintEvent(event);
 }
 
 
 void Widget::resizeEvent(const ResizeEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::resizeEvent" << std::endl;
 
-	_region.setWidth(event.width());
-	_region.setHeight(event.height());
+    _region.setWidth(event.width());
+    _region.setHeight(event.height());
 
-	this->_resizeEvent(event);
+    this->_resizeEvent(event);
 
-	this->updateLayout();
+    this->updateLayout();
 }
 
 
 void Widget::keyEvent(const KeyEvent& event)
 {
-	this->_keyEvent(event);
+    this->_keyEvent(event);
 }
 
 
 void Widget::_event(const Event& e)
 {
-	const type_info& typeInfo = e.typeInfo();
+    const type_info& typeInfo = e.typeInfo();
 
-	if( typeInfo == CloseEvent::TYPE_INFO ) {
-		const CloseEvent& ev = (const CloseEvent&)(e);
-		this->closeEvent(ev);
-	}
-	else if( typeInfo == MouseEvent::TYPE_INFO ) {
-		const MouseEvent& ev = (const MouseEvent&)(e);
-		this->mouseEvent(ev);
-	}
-	else if( typeInfo == KeyEvent::TYPE_INFO ) {
-		const KeyEvent& ev = (const KeyEvent&)(e);
-		this->keyEvent(ev);
-	}
-	else if( typeInfo == MoveEvent::TYPE_INFO ) {
-		const MoveEvent& ev = (const MoveEvent&)(e);
-		this->moveEvent(ev);
-	}
-	else if( typeInfo == MouseMoveEvent::TYPE_INFO ) {
-		const MouseMoveEvent& ev = (const MouseMoveEvent&)(e);
-		this->mouseMoveEvent(ev);
-	}
-	else if( typeInfo == ResizeEvent::TYPE_INFO ) {
-		const ResizeEvent& ev = (const ResizeEvent&)(e);
-		this->resizeEvent(ev);
-	}
-	else if( typeInfo == PaintEvent::TYPE_INFO ) {
-		const PaintEvent& ev = (const PaintEvent&)(e);
-		this->paintEvent(ev);
-	}
+    if( typeInfo == CloseEvent::TYPE_INFO ) {
+        const CloseEvent& ev = (const CloseEvent&)(e);
+        this->closeEvent(ev);
+    }
+    else if( typeInfo == MouseEvent::TYPE_INFO ) {
+        const MouseEvent& ev = (const MouseEvent&)(e);
+        this->mouseEvent(ev);
+    }
+    else if( typeInfo == KeyEvent::TYPE_INFO ) {
+        const KeyEvent& ev = (const KeyEvent&)(e);
+        this->keyEvent(ev);
+    }
+    else if( typeInfo == MoveEvent::TYPE_INFO ) {
+        const MoveEvent& ev = (const MoveEvent&)(e);
+        this->moveEvent(ev);
+    }
+    else if( typeInfo == MouseMoveEvent::TYPE_INFO ) {
+        const MouseMoveEvent& ev = (const MouseMoveEvent&)(e);
+        this->mouseMoveEvent(ev);
+    }
+    else if( typeInfo == ResizeEvent::TYPE_INFO ) {
+        const ResizeEvent& ev = (const ResizeEvent&)(e);
+        this->resizeEvent(ev);
+    }
+    else if( typeInfo == PaintEvent::TYPE_INFO ) {
+        const PaintEvent& ev = (const PaintEvent&)(e);
+        this->paintEvent(ev);
+    }
 }
 
 
 void Widget::_closeEvent(const CloseEvent& event)
 {
-	//std::clog << "Widget::_closeEvent" << std::endl;
-	this->hide();
-	closed.send();
+    //std::clog << "Widget::_closeEvent" << std::endl;
+    this->hide();
+    closed.send();
 }
 
 
 void Widget::_mouseEvent(const MouseEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_mouseEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::_mouseEvent" << std::endl;
 }
 
 
 void Widget::_mouseMoveEvent(const MouseMoveEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_mouseMoveEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::_mouseMoveEvent" << std::endl;
 }
 
 
 void Widget::_moveEvent(const MoveEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_moveEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::_moveEvent" << std::endl;
 }
 
 
 void Widget::_paintEvent(const PaintEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_paintEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::_paintEvent" << std::endl;
 }
 
 
 void Widget::_resizeEvent(const ResizeEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_resizeEvent" << std::endl;
+    //std::clog << "[" << this << "] Widget::_resizeEvent" << std::endl;
 }
 
 
 void Widget::_keyEvent(const KeyEvent& event)
 {
-	//std::clog << "[" << this << "] Widget::_keyEvent" << std::endl;
-	//std::clog << "[" << this << "] text: " << event.text() << std::endl;
-	//std::clog << "[" << this << "] code: " << event.code() << std::endl;
+    //std::clog << "[" << this << "] Widget::_keyEvent" << std::endl;
+    //std::clog << "[" << this << "] text: " << event.text() << std::endl;
+    //std::clog << "[" << this << "] code: " << event.code() << std::endl;
 }
 
 
