@@ -40,10 +40,8 @@ namespace Pt {
 
             inline void operator+=(atomic_t n)
             {
-                //volatile register atomic_t ret = 0;
-                //volatile register atomic_t zero = 0;
-                int ret = 0;
-                int zero = 0;
+                volatile register atomic_t ret  = 0;
+                volatile register atomic_t zero = 0;
 
                 asm volatile (
                     "0:    lwarx  %0, %3, %1\n\t"
@@ -59,10 +57,8 @@ namespace Pt {
 
             inline void operator-=(atomic_t n)
             {
-                //volatile register atomic_t ret = 0;
-                //volatile register atomic_t zero = 0;
-                int ret = 0;
-                int zero = 0;
+                volatile register atomic_t ret  = 0;
+                volatile register atomic_t zero = 0;
 
                 asm volatile (
                     "0:    lwarx  %0, %3, %1\n\t"
@@ -78,8 +74,7 @@ namespace Pt {
 
             inline void operator=(atomic_t n)
             {
-                //volatile register atomic_t ret = 0;
-                atomic_t ret = 0;
+                volatile register atomic_t ret = 0;
 
                 asm volatile (
                     "0:    lwarx  %0,0,%1\n\t"
@@ -94,8 +89,7 @@ namespace Pt {
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
-                //volatile register atomic_t ret = 0;
-                std::sig_atomic_t ret;
+                volatile register atomic_t ret = 0;
 
                 asm volatile (
                     "sync                  \n\t"
