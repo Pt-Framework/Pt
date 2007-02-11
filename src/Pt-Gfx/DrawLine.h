@@ -40,37 +40,37 @@ namespace Gfx {
 class DrawLine
 {
     public:
-    	/** @brief Default Constructor
-    	*/
+        /** @brief Default Constructor
+        */
         DrawLine()
         : _colorBuffer( 0 )
         { }
 
-    	/** @brief Destructor
-    	*/
+        /** @brief Destructor
+        */
         virtual ~DrawLine()
         { }
 
-		/** @brief Draw a line on an image
+        /** @brief Draw a line on an image
 
-			@see DrawLine::draw
-		*/
-		void operator() ( ARgbImage& image, const Pen& pen,
+            @see DrawLine::draw
+        */
+        void operator() ( ARgbImage& image, const Pen& pen,
                           const Math::Point& from,
                           const Math::Point& to )
-		{ this->draw(image, pen, from, to); }
+        { this->draw(image, pen, from, to); }
 
-		/** @brief Draw a line on an image
+        /** @brief Draw a line on an image
 
-		    The line described by a two points will be drawn on an ARgbImage.
-		    The attributes for the line are taken from the passed Pen object.
-			Clipping has to be performed before the line is drawn.
+            The line described by a two points will be drawn on an ARgbImage.
+            The attributes for the line are taken from the passed Pen object.
+            Clipping has to be performed before the line is drawn.
 
-		    @param image Target image
-		    @param pen Pen to be used
-		    @param from Begin of the line
-		    @param end End of the line
-		*/
+            @param image Target image
+            @param pen Pen to be used
+            @param from Begin of the line
+            @param end End of the line
+        */
         virtual void draw( ARgbImage& image, const Pen& pen,
                            const Math::Point& from,
                            const Math::Point& to ) = 0;

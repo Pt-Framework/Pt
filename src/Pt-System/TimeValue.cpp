@@ -24,44 +24,44 @@ TimeValue::~TimeValue()
 
 TimeValue TimeValue::operator-( const TimeValue& from )
 {
-	if( _seconds < from._seconds)
-		throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
-	
-	if( ( _seconds == from._seconds ) && ( _microSeconds < from._microSeconds ) )
-		throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
-	
-	TimeValue diff;
-	 
-	diff._seconds = _seconds - from._seconds;
-	 
-	if( _microSeconds < from._microSeconds )
+    if( _seconds < from._seconds)
+        throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
+    
+    if( ( _seconds == from._seconds ) && ( _microSeconds < from._microSeconds ) )
+        throw std::logic_error("Time to subtract is lesser!" + PT_SOURCEINFO);
+    
+    TimeValue diff;
+     
+    diff._seconds = _seconds - from._seconds;
+     
+    if( _microSeconds < from._microSeconds )
     {
-		diff._seconds--;				
-	    diff._microSeconds =  1000000 + ( _microSeconds - from._microSeconds );		
+        diff._seconds--;                
+        diff._microSeconds =  1000000 + ( _microSeconds - from._microSeconds );        
     }
     else
     {
-        diff._microSeconds =  _microSeconds - from._microSeconds ;		
+        diff._microSeconds =  _microSeconds - from._microSeconds ;        
     }
-		
-	return diff;
+        
+    return diff;
 }
 
 TimeValue TimeValue::operator+( const TimeValue& with )
 {
-	TimeValue sum;	
-	if( _microSeconds + with._microSeconds > 1000000)
+    TimeValue sum;    
+    if( _microSeconds + with._microSeconds > 1000000)
     {
-	    sum._seconds      = _seconds + with._seconds + ( _microSeconds + with._microSeconds ) % 1000000;	
-	   	sum._microSeconds = ( _microSeconds + with._microSeconds ) / 1000000;
-	}
-	else
+        sum._seconds      = _seconds + with._seconds + ( _microSeconds + with._microSeconds ) % 1000000;    
+           sum._microSeconds = ( _microSeconds + with._microSeconds ) / 1000000;
+    }
+    else
     {
-	    sum._seconds      = _seconds + with._seconds;	
+        sum._seconds      = _seconds + with._seconds;    
         sum._microSeconds = _microSeconds + with._microSeconds;
-	}	   
-	
-	return sum;
+    }       
+    
+    return sum;
 }
 
 bool TimeValue::operator==( TimeValue& with )
@@ -70,13 +70,13 @@ bool TimeValue::operator==( TimeValue& with )
 }
 
 bool TimeValue::operator<( TimeValue& with)
-{	
-	return (  ( _seconds < with._seconds) || ( (_seconds == with._seconds) && _microSeconds < with._microSeconds));
+{    
+    return (  ( _seconds < with._seconds) || ( (_seconds == with._seconds) && _microSeconds < with._microSeconds));
 }
 
 bool TimeValue::operator>( TimeValue& with )
 {
-	return ( ( _seconds > with._seconds ) || ( ( _seconds == with._seconds ) && ( _microSeconds > with._microSeconds ) ) );
+    return ( ( _seconds > with._seconds ) || ( ( _seconds == with._seconds ) && ( _microSeconds > with._microSeconds ) ) );
 }
 
 TimeValue TimeValue::operator+=( const TimeValue& with )

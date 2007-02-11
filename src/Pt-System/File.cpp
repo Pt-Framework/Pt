@@ -30,21 +30,21 @@ namespace System {
 File::File(const std::string& path, mode mode)
 {
     // TODO: consider better exception type
-	_impl = new FileImpl(path);
-	switch(mode) {
-		case UseExisting:
-			if ( !_impl->exists() )
-				throw std::invalid_argument("File " + path + " does not exist." + PT_SOURCEINFO);
-			break;
+    _impl = new FileImpl(path);
+    switch(mode) {
+        case UseExisting:
+            if ( !_impl->exists() )
+                throw std::invalid_argument("File " + path + " does not exist." + PT_SOURCEINFO);
+            break;
 
-		case Create: 
-			if ( !_impl->exists() )
-				_impl->create();
-			break;
-		default: std::invalid_argument("wrong mode for constructor" + PT_SOURCEINFO);
-			 break;
+        case Create: 
+            if ( !_impl->exists() )
+                _impl->create();
+            break;
+        default: std::invalid_argument("wrong mode for constructor" + PT_SOURCEINFO);
+             break;
 
-	}
+    }
 }
 
 
@@ -55,54 +55,54 @@ File::~File()
 
 const std::string& File::path() const
 {
-	return _impl->path();
+    return _impl->path();
 }
 
 
 std::size_t File::size() const
 {
-	return _impl->size();
+    return _impl->size();
 }
 
 
 void File::resize(std::size_t newSize)
 {
-	return _impl->resize(newSize);
+    return _impl->resize(newSize);
 }
 
 
 void File::remove()
 {
-	return _impl->remove();
+    return _impl->remove();
 }
 
 /*
 void File::copy(const char* to) const
 {
-	return _impl->copy(to);
+    return _impl->copy(to);
 }
 */
 
 void File::move(const std::string& newname)
 {
-	return _impl->move(newname);
+    return _impl->move(newname);
 }
 
 
 std::string File::name()
 {
-	const std::string& path = _impl->path();
-	
-	size_t separatorPos = path.rfind(Pt::System::Directory::separator());
-	
-	if (separatorPos != -1)
-	{
-		return path.substr(separatorPos + 1);
-	}
-	else
-	{
-		return path;
-	}
+    const std::string& path = _impl->path();
+    
+    size_t separatorPos = path.rfind(Pt::System::Directory::separator());
+    
+    if (separatorPos != -1)
+    {
+        return path.substr(separatorPos + 1);
+    }
+    else
+    {
+        return path;
+    }
 }
 
 

@@ -28,31 +28,31 @@ namespace System {
 
 SharedMemory::SharedMemory(const char* name, size_t sz, OpenMode omode) throw(SystemError)
 {
-	_impl = new SharedMemoryImpl(name, sz, omode);
+    _impl = new SharedMemoryImpl(name, sz, omode);
 }
 
 
 SharedMemory::~SharedMemory()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 void SharedMemory::unlink() throw(SystemError)
 {
-	_impl->unlink();
+    _impl->unlink();
 }
 
 
 void* SharedMemory::map(const void* addr) throw(SystemError)
 {
-	return _impl->map(addr);
+    return _impl->map(addr);
 }
 
 
 void SharedMemory::unmap(void* addr) throw(SystemError)
 {
-	_impl->unmap(addr);
+    _impl->unmap(addr);
 }
 
 

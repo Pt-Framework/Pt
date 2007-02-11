@@ -33,12 +33,12 @@ using namespace Pt::Gfx;
 
 int main()
 {
-	ARgbInterleavedImage     argb_1;
-	ARgbFInterleavedImage    argbf_1;
-	ARgb8888InterleavedImage argb8888_1;
-	Rgb888InterleavedImage   rgb888_1;
-	Rgb565InterleavedImage   rgb565_1;
-	Rgb555InterleavedImage   rgb555_1;
+    ARgbInterleavedImage     argb_1;
+    ARgbFInterleavedImage    argbf_1;
+    ARgb8888InterleavedImage argb8888_1;
+    Rgb888InterleavedImage   rgb888_1;
+    Rgb565InterleavedImage   rgb565_1;
+    Rgb555InterleavedImage   rgb555_1;
 
-	return 0;
+    return 0;
 }

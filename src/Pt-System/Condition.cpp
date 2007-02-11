@@ -31,38 +31,38 @@ namespace System {
 
 Condition::Condition()
 {
-	_impl = new ConditionImpl();
+    _impl = new ConditionImpl();
 }
 
 
 Condition::~Condition()
 {
-	_impl->broadcast();
-	delete _impl;
+    _impl->broadcast();
+    delete _impl;
 }
 
 
 void Condition::wait(Mutex& mtx)
 {
-	_impl->wait(mtx);
+    _impl->wait(mtx);
 }
 
 
 bool Condition::wait(Mutex& mtx, unsigned int ms)
 {
-	return _impl->wait(mtx, ms);
+    return _impl->wait(mtx, ms);
 }
 
 
 void Condition::signal()
 {
-	_impl->signal();
+    _impl->signal();
 }
 
 
 void Condition::broadcast()
 {
-	_impl->broadcast();
+    _impl->broadcast();
 }
 
 

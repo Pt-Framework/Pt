@@ -24,19 +24,19 @@ Brush::Brush(const ARgbImage* texture)
 
 Brush::FillStyle Brush::fillStyle() const
 {
-	return _brushData->fillStyle();
+    return _brushData->fillStyle();
 }
 
 
 const ARgbColor& Brush::color() const
 {
-	return _brushData->color();
+    return _brushData->color();
 }
 
 
 const ARgbImage& Brush::texture() const
 {
-	return _brushData->texture();
+    return _brushData->texture();
 }
 
 
@@ -57,25 +57,25 @@ BrushData::BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const A
 
 BrushData::~BrushData()
 {
-	delete _texture;
+    delete _texture;
 }
 
 
 Brush::FillStyle BrushData::fillStyle() const
 {
-	return _fillStyle;
+    return _fillStyle;
 }
 
 
 const ARgbColor& BrushData::color() const
 {
-	return _color;
+    return _color;
 }
 
 
 const ARgbImage& BrushData::texture() const
 {
-	return *_texture;
+    return *_texture;
 }
 
 } // namespace Gfx

@@ -30,27 +30,27 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	/*std::vector<Pt::Gfx::ARgbColor> data(1000);
+    /*std::vector<Pt::Gfx::ARgbColor> data(1000);
 
-	clock_t begin, time;
+    clock_t begin, time;
 
-	begin = clock();
-	for(int i = 0; i < 10000; ++i)
-	{
-		Pt::Gfx::transform( data.begin(), data.end(), Pt::Gfx::Greyscale<Pt::Gfx::ARgb>() );
-	}
-	time = clock() - begin;
+    begin = clock();
+    for(int i = 0; i < 10000; ++i)
+    {
+        Pt::Gfx::transform( data.begin(), data.end(), Pt::Gfx::Greyscale<Pt::Gfx::ARgb>() );
+    }
+    time = clock() - begin;
 
-	std::cerr << "Duration: " << time << std::endl;
+    std::cerr << "Duration: " << time << std::endl;
 
-	begin = clock();
-	for(int i = 0; i < 10000; ++i)
-	{
-		Pt::Gfx::greyscale( data.begin(), data.end() );
-	}
-	time = clock() - begin;
+    begin = clock();
+    for(int i = 0; i < 10000; ++i)
+    {
+        Pt::Gfx::greyscale( data.begin(), data.end() );
+    }
+    time = clock() - begin;
 
-	std::cerr << "Duration: " << time << std::endl;*/
+    std::cerr << "Duration: " << time << std::endl;*/
 
-	return 0;
+    return 0;
 }

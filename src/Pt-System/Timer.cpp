@@ -20,55 +20,55 @@ Timer::~Timer()
 
 size_t Timer::resolution() 
 { 
-	return _resolution / 1000; 
+    return _resolution / 1000; 
 }
 
 void Timer::start()
 {  
-	_timerThread.start(); 
+    _timerThread.start(); 
 }
 
 void Timer::stop()
 {
-	_run = false;
-	_timerThread.wait();
-	_eventCounter = 0;
+    _run = false;
+    _timerThread.wait();
+    _eventCounter = 0;
 }
 
 void Timer::run()
 {
-	_run = true;
+    _run = true;
 
-	size_t			events	  = 0;
-	size_t			deltaRest = 0;
-	Clock			stopWatch;
-	TimeValue		deltaTime;
+    size_t            events      = 0;
+    size_t            deltaRest = 0;
+    Clock            stopWatch;
+    TimeValue        deltaTime;
 
-	size_t sleepTime = _resolution / 1000;
-	stopWatch.start();
+    size_t sleepTime = _resolution / 1000;
+    stopWatch.start();
 
-	Thread::sleep( sleepTime );
+    Thread::sleep( sleepTime );
 
-	while( _run )
-	{
-		deltaTime = stopWatch.stop();
+    while( _run )
+    {
+        deltaTime = stopWatch.stop();
 
-		stopWatch.start();
+        stopWatch.start();
 
-		deltaRest  +=  ( deltaTime.seconds() / 1000000.0 + ( deltaTime.microSeconds() ) ); 
+        deltaRest  +=  ( deltaTime.seconds() / 1000000.0 + ( deltaTime.microSeconds() ) ); 
 
-		events = ( deltaRest / _resolution  );
+        events = ( deltaRest / _resolution  );
 
-		if( events == 0 )
-			events = 1;
+        if( events == 0 )
+            events = 1;
 
-		deltaRest  = ( deltaRest %  _resolution ); 
+        deltaRest  = ( deltaRest %  _resolution ); 
 
-		for( size_t i = 0; i < events; ++i )
-			onTime.send( ++_eventCounter );
+        for( size_t i = 0; i < events; ++i )
+            onTime.send( ++_eventCounter );
 
-		Thread::sleep( sleepTime );
-	}
+        Thread::sleep( sleepTime );
+    }
 }
 
 }

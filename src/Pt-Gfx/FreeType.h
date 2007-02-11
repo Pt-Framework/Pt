@@ -33,25 +33,25 @@ namespace Gfx{
 
 class FreeType : public Pt::Singleton<FreeType>
 {
-	friend class Pt::Singleton<FreeType>;
+    friend class Pt::Singleton<FreeType>;
 
-	public:
-		struct Init
-		{
-			Init()
-			{ FreeType::instance(); }
-		};
+    public:
+        struct Init
+        {
+            Init()
+            { FreeType::instance(); }
+        };
 
-		FT_Library library() const
-		{ return _ft; }
+        FT_Library library() const
+        { return _ft; }
 
-		~FreeType();
+        ~FreeType();
 
-	protected:
-		FreeType();
+    protected:
+        FreeType();
 
-	private:
-		FT_Library _ft;
+    private:
+        FT_Library _ft;
 };
 
  static FreeType::Init initFreeType;

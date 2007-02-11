@@ -27,33 +27,33 @@ namespace System {
 
 Semaphore::Semaphore(unsigned int initial)
 {
-	_impl = new SemaphoreImpl(initial);
+    _impl = new SemaphoreImpl(initial);
 }
 
 
 Semaphore::~Semaphore()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 Semaphore& Semaphore::wait()
 {
-	_impl->wait();
-	return *this;
+    _impl->wait();
+    return *this;
 }
 
 
 bool Semaphore::tryWait()
 {
-	return _impl->tryWait();
+    return _impl->tryWait();
 }
 
 
 Semaphore& Semaphore::post()
 {
-	_impl->post();
-	return *this;
+    _impl->post();
+    return *this;
 }
 
 

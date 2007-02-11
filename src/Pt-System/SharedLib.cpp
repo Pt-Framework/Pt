@@ -32,34 +32,34 @@ namespace {
 
 std::string addSharedLibraryExtension(const std::string& path)
 {
-	Pt::ssize_t separatorPos = path.rfind( Pt::System::Directory::separator() );
+    Pt::ssize_t separatorPos = path.rfind( Pt::System::Directory::separator() );
 
-	std::string fileName((separatorPos != -1) ? path.substr(separatorPos + 1) : path);
-	std::string onlyPath((separatorPos != -1) ? path.substr(0, separatorPos + 1)  : "");
+    std::string fileName((separatorPos != -1) ? path.substr(separatorPos + 1) : path);
+    std::string onlyPath((separatorPos != -1) ? path.substr(0, separatorPos + 1)  : "");
 
-	Pt::ssize_t extensionPos = fileName.rfind('.');
+    Pt::ssize_t extensionPos = fileName.rfind('.');
 
-	std::string extension((extensionPos != -1) ? fileName.substr(extensionPos + 1) : "");
-	std::string fileNameWithoutExtension((extensionPos != -1)
-	                                ? fileName.substr(0, fileName.length() - extension.length() - 1)
-	                                : fileName);
+    std::string extension((extensionPos != -1) ? fileName.substr(extensionPos + 1) : "");
+    std::string fileNameWithoutExtension((extensionPos != -1)
+                                    ? fileName.substr(0, fileName.length() - extension.length() - 1)
+                                    : fileName);
 
-	std::stringstream result;
+    std::stringstream result;
 
-	result << onlyPath
-	       << Pt::System::Environment::sharedLibraryPrefix()
-	       << fileNameWithoutExtension;
+    result << onlyPath
+           << Pt::System::Environment::sharedLibraryPrefix()
+           << fileNameWithoutExtension;
 
-	if (extension.empty())
-	{
-		result << Pt::System::Environment::sharedLibraryExtension();
-	}
-	else
-	{
-		result << "." << extension;
-	}
+    if (extension.empty())
+    {
+        result << Pt::System::Environment::sharedLibraryExtension();
+    }
+    else
+    {
+        result << "." << extension;
+    }
 
-	return result.str();
+    return result.str();
 }
 
 }
@@ -72,31 +72,31 @@ namespace System {
 SharedLib::SharedLib()
 : _impl(0)
 {
-	_impl = new SharedLibImpl();
+    _impl = new SharedLibImpl();
 }
 
 
 SharedLib::SharedLib(const std::string& path)
 : _impl(0)
 {
-	std::string pathWithExtension = addSharedLibraryExtension(path);
+    std::string pathWithExtension = addSharedLibraryExtension(path);
 
-	_impl = new SharedLibImpl(pathWithExtension);
+    _impl = new SharedLibImpl(pathWithExtension);
 }
 
 
 SharedLib::~SharedLib()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 SharedLib& SharedLib::open(const std::string& path)
 {
-	std::string pathWithExtension = addSharedLibraryExtension(path);
+    std::string pathWithExtension = addSharedLibraryExtension(path);
 
-	_impl->open(pathWithExtension);
-	return *this;
+    _impl->open(pathWithExtension);
+    return *this;
 }
 
 
@@ -114,21 +114,21 @@ void* SharedLib::resolve(const char* symbol)
 
 SharedLib::operator void*()
 {
-	return _impl->failed() ? 0 : this;
+    return _impl->failed() ? 0 : this;
 }
 
 
 bool SharedLib::operator!()
 {
-	return _impl->failed() ? true : false;
+    return _impl->failed() ? true : false;
 }
 
 
 void* SharedLib::openResolve(const std::string& path, const char* symbol)
 {
-	std::string pathWithExtension = addSharedLibraryExtension(path);
+    std::string pathWithExtension = addSharedLibraryExtension(path);
 
-	return SharedLibImpl::openResolve(pathWithExtension, symbol);
+    return SharedLibImpl::openResolve(pathWithExtension, symbol);
 }
 
 

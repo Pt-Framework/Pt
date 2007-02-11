@@ -121,30 +121,30 @@ class DrawEllipseDemo : public Pt::Gui::Widget
 
     private:
         Pt::Gfx::ARgbImage _texture;
-        Pt::Gfx::ARgbImage		_image;
-        Pt::Gfx::ImagePainter	_imagePainter;
-        Pt::ssize_t				_angle;
+        Pt::Gfx::ARgbImage        _image;
+        Pt::Gfx::ImagePainter    _imagePainter;
+        Pt::ssize_t                _angle;
 };
 
 
 int main( int argc, char* argv[] )
 {
-	try
-	{
-		Pt::Gui::Application app;
+    try
+    {
+        Pt::Gui::Application app;
 
-		DrawEllipseDemo demo;
-		connect( demo.closed, app, &Pt::Gui::Application::exit );
+        DrawEllipseDemo demo;
+        connect( demo.closed, app, &Pt::Gui::Application::exit );
 
-		demo.resize(400, 300);
-		demo.show();
-		return app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "Exception: " << e.what() << std::endl;
-		return 1;
-	}
+        demo.resize(400, 300);
+        demo.show();
+        return app.run();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }

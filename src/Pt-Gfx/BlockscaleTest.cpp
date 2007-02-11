@@ -27,42 +27,42 @@
 
 void ScaleARgbImageTestSimple()
 {
-	/*const Pt::Gfx::ARgbImage image(30, 20);
-	Pt::Gfx::ARgbImage image2;
-	blockScale(image, image2, 40, 40);
-	*/
+    /*const Pt::Gfx::ARgbImage image(30, 20);
+    Pt::Gfx::ARgbImage image2;
+    blockScale(image, image2, 40, 40);
+    */
 }
 
 
 void ScaleARgbImageTest()
 {
-	const Pt::Gfx::ARgbImage image(800, 600);
-	Pt::Gfx::ARgbImage image2(400, 300);
+    const Pt::Gfx::ARgbImage image(800, 600);
+    Pt::Gfx::ARgbImage image2(400, 300);
 
-	//clock_t begin = clock();
-	//for(int i = 0; i < 1000; ++i)
-	blockScale(image.begin(), image.begin(), image2.end(), image2.end());
-	//std::cerr << "PixelIterator: " << clock() - begin << std::endl;
+    //clock_t begin = clock();
+    //for(int i = 0; i < 1000; ++i)
+    blockScale(image.begin(), image.begin(), image2.end(), image2.end());
+    //std::cerr << "PixelIterator: " << clock() - begin << std::endl;
 }
 
 
 void ScaleVectorTest()
 {
-	std::vector<Pt::Gfx::ARgbColor> from(100*100);
-	std::vector<Pt::Gfx::ARgbColor> to(400*300);
+    std::vector<Pt::Gfx::ARgbColor> from(100*100);
+    std::vector<Pt::Gfx::ARgbColor> to(400*300);
 
-	//clock_t begin = clock();
-	//for(int i = 0; i < 1000; ++i)
-		blockScale(from.begin(), 100, 100, to.begin(), 400, 300);
-	//std::cerr << "Manual w/h:" << clock() - begin << std::endl;
+    //clock_t begin = clock();
+    //for(int i = 0; i < 1000; ++i)
+        blockScale(from.begin(), 100, 100, to.begin(), 400, 300);
+    //std::cerr << "Manual w/h:" << clock() - begin << std::endl;
 }
 
 
 int main(int argc, char* argv[])
 {
-	for(int n = 0; n < 100; ++n)
-		ScaleARgbImageTest();
+    for(int n = 0; n < 100; ++n)
+        ScaleARgbImageTest();
 
-	ScaleVectorTest();
-	return 0;
+    ScaleVectorTest();
+    return 0;
 }

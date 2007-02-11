@@ -38,37 +38,37 @@ namespace Gfx {
  */
 class DrawPolyline
 {
-	public:
-    	/** @brief Default Constructor
-    	*/
-		DrawPolyline()
-		{ }
+    public:
+        /** @brief Default Constructor
+        */
+        DrawPolyline()
+        { }
 
-    	/** @brief Destructor
-    	*/
-		virtual ~DrawPolyline()
-		{ }
+        /** @brief Destructor
+        */
+        virtual ~DrawPolyline()
+        { }
 
-		/** @brief Draw a polyline on an image
+        /** @brief Draw a polyline on an image
 
-			@see DrawPolyline::draw
-		*/
-		void operator() ( ARgbImage& image, const Pen& pen,
+            @see DrawPolyline::draw
+        */
+        void operator() ( ARgbImage& image, const Pen& pen,
                           const std::vector<Math::Point>& points )
-		{ this->draw(image, pen, points); }
+        { this->draw(image, pen, points); }
 
-		/** @brief Draw a polyline on an image
+        /** @brief Draw a polyline on an image
 
-		    The polyline described by a vector of points will be drawn on an
-		    ARgbImage. The attributes for the lines are taken from the passed
-		    Pen object.
+            The polyline described by a vector of points will be drawn on an
+            ARgbImage. The attributes for the lines are taken from the passed
+            Pen object.
 
-		    @param image Target image
-		    @param pen Pen to be used
-		    @param points Polyline points
-		*/
-		virtual void draw( ARgbImage& image, const Pen& pen,
-						   const std::vector<Math::Point>& points ) = 0;
+            @param image Target image
+            @param pen Pen to be used
+            @param points Polyline points
+        */
+        virtual void draw( ARgbImage& image, const Pen& pen,
+                           const std::vector<Math::Point>& points ) = 0;
 };
 
 } //namespace Pt

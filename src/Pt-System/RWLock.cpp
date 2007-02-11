@@ -28,13 +28,13 @@ namespace System {
 
 RWLock::RWLock()
 {
-	_impl = new RWLockImpl();
+    _impl = new RWLockImpl();
 }
 
 
 RWLock::~RWLock()
 {
-	delete _impl;
+    delete _impl;
 }
 
 

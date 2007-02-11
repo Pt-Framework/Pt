@@ -40,31 +40,31 @@ Font::Font(const std::string& name, size_t size, FontStyle fontStyle, ssize_t an
 
 std::string Font::name() const
 {
-	return _name;
+    return _name;
 }
 
 
 size_t Font::size() const
 {
-	return _size;
+    return _size;
 }
 
 
 Font::FontStyle Font::fontStyle() const
 {
-	return _fontStyle;
+    return _fontStyle;
 }
 
 
 ssize_t Font::angle() const
 {
-	return _angle;
+    return _angle;
 }
 
 
 Font::Direction Font::direction() const
 {
-	return _direction;
+    return _direction;
 }
 
 

@@ -28,12 +28,12 @@ namespace System {
 Environment::Environment()
 : _impl(0)
 {
-	_impl = new EnvironmentImpl();
+    _impl = new EnvironmentImpl();
 }
 
 Environment::~Environment()
 {
-	delete _impl;
+    delete _impl;
 }
 
 const std::string& Environment::sharedLibraryExtension()

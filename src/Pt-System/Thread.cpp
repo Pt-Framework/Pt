@@ -32,7 +32,7 @@ Thread::Thread(Runnable& runnable, Mode mode)
 : _impl(0)
 , _runnable(&runnable)
 {
-	_impl = new ThreadImpl(*this, mode);
+    _impl = new ThreadImpl(*this, mode);
 }
 
 
@@ -40,113 +40,113 @@ Thread::Thread(Mode mode)
 : _impl(0)
 , _runnable(0)
 {
-	_impl = new ThreadImpl(*this, mode);
+    _impl = new ThreadImpl(*this, mode);
 }
 
 
 Thread::~Thread()
 {
-	if( this->state() == Running && this->joinable() ) {
-		this->wait();
-	}
+    if( this->state() == Running && this->joinable() ) {
+        this->wait();
+    }
 
-	delete _impl;
+    delete _impl;
 }
 
 
 Thread::State Thread::state() const
 {
-	return _impl->state();
+    return _impl->state();
 }
 
 
 Thread::Mode Thread::mode() const
 {
-	return _impl->mode();
+    return _impl->mode();
 }
 
 
 bool Thread::detached() const
 {
-	return _impl->mode() == Detached;
+    return _impl->mode() == Detached;
 }
 
 bool Thread::joinable() const
 {
-	return _impl->mode() == Joinable;
+    return _impl->mode() == Joinable;
 }
 
 
 Thread& Thread::start()
 {
-	if( this->state() != Ready ) {
-		return *this;
-	}
+    if( this->state() != Ready ) {
+        return *this;
+    }
 
-	_impl->start( this->mode() );
-	return *this;
+    _impl->start( this->mode() );
+    return *this;
 }
 
 
 Thread& Thread::wait()
 {
-	if( this->detached() ) {
-		return *this;
-	}
+    if( this->detached() ) {
+        return *this;
+    }
 
-	if( this->state() != Running ) {
-		return *this;
-	}
+    if( this->state() != Running ) {
+        return *this;
+    }
 
-	_impl->wait();
-	return *this;
+    _impl->wait();
+    return *this;
 }
 
 
 void Thread::exit()
 {
-	ThreadImpl::exit();
+    ThreadImpl::exit();
 }
 
 
 Thread& Thread::terminate()
 {
-	if( this->state() != Running ) {
-		return *this;
-	}
+    if( this->state() != Running ) {
+        return *this;
+    }
 
-	_impl->terminate();
-	return *this;
+    _impl->terminate();
+    return *this;
 }
 
 
 Thread& Thread::detach()
 {
-	if( this->joinable() ) {
-		_impl->detach();
-	}
+    if( this->joinable() ) {
+        _impl->detach();
+    }
 
-	return *this;
+    return *this;
 }
 
 
 void Thread::yield()
 {
-	ThreadImpl::yield();
+    ThreadImpl::yield();
 }
 
 
 void Thread::sleep(unsigned int ms)
 {
-	ThreadImpl::sleep(ms);
+    ThreadImpl::sleep(ms);
 }
 
 void Thread::run()
 {
-	if(_runnable == 0)
-			throw std::logic_error("No runnable given to thread." + PT_SOURCEINFO);
+    if(_runnable == 0)
+            throw std::logic_error("No runnable given to thread." + PT_SOURCEINFO);
 
-	_runnable->run();
+    _runnable->run();
 }
 
 

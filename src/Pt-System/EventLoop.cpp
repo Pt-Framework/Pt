@@ -39,87 +39,87 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-	this->wake();
+    this->wake();
 }
 
 
 int EventLoop::run()
 {
-	while(false == _exitLoop)
-	{
-		_queueMutex.lock();
+    while(false == _exitLoop)
+    {
+        _queueMutex.lock();
 
-		if( _eventQueue.empty() )
-		{
-			_loopMutex.lock();
-			_queueMutex.unlock();
+        if( _eventQueue.empty() )
+        {
+            _loopMutex.lock();
+            _queueMutex.unlock();
 
-			_loopCondition.wait( _loopMutex );
+            _loopCondition.wait( _loopMutex );
 
-			_loopMutex.unlock();
-		}
-		else {
-			_queueMutex.unlock();
-		}
+            _loopMutex.unlock();
+        }
+        else {
+            _queueMutex.unlock();
+        }
 
-		this->processEvents();
-	}
+        this->processEvents();
+    }
 
-	return 0;
+    return 0;
 }
 
 
 void EventLoop::commitEvent(const Pt::Event& event)
 {
-	queueEvent(event);
-	this->wake();
+    queueEvent(event);
+    this->wake();
 }
 
 
 void EventLoop::processEvents()
 {
-	while( false == _exitLoop )
-	{
-		_queueMutex.lock();
+    while( false == _exitLoop )
+    {
+        _queueMutex.lock();
 
-		if( _eventQueue.empty() ) {
-			_queueMutex.unlock();
-			break;
-		}
+        if( _eventQueue.empty() ) {
+            _queueMutex.unlock();
+            break;
+        }
 
-		Pt::Event* ev = _eventQueue.front();
-		_eventQueue.remove(ev);
+        Pt::Event* ev = _eventQueue.front();
+        _eventQueue.remove(ev);
 
-		_queueMutex.unlock();
+        _queueMutex.unlock();
 
-		event.send<const Pt::Event&>(*ev);
-		delete ev;
-	}
+        event.send<const Pt::Event&>(*ev);
+        delete ev;
+    }
 }
 
 
 void EventLoop::wake()
 {
-	_loopMutex.lock();
-	_loopCondition.signal();
-	_loopMutex.unlock();
+    _loopMutex.lock();
+    _loopCondition.signal();
+    _loopMutex.unlock();
 }
 
 
 void EventLoop::exit()
 {
-	_exitLoop = true;
-	this->wake();
+    _exitLoop = true;
+    this->wake();
 }
 
 void EventLoop::queueEvent(const Pt::Event& event)
 {
-	_queueMutex.lock();
+    _queueMutex.lock();
 
-	Pt::Event* ev = event.clone();
-	_eventQueue.push_back(ev);
+    Pt::Event* ev = event.clone();
+    _eventQueue.push_back(ev);
 
-	_queueMutex.unlock();
+    _queueMutex.unlock();
 }
 
 

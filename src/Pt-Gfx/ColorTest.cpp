@@ -33,30 +33,30 @@ using namespace Pt::Gfx;
 
 int main()
 {
-	ARgbColor      argb_1, argb_2;
-	ARgbFColor     float_1, float_2;
-	ARgb8888Color  argb8888_1, argb8888_2;
-	Rgb888Color    rgb888_1, rgb888_2;
-	Rgb565Color    rgb565_1, rgb565_2;
-	Rgb555Color    rgb555_1, rgb555_2;
+    ARgbColor      argb_1, argb_2;
+    ARgbFColor     float_1, float_2;
+    ARgb8888Color  argb8888_1, argb8888_2;
+    Rgb888Color    rgb888_1, rgb888_2;
+    Rgb565Color    rgb565_1, rgb565_2;
+    Rgb555Color    rgb555_1, rgb555_2;
 
-	const Pt::uint8_t factor = 128;
-	blend(argb_1, argb_2, factor);
+    const Pt::uint8_t factor = 128;
+    blend(argb_1, argb_2, factor);
 
-	fromARgb(argb_2, toARgb(argb_1));
-	fromARgb(argb8888_2, toARgb(argb8888_1));
+    fromARgb(argb_2, toARgb(argb_1));
+    fromARgb(argb8888_2, toARgb(argb8888_1));
 
-	assign(argb_1, argb_2);
-	assign(argb_1, argb8888_2);
-	assign(argb8888_1, argb_2);
+    assign(argb_1, argb_2);
+    assign(argb_1, argb8888_2);
+    assign(argb8888_1, argb_2);
 
-	assign(float_1, argb_1);
-	assign(argb_2, float_1);
+    assign(float_1, argb_1);
+    assign(argb_2, float_1);
 
-	greyscale(argb_1, argb_2);
-	greyscale(argb_1, argb_1);
-	greyscale(argb8888_1);
-	greyscale(float_1);
+    greyscale(argb_1, argb_2);
+    greyscale(argb_1, argb_1);
+    greyscale(argb8888_1);
+    greyscale(float_1);
 
-	return 0;
+    return 0;
 }

@@ -39,47 +39,47 @@ namespace Gfx{
  */
 class ClipPolygon
 {
-	public:
-		/** @brief Default constructor
-		    The default constructor does nothing.
-		*/
-		ClipPolygon();
+    public:
+        /** @brief Default constructor
+            The default constructor does nothing.
+        */
+        ClipPolygon();
 
-		/** @brief Perform clipping
+        /** @brief Perform clipping
 
-			@see ClipPolygon::clip
-		*/
-		void operator() (std::vector<Pt::Math::Point>& in,
-				         const Pt::Math::Rect& clippingArea )
-		{ this-> clip(in, clippingArea); }
+            @see ClipPolygon::clip
+        */
+        void operator() (std::vector<Pt::Math::Point>& in,
+                         const Pt::Math::Rect& clippingArea )
+        { this-> clip(in, clippingArea); }
 
-		/** @brief Perform clipping
+        /** @brief Perform clipping
 
-		    The polygon described by a vector of points is clipped
-		    against a clipping rectangle. The vector of points will
-		    be modified, thus the clipping results in a new polygon.
+            The polygon described by a vector of points is clipped
+            against a clipping rectangle. The vector of points will
+            be modified, thus the clipping results in a new polygon.
 
-		    @param in Polygon points
-		    @param clippingArea Rectangle to clip against
+            @param in Polygon points
+            @param clippingArea Rectangle to clip against
 
-		*/
-		void clip( std::vector<Pt::Math::Point>& in,
-				   const Pt::Math::Rect& clippingArea );
+        */
+        void clip( std::vector<Pt::Math::Point>& in,
+                   const Pt::Math::Rect& clippingArea );
 
-	private:
-		enum Orientation{Left, Right, Top, Bottom} ;
+    private:
+        enum Orientation{Left, Right, Top, Bottom} ;
 
-		void clipEdge( const std::vector<Pt::Math::Point>& in,
-					   std::vector<Pt::Math::Point>& out,
-					   Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1);
+        void clipEdge( const std::vector<Pt::Math::Point>& in,
+                       std::vector<Pt::Math::Point>& out,
+                       Pt::Math::Point edgePoint0, Pt::Math::Point edgePoint1);
 
-		Pt::Math::Point intersect( const Pt::Math::Point& from,
-								   const Pt::Math::Point& to,
-								   const Pt::Math::Point& edge0,
-								   Pt::Math::Point& edge1 );
+        Pt::Math::Point intersect( const Pt::Math::Point& from,
+                                   const Pt::Math::Point& to,
+                                   const Pt::Math::Point& edge0,
+                                   Pt::Math::Point& edge1 );
 
-		bool inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0,
-					 Pt::Math::Point& edge1 );
+        bool inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0,
+                     Pt::Math::Point& edge1 );
 };
 
 }

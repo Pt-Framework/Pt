@@ -42,10 +42,10 @@ class DrawThinPolyline : public DrawPolyline
         */
         DrawThinPolyline();
 
-		/** @brief Draw a polyline on an image
+        /** @brief Draw a polyline on an image
 
-			@see DrawPolyline::draw
-		*/
+            @see DrawPolyline::draw
+        */
         virtual void draw( ARgbImage& image,  const Pen& pen,
                            const std::vector<Math::Point>& points );
 

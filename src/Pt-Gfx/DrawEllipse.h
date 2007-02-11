@@ -29,14 +29,14 @@ namespace Gfx{
 
 class DrawEllipse
 {
-	public:
-		DrawEllipse()
-		{};
-		
-		virtual ~ DrawEllipse()
-		{};
-		
-		virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
+    public:
+        DrawEllipse()
+        {};
+        
+        virtual ~ DrawEllipse()
+        {};
+        
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
 };
 
 }//namespace Gfx

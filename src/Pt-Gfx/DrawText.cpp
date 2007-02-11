@@ -34,45 +34,45 @@ DrawText::DrawText()
 , _faceId( 0 )
 , _charMapId( 0 )
 {
-	_matrix.xx = 0;
+    _matrix.xx = 0;
     _matrix.xy = 0;
     _matrix.yx = 0;
     _matrix.yy = 0;
 
-	if( FTC_Manager_New(  FreeType::instance().library(), 0, 0, 0, &DrawText::fontRequest, (FT_Pointer) this, &_manager ) )
-		throw std::runtime_error( "FTC_Manager_New failed" + PT_SOURCEINFO );
+    if( FTC_Manager_New(  FreeType::instance().library(), 0, 0, 0, &DrawText::fontRequest, (FT_Pointer) this, &_manager ) )
+        throw std::runtime_error( "FTC_Manager_New failed" + PT_SOURCEINFO );
 
-	if( FTC_ImageCache_New( _manager, &_imageChace ) )
-		throw std::runtime_error( "FTC_ImageCache_New failed" + PT_SOURCEINFO );
+    if( FTC_ImageCache_New( _manager, &_imageChace ) )
+        throw std::runtime_error( "FTC_ImageCache_New failed" + PT_SOURCEINFO );
 
     if( FTC_CMapCache_New( _manager, &_charMapCache ) )
-		throw std::runtime_error( "FTC_CMapCache_New failed" + PT_SOURCEINFO );
+        throw std::runtime_error( "FTC_CMapCache_New failed" + PT_SOURCEINFO );
 
     if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
-		throw std::runtime_error( "FTC_SBitCache_New failed" + PT_SOURCEINFO );
+        throw std::runtime_error( "FTC_SBitCache_New failed" + PT_SOURCEINFO );
 }
 
 DrawText::~DrawText()
 {
-	FTC_Manager_Done( _manager );
+    FTC_Manager_Done( _manager );
 }
 
 FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface )
 {
     return  FT_New_Memory_Face( library, vera, veraSize, 0, aface );
 
-	/* FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
+    /* FT_Error error  = FT_New_Face( library, "c:\\WINDOWS\\fonts\\tahoma.ttf", 0, aface );
     FT_Attach_File( *aface, "c:\\WINDOWS\\fonts\\tahoma" );
-	 return error;*/
+     return error;*/
 }
 
 void DrawText::setFont( const Font& font )
 {
     //Setup the image type.
-    _imageType.face_id	= faceId();
-    _imageType.width	= font.size();
-    _imageType.height	= font.size();
-    _imageType.flags	= FT_RENDER_MODE_NORMAL;
+    _imageType.face_id    = faceId();
+    _imageType.width    = font.size();
+    _imageType.height    = font.size();
+    _imageType.flags    = FT_RENDER_MODE_NORMAL;
 
     //Setup the rotation matrix.
     _fontAngle = font.angle() % 3600;
@@ -80,7 +80,7 @@ void DrawText::setFont( const Font& font )
     if ( _fontAngle < 0 )
         _fontAngle += 3600;
 
-    const double angle	 = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
+    const double angle     = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
     const double cosinus = cos( angle ) * 0x10000L;
     const double sinus   = sin( angle ) * 0x10000L;
 
@@ -90,7 +90,7 @@ void DrawText::setFont( const Font& font )
     _matrix.yy = (FT_Fixed) ceil( cosinus );
 
     //Search the unicode charmap.
-    FT_Face	face;
+    FT_Face    face;
 
     FTC_Manager_LookupFace( _manager, faceId(), &face );
 
@@ -112,14 +112,14 @@ void DrawText::setFont( const Font& font )
 
 FontMetrics DrawText::fontMetrics( const String& text )
 {
-    FT_UInt				previous    = 0;
-    FT_Vector			delta;
-    FT_Glyph			glyph;
-    FT_BBox				gbbox = { 0 ,0 , 0, 0 };
-    FT_BBox				tbbox = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max(),
+    FT_UInt                previous    = 0;
+    FT_Vector            delta;
+    FT_Glyph            glyph;
+    FT_BBox                gbbox = { 0 ,0 , 0, 0 };
+    FT_BBox                tbbox = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max(),
                             std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
-    FTC_Node			node;
-    FT_UInt				glyph_index;
+    FTC_Node            node;
+    FT_UInt                glyph_index;
 
     //
     // Lookup global data of the face be getting a Size struct from the 
@@ -176,31 +176,31 @@ FontMetrics DrawText::fontMetrics( const String& text )
 
 void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point& pos, const String& text, const ARgbColor* backGround )
 {
-    FT_Vector			glyphPos;
-    FT_Vector			delta;
-    FT_UInt				previous = 0;
-    FT_Glyph			glyph;
-    FT_Glyph			glyphCopy;
-    FTC_Node			node;
-    FT_Face				face;
-	FTC_SBit			smalGlyphBitmap;
-	FT_BitmapGlyph		glyphBitmap;
-	FT_UInt				glyph_index;
+    FT_Vector            glyphPos;
+    FT_Vector            delta;
+    FT_UInt                previous = 0;
+    FT_Glyph            glyph;
+    FT_Glyph            glyphCopy;
+    FTC_Node            node;
+    FT_Face                face;
+    FTC_SBit            smalGlyphBitmap;
+    FT_BitmapGlyph        glyphBitmap;
+    FT_UInt                glyph_index;
 
-	//Glyph bitmap description
-	int					incX;
-	int					incY;
-	int					left;
-	int					top;
-    int					pitch;
-	int					height;
-	int					width;
-	unsigned char*		buffer;
+    //Glyph bitmap description
+    int                    incX;
+    int                    incY;
+    int                    left;
+    int                    top;
+    int                    pitch;
+    int                    height;
+    int                    width;
+    unsigned char*        buffer;
 
     FTC_Manager_LookupFace( _manager, faceId(), &face );
 
-	glyphPos.x = pos.x() << 16;
-	glyphPos.y = pos.y() << 16;
+    glyphPos.x = pos.x() << 16;
+    glyphPos.y = pos.y() << 16;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
@@ -213,72 +213,72 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
         {
             FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
 
-			glyphPos.x += delta.x;
-			glyphPos.y -= delta.y;
+            glyphPos.x += delta.x;
+            glyphPos.y -= delta.y;
         }
 
-		if( _fontAngle == 0 )
-		{
-			if( FTC_SBitCache_Lookup( _bitmapCache, &_imageType, glyph_index, &smalGlyphBitmap, &node ) )
-				continue;
+        if( _fontAngle == 0 )
+        {
+            if( FTC_SBitCache_Lookup( _bitmapCache, &_imageType, glyph_index, &smalGlyphBitmap, &node ) )
+                continue;
 
-			incX		= smalGlyphBitmap->xadvance << 16;
-			incY		= smalGlyphBitmap->yadvance << 16;
+            incX        = smalGlyphBitmap->xadvance << 16;
+            incY        = smalGlyphBitmap->yadvance << 16;
 
-			left		= (glyphPos.x >> 16) + smalGlyphBitmap->left;
-			top			= (glyphPos.y >> 16) - smalGlyphBitmap->top;
-			pitch		= smalGlyphBitmap->pitch;
-			height		= smalGlyphBitmap->height;
-			width		= smalGlyphBitmap->width;
-			buffer		= smalGlyphBitmap->buffer;
-		}
-		else
-		{
-			FTC_ImageCache_Lookup( _imageChace, &_imageType, glyph_index, &glyph, &node ) ;
+            left        = (glyphPos.x >> 16) + smalGlyphBitmap->left;
+            top            = (glyphPos.y >> 16) - smalGlyphBitmap->top;
+            pitch        = smalGlyphBitmap->pitch;
+            height        = smalGlyphBitmap->height;
+            width        = smalGlyphBitmap->width;
+            buffer        = smalGlyphBitmap->buffer;
+        }
+        else
+        {
+            FTC_ImageCache_Lookup( _imageChace, &_imageType, glyph_index, &glyph, &node ) ;
 
-			FT_Glyph_Copy( glyph, &glyphCopy );
-			FT_Glyph_Transform( glyphCopy, &_matrix, 0);
-			FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1 );
+            FT_Glyph_Copy( glyph, &glyphCopy );
+            FT_Glyph_Transform( glyphCopy, &_matrix, 0);
+            FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1 );
 
-			glyphBitmap = (FT_BitmapGlyph) glyphCopy;
+            glyphBitmap = (FT_BitmapGlyph) glyphCopy;
 
-			incX		= glyphCopy->advance.x;
-			incY		= glyphCopy->advance.y;
+            incX        = glyphCopy->advance.x;
+            incY        = glyphCopy->advance.y;
 
-			left		= (glyphPos.x >> 16) + glyphBitmap->left;
-			top			= (glyphPos.y >> 16) - glyphBitmap->top;
-			pitch		= glyphBitmap->bitmap.pitch;
-			height		= glyphBitmap->bitmap.rows;
-			width		= glyphBitmap->bitmap.width;
-			buffer		= glyphBitmap->bitmap.buffer;
-		}
+            left        = (glyphPos.x >> 16) + glyphBitmap->left;
+            top            = (glyphPos.y >> 16) - glyphBitmap->top;
+            pitch        = glyphBitmap->bitmap.pitch;
+            height        = glyphBitmap->bitmap.rows;
+            width        = glyphBitmap->bitmap.width;
+            buffer        = glyphBitmap->bitmap.buffer;
+        }
 
-		if( false == Pt::Text::Unicode::isSpace(*it) )
-		{
+        if( false == Pt::Text::Unicode::isSpace(*it) )
+        {
 
-//			 FT_Glyph_Get_CBox( image, ft_glyph_bbox_pixels, &bbox );
+//             FT_Glyph_Get_CBox( image, ft_glyph_bbox_pixels, &bbox );
 //
-//			if ( bbox.xMax <= 0 || bbox.xMin >= my_target_width  || bbox.yMax <= 0 || bbox.yMin >= my_target_height )
-//				continue;
+//            if ( bbox.xMax <= 0 || bbox.xMin >= my_target_width  || bbox.yMax <= 0 || bbox.yMin >= my_target_height )
+//                continue;
 
-			if( backGround )
-			{
-				const int leftUp    = left + 1;
-				const int leftDown  = left - 1;
-				const int topUp     = top  + 1;
-				const int topDown   = top  - 1;
+            if( backGround )
+            {
+                const int leftUp    = left + 1;
+                const int leftDown  = left - 1;
+                const int topUp     = top  + 1;
+                const int topDown   = top  - 1;
 
-				drawGlyph( image, *backGround, leftDown, topDown, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, left, topDown, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, leftUp, topDown, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, leftDown, top, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, leftUp, top, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, leftDown, topUp, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, left, topUp, pitch, height, width, buffer );
-				drawGlyph( image, *backGround, leftUp, topUp, pitch, height, width, buffer );
-			}
+                drawGlyph( image, *backGround, leftDown, topDown, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, left, topDown, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, leftUp, topDown, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, leftDown, top, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, leftUp, top, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, leftDown, topUp, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, left, topUp, pitch, height, width, buffer );
+                drawGlyph( image, *backGround, leftUp, topUp, pitch, height, width, buffer );
+            }
 
-			drawGlyph( image, color, left, top, pitch, height, width, buffer );
+            drawGlyph( image, color, left, top, pitch, height, width, buffer );
         }
 
         glyphPos.x   += incX;

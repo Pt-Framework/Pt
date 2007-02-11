@@ -29,7 +29,7 @@ FileBuffer::FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::I
 : IO::IOBuffer(),
   _file(name, omode)
 {
-	IO::IOBuffer::init(_file);
+    IO::IOBuffer::init(_file);
 }
 
 
@@ -39,22 +39,22 @@ FileStream::FileStream(const char* path, FileDevice::OpenMode omode) throw(IO::I
 : IO::IOStream( &_buffer ),
   _buffer(path, omode)
 {
-	// no std::locale on WinCE
-	#ifndef _WIN32_WCE
-	this->imbue( std::locale(this->getloc(), new std::ctype<char>()) );
-	this->imbue( std::locale(this->getloc(), new std::num_get<char>()) );
-	this->imbue( std::locale(this->getloc(), new std::num_put<char>()) );
-	this->imbue( std::locale(this->getloc(), new std::numpunct<char>()) );
-	#endif
+    // no std::locale on WinCE
+    #ifndef _WIN32_WCE
+    this->imbue( std::locale(this->getloc(), new std::ctype<char>()) );
+    this->imbue( std::locale(this->getloc(), new std::num_get<char>()) );
+    this->imbue( std::locale(this->getloc(), new std::num_put<char>()) );
+    this->imbue( std::locale(this->getloc(), new std::numpunct<char>()) );
+    #endif
 }
 
 
 FileStream::~FileStream() throw()
 {
-	try {
-		IO::IOStream::sync();
-	}
-	catch(...) {}
+    try {
+        IO::IOStream::sync();
+    }
+    catch(...) {}
 }
 
 

@@ -30,31 +30,31 @@
 
 namespace Pt {
 
-	namespace Gfx {
+    namespace Gfx {
 
 // With GCC we should be able to use explicit template instantiation correctly
 // and thus we instantiate all the interleaved image and subimage classes here
 #ifdef __GNUC__
 
-		// Explicit instantiation of the standard interleaved image classes
-		template class InterleavedImage<ARgbColor,     ColorTraits<ARgbColor> >;
-		template class InterleavedImage<ARgbFColor,    ColorTraits<ARgbFColor> >;
-		template class InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> >;
-		template class InterleavedImage<Rgb888Color,   ColorTraits<Rgb888Color> >;
-		template class InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >;
-		template class InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >;
+        // Explicit instantiation of the standard interleaved image classes
+        template class InterleavedImage<ARgbColor,     ColorTraits<ARgbColor> >;
+        template class InterleavedImage<ARgbFColor,    ColorTraits<ARgbFColor> >;
+        template class InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> >;
+        template class InterleavedImage<Rgb888Color,   ColorTraits<Rgb888Color> >;
+        template class InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >;
+        template class InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >;
 
-		// Explicit instantiation of the standard  subimage classes of the above image classes
-		template class SubImage<ARgbInterleavedImage>;
-		template class SubImage<ARgbFInterleavedImage>;
-		template class SubImage<ARgb8888InterleavedImage>;
-		template class SubImage<Rgb888InterleavedImage>;
-		template class SubImage<Rgb565InterleavedImage>;
-		template class SubImage<Rgb555InterleavedImage>;
+        // Explicit instantiation of the standard  subimage classes of the above image classes
+        template class SubImage<ARgbInterleavedImage>;
+        template class SubImage<ARgbFInterleavedImage>;
+        template class SubImage<ARgb8888InterleavedImage>;
+        template class SubImage<Rgb888InterleavedImage>;
+        template class SubImage<Rgb565InterleavedImage>;
+        template class SubImage<Rgb555InterleavedImage>;
 
 #endif
 
-	} // namespace Gfx
+    } // namespace Gfx
 
 } // namespace Pt
 

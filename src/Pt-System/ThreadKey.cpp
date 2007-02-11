@@ -31,32 +31,32 @@ namespace System {
 ThreadKeyBase::ThreadKeyBase() throw(SystemError)
 : _impl(0)
 {
-	_impl = new ThreadKeyImpl();
+    _impl = new ThreadKeyImpl();
 }
 
 
 ThreadKeyBase::ThreadKeyBase(const ThreadKeyBase& k) throw(SystemError)
 : _impl(0)
 {
-	_impl = new ThreadKeyImpl();
+    _impl = new ThreadKeyImpl();
 }
 
 
 ThreadKeyBase::~ThreadKeyBase() throw()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 void ThreadKeyBase::set(void* ptr) throw(SystemError)
 {
-	_impl->set(ptr);
+    _impl->set(ptr);
 }
 
 
 void* ThreadKeyBase::get() const throw(SystemError)
 {
-	return _impl->get();
+    return _impl->get();
 }
 
 } // namespace System

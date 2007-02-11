@@ -79,8 +79,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     _drawThinPolyline   = dThinPolyline.release();
     _drawPolyline       = _drawThinPolyline;
     _drawText           = dText.release();
-    _drawThinEllipse	= dThinEllipse.release();
-    _drawThickEllipse	= dThickEllipse.release();
+    _drawThinEllipse    = dThinEllipse.release();
+    _drawThickEllipse    = dThickEllipse.release();
     _drawEllipse        = _drawThinEllipse;
     _fillEllipse        = fillEllipse.release();
     _fillPolygon        = fillPolygon.release();

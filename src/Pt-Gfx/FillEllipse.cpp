@@ -54,15 +54,15 @@ void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Ma
 
 
 void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size )
-{	
-	
-	if( size.width() == 0 || size.height() == 0 )
-	    return;
-	
-	if( size.width() ==  1 && size.height() == 1 )
-	    return;
+{    
+    
+    if( size.width() == 0 || size.height() == 0 )
+        return;
+    
+    if( size.width() ==  1 && size.height() == 1 )
+        return;
 
-	/* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */	  
+    /* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */      
     int errorx = 1;
     int errory = 1;
 
@@ -72,10 +72,10 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
     if( size.height()%2 != 0)
         errory  = 0;
 
-	const int       a      = size.width() /2;
-	const int       b      = size.height() /2;
-	const int       xc     = topLeft.x() + a;
-	const int       yc     = topLeft.y() + b;		
+    const int       a      = size.width() /2;
+    const int       b      = size.height() /2;
+    const int       xc     = topLeft.x() + a;
+    const int       yc     = topLeft.y() + b;        
     int             x      = 0;
     int             y      = b;
     unsigned int    width  = 1;
@@ -92,46 +92,46 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Math::Po
 
     while( y >= 0 && x <= a ) 
     {
-	    if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
+        if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
         {
-		    //Increment x
-		    x++; 
-		    dxt += d2xt; 
-		    t   += dxt;
-		    
-		    width += 2;
-	    }
-	    else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
-	    {
-		    outputSpan(image, brush, topLeft, xc-x, yc-y, width  - errorx);
-		    
-		    if( y!=0 )
-			    outputSpan(image, brush, topLeft, xc-x, yc+y - errory, width  - errorx);
-			    
-		     //Increment Y
-		    y--; 
-		    dyt += d2yt; 
-		    t   += dyt;
-	    }
-	    else 
-	    {
-		    outputSpan( image, brush, topLeft, xc-x, yc-y, width -errorx );
-		    
-		    if( y != 0 )
-			    outputSpan( image, brush, topLeft, xc-x, yc+y -errory, width - errorx );
-			    
-		     //Increment x
-		    x++; 
-		    dxt += d2xt; 
-		    t   += dxt;
-		    
-		    //Increment Y
-		    y--; 
-		    dyt += d2yt; 
-		    t   += dyt;
-		    
-		    width += 2;
-	    }
+            //Increment x
+            x++; 
+            dxt += d2xt; 
+            t   += dxt;
+            
+            width += 2;
+        }
+        else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
+        {
+            outputSpan(image, brush, topLeft, xc-x, yc-y, width  - errorx);
+            
+            if( y!=0 )
+                outputSpan(image, brush, topLeft, xc-x, yc+y - errory, width  - errorx);
+                
+             //Increment Y
+            y--; 
+            dyt += d2yt; 
+            t   += dyt;
+        }
+        else 
+        {
+            outputSpan( image, brush, topLeft, xc-x, yc-y, width -errorx );
+            
+            if( y != 0 )
+                outputSpan( image, brush, topLeft, xc-x, yc+y -errory, width - errorx );
+                
+             //Increment x
+            x++; 
+            dxt += d2xt; 
+            t   += dxt;
+            
+            //Increment Y
+            y--; 
+            dyt += d2yt; 
+            t   += dyt;
+            
+            width += 2;
+        }
     }
 
     if( b == 0 )

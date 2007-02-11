@@ -8,12 +8,12 @@ namespace System {
 
 Clock::Clock()
 {
-	_impl = new ClockImpl();
+    _impl = new ClockImpl();
 }
 
 Clock::~Clock()
 {
-	delete _impl;
+    delete _impl;
 }
 
 void Clock::start()
@@ -23,12 +23,12 @@ void Clock::start()
 
 TimeValue Clock::stop()
 {
-	return _impl->stop();
+    return _impl->stop();
 }
 
 DateTime Clock::getCurrentTime()
 {
-	return ClockImpl::getCurrentTime();
+    return ClockImpl::getCurrentTime();
 }
 
 } //namespace System

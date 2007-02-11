@@ -28,7 +28,7 @@ namespace Gfx{
 FreeType::FreeType()
 {
     if( FT_Init_FreeType( &_ft ) ) 
-		throw std::runtime_error( "FT_Init_FreeType failed" + PT_SOURCEINFO );
+        throw std::runtime_error( "FT_Init_FreeType failed" + PT_SOURCEINFO );
 }
 
 FreeType::~FreeType()

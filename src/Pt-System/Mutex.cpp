@@ -29,31 +29,31 @@ namespace System {
 
 Mutex::Mutex()
 {
-	_impl = new MutexImpl(*this);
+    _impl = new MutexImpl(*this);
 }
 
 
 Mutex::~Mutex()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 void Mutex::lock()
 {
-	_impl->lock();
+    _impl->lock();
 }
 
 
 bool Mutex::tryLock(unsigned int timeout)
 {
-	return _impl->tryLock(timeout);
+    return _impl->tryLock(timeout);
 }
 
 
 void Mutex::unlock()
 {
-	_impl->unlock();
+    _impl->unlock();
 }
 
 

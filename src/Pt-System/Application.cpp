@@ -38,37 +38,37 @@ Application::Application()
 
 int Application::run()
 {
-	return _loop.run();
+    return _loop.run();
 }
 
 
 void Application::exit()
 {
-	_loop.exit();
+    _loop.exit();
 }
 
 
 EventLoop& Application::eventLoop()
 {
-	return _loop;
+    return _loop;
 }
 
 
 void Application::commitEvent(const Pt::Event& ev)
 {
-	_loop.commitEvent(ev);
+    _loop.commitEvent(ev);
 }
 
 
 void Application::queueEvent(const Pt::Event& ev)
 {
-	_loop.queueEvent(ev);
+    _loop.queueEvent(ev);
 }
 
 
 void Application::processEvents()
 {
-	_loop.processEvents();
+    _loop.processEvents();
 }
 
 } // namespace System

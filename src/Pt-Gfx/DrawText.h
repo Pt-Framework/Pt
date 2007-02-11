@@ -75,11 +75,11 @@ class DrawText
 
             The given Text is drawn at the given position (pos) using the given
             font and the given pen color. The specified point to which the
-            text is	drawn is the base-line of the Text/font. If the outline
+            text is    drawn is the base-line of the Text/font. If the outline
             color is set to 0 no text outline is drawn. Clipping is performed
             before the text is drawn.
 
-			@param image The target image
+            @param image The target image
             @param color The text color
             @param pos The position to draw
             @param text The text to draw
@@ -90,12 +90,12 @@ class DrawText
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
         {
-            Pt::uint32_t				yOffset = 0;
-            int							dsy		= ypos;
-            int							dsx		= 0;
-            const Pt::ssize_t			x2		= image.width() - 1;
-            const Pt::ssize_t			y2		= image.height() - 1;
-            ARgbImage::PixelIterator	pixel;
+            Pt::uint32_t                yOffset = 0;
+            int                            dsy        = ypos;
+            int                            dsx        = 0;
+            const Pt::ssize_t            x2        = image.width() - 1;
+            const Pt::ssize_t            y2        = image.height() - 1;
+            ARgbImage::PixelIterator    pixel;
 
             if( bmPitch < width )
                 bmPitch += width;
@@ -110,7 +110,7 @@ class DrawText
                 if( dsy > y2 )
                     break;
 
-				dsx		= xpos;
+                dsx        = xpos;
                 pixel   = image.iterator( dsx, dsy );
 
                 for( Pt::int32_t x = 0; x < width; ++x, ++dsx, ++pixel )
@@ -123,10 +123,10 @@ class DrawText
 
                     const int px = yOffset + x ;
 
-										void *p = &(*pixel);
-										void *b = &(*image.begin());
-										void *e = &(*image.end());
-										assert(p>=b && p<=e);
+                                        void *p = &(*pixel);
+                                        void *b = &(*image.begin());
+                                        void *e = &(*image.end());
+                                        assert(p>=b && p<=e);
 
                     if( buffer[ px ] )
                         mixColor( *pixel, color, buffer[ px ] );
@@ -156,17 +156,17 @@ class DrawText
         inline FTC_FaceID faceId() const
         { return (FTC_FaceID) &_faceId ; }
 
-		static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
+        static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
 
-        FT_Matrix			_matrix;
-        FTC_Manager			_manager;
-        FTC_ImageCache		_imageChace;
-        FTC_CMapCache		_charMapCache;
-        FTC_SBitCache		_bitmapCache;
-        Pt::ssize_t			_fontAngle;
-        FTC_ImageTypeRec	_imageType;
-        size_t				_faceId;
-        size_t				_charMapId;
+        FT_Matrix            _matrix;
+        FTC_Manager            _manager;
+        FTC_ImageCache        _imageChace;
+        FTC_CMapCache        _charMapCache;
+        FTC_SBitCache        _bitmapCache;
+        Pt::ssize_t            _fontAngle;
+        FTC_ImageTypeRec    _imageType;
+        size_t                _faceId;
+        size_t                _charMapId;
 };
 
 } //namespace Gfx

@@ -31,12 +31,12 @@ ClipPolygon::ClipPolygon()
 
 void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )
 {
-	if( clippingArea.isNull())
-	{
-		in.clear();
-		return;		
-	}
-	
+    if( clippingArea.isNull())
+    {
+        in.clear();
+        return;        
+    }
+    
     std::vector<Pt::Math::Point> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
@@ -114,7 +114,7 @@ Pt::Math::Point ClipPolygon::intersect( const Pt::Math::Point& from, const Pt::M
 bool ClipPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
 {
 /*  TODO: is very performant but at time has a logic bug.
-	  return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||
+      return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||
              ( (  edge0.x() == edge1.x() ) && ( edge0.y() >= edge1.y() ) && ( p.x() < edge1.x() ) ) ||
              ( (  edge0.y() == edge1.y() ) && ( edge0.x() < edge1.x()  ) && ( p.y() < edge0.y() ) ) ||
              ( (  edge0.y() == edge1.y() ) && ( edge0.x() >= edge1.x() ) && ( p.y() > edge0.y() ) ) );  */
