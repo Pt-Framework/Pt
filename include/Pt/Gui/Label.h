@@ -29,93 +29,93 @@ namespace Pt {
 
 namespace Gui {
 
-	/**
-	 * @brief A widget to show a single line of text.
-	 *
-	 * A label widget shows a single line of read-only text, which can not be edited directly
-	 * by the user, but can be changed programmatically using the setText() method.
-	 *
-	 * The label uses the default font of the platform to draw the text.
-	 *
-	 * As for any widget the background color can be set explicitely to draw the background of
-	 * the label. This is everything that is not text. The foreground color is used to as color
-	 * for the text of the label.
-	 */
-	class PT_GUI_API Label : public Widget
-	{
-		public:
-			/**
-			 * Constructs a label widget.
-			 *
-			 * A label widget is created. The given parent is set as parent of this label and
-			 * the label is added to the parent's children list. The label is positioned at the
-			 * given location using the given size. An optional text/label can be passed as an
-			 * argument. This text will be shown as read-only text of the label. If no text is
-			 * given, no text is shown.
-			 *
-			 * @param parent The parent widget for this label. The label will become the child of
-			 * this parent and be shown inside of it. To create a top-level widget 0 can be passed
-			 * as an argument.
-			 * @param at The position of this label inside its parent relative to the parent's top-left border.
-			 * @param size The size of this label. The size must be >0 for width and height.
-			 * @param text The (optional) text of this label.
-			 * @see setText(const Pt::String)
-			 */
-			Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text = Pt::String());
+    /**
+     * @brief A widget to show a single line of text.
+     *
+     * A label widget shows a single line of read-only text, which can not be edited directly
+     * by the user, but can be changed programmatically using the setText() method.
+     *
+     * The label uses the default font of the platform to draw the text.
+     *
+     * As for any widget the background color can be set explicitely to draw the background of
+     * the label. This is everything that is not text. The foreground color is used to as color
+     * for the text of the label.
+     */
+    class PT_GUI_API Label : public Widget
+    {
+        public:
+            /**
+             * Constructs a label widget.
+             *
+             * A label widget is created. The given parent is set as parent of this label and
+             * the label is added to the parent's children list. The label is positioned at the
+             * given location using the given size. An optional text/label can be passed as an
+             * argument. This text will be shown as read-only text of the label. If no text is
+             * given, no text is shown.
+             *
+             * @param parent The parent widget for this label. The label will become the child of
+             * this parent and be shown inside of it. To create a top-level widget 0 can be passed
+             * as an argument.
+             * @param at The position of this label inside its parent relative to the parent's top-left border.
+             * @param size The size of this label. The size must be >0 for width and height.
+             * @param text The (optional) text of this label.
+             * @see setText(const Pt::String)
+             */
+            Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text = Pt::String());
 
-			//! Empty destructor for the label widget.
-			~Label();
+            //! Empty destructor for the label widget.
+            ~Label();
 
-			/**
-			 * @brief Sets the label's text which is displayed in the top-left border of the label.
-			 *
-			 * When calling this method, the presentation of the label is updated automatically.
-			 * No re-layout is done, though.
-			 *
-			 * @param text The new text for this label.
-			 */
-			void setText(const Pt::String& text);
+            /**
+             * @brief Sets the label's text which is displayed in the top-left border of the label.
+             *
+             * When calling this method, the presentation of the label is updated automatically.
+             * No re-layout is done, though.
+             *
+             * @param text The new text for this label.
+             */
+            void setText(const Pt::String& text);
 
-			/**
-			 * @brief Returns the current text of this label.
-			 *
-			 * @return The current text of this label.
-			 */
-			const Pt::String& text() const;
+            /**
+             * @brief Returns the current text of this label.
+             *
+             * @return The current text of this label.
+             */
+            const Pt::String& text() const;
 
-			/**
-			 * @brief Updates the presentation of this label.
-			 *
-			 * It does a complete repaint including the background and the text of the label.
-			 */
-			virtual void update();
+            /**
+             * @brief Updates the presentation of this label.
+             *
+             * It does a complete repaint including the background and the text of the label.
+             */
+            virtual void update();
 
-			// inherit doc
-			virtual Math::Size minimumSize();
+            // inherit doc
+            virtual Math::Size minimumSize();
 
-			// inherit doc
-			virtual Math::Size preferredSize();
+            // inherit doc
+            virtual Math::Size preferredSize();
 
-		public:
-			/**
-			 * @brief A signal that notifies the registered listeners when this label was clicked by the user.
-			 */
-			Signal<> clicked;
+        public:
+            /**
+             * @brief A signal that notifies the registered listeners when this label was clicked by the user.
+             */
+            Signal<> clicked;
 
-		protected:
-			//! Internal resize event handle method.
-			virtual void _resizeEvent(const ResizeEvent& event);
+        protected:
+            //! Internal resize event handle method.
+            virtual void _resizeEvent(const ResizeEvent& event);
 
-			//! Internal mouse event handle method.
-			virtual void _mouseEvent(const MouseEvent& event);
+            //! Internal mouse event handle method.
+            virtual void _mouseEvent(const MouseEvent& event);
 
-			//! Internal paint event handle method.
-			virtual void _paintEvent(const PaintEvent& event);
+            //! Internal paint event handle method.
+            virtual void _paintEvent(const PaintEvent& event);
 
-		private:
-			std::auto_ptr<Pixmap> _backbuffer;
-			Pt::String _text;
-	};
+        private:
+            std::auto_ptr<Pixmap> _backbuffer;
+            Pt::String _text;
+    };
 
 } // namespace Gui
 

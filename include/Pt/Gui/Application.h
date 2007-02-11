@@ -29,55 +29,55 @@ namespace Pt {
 
 namespace Gui {
 
-	class PT_GUI_API Application : public Pt::Application
-	{
-		private:
-			//! Pointer to the implementation of Application.
-			class ApplicationImpl* _impl;
+    class PT_GUI_API Application : public Pt::Application
+    {
+        private:
+            //! Pointer to the implementation of Application.
+            class ApplicationImpl* _impl;
 
-		public:
-			/**
-			 * @brief Initializes this application.
-			 *
-			 * Creates the platform specific Application object and stores it in _impl.
-			 * Connects the event signal to dispatchEvent().
-			 */
-			Application();
+        public:
+            /**
+             * @brief Initializes this application.
+             *
+             * Creates the platform specific Application object and stores it in _impl.
+             * Connects the event signal to dispatchEvent().
+             */
+            Application();
 
-			//! @brief Deletes the platform specific Application object.
-			~Application();
+            //! @brief Deletes the platform specific Application object.
+            ~Application();
 
-			//! @brief Returns a reference to the platform specific Application object.
-			ApplicationImpl& impl();
+            //! @brief Returns a reference to the platform specific Application object.
+            ApplicationImpl& impl();
 
-			// inheritdoc
-			void commitEvent(const Pt::Event& event);
+            // inheritdoc
+            void commitEvent(const Pt::Event& event);
 
-			// inheritdoc
-			void queueEvent(const Pt::Event& event);
+            // inheritdoc
+            void queueEvent(const Pt::Event& event);
 
-			// inheritdoc
-			void processEvents();
+            // inheritdoc
+            void processEvents();
 
-			// inheritdoc
-			int run();
+            // inheritdoc
+            int run();
 
-			// inheritdoc
-			void exit();
+            // inheritdoc
+            void exit();
 
-			/**
-			 * @brief Receives GUI events for widgets and delivers them to the widget.
-			 *
-			 * General events which are sent to the 'event' signal of ptv::Application are
-			 * passed to this method. If the event is a GUI event, it is sent to the method
-			 * Widget::event(). From there it may be dispatched to more specific event handling
-			 * methods.
-			 * If the event is not a GUI event, it is ignored.
-			 *
-			 * @param event An event that will be dispatched to the corresponding widget.
-			 */
-			void dispatchEvent(const Pt::Event& ev) const;
-	};
+            /**
+             * @brief Receives GUI events for widgets and delivers them to the widget.
+             *
+             * General events which are sent to the 'event' signal of ptv::Application are
+             * passed to this method. If the event is a GUI event, it is sent to the method
+             * Widget::event(). From there it may be dispatched to more specific event handling
+             * methods.
+             * If the event is not a GUI event, it is ignored.
+             *
+             * @param event An event that will be dispatched to the corresponding widget.
+             */
+            void dispatchEvent(const Pt::Event& ev) const;
+    };
 
 } // namespace gui
 

@@ -29,7 +29,7 @@
 
 namespace std
 {
-	class PT_API std::ios_base;
+    class PT_API std::ios_base;
 }
 
 
@@ -37,93 +37,93 @@ namespace Pt {
 
 namespace IO {
 
-	//! @brief An istream with peeking capability.
-	template <typename CharT>
-	class BasicIStream : public std::basic_istream<CharT> {
-		public:
-			~BasicIStream() throw()
-			{ }
+    //! @brief An istream with peeking capability.
+    template <typename CharT>
+    class BasicIStream : public std::basic_istream<CharT> {
+        public:
+            ~BasicIStream() throw()
+            { }
 
-			//! @brief Access to the underlying buffer.
-			BasicStreamBuffer<CharT>* rdbuf()
-			{ return _buffer; }
+            //! @brief Access to the underlying buffer.
+            BasicStreamBuffer<CharT>* rdbuf()
+            { return _buffer; }
 
-			//! @brief Peeks bytes in the stream buffer.
-			/**
-			   The number of bytes that can be peeked depends on the current
-			   stream buffer get area and maybe less than requested,
-			   similar to istream::readsome().
-			*/
-			std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
-			{ return _buffer->peek(buffer, size); }
+            //! @brief Peeks bytes in the stream buffer.
+            /**
+               The number of bytes that can be peeked depends on the current
+               stream buffer get area and maybe less than requested,
+               similar to istream::readsome().
+            */
+            std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
+            { return _buffer->peek(buffer, size); }
 
-		protected:
-			explicit BasicIStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
-			: std::basic_istream<CharT>( buffer ),
-			  _buffer(buffer)
-			{ }
+        protected:
+            explicit BasicIStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
+            : std::basic_istream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
 
-		private:
-			BasicStreamBuffer<CharT>* _buffer;
-	};
-
-
-	//! @brief An ostream with peeking capability.
-	template <typename CharT>
-	class BasicOStream : public std::basic_ostream<CharT> {
-		public:
-			~BasicOStream() throw()
-			{}
-
-			//! @brief Access to the underlying buffer.
-			BasicStreamBuffer<CharT>* rdbuf()
-			{ return _buffer; }
-
-		protected:
-			explicit BasicOStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
-			: std::basic_ostream<CharT>( buffer ),
-			  _buffer(buffer)
-			{ }
-
-		private:
-			BasicStreamBuffer<CharT>* _buffer;
-	};
+        private:
+            BasicStreamBuffer<CharT>* _buffer;
+    };
 
 
-	//! @brief An iostream with peeking capability.
-	template <typename CharT>
-	class BasicIOStream : public std::basic_iostream<CharT> {
-		public:
-			~BasicIOStream() throw()
-			{ }
+    //! @brief An ostream with peeking capability.
+    template <typename CharT>
+    class BasicOStream : public std::basic_ostream<CharT> {
+        public:
+            ~BasicOStream() throw()
+            {}
 
-			//! @brief Access to the underlying buffer.
-			BasicStreamBuffer<CharT>* rdbuf()
-			{ return _buffer; }
+            //! @brief Access to the underlying buffer.
+            BasicStreamBuffer<CharT>* rdbuf()
+            { return _buffer; }
 
-			//! @brief Peeks bytes in the stream buffer.
-			/**
-			   The number of bytes that can be peeked depends on the current
-			   stream buffer get area and maybe less than requested,
-			   similar to istream::readsome().
-			*/
-			std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
-			{ return _buffer->peek(buffer, size); }
+        protected:
+            explicit BasicOStream(BasicStreamBuffer<CharT>* buffer) throw(IOError)
+            : std::basic_ostream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
 
-		protected:
-			explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
-			: std::basic_iostream<CharT>( buffer ),
-			  _buffer(buffer)
-			{ }
+        private:
+            BasicStreamBuffer<CharT>* _buffer;
+    };
 
-		private:
-			BasicStreamBuffer<CharT>* _buffer;
+
+    //! @brief An iostream with peeking capability.
+    template <typename CharT>
+    class BasicIOStream : public std::basic_iostream<CharT> {
+        public:
+            ~BasicIOStream() throw()
+            { }
+
+            //! @brief Access to the underlying buffer.
+            BasicStreamBuffer<CharT>* rdbuf()
+            { return _buffer; }
+
+            //! @brief Peeks bytes in the stream buffer.
+            /**
+               The number of bytes that can be peeked depends on the current
+               stream buffer get area and maybe less than requested,
+               similar to istream::readsome().
+            */
+            std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
+            { return _buffer->peek(buffer, size); }
+
+        protected:
+            explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
+            : std::basic_iostream<CharT>( buffer ),
+              _buffer(buffer)
+            { }
+
+        private:
+            BasicStreamBuffer<CharT>* _buffer;
 };
 
 
-	typedef BasicIStream<char> IStream;
-	typedef BasicOStream<char> OStream;
-	typedef BasicIOStream<char> IOStream;
+    typedef BasicIStream<char> IStream;
+    typedef BasicOStream<char> OStream;
+    typedef BasicIOStream<char> IOStream;
 
 } // namespace IO
 

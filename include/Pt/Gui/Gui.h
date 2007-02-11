@@ -36,10 +36,10 @@ The most basic GUI application which can be created using PPR looks as follows:
 
 int main(int argc, char* argv[])
 {
-	ptv::gui::Application app;
-	return app.run();
-	
-	return 0;
+    ptv::gui::Application app;
+    return app.run();
+    
+    return 0;
 }
 \endcode
 
@@ -72,23 +72,23 @@ can be used.
 \code
 int main(int argc, char* argv[])
 {
-	try
-	{
-		ptv::gui::Application app;
+    try
+    {
+        ptv::gui::Application app;
 
-		return app.run();
-	}
-	catch(const ptv::Exception& e)
-	{
-		cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
-	}
-	catch(const std::exception& e)
-	{
-		cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
-		return 1;
-	}
+        return app.run();
+    }
+    catch(const ptv::Exception& e)
+    {
+        cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
+    }
+    catch(const std::exception& e)
+    {
+        cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 \endcode
 
@@ -116,12 +116,12 @@ The basic implementation of our window class is as follows:
 \code
 class TutorialWindow : public ptv::gui::Widget
 {
-	public:
-		TutorialWindow()
-		: Widget( )
-		{
-			Widget::setTitle("Tutorial");
-		}
+    public:
+        TutorialWindow()
+        : Widget( )
+        {
+            Widget::setTitle("Tutorial");
+        }
 };
 \endcode
 
@@ -201,10 +201,10 @@ own PaintEvent-handling:
 
 virtual void _paintEvent(const PaintEvent& event)
 {
-	gui::Painter widgetPainter = this->painter();
-	
-	widgetPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
-	widgetPainter.fillRect(event.rect());
+    gui::Painter widgetPainter = this->painter();
+    
+    widgetPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
+    widgetPainter.fillRect(event.rect());
 }
 \endcode
 
@@ -286,7 +286,7 @@ first add a member variable to our TutorialWindow class:
 ...
 
 private:
-	auto_ptr<Button> _actionButton;
+    auto_ptr<Button> _actionButton;
 \endcode
 
 We use an Auto-Pointer (auto_ptr) here so we don't have to manually free the Button object when
@@ -298,13 +298,13 @@ We construct and initialize the Button widget in the TutorialWindow's constructo
 TutorialWindow()
 : Widget( )
 {
-	Widget::setTitle("Tutorial");
+    Widget::setTitle("Tutorial");
 
-	// Create the Action-Button
-	_actionButton.reset(new Button(*this, Point(10, 10),  Size(50, 30), "Paint!"));
+    // Create the Action-Button
+    _actionButton.reset(new Button(*this, Point(10, 10),  Size(50, 30), "Paint!"));
 
-	// Connect clicked-event of buttons with handle methods.
-	connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
+    // Connect clicked-event of buttons with handle methods.
+    connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
 }
 \endcode
 
@@ -333,7 +333,7 @@ Running the application will produce this result:
 The last line of the above constructor demonstrates the Signal-Slot mechanism of PPR.
 
 \code
-	connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
+    connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
 \endcode
 
 With the given code we connect the Signal 'clicked' of the Button-class to the method
@@ -386,38 +386,38 @@ an ellipse, each at a random position and with random size:
 
 void onActionButton()
 {
-	// Get the painter of the widget.
-	gui::Painter widgetPainter = this->painter();
+    // Get the painter of the widget.
+    gui::Painter widgetPainter = this->painter();
 
-	// Set pen size to 3 and color to black.
-	widgetPainter.setPen(Pen(3, ARgbColor(0, 0, 0)));
+    // Set pen size to 3 and color to black.
+    widgetPainter.setPen(Pen(3, ARgbColor(0, 0, 0)));
 
-	// Draw a line (using the just set pen) at a random position.
-	int x1 = random(0, this->size().width());
-	int y1 = random(0, this->size().height());
-	int x2 = random(0, this->size().width());
-	int y2 = random(0, this->size().height());
-	widgetPainter.drawLine(Point(x1, y1), Point (x2, y2));
+    // Draw a line (using the just set pen) at a random position.
+    int x1 = random(0, this->size().width());
+    int y1 = random(0, this->size().height());
+    int x2 = random(0, this->size().width());
+    int y2 = random(0, this->size().height());
+    widgetPainter.drawLine(Point(x1, y1), Point (x2, y2));
 
-	// Set a green solid brush.
-	widgetPainter.setBrush(Brush(ARgbColor(0, 65535, 0)));
+    // Set a green solid brush.
+    widgetPainter.setBrush(Brush(ARgbColor(0, 65535, 0)));
 
-	// Draw a filled rectangle at a random position with a random size using the just set brush.
-	x1         = random(0, this->size().width() - 100);
-	y1         = random(0, this->size().height() - 100);
-	int width  = random(30, 100);
-	int height = random(30, 100);
-	widgetPainter.fillRect(Rect(Point(x1, y1), Size(width, height)));
+    // Draw a filled rectangle at a random position with a random size using the just set brush.
+    x1         = random(0, this->size().width() - 100);
+    y1         = random(0, this->size().height() - 100);
+    int width  = random(30, 100);
+    int height = random(30, 100);
+    widgetPainter.fillRect(Rect(Point(x1, y1), Size(width, height)));
 
-	// Set a red solid brush.
-	widgetPainter.setBrush(Brush(ARgbColor(65535, 0, 0)));
+    // Set a red solid brush.
+    widgetPainter.setBrush(Brush(ARgbColor(65535, 0, 0)));
 
-	// Draw a filled ellipse at a random position with a random size still using the just set brush.
-	x1     = random(0, this->size().width()  - 100);
-	y1     = random(0, this->size().height() - 100);
-	width  = random(30, 100);
-	height = random(30, 100);
-	widgetPainter.fillEllipse(Point(x1, y1), Size(width, height));
+    // Draw a filled ellipse at a random position with a random size still using the just set brush.
+    x1     = random(0, this->size().width()  - 100);
+    y1     = random(0, this->size().height() - 100);
+    width  = random(30, 100);
+    height = random(30, 100);
+    widgetPainter.fillEllipse(Point(x1, y1), Size(width, height));
 }
 \endcode
 
@@ -474,19 +474,19 @@ As stated above, we just have to override $_mouseEvent(const MouseEvent& event)$
 
 virtual void _mouseEvent(const MouseEvent& event)
 {
-	// Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
-	if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
-	{
-		// Get the painter of the widget.
-		gui::Painter widgetPainter = painter();
+    // Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
+    if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
+    {
+        // Get the painter of the widget.
+        gui::Painter widgetPainter = painter();
 
-		// Set the painter's brush to blue color.
-		widgetPainter.setBrush(ARgbColor(0, 0, 65535));
+        // Set the painter's brush to blue color.
+        widgetPainter.setBrush(ARgbColor(0, 0, 65535));
 
-		// Draw a dot (circle) of random size at the mouse event's position.
-		int pointSize = random(5, 50);
-		widgetPainter.fillCircle(Point(event.x() - pointSize / 2, event.y() - pointSize / 2), pointSize);
-	}
+        // Draw a dot (circle) of random size at the mouse event's position.
+        int pointSize = random(5, 50);
+        widgetPainter.fillCircle(Point(event.x() - pointSize / 2, event.y() - pointSize / 2), pointSize);
+    }
 }
 \endcode
 
@@ -536,16 +536,16 @@ The code to do this is as follows:
 
 virtual void _keyEvent(const KeyEvent& event)
 {
-	if(event.text() == 't' && event.type() == KeyEvent::Press) {
-		gui::Painter widgetPainter = this->painter();
+    if(event.text() == 't' && event.type() == KeyEvent::Press) {
+        gui::Painter widgetPainter = this->painter();
 
-		widgetPainter.setPen(Pen(1, ARgbColor(random(0, 40000), random(0, 40000), random(0, 40000))));
-		widgetPainter.setFont(Font("Arial", 17, Font::NormalStyle));
+        widgetPainter.setPen(Pen(1, ARgbColor(random(0, 40000), random(0, 40000), random(0, 40000))));
+        widgetPainter.setFont(Font("Arial", 17, Font::NormalStyle));
 
-		int x = random(0, this->size().width());
-		int y = random(0, this->size().height());
-		widgetPainter.drawText(Point(x, y), "Test-Text!");
-	}
+        int x = random(0, this->size().width());
+        int y = random(0, this->size().height());
+        widgetPainter.drawText(Point(x, y), "Test-Text!");
+    }
 }
 \endcode
 
@@ -599,131 +599,131 @@ using namespace ptv::gui;
 
 class TutorialWindow : public ptv::gui::Widget
 {
-	public:
-		TutorialWindow()
-		: Widget( )
-		{
-			Widget::setTitle("Tutorial");
+    public:
+        TutorialWindow()
+        : Widget( )
+        {
+            Widget::setTitle("Tutorial");
 
-			// Create the Action-Button
-			_actionButton.reset(new Button(*this, Point(10, 10),  Size(50, 30), "Paint!"));
+            // Create the Action-Button
+            _actionButton.reset(new Button(*this, Point(10, 10),  Size(50, 30), "Paint!"));
 
-			// Connect clicked-event of buttons with handle methods.
-			connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
-		}
+            // Connect clicked-event of buttons with handle methods.
+            connect(_actionButton->clicked, *this, &TutorialWindow::onActionButton);
+        }
 
-		void onActionButton()
-		{
-			// Get the painter of the widget.
-			gui::Painter widgetPainter = this->painter();
+        void onActionButton()
+        {
+            // Get the painter of the widget.
+            gui::Painter widgetPainter = this->painter();
 
-			// Set pen size to 3 and color to black.
-			widgetPainter.setPen(Pen(3, ARgbColor(0, 0, 0)));
+            // Set pen size to 3 and color to black.
+            widgetPainter.setPen(Pen(3, ARgbColor(0, 0, 0)));
 
-			// Draw a line (using the just set pen) at a random position.
-			int x1 = random(0, this->size().width());
-			int y1 = random(0, this->size().height());
-			int x2 = random(0, this->size().width());
-			int y2 = random(0, this->size().height());
-			widgetPainter.drawLine(Point(x1, y1), Point (x2, y2));
+            // Draw a line (using the just set pen) at a random position.
+            int x1 = random(0, this->size().width());
+            int y1 = random(0, this->size().height());
+            int x2 = random(0, this->size().width());
+            int y2 = random(0, this->size().height());
+            widgetPainter.drawLine(Point(x1, y1), Point (x2, y2));
 
-			// Set a green solid brush.
-			widgetPainter.setBrush(Brush(ARgbColor(0, 65535, 0)));
+            // Set a green solid brush.
+            widgetPainter.setBrush(Brush(ARgbColor(0, 65535, 0)));
 
-			// Draw a filled rectangle at a random position with a random size using the just set brush.
-			x1         = random(0, this->size().width() - 100);
-			y1         = random(0, this->size().height() - 100);
-			int width  = random(30, 100);
-			int height = random(30, 100);
-			widgetPainter.fillRect(Rect(Point(x1, y1), Size(width, height)));
+            // Draw a filled rectangle at a random position with a random size using the just set brush.
+            x1         = random(0, this->size().width() - 100);
+            y1         = random(0, this->size().height() - 100);
+            int width  = random(30, 100);
+            int height = random(30, 100);
+            widgetPainter.fillRect(Rect(Point(x1, y1), Size(width, height)));
 
-			// Set a red solid brush.
-			widgetPainter.setBrush(Brush(ARgbColor(65535, 0, 0)));
+            // Set a red solid brush.
+            widgetPainter.setBrush(Brush(ARgbColor(65535, 0, 0)));
 
-			// Draw a filled ellipse at a random position with a random size still using the just set brush.
-			x1     = random(0, this->size().width()  - 100);
-			y1     = random(0, this->size().height() - 100);
-			width  = random(30, 100);
-			height = random(30, 100);
-			widgetPainter.fillEllipse(Point(x1, y1), Size(width, height));
-		}
-
-
-		int random(int min, int max)
-		{
-			return (int)(((double)rand() / RAND_MAX) * max + min);
-		}
+            // Draw a filled ellipse at a random position with a random size still using the just set brush.
+            x1     = random(0, this->size().width()  - 100);
+            y1     = random(0, this->size().height() - 100);
+            width  = random(30, 100);
+            height = random(30, 100);
+            widgetPainter.fillEllipse(Point(x1, y1), Size(width, height));
+        }
 
 
-	protected:
-		virtual void _mouseEvent(const MouseEvent& event)
-		{
-			// Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
-			if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
-			{
-				// Get the painter of the widget.
-				gui::Painter widgetPainter = painter();
+        int random(int min, int max)
+        {
+            return (int)(((double)rand() / RAND_MAX) * max + min);
+        }
 
-				// Set the painter's brush to blue color.
-				widgetPainter.setBrush(ARgbColor(0, 0, 65535));
 
-				// Draw a dot (circle) of random size at the mouse event's position.
-				int pointSize = random(5, 50);
-				widgetPainter.fillCircle(Point(event.x() - pointSize / 2, event.y() - pointSize / 2), pointSize);
-			}
-		}
+    protected:
+        virtual void _mouseEvent(const MouseEvent& event)
+        {
+            // Draw a filled blue dot if the left mouse was pressed at the position of the mouse.
+            if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
+            {
+                // Get the painter of the widget.
+                gui::Painter widgetPainter = painter();
 
-		virtual void _paintEvent(const PaintEvent& event)
-		{
-			gui::Painter widgetPainter = this->painter();
+                // Set the painter's brush to blue color.
+                widgetPainter.setBrush(ARgbColor(0, 0, 65535));
 
-			widgetPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
-			widgetPainter.fillRect(event.rect());
-		}
+                // Draw a dot (circle) of random size at the mouse event's position.
+                int pointSize = random(5, 50);
+                widgetPainter.fillCircle(Point(event.x() - pointSize / 2, event.y() - pointSize / 2), pointSize);
+            }
+        }
 
-		virtual void _keyEvent(const KeyEvent& event)
-		{
-			if(event.text() == 't' && event.type() == KeyEvent::Press) {
-				gui::Painter widgetPainter = this->painter();
+        virtual void _paintEvent(const PaintEvent& event)
+        {
+            gui::Painter widgetPainter = this->painter();
 
-				widgetPainter.setPen(Pen(1, ARgbColor(random(0, 40000), random(0, 40000), random(0, 40000))));
-				widgetPainter.setFont(Font("Arial", 17, Font::NormalStyle));
+            widgetPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
+            widgetPainter.fillRect(event.rect());
+        }
 
-				int x = random(0, this->size().width());
-				int y = random(0, this->size().height());
-				widgetPainter.drawText(Point(x, y), "Test-Text!");
-			}
-		}
+        virtual void _keyEvent(const KeyEvent& event)
+        {
+            if(event.text() == 't' && event.type() == KeyEvent::Press) {
+                gui::Painter widgetPainter = this->painter();
 
-	private:
-		auto_ptr<Button> _actionButton;
+                widgetPainter.setPen(Pen(1, ARgbColor(random(0, 40000), random(0, 40000), random(0, 40000))));
+                widgetPainter.setFont(Font("Arial", 17, Font::NormalStyle));
+
+                int x = random(0, this->size().width());
+                int y = random(0, this->size().height());
+                widgetPainter.drawText(Point(x, y), "Test-Text!");
+            }
+        }
+
+    private:
+        auto_ptr<Button> _actionButton;
 };
 
 
 int main(int argc, char* argv[])
 {
-	try
-	{
-		ptv::gui::Application app;
+    try
+    {
+        ptv::gui::Application app;
 
-		TutorialWindow tut;
-		connect(tut.closed, app, &gui::Application::exit);
+        TutorialWindow tut;
+        connect(tut.closed, app, &gui::Application::exit);
 
-		tut.show();
+        tut.show();
 
-		return app.run();
-	}
-	catch(const ptv::Exception& e)
-	{
-		cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
-	}
-	catch(const std::exception& e)
-	{
-		cerr << "Exception: " << e.what() << endl;
-		return 1;
-	}
+        return app.run();
+    }
+    catch(const ptv::Exception& e)
+    {
+        cerr << "Exception: " << e.what() << "(" << e.sourceInfo().line() << " in " << e.sourceInfo().func() << ")" << endl;
+    }
+    catch(const std::exception& e)
+    {
+        cerr << "Exception: " << e.what() << endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 \endcode
 

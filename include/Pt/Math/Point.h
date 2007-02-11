@@ -12,39 +12,39 @@
 
 namespace Pt {
 
-	namespace Math {
+    namespace Math {
 
-		/** \brief BasicPoint class
-		*/
-		template<typename T>
-		class BasicPoint {
-			public:
-				BasicPoint()
-				: _x(0)
-				, _y(0)
-				{}
+        /** \brief BasicPoint class
+        */
+        template<typename T>
+        class BasicPoint {
+            public:
+                BasicPoint()
+                : _x(0)
+                , _y(0)
+                {}
 
-				BasicPoint(T x, T y)
-				: _x(x)
-				, _y(y)
-				{}
+                BasicPoint(T x, T y)
+                : _x(x)
+                , _y(y)
+                {}
 
-				BasicPoint(const BasicPoint& pt)
-				: _x(pt._x)
-				, _y(pt._y)
-				{ }
+                BasicPoint(const BasicPoint& pt)
+                : _x(pt._x)
+                , _y(pt._y)
+                { }
 
-				T x() const
-				{ return _x; }
+                T x() const
+                { return _x; }
 
-				T y() const
-				{ return _y; }
+                T y() const
+                { return _y; }
 
-				void setX(T x_)
-				{_x = x_; }
+                void setX(T x_)
+                {_x = x_; }
 
-				void setY(T y_)
-				{_y = y_; }
+                void setY(T y_)
+                {_y = y_; }
 
                 void set(T x_, T y_)
                 {
@@ -75,65 +75,65 @@ namespace Pt {
                   return *this;
                 }
                 
-				const BasicPoint& move(T dx, T dy)
-				{ _x += dy; _y += dy; return *this; }
+                const BasicPoint& move(T dx, T dy)
+                { _x += dy; _y += dy; return *this; }
 
-				const BasicPoint& operator=(const BasicPoint& pt)
-				{
-					_x = pt._x; _y = pt._y;
-					return *this;
-				}
+                const BasicPoint& operator=(const BasicPoint& pt)
+                {
+                    _x = pt._x; _y = pt._y;
+                    return *this;
+                }
 
-				bool operator==(const BasicPoint& pt) const
-				{ return (_x == pt._x && _y == pt._y); }
+                bool operator==(const BasicPoint& pt) const
+                { return (_x == pt._x && _y == pt._y); }
 
-				bool operator!=(const BasicPoint& pt) const
-				{ return (_x != pt._x || _y != pt._y); }
+                bool operator!=(const BasicPoint& pt) const
+                { return (_x != pt._x || _y != pt._y); }
 
-				bool operator>(const BasicPoint& pt) const
-				{
-					if ( _x < pt._x || _y < pt._y)
-						return false;
+                bool operator>(const BasicPoint& pt) const
+                {
+                    if ( _x < pt._x || _y < pt._y)
+                        return false;
 
-					return ( (*this) != pt );
-				}
+                    return ( (*this) != pt );
+                }
 
-				bool operator<(const BasicPoint& pt) const
-				{
-					if ( _x > pt._x || _y > pt._y )
-						return false;
+                bool operator<(const BasicPoint& pt) const
+                {
+                    if ( _x > pt._x || _y > pt._y )
+                        return false;
 
-					return ( pt != (*this) );
-				}
+                    return ( pt != (*this) );
+                }
 
                 inline const BasicPoint operator+=(const BasicVector2d<T>& vec)
                 {
                     _x += vec.x();
                     _y += vec.y();
-				    return *this;
-			    }
+                    return *this;
+                }
 
                 inline BasicPoint& operator+(const BasicVector2d<T>& vec) const
-				{
+                {
                     return BasicPoint( (_x+vec.x()), (_y+vec.y()) );
-				}
+                }
 
                 inline const BasicPoint operator-=(const BasicVector2d<T>& vec)
                 {
                     _x -= vec.x();
                     _y -= vec.y();
-				    return *this;
-			    }
+                    return *this;
+                }
 
                 inline BasicPoint& operator-(const BasicVector2d<T>& vec) const
-				{
+                {
                     return BasicPoint( (_x-vec.x()), (_y-vec.y()) );
-				}
+                }
 
-			protected:
-				T _x;
-				T _y;
-		};
+            protected:
+                T _x;
+                T _y;
+        };
 
 
         /** @brief functor to compare to points.
@@ -156,7 +156,7 @@ namespace Pt {
             }
         };
 
-	} // namespace Math
+    } // namespace Math
 
 } // namespace Pt
 

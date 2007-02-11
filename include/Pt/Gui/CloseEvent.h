@@ -28,42 +28,42 @@ namespace Pt {
 
 namespace Gui {
 
-	class Widget;
+    class Widget;
 
-	/**
-	 * @brief An event that indicates that a widget was closed.
-	 *
-	 * This event is used to indicate that a widget was closed. This usually means that
-	 * the Widget object was deleted. The widget, which was closed, can be accessed using
-	 * the method widget().
-	 */
-	class PT_GUI_API CloseEvent : public Event
-	{
-		public:
-			//! @brief The type information object (type_info) of this event class.
-			static const std::type_info& TYPE_INFO;
+    /**
+     * @brief An event that indicates that a widget was closed.
+     *
+     * This event is used to indicate that a widget was closed. This usually means that
+     * the Widget object was deleted. The widget, which was closed, can be accessed using
+     * the method widget().
+     */
+    class PT_GUI_API CloseEvent : public Event
+    {
+        public:
+            //! @brief The type information object (type_info) of this event class.
+            static const std::type_info& TYPE_INFO;
 
-			/**
-			 * @brief Constructs a CloseEvent for the given widget.
-			 *
-			 * @param widget The widget which was closed.
-			 */
-			CloseEvent(Widget& widget);
+            /**
+             * @brief Constructs a CloseEvent for the given widget.
+             *
+             * @param widget The widget which was closed.
+             */
+            CloseEvent(Widget& widget);
 
-			//! Empty destructor
-			virtual ~CloseEvent();
+            //! Empty destructor
+            virtual ~CloseEvent();
 
-			// Inherit doc
-			virtual Event* clone() const
-			{ return new CloseEvent(*this); }
+            // Inherit doc
+            virtual Event* clone() const
+            { return new CloseEvent(*this); }
 
-			/**
-			 * @brief Returns the type info for this event.
-			 *
-			 * @return The type info for this event.
-			 */
-			virtual const std::type_info& typeInfo() const;
-	};
+            /**
+             * @brief Returns the type info for this event.
+             *
+             * @return The type info for this event.
+             */
+            virtual const std::type_info& typeInfo() const;
+    };
 
 } // namespace Gui
 

@@ -29,137 +29,137 @@ namespace Pt {
 
 namespace IO {
 
-	class IOHandler;
+    class IOHandler;
 
 
-	class PT_IO_API IOTask : public NonCopyable {
-		public:
-			IOTask(IOHandler& handler, const Url& url)
-			: _handler(handler), _url(url)
-			{}
+    class PT_IO_API IOTask : public NonCopyable {
+        public:
+            IOTask(IOHandler& handler, const Url& url)
+            : _handler(handler), _url(url)
+            {}
 
-			virtual ~IOTask()
-			{}
+            virtual ~IOTask()
+            {}
 
-			//! Returns a pointer to the IOHandler
-			inline IOHandler& handler() const throw()
-			{ return _handler; }
-	
-			//! Returns the Url addressed with this request
-			inline const Url& url() const throw()
-			{ return _url; }
+            //! Returns a pointer to the IOHandler
+            inline IOHandler& handler() const throw()
+            { return _handler; }
+    
+            //! Returns the Url addressed with this request
+            inline const Url& url() const throw()
+            { return _url; }
 
-		private:
-			IOHandler& _handler;
-			Url _url;
-	};
-
-
-	class PT_IO_API GetTask : public IOTask {
-		public:
-			GetTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
-
-			virtual ~GetTask()
-			{}
-
-			virtual IODevice& open() throw (IOError) = 0;
-	};
+        private:
+            IOHandler& _handler;
+            Url _url;
+    };
 
 
-	class PT_IO_API PutTask : public IOTask {
-		public:
-			PutTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
+    class PT_IO_API GetTask : public IOTask {
+        public:
+            GetTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
 
-			virtual ~PutTask()
-			{}
+            virtual ~GetTask()
+            {}
 
-			virtual IODevice& open() throw (IOError) = 0;
-	};
-
-
-	class PT_IO_API UnlinkTask : public IOTask {
-		public:
-			UnlinkTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
-
-			virtual ~UnlinkTask()
-			{}
-
-			virtual void unlink() throw (IOError) = 0;
-	};
+            virtual IODevice& open() throw (IOError) = 0;
+    };
 
 
-	class PT_IO_API MakeDirTask : public IOTask {
-		public:
-			MakeDirTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
+    class PT_IO_API PutTask : public IOTask {
+        public:
+            PutTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
 
-			virtual ~MakeDirTask()
-			{}
+            virtual ~PutTask()
+            {}
 
-			virtual void mkdir() throw (IOError) = 0;
-	};
-
-
-	class PT_IO_API RemoveDirTask: public IOTask {
-		public:
-			RemoveDirTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
-
-			virtual ~RemoveDirTask()
-			{}
-
-			virtual void rmdir() throw (IOError) = 0;
-	};
+            virtual IODevice& open() throw (IOError) = 0;
+    };
 
 
-	class PT_IO_API ListDirTask : public IOTask {
-		public:
-			ListDirTask(IOHandler& handler, const Url& url)
-			: IOTask(handler, url)
-			{}
+    class PT_IO_API UnlinkTask : public IOTask {
+        public:
+            UnlinkTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
 
-			virtual ~ListDirTask()
-			{}
-	
-			virtual void list() throw (IOError) = 0;
-	};
+            virtual ~UnlinkTask()
+            {}
+
+            virtual void unlink() throw (IOError) = 0;
+    };
 
 
-	//! Base class to handle protocol specific IO.
-	class PT_IO_API IOHandler {
-		public:
-			IOHandler()
-			{}
+    class PT_IO_API MakeDirTask : public IOTask {
+        public:
+            MakeDirTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
 
-			virtual ~IOHandler()
-			{}
+            virtual ~MakeDirTask()
+            {}
 
-			virtual GetTask* get(const Url& url) throw (IOError)
-			{ throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+            virtual void mkdir() throw (IOError) = 0;
+    };
 
-			virtual PutTask* put(const Url& url) throw (IOError)
-			{ throw IOError("IO operation not supported.", PT_SOURCEINFO); }
 
-			virtual UnlinkTask* unlink(const Url& url)
-			{ throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+    class PT_IO_API RemoveDirTask: public IOTask {
+        public:
+            RemoveDirTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
 
-			virtual MakeDirTask* mkdir(const Url& url) throw (IOError)
-			{ throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+            virtual ~RemoveDirTask()
+            {}
 
-			virtual RemoveDirTask* rmdir(const Url& url) throw (IOError)
-			{ throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+            virtual void rmdir() throw (IOError) = 0;
+    };
 
-			virtual ListDirTask* list(const Url& url) throw (IOError)
-			{ throw IOError("IO operation not supported..", PT_SOURCEINFO); }
-	};
+
+    class PT_IO_API ListDirTask : public IOTask {
+        public:
+            ListDirTask(IOHandler& handler, const Url& url)
+            : IOTask(handler, url)
+            {}
+
+            virtual ~ListDirTask()
+            {}
+    
+            virtual void list() throw (IOError) = 0;
+    };
+
+
+    //! Base class to handle protocol specific IO.
+    class PT_IO_API IOHandler {
+        public:
+            IOHandler()
+            {}
+
+            virtual ~IOHandler()
+            {}
+
+            virtual GetTask* get(const Url& url) throw (IOError)
+            { throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+
+            virtual PutTask* put(const Url& url) throw (IOError)
+            { throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+
+            virtual UnlinkTask* unlink(const Url& url)
+            { throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+
+            virtual MakeDirTask* mkdir(const Url& url) throw (IOError)
+            { throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+
+            virtual RemoveDirTask* rmdir(const Url& url) throw (IOError)
+            { throw IOError("IO operation not supported.", PT_SOURCEINFO); }
+
+            virtual ListDirTask* list(const Url& url) throw (IOError)
+            { throw IOError("IO operation not supported..", PT_SOURCEINFO); }
+    };
 
 } // namespace IO
 

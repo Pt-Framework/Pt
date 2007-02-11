@@ -13,7 +13,7 @@
 
 namespace Pt {
 
-	namespace Math {
+    namespace Math {
 
         //! \brief A generic Rect class
         template<typename PointT, typename SizeT>
@@ -211,7 +211,7 @@ namespace Pt {
 
         };
 
-	} // namespace Math
+    } // namespace Math
 
 } // namespace Pt
 

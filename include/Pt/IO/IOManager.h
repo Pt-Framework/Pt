@@ -30,48 +30,48 @@ namespace Pt {
 
 namespace IO {
 
-	//! IOManager for protocol transparent IO.
-	class PT_IO_API IOManager : public Pt::Singleton<IOManager> {
-		friend class Pt::Singleton<IOManager>;
+    //! IOManager for protocol transparent IO.
+    class PT_IO_API IOManager : public Pt::Singleton<IOManager> {
+        friend class Pt::Singleton<IOManager>;
 
-		public:
-			template <typename HandlerT>
-			class PT_API Register {
-				public:
-					Register(const std::string& protocol) {
-						IOManager::instance().registerHandler(protocol, new HandlerT);
-					}
-			};
+        public:
+            template <typename HandlerT>
+            class PT_API Register {
+                public:
+                    Register(const std::string& protocol) {
+                        IOManager::instance().registerHandler(protocol, new HandlerT);
+                    }
+            };
 
-		public:
-			~IOManager();
+        public:
+            ~IOManager();
 
-			GetTask* get(const Url& url) throw (IOError);
+            GetTask* get(const Url& url) throw (IOError);
 
-			PutTask* put(const Url& url) throw (IOError);
+            PutTask* put(const Url& url) throw (IOError);
 
-			UnlinkTask* unlink(const Url& url)
-			{ throw IOError("Not implemented.", PT_SOURCEINFO); }
+            UnlinkTask* unlink(const Url& url)
+            { throw IOError("Not implemented.", PT_SOURCEINFO); }
 
-			MakeDirTask* mkdir(const Url& url) throw (IOError)
-			{ throw IOError("Not implemented.", PT_SOURCEINFO); }
+            MakeDirTask* mkdir(const Url& url) throw (IOError)
+            { throw IOError("Not implemented.", PT_SOURCEINFO); }
 
-			RemoveDirTask* rmdir(const Url& url) throw (IOError)
-			{ throw IOError("Not implemented.", PT_SOURCEINFO); }
+            RemoveDirTask* rmdir(const Url& url) throw (IOError)
+            { throw IOError("Not implemented.", PT_SOURCEINFO); }
 
-			ListDirTask* list(const Url& url) throw (IOError)
-			{ throw IOError("Not implemented.", PT_SOURCEINFO); }
+            ListDirTask* list(const Url& url) throw (IOError)
+            { throw IOError("Not implemented.", PT_SOURCEINFO); }
 
-			void registerHandler(const std::string& protocol, IOHandler* handler);
+            void registerHandler(const std::string& protocol, IOHandler* handler);
 
-		protected:
-			IOManager();
+        protected:
+            IOManager();
 
-			IOHandler* findHandler(const std::string& protocol);
+            IOHandler* findHandler(const std::string& protocol);
 
-		private:
-			std::map<std::string, IOHandler*> _handlerMap;
-	};
+        private:
+            std::map<std::string, IOHandler*> _handlerMap;
+    };
 
 } // namespace IO
 

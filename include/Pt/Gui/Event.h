@@ -29,57 +29,57 @@ namespace Pt {
 
 namespace Gui {
 
-	/**
-	 * @brief The root event class for all GUI events.
-	 *
-	 * This class basically stores the widget, for which the specific event
-	 * occured. The widget can be accessed using the method widget().
-	 *
-	 * Specific GUI events must sub-class this class.
-	 *
-	 * This class is a sub-class of system::Event, which is the root class of
-	 * all (non-GUI) events.
-	 */
-	class PT_GUI_API Event : public System::Event
-	{
-		public:
-			/**
-			 * @brief Constructs a new Event object and stores the given widget.
-			 *
-			 * @param widget The widget this event was created for.
-			 */
-			Event(Widget& widget);
+    /**
+     * @brief The root event class for all GUI events.
+     *
+     * This class basically stores the widget, for which the specific event
+     * occured. The widget can be accessed using the method widget().
+     *
+     * Specific GUI events must sub-class this class.
+     *
+     * This class is a sub-class of system::Event, which is the root class of
+     * all (non-GUI) events.
+     */
+    class PT_GUI_API Event : public System::Event
+    {
+        public:
+            /**
+             * @brief Constructs a new Event object and stores the given widget.
+             *
+             * @param widget The widget this event was created for.
+             */
+            Event(Widget& widget);
 
-			//! @brief Empty desctructor.
-			virtual ~Event();
+            //! @brief Empty desctructor.
+            virtual ~Event();
 
-			/**
-			 * @brief The widget on which this event originally occured.
-			 *
-			 * @param widget The widget on which this event originally occured.
-			 */
-			Widget& widget() const
-			{ return _widget; }
+            /**
+             * @brief The widget on which this event originally occured.
+             *
+             * @param widget The widget on which this event originally occured.
+             */
+            Widget& widget() const
+            { return _widget; }
 
-			/**
-			 * @brief Returns the type information object (type_info) of this event class.
-			 * 
-			 * This pure virtual method has to be implemented by any sub-class of Gui::Event
-			 * in a way that it returns the event's type info. Caching of this information
-			 * is recommended.
-			 *
-			 * @return The type information object of this event.
-			 */
-			virtual const std::type_info& typeInfo() const = 0;
+            /**
+             * @brief Returns the type information object (type_info) of this event class.
+             * 
+             * This pure virtual method has to be implemented by any sub-class of Gui::Event
+             * in a way that it returns the event's type info. Caching of this information
+             * is recommended.
+             *
+             * @return The type information object of this event.
+             */
+            virtual const std::type_info& typeInfo() const = 0;
 
-		public:
-			//! @brief The type information object (type_info) of this event class.
-			static const std::type_info& TYPE_INFO;
+        public:
+            //! @brief The type information object (type_info) of this event class.
+            static const std::type_info& TYPE_INFO;
 
-		private:
-			//! @brief The widget on which this event originally occured.
-			Widget& _widget;
-	};
+        private:
+            //! @brief The widget on which this event originally occured.
+            Widget& _widget;
+    };
 
 } // namespace Gui
 

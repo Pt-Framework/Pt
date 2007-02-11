@@ -11,7 +11,7 @@
 
 namespace Pt {
 
-	namespace Math {
+    namespace Math {
 
         template <typename T>
         class BasicSize;
@@ -31,7 +31,7 @@ namespace Pt {
         template <typename T>
         class BasicVector3d;
 
-		typedef BasicSize<Pt::size_t>      Size;
+        typedef BasicSize<Pt::size_t>      Size;
         typedef BasicSize<double>           SizeF;
 
         typedef BasicPoint<Pt::ssize_t>    Point;
@@ -47,11 +47,11 @@ namespace Pt {
         typedef BasicVector3d<double>       Vector3dF;
 
         typedef BasicMatrix<Pt::ssize_t, 3, 3>   Matrix3x3;
-		typedef BasicMatrix<double, 3, 3>		  Matrix3x3F;
-		typedef BasicMatrix<Pt::ssize_t, 4, 4>   Matrix4x4;
+        typedef BasicMatrix<double, 3, 3>          Matrix3x3F;
+        typedef BasicMatrix<Pt::ssize_t, 4, 4>   Matrix4x4;
         typedef BasicMatrix<double, 4, 4>         Matrix4x4F;
 
-	} // namespace Math
+    } // namespace Math
 
 } // namespace Pt
 

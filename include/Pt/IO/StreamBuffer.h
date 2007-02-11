@@ -28,22 +28,22 @@ namespace Pt {
 
 namespace IO {
 
-	template <typename CharT>
-	class BasicStreamBuffer : public std::basic_streambuf<CharT> {
-		public:
-			typedef typename std::basic_streambuf<CharT>::int_type IntT;
-			typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;
+    template <typename CharT>
+    class BasicStreamBuffer : public std::basic_streambuf<CharT> {
+        public:
+            typedef typename std::basic_streambuf<CharT>::int_type IntT;
+            typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;
 
-		public:
-			virtual std::streamsize peek(CharT* buffer, std::streamsize size)
-			{ return this->_peek(buffer, size); }
+        public:
+            virtual std::streamsize peek(CharT* buffer, std::streamsize size)
+            { return this->_peek(buffer, size); }
 
-		protected:
-			virtual std::streamsize _peek(CharT* buffer, std::streamsize size)
-			{ return 0; }
-	};
+        protected:
+            virtual std::streamsize _peek(CharT* buffer, std::streamsize size)
+            { return 0; }
+    };
 
-	typedef BasicStreamBuffer<char> StreamBuffer;
+    typedef BasicStreamBuffer<char> StreamBuffer;
 
 } // namespace IO
 

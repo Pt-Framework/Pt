@@ -29,13 +29,13 @@ namespace Pt {
 
 namespace IO {
 
-	class PT_IO_API IOError : public std::runtime_error {
-		public:
-			IOError(const std::string& what, const SourceInfo& si) throw();
+    class PT_IO_API IOError : public std::runtime_error {
+        public:
+            IOError(const std::string& what, const SourceInfo& si) throw();
 
-			~IOError() throw()
-			{ }
-	};
+            ~IOError() throw()
+            { }
+    };
 
 } // namespace IO
 
