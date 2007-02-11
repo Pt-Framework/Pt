@@ -29,42 +29,42 @@
 
 namespace Pt {
 
-	class PT_TEXT_API Base64Codec : public TextCodec<char, char> {
-		public:
-			explicit Base64Codec(size_t ref = 0);
+    class PT_TEXT_API Base64Codec : public TextCodec<char, char> {
+        public:
+            explicit Base64Codec(size_t ref = 0);
 
-			virtual ~Base64Codec()
-			{}
+            virtual ~Base64Codec()
+            {}
 
-			virtual result do_in(mbstate_t& s, const char* fromBegin,
-			                     const char* fromEnd, const char*& fromNext,
-			                     char* toBegin, char* toEnd, char*& toNext) const;
+            virtual result do_in(mbstate_t& s, const char* fromBegin,
+                                 const char* fromEnd, const char*& fromNext,
+                                 char* toBegin, char* toEnd, char*& toNext) const;
 
-			virtual result do_out(mbstate_t& s, const char* fromBegin,
-			                      const char* fromEnd, const char*& fromNext,
-			                      char* toBegin, char* toEnd, char*& toNext) const;
+            virtual result do_out(mbstate_t& s, const char* fromBegin,
+                                  const char* fromEnd, const char*& fromNext,
+                                  char* toBegin, char* toEnd, char*& toNext) const;
 
-			virtual result do_unshift(mbstate_t& state, char* to,
-			                         char* to_end, char*& to_next) const;
+            virtual result do_unshift(mbstate_t& state, char* to,
+                                     char* to_end, char*& to_next) const;
 
-			virtual bool do_always_noconv() const throw();
+            virtual bool do_always_noconv() const throw();
 
-			virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
-			virtual int do_encoding() const throw();
+            virtual int do_encoding() const throw();
 
-			virtual int do_max_length() const throw();
+            virtual int do_max_length() const throw();
 
-		private:
-			// move to state type
-			mutable Pt::uint8_t _first;
+        private:
+            // move to state type
+            mutable Pt::uint8_t _first;
 
-			// move to state type
-			mutable Pt::uint8_t _second;
+            // move to state type
+            mutable Pt::uint8_t _second;
 
-			// move to state type
-			mutable size_t _padSize;
-	};
+            // move to state type
+            mutable size_t _padSize;
+    };
 
 
 } //namespace Pt

@@ -30,47 +30,47 @@ namespace Pt {
 
 namespace Text {
 
-	/**
-	 * @brief This simple Codec class is able to convert from ASCII to UTF-32 and from UTF-32 to ASCII.
-	 *
-	 * The method do_in() converts an array of char containing ACSII-data into an array of
-	 * Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
-	 * 32-bit representation of the character.
-	 *
-	 * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
-	 * array of char which contains the same sequence of characters in ASCII-encoding.
-	 */
-	class PT_TEXT_API AsciiCodec : public TextCodec<Char, char> {
-		public:
-			/**
-			 * @brief Constructs a new AsciiCodec object with internal type of Pt::Char and
-			 * external type of $char$.
-			 *
-			 * @param ref This parameter is passed to TextCodec. When ref == 0 the locale takes care
-			 * of deleting the facet. If ref == 1 the locale does not destroy the facet.
-			 */
-			explicit AsciiCodec(size_t ref = 0);
+    /**
+     * @brief This simple Codec class is able to convert from ASCII to UTF-32 and from UTF-32 to ASCII.
+     *
+     * The method do_in() converts an array of char containing ACSII-data into an array of
+     * Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
+     * 32-bit representation of the character.
+     *
+     * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
+     * array of char which contains the same sequence of characters in ASCII-encoding.
+     */
+    class PT_TEXT_API AsciiCodec : public TextCodec<Char, char> {
+        public:
+            /**
+             * @brief Constructs a new AsciiCodec object with internal type of Pt::Char and
+             * external type of $char$.
+             *
+             * @param ref This parameter is passed to TextCodec. When ref == 0 the locale takes care
+             * of deleting the facet. If ref == 1 the locale does not destroy the facet.
+             */
+            explicit AsciiCodec(size_t ref = 0);
 
-			//! Empty desctructor
-			virtual ~AsciiCodec();
+            //! Empty desctructor
+            virtual ~AsciiCodec();
 
-			//! @brief Decodes ASCII to UTF-32.
-			virtual result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
-			                                 Char* toBegin, Char* toEnd, Char*& toNext) const;
+            //! @brief Decodes ASCII to UTF-32.
+            virtual result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+                                             Char* toBegin, Char* toEnd, Char*& toNext) const;
 
-			//! @brief Encodes UTF-32 to ASCII.
-			virtual result do_out(mbstate_t& s, const Char* fromBegin, const Char* fromEnd, const Char*& fromNext,
-			                                 char* toBegin, char* toEnd, char*& toNext) const;
+            //! @brief Encodes UTF-32 to ASCII.
+            virtual result do_out(mbstate_t& s, const Char* fromBegin, const Char* fromEnd, const Char*& fromNext,
+                                             char* toBegin, char* toEnd, char*& toNext) const;
 
-			// interhitdoc
-			virtual bool do_always_no_conv() const throw();
+            // interhitdoc
+            virtual bool do_always_no_conv() const throw();
 
-			// interhitdoc
-			virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            // interhitdoc
+            virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
-			// interhitdoc
-			virtual int do_max_length() const throw();
-	};
+            // interhitdoc
+            virtual int do_max_length() const throw();
+    };
 
 } // namespace Text
 

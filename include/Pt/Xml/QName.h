@@ -7,39 +7,39 @@
 
 namespace Pt {
 
-	namespace Xml {
+    namespace Xml {
 
-		class PT_XML_API QName {
-			public:
-				QName();
+        class PT_XML_API QName {
+            public:
+                QName();
 
-				QName(const String& localPart);
+                QName(const String& localPart);
 
-				QName(const String& namespaceURI, const String& localPart);
+                QName(const String& namespaceURI, const String& localPart);
 
-				QName(const String& namespaceURI, const String& localPart, const String& prefix);
+                QName(const String& namespaceURI, const String& localPart, const String& prefix);
 
-				~QName();
+                ~QName();
 
-				const String& prefix() const;
+                const String& prefix() const;
 
-				void setPrefix(const String& prefix);
+                void setPrefix(const String& prefix);
 
-				const String& localPart() const;
+                const String& localPart() const;
 
-				void setLocalPart(const String& localPart);
+                void setLocalPart(const String& localPart);
 
-				const String& namespaceUri() const;
+                const String& namespaceUri() const;
 
-				void setNamespaceUri(const String& namespaceUri);
+                void setNamespaceUri(const String& namespaceUri);
 
-			private:
-				String _prefix;
-				String _localPart;
-				String _namespaceUri;
-		};
+            private:
+                String _prefix;
+                String _localPart;
+                String _namespaceUri;
+        };
 
-	}
+    }
 
 }
 #endif

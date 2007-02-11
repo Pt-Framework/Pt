@@ -29,34 +29,34 @@ namespace Pt {
 
 namespace Text {
 
-	class PT_TEXT_API  Base64Buffer :  public BasicTextBuffer<char, char> {
-		public:
-			Base64Buffer(std::streambuf* buffer, Base64Codec* codec);
-	};
+    class PT_TEXT_API  Base64Buffer :  public BasicTextBuffer<char, char> {
+        public:
+            Base64Buffer(std::streambuf* buffer, Base64Codec* codec);
+    };
 
 
-	class PT_TEXT_API Base64IStream : public BasicTextIStream<char, char> {
-		public:
-			Base64IStream(std::istream& is);
+    class PT_TEXT_API Base64IStream : public BasicTextIStream<char, char> {
+        public:
+            Base64IStream(std::istream& is);
 
-			~Base64IStream();
-	};
-
-
-	class PT_TEXT_API Base64OStream : public BasicTextOStream<char, char> {
-		public:
-			Base64OStream(std::ostream& os);
-
-			~Base64OStream();
-	};
+            ~Base64IStream();
+    };
 
 
-	class PT_TEXT_API Base64Stream : public BasicTextStream<char, char> {
-		public:
-			Base64Stream(std::iostream& ios);
+    class PT_TEXT_API Base64OStream : public BasicTextOStream<char, char> {
+        public:
+            Base64OStream(std::ostream& os);
 
-			~Base64Stream();
-	};
+            ~Base64OStream();
+    };
+
+
+    class PT_TEXT_API Base64Stream : public BasicTextStream<char, char> {
+        public:
+            Base64Stream(std::iostream& ios);
+
+            ~Base64Stream();
+    };
 
 } // namespace Text
 

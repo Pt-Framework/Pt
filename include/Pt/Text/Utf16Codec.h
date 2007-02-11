@@ -70,38 +70,38 @@ namespace Pt {
 
 namespace Text {
 
-	/**
-	 * @brief This Codec class is able to convert from UTF-16 to UTF-32 and from UTF-32 to UTF-16.
-	 *
-	 * The method do_in() converts an array of char containing UTF-16-encoded data into an array
-	 * of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
-	 * 32-bit representation of the character.
-	 *
-	 * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
-	 * array of char which contains the same sequence of characters in UTF-16-encoding.
-	 */
-	class PT_TEXT_API Utf16Codec : public TextCodec<Char, char> {
-		public:
-			explicit Utf16Codec(size_t ref = 0);
-			virtual ~Utf16Codec();
+    /**
+     * @brief This Codec class is able to convert from UTF-16 to UTF-32 and from UTF-32 to UTF-16.
+     *
+     * The method do_in() converts an array of char containing UTF-16-encoded data into an array
+     * of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
+     * 32-bit representation of the character.
+     *
+     * The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
+     * array of char which contains the same sequence of characters in UTF-16-encoding.
+     */
+    class PT_TEXT_API Utf16Codec : public TextCodec<Char, char> {
+        public:
+            explicit Utf16Codec(size_t ref = 0);
+            virtual ~Utf16Codec();
 
-			//! @brief Decodes UTF-16 to UTF-32.
-			virtual result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
-												 Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const;
+            //! @brief Decodes UTF-16 to UTF-32.
+            virtual result do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+                                                 Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const;
 
-			//! @brief Encodes UTF-32 to UTF-16.
-			virtual result do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
-												 char* toBegin, char* toEnd, char*& toNext) const;
+            //! @brief Encodes UTF-32 to UTF-16.
+            virtual result do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
+                                                 char* toBegin, char* toEnd, char*& toNext) const;
 
-			// inheritdoc
-			virtual bool do_always_no_conv() const throw();
+            // inheritdoc
+            virtual bool do_always_no_conv() const throw();
 
-			// inheritdoc
-			virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            // inheritdoc
+            virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
-			// inheritdoc
-			virtual int do_max_length() const throw();
-	};
+            // inheritdoc
+            virtual int do_max_length() const throw();
+    };
 
 } //namespace Text
 

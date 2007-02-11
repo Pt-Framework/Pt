@@ -7,38 +7,38 @@
 
 namespace Pt {
 
-	namespace Xml {
+    namespace Xml {
 
-		/**
-		 * @brief A Node which represents the end of the XML document.
-		 *
-		 * The last Node/Element which is read from a document is the EndDocument-node. It is read after
-		 * the last tag, Text or comment was read from the XML document. This is similar to an eof character
-		 * at the end of a file read.
-		 *
-		 * @see Node
-		 */
-		class PT_XML_API EndDocument : public Node {
-			public:
-				//! Creates an EndDocument object.
-				EndDocument()
-				: Node( Xml::Node::EndDocument )
-				{}
+        /**
+         * @brief A Node which represents the end of the XML document.
+         *
+         * The last Node/Element which is read from a document is the EndDocument-node. It is read after
+         * the last tag, Text or comment was read from the XML document. This is similar to an eof character
+         * at the end of a file read.
+         *
+         * @see Node
+         */
+        class PT_XML_API EndDocument : public Node {
+            public:
+                //! Creates an EndDocument object.
+                EndDocument()
+                : Node( Xml::Node::EndDocument )
+                {}
 
-				//! Destructs this EndDocument object.
-				~EndDocument()
-				{}
+                //! Destructs this EndDocument object.
+                ~EndDocument()
+                {}
 
-				/**
-				 * @brief Clones this EndDocument object by creating a duplicate on the heap and returning it.
-				 * @return A cloned version of this EndDocument object.
-				 */
-				EndDocument* clone() const
-				{ return new EndDocument(*this); }
+                /**
+                 * @brief Clones this EndDocument object by creating a duplicate on the heap and returning it.
+                 * @return A cloned version of this EndDocument object.
+                 */
+                EndDocument* clone() const
+                { return new EndDocument(*this); }
 
-		};
+        };
 
-	}
+    }
 
 }
 

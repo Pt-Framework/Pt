@@ -29,33 +29,33 @@
 
 namespace Pt {
 
-	namespace Text {
+    namespace Text {
 
-		/**
-		 * @brief A specialized list-class for Pt::String objects.
-		 *
-		 * This class is a convenience class which is derived from std::list and specialized for
-		 * containing Pt::String.
-		 *
-		 * See std::list for more details.
-		 */
-		class PT_TEXT_API StringList : public std::list<Pt::String> {
-			public:
-				typedef std::list<Pt::String>::iterator Iterator;
-				typedef std::list<Pt::String>::const_iterator ConstIterator;
+        /**
+         * @brief A specialized list-class for Pt::String objects.
+         *
+         * This class is a convenience class which is derived from std::list and specialized for
+         * containing Pt::String.
+         *
+         * See std::list for more details.
+         */
+        class PT_TEXT_API StringList : public std::list<Pt::String> {
+            public:
+                typedef std::list<Pt::String>::iterator Iterator;
+                typedef std::list<Pt::String>::const_iterator ConstIterator;
 
-			public:
-				StringList();
-		};
+            public:
+                StringList();
+        };
 
-	} // namespace Text
+    } // namespace Text
 
 
-	template <>
-	struct PT_API TypeTraits<Pt::Text::StringList> {
-		static const char* typeName()
-		{ return "Pt::Text::StringList"; }
-	};
+    template <>
+    struct PT_API TypeTraits<Pt::Text::StringList> {
+        static const char* typeName()
+        { return "Pt::Text::StringList"; }
+    };
 
 } // namespace Pt
 

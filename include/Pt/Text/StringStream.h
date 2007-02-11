@@ -28,9 +28,9 @@
 #include <sstream>
 
 namespace Pt {
-	namespace Text {
-		typedef std::basic_stringstream<Pt::Char> StringStream;
-	}
+    namespace Text {
+        typedef std::basic_stringstream<Pt::Char> StringStream;
+    }
 }
 
 #endif

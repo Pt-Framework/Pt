@@ -8,36 +8,36 @@
 
 namespace Pt {
 
-	namespace Xml {
+    namespace Xml {
 
-		class PT_XML_API XmlDeclaration : public Node {
-			public:
-				XmlDeclaration();
+        class PT_XML_API XmlDeclaration : public Node {
+            public:
+                XmlDeclaration();
 
-				~XmlDeclaration();
+                ~XmlDeclaration();
 
-				XmlDeclaration* clone() const
-				{return new XmlDeclaration(*this);}
+                XmlDeclaration* clone() const
+                {return new XmlDeclaration(*this);}
 
-				const String& version() const;
+                const String& version() const;
 
-				void setVersion(const String& version);
+                void setVersion(const String& version);
 
-				const String& encoding() const;
+                const String& encoding() const;
 
-				void setEncoding(const String& encoding);
+                void setEncoding(const String& encoding);
 
-				bool standalone() const;
+                bool standalone() const;
 
-				void setStandalone(bool standalone);
+                void setStandalone(bool standalone);
 
-			private:
-				String _version;
-				String _encoding;
-				bool _standalone;
-		};
+            private:
+                String _version;
+                String _encoding;
+                bool _standalone;
+        };
 
-	}
+    }
 
 }
 #endif
