@@ -11,15 +11,15 @@ are in the namespace system, which is nested in the ptv namespace.
 
 namespace Pt {
 
-	/** The System Module.
-	This module offers support for multithreaded programming, API's for
-	file system handling such as traversing through directories and files,
-	File-IO, shared memory and shared libraries. All classes and functions
-	are in the namespace system, which is nested in the ptv namespace.
-	 */
-	namespace System {
-		class FileSystemMode;
-	}
+    /** The System Module.
+    This module offers support for multithreaded programming, API's for
+    file system handling such as traversing through directories and files,
+    File-IO, shared memory and shared libraries. All classes and functions
+    are in the namespace system, which is nested in the ptv namespace.
+     */
+    namespace System {
+        class FileSystemMode;
+    }
 }
 
 /** \page "File System Operations"

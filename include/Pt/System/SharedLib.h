@@ -39,87 +39,87 @@ namespace System {
 
   @code
     typedef int (*MyProcType)();
-	SharedLib shlib("MySharedLib.dll");
-	void* procAddr = shlib["myProcedure"];
-	MyProcType proc;
-	int result = -1;
+    SharedLib shlib("MySharedLib.dll");
+    void* procAddr = shlib["myProcedure"];
+    MyProcType proc;
+    int result = -1;
 
-	proc = (MyProcType)procAddr;
+    proc = (MyProcType)procAddr;
     result = proc();
   @endcode
 */
 class PT_SYSTEM_API SharedLib : private NonCopyable {
-	public:
+    public:
 
-		//! @brief Default Constructor
-		SharedLib();
+        //! @brief Default Constructor
+        SharedLib();
 
-		//! @brief Constructor
-		/**
-			Constructs the object and loads the shared library specified
-			in the path argument.
+        //! @brief Constructor
+        /**
+            Constructs the object and loads the shared library specified
+            in the path argument.
 
-			@param path the path to the shared library
-		*/
-		SharedLib(const std::string& path);
+            @param path the path to the shared library
+        */
+        SharedLib(const std::string& path);
 
-		//! @brief Destructor
-		/**
-			The destructor unloads the shared library from memory.
-		*/
-		~SharedLib();
+        //! @brief Destructor
+        /**
+            The destructor unloads the shared library from memory.
+        */
+        ~SharedLib();
 
-		//! @brief Loads a shared library.
-		/**
-			Loads a shared library.
+        //! @brief Loads a shared library.
+        /**
+            Loads a shared library.
 
-			@param path the path to the shared library
-		*/
-		SharedLib& open(const std::string& path);
+            @param path the path to the shared library
+        */
+        SharedLib& open(const std::string& path);
 
-		//! @brief Resolve symbol from shared library
-		/**
-			Resolves a symbol from the shared library.
+        //! @brief Resolve symbol from shared library
+        /**
+            Resolves a symbol from the shared library.
 
-			@param symbol the name of the symbol to be resolved.
-			@return the address of the symbol or NULL if it was not found
-		*/
-		void* operator[](const char* symbol);
+            @param symbol the name of the symbol to be resolved.
+            @return the address of the symbol or NULL if it was not found
+        */
+        void* operator[](const char* symbol);
 
-		//! @brief Resolve symbol from shared library
-		/**
-			Resolves a symbol from the shared library.
+        //! @brief Resolve symbol from shared library
+        /**
+            Resolves a symbol from the shared library.
 
-			@param symbol the name of the symbol to be resolved.
-			@return the address of the symbol or NULL if it was not found
-		*/
-		void* resolve(const char* symbol);
+            @param symbol the name of the symbol to be resolved.
+            @return the address of the symbol or NULL if it was not found
+        */
+        void* resolve(const char* symbol);
 
-		//! @brief Object status checking
-		/**
-			@return NULL if object is in a failed state, otherwise non-NULL
-		*/
-		operator void*();
+        //! @brief Object status checking
+        /**
+            @return NULL if object is in a failed state, otherwise non-NULL
+        */
+        operator void*();
 
-		//! @brief Object status checking
-		/**
-			@return true if object is in a failed state
-		*/
-		bool operator!();
+        //! @brief Object status checking
+        /**
+            @return true if object is in a failed state
+        */
+        bool operator!();
 
-	public:
-		//! @brief Resolve symbol from a shared library
-		/**
-			Loads and resolves a symbol from the shared library.
+    public:
+        //! @brief Resolve symbol from a shared library
+        /**
+            Loads and resolves a symbol from the shared library.
 
-			@param path the path to the shared library
-			@param symbol the name of the symbol to be resolved.
-			@return the address of the symbol or NULL if it was not found
-		*/
-		static void* openResolve(const std::string& path, const char* symbol);
+            @param path the path to the shared library
+            @param symbol the name of the symbol to be resolved.
+            @return the address of the symbol or NULL if it was not found
+        */
+        static void* openResolve(const std::string& path, const char* symbol);
 
-	private:
-		class SharedLibImpl* _impl;
+    private:
+        class SharedLibImpl* _impl;
 };
 
 }
@@ -128,8 +128,8 @@ class PT_SYSTEM_API SharedLib : private NonCopyable {
 
 extern "C" {
 
-	/// \exclude
-	PT_SYSTEM_API void pt_system_testSharedLib();
+    /// \exclude
+    PT_SYSTEM_API void pt_system_testSharedLib();
 
 }
 

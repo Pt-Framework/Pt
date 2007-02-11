@@ -29,15 +29,15 @@ namespace Pt {
 
 namespace Net {
 
-	class PT_NET_API Timeout : public std::exception
-	{
-		public:
-			Timeout()
-			{ }
-	        
-			const char* what() const throw()
-			{ return "timeout"; }
-	};
+    class PT_NET_API Timeout : public std::exception
+    {
+        public:
+            Timeout()
+            { }
+            
+            const char* what() const throw()
+            { return "timeout"; }
+    };
 
 } // !namespace Net
 

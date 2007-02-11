@@ -15,7 +15,7 @@ namespace System {
 
     //! @brief Runnable interface.
     /**
-	*   The Runnable interface should be implemented by any class whose
+    *   The Runnable interface should be implemented by any class whose
     *   instances are intended to be executed by a thread. The class must
     *   define a method of no arguments called run. This interface is
     *   designed to provide a common protocol for objects that wish to
@@ -27,8 +27,8 @@ namespace System {
     class Runnable : public NonCopyable
     {
         public:
-	        //! @brief Thread function
-			/** When an object implementing interface Runnable is used to
+            //! @brief Thread function
+            /** When an object implementing interface Runnable is used to
             *   create a thread, starting the thread causes the object's
             *   run method to be called in that separately executing thread.
             *   The general contract of the method run is that it may take any

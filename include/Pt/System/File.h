@@ -34,30 +34,30 @@ namespace System {
 /** Provides common operations on files.
  */
 class PT_SYSTEM_API File : public FileSystemNode, public NonCopyable {
-	private:
-		class FileImpl* _impl;
+    private:
+        class FileImpl* _impl;
 
-	public:
+    public:
 
-		enum mode { Create, UseExisting };
+        enum mode { Create, UseExisting };
 
-		File(const std::string& path, mode mode = UseExisting);
+        File(const std::string& path, mode mode = UseExisting);
 
-		~File();
+        ~File();
 
-		virtual const std::string& path() const;
+        virtual const std::string& path() const;
 
-		virtual std::size_t size() const;
+        virtual std::size_t size() const;
 
-		void resize(std::size_t newSize);
+        void resize(std::size_t newSize);
 
-		virtual void remove();
+        virtual void remove();
 
-		//void copy(const char* to) const;
+        //void copy(const char* to) const;
 
-		virtual void move(const std::string& newname);
-		
-		std::string name();
+        virtual void move(const std::string& newname);
+        
+        std::string name();
 };
 
 } // namespace System

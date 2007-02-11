@@ -30,23 +30,23 @@ namespace System {
 
 class PT_SYSTEM_API FileSystemNode 
 {
-	public:
-		FileSystemNode()
-		{}
+    public:
+        FileSystemNode()
+        {}
 
-		virtual ~FileSystemNode()
-		{}
+        virtual ~FileSystemNode()
+        {}
 
-		//! Returns the path of the file system node.
-		virtual const std::string& path() const = 0;
+        //! Returns the path of the file system node.
+        virtual const std::string& path() const = 0;
 
-		//! Returns the size of the file system node.
-		virtual std::size_t size() const = 0;
+        //! Returns the size of the file system node.
+        virtual std::size_t size() const = 0;
 
-		virtual void remove() = 0;
+        virtual void remove() = 0;
 
-		// virtual void rename(const std::string& newname);
-		virtual void move(const std::string& newname) = 0;
+        // virtual void rename(const std::string& newname);
+        virtual void move(const std::string& newname) = 0;
 };
 
 } // namespace System

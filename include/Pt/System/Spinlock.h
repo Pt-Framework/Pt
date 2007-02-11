@@ -15,7 +15,7 @@ namespace Pt {
 namespace System {
 
     //! @brief Spnilock class.
-	/**
+    /**
     *  The most lightweight synchronisation object is the Spinlock. It is
     *  usually implemented with a status variable that can be set to “Locked”
     *  and “Unlocked” and atomic operations to change and inspect the status.
@@ -27,67 +27,67 @@ namespace System {
     *  usable in cases where resources need to be locked for a very short time, but in
     *  these cases a higher performance can be achieved.
     */
-	class Spinlock : public NonCopyable {
-		public:
-			//! Lock class for Spinlock.
-			class Lock {
-				public:
-					Lock(Spinlock& s)
-					: _spinlock(s)
-					{ _spinlock.lock(); }
+    class Spinlock : public NonCopyable {
+        public:
+            //! Lock class for Spinlock.
+            class Lock {
+                public:
+                    Lock(Spinlock& s)
+                    : _spinlock(s)
+                    { _spinlock.lock(); }
 
-					~Lock()
-					{ _spinlock.unlock(); }
+                    ~Lock()
+                    { _spinlock.unlock(); }
 
-					Spinlock& spinlock()
-					{ return _spinlock; }
+                    Spinlock& spinlock()
+                    { return _spinlock; }
 
-					const Spinlock& spinlock() const
-					{ return _spinlock; }
+                    const Spinlock& spinlock() const
+                    { return _spinlock; }
 
-				private:
-					Spinlock& _spinlock;
-			};
+                private:
+                    Spinlock& _spinlock;
+            };
 
-		public:
-			//! Default Constructor.
-			Spinlock()
-				: _count(0)
-			{}
+        public:
+            //! Default Constructor.
+            Spinlock()
+                : _count(0)
+            {}
 
-			//! Destructor.
-			~Spinlock()
-			{}
+            //! Destructor.
+            ~Spinlock()
+            {}
 
 
             //! @brief Lock.
-			/// Locks the Spinlock. If the Spinlock is currently locked
+            /// Locks the Spinlock. If the Spinlock is currently locked
             /// by another thread, the calling thread suspends until no
             /// other thread holds a lock on it. This happens
             /// performing a  busy-wait. Spinlocks are not recursive
             /// locking it multiple times before unlocking it is undefined.
-			inline void lock()
-			{
-				// busy loop until unlock
-				while(_count.compareExchange(0, 1) ) {
-					;
-				}
-			}
+            inline void lock()
+            {
+                // busy loop until unlock
+                while(_count.compareExchange(0, 1) ) {
+                    ;
+                }
+            }
 
             //! @brief Unlock.
-			/// Unlocks the Spinlock.
-			inline void unlock()
-			{
-				// set unlocked
-				_count = 0;
-			}
+            /// Unlocks the Spinlock.
+            inline void unlock()
+            {
+                // set unlocked
+                _count = 0;
+            }
 
-			bool testIsLocked() const
-			{ return _count.value() != 0; }
+            bool testIsLocked() const
+            { return _count.value() != 0; }
 
-	private:
-		AtomicInt _count;
-	};
+    private:
+        AtomicInt _count;
+    };
 
 } // !namespace System
 

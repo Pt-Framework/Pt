@@ -23,64 +23,64 @@ public:
         @param seconds The seconds part to set.    
         @param microSec The microseconds part to set.
     */
-	TimeValue( size_t seconds = 0, size_t microSeconds = 0 );
-	
-	
-	//! @brief Copy constructor.
+    TimeValue( size_t seconds = 0, size_t microSeconds = 0 );
+    
+    
+    //! @brief Copy constructor.
     /**
         @param ref The time value to copy.
     */
-	TimeValue( const TimeValue& ref );
-	
-	//! @brief Destructor.
-	~TimeValue();
+    TimeValue( const TimeValue& ref );
+    
+    //! @brief Destructor.
+    ~TimeValue();
 
     //! @brief Subtract a TimeValue.
     /**
         @param from Value to subtract.
     */    
-	TimeValue operator-( const TimeValue& from );
-	
-	//! @brief Reduce the time value.
+    TimeValue operator-( const TimeValue& from );
+    
+    //! @brief Reduce the time value.
     /**
         @param from Value to reduce.
-    */    	
-	TimeValue operator-=( const TimeValue& from );
-	
-	//! @brief Add the time value.
+    */        
+    TimeValue operator-=( const TimeValue& from );
+    
+    //! @brief Add the time value.
     /**
         @param with Value to add.
-    */    	
-	TimeValue operator+( const TimeValue& with );
-	
-	//! @brief Increase the time value.
+    */        
+    TimeValue operator+( const TimeValue& with );
+    
+    //! @brief Increase the time value.
     /**
         @param with Value to increase.
-    */    	
-	TimeValue operator+=( const TimeValue& with );
-	
-	//! @brief Compare of egality.
+    */        
+    TimeValue operator+=( const TimeValue& with );
+    
+    //! @brief Compare of egality.
     /**
         @param with Value to compare.
-    */    		
-	bool operator==( TimeValue& with );
-	
-	//! @brief Compare of lesser.
+    */            
+    bool operator==( TimeValue& with );
+    
+    //! @brief Compare of lesser.
     /**
         @param with Value to compare.
-    */    		
-	bool operator<( TimeValue& with );
-	
-	//! @brief Compare of greater.
+    */            
+    bool operator<( TimeValue& with );
+    
+    //! @brief Compare of greater.
     /**
         @param with Value to compare.
-    */    		
-	bool operator>( TimeValue& with );
+    */            
+    bool operator>( TimeValue& with );
 
-	//! @brief Sets the micro seconds part of the TimeValue.
+    //! @brief Sets the micro seconds part of the TimeValue.
     /**
         @param microSec The micro seconds part to set.
-    */    		
+    */            
     inline void setMicroSeconds( size_t microSec )
     {
         _microSeconds = microSec;
@@ -114,8 +114,8 @@ public:
     }      
 
 protected:
-	size_t _seconds;
-	size_t _microSeconds;
+    size_t _seconds;
+    size_t _microSeconds;
 };
 
 

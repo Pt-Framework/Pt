@@ -13,14 +13,14 @@ namespace System {
 
 class PT_SYSTEM_API Clock
 {
-	public:
-		/** @brief Contructs a Clock
-		*/
-		Clock();
+    public:
+        /** @brief Contructs a Clock
+        */
+        Clock();
 
-		/** @brief Destructor
-		*/
-		~Clock();
+        /** @brief Destructor
+        */
+        ~Clock();
 
         /** @brief Start the clock.
             @return Return the micro seconds part.
@@ -30,15 +30,15 @@ class PT_SYSTEM_API Clock
         /** @brief Stop the clock.
             @return Return the time diference.
         */
-		TimeValue stop();
+        TimeValue stop();
 
-		/** @brief Gets the current time
-		    @return Returns the current time
-		*/
-		static DateTime getCurrentTime();
+        /** @brief Gets the current time
+            @return Returns the current time
+        */
+        static DateTime getCurrentTime();
 
-	private:
-		class ClockImpl *_impl;
+    private:
+        class ClockImpl *_impl;
 };
 
 } //namespace Pt

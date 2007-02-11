@@ -27,26 +27,26 @@ namespace Pt {
 
 namespace System {
 
-	//! @brief Environment class.
-	/**
-	*/
+    //! @brief Environment class.
+    /**
+    */
 
-	class PT_SYSTEM_API Environment
-	{
-		private:
-			class EnvironmentImpl* _impl;
+    class PT_SYSTEM_API Environment
+    {
+        private:
+            class EnvironmentImpl* _impl;
 
-		protected:
-			Environment();
-			~Environment();
+        protected:
+            Environment();
+            ~Environment();
 
-		public:
-			//! @brief Returns the extension for a shared library on the current system.
-			///
-			static const std::string& sharedLibraryExtension();
+        public:
+            //! @brief Returns the extension for a shared library on the current system.
+            ///
+            static const std::string& sharedLibraryExtension();
 
-			static const std::string& sharedLibraryPrefix();
-	};
+            static const std::string& sharedLibraryPrefix();
+    };
 
 } // !namespace system
 

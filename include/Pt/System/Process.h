@@ -19,79 +19,79 @@ namespace System {
 //! Process Environment
 class PT_SYSTEM_API Process {
     public:
-	    //! Constructs a Process with a command
-	    /**
+        //! Constructs a Process with a command
+        /**
             @param command Name of the executable
         */
-	    Process(const std::string& command);
+        Process(const std::string& command);
 
         //! Dtor
-	    ~Process();
+        ~Process();
 
-	    //! Get the Command string
-	    /**
+        //! Get the Command string
+        /**
             @return Name of the executable
         */
-	    const std::string& command();
+        const std::string& command();
 
-	    //! Set the Command Arguments
-	    /**
+        //! Set the Command Arguments
+        /**
             @param args Arguments given to the process
         */
-	    void setArgs(const std::string& args);
+        void setArgs(const std::string& args);
 
-	    //! Get the Command Arguments
-	    /**
+        //! Get the Command Arguments
+        /**
             @return Arguments of the process
         */
         const std::string& args();
 
-	    //! Start/Create the Process
-	    /**
+        //! Start/Create the Process
+        /**
             @throw SystemError
         */
-	    void start();
+        void start();
 
-	    //! Kills the Process
-	    /**
+        //! Kills the Process
+        /**
             @throw SystemError
         */
-	    void kill();
+        void kill();
 
-	    //! Waits until the Process ends
-	    /**
+        //! Waits until the Process ends
+        /**
             @throw SystemError
         */
-	    void wait();
+        void wait();
 
     public:
-	    //! Set environment variable
-	    /**
+        //! Set environment variable
+        /**
             @throw SystemError
         */
-	    static void setEnvVar(const std::string& name, const std::string& value);
+        static void setEnvVar(const std::string& name, const std::string& value);
 
-	    //! Unset environment variable
-	    /**
+        //! Unset environment variable
+        /**
             @throw SystemError
         */
-	    static void unsetEnvVar(const std::string& name);
+        static void unsetEnvVar(const std::string& name);
 
-	    //! Get environment variable
-	    /**
+        //! Get environment variable
+        /**
             @throw SystemError
         */
-	    static std::string getEnvVar(const std::string& name);
+        static std::string getEnvVar(const std::string& name);
 
-	    //! Called Process Sleeps milliSec Seconds
-	    /**
+        //! Called Process Sleeps milliSec Seconds
+        /**
             @throw SystemError
         */
-	    static void sleep(size_t milliSec);
+        static void sleep(size_t milliSec);
 
     private:
-	    friend class ProcessImpl;
-	    class ProcessImpl *_impl;
+        friend class ProcessImpl;
+        class ProcessImpl *_impl;
 };
 
 }

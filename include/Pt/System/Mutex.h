@@ -27,88 +27,88 @@ namespace Pt {
 
 namespace System {
 
-	//! /brief Mutex synchronization object
-	///
-	///	A Mutex is a mutual exclusion device. It is used to synchronize
-	///	the access to data which is accessed by more than one thread or
-	///	process at the same time. Mutexes are recursive, that is the
-	///	same thread can lock a mutex multiple times without deadlocking.
-	///	When unlocking the mutex, unlock() must be called for each time
-	///	a thread has successfully called lock() or tryLock().
-	class PT_SYSTEM_API Mutex : public NonCopyable {
-		friend class MutexImpl;
+    //! /brief Mutex synchronization object
+    ///
+    ///    A Mutex is a mutual exclusion device. It is used to synchronize
+    ///    the access to data which is accessed by more than one thread or
+    ///    process at the same time. Mutexes are recursive, that is the
+    ///    same thread can lock a mutex multiple times without deadlocking.
+    ///    When unlocking the mutex, unlock() must be called for each time
+    ///    a thread has successfully called lock() or tryLock().
+    class PT_SYSTEM_API Mutex : public NonCopyable {
+        friend class MutexImpl;
 
-		private:
-			//! Implementation
-			class MutexImpl* _impl;
+        private:
+            //! Implementation
+            class MutexImpl* _impl;
 
-		public:
-			//! Lock class for Mutex.
-			class Lock {
-				public:
-					Lock(Mutex& m)
-					: _mutex(m)
-					{ _mutex.lock(); }
+        public:
+            //! Lock class for Mutex.
+            class Lock {
+                public:
+                    Lock(Mutex& m)
+                    : _mutex(m)
+                    { _mutex.lock(); }
 
-					~Lock()
-					{ _mutex.unlock(); }
+                    ~Lock()
+                    { _mutex.unlock(); }
 
-					Mutex& mutex()
-					{ return _mutex; }
+                    Mutex& mutex()
+                    { return _mutex; }
 
-					const Mutex& mutex() const
-					{ return _mutex; }
+                    const Mutex& mutex() const
+                    { return _mutex; }
 
-				private:
-					Mutex& _mutex;
-			};
+                private:
+                    Mutex& _mutex;
+            };
 
-		public:
-			//! @brief Default constructor
-			///
-			/// Construct the Mutex object.
-			Mutex();
+        public:
+            //! @brief Default constructor
+            ///
+            /// Construct the Mutex object.
+            Mutex();
 
-			//! Destructor
-			///
-			/// The destructor destroys the mutex. The mutex must be in unlocked
-			/// state when the destructor is called.
-			~Mutex();
+            //! Destructor
+            ///
+            /// The destructor destroys the mutex. The mutex must be in unlocked
+            /// state when the destructor is called.
+            ~Mutex();
 
-			//! @brief Lock the mutex
-			///
-			/// Locks the mutex. If the mutex is currently locked by another
-			/// thread, the calling thread suspends until no other thread holds
-			/// a lock on it. If the mutex is already locked by the calling
-			/// thread the function returns immediatly with incrementing the lock-
-			/// count of the mutex. This prevents a thread from dead-locking while
-			/// waiting for a mutex it already owns. To release its ownership under
-			/// such circumstances the thread must unlock the mutex once for each
-			/// time the thread has locked the mutex.
-			void lock();
+            //! @brief Lock the mutex
+            ///
+            /// Locks the mutex. If the mutex is currently locked by another
+            /// thread, the calling thread suspends until no other thread holds
+            /// a lock on it. If the mutex is already locked by the calling
+            /// thread the function returns immediatly with incrementing the lock-
+            /// count of the mutex. This prevents a thread from dead-locking while
+            /// waiting for a mutex it already owns. To release its ownership under
+            /// such circumstances the thread must unlock the mutex once for each
+            /// time the thread has locked the mutex.
+            void lock();
 
-			//! Try locking the mutex with timeout
-			///
-			/// This method does the same as lock() but also supports a timeout-
-			/// value. If the lock cannot be acquired in the given interval the
-			/// method returns without locking the mutex and a FALSE return value.
-			///
-			/// \param timeout the timeout in milliseconds to wait for the mutex. If
-			///                zero is specified the method returns immediatly.
-			/// \return true if the mutex has been locked, false otherwise.
-			bool tryLock(unsigned int msec = 0);
+            //! Try locking the mutex with timeout
+            ///
+            /// This method does the same as lock() but also supports a timeout-
+            /// value. If the lock cannot be acquired in the given interval the
+            /// method returns without locking the mutex and a FALSE return value.
+            ///
+            /// \param timeout the timeout in milliseconds to wait for the mutex. If
+            ///                zero is specified the method returns immediatly.
+            /// \return true if the mutex has been locked, false otherwise.
+            bool tryLock(unsigned int msec = 0);
 
-			//! @brief Unlock the mutex
-			///
-			/// Unlocks the mutex. If the mutex was locked more than one time by the
-			/// same thread unlock decrements the lock-count. The mutex is actually
-			/// unlocked when the lock-count is zero.
-			void unlock();
+            //! @brief Unlock the mutex
+            ///
+            /// Unlocks the mutex. If the mutex was locked more than one time by the
+            /// same thread unlock decrements the lock-count. The mutex is actually
+            /// unlocked when the lock-count is zero.
+            void unlock();
 
-			//! @brief Access to platform specific implementation
-			MutexImpl* impl()
-			{ return _impl; }
-	};
+            //! @brief Access to platform specific implementation
+            MutexImpl* impl()
+            { return _impl; }
+    };
 
 } // !namespace System
 

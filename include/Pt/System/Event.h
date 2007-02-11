@@ -12,26 +12,26 @@ namespace Pt {
 
 namespace System {
 
-	/**
-	 * @see Pt::Event
-	 */
-	class PT_SYSTEM_API Event : public Pt::Event {
-		public:
-			/**
-			 * @see Pt::Event::Event()
-			 */
-			Event()
-			{}
+    /**
+     * @see Pt::Event
+     */
+    class PT_SYSTEM_API Event : public Pt::Event {
+        public:
+            /**
+             * @see Pt::Event::Event()
+             */
+            Event()
+            {}
 
-			/**
-			 * @see Pt::Event::~Event()
-			 */
-			virtual ~Event()
-			{}
+            /**
+             * @see Pt::Event::~Event()
+             */
+            virtual ~Event()
+            {}
 
-			//! Clone method.
-			virtual Event* clone() const = 0;
-	};
+            //! Clone method.
+            virtual Event* clone() const = 0;
+    };
 
 } // namespace System
 

@@ -28,52 +28,52 @@ namespace Pt {
 
 namespace System {
 
-	class PT_SYSTEM_API FileDevice : public IO::IODevice {
-		private:
-			class FileDeviceImpl* _impl;
+    class PT_SYSTEM_API FileDevice : public IO::IODevice {
+        private:
+            class FileDeviceImpl* _impl;
 
-		public:
-			FileDevice();
+        public:
+            FileDevice();
 
-			FileDevice(const char* path, OpenMode mode) throw(IO::IOError);
+            FileDevice(const char* path, OpenMode mode) throw(IO::IOError);
 
-			~FileDevice() throw();
+            ~FileDevice() throw();
 
-			void open(const char* path, OpenMode mode) throw(IO::IOError);
+            void open(const char* path, OpenMode mode) throw(IO::IOError);
 
-			const char* path() const 
-			{ return _path.c_str(); }
+            const char* path() const 
+            { return _path.c_str(); }
 
-			OpenMode openMode() const
-			{ return _mode; }
+            OpenMode openMode() const
+            { return _mode; }
 
-			size_t size() const throw(Pt::IO::IOError);
+            size_t size() const throw(Pt::IO::IOError);
 
-		protected:
-			void _close() throw(IO::IOError);
+        protected:
+            void _close() throw(IO::IOError);
 
-			bool _remote() const throw()
-			{ return false; }
+            bool _remote() const throw()
+            { return false; }
 
-			bool _seekable() const throw()
-			{ return true; }
+            bool _seekable() const throw()
+            { return true; }
 
-			pos_type _seek(off_type offset, SeekMode mode) throw(IO::IOError);
+            pos_type _seek(off_type offset, SeekMode mode) throw(IO::IOError);
 
-			size_t _read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
-			
-			size_t _write(const char* buffer, size_t count) throw(IO::IOError);
+            size_t _read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
+            
+            size_t _write(const char* buffer, size_t count) throw(IO::IOError);
 
-			size_t _peek(char* buffer, size_t count) throw(IO::IOError);
-			
-			void _sync() const throw(IO::IOError);
+            size_t _peek(char* buffer, size_t count) throw(IO::IOError);
+            
+            void _sync() const throw(IO::IOError);
 
-			bool _wait(WaitMode mode, unsigned int msec) throw(IO::IOError);
+            bool _wait(WaitMode mode, unsigned int msec) throw(IO::IOError);
 
-		private:
-			std::string _path;
-			OpenMode _mode;
-	};
+        private:
+            std::string _path;
+            OpenMode _mode;
+    };
 
 } // namespace System
 

@@ -16,23 +16,23 @@ namespace System
 class PT_SYSTEM_API Timer : public Runnable
 {
 public:
-	Timer(void);
-	virtual ~Timer(void);
+    Timer(void);
+    virtual ~Timer(void);
 
-	static size_t resolution();
+    static size_t resolution();
 
-	void start();
-	void stop();
+    void start();
+    void stop();
 
-	void run();
+    void run();
 
-	Signal<size_t> onTime;
+    Signal<size_t> onTime;
 
 private:
-	Thread			_timerThread;
-	static size_t	_resolution;
-	size_t			_eventCounter;
-	bool			_run;
+    Thread            _timerThread;
+    static size_t    _resolution;
+    size_t            _eventCounter;
+    bool            _run;
 
 };
 

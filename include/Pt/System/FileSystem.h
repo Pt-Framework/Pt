@@ -30,16 +30,16 @@ namespace Pt {
 
 namespace System {
 
-	class FileSystemNode;
+    class FileSystemNode;
 
 
-	class PT_SYSTEM_API FileSystem : public Singleton<FileSystem> 
-	{
-		friend class Singleton<FileSystem>;
+    class PT_SYSTEM_API FileSystem : public Singleton<FileSystem> 
+    {
+        friend class Singleton<FileSystem>;
 
-		public:
-			FileSystemNode* create(const char* path) const;
-	};
+        public:
+            FileSystemNode* create(const char* path) const;
+    };
 
 } // namespace System
 

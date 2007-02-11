@@ -29,26 +29,26 @@ namespace Pt {
 namespace System {
 
 class PT_SYSTEM_API Semaphore : public NonCopyable {
-	friend class SemaphoreImpl;
+    friend class SemaphoreImpl;
 
-	public:
-		//! Unnamed semaphore constructor
-		Semaphore(unsigned int initial = 0);
+    public:
+        //! Unnamed semaphore constructor
+        Semaphore(unsigned int initial = 0);
 
-		//! Destructor. Does not signal...
-		~Semaphore();
+        //! Destructor. Does not signal...
+        ~Semaphore();
 
-		//! Wait for the semaphore to become signaled
-		Semaphore& wait();
+        //! Wait for the semaphore to become signaled
+        Semaphore& wait();
 
-		//! Non-blocking wait
-		bool tryWait();
+        //! Non-blocking wait
+        bool tryWait();
 
-		//! Signal the semaphore
-		Semaphore& post();
+        //! Signal the semaphore
+        Semaphore& post();
 
-	private:
-		class SemaphoreImpl* _impl;
+    private:
+        class SemaphoreImpl* _impl;
 };
 
 } // !namespace System

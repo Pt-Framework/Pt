@@ -32,29 +32,29 @@ namespace Pt {
 namespace System {
 
 
-	class PT_SYSTEM_API FileBuffer : public IO::IOBuffer
-	{
-		public:
-			FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
+    class PT_SYSTEM_API FileBuffer : public IO::IOBuffer
+    {
+        public:
+            FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 
-			const FileDevice& fileDevice() const
-			{return _file;}
+            const FileDevice& fileDevice() const
+            {return _file;}
 
-		private:
-			FileDevice _file;
-	};
+        private:
+            FileDevice _file;
+    };
 
 
-	class PT_SYSTEM_API FileStream : public IO::IOStream
-	{
-		public:
-			FileStream(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
+    class PT_SYSTEM_API FileStream : public IO::IOStream
+    {
+        public:
+            FileStream(const char* name, FileDevice::OpenMode omode) throw(IO::IOError);
 
-			~FileStream() throw();
+            ~FileStream() throw();
 
-		private:
-			FileBuffer _buffer;
-	};
+        private:
+            FileBuffer _buffer;
+    };
 
 
 } // namespace System

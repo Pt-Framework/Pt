@@ -20,42 +20,42 @@ namespace Pt {
 
 namespace System {
 
-	/** Cycling through Directories.
-	 *
-	 * You use the iterator as follows:
-	\code
-	Directory d("/usr");
-	Directory::iterator it = d.begin();
-	while (it != d.end())
-	{
-		std::cout << "name : " << (*it).path() << std::endl;
-		++it;
-	}
-	\endcode
- 	*/
-	class PT_SYSTEM_API DirectoryIterator {
-		public:
-			DirectoryIterator();
+    /** Cycling through Directories.
+     *
+     * You use the iterator as follows:
+    \code
+    Directory d("/usr");
+    Directory::iterator it = d.begin();
+    while (it != d.end())
+    {
+        std::cout << "name : " << (*it).path() << std::endl;
+        ++it;
+    }
+    \endcode
+     */
+    class PT_SYSTEM_API DirectoryIterator {
+        public:
+            DirectoryIterator();
 
-			DirectoryIterator(const char* path);
+            DirectoryIterator(const char* path);
 
-			DirectoryIterator(const DirectoryIterator& it);
+            DirectoryIterator(const DirectoryIterator& it);
 
-			~DirectoryIterator();
+            ~DirectoryIterator();
 
-			DirectoryIterator& operator++();
+            DirectoryIterator& operator++();
 
-			DirectoryIterator& operator=(const DirectoryIterator& it);
+            DirectoryIterator& operator=(const DirectoryIterator& it);
 
-			bool operator==(const DirectoryIterator& it) const;
+            bool operator==(const DirectoryIterator& it) const;
 
-			bool operator!=(const DirectoryIterator& it) const;
+            bool operator!=(const DirectoryIterator& it) const;
 
-			FileSystemNode& operator*() const;
+            FileSystemNode& operator*() const;
 
-		private:
-			class DirectoryIteratorImpl* _impl;
-	};
+        private:
+            class DirectoryIteratorImpl* _impl;
+    };
 
 /** Directory Operations.
  This class contains methods to create, move, delete directories and gives to possibility to iterate over the contents of the directory.
@@ -67,58 +67,58 @@ Directory d("/usr");
 Directory::iterator it = d.begin();
 while (it != d.end())
 {
-	std::cout << "name : " << (*it).path() << std::endl;
-	++it;
+    std::cout << "name : " << (*it).path() << std::endl;
+    ++it;
 }
 \endcode
 */
-	class PT_SYSTEM_API Directory : public FileSystemNode {
-		public:
-			typedef DirectoryIterator Iterator;
+    class PT_SYSTEM_API Directory : public FileSystemNode {
+        public:
+            typedef DirectoryIterator Iterator;
 
-			enum mode { Create, UseExisting};
+            enum mode { Create, UseExisting};
 
-			Directory(const std::string& path, mode m = UseExisting);
+            Directory(const std::string& path, mode m = UseExisting);
 
-			~Directory()
-			{ }
+            ~Directory()
+            { }
 
-			bool exists() const;
+            bool exists() const;
 
-			///< gives the system-specific path separator
-			static char separator();
+            ///< gives the system-specific path separator
+            static char separator();
 
-			virtual const std::string& path() const
-			{ return _path; }
+            virtual const std::string& path() const
+            { return _path; }
 
-			virtual std::size_t size() const
-			{ return 0; }
+            virtual std::size_t size() const
+            { return 0; }
 
-			//! Returns an iterator to the node in the directory.
-			DirectoryIterator begin() const
-			{ return DirectoryIterator( _path.c_str() ); }
+            //! Returns an iterator to the node in the directory.
+            DirectoryIterator begin() const
+            { return DirectoryIterator( _path.c_str() ); }
 
-			//! Returns an iterator to the end of the directory.
-			DirectoryIterator end() const
-			{
-				static DirectoryIterator _end;
-				return _end;
-			}
+            //! Returns an iterator to the end of the directory.
+            DirectoryIterator end() const
+            {
+                static DirectoryIterator _end;
+                return _end;
+            }
 
-			virtual void remove();
+            virtual void remove();
 
-			virtual void move(const std::string& newname);
+            virtual void move(const std::string& newname);
 
-		public:
-			// DEPRECATED
-			static Directory system();
+        public:
+            // DEPRECATED
+            static Directory system();
 
-			// DEPRECATED
-			static Directory current();
+            // DEPRECATED
+            static Directory current();
 
-		private:
-			std::string _path;
-	};
+        private:
+            std::string _path;
+    };
 
 }
 

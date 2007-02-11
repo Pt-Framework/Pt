@@ -31,14 +31,14 @@ namespace Pt {
 
 namespace System {
 
-	/** @brief Exception class indication a system error.
-	 */
-	class PT_SYSTEM_API SystemError : public std::runtime_error {
-		public:
-			SystemError(const std::string & what, const SourceInfo& si) throw();
+    /** @brief Exception class indication a system error.
+     */
+    class PT_SYSTEM_API SystemError : public std::runtime_error {
+        public:
+            SystemError(const std::string & what, const SourceInfo& si) throw();
 
-			~SystemError() throw();
-	};
+            ~SystemError() throw();
+    };
 
 } // namespace System
 

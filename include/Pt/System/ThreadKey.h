@@ -30,53 +30,53 @@ namespace Pt {
 
 namespace System {
 
-	class PT_SYSTEM_API ThreadKeyBase : public NonCopyable {
-		public:
-			ThreadKeyBase() throw(SystemError);
+    class PT_SYSTEM_API ThreadKeyBase : public NonCopyable {
+        public:
+            ThreadKeyBase() throw(SystemError);
 
-			ThreadKeyBase(const ThreadKeyBase& k) throw(SystemError);
+            ThreadKeyBase(const ThreadKeyBase& k) throw(SystemError);
 
-			~ThreadKeyBase() throw();
+            ~ThreadKeyBase() throw();
 
-			void set(void* ptr) throw(SystemError);
+            void set(void* ptr) throw(SystemError);
 
-			void* get() const throw(SystemError);
+            void* get() const throw(SystemError);
 
-		private:
-			class ThreadKeyImpl* _impl;
-	};
+        private:
+            class ThreadKeyImpl* _impl;
+    };
 
 
-	//! Thread-specific storage template class
-	template <class T>
-	class ThreadKey: private ThreadKeyBase {
-		public:
-			ThreadKey() throw(SystemError)
-			: ThreadKeyBase()
-			{}
+    //! Thread-specific storage template class
+    template <class T>
+    class ThreadKey: private ThreadKeyBase {
+        public:
+            ThreadKey() throw(SystemError)
+            : ThreadKeyBase()
+            {}
 
-			ThreadKey(const ThreadKey& k) throw(SystemError)
-			: ThreadKeyBase()
-			{ ThreadKeyBase::set( k.get() ); }
+            ThreadKey(const ThreadKey& k) throw(SystemError)
+            : ThreadKeyBase()
+            { ThreadKeyBase::set( k.get() ); }
 
-			~ThreadKey() throw()
-			{}
+            ~ThreadKey() throw()
+            {}
 
-			ThreadKey& operator=(const ThreadKey& k) throw(SystemError)
-			{
-				ThreadKeyBase::set( k.get() );
-				return *this;
-			}
+            ThreadKey& operator=(const ThreadKey& k) throw(SystemError)
+            {
+                ThreadKeyBase::set( k.get() );
+                return *this;
+            }
 
-			ThreadKey& operator=(T* val) throw(SystemError)
-			{
-				ThreadKeyBase::set( static_cast<void*>(val) );
-				return *this;
-			}
-	
-			operator T*() throw(SystemError)
-			{ return (T*)ThreadKeyBase::get(); }
-	};
+            ThreadKey& operator=(T* val) throw(SystemError)
+            {
+                ThreadKeyBase::set( static_cast<void*>(val) );
+                return *this;
+            }
+    
+            operator T*() throw(SystemError)
+            { return (T*)ThreadKeyBase::get(); }
+    };
 
 } // !namespace System
 

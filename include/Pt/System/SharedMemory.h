@@ -30,26 +30,26 @@ namespace Pt {
 
 namespace System {
 
-	class PT_SYSTEM_API SharedMemory: public NonCopyable {
-		private:
-			class SharedMemoryImpl* _impl;
+    class PT_SYSTEM_API SharedMemory: public NonCopyable {
+        private:
+            class SharedMemoryImpl* _impl;
 
-		public:
-			enum OpenMode {
-				Read,
-				Write,
-			};
+        public:
+            enum OpenMode {
+                Read,
+                Write,
+            };
 
-			SharedMemory(const char* name, size_t sz, OpenMode omode) throw(SystemError);
+            SharedMemory(const char* name, size_t sz, OpenMode omode) throw(SystemError);
 
-			~SharedMemory();
+            ~SharedMemory();
 
-			void unlink() throw(SystemError);
+            void unlink() throw(SystemError);
 
-			void* map(const void* addr) throw(SystemError);
+            void* map(const void* addr) throw(SystemError);
 
-			void unmap(void* addr) throw(SystemError);
-	};
+            void unmap(void* addr) throw(SystemError);
+    };
 
 } // !namespace System
 

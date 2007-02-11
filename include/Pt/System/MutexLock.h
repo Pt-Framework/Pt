@@ -37,27 +37,27 @@ namespace System {
         during stack unwinding when the MutexLock is destructed.
 
         @code
- 			// example how to make a member function thread-safe
- 			#include <Pt/System/Mutex.h>
+             // example how to make a member function thread-safe
+             #include <Pt/System/Mutex.h>
 
- 			class MyClass
- 			{
- 				public:
- 					void function()
- 					{
- 						MutexLock lock(_lock);
+             class MyClass
+             {
+                 public:
+                     void function()
+                     {
+                         MutexLock lock(_lock);
 
- 						//
- 						// protected operations
- 						//
+                         //
+                         // protected operations
+                         //
 
-						// dtor of MutexLock unlocks _lock
- 					}
+                        // dtor of MutexLock unlocks _lock
+                     }
 
- 				private:
- 					Pt::System::Mutex _lock;
- 			};
-		@endcode
+                 private:
+                     Pt::System::Mutex _lock;
+             };
+        @endcode
     */
     class MutexLock {
         public:
@@ -82,19 +82,19 @@ namespace System {
              /**
                  \return the enclosing Mutex object
               */
-			Mutex& mutex()
-			{ return _mutex; }
+            Mutex& mutex()
+            { return _mutex; }
 
              //! @brief Get the mutex object
              /**
                  \return the enclosing Mutex object
               */
-			const Mutex& mutex() const
-			{ return _mutex; }
+            const Mutex& mutex() const
+            { return _mutex; }
 
-			private:
-			    Mutex& _mutex;
-	};
+            private:
+                Mutex& _mutex;
+    };
 
 
 } // !namespace System
