@@ -43,7 +43,8 @@ namespace Pt {
                 volatile register atomic_t result;
 
                 asm volatile (
-                    "lock; xadd{l} {%0,%1|%1,%0}"
+                    //"lock; xadd{l} {%0,%1|%1,%0}"
+                    "lock; xadd %0,%1"
                     : "=r" (result), "=m" (_value)
                     : "0" (n), "m" (_value)
                 );
@@ -54,7 +55,8 @@ namespace Pt {
                 volatile register atomic_t result;
 
                 asm volatile (
-                    "lock; xadd{l} {%0,%1|%1,%0}"
+                    //"lock; xadd{l} {%0,%1|%1,%0}"
+                    "lock; xadd %0,%1"
                     : "=r" (result), "=m" (_value)
                     : "0" (-n), "m" (_value)
                 );
