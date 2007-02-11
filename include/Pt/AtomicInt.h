@@ -21,8 +21,6 @@
 #ifndef PT_ATOMICINT_H
 #define PT_ATOMICINT_H
 
-#include <Pt/Types.h>
-
 
 #ifdef _MSC_VER
 
