@@ -26,30 +26,30 @@ namespace Pt {
 namespace System {
 
 class PT_API FileImpl {
-	public:
-		FileImpl(const std::string& path);
+    public:
+        FileImpl(const std::string& path);
 
-		~FileImpl();
+        ~FileImpl();
 
-		const std::string& path() const
-		{ return _path; }
+        const std::string& path() const
+        { return _path; }
 
-		std::size_t size() const;
+        std::size_t size() const;
 
-		void resize(std::size_t newSize);
+        void resize(std::size_t newSize);
 
-		void remove();
+        void remove();
 
-		void copy(const std::string& to) const;
+        void copy(const std::string& to) const;
 
-		void move(const std::string& to);
+        void move(const std::string& to);
 
-		bool exists();
+        bool exists();
 
-		void create();
+        void create();
 
-	private:
-		std::string _path;
+    private:
+        std::string _path;
 };
 
 } // namespace System

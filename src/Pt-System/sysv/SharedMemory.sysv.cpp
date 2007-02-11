@@ -30,70 +30,70 @@ namespace Pt {
 namespace System {
 
 struct SharedMemory::Handle {
-	int shmid;
+    int shmid;
 };
 
 SharedMemory::SharedMemory(const char* name, size_t sz, OpenMode omode,
-	AccessMode /*amode*/) throw(OutOfMemory, SystemError)
+    AccessMode /*amode*/) throw(OutOfMemory, SystemError)
 {
-	key_t key = ftok(name, 0);
-	int flags;
-	
-	switch(omode)
-	{
-		case OpenCreate:
-			flags = IPC_CREAT;
-			break;
-			
-		case CreateFail:
-			flags = IPC_CREAT|IPC_EXCL;
-			break;
-			
-		case OpenFail:
-			flags = 0;
-			break;
-	}
-	
-	int shmid = shmget(key, sz, flags);
-	if(shmid == -1)
-		throw SystemError(errno, "Could not get SYSV shared-memory segment",
-			P_SOURCEINFO);
+    key_t key = ftok(name, 0);
+    int flags;
+    
+    switch(omode)
+    {
+        case OpenCreate:
+            flags = IPC_CREAT;
+            break;
+            
+        case CreateFail:
+            flags = IPC_CREAT|IPC_EXCL;
+            break;
+            
+        case OpenFail:
+            flags = 0;
+            break;
+    }
+    
+    int shmid = shmget(key, sz, flags);
+    if(shmid == -1)
+        throw SystemError(errno, "Could not get SYSV shared-memory segment",
+            P_SOURCEINFO);
 
-	_handle = new Handle;
-	_handle->shmid = shmid;
+    _handle = new Handle;
+    _handle->shmid = shmid;
 }
 
 SharedMemory::~SharedMemory()
 {
-	delete _handle;
+    delete _handle;
 }
 
 void SharedMemory::unlink() throw(SystemError)
 {
-	if(shmctl(_handle->shmid, IPC_RMID, 0) == -1)
-		throw SystemError(errno, "Could not remove SYSV shared-memory segment",
-			P_SOURCEINFO);
+    if(shmctl(_handle->shmid, IPC_RMID, 0) == -1)
+        throw SystemError(errno, "Could not remove SYSV shared-memory segment",
+            P_SOURCEINFO);
 }
 
 void* SharedMemory::map(const void* addr, AccessMode mode) throw(SystemError)
 {
-	int flags = SHM_RND;
-	if(mode == ReadOnly)
-		flags |= SHM_RDONLY;
+    int flags = SHM_RND;
+    if(mode == ReadOnly)
+        flags |= SHM_RDONLY;
 
-	void* mapaddr = shmat(_handle->shmid, addr, flags);
-	if((int)mapaddr == -1)
-		throw SystemError(errno, "Could not map SYSV shared-memory segment",
-			P_SOURCEINFO);
+    void* mapaddr = shmat(_handle->shmid, addr, flags);
+    if((int)mapaddr == -1)
+        throw SystemError(errno, "Could not map SYSV shared-memory segment",
+            P_SOURCEINFO);
 
-	return mapaddr;
+    return mapaddr;
 }
 
 void SharedMemory::unmap(void* addr) throw(SystemError)
 {
-	if(shmdt(addr) == -1)
-		throw SystemError(errno, "Could not unmap SYSV shared-memory segment",
-			P_SOURCEINFO);
+    if(shmdt(addr) == -1)
+        throw SystemError(errno, "Could not unmap SYSV shared-memory segment",
+            P_SOURCEINFO);
 }
 
 } // !namespace System

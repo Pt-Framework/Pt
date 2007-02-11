@@ -32,49 +32,49 @@ namespace System {
 
 SemaphoreImpl::SemaphoreImpl(unsigned int initial)
 {
-	int ret = sem_init(&_handle, 0, initial);
-	if( ret == -1 )
-		throw SystemError("Could not create semaphore.", PT_SOURCEINFO);
+    int ret = sem_init(&_handle, 0, initial);
+    if( ret == -1 )
+        throw SystemError("Could not create semaphore.", PT_SOURCEINFO);
 }
 
 
 SemaphoreImpl::~SemaphoreImpl()
 {
-	sem_destroy( &_handle );
+    sem_destroy( &_handle );
 }
 
 
 void SemaphoreImpl::wait()
 {
-	int ret = sem_wait(&_handle);
-	if(ret == -1)
-		throw SystemError ("Could not wait on semaphore.", PT_SOURCEINFO);
+    int ret = sem_wait(&_handle);
+    if(ret == -1)
+        throw SystemError ("Could not wait on semaphore.", PT_SOURCEINFO);
 }
 
 
 bool SemaphoreImpl::tryWait()
 {
-	int ret = sem_trywait( &_handle );
-	if(ret == -1) {
-		if(errno == EAGAIN)
-			return false;
+    int ret = sem_trywait( &_handle );
+    if(ret == -1) {
+        if(errno == EAGAIN)
+            return false;
 
-		throw SystemError("Could not wait on semaphore.", PT_SOURCEINFO);
-	}
+        throw SystemError("Could not wait on semaphore.", PT_SOURCEINFO);
+    }
 
-	return true;
+    return true;
 }
 
 
 void SemaphoreImpl::post()
 {
-	again:
-	if( 0 != sem_post(&_handle) ) {
-		if(errno == EINTR)
-			goto again;
+    again:
+    if( 0 != sem_post(&_handle) ) {
+        if(errno == EINTR)
+            goto again;
 
-		throw SystemError ("Could not post semaphore.", PT_SOURCEINFO);
-	}
+        throw SystemError ("Could not post semaphore.", PT_SOURCEINFO);
+    }
 
 }
 

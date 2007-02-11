@@ -35,112 +35,112 @@ namespace System {
 
 //! @brief Implementation of SharedLib class for POSIX systems
 /**
-	This class represents the implementation of the bridge pattern of
-	the SharedLib class for POSIX systems. It implements the specific
-	procedures of SharedLib in a system dependend manner. The behaviour
-	of the shared library loading is adapted to the behaviour of shared
-	library loading under MS Windows operating systems.
-	This means that the mode of loading	shared libraries is limitted
-	to the RTLD_NOW mode only.
+    This class represents the implementation of the bridge pattern of
+    the SharedLib class for POSIX systems. It implements the specific
+    procedures of SharedLib in a system dependend manner. The behaviour
+    of the shared library loading is adapted to the behaviour of shared
+    library loading under MS Windows operating systems.
+    This means that the mode of loading    shared libraries is limitted
+    to the RTLD_NOW mode only.
 
-	@see SharedLib documentation
+    @see SharedLib documentation
 */
 class SharedLibImpl {
-	public:
-		//! @brief default Constructor
-		SharedLibImpl()
-		: _handle(0)
-		{ }
+    public:
+        //! @brief default Constructor
+        SharedLibImpl()
+        : _handle(0)
+        { }
 
-		//! @brief Constructor which takes the path to the shared library to load
-		/**
-			@see SharedLib#SharedLib()
-			@param path the shared library to load implicitely
-		*/
-		SharedLibImpl(const std::string& path)
-		: _handle(0)
-		{
-			this->open(path);
-		}
+        //! @brief Constructor which takes the path to the shared library to load
+        /**
+            @see SharedLib#SharedLib()
+            @param path the shared library to load implicitely
+        */
+        SharedLibImpl(const std::string& path)
+        : _handle(0)
+        {
+            this->open(path);
+        }
 
-		//! @brief Destructor
-		~SharedLibImpl()
-		{
-			if(_handle)
-				::dlclose(_handle);
-		}
+        //! @brief Destructor
+        ~SharedLibImpl()
+        {
+            if(_handle)
+                ::dlclose(_handle);
+        }
 
-		//! @brief Loads the shared library specified by path
-		/**
-			This method holds the operating system dependend code to actually
-			load the shared library.
+        //! @brief Loads the shared library specified by path
+        /**
+            This method holds the operating system dependend code to actually
+            load the shared library.
 
-			@see SharedLib#open()
-			@param path the shared library to load
-		*/
-		void open(const std::string& path)
-		{
-			if(_handle)
-				return;
+            @see SharedLib#open()
+            @param path the shared library to load
+        */
+        void open(const std::string& path)
+        {
+            if(_handle)
+                return;
 
-			//since lazy loading is not supported by every target platform
-			int flags = RTLD_NOW;
+            //since lazy loading is not supported by every target platform
+            int flags = RTLD_NOW;
 
-			_handle = ::dlopen(path.c_str(), flags);
-			if( !_handle ) {
-				throw SystemError(dlerror(), PT_SOURCEINFO);
-			}
-		}
+            _handle = ::dlopen(path.c_str(), flags);
+            if( !_handle ) {
+                throw SystemError(dlerror(), PT_SOURCEINFO);
+            }
+        }
 
-		//! @brief Resolves the symbol specified by symbol
-		/**
-			This method holds the operating system dependend code to actually
-			resolve the symbol within the shared library.
+        //! @brief Resolves the symbol specified by symbol
+        /**
+            This method holds the operating system dependend code to actually
+            resolve the symbol within the shared library.
 
-			@see SharedLib#resolve()
-			@param symbol the symbol to resolve
-			@return the resolved symbol or 0 if the symbol cannot be resolved
-		*/
-		void* resolve(const char* symbol)
-		{
-			if(_handle)
-				return ::dlsym(_handle, symbol);
+            @see SharedLib#resolve()
+            @param symbol the symbol to resolve
+            @return the resolved symbol or 0 if the symbol cannot be resolved
+        */
+        void* resolve(const char* symbol)
+        {
+            if(_handle)
+                return ::dlsym(_handle, symbol);
 
-			return 0;
-		}
+            return 0;
+        }
 
-		//! @brief Returns if the loading of the shared library was successful or not
-		/**
-			@see SharedLib#failed()
-			@return true if the loading of the shared library has failed,
-			false otherwise
-		*/
-		bool failed()
-		{ return _handle == 0; }
+        //! @brief Returns if the loading of the shared library was successful or not
+        /**
+            @see SharedLib#failed()
+            @return true if the loading of the shared library has failed,
+            false otherwise
+        */
+        bool failed()
+        { return _handle == 0; }
 
-	public:
-		//! @brief Implicitely loads the shared library specified by path and tries to resolve the symbol specified by symbol
-		/**
-			This method contains the operating system dependend code to load the
-			shared library and to resolve the desired symbol.
+    public:
+        //! @brief Implicitely loads the shared library specified by path and tries to resolve the symbol specified by symbol
+        /**
+            This method contains the operating system dependend code to load the
+            shared library and to resolve the desired symbol.
 
-			@see SharedLib#failed()
-			@param path the shared library to load
-			@param symbol the symbol to resolve within the loaded library
-			@param the resolved symbol or 0 if the loading of the shared
-			library has failed
-		*/
-		static void* openResolve(const std::string& path, const char* symbol)
-		{
-			void* handle = ::dlopen(path.c_str(), RTLD_NOW);
-			if(handle)
-				return ::dlsym(handle, symbol);
+            @see SharedLib#failed()
+            @param path the shared library to load
+            @param symbol the symbol to resolve within the loaded library
+            @param the resolved symbol or 0 if the loading of the shared
+            library has failed
+        */
+        static void* openResolve(const std::string& path, const char* symbol)
+        {
+            void* handle = ::dlopen(path.c_str(), RTLD_NOW);
+            if(handle)
+                return ::dlsym(handle, symbol);
 
-			return 0;
-		}
+            return 0;
+        }
 
-	private:
-		void* _handle;
+    private:
+        void* _handle;
 };
 
 } // namespace System

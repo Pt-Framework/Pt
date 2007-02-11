@@ -44,216 +44,216 @@ FileDeviceImpl::~FileDeviceImpl() throw()
 
 void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::IOError)
 {
-	int flags = O_RDONLY;
+    int flags = O_RDONLY;
 
-	if( (mode & IODevice::Read) && (mode & IODevice::Write) ) {
-		flags |= O_RDWR;
-		flags |= O_CREAT;
-	}
-	else if(mode & IODevice::Write) {
-		flags |= O_WRONLY;
-		flags |= O_CREAT;
-	}
-	else if(mode & IODevice::Read) {
-		flags |= O_RDONLY;
-	}
+    if( (mode & IODevice::Read) && (mode & IODevice::Write) ) {
+        flags |= O_RDWR;
+        flags |= O_CREAT;
+    }
+    else if(mode & IODevice::Write) {
+        flags |= O_WRONLY;
+        flags |= O_CREAT;
+    }
+    else if(mode & IODevice::Read) {
+        flags |= O_RDONLY;
+    }
 
-	//if(mode & IODevice::NonBlock) {
-	//	flags |= O_NONBLOCK;
-	//}
+    //if(mode & IODevice::NonBlock) {
+    //    flags |= O_NONBLOCK;
+    //}
 
-	if(mode & IODevice::Trunc)
-		flags |= O_TRUNC;
+    if(mode & IODevice::Trunc)
+        flags |= O_TRUNC;
 
-	_fd = ::open(path, flags, 0644);
-	if(_fd == -1) {
-		throw IO::IOError("Could not open file handle", PT_SOURCEINFO);
-	}
+    _fd = ::open(path, flags, 0644);
+    if(_fd == -1) {
+        throw IO::IOError("Could not open file handle", PT_SOURCEINFO);
+    }
 
-	try {
-		if(mode & IODevice::AtEnd)
-			this->seek(0, IODevice::SeekEnd);
-	}
-	catch(...) {
-		this->close();
-		throw;
-	}
+    try {
+        if(mode & IODevice::AtEnd)
+            this->seek(0, IODevice::SeekEnd);
+    }
+    catch(...) {
+        this->close();
+        throw;
+    }
 }
 
 
 void FileDeviceImpl::close() throw(IO::IOError)
 {
-	if(_fd != -1)
-	{
-		if( ::close(_fd) != 0 )
-			throw IO::IOError("Could not close file handle", PT_SOURCEINFO);
+    if(_fd != -1)
+    {
+        if( ::close(_fd) != 0 )
+            throw IO::IOError("Could not close file handle", PT_SOURCEINFO);
 
-		_fd = -1;
-	}
+        _fd = -1;
+    }
 }
 
 
 bool FileDeviceImpl::seekable() const throw()
 {
-	struct stat s;
+    struct stat s;
 
-	int ret = fstat(_fd, &s);
-	if(ret == 0)
-	{
-		if(S_ISREG(s.st_mode) || S_ISBLK(s.st_mode))
-			return true;
-	}
+    int ret = fstat(_fd, &s);
+    if(ret == 0)
+    {
+        if(S_ISREG(s.st_mode) || S_ISBLK(s.st_mode))
+            return true;
+    }
 
-	return false;
+    return false;
 }
 
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError)
 {
-	int whence = IODevice::SeekCurrent;
-	switch(mode)
-	{
-		case IODevice::SeekBegin:
-			whence = SEEK_SET;
-			break;
+    int whence = IODevice::SeekCurrent;
+    switch(mode)
+    {
+        case IODevice::SeekBegin:
+            whence = SEEK_SET;
+            break;
 
-		case IODevice::SeekCurrent:
-			whence = SEEK_CUR;
-			break;
+        case IODevice::SeekCurrent:
+            whence = SEEK_CUR;
+            break;
 
-		case IODevice::SeekEnd:
-			whence = SEEK_END;
-			break;
-	}
+        case IODevice::SeekEnd:
+            whence = SEEK_END;
+            break;
+    }
 
-	off_t ret = lseek(_fd, offset, whence);
-	if( ret == (off_t)-1 )
-		throw IO::IOError("Could not seek on file handle", PT_SOURCEINFO);
+    off_t ret = lseek(_fd, offset, whence);
+    if( ret == (off_t)-1 )
+        throw IO::IOError("Could not seek on file handle", PT_SOURCEINFO);
 
-	return ret;
+    return ret;
 }
 
 
 void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
 {
-	int ret = ::ftruncate(_fd, size);
-	if(ret != 0)
-		throw IO::IOError("Could not truncate file", PT_SOURCEINFO);
+    int ret = ::ftruncate(_fd, size);
+    if(ret != 0)
+        throw IO::IOError("Could not truncate file", PT_SOURCEINFO);
 
 }
 
 
 size_t FileDeviceImpl::size() throw(IO::IOError)
 {
-	struct stat buff;
-	int ret = fstat(_fd, &buff);
-	if(ret != 0)
-		throw IO::IOError("Could not stat file", PT_SOURCEINFO);
+    struct stat buff;
+    int ret = fstat(_fd, &buff);
+    if(ret != 0)
+        throw IO::IOError("Could not stat file", PT_SOURCEINFO);
 
-	return buff.st_size;
+    return buff.st_size;
 }
 
 
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOError)
 {
-	eof = false;
+    eof = false;
 
-	retry:
+    retry:
 
-	ssize_t ret = ::read(_fd, (void*)buffer, count);
-	if(ret == -1) 
-	{
-		if(errno == EINTR) // signal interrupt
-			goto retry;
+    ssize_t ret = ::read(_fd, (void*)buffer, count);
+    if(ret == -1) 
+    {
+        if(errno == EINTR) // signal interrupt
+            goto retry;
 
-		if(errno == EAGAIN) // non-blocking and no data yet
-			return 0;
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
 
-		throw IO::IOError("Could not read from file handle", PT_SOURCEINFO);
-	}
+        throw IO::IOError("Could not read from file handle", PT_SOURCEINFO);
+    }
 
-	if(ret == 0)
-		eof = true;
+    if(ret == 0)
+        eof = true;
 
-	return ret;
+    return ret;
 }
 
 
 size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError)
 {
-	retry:
+    retry:
 
-	ssize_t ret = ::write(_fd, (const void*)buffer, count);
-	if(ret == -1) {
-		if(errno == EINTR) // signal interrupt
-			goto retry;
+    ssize_t ret = ::write(_fd, (const void*)buffer, count);
+    if(ret == -1) {
+        if(errno == EINTR) // signal interrupt
+            goto retry;
 
-		if(errno == EAGAIN) // non-blocking and no data yet
-			return 0;
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
 
-		throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
-	}
+        throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
+    }
 
-	return ret;
+    return ret;
 }
 
 
 size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IO::IOError)
 {
-	bool eof;
-	size_t ret = this->read(buffer, count, eof);
+    bool eof;
+    size_t ret = this->read(buffer, count, eof);
 
-	// if we could read data seek back
-	if(ret > 0)
-		this->seek(-((off_type)ret), IODevice::SeekCurrent);
+    // if we could read data seek back
+    if(ret > 0)
+        this->seek(-((off_type)ret), IODevice::SeekCurrent);
 
-	return ret;
+    return ret;
 }
 
 
 void FileDeviceImpl::sync() const throw(IO::IOError)
 {
-	int ret = fsync(_fd);
-	if(ret != 0)
-		throw IO::IOError("Could not sync handle", PT_SOURCEINFO);
+    int ret = fsync(_fd);
+    if(ret != 0)
+        throw IO::IOError("Could not sync handle", PT_SOURCEINFO);
 }
 
 
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError)
 {
-	fd_set rfds;
-	fd_set wfds;
-	FD_ZERO(&rfds);
-	FD_ZERO(&wfds);
-	FD_SET(_fd, &rfds);
-	FD_SET(_fd, &wfds);
+    fd_set rfds;
+    fd_set wfds;
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+    FD_SET(_fd, &rfds);
+    FD_SET(_fd, &wfds);
 
-	struct timeval tv;
-	tv.tv_sec = msec / 1000;
-	tv.tv_usec = (msec % 1000) * 1000;
+    struct timeval tv;
+    tv.tv_sec = msec / 1000;
+    tv.tv_usec = (msec % 1000) * 1000;
 
-	retry:
-	int ret = -1;
+    retry:
+    int ret = -1;
 
-	if(mode & IODevice::WaitInput)
-		ret = ::select(_fd + 1, &rfds, 0, 0, &tv);
-	else if(mode & IODevice::WaitOutput)
-		ret = ::select(_fd + 1, 0, &wfds, 0, &tv);
-	else
-		ret = ::select(_fd + 1, &rfds, &wfds, 0, &tv);	
+    if(mode & IODevice::WaitInput)
+        ret = ::select(_fd + 1, &rfds, 0, 0, &tv);
+    else if(mode & IODevice::WaitOutput)
+        ret = ::select(_fd + 1, 0, &wfds, 0, &tv);
+    else
+        ret = ::select(_fd + 1, &rfds, &wfds, 0, &tv);    
 
-	if(ret == -1)
-	{
-		if(errno == EINTR)
-			goto retry;
+    if(ret == -1)
+    {
+        if(errno == EINTR)
+            goto retry;
 
-		throw IO::IOError("Could not select on socket", PT_SOURCEINFO);
-	}
+        throw IO::IOError("Could not select on socket", PT_SOURCEINFO);
+    }
 
-	if(ret == 1)
-		return true;
+    if(ret == 1)
+        return true;
 
-	return false;
+    return false;
 }
 
 

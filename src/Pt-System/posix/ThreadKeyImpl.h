@@ -29,36 +29,36 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API ThreadKeyImpl {
-		public:
-			ThreadKeyImpl() throw(SystemError)
-			{
-				pthread_key_t h;
-				int ret = pthread_key_create(&h, 0);
-				if(ret != 0)
-					throw SystemError("Could not create thread-key", PT_SOURCEINFO);
-			
-				_handle = h;
-			}
+    class PT_API ThreadKeyImpl {
+        public:
+            ThreadKeyImpl() throw(SystemError)
+            {
+                pthread_key_t h;
+                int ret = pthread_key_create(&h, 0);
+                if(ret != 0)
+                    throw SystemError("Could not create thread-key", PT_SOURCEINFO);
+            
+                _handle = h;
+            }
 
-			~ThreadKeyImpl() throw()
-			{
-				pthread_key_delete(_handle);
-			}
-	
-			void set(void* ptr) throw(SystemError)
-			{
-				pthread_setspecific(_handle, ptr);
-			}
+            ~ThreadKeyImpl() throw()
+            {
+                pthread_key_delete(_handle);
+            }
+    
+            void set(void* ptr) throw(SystemError)
+            {
+                pthread_setspecific(_handle, ptr);
+            }
 
-			void* get() const throw(SystemError)
-			{
-				return pthread_getspecific(_handle);
-			}
+            void* get() const throw(SystemError)
+            {
+                return pthread_getspecific(_handle);
+            }
 
-		private:
-			pthread_key_t _handle;
-	};
+        private:
+            pthread_key_t _handle;
+    };
 
 } // namespace System
 

@@ -33,48 +33,48 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API FileSystemImpl {
-		public:
-			FileSystemImpl()
-			{}
+    class PT_API FileSystemImpl {
+        public:
+            FileSystemImpl()
+            {}
 
-			static FileSystemNode* create(const char* path)
-			{
-				struct stat st;
-				if( 0 != ::stat(path, &st) )
-					throw SystemError("Could not stat file", PT_SOURCEINFO);
-			
-				if( S_ISREG(st.st_mode) )
-				{
-					return new File(path);
-				}
-				else if( S_ISDIR(st.st_mode) ) 
-				{
-					return new Directory(path);
-				}
-				else {
-					return new File(path);
-				}
-				/*
-				else if(S_ISCHR(st.st_mode))
-					type = File::CharDevice;
-				else if(S_ISBLK(st.st_mode))
-					type = File::BlockDevice;
-				else if(S_ISFIFO(st.st_mode))
-					type = File::Pipe;
-				#ifdef S_ISSOCK
-				else if(S_ISSOCK(st.st_mode))
-					type = File::Pipe;
-				#endif
-				#ifdef S_ISLNK
-				else if(S_ISLNK(st.st_mode))
-					type = File::Link;
-				#endif
-				*/
-			
-				return 0;
-			}
-	};
+            static FileSystemNode* create(const char* path)
+            {
+                struct stat st;
+                if( 0 != ::stat(path, &st) )
+                    throw SystemError("Could not stat file", PT_SOURCEINFO);
+            
+                if( S_ISREG(st.st_mode) )
+                {
+                    return new File(path);
+                }
+                else if( S_ISDIR(st.st_mode) ) 
+                {
+                    return new Directory(path);
+                }
+                else {
+                    return new File(path);
+                }
+                /*
+                else if(S_ISCHR(st.st_mode))
+                    type = File::CharDevice;
+                else if(S_ISBLK(st.st_mode))
+                    type = File::BlockDevice;
+                else if(S_ISFIFO(st.st_mode))
+                    type = File::Pipe;
+                #ifdef S_ISSOCK
+                else if(S_ISSOCK(st.st_mode))
+                    type = File::Pipe;
+                #endif
+                #ifdef S_ISLNK
+                else if(S_ISLNK(st.st_mode))
+                    type = File::Link;
+                #endif
+                */
+            
+                return 0;
+            }
+    };
 
 } // namespace System
 

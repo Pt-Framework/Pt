@@ -35,67 +35,67 @@ namespace System {
 SharedMemoryImpl::SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError)
 : _mode(omode), _size(sz), _fd(-1)
 {
-	int flags = O_RDONLY;
+    int flags = O_RDONLY;
 
-	if(omode & SharedMemory::Write) {
-		flags |= O_RDWR;
-	}
+    if(omode & SharedMemory::Write) {
+        flags |= O_RDWR;
+    }
 
-	flags |= O_CREAT;
+    flags |= O_CREAT;
 
-	// open the shared memory segment
-	_fd = ::shm_open(name, flags, 0700);
-	if(_fd == -1)
-	{
-		throw SystemError("Could not open POSIX shared-memory segment", PT_SOURCEINFO);
-	}
+    // open the shared memory segment
+    _fd = ::shm_open(name, flags, 0700);
+    if(_fd == -1)
+    {
+        throw SystemError("Could not open POSIX shared-memory segment", PT_SOURCEINFO);
+    }
 
-	// truncate segment to given size
-	if( -1 == ::ftruncate(_fd, sz) )
-	{
-		::close(_fd);
-		_fd = -1;
-		throw SystemError("Could not truncate POSIX shared-memory segment", PT_SOURCEINFO);
-	}
+    // truncate segment to given size
+    if( -1 == ::ftruncate(_fd, sz) )
+    {
+        ::close(_fd);
+        _fd = -1;
+        throw SystemError("Could not truncate POSIX shared-memory segment", PT_SOURCEINFO);
+    }
 
-	_name = name;
+    _name = name;
 }
 
 
 SharedMemoryImpl::~SharedMemoryImpl()
 {
-	if(_fd != -1)
-		::close(_fd);
+    if(_fd != -1)
+        ::close(_fd);
 }
 
 
 void SharedMemoryImpl::unlink() throw(SystemError)
 {
-	if(-1 == ::shm_unlink( _name.c_str() ) )
-		throw SystemError("Could not unlink POSIX shared-memory segment", PT_SOURCEINFO);
+    if(-1 == ::shm_unlink( _name.c_str() ) )
+        throw SystemError("Could not unlink POSIX shared-memory segment", PT_SOURCEINFO);
 }
 
 
 void* SharedMemoryImpl::map(const void* addr) throw(SystemError)
 {
-	int prot= PROT_READ;
+    int prot= PROT_READ;
 
-	if(_mode & SharedMemory::Write)
-		prot = PROT_WRITE;
+    if(_mode & SharedMemory::Write)
+        prot = PROT_WRITE;
 
-	void* mapaddr = ::mmap((void*)addr, _size, prot, MAP_SHARED, _fd, 0);
+    void* mapaddr = ::mmap((void*)addr, _size, prot, MAP_SHARED, _fd, 0);
 
-	if(mapaddr == MAP_FAILED)
-		throw SystemError("Could not map POSIX shared-memory segment", PT_SOURCEINFO);
+    if(mapaddr == MAP_FAILED)
+        throw SystemError("Could not map POSIX shared-memory segment", PT_SOURCEINFO);
 
-	return mapaddr;
+    return mapaddr;
 }
 
 
 void SharedMemoryImpl::unmap(void* addr) throw(SystemError)
 {
-	if(-1 == ::munmap(addr, _size) )
-		throw SystemError("Could not unmap POSIX shared-memory segment", PT_SOURCEINFO);
+    if(-1 == ::munmap(addr, _size) )
+        throw SystemError("Could not unmap POSIX shared-memory segment", PT_SOURCEINFO);
 }
 
 

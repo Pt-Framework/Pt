@@ -33,8 +33,8 @@ public:
     EnvironmentImpl();
     ~EnvironmentImpl();
 
-    static const std::string&	sharedLibraryExtension();
-    static const std::string&	sharedLibraryPrefix();
+    static const std::string&    sharedLibraryExtension();
+    static const std::string&    sharedLibraryPrefix();
 
 };
 

@@ -33,14 +33,14 @@ EnvironmentImpl::~EnvironmentImpl()
 {
 }
 
-const std::string&	EnvironmentImpl::sharedLibraryExtension()
+const std::string&    EnvironmentImpl::sharedLibraryExtension()
 {
     static std::string sharedLibraryExtention(".so");
 
     return sharedLibraryExtention;
 }
 
-const std::string&	EnvironmentImpl::sharedLibraryPrefix()
+const std::string&    EnvironmentImpl::sharedLibraryPrefix()
 {
     static std::string sharedLibraryPrefix("lib");
 

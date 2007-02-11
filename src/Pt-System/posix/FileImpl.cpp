@@ -35,7 +35,7 @@ namespace Pt {
 namespace System {
 
 FileImpl::FileImpl(const std::string& path)
-: _path(path)	
+: _path(path)    
 {
 
 }
@@ -48,70 +48,70 @@ FileImpl::~FileImpl()
 
 std::size_t FileImpl::size() const
 {
-	struct stat buff;
+    struct stat buff;
 
-	if( 0 != stat(_path.c_str(), &buff) )
-		throw SystemError("Could not stat file", PT_SOURCEINFO);
+    if( 0 != stat(_path.c_str(), &buff) )
+        throw SystemError("Could not stat file", PT_SOURCEINFO);
 
-	return buff.st_size;
+    return buff.st_size;
 }
 
 
 void FileImpl::resize(std::size_t newSize)
 {
-	int ret = 0;
-	do {
-		ret = truncate(_path.c_str(), newSize);
-	} while ( ret == EINTR );
+    int ret = 0;
+    do {
+        ret = truncate(_path.c_str(), newSize);
+    } while ( ret == EINTR );
 
-	if(ret != 0)
-		throw SystemError("Could not truncate file", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError("Could not truncate file", PT_SOURCEINFO);
 }
 
 
 void FileImpl::remove()
 {
-	if(0 != ::remove(_path.c_str()) == -1)
-		throw SystemError("Could not remove file", PT_SOURCEINFO);
+    if(0 != ::remove(_path.c_str()) == -1)
+        throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 
 
 void FileImpl::copy(const std::string& to) const
 {
-	throw SystemError("Could not copy file", PT_SOURCEINFO);
+    throw SystemError("Could not copy file", PT_SOURCEINFO);
 }
 
 
 void FileImpl::move(const std::string& to)
 {
-	if (0 != ::rename(_path.c_str(), to.c_str()))
-		throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
- 	_path = to;	
+    if (0 != ::rename(_path.c_str(), to.c_str()))
+        throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
+     _path = to;    
 }
 
 void FileImpl::create()
 {
-	FILE* f = fopen(_path.c_str(), "w");
-	if (!f)
-		throw SystemError("Could not create file " + _path, PT_SOURCEINFO);
+    FILE* f = fopen(_path.c_str(), "w");
+    if (!f)
+        throw SystemError("Could not create file " + _path, PT_SOURCEINFO);
 
-	fclose(f);
+    fclose(f);
 }
 
 bool FileImpl::exists()
 {
-	struct stat buff;
+    struct stat buff;
 
-	int err = stat(_path.c_str(), &buff);
-	if (err == -1 )
-	{
-		if (errno == ENOENT || errno == ENOTDIR)
-			return false;
+    int err = stat(_path.c_str(), &buff);
+    if (err == -1 )
+    {
+        if (errno == ENOENT || errno == ENOTDIR)
+            return false;
 
-		throw SystemError("Could not stat file " + _path, PT_SOURCEINFO);
-	}
+        throw SystemError("Could not stat file " + _path, PT_SOURCEINFO);
+    }
 
-	return true;
+    return true;
 
 }
 

@@ -25,64 +25,64 @@ namespace Pt {
 
 namespace System {
 
-	class ThreadImpl {
-		public:
-			enum Priority
+    class ThreadImpl {
+        public:
+            enum Priority
             {
-				LowestPriority  = 0,
-				LowPriority     = 1,
-				NormalPriority  = 2,
-				HighPriority    = 3,
-				HighestPriority = 4,
-				InheritPriority = 5
-			};
+                LowestPriority  = 0,
+                LowPriority     = 1,
+                NormalPriority  = 2,
+                HighPriority    = 3,
+                HighestPriority = 4,
+                InheritPriority = 5
+            };
 
-		public:
-			ThreadImpl(Thread& obj, Thread::Mode mode);
+        public:
+            ThreadImpl(Thread& obj, Thread::Mode mode);
 
-			~ThreadImpl();
+            ~ThreadImpl();
 
-			Thread::Mode mode() const
-			{ return _mode; }
+            Thread::Mode mode() const
+            { return _mode; }
 
-			Thread::State state() const
-			{ return _state; }
+            Thread::State state() const
+            { return _state; }
 
-			void detach();
+            void detach();
 
-			void setPriority(Priority prio);
+            void setPriority(Priority prio);
 
-			Priority priority() const
-			{ return _priority; }
+            Priority priority() const
+            { return _priority; }
 
-			void start(Thread::Mode mode);
+            void start(Thread::Mode mode);
 
-			void wait();
+            void wait();
 
-			static void exit();
+            static void exit();
 
-			void terminate();
+            void terminate();
 
-			static void yield();
+            static void yield();
 
-			static void sleep(unsigned int ms);
+            static void sleep(unsigned int ms);
 
-		public:
-			static void* entry(void* arg)
-			{
-				ThreadImpl* impl = (ThreadImpl*)arg;
-				impl->_thread.run();
-				impl->_state = Thread::Finished;
-				return 0;
-			}
+        public:
+            static void* entry(void* arg)
+            {
+                ThreadImpl* impl = (ThreadImpl*)arg;
+                impl->_thread.run();
+                impl->_state = Thread::Finished;
+                return 0;
+            }
 
-		private:
-			Thread& _thread;
-			pthread_t _id;
-			Priority _priority;
-			Thread::State _state;
-			Thread::Mode _mode;
-	};
+        private:
+            Thread& _thread;
+            pthread_t _id;
+            Priority _priority;
+            Thread::State _state;
+            Thread::Mode _mode;
+    };
 
 }
 

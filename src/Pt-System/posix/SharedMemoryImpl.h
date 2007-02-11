@@ -26,25 +26,25 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API SharedMemoryImpl {
-		public:
+    class PT_API SharedMemoryImpl {
+        public:
 
-			SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError);
+            SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode) throw(SystemError);
 
-			~SharedMemoryImpl();
+            ~SharedMemoryImpl();
 
-			void unlink() throw(SystemError);
+            void unlink() throw(SystemError);
 
-			void* map(const void* addr) throw(SystemError);
+            void* map(const void* addr) throw(SystemError);
 
-			void unmap(void* addr) throw(SystemError);
+            void unmap(void* addr) throw(SystemError);
 
-		private:
-			std::string _name;
-			SharedMemory::OpenMode _mode;
-			size_t _size;
-			int _fd;
-	};
+        private:
+            std::string _name;
+            SharedMemory::OpenMode _mode;
+            size_t _size;
+            int _fd;
+    };
 
 } // !namespace System
 

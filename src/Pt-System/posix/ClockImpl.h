@@ -14,19 +14,19 @@ namespace System {
 
 class PT_API ClockImpl
 {
-	public:
-		ClockImpl();
-		~ClockImpl();
+    public:
+        ClockImpl();
+        ~ClockImpl();
 
         void start ();
-		TimeValue stop();
+        TimeValue stop();
 
-		static DateTime getCurrentTime();
+        static DateTime getCurrentTime();
 
-	private:
-		struct timeval  _startTime;
-		struct timeval  _stopTime;
-		struct timezone _timeZone;
+    private:
+        struct timeval  _startTime;
+        struct timeval  _stopTime;
+        struct timezone _timeZone;
 };
 
 } // namespace Pt

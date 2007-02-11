@@ -48,127 +48,127 @@ ThreadImpl::~ThreadImpl()
 
 void ThreadImpl::detach()
 {
-	if( !_id ) {
-		return;
-	}
+    if( !_id ) {
+        return;
+    }
 
-	int ret = pthread_detach(_id);
-	if( ret != 0 )
-		throw SystemError("Could not detach thread. ", PT_SOURCEINFO);
+    int ret = pthread_detach(_id);
+    if( ret != 0 )
+        throw SystemError("Could not detach thread. ", PT_SOURCEINFO);
 
-	_mode = Thread::Detached;
+    _mode = Thread::Detached;
 }
 
 
 void ThreadImpl::setPriority(Priority prio)
 {
-	_priority = prio;
+    _priority = prio;
 
-	// only save new priority if thread is not running
-	if(_state != Thread::Running) {
-		return;
-	}
+    // only save new priority if thread is not running
+    if(_state != Thread::Running) {
+        return;
+    }
 
-	// TODO: InheritPriority ???
+    // TODO: InheritPriority ???
 
-	sched_param sched;
-	int policy = 0;
-	pthread_getschedparam(_id, &policy, &sched);
+    sched_param sched;
+    int policy = 0;
+    pthread_getschedparam(_id, &policy, &sched);
 
-	int priomin = sched_get_priority_min(policy);
-	int priomax = sched_get_priority_max(policy);
+    int priomin = sched_get_priority_min(policy);
+    int priomax = sched_get_priority_max(policy);
 
-	// currently we have 5 priorities, therefore divide range by 4
-	int step = (priomax - priomin) / 4;
-	int n = step * _priority;
-	sched.sched_priority = std::min(priomax, priomin+n);
+    // currently we have 5 priorities, therefore divide range by 4
+    int step = (priomax - priomin) / 4;
+    int n = step * _priority;
+    sched.sched_priority = std::min(priomax, priomin+n);
 
-	if( 0 !=  pthread_setschedparam(_id, policy, &sched) )
-		throw SystemError("Could not set priority.", PT_SOURCEINFO);
+    if( 0 !=  pthread_setschedparam(_id, policy, &sched) )
+        throw SystemError("Could not set priority.", PT_SOURCEINFO);
 }
 
 
 void ThreadImpl::start(Thread::Mode mode)
 {
-	size_t stacksize = 0;
+    size_t stacksize = 0;
 
-	pthread_attr_t attrs;
-	pthread_attr_init(&attrs);
- 	pthread_attr_setinheritsched(&attrs, PTHREAD_INHERIT_SCHED);
+    pthread_attr_t attrs;
+    pthread_attr_init(&attrs);
+     pthread_attr_setinheritsched(&attrs, PTHREAD_INHERIT_SCHED);
 
-	if(stacksize > 0){
-		pthread_attr_setstacksize(&attrs ,stacksize);
-	}
+    if(stacksize > 0){
+        pthread_attr_setstacksize(&attrs ,stacksize);
+    }
 
-	if(mode == Thread::Detached){
-		pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-	}
-	else {
-		pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_JOINABLE);
-	}
+    if(mode == Thread::Detached){
+        pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
+    }
+    else {
+        pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_JOINABLE);
+    }
 
-	int ret = pthread_create(&_id, &attrs, this->entry, this);
-	pthread_attr_destroy(&attrs);
+    int ret = pthread_create(&_id, &attrs, this->entry, this);
+    pthread_attr_destroy(&attrs);
 
-	if(ret != 0) {
-		_id = 0;
-		throw SystemError("Could not create thread. ", PT_SOURCEINFO);
-	}
+    if(ret != 0) {
+        _id = 0;
+        throw SystemError("Could not create thread. ", PT_SOURCEINFO);
+    }
 
-	_state = Thread::Running;
+    _state = Thread::Running;
 
-	// setPriority() might have been called before start()
-	if(_priority != InheritPriority) {
-		this->setPriority(_priority);
-	}
+    // setPriority() might have been called before start()
+    if(_priority != InheritPriority) {
+        this->setPriority(_priority);
+    }
 }
 
 
 void ThreadImpl::wait()
 {
-	void* threadRet = 0;
-	int ret = pthread_join(_id, &threadRet);
+    void* threadRet = 0;
+    int ret = pthread_join(_id, &threadRet);
 
-	if(ret != 0)
-		throw SystemError("Could not join thread. ", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError("Could not join thread. ", PT_SOURCEINFO);
 
-	_state = Thread::Finished;
-	_id = 0;
+    _state = Thread::Finished;
+    _id = 0;
 }
 
 
 void ThreadImpl::exit()
 {
-	::pthread_exit( NULL );
+    ::pthread_exit( NULL );
 }
 
 
 void ThreadImpl::terminate()
 {
-	int ret = pthread_kill(_id, SIGKILL);
+    int ret = pthread_kill(_id, SIGKILL);
 
-	if(ret != 0)
-		throw SystemError("Could not terminate thread. ", PT_SOURCEINFO);
+    if(ret != 0)
+        throw SystemError("Could not terminate thread. ", PT_SOURCEINFO);
 
-	_state = Thread::Finished;
-	_id = 0;
+    _state = Thread::Finished;
+    _id = 0;
 }
 
 
 void ThreadImpl::yield()
 {
-	sched_yield();
+    sched_yield();
 }
 
 
 void ThreadImpl::sleep(unsigned int ms)
 {
-	//struct timespec ts;
-	//ts.tv_sec  = ms / 1000;
-	//ts.tv_nsec = (ms % 1000) * 1000000;
-	//pthread_delay(ts);
+    //struct timespec ts;
+    //ts.tv_sec  = ms / 1000;
+    //ts.tv_nsec = (ms % 1000) * 1000000;
+    //pthread_delay(ts);
 
-	usleep(ms * 1000);
+    usleep(ms * 1000);
 }
 
 

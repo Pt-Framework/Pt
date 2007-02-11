@@ -28,21 +28,21 @@ namespace Pt {
 
 namespace System {
 
-	class PT_API SemaphoreImpl {
-		public:
-			SemaphoreImpl(unsigned int initial = 0);
+    class PT_API SemaphoreImpl {
+        public:
+            SemaphoreImpl(unsigned int initial = 0);
 
-			~SemaphoreImpl();
+            ~SemaphoreImpl();
 
-			void wait();
+            void wait();
 
-			bool tryWait();
+            bool tryWait();
 
-			void post();
+            void post();
 
-		private:
-			sem_t _handle;
-	};
+        private:
+            sem_t _handle;
+    };
 
 } // !namespace System
 

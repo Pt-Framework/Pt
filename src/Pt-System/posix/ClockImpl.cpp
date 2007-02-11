@@ -29,22 +29,22 @@ TimeValue ClockImpl::stop()
 
 DateTime ClockImpl::getCurrentTime()
 {
-	struct timeval timeValue;
-	gettimeofday(&timeValue, NULL);
+    struct timeval timeValue;
+    gettimeofday(&timeValue, NULL);
 
-	struct tm* currentTimeStruct;
-	currentTimeStruct = localtime(&timeValue.tv_sec);
+    struct tm* currentTimeStruct;
+    currentTimeStruct = localtime(&timeValue.tv_sec);
 
-	Date date(	currentTimeStruct->tm_year + 1900,
-				currentTimeStruct->tm_mon + 1,
-				currentTimeStruct->tm_mday	);
-	Time time(	currentTimeStruct->tm_hour,
-				currentTimeStruct->tm_min,
-				currentTimeStruct->tm_sec,
-				timeValue.tv_usec / 1000	);
-	DateTime dateTime(date, time);
+    Date date(    currentTimeStruct->tm_year + 1900,
+                currentTimeStruct->tm_mon + 1,
+                currentTimeStruct->tm_mday    );
+    Time time(    currentTimeStruct->tm_hour,
+                currentTimeStruct->tm_min,
+                currentTimeStruct->tm_sec,
+                timeValue.tv_usec / 1000    );
+    DateTime dateTime(date, time);
 
-	return dateTime;
+    return dateTime;
 }
 
 } // namespace Pt

@@ -24,30 +24,30 @@
 namespace Pt {
 
 namespace System {
-	class Mutex;
+    class Mutex;
 
-	class MutexImpl {
-		public:
-			MutexImpl(Mutex& mutex);
+    class MutexImpl {
+        public:
+            MutexImpl(Mutex& mutex);
 
-			~MutexImpl();
+            ~MutexImpl();
 
-			void lock();
+            void lock();
 
-			bool tryLock(unsigned int msec = 0);
+            bool tryLock(unsigned int msec = 0);
 
-			void unlock();
+            void unlock();
 
-			pthread_mutex_t* handle()
-			{ return &_handle; }
+            pthread_mutex_t* handle()
+            { return &_handle; }
 
-			const pthread_mutex_t* handle() const
-			{ return &_handle; }
+            const pthread_mutex_t* handle() const
+            { return &_handle; }
 
-		private:
-			Mutex& _mutex;
-			pthread_mutex_t _handle;
-	};
+        private:
+            Mutex& _mutex;
+            pthread_mutex_t _handle;
+    };
 
 } // !namepsace System
 

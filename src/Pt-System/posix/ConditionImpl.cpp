@@ -31,52 +31,52 @@ namespace System {
 
 ConditionImpl::ConditionImpl()
 {
-	pthread_cond_init( &_cond, NULL );
+    pthread_cond_init( &_cond, NULL );
 }
 
 
 ConditionImpl::~ConditionImpl()
 {
-	pthread_cond_destroy(&_cond);
+    pthread_cond_destroy(&_cond);
 }
 
 
 void ConditionImpl::wait(Mutex& mtx)
 {
-	pthread_cond_wait(&_cond, mtx.impl()->handle() );
+    pthread_cond_wait(&_cond, mtx.impl()->handle() );
 }
 
 
 bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 {
-	int result;
+    int result;
 
-	struct timeval tv;
-	::gettimeofday(&tv, NULL);
+    struct timeval tv;
+    ::gettimeofday(&tv, NULL);
 
-	struct timespec ts;
-	ts.tv_nsec = ((ms%1000) * 1000 + tv.tv_usec) * 1000;
-	ts.tv_sec = (ms/1000) + (ts.tv_nsec/1000000000) + tv.tv_sec;
-	ts.tv_nsec = ts.tv_nsec % 1000000000;
+    struct timespec ts;
+    ts.tv_nsec = ((ms%1000) * 1000 + tv.tv_usec) * 1000;
+    ts.tv_sec = (ms/1000) + (ts.tv_nsec/1000000000) + tv.tv_sec;
+    ts.tv_nsec = ts.tv_nsec % 1000000000;
 
-	do{
-		result = pthread_cond_timedwait(&_cond, mtx.impl()->handle(), &ts);
-	}
-	while(result == EINTR);
+    do{
+        result = pthread_cond_timedwait(&_cond, mtx.impl()->handle(), &ts);
+    }
+    while(result == EINTR);
 
-	return result != ETIMEDOUT;
+    return result != ETIMEDOUT;
 }
 
 
 void ConditionImpl::signal()
 {
-	pthread_cond_signal( &_cond );
+    pthread_cond_signal( &_cond );
 }
 
 
 void ConditionImpl::broadcast()
 {
-	pthread_cond_broadcast( &_cond );
+    pthread_cond_broadcast( &_cond );
 }
 
 

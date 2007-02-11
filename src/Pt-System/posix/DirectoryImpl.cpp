@@ -50,147 +50,147 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _handle(0),
   _current(0)
 {
-	_handle = ::opendir( path );
-	if( !_handle ) {
-		throw SystemError("Could not open directory", PT_SOURCEINFO);
-	}
+    _handle = ::opendir( path );
+    if( !_handle ) {
+        throw SystemError("Could not open directory", PT_SOURCEINFO);
+    }
 
-	_path = path;
-	this->advance();
+    _path = path;
+    this->advance();
 }
 
 
 DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
-	delete _node;
+    delete _node;
 
-	if(_handle)
-		::closedir(_handle);
+    if(_handle)
+        ::closedir(_handle);
 }
 
 
 int DirectoryIteratorImpl::ref()
 {
-	return ++_refs;
+    return ++_refs;
 }
 
 
 int DirectoryIteratorImpl::deref()
 {
-	return --_refs;
+    return --_refs;
 }
 
 
 void DirectoryIteratorImpl::advance()
 {
-	// cannot advance a unintialised iterator
-	if(_handle == 0) {
-		_current = 0;
-		return;
-	}
+    // cannot advance a unintialised iterator
+    if(_handle == 0) {
+        _current = 0;
+        return;
+    }
 
-	// the current node becomes invalid now
-	delete _node;
-	_node = 0;
+    // the current node becomes invalid now
+    delete _node;
+    _node = 0;
 
-	// _current == 0 means end
-	_current = ::readdir( _handle );
+    // _current == 0 means end
+    _current = ::readdir( _handle );
 }
 
 
 FileSystemNode& DirectoryIteratorImpl::node()
 {
-	// reuse previously created node
-	if(_node)
-		return *_node;
+    // reuse previously created node
+    if(_node)
+        return *_node;
 
-	// build complete path
-	std::string path = _path;
-	if( !path.empty() && path[path.size()] != '/')
-		path += '/';
-	path += this->name();
+    // build complete path
+    std::string path = _path;
+    if( !path.empty() && path[path.size()] != '/')
+        path += '/';
+    path += this->name();
 
-	// create file system node by full path
-	_node = FileSystem::instance().create( path.c_str() );
-	if(!_node)
-		throw SystemError("Unknown file system node", PT_SOURCEINFO);
+    // create file system node by full path
+    _node = FileSystem::instance().create( path.c_str() );
+    if(!_node)
+        throw SystemError("Unknown file system node", PT_SOURCEINFO);
 
-	return *_node;
+    return *_node;
 }
 
 
 std::string DirectoryIteratorImpl::name() const
 {
-	if(_current)
-		return _current->d_name;
+    if(_current)
+        return _current->d_name;
 
-	return "";
+    return "";
 }
 
 
 bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 {
-	return _current == impl._current;
+    return _current == impl._current;
 }
 
 
 void DirectoryImpl::create(const char* dirpath)
 {
-	if( -1 == ::mkdir(dirpath, 0777) )
-		throw SystemError("Could not create directory" , PT_SOURCEINFO);
+    if( -1 == ::mkdir(dirpath, 0777) )
+        throw SystemError("Could not create directory" , PT_SOURCEINFO);
 }
 
 bool DirectoryImpl::exists(const std::string& path)
 {
-	struct stat buff;
-	int err = stat(path.c_str(), &buff);
-	if (err == -1 )
-	{
-		if (errno == ENOENT || errno == ENOTDIR)
-			return false;
-		throw SystemError("Could not stat file " + path, PT_SOURCEINFO);
-	}
+    struct stat buff;
+    int err = stat(path.c_str(), &buff);
+    if (err == -1 )
+    {
+        if (errno == ENOENT || errno == ENOTDIR)
+            return false;
+        throw SystemError("Could not stat file " + path, PT_SOURCEINFO);
+    }
 
-	return true;
+    return true;
 }
 
 
 void DirectoryImpl::remove(const std::string& path)
 {
-	if( -1 == ::rmdir(path.c_str()) )
-		throw SystemError("Could not remove directory" , PT_SOURCEINFO);
+    if( -1 == ::rmdir(path.c_str()) )
+        throw SystemError("Could not remove directory" , PT_SOURCEINFO);
 }
 
 
 void DirectoryImpl::move(const std::string& oldname, const std::string& newname)
 {
-	if (0 != ::rename(oldname.c_str(), newname.c_str()))
-		throw SystemError("Could not move directory" + oldname + " to " + newname , PT_SOURCEINFO);
+    if (0 != ::rename(oldname.c_str(), newname.c_str()))
+        throw SystemError("Could not move directory" + oldname + " to " + newname , PT_SOURCEINFO);
 
 }
 
 
 std::string DirectoryImpl::current()
 {
-	char cwd[PATH_MAX];
+    char cwd[PATH_MAX];
 
-	if( !getcwd(cwd, PATH_MAX) )
-		throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
+    if( !getcwd(cwd, PATH_MAX) )
+        throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
 
-	return std::string(cwd);
+    return std::string(cwd);
 }
 
 
 std::string DirectoryImpl::system()
 {
-	return "/";
+    return "/";
 }
 
 
 void DirectoryImpl::changeCurrent(const char* dirpath)
 {
-	if( -1 == ::chdir(dirpath) )
-		throw SystemError("Could not change working directory", PT_SOURCEINFO);
+    if( -1 == ::chdir(dirpath) )
+        throw SystemError("Could not change working directory", PT_SOURCEINFO);
 }
 
 

@@ -29,64 +29,64 @@ namespace Pt {
 
 namespace System {
 
-	class FileSystemNode;
+    class FileSystemNode;
 
 
-	class PT_API DirectoryIteratorImpl {
-		public:
-			DirectoryIteratorImpl();
+    class PT_API DirectoryIteratorImpl {
+        public:
+            DirectoryIteratorImpl();
 
-			DirectoryIteratorImpl(const char* path);
+            DirectoryIteratorImpl(const char* path);
 
-			~DirectoryIteratorImpl();
+            ~DirectoryIteratorImpl();
 
-			int ref();
+            int ref();
 
-			int deref();
+            int deref();
 
-			void advance();
+            void advance();
 
-			const char* path() const
-			{ return _path.c_str(); }
+            const char* path() const
+            { return _path.c_str(); }
 
-			FileSystemNode& node();
+            FileSystemNode& node();
 
-			std::string name() const;
+            std::string name() const;
 
-			bool operator==(const DirectoryIteratorImpl& impl) const;
+            bool operator==(const DirectoryIteratorImpl& impl) const;
 
-		private:
-			unsigned int _refs;
-			std::string _path;
-			FileSystemNode* _node;
-			DIR* _handle;
-			::dirent* _current;
-	};
+        private:
+            unsigned int _refs;
+            std::string _path;
+            FileSystemNode* _node;
+            DIR* _handle;
+            ::dirent* _current;
+    };
 
 
-	class PT_API DirectoryImpl {
-		public:
-			DirectoryImpl() {}
-			~DirectoryImpl() {}
+    class PT_API DirectoryImpl {
+        public:
+            DirectoryImpl() {}
+            ~DirectoryImpl() {}
 
-		public:
-			static void create(const char* dirpath);
+        public:
+            static void create(const char* dirpath);
 
-			static void remove(const std::string& path);
+            static void remove(const std::string& path);
 
-			static void move(const std::string& oldname, const std::string& newname);
+            static void move(const std::string& oldname, const std::string& newname);
 
-			static bool exists(const std::string& path);
+            static bool exists(const std::string& path);
 
-			static std::string current();
+            static std::string current();
 
-			static std::string system();
+            static std::string system();
 
-			static char separator()
-			{ return '/'; }
+            static char separator()
+            { return '/'; }
 
-			static void changeCurrent(const char* dirpath);
-	};
+            static void changeCurrent(const char* dirpath);
+    };
 
 } // namespace System
 

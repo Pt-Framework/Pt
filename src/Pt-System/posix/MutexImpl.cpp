@@ -35,68 +35,68 @@ namespace System {
 MutexImpl::MutexImpl(Mutex& mutex)
 : _mutex(mutex)
 {
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init(&attr);
-	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&_handle, &attr);
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&_handle, &attr);
 }
 
 
 MutexImpl::~MutexImpl()
 {
-	pthread_mutex_destroy(&_handle);
+    pthread_mutex_destroy(&_handle);
 }
 
 
 void MutexImpl::lock()
 {
-	int ret = pthread_mutex_lock(&_handle);
-	if(ret != 0)
-		throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
+    int ret = pthread_mutex_lock(&_handle);
+    if(ret != 0)
+        throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
 }
 
 
 bool MutexImpl::tryLock(unsigned int msec)
 {
-	int ret = 0;
+    int ret = 0;
 
-	// get start time
-	struct timeval start, current;
-	::gettimeofday(&start, 0);
-	start.tv_sec = start.tv_sec + msec / 1000;
-	start.tv_usec = (start.tv_usec + (msec % 1000) * 1000);
+    // get start time
+    struct timeval start, current;
+    ::gettimeofday(&start, 0);
+    start.tv_sec = start.tv_sec + msec / 1000;
+    start.tv_usec = (start.tv_usec + (msec % 1000) * 1000);
 
-	for( ; ; ) {
-		ret = pthread_mutex_trylock(&_handle);
+    for( ; ; ) {
+        ret = pthread_mutex_trylock(&_handle);
 
-		if( (ret != EBUSY && ret != ETIMEDOUT) )
-			break;
+        if( (ret != EBUSY && ret != ETIMEDOUT) )
+            break;
 
-		// check if timeout
-		::gettimeofday(&current, 0);
-		if( current.tv_sec > start.tv_sec ||
-				(current.tv_sec == start.tv_sec && current.tv_usec > start.tv_usec) )
-			break;
-	}
+        // check if timeout
+        ::gettimeofday(&current, 0);
+        if( current.tv_sec > start.tv_sec ||
+                (current.tv_sec == start.tv_sec && current.tv_usec > start.tv_usec) )
+            break;
+    }
 
-	switch(ret) {
-		case 0:         break;
-		case EBUSY:     return false;
-		case ETIMEDOUT: return false;
-		default: {
-			throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
-		}
-	}
+    switch(ret) {
+        case 0:         break;
+        case EBUSY:     return false;
+        case ETIMEDOUT: return false;
+        default: {
+            throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
+        }
+    }
 
-	return true;
+    return true;
 }
 
 
 void MutexImpl::unlock()
 {
-	int ret = pthread_mutex_unlock(&_handle);
-	if(ret != 0)
-		throw SystemError("Could not unlock mutex: ", PT_SOURCEINFO);
+    int ret = pthread_mutex_unlock(&_handle);
+    if(ret != 0)
+        throw SystemError("Could not unlock mutex: ", PT_SOURCEINFO);
 }
 
 
