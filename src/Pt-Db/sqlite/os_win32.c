@@ -77,9 +77,9 @@ typedef struct winceLock {
 */
 typedef struct winMMViewInfo winMMViewInfo;
 struct winMMViewInfo{
-  LPVOID lpMapBaseViewAddr;	/* Views Base Address */
-  DWORD iMapViewFrom;		/* Start Offset from the View */
-  DWORD iMapViewUntil;		/* End Offset from the View */
+  LPVOID lpMapBaseViewAddr;    /* Views Base Address */
+  DWORD iMapViewFrom;        /* Start Offset from the View */
+  DWORD iMapViewUntil;        /* End Offset from the View */
   DWORD iHitCount;
   winMMViewInfo *prev;
   winMMViewInfo *next;
@@ -98,9 +98,9 @@ struct winFile {
   // OG Handle for Memory Mapped File
   HANDLE hMap;            /* Handle for accessing the file */
   winMMViewInfo *root_views;
-  LPVOID lpMapBaseAddr;		/* The Pointer to The File */
-  LPVOID lpMapReadAddr;		/* The Read Pointer from MM File */
-  DWORD AllocationGranularity;	/* For Generate Views, because a View must be a factor of AllocationGranularity */
+  LPVOID lpMapBaseAddr;        /* The Pointer to The File */
+  LPVOID lpMapReadAddr;        /* The Read Pointer from MM File */
+  DWORD AllocationGranularity;    /* For Generate Views, because a View must be a factor of AllocationGranularity */
   DWORD dwFileSize;
   short isMMFile;
   // OG End
@@ -605,7 +605,7 @@ int sqlite3WinOpenReadWriteMMFile(
   assert( *pId==0 );
   if( zWide ){
 #if OS_WINCE
-	  h = CreateFileForMapping(zWide,
+      h = CreateFileForMapping(zWide,
        GENERIC_READ | GENERIC_WRITE,
        FILE_SHARE_READ | FILE_SHARE_WRITE,
        NULL,
@@ -627,7 +627,7 @@ int sqlite3WinOpenReadWriteMMFile(
         return SQLITE_CANTOPEN;
       }
 #else
-	h = CreateFileW(zWide,
+    h = CreateFileW(zWide,
        GENERIC_READ | GENERIC_WRITE,
        FILE_SHARE_READ | FILE_SHARE_WRITE,
        NULL,
@@ -652,36 +652,36 @@ int sqlite3WinOpenReadWriteMMFile(
       *pReadonly = 1;
     }else{
       *pReadonly = 0;
-	  // OG Map the File to the Memory
-	  hMap = CreateFileMapping(h,NULL,PAGE_READWRITE,0,0,NULL);
-	  if( hMap == NULL ){
-		  sqliteFree(zWide);
-		  CloseHandle(h);
-		  return SQLITE_CANTOPEN;
-	  }
-	  
-	  GetSystemInfo(&SystemInfo); 
-	  f.AllocationGranularity = SystemInfo.dwAllocationGranularity;
-	  
+      // OG Map the File to the Memory
+      hMap = CreateFileMapping(h,NULL,PAGE_READWRITE,0,0,NULL);
+      if( hMap == NULL ){
+          sqliteFree(zWide);
+          CloseHandle(h);
+          return SQLITE_CANTOPEN;
+      }
+      
+      GetSystemInfo(&SystemInfo); 
+      f.AllocationGranularity = SystemInfo.dwAllocationGranularity;
+      
 #ifndef PTV_MM_DB_WITH_VIEWS
-	  lpAddr = MapViewOfFile(hMap,FILE_MAP_ALL_ACCESS,0,0,0);
-	  if(lpAddr == NULL){
-		  sqliteFree(zWide);
-		  CloseHandle(h);
-		  CloseHandle(hMap);
-		  return SQLITE_CANTOPEN;
-	  }
-  	  f.lpMapReadAddr = lpAddr;
-	  f.lpMapBaseAddr = lpAddr;
-	  f.root_views=0;
+      lpAddr = MapViewOfFile(hMap,FILE_MAP_ALL_ACCESS,0,0,0);
+      if(lpAddr == NULL){
+          sqliteFree(zWide);
+          CloseHandle(h);
+          CloseHandle(hMap);
+          return SQLITE_CANTOPEN;
+      }
+        f.lpMapReadAddr = lpAddr;
+      f.lpMapBaseAddr = lpAddr;
+      f.root_views=0;
 #else
-	  f.root_views=0;
+      f.root_views=0;
 #endif
-	  
-	  f.hMap = hMap;
-	  f.dwFileSize = GetFileSize (h, NULL);	  
-	  f.isMMFile=PTV_MMFILE_STAMP;
-  	  // OG End
+      
+      f.hMap = hMap;
+      f.dwFileSize = GetFileSize (h, NULL);      
+      f.isMMFile=PTV_MMFILE_STAMP;
+        // OG End
     }
 #if OS_WINCE
     if (!winceCreateLock(zFilename, &f)){
@@ -1068,26 +1068,26 @@ static int winClose(OsFile **pId){
     do{
       rc = CloseHandle(pFile->h);
     }while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
-	
+    
 #ifdef PTV_MM_DB
-	if(pFile->isMMFile==PTV_MMFILE_STAMP){
-		aktuel=pFile->root_views;
-		for( ; aktuel != 0 ; ){
-			cnt = 0;
-			do{
-				if(aktuel->lpMapBaseViewAddr==0)break;
-				rc = UnmapViewOfFile(aktuel->lpMapBaseViewAddr);
-			}while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
-			next=aktuel->next;
-			free(aktuel);
-			aktuel=next;
-		}
-		cnt = 0;
-		do{
-			if(pFile->hMap==0)break;
-			rc = CloseHandle(pFile->hMap);
-		}while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
-	}
+    if(pFile->isMMFile==PTV_MMFILE_STAMP){
+        aktuel=pFile->root_views;
+        for( ; aktuel != 0 ; ){
+            cnt = 0;
+            do{
+                if(aktuel->lpMapBaseViewAddr==0)break;
+                rc = UnmapViewOfFile(aktuel->lpMapBaseViewAddr);
+            }while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
+            next=aktuel->next;
+            free(aktuel);
+            aktuel=next;
+        }
+        cnt = 0;
+        do{
+            if(pFile->hMap==0)break;
+            rc = CloseHandle(pFile->hMap);
+        }while( rc==0 && cnt++ < MX_CLOSE_ATTEMPT && (Sleep(100), 1) );
+    }
 #endif
 
 #if OS_WINCE
@@ -1118,25 +1118,25 @@ static int winRead(OsFile *id, void *pBuf, int amt){
 
   if(((winFile*)id)->isMMFile==PTV_MMFILE_STAMP){
 #ifdef OG_DEBUG 
-	printf(" MMwinRead:%d ",amt);
+    printf(" MMwinRead:%d ",amt);
 #endif 
-		cp = (char*)(((winFile*)id)->lpMapReadAddr);
-		memcpy(pBuf,((winFile*)id)->lpMapReadAddr,amt);
-		cp+=amt;
-		((winFile*)id)->lpMapReadAddr=(LPVOID)cp;
-		return SQLITE_OK;
+        cp = (char*)(((winFile*)id)->lpMapReadAddr);
+        memcpy(pBuf,((winFile*)id)->lpMapReadAddr,amt);
+        cp+=amt;
+        ((winFile*)id)->lpMapReadAddr=(LPVOID)cp;
+        return SQLITE_OK;
   }else{
 #ifdef OG_DEBUG 
-	printf(" FILEwinRead:%d ",amt);
+    printf(" FILEwinRead:%d ",amt);
 #endif 
-	if( !ReadFile(((winFile*)id)->h, pBuf, amt, &got, 0) ){
-	  got = 0;
-	}
-	if( got==(DWORD)amt ){
-		return SQLITE_OK;
-	}else{
-		return SQLITE_IOERR;
-	}
+    if( !ReadFile(((winFile*)id)->h, pBuf, amt, &got, 0) ){
+      got = 0;
+    }
+    if( got==(DWORD)amt ){
+        return SQLITE_OK;
+    }else{
+        return SQLITE_IOERR;
+    }
   }
 }
 
@@ -1178,129 +1178,129 @@ static int winWrite(OsFile *id, const void *pBuf, int amt){
 
 
 char *getMemMapReadAddr(winFile* id,i64 offset){
-	DWORD dwViewAddr;
-	int viewCnt;
-	int Cnt;
-	winMMViewInfo *run,*newTmp,*copy,test;
+    DWORD dwViewAddr;
+    int viewCnt;
+    int Cnt;
+    winMMViewInfo *run,*newTmp,*copy,test;
 
-	run = id->root_views;
-	if(run == 0){
-		newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
-		if(!newTmp){
-			return 0;
-		}
-		dwViewAddr = offset % id->AllocationGranularity;
-		dwViewAddr = offset - dwViewAddr;
-		newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
-		if(newTmp->lpMapBaseViewAddr == NULL){
-			return 0;
-		}
-		newTmp->iMapViewFrom=dwViewAddr;
-		newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
-		newTmp->iHitCount=1;
-		newTmp->prev=0;
-		newTmp->next=0;
-		id->root_views=newTmp;
-		return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
-	}
-	for(viewCnt=0;viewCnt<=PtvMmViewCount;viewCnt++){
-		if(run->lpMapBaseViewAddr != 0){
-			if( (offset >= run->iMapViewFrom) && (offset < run->iMapViewUntil) ){
-				run->iHitCount++;
-				if(run==id->root_views){
-					return (char*)run->lpMapBaseViewAddr + (offset - run->iMapViewFrom);
-				}else{
-					if(run->next == 0){
-						copy=run;
-						run->prev->next=0;
-						copy->prev=0;
-						copy->next=id->root_views;
-						id->root_views->prev=copy;
-						id->root_views=copy;
-					}else{
-						copy=run;
-						run->next->prev=copy->prev;
-						run->prev->next=copy->next;
-						copy->prev=0;
-						copy->next=id->root_views;
-						id->root_views->prev=copy;
-						id->root_views=copy;	
-					}
-					return (char*)run->lpMapBaseViewAddr + (offset - run->iMapViewFrom);
-				}
-			}
-		}else{
-			newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
-			if(!newTmp){
-				return 0;
-			}
-			dwViewAddr = offset % id->AllocationGranularity;
-			dwViewAddr = offset - dwViewAddr;
-			newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
-			if(newTmp->lpMapBaseViewAddr == NULL){
-				return 0;
-			}
-			newTmp->iMapViewFrom=dwViewAddr;
-			newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
-			newTmp->iHitCount=1;
-			newTmp->prev=0;
-			newTmp->next=id->root_views;
-			            
-			newTmp->next->prev=newTmp;
+    run = id->root_views;
+    if(run == 0){
+        newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
+        if(!newTmp){
+            return 0;
+        }
+        dwViewAddr = offset % id->AllocationGranularity;
+        dwViewAddr = offset - dwViewAddr;
+        newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
+        if(newTmp->lpMapBaseViewAddr == NULL){
+            return 0;
+        }
+        newTmp->iMapViewFrom=dwViewAddr;
+        newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
+        newTmp->iHitCount=1;
+        newTmp->prev=0;
+        newTmp->next=0;
+        id->root_views=newTmp;
+        return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
+    }
+    for(viewCnt=0;viewCnt<=PtvMmViewCount;viewCnt++){
+        if(run->lpMapBaseViewAddr != 0){
+            if( (offset >= run->iMapViewFrom) && (offset < run->iMapViewUntil) ){
+                run->iHitCount++;
+                if(run==id->root_views){
+                    return (char*)run->lpMapBaseViewAddr + (offset - run->iMapViewFrom);
+                }else{
+                    if(run->next == 0){
+                        copy=run;
+                        run->prev->next=0;
+                        copy->prev=0;
+                        copy->next=id->root_views;
+                        id->root_views->prev=copy;
+                        id->root_views=copy;
+                    }else{
+                        copy=run;
+                        run->next->prev=copy->prev;
+                        run->prev->next=copy->next;
+                        copy->prev=0;
+                        copy->next=id->root_views;
+                        id->root_views->prev=copy;
+                        id->root_views=copy;    
+                    }
+                    return (char*)run->lpMapBaseViewAddr + (offset - run->iMapViewFrom);
+                }
+            }
+        }else{
+            newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
+            if(!newTmp){
+                return 0;
+            }
+            dwViewAddr = offset % id->AllocationGranularity;
+            dwViewAddr = offset - dwViewAddr;
+            newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
+            if(newTmp->lpMapBaseViewAddr == NULL){
+                return 0;
+            }
+            newTmp->iMapViewFrom=dwViewAddr;
+            newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
+            newTmp->iHitCount=1;
+            newTmp->prev=0;
+            newTmp->next=id->root_views;
+                        
+            newTmp->next->prev=newTmp;
 
-			id->root_views=newTmp;
-			
-			return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
-		}
-		if(run->next==0){
-			newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
-			if(!newTmp){
-				return 0;
-			}
-			dwViewAddr = offset % id->AllocationGranularity;
-			dwViewAddr = offset - dwViewAddr;
-			newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
-			if(newTmp->lpMapBaseViewAddr == NULL){
-				return 0;
-			}
-			newTmp->iMapViewFrom=dwViewAddr;
-			newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
-			newTmp->iHitCount=1;
-			newTmp->prev=0;
-			newTmp->next=id->root_views;
-			            
-			newTmp->next->prev=newTmp;
-			
             id->root_views=newTmp;
-			return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
-		}
-        run=run->next;		
-	}
+            
+            return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
+        }
+        if(run->next==0){
+            newTmp=(winMMViewInfo*)malloc(sizeof(winMMViewInfo));
+            if(!newTmp){
+                return 0;
+            }
+            dwViewAddr = offset % id->AllocationGranularity;
+            dwViewAddr = offset - dwViewAddr;
+            newTmp->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
+            if(newTmp->lpMapBaseViewAddr == NULL){
+                return 0;
+            }
+            newTmp->iMapViewFrom=dwViewAddr;
+            newTmp->iMapViewUntil=dwViewAddr + (PtvMMViewSize);
+            newTmp->iHitCount=1;
+            newTmp->prev=0;
+            newTmp->next=id->root_views;
+                        
+            newTmp->next->prev=newTmp;
+            
+            id->root_views=newTmp;
+            return (char*)newTmp->lpMapBaseViewAddr + (offset % id->AllocationGranularity);
+        }
+        run=run->next;        
+    }
 
-	// Sort, delete
-	run=id->root_views;
-	while(run->next)run=run->next;
-	if(!UnmapViewOfFile(run->lpMapBaseViewAddr)){
-		return 0;
-	}
-	dwViewAddr = offset % id->AllocationGranularity;
-	dwViewAddr = offset - dwViewAddr;
-	run->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
-	if(run->lpMapBaseViewAddr == NULL){
-		return 0;
-	}
-	run->iMapViewFrom = dwViewAddr;
-	run->iMapViewUntil = dwViewAddr + PtvMMViewSize;
-	run->iHitCount=1;
+    // Sort, delete
+    run=id->root_views;
+    while(run->next)run=run->next;
+    if(!UnmapViewOfFile(run->lpMapBaseViewAddr)){
+        return 0;
+    }
+    dwViewAddr = offset % id->AllocationGranularity;
+    dwViewAddr = offset - dwViewAddr;
+    run->lpMapBaseViewAddr = MapViewOfFile(id->hMap,FILE_MAP_ALL_ACCESS,0,dwViewAddr,PtvMMViewSize);
+    if(run->lpMapBaseViewAddr == NULL){
+        return 0;
+    }
+    run->iMapViewFrom = dwViewAddr;
+    run->iMapViewUntil = dwViewAddr + PtvMMViewSize;
+    run->iHitCount=1;
 
-	copy=run;
-	run->prev->next=0;
-	copy->prev=0;
-	copy->next=id->root_views;
-	id->root_views->prev=copy;
-	id->root_views=copy;
+    copy=run;
+    run->prev->next=0;
+    copy->prev=0;
+    copy->next=id->root_views;
+    id->root_views->prev=copy;
+    id->root_views=copy;
 
-	return (char*)id->root_views->lpMapBaseViewAddr+(offset % id->AllocationGranularity);
+    return (char*)id->root_views->lpMapBaseViewAddr+(offset % id->AllocationGranularity);
 }
 
 /*
@@ -1323,31 +1323,31 @@ static int winSeek(OsFile *id, i64 offset){
 
   if(((winFile*)id)->isMMFile==PTV_MMFILE_STAMP){
 #ifdef OG_DEBUG 
-	  printf("\nOG SQL3 MM winSeek:%d",offset);
+      printf("\nOG SQL3 MM winSeek:%d",offset);
 #endif
 
 #ifdef PTV_MM_DB_WITH_VIEWS
-	  cp = getMemMapReadAddr((winFile*)id,offset);
-	  if(cp==0){	// If Error Ocur
-		  return SQLITE_FULL;
-	  }
+      cp = getMemMapReadAddr((winFile*)id,offset);
+      if(cp==0){    // If Error Ocur
+          return SQLITE_FULL;
+      }
 #else
-	  cp = (char*)(((winFile*)id)->lpMapBaseAddr);
-	  cp+=offset;
+      cp = (char*)(((winFile*)id)->lpMapBaseAddr);
+      cp+=offset;
 #endif
-	  ((winFile*)id)->lpMapReadAddr=(LPVOID)cp;
+      ((winFile*)id)->lpMapReadAddr=(LPVOID)cp;
 
   }else{
 #ifdef OG_DEBUG 
-	  printf("\nOG SQL3 FILE winSeek:%d",offset);
+      printf("\nOG SQL3 FILE winSeek:%d",offset);
 #endif
 
-	  SEEK(offset/1024 + 1);
-	  rc = SetFilePointer(((winFile*)id)->h, lowerBits, &upperBits, FILE_BEGIN);
-	  TRACE3("SEEK %d %lld\n", ((winFile*)id)->h, offset);
-	  if( rc==INVALID_SET_FILE_POINTER && GetLastError()!=NO_ERROR ){
-		  return SQLITE_FULL;
-	  }
+      SEEK(offset/1024 + 1);
+      rc = SetFilePointer(((winFile*)id)->h, lowerBits, &upperBits, FILE_BEGIN);
+      TRACE3("SEEK %d %lld\n", ((winFile*)id)->h, offset);
+      if( rc==INVALID_SET_FILE_POINTER && GetLastError()!=NO_ERROR ){
+          return SQLITE_FULL;
+      }
   }
   return SQLITE_OK;
 }

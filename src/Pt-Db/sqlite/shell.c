@@ -61,7 +61,7 @@
 /* Make sure isatty() has a prototype.
 */
 int isatty(int dummy) {
-	return 1;
+    return 1;
 }
 
 /*

@@ -5168,7 +5168,7 @@ static int balance_nonroot(MemPage *pPage){
         memcpy(&pNew->aData[8], pCell, 4);
         pTemp = 0;
       }else if( leafData ){
-	/* If the tree is a leaf-data tree, and the siblings are leaves, 
+    /* If the tree is a leaf-data tree, and the siblings are leaves, 
         ** then there is no divider cell in apCell[]. Instead, the divider 
         ** cell consists of the integer key for the right-most cell of 
         ** the sibling-page assembled above only.

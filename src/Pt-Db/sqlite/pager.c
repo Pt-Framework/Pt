@@ -2787,7 +2787,7 @@ int sqlite3pager_get(Pager *pPager, Pgno pgno, void **ppPage){
         i64 fileSize;
         int rc2 = sqlite3OsFileSize(pPager->fd, &fileSize);
         if( rc2!=SQLITE_OK || fileSize>=pgno*pPager->pageSize ){
-	  /* An IO error occured in one of the the sqlite3OsSeek() or
+      /* An IO error occured in one of the the sqlite3OsSeek() or
           ** sqlite3OsRead() calls above. */
           pPg->pgno = 0;
           sqlite3pager_unref(PGHDR_TO_DATA(pPg));
@@ -3167,7 +3167,7 @@ int sqlite3pager_write(void *pData){
                   PAGERID(pPager), pPg->pgno, pPg->needSync);
           *(u32*)pEnd = saved;
 
-	  /* An error has occured writing to the journal file. The 
+      /* An error has occured writing to the journal file. The 
           ** transaction will be rolled back by the layer above.
           */
           if( rc!=SQLITE_OK ){

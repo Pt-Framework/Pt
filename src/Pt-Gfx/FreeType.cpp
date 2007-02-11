@@ -22,19 +22,22 @@
 #include <stdexcept>
 #include "Pt/SourceInfo.h"
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
-FreeType::FreeType()
-{
-    if( FT_Init_FreeType( &_ft ) ) 
-        throw std::runtime_error( "FT_Init_FreeType failed" + PT_SOURCEINFO );
-}
+    namespace Gfx {
 
-FreeType::~FreeType()
-{
-    FT_Done_FreeType( _ft );
-}
+        FreeType::FreeType()
+        {
+            if( FT_Init_FreeType( &_ft ) )
+                throw std::runtime_error( "FT_Init_FreeType failed" + PT_SOURCEINFO );
+        }
 
-}
-}
+        FreeType::~FreeType()
+        {
+            FT_Done_FreeType( _ft );
+        }
+
+    } // namespace Gfx
+
+} // namespace Pt
+

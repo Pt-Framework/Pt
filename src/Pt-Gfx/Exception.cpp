@@ -20,15 +20,18 @@
  ***************************************************************************/
 #include "Pt/Gfx/Exception.h"
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
-InvalidFont::InvalidFont(const std::string& what)
-: invalid_argument( what )
-{ }
+    namespace Gfx {
 
-InvalidFont::~InvalidFont() throw()
-{ }
+        InvalidFont::InvalidFont(const std::string& what)
+        : invalid_argument( what )
+        { }
 
-}
-}
+        InvalidFont::~InvalidFont() throw()
+        { }
+
+    } // namespace Gfx
+
+} // namespace Pt
+

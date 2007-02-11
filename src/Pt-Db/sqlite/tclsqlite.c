@@ -1689,7 +1689,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       int len;
       int N;
       if( TCL_OK!=Tcl_GetIntFromObj(interp, objv[2], &N) ){
-	return TCL_ERROR;
+    return TCL_ERROR;
       };
       if( pDb->zProgress ){
         Tcl_Free(pDb->zProgress);
