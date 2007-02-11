@@ -34,84 +34,84 @@ namespace Pt {
 
 class PT_API PropertyValue : public AbstractProperty
 {
-	public:
-		virtual Pt::Any value()
-		{  return _value; }
+    public:
+        virtual Pt::Any value()
+        {  return _value; }
 
-		virtual void setValue(const Pt::Any& value)
-		{
-			_value = value;
-			onValueChanged.send();
-		}
+        virtual void setValue(const Pt::Any& value)
+        {
+            _value = value;
+            onValueChanged.send();
+        }
 
-	protected:
-	    Pt::Any _value;
+    protected:
+        Pt::Any _value;
 };
 
 
 template <typename T>
 class ReadProperty : public PropertyValue
 {
-	public:
-		ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
-		: PropertyValue()
-		{
-			parent->registerProperty( name, this, &ReadProperty<T>::get );
-			_value = value;
-		}
+    public:
+        ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+        : PropertyValue()
+        {
+            parent->registerProperty( name, this, &ReadProperty<T>::get );
+            _value = value;
+        }
 
-		AbstractProperty* clone() const
-		{  return new ReadProperty<T>(*this); }
+        AbstractProperty* clone() const
+        {  return new ReadProperty<T>(*this); }
 
-		T get() const
-		{  return any_cast<T>(_value); }
+        T get() const
+        {  return any_cast<T>(_value); }
 };
 
 
 template <typename T>
 class WriteProperty : public PropertyValue
 {
-	public:
-		WriteProperty( const std::string& name, Reflectable* parent, const T& value = T() )
-		: PropertyValue()
-		{
-			parent->registerWriteProperty( name, this, &WriteProperty<T>::set );
-			_value = value;
-		}
+    public:
+        WriteProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+        : PropertyValue()
+        {
+            parent->registerWriteProperty( name, this, &WriteProperty<T>::set );
+            _value = value;
+        }
 
-		AbstractProperty* clone() const
-		{ return new WriteProperty<T>(*this); }
+        AbstractProperty* clone() const
+        { return new WriteProperty<T>(*this); }
 
-		void set( T value )
-		{
-			_value = value;
-			onValueChanged.send();
-		}
+        void set( T value )
+        {
+            _value = value;
+            onValueChanged.send();
+        }
 };
 
 
 template <typename T>
 class Property : public PropertyValue
 {
-	public:
-		Property( const std::string& name, Reflectable* parent, const T& value = T() )
-		: PropertyValue()
-		{
-			parent->registerProperty( name, this, &Property<T>::get, &Property<T>::set );
-			_value = value;
-		}
+    public:
+        Property( const std::string& name, Reflectable* parent, const T& value = T() )
+        : PropertyValue()
+        {
+            parent->registerProperty( name, this, &Property<T>::get, &Property<T>::set );
+            _value = value;
+        }
 
-		T get() const
-		{  return any_cast<T>(_value); }
+        T get() const
+        {  return any_cast<T>(_value); }
 
-		void set( T value )
-		{
-			_value = value;
-			onValueChanged.send();
-		}
+        void set( T value )
+        {
+            _value = value;
+            onValueChanged.send();
+        }
 
-		AbstractProperty* clone() const
-		{ return new Property<T>(*this); }
+        AbstractProperty* clone() const
+        { return new Property<T>(*this); }
 };
 
 } // namespace Pt

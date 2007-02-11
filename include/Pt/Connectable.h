@@ -26,34 +26,34 @@
 
 namespace Pt {
 
-	class PT_API Connectable {
-		public:
-			Connectable();
+    class PT_API Connectable {
+        public:
+            Connectable();
 
-			virtual ~Connectable();
+            virtual ~Connectable();
 
-			//! @brief Registers a Connection with the Connectable.
-			virtual void opened(const Connection& c);
+            //! @brief Registers a Connection with the Connectable.
+            virtual void opened(const Connection& c);
 
-			//! @brief Unregisters a Connection from the Connectable.
-			virtual void closed(const Connection& c);
+            //! @brief Unregisters a Connection from the Connectable.
+            virtual void closed(const Connection& c);
 
-			void clear();
+            void clear();
 
-			const std::list<Connection>& connections() const
-			{ return _connections; }
+            const std::list<Connection>& connections() const
+            { return _connections; }
 
-			std::list<Connection>& connections()
-			{ return _connections; }
+            std::list<Connection>& connections()
+            { return _connections; }
 
-		protected:
-			Connectable(const Connectable& c);
+        protected:
+            Connectable(const Connectable& c);
 
-			Connectable& operator=(const Connectable& rhs);
+            Connectable& operator=(const Connectable& rhs);
 
-		protected:
-			mutable std::list<Connection> _connections;
-	};
+        protected:
+            mutable std::list<Connection> _connections;
+    };
 
 } // !namespace Pt
 

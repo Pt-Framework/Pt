@@ -27,21 +27,21 @@
 
 namespace Pt {
 
-	class Variant {
-		public:
-			Variant() throw()
-			{}
+    class Variant {
+        public:
+            Variant() throw()
+            {}
 
-			~Variant() throw()
-			{}
+            ~Variant() throw()
+            {}
 
-			template <typename T>
-			Variant(const T& value) throw()
-			{ this->set(value); }
+            template <typename T>
+            Variant(const T& value) throw()
+            { this->set(value); }
 
-			Variant(const Variant & variant) throw()
-			: _data(variant._data)
-			{ }
+            Variant(const Variant & variant) throw()
+            : _data(variant._data)
+            { }
 
             Variant(const void* blob, int byteCount) throw()
             {
@@ -53,88 +53,88 @@ namespace Pt {
                 _data.assign((const char*)blob, byteCount);
             }
 
-			template <typename T>
-			bool get(T& type) const throw()
-			{ return VariantTraits<T>::fromData(type , _data); }
+            template <typename T>
+            bool get(T& type) const throw()
+            { return VariantTraits<T>::fromData(type , _data); }
 
-			template <typename T>
-			void set(const T& value) throw()
-			{ VariantTraits<T>::toData(_data, value); }
+            template <typename T>
+            void set(const T& value) throw()
+            { VariantTraits<T>::toData(_data, value); }
 
-			void clear()
-			{ this->_data.clear(); }
+            void clear()
+            { this->_data.clear(); }
 
-			inline bool empty() const
-			{ return this->_data.empty(); }
+            inline bool empty() const
+            { return this->_data.empty(); }
 
-			template <typename T>
-			inline Variant& operator=(const T& type) throw()
-			{
-				this->set(type);
-				return *this;
-			}
+            template <typename T>
+            inline Variant& operator=(const T& type) throw()
+            {
+                this->set(type);
+                return *this;
+            }
 
-			inline Variant& operator=(const Variant & rhs) throw()
-			{
-				if(&rhs != this)
-					this->_data = rhs._data;
+            inline Variant& operator=(const Variant & rhs) throw()
+            {
+                if(&rhs != this)
+                    this->_data = rhs._data;
 
-				return *this;
-			}
+                return *this;
+            }
 
-			inline std::string& str() throw()
-			{ return this->_data; }
+            inline std::string& str() throw()
+            { return this->_data; }
 
-			inline const std::string& str() const throw()
-			{ return  this->_data; }
+            inline const std::string& str() const throw()
+            { return  this->_data; }
 
-			inline bool operator<(const Variant& rhs) const
-			{ return this->str() < rhs.str(); }
+            inline bool operator<(const Variant& rhs) const
+            { return this->str() < rhs.str(); }
 
-			inline bool operator>(const Variant& rhs) const
-			{ return this->str() > rhs.str(); }
+            inline bool operator>(const Variant& rhs) const
+            { return this->str() > rhs.str(); }
 
-			template <typename T>
-			inline bool operator==(const T & rhs) const
-			{
-				T type;
-				this->get(type);
-				return type == rhs;
-			}
+            template <typename T>
+            inline bool operator==(const T & rhs) const
+            {
+                T type;
+                this->get(type);
+                return type == rhs;
+            }
 
-			inline bool operator==(const Variant & rhs) const
-			{
-				return this->str() == rhs.str();
-			}
+            inline bool operator==(const Variant & rhs) const
+            {
+                return this->str() == rhs.str();
+            }
 
-			inline bool operator==(const char * rhs) const
-			{
-				if( !rhs ) return this->empty();
-				return this->str() == std::string(rhs);
-			}
+            inline bool operator==(const char * rhs) const
+            {
+                if( !rhs ) return this->empty();
+                return this->str() == std::string(rhs);
+            }
 
-			inline bool operator==(const std::string & rhs) const
-			{
-				return this->str() == rhs;
-			}
+            inline bool operator==(const std::string & rhs) const
+            {
+                return this->str() == rhs;
+            }
 
-		private:
-			std::string _data;
-	};
-
-
-	inline std::ostream& operator<<(std::ostream & os, const Variant& var)
-	{
-		os << var.str();
-		return os;
-	}
+        private:
+            std::string _data;
+    };
 
 
-	inline std::istream& operator>>(std::istream & is, Variant& var)
-	{
-		std::getline( is, var.str(), static_cast<std::istream::char_type>(std::istream::traits_type::eof()) );
-		return is;
-	}
+    inline std::ostream& operator<<(std::ostream & os, const Variant& var)
+    {
+        os << var.str();
+        return os;
+    }
+
+
+    inline std::istream& operator>>(std::istream & is, Variant& var)
+    {
+        std::getline( is, var.str(), static_cast<std::istream::char_type>(std::istream::traits_type::eof()) );
+        return is;
+    }
 
 
 } // namespace Pt

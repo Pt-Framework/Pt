@@ -31,86 +31,86 @@
 namespace Pt {
 
 
-	template < typename A1 = Pt::Void,
-	            typename A2 = Pt::Void,
-	            typename A3 = Pt::Void,
-	            typename A4 = Pt::Void,
-	            typename A5 = Pt::Void >
-	class Invokable {
-		public:
-			virtual ~Invokable()
-			{}
+    template < typename A1 = Pt::Void,
+                typename A2 = Pt::Void,
+                typename A3 = Pt::Void,
+                typename A4 = Pt::Void,
+                typename A5 = Pt::Void >
+    class Invokable {
+        public:
+            virtual ~Invokable()
+            {}
 
-			virtual Invokable* cloneInvokable() const = 0;
+            virtual Invokable* cloneInvokable() const = 0;
 
-			virtual void invoke(A1, A2, A3, A4, A5) const = 0;
-	};
+            virtual void invoke(A1, A2, A3, A4, A5) const = 0;
+    };
 
-	
-	template < typename A1,
-	           typename A2,
-	           typename A3,
-	           typename A4 >
-	class Invokable<A1, A2, A3, A4, Pt::Void> {
-		public:
-			virtual ~Invokable()
-			{}
+    
+    template < typename A1,
+               typename A2,
+               typename A3,
+               typename A4 >
+    class Invokable<A1, A2, A3, A4, Pt::Void> {
+        public:
+            virtual ~Invokable()
+            {}
 
-			virtual Invokable* cloneInvokable() const = 0;
+            virtual Invokable* cloneInvokable() const = 0;
 
-			virtual void invoke(A1, A2, A3, A4) const = 0;
-	};
-
-
-	template < typename A1,
-	            typename A2,
-	            typename A3 >
-	class Invokable<A1, A2, A3, Pt::Void, Pt::Void> {
-		public:
-			virtual ~Invokable()
-			{}
-
-			virtual Invokable* cloneInvokable() const = 0;
-
-			virtual void invoke(A1, A2, A3) const = 0;
-	};
+            virtual void invoke(A1, A2, A3, A4) const = 0;
+    };
 
 
-	template < typename A1,
-	            typename A2 >
-	class Invokable<A1, A2, Pt::Void, Pt::Void, Pt::Void> {
-		public:
-			virtual ~Invokable()
-			{}
+    template < typename A1,
+                typename A2,
+                typename A3 >
+    class Invokable<A1, A2, A3, Pt::Void, Pt::Void> {
+        public:
+            virtual ~Invokable()
+            {}
 
-			virtual Invokable* cloneInvokable() const = 0;
+            virtual Invokable* cloneInvokable() const = 0;
 
-			virtual void invoke(A1, A2) const = 0;
-	};
-
-
-	template <typename A1>
-	class Invokable<A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
-		public:
-			virtual ~Invokable()
-			{}
-
-			virtual Invokable* cloneInvokable() const = 0;
-
-			virtual void invoke(A1) const = 0;
-	};
+            virtual void invoke(A1, A2, A3) const = 0;
+    };
 
 
-	template <>
-	class PT_API Invokable<Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
-		public:
-			virtual ~Invokable()
-			{}
+    template < typename A1,
+                typename A2 >
+    class Invokable<A1, A2, Pt::Void, Pt::Void, Pt::Void> {
+        public:
+            virtual ~Invokable()
+            {}
 
-			virtual Invokable* cloneInvokable() const = 0;
+            virtual Invokable* cloneInvokable() const = 0;
 
-			virtual void invoke() const = 0;
-	};
+            virtual void invoke(A1, A2) const = 0;
+    };
+
+
+    template <typename A1>
+    class Invokable<A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
+        public:
+            virtual ~Invokable()
+            {}
+
+            virtual Invokable* cloneInvokable() const = 0;
+
+            virtual void invoke(A1) const = 0;
+    };
+
+
+    template <>
+    class PT_API Invokable<Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> {
+        public:
+            virtual ~Invokable()
+            {}
+
+            virtual Invokable* cloneInvokable() const = 0;
+
+            virtual void invoke() const = 0;
+    };
 
 } // !namespace Pt
 

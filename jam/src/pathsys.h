@@ -29,22 +29,22 @@ typedef struct _pathname PATHNAME;
 typedef struct _pathpart PATHPART;
 
 struct _pathpart {
-	char	*ptr;
-	int	len;
+    char    *ptr;
+    int    len;
 };
 
 struct _pathname {
-	PATHPART	part[6];
+    PATHPART    part[6];
 # ifdef OS_VMS
-	int		parent;
+    int        parent;
 # endif
 
-# define f_grist	part[0]
-# define f_root		part[1]
-# define f_dir		part[2]
-# define f_base		part[3]
-# define f_suffix	part[4]
-# define f_member	part[5]
+# define f_grist    part[0]
+# define f_root        part[1]
+# define f_dir        part[2]
+# define f_base        part[3]
+# define f_suffix    part[4]
+# define f_member    part[5]
 
 } ;
 

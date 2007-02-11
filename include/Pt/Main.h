@@ -39,17 +39,17 @@ int wmain(int argc, wchar_t* wargv[])
     char** argv;
     argv = new char*[argc];
 
-	// convert arguments to char*
-	for (int i = 0; i < argc; ++i)
+    // convert arguments to char*
+    for (int i = 0; i < argc; ++i)
     {
-		char line[256];
+        char line[256];
         wcstombs(line, wargv[i], 256);
         char* line2 = new char[ strlen(line) + 1 ];
         strcpy(line2, line);
-	    argv[i] = line2;
+        argv[i] = line2;
     }
 
-	// call the "regular" main function
+    // call the "regular" main function
     int ret = main(argc, argv);
 
     for (int n = 0; n < argc; ++n)

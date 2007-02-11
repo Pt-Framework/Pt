@@ -21,10 +21,10 @@ public:
         while( !_items.empty() )
         {
             T* p = _items.front();
-						_allocator.destroy(p);
-						_allocator.deallocate(p, 1);
+                        _allocator.destroy(p);
+                        _allocator.deallocate(p, 1);
             _items.pop();
-				}
+                }
     }
 
     T* alloc()

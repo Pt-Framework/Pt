@@ -27,8 +27,8 @@ namespace Pt {
 inline StringData::StringData( const allocator_type& a )
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-	_str = _allocator.allocate(1, _str);
-	_str[0] = Pt::Char::null();
+    _str = _allocator.allocate(1, _str);
+    _str[0] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
@@ -36,12 +36,12 @@ inline StringData::StringData( const allocator_type& a )
 inline StringData::StringData(const Pt::Char* s, size_type length, const allocator_type& a)
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-	_str = _allocator.allocate(length + 1, _str);
-	_capacity = length;
+    _str = _allocator.allocate(length + 1, _str);
+    _capacity = length;
 
-	traits_type::copy(_str, s, length);
-	_str[length] = Pt::Char::null();
-	_length = length;
+    traits_type::copy(_str, s, length);
+    _str[length] = Pt::Char::null();
+    _length = length;
     this->updateInternalStringData();
 }
 
@@ -49,18 +49,18 @@ inline StringData::StringData(const Pt::Char* s, size_type length, const allocat
 inline StringData::StringData(const wchar_t* wstr, size_type length, const allocator_type& a)
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-	_str = _allocator.allocate(length + 1, _str);
-	_str[length] = Pt::Char::null();
-	_capacity = length;
-	_length = length;
+    _str = _allocator.allocate(length + 1, _str);
+    _str[length] = Pt::Char::null();
+    _capacity = length;
+    _length = length;
 
-	Char* str = _str;
-	for(size_t n = 0; n < length; ++n)
-	{
-		*str = *wstr;
-		++wstr;
-		++str;
-	}
+    Char* str = _str;
+    for(size_t n = 0; n < length; ++n)
+    {
+        *str = *wstr;
+        ++wstr;
+        ++str;
+    }
     this->updateInternalStringData();
 }
 
@@ -68,142 +68,142 @@ inline StringData::StringData(const wchar_t* wstr, size_type length, const alloc
 inline StringData::StringData(size_type length, Pt::Char ch)
 : _str(0), _length(0), _capacity(0), _allocator(), _n(1)
 {
-	_str = _allocator.allocate(length + 1, _str);
-	_capacity = length;
+    _str = _allocator.allocate(length + 1, _str);
+    _capacity = length;
 
-	traits_type::assign(_str, length, ch);
-	_str[length] = Pt::Char::null();
-	_length = length;
+    traits_type::assign(_str, length, ch);
+    _str[length] = Pt::Char::null();
+    _length = length;
     this->updateInternalStringData();
 }
 
 
 inline StringData::~StringData()
 {
-	_allocator.deallocate(_str, _capacity + 1 );
+    _allocator.deallocate(_str, _capacity + 1 );
 }
 
 
 inline const AtomicInt& StringData::refs() const
 {
-	return _n;
+    return _n;
 }
 
 
 inline AtomicInt& StringData::ref()
 {
-	++_n;
-	return _n;
+    ++_n;
+    return _n;
 }
 
 
 inline AtomicInt& StringData::unref()
 {
-	--_n;
-	return _n;
+    --_n;
+    return _n;
 }
 
 
 inline Pt::Char* StringData::str()
 {
-	return _str;
+    return _str;
 }
 
 
 inline Pt::Char* StringData::end()
 {
-	return _str + _length;
+    return _str + _length;
 }
 
 
 inline StringData::size_type StringData::length() const
 {
-	return _length;
+    return _length;
 }
 
 
 inline StringData::size_type StringData::capacity() const
 {
-	return _capacity;
+    return _capacity;
 }
 
 
 inline void StringData::assign(const Pt::Char* s, size_type length)
 {
-	this->allocate(length);
+    this->allocate(length);
 
-	traits_type::copy(_str, s, length);
+    traits_type::copy(_str, s, length);
 
-	_str[length] = Pt::Char::null();
-	_length = length;
+    _str[length] = Pt::Char::null();
+    _length = length;
     this->updateInternalStringData();
 }
 
 
 inline void StringData::assign(size_type length, Pt::Char ch)
 {
-	this->allocate(length);
+    this->allocate(length);
 
-	traits_type::assign(_str, length, ch);
+    traits_type::assign(_str, length, ch);
 
-	_str[length] = Pt::Char::null();
-	_length = length;
+    _str[length] = Pt::Char::null();
+    _length = length;
     this->updateInternalStringData();
 }
 
 
 inline void StringData::append(size_type n, Pt::Char ch)
 {
-	this->reserve( _length + n + 1);
+    this->reserve( _length + n + 1);
 
-	traits_type::assign( _str + _length, n, ch);
+    traits_type::assign( _str + _length, n, ch);
 
-	_length += n;
-	_str[_length] = Pt::Char::null();
+    _length += n;
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
 
 inline void StringData::append(const Pt::Char* str, size_type n)
 {
-	this->reserve( _length + n + 1);
+    this->reserve( _length + n + 1);
 
-	traits_type::copy( _str + _length, str, n);
+    traits_type::copy( _str + _length, str, n);
 
-	_length += n;
-	_str[_length] = Pt::Char::null();
+    _length += n;
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
 
 inline void StringData::insert(size_type pos, const Pt::Char* str, size_type n)
 {
-	this->reserve( _length + n );
+    this->reserve( _length + n );
 
-	traits_type::move(_str + pos + n,
-	                  _str + pos,
-	                  _length - pos);
+    traits_type::move(_str + pos + n,
+                      _str + pos,
+                      _length - pos);
 
-	traits_type::copy(_str + pos, str, n);
+    traits_type::copy(_str + pos, str, n);
 
-	_length += n;
-	_str[_length] = Pt::Char::null();
+    _length += n;
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
 
 inline void StringData::insert(size_type pos, size_type n, Pt::Char ch)
 {
-	this->reserve( _length + n );
+    this->reserve( _length + n );
 
-	traits_type::move(_str + pos + n,
-	                  _str + pos,
-	                  _length - pos);
+    traits_type::move(_str + pos + n,
+                      _str + pos,
+                      _length - pos);
 
-	traits_type::assign(_str + pos, n, ch);
+    traits_type::assign(_str + pos, n, ch);
 
-	_length += n;
-	_str[_length] = Pt::Char::null();
+    _length += n;
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
@@ -211,89 +211,89 @@ inline void StringData::insert(size_type pos, size_type n, Pt::Char ch)
 // better make size_t pos based
 inline StringData::value_type* StringData::erase(value_type* pos, size_type n)
 {
-	const size_type rpos = pos - _str;
+    const size_type rpos = pos - _str;
 
-	traits_type::move(pos,
-	                  pos + n,
-	                  _length - n - rpos);
+    traits_type::move(pos,
+                      pos + n,
+                      _length - n - rpos);
 
-	_length -= n;
-	_str[_length] = Pt::Char::null();
+    _length -= n;
+    _str[_length] = Pt::Char::null();
 
-	return _str + rpos;
+    return _str + rpos;
     this->updateInternalStringData();
 }
 
 
 inline void StringData::replace(size_type pos, size_type n, const Pt::Char* str, size_type n2)
 {
-	this->reserve( _length - n + n2);
+    this->reserve( _length - n + n2);
 
-	if( n2 > n ) {
-		traits_type::move(_str + pos + n2,
-		                  _str + pos + n,
-		                  _length - pos - n);
-		//cerr << "moved a: " << (_length - pos - n) << endl;
-	}
-	else if(n2 < n) {
-		traits_type::move(_str + pos + n2,
-		                  _str + pos + n,
-		                  _length - pos - n2);
-		//cerr << "moved b: " << (_length - pos - n2) << endl;
-	}
+    if( n2 > n ) {
+        traits_type::move(_str + pos + n2,
+                          _str + pos + n,
+                          _length - pos - n);
+        //cerr << "moved a: " << (_length - pos - n) << endl;
+    }
+    else if(n2 < n) {
+        traits_type::move(_str + pos + n2,
+                          _str + pos + n,
+                          _length - pos - n2);
+        //cerr << "moved b: " << (_length - pos - n2) << endl;
+    }
 
-	traits_type::copy(_str + pos, str, n2);
+    traits_type::copy(_str + pos, str, n2);
 
-	_length += (n2 - n);
-	_str[_length] = Pt::Char::null();
+    _length += (n2 - n);
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
 
 inline void StringData::replace(size_type pos, size_type n, size_type n2, Pt::Char ch)
 {
-	this->reserve( _length - n + n2);
+    this->reserve( _length - n + n2);
 
-	if( n2 > n ) {
-		traits_type::move(_str + pos + n2,
-		                  _str + pos + n,
-		                  _length - pos - n);
-		//cerr << "moved a: " << (_length - pos - n) << endl;
-	}
-	else if(n2 < n) {
-		traits_type::move(_str + pos + n2,
-		                  _str + pos + n,
-		                  _length - pos - n2);
-		//cerr << "moved b: " << (_length - pos - n2) << endl;
-	}
+    if( n2 > n ) {
+        traits_type::move(_str + pos + n2,
+                          _str + pos + n,
+                          _length - pos - n);
+        //cerr << "moved a: " << (_length - pos - n) << endl;
+    }
+    else if(n2 < n) {
+        traits_type::move(_str + pos + n2,
+                          _str + pos + n,
+                          _length - pos - n2);
+        //cerr << "moved b: " << (_length - pos - n2) << endl;
+    }
 
-	traits_type::assign(_str+ pos, n2, ch);
+    traits_type::assign(_str+ pos, n2, ch);
 
-	_length += (n2 - n);
-	_str[_length] = Pt::Char::null();
+    _length += (n2 - n);
+    _str[_length] = Pt::Char::null();
     this->updateInternalStringData();
 }
 
 
 inline void StringData::reserve(size_type n)
 {
-	// only resize if necessary
-	if(n <= _capacity)
-		return;
+    // only resize if necessary
+    if(n <= _capacity)
+        return;
 
-	// make room for new string AND NULL TERMINATION CHAR
-	Pt::Char* newStr = _allocator.allocate(n + 1, _str);
+    // make room for new string AND NULL TERMINATION CHAR
+    Pt::Char* newStr = _allocator.allocate(n + 1, _str);
 
-	// backup old string
-	traits_type::copy(newStr, _str, _length);
+    // backup old string
+    traits_type::copy(newStr, _str, _length);
 
-	// dealloc old string
-	if(_str) {
-		_allocator.deallocate(_str, _capacity + 1 );
-	}
+    // dealloc old string
+    if(_str) {
+        _allocator.deallocate(_str, _capacity + 1 );
+    }
 
-	_str = newStr;
-	_capacity = n;
+    _str = newStr;
+    _capacity = n;
     this->updateInternalStringData();
 }
 
@@ -304,8 +304,8 @@ inline void StringData::updateInternalStringData()
     Pt::Char* str = _str;
     for (Pt::size_t charCount = 0; ((charCount < _capacity) && (charCount < 100)); ++charCount)
     {
-    	this->_wStr[charCount] = (wchar_t)(*str);
-		++str;
+        this->_wStr[charCount] = (wchar_t)(*str);
+        ++str;
     } 
     _wStr[99] = '0';
 #endif
@@ -314,15 +314,15 @@ inline void StringData::updateInternalStringData()
 
 inline void StringData::allocate(size_type n)
 {
-	if(n <= _capacity)
-		return;
+    if(n <= _capacity)
+        return;
 
-	if(_str) {
-		_allocator.deallocate(_str, _capacity + 1 );
-	}
+    if(_str) {
+        _allocator.deallocate(_str, _capacity + 1 );
+    }
 
-	_str = _allocator.allocate(n + 1, _str);
-	_capacity = n;
+    _str = _allocator.allocate(n + 1, _str);
+    _capacity = n;
 }
 
 } // namespace Pt

@@ -26,33 +26,33 @@
 
 namespace Pt
 {
-	class PT_API RefCounted : private NonCopyable
-	{
-		public:
-			RefCounted()
-			: _refs(0)
-			{ }
+    class PT_API RefCounted : private NonCopyable
+    {
+        public:
+            RefCounted()
+            : _refs(0)
+            { }
 
-			virtual ~RefCounted()
-			{ }
+            virtual ~RefCounted()
+            { }
 
-			virtual void addRef()
-			{ ++_refs; }
+            virtual void addRef()
+            { ++_refs; }
 
-			virtual void release()
-			{
-				if (--_refs == 0)
-				{
-					delete this;
-				}
-			}
+            virtual void release()
+            {
+                if (--_refs == 0)
+                {
+                    delete this;
+                }
+            }
 
-			size_t refs() const
-			{ return _refs; }
+            size_t refs() const
+            { return _refs; }
 
-		private:
-			size_t _refs;
-	};
+        private:
+            size_t _refs;
+    };
 }
 
 #endif // PT_REFCOUNTED_H

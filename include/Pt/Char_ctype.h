@@ -31,101 +31,101 @@
 
 namespace std {
 
-	class PT_API ios_base;
+    class PT_API ios_base;
 
 #ifdef _MSC_VER
 
-	struct PT_API ctype_base;
+    struct PT_API ctype_base;
 
-	template <>
-	class PT_API ctype< Pt::Char > : public ctype_base {
+    template <>
+    class PT_API ctype< Pt::Char > : public ctype_base {
 
 #else
 
-	template <>
-	class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
+    template <>
+    class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
 
 #endif
 
-		public:
-			typedef ctype_base::mask mask;
+        public:
+            typedef ctype_base::mask mask;
 
-			static locale::id id;
+            static locale::id id;
 
-		public:
-			explicit ctype(size_t refs = 0);
+        public:
+            explicit ctype(size_t refs = 0);
 
-			virtual ~ctype();
+            virtual ~ctype();
 
-			bool is(mask m, Pt::Char c) const
-			{ return this->do_is(m, c); }
+            bool is(mask m, Pt::Char c) const
+            { return this->do_is(m, c); }
 
-			const Pt::Char* is(const Pt::Char *lo, const Pt::Char *hi, mask *vec) const
-			{ return this->do_is(lo, hi, vec); }
+            const Pt::Char* is(const Pt::Char *lo, const Pt::Char *hi, mask *vec) const
+            { return this->do_is(lo, hi, vec); }
 
-			const Pt::Char* scan_is(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-			{ return this->do_scan_is(m, lo, hi); }
+            const Pt::Char* scan_is(mask m, const Pt::Char* lo, const Pt::Char* hi) const
+            { return this->do_scan_is(m, lo, hi); }
 
-			const Pt::Char* scan_not(mask m, const Pt::Char* lo, const Pt::Char* hi) const
-			{ return this->do_scan_not(m, lo, hi); }
+            const Pt::Char* scan_not(mask m, const Pt::Char* lo, const Pt::Char* hi) const
+            { return this->do_scan_not(m, lo, hi); }
 
-			Pt::Char toupper(Pt::Char c) const
-			{ return this->do_toupper(c); }
+            Pt::Char toupper(Pt::Char c) const
+            { return this->do_toupper(c); }
 
-			const Pt::Char* toupper(Pt::Char *lo, const Pt::Char* hi) const
-			{ return this->do_toupper(lo, hi); }
+            const Pt::Char* toupper(Pt::Char *lo, const Pt::Char* hi) const
+            { return this->do_toupper(lo, hi); }
 
-			Pt::Char tolower(Pt::Char c) const
-			{ return this->do_tolower(c); }
+            Pt::Char tolower(Pt::Char c) const
+            { return this->do_tolower(c); }
 
-			const Pt::Char* tolower(Pt::Char* lo, const Pt::Char* hi) const
-			{ return this->do_tolower(lo, hi); }
+            const Pt::Char* tolower(Pt::Char* lo, const Pt::Char* hi) const
+            { return this->do_tolower(lo, hi); }
 
-			Pt::Char widen(char c) const
-			{ return this->do_widen(c); }
+            Pt::Char widen(char c) const
+            { return this->do_widen(c); }
 
-			const char* widen(const char* lo, const char* hi, Pt::Char* to) const
-			{ return this->do_widen(lo, hi, to); }
+            const char* widen(const char* lo, const char* hi, Pt::Char* to) const
+            { return this->do_widen(lo, hi, to); }
 
-			char narrow(Pt::Char c, char dfault) const
-			{ return this->do_narrow(c, dfault); }
+            char narrow(Pt::Char c, char dfault) const
+            { return this->do_narrow(c, dfault); }
 
-			const Pt::Char* narrow(const Pt::Char* lo, const Pt::Char* hi,
-			                       char dfault, char *to) const
-			{ return this->do_narrow(lo, hi, dfault, to); }
+            const Pt::Char* narrow(const Pt::Char* lo, const Pt::Char* hi,
+                                   char dfault, char *to) const
+            { return this->do_narrow(lo, hi, dfault, to); }
 
-		protected:
-			ctype_base::mask lookup(Pt::Char c) const;
+        protected:
+            ctype_base::mask lookup(Pt::Char c) const;
 
-			virtual bool do_is(mask m, Pt::Char c) const;
+            virtual bool do_is(mask m, Pt::Char c) const;
 
-			virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
-			                               mask* vec) const;
+            virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
+                                           mask* vec) const;
 
-			virtual const Pt::Char* do_scan_is(mask m, const Pt::Char* lo,
-			                                    const Pt::Char* hi) const;
+            virtual const Pt::Char* do_scan_is(mask m, const Pt::Char* lo,
+                                                const Pt::Char* hi) const;
 
-			virtual const Pt::Char* do_scan_not(mask m, const Pt::Char* lo,
-			                                     const Pt::Char* hi) const;
+            virtual const Pt::Char* do_scan_not(mask m, const Pt::Char* lo,
+                                                 const Pt::Char* hi) const;
 
-			virtual Pt::Char do_toupper(Pt::Char) const;
+            virtual Pt::Char do_toupper(Pt::Char) const;
 
-			virtual const Pt::Char* do_toupper(Pt::Char* lo, const Pt::Char* hi) const;
+            virtual const Pt::Char* do_toupper(Pt::Char* lo, const Pt::Char* hi) const;
 
-			virtual Pt::Char do_tolower(Pt::Char) const;
+            virtual Pt::Char do_tolower(Pt::Char) const;
 
-			virtual const Pt::Char* do_tolower(Pt::Char* lo, const Pt::Char* hi) const;
+            virtual const Pt::Char* do_tolower(Pt::Char* lo, const Pt::Char* hi) const;
 
-			virtual Pt::Char do_widen(char) const;
+            virtual Pt::Char do_widen(char) const;
 
-			virtual const char* do_widen(const char* lo, const char* hi,
-			                              Pt::Char* dest) const;
+            virtual const char* do_widen(const char* lo, const char* hi,
+                                          Pt::Char* dest) const;
 
-			virtual char do_narrow(Pt::Char, char dfault) const;
+            virtual char do_narrow(Pt::Char, char dfault) const;
 
-			virtual const Pt::Char* do_narrow(const Pt::Char* lo, const Pt::Char* hi,
-			                                   char dfault, char* dest) const;
-	};
+            virtual const Pt::Char* do_narrow(const Pt::Char* lo, const Pt::Char* hi,
+                                               char dfault, char* dest) const;
+    };
 
 } // namespace std
 

@@ -18,13 +18,13 @@ typedef struct timing_info
 } timing_info;
 
 void execcmd(
-	char *string,
-	void (*func)( void *closure, int status, timing_info* ),
-	void *closure,
-	LIST *shell );
+    char *string,
+    void (*func)( void *closure, int status, timing_info* ),
+    void *closure,
+    LIST *shell );
 
 int execwait();
 
-# define EXEC_CMD_OK	0
-# define EXEC_CMD_FAIL	1
-# define EXEC_CMD_INTR	2
+# define EXEC_CMD_OK    0
+# define EXEC_CMD_FAIL    1
+# define EXEC_CMD_INTR    2

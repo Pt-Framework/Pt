@@ -106,7 +106,8 @@ namespace Pt {
                         "1:                        "
                     : "=&r" (result), "=&r" (tmp)
                     : "r" (&_value), "r" (newval), "r" (oldval)
-                    : "cc", "memory");
+                    : "cc", "memory"
+                );
 
                 return result;
             }

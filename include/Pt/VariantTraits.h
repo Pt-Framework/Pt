@@ -27,55 +27,55 @@
 
 namespace Pt {
 
-	template <typename T>
-	struct VariantTraits {
-		static void toData(std::string& data, const T& value)
-		{
-			std::ostringstream os;
-			os << value;
-			data = os.str();
-		}
+    template <typename T>
+    struct VariantTraits {
+        static void toData(std::string& data, const T& value)
+        {
+            std::ostringstream os;
+            os << value;
+            data = os.str();
+        }
 
-		static bool fromData(T& value, const std::string& data)
-		{
-			std::istringstream is(data);
-			is >> value;
+        static bool fromData(T& value, const std::string& data)
+        {
+            std::istringstream is(data);
+            is >> value;
             return is.good();
-		}
-	};
+        }
+    };
 
-	template <>
-	struct VariantTraits<std::string> {
-		static void toData(std::string& data, const std::string& value)
-		{ data = value; }
+    template <>
+    struct VariantTraits<std::string> {
+        static void toData(std::string& data, const std::string& value)
+        { data = value; }
 
-		static bool fromData(std::string& value, const std::string& data)
-		{
+        static bool fromData(std::string& value, const std::string& data)
+        {
             value = data;
             return true;
         }
-	};
+    };
 
-	/** \brief Special trait for double.
+    /** \brief Special trait for double.
 
-		VariantTraits for double.
-	*/
-	template <>
-	struct VariantTraits<double> {
-		static void toData(std::string& data, const double& value)
-		{
-			std::ostringstream os;
-			os << std::scientific << std::setprecision(15) << value;
-			data = os.str();
-		}
+        VariantTraits for double.
+    */
+    template <>
+    struct VariantTraits<double> {
+        static void toData(std::string& data, const double& value)
+        {
+            std::ostringstream os;
+            os << std::scientific << std::setprecision(15) << value;
+            data = os.str();
+        }
 
-		static bool fromData(double& value, const std::string& data)
-		{
-			std::istringstream is(data);
-			is >> std::scientific >> std::setprecision(15) >> value;
-			return is.good();
-		}
-	};
+        static bool fromData(double& value, const std::string& data)
+        {
+            std::istringstream is(data);
+            is >> std::scientific >> std::setprecision(15) >> value;
+            return is.good();
+        }
+    };
 
 } // namespace Pt
 

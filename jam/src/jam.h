@@ -103,7 +103,7 @@
 # define SPLITPATH ';'
 /* Windows NT 3.51 only allows 996 chars per line, but we deal */
 /* with problem in "execnt.c".                                 */
-# define MAXLINE (maxline())	/* longest 'together' actions */
+# define MAXLINE (maxline())    /* longest 'together' actions */
 # define USE_EXECNT
 # define USE_PATHUNIX
 # define PATH_DELIM '\\'
@@ -147,7 +147,7 @@
 # define OSMINOR "OS=MINGW"
 # define OS_NT
 # define SPLITPATH ';'
-# define MAXLINE 996	/* longest 'together' actions */
+# define MAXLINE 996    /* longest 'together' actions */
 # define USE_EXECUNIX
 # define USE_PATHUNIX
 # define PATH_DELIM '\\'
@@ -174,7 +174,7 @@
 # define OSMINOR "OS=OS2"
 # define OS_OS2
 # define SPLITPATH ';'
-# define MAXLINE 996	/* longest 'together' actions */
+# define MAXLINE 996    /* longest 'together' actions */
 # define USE_EXECUNIX
 # define USE_PATHUNIX
 # define PATH_DELIM '\\'
@@ -497,7 +497,7 @@
  */
 
 # ifndef MAXLINE
-# define MAXLINE 102400	/* longest 'together' actions' */
+# define MAXLINE 102400    /* longest 'together' actions' */
 # endif
 
 # ifndef EXITOK
@@ -511,54 +511,54 @@
 
 /* You probably don't need to muck with these. */
 
-# define MAXSYM	1024	/* longest symbol in the environment */
-# define MAXJPATH 1024	/* longest filename */
+# define MAXSYM    1024    /* longest symbol in the environment */
+# define MAXJPATH 1024    /* longest filename */
 
-# define MAXJOBS 64	/* silently enforce -j limit */
-# define MAXARGC 32	/* words in $(JAMSHELL) */
+# define MAXJOBS 64    /* silently enforce -j limit */
+# define MAXARGC 32    /* words in $(JAMSHELL) */
 
 /* Jam private definitions below. */
 
-# define DEBUG_MAX	14
+# define DEBUG_MAX    14
 
 struct globs {
-	int	noexec;
-	int	jobs;
-	int	quitquick;
-	int	newestfirst;		    /* build newest sources first */
-	char debug[DEBUG_MAX];
+    int    noexec;
+    int    jobs;
+    int    quitquick;
+    int    newestfirst;            /* build newest sources first */
+    char debug[DEBUG_MAX];
     char logfilepath[MAXJPATH]; /*path to write logfiles into */
-	FILE *cmdout;		        /* print cmds, not run them */
+    FILE *cmdout;                /* print cmds, not run them */
     long timeout;               /* number of seconds to limit actions to, default 0 for no limit. */
 } ;
 
 extern struct globs globs;
 
-# define DEBUG_MAKE	( globs.debug[ 1 ] )	/* show actions when executed */
-# define DEBUG_MAKEQ	( globs.debug[ 2 ] )	/* show even quiet actions */
-# define DEBUG_EXEC	( globs.debug[ 2 ] )	/* show text of actons */
-# define DEBUG_MAKEPROG	( globs.debug[ 3 ] )	/* show progress of make0 */
-# define DEBUG_BIND	( globs.debug[ 3 ] )	/* show when files bound */
+# define DEBUG_MAKE    ( globs.debug[ 1 ] )    /* show actions when executed */
+# define DEBUG_MAKEQ    ( globs.debug[ 2 ] )    /* show even quiet actions */
+# define DEBUG_EXEC    ( globs.debug[ 2 ] )    /* show text of actons */
+# define DEBUG_MAKEPROG    ( globs.debug[ 3 ] )    /* show progress of make0 */
+# define DEBUG_BIND    ( globs.debug[ 3 ] )    /* show when files bound */
 
-# define DEBUG_EXECCMD	( globs.debug[ 4 ] )	/* show execcmds()'s work */
+# define DEBUG_EXECCMD    ( globs.debug[ 4 ] )    /* show execcmds()'s work */
 
-# define DEBUG_COMPILE	( globs.debug[ 5 ] )	/* show rule invocations */
+# define DEBUG_COMPILE    ( globs.debug[ 5 ] )    /* show rule invocations */
 
-# define DEBUG_HEADER	( globs.debug[ 6 ] )	/* show result of header scan */
-# define DEBUG_BINDSCAN	( globs.debug[ 6 ] )	/* show result of dir scan */
-# define DEBUG_SEARCH	( globs.debug[ 6 ] )	/* show attempts at binding */
+# define DEBUG_HEADER    ( globs.debug[ 6 ] )    /* show result of header scan */
+# define DEBUG_BINDSCAN    ( globs.debug[ 6 ] )    /* show result of dir scan */
+# define DEBUG_SEARCH    ( globs.debug[ 6 ] )    /* show attempts at binding */
 
-# define DEBUG_VARSET	( globs.debug[ 7 ] )	/* show variable settings */
-# define DEBUG_VARGET	( globs.debug[ 8 ] )	/* show variable fetches */
-# define DEBUG_VAREXP	( globs.debug[ 8 ] )	/* show variable expansions */
-# define DEBUG_IF	( globs.debug[ 8 ] )	/* show 'if' calculations */
-# define DEBUG_LISTS	( globs.debug[ 9 ] )	/* show list manipulation */
-# define DEBUG_SCAN	( globs.debug[ 9 ] )	/* show scanner tokens */
-# define DEBUG_MEM	( globs.debug[ 9 ] )	/* show memory use */
+# define DEBUG_VARSET    ( globs.debug[ 7 ] )    /* show variable settings */
+# define DEBUG_VARGET    ( globs.debug[ 8 ] )    /* show variable fetches */
+# define DEBUG_VAREXP    ( globs.debug[ 8 ] )    /* show variable expansions */
+# define DEBUG_IF    ( globs.debug[ 8 ] )    /* show 'if' calculations */
+# define DEBUG_LISTS    ( globs.debug[ 9 ] )    /* show list manipulation */
+# define DEBUG_SCAN    ( globs.debug[ 9 ] )    /* show scanner tokens */
+# define DEBUG_MEM    ( globs.debug[ 9 ] )    /* show memory use */
 
-# define DEBUG_PROFILE	( globs.debug[ 10 ] )	/* dump rule execution times */
-# define DEBUG_PARSE	( globs.debug[ 11 ] )	/* debug parsing */
-# define DEBUG_GRAPH	( globs.debug[ 12 ] )	/* debug dependencies */
+# define DEBUG_PROFILE    ( globs.debug[ 10 ] )    /* dump rule execution times */
+# define DEBUG_PARSE    ( globs.debug[ 11 ] )    /* debug parsing */
+# define DEBUG_GRAPH    ( globs.debug[ 12 ] )    /* debug dependencies */
 # define DEBUG_FATE ( globs.debug[ 13 ] )  /* show changes to fate in make0() */
 
 #endif

@@ -33,39 +33,39 @@ template < typename R,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void >
 class Function : public Callable<R, A1, A2, A3> {
-	public:
-		typedef R (*FuncT)(A1, A2, A3);
+    public:
+        typedef R (*FuncT)(A1, A2, A3);
 
-		Function(FuncT func) throw()
-		: _funcPtr(func) { }
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
 
-		Function(const Function& f) throw()
-		{ this->operator=(f); }
+        Function(const Function& f) throw()
+        { this->operator=(f); }
 
-		R operator()(A1 a1, A2 a2, A3 a3) const
-		{ return (*_funcPtr)(a1, a2, a3); }
+        R operator()(A1 a1, A2 a2, A3 a3) const
+        { return (*_funcPtr)(a1, a2, a3); }
 
-		Function<R, A1, A2, A3>* clone() const
-		{ return new Function(*this); }
+        Function<R, A1, A2, A3>* clone() const
+        { return new Function(*this); }
 
-		Function& operator=(const Function& function)
-		{
-			_funcPtr = function._funcPtr;
-			return (*this);
-		}
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& s) const
-		{
-			try {
-				const Function& function = dynamic_cast<const Function&>(s);
-				return _funcPtr == function._funcPtr;
-			} catch(...) {}
+        virtual bool operator==(const Slot& s) const
+        {
+            try {
+                const Function& function = dynamic_cast<const Function&>(s);
+                return _funcPtr == function._funcPtr;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		FuncT _funcPtr;
+    private:
+        FuncT _funcPtr;
 };
 
 
@@ -80,39 +80,39 @@ template < typename R,
            typename A1,
            typename A2>
 class Function<R, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::Void> {
-	public:
-		typedef R (*FuncT)( A1, A2);
+    public:
+        typedef R (*FuncT)( A1, A2);
 
-		Function(FuncT func) throw()
-		: _funcPtr(func) { }
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
 
-		Function(const Function& f) throw()
-		{ this->operator=(f); }
+        Function(const Function& f) throw()
+        { this->operator=(f); }
 
-		R operator()(A1 a1, A2 a2) const
-		{ return (*_funcPtr)(a1, a2); }
+        R operator()(A1 a1, A2 a2) const
+        { return (*_funcPtr)(a1, a2); }
 
-		Function<R, A1, A2>* clone() const
-		{ return new Function(*this); }
+        Function<R, A1, A2>* clone() const
+        { return new Function(*this); }
 
-		Function& operator=(const Function& function)
-		{
-			_funcPtr = function._funcPtr;
-			return (*this);
-		}
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Function& function = dynamic_cast<const Function&>(cb);
-				return _funcPtr == function._funcPtr;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Function& function = dynamic_cast<const Function&>(cb);
+                return _funcPtr == function._funcPtr;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		FuncT _funcPtr;
+    private:
+        FuncT _funcPtr;
 };
 
 
@@ -127,39 +127,39 @@ Function<R, A1, A2> callable(R (*func)(A1, A2)) throw()
 template < typename R,
            typename A1 >
 class Function<R, A1, Pt::Void, Pt::Void> : public Callable<R, A1, Pt::Void, Pt::Void> {
-	public:
-		typedef R (*FuncT)(A1);
+    public:
+        typedef R (*FuncT)(A1);
 
-		Function(FuncT func) throw()
-		: _funcPtr(func) { }
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
 
-		Function(const Function& f) throw()
-		{ this->operator=(f); }
+        Function(const Function& f) throw()
+        { this->operator=(f); }
 
-		R operator()(A1 a1) const
-		{ return (*_funcPtr)(a1); }
+        R operator()(A1 a1) const
+        { return (*_funcPtr)(a1); }
 
-		Function<R, A1>* clone() const
-		{ return new Function(*this); }
+        Function<R, A1>* clone() const
+        { return new Function(*this); }
 
-		Function& operator=(const Function& function)
-		{
-			_funcPtr = function._funcPtr;
-			return (*this);
-		}
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Function& function = dynamic_cast<const Function&>(cb);
-				return _funcPtr == function._funcPtr;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Function& function = dynamic_cast<const Function&>(cb);
+                return _funcPtr == function._funcPtr;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		FuncT _funcPtr;
+    private:
+        FuncT _funcPtr;
 };
 
 
@@ -172,42 +172,42 @@ Function<R, A1> callable(R (*func)(A1)) throw()
 
 template < typename R >
 class Function<R, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, Pt::Void, Pt::Void, Pt::Void> {
-	public:
-		typedef R (*FuncT)();
+    public:
+        typedef R (*FuncT)();
 
-		Function(FuncT func) throw()
-		: _funcPtr(func) { }
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
 
-		Function(const Function& f) throw()
-		{ this->operator=(f); }
+        Function(const Function& f) throw()
+        { this->operator=(f); }
 
-		R operator()() const
-		{ return this->call(); }
+        R operator()() const
+        { return this->call(); }
 
-		R call() const
-		{ return (*_funcPtr)(); }
+        R call() const
+        { return (*_funcPtr)(); }
 
-		Function<R>* clone() const
-		{ return new Function(*this); }
+        Function<R>* clone() const
+        { return new Function(*this); }
 
-		Function& operator=(const Function& function)
-		{
-			_funcPtr = function._funcPtr;
-			return (*this);
-		}
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Function& function = dynamic_cast<const Function&>(cb);
-				return _funcPtr == function._funcPtr;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Function& function = dynamic_cast<const Function&>(cb);
+                return _funcPtr == function._funcPtr;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		FuncT _funcPtr;
+    private:
+        FuncT _funcPtr;
 };
 
 
@@ -224,25 +224,25 @@ template < typename R,
             typename A3 = Pt::Void
           >
 class FunctionSlot : public BasicSlot<R, A1, A2, A3> {
-	public:
-		FunctionSlot(const Function<R, A1, A2, A3>& func)
-		: _func( func )
-		{}
+    public:
+        FunctionSlot(const Function<R, A1, A2, A3>& func)
+        : _func( func )
+        {}
 
-		virtual const void* callable() const
-		{ return &_func; }
+        virtual const void* callable() const
+        { return &_func; }
 
-		Slot* clone() const
-		{ return new FunctionSlot(*this); }
+        Slot* clone() const
+        { return new FunctionSlot(*this); }
 
-		virtual void opened(const Connection& c)
-		{ }
+        virtual void opened(const Connection& c)
+        { }
 
-		virtual void closed(const Connection& c)
-		{ }
+        virtual void closed(const Connection& c)
+        { }
 
-	private:
-		Function<R, A1, A2, A3> _func;
+    private:
+        Function<R, A1, A2, A3> _func;
 };
 
 

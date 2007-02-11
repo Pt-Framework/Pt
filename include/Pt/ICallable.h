@@ -25,20 +25,20 @@
 //! \addtogroup Pt
 namespace Pt {
 
-	class PT_API ICallable
-	{
-		public:
-			virtual ~ICallable()
-			{}
+    class PT_API ICallable
+    {
+        public:
+            virtual ~ICallable()
+            {}
 
-			virtual size_t argSize() const = 0;
+            virtual size_t argSize() const = 0;
 
-			virtual const char* argName(size_t index) const = 0;
+            virtual const char* argName(size_t index) const = 0;
 
-			virtual const std::type_info& argType(size_t index) const = 0;
+            virtual const std::type_info& argType(size_t index) const = 0;
 
-			virtual void call(const Args& args) = 0;
-	};
+            virtual void call(const Args& args) = 0;
+    };
 
 } // namespace Pt
 

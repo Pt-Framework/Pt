@@ -23,25 +23,25 @@
 
 namespace Pt {
 
-	template <bool, typename A, typename B>
-	struct IfElse {
-	};
+    template <bool, typename A, typename B>
+    struct IfElse {
+    };
 
 
-	template <typename A, typename B>
-	struct IfElse<true, A, B> {
-		public:
-			typedef A ResultT;
-			typedef B NotResultT;
-	};
+    template <typename A, typename B>
+    struct IfElse<true, A, B> {
+        public:
+            typedef A ResultT;
+            typedef B NotResultT;
+    };
 
 
-	template <typename A, typename B>
-	struct IfElse<false, A, B> {
-		public:
-			typedef A NotResultT;
-			typedef B ResultT;
-	};
+    template <typename A, typename B>
+    struct IfElse<false, A, B> {
+        public:
+            typedef A NotResultT;
+            typedef B ResultT;
+    };
 
 } // !namespace Pt
 

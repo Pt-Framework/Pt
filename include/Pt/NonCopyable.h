@@ -27,47 +27,47 @@
 
 namespace Pt {
 
-	/** @brief Protects derived classes from being copied
-	 *  @ingroup Pt
-	 *
-	 *  The NonCopyable class has a private copy constructor and assignment
-	 *  operator, therefore derived classes cannot be copied. This class
-	 *  is meant to be used as a mix-in class as shown in the code example
-	 *  below.
-	 *
-	 *  @code
-	 *  	class MyClass : public NonCopyable {
-	 *			// ...
-	 *			// The class' implementation
-	 *			// ...
-	 *		};
-	 *  @endcode
-	 *
-	 *	Trying to copy a NonCopyable object will cause compile-time error.
-	 */
-	class PT_API NonCopyable {
-		public:
-			/** @brief Default constructor
-			*/
-			NonCopyable()
-			{ }
+    /** @brief Protects derived classes from being copied
+     *  @ingroup Pt
+     *
+     *  The NonCopyable class has a private copy constructor and assignment
+     *  operator, therefore derived classes cannot be copied. This class
+     *  is meant to be used as a mix-in class as shown in the code example
+     *  below.
+     *
+     *  @code
+     *      class MyClass : public NonCopyable {
+     *            // ...
+     *            // The class' implementation
+     *            // ...
+     *        };
+     *  @endcode
+     *
+     *    Trying to copy a NonCopyable object will cause compile-time error.
+     */
+    class PT_API NonCopyable {
+        public:
+            /** @brief Default constructor
+            */
+            NonCopyable()
+            { }
 
-			/** @brief Destructor
-			*/
-			~NonCopyable()
-			{ }
+            /** @brief Destructor
+            */
+            ~NonCopyable()
+            { }
 
-		private:
-			/** @brief Declared as private to prevent usage of copy constructor
-			*/
-			NonCopyable(const NonCopyable&); // No need to really implement it
-			//{ }
+        private:
+            /** @brief Declared as private to prevent usage of copy constructor
+            */
+            NonCopyable(const NonCopyable&); // No need to really implement it
+            //{ }
 
-			/**  @brief Declared as private to prevent usage of assignment operator
-			*/
-			NonCopyable& operator=(const NonCopyable&); // No need to really implement it
-			//{ return *this; }
-	};
+            /**  @brief Declared as private to prevent usage of assignment operator
+            */
+            NonCopyable& operator=(const NonCopyable&); // No need to really implement it
+            //{ return *this; }
+    };
 
 }
 

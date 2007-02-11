@@ -101,7 +101,8 @@ namespace Pt {
                     "2:    isync               "
                     : "=&r" (result)
                     : "b" (&_value), "r" (oldval), "r" (newval)
-                    : "cr0", "memory");
+                    : "cr0", "memory"
+                );
 
                 return result == 0;
             }

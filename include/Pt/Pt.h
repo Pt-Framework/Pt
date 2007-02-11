@@ -36,115 +36,115 @@ ptv::io namespace.
 
 namespace Pt {
 
-	class Any;
+    class Any;
 
     template <typename T>
-	struct AnyTraits;
+    struct AnyTraits;
 
-	template < typename R,
-	            typename A1,
-	            typename A2,
-	            typename A3,
-	            typename A4,
-	            typename A5 >
-	class Callable;
+    template < typename R,
+                typename A1,
+                typename A2,
+                typename A3,
+                typename A4,
+                typename A5 >
+    class Callable;
 
-	class Connectable;
-	class Connection;
-	class ICallable;
+    class Connectable;
+    class Connection;
+    class ICallable;
 
     // NOTE: change when API is ready
-	//class PropertyProxy
-	//class Property;
+    //class PropertyProxy
+    //class Property;
 
-	class Time;
+    class Time;
 
-	template < typename R,
+    template < typename R,
                 typename C,
-	            typename A1,
-	            typename A2,
-	            typename A3,
-	            typename A4,
-	            typename A5 >
-	class ConstMethod;
+                typename A1,
+                typename A2,
+                typename A3,
+                typename A4,
+                typename A5 >
+    class ConstMethod;
 
     template <typename T>
-	struct TypeInfo;
+    struct TypeInfo;
 
     class Date;
 
-	template < typename A1,
-	            typename A2,
-	            typename A3,
-	            typename A4,
-	            typename A5 >
-	class Invokable;
+    template < typename A1,
+                typename A2,
+                typename A3,
+                typename A4,
+                typename A5 >
+    class Invokable;
 
     class RefCounted;
-	class Application;
-	class DateTime;
-	class Reflectable;
+    class Application;
+    class DateTime;
+    class Reflectable;
 
     template <typename T>
-	struct TypeTraits;
+    struct TypeTraits;
 
     template <typename T>
-	class Arg;
+    class Arg;
 
-	template < typename R,
-	            typename A1,
-	            typename A2,
-	            typename A3 >
-	class Delegate;
+    template < typename R,
+                typename A1,
+                typename A2,
+                typename A3 >
+    class Delegate;
 
-	template < typename A1,
-	            typename A2,
-	            typename A3 >
-	class Signal;
+    template < typename A1,
+                typename A2,
+                typename A3 >
+    class Signal;
 
-	class Args;
-	class Event;
+    class Args;
+    class Event;
 
-	template <typename T, typename AllocatorT >
-	class Singleton;
+    template <typename T, typename AllocatorT >
+    class Singleton;
 
-	class Variant;
-	class AtomicInt;
-	class Exception;
-	class Slot;
+    class Variant;
+    class AtomicInt;
+    class Exception;
+    class Slot;
 
-	template < typename R,
-	            typename A1,
-	            typename A2,
-	            typename A3,
-	            typename A4,
-	            typename A5 >
-	class BasicSlot;
+    template < typename R,
+                typename A1,
+                typename A2,
+                typename A3,
+                typename A4,
+                typename A5 >
+    class BasicSlot;
 
     template <typename T>
-	class VariantTraits;
+    class VariantTraits;
 
-	template < typename R,
-	            typename A1,
-	            typename A2,
-	            typename A3 >
-	class Function;
+    template < typename R,
+                typename A1,
+                typename A2,
+                typename A3 >
+    class Function;
 
-	template < typename R,
+    template < typename R,
                 typename C,
-	            typename A1,
-	            typename A2,
-	            typename A3,
-	            typename A4,
-	            typename A5 >
-	class Method;
+                typename A1,
+                typename A2,
+                typename A3,
+                typename A4,
+                typename A5 >
+    class Method;
 
-	template <typename T, typename ModelT >
-	class SmartPtr;
+    template <typename T, typename ModelT >
+    class SmartPtr;
 
-	struct Void;
-	class SourceInfo;
-	class NonCopyable;
+    struct Void;
+    class SourceInfo;
+    class NonCopyable;
 
 }
 
@@ -185,16 +185,16 @@ the following struct can have an overloaded swab():
 @code
 struct value
 {
-	value(char a, uint16_t b, char c)
-	: _a(a), _b(b), _c(c)
-	char _a;
-	uint16_t _b;
-	char _c;
+    value(char a, uint16_t b, char c)
+    : _a(a), _b(b), _c(c)
+    char _a;
+    uint16_t _b;
+    char _c;
 };
 
 value swab(const value& val)
 {
-	return value(val._a, swab(val.b), val._c);
+    return value(val._a, swab(val.b), val._c);
 }
 @endcode
 
@@ -238,12 +238,12 @@ the function name, the source file and the line where the esxception was thrown:
 
 @code
 try {
-	// monitored code
+    // monitored code
 }
 catch(ptv::Exception& e) {
-	cerr << "Exception in " << e.sourceInfo().func() << endl;
-	     << e.sourceInfo().file() << ": " << e.sourceInfo().line() << endl;
-	     << e.what() << endl;
+    cerr << "Exception in " << e.sourceInfo().func() << endl;
+         << e.sourceInfo().file() << ": " << e.sourceInfo().line() << endl;
+         << e.what() << endl;
 }
 @endcode
 

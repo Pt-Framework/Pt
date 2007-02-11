@@ -36,37 +36,37 @@ template < typename R,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
 class Method : public Callable<R, A1, A2, A3, A4, A5> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
-		typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
 
-		explicit Method(C* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(C* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, A1, A2, A3>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, A1, A2, A3>()
+        { this->operator=(method); }
 
-		C& object()
-		{ return *_object;}
+        C& object()
+        { return *_object;}
 
-		const C& object() const
-		{ return *_object;}
+        const C& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
-		{ return (_object->*_memFunc)(a1, a2, a3, a4, a5); }
+        inline R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+        { return (_object->*_memFunc)(a1, a2, a3, a4, a5); }
 
-		Method<R, C, A1, A2, A3, A4, A5>* clone() const
-		{ return new Method(*this); }
+        Method<R, C, A1, A2, A3, A4, A5>* clone() const
+        { return new Method(*this); }
 
-	private:
-		C* _object;
-		MemFuncT _memFunc;
+    private:
+        C* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -82,37 +82,37 @@ template < typename R,
            typename A3,
            typename A4 >
 class Method<R, C, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)(A1, A2, A3, A4);
-		typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4) const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1, A2, A3, A4);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4) const;
 
-		explicit Method(C* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(C* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, A1, A2, A3, A4>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, A1, A2, A3, A4>()
+        { this->operator=(method); }
 
-		C& object()
-		{ return *_object;}
+        C& object()
+        { return *_object;}
 
-		const C& object() const
-		{ return *_object;}
+        const C& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
-		{ return (_object->*_memFunc)(a1, a2, a3, a4); }
+        inline R operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
+        { return (_object->*_memFunc)(a1, a2, a3, a4); }
 
-		Method<R, C, A1, A2, A3, A4>* clone() const
-		{ return new Method(*this); }
+        Method<R, C, A1, A2, A3, A4>* clone() const
+        { return new Method(*this); }
 
-	private:
-		C* _object;
-		MemFuncT _memFunc;
+    private:
+        C* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -127,54 +127,54 @@ template < typename R,
            typename A2,
            typename A3>
 class Method<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)(A1, A2, A3);
-		typedef R (C::*ConstMemFuncT)(A1, A2, A3) const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1, A2, A3);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3) const;
 
-		explicit Method(C* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(C* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, A1, A2, A3>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, A1, A2, A3>()
+        { this->operator=(method); }
 
-		C& object()
-		{ return *_object;}
+        C& object()
+        { return *_object;}
 
-		const C& object() const
-		{ return *_object;}
+        const C& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()(A1 a1, A2 a2, A3 a3) const
-		{ return (_object->*_memFunc)(a1, a2, a3); }
+        inline R operator()(A1 a1, A2 a2, A3 a3) const
+        { return (_object->*_memFunc)(a1, a2, a3); }
 
-		Method<R, C, A1, A2, A3>* clone() const
-		{ return new Method(*this); }
+        Method<R, C, A1, A2, A3>* clone() const
+        { return new Method(*this); }
 
-		Method& operator=(const Method& method)
-		{
-			_object = method._object;
-			_memFunc = method._memFunc;
-			return (*this);
-		}
+        Method& operator=(const Method& method)
+        {
+            _object = method._object;
+            _memFunc = method._memFunc;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Method& method = dynamic_cast<const Method&>(cb);
-				return _object == method._object && _memFunc == method._memFunc;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Method& method = dynamic_cast<const Method&>(cb);
+                return _object == method._object && _memFunc == method._memFunc;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		C* _object;
-		MemFuncT _memFunc;
+    private:
+        C* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -190,54 +190,54 @@ template < typename R,
            typename A1,
            typename A2 >
 class Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)(A1, A2);
-		typedef R (C::*ConstMemFuncT)(A1, A2) const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1, A2);
+        typedef R (C::*ConstMemFuncT)(A1, A2) const;
 
-		explicit Method(ClassT* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(ClassT* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, A1, A2, Pt::Void>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, A1, A2, Pt::Void>()
+        { this->operator=(method); }
 
-		ClassT& object()
-		{ return *_object;}
+        ClassT& object()
+        { return *_object;}
 
-		const ClassT& object() const
-		{ return *_object;}
+        const ClassT& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()(A1 a1, A2 a2) const
-		{ return (_object->*_memFunc)(a1, a2); }
+        inline R operator()(A1 a1, A2 a2) const
+        { return (_object->*_memFunc)(a1, a2); }
 
-		Method<R, ClassT, A1, A2>* clone() const
-		{ return new Method(*this); }
+        Method<R, ClassT, A1, A2>* clone() const
+        { return new Method(*this); }
 
-		Method& operator=(const Method& method)
-		{
-			_object = method._object;
-			_memFunc = method._memFunc;
-			return (*this);
-		}
+        Method& operator=(const Method& method)
+        {
+            _object = method._object;
+            _memFunc = method._memFunc;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Method& method = dynamic_cast<const Method&>(cb);
-				return _object == method._object && _memFunc == method._memFunc;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Method& method = dynamic_cast<const Method&>(cb);
+                return _object == method._object && _memFunc == method._memFunc;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		ClassT* _object;
-		MemFuncT _memFunc;
+    private:
+        ClassT* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -250,57 +250,57 @@ template < typename R,
            class C,
            typename A1 >
 class Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)(A1);
-		typedef R (C::*ConstMemFuncT)(A1) const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1);
+        typedef R (C::*ConstMemFuncT)(A1) const;
 
-		explicit Method(ClassT* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(ClassT* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, A1, Pt::Void, Pt::Void>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, A1, Pt::Void, Pt::Void>()
+        { this->operator=(method); }
 
-		ClassT& object()
-		{ return *_object;}
+        ClassT& object()
+        { return *_object;}
 
-		const ClassT& object() const
-		{ return *_object;}
+        const ClassT& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()(A1 a1) const
-		{ return (_object->*_memFunc)(a1); }
+        inline R operator()(A1 a1) const
+        { return (_object->*_memFunc)(a1); }
 
-		Method<R, ClassT, A1>* clone() const
-		{ return new Method(*this); }
+        Method<R, ClassT, A1>* clone() const
+        { return new Method(*this); }
 
-		Method& operator=(const Method& method)
-		{
-			_object = method._object;
-			_memFunc = method._memFunc;
-			return (*this);
-		}
+        Method& operator=(const Method& method)
+        {
+            _object = method._object;
+            _memFunc = method._memFunc;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Method& method = dynamic_cast<const Method&>(cb);
-				return _object == method._object && _memFunc == method._memFunc;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Method& method = dynamic_cast<const Method&>(cb);
+                return _object == method._object && _memFunc == method._memFunc;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-		//virtual void closed(const Connection& c)
-		//{ _object->closed(c); }
+        //virtual void closed(const Connection& c)
+        //{ _object->closed(c); }
 
-	private:
-		ClassT* _object;
-		MemFuncT _memFunc;
+    private:
+        ClassT* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -312,54 +312,54 @@ Method<R,ClassT, A1> callable( ClassT* obj, R (BaseT::*ptr)(A1) ) throw()
 template < typename R,
            class C >
 class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
-	public:
-		typedef C ClassT;
-		typedef R (C::*MemFuncT)();
-		typedef R (C::*ConstMemFuncT)() const;
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)();
+        typedef R (C::*ConstMemFuncT)() const;
 
-		explicit Method(ClassT* object, MemFuncT ptr) throw()
-		: _object(object), _memFunc(ptr)
-		{ }
+        explicit Method(ClassT* object, MemFuncT ptr) throw()
+        : _object(object), _memFunc(ptr)
+        { }
 
-		Method(const Method& method) throw()
-		: Callable<R, Pt::Void, Pt::Void, Pt::Void>()
-		{ this->operator=(method); }
+        Method(const Method& method) throw()
+        : Callable<R, Pt::Void, Pt::Void, Pt::Void>()
+        { this->operator=(method); }
 
-		ClassT& object()
-		{ return *_object;}
+        ClassT& object()
+        { return *_object;}
 
-		const ClassT& object() const
-		{ return *_object;}
+        const ClassT& object() const
+        { return *_object;}
 
-		const MemFuncT& method() const
-		{ return _memFunc;}
+        const MemFuncT& method() const
+        { return _memFunc;}
 
-		inline R operator()() const
-		{ return (_object->*_memFunc)(); }
+        inline R operator()() const
+        { return (_object->*_memFunc)(); }
 
-		Method<R, ClassT>* clone() const
-		{ return new Method(*this); }
+        Method<R, ClassT>* clone() const
+        { return new Method(*this); }
 
-		Method& operator=(const Method& method)
-		{
-			_object = method._object;
-			_memFunc = method._memFunc;
-			return (*this);
-		}
+        Method& operator=(const Method& method)
+        {
+            _object = method._object;
+            _memFunc = method._memFunc;
+            return (*this);
+        }
 
-		virtual bool operator==(const Slot& cb) const
-		{
-			try {
-				const Method& method = dynamic_cast<const Method&>(cb);
-				return _object == method._object && _memFunc == method._memFunc;
-			} catch(...) {}
+        virtual bool operator==(const Slot& cb) const
+        {
+            try {
+                const Method& method = dynamic_cast<const Method&>(cb);
+                return _object == method._object && _memFunc == method._memFunc;
+            } catch(...) {}
 
-			return false;
-		}
+            return false;
+        }
 
-	private:
-		ClassT* _object;
-		MemFuncT _memFunc;
+    private:
+        ClassT* _object;
+        MemFuncT _memFunc;
 };
 
 
@@ -378,33 +378,33 @@ template < typename R,
             typename A5 = Pt::Void
           >
 class MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
-	public:
-		MethodSlot(const Method<R, C, A1, A2, A3, A4, A5>& method)
-		: _method(method)
-		{}
+    public:
+        MethodSlot(const Method<R, C, A1, A2, A3, A4, A5>& method)
+        : _method(method)
+        {}
 
-		Slot* clone() const
-		{
-			return new MethodSlot(*this);
-		}
+        Slot* clone() const
+        {
+            return new MethodSlot(*this);
+        }
 
-		virtual const void* callable() const
-		{ return &_method; }
+        virtual const void* callable() const
+        { return &_method; }
 
-		virtual void opened(const Connection& c)
-		{
-			Connectable& connectable = _method.object();
-			connectable.opened(c);
-		}
+        virtual void opened(const Connection& c)
+        {
+            Connectable& connectable = _method.object();
+            connectable.opened(c);
+        }
 
-		virtual void closed(const Connection& c)
-		{
-			Connectable& connectable = _method.object();
-			connectable.closed(c);
-		}
+        virtual void closed(const Connection& c)
+        {
+            Connectable& connectable = _method.object();
+            connectable.closed(c);
+        }
 
-	private:
-		Method<R, C, A1, A2, A3, A4, A5> _method;
+    private:
+        Method<R, C, A1, A2, A3, A4, A5> _method;
 };
 
 

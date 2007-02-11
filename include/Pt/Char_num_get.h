@@ -29,86 +29,86 @@
 
 namespace std {
 
-	template<typename InIterT>
-	class num_get<Pt::Char, InIterT> : public locale::facet {
-		public:
-			typedef Pt::Char char_type;
-			typedef InIterT iter_type;
+    template<typename InIterT>
+    class num_get<Pt::Char, InIterT> : public locale::facet {
+        public:
+            typedef Pt::Char char_type;
+            typedef InIterT iter_type;
 
-			static locale::id id;
+            static locale::id id;
 
-			explicit num_get(size_t refs = 0)
-			: facet(refs)
-			{ }
+            explicit num_get(size_t refs = 0)
+            : facet(refs)
+            { }
 
-			virtual ~num_get()
-			{ }
+            virtual ~num_get()
+            { }
 
-			iter_type get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, bool& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, bool& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, long& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, long& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned short& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned short& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned int& v)   const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned int& v)   const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned long& v)  const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, unsigned long& v)  const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, float& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, float& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, double& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, double& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, long double& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, long double& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-			iter_type
-			get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, void*& v) const
-			{ return this->do_get(in, end, io, err, v); }
+            iter_type
+            get(iter_type in, iter_type end, ios_base& io, ios_base::iostate& err, void*& v) const
+            { return this->do_get(in, end, io, err, v); }
 
-		protected:
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, bool&) const
-			{}
+        protected:
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, bool&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, long&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned short&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned short&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned int&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned int&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned long&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, unsigned long&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, float&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, float&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, double&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, double&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, long double&) const
-			{}
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, long double&) const
+            {}
 
-			virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, void*&) const
-			{}
-	};
+            virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate& err, void*&) const
+            {}
+    };
 
-	template<typename InIterT>
-	locale::id num_get<Pt::Char, InIterT>::id;
+    template<typename InIterT>
+    locale::id num_get<Pt::Char, InIterT>::id;
 
 } // namespace std
 

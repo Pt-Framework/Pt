@@ -41,150 +41,150 @@
  * \endcode
  */
 
-	#ifdef PT_WITHOUT_STD_LOCALE
+    #ifdef PT_WITHOUT_STD_LOCALE
 
-		namespace std {
+        namespace std {
 
-			class PT_API locale
-			{
-				public:
-					class PT_API facet
-					{
-						public:
-							facet(size_t refs)
-								:_refs(refs)
-							{}
+            class PT_API locale
+            {
+                public:
+                    class PT_API facet
+                    {
+                        public:
+                            facet(size_t refs)
+                                :_refs(refs)
+                            {}
 
-						private:
-							size_t _refs;
-					};
+                        private:
+                            size_t _refs;
+                    };
 
-					class id
-					{
-					};
+                    class id
+                    {
+                    };
 
-				private:
-					int _dummy;
-			};
-
-
-			class PT_API ctype_base
-			{
-				public:
-					enum {
-						alpha  = 1 << 5,
-						cntrl  = 1 << 2,
-						digit  = 1 << 6,
-						lower  = 1 << 4,
-						print  = 1 << 1,
-						punct  = 1 << 7,
-						space  = 1 << 0,
-						upper  = 1 << 3,
-						xdigit = 1 << 8,
-						alnum  = alpha | digit,
-						graph  = alnum | punct
-					};
-
-					typedef short mask;
-
-					ctype_base(size_t _refs = 0)
-					{ }
-			};
+                private:
+                    int _dummy;
+            };
 
 
-			template <typename T>
-			class ctype
-			{
-				public:
-					ctype()
-					{ }
-			};
+            class PT_API ctype_base
+            {
+                public:
+                    enum {
+                        alpha  = 1 << 5,
+                        cntrl  = 1 << 2,
+                        digit  = 1 << 6,
+                        lower  = 1 << 4,
+                        print  = 1 << 1,
+                        punct  = 1 << 7,
+                        space  = 1 << 0,
+                        upper  = 1 << 3,
+                        xdigit = 1 << 8,
+                        alnum  = alpha | digit,
+                        graph  = alnum | punct
+                    };
 
-			//typedef int mbstate_t;
+                    typedef short mask;
 
-			class PT_API codecvt_base
-			{
-				public:
-					enum {
-						ok, partial, error, noconv
-					};
-
-					typedef int result;
-
-					codecvt_base(size_t _Refs = 0)
-					{
-					}
-
-					class id
-					{
-					};
-			};
+                    ctype_base(size_t _refs = 0)
+                    { }
+            };
 
 
-		template<class internT, class externT, class stateT>
-		class codecvt : public codecvt_base
-		{
-			public:
-				typedef internT intern_type;
-				typedef externT extern_type;
-				typedef stateT state_type;
+            template <typename T>
+            class ctype
+            {
+                public:
+                    ctype()
+                    { }
+            };
 
-				explicit codecvt(size_t refs = 0)
-				: codecvt_base(refs)
-				{}
+            //typedef int mbstate_t;
 
-				result in(stateT& state,
-						  const externT *from, const externT *from_end, const externT *& from_next,
-						  internT *to, internT *to_limit, internT *& to_next) const
-				{ return 0; }
+            class PT_API codecvt_base
+            {
+                public:
+                    enum {
+                        ok, partial, error, noconv
+                    };
 
-				result out(stateT& state,
-						   const internT *from, const internT *from_end, const internT *& from_next,
-						   externT *to, externT *to_limit, externT *& to_next) const
-				{ return 0; }
+                    typedef int result;
 
-				result unshift(stateT& state, externT to, externT to_end, externT*& to_next) const
-				{ return 0; }
+                    codecvt_base(size_t _Refs = 0)
+                    {
+                    }
 
-				int encoding() const
-				{ return 0; }
+                    class id
+                    {
+                    };
+            };
 
-				bool always_noconv() const
-				{ return false; }
 
-				int length(stateT& state, const externT* from, const externT* end, size_t max) const
-				{ return 0; }
+        template<class internT, class externT, class stateT>
+        class codecvt : public codecvt_base
+        {
+            public:
+                typedef internT intern_type;
+                typedef externT extern_type;
+                typedef stateT state_type;
 
-				int max_length() const
-				{ return 0; }
+                explicit codecvt(size_t refs = 0)
+                : codecvt_base(refs)
+                {}
 
-			protected:
-				virtual ~codecvt() = 0;
+                result in(stateT& state,
+                          const externT *from, const externT *from_end, const externT *& from_next,
+                          internT *to, internT *to_limit, internT *& to_next) const
+                { return 0; }
 
-				virtual result do_in(stateT& state,
-									 const externT *from, const externT* from_end, const externT*& from_next,
-									 internT* to, internT* to_limit, internT*& to_next) const = 0;
+                result out(stateT& state,
+                           const internT *from, const internT *from_end, const internT *& from_next,
+                           externT *to, externT *to_limit, externT *& to_next) const
+                { return 0; }
 
-				virtual result do_out(stateT&,
-									  const internT* from, const internT* from_end, const internT*& from_next,
-									  externT* to, externT* to_limit, externT*& to_next) const = 0;
+                result unshift(stateT& state, externT to, externT to_end, externT*& to_next) const
+                { return 0; }
 
-				virtual result do_unshift(stateT& state, externT* to, externT* to_limit, externT*& to_next) const = 0;
+                int encoding() const
+                { return 0; }
 
-				virtual int do_length(const stateT& state, const externT* from, const externT* end, size_t max) const = 0;
+                bool always_noconv() const
+                { return false; }
 
-				virtual int do_encoding() const = 0;
+                int length(stateT& state, const externT* from, const externT* end, size_t max) const
+                { return 0; }
 
-				virtual bool do_always_noconv() const = 0;
+                int max_length() const
+                { return 0; }
 
-				virtual int do_max_length() const = 0;
-		};
+            protected:
+                virtual ~codecvt() = 0;
 
-		} // namespace std
+                virtual result do_in(stateT& state,
+                                     const externT *from, const externT* from_end, const externT*& from_next,
+                                     internT* to, internT* to_limit, internT*& to_next) const = 0;
 
-	#else
-		#include <locale>
+                virtual result do_out(stateT&,
+                                      const internT* from, const internT* from_end, const internT*& from_next,
+                                      externT* to, externT* to_limit, externT*& to_next) const = 0;
 
-	#endif
+                virtual result do_unshift(stateT& state, externT* to, externT* to_limit, externT*& to_next) const = 0;
+
+                virtual int do_length(const stateT& state, const externT* from, const externT* end, size_t max) const = 0;
+
+                virtual int do_encoding() const = 0;
+
+                virtual bool do_always_noconv() const = 0;
+
+                virtual int do_max_length() const = 0;
+        };
+
+        } // namespace std
+
+    #else
+        #include <locale>
+
+    #endif
 
 #endif
