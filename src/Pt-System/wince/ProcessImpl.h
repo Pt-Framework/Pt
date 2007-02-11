@@ -29,17 +29,17 @@ namespace System {
 
 class ProcessImpl : public ProcessImplBase
 {
-	public:
-		ProcessImpl(const string& command);
+    public:
+        ProcessImpl(const string& command);
 
-		static std::string getEnvVar(const string& name);
-		
-		static void setEnvVar(const string& name, const string& value);
-		
-		static void unsetEnvVar(const string& name)
-		{
-			ProcessImpl::setEnvVar(name, "");
-		}
+        static std::string getEnvVar(const string& name);
+        
+        static void setEnvVar(const string& name, const string& value);
+        
+        static void unsetEnvVar(const string& name)
+        {
+            ProcessImpl::setEnvVar(name, "");
+        }
 };
 
 } // namespace System

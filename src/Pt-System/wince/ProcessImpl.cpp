@@ -32,69 +32,69 @@ ProcessImpl::ProcessImpl(const string& command)
 
 std::string ProcessImpl::getEnvVar(const string& name)
 {
-	HKEY hk;
+    HKEY hk;
 
-	long ret = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
-			                    _T("Software\\ptv\\environment"),
-			                    0,
-			                    KEY_QUERY_VALUE,
-			                    &hk );
+    long ret = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
+                                _T("Software\\ptv\\environment"),
+                                0,
+                                KEY_QUERY_VALUE,
+                                &hk );
 
-	if(ret != ERROR_SUCCESS)
-	{
-		throw std::runtime_error("Could not open Registry" + PT_SOURCEINFO);
-	}
+    if(ret != ERROR_SUCCESS)
+    {
+        throw std::runtime_error("Could not open Registry" + PT_SOURCEINFO);
+    }
 
-	DWORD type = REG_SZ;
-	DWORD byteLength = MAX_PATH * sizeof(TCHAR);
-	TCHAR data[MAX_PATH] = {0};
-	std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
+    DWORD type = REG_SZ;
+    DWORD byteLength = MAX_PATH * sizeof(TCHAR);
+    TCHAR data[MAX_PATH] = {0};
+    std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
 
-	ret = RegQueryValueEx(hk, wname.c_str(), NULL, &type, (LPBYTE)data, &byteLength);
+    ret = RegQueryValueEx(hk, wname.c_str(), NULL, &type, (LPBYTE)data, &byteLength);
 
-	RegCloseKey(hk);
+    RegCloseKey(hk);
 
-	if(ret != ERROR_SUCCESS)
-	{
-		throw std::runtime_error("Could not query Registry" + PT_SOURCEINFO);
-	}
+    if(ret != ERROR_SUCCESS)
+    {
+        throw std::runtime_error("Could not query Registry" + PT_SOURCEINFO);
+    }
 
-	if( byteLength==0 || data[0] == 0 )
-		return "";
+    if( byteLength==0 || data[0] == 0 )
+        return "";
 
-	return win32::toMultiByte( (LPCTSTR)data );
+    return win32::toMultiByte( (LPCTSTR)data );
 }
 
 
 void ProcessImpl::setEnvVar(const string& name, const string& value)
 {
-	HKEY hk;
-	DWORD ret = 0;
-	ret = RegCreateKeyEx( HKEY_LOCAL_MACHINE,
-			                _T("Software\\ptv\\environment"),
-			                0,
-			                _T(""),
-			                0,
-			                0,
-			                NULL,
-			                &hk,
-			                &ret );
-	if(ret != ERROR_SUCCESS)
-	{
-		throw std::runtime_error("Could not create Registry key" + PT_SOURCEINFO);
-	}
+    HKEY hk;
+    DWORD ret = 0;
+    ret = RegCreateKeyEx( HKEY_LOCAL_MACHINE,
+                            _T("Software\\ptv\\environment"),
+                            0,
+                            _T(""),
+                            0,
+                            0,
+                            NULL,
+                            &hk,
+                            &ret );
+    if(ret != ERROR_SUCCESS)
+    {
+        throw std::runtime_error("Could not create Registry key" + PT_SOURCEINFO);
+    }
 
-	std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
-	std::basic_string<TCHAR> wvalue = win32::fromMultiByte(value);
+    std::basic_string<TCHAR> wname = win32::fromMultiByte(name);
+    std::basic_string<TCHAR> wvalue = win32::fromMultiByte(value);
 
-	LPBYTE data = (LPBYTE)wvalue.c_str();
-	DWORD size = (wvalue.size()+1) * sizeof(TCHAR); // size includes \0 char !!!
+    LPBYTE data = (LPBYTE)wvalue.c_str();
+    DWORD size = (wvalue.size()+1) * sizeof(TCHAR); // size includes \0 char !!!
 
-	LONG lret = RegSetValueEx(hk, wname.c_str(), 0, REG_SZ, data, size);
-	RegCloseKey(hk);
+    LONG lret = RegSetValueEx(hk, wname.c_str(), 0, REG_SZ, data, size);
+    RegCloseKey(hk);
 
-	if(lret != ERROR_SUCCESS)
-		throw std::runtime_error("Could not set Registry value" + PT_SOURCEINFO);
+    if(lret != ERROR_SUCCESS)
+        throw std::runtime_error("Could not set Registry value" + PT_SOURCEINFO);
 }
 
 } // namespace Pt

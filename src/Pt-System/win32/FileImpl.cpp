@@ -42,139 +42,139 @@ FileImpl::~FileImpl()
 
 std::size_t FileImpl::size() const
 {
-	WIN32_FIND_DATA data;
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    WIN32_FIND_DATA data;
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
-	HANDLE h = FindFirstFile(tpath.c_str(), &data);
-	if(h == INVALID_HANDLE_VALUE)
-		throw SystemError("Could not get file size.", PT_SOURCEINFO);
+    HANDLE h = FindFirstFile(tpath.c_str(), &data);
+    if(h == INVALID_HANDLE_VALUE)
+        throw SystemError("Could not get file size.", PT_SOURCEINFO);
 
-	FindClose(h);
+    FindClose(h);
 
-	LARGE_INTEGER li;
-	li.HighPart = data.nFileSizeHigh;
-	li.LowPart = data.nFileSizeLow;
-	return static_cast<std::size_t>(li.QuadPart);
+    LARGE_INTEGER li;
+    li.HighPart = data.nFileSizeHigh;
+    li.LowPart = data.nFileSizeLow;
+    return static_cast<std::size_t>(li.QuadPart);
 }
 
 
 void FileImpl::resize(std::size_t newSize)
 {
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
-	HANDLE fileHandle = ::CreateFile(tpath.c_str(),
-	                                 GENERIC_READ|GENERIC_WRITE,
-	                                 FILE_SHARE_READ|FILE_SHARE_WRITE,
-	                                 NULL,
-	                                 OPEN_EXISTING,
-	                                 0,
-	                                 NULL);
+    HANDLE fileHandle = ::CreateFile(tpath.c_str(),
+                                     GENERIC_READ|GENERIC_WRITE,
+                                     FILE_SHARE_READ|FILE_SHARE_WRITE,
+                                     NULL,
+                                     OPEN_EXISTING,
+                                     0,
+                                     NULL);
 
-	if(fileHandle == INVALID_HANDLE_VALUE)
-	{
-		throw SystemError("Could not open file.", PT_SOURCEINFO);
-	}
+    if(fileHandle == INVALID_HANDLE_VALUE)
+    {
+        throw SystemError("Could not open file.", PT_SOURCEINFO);
+    }
 
-	// under Win32 resizing is done by moving to the desired position
-	// and then calling SetEndOfFile on the handle.
-	DWORD ret = ::SetFilePointer(fileHandle, newSize, NULL, FILE_BEGIN);
-	if(ret == INVALID_SET_FILE_POINTER) {
-		::CloseHandle(fileHandle);
-		throw SystemError("Could not set file pointer", PT_SOURCEINFO);
-	}
+    // under Win32 resizing is done by moving to the desired position
+    // and then calling SetEndOfFile on the handle.
+    DWORD ret = ::SetFilePointer(fileHandle, newSize, NULL, FILE_BEGIN);
+    if(ret == INVALID_SET_FILE_POINTER) {
+        ::CloseHandle(fileHandle);
+        throw SystemError("Could not set file pointer", PT_SOURCEINFO);
+    }
 
-	if( FALSE == ::SetEndOfFile(fileHandle) ) {
-		::CloseHandle(fileHandle);
-		throw SystemError("Could not truncate file", PT_SOURCEINFO);
-	}
+    if( FALSE == ::SetEndOfFile(fileHandle) ) {
+        ::CloseHandle(fileHandle);
+        throw SystemError("Could not truncate file", PT_SOURCEINFO);
+    }
 
-	if( FALSE == ::CloseHandle(fileHandle) )
-		throw SystemError("Could not close file handle", PT_SOURCEINFO);
+    if( FALSE == ::CloseHandle(fileHandle) )
+        throw SystemError("Could not close file handle", PT_SOURCEINFO);
 }
 
 
 void FileImpl::remove()
 {
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
-	if(FALSE == ::DeleteFile( tpath.c_str() ))
-		throw SystemError("Could not unlink file", PT_SOURCEINFO);
-	_path = "";
+    if(FALSE == ::DeleteFile( tpath.c_str() ))
+        throw SystemError("Could not unlink file", PT_SOURCEINFO);
+    _path = "";
 }
 
 
 void FileImpl::copy(const std::string& to) const
 {
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
-	std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
 
-	if(FALSE == ::CopyFile( tpath.c_str(), tto.c_str(), FALSE ))
-		throw SystemError("Could not copy file", PT_SOURCEINFO);
+    if(FALSE == ::CopyFile( tpath.c_str(), tto.c_str(), FALSE ))
+        throw SystemError("Could not copy file", PT_SOURCEINFO);
 }
 
 
 void FileImpl::move(const std::string& to)
 {
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
-	std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
 
-	#ifdef _WIN32_WCE
-		if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-			throw SystemError("Could not move file", PT_SOURCEINFO);
-	#else
-		if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
-			throw SystemError("Could not move file", PT_SOURCEINFO);
-	#endif
+    #ifdef _WIN32_WCE
+        if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
+            throw SystemError("Could not move file", PT_SOURCEINFO);
+    #else
+        if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
+            throw SystemError("Could not move file", PT_SOURCEINFO);
+    #endif
 
-	_path = to;
+    _path = to;
 }
 
 
 bool FileImpl::exists()
 {
-	DWORD file_attr;
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    DWORD file_attr;
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
-	file_attr = ::GetFileAttributes( tpath.c_str() );
-	return (file_attr != 0xffffffff)
-			? true : false;
+    file_attr = ::GetFileAttributes( tpath.c_str() );
+    return (file_attr != 0xffffffff)
+            ? true : false;
 
 }
 
 
 void FileImpl::create()
 {
-	HANDLE hFile;
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    HANDLE hFile;
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
 // WinCE does not support overlapped I/O
 #ifdef _WIN32_WCE
-	hFile = CreateFile(tpath.c_str(),   // file to create
-			GENERIC_WRITE,          // open for writing
-			0,                      // do not share
-			NULL,                   // default security
-			CREATE_ALWAYS,          // overwrite existing
-			FILE_ATTRIBUTE_NORMAL | // normal file
-			NULL,                   // asynchronous I/O
-			NULL);
+    hFile = CreateFile(tpath.c_str(),   // file to create
+            GENERIC_WRITE,          // open for writing
+            0,                      // do not share
+            NULL,                   // default security
+            CREATE_ALWAYS,          // overwrite existing
+            FILE_ATTRIBUTE_NORMAL | // normal file
+            NULL,                   // asynchronous I/O
+            NULL);
 #else
-	hFile = CreateFile(tpath.c_str(),   // file to create
-			GENERIC_WRITE,          // open for writing
-			0,                      // do not share
-			NULL,                   // default security
-			CREATE_ALWAYS,          // overwrite existing
-			FILE_ATTRIBUTE_NORMAL | // normal file
-			FILE_FLAG_OVERLAPPED,   // asynchronous I/O
-			NULL);                  // no attr. template
+    hFile = CreateFile(tpath.c_str(),   // file to create
+            GENERIC_WRITE,          // open for writing
+            0,                      // do not share
+            NULL,                   // default security
+            CREATE_ALWAYS,          // overwrite existing
+            FILE_ATTRIBUTE_NORMAL | // normal file
+            FILE_FLAG_OVERLAPPED,   // asynchronous I/O
+            NULL);                  // no attr. template
 #endif
 
-	if (hFile == INVALID_HANDLE_VALUE)
-	{
-		throw SystemError( "Could not create file" , PT_SOURCEINFO);
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        throw SystemError( "Could not create file" , PT_SOURCEINFO);
 
-	}
+    }
 
-	CloseHandle(hFile);
+    CloseHandle(hFile);
 }
 
 

@@ -29,41 +29,41 @@ namespace Pt {
 
 namespace System {
 
-	class FileDeviceImpl {
-		public:
-			typedef FileDevice::pos_type pos_type;
-			typedef FileDevice::off_type off_type;
+    class FileDeviceImpl {
+        public:
+            typedef FileDevice::pos_type pos_type;
+            typedef FileDevice::off_type off_type;
 
-		public:
-			FileDeviceImpl();
+        public:
+            FileDeviceImpl();
 
-			FileDeviceImpl(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
+            FileDeviceImpl(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
 
-			~FileDeviceImpl() throw();
-			
-			void open(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
+            ~FileDeviceImpl() throw();
+            
+            void open(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
 
-			void close() throw(IO::IOError);
+            void close() throw(IO::IOError);
 
-			pos_type seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError);
+            pos_type seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError);
 
-			size_t size() throw(IO::IOError);
+            size_t size() throw(IO::IOError);
 
-			size_t read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
+            size_t read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
 
-			size_t write(const char* buffer, size_t count) throw(IO::IOError);
+            size_t write(const char* buffer, size_t count) throw(IO::IOError);
 
-			size_t peek(char* buffer, size_t count) throw(IO::IOError);
+            size_t peek(char* buffer, size_t count) throw(IO::IOError);
 
-			void sync() const throw(IO::IOError);
+            void sync() const throw(IO::IOError);
 
-			bool wait(IO::IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError);
+            bool wait(IO::IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError);
 
-		private:
-			HANDLE _handle;
-			OVERLAPPED _readOv;
-			OVERLAPPED _writeOv;
-	};
+        private:
+            HANDLE _handle;
+            OVERLAPPED _readOv;
+            OVERLAPPED _writeOv;
+    };
 
 }
 

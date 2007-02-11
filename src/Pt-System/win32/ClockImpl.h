@@ -13,25 +13,25 @@ namespace System {
 class ClockImpl
 {
 public:
-	ClockImpl();
+    ClockImpl();
 
-	~ClockImpl();
+    ~ClockImpl();
 
-	void start();
+    void start();
 
-	TimeValue stop();
+    TimeValue stop();
 
-	static DateTime getCurrentTime();
+    static DateTime getCurrentTime();
 
 private:
-	DWORD           _procAffinity;
-	DWORD           _sysAffinity;
-	HANDLE          _currentProcessHandle;
-	LARGE_INTEGER   _frequency;
-	LARGE_INTEGER   _startValue;
-	LARGE_INTEGER   _stopValue;
-	DWORD           _secondStartValue;
-	DWORD           _secondStopValue;
+    DWORD           _procAffinity;
+    DWORD           _sysAffinity;
+    HANDLE          _currentProcessHandle;
+    LARGE_INTEGER   _frequency;
+    LARGE_INTEGER   _startValue;
+    LARGE_INTEGER   _stopValue;
+    DWORD           _secondStartValue;
+    DWORD           _secondStopValue;
 };
 
 } // namespace Pt

@@ -27,55 +27,55 @@ namespace Pt {
 namespace System {
 
 class DirectoryIteratorImpl {
-	public:
-		DirectoryIteratorImpl();
+    public:
+        DirectoryIteratorImpl();
 
-		DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const char* path);
 
-		~DirectoryIteratorImpl();
+        ~DirectoryIteratorImpl();
 
-		int ref();
+        int ref();
 
-		int deref();
+        int deref();
 
-		void advance();
+        void advance();
 
-		FileSystemNode& node();
+        FileSystemNode& node();
 
-		std::string name() const;
+        std::string name() const;
 
-		bool operator==(const DirectoryIteratorImpl& impl) const;
+        bool operator==(const DirectoryIteratorImpl& impl) const;
 
-	private:
-		unsigned int _refs;
-		std::string _path;
-		FileSystemNode* _node;
-		HANDLE _findHandle;
-		WIN32_FIND_DATA _current;
+    private:
+        unsigned int _refs;
+        std::string _path;
+        FileSystemNode* _node;
+        HANDLE _findHandle;
+        WIN32_FIND_DATA _current;
 };
 
 
 class DirectoryImpl {
-	public:
-		DirectoryImpl();
-		~DirectoryImpl();
+    public:
+        DirectoryImpl();
+        ~DirectoryImpl();
 
-	public:
-		static void create(const char* dirpath);
-		static void remove(const std::string& path);
+    public:
+        static void create(const char* dirpath);
+        static void remove(const std::string& path);
 
-		static void move(const std::string& oldname, const std::string& newname);
-		static bool exists(const std::string& path);
+        static void move(const std::string& oldname, const std::string& newname);
+        static bool exists(const std::string& path);
 
-		static char separator()
-		{ return '\\'; }
+        static char separator()
+        { return '\\'; }
 
 
-		static std::string current();
+        static std::string current();
 
-		static std::string system();
+        static std::string system();
 
-		static void changeCurrent(const char* dirpath);
+        static void changeCurrent(const char* dirpath);
 };
 
 } // namespace System

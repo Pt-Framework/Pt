@@ -16,43 +16,43 @@ namespace Pt {
 namespace System {
 
 class SharedMemoryImpl {
-	public:
+    public:
 
-		//! @brief Constructor
-		//  @throw SystemError
-		SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode);
+        //! @brief Constructor
+        //  @throw SystemError
+        SharedMemoryImpl(const char* name, size_t sz, SharedMemory::OpenMode omode);
 
-		//! @brief Destructor
-		~SharedMemoryImpl();
+        //! @brief Destructor
+        ~SharedMemoryImpl();
 
-		//! @brief MS Windows specific implementation of unlink()
-		/**
-			@see SharedMemory#unlink()
-			@throw SystemError
-		*/
-		void unlink();
+        //! @brief MS Windows specific implementation of unlink()
+        /**
+            @see SharedMemory#unlink()
+            @throw SystemError
+        */
+        void unlink();
 
-		//! @brief MS Windows specific implementation of map()
-		/**
-			@see SharedMemory#map()
+        //! @brief MS Windows specific implementation of map()
+        /**
+            @see SharedMemory#map()
 
-			@param addr ignored
-			@throw SystemError
-		*/
-		void* map(const void* addr);
+            @param addr ignored
+            @throw SystemError
+        */
+        void* map(const void* addr);
 
-		//! @brief MS Windows specific implementation of unmap()
-		/**
-			@see SharedMemory#unmap()
-			@throw SystemError
-		*/
-		void unmap(void* addr);
+        //! @brief MS Windows specific implementation of unmap()
+        /**
+            @see SharedMemory#unmap()
+            @throw SystemError
+        */
+        void unmap(void* addr);
 
-	private:
-		LPCSTR _name;
-		DWORD  _mode;
-		DWORD  _size;
-		HANDLE _handle;
+    private:
+        LPCSTR _name;
+        DWORD  _mode;
+        DWORD  _size;
+        HANDLE _handle;
 };
 
 } // !namespace System

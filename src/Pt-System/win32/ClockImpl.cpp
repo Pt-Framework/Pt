@@ -20,15 +20,15 @@ ClockImpl::ClockImpl()
     if( !GetProcessAffinityMask( _currentProcessHandle,  &_procAffinity, &_sysAffinity ))
         throw std::runtime_error("GetProcessAffinityMask failed" + PT_SOURCEINFO);
 
-	if( !SetProcessAffinityMask( _currentProcessHandle, 0x01 ) )
-		throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
+    if( !SetProcessAffinityMask( _currentProcessHandle, 0x01 ) )
+        throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
 
-	if( !SetThreadAffinityMask( GetCurrentThread(), 0x01 ) )
-		throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
+    if( !SetThreadAffinityMask( GetCurrentThread(), 0x01 ) )
+        throw std::runtime_error("SetProcessAffinityMask failed" + PT_SOURCEINFO);
 #endif
 
-	if( !QueryPerformanceFrequency( &_frequency ) )
-		throw std::runtime_error("QueryPerformanceFrequency failed" + PT_SOURCEINFO);
+    if( !QueryPerformanceFrequency( &_frequency ) )
+        throw std::runtime_error("QueryPerformanceFrequency failed" + PT_SOURCEINFO);
 }
 
 ClockImpl::~ClockImpl()
@@ -43,8 +43,8 @@ void ClockImpl::start()
 
 TimeValue ClockImpl::stop()
 {
-	QueryPerformanceCounter( &_stopValue );
-	_secondStopValue = timeGetTime();
+    QueryPerformanceCounter( &_stopValue );
+    _secondStopValue = timeGetTime();
 
     LARGE_INTEGER delta;
     delta.QuadPart      = _stopValue.QuadPart - _startValue.QuadPart;
@@ -60,30 +60,30 @@ TimeValue ClockImpl::stop()
     else
     {
         size_t seconds = static_cast<size_t>( delta.QuadPart / _frequency.QuadPart );
-	    result.setSeconds( seconds );
+        result.setSeconds( seconds );
 
-	    size_t microSeconds = static_cast<size_t>( ( ( delta.QuadPart * 1000000 ) / _frequency.QuadPart ) % 1000000 );
-	    result.setMicroSeconds( microSeconds );
-	}
+        size_t microSeconds = static_cast<size_t>( ( ( delta.QuadPart * 1000000 ) / _frequency.QuadPart ) % 1000000 );
+        result.setMicroSeconds( microSeconds );
+    }
 
-	return result;
+    return result;
 }
 
 DateTime ClockImpl::getCurrentTime()
 {
-	SYSTEMTIME systemTime;
-	GetSystemTime(&systemTime);
+    SYSTEMTIME systemTime;
+    GetSystemTime(&systemTime);
 
-	Date date(	systemTime.wYear,
-				systemTime.wMonth,
-				systemTime.wDay	);
-	Time time(	systemTime.wHour,
-				systemTime.wMinute,
-				systemTime.wSecond,
-				systemTime.wMilliseconds	);
-	DateTime dateTime(date, time);
+    Date date(    systemTime.wYear,
+                systemTime.wMonth,
+                systemTime.wDay    );
+    Time time(    systemTime.wHour,
+                systemTime.wMinute,
+                systemTime.wSecond,
+                systemTime.wMilliseconds    );
+    DateTime dateTime(date, time);
 
-	return dateTime;
+    return dateTime;
 }
 
 } // namespace Pt

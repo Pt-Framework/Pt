@@ -29,30 +29,30 @@ namespace Pt {
 
 namespace System {
 
-	class FileSystemImpl {
-		public:
-			FileSystemImpl()
-			{}
+    class FileSystemImpl {
+        public:
+            FileSystemImpl()
+            {}
 
-			static FileSystemNode* create(const char* path)
-			{
-				std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
-				DWORD attr = GetFileAttributes( tpath.c_str() );
+            static FileSystemNode* create(const char* path)
+            {
+                std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+                DWORD attr = GetFileAttributes( tpath.c_str() );
 
-				if(attr == 0xffffffff)
-					throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
+                if(attr == 0xffffffff)
+                    throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
 
 
-				if(attr & FILE_ATTRIBUTE_DIRECTORY) {
-					return new Directory(path);
-				}
-				else {
-					return new File(path);
-				}
+                if(attr & FILE_ATTRIBUTE_DIRECTORY) {
+                    return new Directory(path);
+                }
+                else {
+                    return new File(path);
+                }
 
-				return 0;
-			}
-	};
+                return 0;
+            }
+    };
 
 } // namespace System
 

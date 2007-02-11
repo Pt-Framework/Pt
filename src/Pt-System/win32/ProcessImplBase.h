@@ -34,33 +34,33 @@ namespace Pt {
 
 namespace System {
 
-	class ProcessImplBase
-	{
-		public:
-			ProcessImplBase(const string& command);
+    class ProcessImplBase
+    {
+        public:
+            ProcessImplBase(const string& command);
 
-			static void sleep(unsigned int milliSec)
-			{ ::Sleep(milliSec); }
+            static void sleep(unsigned int milliSec)
+            { ::Sleep(milliSec); }
 
-			const std::string& command();
+            const std::string& command();
 
-			void setArgs(const std::string& strArgs);
+            void setArgs(const std::string& strArgs);
 
-			const std::string& args();
+            const std::string& args();
 
-			void start();
+            void start();
 
-			void kill();
+            void kill();
 
-			void wait();
+            void wait();
 
-	private:
-		STARTUPINFO m_startUp;
-		PROCESS_INFORMATION m_pid;
-		std::vector<TCHAR> m_buffer;
-		string m_command;
-		string m_args;
-	};
+    private:
+        STARTUPINFO m_startUp;
+        PROCESS_INFORMATION m_pid;
+        std::vector<TCHAR> m_buffer;
+        string m_command;
+        string m_args;
+    };
 
 } // namespace System
 

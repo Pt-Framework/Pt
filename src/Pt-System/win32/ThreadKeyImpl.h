@@ -32,34 +32,34 @@ namespace Pt {
 namespace System {
 
 class ThreadKeyImpl {
-	public:
-		ThreadKeyImpl() throw(SystemError)
-		{
-			DWORD handle = TlsAlloc();
-			if( handle == TLS_OUT_OF_INDEXES )
-				throw SystemError("Could not create thread-key", PT_SOURCEINFO);
+    public:
+        ThreadKeyImpl() throw(SystemError)
+        {
+            DWORD handle = TlsAlloc();
+            if( handle == TLS_OUT_OF_INDEXES )
+                throw SystemError("Could not create thread-key", PT_SOURCEINFO);
 
-			_handle = handle;
-		}
+            _handle = handle;
+        }
 
-		~ThreadKeyImpl() throw()
-		{
-			TlsFree(_handle);
-		}
+        ~ThreadKeyImpl() throw()
+        {
+            TlsFree(_handle);
+        }
 
-		void set(void* ptr) throw(SystemError)
-		{
-			if( !TlsSetValue(_handle, ptr) )
-				throw SystemError("Could not set thread-key", PT_SOURCEINFO);
-		}
+        void set(void* ptr) throw(SystemError)
+        {
+            if( !TlsSetValue(_handle, ptr) )
+                throw SystemError("Could not set thread-key", PT_SOURCEINFO);
+        }
 
-		void* get() const throw(SystemError)
-		{
-			return TlsGetValue(_handle);
-		}
+        void* get() const throw(SystemError)
+        {
+            return TlsGetValue(_handle);
+        }
 
-	private:
-		DWORD _handle;
+    private:
+        DWORD _handle;
 };
 
 } // namespace System

@@ -43,95 +43,95 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _node(0),
   _findHandle(INVALID_HANDLE_VALUE)
 {
-	std::string firstFile = path;
-	if( !firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
-		firstFile += "\\";
+    std::string firstFile = path;
+    if( !firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
+        firstFile += "\\";
 
-	firstFile += '*';
+    firstFile += '*';
 
-	std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
-	_findHandle = FindFirstFile( tpath.c_str(), &_current );
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
+    _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
-	if(_findHandle == INVALID_HANDLE_VALUE)
-		throw SystemError("Could not open find handle.", PT_SOURCEINFO);
+    if(_findHandle == INVALID_HANDLE_VALUE)
+        throw SystemError("Could not open find handle.", PT_SOURCEINFO);
 
-	_path = path;
+    _path = path;
 }
 
 
 DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
-	delete _node;
+    delete _node;
 
-	if(_findHandle == INVALID_HANDLE_VALUE)
-		::FindClose(_findHandle);
+    if(_findHandle == INVALID_HANDLE_VALUE)
+        ::FindClose(_findHandle);
 }
 
 
 int DirectoryIteratorImpl::ref()
 {
-	return ++_refs;
+    return ++_refs;
 }
 
 
 int DirectoryIteratorImpl::deref()
 {
-	return --_refs;
+    return --_refs;
 }
 
 
 void DirectoryIteratorImpl::advance()
 {
-	// cannot advance an unintialised iterator
-	if(_findHandle == INVALID_HANDLE_VALUE) {
-		return;
-	}
+    // cannot advance an unintialised iterator
+    if(_findHandle == INVALID_HANDLE_VALUE) {
+        return;
+    }
 
-	// the current node becomes invalid now
-	delete _node;
-	_node = 0;
+    // the current node becomes invalid now
+    delete _node;
+    _node = 0;
 
-	// _findHandle = INVALID_HANDLE_VALUE means end
-	if( FALSE == FindNextFile(_findHandle, &_current) )
-	{
-		::FindClose(_findHandle);
-		_findHandle = INVALID_HANDLE_VALUE;
-	}
+    // _findHandle = INVALID_HANDLE_VALUE means end
+    if( FALSE == FindNextFile(_findHandle, &_current) )
+    {
+        ::FindClose(_findHandle);
+        _findHandle = INVALID_HANDLE_VALUE;
+    }
 }
 
 
 FileSystemNode& DirectoryIteratorImpl::node()
 {
-	// reuse previously created node
-	if(_node)
-		return *_node;
+    // reuse previously created node
+    if(_node)
+        return *_node;
 
-	// build complete path
-	std::string path = _path;
-	if( !path.empty() && path[path.size()-1] != '\\')
-		path += '\\';
-	path += this->name();
+    // build complete path
+    std::string path = _path;
+    if( !path.empty() && path[path.size()-1] != '\\')
+        path += '\\';
+    path += this->name();
 
-	// create file system node by full path
-	_node = FileSystem::instance().create( path.c_str() );
-	if(!_node)
-		throw SystemError("Unknown file system node", PT_SOURCEINFO);
+    // create file system node by full path
+    _node = FileSystem::instance().create( path.c_str() );
+    if(!_node)
+        throw SystemError("Unknown file system node", PT_SOURCEINFO);
 
-	return *_node;
+    return *_node;
 }
 
 
 std::string DirectoryIteratorImpl::name() const
 {
-	if(_findHandle != INVALID_HANDLE_VALUE)
-		return win32::toMultiByte( _current.cFileName );
+    if(_findHandle != INVALID_HANDLE_VALUE)
+        return win32::toMultiByte( _current.cFileName );
 
-	return "";
+    return "";
 }
 
 bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 {
-	return _findHandle == impl._findHandle;
+    return _findHandle == impl._findHandle;
 }
 
 
@@ -139,74 +139,74 @@ bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 
 bool DirectoryImpl::exists(const std::string& path)
 {
-	DWORD file_attr;
-	std::basic_string<TCHAR> str = win32::fromMultiByte( path );
+    DWORD file_attr;
+    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
-	file_attr = ::GetFileAttributes( str.c_str() );
-	return (file_attr != 0xffffffff && (file_attr & FILE_ATTRIBUTE_DIRECTORY))
-			? true : false;
+    file_attr = ::GetFileAttributes( str.c_str() );
+    return (file_attr != 0xffffffff && (file_attr & FILE_ATTRIBUTE_DIRECTORY))
+            ? true : false;
 }
 
 
 void DirectoryImpl::create(const char* dirpath)
 {
-	std::basic_string<TCHAR> str = win32::fromMultiByte( dirpath );
+    std::basic_string<TCHAR> str = win32::fromMultiByte( dirpath );
 
-	if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
-		throw SystemError("Could not create directory" , PT_SOURCEINFO);
+    if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
+        throw SystemError("Could not create directory" , PT_SOURCEINFO);
 }
 
 
 void DirectoryImpl::move(const std::string& oldname, const std::string& newname)
 {
-	std::basic_string<TCHAR> from = win32::fromMultiByte( oldname );
-	std::basic_string<TCHAR> to = win32::fromMultiByte( newname );
+    std::basic_string<TCHAR> from = win32::fromMultiByte( oldname );
+    std::basic_string<TCHAR> to = win32::fromMultiByte( newname );
 
-	#ifdef _WIN32_WCE
-		if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
-			throw SystemError("Could not move directory" , PT_SOURCEINFO);
-	#else
-		if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
-			throw SystemError("Could not move directory" , PT_SOURCEINFO);
-	#endif
+    #ifdef _WIN32_WCE
+        if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
+            throw SystemError("Could not move directory" , PT_SOURCEINFO);
+    #else
+        if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
+            throw SystemError("Could not move directory" , PT_SOURCEINFO);
+    #endif
 }
 
 
 void DirectoryImpl::remove(const std::string& path)
 {
-	std::basic_string<TCHAR> str = win32::fromMultiByte( path );
+    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
-	if( FALSE == ::RemoveDirectory( str.c_str() ) )
-		throw SystemError("Could not remove directory" , PT_SOURCEINFO);
+    if( FALSE == ::RemoveDirectory( str.c_str() ) )
+        throw SystemError("Could not remove directory" , PT_SOURCEINFO);
 }
 
 
 std::string DirectoryImpl::current()
 {
-	#ifdef _WIN32_WCE
-		throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
-	#else
-		char path[MAX_PATH+2];
-		DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
-		return std::string(path, len);
-	#endif
+    #ifdef _WIN32_WCE
+        throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
+    #else
+        char path[MAX_PATH+2];
+        DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
+        return std::string(path, len);
+    #endif
 }
 
 
 std::string DirectoryImpl::system()
 {
-	return "c:\\";
+    return "c:\\";
 }
 
 
 void DirectoryImpl::changeCurrent(const char* dirpath)
 {
-	#ifdef _WIN32_WCE
-		throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
-	#else
-		if(FALSE == ::SetCurrentDirectory(dirpath) )
-			throw SystemError("Could not change current directory" , PT_SOURCEINFO);
-	#endif
+    #ifdef _WIN32_WCE
+        throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
+    #else
+        if(FALSE == ::SetCurrentDirectory(dirpath) )
+            throw SystemError("Could not change current directory" , PT_SOURCEINFO);
+    #endif
 }
 
 }
