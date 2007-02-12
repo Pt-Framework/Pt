@@ -55,9 +55,9 @@ namespace Pt {
                 const BasicPoint& addX(T x)
                 {
                   _x +=  x;
-                  return *this; 
+                  return *this;
                 }
-                
+
                 const BasicPoint& subX(T x)
                 {
                   _x -=  x;
@@ -68,13 +68,13 @@ namespace Pt {
                   _y +=  y;
                   return *this;
                 }
-                
+
                 const BasicPoint& subY(T y)
                 {
                   _y -=  y;
                   return *this;
                 }
-                
+
                 const BasicPoint& move(T dx, T dy)
                 { _x += dy; _y += dy; return *this; }
 
@@ -139,14 +139,14 @@ namespace Pt {
         /** @brief functor to compare to points.
 
             First point is smaller as second if the x value
-            is smaller or the x values are equal and the 
+            is smaller or the x values are equal and the
             y value of first point is smaller.
         */
         class PointCompareFunctorXY
         {
         public:
-            bool operator()(const Pt::Math::Point& pt1, const Pt::Math::Point& pt2)
-            {   
+            bool operator()(const Pt::Math::Point& pt1, const Pt::Math::Point& pt2) const
+            {
                 if( (pt1.x() < pt2.x()) ||
                     ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) )
                 {
