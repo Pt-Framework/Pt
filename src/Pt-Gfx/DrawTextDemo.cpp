@@ -35,6 +35,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <typeinfo>
 
 
 class UpdateEvent : public Pt::Event
@@ -52,7 +53,7 @@ class UpdateEvent : public Pt::Event
         static const std::type_info& TypeInfo;
 };
 
-const type_info& UpdateEvent::TypeInfo = typeid(UpdateEvent);
+const std::type_info& UpdateEvent::TypeInfo = typeid(UpdateEvent);
 
 
 class UpdateThread : public Pt::System::Thread, public Pt::Connectable

@@ -211,7 +211,21 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         }
         
         void drawThickEllipseTest()
-        { }
+        {
+            _imagePainter.setPen( Pen( 10, ARgbColor( 0, 0, 0 ) ) );
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.drawEllipse( Point( 10,10), Size( 100,100) );
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.drawEllipse( Point( -10,10), Size( 100,100) );
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.drawEllipse( Point( -10,10), Size( 1000,100) );
+            PT_UNIT_ASSERT( checkImage() );
+        }
         
         void drawThinEllipseTest()
         { 
