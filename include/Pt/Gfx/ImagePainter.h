@@ -146,9 +146,9 @@ class PT_GFX_API ImagePainter : public Painter
         FillEllipse*         _fillEllipse;
         FillPolygon*         _fillPolygon;
         DrawText*            _drawText;
+        Stroke*              _stroke;
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
-        Stroke*              _stroke;
 };
 
 } //namespace Gfx
