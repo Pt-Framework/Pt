@@ -18,61 +18,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_DRAWPOLYLINE_H
-#define PT_GFX_DRAWPOLYLINE_H
+#include "Pt/Gfx/ARgbImage.h"
+#include "Pt/Gfx/Pen.h"
+#include "Stroke.h"
 
-#include <vector>
+namespace Pt{
+namespace Gfx{
 
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/ARgbImage.h>
+Stroke::Stroke()
+{ }
 
-
-namespace Pt {
-
-namespace Gfx {
-
-/** @brief Draw polylines on an image
-
-    This class is an interface for all function objects that can
-    draw lines.
- */
-class DrawPolyline
+Stroke::~Stroke()
+{ }
+        
+void Stroke::stroke( Pt::Gfx::ARgbImage& image, const Pen& pen, ssize_t xpos, ssize_t ypos, size_t length )
 {
-    public:
-        /** @brief Default Constructor
-        */
-        DrawPolyline()
-        { }
+   const Pt::Gfx::ARgbImage& colorBuffer = pen.buffer();
 
-        /** @brief Destructor
-        */
-        virtual ~DrawPolyline()
-        { }
+    // copy pixels blockwise to the target image
+    while(length)
+    {
+        const size_t fillLength = std::min( length, colorBuffer.width() );
 
-        /** @brief Draw a polyline on an image
+        if(fillLength)
+        {
+            std::memcpy( &image.pixel( xpos, ypos ), colorBuffer.data(),
+                         fillLength * sizeof(ARgbColor) );
+        }
 
-            @see DrawPolyline::draw
-        */
-        void operator() ( ARgbImage& image, const Pen& pen,
-                          const std::vector<Math::Point>& points )
-        { this->draw(image, pen, points); }
+        length -= fillLength;
+        xpos   += fillLength;
+    }
+}
 
-        /** @brief Draw a polyline on an image
-
-            The polyline described by a vector of points will be drawn on an
-            ARgbImage. The attributes for the lines are taken from the passed
-            Pen object.
-
-            @param image Target image
-            @param pen Pen to be used
-            @param points Polyline points
-        */
-        virtual void draw( ARgbImage& image, const Pen& pen,
-                           const std::vector<Math::Point>& points ) = 0;
-};
-
-} //namespace Pt
-
-} //namespace Gfx
-
-#endif
+}//namespace gfx
+}//namespace Pt

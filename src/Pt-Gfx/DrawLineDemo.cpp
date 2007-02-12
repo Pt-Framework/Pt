@@ -54,7 +54,7 @@ class DrawLineDemo : public Pt::Gui::Widget
 
             painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()-120 ),
-                                    Pt::Math::Point( center.x(), center.y()-50 ));
+                                    Pt::Math::Point( center.x(), center.y()-50 )); 
 
             painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()-120 ),
@@ -110,7 +110,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             painter.drawLine( Pt::Math::Point( center.x() - 50, center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+30 ));
 
-            painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
+           painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+50 ));
 

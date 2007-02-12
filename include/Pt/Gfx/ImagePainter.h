@@ -48,6 +48,7 @@ class FillEllipse;
 class DrawText;
 class FillSolid;
 class FillTexture;
+class Stroke;
 
 
 /**
@@ -139,8 +140,6 @@ class PT_GFX_API ImagePainter : public Painter
         DrawLine*            _drawLine;
         DrawThinLine*        _drawThinLine;
         DrawThickLine*       _drawThickLine;
-        DrawPolyline*        _drawPolyline;
-        DrawThinPolyline*    _drawThinPolyline;
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;
@@ -149,6 +148,7 @@ class PT_GFX_API ImagePainter : public Painter
         DrawText*            _drawText;
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
+        Stroke*              _stroke;
 };
 
 } //namespace Gfx

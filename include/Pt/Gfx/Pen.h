@@ -22,13 +22,15 @@
 #define PTV_GFX_PEN_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ARgbColor.h>
-
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
-
 namespace Gfx {
 
+    class PenData;
+    
     /**
      * @brief A pen which contains of attributes (size, color) for the drawing of outlines.
      *
@@ -46,12 +48,9 @@ namespace Gfx {
      */
     class PT_GFX_API Pen
     {
-        friend bool operator==(const Pen& a, const Pen& b);
-
         public:            
                 
             enum PenStyle{ SolidStyle, DashStyle };
-
             
             /**
              * @brief Create Pen by style.
@@ -61,7 +60,7 @@ namespace Gfx {
              *
              * @param style The pen style.
              */
-            Pen(  PenStyle style );
+            Pen( PenStyle style );
                 
             /**
              * @brief Creates Pen by color.
@@ -95,54 +94,81 @@ namespace Gfx {
              */
             Pen( size_t size, const ARgbColor& color, PenStyle style = SolidStyle );
 
-            /**
-             * @brief Returns the size of the pen as specified when created.
-             *
-             * @return The size of the pen.
-             */
-            inline size_t size() const
-            { return _size; }
+			/**
+			 * @brief Returns the size of the pen as specified when created.
+			 *
+			 * @return The size of the pen.
+			 */
+            size_t size() const;
 
-            /**
-             * @brief Returns a reference to the color of the pen as specified when created.
-             *
-             * @return The color of the pen.
-             */
-            inline const ARgbColor& color() const
-            { return _color; }
-            
-            /**
-             * @brief Returns a reference to the color of the pen as specified when created.
-             *
-             * @return The color of the pen.
-             */
-            inline PenStyle style() const
-            { return _style; }
+			/**
+			 * @brief Returns a reference to the color of the pen as specified when created.
+			 *
+			 * @return The color of the pen.
+			 */
+			const ARgbColor& color() const;
+						
+			/**
+			 * @brief Returns a reference to the color of the pen as specified when created.
+			 *
+			 * @return The color of the pen.
+			 */
+			PenStyle style() const;			
+			
+			/**
+			 * @brief Returns a reference to the pen color buffer
+			 *
+			 * @return The color buffer of the pen.
+			 */			
+			const ARgbImage& buffer() const;						
 
-        private:
-            size_t      _size;
-            ARgbColor   _color;
-            PenStyle    _style;
+             /**
+             * @brief Equality-operator (==) which compares the given Pen's by comparing their
+             * properties.
+             *
+             * The size and color are compared. If all values are the same, $true$ is returned;
+             * $false$ otherwise.
+             *
+             * @param a The Pen object to compare with Pen object b.
+             * @param b The Pen object to compare with Pen object a.
+             * @return $true$ when the Pen objects are the same; $false$ otherwise.
+             */
+            friend PT_GFX_API bool operator==(const Pen& a, const Pen& b);
+
+		private:	
+		    SmartPtr<PenData> _penData;	
+	};
+	
+    class PT_GFX_API PenData
+	{
+		public:
+			PenData( size_t size, const ARgbColor& color, Pen::PenStyle style )
+			: _size( size )			
+			, _style( style )
+			, _buffer( 64, 1, color )
+			{ }
+
+			~PenData()
+			{ }
+
+			const ARgbColor& color() const
+			{ return _buffer.pixel( 0, 0); }
+
+			const ARgbImage& buffer() const
+			{ return _buffer; }
+
+			size_t size() const
+			{ return _size; }
+			
+			Pen::PenStyle style() const
+			{ return _style; }
+
+		private:
+	        size_t          _size;
+			Pen::PenStyle   _style;
+			ARgbImage       _buffer;	
     };
-
-    /**
-     * @brief Equality-operator (==) which compares the given Pen's by comparing their
-     * properties.
-     *
-     * The size and color are compared. If all values are the same, $true$ is returned;
-     * $false$ otherwise.
-     *
-     * @param a The Pen object to compare with Pen object b.
-     * @param b The Pen object to compare with Pen object a.
-     * @return $true$ when the Pen objects are the same; $false$ otherwise.
-     */
-    inline bool operator==(const Pen& a, const Pen& b)
-    {
-        return a._size == b._size && 
-               a._color == b._color && 
-               a._style == b._style;
-    }
-
+	
 } // namespace Gfx
 
 } // namespace Pt

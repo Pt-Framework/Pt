@@ -33,7 +33,7 @@ namespace Gfx {
 
 void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                         const Math::Point& origin,
-                        size_t xpos, size_t ypos, size_t length )
+                        ssize_t xpos, ssize_t ypos, size_t length )
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();
 
@@ -65,7 +65,7 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
 
 void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                       const Math::Point& origin,
-                      size_t xpos, size_t ypos, size_t length )
+                      ssize_t xpos, ssize_t ypos, size_t length )
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();
 

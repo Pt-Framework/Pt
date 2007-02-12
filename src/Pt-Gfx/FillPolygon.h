@@ -68,8 +68,8 @@ class FillPolygon
             @see FillPolygon::draw
         */
         void operator() ( ARgbImage& image, const Brush& brush,
-                          std::vector<Math::Point>& points )
-        { this->draw(image, brush, points); }
+                          const Math::Point* points, size_t pointCount )
+        { this->draw(image, brush, points, pointCount); }
 
         /** @brief Fill a polygon on an image
 
@@ -82,7 +82,7 @@ class FillPolygon
             @param points Polygon points
         */
         virtual void draw( ARgbImage& image, const Brush& brush,
-                           std::vector<Math::Point>& points );
+                           const Math::Point* points, size_t pointCount );
 
     private:
         Fill*             _fill;

@@ -27,10 +27,11 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Math/Point.h>
 
+#include "Stroke.h"
 
 namespace Pt {
-
 namespace Gfx {
+
 
 /** @brief Draw lines on an image
 
@@ -75,8 +76,13 @@ class DrawLine
                            const Math::Point& from,
                            const Math::Point& to ) = 0;
 
+
+        inline void setOutput(Stroke& d)
+        { _stroke = &d; }
+        
     protected:
         std::vector<ARgbColor>  _colorBuffer;
+        Stroke*                 _stroke;
 };
 
 } // namespace Gfx

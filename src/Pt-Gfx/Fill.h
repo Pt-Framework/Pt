@@ -58,7 +58,9 @@ class PT_GFX_API Fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                             const Math::Point& origin,
-                            size_t xpos, size_t ypos, size_t length ) = 0;
+                            ssize_t xpos, ssize_t ypos, size_t length ) = 0;
+                            
+
 };
 
 
@@ -78,7 +80,7 @@ class PT_GFX_API FillTexture : public Fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                            const Math::Point& origin,
-                           size_t xpos, size_t ypos, size_t length );
+                           ssize_t xpos, ssize_t ypos, size_t length );
 };
 
 
@@ -95,7 +97,7 @@ class PT_GFX_API FillSolid : public Fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                            const Math::Point& origin,
-                           size_t xpos, size_t ypos, size_t length );
+                           ssize_t xpos, ssize_t ypos, size_t length );
 };
 
 } // namespace Gfx

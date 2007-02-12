@@ -17,7 +17,6 @@ SharedLibrary Pt-Gfx : Pen.cpp
                        InterleavedImage.cpp
                        ImagePainter.cpp
                        DrawText.cpp
-                       DrawThinPolyline.cpp
                        DrawThinLine.cpp
                        DrawThickLine.cpp
                        FillPolygon.cpp
@@ -27,6 +26,7 @@ SharedLibrary Pt-Gfx : Pen.cpp
                        DrawThinEllipse.cpp
                        DrawThickEllipse.cpp
                        FillEllipse.cpp
+                       Stroke.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Gfx : Pt Pt-Text Pt-System ;

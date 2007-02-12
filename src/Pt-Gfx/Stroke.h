@@ -18,43 +18,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_DRAWTHINPOLYLINE_H
-#define PT_GFX_DRAWTHINPOLYLINE_H
+#ifndef PT_GFX_STROKE_H
+#define PT_GFX_STROKE_H
 
-#include <vector>
-#include "DrawPolyline.h"
-#include "DrawThinLine.h"
+#include "Pt/Gfx/Gfx.h"
 
+namespace Pt{
+namespace Gfx{
 
-namespace Pt {
-
-namespace Gfx {
-
-/** @brief Draw thin polylines on an image
-
-    This class implements DrawPolyline and is specialised for the drawing
-    of thin polylines.
- */
-class DrawThinPolyline : public DrawPolyline
+class Stroke
 {
     public:
-        /** @brief Default constructor
-        */
-        DrawThinPolyline();
-
-        /** @brief Draw a polyline on an image
-
-            @see DrawPolyline::draw
-        */
-        virtual void draw( ARgbImage& image,  const Pen& pen,
-                           const std::vector<Math::Point>& points );
-
-    private:
-        DrawThinLine _drawThinLine;
+        Stroke();
+        virtual ~Stroke();        
+        
+        virtual void stroke( Pt::Gfx::ARgbImage& image, const Pen& pen,
+                             ssize_t xpos, ssize_t ypos, size_t length );
 };
 
-} //namespace gfx
-
-} //namespace Pt
+}//namespace Pt
+}//namespace Gfx
 
 #endif

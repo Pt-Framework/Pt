@@ -39,7 +39,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
     Math::Point clippedFrom( from );
     Math::Point clippedTo( to );
 
-    if( !_clipLine( clippedFrom, clippedTo , 0, image.width(), 0, image.height() ) )
+    if( !_clipLine( clippedFrom, clippedTo , 0, image.width() - 1, 0, image.height() -1 ) )
         return;
 
     if( _colorBuffer.size() < image.width() || _colorBuffer[0] != pen.color() )
@@ -116,7 +116,7 @@ void DrawThinLine::drawPattern( ARgbImage& image, const Pen& pen, const Math::Po
         for( ssize_t x = x0; x <= x1; ++x )
         {
             if( pattern[ x%pattern.size()] )
-                outputPixel( image, pen, y,x);
+                outputPixel( image, pen, y, x );
 
             error += deltay;
 
@@ -159,6 +159,7 @@ void DrawThinLine::drawPattern( ARgbImage& image, const Pen& pen, const Math::Po
     }
 }
 
+    
 void DrawThinLine::drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
 {
     ssize_t     x0      = from.x();

@@ -18,30 +18,52 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Gfx/Pen.h"
+#include <Pt/Gfx/ARgbImage.h>
 
 namespace Pt {
 namespace Gfx {
 
 Pen::Pen(  PenStyle style )
-: _size( 1 )
-, _style( style )
+: _penData( new PenData( 1, ARgbColor(0,0,0) ,style ) )
 { }                
 
 Pen::Pen( const ARgbColor& color )
-: _size( 1 )
-, _color( color )
+: _penData( new PenData( 1, color , SolidStyle ) )
 { }
 
 Pen::Pen( size_t size, PenStyle style )
-: _size( size )
-, _style( style )
+: _penData( new PenData( size, ARgbColor( 0,0,0) ,style ) )
 { }
 
 Pen::Pen( size_t size, const ARgbColor& color, PenStyle style )
-: _size( size )
-, _color( color )
-, _style( style )
+: _penData( new PenData( size, color ,style ) )
 { }
 
+size_t Pen::size() const
+{
+    return _penData->size();
+}
+
+const ARgbColor& Pen::color() const
+{
+    return _penData->color();
+}
+
+Pen::PenStyle Pen::style() const
+{
+    return _penData->style();
+}
+
+const ARgbImage& Pen::buffer() const
+{ 
+    return _penData->buffer(); 
+}
+
+bool operator==(const Pen& a, const Pen& b)
+{
+	return a._penData->size() == b._penData->size() && 
+	       a._penData->color() == b._penData->color() && 
+	       a._penData->style() == b._penData->style();
+}
 } // namespace Gfx
 } // namespace Pt

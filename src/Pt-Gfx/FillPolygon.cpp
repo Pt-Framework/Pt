@@ -35,12 +35,11 @@ FillPolygon::FillPolygon()
 { }
 
 
-void FillPolygon::draw( ARgbImage& image, const Brush& brush, std::vector<Math::Point>& points )
+void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Math::Point* points_, size_t pointCount )
 {
-    //Pt::System::Clock clock;
-    //clock.start();
-
-    //
+    std::vector<Math::Point> points( pointCount );
+    memcpy( &points[0], points_ , sizeof( Math::Point) * pointCount );
+    
     // find unclipped origin coordinates
     //
     Math::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );

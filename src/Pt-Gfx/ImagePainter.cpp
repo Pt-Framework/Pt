@@ -31,8 +31,6 @@
 
 #include "DrawThinLine.h"
 #include "DrawThickLine.h"
-#include "DrawPolyline.h"
-#include "DrawThinPolyline.h"
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
 #include "DrawThickEllipse.h"
@@ -40,6 +38,7 @@
 #include "FillEllipse.h"
 #include "FillPolygon.h"
 #include "Fill.h"
+#include "Stroke.h"
 
 
 namespace Pt {
@@ -52,19 +51,22 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _drawLine( 0 )
 , _drawThinLine(0 )
 , _drawThickLine( 0)
-, _drawPolyline( 0 )
-, _drawThinPolyline( 0 )
 , _drawEllipse( 0 )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
 , _fillPolygon( 0 )
 , _drawText( 0 )
+, _stroke( 0 )
+, _fillSolid( 0 )
+, _fillTexture( 0 )
 {
     std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
     std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
+    std::auto_ptr<Stroke>                 stroke( new Stroke() );    
     std::auto_ptr<DrawThinLine>           dThinLine( new DrawThinLine );
+    dThinLine->setOutput( *stroke );
     std::auto_ptr<DrawThickLine>          dThickLine( new DrawThickLine );
-    std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline() );
+    dThickLine->setOutput( *stroke );    
     std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
     std::auto_ptr<DrawThinEllipse>        dThinEllipse( new DrawThinEllipse() );
@@ -72,20 +74,20 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillPolygon>            fillPolygon( new FillPolygon() );
     fillPolygon->setOutput( *fillSolid );
     std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
-
+    
+    
     _drawThinLine       = dThinLine.release();
     _drawThickLine      = dThickLine.release();
     _drawLine           = _drawThinLine;
-    _drawThinPolyline   = dThinPolyline.release();
-    _drawPolyline       = _drawThinPolyline;
     _drawText           = dText.release();
     _drawThinEllipse    = dThinEllipse.release();
     _drawThickEllipse    = dThickEllipse.release();
     _drawEllipse        = _drawThinEllipse;
     _fillEllipse        = fillEllipse.release();
     _fillPolygon        = fillPolygon.release();
-    _fillSolid          = fillSolid.release();
+    _fillSolid     = fillSolid.release();
     _fillTexture        = fillTexture.release();
+    _stroke             = stroke.release();
 }
 
 ImagePainter::~ImagePainter()
@@ -93,31 +95,31 @@ ImagePainter::~ImagePainter()
     try {
         delete _drawThinLine;
         delete _drawThickLine;
-        delete _drawThinPolyline;
         delete _fillPolygon;
         delete _drawText;
         delete _drawThinEllipse;
         delete _drawThickEllipse;
         delete _fillEllipse;
+        delete _stroke;
    }
    catch(...) {}
 }
 
 void ImagePainter::setPen( const Pen& pen )
 {
-    _pen = pen;
-
+    _pen = pen;    
+    
     if( _pen.size() == 1 )
     {
         _drawLine       = _drawThinLine;
-        _drawPolyline   = _drawThinPolyline;
-        _drawEllipse    = _drawThinEllipse;
+        _drawEllipse    = _drawThinEllipse;        
     }
     else
     {
         _drawLine       = _drawThickLine;
         _drawEllipse    = _drawThickEllipse;
     }
+        
 }
 
 const Pen& ImagePainter::pen() const
@@ -240,14 +242,11 @@ void ImagePainter::drawPolyline( const  Math::Point* points, const size_t pointC
 
 void ImagePainter::fillPolygon( const  Math::Point* points, const size_t pointCount )
 {
-    std::vector<Math::Point> p( pointCount );
-    memcpy( &p[0], points, sizeof( Math::Point) * pointCount );
-
-    _fillPolygon->draw( _image, _brush, p );
+    _fillPolygon->draw( _image, _brush, points, pointCount );
 }
 
 void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image )
-{
+{    
 }
 
 void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image, const Region& imageRegion )
