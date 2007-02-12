@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <vector>
 
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbColor.h>
@@ -26,6 +27,8 @@
 #include <Pt/Gfx/Rgb555Color.h>
 #include <Pt/Gfx/Rgb565Color.h>
 #include <Pt/Gfx/ColorAlgo.h>
+
+#include <Pt/Gfx/ARgbColorRef.h>
 
 using namespace Pt;
 using namespace Pt::Gfx;
@@ -57,6 +60,21 @@ int main()
     greyscale(argb_1, argb_1);
     greyscale(argb8888_1);
     greyscale(float_1);
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    typedef std::vector<ColorTraits<ARgbColorRef>::ComponentT> PlaneT;
+
+    PlaneT ap(320 * 240);
+    PlaneT rp(320 * 240);
+    PlaneT gp(320 * 240);
+    PlaneT bp(320 * 240);
+
+    ARgbColorRef argb_1_ref(ap[0], rp[0], gp[0], bp[0]);
+    ARgbColorRef argb_2_ref(ap[1], rp[1], gp[1], bp[1]);
+
+    argb_1_ref = argb_1;
+    argb_2 = argb_2_ref;
 
     return 0;
 }

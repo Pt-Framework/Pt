@@ -86,6 +86,17 @@ namespace Pt {
                 inline Color& operator=(const Color& c)
                 { _val = c._val; return *this; }
 
+                /** @brief Assignment operator.
+                 *
+                 *  This assigns color with different type to this one by calling
+                 *  assign(), which can be overloaded to allow new color types to
+                 *  be assigned to this one.
+                 */
+                template <typename ColorT>
+                inline Color<Rgb888>& operator=(const ColorT& color)
+                { assign(*this, color); return *this; }
+
+
                 /** @brief Assignment-addition operator (beware of overflow).
                  */
                 inline Color& operator+=(const Color& c)
@@ -207,15 +218,39 @@ namespace Pt {
         }
 
 
-        /** @brief Assign an Color<Rgb888> to an ARgbFColor.
+        /** @brief Assign a Color<ARgb> to a Color<Rgb888>.
          */
-        inline void assign(ARgbFColor& to, const Color<Rgb888>& from)
+        inline void assign(Color<Rgb888>& to, const Color<ARgb>& from)
+        { fromARgb(to, from); }
+
+        /** @brief Assign a Color<Rgb888> to a Color<ARgb>.
+         */
+        inline void assign(Color<ARgb>& to, const Color<Rgb888>& from)
+        {
+            const uint16_t tr = from.red();
+            const uint16_t tg = from.green();
+            const uint16_t tb = from.blue();
+
+            to.setAlpha(0xFFFF);
+            to.setRed  ( ((tr + !!tr) << 8) - !!tr ); // Thanks to Mike Sharov for this algorithm
+            to.setGreen( ((tg + !!tg) << 8) - !!tg );
+            to.setBlue ( ((tb + !!tb) << 8) - !!tb );
+        }
+
+        /** @brief Assign an Color<Rgb888> to an Color<ARgbF>.
+         */
+        inline void assign(Color<ARgbF>& to, const Color<Rgb888>& from)
         {
             to.setAlpha( 1.0f                         );
             to.setRed  ( float(from.red  ()) / 255.0f );
             to.setGreen( float(from.green()) / 255.0f );
             to.setBlue ( float(from.blue ()) / 255.0f );
         }
+
+        // No need to overload for:
+        //   void assign(Color<Rgb888>& to, const Color<ARgbF>& from)
+        // beause there is no more direct method to do this yet instead of
+        // converting to the master color format first.
 
 
         /** @brief Equality operator for Color<Rgb888> comparison.

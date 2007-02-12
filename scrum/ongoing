@@ -26,3 +26,10 @@ ITEM P10 S5 "The AtomicInt class implements atomic operations"
     TASK "Review asm" blue_wind_25
     TASK "Write test case"
     TASK "Write docs"
+
+ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
+    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
+    TASK "Implement ARgbColorRef" blue_wind_25
+    TASK "Implement ARgbPlanarImage"
+    TASK "Implement PtrT helper class in ColorTraits"
+    TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"

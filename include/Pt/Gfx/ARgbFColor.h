@@ -84,6 +84,17 @@ namespace Pt {
                 inline Color<ARgbF>& operator=(const Color<ARgbF>& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
+                /** @brief Assignment operator.
+                 *
+                 *  This assigns color with different type to this one by calling
+                 *  assign(), which can be overloaded to allow new color types to
+                 *  be assigned to this one.
+                 */
+                template <typename ColorT>
+                inline Color<ARgbF>& operator=(const ColorT& color)
+                { assign(*this, color); return *this; }
+
+
                 /** @brief Assignment-addition operator.
                  */
                 inline Color<ARgbF>& operator+=(const Color<ARgbF>& c)
@@ -156,26 +167,24 @@ namespace Pt {
         };
 
 
+// This helper macro is implemented to make the compiler tries to generate the 'cmov'
+// instruction if available. This macro will be undefined before leaving this file.
+#define Pt_Gfx_ARgbFColor_h_convert(dVar, sVar, sChn) \
+    const float&      sChn = sVar.sChn();             \
+    register uint16_t dVar = 0;                       \
+    if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f); \
+    if(sChn > 1.0f) dVar = 65535
+
         /** @brief Convert a Color<ARgbF> to a Color<ARgb>.
          */
         inline const Color<ARgb> toARgb(const Color<ARgbF>& from)
         {
-// Try to make the compiler generate
-// the 'cmov' instruction if available
-#define Pt_Gfx_ARgbFColor_h_convert(dVar, sVar, sChn) \
-    const float&      sChn = sVar.sChn();                \
-    register uint16_t dVar = 0;                          \
-    if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f);    \
-    if(sChn > 1.0f) dVar = 65535
-
             Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
             Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
             Pt_Gfx_ARgbFColor_h_convert(g, from, green);
             Pt_Gfx_ARgbFColor_h_convert(b, from, blue );
 
             return Color<ARgb>(a, r, g, b);
-
-#undef Pt_Gfx_ARgbFColor_h_convert
         }
 
         /** @brief Convert a Color<ARgb> to a Color<ARgbF>.
@@ -187,6 +196,29 @@ namespace Pt {
             to.setGreen( float( from.green() ) / 65535.0f );
             to.setBlue ( float( from.blue () ) / 65535.0f );
         }
+
+
+        /** @brief Assign a Color<ARgb> to a Color<ARgbF>.
+         */
+        inline void assign(Color<ARgbF>& to, const Color<ARgb>& from)
+        { fromARgb(to, from); }
+
+        /** @brief Assign a Color<RgbF> to a Color<ARgb>.
+         */
+        inline void assign(Color<ARgb>& to, const Color<ARgbF>& from)
+        {
+            Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
+            Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
+            Pt_Gfx_ARgbFColor_h_convert(g, from, green);
+            Pt_Gfx_ARgbFColor_h_convert(b, from, blue );
+
+            to.setAlpha(a);
+            to.setRed  (r);
+            to.setGreen(g);
+            to.setBlue (b);
+        }
+
+#undef Pt_Gfx_ARgbFColor_h_convert
 
 
         /** @brief Equality operator for Color<ARgbF> comparison.

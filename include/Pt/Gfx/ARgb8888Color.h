@@ -99,17 +99,15 @@ namespace Pt {
                 { _val = c._val; return *this; }
 
                 /** @brief Assignment operator.
-
-                        This assigns another color to this one by calling
-                        assign(), which can be overloaded to allow other
-                        color types to be assigned to this one,
-                */
+                 *
+                 *  This assigns color with different type to this one by calling
+                 *  assign(), which can be overloaded to allow new color types to
+                 *  be assigned to this one.
+                 */
                 template <typename ColorT>
-                inline Color<ARgb>& operator=(const ColorT& color)
-                {
-                        assign(*this, color);
-                        return *this;
-                }
+                inline Color<ARgb8888>& operator=(const ColorT& color)
+                { assign(*this, color); return *this; }
+
 
                 /** @brief Assignment-addition operator (beware of overflow).
                  */
@@ -248,43 +246,40 @@ namespace Pt {
         }
 
 
-        /** @brief Convert a Color<ARgb8888> to a Color<ARgb>.
+        /** @brief Assign a Color<ARgb> to a Color<ARgb8888>.
          */
-        inline void toARgb(Color<ARgb>& to,  const Color<ARgb8888>& from)
+        inline void assign(Color<ARgb8888>& to, const Color<ARgb>& from)
+        { fromARgb(to, from); }
+
+        /** @brief Assign a Color<ARgb8888> to a Color<ARgb>.
+         */
+        inline void assign(Color<ARgb>& to, const Color<ARgb8888>& from)
         {
             const uint16_t ta = from.alpha();
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
             const uint16_t tb = from.blue();
 
-            to.setAlpha( ((ta + !!ta) << 8) - !!ta );
-            to.setRed( ((tr + !!tr) << 8) - !!tr );
+            to.setAlpha( ((ta + !!ta) << 8) - !!ta ); // Thanks to Mike Sharov for this algorithm
+            to.setRed  ( ((tr + !!tr) << 8) - !!tr );
             to.setGreen( ((tg + !!tg) << 8) - !!tg );
-            to.setBlue( ((tb + !!tb) << 8) - !!tb );
+            to.setBlue ( ((tb + !!tb) << 8) - !!tb );
         }
 
-
-        /** @brief Convert a Color<ARgb> to a Color<ARgb8888>.
+        /** @brief Assign a Color<ARgb8888> to an Color<ARgbF>.
          */
-        inline void assign(Color<ARgb8888>& to, const Color<ARgb>& from)
-        {
-            const uint32_t val = ( uint32_t(from.alpha() & 0xFF00) << 16 ) |
-                                 ( uint32_t(from.red  () & 0xFF00) <<  8 ) |
-                                   uint32_t(from.green() & 0xFF00)         |
-                                 ( uint32_t(from.blue ()         ) >>  8 );
-            to.setValue(val);
-        }
-
-
-        /** @brief Assign an Color<ARgb8888> to an ARgbFColor.
-         */
-        inline void assign(ARgbFColor& to, const Color<ARgb8888>& from)
+        inline void assign(Color<ARgbF>& to, const Color<ARgb8888>& from)
         {
             to.setAlpha( float(from.alpha()) / 255.0f );
             to.setRed  ( float(from.red  ()) / 255.0f );
             to.setGreen( float(from.green()) / 255.0f );
             to.setBlue ( float(from.blue ()) / 255.0f );
         }
+
+        // No need to overload for:
+        //   void assign(Color<ARgb8888>& to, const Color<ARgbF>& from)
+        // beause there is no more direct method to do this yet instead of
+        // converting to the master color format first.
 
 
         /** @brief Equality operator for Color<ARgb8888> comparison.

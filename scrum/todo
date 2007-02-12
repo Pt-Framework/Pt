@@ -46,12 +46,6 @@ ITEM P10 S5 "Event based Application class is implemented"
     TASK "Write Documentation"
     TASK "Write test case"
 
-ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
-    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
-    TASK "Implement ARgbPlanarImage"
-    TASK "Implement PtrT helper class in ColorTraits"
-    TASK "Make PixelIterator and ConstInterator in SubImage<T> supports all image types (interleaved, planar, etc.)"
-
 ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
     TASK "Extend Jamrules.platinum"
 
