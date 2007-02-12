@@ -186,13 +186,13 @@ namespace Pt {
                     public:
                         inline PixelIterator(SubImage& image)
                         : _pixel(&image.scanline(0)[0]),
-                          /*_offsetX(0),*/ _currentX(0), _width(image.width()),
+                          _currentX(0), _width(image.width()),
                           _incr(image.fullImage().width() - image.width() + 1)
                         {}
 
                         inline PixelIterator(SubImage& image, uint x, uint y)
                         : _pixel(&image.scanline(y-1)[x-1]),
-                          /*_offsetX(x),*/ _currentX(0), _width(image.width()),
+                          _currentX(0), _width(image.width()),
                           _incr(image.fullImage().width() - image.width() + 1)
                         {}
 
@@ -217,11 +217,13 @@ namespace Pt {
                         }
 
                     private:
-                        ColorT* _pixel;
-                        //uint    _offsetX;
-                        uint    _currentX;
-                        uint    _width;
-                        uint    _incr;
+                        typedef typename ColorTraits<ColorT>::ColorPtrT ColorPtrT;
+
+                    private:
+                        ColorPtrT _pixel;
+                        uint      _currentX;
+                        uint      _width;
+                        uint      _incr;
                 };
 
                 /** @brief Pixel-based constant iterator class.
@@ -236,14 +238,14 @@ namespace Pt {
                     public:
                         inline ConstPixelIterator(const SubImage& image)
                         : _pixel(&image.scanline(0)[0]),
-                          /*_offsetX(0),*/ _currentX(0), _width(image.width()),
+                          _currentX(0), _width(image.width()),
                           _incr(image.fullImage().width() - image.width() + 1)
                         {
                         }
 
                         inline ConstPixelIterator(const SubImage& image, uint x, uint y)
                         : _pixel(&image.scanline(y-1)[x-1]),
-                          /*_offsetX(x),*/ _currentX(0), _width(image.width()),
+                          _currentX(0), _width(image.width()),
                           _incr(image.fullImage().width() - image.width() + 1)
                         {
                         }
@@ -269,11 +271,13 @@ namespace Pt {
                         }
 
                     private:
-                        const ColorT* _pixel;
-                        //uint          _offsetX;
-                        uint          _currentX;
-                        uint          _width;
-                        uint          _incr;
+                        typedef typename ColorTraits<ColorT>::ConstColorPtrT ConstColorPtrT;
+
+                    private:
+                        ConstColorPtrT _pixel;
+                        uint           _currentX;
+                        uint           _width;
+                        uint           _incr;
             };
 
         };

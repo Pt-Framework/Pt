@@ -34,7 +34,8 @@ KeyboardHandler::KeyboardHandler()
 : _exit(false)
 , _fd(-1)
 {
-    _fd = open("/dev/input/event0", O_RDONLY);
+    //_fd = open("/dev/input/event0", O_RDONLY);
+    _fd = open("/dev/input/event1", O_RDONLY);
     if( _fd < 0 )
     {
         throw std::runtime_error("Could not open keyboard device /dev/input/eventX" + PT_SOURCEINFO);

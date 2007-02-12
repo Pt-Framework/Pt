@@ -28,12 +28,12 @@ namespace Pt {
 
     namespace Gfx {
 
-        /** @brief An empty structure used for tagging ref-type 64-bit ARGB color class.
+        /** @brief An empty structure used for tagging reference-type 64-bit ARGB color class.
          */
         struct ARgbRef {};
 
 
-        /** @brief Reference type 64-Bit ARGB color class.
+        /** @brief Reference-type 64-Bit ARGB color class.
          *  @ingroup Gfx
          *
          *  Valid range of the color components for this color model:
@@ -143,6 +143,14 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<ARgbColorRef> {
+            class ColorPtrT {
+              // TODO: Write it !!!
+            };
+
+            class ConstColorPtrT {
+              // TODO: Write it !!!
+            };
+
             typedef uint16_t ComponentT;
             typedef uint32_t TmpValueT;
         };
