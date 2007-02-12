@@ -41,7 +41,7 @@
 #include <list>
 
 struct input_event;
-
+struct js_event;
 
 namespace Pt {
 
@@ -63,7 +63,7 @@ namespace Gui {
             void run();
 
             void handleEvents(input_event* events, int rd);
-
+            void handleJEvents(js_event& events, int rd);
         private:
             bool _exit;
             int _highestFd;

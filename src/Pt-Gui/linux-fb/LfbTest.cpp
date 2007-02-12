@@ -97,7 +97,8 @@ class DemoWidget : public Pt::Gui::Widget
             Pt::Gfx::ARgbColor white(0xffff, 0xffff, 0xffff);
             Pt::Gfx::Font font24("Vera", 24);
 
-            for(unsigned n = 0; n < 50; ++n)
+            int n = 50;
+            //for(unsigned n = 0; n < 50; ++n)
             {
                 Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(n*1200, 0, 0) );
 

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <linux/input.h>
+#include <linux/joystick.h>
 
 #include "ApplicationImpl.h"
 #include <Pt/System/MutexLock.h>
@@ -58,7 +59,7 @@ InputHandler::InputHandler()
         _highestFd = std::max(_highestFd, _fd2);
     }
 
-    _fd3 = open("/dev/input/event2", O_RDONLY|O_NONBLOCK);
+    _fd3 = open("/dev/input/js0", O_RDONLY|O_NONBLOCK);
     if( _fd3 >= 0 )
     {
         _highestFd = std::max(_highestFd, _fd3);
@@ -89,26 +90,42 @@ void InputHandler::run()
 
     while( !_exit )
     {
-        int bytes = read(_fd1, ev, sizeof(struct input_event) * 64);
-        this->handleEvents(ev, bytes);
+        js_event jev;
+        memset(&jev, 0, sizeof(js_event));
+        int bytes = 0;
 
-        bytes = read(_fd2, ev, sizeof(struct input_event) * 64);
-        this->handleEvents(ev, bytes);
-
-        bytes = read(_fd3, ev, sizeof(struct input_event) * 64);
-        this->handleEvents(ev, bytes);
+        if(_fd1 >= 0)
+        {
+            bytes = read(_fd1, ev, sizeof(struct input_event) * 64);
+            this->handleEvents(ev, bytes);
+        }
+        if(_fd2 >= 0)
+        {
+            bytes = read(_fd2, ev, sizeof(struct input_event) * 64);
+            this->handleEvents(ev, bytes);
+        }
+        if(_fd2 >= 0)
+        {
+            bytes = read(_fd3, &jev, sizeof(struct js_event) );
+            this->handleJEvents(jev, bytes);
+        }
 
         fd_set rfds;
         FD_ZERO(&rfds);
-        FD_SET(_fd1, &rfds);
-        FD_SET(_fd2, &rfds);
-        FD_SET(_fd3, &rfds);
+        if(_fd1 >= 0)
+            FD_SET(_fd1, &rfds);
+
+        if(_fd2 >= 0)
+            FD_SET(_fd2, &rfds);
+
+        if(_fd3 >= 0)
+            FD_SET(_fd3, &rfds);
 
         struct timeval tv;
         tv.tv_sec = msec / 1000;
         tv.tv_usec = (msec % 1000) * 1000;
 
-        int ret = ::select(_highestFd + 1, &rfds, 0, 0, &tv);
+        int ret = ::select(_fd3 + 1, &rfds, 0, 0, &tv);
 
         if(ret == 0)
             continue;
@@ -122,15 +139,22 @@ void InputHandler::run()
         }
 
         if( FD_ISSET(_fd1, &_fds) )
+        {
             bytes = read(_fd1, ev, sizeof(struct input_event) * 64);
+            this->handleEvents(ev, bytes);
+        }
 
         if( FD_ISSET(_fd2, &_fds) )
+        {
             bytes = read(_fd2, ev, sizeof(struct input_event) * 64);
+            this->handleEvents(ev, bytes);
+        }
 
         if( FD_ISSET(_fd3, &_fds) )
-            bytes = read(_fd3, ev, sizeof(struct input_event) * 64);
-
-        this->handleEvents(ev, bytes);
+        {
+            bytes = read(_fd3, &jev, sizeof(struct js_event) );
+            this->handleJEvents(jev, bytes);
+        }
     }
 }
 
@@ -151,6 +175,38 @@ void InputHandler::handleEvents(input_event* events, int bytes)
     }
 }
 
+
+void InputHandler::handleJEvents(js_event& events, int bytes)
+{
+    if( bytes < sizeof(struct js_event) )
+    {
+        return;
+    }
+        if (events.type == JS_EVENT_BUTTON)
+        {
+            if(events.number == 0)
+            {
+                if(events.value == 1) keyEvent.send( KEY_LEFTALT, 1 );
+            }
+            if(events.number == 1)
+            {
+                if(events.value ==1 ) keyEvent.send( KEY_RIGHTALT, 1 );
+            }
+        }
+        if (events.type == JS_EVENT_AXIS)
+        {
+                if(events.number == 1)
+                {
+                    if(events.value < 0) keyEvent.send( KEY_UP, 1 );
+                    if(events.value > 0) keyEvent.send( KEY_DOWN, 1 );
+                }
+                if(events.number == 0)
+                {
+                    if(events.value < 0) keyEvent.send( KEY_LEFT, 1 );
+                    if(events.value > 0) keyEvent.send( KEY_RIGHT, 1 );
+                }
+        }
+}
 
 
 
