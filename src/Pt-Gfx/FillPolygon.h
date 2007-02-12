@@ -39,16 +39,27 @@ namespace Gfx{
 /** @brief Fill polygons on images
 
     This class is an interface for all function objects that can
-    fill polygons.
+    fill polygons. It delegates pixel filling to a Fill object.
  */
 class FillPolygon
 {
     public:
+        /** @brief Default constructor
+        */
         FillPolygon();
 
+        /** @brief Destructor
+        */
         virtual ~FillPolygon()
         { }
 
+        /** @brief Set Fill routine
+
+            The set Fill object is used to perform the actuall filling
+            of the spans and pixels.
+
+            @param f Fill object to use
+        */
         void setOutput(Fill& f)
         { _fill = &f; };
 

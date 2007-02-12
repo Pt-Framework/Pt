@@ -27,13 +27,26 @@
 namespace Pt{
 namespace Gfx{
 
+/** @brief Draw thick ellipses on an image
+
+    This class implements DrawEllipse and is specialised for the  drawing
+    of thick ellipses.
+ */
 class DrawThickEllipse : public DrawEllipse
 {
     public:
+        /** @brief Default constructor
+        */
         DrawThickEllipse();
-        
+
+        /** @brief Destructor
+        */
         virtual ~DrawThickEllipse();
-        
+
+        /** @brief Draw an ellipse on an image
+
+            @see DrawEllipse::draw
+        */
         virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
     private:
@@ -46,23 +59,21 @@ class DrawThickEllipse : public DrawEllipse
                 , x2( 0 )
                 , len2( 0 )
                 {}
-                
+
                 ~EllipseSpan()
                 { }
-                
-                int x1;            
+
+                int x1;
                 int len1;
-                int x2;            
+                int x2;
                 int len2;
-                
+
         };
-        
+
         void fillEllipse(  const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
         void outputSpan( int x, int y, unsigned len );
-        
+
         std::vector<EllipseSpan> _spans;
-        
-        
 };
 
 }//namespace Gfx

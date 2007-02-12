@@ -45,7 +45,7 @@ class PT_GFX_API Fill
 
         /** @brief Fill Pixels on an Image
 
-            The pixels at the given X and y position are filles using the
+            The pixels at the given X and y position are filled using the
             given brush. The origin of the geometric figure is also given
             for the algorithms that need a relative point.
 
@@ -72,6 +72,9 @@ class PT_GFX_API FillTexture : public Fill
 {
     public:
         /** @sa Fill::fill
+
+            The Texture of the brush is drawn relative to the origin passed
+            to this function.
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
                            const Math::Point& origin,

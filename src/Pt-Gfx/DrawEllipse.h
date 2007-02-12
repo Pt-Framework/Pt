@@ -27,15 +27,35 @@
 namespace Pt{
 namespace Gfx{
 
+/** @brief Draw ellipses on images
+
+    This class is an interface for all function objects that can
+    draw ellipses. It delegates pixel filling to a Fill object.
+ */
 class DrawEllipse
 {
     public:
+        /** @brief Default constructor
+        */
         DrawEllipse()
-        {};
-        
-        virtual ~ DrawEllipse()
-        {};
-        
+        {}
+
+        /** @brief Destructor
+        */
+        virtual ~DrawEllipse()
+        {}
+
+        /** @brief Draw an ellipse
+
+            The ellipse described by its top-left point and size will be
+            drawn on an ARgbImage. The attributes for the fill operation
+            are taken from the passed Pen object.
+
+            @param image Target image
+            @param pen Pen to be used
+            @param topLeft Top-left point of the ellipse
+            @param size Size of the ellipse
+        */
         virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size) = 0;
 };
 

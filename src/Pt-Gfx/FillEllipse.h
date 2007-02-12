@@ -32,16 +32,43 @@ namespace Gfx{
 
 class Fill;
 
+/** @brief Fill ellipses on images
+
+    This class is a function object that can fill ellipes.
+    It delegates pixel filling to a Fill object.
+ */
 class FillEllipse
 {
     public:
+        /** @brief Default constructor
+        */
         FillEllipse();
 
+        /** @brief Destructor
+        */
         ~FillEllipse();
 
+        /** @brief Set Fill routine
+
+            The set Fill object is used to perform the actuall filling
+            of the spans and pixels.
+
+            @param f Fill object to use
+        */
         void setOutput(Fill& f)
         { _fill = & f; }
 
+        /** @brief Fill an ellipse
+
+            The ellipse described by its top-left point and size will be
+            filled on an ARgbImage. The attributes for the fill operation
+            are taken from the passed Brush object.
+
+            @param image Target image
+            @param pen Brush to be used
+            @param topLeft Top-left point of the ellipse
+            @param size Size of the ellipse
+        */
         void draw( ARgbImage& image, const Brush& brush, const Pt::Math::Point& topLeft, const Pt::Math::Size& size );
 
     private:

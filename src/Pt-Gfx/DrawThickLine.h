@@ -196,13 +196,12 @@ class DrawThickLine : public DrawLine
                          Pt::Math::Point from, Pt::Math::Point to,
                          bool projectLeft, bool projectRight,
                          LineFace* leftFace, LineFace* rightFace);
-                         
-        
+
         void drawDashSegment(ARgbImage& image, const Pen& pen,
                          Pt::Math::Point from, Pt::Math::Point to,
                          bool projectLeft, bool projectRight,
-                         LineFace* leftFace, LineFace* rightFace );                          
-        
+                         LineFace* leftFace, LineFace* rightFace );
+
     private:
         FillPolygon _fillPolygon;
         ClipPolygon _clipPolygon;
