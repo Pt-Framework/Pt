@@ -23,53 +23,130 @@
 #include "ApplicationImpl.h"
 #include <Pt/System/MutexLock.h>
 #include <iostream>
+#include <cerrno>
+
+#define BITS_PER_LONG (sizeof(long) * 8)
+#define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
+#define OFF(x)  ((x)%BITS_PER_LONG)
+#define BIT(x)  (1UL<<OFF(x))
+#define LONG(x) ((x)/BITS_PER_LONG)
+#define test_bit(bit, array)	((array[LONG(bit)] >> OFF(bit)) & 1)
 
 
 namespace Pt {
 
 namespace Gui {
 
-
-KeyboardHandler::KeyboardHandler()
+InputHandler::InputHandler()
 : _exit(false)
-, _fd(-1)
+, _highestFd(0)
+, _fd1(-1)
+, _fd2(-1)
+, _fd3(-1)
 {
-    //_fd = open("/dev/input/event0", O_RDONLY);
-    _fd = open("/dev/input/event1", O_RDONLY);
-    if( _fd < 0 )
+    FD_ZERO(&_fds);
+
+    _fd1 = open("/dev/input/event0", O_RDONLY|O_NONBLOCK);
+    if( _fd1 >= 0 )
     {
-        throw std::runtime_error("Could not open keyboard device /dev/input/eventX" + PT_SOURCEINFO);
+        _highestFd = std::max(_highestFd, _fd1);
+    }
+
+    _fd2 = open("/dev/input/event1", O_RDONLY|O_NONBLOCK);
+    if( _fd2 >= 0 )
+    {
+        _highestFd = std::max(_highestFd, _fd2);
+    }
+
+    _fd3 = open("/dev/input/event2", O_RDONLY|O_NONBLOCK);
+    if( _fd3 >= 0 )
+    {
+        _highestFd = std::max(_highestFd, _fd3);
+    }
+
+    if(_highestFd == 0)
+        throw std::runtime_error("Could not open device /dev/input/eventX" + PT_SOURCEINFO);
+}
+
+
+InputHandler::~InputHandler()
+{
+    if(_fd1 > 0)
+        close(_fd1);
+
+    if(_fd2 > 0)
+        close(_fd2);
+
+    if(_fd3 > 0)
+        close(_fd3);
+}
+
+
+void InputHandler::run()
+{
+    struct input_event ev[64];
+    const int msec = 200;
+
+    while( !_exit )
+    {
+        int bytes = read(_fd1, ev, sizeof(struct input_event) * 64);
+        this->handleEvents(ev, bytes);
+
+        bytes = read(_fd2, ev, sizeof(struct input_event) * 64);
+        this->handleEvents(ev, bytes);
+
+        bytes = read(_fd3, ev, sizeof(struct input_event) * 64);
+        this->handleEvents(ev, bytes);
+
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(_fd1, &rfds);
+        FD_SET(_fd2, &rfds);
+        FD_SET(_fd3, &rfds);
+
+        struct timeval tv;
+        tv.tv_sec = msec / 1000;
+        tv.tv_usec = (msec % 1000) * 1000;
+
+        int ret = ::select(_highestFd + 1, &rfds, 0, 0, &tv);
+
+        if(ret == 0)
+            continue;
+
+        if(ret == -1)
+        {
+            if(errno == EINTR)
+                continue;
+
+            throw std::runtime_error("Could not select on socket" + PT_SOURCEINFO);
+        }
+
+        if( FD_ISSET(_fd1, &_fds) )
+            bytes = read(_fd1, ev, sizeof(struct input_event) * 64);
+
+        if( FD_ISSET(_fd2, &_fds) )
+            bytes = read(_fd2, ev, sizeof(struct input_event) * 64);
+
+        if( FD_ISSET(_fd3, &_fds) )
+            bytes = read(_fd3, ev, sizeof(struct input_event) * 64);
+
+        this->handleEvents(ev, bytes);
     }
 }
 
 
-KeyboardHandler::~KeyboardHandler()
+void InputHandler::handleEvents(input_event* events, int bytes)
 {
-    if(_fd > 0)
-        close(_fd);
-}
-
-
-void KeyboardHandler::run()
-{
-    struct input_event ev[64];
-
-    // TODO: make non-blocking and use select
-    while( !_exit )
+    if( bytes < (int) sizeof(struct input_event) )
     {
-        int rd = read(_fd, ev, sizeof(struct input_event) * 64);
+        return;
+    }
 
-        if (rd < (int) sizeof(struct input_event))
+    for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
+    {
+        if (events[i].type == EV_KEY)
         {
-            continue;
-        }
-
-        for (unsigned i = 0; i < rd / sizeof(struct input_event); i++)
-        {
-            if (ev[i].type == EV_KEY)
-            {
-                 keyEvent.send(ev[i].code, ev[i].value);
-            }
+            keyEvent.send( events[i].code, events[i].value );
         }
     }
 }
@@ -79,15 +156,15 @@ void KeyboardHandler::run()
 
 LfbEventLoop::LfbEventLoop()
 {
-    connect(_keyboard.keyEvent, *this, &LfbEventLoop::handleKeyEvent);
-    _keyboard.start();
+    connect(_input.keyEvent, *this, &LfbEventLoop::handleKeyEvent);
+    _input.start();
 }
 
 
 LfbEventLoop::~LfbEventLoop()
 {
-    _keyboard.stop();
-    _keyboard.wait();
+    _input.stop();
+    _input.wait();
 }
 
 
@@ -119,10 +196,19 @@ void LfbEventLoop::handleKeyEvent(int keycode, int value)
 
     KeyEvent::KeyCode code = KeyEvent::Void;
     switch( keycode ) {
-        case KEY_UP:        code = KeyEvent::Up; break;
-        case KEY_LEFT:      code = KeyEvent::Left; break;
-        case KEY_RIGHT:     code = KeyEvent::Right; break;
-        case KEY_DOWN:      code = KeyEvent::Down; break;
+        case KEY_UP:         code = KeyEvent::Up; break;
+        case KEY_LEFT:       code = KeyEvent::Left; break;
+        case KEY_RIGHT:      code = KeyEvent::Right; break;
+        case KEY_DOWN:       code = KeyEvent::Down; break;
+        case KEY_ESC:        code = KeyEvent::Escape; break;
+        case KEY_PAGEDOWN:   code = KeyEvent::PageDown; break;
+        case KEY_PAGEUP:     code = KeyEvent::PageUp; break;
+        case KEY_SPACE:      code = KeyEvent::Space; break;
+        case KEY_ENTER:      code = KeyEvent::Enter; break;
+        case KEY_LEFTSHIFT:  code = KeyEvent::ShiftL; break;
+        case KEY_RIGHTSHIFT: code = KeyEvent::ShiftR; break;
+        case KEY_LEFTALT:    code = KeyEvent::AltL; break;
+        case KEY_RIGHTALT:   code = KeyEvent::AltR; break;
     }
 
     KeyEvent kev(*widget, type, code, 0);
@@ -158,8 +244,8 @@ Screen::Screen()
         throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
 
     // Get the fixed state
-    //if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-    //    throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
+    if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
+        throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
 
     //_fixedInfo.type;   // 0 -> Packed pixels
                          // 1 -> Non interleaved planes

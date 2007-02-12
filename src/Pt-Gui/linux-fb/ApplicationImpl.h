@@ -40,17 +40,19 @@
 
 #include <list>
 
+struct input_event;
+
 
 namespace Pt {
 
 namespace Gui {
 
-    class PT_GUI_API KeyboardHandler : public Pt::System::Thread
+    class PT_GUI_API InputHandler : public Pt::System::Thread
     {
         public:
-            KeyboardHandler();
+            InputHandler();
 
-            ~KeyboardHandler();
+            ~InputHandler();
 
             void stop()
             { _exit = true; }
@@ -60,9 +62,15 @@ namespace Gui {
         protected:
             void run();
 
+            void handleEvents(input_event* events, int rd);
+
         private:
             bool _exit;
-            int _fd;
+            int _highestFd;
+            int _fd1;
+            int _fd2;
+            int _fd3;
+            fd_set _fds;
     };
 
 
@@ -84,7 +92,7 @@ namespace Gui {
         private:
             std::list<Widget*> _widgets;
             Pt::System::Mutex _mutex;
-            KeyboardHandler _keyboard;
+            InputHandler _input;
     };
 
 

@@ -38,6 +38,8 @@ class DemoWidget : public Pt::Gui::Widget
         : _pos(50, 50)
         {}
 
+        Signal<> escape;
+
     protected:
         void _paintEvent(const Pt::Gui::PaintEvent& pev)
         {
@@ -70,6 +72,10 @@ class DemoWidget : public Pt::Gui::Widget
                     this->erase();
                     _pos = Pt::Math::Point(_pos.x(), _pos. y()+ 10);
                     this->refresh();
+                    break;
+
+                case Pt::Gui::KeyEvent::Escape:
+                    escape.send();
                     break;
 
                 default:
@@ -119,6 +125,7 @@ int main(int argc, char** argv)
 
     DemoWidget widget;
     connect(widget.closed, app, &Pt::Gui::Application::exit);
+    connect(widget.escape, app, &Pt::Gui::Application::exit);
 
     widget.show();
     return app.run();
