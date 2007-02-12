@@ -26,12 +26,26 @@
 namespace Pt{
 namespace Gfx{
 
+/** @brief Draw thin ellipses on an image
+
+    This class implements DrawEllipse and is specialised for the  drawing
+    of thin ellipses.
+ */
 class DrawThinEllipse : public DrawEllipse
 {
     public:
+        /** @brief Default constructor
+        */
         DrawThinEllipse();
+
+        /** @brief Destructor
+        */
         virtual ~DrawThinEllipse();
-        
+
+        /** @brief Draw an ellipse on an image
+
+            @see DrawEllipse::draw
+        */
         virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 
     private:
@@ -39,12 +53,12 @@ class DrawThinEllipse : public DrawEllipse
         {
             //Pixel clipping
             if( x >= int(image.width()) || x < 0)
-                return;        
+                return;
 
             if( y >= int(image.height()) || y < 0)
-                return;        
-                
-            image.pixel( x, y ) = pen.color();                        
+                return;
+
+            image.pixel( x, y ) = pen.color();
         }
 };
 
