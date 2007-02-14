@@ -151,8 +151,29 @@ namespace Pt {
               // TODO: Write it !!!
             };
 
+
             typedef uint16_t ComponentT;
             typedef uint32_t TmpValueT;
+
+
+            // We have 4 channels (A, R, G and B)
+            static const size_t ChannelCount = 4;
+
+            // All channel have the same full size (not sub-sampled) and thus
+            // just return constant value of '1'
+            static inline size_t ChannelSubsamplingX(size_t channelIndex)
+            {
+                assert(channelIndex <= ChannelCount);
+                return 1;
+            }
+
+            // All channel have the same full size (not sub-sampled) and thus
+            // just return constant value of '1'
+            static inline size_t ChannelSubsamplingY(size_t channelIndex)
+            {
+                assert(channelIndex <= ChannelCount);
+                return 1;
+            }
         };
 
 

@@ -48,7 +48,7 @@ namespace Pt {
          *
          *  <B>This is the master planar image model</B>
          */
-        typedef PlanarImage<ARgbColor, ColorTraits<ARgbColor> > ARgbPlanarImage;
+        typedef PlanarImage<ARgbColorRef, ColorTraits<ARgbColorRef> > ARgbPlanarImage;
 
 
         /** @brief Standard planar ARgb subimage class.

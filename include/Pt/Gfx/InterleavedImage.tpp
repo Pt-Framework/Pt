@@ -56,7 +56,7 @@ namespace Pt {
         }
 
         template <typename ColorT_, typename ColorTraitsT_>
-                InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const InterleavedImage& src)
+        InterleavedImage<ColorT_, ColorTraitsT_>& InterleavedImage<ColorT_, ColorTraitsT_>::operator=(const InterleavedImage& src)
         {
             if(src.empty()) {
                 clear();
@@ -73,6 +73,7 @@ namespace Pt {
             return *this;
         }
 
+
         template <typename ColorT_, typename ColorTraitsT_>
         typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y)
         {
@@ -82,7 +83,7 @@ namespace Pt {
             return _buff[y*_width + x];
         }
 
-        template <typename ColorT_, typename ColorTraitsT_>
+       template <typename ColorT_, typename ColorTraitsT_>
         const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::at(int x, int y) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))

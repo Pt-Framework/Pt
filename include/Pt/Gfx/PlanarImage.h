@@ -96,10 +96,10 @@ namespace Pt {
                 /** @brief Clears the image (and sets its width and height to 0).
                  */
                 inline void clear()
-                { _buff.clear(); _width = 0; _height = 0; }
+                { _buff.clear(); _chanPtr.clear(); _chanSize.clear(); _width = 0; _height = 0; }
 
 
-                /** @brief Resizes the image to a new width and height and let it be initialized using the default color.
+	              /** @brief Resizes the image to a new width and height and let it be initialized using the default color.
                  */
                 void resize(uint width_, uint height_);
 
@@ -116,7 +116,7 @@ namespace Pt {
                  */
                 PlanarImage& operator=(const PlanarImage& src);
 
-
+#if 0
                 /** @brief Raw data access.
                  */
                 inline ColorT* data()
@@ -146,6 +146,7 @@ namespace Pt {
                  */
                 inline const ColorT& pixel(int x, int y) const
                 { return _buff[y*_width + x]; }
+#endif
 
                 /** @brief Random pixel access with range check.
                  */
@@ -167,6 +168,7 @@ namespace Pt {
                 void setColor(int x, int y, const ColorT& color_);
 
 
+#if 0
                 /** @brief Return an iterator indicating the position of the first pixel in the image.
                  */
                 inline PixelIterator begin()
@@ -196,11 +198,21 @@ namespace Pt {
                  */
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator( *this, y, x ); }
+#endif
 
             protected:
-                std::vector<ColorT> _buff;
-                size_t              _width;
-                size_t              _height;
+                typedef typename ColorTraitsT::ComponentT ComponentT;
+
+                struct ChanSize {
+                    size_t width;
+                    size_t height;
+                };
+
+                std::vector<ComponentT>  _buff;
+                std::vector<ComponentT*> _chanPtr;
+                std::vector<size_t>      _chanSize;
+                size_t                   _width;
+                size_t                   _height;
 
             public:
                 /** @brief Pixel-based iterator class.
@@ -210,10 +222,11 @@ namespace Pt {
                 {
                     public:
                         typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT                  ColorT;
-                        typedef typename ImageT::ColorTraitsT            ColorTraitsT;
+                        typedef typename ImageT::ColorT             ColorT;
+                        typedef typename ImageT::ColorTraitsT       ColorTraitsT;
 
                     public:
+#if 0
                         inline PixelIterator()
                          : _image( 0 )
                          , _pixel( 0 )
@@ -254,6 +267,7 @@ namespace Pt {
 
                             return Math::Size(width - otherWidth, height -otherHeight);
                         }
+#endif
 
                     private:
                         ImageT* _image;
@@ -267,10 +281,11 @@ namespace Pt {
                 {
                     public:
                         typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT                  ColorT;
-                        typedef typename ImageT::ColorTraitsT            ColorTraitsT;
+                        typedef typename ImageT::ColorT             ColorT;
+                        typedef typename ImageT::ColorTraitsT       ColorTraitsT;
 
                     public:
+#if 0
                         inline ConstPixelIterator()
                         : _image( 0 )
                         , _pixel( 0 )
@@ -311,6 +326,7 @@ namespace Pt {
 
                             return Math::Size(width - otherWidth, height -otherHeight);
                         }
+#endif
 
                     private:
                         const ImageT* _image;

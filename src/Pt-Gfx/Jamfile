@@ -3,19 +3,19 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 
-SharedLibrary Pt-Gfx : Pen.cpp
-                       Brush.cpp
-                       Fill.cpp
-                       Font.cpp
-                       FontMetrics.cpp
-                       ARgbColor.cpp
+SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ARgbFColor.cpp
                        ARgb8888Color.cpp
                        Rgb888Color.cpp
                        Rgb565Color.cpp
                        Rgb555Color.cpp
-                       InterleavedImage.cpp
                        PlanarImage.cpp
+                       InterleavedImage.cpp
+                       Pen.cpp
+                       Brush.cpp
+                       Fill.cpp
+                       Font.cpp
+                       FontMetrics.cpp
                        ImagePainter.cpp
                        DrawText.cpp
                        DrawThinLine.cpp
