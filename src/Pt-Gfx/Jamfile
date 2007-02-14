@@ -15,6 +15,7 @@ SharedLibrary Pt-Gfx : Pen.cpp
                        Rgb565Color.cpp
                        Rgb555Color.cpp
                        InterleavedImage.cpp
+                       PlanarImage.cpp
                        ImagePainter.cpp
                        DrawText.cpp
                        DrawThinLine.cpp

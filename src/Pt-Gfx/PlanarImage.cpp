@@ -17,55 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbImage_h
-#define Pt_Gfx_ARgbImage_h
 
-#include <Pt/Gfx/ARgbFColor.h>
-#include <Pt/Gfx/ARgbFColorRef.h>
-#include <Pt/Gfx/InterleavedImage.h>
-#include <Pt/Gfx/PlanarImage.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/ARgbFImage.h>
+#include <Pt/Gfx/ARgb8888Image.h>
+#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Gfx/Rgb555Image.h>
+#include <Pt/Gfx/PlanarImage.tpp>
 #include <Pt/Gfx/SubImage.h>
-
+#include <Pt/Gfx/SubImage.tpp>
 
 namespace Pt {
+
     namespace Gfx {
 
-        /** @brief Standard interleaved ARgb image class.
-         *
-         *  <B>This is the master interleaved image model</B>
-         */
-        typedef InterleavedImage<ARgbColor, ColorTraits<ARgbColor> > ARgbInterleavedImage;
+// With GCC we should be able to use explicit template instantiation correctly
+// and thus we instantiate all the interleaved image and subimage classes here
+#ifdef __GNUC__
 
+        // Explicit instantiation of the standard planar image classes
+        template class PlanarImage<ARgbColor, ColorTraits<ARgbColor> >;
 
-        /** @brief Standard interleaved ARgb subimage class.
-         *
-         *  <B>This is the master interleaved subimage model</B>
-         */
-        typedef SubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
-
-
-        /** @brief Standard planar ARgb image class.
-         *
-         *  <B>This is the master planar image model</B>
-         */
-        typedef PlanarImage<ARgbColor, ColorTraits<ARgbColor> > ARgbPlanarImage;
-
-
-        /** @brief Standard planar ARgb subimage class.
-         *
-         *  <B>This is the master planar subimage model</B>
-         */
-        typedef SubImage<ARgbPlanarImage> ARgbPlanarSubImage;
-
-
-        //
-        // Interleaved images and subimages will be the most used types
-        // and so typedefs them for convenience
-        //
-        typedef ARgbInterleavedImage    ARgbImage;
-        typedef ARgbInterleavedSubImage ARgbSubImage;
-
-    }
-}
+        // Explicit instantiation of the standard subimage classes of the above image classes
+        template class SubImage<ARgbPlanarImage>;
 
 #endif
+
+    } // namespace Gfx
+
+} // namespace Pt
+

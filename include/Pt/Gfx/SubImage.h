@@ -286,6 +286,14 @@ namespace Pt {
 
 } // namespace Pt
 
+
+//
+// NOTE: Why these conditional compilation is always get deleted ???
+//
+// With GCC we should be able to use explicit template instantiation correctly
+// and thus we does not need to include the template implementation header
+#ifndef __GNUC__
 #include "SubImage.tpp"
+#endif
 
 #endif

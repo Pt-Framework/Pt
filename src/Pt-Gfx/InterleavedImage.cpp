@@ -44,7 +44,7 @@ namespace Pt {
         template class InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >;
         template class InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >;
 
-        // Explicit instantiation of the standard  subimage classes of the above image classes
+        // Explicit instantiation of the standard subimage classes of the above image classes
         template class SubImage<ARgbInterleavedImage>;
         template class SubImage<ARgbFInterleavedImage>;
         template class SubImage<ARgb8888InterleavedImage>;

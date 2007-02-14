@@ -17,55 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbImage_h
-#define Pt_Gfx_ARgbImage_h
+#ifndef Pt_Gfx_ARgbFColorRef_h
+#define Pt_Gfx_ARgbFColorRef_h
 
-#include <Pt/Gfx/ARgbFColor.h>
-#include <Pt/Gfx/ARgbFColorRef.h>
-#include <Pt/Gfx/InterleavedImage.h>
-#include <Pt/Gfx/PlanarImage.h>
-#include <Pt/Gfx/SubImage.h>
+#include <Pt/Gfx/ARgbColorRef.h>
 
 
 namespace Pt {
+
     namespace Gfx {
 
-        /** @brief Standard interleaved ARgb image class.
-         *
-         *  <B>This is the master interleaved image model</B>
-         */
-        typedef InterleavedImage<ARgbColor, ColorTraits<ARgbColor> > ARgbInterleavedImage;
+        // Nothing is here yet
 
+    } // namespace Gfx
 
-        /** @brief Standard interleaved ARgb subimage class.
-         *
-         *  <B>This is the master interleaved subimage model</B>
-         */
-        typedef SubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
-
-
-        /** @brief Standard planar ARgb image class.
-         *
-         *  <B>This is the master planar image model</B>
-         */
-        typedef PlanarImage<ARgbColor, ColorTraits<ARgbColor> > ARgbPlanarImage;
-
-
-        /** @brief Standard planar ARgb subimage class.
-         *
-         *  <B>This is the master planar subimage model</B>
-         */
-        typedef SubImage<ARgbPlanarImage> ARgbPlanarSubImage;
-
-
-        //
-        // Interleaved images and subimages will be the most used types
-        // and so typedefs them for convenience
-        //
-        typedef ARgbInterleavedImage    ARgbImage;
-        typedef ARgbInterleavedSubImage ARgbSubImage;
-
-    }
-}
+} // namespace Pt
 
 #endif
+

@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_InterleavedImage_h
-#define Pt_Gfx_InterleavedImage_h
+#ifndef Pt_Gfx_PlanarImage_h
+#define Pt_Gfx_PlanarImage_h
 
 #include <Pt/Exception.h>
-#include <Pt/Gfx/ARgbFColor.h>
+#include <Pt/Gfx/ARgbFColorRef.h>
 #include <Pt/Math/Rect.h>
 
 #include <vector>
@@ -31,21 +31,21 @@ namespace Pt {
 
     namespace Gfx {
 
-        /** @brief Interleaved image class.
+        /** @brief Planar image class.
          *  @ingroup Gfx
          *
          *  There are two common memory structures for an image:
-         *    - Interleaved image which is represented by grouping the pixels together
+         *    - Planar image which is represented by grouping the pixels together
          *      in memory and interleaving all channels together.
          *    - Planar images which is represented by keeping the channels in separate
          *      color planes (blocks of memory). One block to the other blocks may or
          *      may not be in contiguous memory address.
          *
-         *  This InterleavedImage<typename ColorT, typename ColorTraitsT> class is
+         *  This PlanarImage<typename ColorT, typename ColorTraitsT> class is
          *  meant to be used for implementing interleaved images.
          */
         template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
-        class /*PT_GFX_API*/ InterleavedImage {
+        class /*PT_GFX_API*/ PlanarImage {
             public:
                 typedef ColorT_       ColorT;
                 typedef ColorTraitsT_ ColorTraitsT;
@@ -60,19 +60,19 @@ namespace Pt {
             public:
                 /** @brief The default constructor; will construct an empty image.
                  */
-                inline InterleavedImage()
+                inline PlanarImage()
                 : _width(0), _height(0)
                 {}
 
                 /** @brief Copy constructor.
                  */
-                inline InterleavedImage(const InterleavedImage& src)
+                inline PlanarImage(const PlanarImage& src)
                 : _width(0), _height(0)
                 { *this = src; }
 
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
-                inline InterleavedImage(uint width_, uint height_, const ColorT& fill = ColorT())
+                inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT())
                 : _width(0), _height(0)
                 { resize(width_, height_, fill); }
 
@@ -110,11 +110,11 @@ namespace Pt {
 
                 /** @brief Assigns a color to all pixels.
                  */
-                InterleavedImage& operator=(const ColorT& fill);
+                PlanarImage& operator=(const ColorT& fill);
 
                 /** @brief Assignment operator from the same image type.
                  */
-                InterleavedImage& operator=(const InterleavedImage& src);
+                PlanarImage& operator=(const PlanarImage& src);
 
 
                 /** @brief Raw data access.
@@ -209,7 +209,7 @@ namespace Pt {
                 class PixelIterator
                 {
                     public:
-                        typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
+                        typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
                         typedef typename ImageT::ColorT                  ColorT;
                         typedef typename ImageT::ColorTraitsT            ColorTraitsT;
 
@@ -266,7 +266,7 @@ namespace Pt {
                 class ConstPixelIterator
                 {
                     public:
-                        typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
+                        typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
                         typedef typename ImageT::ColorT                  ColorT;
                         typedef typename ImageT::ColorTraitsT            ColorTraitsT;
 
@@ -329,7 +329,7 @@ namespace Pt {
 // With GCC we should be able to use explicit template instantiation correctly
 // and thus we does not need to include the template implementation header
 #ifndef __GNUC__
-#include "InterleavedImage.tpp"
+#include "PlanarImage.tpp"
 #endif
 
 #endif
