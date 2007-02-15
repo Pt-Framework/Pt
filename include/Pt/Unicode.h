@@ -31,8 +31,6 @@
 
 namespace Pt {
 
-namespace Text {
-
 namespace Unicode {
 
     //! @brief General category
@@ -449,7 +447,6 @@ PT_API Char toUpper(const Pt::Char& ch);
 
 
 } // namespace Pt
-} // namespace Text
 } // namespace Unicode
 
 

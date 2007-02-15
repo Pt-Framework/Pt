@@ -26,8 +26,6 @@
 
 namespace Pt {
 
-namespace Text {
-
 namespace Unicode {
 
 // Planes category
@@ -6544,8 +6542,6 @@ FXuint Unicode::scriptType(FXwchar ucs){
   }
 */
 
-}
+} // namespace Unicode
 
-}
-
-}
+} // namespace Pt

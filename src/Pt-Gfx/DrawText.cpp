@@ -253,7 +253,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
             buffer        = glyphBitmap->bitmap.buffer;
         }
 
-        if( false == Pt::Text::Unicode::isSpace(*it) )
+        if( false == Pt::Unicode::isSpace(*it) )
         {
 
 //             FT_Glyph_Get_CBox( image, ft_glyph_bbox_pixels, &bbox );

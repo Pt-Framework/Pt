@@ -22,8 +22,6 @@
 
 #include <iostream>
 
-using namespace Pt::Text;
-
 namespace std {
 
 std::locale::id ctype< Pt::Char >::id;
@@ -53,70 +51,70 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char ch) const
 {
     ctype_base::mask m = 0;
 
-    switch (Unicode::category(ch)) {
-        case Unicode::MarkNonSpacing:
+    switch (Pt::Unicode::category(ch)) {
+        case Pt::Unicode::MarkNonSpacing:
             m |= ctype_base::print;
             break;
 
-        case Unicode::MarkSpacingCombining:
+        case Pt::Unicode::MarkSpacingCombining:
             m |= ctype_base::print;
             break;
 
-        case Unicode::MarkEnclosing:
+        case Pt::Unicode::MarkEnclosing:
             m |= ctype_base::print;
             break;
 
-        case Unicode::NumberDecimal:
+        case Pt::Unicode::NumberDecimal:
             m |= ctype_base::print;
             m |= ctype_base::digit;
             m |= ctype_base::alnum;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::NumberLetter:
+        case Pt::Unicode::NumberLetter:
             m |= ctype_base::print;
             //m |= ctype_base::alpha;
             //m |= ctype_base::alnum;
             //m |= ctype_base::graph;
             break;
 
-        case Unicode::NumberOther:
+        case Pt::Unicode::NumberOther:
             m |= ctype_base::print;
             break;
 
-        case Unicode::SeparatorSpace:
+        case Pt::Unicode::SeparatorSpace:
             m |= ctype_base::space;
             break;
 
-        case Unicode::SeparatorLine:
+        case Pt::Unicode::SeparatorLine:
             m |= ctype_base::space;
             break;
 
-        case Unicode::SeparatorParagraph:
+        case Pt::Unicode::SeparatorParagraph:
             m |= ctype_base::space;
             break;
 
-        case Unicode::OtherControl:
+        case Pt::Unicode::OtherControl:
             m |= ctype_base::cntrl;
             break;
 
-        case Unicode::OtherFormat:
+        case Pt::Unicode::OtherFormat:
             m |= ctype_base::cntrl;
             break;
 
-        case Unicode::OtherSurrogate:
+        case Pt::Unicode::OtherSurrogate:
             m |= ctype_base::cntrl;
             break;
 
-        case Unicode::OtherPrivate:
+        case Pt::Unicode::OtherPrivate:
             m |= ctype_base::cntrl;
             break;
 
-        case Unicode::OtherNotAssigned:
+        case Pt::Unicode::OtherNotAssigned:
             m |= ctype_base::cntrl;
             break;
 
-        case Unicode::LetterUpper:
+        case Pt::Unicode::LetterUpper:
             m |= ctype_base::print;
             m |= ctype_base::upper;
             m |= ctype_base::alpha;
@@ -124,7 +122,7 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char ch) const
             m |= ctype_base::graph;
             break;
 
-        case Unicode::LetterLower:
+        case Pt::Unicode::LetterLower:
             m |= ctype_base::print;
             m |= ctype_base::lower;
             m |= ctype_base::alpha;
@@ -132,7 +130,7 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char ch) const
             m |= ctype_base::graph;
             break;
 
-        case Unicode::LetterTitle:
+        case Pt::Unicode::LetterTitle:
             m |= ctype_base::print;
             //m |= ctype_base::upper;
             m |= ctype_base::alpha;
@@ -140,69 +138,69 @@ ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char ch) const
             m |= ctype_base::graph;
             break;
 
-        case Unicode::LetterModifier:
+        case Pt::Unicode::LetterModifier:
             m |= ctype_base::print;
             break;
 
-        case Unicode::LetterOther:
+        case Pt::Unicode::LetterOther:
             m |= ctype_base::print;
             break;
 
-        case Unicode::PunctConnector:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Unicode::PunctDash:
+        case Pt::Unicode::PunctConnector:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::PunctOpen:
+        case Pt::Unicode::PunctDash:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::PunctClose:
+        case Pt::Unicode::PunctOpen:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::PunctInitial:
+        case Pt::Unicode::PunctClose:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::PunctFinal:
+        case Pt::Unicode::PunctInitial:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::PunctOther:
+        case Pt::Unicode::PunctFinal:
             m |= ctype_base::print;
             m |= ctype_base::punct;
             m |= ctype_base::graph;
             break;
 
-        case Unicode::SymbolMath:
+        case Pt::Unicode::PunctOther:
+            m |= ctype_base::print;
+            m |= ctype_base::punct;
+            m |= ctype_base::graph;
+            break;
+
+        case Pt::Unicode::SymbolMath:
             m |= ctype_base::print;
             break;
 
-        case Unicode::SymbolCurrency:
+        case Pt::Unicode::SymbolCurrency:
             m |= ctype_base::print;
             break;
 
-        case Unicode::SymbolModifier:
+        case Pt::Unicode::SymbolModifier:
             m |= ctype_base::print;
             break;
 
-        case Unicode::SymbolOther:
+        case Pt::Unicode::SymbolOther:
             m |= ctype_base::print;
             break;
     }
@@ -251,7 +249,7 @@ ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end)
 
 Pt::Char
 ctype<Pt::Char>::do_toupper(Pt::Char ch) const {
-    return Unicode::toUpper(ch);
+    return Pt::Unicode::toUpper(ch);
 }
 
 
@@ -267,7 +265,7 @@ ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const {
 
 Pt::Char
 ctype<Pt::Char>::do_tolower(Pt::Char ch) const {
-    return Unicode::toLower(ch);
+    return Pt::Unicode::toLower(ch);
 }
 
 
