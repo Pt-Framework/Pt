@@ -49,13 +49,6 @@ class BasicIODevice : public NonCopyable {
         typedef typename std::char_traits<CharT>::off_type off_type;
 
     public:
-        enum OpenMode {
-            Read = std::ios::in,
-            Write = std::ios::out,
-            Trunc = std::ios::trunc,
-            AtEnd = std::ios::ate
-            //NonBlock = 16
-        };
 
         enum SeekMode {
             SeekCurrent,

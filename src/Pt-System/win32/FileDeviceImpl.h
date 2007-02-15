@@ -37,11 +37,11 @@ namespace System {
         public:
             FileDeviceImpl();
 
-            FileDeviceImpl(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
+            FileDeviceImpl(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
 
             ~FileDeviceImpl() throw();
             
-            void open(const char* path, IO::IODevice::OpenMode mode) throw(IO::IOError);
+            void open(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
 
             void close() throw(IO::IOError);
 

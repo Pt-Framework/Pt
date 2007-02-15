@@ -25,7 +25,7 @@ namespace Pt {
 namespace System {
 
 
-FileBuffer::FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::IOError)
+FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode) throw(IO::IOError)
 : IO::IOBuffer(),
   _file(name, omode)
 {
@@ -35,7 +35,7 @@ FileBuffer::FileBuffer(const char* name, FileDevice::OpenMode omode) throw(IO::I
 
 
 
-FileStream::FileStream(const char* path, FileDevice::OpenMode omode) throw(IO::IOError)
+FileStream::FileStream(const char* path, std::ios_base::openmode omode) throw(IO::IOError)
 : IO::IOStream( &_buffer ),
   _buffer(path, omode)
 {

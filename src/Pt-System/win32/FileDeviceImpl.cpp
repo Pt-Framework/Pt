@@ -51,7 +51,7 @@ FileDeviceImpl::~FileDeviceImpl() throw()
 }
 
 
-void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::IOError)
+void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -66,16 +66,16 @@ void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::I
     DWORD create = OPEN_EXISTING; // fail if not exist
     DWORD flags = 0;
 
-    if(mode & IODevice::Read) {
+    if(mode & std::ios_base::in ) {
         access |= GENERIC_READ; // open for reading
     }
 
-    if(mode & IODevice::Write) {
+    if(mode & std::ios_base::out) {
         access |= GENERIC_WRITE; // open for writing
         create = OPEN_ALWAYS;    // create if not exist
     }
 
-    if(mode & IODevice::Trunc)
+    if(mode & std::ios_base::trunc )
         create |= TRUNCATE_EXISTING;
 
     //if(mode & IODevice::NonBlock)
@@ -96,7 +96,7 @@ void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::I
     }
 
     try {
-        if(mode & IODevice::AtEnd)
+        if(mode & std::ios_base::end )
             this->seek(0, IODevice::SeekEnd);
     }
     catch(...) {

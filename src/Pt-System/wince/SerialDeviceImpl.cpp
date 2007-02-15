@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,49 +17,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "SerialDeviceImpl.h"
 
-#ifndef Pt_System_FileStream_h
-#define Pt_System_FileStream_h
+namespace Pt{
+namespace System{
 
-#include <Pt/System/Api.h>
-#include <Pt/NonCopyable.h>
-#include <Pt/IO/IOBuffer.h>
-#include <Pt/IO/IOStream.h>
-#include <Pt/System/FileDevice.h>
+SerialDeviceImpl::SerialDeviceImpl( const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError)
+{    
+}
 
+SerialDeviceImpl::~SerialDeviceImpl()
+{ 
+}
+        
+void SerialDeviceImpl::close()
+{
+}
 
-namespace Pt {
+bool SerialDeviceImpl::wait( IO::IODevice::WaitMode mode, unsigned int msec )
+{
+    return true;
+}
 
-namespace System {
+size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+{
+    return 0;
+}
 
+size_t SerialDeviceImpl::write( const char* buffer, size_t count )
+{ 
+    return 0;
+}
 
-    class PT_SYSTEM_API FileBuffer : public IO::IOBuffer
-    {
-        public:
-            FileBuffer(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
+void SerialDeviceImpl::sync() const
+{
 
-            const FileDevice& fileDevice() const
-            {return _file;}
+}
 
-        private:
-            FileDevice _file;
-    };
-
-
-    class PT_SYSTEM_API FileStream : public IO::IOStream
-    {
-        public:
-            FileStream(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
-
-            ~FileStream() throw();
-
-        private:
-            FileBuffer _buffer;
-    };
-
-
-} // namespace System
-
-} // namespace Pt
-
-#endif
+}//namespace System
+}//namespace Pt

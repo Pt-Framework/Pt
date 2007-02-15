@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,49 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
+#define PT_SYSTEM_SERIALDEVICEIMPL_H
 
-#ifndef Pt_System_FileStream_h
-#define Pt_System_FileStream_h
+#include <string>
 
-#include <Pt/System/Api.h>
-#include <Pt/NonCopyable.h>
-#include <Pt/IO/IOBuffer.h>
-#include <Pt/IO/IOStream.h>
-#include <Pt/System/FileDevice.h>
+#include "Pt/IO/IODevice.h"
+#include "Pt/IO/IOError.h"
 
+namespace Pt{
+namespace System{
 
-namespace Pt {
+class SerialDeviceImpl
+{
+    public:
+        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
+        ~SerialDeviceImpl();
+        
+        //! @brief Closes the I/O device
+        void close();        
 
-namespace System {
+        //! @brief Waits until data is available
+        bool wait( IO::IODevice::WaitMode mode, unsigned int msec );
 
+        //! @brief Read bytes from device
+        size_t read(char* buffer, size_t count, bool& eof);
 
-    class PT_SYSTEM_API FileBuffer : public IO::IOBuffer
-    {
-        public:
-            FileBuffer(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
+        //! @brief Write bytes to device
+        size_t write(const char* buffer, size_t count);
 
-            const FileDevice& fileDevice() const
-            {return _file;}
+        //! @brief Synchronize device
+        void sync() const;        
+};
 
-        private:
-            FileDevice _file;
-    };
-
-
-    class PT_SYSTEM_API FileStream : public IO::IOStream
-    {
-        public:
-            FileStream(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
-
-            ~FileStream() throw();
-
-        private:
-            FileBuffer _buffer;
-    };
-
-
-} // namespace System
-
-} // namespace Pt
+}//namespace System
+}//namespaec Pt
 
 #endif

@@ -42,19 +42,19 @@ FileDeviceImpl::~FileDeviceImpl() throw()
 { }
 
 
-void FileDeviceImpl::open(const char* path, IODevice::OpenMode mode) throw(IO::IOError)
+void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
 {
     int flags = O_RDONLY;
 
-    if( (mode & IODevice::Read) && (mode & IODevice::Write) ) {
+    if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) ) {
         flags |= O_RDWR;
         flags |= O_CREAT;
     }
-    else if(mode & IODevice::Write) {
+    else if(mode & std::ios_base::out) {
         flags |= O_WRONLY;
         flags |= O_CREAT;
     }
-    else if(mode & IODevice::Read) {
+    else if(mode & std::ios_base::in  ) {
         flags |= O_RDONLY;
     }
 

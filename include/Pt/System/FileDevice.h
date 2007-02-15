@@ -35,16 +35,16 @@ namespace System {
         public:
             FileDevice();
 
-            FileDevice(const char* path, OpenMode mode) throw(IO::IOError);
+            FileDevice(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
 
             ~FileDevice() throw();
 
-            void open(const char* path, OpenMode mode) throw(IO::IOError);
+            void open(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
 
             const char* path() const 
             { return _path.c_str(); }
 
-            OpenMode openMode() const
+            std::ios_base::openmode openMode() const
             { return _mode; }
 
             size_t size() const throw(Pt::IO::IOError);
@@ -71,8 +71,8 @@ namespace System {
             bool _wait(WaitMode mode, unsigned int msec) throw(IO::IOError);
 
         private:
-            std::string _path;
-            OpenMode _mode;
+            std::string             _path;
+            std::ios_base::openmode _mode;
     };
 
 } // namespace System

@@ -17,6 +17,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadKeyImpl.cpp  ]
                           [ FDirName $(SYS:L) ProcessImpl.cpp ]
                           [ FDirName $(SYS:L) SharedMemoryImpl.cpp ]
+#                          [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
                           Application.cpp
                           Clock.cpp
                           Condition.cpp
@@ -41,8 +42,13 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Thread.cpp
                           ThreadKey.cpp
                           TimeValue.cpp
+#                          SerialDevice.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt Pt-IO ;
 SharedLibrary_AddLibraries Pt-System : $(SYSLIBS) ;
 SharedLibrary_MakeLocate Pt-System : bin ;
+
+#Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
+#Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
+#Main_MakeLocate SerialDeviceDemo : bin ;
