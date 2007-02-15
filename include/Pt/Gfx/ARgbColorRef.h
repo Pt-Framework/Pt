@@ -22,6 +22,7 @@
 
 #include <Pt/Gfx/ARgbColor.h>
 #include <limits>
+#include <vector>
 
 
 namespace Pt {
@@ -47,10 +48,16 @@ namespace Pt {
         template <>
         class PT_GFX_API Color<ARgbRef> {
             public:
-                /** @brief The default constructor, will take reference to the real storage.
+                /** @brief This constructor will take reference to the real storage.
                  */
                 inline Color(uint16_t &a, uint16_t &r, uint16_t &g, uint16_t &b)
                 : _a(a), _r(r), _g(g), _b(b)
+                {}
+
+                /** @brief This constructor will take reference to the real storage.
+                 */
+                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
+                : _a(const_cast<uint16_t&>(a)), _r(const_cast<uint16_t&>(r)), _g(const_cast<uint16_t&>(g)), _b(const_cast<uint16_t&>(b))
                 {}
 
                 /** @brief Copy constructor.
@@ -143,32 +150,106 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<ARgbColorRef> {
-            class ColorPtrT {
-              // TODO: Write it !!!
-            };
-
-            class ConstColorPtrT {
-              // TODO: Write it !!!
-            };
-
-
             typedef uint16_t ComponentT;
             typedef uint32_t TmpValueT;
+
+            // Color pointer class for ARgbColorRef color model.
+            class ColorPtrT {
+                public:
+                    inline ColorPtrT(std::vector<ComponentT*>& chanPtr,
+                                     size_t                    imageWidth,
+                                     size_t                    posX,
+                                     size_t                    posY)
+                    {
+                        // In this ARgbColorRef, all channel have the same full size
+                        // (no subsampling) and thus simple pointer arithmetic will
+                        // does the job :)
+                        const size_t pos = posY*imageWidth + posX;
+
+                        _chnA = chanPtr[0] + pos; // A is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #0
+                        _chnG = chanPtr[2] + pos; // G is channel #0
+                        _chnB = chanPtr[3] + pos; // B is channel #0
+                    }
+
+                    inline ARgbColorRef operator*()
+                    { return ARgbColorRef(*_chnA, *_chnR, *_chnG, *_chnB); }
+
+                    inline ColorPtrT& operator++()
+                    { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
+
+                    inline ColorPtrT& operator--()
+                    { --_chnA; --_chnR; --_chnG; --_chnB; return *this; }
+
+                    inline ColorPtrT& operator+=(size_t n)
+                    { _chnA+=n; _chnR+=n; _chnG+=n; _chnB+=n; return *this; }
+
+                    inline ColorPtrT& operator-=(size_t n)
+                    { _chnA-=n; _chnR-=n; _chnG-=n; _chnB-=n; return *this; }
+
+                private:
+                    uint16_t* _chnA;
+                    uint16_t* _chnR;
+                    uint16_t* _chnG;
+                    uint16_t* _chnB;
+            };
+
+            // Constant color pointer class for ARgbColorRef color model.
+            class ConstColorPtrT {
+                public:
+                    inline ConstColorPtrT(const std::vector<ComponentT*>& chanPtr,
+                                          size_t                          imageWidth,
+                                          size_t                          posX,
+                                          size_t                          posY)
+                    {
+                        // In this ARgbColorRef, all channel have the same full size
+                        // (no subsampling) and thus simple pointer arithmetic will
+                        // does the job :)
+                        const size_t pos = posY*imageWidth + posX;
+
+                        _chnA = chanPtr[0] + pos; // A is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #0
+                        _chnG = chanPtr[2] + pos; // G is channel #0
+                        _chnB = chanPtr[3] + pos; // B is channel #0
+                    }
+
+                    inline const ARgbColorRef operator*() const
+                    { return ARgbColorRef(*_chnA, *_chnR, *_chnG, *_chnB); }
+
+                    inline ConstColorPtrT& operator++()
+                    { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
+
+                    inline ConstColorPtrT& operator--()
+                    { --_chnA; --_chnR; --_chnG; --_chnB; return *this; }
+
+                    inline ConstColorPtrT& operator+=(size_t n)
+                    { _chnA+=n; _chnR+=n; _chnG+=n; _chnB+=n; return *this; }
+
+                    inline ConstColorPtrT& operator-=(size_t n)
+                    { _chnA-=n; _chnR-=n; _chnG-=n; _chnB-=n; return *this; }
+
+                private:
+                    const uint16_t* _chnA;
+                    const uint16_t* _chnR;
+                    const uint16_t* _chnG;
+                    const uint16_t* _chnB;
+            };
 
 
             // We have 4 channels (A, R, G and B)
             static const size_t ChannelCount = 4;
 
-            // All channel have the same full size (not sub-sampled) and thus
-            // just return constant value of '1'
+
+            // In this ARgbColorRef, all channel have the same full size
+            // (no subsampling) and thus just return a constant value of '1'
             static inline size_t ChannelSubsamplingX(size_t channelIndex)
             {
                 assert(channelIndex <= ChannelCount);
                 return 1;
             }
 
-            // All channel have the same full size (not sub-sampled) and thus
-            // just return constant value of '1'
+            // In this ARgbColorRef, all channel have the same full size
+            // (no subsampling) and thus just return a constant value of '1'
             static inline size_t ChannelSubsamplingY(size_t channelIndex)
             {
                 assert(channelIndex <= ChannelCount);

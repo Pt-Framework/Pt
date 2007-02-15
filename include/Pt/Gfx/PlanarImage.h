@@ -50,8 +50,12 @@ namespace Pt {
                 typedef ColorT_       ColorT;
                 typedef ColorTraitsT_ ColorTraitsT;
 
-                typedef ColorT*       Scanline;
-                typedef const ColorT* ConstScanline;
+                //typedef ColorT*       Scanline;
+                //typedef const ColorT* ConstScanline;
+
+                typedef typename ColorTraitsT::ComponentT     ComponentT;
+                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
+                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
 
             public:
                 class PixelIterator;
@@ -116,17 +120,18 @@ namespace Pt {
                  */
                 PlanarImage& operator=(const PlanarImage& src);
 
+
+                /** @brief Raw data access.
+                 */
+                inline ComponentT* data()
+                { return &_buff[0]; }
+
+                /** @brief Raw data access.
+                 */
+                inline const ComponentT* data() const
+                { return &_buff[0]; }
+
 #if 0
-                /** @brief Raw data access.
-                 */
-                inline ColorT* data()
-                { return &_buff[0]; }
-
-                /** @brief Raw data access.
-                 */
-                inline const ColorT* data() const
-                { return &_buff[0]; }
-
                 /** @brief Scanline access without range check.
                  */
                 inline Scanline scanline(int y)
@@ -150,11 +155,11 @@ namespace Pt {
 
                 /** @brief Random pixel access with range check.
                  */
-                ColorT& at(int x, int y);
+                ColorT at(int x, int y);
 
                 /** @brief Random pixel access with range check.
                  */
-                const ColorT& at(int x, int y) const;
+                const ColorT at(int x, int y) const;
 
                 /** @brief Return the color at the specified coordinates.
                   *
@@ -201,8 +206,6 @@ namespace Pt {
 #endif
 
             protected:
-                typedef typename ColorTraitsT::ComponentT ComponentT;
-
                 struct ChanSize {
                     size_t width;
                     size_t height;
