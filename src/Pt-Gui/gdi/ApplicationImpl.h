@@ -20,10 +20,10 @@
 #ifndef Pt_Gui_ApplicationImpl_h
 #define Pt_Gui_ApplicationImpl_h
 
+#include <Pt/Api.h>
 #include <map>
 #include <iostream>
 
-#include <Pt/Api.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
 
