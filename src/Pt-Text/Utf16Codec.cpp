@@ -54,7 +54,7 @@ Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const 
                 ch2 = *fNext;
                 // If it's a low surrogate, convert to UTF32.
                     if (ch2 >= 0xDC00 && ch2 <= 0xDFFF) {
-                        ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000UL;
+                        ch = ((ch - 0xD800) << 10) + (ch2 - 0xDC00) + 0x0010000U;
                         ++fNext;
                     } else {
                         --fNext; // return to the illegal value itself
@@ -143,7 +143,7 @@ Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, c
             }
             ch -= 0x0010000UL;
             *toNext++ = (((uint32_t)ch >> 10) + 0xD800);
-            *toNext++ = (((uint32_t)ch & 0x3FFUL) + 0xDC00);
+            *toNext++ = (((uint32_t)ch & 0x3FFU) + 0xDC00);
         }
 
     } // while
