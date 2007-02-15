@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Main.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/ARgbFImage.h>
@@ -31,7 +32,7 @@ using namespace Pt;
 using namespace Pt::Gfx;
 
 
-int main()
+int main( int argc, char* argv[] )
 {
     ARgbInterleavedImage     argb_1;
     ARgbFInterleavedImage    argbf_1;

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include <vector>
 
+#include <Pt/Main.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/ARgbFColor.h>
@@ -34,7 +35,7 @@ using namespace Pt;
 using namespace Pt::Gfx;
 
 
-int main()
+int main( int argc, char* argv[] )
 {
     ARgbColor      argb_1, argb_2;
     ARgbFColor     float_1, float_2;
