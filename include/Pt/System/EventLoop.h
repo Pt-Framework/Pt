@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Drner                                  *
  *                                                                         *
  ***************************************************************************/
 
@@ -12,6 +12,7 @@
 #include <Pt/System/Condition.h>
 #include <Pt/System/Event.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/System/MutexLock.h>
 
 #include <list>
 
@@ -20,10 +21,7 @@ namespace Pt {
 
 namespace System {
 
-    class Event;
-
-    /**
-     * \brief An event loop which handles events from multiple sources.
+    /** \brief An event loop which handles events from multiple sources.
      *
      * Events can be added to the internal event queue from multiple sources using
      * the method "commitEvent(...)". Multiple events receivers (methods and
@@ -177,6 +175,64 @@ namespace System {
              */
             std::list<Pt::Event*> _eventQueue;
             System::Mutex _queueMutex;
+    };
+
+
+    class EventDispatcher : public Connectable, public NonCopyable {
+        public:
+            typedef Pt::Invokable< const Pt::Event&, Pt::Void, Pt::Void> Invokable;
+
+        public:
+            EventDispatcher()
+            { }
+
+            ~EventDispatcher()
+            {
+                MutexLock lock(_mutex);
+
+                while( !_connections.empty() ) {
+                    Connection connection = _connections.front();
+                    connection.close();
+                }
+            }
+
+            Connection connect( EventLoop& receiver )
+            {
+                // do not lock here, the Connection will call
+                // Connectable::opened on this object
+                return Connection(*this, slot(&receiver, &EventLoop::commitEvent).clone() );
+            }
+
+            virtual void opened(const Connection& c)
+            {
+                MutexLock lock(_mutex);
+                Connectable::opened(c);
+            }
+
+            virtual void closed(const Connection& c)
+            {
+                MutexLock lock(_mutex);
+                Connectable::closed(c);
+            }
+
+            inline void dispatch(const Event& ev) const
+            {
+                MutexLock lock(_mutex);
+
+                std::list<Connection>::const_iterator it = Connectable::connections().begin();
+                for(; it != _connections.end(); ++it)
+                {
+                    if( false == it->valid() || &( it->sender() ) != this  )
+                        continue;
+
+                    Connection c = *it;
+                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
+                    invokable->invoke(ev);
+                }
+            }
+
+        private:
+            mutable Mutex _mutex;
     };
 
 } // namespace System

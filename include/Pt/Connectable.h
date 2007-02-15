@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Dr. Marc Boris Dürner                           *
+ *   Copyright (C) 2004-2006 by Dr. Marc Boris Drner                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,8 +38,6 @@ namespace Pt {
             //! @brief Unregisters a Connection from the Connectable.
             virtual void closed(const Connection& c);
 
-            void clear();
-
             const std::list<Connection>& connections() const
             { return _connections; }
 
@@ -50,6 +48,8 @@ namespace Pt {
             Connectable(const Connectable& c);
 
             Connectable& operator=(const Connectable& rhs);
+
+            void clear();
 
         protected:
             mutable std::list<Connection> _connections;

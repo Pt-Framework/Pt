@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -62,7 +62,7 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     //    flags |= O_NONBLOCK;
     //}
 
-    if(mode & IODevice::Trunc)
+    if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
     _fd = ::open(path, flags, 0644);
@@ -71,7 +71,7 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     }
 
     try {
-        if(mode & IODevice::AtEnd)
+        if(mode & std::ios::ate)
             this->seek(0, IODevice::SeekEnd);
     }
     catch(...) {
