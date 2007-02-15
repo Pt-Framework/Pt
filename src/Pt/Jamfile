@@ -66,7 +66,7 @@ PtUnitTest TypeTraitsTest : TypeTraitsTest.cpp ;
 Main_LinkSharedLibraries TypeTraitsTest : Pt ;
 Main_MakeLocate TypeTraitsTest : bin ;
 
-PtUnitTest SignalTest : SignalTest.cpp ;
+Main SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
 

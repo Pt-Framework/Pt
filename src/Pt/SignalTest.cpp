@@ -413,33 +413,35 @@ void functionTest3()
 }
 
 
+void slotMethod()
+{ std::cerr << "\nslotMethod called." << std::endl;}
+
 class DeleteTest : public Pt::Connectable
 {
 public:
-    Signal<> signal;
+    //Signal<> signal;
 
     DeleteTest()
-    : _caller(0), _callee(0)
+    : _caller(0)
     {}
 
     ~DeleteTest()
     {
-        //cerr << "SelfDisconnectTest::~SelfDisconnectTest" << endl;
+        //std::cerr << "DeleteTest::~DeleteTest" << std::endl;
+    }
+
+    void deleteCallee()
+    {
+        //std::cerr << "\nSelfDisconnectTest::deleteCallee" << std::endl;
+        delete _callee;
+        _callee = 0;
     }
 
     void deleteCaller()
     {
-        //cerr << "SelfDisconnectTest::deleteCaller" << endl;
+        //std::cerr << "\nSelfDisconnectTest::deleteCaller" << std::endl;
         delete _caller;
         _caller = 0;
-    }
-
-
-    void deleteCallee()
-    {
-        //cerr << "SelfDisconnectTest::deleteCallee" << endl;
-        delete _callee;
-        _callee = 0;
     }
 
     void operator()()
@@ -447,17 +449,18 @@ public:
         _caller = new Signal<>;
         _callee = new DeleteTest;
 
-        connect(*_caller, *this, &DeleteTest::deleteCallee );
-        _caller->send();
-
+        //connect(*_caller, *_callee, &DeleteTest::deleteCallee );
+        connect(*_caller, &slotMethod);
         connect(*_caller, *this, &DeleteTest::deleteCaller);
+        connect(*_caller, &slotMethod);
         _caller->send();
     }
 
     Signal<>* _caller;
-    DeleteTest* _callee;
+    static DeleteTest* _callee;
 };
 
+DeleteTest* DeleteTest::_callee = 0;
 
 
 int main(int argc, char* argv[])
@@ -470,7 +473,7 @@ int main(int argc, char* argv[])
         DeleteTest delTest;
         delTest();
         std::cerr << "ok." << std::endl;
-
+/*
         std::cerr << "  CopyTest: ";
         CopyTest();
         std::cerr << "ok." << std::endl;
@@ -522,7 +525,7 @@ int main(int argc, char* argv[])
         std::cerr << "  FunctionTest3: ";
         functionTest3();
         std::cerr << "ok." << std::endl;
-
+*/
         //performanceTest();
 
     }

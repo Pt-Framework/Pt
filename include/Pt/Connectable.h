@@ -26,7 +26,8 @@
 
 namespace Pt {
 
-    class PT_API Connectable {
+    class PT_API Connectable
+    {
         public:
             Connectable();
 

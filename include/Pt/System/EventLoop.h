@@ -139,6 +139,18 @@ namespace System {
              */
             void exit();
 
+            virtual void opened(const Connection& c)
+            {
+                MutexLock lock(_connectionMutex);
+                Connectable::opened(c);
+            }
+
+            virtual void closed(const Connection& c)
+            {
+                MutexLock lock(_connectionMutex);
+                Connectable::closed(c);
+            }
+
             /**
              * \brief The signal to which slots can register themselves to listen for
              * any event that is committed to this event loop's event queue.
@@ -175,6 +187,8 @@ namespace System {
              */
             std::list<Pt::Event*> _eventQueue;
             System::Mutex _queueMutex;
+
+            Mutex _connectionMutex;
     };
 
 
@@ -188,17 +202,14 @@ namespace System {
 
             ~EventDispatcher()
             {
-                MutexLock lock(_mutex);
-
-                while( !_connections.empty() ) {
-                    Connection connection = _connections.front();
-                    connection.close();
-                }
+                // Do not lock here, the Connection will call
+                // Connectable::closed on this object
+                Connectable::clear();
             }
 
             Connection connect( EventLoop& receiver )
             {
-                // do not lock here, the Connection will call
+                // Do not lock here, the Connection will call
                 // Connectable::opened on this object
                 return Connection(*this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
@@ -225,7 +236,6 @@ namespace System {
                     if( false == it->valid() || &( it->sender() ) != this  )
                         continue;
 
-                    Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(ev);
                 }

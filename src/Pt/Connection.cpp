@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2004-2006 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -67,9 +67,9 @@ Connection::~Connection()
 
 void Connection::close()
 {
-    _data->setValid(false);
     _data->slot().closed( *this );
     _data->sender().closed( *this );
+    _data->setValid(false);
 }
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2004-2006 by Dr. Marc Boris Drner                      *
  *   Copyright (C) 2005 Stephan Beal                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -150,6 +150,8 @@ namespace Pt {
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke();
 
+                    // FIXME: this will stop slot invokation if callee gets
+                    // deleted or disconnected
                     if( c.valid() == false) {
                         sentry.release();
                         return;
@@ -171,6 +173,20 @@ namespace Pt {
                     Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1);
+                    // If calling the slot leads to deletion or or disconnection
+                    // of the callee itself we do not modify the connection list
+                    // to keep the iterator valid. alternatively, Signal::closed
+                    // could advance the iterator before removing the current
+                    // connection and here we only advance if no disconnct
+                    // occurred.
+
+                    // What happens if calling the slot deletes this Signal?
+                    // It would probably be better to mark the sentry
+                    // since it will survive the deletion, unlike the
+                    // _destructing member valiable.
+                    // TODO: change Sentry to a caller object and the Signal
+                    // has a pointer to the current caller. If we get deleted,
+                    // the caller will survive and stop calling slots
 
                     if( c.valid() == false) {
                         sentry.release();

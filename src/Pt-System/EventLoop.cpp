@@ -21,15 +21,10 @@
 #include "Pt/System/Event.h"
 #include "Pt/System/EventLoop.h"
 
-#include <string>
-#include <iostream>
-using namespace std;
-
 
 namespace Pt {
 
 namespace System {
-
 
 EventLoop::EventLoop()
 : _exitLoop(false)
@@ -39,7 +34,8 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    this->wake();
+    this->exit();
+    Connectable::clear();
 }
 
 
@@ -112,6 +108,7 @@ void EventLoop::exit()
     this->wake();
 }
 
+
 void EventLoop::queueEvent(const Pt::Event& event)
 {
     _queueMutex.lock();
@@ -121,7 +118,6 @@ void EventLoop::queueEvent(const Pt::Event& event)
 
     _queueMutex.unlock();
 }
-
 
 
 } // namespace Gui
