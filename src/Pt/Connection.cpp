@@ -67,6 +67,9 @@ Connection::~Connection()
 
 void Connection::close()
 {
+    if( !this->valid() )
+        return;
+        
     _data->slot().closed( *this );
     _data->sender().closed( *this );
     _data->setValid(false);
@@ -75,12 +78,12 @@ void Connection::close()
 
 Connection& Connection::operator=(const Connection& connection)
 {
-    if( 0 == _data->unref() && this->valid() ) {
-        this->close();
+    if( 0 == _data->unref()) 
+    {
+        this->close();        
+        delete _data;   
     }
-
-    delete _data;
-
+    
     _data = connection._data;
     _data->ref();
     return (*this);

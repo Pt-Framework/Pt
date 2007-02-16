@@ -150,7 +150,7 @@ namespace System {
                 MutexLock lock(_connectionMutex);
                 Connectable::closed(c);
             }
-
+            
             /**
              * \brief The signal to which slots can register themselves to listen for
              * any event that is committed to this event loop's event queue.
@@ -176,6 +176,7 @@ namespace System {
              */
             bool _exitLoop;
 
+
             //! Condition to stop the execution of "run()" until a new event was committed.
             Condition _loopCondition;
             Mutex _loopMutex;
@@ -191,7 +192,7 @@ namespace System {
             Mutex _connectionMutex;
     };
 
-
+    
     class EventDispatcher : public Connectable, public NonCopyable {
         public:
             typedef Pt::Invokable< const Pt::Event&, Pt::Void, Pt::Void> Invokable;
@@ -201,11 +202,7 @@ namespace System {
             { }
 
             ~EventDispatcher()
-            {
-                // Do not lock here, the Connection will call
-                // Connectable::closed on this object
-                Connectable::clear();
-            }
+            { }
 
             Connection connect( EventLoop& receiver )
             {
@@ -213,7 +210,7 @@ namespace System {
                 // Connectable::opened on this object
                 return Connection(*this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
-
+            
             virtual void opened(const Connection& c)
             {
                 MutexLock lock(_mutex);
@@ -221,12 +218,12 @@ namespace System {
             }
 
             virtual void closed(const Connection& c)
-            {
+            {                
                 MutexLock lock(_mutex);
-                Connectable::closed(c);
+                Connectable::closed(c);             
             }
 
-            inline void dispatch(const Event& ev) const
+            inline void send(const Pt::Event& ev) const
             {
                 MutexLock lock(_mutex);
 
@@ -240,13 +237,55 @@ namespace System {
                     invokable->invoke(ev);
                 }
             }
+            
+            void shutDown()
+            {     
+                Connectable::shutDown();
+                
+                Connection connection;
+                
+                while( true )
+                {
+                    {
+                        MutexLock lock( _mutex );
+
+                         if( _connections.empty() )
+                            break;
+
+                         connection = _connections.front();
+                        _connections.remove( connection );
+                    }
+                    
+                    connection.close();                    
+                }
+       
+            }
 
         private:
             mutable Mutex _mutex;
     };
 
+    class EventSignal : public NonCopyable
+    {
+        public:
+            EventSignal()
+            {}
+            
+            Connection connect( EventLoop& receiver )
+            {
+                return _dispatcher.connect(receiver);
+            }
+            
+            ~EventSignal()
+            {
+                _dispatcher.shutDown();
+            }
+            
+        private:
+            EventDispatcher _dispatcher;
+    };
+    
 } // namespace System
-
 } // namespace Ptv
 
 #endif

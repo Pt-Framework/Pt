@@ -45,6 +45,10 @@ namespace Pt {
             std::list<Connection>& connections()
             { return _connections; }
 
+            virtual void shutDown();
+            
+            bool isDown() const;
+            
         protected:
             Connectable(const Connectable& c);
 
@@ -54,6 +58,9 @@ namespace Pt {
 
         protected:
             mutable std::list<Connection> _connections;
+            
+        private:
+            bool _shutDown;            
     };
 
 } // !namespace Pt

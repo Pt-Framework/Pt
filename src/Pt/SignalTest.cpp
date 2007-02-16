@@ -473,7 +473,7 @@ int main(int argc, char* argv[])
         DeleteTest delTest;
         delTest();
         std::cerr << "ok." << std::endl;
-/*
+
         std::cerr << "  CopyTest: ";
         CopyTest();
         std::cerr << "ok." << std::endl;
@@ -525,7 +525,6 @@ int main(int argc, char* argv[])
         std::cerr << "  FunctionTest3: ";
         functionTest3();
         std::cerr << "ok." << std::endl;
-*/
         //performanceTest();
 
     }

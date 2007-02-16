@@ -39,7 +39,10 @@ void MutexImpl::lock()
     #endif
 
     if(ret != WAIT_OBJECT_0)
+    {
+        DWORD error =  GetLastError();
         throw SystemError ("Could not wait for mutex: ", PT_SOURCEINFO);
+    }
 }
 
 
@@ -64,7 +67,10 @@ bool MutexImpl::tryLock(unsigned int msec)
 void MutexImpl::unlock()
 {
     if( !ReleaseMutex(_handle) )
+    {
+        DWORD error =  GetLastError();
         throw SystemError("Could not release mutex: ", PT_SOURCEINFO);
+    }
 }
 
 

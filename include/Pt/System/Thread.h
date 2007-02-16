@@ -88,8 +88,9 @@ namespace System {
 
             //! @brief Destructor
             ///
-            /// If the thread is joinable Thread::wait() is called. Detached Threads
-            /// do not depend on the Thread object lifetime.
+            /// Deleting a running joinable Thread (i.e. state is Running ) will result 
+            /// in a program crash. You can wait() on a thread to make sure that it has 
+            /// finished. Detached Threads do not depend on the Thread object lifetime.
             virtual ~Thread();
 
             //! @brief Returns the current mode of the thread.

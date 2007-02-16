@@ -46,10 +46,6 @@ Thread::Thread(Mode mode)
 
 Thread::~Thread()
 {
-    if( this->state() == Running && this->joinable() ) {
-        this->wait();
-    }
-
     delete _impl;
 }
 

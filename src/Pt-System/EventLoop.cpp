@@ -34,8 +34,21 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    this->exit();
-    Connectable::clear();
+    _connectionMutex.lock();
+
+     Connectable::shutDown();
+
+    while( !_connections.empty() )                 
+    {
+        Connection connection = _connections.front();
+        _connectionMutex.unlock();
+        
+        connection.close();                    
+        _connectionMutex.lock();
+        _connections.remove( connection );
+    }
+
+    _connectionMutex.unlock();
 }
 
 
