@@ -62,7 +62,7 @@ namespace Pt {
 
                 /** @brief Copy constructor.
                  */
-                inline Color(const Color<ARgbF>& c)
+                inline Color(const Color& c)
                 : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
                 {}
 
@@ -81,7 +81,7 @@ namespace Pt {
 
                 /** @brief Assignment operator.
                  */
-                inline Color<ARgbF>& operator=(const Color<ARgbF>& c)
+                inline Color& operator=(const Color& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
                 /** @brief Assignment operator.
@@ -91,18 +91,18 @@ namespace Pt {
                  *  be assigned to this one.
                  */
                 template <typename ColorT>
-                inline Color<ARgbF>& operator=(const ColorT& color)
+                inline Color& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
                 /** @brief Assignment-addition operator.
                  */
-                inline Color<ARgbF>& operator+=(const Color<ARgbF>& c)
+                inline Color& operator+=(const Color& c)
                 { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
                 /** @brief Assignment-substraction operator.
                  */
-                inline Color<ARgbF>& operator-=(const Color<ARgbF>& c)
+                inline Color& operator-=(const Color& c)
                 { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -180,14 +180,18 @@ namespace Pt {
 
         /** @brief Convert a Color<ARgbF> to a Color<ARgb>.
          */
-        inline const Color<ARgb> toARgb(const Color<ARgbF>& from)
+        inline const Color<ARgb>& toARgb(Color<ARgb> &to, const Color<ARgbF>& from)
         {
             Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
             Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
             Pt_Gfx_ARgbFColor_h_convert(g, from, green);
             Pt_Gfx_ARgbFColor_h_convert(b, from, blue );
 
-            return Color<ARgb>(a, r, g, b);
+            to.setAlpha(a);
+            to.setRed  (r);
+            to.setGreen(g);
+            to.setBlue (b);
+            return to;
         }
 
         /** @brief Convert a Color<ARgb> to a Color<ARgbF>.

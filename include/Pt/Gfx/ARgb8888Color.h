@@ -105,7 +105,7 @@ namespace Pt {
                  *  be assigned to this one.
                  */
                 template <typename ColorT>
-                inline Color<ARgb8888>& operator=(const ColorT& color)
+                inline Color& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
@@ -220,17 +220,18 @@ namespace Pt {
 
         /** @brief Convert a Color<ARgb8888> to a Color<ARgb>.
          */
-        inline const Color<ARgb> toARgb(const Color<ARgb8888>& from)
+        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<ARgb8888>& from)
         {
             const uint16_t ta = from.alpha();
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
             const uint16_t tb = from.blue();
 
-            return Color<ARgb>( ((ta + !!ta) << 8) - !!ta, // Thanks to Mike Sharov for this algorithm
-                                ((tr + !!tr) << 8) - !!tr,
-                                ((tg + !!tg) << 8) - !!tg,
-                                ((tb + !!tb) << 8) - !!tb );
+            to.setAlpha( ((ta + !!ta) << 8) - !!ta ); // Thanks to Mike Sharov for this algorithm
+            to.setRed  ( ((tr + !!tr) << 8) - !!tr );
+            to.setGreen( ((tg + !!tg) << 8) - !!tg );
+            to.setBlue ( ((tb + !!tb) << 8) - !!tb );
+            return to;
         }
 
         /** @brief Convert a Color<ARgb> to a Color<ARgb8888>.

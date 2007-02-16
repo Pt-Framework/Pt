@@ -32,12 +32,24 @@ namespace Pt {
 
     namespace Gfx {
 
+        /** @brief An empty structure used for tagging the type of the color class.
+         */
+        struct ContainerType {};
+
+        /** @brief An empty structure used for tagging the type of the color class.
+         */
+        struct ReferenceType {};
+
+        /** @brief An empty structure used for tagging the type of the color class.
+         */
+        struct ConstReferenceType {};
+
+
         /** @brief Basic template declaration of color classes.
          *  @ingroup Gfx
          */
-        template <typename TagT>
+        template <typename TagT, typename TypeT = ContainerType>
         class Color;
-
 
         /** @brief Basic template declaration of color traits classes.
          */

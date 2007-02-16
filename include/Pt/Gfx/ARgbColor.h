@@ -58,7 +58,7 @@ namespace Pt {
 
                 /** @brief Copy constructor.
                  */
-                inline Color(const Color<ARgb>& c)
+                inline Color(const Color& c)
                 : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
                 {}
 
@@ -76,7 +76,7 @@ namespace Pt {
 
                 /** @brief Assignment operator.
                  */
-                inline Color<ARgb>& operator=(const Color<ARgb>& c)
+                inline Color& operator=(const Color& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
                 /** @brief Assignment operator.
@@ -86,18 +86,18 @@ namespace Pt {
                  *  be assigned to this one.
                  */
                 template <typename ColorT>
-                inline Color<ARgb>& operator=(const ColorT& color)
+                inline Color& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
                 /** @brief Assignment-addition operator (beware of overflow).
                  */
-                inline Color<ARgb>& operator+=(const Color<ARgb>& c)
+                inline Color& operator+=(const Color& c)
                 { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
                 /** @brief Assignment-substraction operator (beware of underflow).
                  */
-                inline Color<ARgb>& operator-=(const Color<ARgb>& c)
+                inline Color& operator-=(const Color& c)
                 { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -165,36 +165,53 @@ namespace Pt {
         };
 
 
-        /** @brief Dummy function for the sake of completeness.
+        /** @brief Convert a Color<ARgb, DstTypeT> to a Color<ARgb, SrcTypeT>.
          */
-        inline const Color<ARgb> toARgb(const Color<ARgb>& from)
-        { return from; }
+        template<typename DstTypeT, typename SrcTypeT>
+        inline const Color<ARgb, DstTypeT>& toARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
+        {
+            to.setAlpha(from.alpha());
+            to.setRed  (from.red  ());
+            to.setGreen(from.green());
+            to.setBlue (from.blue ());
+            return to;
+        }
 
-        /** @brief Dummy function for the sake of completeness.
+        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
          */
-        inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
-        { to = from; }
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void fromARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
+        {
+            to.setAlpha(from.alpha());
+            to.setRed  (from.red  ());
+            to.setGreen(from.green());
+            to.setBlue (from.blue ());
+        }
 
 
-        /** @brief Equality operator for Color<ARgb> comparison.
+        /** @brief Equality operator for Color<ARgb, TypeT> comparison.
          */
-        inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        template<typename TypeT>
+        inline bool operator==(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
         { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
-        /** @brief Less-than operator for Color<ARgb> comparison.
+        /** @brief Less-than operator for Color<ARgb, TypeT> comparison.
          */
-        inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        template<typename TypeT>
+        inline bool operator<(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
         { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
-        /** @brief Greater-than operator for Color<ARgb> comparison.
+        /** @brief Greater-than operator for Color<ARgb, TypeT> comparison.
          */
-        inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
+        template<typename TypeT>
+        inline bool operator>(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
         { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
 
-        /** @brief Make the greyscale version of the source Color<ARgb>.
+        /** @brief Make the greyscale version of the source Color<ARgb, TypeT>.
          */
-        inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
+        template<typename TypeT>
+        inline Color<ARgb, TypeT>& greyscale(Color<ARgb, TypeT>& to, const Color<ARgb, TypeT>& from)
         {
             const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
 
@@ -207,16 +224,16 @@ namespace Pt {
         }
 
 
-        /** @brief Mix two Color<ARgb>s using the given mixing factor.
+        /** @brief Mix two Color<ARgb, TypeT>s using the given mixing factor.
          */
-        template <typename FactorT>
-        inline void blend(Color<ARgb>& dst, const Color<ARgb>& src, const FactorT& factor)
+        template <typename TypeT, typename FactorT>
+        inline void blend(Color<ARgb, TypeT>& dst, const Color<ARgb, TypeT>& src, const FactorT& factor)
         {
             assert(  std::numeric_limits<FactorT>::is_integer );
             assert( !std::numeric_limits<FactorT>::is_signed  );
 
-            typedef ColorTraits<ARgbColor> Traits;
-            typedef typename LargestSizeOf< Traits::TmpValueT, FactorT >::Result ValueT;
+            typedef typename ColorTraits  < Color<ARgb, TypeT>  >::TmpValueT TmpValueT;
+            typedef typename LargestSizeOf< TmpValueT , FactorT >::Result    ValueT;
 
             const ValueT oF = factor;
             const ValueT rF = std::numeric_limits<FactorT>::max() - oF;

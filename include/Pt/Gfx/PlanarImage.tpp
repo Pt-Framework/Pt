@@ -110,7 +110,7 @@ namespace Pt {
         }
 
         template <typename ColorT_, typename ColorTraitsT_>
-        const typename PlanarImage<ColorT_, ColorTraitsT_>::ColorT PlanarImage<ColorT_, ColorTraitsT_>::at(int x, int y) const
+        const typename PlanarImage<ColorT_, ColorTraitsT_>::ConstColorT PlanarImage<ColorT_, ColorTraitsT_>::at(int x, int y) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);

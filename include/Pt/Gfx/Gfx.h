@@ -43,6 +43,17 @@ namespace Pt {
         // Foward declarations of color classes
         //
 
+        struct ContainerType;
+        struct ReferenceType;
+        struct ConstReferenceType;
+
+        template <typename TagT, typename TypeT>
+        class Color;
+
+        template <typename ColorT>
+        struct ColorTraits;
+
+
         struct ARgb;
         struct ARgbF;
         struct ARgb8888;
@@ -50,18 +61,26 @@ namespace Pt {
         struct Rgb565;
         struct Rgb555;
 
-        template <typename TagT>
-        class Color;
+        typedef Color<ARgb,     ContainerType> ARgbColor;
+        typedef Color<ARgbF,    ContainerType> ARgbFColor;
+        typedef Color<ARgb8888, ContainerType> ARgb8888Color;
+        typedef Color<Rgb888,   ContainerType> Rgb888Color;
+        typedef Color<Rgb565,   ContainerType> Rgb565Color;
+        typedef Color<Rgb555,   ContainerType> Rgb555Color;
 
-        template <typename ColorT>
-        struct ColorTraits;
+        typedef Color<ARgb,     ReferenceType> ARgbColorRef;
+        typedef Color<ARgbF,    ReferenceType> ARgbFColorRef;
+        typedef Color<ARgb8888, ReferenceType> ARgb8888ColorRef;
+        typedef Color<Rgb888,   ReferenceType> Rgb888ColorRef;
+        typedef Color<Rgb565,   ReferenceType> Rgb565ColorRef;
+        typedef Color<Rgb555,   ReferenceType> Rgb555ColorRef;
 
-        typedef Color<ARgb>     ARgbColor;
-        typedef Color<ARgbF>    ARgbFColor;
-        typedef Color<ARgb8888> ARgb8888Color;
-        typedef Color<Rgb888>   Rgb888Color;
-        typedef Color<Rgb565>   Rgb565Color;
-        typedef Color<Rgb555>   Rgb555Color;
+        typedef Color<ARgb,     ConstReferenceType> ARgbColorConstRef;
+        typedef Color<ARgbF,    ConstReferenceType> ARgbFColorConstRef;
+        typedef Color<ARgb8888, ConstReferenceType> ARgb8888ColorConstRef;
+        typedef Color<Rgb888,   ConstReferenceType> Rgb888ColorConstRef;
+        typedef Color<Rgb565,   ConstReferenceType> Rgb565ColorConstRef;
+        typedef Color<Rgb555,   ConstReferenceType> Rgb555ColorConstRef;
 
 
         //

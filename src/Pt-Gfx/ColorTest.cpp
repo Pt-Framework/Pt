@@ -47,8 +47,8 @@ int main( int argc, char* argv[] )
     const Pt::uint8_t factor = 128;
     blend(argb_1, argb_2, factor);
 
-    fromARgb(argb_2, toARgb(argb_1));
-    fromARgb(argb8888_2, toARgb(argb8888_1));
+    argb_2 = argb_1;
+    argb_2 = argb8888_1;
 
     assign(argb_1, argb_2);
     assign(argb_1, argb8888_2);

@@ -29,24 +29,18 @@ namespace Pt {
 
     namespace Gfx {
 
-        /** @brief An empty structure used for tagging reference-type 64-bit ARGB color class.
-         */
-        struct ARgbRef {};
-
-
         /** @brief Reference-type 64-Bit ARGB color class.
          *  @ingroup Gfx
          *
-         *  Valid range of the color components for this color model:
-         *  <TABLE>
-         *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *  </TABLE>
+         *  @see ARgbColor.
          */
         template <>
-        class PT_GFX_API Color<ARgbRef> {
+        class PT_GFX_API Color<ARgb, ReferenceType> {
+            public:
+                /** @brief Constant reference type of this color.
+                 */
+                typedef Color<ARgb, ConstReferenceType> ConstRefT;
+
             public:
                 /** @brief This constructor will take reference to the real storage.
                  */
@@ -54,84 +48,56 @@ namespace Pt {
                 : _a(a), _r(r), _g(g), _b(b)
                 {}
 
-                /** @brief This constructor will take reference to the real storage.
-                 */
-                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
-                : _a(const_cast<uint16_t&>(a)), _r(const_cast<uint16_t&>(r)), _g(const_cast<uint16_t&>(g)), _b(const_cast<uint16_t&>(b))
-                {}
 
-                /** @brief Copy constructor.
-                 */
-                inline Color(const Color<ARgbRef>& c)
-                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
-                {}
-
-
-                /** @brief Assignment operator.
-                 */
-                inline Color<ARgbRef>& operator=(const Color<ARgbRef>& c)
+                /** @see ARgbColor. */
+                inline Color& operator=(const Color& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
-                /** @brief Assignment operator.
-                 *
-                 *  This assigns color with different type to this one by calling
-                 *  assign(), which can be overloaded to allow new color types to
-                 *  be assigned to this one.
-                 */
+                /** @see ARgbColor. */
                 template <typename ColorT>
-                inline Color<ARgbRef>& operator=(const ColorT& color)
+                inline Color& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
-                /** @brief Assignment-addition operator (beware of overflow).
-                 */
-                inline Color<ARgbRef>& operator+=(const Color<ARgbRef>& c)
+                /** @see ARgbColor. */
+                inline Color& operator+=(const Color& c)
                 { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
-                /** @brief Assignment-substraction operator (beware of underflow).
-                 */
-                inline Color<ARgbRef>& operator-=(const Color<ARgbRef>& c)
+                /** @see ARgbColor. */
+                inline Color& operator-=(const Color& c)
                 { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
-                /** @brief Return the alpha component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline uint16_t alpha() const
                 { return _a; }
 
-                /** @brief Return the red component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline uint16_t red() const
                 { return _r; }
 
-                /** @brief Return the green component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline uint16_t green() const
                 { return _g; }
 
-                /** @brief Return the blue component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline uint16_t blue() const
                 { return _b; }
 
 
-                /** @brief Set the alpha component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline void setAlpha(uint16_t a)
                 { _a = a; }
 
-                /** @brief Set the red component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline void setRed(uint16_t r)
                 { _r = r; }
 
-                /** @brief Set the green component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline void setGreen(uint16_t g)
                 { _g = g; }
 
-                /** @brief Set the blue component of this color (range 0 to 65535).
-                 */
+                /** @see ARgbColor. */
                 inline void setBlue(uint16_t b)
                 { _b = b; }
 
@@ -139,11 +105,58 @@ namespace Pt {
                 uint16_t &_a, &_r, &_g, &_b;
         };
 
+        /** @brief Constant reference-type 64-Bit ARGB color class.
+         *  @ingroup Gfx
+         *
+         *  @see  ARgbColor.
+         *  @note This class is not meant to be used directly by the user.
+         */
+        template <>
+        class PT_GFX_API Color<ARgb, ConstReferenceType> {
+            public:
+                /** @brief Non-constant reference type of this color.
+                 */
+                typedef Color<ARgb, ReferenceType> NonConstRefT;
 
-        /** @brief Convenience access to the 64-Bit ARGB color model.
+            public:
+                /** @see ARgbColor. */
+                inline uint16_t alpha() const
+                { return _a; }
+
+                /** @see ARgbColor. */
+                inline uint16_t red() const
+                { return _r; }
+
+                /** @see ARgbColor. */
+                inline uint16_t green() const
+                { return _g; }
+
+                /** @see ARgbColor. */
+                inline uint16_t blue() const
+                { return _b; }
+
+                // Make this one as a friend of this class.
+                friend struct ColorTraits< Color<ARgb, ReferenceType> >;
+
+            protected:
+                const uint16_t &_a, &_r, &_g, &_b;
+
+                // This constructor will take constant reference to the real storage.
+                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
+                : _a(a), _r(r), _g(g), _b(b)
+                {}
+        };
+
+
+        /** @brief Convenience access to the reference-type 64-Bit ARGB color model.
          *  @ingroup Gfx
          */
-        typedef Color<ARgbRef> ARgbColorRef;
+        typedef Color<ARgb, ReferenceType> ARgbColorRef;
+
+        /** @brief Convenience access to the constant reference-type 64-Bit ARGB color model.
+         *  @ingroup Gfx
+         */
+        typedef Color<ARgb, ConstReferenceType> ARgbColorConstRef;
 
 
         /** @brief Full specialisation of the color traits class for ARgbColorRef.
@@ -213,8 +226,8 @@ namespace Pt {
                         _chnB = chanPtr[3] + pos; // B is channel #0
                     }
 
-                    inline const ARgbColorRef operator*() const
-                    { return ARgbColorRef(*_chnA, *_chnR, *_chnG, *_chnB); }
+                    inline ARgbColorConstRef operator*() const
+                    { return ColorTraits::_constructColorConstRef(_chnA, _chnR, _chnG, _chnB); }
 
                     inline ConstColorPtrT& operator++()
                     { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
@@ -255,59 +268,18 @@ namespace Pt {
                 assert(channelIndex <= ChannelCount);
                 return 1;
             }
+
+
+            //
+            // Below are for helper purposes
+            //
+            friend class ConstColorPtrT;
+
+            private:
+                static inline ARgbColorConstRef _constructColorConstRef(const uint16_t *a, const uint16_t *r, const uint16_t *g, const uint16_t *b)
+                { return ARgbColorConstRef(*a, *r, *g, *b); }
         };
 
-
-        /** @brief Convert a Color<ARgbRef> to a Color<ARgb>.
-         */
-        inline const Color<ARgb> toARgb(const Color<ARgbRef>& from)
-        { return Color<ARgb>(from.alpha(), from.red(), from.green(), from.blue()); }
-
-        /** @brief Convert a Color<ARgb> to a Color<ARgb8888>.
-         */
-        inline void fromARgb(Color<ARgbRef>& to, const Color<ARgb>& from)
-        {
-            to.setAlpha(from.alpha());
-            to.setRed  (from.red  ());
-            to.setGreen(from.green());
-            to.setBlue (from.blue ());
-        }
-
-
-        /** @brief Equality operator for Color<ARgbRef> comparison.
-         */
-        inline bool operator==(const Color<ARgbRef>& c1, const Color<ARgbRef>& c2)
-        { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
-
-        /** @brief Less-than operator for Color<ARgbRef> comparison.
-         */
-        inline bool operator<(const Color<ARgbRef>& c1, const Color<ARgbRef>& c2)
-        { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
-
-        /** @brief Greater-than operator for Color<ARgbRef> comparison.
-         */
-        inline bool operator>(const Color<ARgbRef>& c1, const Color<ARgbRef>& c2)
-        { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
-
-
-        /** @brief Make the greyscale version of the source Color<ARgbRef>.
-         */
-        inline Color<ARgbRef>& greyscale(Color<ARgbRef>& to, const Color<ARgbRef>& from)
-        {
-            Color<ARgb> tmp;
-            fromARgb(to, greyscale( tmp, toARgb(from) ) );
-            return to;
-        }
-
-
-        /** @brief Mix two Color<ARgbRef>s using the given mixing factor.
-         */
-        template <typename FactorT>
-        inline void blend(Color<ARgbRef>& dst, const Color<ARgbRef>& src, const FactorT& factor)
-        {
-            Color<ARgb> tmp;
-            fromARgb(dst, blend( tmp, toARgb(src), factor ) );
-        }
 
     } // namespace Gfx
 

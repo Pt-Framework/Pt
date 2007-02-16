@@ -94,7 +94,7 @@ namespace Pt {
                  *  be assigned to this one.
                  */
                 template <typename ColorT>
-                inline Color<Rgb555>& operator=(const ColorT& color)
+                inline Color& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
@@ -199,16 +199,17 @@ namespace Pt {
 
         /** @brief Convert a Color<Rgb555> to a Color<ARgb>.
          */
-        inline const Color<ARgb> toARgb(const Color<Rgb555>& from)
+        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<Rgb555>& from)
         {
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
             const uint16_t tb = from.blue();
 
-            return Color<ARgb>( 0xFFFF,
-                                ((tr + !!tr) << 11) - !!tr, // Thanks to Mike Sharov for this algorithm
-                                ((tg + !!tg) << 11) - !!tg,
-                                ((tb + !!tb) << 11) - !!tb );
+            to.setAlpha( 0xFFFF                     );
+            to.setRed  ( ((tr + !!tr) << 11) - !!tr ); // Thanks to Mike Sharov for this algorithm
+            to.setGreen( ((tg + !!tg) << 11) - !!tg );
+            to.setBlue ( ((tb + !!tb) << 11) - !!tb );
+            return to;
         }
 
         /** @brief Convert a Color<ARgb> to a Color<Rgb555>.

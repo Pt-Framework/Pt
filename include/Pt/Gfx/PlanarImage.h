@@ -47,8 +47,9 @@ namespace Pt {
         template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
         class /*PT_GFX_API*/ PlanarImage {
             public:
-                typedef ColorT_       ColorT;
-                typedef ColorTraitsT_ ColorTraitsT;
+                typedef ColorT_                     ColorT;
+                typedef typename ColorT_::ConstRefT ConstColorT;
+                typedef ColorTraitsT_               ColorTraitsT;
 
                 //typedef ColorT*       Scanline;
                 //typedef const ColorT* ConstScanline;
@@ -159,7 +160,7 @@ namespace Pt {
 
                 /** @brief Random pixel access with range check.
                  */
-                const ColorT at(int x, int y) const;
+                const ConstColorT at(int x, int y) const;
 
                 /** @brief Return the color at the specified coordinates.
                   *
