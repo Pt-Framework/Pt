@@ -1,4 +1,3 @@
-#include <windows.h>
 #include <Pt/Main.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Thread.h>
