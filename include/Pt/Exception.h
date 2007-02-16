@@ -21,10 +21,10 @@
 #ifndef Pt_Exception_h
 #define Pt_Exception_h
 
+#include <Pt/Api.h>
 #include <string>
 #include <exception>
 #include <stdexcept>
-#include <Pt/Api.h>
 #include <Pt/SourceInfo.h>
 
 
