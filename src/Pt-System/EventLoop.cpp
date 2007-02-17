@@ -38,12 +38,12 @@ EventLoop::~EventLoop()
 
      Connectable::shutDown();
 
-    while( !_connections.empty() )                 
+    while( !_connections.empty() )
     {
         Connection connection = _connections.front();
         _connectionMutex.unlock();
-        
-        connection.close();                    
+
+        connection.close();
         _connectionMutex.lock();
         _connections.remove( connection );
     }

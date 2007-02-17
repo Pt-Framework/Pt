@@ -150,7 +150,7 @@ namespace System {
                 MutexLock lock(_connectionMutex);
                 Connectable::closed(c);
             }
-            
+
             /**
              * \brief The signal to which slots can register themselves to listen for
              * any event that is committed to this event loop's event queue.
@@ -192,17 +192,18 @@ namespace System {
             Mutex _connectionMutex;
     };
 
-    
-    class EventDispatcher : public Connectable, public NonCopyable {
+
+    class EventSource : public Connectable, public NonCopyable
+    {
         public:
             typedef Pt::Invokable< const Pt::Event&, Pt::Void, Pt::Void> Invokable;
 
         public:
-            EventDispatcher()
+            EventSource()
             { }
 
-            ~EventDispatcher()
-            { }
+            ~EventSource()
+            { this->shutDown(); }
 
             Connection connect( EventLoop& receiver )
             {
@@ -210,7 +211,7 @@ namespace System {
                 // Connectable::opened on this object
                 return Connection(*this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
-            
+
             virtual void opened(const Connection& c)
             {
                 MutexLock lock(_mutex);
@@ -218,9 +219,9 @@ namespace System {
             }
 
             virtual void closed(const Connection& c)
-            {                
+            {
                 MutexLock lock(_mutex);
-                Connectable::closed(c);             
+                Connectable::closed(c);
             }
 
             inline void send(const Pt::Event& ev) const
@@ -237,13 +238,15 @@ namespace System {
                     invokable->invoke(ev);
                 }
             }
-            
+
+
+        protected:
             void shutDown()
-            {     
+            {
                 Connectable::shutDown();
-                
+
                 Connection connection;
-                
+
                 while( true )
                 {
                     {
@@ -255,37 +258,18 @@ namespace System {
                          connection = _connections.front();
                         _connections.remove( connection );
                     }
-                    
-                    connection.close();                    
+
+                    connection.close();
                 }
-       
+
             }
 
         private:
             mutable Mutex _mutex;
     };
 
-    class EventSignal : public NonCopyable
-    {
-        public:
-            EventSignal()
-            {}
-            
-            Connection connect( EventLoop& receiver )
-            {
-                return _dispatcher.connect(receiver);
-            }
-            
-            ~EventSignal()
-            {
-                _dispatcher.shutDown();
-            }
-            
-        private:
-            EventDispatcher _dispatcher;
-    };
-    
 } // namespace System
+
 } // namespace Ptv
 
 #endif

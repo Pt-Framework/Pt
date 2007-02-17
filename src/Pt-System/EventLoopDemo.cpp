@@ -68,7 +68,7 @@ class ConsumerThread : public Thread, public Connectable
         {            
             TestEvent* testEvent  = (TestEvent*) &event;
             printf(testEvent->text().c_str() );
-            printf("\n");
+            printf("-");
         }              
         
     protected:    
@@ -93,7 +93,7 @@ class ProducerThread : public Thread
         
         ~ProducerThread()
         {  
-            eventDispatcher.shutDown();
+            //eventDispatcher.shutDown();
         }
         
         void stop()
@@ -101,7 +101,7 @@ class ProducerThread : public Thread
             _stop = true;
         }
 
-        EventDispatcher eventDispatcher;
+        EventSource eventSource;
         
     protected:
         virtual void run()
@@ -111,8 +111,8 @@ class ProducerThread : public Thread
                 std::stringstream ss;
                 ss<<_text <<" :" <<i;
                
-               _event.setText( ss.str().c_str() );
-                eventDispatcher.send( _event );
+               _event.setText( _text.c_str() );
+                eventSource.send( _event );
             }
         }            
   
@@ -121,6 +121,8 @@ class ProducerThread : public Thread
         std::string _text;
         bool        _stop;
 };
+
+
 
 int main( int argc, char* argv[] )
 {
@@ -132,8 +134,8 @@ int main( int argc, char* argv[] )
         ProducerThread* producer1 = new ProducerThread("p1");
 
         //Connect the two producer to the consumer
-        producer2.eventDispatcher.connect( consumer->eventLoop() );
-        producer1->eventDispatcher.connect( consumer->eventLoop() );
+        producer2.eventSource.connect( consumer->eventLoop() );
+        producer1->eventSource.connect( consumer->eventLoop() );
         
         //Start working
         consumer->start();
@@ -152,8 +154,8 @@ int main( int argc, char* argv[] )
                 
                 //Add a new consumer 
                 consumer = new ConsumerThread();                                
-                producer2.eventDispatcher.connect( consumer->eventLoop() );
-                producer1->eventDispatcher.connect( consumer->eventLoop() );
+                producer2.eventSource.connect( consumer->eventLoop() );
+                producer1->eventSource.connect( consumer->eventLoop() );
                 
                 consumer->start();   
             }
@@ -168,7 +170,7 @@ int main( int argc, char* argv[] )
                 //Add a new producer
                 printf("A");
                 producer1 = new ProducerThread("p1");
-                producer1->eventDispatcher.connect( consumer->eventLoop() );
+                producer1->eventSource.connect( consumer->eventLoop() );
                 producer1->start();
             }
         }                                
