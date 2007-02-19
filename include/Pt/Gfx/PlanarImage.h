@@ -274,6 +274,7 @@ namespace Pt {
 
                             return Math::Size(width - otherWidth, height -otherHeight);
 #endif
+                            return Math::Size(0, 0);
                         }
 
                     private:
@@ -333,6 +334,7 @@ namespace Pt {
 
                             return Math::Size(width - otherWidth, height -otherHeight);
 #endif
+                            return Math::Size(0, 0);
                         }
 
                     private:

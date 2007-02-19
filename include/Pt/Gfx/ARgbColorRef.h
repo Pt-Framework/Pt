@@ -312,8 +312,8 @@ namespace Pt {
                                      size_t                    posY)
                     {}
 
-                    inline ARgbColorRef operator[](size_t x)
-                    {}
+                    //inline ARgbColorRef operator[](size_t x)
+                    //{}
             };
 
             // Constant scanline class for ARgbColorRef color model.
@@ -325,8 +325,8 @@ namespace Pt {
                                           size_t                          posY)
                     {}
 
-                    inline ARgbColorConstRef operator[](size_t x)
-                    {}
+                    //inline ARgbColorConstRef operator[](size_t x)
+                    //{}
             };
 
 
