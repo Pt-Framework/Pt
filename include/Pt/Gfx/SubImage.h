@@ -34,12 +34,16 @@ namespace Pt {
         template <typename ImageT_>
         class /*PT_GFX_API*/ SubImage {
             public:
-                typedef typename ImageT_::ColorT       ColorT;
-                typedef typename ImageT_::ColorTraitsT ColorTraitsT;
-                typedef ImageT_                        ImageT;
+                typedef ImageT_  ImageT;
 
-                typedef ColorT*       Scanline;
-                typedef const ColorT* ConstScanline;
+                typedef typename ImageT::ColorT       ColorT;
+                typedef typename ImageT::ColorTraitsT ColorTraitsT;
+
+                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
+                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
+
+                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
+                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
 
             public:
                 class PixelIterator;
@@ -101,14 +105,14 @@ namespace Pt {
                 SubImage& operator=(const SubImage& src);
 
 
-                /** @brief Scanline access without range check.
+                /** @brief ScanlineT access without range check.
                  */
-                inline Scanline scanline(int y)
+                inline ScanlineT scanline(int y)
                 { return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
-                /** @brief Scanline access without range check.
+                /** @brief ScanlineT access without range check.
                  */
-                inline ConstScanline scanline(int y) const
+                inline ConstScanlineT scanline(int y) const
                 { return &_image.data()[(y+_area.y())*_image.width() + _area.x()]; }
 
                 /** @brief Random access without range check.

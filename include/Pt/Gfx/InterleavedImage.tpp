@@ -96,6 +96,7 @@ namespace Pt {
         const typename InterleavedImage<ColorT_, ColorTraitsT_>::ColorT& InterleavedImage<ColorT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
+
             return _buff[y*_width + x];
         }
 
@@ -103,6 +104,7 @@ namespace Pt {
         void InterleavedImage<ColorT_, ColorTraitsT_>::setColor(int x, int y, const ColorT& color_)
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
+
             _buff[y*_width + x] = color_;
         }
 

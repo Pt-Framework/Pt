@@ -37,6 +37,10 @@ namespace Pt {
         template <>
         class PT_GFX_API Color<ARgb, ReferenceType> {
             public:
+                /** @brief Non-reference type (container type) of this color.
+                 */
+                typedef Color<ARgb, ContainerType> NonRefT;
+
                 /** @brief Constant reference type of this color.
                  */
                 typedef Color<ARgb, ConstReferenceType> ConstRefT;
@@ -48,10 +52,20 @@ namespace Pt {
                 : _a(a), _r(r), _g(g), _b(b)
                 {}
 
+                /** @brief Copy constructor.
+                 */
+                inline Color(const Color& c)
+                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
+                {}
+
 
                 /** @see ARgbColor. */
                 inline Color& operator=(const Color& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
+
+                /** @see ARgbColor. */
+                inline Color& operator=(const Color<ARgb>& c)
+                { _a = c.alpha(); _r = c.red(); _g = c.green(); _b = c.blue(); return *this; }
 
                 /** @see ARgbColor. */
                 template <typename ColorT>
@@ -114,11 +128,34 @@ namespace Pt {
         template <>
         class PT_GFX_API Color<ARgb, ConstReferenceType> {
             public:
+                /** @brief Non-reference type (container type) of this color.
+                 */
+                typedef Color<ARgb, ContainerType> NonRefT;
+
                 /** @brief Non-constant reference type of this color.
                  */
                 typedef Color<ARgb, ReferenceType> NonConstRefT;
 
             public:
+                /** @brief This constructor will take reference to the real storage.
+                 */
+                inline Color(const NonRefT& c)
+                : _a(c.alpha()), _r(c.red()), _g(c.green()), _b(c.blue())
+                {}
+
+                /** @brief This constructor will take reference to the real storage.
+                 */
+                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
+                : _a(a), _r(r), _g(g), _b(b)
+                {}
+
+                /** @brief Copy constructor.
+                 */
+                inline Color(const Color& c)
+                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
+                {}
+
+
                 /** @see ARgbColor. */
                 inline uint16_t alpha() const
                 { return _a; }
@@ -135,16 +172,8 @@ namespace Pt {
                 inline uint16_t blue() const
                 { return _b; }
 
-                // Make this one as a friend of this class.
-                friend struct ColorTraits< Color<ARgb, ReferenceType> >;
-
             protected:
                 const uint16_t &_a, &_r, &_g, &_b;
-
-                // This constructor will take constant reference to the real storage.
-                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
-                : _a(a), _r(r), _g(g), _b(b)
-                {}
         };
 
 
@@ -163,12 +192,21 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<ARgbColorRef> {
+            // Value type of the components
             typedef uint16_t ComponentT;
+
+            // Temporary value type to be used when performing arithmetic on
+            // the components
             typedef uint32_t TmpValueT;
+
 
             // Color pointer class for ARgbColorRef color model.
             class ColorPtrT {
                 public:
+                    inline ColorPtrT(void*)
+                    : _chnA(0), _chnR(0), _chnG(0), _chnB(0)
+                    {}
+
                     inline ColorPtrT(std::vector<ComponentT*>& chanPtr,
                                      size_t                    imageWidth,
                                      size_t                    posX,
@@ -200,6 +238,12 @@ namespace Pt {
                     inline ColorPtrT& operator-=(size_t n)
                     { _chnA-=n; _chnR-=n; _chnG-=n; _chnB-=n; return *this; }
 
+                    inline bool operator==(const ColorPtrT& c) const
+                    { return _chnA==c._chnA && _chnR==c._chnR && _chnG==c._chnG && _chnB==c._chnB; }
+
+                    inline bool operator!=(const ColorPtrT& c) const
+                    { return _chnA!=c._chnA || _chnR!=c._chnR || _chnG!=c._chnG || _chnB!=c._chnB; }
+
                 private:
                     uint16_t* _chnA;
                     uint16_t* _chnR;
@@ -210,6 +254,10 @@ namespace Pt {
             // Constant color pointer class for ARgbColorRef color model.
             class ConstColorPtrT {
                 public:
+                    inline ConstColorPtrT(void*)
+                    : _chnA(0), _chnR(0), _chnG(0), _chnB(0)
+                    {}
+
                     inline ConstColorPtrT(const std::vector<ComponentT*>& chanPtr,
                                           size_t                          imageWidth,
                                           size_t                          posX,
@@ -227,7 +275,7 @@ namespace Pt {
                     }
 
                     inline ARgbColorConstRef operator*() const
-                    { return ColorTraits::_constructColorConstRef(_chnA, _chnR, _chnG, _chnB); }
+                    { return ARgbColorConstRef(*_chnA, *_chnR, *_chnG, *_chnB); }
 
                     inline ConstColorPtrT& operator++()
                     { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
@@ -241,6 +289,12 @@ namespace Pt {
                     inline ConstColorPtrT& operator-=(size_t n)
                     { _chnA-=n; _chnR-=n; _chnG-=n; _chnB-=n; return *this; }
 
+                    inline bool operator==(const ConstColorPtrT& c) const
+                    { return _chnA==c._chnA && _chnR==c._chnR && _chnG==c._chnG && _chnB==c._chnB; }
+
+                    inline bool operator!=(const ConstColorPtrT& c) const
+                    { return _chnA!=c._chnA || _chnR!=c._chnR || _chnG!=c._chnG || _chnB!=c._chnB; }
+
                 private:
                     const uint16_t* _chnA;
                     const uint16_t* _chnR;
@@ -249,9 +303,39 @@ namespace Pt {
             };
 
 
+            // Scanline class for ARgbColorRef color model.
+            class ScanlineT {
+                // TODO: WRITE IT !!!
+                public:
+                    inline ScanlineT(std::vector<ComponentT*>& chanPtr,
+                                     size_t                    imageWidth,
+                                     size_t                    posY)
+                    {}
+
+                    inline ARgbColorRef operator[](size_t x)
+                    {}
+            };
+
+            // Constant scanline class for ARgbColorRef color model.
+            class ConstScanlineT {
+                // TODO: WRITE IT !!!
+                public:
+                    inline ConstScanlineT(const std::vector<ComponentT*>& chanPtr,
+                                          size_t                          imageWidth,
+                                          size_t                          posY)
+                    {}
+
+                    inline ARgbColorConstRef operator[](size_t x)
+                    {}
+            };
+
+
+            //
+            // Below are specific to reference-type color only
+            //
+
             // We have 4 channels (A, R, G and B)
             static const size_t ChannelCount = 4;
-
 
             // In this ARgbColorRef, all channel have the same full size
             // (no subsampling) and thus just return a constant value of '1'
@@ -268,16 +352,6 @@ namespace Pt {
                 assert(channelIndex <= ChannelCount);
                 return 1;
             }
-
-
-            //
-            // Below are for helper purposes
-            //
-            friend class ConstColorPtrT;
-
-            private:
-                static inline ARgbColorConstRef _constructColorConstRef(const uint16_t *a, const uint16_t *r, const uint16_t *g, const uint16_t *b)
-                { return ARgbColorConstRef(*a, *r, *g, *b); }
         };
 
 

@@ -192,10 +192,14 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<Rgb565Color> {
+            typedef uint8_t  ComponentT;
+            typedef uint16_t TmpValueT;
+
             typedef Color<Rgb565>*       ColorPtrT;
             typedef const Color<Rgb565>* ConstColorPtrT;
 
-            typedef uint16_t             TmpValueT;
+            typedef Color<Rgb565>*       ScanlineT;
+            typedef const Color<Rgb565>* ConstScanlineT;
         };
 
 

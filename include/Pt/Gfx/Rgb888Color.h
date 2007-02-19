@@ -185,10 +185,14 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<Rgb888Color> {
+            typedef uint8_t  ComponentT;
+            typedef uint16_t TmpValueT;
+
             typedef Color<Rgb888>*       ColorPtrT;
             typedef const Color<Rgb888>* ConstColorPtrT;
 
-            typedef uint16_t             TmpValueT;
+            typedef Color<Rgb888>*       ScanlineT;
+            typedef const Color<Rgb888>* ConstScanlineT;
         };
 
 

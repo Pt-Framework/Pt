@@ -41,22 +41,27 @@ namespace Pt {
          *      color planes (blocks of memory). One block to the other blocks may or
          *      may not be in contiguous memory address.
          *
-         *  This PlanarImage<typename ColorT, typename ColorTraitsT> class is
+         *  This PlanarImage<typename ColorRefT, typename ColorTraitsT> class is
          *  meant to be used for implementing interleaved images.
          */
-        template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
+        template <typename ColorRefT_, typename ColorTraitsT_ = ColorTraits< Color<ColorRefT_> > >
         class /*PT_GFX_API*/ PlanarImage {
             public:
-                typedef ColorT_                     ColorT;
-                typedef typename ColorT_::ConstRefT ConstColorT;
-                typedef ColorTraitsT_               ColorTraitsT;
+                typedef typename ColorRefT_::NonRefT ColorT;
+                typedef ColorTraitsT_                ColorTraitsT;
 
-                //typedef ColorT*       Scanline;
-                //typedef const ColorT* ConstScanline;
+                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
+                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
 
-                typedef typename ColorTraitsT::ComponentT     ComponentT;
                 typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
                 typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
+
+                //
+                // Below are specific to planar image only
+                //
+                typedef ColorRefT_                        ColorRefT;
+                typedef typename ColorRefT_::ConstRefT    ConstColorRefT;
+                typedef typename ColorTraitsT::ComponentT ComponentT;
 
             public:
                 class PixelIterator;
@@ -77,7 +82,7 @@ namespace Pt {
 
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
-                inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT())
+                inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT() )
                 : _width(0), _height(0)
                 { resize(width_, height_, fill); }
 
@@ -132,49 +137,48 @@ namespace Pt {
                 inline const ComponentT* data() const
                 { return &_buff[0]; }
 
-#if 0
-                /** @brief Scanline access without range check.
-                 */
-                inline Scanline scanline(int y)
-                { return &_buff[y*_width]; }
 
                 /** @brief Scanline access without range check.
                  */
-                inline ConstScanline scanline(int y) const
-                { return &_buff[y*_width]; }
+                inline ScanlineT scanline(int y)
+                { return ScanlineT(_chanPtr, _width, y); }
+
+                /** @brief Scanline access without range check.
+                 */
+                inline ConstScanlineT scanline(int y) const
+                { return ConstScanlineT(_chanPtr, _width, y); }
+
 
                 /** @brief Random pixel access without range check.
                  */
-                inline ColorT& pixel(int x, int y)
-                { return _buff[y*_width + x]; }
+                inline ColorRefT pixel(int x, int y)
+                { return *ColorPtrT(_chanPtr, _width, x, y); }
 
                 /** @brief Random pixel access without range check.
                  */
-                inline const ColorT& pixel(int x, int y) const
-                { return _buff[y*_width + x]; }
-#endif
+                inline ConstColorRefT pixel(int x, int y) const
+                { return *ConstColorPtrT(_chanPtr, _width, x, y); }
 
                 /** @brief Random pixel access with range check.
                  */
-                ColorT at(int x, int y);
+                ColorRefT at(int x, int y);
 
                 /** @brief Random pixel access with range check.
                  */
-                const ConstColorT at(int x, int y) const;
+                ConstColorRefT at(int x, int y) const;
 
                 /** @brief Return the color at the specified coordinates.
                   *
                   * If the coordinates are out of range, the given 'invalid' color
                   * will be returned instead.
                  */
-                const ColorT& color(int x, int y, const ColorT& invalid = ColorT() ) const;
+                ConstColorRefT color(int x, int y, const ColorT& invalid = ColorT() ) const;
 
                 /** @brief Set the color at the specified coordinates.
                  */
                 void setColor(int x, int y, const ColorT& color_);
 
 
-#if 0
                 /** @brief Return an iterator indicating the position of the first pixel in the image.
                  */
                 inline PixelIterator begin()
@@ -204,7 +208,6 @@ namespace Pt {
                  */
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator( *this, y, x ); }
-#endif
 
             protected:
                 struct ChanSize {
@@ -225,19 +228,17 @@ namespace Pt {
                 class PixelIterator
                 {
                     public:
-                        typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT             ColorT;
-                        typedef typename ImageT::ColorTraitsT       ColorTraitsT;
+                        typedef PlanarImage<ColorRefT_, ColorTraitsT_> ImageT;
+                        typedef typename ImageT::ColorRefT             ColorRefT;
+                        typedef typename ImageT::ColorTraitsT          ColorTraitsT;
 
                     public:
-#if 0
                         inline PixelIterator()
-                         : _image( 0 )
-                         , _pixel( 0 )
-                        { }
+                        : _image(0), _pixel(0)
+                        {}
 
                         inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(&image.scanline(y)[x])
+                        : _image(&image), _pixel(ColorPtrT(image._chanPtr, image._width, x, y))
                         {}
 
                         inline PixelIterator operator=(PixelIterator other)
@@ -250,7 +251,7 @@ namespace Pt {
                         inline bool operator!=(const PixelIterator& it) const
                         { return this->_pixel != it._pixel; }
 
-                        inline ColorT& operator*() const
+                        inline ColorRefT operator*()
                         { return *_pixel; }
 
                         inline PixelIterator& operator++()
@@ -261,6 +262,8 @@ namespace Pt {
 
                         inline Math::Size operator-(const PixelIterator& other)
                         {
+                            // TODO: WRITE IT !!!
+#if 0
                             const size_t pos         = _pixel - _image->data();
                             const size_t otherPos    = other._pixel - other._image->data();
                             const size_t otherWidth  = otherPos / other._image->height();
@@ -270,12 +273,12 @@ namespace Pt {
                             const size_t height = pos / _image->width();
 
                             return Math::Size(width - otherWidth, height -otherHeight);
-                        }
 #endif
+                        }
 
                     private:
-                        ImageT* _image;
-                        ColorT* _pixel;
+                        ImageT*   _image;
+                        ColorPtrT _pixel;
                 };
 
                 /** @brief Pixel-based constant iterator class.
@@ -284,19 +287,17 @@ namespace Pt {
                 class ConstPixelIterator
                 {
                     public:
-                        typedef PlanarImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT             ColorT;
-                        typedef typename ImageT::ColorTraitsT       ColorTraitsT;
+                        typedef PlanarImage<ColorRefT_, ColorTraitsT_> ImageT;
+                        typedef typename ImageT::ColorRefT             ColorRefT;
+                        typedef typename ImageT::ColorTraitsT          ColorTraitsT;
 
                     public:
-#if 0
                         inline ConstPixelIterator()
-                        : _image( 0 )
-                        , _pixel( 0 )
+                        : _image(0), _pixel(0)
                         {}
 
                         inline ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(&image.scanline(y)[x])
+                        : _image(&image), _pixel(ConstColorPtrT(image._chanPtr, image._width, x, y))
                         {}
 
                         inline ConstPixelIterator operator=(ConstPixelIterator other)
@@ -309,7 +310,7 @@ namespace Pt {
                         inline bool operator!=(const ConstPixelIterator& it) const
                         { return this->_pixel != it._pixel; }
 
-                        inline const ColorT& operator*() const
+                        inline ConstColorRefT operator*()
                         { return *_pixel; }
 
                         inline ConstPixelIterator& operator++()
@@ -318,8 +319,10 @@ namespace Pt {
                         inline ConstPixelIterator operator+=(size_t n)
                         { _pixel += n; return *this; }
 
-                        inline Math::Size operator-(const ConstPixelIterator& other)
+                        inline Math::Size operator-(const PixelIterator& other)
                         {
+                            // TODO: WRITE IT !!!
+#if 0
                             const size_t pos         = _pixel - _image->data();
                             const size_t otherPos    = other._pixel - other._image->data();
                             const size_t otherWidth  = otherPos / other._image->height();
@@ -329,12 +332,12 @@ namespace Pt {
                             const size_t height = pos / _image->width();
 
                             return Math::Size(width - otherWidth, height -otherHeight);
-                        }
 #endif
+                        }
 
                     private:
-                        const ImageT* _image;
-                        const ColorT* _pixel;
+                        const ImageT*  _image;
+                        ConstColorPtrT _pixel;
                 };
         };
 

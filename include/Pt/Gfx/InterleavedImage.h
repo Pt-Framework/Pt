@@ -50,8 +50,11 @@ namespace Pt {
                 typedef ColorT_       ColorT;
                 typedef ColorTraitsT_ ColorTraitsT;
 
-                typedef ColorT*       Scanline;
-                typedef const ColorT* ConstScanline;
+                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
+                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
+
+                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
+                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
 
             public:
                 class PixelIterator;
@@ -72,7 +75,7 @@ namespace Pt {
 
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
-                inline InterleavedImage(uint width_, uint height_, const ColorT& fill = ColorT())
+                inline InterleavedImage(uint width_, uint height_, const ColorT& fill = ColorT() )
                 : _width(0), _height(0)
                 { resize(width_, height_, fill); }
 
@@ -119,23 +122,25 @@ namespace Pt {
 
                 /** @brief Raw data access.
                  */
-                inline ColorT* data()
+                inline ColorPtrT data()
                 { return &_buff[0]; }
 
                 /** @brief Raw data access.
                  */
-                inline const ColorT* data() const
+                inline ConstColorPtrT data() const
                 { return &_buff[0]; }
 
-                /** @brief Scanline access without range check.
+
+                /** @brief ScanlineT access without range check.
                  */
-                inline Scanline scanline(int y)
+                inline ScanlineT scanline(int y)
                 { return &_buff[y*_width]; }
 
-                /** @brief Scanline access without range check.
+                /** @brief ScanlineT access without range check.
                  */
-                inline ConstScanline scanline(int y) const
+                inline ConstScanlineT scanline(int y) const
                 { return &_buff[y*_width]; }
+
 
                 /** @brief Random pixel access without range check.
                  */
@@ -215,9 +220,8 @@ namespace Pt {
 
                     public:
                         inline PixelIterator()
-                         : _image( 0 )
-                         , _pixel( 0 )
-                        { }
+                        : _image(0), _pixel(0)
+                        {}
 
                         inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
                         : _image(&image), _pixel(&image.scanline(y)[x])
@@ -233,7 +237,7 @@ namespace Pt {
                         inline bool operator!=(const PixelIterator& it) const
                         { return this->_pixel != it._pixel; }
 
-                        inline ColorT& operator*() const
+                        inline ColorT& operator*()
                         { return *_pixel; }
 
                         inline PixelIterator& operator++()
@@ -245,19 +249,19 @@ namespace Pt {
                         inline Math::Size operator-(const PixelIterator& other)
                         {
                             const size_t pos         = _pixel - _image->data();
+                            const size_t width       = pos / _image->height();
+                            const size_t height      = pos / _image->width();
+
                             const size_t otherPos    = other._pixel - other._image->data();
                             const size_t otherWidth  = otherPos / other._image->height();
                             const size_t otherHeight = otherPos / other._image->width();
-
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
 
                             return Math::Size(width - otherWidth, height -otherHeight);
                         }
 
                     private:
-                        ImageT* _image;
-                        ColorT* _pixel;
+                        ImageT*   _image;
+                        ColorPtrT _pixel;
                 };
 
                 /** @brief Pixel-based constant iterator class.
@@ -272,8 +276,7 @@ namespace Pt {
 
                     public:
                         inline ConstPixelIterator()
-                        : _image( 0 )
-                        , _pixel( 0 )
+                        : _image(0) , _pixel(0)
                         {}
 
                         inline ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
@@ -313,8 +316,8 @@ namespace Pt {
                         }
 
                     private:
-                        const ImageT* _image;
-                        const ColorT* _pixel;
+                        const ImageT*  _image;
+                        ConstColorPtrT _pixel;
                 };
         };
 

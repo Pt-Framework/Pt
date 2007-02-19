@@ -163,10 +163,14 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<ARgbFColor> {
+            typedef float ComponentT;
+            typedef float TmpValueT;
+
             typedef Color<ARgbF>*       ColorPtrT;
             typedef const Color<ARgbF>* ConstColorPtrT;
 
-            typedef float               TmpValueT;
+            typedef Color<ARgbF>*       ScanlineT;
+            typedef const Color<ARgbF>* ConstScanlineT;
         };
 
 

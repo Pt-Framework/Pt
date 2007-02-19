@@ -211,10 +211,14 @@ namespace Pt {
          */
         template <>
         struct ColorTraits<ARgb8888Color> {
+            typedef uint8_t  ComponentT;
+            typedef uint16_t TmpValueT;
+
             typedef Color<ARgb8888>*       ColorPtrT;
             typedef const Color<ARgb8888>* ConstColorPtrT;
 
-            typedef uint16_t               TmpValueT;
+            typedef Color<ARgb8888>*       ScanlineT;
+            typedef const Color<ARgb8888>* ConstScanlineT;
         };
 
 
