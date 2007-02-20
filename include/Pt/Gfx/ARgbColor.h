@@ -20,7 +20,10 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
+#include <Pt/Unicode.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/AnyTraits.h>
+#include <Pt/SourceInfo.h>
 #include <limits>
 
 
@@ -259,6 +262,93 @@ namespace Pt {
         }
 
     } // namespace Gfx
+
+    template<>
+    struct AnyTraits<Gfx::Color<Gfx::ARgb> > {
+	    static void output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value);
+	    static void input(std::istream& is, Gfx::Color<Gfx::ARgb>& value);
+	    static void output(std::basic_ostream<Pt::Char>& os, const Gfx::Color<Gfx::ARgb>& value);
+	    static void input(std::basic_istream<Pt::Char>& is, Gfx::Color<Gfx::ARgb>& value);
+    };
+
+
+inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value)
+{
+    os << "ARGB(" << value.alpha() << ' ' << value.red() << ' ' << value.green() << ' ' << value.blue() << ')';
+}
+
+
+inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::output(std::basic_ostream<Pt::Char>& os, const Gfx::Color<Gfx::ARgb>& value)
+{
+    os << L"ARGB(" << value.alpha() << ' ' << value.red() << ' ' << value.green() << ' ' << value.blue() << ')';
+}
+
+
+template <typename CharT>
+inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Color<Gfx::ARgb>& value)
+{
+    uint16_t alpha;
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+
+    is >> alpha;
+    is >> red;
+    is >> green;
+    is >> blue;
+
+    CharT endChar;
+    is >> endChar;
+
+    if (endChar != ')')
+    {
+		throw std::runtime_error("Could not read ARgbColor value" + PT_SOURCEINFO);
+    }
+
+    value.setAlpha(alpha);
+    value.setRed(red);
+    value.setGreen(green);
+    value.setBlue(blue);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::input(std::istream& is, Gfx::Color<Gfx::ARgb>& value)
+{
+    while ( isspace( is.peek() ) )
+    {
+        is.get();
+    }
+
+    char ch[6];
+	is.get(ch, 6);
+
+	if (ch != "ARGB(")
+	{
+		throw std::runtime_error("Could not read ARgbColor value" + PT_SOURCEINFO);
+	}
+    
+    inputGeneric(is, value);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::input(std::basic_istream<Pt::Char>& is, Gfx::Color<Gfx::ARgb>& value)
+{
+    while (Unicode::isSpace(is.peek()))
+    {
+        is.get();
+    }
+
+    Pt::Char ch[6];
+	is.get(ch, 6);
+
+    if (!(Pt::String(ch) == L"ARGB("))
+	{
+		throw std::runtime_error("Could not read ARgbColor value" + PT_SOURCEINFO);
+	}
+
+    inputGeneric(is, value);
+}
+
 
 } // namespace Pt
 
