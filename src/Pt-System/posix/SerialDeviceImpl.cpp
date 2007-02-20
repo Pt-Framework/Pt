@@ -35,6 +35,24 @@ SerialDeviceImpl::SerialDeviceImpl( const std::string& port, std::ios_base::open
 : _fd(-1)
 {
     this->open(port.c_str(), mode);
+
+    struct termios ios;
+
+    if( ::tcgetattr(_fd, &ios) == -1 )
+        throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
+
+    ios.c_cflag |= (CREAD | CLOCAL | HUPCL);
+    ios.c_lflag = 0;
+    ios.c_iflag = 0;
+    ios.c_oflag = 0;
+    ios.c_cc[VTIME] = 0;
+    ios.c_cc[VMIN] = 1;
+    ios.c_iflag |= (IGNBRK | IGNPAR);
+
+    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
+    {
+        throw Pt::IO::IOError("Could not set termios attributes", PT_SOURCEINFO);
+    }
 }
 
 
@@ -48,7 +66,7 @@ void SerialDeviceImpl::open(const char* path, std::ios_base::openmode mode)
 
     if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) ) {
         flags |= O_RDWR;
-        flags |= O_CREAT;
+        //flags |= O_CREAT;
     }
     else if(mode & std::ios_base::out) {
         flags |= O_WRONLY;
@@ -365,6 +383,8 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     return SerialDevice::ParityNone;
 }
 
+#define CTRL_Q 0x11
+#define CTRL_S 0x13
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
@@ -380,11 +400,15 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     {
     case SerialDevice::FlowControlSoft:
         ios.c_iflag |= (IXON | IXANY | IXOFF);
+        ios.c_cc[VSTART] = CTRL_Q ;
+        ios.c_cc[VSTOP]  = CTRL_S ;
         break;
     //case flowBoth:
     //    ios.c_iflag |= (IXON | IXANY | IXOFF);
     case SerialDevice::FlowControlHard:
         ios.c_cflag |= CRTSCTS;
+        ios.c_cc[VSTART] = _POSIX_VDISABLE;
+        ios.c_cc[VSTOP] = _POSIX_VDISABLE;
         break;
     //case flowNone:
     //    break;
@@ -400,6 +424,13 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
 
 }
+
+
+void SerialDeviceImpl::flush()
+{
+    ::tcflush(_fd, TCIFLUSH);
+}
+
 
 } //namespace System
 

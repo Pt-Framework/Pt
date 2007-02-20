@@ -71,6 +71,8 @@ class SerialDeviceImpl
 
         SerialDevice::FlowControl flowControl() const;
 
+        void flush();
+
     private:
         int _fd;
 };

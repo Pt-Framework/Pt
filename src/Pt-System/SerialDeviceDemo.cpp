@@ -8,29 +8,50 @@
 
 void readMouseData()
 {
-    Pt::System::SerialDevice serdev( "COM1",  std::ios_base::out );        
-    
-    serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
-    serdev.setCharSize(7);
-    serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
-    serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard); 
-    Pt::System::Thread::sleep( 300 );               
-    serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
-    
-    Pt::System::Thread::sleep( 300 );   
-    
-    char buffer[200];
-    char byte;
-    memset( buffer, 0, 200);
-    size_t size = serdev.read( buffer, 200);
+    std::cerr << "Opening " << "/dev/ttyS0" << std::endl;
+    Pt::System::SerialDevice serdev( "/dev/ttyS0",  std::ios_base::in|std::ios_base::out );
 
-   //read pnp info
-    std::string pnpString;       
+    std::cerr << "Setting baud rate " << std::endl;
+    serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
+
+    std::cerr << "Setting char size " << std::endl;
+    serdev.setCharSize(7);
+
+    std::cerr << "Setting stop bits " << std::endl;
+    serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
+
+    std::cerr << "Setting stop bits " << std::endl;
+    serdev.setParity(Pt::System::SerialDevice::ParityNone);
+
+    std::cerr << "Setting flow control" << std::endl;
+    serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
+    Pt::System::Thread::sleep( 300 );
+
+    serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
+    Pt::System::Thread::sleep( 300 );
+
+    char buffer[201];
+    char byte;
+    memset( buffer, 0, 201);
+
+    std::cerr << "Reading bytes " << std::endl;
+    size_t size = serdev.read( buffer, 1);
+    std::cerr << "Read: " << (int) buffer[0] << " (" << size << " bytes)" << std::endl;
+
+    if( (int)buffer[0] == 0 )
+        return;
+
+    std::cerr << "Reading bytes " << std::endl;
+    size = serdev.read( buffer, 200);
+    std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
+
+    std::cerr << "Parsing PnP data " << std::endl;
+    std::string pnpString;
     for( size_t i = 0; i < size; i++)
     {
       byte = buffer[i];
       if(byte == 0x08 || byte == 0x28) 
-      {            
+      {
         int offset = 0x28 - byte;
         int stop = byte + 1;
         i++;
@@ -39,50 +60,56 @@ void readMouseData()
            byte = buffer[i];
           if(byte == stop) 
             break;
-            
+
           byte += offset;
-          pnpString.append(1, byte);  
+          pnpString.append(1, byte);
         }
         break;
-      }  
-    }           
-    std::cerr<<pnpString<<std::endl;
+      }
+    }
+
+    std::cerr << pnpString << std::endl;
 }
 
 int main( int argc, char* argv[] )
-{    
+{
+    readMouseData();
+    return 0;
     std::ofstream fs("serial.txt");
     std::cerr.rdbuf( fs.rdbuf() );
-    Pt::System::Thread::sleep( 10000 );    
-    
+    Pt::System::Thread::sleep( 10000 );
+
         try
         {
             std::stringstream ss;
             ss<<"COM5:";
-            
-            Pt::System::SerialDevice serdev( ss.str().c_str(),  std::ios_base::out );        
-            
+
+            std::cerr << "Opening " << ss.str() << std::endl;
+            Pt::System::SerialDevice serdev( ss.str().c_str(),  std::ios_base::out );
+
+            std::cerr << "Setting baud rate " << std::endl;
             serdev.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
             serdev.setCharSize(7);
             serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
 
+            std::cerr << "Setting flow control" << std::endl;
             serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard); 
-            Pt::System::Thread::sleep( 300 );               
+            Pt::System::Thread::sleep( 300 );
             serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
-            
-            Pt::System::Thread::sleep( 300 );            
-            
+
+            Pt::System::Thread::sleep( 300 );
+
             char buffer[200];
             memset( buffer, 0, 200);
-            size_t size = serdev.read( buffer, 200);            
-            
+            size_t size = serdev.read( buffer, 200);
+
             std::cerr<<"Byte readed: "<<size<<std::endl;
-            
+
             std::cerr<<"Data: "<<buffer;
-        }    
+        }
         catch(const std::exception& e)
         {
-            std::cerr << "Exception: Port :"<< std::endl;
+            std::cerr << "Exception: " << e.what() << std::endl;
         }
 
     return 0;
