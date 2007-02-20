@@ -135,6 +135,11 @@ namespace Gfx {
              */
             friend PT_GFX_API bool operator==(const Pen& a, const Pen& b);
 
+            inline bool operator<(const Pen& pen) const
+            { 
+                return size() < pen.size();
+            }
+
 		private:	
 		    SmartPtr<PenData> _penData;	
 	};
@@ -170,6 +175,76 @@ namespace Gfx {
     };
 	
 } // namespace Gfx
+
+template <>
+struct AnyTraits<Gfx::Pen> {
+	static void output(std::ostream& os, const Gfx::Pen& value);
+	static void input(std::istream& is, Gfx::Pen& value);
+	static void output(std::basic_ostream<Pt::Char>& os, const Gfx::Pen& value);
+	static void input(std::basic_istream<Pt::Char>& is, Gfx::Pen& value);
+};
+
+
+template <typename CharT>
+inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Pen& value)
+{
+    os << '(' << value.size() << ' ';
+    AnyTraits<Gfx::ARgbColor >::output(os, value.color());
+    os << ' ' << value.style() << ')';
+}
+
+	
+inline void Pt::AnyTraits<Gfx::Pen>::output(std::ostream& os, const Gfx::Pen& value)
+{
+	outputGeneric(os, value);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Pen>::output(std::basic_ostream<Pt::Char>& os, const Gfx::Pen& value)
+{
+	outputGeneric(os, value);
+}
+
+
+template <typename CharT>
+inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Pen& value)
+{
+    CharT ch;
+    	
+    is >> ch;
+    if (ch != '(')
+    {
+	    throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
+    }
+
+    size_t              penSize;
+    Gfx::ARgbColor      penColor;
+    Pt::ssize_t         penStyle;
+
+    is >> penSize;
+    AnyTraits<Gfx::ARgbColor >::input(is, penColor);
+    is >> penStyle;
+
+    is >> ch;
+    if (ch != ')')
+    {
+	    throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
+    }
+
+    value = Gfx::Pen(penSize, penColor, (Gfx::Pen::PenStyle)penStyle);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Pen>::input(std::istream& is, Gfx::Pen& value)
+{
+	inputGeneric(is, value);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Pen>::input(std::basic_istream<Pt::Char>& is, Gfx::Pen& value)
+{
+	inputGeneric(is, value);
+}
 
 } // namespace Pt
 
