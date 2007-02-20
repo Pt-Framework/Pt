@@ -25,6 +25,7 @@
 #include <Pt/PropertyProxy.h>
 #include <Pt/Method.h>
 #include <map>
+#include "Pt/Property.h"
 
 
 namespace Pt {
@@ -332,7 +333,8 @@ typedef std::multimap<std::string, ICallable*> MethodMap;
 
 class PT_API Reflectable {
     public:
-        Reflectable();
+        Reflectable(const std::string& name);
+//        Reflectable(const std::string& name = "Reflectable");
 
         virtual ~Reflectable();
 
@@ -414,7 +416,7 @@ class PT_API Reflectable {
             ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
-        
+
         const MethodMap& methods() const
         { return _methods; }
 
@@ -422,9 +424,19 @@ class PT_API Reflectable {
 
         void call(const std::string& name, const Args& args);
 
+        Reflectable* self()
+        { return this; }
+
+        const std::string& getIdentifierName()
+        {
+            static const std::string name = _identiferName.get();
+            return name;
+        }
+
     private:
-        MethodMap _methods;
-        PropertyMap _properties;
+        MethodMap                 _methods;
+        PropertyMap               _properties;
+        Pt::Property<std::string> _identiferName;
 };
 
 } // namespace Pt
