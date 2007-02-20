@@ -64,15 +64,14 @@ namespace Db {
 
 
     Statement::ConstIterator::ConstIterator(ICursor* cursor)
+        : _cursor(cursor)
     {
         if (cursor)
         {
             _current = cursor->fetch();
             if (!_current) {
                 //clog << "No row fetched" << endl;
-            }
-            else {
-                _cursor = cursor;
+                _cursor = 0;
             }
         }
     }
