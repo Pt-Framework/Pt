@@ -23,7 +23,7 @@
 namespace Pt {
 
 Reflectable::Reflectable(const std::string& name)
-: _identiferName("IdentifierName", self(), name)
+: _identiferName(name)
 {
 }
 
