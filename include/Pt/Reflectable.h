@@ -25,7 +25,6 @@
 #include <Pt/PropertyProxy.h>
 #include <Pt/Method.h>
 #include <map>
-#include "Pt/Property.h"
 
 
 namespace Pt {
@@ -429,14 +428,13 @@ class PT_API Reflectable {
 
         const std::string& getIdentifierName()
         {
-            static const std::string name = _identiferName.get();
-            return name;
+            return _identiferName;
         }
 
     private:
-        MethodMap                 _methods;
-        PropertyMap               _properties;
-        Pt::Property<std::string> _identiferName;
+        MethodMap   _methods;
+        PropertyMap _properties;
+        std::string _identiferName;
 };
 
 } // namespace Pt
