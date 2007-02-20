@@ -135,10 +135,10 @@ namespace Pt {
              */
             Char& operator=(uint32_t value)
             { _value = value; return *this; }
-            
+
             Char& operator=(const Char& ch)
             { _value = ch._value; return *this; }
-            
+
             /**
              * @brief Returns the internal value (unsigned 32 bits) of this character.
              * @return The 32-bit-value of this character.
@@ -167,7 +167,7 @@ namespace Pt {
              */
             operator uint32_t()
             { return _value; }
-            
+
             /**
              * @brief Substracts the numeric value of this character and the numeric value of the given character and
              * stores the result in this chracater class.
@@ -226,6 +226,16 @@ namespace Pt {
             friend bool operator!=(const Char& a, const Char& b)
             { return a.value() != b.value(); }
 
+            //! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
+            //! @return $true$ if the a and b are the same character; $false$ otherwise.
+            friend bool operator!=(const Char& a, char b)
+            { return a.value() != (unsigned char)b; }
+
+            //! @brief Returns $true$ if the a and b are the same character; $false$ otherwise.
+            //! @return $true$ if the a and b are the same character; $false$ otherwise.
+            friend bool operator!=(const Char& a, int b)
+            { return a.value() != (unsigned int)b; }
+
             //! @brief Returns $true$ if the numeric value of a is less than the numeric value of b; $false$ otherwise.
             //! @return $true$ if the numeric value of a is less than the numeric value of b; $false$ otherwise.
             friend bool operator<(const Char& a, const Char& b)
@@ -255,10 +265,10 @@ namespace Pt {
             //! @return The sum of the numeric values of a and b.
             friend Char operator+(const Char& a, char ch)
             { return a.value() + ch; }
-            
+
             friend Char operator+(const Char& a, int ch)
             { return a.value() + ch; }
-            
+
             //! @brief Subtracts the numeric value of b from the numeric value of b and returns the result.
             //! @return The substraction of the numeric values of b from a.
             friend Char operator-(const Char& a, const Char& b)
@@ -458,7 +468,7 @@ namespace Pt {
 
         return def;
     }
-    
+
 } // namespace Pt
 
 #endif
