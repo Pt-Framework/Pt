@@ -24,6 +24,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
+#include <Pt/AnyTraits.h>
+#include <Pt/SourceInfo.h>
 
 #include <Pt/String.h>
 
@@ -34,6 +36,7 @@ namespace Gfx {
     class PT_GFX_API Font
     {
         friend bool operator==(const Font& a, const Font& b);
+        friend bool operator<(const Font& a, const Font& b);
 
         public:
             enum FontStyle {
@@ -82,7 +85,90 @@ namespace Gfx {
             && a._direction             == b._direction;
     }
 
+    inline bool operator<(const Font& a, const Font& b)
+    { 
+        return a._size < b._size;
+    }
+
 } // namespace Gfx
+
+
+
+
+template <>
+struct AnyTraits<Gfx::Font> {
+	static void output(std::ostream& os, const Gfx::Font& value);
+	static void input(std::istream& is, Gfx::Font& value);
+	static void output(std::basic_ostream<Pt::Char>& os, const Gfx::Font& value);
+	static void input(std::basic_istream<Pt::Char>& is, Gfx::Font& value);
+};
+
+
+template <typename CharT>
+inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Font& value)
+{
+    os << '(';
+    AnyTraits<std::string>::output(os, value.name());
+    os << ' ' << value.size() << ' ' << value.fontStyle() << ' ' << value.angle() << ' ' << value.direction() << ')';
+}
+
+	
+inline void Pt::AnyTraits<Gfx::Font>::output(std::ostream& os, const Gfx::Font& value)
+{
+	outputGeneric(os, value);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Font>::output(std::basic_ostream<Pt::Char>& os, const Gfx::Font& value)
+{
+	outputGeneric(os, value);
+}
+
+
+template <typename CharT>
+inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Font& value)
+{
+    CharT ch;
+    	
+    is >> ch;
+    if (ch != '(')
+    {
+	    throw std::runtime_error("Could not read Font value" + PT_SOURCEINFO);
+    }
+
+    std::string fontName;         
+    size_t      fontSize;
+    ssize_t     fontStyle;
+    ssize_t     fontAngle;
+    ssize_t     fontDirection;
+
+    AnyTraits<std::string>::input(is, fontName);
+    is >> fontSize;
+    is >> fontStyle;
+    is >> fontAngle;
+    is >> fontDirection;
+
+    is >> ch;
+    if (ch != ')')
+    {
+	    throw std::runtime_error("Could not read Font value" + PT_SOURCEINFO);
+    }
+
+    value = Gfx::Font(fontName, fontSize, (Gfx::Font::FontStyle)fontStyle, fontAngle, (Gfx::Font::Direction)fontDirection);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Font>::input(std::istream& is, Gfx::Font& value)
+{
+	inputGeneric(is, value);
+}
+
+
+inline void Pt::AnyTraits<Gfx::Font>::input(std::basic_istream<Pt::Char>& is, Gfx::Font& value)
+{
+	inputGeneric(is, value);
+}
+
 
 } // namespace Pt
 
