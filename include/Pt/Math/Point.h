@@ -9,6 +9,9 @@
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 
+#include <Pt/AnyTraits.h>
+#include <Pt/SourceInfo.h>
+
 
 namespace Pt {
 
@@ -157,6 +160,78 @@ namespace Pt {
         };
 
     } // namespace Math
+
+
+
+    template <typename T>
+    struct AnyTraits<Math::BasicPoint<T> > {
+        static void output(std::ostream& os, const Math::BasicPoint<T>& value);
+        static void input(std::istream& is, Math::BasicPoint<T>& value);
+        static void output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint<T>& value);
+        static void input(std::basic_istream<Pt::Char>& is, Math::BasicPoint<T>& value);
+    };
+
+
+    template <typename CharT, typename T>
+    inline void outputGeneric(std::basic_ostream<CharT>& os, const Math::BasicPoint<T>& value)
+    {
+        os << '(' << value.x() << ' ' << value.y() << ')';
+    }
+
+    template <typename T>
+    inline void Pt::AnyTraits<Math::BasicPoint<T> >::output(std::ostream& os, const Math::BasicPoint<T>& value)
+    {
+        outputGeneric(os, value);
+    }
+
+
+    template <typename T>
+    inline void Pt::AnyTraits<Math::BasicPoint<T> >::output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint<T>& value)
+    {
+        outputGeneric(os, value);
+    }
+
+
+    template <typename CharT, typename T>
+    inline void inputGeneric(std::basic_istream<CharT>& is, Math::BasicPoint<T>& value)
+    {
+        CharT ch;
+
+        is >> ch;
+        if (ch != '(')
+        {
+            throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
+        }
+
+        T x;
+        T y;
+
+        is >> x;
+        is >> y;
+
+        is >> ch;
+        if (ch != ')')
+        {
+            throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
+        }
+
+        value.set(x, y);
+    }
+
+
+    template <typename T>
+    inline void Pt::AnyTraits<Math::BasicPoint<T> >::input(std::istream& is, Math::BasicPoint<T>& value)
+    {
+        inputGeneric(is, value);
+    }
+
+
+    template <typename T>
+    inline void Pt::AnyTraits<Math::BasicPoint<T> >::input(std::basic_istream<Pt::Char>& is, Math::BasicPoint<T>& value)
+    {
+        inputGeneric(is, value);
+    }
+
 
 } // namespace Pt
 
