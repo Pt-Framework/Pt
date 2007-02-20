@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Tobias Müller                                 *
+ *   Copyright (C) 2006-2007 Tobias Mller                                 *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -38,7 +38,7 @@ Font::Font(const std::string& name, size_t size, FontStyle fontStyle, ssize_t an
 }
 
 
-std::string Font::name() const
+const std::string& Font::name() const
 {
     return _name;
 }

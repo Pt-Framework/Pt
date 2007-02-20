@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Drner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,37 +20,63 @@
 #ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
-#include <string>
+#include <termios.h>
 
 #include "Pt/IO/IODevice.h"
 #include "Pt/IO/IOError.h"
+#include "Pt/System/SerialDevice.h"
 
-namespace Pt{
-namespace System{
+#include <string>
+
+
+namespace Pt {
+
+namespace System {
 
 class SerialDeviceImpl
 {
     public:
-        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
-        ~SerialDeviceImpl();
-        
-        //! @brief Closes the I/O device
-        void close();        
+        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode );
 
-        //! @brief Waits until data is available
-        bool wait( IO::IODevice::WaitMode mode, unsigned int msec );
+        ~SerialDeviceImpl();
+
+        void open(const char* path, std::ios_base::openmode mode);
+
+        //! @brief Closes the I/O device
+        void close();
 
         //! @brief Read bytes from device
-        size_t read(char* buffer, size_t count, bool& eof);
+        size_t read( char* buffer, size_t count, bool& eof );
 
         //! @brief Write bytes to device
-        size_t write(const char* buffer, size_t count);
+        size_t write( const char* buffer, size_t count );
 
-        //! @brief Synchronize device
-        void sync() const;        
+        void setBaudRate( SerialDevice::BaudRate rate );
+
+        SerialDevice::BaudRate baudRate() const;
+
+        void setCharSize( int size );
+
+        int charSize() const;
+
+        void setStopBits( SerialDevice::StopBits bits );
+
+        SerialDevice::StopBits stopBits() const;
+
+        void setParity( SerialDevice::Parity parity );
+
+        SerialDevice::Parity parity() const;
+
+        void setFlowControl( SerialDevice::FlowControl flowControl );
+
+        SerialDevice::FlowControl flowControl() const;
+
+    private:
+        int _fd;
 };
 
-}//namespace System
-}//namespaec Pt
+} //namespace System
+
+} //namespaec Pt
 
 #endif

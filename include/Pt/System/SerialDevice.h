@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Drner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,51 +31,51 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
    private:
         //! @brief A pointer to the platform-specific SerialDevice implementation.
         class SerialDeviceImpl* _impl;
-            
+
     public:
         enum BaudRate 
         {
             BaudRate0       = 0,
-            BaudRate50      = 50,       
-            BaudRate75      = 75,        
-            BaudRate110     = 110,       
-            BaudRate134     = 134,       
-            BaudRate150     = 150,      
-            BaudRate200     = 200,       
-            BaudRate300     = 300,        
-            BaudRate600     = 600,      
-            BaudRate1200    = 1200,      
-            BaudRate1800    = 1800,      
-            BaudRate2400    = 2400,      
-            BaudRate4800    = 4800,       
-            BaudRate9600    = 9600,      
-            BaudRate19200   = 19200,     
+            BaudRate50      = 50,
+            BaudRate75      = 75,
+            BaudRate110     = 110,
+            BaudRate134     = 134,
+            BaudRate150     = 150,
+            BaudRate200     = 200,
+            BaudRate300     = 300,
+            BaudRate600     = 600,
+            BaudRate1200    = 1200,
+            BaudRate1800    = 1800,
+            BaudRate2400    = 2400,
+            BaudRate4800    = 4800,
+            BaudRate9600    = 9600,
+            BaudRate19200   = 19200,
             BaudRate38400   = 38400,
             BaudRate57600   = 57600,
             BaudRate115200  = 115200,
-            BaudRate230400  = 230400            
+            BaudRate230400  = 230400
         };
  
         enum Parity 
         {
             ParityEven, 
-            ParityOdd,    
+            ParityOdd,
             ParityNone
         };
 
         enum FlowControl 
         {
-            FlowControlHard,   
-            FlowControlSoft     
+            FlowControlHard,
+            FlowControlSoft
         }; 
-       
+
         enum StopBits
         {
             OneStopBit,
             One5StopBits,
             TwoStopBits
         };
-      
+
         SerialDevice( const std::string& file, std::ios_base::openmode mode )  throw(IO::IOError);
         virtual ~SerialDevice();
         

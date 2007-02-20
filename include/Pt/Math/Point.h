@@ -6,11 +6,14 @@
 #define PT_MATH_POINT_H
 
 #include <Pt/Types.h>
+#include <Pt/AnyTraits.h>
+#include <Pt/SourceInfo.h>
+#include <Pt/Char.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 
-#include <Pt/AnyTraits.h>
-#include <Pt/SourceInfo.h>
+#include <iostream>
+#include <stdexcept>
 
 
 namespace Pt {

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Tobias Müller                              *
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Tobias Mller                              *
+ *   Copyright (C) 2006-2007 by Marc Boris Drner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -57,7 +57,7 @@ namespace Gfx {
                 
             );
 
-            std::string name() const;
+            const std::string& name() const;
 
             size_t size() const;
 
@@ -94,7 +94,7 @@ namespace Gfx {
 
 
 
-
+/*
 template <>
 struct AnyTraits<Gfx::Font> {
 	static void output(std::ostream& os, const Gfx::Font& value);
@@ -108,7 +108,7 @@ template <typename CharT>
 inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Font& value)
 {
     os << '(';
-    AnyTraits<std::string>::output(os, value.name());
+    Pt::AnyTraits<std::string>::output(os, value.name());
     os << ' ' << value.size() << ' ' << value.fontStyle() << ' ' << value.angle() << ' ' << value.direction() << ')';
 }
 
@@ -168,7 +168,7 @@ inline void Pt::AnyTraits<Gfx::Font>::input(std::basic_istream<Pt::Char>& is, Gf
 {
 	inputGeneric(is, value);
 }
-
+*/
 
 } // namespace Pt
 
