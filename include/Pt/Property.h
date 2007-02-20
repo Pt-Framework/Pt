@@ -27,11 +27,10 @@
 #include <Pt/ConstMethod.h>
 #include <Pt/Signal.h>
 #include <Pt/PropertyProxy.h>
+#include <Pt/Reflectable.h>
 
 
 namespace Pt {
-
-class Reflectable;
 
 class PT_API PropertyValue : public AbstractProperty
 {
