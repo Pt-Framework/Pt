@@ -133,6 +133,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SerialDevice.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SharedLib.cpp"
 				>
 			</File>
@@ -348,6 +352,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\win32\SerialDeviceImpl.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\win32\SharedLibImpl.cpp"
 					>
 				</File>
@@ -448,6 +456,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\Semaphore.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\SerialDevice.h"
 				>
 			</File>
 			<File
@@ -667,6 +679,10 @@
 				</File>
 				<File
 					RelativePath=".\win32\SemaphoreImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\SerialDeviceImpl.h"
 					>
 				</File>
 				<File

@@ -17,40 +17,4 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
-#define PT_SYSTEM_SERIALDEVICEIMPL_H
-
-#include <string>
-
-#include "Pt/IO/IODevice.h"
-#include "Pt/IO/IOError.h"
-
-namespace Pt{
-namespace System{
-
-class SerialDeviceImpl
-{
-    public:
-        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
-        ~SerialDeviceImpl();
-        
-        //! @brief Closes the I/O device
-        void close();        
-
-        //! @brief Waits until data is available
-        bool wait( IO::IODevice::WaitMode mode, unsigned int msec );
-
-        //! @brief Read bytes from device
-        size_t read(char* buffer, size_t count, bool& eof);
-
-        //! @brief Write bytes to device
-        size_t write(const char* buffer, size_t count);
-
-        //! @brief Synchronize device
-        void sync() const;        
-};
-
-}//namespace System
-}//namespaec Pt
-
-#endif
+#include "../win32/SerialDeviceImpl.h"

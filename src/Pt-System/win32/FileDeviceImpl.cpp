@@ -22,13 +22,6 @@ using namespace Pt::IO;
 
 #include "FileDeviceImpl.h"
 
-
-//LPSTR message;
-//FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
-//              NULL, exxr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
-//printf(message);
-
-
 namespace Pt {
 
 namespace System {
@@ -47,9 +40,7 @@ FileDeviceImpl::FileDeviceImpl()
 
 
 FileDeviceImpl::~FileDeviceImpl() throw()
-{
-}
-
+{ }
 
 void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
 {
@@ -105,7 +96,6 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     }
 }
 
-
 void FileDeviceImpl::close() throw(IO::IOError)
 {
     if(_readOv.hEvent != NULL)
@@ -122,7 +112,6 @@ void FileDeviceImpl::close() throw(IO::IOError)
         _handle = INVALID_HANDLE_VALUE;
     }
 }
-
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError)
 {
@@ -286,7 +275,5 @@ bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::
     return true;
 }
 
-
-}
-
-}
+} //namespace System
+} //namespace Pt

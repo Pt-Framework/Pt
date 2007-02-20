@@ -46,7 +46,7 @@ void SerialDevice::setBaudRate( BaudRate rate )
     _impl->setBaudRate( rate );
 }
 
-BaudRate SerialDevice::baudRate() const
+SerialDevice::BaudRate SerialDevice::baudRate() const
 {
     return _impl->baudRate();
 }
@@ -61,14 +61,14 @@ int SerialDevice::charSize() const
     return _impl->charSize();
 }
       
-void SerialDevice::setStopBits( short bits )
+void SerialDevice::setStopBits( StopBits bits )
 {
     _impl->setStopBits( bits );
 }
 
-short SerialDevice::stopBits()
+SerialDevice::StopBits SerialDevice::stopBits() const
 {
-    return _impl->setStopBits();
+    return _impl->stopBits();
 }
         
 void SerialDevice::setParity( Parity parity )
@@ -76,9 +76,9 @@ void SerialDevice::setParity( Parity parity )
     _impl->setParity( parity );
 }
 
-Parity SerialDevice::parity() const
+SerialDevice::Parity SerialDevice::parity() const
 {
-    _impl->parity();
+    return _impl->parity();
 }
         
 void SerialDevice::setFlowControl( FlowControl flowControl )
@@ -86,84 +86,19 @@ void SerialDevice::setFlowControl( FlowControl flowControl )
     _impl->setFlowControl(  flowControl );
 }
 
-FlowControl SerialDevice::flowControl() const
+SerialDevice::FlowControl SerialDevice::flowControl() const
 {
     return _impl->flowControl();
 }
 
-void SerialDevice::setInputMode( InputMode mode )
-{
-    _impl->setInputMode( mode );
-}
-
-InputMode SerialDevice::inputMode() const
-{
-    return _impl->inputMode();
-}
-      
-void SerialDevice::setControlMode( ControlMode mode )
-{
-    _impl->setControlMode( mode );
-}
-
-ControlMode SerialDevice::controlMode() const
-{
-    _impl->controlMode();
-}
-        
-LocalMode SerialDevice::localMode() const
-{
-    return _impl->localMode();
-}
-
-void SerialDevice::setLocalMode( LocalMode mode )
-{
-    _impl->setLocalMode( mode );
-}
-
-OutputMode SerialDevice::outputMode() const
-{
-    _impl->outputMode();
-}
-
-void SerialDevice::setOutputMode( OutputMode mode )
-{
-    _impl->setOutputMode( mode );
-}
-
-int SerialDevice::vMin() const
-{
-    return _impl->vMin();
-}
- 
-void SerialDevice::setVMin( const int chars )
-{
-    return _impl->setVmin( chars );
-}
-
-int SerialDevice::vTime() const
-{
-    _impl->vTime( );
-}
-
-void SerialDevice::setVTime( const int secs )
-{
-    _impl->setVTime( secs );
-}
-    
 void SerialDevice::_close()
 {
     _impl->close();
 }
 
-bool SerialDevice::_wait( WaitMode mode , unsigned int msec)
-{ 
-    return _impl->wait( mode, msec );
-}
-
-size_t SerialDevice::_read( char* buffer, size_t count )
+size_t SerialDevice::_read( char* buffer, size_t count, bool& eof )
 {
-    return _impl->read( buffer, count );
+    return _impl->read( buffer, count, eof );
 }
 
 size_t SerialDevice::_write(const char* buffer, size_t count)

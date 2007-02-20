@@ -68,40 +68,7 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
             FlowControlHard,   
             FlowControlSoft     
         }; 
-
-        enum InputMode 
-        {
-            IgnoreBreak,
-            IgnoreParityError
-        };  
-
-        enum OutputMode 
-        {
-            CRtoNL,
-            IgnoreNL,
-            IgnoreCR
-        };  
-
-        enum ControlMode 
-        {
-            EnableReceiver,
-            LocalLine,
-            HangupLine
-        };
-
-        enum LocalMode 
-        {
-            Echo,
-            NoFlush
-        };  
-
-        enum FlushMode 
-        {
-            FlushInput,
-            FlushOutput,
-            FlushAll
-        };
-        
+       
         enum StopBits
         {
             OneStopBit,
@@ -119,41 +86,17 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
         int charSize() const;
               
         void setStopBits( StopBits bits );
-        StopBits stopBits();    
+        StopBits stopBits() const;    
                 
         void setParity( Parity Parity );        
         Parity parity() const;
                 
         void setFlowControl( FlowControl FlowControl );              
-        FlowControl flowControl() const;
-        
-        void setInputMode( InputMode mode );
-        InputMode inputMode() const;
-              
-        void setControlMode( ControlMode mode );
-        ControlMode controlMode() const;
-                
-        LocalMode localMode() const;
-        void setLocalMode( LocalMode mode );
-      
-        OutputMode outputMode() const;
-        void setOutputMode( OutputMode mode );
-        
-        //Minimum number of characters to read
-        int vMin()const ;         
-        void setVMin( const int chars );
-      
-        //Time to wait for data (tenths of seconds)
-        int vTime() const;
-        void setVTime(const int secs);
-
+        FlowControl flowControl() const;             
         
     protected:
         //! @brief Closes the I/O device
         virtual void _close();        
-
-        //! @brief Waits until data is available
-        virtual bool _wait(WaitMode mode, unsigned int msec );
 
         //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);

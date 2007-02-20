@@ -25,6 +25,7 @@
 
 #include "Pt/IO/IODevice.h"
 #include "Pt/IO/IOError.h"
+#include "Pt/System/SerialDevice.h"
 
 namespace Pt{
 namespace System{
@@ -32,60 +33,38 @@ namespace System{
 class SerialDeviceImpl
 {
     public:
-        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
+        SerialDeviceImpl( const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
         ~SerialDeviceImpl();
         
         //! @brief Closes the I/O device
         void close();        
 
-        //! @brief Waits until data is available
-        bool wait( IO::IODevice::WaitMode mode, unsigned int msec );
-
         //! @brief Read bytes from device
-        size_t read( char* buffer, size_t count );
+        size_t read( char* buffer, size_t count, bool& eof );
 
         //! @brief Write bytes to device
-        size_t write(const char* buffer, size_t count);
+        size_t write( const char* buffer, size_t count );
 
-        void setBaudRate( BaudRate rate );
-        BaudRate baudRate() const;
+        void setBaudRate( SerialDevice::BaudRate rate );
+        SerialDevice::BaudRate baudRate() const;
         
         void setCharSize( int size );
         int charSize() const;
               
-        void setStopBits( StopBits bits );
-        StopBits stopBits();    
+        void setStopBits( SerialDevice::StopBits bits );
+        SerialDevice::StopBits stopBits() const;    
                 
-        void setParity( Parity Parity );        
-        Parity parity() const;
+        void setParity( SerialDevice::Parity parity );        
+        SerialDevice::Parity parity() const;
                 
-        void setFlowControl( FlowControl FlowControl );              
-        FlowControl flowControl() const;
+        void setFlowControl( SerialDevice::FlowControl flowControl );              
+        SerialDevice::FlowControl flowControl() const;      
         
-        void setInputMode( InputMode mode );
-        InputMode inputMode() const;
-              
-        void setControlMode( ControlMode mode );
-        ControlMode controlMode() const;
-                
-        LocalMode localMode() const;
-        void setLocalMode( LocalMode mode );
-      
-        OutputMode outputMode() const;
-        void setOutputMode( OutputMode mode );
-        
-        int vMin()const ;         
-        void setVMin( const int chars );
-      
-        int vTime() const;
-        void setVTime(const int secs);
-                  
-    
     private:
         void updateCommState();
+        
         HANDLE _handle;
-        DCB    _commState;
-            
+        DCB    _commState;            
 };
 
 }//namespace System
