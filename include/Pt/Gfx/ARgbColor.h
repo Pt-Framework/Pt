@@ -20,6 +20,7 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
+#include <Pt/String.h>
 #include <Pt/Unicode.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/AnyTraits.h>
@@ -263,13 +264,13 @@ namespace Pt {
 
     } // namespace Gfx
 
-    template<>
-    struct AnyTraits<Gfx::Color<Gfx::ARgb> > {
-	    static void output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value);
-	    static void input(std::istream& is, Gfx::Color<Gfx::ARgb>& value);
-	    static void output(std::basic_ostream<Pt::Char>& os, const Gfx::Color<Gfx::ARgb>& value);
-	    static void input(std::basic_istream<Pt::Char>& is, Gfx::Color<Gfx::ARgb>& value);
-    };
+template<>
+struct AnyTraits<Gfx::Color<Gfx::ARgb> > {
+	static void output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value);
+	static void input(std::istream& is, Gfx::Color<Gfx::ARgb>& value);
+	static void output(std::basic_ostream<Pt::Char>& os, const Gfx::Color<Gfx::ARgb>& value);
+	static void input(std::basic_istream<Pt::Char>& is, Gfx::Color<Gfx::ARgb>& value);
+};
 
 
 inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value)
