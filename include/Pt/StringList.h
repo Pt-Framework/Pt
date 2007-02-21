@@ -17,45 +17,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
 
-#ifndef PTV_StringList_h
-#define PTV_StringList_h
+#ifndef PTV_STRINGLIST_h
+#define PTV_STRINGLIST_h
 
+#include <Pt/Api.h>
 #include <Pt/TypeInfo.h>
-#include <Pt/AnyTraits.h>
-#include <Pt/Text/Api.h>
 #include <Pt/String.h>
 #include <list>
 
 
 namespace Pt {
 
-    namespace Text {
+	/**
+	 * @brief A specialized list-class for Pt::String objects.
+	 *
+	 * This class is a convenience class which is derived from std::list and specialized for
+	 * containing Pt::String.
+	 *
+	 * See std::list for more details.
+	 */
+	class PT_API StringList : public std::list<Pt::String> {
+		public:
+			typedef std::list<Pt::String>::iterator Iterator;
+			typedef std::list<Pt::String>::const_iterator ConstIterator;
 
-        /**
-         * @brief A specialized list-class for Pt::String objects.
-         *
-         * This class is a convenience class which is derived from std::list and specialized for
-         * containing Pt::String.
-         *
-         * See std::list for more details.
-         */
-        class PT_TEXT_API StringList : public std::list<Pt::String> {
-            public:
-                typedef std::list<Pt::String>::iterator Iterator;
-                typedef std::list<Pt::String>::const_iterator ConstIterator;
-
-            public:
-                StringList();
-        };
-
-    } // namespace Text
+		public:
+			StringList();
+	};
 
 
-    template <>
-    struct PT_API TypeTraits<Pt::Text::StringList> {
-        static const char* typeName()
-        { return "Pt::Text::StringList"; }
-    };
+	template <>
+	struct TypeTraits<Pt::StringList> {
+		static const char* typeName()
+		{ return "Pt::StringList"; }
+	};
 
 } // namespace Pt
 

@@ -15,11 +15,12 @@ SharedLibrary Pt : Any.cpp
                    Property.cpp
                    PropertyProxy.cpp
                    Signal.cpp
+                   StringList.cpp
                    Time.cpp
                    TypeInfo.cpp
                    codecvt.cpp
                    ctype.cpp
-                   num_get.cpp
+                   #num_get.cpp
                    numpunct.cpp
                    Unicode.cpp ;
 
