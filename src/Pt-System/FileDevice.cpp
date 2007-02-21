@@ -34,7 +34,7 @@ FileDevice::FileDevice()
 }
 
 
-FileDevice::FileDevice(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
+FileDevice::FileDevice(const char* path, std::ios_base::openmode mode)
 : _mode(mode)
 {
     _impl = new FileDeviceImpl();
@@ -42,7 +42,7 @@ FileDevice::FileDevice(const char* path, std::ios_base::openmode mode) throw(IO:
 }
 
 
-FileDevice::~FileDevice() throw()
+FileDevice::~FileDevice()
 {
     if( this->valid() ) {
         try { this->close(); } catch(...) { }
@@ -52,7 +52,7 @@ FileDevice::~FileDevice() throw()
 }
 
 
-void FileDevice::open(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
+void FileDevice::open(const char* path, std::ios_base::openmode mode)
 {
     if( this->valid() ) {
         this->close();
@@ -68,7 +68,7 @@ void FileDevice::open(const char* path, std::ios_base::openmode mode) throw(IO::
 }
 
 
-void FileDevice::_close() throw(IO::IOError)
+void FileDevice::_close()
 {
     _impl->close();
     IO::IODevice::setValid(false);
@@ -76,19 +76,19 @@ void FileDevice::_close() throw(IO::IOError)
 }
 
 
-size_t FileDevice::size() const throw(IO::IOError)
+size_t FileDevice::size() const
 {
     return _impl->size();
 }
 
 
-FileDevice::pos_type FileDevice::_seek(off_type offset, SeekMode mode) throw(IO::IOError)
+FileDevice::pos_type FileDevice::_seek(off_type offset, SeekMode mode)
 {
     return _impl->seek(offset, mode);
 }
 
 
-size_t FileDevice::_read( char* buffer, size_t count, bool& eof ) throw(IO::IOError)
+size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
 {
     //if(count > SSIZE_MAX)
     //    count = SSIZE_MAX;
@@ -98,7 +98,7 @@ size_t FileDevice::_read( char* buffer, size_t count, bool& eof ) throw(IO::IOEr
 }
 
 
-size_t FileDevice::_write(const char* buffer, size_t count) throw(IO::IOError)
+size_t FileDevice::_write(const char* buffer, size_t count)
 {
     if( _mode & std::ios_base::out ) 
         return _impl->write(buffer, count);
@@ -107,20 +107,20 @@ size_t FileDevice::_write(const char* buffer, size_t count) throw(IO::IOError)
 }
 
 
-size_t FileDevice::_peek(char* buffer, size_t count) throw(IO::IOError)
+size_t FileDevice::_peek(char* buffer, size_t count)
 {
     return _impl->peek(buffer, count);
 }
 
 
-void FileDevice::_sync() const throw(IO::IOError)
+void FileDevice::_sync() const
 {
     if( _mode & std::ios_base::out ) 
         _impl->sync();
 }
 
 
-bool FileDevice::_wait(WaitMode mode, unsigned int msec) throw(IO::IOError)
+bool FileDevice::_wait(WaitMode mode, unsigned int msec)
 {
     return _impl->wait(mode, msec);
 }

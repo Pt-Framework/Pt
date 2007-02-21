@@ -33,7 +33,7 @@ SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mod
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl();
-    _impl->open( file, mode );
+    this->open( file, mode );
 }
 
 SerialDevice::~SerialDevice()
@@ -50,7 +50,14 @@ SerialDevice::~SerialDevice()
 
 void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
 {
+    if( this->valid() ) {
+        this->close();
+    }
+
     _impl->open( file, mode );
+
+    IO::IODevice::setValid(true);
+    IO::IODevice::setEof(false);
 }
 
 void SerialDevice::setBaudRate( BaudRate rate )

@@ -35,11 +35,11 @@ namespace System {
         public:
             FileDevice();
 
-            FileDevice(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
+            FileDevice(const char* path, std::ios_base::openmode mode);
 
-            ~FileDevice() throw();
+            ~FileDevice();
 
-            void open(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
+            void open(const char* path, std::ios_base::openmode mode);
 
             const char* path() const 
             { return _path.c_str(); }
@@ -47,28 +47,28 @@ namespace System {
             std::ios_base::openmode openMode() const
             { return _mode; }
 
-            size_t size() const throw(Pt::IO::IOError);
+            size_t size() const;
 
         protected:
-            void _close() throw(IO::IOError);
+            void _close();
 
-            bool _remote() const throw()
+            bool _remote() const
             { return false; }
 
-            bool _seekable() const throw()
+            bool _seekable() const
             { return true; }
 
-            pos_type _seek(off_type offset, SeekMode mode) throw(IO::IOError);
+            pos_type _seek(off_type offset, SeekMode mode) ;
 
-            size_t _read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
+            size_t _read(char* buffer, size_t count, bool& eof);
             
-            size_t _write(const char* buffer, size_t count) throw(IO::IOError);
+            size_t _write(const char* buffer, size_t count);
 
-            size_t _peek(char* buffer, size_t count) throw(IO::IOError);
+            size_t _peek(char* buffer, size_t count);
             
-            void _sync() const throw(IO::IOError);
+            void _sync() const;
 
-            bool _wait(WaitMode mode, unsigned int msec) throw(IO::IOError);
+            bool _wait(WaitMode mode, unsigned int msec);
 
         private:
             std::string             _path;

@@ -30,8 +30,23 @@ namespace Pt {
 
 namespace IO {
 
-IOError::IOError(const std::string& what, const SourceInfo& si) throw()
-: std::runtime_error(what + si) 
+IOError::IOError(const std::string& what, const SourceInfo& si)
+: std::ios::failure(what + si)
+{
+}
+
+
+IOError::~IOError() throw()
+{
+}
+
+OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
+: std::ios::failure(what + si)
+{
+}
+
+
+OpenFailed::~OpenFailed() throw()
 {
 }
 

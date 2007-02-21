@@ -21,14 +21,14 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>bin/SmartPtrTestd</mainprogram>
+      <mainprogram>bin/SerialDeviceTestd</mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs/>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars>
-        <envvar value="/home/marc/Pt/bin/" name="LD_LIBRARY_PATH" />
+        <envvar value="/home/marc/src/Platinum/bin/" name="LD_LIBRARY_PATH" />
       </envvars>
     </run>
     <build>

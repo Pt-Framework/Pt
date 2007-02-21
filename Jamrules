@@ -21,5 +21,6 @@ Echo "System Interface (SYS)          :" $(SYS) ;
 Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
 Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
 Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
+Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
 Echo ;
 

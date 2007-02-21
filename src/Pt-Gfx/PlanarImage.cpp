@@ -37,7 +37,7 @@ namespace Pt {
 #ifdef __GNUC__
 
         // Explicit instantiation of the standard planar image classes
-        template class PlanarImage<ARgbColorRef, ColorTraits<ARgbColorRef> >;
+        //template class PlanarImage<ARgbColorRef, ColorTraits<ARgbColorRef> >;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
         //template class SubImage<ARgbPlanarImage>;

@@ -7,9 +7,10 @@
 
 void readMouseData()
 {
-    std::string port("COM1:");
+    std::string port("/dev/ttyS0");
+    //std::string port("COM1:");
     std::cerr << "Opening " <<port << std::endl;
-    Pt::System::SerialDevice serdev( port,  std::ios_base::in|std::ios_base::out );
+    Pt::System::SerialDevice serdev( port,  std::ios_base::in );
 
     std::cerr << "Setting baud rate " << std::endl;
     serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
@@ -73,8 +74,16 @@ void readMouseData()
 
 int main( int argc, char* argv[] )
 {
-    readMouseData();
-    return 0;
+    try {
+        readMouseData();
+        return 0;
+    }
+    catch(const std::exception& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+        return 1;
+    }
+
     std::ofstream fs("serial.txt");
     std::cerr.rdbuf( fs.rdbuf() );
     Pt::System::Thread::sleep( 10000 );

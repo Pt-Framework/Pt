@@ -53,6 +53,10 @@ Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
 Main_MakeLocate SerialDeviceDemo : bin ;
 
+PtUnitTest SerialDeviceTest : SerialDeviceTest.cpp ;
+Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System Pt-IO ;
+Main_MakeLocate SerialDeviceTest : bin ;
+
 Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-IO Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;

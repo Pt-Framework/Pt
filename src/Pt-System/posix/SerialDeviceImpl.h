@@ -36,11 +36,11 @@ namespace System {
 class SerialDeviceImpl
 {
     public:
-        SerialDeviceImpl(const std::string& file, std::ios_base::openmode mode );
+        SerialDeviceImpl( );
 
         ~SerialDeviceImpl();
 
-        void open(const char* path, std::ios_base::openmode mode);
+        void open(const std::string& path, std::ios_base::openmode mode);
 
         //! @brief Closes the I/O device
         void close();
@@ -72,11 +72,14 @@ class SerialDeviceImpl
         SerialDevice::FlowControl flowControl() const;
 
         void flush();
-        
-        void wait( SerialDevice::WaitMode mode, unsigned int  msec );
+
+        bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
 
     private:
         int                         _fd;
+        termios                     _ios;
+        termios                     _prevIos;
+        
         SerialDevice::FlowControl   _flowControl;
 };
 

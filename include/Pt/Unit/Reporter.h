@@ -150,7 +150,9 @@ namespace Unit {
         {}
 
         virtual void message(const std::string& msg)
-        {}
+        {
+            *_out << "INFO: " << msg << std::endl;
+        }
 
         virtual void success(const TestContext& test)
         {

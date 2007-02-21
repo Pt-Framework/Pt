@@ -23,18 +23,25 @@
 
 #include <Pt/IO/Api.h>
 #include <Pt/Exception.h>
-
+#include <ios>
 
 namespace Pt {
 
 namespace IO {
 
-    class PT_IO_API IOError : public std::runtime_error {
+    // DEPRECATED, use ios::failure instead
+    class PT_IO_API IOError : public std::ios::failure {
         public:
-            IOError(const std::string& what, const SourceInfo& si) throw();
+            IOError(const std::string& what, const SourceInfo& si);
 
-            ~IOError() throw()
-            { }
+            ~IOError() throw();
+    };
+
+    class PT_IO_API OpenFailed : public std::ios::failure {
+        public:
+            OpenFailed(const std::string& what, const SourceInfo& si);
+
+            ~OpenFailed() throw();
     };
 
 } // namespace IO
