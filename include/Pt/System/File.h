@@ -57,7 +57,9 @@ class PT_SYSTEM_API File : public FileSystemNode, public NonCopyable {
 
         virtual void move(const std::string& newname);
         
-        std::string name();
+        std::string name() const;
+        
+        std::string extension() const;
 };
 
 } // namespace System

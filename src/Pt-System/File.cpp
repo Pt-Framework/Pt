@@ -37,7 +37,7 @@ File::File(const std::string& path, mode mode)
                 throw std::invalid_argument("File " + path + " does not exist." + PT_SOURCEINFO);
             break;
 
-        case Create:
+        case Create: 
             if ( !_impl->exists() )
                 _impl->create();
             break;
@@ -89,12 +89,12 @@ void File::move(const std::string& newname)
 }
 
 
-std::string File::name()
+std::string File::name() const
 {
     const std::string& path = _impl->path();
-
-    size_t separatorPos = path.rfind(Pt::System::Directory::separator());
-
+    
+    std::string::size_type separatorPos = path.rfind(Pt::System::Directory::separator());
+    
     if (separatorPos != std::string::npos)
     {
         return path.substr(separatorPos + 1);
@@ -105,6 +105,22 @@ std::string File::name()
     }
 }
 
+
+std::string File::extension() const
+{
+    std::string fileName = this->name();
+    
+    std::string::size_type extensionPointPos = fileName.rfind('.');
+    
+    if (extensionPointPos != std::string::npos)
+    {
+        return fileName.substr(extensionPointPos + 1);
+    }
+    else
+    {
+        return fileName;
+    }
+}
 
 } // namespace System
 
