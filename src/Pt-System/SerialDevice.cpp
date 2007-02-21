@@ -23,22 +23,34 @@
 namespace Pt{
 namespace System{
 
-SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode )  throw(IO::IOError)
+SerialDevice::SerialDevice()
 : _impl( 0 )
 {
-    _impl = new SerialDeviceImpl( file, mode );
+    _impl = new SerialDeviceImpl();
+}
+
+SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode )
+: _impl( 0 )
+{
+    _impl = new SerialDeviceImpl();
+    _impl->open( file, mode );
 }
 
 SerialDevice::~SerialDevice()
 {
     try
-    { 
+    {
         close(); 
     }
     catch( ... )
     { }
-    
+
     delete _impl;
+}
+
+void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
+{
+    _impl->open( file, mode );
 }
 
 void SerialDevice::setBaudRate( BaudRate rate )
@@ -115,7 +127,6 @@ bool SerialDevice::_wait( WaitMode mode, unsigned int  msec )
 {
     return _impl->wait( mode, msec );
 }
-
 
 }//namespace System
 }//namespace Pt

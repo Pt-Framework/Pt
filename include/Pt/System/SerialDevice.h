@@ -77,8 +77,11 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
             TwoStopBits
         };
 
-        SerialDevice( const std::string& file, std::ios_base::openmode mode )  throw(IO::IOError);
+        SerialDevice();
+        SerialDevice( const std::string& file, std::ios_base::openmode mode );
         virtual ~SerialDevice();
+        
+        void open( const std::string& file, std::ios_base::openmode mode );
         
         void setBaudRate( BaudRate rate );
         BaudRate baudRate() const;

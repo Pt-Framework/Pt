@@ -33,8 +33,10 @@ namespace System{
 class SerialDeviceImpl
 {
     public:
-        SerialDeviceImpl( const std::string& file, std::ios_base::openmode mode ) throw(IO::IOError);
+        SerialDeviceImpl();
         ~SerialDeviceImpl();
+
+        void open( const std::string& file, std::ios_base::openmode mode );         
         
         //! @brief Closes the I/O device
         void close();        

@@ -26,40 +26,51 @@ namespace System{
 const int SerialDeviceImpl::ASCII_XON  = 0x11; 
 const int SerialDeviceImpl::ASCII_XOFF = 0x13;
 
-SerialDeviceImpl::SerialDeviceImpl( const std::string& port_, std::ios_base::openmode mode ) throw(IO::IOError)
-{    
-    std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
-    
-    _handle = CreateFile( port.c_str() , GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-       
-    if ( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
-        throw IO::IOError("Could not open port" , PT_SOURCEINFO);
-        
-    COMMTIMEOUTS comTimeOut;                   
-    comTimeOut.ReadIntervalTimeout          = MAXDWORD;  
-    comTimeOut.ReadTotalTimeoutMultiplier   = 0;  
-    comTimeOut.ReadTotalTimeoutConstant     = 0;    
-    comTimeOut.WriteTotalTimeoutMultiplier  = 10;  
-    comTimeOut.WriteTotalTimeoutConstant    = 1000;  
-    
-    if( !SetCommTimeouts( _handle, &comTimeOut ) )
-        throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);
-            
-    if( !GetCommState( _handle, &_commState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);     
-    
-    if( !GetCommState( _handle, &_orgCommState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
-               
-    if( !GetCommMask( _handle, &_waitCommMask ) )
-        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);        
-}
+SerialDeviceImpl::SerialDeviceImpl()
+{ }
 
 SerialDeviceImpl::~SerialDeviceImpl()
 { }
-        
+
+void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode )
+{
+    std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
+
+    DWORD openFlags = 0;
+
+    if( mode & std::ios_base::out )
+        openFlags |= GENERIC_WRITE;
+
+    if( mode & std::ios_base::in )
+        openFlags |= GENERIC_READ;
+
+    _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
+
+    if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
+        throw IO::IOError("Could not open port" , PT_SOURCEINFO);
+
+    COMMTIMEOUTS comTimeOut;
+    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutMultiplier   = 0;
+    comTimeOut.ReadTotalTimeoutConstant     = 0;
+    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+    comTimeOut.WriteTotalTimeoutConstant    = 1000;
+
+    if( !SetCommTimeouts( _handle, &comTimeOut ) )
+        throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);
+
+    if( !GetCommState( _handle, &_commState ) )
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
+
+    if( !GetCommState( _handle, &_orgCommState ) )
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
+
+    if( !GetCommMask( _handle, &_waitCommMask ) )
+        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);
+}
+
 void SerialDeviceImpl::close()
-{    
+{
     if( _handle == 0 || _handle == INVALID_HANDLE_VALUE )
         return;
 
@@ -68,25 +79,25 @@ void SerialDeviceImpl::close()
 
     CloseHandle( _handle );
 
-    _handle = 0;        
+    _handle = 0;
 }
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD   length;
-  	DWORD	error;
-	COMSTAT	cs;
-            
+    DWORD   error;
+    COMSTAT	cs;
+
     ClearCommError( _handle, &error, &cs );
-    
+
     if( ! ReadFile( _handle, buffer, count, &length, 0 ) )
         throw IO::IOError("Read port failed" , PT_SOURCEINFO);
-        
-    return length;     
+
+    return length;
 }
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
-{ 
+{
     DWORD noOfBytesWritten = 0;
 
     if( !WriteFile(  _handle,  buffer,  count, &noOfBytesWritten, 0 ) )
@@ -98,13 +109,13 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 void SerialDeviceImpl::writeCommState()
 {
     if( !SetCommState( _handle, &_commState ) )
-        throw IO::IOError("Changing port state failed" , PT_SOURCEINFO);        
+        throw IO::IOError("Changing port state failed" , PT_SOURCEINFO);
 }
 
 void SerialDeviceImpl::readCommState()
 {
     if( !GetCommState( _handle, &_commState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);     
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
 }
 
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
@@ -128,7 +139,7 @@ int SerialDeviceImpl::charSize() const
 {
     return _commState.ByteSize;
 }
-              
+
 void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
     switch( bits )
@@ -136,16 +147,16 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
         case SerialDevice::OneStopBit: 
             _commState.StopBits  = ONESTOPBIT;
         break;
-        
+
         case SerialDevice::One5StopBits:
             _commState.StopBits  = ONE5STOPBITS;
         break;
-        
+
         case SerialDevice::TwoStopBits:
             _commState.StopBits  = TWOSTOPBITS;
         break;
     }
-    
+
     writeCommState();
 }
 
@@ -165,12 +176,12 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
             return SerialDevice::TwoStopBits;
         break;
     }
-    
+
     throw std::runtime_error( "Unknown stop bits" + PT_SOURCEINFO);
-    
+
     return SerialDevice::OneStopBit;
 }
-                
+
 void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
     switch( parity )
@@ -178,16 +189,16 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
         case SerialDevice::ParityEven:
             _commState.Parity = EVENPARITY;
         break;
-        
+
         case SerialDevice::ParityOdd:
-            _commState.Parity = ODDPARITY; 
+            _commState.Parity = ODDPARITY;
         break;
-        
+
         case SerialDevice::ParityNone:
-            _commState.Parity = NOPARITY; 
-        break;            
+            _commState.Parity = NOPARITY;
+        break;
     }
-    
+
     writeCommState();
 }
 
@@ -198,40 +209,40 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
         case EVENPARITY:
             return SerialDevice::ParityEven;
         break;
-        
+
         case ODDPARITY:
             return SerialDevice::ParityOdd; 
         break;
-        
+
         case NOPARITY :
             return SerialDevice::ParityNone; 
-        break;            
+        break;
     }
-     
+
     throw std::runtime_error( "Invalid parity" + PT_SOURCEINFO);
-    return SerialDevice::ParityEven;    
+    return SerialDevice::ParityEven;
 }
-        
-void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )            
+
+void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
     _commState.XonChar  = ASCII_XON;
     _commState.XoffChar = ASCII_XOFF;
     _commState.XonLim   = 100;
     _commState.XoffLim  = 100;
 
-	switch( flowControl )
-	{
-	    case SerialDevice::FlowControlSoft:
-		    _commState.fInX = _commState.fOutX = 1;
-		break;
-		
-	    case SerialDevice::FlowControlBoth:
-		    _commState.fInX = _commState.fOutX = 1;
-	    case SerialDevice::FlowControlHard:
-		    _commState.fOutxCtsFlow = 1;
-		    _commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
-		break;		
-	}
+    switch( flowControl )
+    {
+        case SerialDevice::FlowControlSoft:
+            _commState.fInX = _commState.fOutX = 1;
+        break;
+
+        case SerialDevice::FlowControlBoth:
+            _commState.fInX = _commState.fOutX = 1;
+        case SerialDevice::FlowControlHard:
+            _commState.fOutxCtsFlow = 1;
+            _commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
+        break;
+    }
 
     _currentFlowControl = flowControl; 
     writeCommState();
@@ -251,12 +262,12 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
     if( msec != 0 )
         throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
-      
+
     DWORD waitMask = EV_RXCHAR;
-    
+
     if( mode == SerialDevice::WaitOutput)
-        waitMask = EV_TXEMPTY;                
-        
+        waitMask = EV_TXEMPTY;
+
     return ( WaitCommEvent( _handle, &waitMask, NULL )  == TRUE );
 }
 
