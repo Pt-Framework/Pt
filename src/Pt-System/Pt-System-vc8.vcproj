@@ -216,6 +216,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\posix\SerialDeviceImpl.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\posix\SharedLibImpl.cpp"
 					>
 				</File>
@@ -611,6 +615,10 @@
 				</File>
 				<File
 					RelativePath=".\posix\SemaphoreImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\posix\SerialDeviceImpl.h"
 					>
 				</File>
 				<File

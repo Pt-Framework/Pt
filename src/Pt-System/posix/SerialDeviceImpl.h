@@ -72,9 +72,12 @@ class SerialDeviceImpl
         SerialDevice::FlowControl flowControl() const;
 
         void flush();
+        
+        void wait( SerialDevice::WaitMode mode, unsigned int  msec );
 
     private:
-        int _fd;
+        int                         _fd;
+        SerialDevice::FlowControl   _flowControl;
 };
 
 } //namespace System

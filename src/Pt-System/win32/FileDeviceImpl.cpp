@@ -250,7 +250,6 @@ void FileDeviceImpl::sync() const throw(IO::IOError)
     }
 }
 
-
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError)
 {
     DWORD count = 0;

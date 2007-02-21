@@ -23,6 +23,9 @@
 namespace Pt{
 namespace System{
 
+const int SerialDeviceImpl::ASCII_XON  = 0x11; 
+const int SerialDeviceImpl::ASCII_XOFF = 0x13;
+
 SerialDeviceImpl::SerialDeviceImpl( const std::string& port_, std::ios_base::openmode mode ) throw(IO::IOError)
 {    
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
@@ -43,24 +46,39 @@ SerialDeviceImpl::SerialDeviceImpl( const std::string& port_, std::ios_base::ope
         throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);
             
     if( !GetCommState( _handle, &_commState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);        
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);     
+    
+    if( !GetCommState( _handle, &_orgCommState ) )
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
+               
+    if( !GetCommMask( _handle, &_waitCommMask ) )
+        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);        
 }
 
 SerialDeviceImpl::~SerialDeviceImpl()
 { }
         
 void SerialDeviceImpl::close()
-{
-    if( _handle != 0 )
-        CloseHandle( _handle );
+{    
+    if( _handle == 0 || _handle == INVALID_HANDLE_VALUE )
+        return;
+
+    SetCommState( _handle, &_orgCommState );
+    SetCommMask( _handle, _waitCommMask );
+
+    CloseHandle( _handle );
 
     _handle = 0;        
 }
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
-    DWORD length;
-  
+    DWORD   length;
+  	DWORD	error;
+	COMSTAT	cs;
+            
+    ClearCommError( _handle, &error, &cs );
+    
     if( ! ReadFile( _handle, buffer, count, &length, 0 ) )
         throw IO::IOError("Read port failed" , PT_SOURCEINFO);
         
@@ -77,16 +95,22 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     return noOfBytesWritten;
 }
 
-void SerialDeviceImpl::updateCommState()
+void SerialDeviceImpl::writeCommState()
 {
     if( !SetCommState( _handle, &_commState ) )
         throw IO::IOError("Changing port state failed" , PT_SOURCEINFO);        
 }
 
+void SerialDeviceImpl::readCommState()
+{
+    if( !GetCommState( _handle, &_commState ) )
+        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);     
+}
+
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
 {
     _commState.BaudRate = static_cast<DWORD>( rate );
-    updateCommState();
+    writeCommState();
 }
 
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
@@ -97,7 +121,7 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 void SerialDeviceImpl::setCharSize( int size )
 {
     _commState.ByteSize  = size;
-    updateCommState();
+    writeCommState();
 }
 
 int SerialDeviceImpl::charSize() const
@@ -122,7 +146,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
         break;
     }
     
-    updateCommState();
+    writeCommState();
 }
 
 SerialDevice::StopBits SerialDeviceImpl::stopBits() const
@@ -164,7 +188,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
         break;            
     }
     
-    updateCommState();
+    writeCommState();
 }
 
 SerialDevice::Parity SerialDeviceImpl::parity() const
@@ -190,20 +214,50 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
         
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )            
 {
-    if(  flowControl  == SerialDevice::FlowControlHard)
-        _commState.fOutxCtsFlow  = TRUE;
-    else            
-        _commState.fOutxCtsFlow  = FALSE;
-    
-    updateCommState();
+    _commState.XonChar  = ASCII_XON;
+    _commState.XoffChar = ASCII_XOFF;
+    _commState.XonLim   = 100;
+    _commState.XoffLim  = 100;
+
+	switch( flowControl )
+	{
+	    case SerialDevice::FlowControlSoft:
+		    _commState.fInX = _commState.fOutX = 1;
+		break;
+		
+	    case SerialDevice::FlowControlBoth:
+		    _commState.fInX = _commState.fOutX = 1;
+	    case SerialDevice::FlowControlHard:
+		    _commState.fOutxCtsFlow = 1;
+		    _commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
+		break;		
+	}
+
+    _currentFlowControl = flowControl; 
+    writeCommState();
+}
+
+void SerialDeviceImpl::flush()
+{
+    PurgeComm( _handle, PURGE_RXABORT | PURGE_RXCLEAR);
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {    
-    if( _commState.fOutxCtsFlow )
-        return SerialDevice::FlowControlHard;
-    else
-        return SerialDevice::FlowControlSoft;            
+    return  _currentFlowControl;
+}
+
+bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
+{
+    if( msec != 0 )
+        throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
+      
+    DWORD waitMask = EV_RXCHAR;
+    
+    if( mode == SerialDevice::WaitOutput)
+        waitMask = EV_TXEMPTY;                
+        
+    return ( WaitCommEvent( _handle, &waitMask, NULL )  == TRUE );
 }
 
 }//namespace System

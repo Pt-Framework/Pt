@@ -5,11 +5,11 @@
 #include <fstream>
 #include <sstream>
 
-
 void readMouseData()
 {
-    std::cerr << "Opening " << "/dev/ttyS0" << std::endl;
-    Pt::System::SerialDevice serdev( "/dev/ttyS0",  std::ios_base::in|std::ios_base::out );
+    std::string port("COM1:");
+    std::cerr << "Opening " <<port << std::endl;
+    Pt::System::SerialDevice serdev( port,  std::ios_base::in|std::ios_base::out );
 
     std::cerr << "Setting baud rate " << std::endl;
     serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);

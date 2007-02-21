@@ -65,8 +65,9 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
 
         enum FlowControl 
         {
-            FlowControlHard,
-            FlowControlSoft
+            FlowControlHard,            
+            FlowControlSoft,
+            FlowControlBoth
         }; 
 
         enum StopBits
@@ -92,7 +93,9 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
         Parity parity() const;
                 
         void setFlowControl( FlowControl FlowControl );              
-        FlowControl flowControl() const;             
+        FlowControl flowControl() const;       
+        
+        void flush();      
         
     protected:
         //! @brief Closes the I/O device
@@ -103,6 +106,8 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
 
         //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
+        
+        virtual bool _wait( WaitMode mode, unsigned int  msec);
 
 };
 

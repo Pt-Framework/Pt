@@ -416,21 +416,33 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         throw Pt::IO::IOError("Invalid flow control", PT_SOURCEINFO);
     }
 
+    _flowControl = flowControl;
     tcsetattr(_fd, TCSANOW, &ios);
 }
 
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
-
+    return _flowControl;
 }
-
 
 void SerialDeviceImpl::flush()
 {
     ::tcflush(_fd, TCIFLUSH);
 }
 
+void SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
+{
+/*  
+    if( msec != 0 )
+        throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
+  
+    if( mode == SerialDevice::WaitOutput)
+        tcdrain(_fd);
+    else
+  */          
+        
+}
 
 } //namespace System
 

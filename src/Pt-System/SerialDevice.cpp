@@ -106,5 +106,16 @@ size_t SerialDevice::_write(const char* buffer, size_t count)
     return _impl->write( buffer, count );
 }
 
+void SerialDevice::flush()
+{
+    _impl->flush();
+}
+
+bool SerialDevice::_wait( WaitMode mode, unsigned int  msec )
+{
+    return _impl->wait( mode, msec );
+}
+
+
 }//namespace System
 }//namespace Pt
