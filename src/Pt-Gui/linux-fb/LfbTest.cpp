@@ -30,7 +30,6 @@
 
 #include <iostream>
 
-
 class DemoWidget : public Pt::Gui::Widget
 {
     public:
@@ -38,7 +37,7 @@ class DemoWidget : public Pt::Gui::Widget
         : _pos(50, 50)
         {}
 
-        Signal<> escape;
+        Pt::Signal<> escape;
 
     protected:
         void _paintEvent(const Pt::Gui::PaintEvent& pev)
@@ -80,7 +79,7 @@ class DemoWidget : public Pt::Gui::Widget
 
                 default:
                     break;
-            }
+	    }
         }
 
         void erase()
@@ -96,20 +95,15 @@ class DemoWidget : public Pt::Gui::Widget
         {
             Pt::Gfx::ARgbColor white(0xffff, 0xffff, 0xffff);
             Pt::Gfx::Font font24("Vera", 24);
+            Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(0xffff, 0, 0) );
 
-            int n = 50;
-            //for(unsigned n = 0; n < 50; ++n)
-            {
-                Pt::Gfx::ARgbImage image(220, 50, Pt::Gfx::ARgbColor(n*1200, 0, 0) );
+            Pt::Gfx::ImagePainter imagePainter(image);
+            imagePainter.setFont(font24);
+            imagePainter.drawText(Pt::Math::Point(32, 33), L"Hello World!", &white);
 
-                Pt::Gfx::ImagePainter imagePainter(image);
-                imagePainter.setFont(font24);
-                imagePainter.drawText(Pt::Math::Point(32, 33), L"Hello World!", &white);
-
-                Pt::Gui::Painter painter = this->painter();
-                painter.drawImage(_pos, image);
-                Pt::System::Thread::sleep(10);
-            }
+            Pt::Gui::Painter painter = this->painter();
+            painter.drawImage(_pos, image);
+            Pt::System::Thread::sleep(10);
         }
 
     private:
@@ -119,9 +113,6 @@ class DemoWidget : public Pt::Gui::Widget
 
 int main(int argc, char** argv)
 {
-    Pt::Gfx::ARgbColor white(0xffff, 0xffff, 0xffff);
-    Pt::Gfx::Font font24("Vera", 24);
-
     Pt::Gui::Application app;
 
     DemoWidget widget;
