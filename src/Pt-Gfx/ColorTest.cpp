@@ -37,6 +37,7 @@ using namespace Pt::Gfx;
 
 int main( int argc, char* argv[] )
 {
+/*
     ARgbColor      argb_1, argb_2;
     ARgbFColor     float_1, float_2;
     ARgb8888Color  argb8888_1, argb8888_2;
@@ -76,6 +77,6 @@ int main( int argc, char* argv[] )
 
     argb_1_ref = argb_1;
     argb_2 = argb_2_ref;
-
+*/
     return 0;
 }

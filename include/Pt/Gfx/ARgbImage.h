@@ -48,14 +48,14 @@ namespace Pt {
          *
          *  <B>This is the master planar image model</B>
          */
-        typedef PlanarImage<ARgbColorRef, ColorTraits<ARgbColorRef> > ARgbPlanarImage;
+        //typedef PlanarImage<ARgbColorRef, ColorTraits<ARgbColorRef> > ARgbPlanarImage;
 
 
         /** @brief Standard planar ARgb subimage class.
          *
          *  <B>This is the master planar subimage model</B>
          */
-        typedef SubImage<ARgbPlanarImage> ARgbPlanarSubImage;
+        //typedef SubImage<ARgbPlanarImage> ARgbPlanarSubImage;
 
 
         //

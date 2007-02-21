@@ -34,6 +34,7 @@ namespace Pt {
          *
          *  @see ARgbColor.
          */
+#if 0         
         template <>
         class PT_GFX_API Color<ARgb, ReferenceType> {
             public:
@@ -353,7 +354,7 @@ namespace Pt {
                 return 1;
             }
         };
-
+#endif
 
     } // namespace Gfx
 
