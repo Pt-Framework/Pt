@@ -32,6 +32,8 @@
 #include "Pt/Text/TextStream.h"
 
 
+using namespace std;
+
 class Utf8Converter
 {
     public:

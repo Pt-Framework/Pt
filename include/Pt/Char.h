@@ -471,4 +471,8 @@ namespace Pt {
 
 } // namespace Pt
 
+
+#include <Pt/Char_ctype.h>
+#include <Pt/Char_numpunct.h>
+
 #endif

@@ -116,6 +116,7 @@ namespace Unit {
             */
             TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
             : Test(name)
+            , Reflectable("Pt.Unit.TestSuite")
             , _protocol(&protocol)
             { }
 

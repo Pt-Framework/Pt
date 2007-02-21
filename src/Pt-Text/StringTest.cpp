@@ -30,6 +30,9 @@
 #include <sstream>
 
 
+using namespace Pt;
+using namespace std;
+
 class StringTest : public Pt::Unit::TestSuite
 {
     public:

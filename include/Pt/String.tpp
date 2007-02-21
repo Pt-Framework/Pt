@@ -17,46 +17,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-using namespace Pt;
-
-using namespace std;
-
-
 
 namespace std {
 
 inline basic_string<Pt::Char>::basic_string(const allocator_type& a)
-: _data( new StringData(a) )
+: _data( new Pt::StringData(a) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const Pt::Char* str, const allocator_type& a)
-: _data( new StringData( str, char_traits<Pt::Char>::length(str), a ) )
+: _data( new Pt::StringData( str, char_traits<Pt::Char>::length(str), a ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const wchar_t* str, const allocator_type& a)
-: _data( new StringData( str, char_traits<wchar_t>::length(str), a ) )
+: _data( new Pt::StringData( str, char_traits<wchar_t>::length(str), a ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const wchar_t* wstr, size_type length, const allocator_type& a)
-: _data( new StringData( wstr, length, a ) )
+: _data( new Pt::StringData( wstr, length, a ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const Pt::Char* str, size_type n, const allocator_type& a)
-: _data( new StringData( str, n, a ) )
+: _data( new Pt::StringData( str, n, a ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(size_type n, Pt::Char c)
-: _data( new StringData( n, c ) )
+: _data( new Pt::StringData( n, c ) )
 {
 }
 
@@ -69,30 +64,30 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str)
         _data->ref();
     }
     else {
-        _data = new StringData( str._data->str(), str._data->length() );
+        _data = new Pt::StringData( str._data->str(), str._data->length() );
     }
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type pos)
-: _data( new StringData( str._data->str() + pos, str._data->length() - pos ) )
+: _data( new Pt::StringData( str._data->str() + pos, str._data->length() - pos ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type pos, size_type n)
-: _data( new StringData( str._data->str() + pos, n ) )
+: _data( new Pt::StringData( str._data->str() + pos, n ) )
 {
 }
 
 
 inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a)
-: _data( new StringData( str._data->str() + pos, n, a ) )
+: _data( new Pt::StringData( str._data->str() + pos, n, a ) )
 {
 }
 
 inline basic_string<Pt::Char>::basic_string(Pt::Char* begin, Pt::Char* end)
-: _data( new StringData( begin, end - begin ) )
+: _data( new Pt::StringData( begin, end - begin ) )
 {
 }
 
@@ -171,7 +166,7 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
     // shared, not busy - make copy
     if( _data->shared() ) 
     {
-        StringData* newBuffer = new StringData();
+        Pt::StringData* newBuffer = new Pt::StringData();
         newBuffer->reserve( reserveSize );
         newBuffer->assign( _data->str(), _data->length() );
 
@@ -285,7 +280,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* st
 {
     // copy if shared and not busy
     if( _data->shared() ) {
-        StringData* newBuffer = new StringData( str, length );
+        Pt::StringData* newBuffer = new Pt::StringData( str, length );
         _data->unref();
         _data = newBuffer;
     }
@@ -303,7 +298,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(size_type n, Pt::C
 {
     // copy if shared and not busy
     if( _data->shared() ) {
-        StringData* newBuffer = new StringData( n, ch );
+        Pt::StringData* newBuffer = new Pt::StringData( n, ch );
         _data->unref();
         _data = newBuffer;
     }
@@ -328,7 +323,7 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
 {
     // shared, not busy - make copy
     if( _data->shared() ) {
-        StringData* newBuffer = new StringData( reserveSize, _data->str(), _data->length() );
+        Pt::StringData* newBuffer = new Pt::StringData( reserveSize, _data->str(), _data->length() );
         _data->unref();
         _data = newBuffer;
     }
@@ -339,7 +334,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* st
 {
     // shared, not busy - work on copy
     if( _data->shared() ) {
-        StringData* newBuffer = new StringData( _data->str(), _data->length() );
+        Pt::StringData* newBuffer = new Pt::StringData( _data->str(), _data->length() );
         _data->unref();
         _data = newBuffer; // refs == 1
     }
@@ -356,7 +351,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(size_type n, Pt::C
 {
     // shared, not busy - work on copy
     if( _data->shared() ) {
-        StringData* newBuffer = new StringData();
+        Pt::StringData* newBuffer = new Pt::StringData();
         newBuffer->reserve(_data->length() + n);
         newBuffer->assign( _data->str(), _data->length() );
 
@@ -468,7 +463,7 @@ inline void basic_string<Pt::Char>::clear()
         _data = 0;
     }
 
-    _data = new StringData();
+    _data = new Pt::StringData();
 }
 
 
@@ -713,7 +708,7 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find(const Pt::Char* token, size_type pos, size_type n) const
 {
     const size_type size = this->size();
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     for( ; pos + n <= size; ++pos) {
         if( 0 == traits_type::compare( str + pos, token, n ) ) {
@@ -742,7 +737,7 @@ basic_string<Pt::Char>::find(Pt::Char ch, size_type pos) const
         return npos;
     }
 
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
     const size_type n = size - pos;
 
     const Pt::Char* found = traits_type::find(str + pos, n, ch);
@@ -774,7 +769,7 @@ basic_string<Pt::Char>::rfind(const Pt::Char* token, size_type pos, size_type n)
     }
 
     pos = min(size_type(size - n), pos);
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
     do {
         if (traits_type::compare(str + pos, token, n) == 0)
         return pos;
@@ -797,7 +792,7 @@ inline
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::rfind(Pt::Char ch, size_type pos) const
 {
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
     size_type size = this->size();
 
     if(size == 0)
@@ -819,7 +814,7 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_of(const Pt::Char* s, size_type pos, size_type n) const
 {
     // check length os s against n
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
     const size_type size = this->size();
 
     for (; n && pos < size; ++pos) {
@@ -836,7 +831,7 @@ basic_string<Pt::Char>::find_last_of(const Pt::Char* s, size_type pos, size_type
 {
     // check length os s against n
     size_type size = this->size();
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     if (size == 0 ||  n == 0) {
         return npos;
@@ -861,7 +856,7 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_not_of(const Pt::Char* tok, size_type pos, size_type n) const
 {
     // pt_requires_string_len(str, n);
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     for (; pos < this->size(); ++pos) {
         if ( !traits_type::find(tok, n, str[pos]) )
@@ -874,7 +869,7 @@ inline
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_not_of(Pt::Char ch, size_type pos) const
 {
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     for (; pos < this->size(); ++pos) {
         if ( !traits_type::eq(str[pos], ch) ) {
@@ -892,7 +887,7 @@ basic_string<Pt::Char>::find_last_not_of(const Pt::Char* tok, size_type pos, siz
 {
     //requires_string_len(__s, __n);
     size_type size = this->size();
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     if(size) {
         if (--size > pos)
@@ -914,7 +909,7 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_last_not_of(Pt::Char ch, size_type pos) const
 {
     size_type size = this->size();
-    const Char* str = _data->str();
+    const Pt::Char* str = _data->str();
 
     if (size) {
         if (--size > pos)

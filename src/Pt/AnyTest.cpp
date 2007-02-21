@@ -16,6 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#undef PT_API_EXPORT
+
 #include "Pt/Any.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -118,7 +120,7 @@ class AnyTest : public Pt::Unit::TestSuite
             const std::string& s = Pt::any_cast<const std::string&>(a);
             PT_UNIT_ASSERT( s == "hello" );
 
-            std::istringstream ss("bye");
+            std::istringstream ss("\"bye\"");
             ss >> a;
             PT_UNIT_ASSERT( a == std::string("bye") );
         }

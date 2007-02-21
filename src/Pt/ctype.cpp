@@ -22,12 +22,13 @@
 
 #include <iostream>
 
+
 namespace std {
 
-std::locale::id ctype< Pt::Char >::id;
+std::locale::id ctype<Pt::Char>::id;
 
 
-#ifdef _MSC_VER
+#if (defined _MSC_VER || defined __QNX__)
 
 ctype<Pt::Char>::ctype(size_t refs)
 : ctype_base(refs)

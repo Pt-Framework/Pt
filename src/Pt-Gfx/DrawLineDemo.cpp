@@ -35,6 +35,8 @@
 #include <string>
 
 
+using namespace Pt;
+
 class DrawLineDemo : public Pt::Gui::Widget
 {
     public:

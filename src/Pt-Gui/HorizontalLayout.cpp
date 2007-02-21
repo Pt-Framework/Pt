@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -82,7 +82,7 @@ void HorizontalLayout::remove(Widget& widget)
 void HorizontalLayout::update()
 {
     const std::list<Widget*>& children = this->widget().childWidgets();
-    list<Widget*>::const_iterator childrenIter;
+    std::list<Widget*>::const_iterator childrenIter;
 
     // If the width behaviour is "uniform width" then the widest widget's width is
     // used. So find it here first.
@@ -90,7 +90,7 @@ void HorizontalLayout::update()
     if (_widthBehaviour == UniformWidth) {
         for (childrenIter = children.begin(); childrenIter != children.end(); childrenIter++) {
             Widget* w = *childrenIter;
-            maxWidth = max<size_t>(maxWidth, w->preferredSize().width());
+            maxWidth = std::max<size_t>(maxWidth, w->preferredSize().width());
         }
     }
 
@@ -105,7 +105,7 @@ void HorizontalLayout::update()
         // it will be used instead, though.
         HorizontalLayoutData layoutData;
 
-        map<Widget*, HorizontalLayoutData>::const_iterator findIter = _widget2LayoutData.find(w);
+        std::map<Widget*, HorizontalLayoutData>::const_iterator findIter = _widget2LayoutData.find(w);
         if (findIter != _widget2LayoutData.end()) {
             layoutData = findIter->second;
         }
@@ -172,17 +172,17 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
         ssize_t maxHeight = 0;
 
         // Sum all width and find heighest height.
-        list<Widget*>::const_iterator childrenIter = children.begin();
+        std::list<Widget*>::const_iterator childrenIter = children.begin();
 
         while (childrenIter != children.end()) {
             Widget* w = *childrenIter;
 
             if (forPreferredSize) {
                 allWidth  += w->preferredSize().width();
-                maxHeight =  max<size_t>(maxHeight,  w->preferredSize().height());
+                maxHeight =  std::max<size_t>(maxHeight,  w->preferredSize().height());
             } else {
                 allWidth  += w->minimumSize().width();
-                maxHeight =  max<size_t>(maxHeight,  w->minimumSize().height());
+                maxHeight =  std::max<size_t>(maxHeight,  w->minimumSize().height());
             }
 
             childrenIter++;
@@ -200,17 +200,17 @@ Math::Size HorizontalLayout::calculateSize(Widget& parent, bool forPreferredSize
         ssize_t maxHeight = 0;
 
         // Findet heighest height and widest width.
-        list<Widget*>::const_iterator childrenIter = children.begin();
+        std::list<Widget*>::const_iterator childrenIter = children.begin();
 
         while (childrenIter != children.end()) {
             Widget* w = *childrenIter;
 
             if (forPreferredSize) {
-                maxWidth  = max<size_t>(maxWidth,  w->preferredSize().width());
-                maxHeight = max<size_t>(maxHeight, w->preferredSize().height());
+                maxWidth  = std::max<size_t>(maxWidth,  w->preferredSize().width());
+                maxHeight = std::max<size_t>(maxHeight, w->preferredSize().height());
             } else {
-                maxWidth  = max<size_t>(maxWidth,  w->minimumSize().width());
-                maxHeight = max<size_t>(maxHeight, w->minimumSize().height());
+                maxWidth  = std::max<size_t>(maxWidth,  w->minimumSize().width());
+                maxHeight = std::max<size_t>(maxHeight, w->minimumSize().height());
             }
 
             childrenIter++;

@@ -345,15 +345,20 @@ class basic_string< Pt::Char > {
         Pt::StringData* _data;
     };
 
-    inline basic_string<Pt::Char>& operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b);
+    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char>& operator+(const basic_string<Pt::Char>& a, const Pt::Char* b);
+    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char>& operator+(const Pt::Char* a, const basic_string<Pt::Char>& b);
+    inline basic_string<Pt::Char> operator+(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char>& operator+(const basic_string<Pt::Char>& a, Pt::Char b);
+    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, Pt::Char b)
+    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char>& operator+(Pt::Char a, const basic_string<Pt::Char>& b);
+    inline basic_string<Pt::Char> operator+(Pt::Char a, const basic_string<Pt::Char>& b)
+    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
     inline bool operator==(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) == 0; }
@@ -371,9 +376,7 @@ namespace Pt {
 
     typedef std::basic_string<Pt::Char> String;
 
-    using Pt::String;
-} // namespace Pt
-
+}
 
 // Include the implementation header
 #include <Pt/String.tpp>

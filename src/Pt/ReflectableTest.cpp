@@ -14,7 +14,8 @@ class TestReflectable : public Pt::Reflectable
 {
     public:
         TestReflectable()
-        : intProperty( "intProperty", self() , 20 )
+        : Pt::Reflectable("TestReflectable")
+        , intProperty( "intProperty", self() , 20 )
         {
             this->registerProperty("value", this, &TestReflectable::value, &TestReflectable::setValue);
 

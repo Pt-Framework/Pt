@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/Api.h"
+#include "Pt/String.h"
 #include "Pt/Char_numpunct.h"
 #include <iostream>
 
@@ -26,10 +27,60 @@ namespace std {
 
     locale::id numpunct<Pt::Char>::id;
 
+
     numpunct<Pt::Char>::numpunct(size_t refs)
     : locale::facet(refs)
     { }
 
-} // namespace std
 
+    numpunct<Pt::Char>::~numpunct()
+    { }
+
+
+    Pt::Char numpunct<Pt::Char>::decimal_point() const
+    { return this->do_decimal_point(); }
+
+
+    Pt::Char numpunct<Pt::Char>::thousands_sep() const
+    { return this->do_thousands_sep(); }
+
+
+    string numpunct<Pt::Char>::grouping() const
+    { return this->do_grouping(); }
+
+
+    Pt::String  numpunct<Pt::Char>::truename() const
+    { return this->do_truename(); }
+
+
+    Pt::String  numpunct<Pt::Char>::falsename() const
+    { return this->do_falsename(); }
+
+
+    Pt::Char numpunct<Pt::Char>::do_decimal_point() const
+    { return '.'; }
+
+
+    Pt::Char numpunct<Pt::Char>::do_thousands_sep() const
+    { return ','; }
+
+
+    std::string numpunct<Pt::Char>::do_grouping() const
+    { return ""; }
+
+
+    Pt::String numpunct<Pt::Char>::do_truename() const
+    {
+        static const Pt::Char truename[] = {'t', 'r', 'u', 'e', '\0'};
+        return truename;
+    }
+
+
+    Pt::String numpunct<Pt::Char>::do_falsename() const
+    {
+        static const Pt::Char falsename[] = {'f', 'a', 'l', 's', 'e', '\0'};
+        return falsename;
+    }
+
+} // namespace std
 

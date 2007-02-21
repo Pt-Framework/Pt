@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 by Marc Boris DÃ¼rner                          *
+ *   Copyright (C) 2004-2007 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -127,7 +127,9 @@ namespace Pt {
                     virtual const char* typeName() const = 0;
                     virtual const std::type_info& type() const = 0;
                     virtual void output(std::ostream& os) const = 0;
-                    virtual void input(std::istream& os) = 0;
+                    virtual void input(std::istream& is) = 0;
+                    virtual void output(std::basic_ostream<Pt::Char>& os) const = 0;
+                    virtual void input(std::basic_istream<Pt::Char>& is) = 0;
                     virtual bool equal(const Value& value) const = 0;
                     virtual bool lt(const Value& value) const = 0;
             };
@@ -163,6 +165,12 @@ namespace Pt {
                     virtual void input(std::istream& is)
                     { AnyTraits<T>::input(is, _value); }
 
+                    virtual void output(std::basic_ostream<Pt::Char>& os) const
+                    { AnyTraits<T>::output(os, _value); }
+
+                    virtual void input(std::basic_istream<Pt::Char>& is)
+                    { AnyTraits<T>::input(is, _value); }
+
                     virtual bool equal(const Value& value) const
                     {
                         try {
@@ -190,13 +198,7 @@ namespace Pt {
                     T _value;
             };
 
-            /** @brief Default constructor
-
-                Constructs an empty any. No memory needs to be allocated for
-                empty Anys.
-            */
-            Any();
-
+        public:
             /** @brief Construct with value
 
                 Constructs the Any from an value of arbitrary type. The type
@@ -208,7 +210,14 @@ namespace Pt {
                 @param val Value to assign
             */
             template <typename T>
-            Any(const T& val);
+            Any(const T& type);
+
+            /** @brief Default constructor
+
+                Constructs an empty any. No memory needs to be allocated for
+                empty Anys.
+            */
+            Any();
 
             /** @brief Copy constructor
 
@@ -317,6 +326,10 @@ namespace Pt {
                 @param is Input stream
             */
             void input(std::istream& is);
+
+            void output(std::basic_ostream<Pt::Char>& os) const;
+
+            void input(std::basic_istream<Pt::Char>& is);
 
             /** @brief Assign value
 
@@ -441,6 +454,11 @@ namespace Pt {
     */
     PT_API std::istream& operator>>(std::istream& is, Pt::Any& val);
 
+    PT_API std::basic_ostream<Pt::Char>& operator<<(std::basic_ostream<Pt::Char>& os, const Pt::Any& val);
+
+    PT_API std::basic_istream<Pt::Char>& operator>>(std::basic_istream<Pt::Char>& is, Pt::Any& val);
+
+
     /** @brief Get contained value
 
         This function is used to get the contained value from an Any. It is
@@ -456,13 +474,30 @@ namespace Pt {
     template <typename T>
     inline T any_cast(const Any& any)
     {
+        // NOTE:
+        // This implementation is just a workaround:
+        // - the first if(...) may not work properly on Linux when loading libs,
+        //   so there is also a comparison of string names (second if(...))
+        // - but: the name() method necessary for string comparison does not
+        //   exist on WinCE, so the second if(...) is not compiled for WinCE
+
         typedef typename Pt::TypeInfo<T>::Value ValueT;
 
-        if( any.type() == typeid(ValueT) ) {
+        if( any.type() == typeid(ValueT) )
+        {
             const Any::BasicValue<ValueT>* value;
             value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
             return value->value();
         }
+
+#ifndef _WIN32_WCE
+        else if( std::string(any.type().name()) == std::string(typeid(ValueT).name()) )
+        {
+            const Any::BasicValue<ValueT>* value;
+            value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
+            return value->value();
+        }
+#endif
 
         throw std::bad_cast();
     }
@@ -477,7 +512,6 @@ namespace Pt {
     : _value(0)
     { (*this) = type; }
 
-
     template <typename T>
     Any& Any::operator=(const T& rhs)
     {
@@ -486,7 +520,6 @@ namespace Pt {
         _value = tmp;
         return *this;
     }
-
 
     template <typename T>
     void Any::init()

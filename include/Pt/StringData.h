@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
+
 #ifndef PT_STRINGDATA_H
 #define PT_STRINGDATA_H
 
@@ -26,15 +26,16 @@
 
 #include <string>
 #include <iterator>
+#include <algorithm>
 
 
 namespace Pt {
 
-typedef unsigned int AtomicInt;
-
 
 class StringData {
     public:
+		typedef unsigned int atomic_type;
+		
         typedef size_t size_type;
         typedef Pt::Char value_type;
         typedef std::char_traits<Pt::Char> traits_type;
@@ -54,23 +55,23 @@ class StringData {
         allocator_type get_allocator() const
         { return _allocator; }
 
-        const AtomicInt& refs() const;
+        const atomic_type& refs() const;
 
-        AtomicInt& ref();
+        atomic_type& ref();
 
-        AtomicInt& unref();
+        atomic_type& unref();
 
         void setInitial()
-        { _n = AtomicInt(1); }
+        { _n = atomic_type(1); }
 
         bool busy() const
-        { return _n == AtomicInt(-1); }
+        { return _n == atomic_type(-1); }
 
         void setBusy()
-        { _n = AtomicInt(-1); }
+        { _n = atomic_type(-1); }
 
         bool shared() const
-        { return (_n > 1) && ( _n != AtomicInt(-1) ); }
+        { return (_n > 1) && ( _n != atomic_type(-1) ); }
 
         Pt::Char* str();
 
@@ -103,7 +104,7 @@ class StringData {
     protected:
         void allocate(size_type length);
         void updateInternalStringData();
-        
+
 
     public:
         // the allocated size is the capacity plus 1
@@ -111,10 +112,11 @@ class StringData {
         size_type _length;
         size_type _capacity;
         allocator_type _allocator;
-        AtomicInt _n;
+        atomic_type _n;
 
 #ifndef NDEBUG
-        wchar_t _wStr[100];
+        static const Pt::size_t _wstrSize = 100;
+        wchar_t _wStr[_wstrSize];
 #endif
 };
 

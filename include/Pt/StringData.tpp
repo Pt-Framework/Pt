@@ -17,10 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-using namespace Pt;
-
-using namespace std;
-
+#include <algorithm>
 
 namespace Pt {
 
@@ -84,20 +81,20 @@ inline StringData::~StringData()
 }
 
 
-inline const AtomicInt& StringData::refs() const
+inline const StringData::atomic_type& StringData::refs() const
 {
     return _n;
 }
 
 
-inline AtomicInt& StringData::ref()
+inline StringData::atomic_type& StringData::ref()
 {
     ++_n;
     return _n;
 }
 
 
-inline AtomicInt& StringData::unref()
+inline StringData::atomic_type& StringData::unref()
 {
     --_n;
     return _n;
@@ -301,13 +298,21 @@ inline void StringData::reserve(size_type n)
 inline void StringData::updateInternalStringData()
 {
 #ifndef NDEBUG
+/*
     Pt::Char* str = _str;
+
     for (Pt::size_t charCount = 0; ((charCount < _capacity) && (charCount < 100)); ++charCount)
     {
         this->_wStr[charCount] = (wchar_t)(*str);
         ++str;
-    } 
+    }
+
     _wStr[99] = '0';
+*/
+
+    Pt::size_t size = std::min<size_t>( _wstrSize - 1, _length );
+    wchar_t* end = std::copy(_str, _str + size, _wStr);
+    *end = 0;
 #endif
 }
 

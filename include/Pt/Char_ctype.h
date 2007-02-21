@@ -31,11 +31,16 @@
 
 namespace std {
 
-    class PT_API ios_base;
+    class ios_base;
 
-#ifdef _MSC_VER
+#if (defined _MSC_VER || defined __QNX__)
 
+// According to the VC compiler warning, ctype_base is declared as class on WinCE
+#ifdef _WIN32_WCE
+    class PT_API ctype_base;
+#else
     struct PT_API ctype_base;
+#endif
 
     template <>
     class PT_API ctype< Pt::Char > : public ctype_base {
