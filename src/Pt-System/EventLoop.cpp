@@ -56,19 +56,15 @@ int EventLoop::run()
 {
     while(false == _exitLoop)
     {
-        _queueMutex.lock();
+        _mutex.lock();
 
         if( _eventQueue.empty() )
         {
-            _loopMutex.lock();
-            _queueMutex.unlock();
-
-            _loopCondition.wait( _loopMutex );
-
-            _loopMutex.unlock();
+            _cond.wait( _mutex );
+            _mutex.unlock();
         }
         else {
-            _queueMutex.unlock();
+            _mutex.unlock();
         }
 
         this->processEvents();
@@ -89,17 +85,17 @@ void EventLoop::processEvents()
 {
     while( false == _exitLoop )
     {
-        _queueMutex.lock();
+        _mutex.lock();
 
         if( _eventQueue.empty() ) {
-            _queueMutex.unlock();
+            _mutex.unlock();
             break;
         }
 
         Pt::Event* ev = _eventQueue.front();
         _eventQueue.remove(ev);
 
-        _queueMutex.unlock();
+        _mutex.unlock();
 
         event.send<const Pt::Event&>(*ev);
         delete ev;
@@ -109,9 +105,9 @@ void EventLoop::processEvents()
 
 void EventLoop::wake()
 {
-    _loopMutex.lock();
-    _loopCondition.signal();
-    _loopMutex.unlock();
+    _mutex.lock();
+    _cond.signal();
+    _mutex.unlock();
 }
 
 
@@ -124,12 +120,12 @@ void EventLoop::exit()
 
 void EventLoop::queueEvent(const Pt::Event& event)
 {
-    _queueMutex.lock();
+    _mutex.lock();
 
     Pt::Event* ev = event.clone();
     _eventQueue.push_back(ev);
 
-    _queueMutex.unlock();
+    _mutex.unlock();
 }
 
 

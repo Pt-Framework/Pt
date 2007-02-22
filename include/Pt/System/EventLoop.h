@@ -178,8 +178,7 @@ namespace System {
 
 
             //! Condition to stop the execution of "run()" until a new event was committed.
-            Condition _loopCondition;
-            Mutex _loopMutex;
+            Condition _cond;
 
             /**
              * Contains the Event objects of the event queue that are delivered one
@@ -187,7 +186,8 @@ namespace System {
              * @see processEvents()
              */
             std::list<Pt::Event*> _eventQueue;
-            System::Mutex _queueMutex;
+
+            System::Mutex _mutex;
 
             Mutex _connectionMutex;
     };
