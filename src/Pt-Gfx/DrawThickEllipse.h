@@ -21,6 +21,7 @@
 #ifndef PT_GFX_DRAWTHICKELLIPSE_H
 #define PT_GFX_DRAWTHICKELLIPSE_H
 
+#include <Pt/Api.h>
 #include <vector>
 #include "DrawEllipse.h"
 
