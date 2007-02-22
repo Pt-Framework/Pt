@@ -16,20 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_IODevice_h
 #define Pt_IODevice_h
+
 
 #include <Pt/IO/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/IO/IOError.h>
 
+#include <limits>
 #include <ios>
 
 
 namespace Pt {
-
 namespace IO {
 
 
@@ -64,8 +64,8 @@ class BasicIODevice : public NonCopyable {
     public:
         //! @brief Default Constructor
         BasicIODevice()
-        : _valid(false),
-            _eof(false)
+        : _valid(false)
+        , _eof(false)
         { }
 
         //! @brief Destructor
@@ -84,19 +84,22 @@ class BasicIODevice : public NonCopyable {
             }
         }
 
+        static const unsigned int WaitTimeInfinite = static_cast<unsigned int>(-1);
+        
         //! @brief Waits until data is available
         /*!
             If the device is in asynchronous mode this function waits for
             I/O events.
 
             \param mode WaitInput or WaitOutput.
-            \param msec time interval to wait
+            \param msec time interval to wait for infinete use msec = WaitTimeInfinite.
             \return true if an I/O operatin has occured.
             \throw IOError
         */
         bool wait(WaitMode mode, unsigned int msec)
         { return this->_wait(mode, msec); }
 
+                
         //! @brief Read data from I/O device
         /*!
             Reads up to n bytes and stores them in buffer. Returns the number
@@ -274,7 +277,6 @@ class BasicIODevice : public NonCopyable {
 typedef BasicIODevice<char> IODevice;
 
 } // namespace IO
-
-} // !namespace Pt
+} // namespace Pt
 
 #endif

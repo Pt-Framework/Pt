@@ -4,11 +4,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <windows.h>
 
 void readMouseData()
 {
-    std::string port("/dev/ttyS0");
-    //std::string port("COM1:");
+    //std::string port("/dev/ttyS0");
+    std::string port("COM1:");
     std::cerr << "Opening " <<port << std::endl;
     Pt::System::SerialDevice serdev( port,  std::ios_base::in );
 
@@ -72,54 +73,84 @@ void readMouseData()
     std::cerr << pnpString << std::endl;
 }
 
-int main( int argc, char* argv[] )
+void readNMEA()
 {
-    try {
-        readMouseData();
-        return 0;
-    }
-    catch(const std::exception& ex)
-    {
-        std::cerr << ex.what() << std::endl;
-        return 1;
-    }
-
     std::ofstream fs("serial.txt");
     std::cerr.rdbuf( fs.rdbuf() );
     Pt::System::Thread::sleep( 10000 );
 
-        try
+    try
+    {
+        std::stringstream ss;
+        ss<<"COM5:";
+
+        std::cerr << "Opening " << ss.str() << std::endl;
+        Pt::System::SerialDevice serdev( ss.str().c_str(),  std::ios_base::out );
+
+        std::cerr << "Setting baud rate " << std::endl;
+        serdev.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+        serdev.setCharSize(7);
+        serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
+
+        std::cerr << "Setting flow control" << std::endl;
+        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard); 
+        Pt::System::Thread::sleep( 300 );
+        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
+
+        Pt::System::Thread::sleep( 300 );
+
+        char buffer[200];
+        memset( buffer, 0, 200);
+        size_t size = serdev.read( buffer, 200);
+
+        std::cerr<<"Byte readed: "<<size<<std::endl;
+
+        std::cerr<<"Data: "<<buffer;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+}
+
+class Reader : public Pt::System::Thread
+{
+    public:
+        Reader( Pt::System::SerialDevice& serDev_ )
+        : serDev( serDev_ )
+        { }
+        
+        ~Reader()
+        {}
+        
+        void run()
         {
-            std::stringstream ss;
-            ss<<"COM5:";
-
-            std::cerr << "Opening " << ss.str() << std::endl;
-            Pt::System::SerialDevice serdev( ss.str().c_str(),  std::ios_base::out );
-
-            std::cerr << "Setting baud rate " << std::endl;
-            serdev.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-            serdev.setCharSize(7);
-            serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
-
-            std::cerr << "Setting flow control" << std::endl;
-            serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard); 
-            Pt::System::Thread::sleep( 300 );
-            serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
-
-            Pt::System::Thread::sleep( 300 );
-
-            char buffer[200];
-            memset( buffer, 0, 200);
-            size_t size = serdev.read( buffer, 200);
-
-            std::cerr<<"Byte readed: "<<size<<std::endl;
-
-            std::cerr<<"Data: "<<buffer;
+            bool retVal = serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
         }
-        catch(const std::exception& e)
-        {
-            std::cerr << "Exception: " << e.what() << std::endl;
-        }
+        
+        Pt::System::SerialDevice& serDev;
+};
 
+void waitEventDemo()
+{
+    try
+    {
+        Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
+        Reader reader(serDev);    
+        reader.start();
+        
+        Pt::System::Thread::sleep( 5000 );
+        serDev.close();             
+        reader.wait();
+    }
+    catch( const std::exception& e)
+    {
+        std::cerr << "Exception: " << e.what() << std::endl;    
+    }
+}
+
+int main( int argc, char* argv[] )
+{    
+    waitEventDemo();
     return 0;
 }

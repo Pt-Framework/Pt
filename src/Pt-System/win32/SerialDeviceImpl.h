@@ -37,46 +37,47 @@ class SerialDeviceImpl
         ~SerialDeviceImpl();
 
         void open( const std::string& file, std::ios_base::openmode mode );         
-        
+
         //! @brief Closes the I/O device
-        void close();        
+        void close();
 
         //! @brief Read bytes from device
         size_t read( char* buffer, size_t count, bool& eof );
 
         //! @brief Write bytes to device
         size_t write( const char* buffer, size_t count );
-        
-        void flush();        
+
+        void flush();
 
         void setBaudRate( SerialDevice::BaudRate rate );
         SerialDevice::BaudRate baudRate() const;
-        
+
         void setCharSize( int size );
         int charSize() const;
-              
+
         void setStopBits( SerialDevice::StopBits bits );
         SerialDevice::StopBits stopBits() const;    
-                
-        void setParity( SerialDevice::Parity parity );        
+
+        void setParity( SerialDevice::Parity parity );
         SerialDevice::Parity parity() const;
-                
-        void setFlowControl( SerialDevice::FlowControl flowControl );              
+
+        void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;      
-        
+
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-        
+
     private:
         void writeCommState();
         void readCommState();
-        
-        HANDLE                      _handle;
-        DCB                         _commState;    
-        DCB                         _orgCommState;        
-        SerialDevice::FlowControl   _currentFlowControl;  
-        DWORD                       _waitCommMask;  
-        static const int            ASCII_XON; 
-        static const int            ASCII_XOFF;
+
+        HANDLE           _handle;
+        DCB              _commState;
+        DCB              _orgCommState;
+        DWORD            _waitCommMask;
+        OVERLAPPED       _overlapped;
+        HANDLE           _terminateEv;
+        static const int ASCII_XON; 
+        static const int ASCII_XOFF;
 };
 
 }//namespace System

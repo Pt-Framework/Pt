@@ -194,8 +194,8 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOE
         }
 
         #ifndef _WIN32_WCE
-        else if
-        ( FALSE == GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == TRUE ) {
+        else if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE ) 
+        {
             readBytes = 0;
         }
         #endif
@@ -219,7 +219,7 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError
         }
 
         #ifndef _WIN32_WCE
-        if( FALSE == GetOverlappedResult(_handle, &_readOv, &writtenBytes, FALSE) == TRUE )
+        if(GetOverlappedResult(_handle, &_readOv, &writtenBytes, FALSE) == FALSE )
         {
             writtenBytes = 0;
         }
@@ -243,14 +243,14 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IO::IOError)
 }
 
 
-void FileDeviceImpl::sync() const throw(IO::IOError)
+void FileDeviceImpl::sync() const
 {
     if( false == ::FlushFileBuffers(_handle) ) {
         throw IO::IOError("Could not flush file buffer", PT_SOURCEINFO);
     }
 }
 
-bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError)
+bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
 {
     DWORD count = 0;
     HANDLE handles[2];

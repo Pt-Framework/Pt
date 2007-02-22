@@ -17,4 +17,68 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "../win32/SerialDeviceImpl.h"
+#ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
+#define PT_SYSTEM_SERIALDEVICEIMPL_H
+
+#include <string>
+#include <windows.h>
+
+#include "Pt/IO/IODevice.h"
+#include "Pt/IO/IOError.h"
+#include "Pt/System/SerialDevice.h"
+
+namespace Pt{
+namespace System{
+
+class SerialDeviceImpl
+{
+    public:
+        SerialDeviceImpl();
+        ~SerialDeviceImpl();
+
+        void open( const std::string& file, std::ios_base::openmode mode );         
+
+        //! @brief Closes the I/O device
+        void close();
+
+        //! @brief Read bytes from device
+        size_t read( char* buffer, size_t count, bool& eof );
+
+        //! @brief Write bytes to device
+        size_t write( const char* buffer, size_t count );
+
+        void flush();
+
+        void setBaudRate( SerialDevice::BaudRate rate );
+        SerialDevice::BaudRate baudRate() const;
+
+        void setCharSize( int size );
+        int charSize() const;
+
+        void setStopBits( SerialDevice::StopBits bits );
+        SerialDevice::StopBits stopBits() const;    
+
+        void setParity( SerialDevice::Parity parity );
+        SerialDevice::Parity parity() const;
+
+        void setFlowControl( SerialDevice::FlowControl flowControl );
+        SerialDevice::FlowControl flowControl() const;      
+
+        bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
+
+    private:
+        void writeCommState();
+        void readCommState();
+
+        HANDLE           _handle;
+        DCB              _commState;
+        DCB              _orgCommState;
+        DWORD            _waitCommMask;
+        static const int ASCII_XON; 
+        static const int ASCII_XOFF;
+};
+
+}//namespace System
+}//namespaec Pt
+
+#endif

@@ -17,8 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "win32.h"
 #include "SerialDeviceImpl.h"
+#include "win32.h"
+#include <iostream>
+#include <Pt/System/Thread.h>
 
 namespace Pt{
 namespace System{
@@ -44,7 +46,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     if( mode & std::ios_base::in )
         openFlags |= GENERIC_READ;
 
-    _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
+    _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
         throw IO::IOError("Could not open port" , PT_SOURCEINFO);
@@ -66,18 +68,37 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
 
     if( !GetCommMask( _handle, &_waitCommMask ) )
-        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);
+        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);        
+
+    //Create the wait events.            
+    memset(&_overlapped,0,sizeof(_overlapped) );
+    
+    _overlapped.hEvent = CreateEvent( 0, FALSE ,0, 0 ); // The port event.
+    _terminateEv       = CreateEvent( 0, FALSE ,0, 0 ); // The terminate event.       
 }
 
 void SerialDeviceImpl::close()
 {
     if( _handle == 0 || _handle == INVALID_HANDLE_VALUE )
         return;
+    
+    //Signalize the terminate event.
+    SetEvent( _terminateEv );
+    
+    //Reset the wait mask
+    SetCommMask( _handle, 0 );
 
+    //Restore the port state.
     SetCommState( _handle, &_orgCommState );
-    SetCommMask( _handle, _waitCommMask );
-
+    
+    //Close the port handle.
     CloseHandle( _handle );
+    
+    //Terminate event
+    CloseHandle( _terminateEv );
+    
+    //Port event.
+    CloseHandle( _overlapped.hEvent );
 
     _handle = 0;
 }
@@ -86,24 +107,53 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD   length;
     DWORD   error;
-    COMSTAT	cs;
+    COMSTAT cs;
 
     ClearCommError( _handle, &error, &cs );
 
-    if( ! ReadFile( _handle, buffer, count, &length, 0 ) )
-        throw IO::IOError("Read port failed" , PT_SOURCEINFO);
+    if( !ReadFile( _handle, buffer, count, &length, &_overlapped ) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+            eof = true;
+            length = 0;
+        }
+        else if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if ( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) ) 
+            {
+                length = 0;
+            }
+        }
+        else
+        {
+            throw IO::IOError("Read port failed" , PT_SOURCEINFO);
+        }             
+    }
 
     return length;
 }
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
-    DWORD noOfBytesWritten = 0;
+    DWORD length = 0;
 
-    if( !WriteFile(  _handle,  buffer,  count, &noOfBytesWritten, 0 ) )
-        throw IO::IOError("Write port failed" , PT_SOURCEINFO);
+    if( !WriteFile(  _handle,  buffer,  count, &length, &_overlapped ) )
+    {
+        if( ERROR_IO_PENDING == GetLastError() )
+        {
+            if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) )
+            {
+                length = 0;
+            }            
+        }
+        else
+        {
+            throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
+        }
+    }
 
-    return noOfBytesWritten;
+    return length;
 }
 
 void SerialDeviceImpl::writeCommState()
@@ -211,11 +261,11 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
         break;
 
         case ODDPARITY:
-            return SerialDevice::ParityOdd; 
+            return SerialDevice::ParityOdd;
         break;
 
         case NOPARITY :
-            return SerialDevice::ParityNone; 
+            return SerialDevice::ParityNone;
         break;
     }
 
@@ -244,7 +294,6 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         break;
     }
 
-    _currentFlowControl = flowControl; 
     writeCommState();
 }
 
@@ -254,21 +303,60 @@ void SerialDeviceImpl::flush()
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
-{    
-    return  _currentFlowControl;
+{
+    //Check for both.
+    if( _commState.fInX == _commState.fOutX && _commState.fOutX == 1 &&
+        _commState.fOutxCtsFlow == 1 && _commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
+        return SerialDevice::FlowControlBoth;
+
+    //Check for hardware flow control.
+    if( _commState.fOutxCtsFlow == 1 && _commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
+        return  SerialDevice::FlowControlHard;
+
+    //Check for software flow control.
+    if( _commState.fInX == _commState.fOutX && _commState.fInX == 1 )
+       return SerialDevice::FlowControlSoft;
+
+    throw std::runtime_error( "Unknown flow control" + PT_SOURCEINFO );
+
+    return SerialDevice::FlowControlBoth;
 }
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
-    if( msec != 0 )
-        throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
-
-    DWORD waitMask = EV_RXCHAR;
+    DWORD timeout = static_cast<DWORD>( msec );     
+    
+    if( msec != SerialDevice::WaitTimeInfinite )
+        timeout = INFINITE;            
 
     if( mode == SerialDevice::WaitOutput)
-        waitMask = EV_TXEMPTY;
+        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK);
+    else if ( mode == SerialDevice::WaitInput)
+        SetCommMask( _handle, EV_RXCHAR | EV_BREAK);
 
-    return ( WaitCommEvent( _handle, &waitMask, NULL )  == TRUE );
+    DWORD waitMask = 0;
+
+    if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
+    {
+        if( GetLastError () != ERROR_IO_PENDING )
+            throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
+    }
+
+    HANDLE  eventHandles[2];
+    eventHandles[0] = _overlapped.hEvent;
+    eventHandles[1] = _terminateEv;
+
+    const DWORD reason = WaitForMultipleObjects( 2, eventHandles, FALSE, timeout );
+    
+    if( reason == WAIT_FAILED )
+        throw std::runtime_error( "Could not wait for file handle: " + PT_SOURCEINFO);
+    
+    GetCommMask( _handle, &waitMask );
+    
+    if( mode == SerialDevice::WaitOutput )
+        return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_TXEMPTY ) );
+    else
+        return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_RXCHAR ) );
 }
 
 }//namespace System
