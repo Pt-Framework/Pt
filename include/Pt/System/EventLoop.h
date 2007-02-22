@@ -176,7 +176,6 @@ namespace System {
              */
             bool _exitLoop;
 
-
             //! Condition to stop the execution of "run()" until a new event was committed.
             Condition _cond;
 
