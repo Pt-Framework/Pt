@@ -1,0 +1,179 @@
+body {
+        margin: 10px 35px;
+	font-family: Helvetica, Arial, sans-serif; 
+	background: #F3F4F8;
+	color: #11375F;
+}
+h1 {
+	text-align: center;
+        line-height: 1.2em;
+	color: #154374; 
+}
+h2, h3, h4 {
+	color: #154374;
+}
+caption { font-weight: bold }
+div.qindex {
+	width: 100%;
+	text-align: center;
+	margin: 2px;
+	padding: 2px;
+	line-height: 1.2em;
+}
+div.nav {
+	width: 100%;
+	text-align: center;
+	margin: 2px;
+	padding: 2px;
+	line-height: 140%;
+}
+a.qindex {
+	text-decoration: none;
+	font-weight: bold;
+	color: #1A5593;
+	padding: 2px;
+}
+a.qindex:visited {
+	text-decoration: none;
+	font-weight: bold;
+	color: #1A5593;
+	padding: 2px;
+}
+a.qindex:hover {
+	color: #3366FF;
+	text-decoration: underline;
+	padding: 2px;
+}
+a.qindexHL {
+	text-decoration: underline;
+	font-weight: bold;
+	padding: 2px 6px;
+}
+a.qindexHL:hover {
+	text-decoration: underline;
+	padding: 2px 6px;
+}
+a.qindexHL:visited { text-decoration: underline }
+a.el { text-decoration: none; color: #1A5593; font-weight: bold }
+a.elRef { font-weight: bold; color: #1A5593; }
+a.code { text-decoration: none; font-weight: normal; color: #1A5593;}
+a.codeRef { font-weight: normal; color: #1A5593;}
+a:link, a:active { font-weight: bold; color: #1A5593; }
+a:visited { font-weight: bold; color: #1A5593; }
+a:hover { font-weight: bold; text-decoration: underline; color: #3366FF; }
+dl.el { 
+	margin-left: 0cm;
+}
+.fragment {
+       font-family: monospace
+}
+pre.fragment {
+	border: 1px solid #8593B3;
+	background-color: #E5E9F0;
+	margin-top: 4px;
+	margin-bottom: 4px;
+	margin-left: 2px;
+	margin-right: 8px;
+	padding-left: 6px;
+	padding-right: 6px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+div.ah { background-color: black; font-weight: bold; color: #FFFFFF; margin-bottom: 3px; margin-top: 3px }
+td.md { background-color: #E5E9F0; font-weight: bold }
+td.mdname1 { background-color: #E5E9F0; font-weight: bold; color: #602020; }
+td.mdname { background-color: #E5E9F0; font-weight: bold; color: #602020; width: 600px; }
+div.groupHeader {
+       margin-left: 16px;
+       margin-top: 12px;
+       margin-bottom: 6px;
+       font-weight: bold;
+       font-family: Geneva, Arial, Helvetica, sans-serif;
+}
+div.groupText { margin-left: 16px; font-style: italic; font-size: 14px }
+td.indexkey {
+	background-color: #E5E9F0;
+	font-weight: bold;
+	padding-right  : 10px;
+	padding-top    : 2px;
+	padding-left   : 10px;
+	padding-bottom : 2px;
+	margin-left    : 0px;
+	margin-right   : 0px;
+	margin-top     : 2px;
+	margin-bottom  : 2px;
+	border: 1px solid #8593B3;
+}
+td.indexvalue {
+	background-color: #E5E9F0;
+	font-style: italic;
+	padding-right  : 10px;
+	padding-top    : 2px;
+	padding-left   : 10px;
+	padding-bottom : 2px;
+	margin-left    : 0px;
+	margin-right   : 0px;
+	margin-top     : 2px;
+	margin-bottom  : 2px;
+	border: 1px solid #8593B3;
+}
+tr.memlist {
+	background-color: #D5DBE6;
+}
+p.formulaDsp { text-align: center; }
+img.formulaDsp { }
+img.formulaInl { vertical-align: middle; }
+.mdTable {
+	border: 1px solid #8593B3;
+	background-color: #E5E9F0;
+}
+.mdRow {
+	padding: 8px 10px;
+}
+.mdescRight {
+        padding: 0px 8px 4px 8px;
+	font-size: 12px;
+	font-style: italic;
+	margin-bottom: 0px;
+}
+.search     { color: #003399;
+              font-weight: bold;
+}
+form.search {
+              margin-bottom: 0px;
+              margin-top: 0px;
+}
+input.search { font-size: 75%;
+               color: #000080;
+               font-weight: normal;
+               background-color: #E5E9F0;
+}
+td.tiny      { font-size: 75%;
+}
+ul { 
+	background-color: #F8F9FD;
+	border: 1px solid #8593B3;
+}
+.nestedul { 
+	border: none;
+}
+li { 
+	list-style-type: square;
+	margin-top: 0.4em;
+	margin-bottom: 0.5em;
+}
+hr { 
+	background-color: #8593B3; 
+	border-style: none; 
+	height: 1px; 
+	margin-top: 2em;
+}
+a.qindexH {
+	font-weight: normal;
+	font-size: small;
+	color: #FFFFFF;
+}
+a.qindexH:hover, a.qindexH:active { 
+	color: #154374;
+	text-decoration: underline; 
+}
