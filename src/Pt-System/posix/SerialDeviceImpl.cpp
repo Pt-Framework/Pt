@@ -414,26 +414,23 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 
     switch(flowControl)
     {
-    case SerialDevice::FlowControlSoft:
-        ios.c_iflag |= (IXON | IXANY | IXOFF);
-        ios.c_cc[VSTART] = CTRL_Q ;
-        ios.c_cc[VSTOP]  = CTRL_S ;
-        break;
-    //case flowBoth:
-    //    ios.c_iflag |= (IXON | IXANY | IXOFF);
-    case SerialDevice::FlowControlHard:
-        ios.c_cflag |= CRTSCTS;
-        ios.c_cc[VSTART] = _POSIX_VDISABLE;
-        ios.c_cc[VSTOP] = _POSIX_VDISABLE;
-        break;
-    //case flowNone:
-    //    break;
-    default:
-        throw Pt::IO::IOError("Invalid flow control", PT_SOURCEINFO);
+        case SerialDevice::FlowControlSoft:
+            ios.c_iflag |= (IXON | IXANY | IXOFF);
+            ios.c_cc[VSTART] = CTRL_Q ;
+            ios.c_cc[VSTOP]  = CTRL_S ;
+            break;
+
+        case SerialDevice::FlowControlBoth:
+            ios.c_iflag |= (IXON | IXANY | IXOFF);
+        case SerialDevice::FlowControlHard:
+            ios.c_cflag |= CRTSCTS;
+            ios.c_cc[VSTART] = _POSIX_VDISABLE;
+            ios.c_cc[VSTOP] = _POSIX_VDISABLE;
+            break;
     }
 
-    _flowControl = flowControl;
     tcsetattr(_fd, TCSANOW, &ios);
+    _flowControl = flowControl;
 }
 
 
@@ -442,23 +439,24 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return _flowControl;
 }
 
+
 void SerialDeviceImpl::flush()
 {
     ::tcflush(_fd, TCIFLUSH);
 }
 
+
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
-/*  
     if( msec != 0 )
         throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
-  
+/*
     if( mode == SerialDevice::WaitOutput)
         tcdrain(_fd);
     else
-  */          
+*/
 
-    return true;
+    return false;
 }
 
 } //namespace System

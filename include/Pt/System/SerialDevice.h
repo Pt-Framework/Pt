@@ -33,7 +33,7 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
         class SerialDeviceImpl* _impl;
 
     public:
-        enum BaudRate 
+        enum BaudRate
         {
             BaudRate0       = 0,
             BaudRate50      = 50,
@@ -55,17 +55,17 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
             BaudRate115200  = 115200,
             BaudRate230400  = 230400
         };
- 
-        enum Parity 
+
+        enum Parity
         {
-            ParityEven, 
+            ParityEven,
             ParityOdd,
             ParityNone
         };
 
         enum FlowControl 
         {
-            FlowControlHard,            
+            FlowControlHard,
             FlowControlSoft,
             FlowControlBoth
         }; 
@@ -80,38 +80,37 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
         SerialDevice();
         SerialDevice( const std::string& file, std::ios_base::openmode mode );
         virtual ~SerialDevice();
-        
+
         void open( const std::string& file, std::ios_base::openmode mode );
-        
+
         void setBaudRate( BaudRate rate );
         BaudRate baudRate() const;
-        
+
         void setCharSize( int size );
         int charSize() const;
-              
+
         void setStopBits( StopBits bits );
-        StopBits stopBits() const;    
-                
-        void setParity( Parity Parity );        
+        StopBits stopBits() const;
+
+        void setParity( Parity Parity );
         Parity parity() const;
-                
-        void setFlowControl( FlowControl FlowControl );              
-        FlowControl flowControl() const;       
-        
-        void flush();      
-        
+
+        void setFlowControl( FlowControl FlowControl );
+        FlowControl flowControl() const;
+
+        void flush();
+
     protected:
         //! @brief Closes the I/O device
-        virtual void _close();        
+        virtual void _close();
 
         //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);
 
         //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
-        
-        virtual bool _wait( WaitMode mode, unsigned int  msec);
 
+        virtual bool _wait( WaitMode mode, unsigned int  msec);
 };
 
 } //namespace System
