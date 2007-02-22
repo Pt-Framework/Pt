@@ -110,23 +110,24 @@ namespace Pt {
         }
 
         template <typename ColorRefT_, typename ColorTraitsT_>
-        typename PlanarImage<ColorRefT_, ColorTraitsT_>::ConstColorRefT PlanarImage<ColorRefT_, ColorTraitsT_>::at(int x, int y) const
+        const typename PlanarImage<ColorRefT_, ColorTraitsT_>::ColorT PlanarImage<ColorRefT_, ColorTraitsT_>::at(int x, int y) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-            return *ConstColorPtrT(_chanPtr, _width, x, y);
+            ColorT col;
+            assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+            return col;
         }
 
         template <typename ColorRefT_, typename ColorTraitsT_>
-        typename PlanarImage<ColorRefT_, ColorTraitsT_>::ConstColorRefT PlanarImage<ColorRefT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
+        const typename PlanarImage<ColorRefT_, ColorTraitsT_>::ColorT PlanarImage<ColorRefT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
         {
-            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) {
-                const ConstColorRefT ret(invalid);
-                return ret;
-            }
+            if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
 
-            return *ConstColorPtrT(_chanPtr, _width, x, y);
+            ColorT col;
+            assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+            return col;
         }
 
         template <typename ColorRefT_, typename ColorTraitsT_>

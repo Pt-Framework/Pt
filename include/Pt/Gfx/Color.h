@@ -40,10 +40,6 @@ namespace Pt {
          */
         struct ReferenceType {};
 
-        /** @brief An empty structure used for tagging the type of the color class.
-         */
-        struct ConstReferenceType {};
-
 
         /** @brief Basic template declaration of color classes.
          *  @ingroup Gfx

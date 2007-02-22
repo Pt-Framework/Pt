@@ -34,17 +34,13 @@ namespace Pt {
          *
          *  @see ARgbColor.
          */
-#if 0         
+
         template <>
         class PT_GFX_API Color<ARgb, ReferenceType> {
             public:
                 /** @brief Non-reference type (container type) of this color.
                  */
                 typedef Color<ARgb, ContainerType> NonRefT;
-
-                /** @brief Constant reference type of this color.
-                 */
-                typedef Color<ARgb, ConstReferenceType> ConstRefT;
 
             public:
                 /** @brief This constructor will take reference to the real storage.
@@ -120,86 +116,20 @@ namespace Pt {
                 uint16_t &_a, &_r, &_g, &_b;
         };
 
-        /** @brief Constant reference-type 64-Bit ARGB color class.
-         *  @ingroup Gfx
-         *
-         *  @see  ARgbColor.
-         *  @note This class is not meant to be used directly by the user.
-         */
-        template <>
-        class PT_GFX_API Color<ARgb, ConstReferenceType> {
-            public:
-                /** @brief Non-reference type (container type) of this color.
-                 */
-                typedef Color<ARgb, ContainerType> NonRefT;
-
-                /** @brief Non-constant reference type of this color.
-                 */
-                typedef Color<ARgb, ReferenceType> NonConstRefT;
-
-            public:
-                /** @brief This constructor will take reference to the real storage.
-                 */
-                inline Color(const NonRefT& c)
-                : _a(c.alpha()), _r(c.red()), _g(c.green()), _b(c.blue())
-                {}
-
-                /** @brief This constructor will take reference to the real storage.
-                 */
-                inline Color(const uint16_t &a, const uint16_t &r, const uint16_t &g, const uint16_t &b)
-                : _a(a), _r(r), _g(g), _b(b)
-                {}
-
-                /** @brief Copy constructor.
-                 */
-                inline Color(const Color& c)
-                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
-                {}
-
-
-                /** @see ARgbColor. */
-                inline uint16_t alpha() const
-                { return _a; }
-
-                /** @see ARgbColor. */
-                inline uint16_t red() const
-                { return _r; }
-
-                /** @see ARgbColor. */
-                inline uint16_t green() const
-                { return _g; }
-
-                /** @see ARgbColor. */
-                inline uint16_t blue() const
-                { return _b; }
-
-            protected:
-                const uint16_t &_a, &_r, &_g, &_b;
-        };
-
 
         /** @brief Convenience access to the reference-type 64-Bit ARGB color model.
          *  @ingroup Gfx
          */
         typedef Color<ARgb, ReferenceType> ARgbColorRef;
 
-        /** @brief Convenience access to the constant reference-type 64-Bit ARGB color model.
-         *  @ingroup Gfx
-         */
-        typedef Color<ARgb, ConstReferenceType> ARgbColorConstRef;
-
 
         /** @brief Full specialisation of the color traits class for ARgbColorRef.
          */
         template <>
         struct ColorTraits<ARgbColorRef> {
-            // Value type of the components
-            typedef uint16_t ComponentT;
-
-            // Temporary value type to be used when performing arithmetic on
-            // the components
-            typedef uint32_t TmpValueT;
-
+            typedef uint16_t ComponentT; // Value type of the components
+            typedef uint32_t TmpValueT;  // Temporary value type to be used when
+                                         // performing arithmetic on the components
 
             // Color pointer class for ARgbColorRef color model.
             class ColorPtrT {
@@ -275,8 +205,8 @@ namespace Pt {
                         _chnB = chanPtr[3] + pos; // B is channel #0
                     }
 
-                    inline ARgbColorConstRef operator*() const
-                    { return ARgbColorConstRef(*_chnA, *_chnR, *_chnG, *_chnB); }
+                    inline ARgbColor operator*() const
+                    { return ARgbColor(*_chnA, *_chnR, *_chnG, *_chnB); }
 
                     inline ConstColorPtrT& operator++()
                     { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
@@ -326,7 +256,7 @@ namespace Pt {
                                           size_t                          posY)
                     {}
 
-                    //inline ARgbColorConstRef operator[](size_t x)
+                    //inline ARgbColor operator[](size_t x)
                     //{}
             };
 
@@ -354,7 +284,6 @@ namespace Pt {
                 return 1;
             }
         };
-#endif
 
     } // namespace Gfx
 

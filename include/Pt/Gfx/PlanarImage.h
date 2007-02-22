@@ -42,7 +42,7 @@ namespace Pt {
          *      may not be in contiguous memory address.
          *
          *  This PlanarImage<typename ColorRefT, typename ColorTraitsT> class is
-         *  meant to be used for implementing interleaved images.
+         *  meant to be used for implementing planar images.
          */
         template <typename ColorRefT_, typename ColorTraitsT_ = ColorTraits< Color<ColorRefT_> > >
         class /*PT_GFX_API*/ PlanarImage {
@@ -60,7 +60,6 @@ namespace Pt {
                 // Below are specific to planar image only
                 //
                 typedef ColorRefT_                        ColorRefT;
-                typedef typename ColorRefT_::ConstRefT    ConstColorRefT;
                 typedef typename ColorTraitsT::ComponentT ComponentT;
 
             public:
@@ -156,8 +155,12 @@ namespace Pt {
 
                 /** @brief Random pixel access without range check.
                  */
-                inline ConstColorRefT pixel(int x, int y) const
-                { return *ConstColorPtrT(_chanPtr, _width, x, y); }
+                inline const ColorT pixel(int x, int y) const
+                {
+                    ColorT col;
+                    assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+                    return col;
+                }
 
                 /** @brief Random pixel access with range check.
                  */
@@ -165,14 +168,14 @@ namespace Pt {
 
                 /** @brief Random pixel access with range check.
                  */
-                ConstColorRefT at(int x, int y) const;
+                const ColorT at(int x, int y) const;
 
                 /** @brief Return the color at the specified coordinates.
                   *
                   * If the coordinates are out of range, the given 'invalid' color
                   * will be returned instead.
                  */
-                ConstColorRefT color(int x, int y, const ColorT& invalid = ColorT() ) const;
+                const ColorT color(int x, int y, const ColorT& invalid = ColorT() ) const;
 
                 /** @brief Set the color at the specified coordinates.
                  */
@@ -311,8 +314,12 @@ namespace Pt {
                         inline bool operator!=(const ConstPixelIterator& it) const
                         { return this->_pixel != it._pixel; }
 
-                        inline ConstColorRefT operator*()
-                        { return *_pixel; }
+                        inline const ColorT operator*()
+                        {
+                            ColorT col;
+                            assign(col, *_pixel);
+                            return col;
+                        }
 
                         inline ConstPixelIterator& operator++()
                         { ++_pixel; return *this; }

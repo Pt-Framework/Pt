@@ -45,7 +45,6 @@ namespace Pt {
 
         struct ContainerType;
         struct ReferenceType;
-        struct ConstReferenceType;
 
         template <typename TagT, typename TypeT>
         class Color;
@@ -74,13 +73,6 @@ namespace Pt {
         typedef Color<Rgb888,   ReferenceType> Rgb888ColorRef;
         typedef Color<Rgb565,   ReferenceType> Rgb565ColorRef;
         typedef Color<Rgb555,   ReferenceType> Rgb555ColorRef;
-
-        typedef Color<ARgb,     ConstReferenceType> ARgbColorConstRef;
-        typedef Color<ARgbF,    ConstReferenceType> ARgbFColorConstRef;
-        typedef Color<ARgb8888, ConstReferenceType> ARgb8888ColorConstRef;
-        typedef Color<Rgb888,   ConstReferenceType> Rgb888ColorConstRef;
-        typedef Color<Rgb565,   ConstReferenceType> Rgb565ColorConstRef;
-        typedef Color<Rgb555,   ConstReferenceType> Rgb555ColorConstRef;
 
 
         //
