@@ -16,8 +16,7 @@
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
         <li style="margin: 2px;"><a href="download.html" style="text-decoration: none;">Download</a></li>
         <li style="margin: 2px;"><a href="building.html" style="text-decoration: none;">Building</a></li>
-        <li style="margin: 2px;"><a href="installation.html" style="text-decoration: none;">Installation</a></li>
-        <li style="margin: 2px;"><a href="examples.html" style="text-decoration: none;">Tutorial and Examples</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Installation</a></li>
         </ul>
         </td>
         <td valign="top">
@@ -30,8 +29,8 @@
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="http://lists.trolltech.com" style="text-decoration: none;">Mailing Lists</a></li>
-
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Mailing Lists</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Recommended Reading</a></li>
         </ul>
         </td>
         </tr>
@@ -55,29 +54,21 @@
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="signalsandslots.html" style="text-decoration: none;">Signals and Slots</a></li>
-        <li style="margin: 2px;"><a href="object.html" style="text-decoration: none;">Object Model</a></li>
-        <li style="margin: 2px;"><a href="layout.html" style="text-decoration: none;">Layout Management</a></li>
-        <li style="margin: 2px;"><a href="paintsystem.html" style="text-decoration: none;">Paint System</a></li>
-        <li style="margin: 2px;"><a href="dnd.html" style="text-decoration: none;">Drag and Drop</a></li>
-        <li style="margin: 2px;"><a href="containers.html" style="text-decoration: none;">Tool and Container Classes</a></li>
-        <li style="margin: 2px;"><a href="i18n.html" style="text-decoration: none;">Internationalization</a></li>
-        <li style="margin: 2px;"><a href="plugins-howto.html" style="text-decoration: none;">Plugin System</a></li>
-        <li style="margin: 2px;"><a href="intro-to-dbus.html" style="text-decoration: none;">Inter-process Communication</a></li>
-        <li style="margin: 2px;"><a href="qtestlib-manual.html" style="text-decoration: none;">Unit Testing Framework</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Signals and Delegates</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Reflection</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">CTTI</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Components</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">PLugins</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">I/O Handling</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Unit Testing</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="threads.html" style="text-decoration: none;">Multithreaded Programming</a></li>
-        <li style="margin: 2px;"><a href="qt4-mainwindow.html" style="text-decoration: none;">Main Window Architecture</a></li>
-        <li style="margin: 2px;"><a href="richtext.html" style="text-decoration: none;">Rich Text Processing</a></li>
-        <li style="margin: 2px;"><a href="model-view-programming.html" style="text-decoration: none">Model/View Programming</a></li>
-        <li style="margin: 2px;"><a href="qtnetwork.html" style="text-decoration: none;">Network Module</a></li>
-        <li style="margin: 2px;"><a href="qtopengl.html" style="text-decoration: none;">OpenGL Module</a></li>
-        <li style="margin: 2px;"><a href="qtsql.html" style="text-decoration: none;">SQL Module</a></li>
-        <li style="margin: 2px;"><a href="qtsvg.html" style="text-decoration: none;">SVG Module</a></li>
-        <li style="margin: 2px;"><a href="qtxml.html" style="text-decoration: none;">XML Module</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Cocurrency</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Unicode</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Network Programming</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">XML Processing</a></li>
         </ul>
         </td>
         </tr>
