@@ -65,5 +65,11 @@ bool operator==(const Pen& a, const Pen& b)
 	       a._penData->color() == b._penData->color() && 
 	       a._penData->style() == b._penData->style();
 }
+
+bool operator<(const Pen& a, const Pen& b)
+{
+	return a._penData->size() < b._penData->size();
+}
+
 } // namespace Gfx
 } // namespace Pt
