@@ -78,6 +78,18 @@ const ARgbImage& BrushData::texture() const
     return *_texture;
 }
 
+bool operator==(const Brush& a, const Brush& b)
+{
+	return a._brushData->fillStyle() == b._brushData->fillStyle() && 
+	       a._brushData->color() == b._brushData->color();
+//           && a._brushData->texture() == b._brushData->texture();    //real image comparison needed ???
+}
+
+bool operator<(const Brush& a, const Brush& b)
+{
+	return a._brushData->fillStyle() < b._brushData->fillStyle();
+}
+
 } // namespace Gfx
 
 } // namespace Pt
