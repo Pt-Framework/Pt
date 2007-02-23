@@ -1,0 +1,91 @@
+ /** \mainpage
+       <table style="color: rgb(255, 255, 255);" cellpadding="2" cellspacing="1" border="0" width="100%" bgcolor="#e5e5e5">
+        <tr>
+        <th bgcolor="#C30014" width="33%">
+        Getting Started
+        </th>
+        <th bgcolor="#C30014" width="33%">
+        General
+        </th>
+        <th bgcolor="#C30014" width="33%">
+        Developer Resources
+        </th>
+        </tr>
+        <tr style="color: rgb(0, 0, 0);">
+        <td valign="top" style="border: none;">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
+        <li style="margin: 2px;"><a href="qt4-2-intro.html" style="text-decoration: none;">Download</a></li>
+        <li style="margin: 2px;"><a href="how-to-learn-qt.html" style="text-decoration: none;">Building</a></li>
+        <li style="margin: 2px;"><a href="installation.html" style="text-decoration: none;">Installation</a></li>
+        <li style="margin: 2px;"><a href="examples.html" style="text-decoration: none;">Tutorial and Examples</a></li>
+        </ul>
+        </td>
+        <td valign="top">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">About Pt</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">License</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Acknowledgements</a></li>
+        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Frequently Asked Questions</a></li>
+        </ul>
+        </td>
+        <td valign="top">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
+        <li style="margin: 2px;"><a href="http://lists.trolltech.com" style="text-decoration: none;">Mailing Lists</a></li>
+
+        </ul>
+        </td>
+        </tr>
+        <tr>
+        <th bgcolor="#C30014">
+        API Reference
+        </th>
+        <th bgcolor="#C30014">
+        Core Features
+        </th>
+        <th bgcolor="#C30014">
+        Key Technologies
+        </th>
+        </tr>
+        <tr style="color: rgb(0, 0, 0);">
+        <td valign="top">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
+        <li style="margin: 2px;"><a href="classes.html" style="text-decoration: none;">All Classes</a></li>
+        <li style="margin: 2px;" style="margin: 2px;"><a href="mainclasses.html" style="text-decoration: none;">Main Classes</a></li>
+        <li style="margin: 2px;"><a href="groups.html" style="text-decoration: none;">Grouped Classes</a></li>
+        <li style="margin: 2px;"><a href="annotated.html" style="text-decoration: none;">Annotated Classes</a></li>
+        <li style="margin: 2px;"><a href="modules.html" style="text-decoration: none;">Modules</a></li>
+        <li style="margin: 2px;"><a href="hierarchy.html" style="text-decoration: none;">Inheritance Hierarchy</a></li>
+        <li style="margin: 2px;"><a href="functions.html" style="text-decoration: none;">All Functions</a></li>
+        <li style="margin: 2px;"><a href="overviews.html" style="text-decoration: none;">All Overviews and HOWTOs</a></li>
+        </ul>
+        </td>
+        <td valign="top">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
+        <li style="margin: 2px;"><a href="signalsandslots.html" style="text-decoration: none;">Signals and Slots</a></li>
+        <li style="margin: 2px;"><a href="object.html" style="text-decoration: none;">Object Model</a></li>
+        <li style="margin: 2px;"><a href="layout.html" style="text-decoration: none;">Layout Management</a></li>
+        <li style="margin: 2px;"><a href="paintsystem.html" style="text-decoration: none;">Paint System</a></li>
+        <li style="margin: 2px;"><a href="dnd.html" style="text-decoration: none;">Drag and Drop</a></li>
+        <li style="margin: 2px;"><a href="containers.html" style="text-decoration: none;">Tool and Container Classes</a></li>
+        <li style="margin: 2px;"><a href="i18n.html" style="text-decoration: none;">Internationalization</a></li>
+        <li style="margin: 2px;"><a href="plugins-howto.html" style="text-decoration: none;">Plugin System</a></li>
+        <li style="margin: 2px;"><a href="intro-to-dbus.html" style="text-decoration: none;">Inter-process Communication</a></li>
+        <li style="margin: 2px;"><a href="qtestlib-manual.html" style="text-decoration: none;">Unit Testing Framework</a></li>
+        </ul>
+        </td>
+        <td valign="top">
+        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
+        <li style="margin: 2px;"><a href="threads.html" style="text-decoration: none;">Multithreaded Programming</a></li>
+        <li style="margin: 2px;"><a href="qt4-mainwindow.html" style="text-decoration: none;">Main Window Architecture</a></li>
+        <li style="margin: 2px;"><a href="richtext.html" style="text-decoration: none;">Rich Text Processing</a></li>
+        <li style="margin: 2px;"><a href="model-view-programming.html" style="text-decoration: none">Model/View Programming</a></li>
+        <li style="margin: 2px;"><a href="qtnetwork.html" style="text-decoration: none;">Network Module</a></li>
+        <li style="margin: 2px;"><a href="qtopengl.html" style="text-decoration: none;">OpenGL Module</a></li>
+        <li style="margin: 2px;"><a href="qtsql.html" style="text-decoration: none;">SQL Module</a></li>
+        <li style="margin: 2px;"><a href="qtsvg.html" style="text-decoration: none;">SVG Module</a></li>
+        <li style="margin: 2px;"><a href="qtxml.html" style="text-decoration: none;">XML Module</a></li>
+        </ul>
+        </td>
+        </tr>
+        </table>
+*/
