@@ -1,19 +1,17 @@
-/** \page People
+/** \page people Platinum Developers
 
-!!! People
-\n
-| #Marc Duerner#\n
-Marc earned a PhD in Chemistry in 2004 and has been working as a professional C++ programmer since then. He started as a "programming chemist" to solve his every day scientific computational problems, he quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. Marc has written much code for the System, IO, Net, Text, XML, Gui and the core module of %Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
+<b>Marc Duerner</b> \n
+Marc earned a PhD in Chemistry in 2004 and has been working as a professional C++ programmer since then. He started as a programming to solve his scientific computational problems and quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. Marc has written much code for the System, IO, Net, Text, XML, Gui and the core module of %Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
 
-| #Tommi Maekitalo#\n
+<b>Tommi Maekitalo</b> \n
 Tommi has many years of experience with C++ development in general and network, system and database programming in particular. Tommi is also the founder of the TNT web application server (www.tntnet.org). He currently works for Eckhard+Partner GmBH in Germany.
 
-| #Aloysius Indrayanto#\n
+<b>Aloysius Indrayanto</b> \n
 Aloysius finished his B.Sc. in electrical engineering in early 2004. He has been interested in C/C++ programming since before he started his college. After his graduation, he work as a assistant lecturer for about 6 months and then as a professional C++ developer in L4M GmBH for about 1 year. Currently, he is trying to get back to university for further study. He has written large parts of the Gfx and some parts of the Gui module of %Pt. Additionally, he is the %main author of the VortexGE software renderer (freshmeat.net/projects/vortexge).
 
-| #Stephan Beal#\n
+<b>Stephan Beal</b> \n
 Stephan has been a professional C++ developer for many years. He currently works for navigating.de in Berlin, Germany. Besides %Pt, he works on s11n, a C++ serialization framework (www.s11n.net).
 
-| #Laurentiu-Gheorghe Crisan#\n
+<b>Laurentiu-Gheorghe Crisan</b> \n
 Laurentiu has many years of experience in object-oriented software architecture in the automotive and automatisation industry. He earned an M Sc. in Computer Science and Multimedia in 2003 at the University of Applied Science Karlsruhe. Laurentiu is currently employed by PTV AG in Karlsruhe, Germany. Platinum serves as the foundation for the MeaProcess-Automatisation and Measurement framework (http://www.crisan-soft.com).
 */

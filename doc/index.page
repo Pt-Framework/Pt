@@ -16,21 +16,23 @@
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
         <li style="margin: 2px;"><a href="download.html" style="text-decoration: none;">Download</a></li>
         <li style="margin: 2px;"><a href="building.html" style="text-decoration: none;">Building</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Installation</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Installation</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">About Pt</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">License</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">About Pt</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">License</a></li>
+        <li style="margin: 2px;"><a href="people.html" style="text-decoration: none;">People</a></li>
         <li style="margin: 2px;"><a href="acknowledgements.html" style="text-decoration: none;">Acknowledgements</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Frequently Asked Questions</a></li>
+        <li style="margin: 2px;"><a href="faq.html" style="text-decoration: none;">Frequently Asked Questions</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Mailing Lists</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Recommended Reading</a></li>
+        <li style="margin: 2px;"><a href="mailinglist.html" style="text-decoration: none;">Mailing Lists</a></li>
+        <li style="margin: 2px;"><a href="scrum.html" style="text-decoration: none;">Project Overview</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Recommended Reading</a></li>
         </ul>
         </td>
         </tr>
@@ -54,21 +56,21 @@
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Signals and Delegates</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Reflection</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">CTTI</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Components</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">PLugins</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">I/O Handling</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Unit Testing</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Signals and Delegates</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Reflection</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">CTTI</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Components</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">PLugins</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">I/O Handling</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Unit Testing</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Cocurrency</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Unicode</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Network Programming</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">XML Processing</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Cocurrency</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Unicode</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Network Programming</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">XML Processing</a></li>
         </ul>
         </td>
         </tr>

@@ -1,36 +1,5 @@
-/** \page "Platinum Reference Documentation"
-<b>Discover the Platinum C++ Framework</b>
-\n
-\n
-Boost your daily performance with the Platinum C++ framework! With %Pt your
-applications are portable to many platforms without change. Its clean and
-concise design assists you in writing robust and highly reusable code.
+/** \page news News
 
-<b>Unleash the power of %Pt and C++ onto your programs today!</b>
-
-- \b Portablility \n
-Platinum is extremely portable and runs on everything from embedded devices up
-to large servers. The supported platforms include Windows, Windows CE,
-Linux, QNX, Unix with many more to come. %Pt lets you spend your time on
-your application taking away the pain of low-level programming.
-
-- \b Performance \n
-A high degree of performance is achieved through the use of modern C++
-features. Your program will benefit from the many optimizations
-included in the framework.
-
-- <b>Easy to use</b> \n
-Platinum is designed from the ground up to be flexible and extensible.
-It provide simple solutions to your problems. Programs written with
-Platinum tend to be significantly shorter and much easier to understand.
-
-- <b>Open Source</b> \n
-Its not just open, its free! Published under the LGPL it allows you
-to write commercial application and be part of the great community that
-develops PPR and determines its future.
-
-<b>News<\b>
-\n
 | #05-02-2007, }Sprint Results}#\n
 This slightly longer development sprint has lead to the TR-1 release. Many improvements have been made to the core module and the %Gfx module. A new module for network programming was added (%Pt::Net). %Pt can now be built wit the intel compiler on win32. The code is available as a tarball in the download section or as a tag in the subversion repository (tags/tr1).
 
@@ -50,3 +19,4 @@ Platinum was presented together with Tntnet, the open-source web application ser
 The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
 
 */
+

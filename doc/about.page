@@ -1,0 +1,31 @@
+/** \page about About Pt
+<b>Discover the Platinum C++ Framework</b>
+
+Boost your daily performance with the Platinum C++ framework! With %Pt your
+applications are portable to many platforms without change. Its clean and
+concise design assists you in writing robust and highly reusable code.
+
+<b>Unleash the power of %Pt and C++ onto your programs today!</b>
+
+- \b Portablility \n
+Platinum is extremely portable and runs on everything from embedded devices up
+to large servers. The supported platforms include Windows, Windows CE,
+Linux, QNX, Unix with many more to come. %Pt lets you spend your time on
+your application taking away the pain of low-level programming.
+
+- \b Performance \n
+A high degree of performance is achieved through the use of modern C++
+features. Your program will benefit from the many optimizations
+included in the framework.
+
+- <b>Easy to use</b> \n
+Platinum is designed from the ground up to be flexible and extensible.
+It provide simple solutions to your problems. Programs written with
+Platinum tend to be significantly shorter and much easier to understand.
+
+- <b>Open Source</b> \n
+Its not just open, its free! Published under the LGPL it allows you
+to write commercial application and be part of the great community that
+develops PPR and determines its future.
+
+*/
