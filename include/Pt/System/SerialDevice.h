@@ -26,13 +26,17 @@
 namespace Pt {
 namespace System {
 
+/** @brief Serial device 
+    @ingroup Pt::System
+    
+    This class implements the serial device I/O operations. 
+*/
 class PT_SYSTEM_API SerialDevice : public  IO::IODevice
 {
    private:
-        //! @brief A pointer to the platform-specific SerialDevice implementation.
         class SerialDeviceImpl* _impl;
 
-    public:
+   public:
         enum BaudRate
         {
             BaudRate0       = 0,
@@ -77,27 +81,98 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
             TwoStopBits
         };
 
+        //! Default constructor.
         SerialDevice();
+        
+        //! @brief Constructs a serial device and open the specified device file
+        /*!                        
+            
+            \param file The serial device file
+            \param mode The open mode 
+            \throw std::exception
+        */
         SerialDevice( const std::string& file, std::ios_base::openmode mode );
+        
+        //! @brief Destructor
         virtual ~SerialDevice();
 
+        //! @brief Open the specified device file
+        /*!                        
+            
+            \param file The serial device file
+            \param mode The open mode 
+        */
         void open( const std::string& file, std::ios_base::openmode mode );
 
+        //! @brief Sets the baud rate
+        /*!                                    
+            \param rate The new baud rate
+        */
         void setBaudRate( BaudRate rate );
+
+        //! @brief Gets the baud rate
+        /*!        
+                                    
+            \return The current baud rate
+        */
         BaudRate baudRate() const;
 
+        //! @brief Sets the char size
+        /*!     
+                                       
+            \param size The char size to set
+        */
         void setCharSize( int size );
+        
+        //! @brief Gets the current char size
+        /*!                                    
+            \return The current char size
+        */
         int charSize() const;
 
+        //! @brief Sets the number of stop bits
+        /*!    
+                                        
+            \param bits The number of stop bits
+        */
         void setStopBits( StopBits bits );
+        
+        //! @brief Gets the current number of stop bits
+        /*!   
+                                         
+            \return The current number of stop bits
+        */
         StopBits stopBits() const;
 
-        void setParity( Parity Parity );
+        //! @brief Sets the parity
+        /*!    
+                                        
+            \param parity The new parity
+        */
+        void setParity( Parity parity );
+        
+        //! @brief Gets the current parity
+        /*!      
+                                      
+            \return The current parity
+        */
         Parity parity() const;
 
-        void setFlowControl( FlowControl FlowControl );
+        //! @brief Sets the flow control kind
+        /*!    
+                                        
+            \param flowControl The new flow control kind
+        */
+        void setFlowControl( FlowControl flowControl );
+        
+        //! @brief Gets the current flow control kind
+        /*!   
+                                         
+            \return The current flow control kind
+        */
         FlowControl flowControl() const;
 
+        //! @brief Transmit the current buffered characters.
         void flush();
 
     protected:
