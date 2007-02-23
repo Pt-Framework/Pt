@@ -1,28 +1,25 @@
+/** \page download Download
 
-/** \page "Download"
+@section releases Releases
 
-!!! Download
-\n
-!!Releases
-\n
-- #Platinum 1.0.0 TR-1 %Pt#\n
+- <b>Platinum 1.0.0 TR-1 %Pt</b> \n
   http://pt-framework.sourceforge.net/Platinum-1.0.0-tr1.tar.gz
 
-!!Documentation
-\n
-- #Effective Library Design with %Pt#\n
+@section docs Documentation
+
+- <b>Effective Library Design with %Pt</b> \n
   http://pt-framework.sourceforge.net/platinum-programming20061013.pdf
 
-!! Subversion
-\n
-- #Current Development Version#\n
+@section svn Subversion
+
+- <b>Current Development Version</b> \n
   https://svn.sourceforge.net/svnroot/pt-framework/trunk
 
-- #Branches and tags#\n
+- <b>Branches and tags</b> \n
   https://svn.sourceforge.net/svnroot/pt-framework/tags \n
   https://svn.sourceforge.net/svnroot/pt-framework/branches
 
-- #Precompiled Development Tools#\n
+- <b>Precompiled Development Tools</b> \n
   https://svn.sourceforge.net/svnroot/pt-framework/tools
 */
 

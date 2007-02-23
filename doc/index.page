@@ -14,8 +14,8 @@
         <tr style="color: rgb(0, 0, 0);">
         <td valign="top" style="border: none;">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="qt4-2-intro.html" style="text-decoration: none;">Download</a></li>
-        <li style="margin: 2px;"><a href="how-to-learn-qt.html" style="text-decoration: none;">Building</a></li>
+        <li style="margin: 2px;"><a href="download.html" style="text-decoration: none;">Download</a></li>
+        <li style="margin: 2px;"><a href="building.html" style="text-decoration: none;">Building</a></li>
         <li style="margin: 2px;"><a href="installation.html" style="text-decoration: none;">Installation</a></li>
         <li style="margin: 2px;"><a href="examples.html" style="text-decoration: none;">Tutorial and Examples</a></li>
         </ul>
@@ -24,7 +24,7 @@
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
         <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">About Pt</a></li>
         <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">License</a></li>
-        <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Acknowledgements</a></li>
+        <li style="margin: 2px;"><a href="acknowledgements.html" style="text-decoration: none;">Acknowledgements</a></li>
         <li style="margin: 2px;"><a href="http://pt-framework.sf.net" style="text-decoration: none;">Frequently Asked Questions</a></li>
         </ul>
         </td>
@@ -40,23 +40,17 @@
         API Reference
         </th>
         <th bgcolor="#C30014">
-        Core Features
+        Features
         </th>
         <th bgcolor="#C30014">
-        Key Technologies
+        Technologies
         </th>
         </tr>
         <tr style="color: rgb(0, 0, 0);">
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="classes.html" style="text-decoration: none;">All Classes</a></li>
-        <li style="margin: 2px;" style="margin: 2px;"><a href="mainclasses.html" style="text-decoration: none;">Main Classes</a></li>
-        <li style="margin: 2px;"><a href="groups.html" style="text-decoration: none;">Grouped Classes</a></li>
-        <li style="margin: 2px;"><a href="annotated.html" style="text-decoration: none;">Annotated Classes</a></li>
-        <li style="margin: 2px;"><a href="modules.html" style="text-decoration: none;">Modules</a></li>
-        <li style="margin: 2px;"><a href="hierarchy.html" style="text-decoration: none;">Inheritance Hierarchy</a></li>
-        <li style="margin: 2px;"><a href="functions.html" style="text-decoration: none;">All Functions</a></li>
-        <li style="margin: 2px;"><a href="overviews.html" style="text-decoration: none;">All Overviews and HOWTOs</a></li>
+        <li style="margin: 2px;"><a href="classes.html" style="text-decoration: none;">Class Index</a></li>
+        <li style="margin: 2px;" style="margin: 2px;"><a href="namespaces.html" style="text-decoration: none;">Namespaces</a></li>
         </ul>
         </td>
         <td valign="top">

@@ -1,10 +1,6 @@
+/** \page acknowledgements Acknowledgements
 
-/** \page Acknowledgements
-
-!!! Acknowledgements
-\n
-| #PTV AG, Karlsruhe#\n
-We would like to thank PTV AG for supporting the Platinum C++ framework
-and for encouaging their developers to commit code to the project.
-
+    \section sec PTV AG, Karlsruhe
+        We would like to thank PTV AG for supporting the Platinum C++ framework
+        and for encouaging their developers to commit code to the project.
 */
