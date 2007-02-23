@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Tobias Mller                                 *
+ *   Copyright (C) 2006-2007 Tobias Müller                                 *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -28,6 +28,15 @@ namespace Pt {
 
 namespace Gfx {
 
+Font::Font()
+: _name("")
+,  _size(12)
+,  _fontStyle(NormalStyle)
+,  _angle(0)
+,  _direction(LeftToRightDirection)
+{
+}
+
 Font::Font(const std::string& name, size_t size, FontStyle fontStyle, ssize_t angle, Direction direction)
 : _name(name),
   _size(size),
@@ -38,7 +47,7 @@ Font::Font(const std::string& name, size_t size, FontStyle fontStyle, ssize_t an
 }
 
 
-const std::string& Font::name() const
+std::string Font::name() const
 {
     return _name;
 }
