@@ -22,6 +22,7 @@
 #include <fcntl.h>
 
 #include "SerialDeviceImpl.h"
+#include "Pt/System/Thread.h"
 
 #include <cerrno>
 #include <iostream>
@@ -60,71 +61,67 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         flags |= O_RDONLY;
     }
 
-    //if(mode & IODevice::NonBlock) {
-    //    flags |= O_NONBLOCK;
-    //}
-
     if(mode & std::ios::trunc)
     {
         flags |= O_TRUNC;
     }
 
+    flags |= O_NONBLOCK | O_NOCTTY;
+
     _fd = ::open(path.c_str(), flags, 0644);
     if(_fd == -1)
         throw Pt::IO::OpenFailed("open failed", PT_SOURCEINFO);
 
-
-    if( ::tcgetattr(_fd, &_ios) == -1 )
-        throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
-
-    if( ::tcgetattr(_fd, &_prevIos) == -1 )
-        throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
-
-    // Disable line wise reading
-    _ios.c_lflag &= ~ICANON;
-    _ios.c_lflag &= ~ECHO;
-
-    if( ::tcsetattr(_fd, TCSANOW, &_ios) == -1  )
+    try
     {
-        throw Pt::IO::IOError("Could not set termios attributes", PT_SOURCEINFO);
-    }
+        struct termios ios;
+        if( ::tcgetattr(_fd, &ios) == -1 )
+            throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
 
-     //std::cerr << "L: " << _ios.c_lflag << std::endl;
-     //if( _ios.c_lflag & ISIG) printf("ISIG\n");
-     //if( _ios.c_lflag & ICANON)printf("ICANON\n");
-     //if( _ios.c_lflag & XCASE)printf("XCASE\n");
-     //if( _ios.c_lflag & ECHO)printf("ECHO\n");
-     //if( _ios.c_lflag & ECHOE)printf("ECHOE\n");
-     //if( _ios.c_lflag & ECHOK)printf("ECHOK\n");
-     //if( _ios.c_lflag & ECHONL)printf("ECHONL\n");
-     //if( _ios.c_lflag & NOFLSH)printf("NOFLSH\n");
-     //if( _ios.c_lflag & TOSTOP)printf("TOSTOP\n");
-     //if( _ios.c_lflag & ECHOCTL)printf("ECHOCTL\n");
-     //if( _ios.c_lflag & ECHOPRT)printf("ECHOPRT\n");
-     //if( _ios.c_lflag & ECHOKE)printf("ECHOKE\n");
-     //if( _ios.c_lflag & FLUSHO)printf("FLUSHO\n");
-     //if( _ios.c_lflag & PENDIN)printf("PENDIN\n");
-     //if( _ios.c_lflag & IEXTEN)printf("IEXTEN\n");
-    // _ios.c_cflag |= (CREAD | CLOCAL | HUPCL);
-    // _ios.c_lflag = 0;
-    // _ios.c_iflag = 0;
-    // _ios.c_oflag = 0;
-    // _ios.c_cc[VTIME] = 0;
-    // _ios.c_cc[VMIN] = 1;
-    // _ios.c_iflag |= (IGNBRK | IGNPAR);
+        if( ::tcgetattr(_fd, &_prevIos) == -1 )
+            throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
+
+        // Disable line wise reading
+        ios.c_lflag &= ~ICANON;
+        ios.c_lflag &= ~ECHO;
+
+        if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
+        {
+            throw Pt::IO::IOError("Could not set termios attributes", PT_SOURCEINFO);
+        }
+
+        // Open a pipe to send wake up messages
+        if( ::pipe(_pipe) )
+            throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
+    }
+    catch(...)
+    {
+        ::close(_fd);
+        throw;
+    }
 }
 
 
 void SerialDeviceImpl::close()
 {
+
     if(_fd != -1)
     {
+        ::write( _pipe[1], "XXXXXXXXXXX", 11);
+        Thread::yield();
+
         ::tcsetattr(_fd, TCSANOW, &_prevIos);
 
         if( ::close(_fd) != 0 )
             throw IO::IOError("Could not close file handle", PT_SOURCEINFO);
 
         _fd = -1;
+    }
+
+    if(_pipe[0] != -1 && _pipe[1] != -1)
+    {
+        ::close(_pipe[0]);
+        ::close(_pipe[1]);
     }
 }
 
@@ -399,11 +396,12 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     return SerialDevice::ParityNone;
 }
 
-#define CTRL_Q 0x11
-#define CTRL_S 0x13
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
+    static const int CTRL_Q = 0x11;
+    static const int CTRL_S = 0x13;
+
    struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
@@ -448,13 +446,53 @@ void SerialDeviceImpl::flush()
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
-    if( msec != 0 )
-        throw std::runtime_error( "Only wait infinite is supported, msec must be 0" + PT_SOURCEINFO);
-/*
-    if( mode == SerialDevice::WaitOutput)
-        tcdrain(_fd);
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET( _pipe[0], &rfds );
+
+    fd_set wfds;
+    FD_ZERO(&wfds);
+    int maxFd = std::max( _fd, _pipe[0] );
+
+    struct timeval* timeout = NULL;
+    struct timeval tv;
+    if(msec != IO::IODevice::WaitTimeInfinite)
+    {
+        tv.tv_sec = msec / 1000;
+        tv.tv_usec = (msec % 1000) * 1000;
+        timeout = &tv;
+    }
+
+    retry:
+    int ret = -1;
+
+    if(mode & IO::IODevice::WaitInput)
+    {
+        FD_SET(_fd, &rfds);
+        ret = ::select(maxFd + 1, &rfds, 0, 0, timeout);
+    }
+    else if(mode & IO::IODevice::WaitOutput)
+    {
+        FD_SET(_fd, &wfds);
+        ret = ::select(maxFd + 1, &rfds, &wfds, 0, timeout);
+    }
     else
-*/
+    {
+        FD_SET(_fd, &rfds);
+        FD_SET(_fd, &wfds);
+        ret = ::select(maxFd + 1, &rfds, &wfds, 0, timeout);
+    }
+
+    if(ret == -1)
+    {
+        if(errno == EINTR)
+            goto retry;
+
+        throw IO::IOError("Could not select on file descriptor", PT_SOURCEINFO);
+    }
+
+    if(ret == 1)
+        return true;
 
     return false;
 }

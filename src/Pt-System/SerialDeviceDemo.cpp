@@ -119,15 +119,15 @@ class Reader : public Pt::System::Thread
         Reader( Pt::System::SerialDevice& serDev_ )
         : serDev( serDev_ )
         { }
-        
+
         ~Reader()
         {}
-        
+
         void run()
         {
             bool retVal = serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
         }
-        
+
         Pt::System::SerialDevice& serDev;
 };
 
@@ -135,12 +135,12 @@ void waitEventDemo()
 {
     try
     {
-        Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
+        Pt::System::SerialDevice serDev("/dev/ttyS0", std::ios_base::in | std::ios_base::out);
         Reader reader(serDev);    
         reader.start();
-        
-        Pt::System::Thread::sleep( 5000 );
-        serDev.close();             
+
+        Pt::System::Thread::sleep( 1000 );
+        serDev.close();
         reader.wait();
     }
     catch( const std::exception& e)

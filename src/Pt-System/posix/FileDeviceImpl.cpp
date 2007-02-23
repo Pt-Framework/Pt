@@ -228,9 +228,14 @@ bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec) throw(IO::
     FD_SET(_fd, &rfds);
     FD_SET(_fd, &wfds);
 
+    struct timeval* timeout = NULL;
     struct timeval tv;
-    tv.tv_sec = msec / 1000;
-    tv.tv_usec = (msec % 1000) * 1000;
+    if(msec != IO::IODevice::WaitTimeInfinite)
+    {
+        tv.tv_sec = msec / 1000;
+        tv.tv_usec = (msec % 1000) * 1000;
+        timeout = &tv;
+    }
 
     retry:
     int ret = -1;

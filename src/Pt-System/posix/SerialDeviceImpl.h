@@ -77,9 +77,9 @@ class SerialDeviceImpl
 
     private:
         int                         _fd;
-        termios                     _ios;
+        int                         _pipe[2];
+        //termios                     _ios;
         termios                     _prevIos;
-        
         SerialDevice::FlowControl   _flowControl;
 };
 
