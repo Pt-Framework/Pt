@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Tobias Mller                              *
- *   Copyright (C) 2006-2007 by Marc Boris Drner                          *
+ *   Copyright (C) 2006-2007 by Tobias Müller                              *
+ *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -40,14 +40,16 @@ namespace Gfx {
 
         public:
             enum FontStyle {
-                NormalStyle, BoldStyle, ItalicStyle, BoldItalicStyle
+                NormalStyle = 0, BoldStyle, ItalicStyle, BoldItalicStyle
             };
 
             enum Direction {
-                LeftToRightDirection, RightToLeftDirection
+                LeftToRightDirection = 0, RightToLeftDirection
             };
 
         public:
+            Font();
+
             Font(
                 const std::string& name,
                 size_t             size = 12,
@@ -57,7 +59,7 @@ namespace Gfx {
                 
             );
 
-            const std::string& name() const;
+            std::string name() const;
 
             size_t size() const;
 
@@ -94,7 +96,7 @@ namespace Gfx {
 
 
 
-/*
+
 template <>
 struct AnyTraits<Gfx::Font> {
 	static void output(std::ostream& os, const Gfx::Font& value);
@@ -168,7 +170,7 @@ inline void Pt::AnyTraits<Gfx::Font>::input(std::basic_istream<Pt::Char>& is, Gf
 {
 	inputGeneric(is, value);
 }
-*/
+
 
 } // namespace Pt
 
