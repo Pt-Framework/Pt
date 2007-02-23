@@ -1,11 +1,12 @@
 /** \page about About Pt
-<b>Discover the Platinum C++ Framework</b>
+
+@section discover Discover the Platinum C++ Framework...
 
 Boost your daily performance with the Platinum C++ framework! With %Pt your
 applications are portable to many platforms without change. Its clean and
 concise design assists you in writing robust and highly reusable code.
 
-<b>Unleash the power of %Pt and C++ onto your programs today!</b>
+<b>...unleash the power of %Pt and C++ onto your programs today!</b>
 
 - \b Portablility \n
 Platinum is extremely portable and runs on everything from embedded devices up

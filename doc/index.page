@@ -1,4 +1,6 @@
  /** \mainpage
+        <h1>Online Reference Documentation</h1>
+        <br>
        <table style="color: rgb(255, 255, 255);" cellpadding="2" cellspacing="1" border="0" width="100%" bgcolor="#e5e5e5">
         <tr>
         <th bgcolor="#C30014" width="33%">
@@ -16,12 +18,12 @@
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
         <li style="margin: 2px;"><a href="download.html" style="text-decoration: none;">Download</a></li>
         <li style="margin: 2px;"><a href="building.html" style="text-decoration: none;">Building</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Installation</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">About Pt</a></li>
+        <li style="margin: 2px;"><a href="about.html" style="text-decoration: none;">About Pt</a></li>
+        <li style="margin: 2px;"><a href="news.html" style="text-decoration: none;">News</a></li>
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">License</a></li>
         <li style="margin: 2px;"><a href="people.html" style="text-decoration: none;">People</a></li>
         <li style="margin: 2px;"><a href="acknowledgements.html" style="text-decoration: none;">Acknowledgements</a></li>
@@ -41,7 +43,7 @@
         API Reference
         </th>
         <th bgcolor="#C30014">
-        Features
+        Guidance
         </th>
         <th bgcolor="#C30014">
         Technologies
