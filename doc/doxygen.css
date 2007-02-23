@@ -1,14 +1,14 @@
 body {
-	font-family: Helvetica, Arial, sans-serif; 
 	color: #11375F;
+	background-color: #FFFFFF;
 }
 h1 {
 	text-align: center;
-        line-height: 1.2em;
-	color: #154374; 
+  line-height: 1.2em;
+	color: #000000; 
 }
 h2, h3, h4 {
-	color: #154374;
+	color: #000000;
 }
 caption { font-weight: bold }
 div.qindex {
@@ -38,27 +38,26 @@ a.qindex:visited {
 	padding: 2px;
 }
 a.qindex:hover {
-	color: #3366FF;
-	text-decoration: underline;
+	color: #C30014;
 	padding: 2px;
 }
 a.qindexHL {
-	text-decoration: underline;
 	font-weight: bold;
 	padding: 2px 6px;
 }
 a.qindexHL:hover {
-	text-decoration: underline;
 	padding: 2px 6px;
 }
-a.qindexHL:visited { text-decoration: underline }
-a.el { text-decoration: none; color: #1A5593; font-weight: bold }
+a.qindexHL:visited {
+}
+a.el { text-decoration: none; color: #FF5593; font-weight: bold; }
 a.elRef { font-weight: bold; color: #1A5593; }
 a.code { text-decoration: none; font-weight: normal; color: #1A5593;}
 a.codeRef { font-weight: normal; color: #1A5593;}
-a:link, a:active { font-weight: bold; color: #1A5593; }
-a:visited { font-weight: bold; color: #1A5593; }
-a:hover { font-weight: bold; text-decoration: underline; color: #3366FF; }
+
+a:link, a:active { font-weight: bold; color: #154374; }
+a:visited { font-weight: bold; color: #154374; }
+a:hover { font-weight: bold; color: #C30014; }
 dl.el { 
 	margin-left: 0cm;
 }
@@ -66,7 +65,6 @@ dl.el {
        font-family: monospace
 }
 pre.fragment {
-	border: 1px solid #8593B3;
 	background-color: #E5E5E5;
 	margin-top: 4px;
 	margin-bottom: 4px;
@@ -78,8 +76,8 @@ pre.fragment {
 	padding-bottom: 4px;
 }
 div.ah { background-color: black; font-weight: bold; color: #FFFFFF; margin-bottom: 3px; margin-top: 3px }
-td.md { background-color: #E5E5E5; font-weight: bold }
-td.mdname1 { background-color: #E5E5E5; font-weight: bold; color: #602020; }
+td.md { background-color: #E5E5E5; font-size: 20px; font-weight: bold; }
+td.mdname1 { background-color: #E5E5E5; font-size: 20px; font-weight: bold; color: #602020; }
 td.mdname { background-color: #E5E5E5; font-weight: bold; color: #602020; width: 600px; }
 div.groupHeader {
        margin-left: 16px;
@@ -100,7 +98,6 @@ td.indexkey {
 	margin-right   : 0px;
 	margin-top     : 2px;
 	margin-bottom  : 2px;
-	border: 1px solid #8593B3;
 }
 td.indexvalue {
 	background-color: #E5E5E5;
@@ -113,7 +110,6 @@ td.indexvalue {
 	margin-right   : 0px;
 	margin-top     : 2px;
 	margin-bottom  : 2px;
-	border: 1px solid #8593B3;
 }
 tr.memlist {
 	background-color: #D5DBE6;
@@ -122,7 +118,7 @@ p.formulaDsp { text-align: center; }
 img.formulaDsp { }
 img.formulaInl { vertical-align: middle; }
 .mdTable {
-	border: 1px solid #8593B3;
+	width: 100%;
 	background-color: #E5E5E5;
 }
 .mdRow {
@@ -150,13 +146,12 @@ td.tiny      { font-size: 75%;
 }
 ul { 
 	background-color: #F8F9FD;
-	border: 1px solid #8593B3;
 }
 .nestedul { 
 	border: none;
 }
 li { 
-	list-style-type: square;
+	list-style-type: disc;
 	margin-top: 0.4em;
 	margin-bottom: 0.5em;
 }
@@ -173,5 +168,4 @@ a.qindexH {
 }
 a.qindexH:hover, a.qindexH:active { 
 	color: #154374;
-	text-decoration: underline; 
 }
