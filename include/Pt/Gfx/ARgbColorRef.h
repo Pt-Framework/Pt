@@ -264,28 +264,58 @@ namespace Pt {
 
             // Scanline class for ARgbColorRef color model.
             class ScanlineT {
-                // TODO: WRITE IT !!!
                 public:
                     inline ScanlineT(std::vector<ComponentT*>& chanPtr,
                                      size_t                    imageWidth,
                                      size_t                    posY)
-                    {}
+                    {
+                        // In this ARgbColorRef, all channel have the same full size
+                        // (no subsampling) and thus simple pointer arithmetic will
+                        // does the job :)
+                        const size_t pos = posY*imageWidth;
 
-                    //inline ARgbColorRef operator[](size_t x)
-                    //{}
+                        _chnA = chanPtr[0] + pos; // A is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #1
+                        _chnG = chanPtr[2] + pos; // G is channel #2
+                        _chnB = chanPtr[3] + pos; // B is channel #3
+                    }
+
+                    inline ARgbColorRef operator[](size_t x)
+                    { return ARgbColorRef( *(_chnA+x), *(_chnR+x), *(_chnG+x), *(_chnB+x) ); }
+
+                private:
+                    uint16_t* _chnA;
+                    uint16_t* _chnR;
+                    uint16_t* _chnG;
+                    uint16_t* _chnB;
             };
 
             // Constant scanline class for ARgbColorRef color model.
             class ConstScanlineT {
-                // TODO: WRITE IT !!!
                 public:
                     inline ConstScanlineT(const std::vector<ComponentT*>& chanPtr,
                                           size_t                          imageWidth,
                                           size_t                          posY)
-                    {}
+                    {
+                        // In this ARgbColorRef, all channel have the same full size
+                        // (no subsampling) and thus simple pointer arithmetic will
+                        // does the job :)
+                        const size_t pos = posY*imageWidth;
 
-                    //inline ARgbColor operator[](size_t x)
-                    //{}
+                        _chnA = chanPtr[0] + pos; // A is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #1
+                        _chnG = chanPtr[2] + pos; // G is channel #2
+                        _chnB = chanPtr[3] + pos; // B is channel #3
+                    }
+
+                    inline ARgbColor operator[](size_t x)
+                    { return ARgbColor( *(_chnA+x), *(_chnR+x), *(_chnG+x), *(_chnB+x) ); }
+
+                private:
+                    const uint16_t* _chnA;
+                    const uint16_t* _chnR;
+                    const uint16_t* _chnG;
+                    const uint16_t* _chnB;
             };
 
 
