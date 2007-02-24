@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-    /** @brief Contains any type
+    /** @brief Contains an arbitrary type
         @ingroup Reflection
 
         Any can contain any other type that is default- and copy constructible

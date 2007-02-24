@@ -26,6 +26,13 @@
     The Pt Reflection API offers support for properties and method invokation.
 */
 
+/** @defgroup CTTI
+    @brief Compile time type information
+
+    Compile time type information allows a programmer to specialize and branch
+    code at compile time depending on type. 
+*/
+
 /** @namespace Pt
     @brief Core module
 

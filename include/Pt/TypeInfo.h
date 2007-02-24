@@ -38,7 +38,9 @@ namespace Pt {
     };
 
 
-    //! CTTI for for non-const value types
+    /** @brief CTTI for for non-const value types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo : public TypeInfoBase<T> {
         static const char* typeName()
@@ -46,7 +48,9 @@ namespace Pt {
     };
 
 
-    //! CTTI for for const value types
+    /** @brief CTTI for for const value types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<const T> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -59,7 +63,9 @@ namespace Pt {
     const std::string TypeInfo<const T>::_typeName = "const " + std::string( TypeTraits<T>::typeName() );
 
 
-    //! CTTI for for non-const reference types
+    /** @brief CTTI for for non-const reference types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<T&> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -72,7 +78,9 @@ namespace Pt {
     const std::string TypeInfo<T&>::_typeName = std::string( TypeTraits<T>::typeName() ) + "&";
 
 
-    //! CTTI for for const reference types
+    /** @brief CTTI for for const reference types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<const T&> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -85,7 +93,9 @@ namespace Pt {
     const std::string TypeInfo<const T&>::_typeName = "const " + std::string( TypeTraits<T>::typeName() ) + "&";
 
 
-    //! CTTI for for non-const pointer types
+    /** @brief CTTI for for non-const pointer types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<T*> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -98,7 +108,9 @@ namespace Pt {
     const std::string TypeInfo<T*>::_typeName = std::string( TypeTraits<T>::typeName() ) + "*";
 
 
-    //! CTTI for for const pointer types
+    /** @brief CTTI for for const pointer types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<const T*> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -111,7 +123,9 @@ namespace Pt {
     const std::string TypeInfo<const T*>::_typeName = "const " + std::string( TypeTraits<T>::typeName() ) + "*";
 
 
-    //! CTTI for for fixed-size array types
+    /** @brief CTTI for for fixed-size array types
+        @ingroup CTTI
+    */
     template <typename T, size_t N>
     struct TypeInfo<T[N]> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -124,7 +138,9 @@ namespace Pt {
     const std::string TypeInfo<T[N]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[N]";
 
 
-    //! CTTI for for array types
+    /** @brief CTTI for for array types
+        @ingroup CTTI
+    */
     template <typename T>
     struct TypeInfo<T[]> : public TypeInfoBase<T> {
         static const char* typeName()
@@ -137,7 +153,9 @@ namespace Pt {
     const std::string TypeInfo<T[]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[]";
 
 
-    //! CTTI for for member function types
+    /** @brief CTTI for for member function types
+        @ingroup CTTI
+    */
     template <typename R, class C>
     struct TypeInfo< R C::* > {
         typedef R ReturnT;
@@ -157,7 +175,9 @@ namespace Pt {
                                                   std::string( TypeTraits<C>::typeName() ) + "::*";
 
 
-    //! CTTI for for void
+    /** @brief CTTI for for void
+        @ingroup CTTI
+    */
     template <>
     struct PT_API TypeInfo<void> {
         typedef void Value;
@@ -188,7 +208,9 @@ namespace Pt {
     };
 
 
-    //! CTTI predicate for type comparson
+    /** @brief  CTTI predicate for type comparson
+        @ingroup CTTI
+    */
     template <typename A, typename B>
     struct isEqual : public isFalse {
     };
@@ -199,7 +221,9 @@ namespace Pt {
     };
 
 
-    //! CTTI predicate for array types
+    /** @brief  CTTI predicate for array types
+        @ingroup CTTI
+    */
     template <typename T>
     struct isArray : public isFalse {
     };
