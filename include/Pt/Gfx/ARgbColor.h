@@ -173,7 +173,10 @@ namespace Pt {
         };
 
 
-        /** @brief Convert a Color<ARgb, DstTypeT> to a Color<ARgb, SrcTypeT>.
+        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
+         *
+         *  This function is implemented so that conversion between ContainerType
+         *  ARgb color and ReferenceType ARgb color is possible.
          */
         template<typename DstTypeT, typename SrcTypeT>
         inline const Color<ARgb, DstTypeT>& toARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
@@ -186,9 +189,27 @@ namespace Pt {
         }
 
         /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
+         *
+         *  This function is implemented so that conversion between ContainerType
+         *  ARgb color and ReferenceType ARgb color is possible.
          */
         template<typename DstTypeT, typename SrcTypeT>
         inline void fromARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
+        {
+            to.setAlpha(from.alpha());
+            to.setRed  (from.red  ());
+            to.setGreen(from.green());
+            to.setBlue (from.blue ());
+        }
+
+
+        /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
+         *
+         *  This function is implemented so that assignment between ContainerType
+         *  ARgb color and ReferenceType ARgb color is possible.
+         */
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         {
             to.setAlpha(from.alpha());
             to.setRed  (from.red  ());
@@ -264,6 +285,9 @@ namespace Pt {
 
     } // namespace Gfx
 
+
+
+
 template<>
 struct AnyTraits<Gfx::Color<Gfx::ARgb> > {
 	static void output(std::ostream& os, const Gfx::Color<Gfx::ARgb>& value);
@@ -327,7 +351,7 @@ inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::input(std::istream& is, Gfx::
 	{
 		throw std::runtime_error("Could not read ARgbColor value" + PT_SOURCEINFO);
 	}
-    
+
     inputGeneric(is, value);
 }
 

@@ -80,7 +80,13 @@ namespace Pt {
         template <typename ColorRefT_, typename ColorTraitsT_>
         PlanarImage<ColorRefT_, ColorTraitsT_>& PlanarImage<ColorRefT_, ColorTraitsT_>::operator=(const ColorT& fill)
         {
-            // TODO: WRITE IT !!!
+            ColorPtrT ptr(_chanPtr, _width, 0, 0);
+
+            for(size_t i = 0; i < _width*_height; ++i) {
+                *ptr = fill;
+                ++ptr;
+            }
+
             return *this;
         }
 

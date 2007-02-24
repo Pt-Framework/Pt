@@ -231,6 +231,15 @@ namespace Pt {
         }
 
 
+        /** @brief Assign a Color<Rgb555, SrcTypeT> to a Color<Rgb555, DstTypeT>.
+         *
+         *  This function is implemented so that assignment between ContainerType
+         *  Rgb555 color and ReferenceType Rgb555 color is possible.
+         */
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<Rgb555, DstTypeT>& to, const Color<Rgb555, SrcTypeT>& from)
+        { to.setValue(from.value()); }
+
         /** @brief Assign a Color<ARgb> to a Color<Rgb555>.
          */
         inline void assign(Color<Rgb555>& to, const Color<ARgb>& from)

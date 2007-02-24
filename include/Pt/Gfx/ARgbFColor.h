@@ -209,6 +209,20 @@ namespace Pt {
         }
 
 
+        /** @brief Assign a Color<ARgbF, SrcTypeT> to a Color<ARgbF, DstTypeT>.
+         *
+         *  This function is implemented so that assignment between ContainerType
+         *  ARgbF color and ReferenceType ARgbF color is possible.
+         */
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgbF, DstTypeT>& to, const Color<ARgbF, SrcTypeT>& from)
+        {
+            to.setAlpha(from.alpha());
+            to.setRed  (from.red  ());
+            to.setGreen(from.green());
+            to.setBlue (from.blue ());
+        }
+
         /** @brief Assign a Color<ARgb> to a Color<ARgbF>.
          */
         inline void assign(Color<ARgbF>& to, const Color<ARgb>& from)

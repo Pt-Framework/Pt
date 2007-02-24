@@ -21,8 +21,6 @@
 #ifndef PT_ATOMICINT_GCC_MIPS_H
 #define PT_ATOMICINT_GCC_MIPS_H
 
-#error "Not implemented yet !!!"
-
 #include <csignal>
 
 
@@ -42,22 +40,60 @@ namespace Pt {
 
             inline void operator+=(atomic_t n)
             {
+                register atomic_t expected;
+                for (;;) {
+                    expected = _value;
+                    if(_mipsAtomicTestAndSet(&_value, expected, expected + n)) break;
+                }
             }
 
             inline void operator-=(atomic_t n)
             {
+                register atomic_t expected;
+                for (;;) {
+                    expected = _value;
+                    if(_mipsAtomicTestAndSet(&_value, expected, expected - n)) break;
+                }
             }
 
             inline void operator=(atomic_t n)
             {
+                register atomic_t expected;
+                for (;;) {
+                    expected = _value;
+                    if(_mipsAtomicTestAndSet(&_value, expected, n)) break;
+                }
             }
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
+                register atomic_t expected = oldval;
+                return _mipsAtomicTestAndSet(&_value, expected, newval);
             }
 
         private:
             volatile atomic_t _value;
+
+            inline atomic_t _mipsAtomicTestAndSet(volatile atomic_t* dst, atomic_t expected, atomic_t newval)
+            {
+                asm volatile (
+                    "0:                   \n\t"
+                    "1:    ll   $8, 0($4) \n\t"
+                    "      bne  $8, $5, 2f\n\t"
+                    "      move $2, $6    \n\t"
+                    "      sc   $2, 0($4) \n\t"
+                    "      beqz $2, 1b    \n\t"
+                    "      nop            \n\t"
+                    "      jr   $31       \n\t"
+                    "      nop            \n\t"
+                    "2:    jr   $31       \n\t"
+                    "      move %2, $0    \n\t"
+                    "      .end 0             "
+                );
+                // Is this correct ???
+                // How to return value in MIPS ???
+            }
+
     };
 
 } // namespace Pt

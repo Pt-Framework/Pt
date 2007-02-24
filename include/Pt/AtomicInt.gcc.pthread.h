@@ -21,6 +21,9 @@
 #ifndef PT_ATOMICINT_GCC_PTHREAD_H
 #define PT_ATOMICINT_GCC_PTHREAD_H
 
+#warning "Using fallback implementation of AtomicInt (using pthread) !!!"
+
+
 #include <csignal>
 #include <pthread.h>
 
@@ -62,13 +65,16 @@ namespace Pt {
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
+                bool ret = false;
 
                 pthread_mutex_lock(&_mutex);
-                oldval = _value;
-                _value = newval;
+                if(_value == oldval) {
+                    _value = newval;
+                    ret = true;
+                }
                 pthread_mutex_unlock(&_mutex);
 
-                return oldval;
+                return ret;
             }
 
         private:
