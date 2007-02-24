@@ -31,11 +31,12 @@
 namespace Pt {
 
     /** @brief Tune types for use with Any
+        @ingroup Reflection
 
-    The behaviour of types used in Anys can be refined by specialising
-    AnyTraits for the type. AnyTraits::input determines how a type is
-    read from an std::istream, AnyTraits<>::output determines how a
-    type is written to a std::osteam.
+        The behaviour of types used in Anys can be refined by specialising
+        AnyTraits for the type. AnyTraits::input determines how a type is
+        read from an std::istream, AnyTraits<>::output determines how a
+        type is written to a std::osteam.
     */
     template <typename T>
     struct AnyTraits

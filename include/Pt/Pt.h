@@ -33,6 +33,16 @@
     code at compile time depending on type. 
 */
 
+/** @defgroup Unicode
+    @brief Unicode string handling
+
+    Pt extends the string handling of the standard C++ library by
+    a unicode capable character type and a specialization of the
+    std:basic_string<> template for this charcter type. Localization
+    factes are provides that allow the use of i/o streams with the
+    unicode charcter type.
+*/
+
 /** @namespace Pt
     @brief Core module
 

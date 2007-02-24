@@ -28,29 +28,29 @@
 
 namespace Pt {
 
-	/**
-	 * @brief A specialized list-class for Pt::String objects.
-	 *
-	 * This class is a convenience class which is derived from std::list and specialized for
-	 * containing Pt::String.
-	 *
-	 * See std::list for more details.
-	 */
-	class PT_API StringList : public std::list<Pt::String> {
-		public:
-			typedef std::list<Pt::String>::iterator Iterator;
-			typedef std::list<Pt::String>::const_iterator ConstIterator;
+    /** @brief List of unicode capable strings.
+    *   @ingroup Unicode
+    *
+    * This class is a convenience class which is derived from std::list and specialized for
+    * containing Pt::String.
+    *
+    * See std::list for more details.
+    */
+    class PT_API StringList : public std::list<Pt::String> {
+        public:
+            typedef std::list<Pt::String>::iterator Iterator;
+            typedef std::list<Pt::String>::const_iterator ConstIterator;
 
-		public:
-			StringList();
-	};
+        public:
+            StringList();
+    };
 
 
-	template <>
-	struct TypeTraits<Pt::StringList> {
-		static const char* typeName()
-		{ return "Pt::StringList"; }
-	};
+    template <>
+    struct TypeTraits<Pt::StringList> {
+        static const char* typeName()
+        { return "Pt::StringList"; }
+    };
 
 } // namespace Pt
 

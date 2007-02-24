@@ -29,8 +29,8 @@
 
 namespace Pt {
 
-    /**
-     * @brief A lightweight Character class (32 bits).
+    /** @brief Unicode capable character type
+     *  @ingroup Unicode
      *
      * Unicode characters are 32-bit entities. This class represents such an entity. It is lightweight, so it
      * can be used everywhere. Most compilers treat it like an unsigned int of 32 bits.

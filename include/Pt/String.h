@@ -34,9 +34,9 @@
 
 namespace std {
 
-/**
- * @brief A Unicode string-class.
- */
+/** @brief Unicode capable strings
+    @ingroup Unicode
+*/
 template <>
 class basic_string< Pt::Char > {
     public:
@@ -374,6 +374,9 @@ class basic_string< Pt::Char > {
 
 namespace Pt {
 
+    /** @brief Unicode capable strings
+        @ingroup Unicode
+    */
     typedef std::basic_string<Pt::Char> String;
 
 }

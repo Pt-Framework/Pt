@@ -33,11 +33,16 @@ namespace std {
 
     class PT_API codecvt_base;
 
+    /** @brief Codecvt localization facet
+        @ingroup Unicode
+    */
     template<>
     class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base {
 
 #else
-
+    /** @brief Codecvt localization facet
+        @ingroup Unicode
+    */
     template<>
     class PT_API codecvt<Pt::Char, char, mbstate_t> : public codecvt_base, public locale::facet {
 #endif

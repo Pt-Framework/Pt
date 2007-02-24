@@ -31,7 +31,8 @@
 
 namespace Pt {
 
-
+/** @internal
+*/
 class StringData {
     public:
 		typedef unsigned int atomic_type;
