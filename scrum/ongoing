@@ -21,6 +21,11 @@
 # Aloysius
 #
 
+ITEM P10 S8 "Signals and Delegates are implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
 ITEM P10 S5 "The AtomicInt class implements atomic operations"
     TASK "Review asm" blue_wind_25
     TASK "Write test case"
