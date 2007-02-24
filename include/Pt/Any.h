@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2004-2007 by Marc Boris Drner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,8 @@
 
 namespace Pt {
 
-    /** Contains any type
+    /** @brief Contains any type
+        @ingroup Reflection
 
         Any can contain any other type that is default- and copy constructible
         and less-than and equality comparable. The behaviour of types used in

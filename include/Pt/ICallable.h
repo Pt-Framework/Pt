@@ -25,6 +25,9 @@
 //! \addtogroup Pt
 namespace Pt {
 
+    /** @brief Interface for callable entities
+        @ingroup Reflection
+    */
     class PT_API ICallable
     {
         public:

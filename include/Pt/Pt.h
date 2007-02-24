@@ -20,20 +20,21 @@
 #ifndef Pt_h
 #define Pt_h
 
-/** \dir
-!!! Pt (module)
-\n
-!! The core module
-\n
-This module is the base module for all other modules. It provides
-basic types, support for byte-order handling and macros for conditional
-compilation. Support for object-modelling is included as well as the
-root of the exception hierachy.
-The core module introduces the namespace ptv and all extention modules
-use their own module-wide namespace i.e.The ptv-io module uses the
-ptv::io namespace.
+/** @defgroup Reflection
+    @brief Object reflection system
+
+    The Pt Reflection API offers support for properties and method invokation.
 */
 
+/** @namespace Pt
+    @brief Core module
+
+    This module is the base module for all other modules and has no dependency
+    to any system specific libraries except the standard c++ library. It
+    provides some basic types, support for byte-order handling, a CTTI system,
+    an unicode string and character class, reflection and a signals/delegates
+    based callback mechanism.
+*/
 namespace Pt {
 
     class Any;

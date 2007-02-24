@@ -28,6 +28,9 @@
 //! \addtogroup Pt
 namespace Pt {
 
+/** @brief Method invokation arguments
+    @ingroup Reflection
+*/
 class Args
 {
     public:

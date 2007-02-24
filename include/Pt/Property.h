@@ -49,6 +49,9 @@ class PT_API PropertyValue : public AbstractProperty
 };
 
 
+/** @brief Read-only property
+    @ingroup Reflection
+*/
 template <typename T>
 class ReadProperty : public PropertyValue
 {
@@ -68,6 +71,9 @@ class ReadProperty : public PropertyValue
 };
 
 
+/** @brief Write-only property
+    @ingroup Reflection
+*/
 template <typename T>
 class WriteProperty : public PropertyValue
 {
@@ -89,7 +95,9 @@ class WriteProperty : public PropertyValue
         }
 };
 
-
+/** @brief Readable and writable property
+    @ingroup Reflection
+*/
 template <typename T>
 class Property : public PropertyValue
 {
