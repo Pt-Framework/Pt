@@ -21,10 +21,9 @@
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
-        <li style="margin: 2px;"><a href="news.html" style="text-decoration: none;">News</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">License</a></li>
-        <li style="margin: 2px;"><a href="people.html" style="text-decoration: none;">People</a></li>
         <li style="margin: 2px;"><a href="acknowledgements.html" style="text-decoration: none;">Acknowledgements</a></li>
+        <li style="margin: 2px;"><a href="http://www.gnu.org/licenses/lgpl.html" style="text-decoration: none;">License</a></li>
+        <li style="margin: 2px;"><a href="people.html" style="text-decoration: none;">People</a></li>
         <li style="margin: 2px;"><a href="faq.html" style="text-decoration: none;">Frequently Asked Questions</a></li>
         </ul>
         </td>
@@ -41,10 +40,10 @@
         API Reference
         </th>
         <th bgcolor="#C30014">
-        Guidance
+        Features
         </th>
         <th bgcolor="#C30014">
-        Technologies
+        Tools
         </th>
         </tr>
         <tr style="color: rgb(0, 0, 0);">
@@ -62,17 +61,18 @@
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Reflection</a></li>
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">CTTI</a></li>
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Components</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">PLugins</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Plugins</a></li>
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">I/O Handling</a></li>
         <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Unit Testing</a></li>
         </ul>
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Cocurrency</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Unicode</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Network Programming</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">XML Processing</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Jam Build Tool</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Doxygen</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Subversion</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">GNU Toolset</a></li>
+        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">GNU for Win32</a></li>
         </ul>
         </td>
         </tr>

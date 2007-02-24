@@ -1,6 +1,6 @@
 /** \mainpage
 
-@section discover Discover the Platinum C++ Framework...
+<h1>Discover Discover the Platinum C++ Framework...</h1>
 
 Boost your daily performance with the Platinum C++ framework! With %Pt your
 applications are portable to many platforms without change. Its clean and
@@ -21,12 +21,35 @@ included in the framework.
 
 - <b>Easy to use</b> \n
 Platinum is designed from the ground up to be flexible and extensible.
-It provide simple solutions to your problems. Programs written with
+It provides simple solutions to your problems. Programs written with
 Platinum tend to be significantly shorter and much easier to understand.
 
 - <b>Open Source</b> \n
 Its not just open, its free! Published under the LGPL it allows you
-to write commercial application and be part of the great community that
+to write commercial applications and be part of the great community that
 develops PPR and determines its future.
+
+<h1>News</h1>
+
+<b> <em>25-02-2007, New Project Website</em> </b>\n
+The new project website integrates the generated doxygen documentation into the project pages. The online reference documentation was improved and contains class groups for easier navigation.
+
+<b> <em>05-02-2007, Sprint Results</em> </b>\n
+This slightly longer development sprint has lead to the TR-1 release. Many improvements have been made to the core module and the %Gfx module. A new module for network programming was added (%Pt::Net). %Pt can now be built wit the intel compiler on win32. The code is available as a tarball in the download section or as a tag in the subversion repository (tags/tr1).
+
+<b> <em>01-12-2006, Sprint Results</em> </b>\n
+During the last sprint, enhancements have been made to the %Gfx module and the core module, Most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
+
+<b> <em>01-11-2006, Scrum project management introduced</em> </b>\n
+The scrum system can now be used by developers to coordinate their efforts to
+improve %Pt. It is not mandatory to take part in the scrum process, but highly
+encouraged. Progress can be monitored on the "Project Status" link on the 
+%Pt website.
+
+<b> <em>14-10-2006, %Pt and Tntnet at LinuxWorldExpo in Cologne</em> </b>\n
+Platinum was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne in the open source pavillion.
+
+<b> <em>22-09-2006, %Pt on Sourceforge</em> </b>\n
+The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
 
 */
