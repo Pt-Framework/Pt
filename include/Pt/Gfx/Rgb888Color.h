@@ -196,9 +196,10 @@ namespace Pt {
         };
 
 
-        /** @brief Convert a Color<Rgb888> to a Color<ARgb>.
+        /** @brief Convert a Color<Rgb888, SrcTypeT> to a Color<ARgb, DstTypeT>.
          */
-        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<Rgb888>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline const Color<ARgb>& toARgb(Color<ARgb, DstTypeT>& to, const Color<Rgb888, SrcTypeT>& from)
         {
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
@@ -211,9 +212,10 @@ namespace Pt {
             return to;
         }
 
-        /** @brief Convert a Color<ARgb> to a Color<Rgb888>.
+        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<Rgb888, DstTypeT>.
          */
-        inline void fromARgb(Color<Rgb888>& to, const Color<ARgb>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void fromARgb(Color<Rgb888, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         {
             // 33333333222222221111111100000000
             // 76543210765432107654321076543210
@@ -235,14 +237,16 @@ namespace Pt {
         inline void assign(Color<Rgb888, DstTypeT>& to, const Color<Rgb888, SrcTypeT>& from)
         { to.setValue(from.value()); }
 
-        /** @brief Assign a Color<ARgb> to a Color<Rgb888>.
+        /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<Rgb888, DstTypeT>.
          */
-        inline void assign(Color<Rgb888>& to, const Color<ARgb>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<Rgb888, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         { fromARgb(to, from); }
 
-        /** @brief Assign a Color<Rgb888> to a Color<ARgb>.
+        /** @brief Assign a Color<Rgb888, SrcTypeT> to a Color<ARgb, DstTypeT>.
          */
-        inline void assign(Color<ARgb>& to, const Color<Rgb888>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgb, DstTypeT>& to, const Color<Rgb888, SrcTypeT>& from)
         {
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
@@ -254,9 +258,10 @@ namespace Pt {
             to.setBlue ( ((tb + !!tb) << 8) - !!tb );
         }
 
-        /** @brief Assign an Color<Rgb888> to an Color<ARgbF>.
+        /** @brief Assign an Color<Rgb888, SrcTypeT> to an Color<ARgbF, DstTypeT>.
          */
-        inline void assign(Color<ARgbF>& to, const Color<Rgb888>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgbF, DstTypeT>& to, const Color<Rgb888, SrcTypeT>& from)
         {
             to.setAlpha( 1.0f                         );
             to.setRed  ( float(from.red  ()) / 255.0f );
@@ -265,30 +270,34 @@ namespace Pt {
         }
 
         // No need to overload for:
-        //   void assign(Color<Rgb888>& to, const Color<ARgbF>& from)
+        //   void assign(Color<Rgb888, DstTypeT>& to, const Color<ARgbF, SrcTypeT>& from)
         // beause there is no more direct method to do this yet instead of
         // converting to the master color format first.
 
 
-        /** @brief Equality operator for Color<Rgb888> comparison.
+        /** @brief Equality operator for Color<Rgb888, TypeT> comparison.
          */
-        inline bool operator==(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
+        template<typename TypeT>
+        inline bool operator==(const Color<Rgb888, TypeT>& c1, const Color<Rgb888, TypeT>& c2)
         { return c1.value()==c2.value(); }
 
-        /** @brief Less-than operator for Color<Rgb888> comparison.
+        /** @brief Less-than operator for Color<Rgb888, TypeT> comparison.
          */
-        inline bool operator<(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
+        template<typename TypeT>
+        inline bool operator<(const Color<Rgb888, TypeT>& c1, const Color<Rgb888, TypeT>& c2)
         { return c1.value()<c2.value(); }
 
-        /** @brief Greater-than operator for Color<Rgb888> comparison.
+        /** @brief Greater-than operator for Color<Rgb888, TypeT> comparison.
          */
-        inline bool operator>(const Color<Rgb888>& c1, const Color<Rgb888>& c2)
+        template<typename TypeT>
+        inline bool operator>(const Color<Rgb888, TypeT>& c1, const Color<Rgb888, TypeT>& c2)
         { return c1.value()>c2.value(); }
 
 
-        /** @brief Make the greyscale version of the source Color<Rgb888> color.
+        /** @brief Make the greyscale version of the source Color<Rgb888, TypeT> color.
          */
-        inline Color<Rgb888>& greyscale(Color<Rgb888>& to, const Color<Rgb888>& from)
+        template<typename TypeT>
+        inline Color<Rgb888>& greyscale(Color<Rgb888, TypeT>& to, const Color<Rgb888, TypeT>& from)
         {
             const uint32_t r = from.red();
             const uint32_t g = from.green();
@@ -306,10 +315,10 @@ namespace Pt {
         }
 
 
-        /** @brief Mix two Color<Rgb888>s using the given mixing factor.
+        /** @brief Mix two Color<Rgb888, TypeT>s using the given mixing factor.
          */
-        template <typename FactorT>
-        inline void mixColor(Color<Rgb888>& dst, const Color<Rgb888>& src, const FactorT& factor)
+        template <typename TypeT, typename FactorT>
+        inline void mixColor(Color<Rgb888, TypeT>& dst, const Color<Rgb888, TypeT>& src, const FactorT& factor)
         {
             // TODO: Write it !!!
         }

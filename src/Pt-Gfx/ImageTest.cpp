@@ -34,12 +34,14 @@ using namespace Pt::Gfx;
 
 int main( int argc, char* argv[] )
 {
-    ARgbInterleavedImage     argb_1;
-    ARgbFInterleavedImage    argbf_1;
-    ARgb8888InterleavedImage argb8888_1;
-    Rgb888InterleavedImage   rgb888_1;
-    Rgb565InterleavedImage   rgb565_1;
-    Rgb555InterleavedImage   rgb555_1;
+    ARgbInterleavedImage     iargb_1;
+    ARgbFInterleavedImage    iargbf_1;
+    ARgb8888InterleavedImage iargb8888_1;
+    Rgb888InterleavedImage   irgb888_1;
+    Rgb565InterleavedImage   irgb565_1;
+    Rgb555InterleavedImage   irgb555_1;
+
+    ARgbPlanarImage          pargb_1;
 
     return 0;
 }

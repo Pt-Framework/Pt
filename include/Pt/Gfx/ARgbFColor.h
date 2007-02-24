@@ -182,9 +182,10 @@ namespace Pt {
     if(sChn > 0.0f) dVar = uint16_t(sChn * 65535.0f); \
     if(sChn > 1.0f) dVar = 65535
 
-        /** @brief Convert a Color<ARgbF> to a Color<ARgb>.
+        /** @brief Convert a Color<ARgbF, SrcTypeT> to a Color<ARgb, DstTypeT>.
          */
-        inline const Color<ARgb>& toARgb(Color<ARgb> &to, const Color<ARgbF>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline const Color<ARgb>& toARgb(Color<ARgb, DstTypeT> &to, const Color<ARgbF, SrcTypeT>& from)
         {
             Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
             Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
@@ -198,9 +199,10 @@ namespace Pt {
             return to;
         }
 
-        /** @brief Convert a Color<ARgb> to a Color<ARgbF>.
+        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgbF, DstTypeT>.
          */
-        inline void fromARgb(Color<ARgbF>& to, const Color<ARgb>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void fromARgb(Color<ARgbF, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         {
             to.setAlpha( float( from.alpha() ) / 65535.0f );
             to.setRed  ( float( from.red  () ) / 65535.0f );
@@ -223,14 +225,16 @@ namespace Pt {
             to.setBlue (from.blue ());
         }
 
-        /** @brief Assign a Color<ARgb> to a Color<ARgbF>.
+        /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<ARgbF, DstTypeT>.
          */
-        inline void assign(Color<ARgbF>& to, const Color<ARgb>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgbF, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         { fromARgb(to, from); }
 
-        /** @brief Assign a Color<RgbF> to a Color<ARgb>.
+        /** @brief Assign a Color<RgbF, SrcTypeT> to a Color<ARgb, DstTypeT>.
          */
-        inline void assign(Color<ARgb>& to, const Color<ARgbF>& from)
+        template<typename DstTypeT, typename SrcTypeT>
+        inline void assign(Color<ARgb, DstTypeT>& to, const Color<ARgbF, SrcTypeT>& from)
         {
             Pt_Gfx_ARgbFColor_h_convert(a, from, alpha);
             Pt_Gfx_ARgbFColor_h_convert(r, from, red  );
@@ -246,25 +250,29 @@ namespace Pt {
 #undef Pt_Gfx_ARgbFColor_h_convert
 
 
-        /** @brief Equality operator for Color<ARgbF> comparison.
+        /** @brief Equality operator for Color<ARgbF, TypeT> comparison.
          */
-        inline bool operator==(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        template<typename TypeT>
+        inline bool operator==(const Color<ARgbF, TypeT>& c1, const Color<ARgbF, TypeT>& c2)
         { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
-        /** @brief Less-than operator for Color<ARgbF> comparison.
+        /** @brief Less-than operator for Color<ARgbF, TypeT> comparison.
          */
-        inline bool operator<(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        template<typename TypeT>
+        inline bool operator<(const Color<ARgbF, TypeT>& c1, const Color<ARgbF, TypeT>& c2)
         { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
-        /** @brief Greater-than operator for Color<ARgbF> comparison.
+        /** @brief Greater-than operator for Color<ARgbF, TypeT> comparison.
          */
-        inline bool operator>(const Color<ARgbF>& c1, const Color<ARgbF>& c2)
+        template<typename TypeT>
+        inline bool operator>(const Color<ARgbF, TypeT>& c1, const Color<ARgbF, TypeT>& c2)
         { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
 
-        /** @brief Make the greyscale version of the source Color<ARgbF> color.
+        /** @brief Make the greyscale version of the source Color<ARgbF, TypeT> color.
          */
-        inline Color<ARgbF>& greyscale(Color<ARgbF>& to, const Color<ARgbF>& from)
+        template<typename TypeT>
+        inline Color<ARgbF>& greyscale(Color<ARgbF, TypeT>& to, const Color<ARgbF, TypeT>& from)
         {
             const float s = from.red()*0.3f + from.green()*0.5f + from.blue()*0.2f;
 
@@ -277,10 +285,10 @@ namespace Pt {
         }
 
 
-        /** @brief Mix two Color<ARgbF>s using the given mixing factor.
+        /** @brief Mix two Color<ARgbF, TypeT>s using the given mixing factor.
          */
-        template <typename FactorT>
-        inline void mixColor(Color<ARgbF>& dst, const Color<ARgbF>& src, const FactorT& factor)
+        template <typename TypeT, typename FactorT>
+        inline void mixColor(Color<ARgbF, TypeT>& dst, const Color<ARgbF, TypeT>& src, const FactorT& factor)
         {
             // TODO: Write it !!!
         }
