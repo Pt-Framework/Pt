@@ -21,6 +21,8 @@
 #define Pt_Gfx_ARgbColorRef_h
 
 #include <Pt/Gfx/ARgbColor.h>
+#include <Pt/Math/Rect.h>
+
 #include <limits>
 #include <vector>
 
@@ -140,18 +142,22 @@ namespace Pt {
 
                     inline ColorPtrT(std::vector<ComponentT*>& chanPtr,
                                      size_t                    imageWidth,
+                                     size_t                    imageHeight,
                                      size_t                    posX,
                                      size_t                    posY)
+                    : _imgW(imageWidth), _imgH(imageHeight)
                     {
                         // In this ARgbColorRef, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth + posX;
 
+                        _chnAStart = chanPtr[0];
+
                         _chnA = chanPtr[0] + pos; // A is channel #0
-                        _chnR = chanPtr[1] + pos; // R is channel #0
-                        _chnG = chanPtr[2] + pos; // G is channel #0
-                        _chnB = chanPtr[3] + pos; // B is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #1
+                        _chnG = chanPtr[2] + pos; // G is channel #2
+                        _chnB = chanPtr[3] + pos; // B is channel #3
                     }
 
                     inline ARgbColorRef operator*()
@@ -175,11 +181,20 @@ namespace Pt {
                     inline bool operator!=(const ColorPtrT& c) const
                     { return _chnA!=c._chnA || _chnR!=c._chnR || _chnG!=c._chnG || _chnB!=c._chnB; }
 
+                    inline Math::Point currentXYPosition() const
+                    {
+                        const size_t pos = _chnA - _chnAStart;
+                        return Math::Point(pos/_imgH, pos/_imgW);
+                    }
+
                 private:
-                    uint16_t* _chnA;
+                    uint16_t* _chnAStart; // Becase all channel are at the same size, just
+                    uint16_t* _chnA;      // use the alpha channel the master channel
                     uint16_t* _chnR;
                     uint16_t* _chnG;
                     uint16_t* _chnB;
+
+                    size_t    _imgW, _imgH;
             };
 
             // Constant color pointer class for ARgbColorRef color model.
@@ -191,18 +206,22 @@ namespace Pt {
 
                     inline ConstColorPtrT(const std::vector<ComponentT*>& chanPtr,
                                           size_t                          imageWidth,
+                                          size_t                          imageHeight,
                                           size_t                          posX,
                                           size_t                          posY)
+                    : _imgW(imageWidth), _imgH(imageHeight)
                     {
                         // In this ARgbColorRef, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth + posX;
 
+                        _chnAStart = chanPtr[0];
+
                         _chnA = chanPtr[0] + pos; // A is channel #0
-                        _chnR = chanPtr[1] + pos; // R is channel #0
-                        _chnG = chanPtr[2] + pos; // G is channel #0
-                        _chnB = chanPtr[3] + pos; // B is channel #0
+                        _chnR = chanPtr[1] + pos; // R is channel #1
+                        _chnG = chanPtr[2] + pos; // G is channel #2
+                        _chnB = chanPtr[3] + pos; // B is channel #3
                     }
 
                     inline ARgbColor operator*() const
@@ -226,11 +245,20 @@ namespace Pt {
                     inline bool operator!=(const ConstColorPtrT& c) const
                     { return _chnA!=c._chnA || _chnR!=c._chnR || _chnG!=c._chnG || _chnB!=c._chnB; }
 
+                    inline Math::Point currentXYPosition() const
+                    {
+                        const size_t pos = _chnA - _chnAStart;
+                        return Math::Point(pos/_imgH, pos/_imgW);
+                    }
+
                 private:
-                    const uint16_t* _chnA;
+                    const uint16_t* _chnAStart; // Becase all channel are at the same size, just
+                    const uint16_t* _chnA;      // use the alpha channel the master channel
                     const uint16_t* _chnR;
                     const uint16_t* _chnG;
                     const uint16_t* _chnB;
+
+                    size_t          _imgW, _imgH;
             };
 
 

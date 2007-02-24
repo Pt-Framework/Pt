@@ -246,17 +246,17 @@ namespace Pt {
                         inline PixelIterator operator+=(size_t n)
                         { _pixel += n; return *this; }
 
-                        inline Math::Size operator-(const PixelIterator& other)
+                        inline Math::Size operator-(const PixelIterator& other) const
                         {
-                            const size_t pos         = _pixel - _image->data();
-                            const size_t width       = pos / _image->height();
-                            const size_t height      = pos / _image->width();
+                            const size_t pos    = _pixel - _image->data();
+                            const size_t width  = pos / _image->height();
+                            const size_t height = pos / _image->width();
 
                             const size_t otherPos    = other._pixel - other._image->data();
                             const size_t otherWidth  = otherPos / other._image->height();
                             const size_t otherHeight = otherPos / other._image->width();
 
-                            return Math::Size(width - otherWidth, height -otherHeight);
+                            return Math::Size(width - otherWidth, height - otherHeight);
                         }
 
                     private:
@@ -302,17 +302,17 @@ namespace Pt {
                         inline ConstPixelIterator operator+=(size_t n)
                         { _pixel += n; return *this; }
 
-                        inline Math::Size operator-(const ConstPixelIterator& other)
+                        inline Math::Size operator-(const ConstPixelIterator& other) const
                         {
-                            const size_t pos         = _pixel - _image->data();
+                            const size_t pos    = _pixel - _image->data();
+                            const size_t width  = pos / _image->height();
+                            const size_t height = pos / _image->width();
+
                             const size_t otherPos    = other._pixel - other._image->data();
                             const size_t otherWidth  = otherPos / other._image->height();
                             const size_t otherHeight = otherPos / other._image->width();
 
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
-
-                            return Math::Size(width - otherWidth, height -otherHeight);
+                            return Math::Size(width - otherWidth, height - otherHeight);
                         }
 
                     private:

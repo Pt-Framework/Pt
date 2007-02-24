@@ -22,7 +22,6 @@
 
 #include <Pt/Exception.h>
 #include <Pt/Gfx/ARgbFColorRef.h>
-#include <Pt/Math/Rect.h>
 
 #include <vector>
 
@@ -151,14 +150,14 @@ namespace Pt {
                 /** @brief Random pixel access without range check.
                  */
                 inline ColorRefT pixel(int x, int y)
-                { return *ColorPtrT(_chanPtr, _width, x, y); }
+                { return *ColorPtrT(_chanPtr, _width, _height, x, y); }
 
                 /** @brief Random pixel access without range check.
                  */
                 inline const ColorT pixel(int x, int y) const
                 {
                     ColorT col;
-                    assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+                    assign(col, *ConstColorPtrT(_chanPtr, _width, _height, x, y));
                     return col;
                 }
 
@@ -241,7 +240,7 @@ namespace Pt {
                         {}
 
                         inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(ColorPtrT(image._chanPtr, image._width, x, y))
+                        : _image(&image), _pixel(ColorPtrT(image._chanPtr, image._width, image._height, x, y))
                         {}
 
                         inline PixelIterator operator=(PixelIterator other)
@@ -263,21 +262,13 @@ namespace Pt {
                         inline PixelIterator operator+=(size_t n)
                         { _pixel += n; return *this; }
 
-                        inline Math::Size operator-(const PixelIterator& other)
+                        inline Math::Size operator-(const PixelIterator& other) const
                         {
-                            // TODO: WRITE IT !!!
-#if 0
-                            const size_t pos         = _pixel - _image->data();
-                            const size_t otherPos    = other._pixel - other._image->data();
-                            const size_t otherWidth  = otherPos / other._image->height();
-                            const size_t otherHeight = otherPos / other._image->width();
 
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
+                            const Math::Point& a = _pixel.currentXYPosition();
+                            const Math::Point& b = other._pixel.currentXYPosition();
 
-                            return Math::Size(width - otherWidth, height -otherHeight);
-#endif
-                            return Math::Size(0, 0);
+                            return Math::Size(a.x()-b.x(), a.y()-b.y());
                         }
 
                     private:
@@ -301,7 +292,7 @@ namespace Pt {
                         {}
 
                         inline ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(ConstColorPtrT(image._chanPtr, image._width, x, y))
+                        : _image(&image), _pixel(ConstColorPtrT(image._chanPtr, image._width, image._height, x, y))
                         {}
 
                         inline ConstPixelIterator operator=(ConstPixelIterator other)
@@ -327,21 +318,13 @@ namespace Pt {
                         inline ConstPixelIterator operator+=(size_t n)
                         { _pixel += n; return *this; }
 
-                        inline Math::Size operator-(const PixelIterator& other)
+                        inline Math::Size operator-(const ConstPixelIterator& other) const
                         {
-                            // TODO: WRITE IT !!!
-#if 0
-                            const size_t pos         = _pixel - _image->data();
-                            const size_t otherPos    = other._pixel - other._image->data();
-                            const size_t otherWidth  = otherPos / other._image->height();
-                            const size_t otherHeight = otherPos / other._image->width();
 
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
+                            const Math::Point& a = _pixel.currentXYPosition();
+                            const Math::Point& b = other._pixel.currentXYPosition();
 
-                            return Math::Size(width - otherWidth, height -otherHeight);
-#endif
-                            return Math::Size(0, 0);
+                            return Math::Size(a.x()-b.x(), a.y()-b.y());
                         }
 
                     private:

@@ -80,7 +80,7 @@ namespace Pt {
         template <typename ColorRefT_, typename ColorTraitsT_>
         PlanarImage<ColorRefT_, ColorTraitsT_>& PlanarImage<ColorRefT_, ColorTraitsT_>::operator=(const ColorT& fill)
         {
-            ColorPtrT ptr(_chanPtr, _width, 0, 0);
+            ColorPtrT ptr(_chanPtr, _width, _height, 0, 0);
 
             for(size_t i = 0; i < _width*_height; ++i) {
                 *ptr = fill;
@@ -112,7 +112,7 @@ namespace Pt {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
-            return *ColorPtrT(_chanPtr, _width, x, y);
+            return *ColorPtrT(_chanPtr, _width, _height, x, y);
         }
 
         template <typename ColorRefT_, typename ColorTraitsT_>
@@ -122,7 +122,7 @@ namespace Pt {
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
 
             ColorT col;
-            assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+            assign(col, *ConstColorPtrT(_chanPtr, _width, _height, x, y));
             return col;
         }
 
@@ -132,7 +132,7 @@ namespace Pt {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
 
             ColorT col;
-            assign(col, *ConstColorPtrT(_chanPtr, _width, x, y));
+            assign(col, *ConstColorPtrT(_chanPtr, _width, _height, x, y));
             return col;
         }
 
@@ -141,7 +141,7 @@ namespace Pt {
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
 
-            *ColorPtrT(_chanPtr, _width, x, y) = color_;
+            *ColorPtrT(_chanPtr, _width, _height, x, y) = color_;
         }
 
     } // namespace Gfx
