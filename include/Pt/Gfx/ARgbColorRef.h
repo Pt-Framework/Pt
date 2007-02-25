@@ -36,8 +36,7 @@ namespace Pt {
          *
          *  @see ARgbColor.
          */
-        template <>
-        class PT_GFX_API Color<ARgb, ReferenceType> {
+        class PT_GFX_API ARgbColorRef {
             public:
                 /** @brief Non-reference type (container type) of this color.
                  */
@@ -46,31 +45,36 @@ namespace Pt {
             public:
                 /** @brief This constructor will take reference to the real storage.
                  */
-                inline Color(uint16_t &a, uint16_t &r, uint16_t &g, uint16_t &b)
+                inline ARgbColorRef(uint16_t &a, uint16_t &r, uint16_t &g, uint16_t &b)
                 : _a(a), _r(r), _g(g), _b(b)
                 {}
 
+                /** @brief Copy constructor.
+                 */
+                inline ARgbColorRef(const ARgbColorRef& c)
+                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
+                {}
 
                 /** @see ARgbColor. */
-                inline Color& operator=(const Color& c)
+                inline ARgbColorRef& operator=(const ARgbColorRef& c)
                 { _a = c._a; _r = c._r; _g = c._g; _b = c._b; return *this; }
 
                 /** @see ARgbColor. */
-                inline Color& operator=(const Color<ARgb>& c)
+                inline ARgbColorRef& operator=(const Color<ARgb>& c)
                 { _a = c.alpha(); _r = c.red(); _g = c.green(); _b = c.blue(); return *this; }
 
                 /** @see ARgbColor. */
                 template <typename ColorT>
-                inline Color& operator=(const ColorT& color)
+                inline ARgbColorRef& operator=(const ColorT& color)
                 { assign(*this, color); return *this; }
 
 
                 /** @see ARgbColor. */
-                inline Color& operator+=(const Color& c)
+                inline ARgbColorRef& operator+=(const ARgbColorRef& c)
                 { _a += c._a; _r += c._r; _g += c._g; _b += c._b; return *this; }
 
                 /** @see ARgbColor. */
-                inline Color& operator-=(const Color& c)
+                inline ARgbColorRef& operator-=(const ARgbColorRef& c)
                 { _a -= c._a; _r -= c._r; _g -= c._g; _b -= c._b; return *this; }
 
 
@@ -111,17 +115,22 @@ namespace Pt {
                 uint16_t &_a, &_r, &_g, &_b;
         };
 
+        inline void assign(ARgbColor& to, const ARgbColorRef& from)
+        {
+            assignByARgb(to, from);
+        }
 
         /** @brief Convenience access to the reference-type 64-Bit ARGB color model.
          *  @ingroup Gfx
          */
-        typedef Color<ARgb, ReferenceType> ARgbColorRef;
+        //typedef Color<ARgb, ReferenceType> ARgbColorRef;
 
 
         /** @brief Full specialisation of the color traits class for ARgbColorRef.
          */
         template <>
-        struct ColorTraits<ARgbColorRef> {
+        struct ColorTraits<ARgbColorRef>
+        {
             typedef uint16_t ComponentT; // Value type of the components
             typedef uint32_t TmpValueT;  // Temporary value type to be used when
                                          // performing arithmetic on the components

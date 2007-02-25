@@ -202,6 +202,20 @@ namespace Pt {
             to.setBlue (from.blue ());
         }
 
+        /** @brief Assign colors via ARgb intermediate
+            @internal
+
+            This is an implemntation function for all overloads of assign()
+            for two colors that are implemnted using toARgb() and fromARgb()
+        */
+        template<typename ColorA, typename ColorB>
+        inline void assignByARgb(ColorA& to, const ColorB& from)
+        {
+            to.setAlpha( from.alpha() );
+            to.setRed  ( from.red  () );
+            to.setGreen( from.green() );
+            to.setBlue ( from.blue () );
+        }
 
         /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
          *
@@ -211,10 +225,7 @@ namespace Pt {
         template<typename DstTypeT, typename SrcTypeT>
         inline void assign(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
         {
-            to.setAlpha(from.alpha());
-            to.setRed  (from.red  ());
-            to.setGreen(from.green());
-            to.setBlue (from.blue ());
+            assignByARgb(to, from);
         }
 
 

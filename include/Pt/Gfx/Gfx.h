@@ -67,7 +67,7 @@ namespace Pt {
         typedef Color<Rgb565,   ContainerType> Rgb565Color;
         typedef Color<Rgb555,   ContainerType> Rgb555Color;
 
-        typedef Color<ARgb,     ReferenceType> ARgbColorRef;
+        //typedef Color<ARgb,     ReferenceType> ARgbColorRef;
         typedef Color<ARgbF,    ReferenceType> ARgbFColorRef;
         typedef Color<ARgb8888, ReferenceType> ARgb8888ColorRef;
         typedef Color<Rgb888,   ReferenceType> Rgb888ColorRef;
