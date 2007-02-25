@@ -36,7 +36,6 @@ namespace Pt {
          *
          *  @see ARgbColor.
          */
-
         template <>
         class PT_GFX_API Color<ARgb, ReferenceType> {
             public:
@@ -49,12 +48,6 @@ namespace Pt {
                  */
                 inline Color(uint16_t &a, uint16_t &r, uint16_t &g, uint16_t &b)
                 : _a(a), _r(r), _g(g), _b(b)
-                {}
-
-                /** @brief Copy constructor.
-                 */
-                inline Color(const Color& c)
-                : _a(c._a), _r(c._r), _g(c._g), _b(c._b)
                 {}
 
 
@@ -189,7 +182,7 @@ namespace Pt {
 
                 private:
                     uint16_t* _chnAStart; // Becase all channel are at the same size, just
-                    uint16_t* _chnA;      // use the alpha channel the master channel
+                    uint16_t* _chnA;      // use the alpha channel as the master channel
                     uint16_t* _chnR;
                     uint16_t* _chnG;
                     uint16_t* _chnB;
@@ -253,7 +246,7 @@ namespace Pt {
 
                 private:
                     const uint16_t* _chnAStart; // Becase all channel are at the same size, just
-                    const uint16_t* _chnA;      // use the alpha channel the master channel
+                    const uint16_t* _chnA;      // use the alpha channel as the master channel
                     const uint16_t* _chnR;
                     const uint16_t* _chnG;
                     const uint16_t* _chnB;
