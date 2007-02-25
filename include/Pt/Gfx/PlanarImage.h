@@ -34,7 +34,7 @@ namespace Pt {
          *  @ingroup Gfx
          *
          *  There are two common memory structures for an image:
-         *    - Planar image which is represented by grouping the pixels together
+         *    - Interleaved image which is represented by grouping the pixels together
          *      in memory and interleaving all channels together.
          *    - Planar images which is represented by keeping the channels in separate
          *      color planes (blocks of memory). One block to the other blocks may or
