@@ -34,7 +34,7 @@ namespace Pt {
          *
          *  <B>This is the master interleaved image model</B>
          */
-        typedef InterleavedImage<ARgbColor, ColorTraits<ARgbColor> > ARgbInterleavedImage;
+        typedef InterleavedImage<ARgbColor> ARgbInterleavedImage;
 
 
         /** @brief Standard interleaved ARgb subimage class.

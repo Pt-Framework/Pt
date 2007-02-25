@@ -158,8 +158,7 @@ namespace Pt {
         typedef Color<ARgb> ARgbColor;
 
 
-        /** @brief Full specialisation of the color traits class for ARgbColor.
-         */
+/*
         template <>
         struct ColorTraits<ARgbColor> {
             typedef uint16_t ComponentT;
@@ -171,7 +170,7 @@ namespace Pt {
             typedef Color<ARgb>*       ScanlineT;
             typedef const Color<ARgb>* ConstScanlineT;
         };
-
+*/
 
         /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
          *
@@ -188,6 +187,7 @@ namespace Pt {
             return to;
         }
 
+
         /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
          *
          *  This function is implemented so that conversion between ContainerType
@@ -202,32 +202,6 @@ namespace Pt {
             to.setBlue (from.blue ());
         }
 
-        /** @brief Assign colors via ARgb intermediate
-            @internal
-
-            This is an implemntation function for all overloads of assign()
-            for two colors that are implemnted using toARgb() and fromARgb()
-        */
-        template<typename ColorA, typename ColorB>
-        inline void assignByARgb(ColorA& to, const ColorB& from)
-        {
-            to.setAlpha( from.alpha() );
-            to.setRed  ( from.red  () );
-            to.setGreen( from.green() );
-            to.setBlue ( from.blue () );
-        }
-
-        /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
-         *
-         *  This function is implemented so that assignment between ContainerType
-         *  ARgb color and ReferenceType ARgb color is possible.
-         */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void assign(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
-        {
-            assignByARgb(to, from);
-        }
-
 
         /** @brief Equality operator for Color<ARgb, TypeT> comparison.
          */
@@ -235,11 +209,13 @@ namespace Pt {
         inline bool operator==(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
         { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
+
         /** @brief Less-than operator for Color<ARgb, TypeT> comparison.
          */
         template<typename TypeT>
         inline bool operator<(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
         { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
+
 
         /** @brief Greater-than operator for Color<ARgb, TypeT> comparison.
          */
@@ -266,17 +242,16 @@ namespace Pt {
 
         /** @brief Mix two Color<ARgb, TypeT>s using the given mixing factor.
          */
-        template <typename TypeT, typename FactorT>
-        inline void blend(Color<ARgb, TypeT>& dst, const Color<ARgb, TypeT>& src, const FactorT& factor)
+        template <typename TypeT>
+        inline void blend(Color<ARgb, TypeT>& dst, const Color<ARgb, TypeT>& src, const uint16_t factor)
         {
-            assert(  std::numeric_limits<FactorT>::is_integer );
-            assert( !std::numeric_limits<FactorT>::is_signed  );
+            //assert(  std::numeric_limits<FactorT>::is_integer );
+            //assert( !std::numeric_limits<FactorT>::is_signed  );
 
-            typedef typename ColorTraits  < Color<ARgb, TypeT>  >::TmpValueT TmpValueT;
-            typedef typename LargestSizeOf< TmpValueT , FactorT >::Result    ValueT;
+            typedef unsigned long ValueT;
 
             const ValueT oF = factor;
-            const ValueT rF = std::numeric_limits<FactorT>::max() - oF;
+            const ValueT rF = std::numeric_limits<uint16_t>::max() - factor;
 
             const ValueT dA = ValueT( dst.alpha() ) * rF;
             const ValueT dR = ValueT( dst.red()   ) * rF;

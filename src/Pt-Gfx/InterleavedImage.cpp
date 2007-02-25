@@ -37,12 +37,12 @@ namespace Pt {
 #ifdef __GNUC__
 
         // Explicit instantiation of the standard interleaved image classes
-        template class InterleavedImage<ARgbColor,     ColorTraits<ARgbColor> >;
-        template class InterleavedImage<ARgbFColor,    ColorTraits<ARgbFColor> >;
-        template class InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> >;
-        template class InterleavedImage<Rgb888Color,   ColorTraits<Rgb888Color> >;
-        template class InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >;
-        template class InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >;
+        template class InterleavedImage<ARgbColor>;
+        template class InterleavedImage<ARgbFColor>;
+        template class InterleavedImage<ARgb8888Color>;
+        template class InterleavedImage<Rgb888Color>;
+        template class InterleavedImage<Rgb565Color>;
+        template class InterleavedImage<Rgb555Color>;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
         template class SubImage<ARgbInterleavedImage>;

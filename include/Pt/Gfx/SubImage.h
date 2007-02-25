@@ -37,13 +37,12 @@ namespace Pt {
                 typedef ImageT_  ImageT;
 
                 typedef typename ImageT::ColorT       ColorT;
-                typedef typename ImageT::ColorTraitsT ColorTraitsT;
 
-                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
-                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
+                typedef typename ImageT::ScanlineT      ScanlineT;
+                typedef typename ImageT::ConstScanlineT ConstScanlineT;
 
-                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
-                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
+                typedef typename ImageT::ColorPtrT      ColorPtrT;
+                typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
 
             public:
                 class PixelIterator;
@@ -183,9 +182,8 @@ namespace Pt {
                  */
                 class PixelIterator {
                     public:
-                        typedef typename ImageT_::ColorT       ColorT;
-                        typedef typename ImageT_::ColorTraitsT ColorTraitsT;
-                        typedef ImageT_                        ImageT;
+                        typedef typename ImageT_::ColorT ColorT;
+                        typedef ImageT_ ImageT;
 
                     public:
                         inline PixelIterator(SubImage& image)
@@ -221,7 +219,7 @@ namespace Pt {
                         }
 
                     private:
-                        typedef typename ColorTraits<ColorT>::ColorPtrT ColorPtrT;
+                        typedef typename ImageT::ColorPtrT ColorPtrT;
 
                     private:
                         ColorPtrT _pixel;
@@ -235,9 +233,9 @@ namespace Pt {
                  */
                 class ConstPixelIterator {
                     public:
-                        typedef typename ImageT_::ColorT       ColorT;
-                        typedef typename ImageT_::ColorTraitsT ColorTraitsT;
-                        typedef ImageT_                        ImageT;
+                        typedef ImageT_ ImageT;
+                        typedef typename ImageT::ColorT ColorT;
+
 
                     public:
                         inline ConstPixelIterator(const SubImage& image)
@@ -275,7 +273,7 @@ namespace Pt {
                         }
 
                     private:
-                        typedef typename ColorTraits<ColorT>::ConstColorPtrT ConstColorPtrT;
+                        typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
 
                     private:
                         ConstColorPtrT _pixel;

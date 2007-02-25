@@ -44,17 +44,16 @@ namespace Pt {
          *  This InterleavedImage<typename ColorT, typename ColorTraitsT> class is
          *  meant to be used for implementing interleaved images.
          */
-        template <typename ColorT_, typename ColorTraitsT_ = ColorTraits< Color<ColorT_> > >
+        template <typename ColorT_>
         class /*PT_GFX_API*/ InterleavedImage {
             public:
                 typedef ColorT_       ColorT;
-                typedef ColorTraitsT_ ColorTraitsT;
 
-                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
-                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
+                typedef ColorT*       ColorPtrT;
+                typedef const ColorT* ConstColorPtrT;
 
-                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
-                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
+                typedef ColorT*       ScanlineT;
+                typedef const ColorT* ConstScanlineT;
 
             public:
                 class PixelIterator;
@@ -214,9 +213,8 @@ namespace Pt {
                 class PixelIterator
                 {
                     public:
-                        typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT                  ColorT;
-                        typedef typename ImageT::ColorTraitsT            ColorTraitsT;
+                        typedef InterleavedImage<ColorT_> ImageT;
+                        typedef typename ImageT::ColorT   ColorT;
 
                     public:
                         inline PixelIterator()
@@ -270,9 +268,8 @@ namespace Pt {
                 class ConstPixelIterator
                 {
                     public:
-                        typedef InterleavedImage<ColorT_, ColorTraitsT_> ImageT;
-                        typedef typename ImageT::ColorT                  ColorT;
-                        typedef typename ImageT::ColorTraitsT            ColorTraitsT;
+                        typedef InterleavedImage<ColorT_> ImageT;
+                        typedef typename ImageT::ColorT   ColorT;
 
                     public:
                         inline ConstPixelIterator()

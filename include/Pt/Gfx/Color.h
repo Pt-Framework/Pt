@@ -40,6 +40,13 @@ namespace Pt {
          */
         struct ReferenceType {};
 
+        /** @brief Category for interleaved images
+         */
+        struct Interleaved {};
+
+        /** @brief Category for planar images
+         */
+        struct Planar {};
 
         /** @brief Basic template declaration of color classes.
          *  @ingroup Gfx

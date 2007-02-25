@@ -79,15 +79,15 @@ namespace Pt {
         // Foward declarations of standards interleaved image classes
         //
 
-        template <typename ColorT_, typename ColorTraitsT_>
+        template <typename ColorT_>
         class InterleavedImage;
 
-        typedef InterleavedImage<ARgbColor,     ColorTraits<ARgbColor> >     ARgbInterleavedImage;
-        typedef InterleavedImage<ARgbFColor,    ColorTraits<ARgbFColor> >    ARgbFInterleavedImage;
-        typedef InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> > ARgb8888InterleavedImage;
-        typedef InterleavedImage<Rgb888Color,   ColorTraits<Rgb888Color> >   Rgb888InterleavedImage;
-        typedef InterleavedImage<Rgb565Color,   ColorTraits<Rgb565Color> >   Rgb565InterleavedImage;
-        typedef InterleavedImage<Rgb555Color,   ColorTraits<Rgb555Color> >   Rgb555InterleavedImage;
+        typedef InterleavedImage<ARgbColor>     ARgbInterleavedImage;
+        typedef InterleavedImage<ARgbFColor>    ARgbFInterleavedImage;
+        typedef InterleavedImage<ARgb8888Color> ARgb8888InterleavedImage;
+        typedef InterleavedImage<Rgb888Color>   Rgb888InterleavedImage;
+        typedef InterleavedImage<Rgb565Color>   Rgb565InterleavedImage;
+        typedef InterleavedImage<Rgb555Color>   Rgb555InterleavedImage;
 
 
         //

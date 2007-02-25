@@ -30,7 +30,7 @@ namespace Pt {
 
         /** @brief Standard interleaved ARgb8888 image class.
          */
-        typedef InterleavedImage<ARgb8888Color, ColorTraits<ARgb8888Color> > ARgb8888InterleavedImage;
+        typedef InterleavedImage<ARgb8888Color> ARgb8888InterleavedImage;
 
 
         /** @brief Standard interleaved ARgb8888 subimage class.

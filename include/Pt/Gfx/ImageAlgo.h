@@ -42,16 +42,16 @@ namespace Pt {
         *  An image classes implementor should specialize this function as needed if
         *  faster implementation for the two classes is exist.
         */
-        template <typename DstColorT, typename SrcColorT, typename DstColorTraitsT, typename SrcColorTraitsT>
-        void assign(InterleavedImage<DstColorT, DstColorTraitsT>& to, const InterleavedImage<SrcColorT, SrcColorTraitsT>& from);
+        template <typename ColorA, typename ColorB>
+        void assign(InterleavedImage<ColorA>& to, const InterleavedImage<ColorB>& from);
 
 
         /** @brief Partial specialization of assign() if both the color models are the same.
         *
         *  This function will just copy the value from the source to the destiantion.
         */
-        template <typename ColorT, typename ColorTraitsT> inline
-        void assign(InterleavedImage<ColorT, ColorTraitsT>& to, const InterleavedImage<ColorT, ColorTraitsT>& from)
+        template <typename ColorT> inline
+        void assign(InterleavedImage<ColorT>& to, const InterleavedImage<ColorT>& from)
         { to = from; }
 
 
