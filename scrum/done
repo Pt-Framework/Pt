@@ -28,6 +28,8 @@
 # Aloysius
 #
 
+ITEM P10 S8 "Dokumentation is based on doxygen"
+
 ITEM P10 S1 "The AtomicInt class implements atomic operations"
     TASK "Add fallback version that uses pthreads" blue_wind_25 2007-02-24
 
