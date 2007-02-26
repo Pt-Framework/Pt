@@ -68,6 +68,8 @@ ITEM P0 S13 "The Db module has a oracle driver"
 
 ITEM P0 S13 "The Db module has a odbc driver"
 
+ITEM P0 S13 "X11 handles key-codes"
+
 ITEM P0 S13 "The IOError class is removed"
     TASK "Remove IOError class"
     TASK "Replace IOError with ios_base::failure"
