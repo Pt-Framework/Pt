@@ -1,5 +1,6 @@
 #include <Pt/Main.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/EventSource.h>
 #include <Pt/System/Thread.h>
 #include <iostream>
 #include <sstream>
@@ -15,31 +16,31 @@ class TestEvent : public Pt::Event
         TestEvent( const char* text)
         : _text( text )
         { }
-        
+
         ~TestEvent()
         { }
-    
+
         Pt::Event* clone() const
         {
             return new TestEvent(*this);
-        }                
-        
+        }
+
         const std::type_info& typeInfo() const
         {
             return typeid( *this );
         }
-        
-        
-        std::string text() const 
+
+
+        std::string text() const
         { return _text; }
-        
+
         void setText( const char* text )
         {
             _text = text;
         }
-        
-    
-    private:        
+
+
+    private:
         std::string _text;
 };
 
@@ -48,10 +49,10 @@ class ConsumerThread : public Thread, public Connectable
 {
     public:
         ConsumerThread()
-        { 
+        {
             connect( _eventLoop.event , *this, &ConsumerThread::handleEvent );
         }
-        
+
         ~ConsumerThread()
         {}
 
@@ -61,25 +62,25 @@ class ConsumerThread : public Thread, public Connectable
         void stop()
         {
             _eventLoop.exit();
-            this->wait();           
+            this->wait();
         }
-        
+
         void handleEvent( const Pt::Event& event )
-        {            
+        {
             TestEvent* testEvent  = (TestEvent*) &event;
             printf(testEvent->text().c_str() );
             printf("-");
-        }              
-        
-    protected:    
-        
+        }
+
+    protected:
+
         virtual void run()
         {
-            _eventLoop.run();             
-        }        
-        
-    private:        
-        EventLoop _eventLoop;            
+            _eventLoop.run();
+        }
+
+    private:
+        EventLoop _eventLoop;
 };
 
 class ProducerThread : public Thread
@@ -90,32 +91,32 @@ class ProducerThread : public Thread
         , _text( text )
         , _stop( false)
         { }
-        
+
         ~ProducerThread()
-        {  
+        {
             //eventDispatcher.shutDown();
         }
-        
+
         void stop()
         {
             _stop = true;
         }
 
         EventSource eventSource;
-        
+
     protected:
         virtual void run()
         {
-            for( size_t i = 0; i < 1000 && !_stop; i++ )         
-            {   
+            for( size_t i = 0; i < 1000 && !_stop; i++ )
+            {
                 std::stringstream ss;
                 ss<<_text <<" :" <<i;
-               
+
                _event.setText( _text.c_str() );
                 eventSource.send( _event );
             }
-        }            
-  
+        }
+
     private:
         TestEvent   _event;
         std::string _text;
@@ -129,61 +130,61 @@ int main( int argc, char* argv[] )
     try
     {
         //Create a consumer and two producer
-        ConsumerThread* consumer = new ConsumerThread();        
+        ConsumerThread* consumer = new ConsumerThread();
         ProducerThread  producer2("p2");
         ProducerThread* producer1 = new ProducerThread("p1");
 
         //Connect the two producer to the consumer
         producer2.eventSource.connect( consumer->eventLoop() );
         producer1->eventSource.connect( consumer->eventLoop() );
-        
+
         //Start working
         consumer->start();
-        producer1->start();                
+        producer1->start();
         producer2.start();
 
         //Changing the producer consumer relation
         for( int i = 0; i < 1000; i++)
-        {            
+        {
             if( i % 10 == 0)
-            { 
+            {
                 //Remove the consumer
                 consumer->stop();
                 delete consumer;
                 printf("B");
-                
-                //Add a new consumer 
-                consumer = new ConsumerThread();                                
+
+                //Add a new consumer
+                consumer = new ConsumerThread();
                 producer2.eventSource.connect( consumer->eventLoop() );
                 producer1->eventSource.connect( consumer->eventLoop() );
-                
-                consumer->start();   
+
+                consumer->start();
             }
-            
+
             if( i % 9 == 0)
             {
                 //Remove a producer
                 producer1->stop();
                 producer1->wait();
                 delete producer1;
-                
+
                 //Add a new producer
                 printf("A");
                 producer1 = new ProducerThread("p1");
                 producer1->eventSource.connect( consumer->eventLoop() );
                 producer1->start();
             }
-        }                                
-        
-        //Remove the producer 1 
+        }
+
+        //Remove the producer 1
         producer1->wait();
-        delete producer1;       
-        
+        delete producer1;
+
         //Remove the producer 2
-        producer2.wait();     
-        
+        producer2.wait();
+
         consumer->stop();
-        delete consumer;               
+        delete consumer;
     }
     catch( const std::exception& e )
     {
