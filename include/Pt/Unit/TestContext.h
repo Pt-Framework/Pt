@@ -28,7 +28,9 @@
 namespace Pt {
 
 namespace Unit {
-
+    /** @brief TestContext
+        @ingroup UnitTests
+    */
     class TestContext
     {
         public:

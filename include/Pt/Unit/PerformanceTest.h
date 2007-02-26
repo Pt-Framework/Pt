@@ -33,7 +33,9 @@ namespace Pt
 namespace Unit
 {
 
-/**
+/** @brief Performance test
+  @ingroup UnitTests
+
  * Performance tests can be done by creating and destroying an object of this class (for example in a scope).
  */
 class PerformanceTest

@@ -31,6 +31,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Protocol and data driven tests
+        @ingroup UnitTests
 
         This is a simple implementation of a TestProtocol where methods and
         data can be added to a schedule. When the TestSchedule is applied to

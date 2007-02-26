@@ -28,6 +28,8 @@ namespace Pt {
 namespace Unit {
 
     /**
+        @ingroup UnitTests
+
         @param TestT The type of test to register
     */
     template <class TestT>

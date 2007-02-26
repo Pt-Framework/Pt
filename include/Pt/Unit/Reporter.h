@@ -34,6 +34,7 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Test event reporter
+        @ingroup UnitTests
 
         This class is the base class for all reporters for test events. It
         lets the implementor override several virtual methods that are called
