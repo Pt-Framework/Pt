@@ -257,7 +257,12 @@ namespace Pt {
         */
         bool operator>= (const DateTime& dt) const
         { return !(*this < dt); }
-                
+        
+        const Date& date()
+        { return _date; }
+        
+        const Time& time()
+        { return _time; }
     };
 
 }

@@ -202,6 +202,11 @@ namespace Pt {
         */
         bool operator>= (const Time& dt) const
         { return !(*this < dt); }
+              
+        double toSeconds()
+        {
+            return (hours() * 3600) + (minutes() * 60) + seconds() + ( msecs() /1000.0 );
+        }      
     };
 }
 

@@ -415,6 +415,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\System\EventSource.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\System\File.h"
 				>
 			</File>
