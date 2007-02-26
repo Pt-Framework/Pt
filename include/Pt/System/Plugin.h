@@ -97,10 +97,10 @@ namespace System {
 
         protected:
             //! Override to change how a SharedLib is opened.
-            virtual SharedLib* openPlugin(const std::string& path) throw(SystemError);
+            virtual SharedLib* openPlugin(const std::string& path);
 
             //! Override to change how plugins are extracted from a shared library.
-            virtual PluginId** resolvePlugin(SharedLib& shlib) throw(SystemError);
+            virtual PluginId** resolvePlugin(SharedLib& shlib);
 
             std::list<SharedLib*>& sharedLibs();
 

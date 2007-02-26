@@ -9,13 +9,11 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		std::string  shlibName = Pt::System::Environment::sharedLibraryPrefix() + "TestPlugin";
+		std::string  shlibName = "TestPlugin";
 
 		#ifndef NDEBUG
-			shlibName += "d";
+		  shlibName += "d";
 		#endif
-
-		shlibName += Pt::System::Environment::sharedLibraryExtension();
 
 		Pt::System::PluginManager<TestPlugin> pm;
 		pm.loadPlugin( shlibName );
