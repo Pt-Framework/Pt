@@ -48,14 +48,14 @@ std::list<SharedLib*>& PluginManagerBase::sharedLibs()
 }
 
 
-SharedLib* PluginManagerBase::openPlugin(const std::string& path) throw(SystemError)
+SharedLib* PluginManagerBase::openPlugin(const std::string& path)
 {
     SharedLib* shlib = new SharedLib( path.c_str() );
     return shlib;
 }
 
 
-PluginId** PluginManagerBase::resolvePlugin(SharedLib& shlib) throw(SystemError)
+PluginId** PluginManagerBase::resolvePlugin(SharedLib& shlib)
 {
     void* symbol = shlib.resolve( "PluginList" );
     if( !symbol ) {

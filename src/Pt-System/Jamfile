@@ -49,6 +49,14 @@ SharedLibrary_LinkSharedLibraries Pt-System : Pt Pt-IO ;
 SharedLibrary_AddLibraries Pt-System : $(SYSLIBS) ;
 SharedLibrary_MakeLocate Pt-System : bin ;
 
+SharedLibrary TestPlugin : TestPlugin.cpp ;
+SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-IO Pt-System ;
+SharedLibrary_MakeLocate TestPlugin : bin ;
+
+Main PluginDemo : PluginDemo.cpp ;
+Main_LinkSharedLibraries PluginDemo : Pt Pt-System Pt-IO ;
+Main_MakeLocate PluginDemo : bin ;
+
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
 Main_MakeLocate SerialDeviceDemo : bin ;
