@@ -25,8 +25,6 @@
 namespace Pt{
 namespace System{
 
-const int SerialDeviceImpl::ASCII_XON  = 0x11; 
-const int SerialDeviceImpl::ASCII_XOFF = 0x13;
 
 SerialDeviceImpl::SerialDeviceImpl()
 { }
@@ -51,24 +49,27 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
         throw IO::IOError("Could not open port" , PT_SOURCEINFO);
 
-    COMMTIMEOUTS comTimeOut;
-    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-    comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-    comTimeOut.ReadTotalTimeoutConstant     = 0;
-    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-    comTimeOut.WriteTotalTimeoutConstant    = 1000;
+    try
+    {
+        if( !GetCommState( _handle, &_orgCommState ) )
+            throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
 
-    if( !SetCommTimeouts( _handle, &comTimeOut ) )
-        throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);
+        COMMTIMEOUTS comTimeOut;
+        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
+        comTimeOut.ReadTotalTimeoutConstant     = 0;
+        comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+        comTimeOut.WriteTotalTimeoutConstant    = 1000;       
 
-    if( !GetCommState( _handle, &_commState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
-
-    if( !GetCommState( _handle, &_orgCommState ) )
-        throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
-
-    if( !GetCommMask( _handle, &_waitCommMask ) )
-        throw IO::IOError("Get port wait mask failed" , PT_SOURCEINFO);        
+        if( !SetCommTimeouts( _handle, &comTimeOut ) )
+            throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);            
+    }        
+    catch( ... )
+    {
+        CloseHandle( _handle );
+        _handle = 0;
+        throw;
+    }    
 }
 
 void SerialDeviceImpl::close()
@@ -115,63 +116,85 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     return length;
 }
 
-void SerialDeviceImpl::writeCommState()
+void SerialDeviceImpl::writeCommState( DCB& commState )
 {
-    if( !SetCommState( _handle, &_commState ) )
+    if( !SetCommState( _handle, &commState ) )
         throw IO::IOError("Changing port state failed" , PT_SOURCEINFO);
 }
 
-void SerialDeviceImpl::readCommState()
+void SerialDeviceImpl::readCommState( DCB& commState ) const
 {
-    if( !GetCommState( _handle, &_commState ) )
+    if( !GetCommState( _handle, &commState ) )
         throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
 }
 
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
 {
-    _commState.BaudRate = static_cast<DWORD>( rate );
-    writeCommState();
+    DCB commState;
+    
+    readCommState( commState );
+    commState.BaudRate = static_cast<DWORD>( rate );
+    writeCommState( commState );
 }
 
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
-    return static_cast<SerialDevice::BaudRate>( _commState.BaudRate );
+    DCB commState;
+    
+    readCommState( commState );
+    return static_cast<SerialDevice::BaudRate>( commState.BaudRate );
 }
 
 void SerialDeviceImpl::setCharSize( int size )
 {
-    _commState.ByteSize  = size;
-    writeCommState();
+    DCB commState;
+    
+    readCommState( commState );
+    
+    commState.ByteSize  = size;
+    writeCommState( commState );
 }
 
 int SerialDeviceImpl::charSize() const
 {
-    return _commState.ByteSize;
+    DCB commState;
+    
+    readCommState( commState );
+    
+    return commState.ByteSize;
 }
 
 void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
+    DCB commState;
+    
+    readCommState( commState );
+    
     switch( bits )
     {
         case SerialDevice::OneStopBit: 
-            _commState.StopBits  = ONESTOPBIT;
+            commState.StopBits  = ONESTOPBIT;
         break;
 
         case SerialDevice::One5StopBits:
-            _commState.StopBits  = ONE5STOPBITS;
+            commState.StopBits  = ONE5STOPBITS;
         break;
 
         case SerialDevice::TwoStopBits:
-            _commState.StopBits  = TWOSTOPBITS;
+            commState.StopBits  = TWOSTOPBITS;
         break;
     }
 
-    writeCommState();
+    writeCommState( commState );
 }
 
 SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 {
-    switch( _commState.StopBits )
+    DCB commState;
+    
+    readCommState( commState );
+    
+    switch( commState.StopBits )
     {
         case ONESTOPBIT: 
             return SerialDevice::OneStopBit;
@@ -193,27 +216,35 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 
 void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
+    DCB commState;
+    
+    readCommState( commState );
+ 
     switch( parity )
     {
         case SerialDevice::ParityEven:
-            _commState.Parity = EVENPARITY;
+            commState.Parity = EVENPARITY;
         break;
 
         case SerialDevice::ParityOdd:
-            _commState.Parity = ODDPARITY;
+            commState.Parity = ODDPARITY;
         break;
 
         case SerialDevice::ParityNone:
-            _commState.Parity = NOPARITY;
+            commState.Parity = NOPARITY;
         break;
     }
 
-    writeCommState();
+    writeCommState( commState );
 }
 
 SerialDevice::Parity SerialDeviceImpl::parity() const
 {
-    switch( _commState.Parity )
+    DCB commState;
+    
+    readCommState( commState );
+    
+    switch( commState.Parity )
     {
         case EVENPARITY:
             return SerialDevice::ParityEven;
@@ -234,51 +265,62 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
-    _commState.XonChar  = ASCII_XON;
-    _commState.XoffChar = ASCII_XOFF;
-    _commState.XonLim   = 100;
-    _commState.XoffLim  = 100;
+    static const int ASCII_XON  = 0x11; 
+    static const int ASCII_XOFF = 0x13;
+    
+    DCB commState;
+    
+    readCommState( commState );
+    
+    commState.XonChar  = ASCII_XON;
+    commState.XoffChar = ASCII_XOFF;
+    commState.XonLim   = 100;
+    commState.XoffLim  = 100;
 
     switch( flowControl )
     {
         case SerialDevice::FlowControlSoft:
-            _commState.fInX = _commState.fOutX = 1;
+            commState.fInX = commState.fOutX = 1;
         break;
 
         case SerialDevice::FlowControlBoth:
-            _commState.fInX = _commState.fOutX = 1;
+            commState.fInX = commState.fOutX = 1;
         case SerialDevice::FlowControlHard:
-            _commState.fOutxCtsFlow = 1;
-            _commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
+            commState.fOutxCtsFlow = 1;
+            commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
         break;
     }
 
-    writeCommState();
-}
-
-void SerialDeviceImpl::flush()
-{
-    PurgeComm( _handle, PURGE_RXABORT | PURGE_RXCLEAR);
+    writeCommState( commState );
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
+    DCB commState;
+    
+    readCommState( commState );
+    
     //Check for both.
-    if( _commState.fInX == _commState.fOutX && _commState.fOutX == 1 &&
-        _commState.fOutxCtsFlow == 1 && _commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
+    if( commState.fInX == commState.fOutX && commState.fOutX == 1 &&
+        commState.fOutxCtsFlow == 1 && commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
         return SerialDevice::FlowControlBoth;
 
     //Check for hardware.
-    if( _commState.fOutxCtsFlow == 1 && _commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
+    if( commState.fOutxCtsFlow == 1 && commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
         return  SerialDevice::FlowControlHard;
 
     //Check for software.
-    if( _commState.fInX == _commState.fOutX && _commState.fInX == 1 )
+    if( commState.fInX == commState.fOutX && commState.fInX == 1 )
        return SerialDevice::FlowControlSoft;
 
     throw std::runtime_error( "Unknown flow control" + PT_SOURCEINFO );
 
     return SerialDevice::FlowControlBoth;
+}
+
+void SerialDeviceImpl::flush()
+{
+    PurgeComm( _handle, PURGE_RXABORT | PURGE_RXCLEAR);
 }
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )

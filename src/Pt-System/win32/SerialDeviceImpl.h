@@ -67,17 +67,13 @@ class SerialDeviceImpl
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
 
     private:
-        void writeCommState();
-        void readCommState();
+        void writeCommState( DCB& commState );
+        void readCommState( DCB& commState ) const;
 
         HANDLE           _handle;
-        DCB              _commState;
         DCB              _orgCommState;
-        DWORD            _waitCommMask;
         OVERLAPPED       _overlapped;
         HANDLE           _terminateEv;
-        static const int ASCII_XON; 
-        static const int ASCII_XOFF;
 };
 
 }//namespace System

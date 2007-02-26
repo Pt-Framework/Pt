@@ -84,21 +84,18 @@ class PT_SYSTEM_API SerialDevice : public  IO::IODevice
         //! Default constructor.
         SerialDevice();
         
-        //! @brief Constructs a serial device and open the specified device file
-        /*!                        
+        /** @brief Constructs a serial device and open the specified device file
             
             \param file The serial device file
-            \param mode The open mode 
-            \throw std::exception
+            \param mode The open mode             
         */
         SerialDevice( const std::string& file, std::ios_base::openmode mode );
         
         //! @brief Destructor
         virtual ~SerialDevice();
 
-        //! @brief Open the specified device file
-        /*!                        
-            
+        /** @brief Open the specified device file
+                                            
             \param file The serial device file
             \param mode The open mode 
         */
