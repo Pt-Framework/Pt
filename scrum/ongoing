@@ -21,10 +21,12 @@
 # Aloysius
 #
 
+ITEM P10 S5 "Variant class is implemented"
+    TASK "Review code" sgbeal
+    TASK "Write Documentation" sgbeal
+
 ITEM P10 S8 "Signals and Delegates are implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
+    TASK "Review code" d-marc
 
 ITEM P10 S5 "The AtomicInt class implements atomic operations"
     TASK "Review asm" blue_wind_25
