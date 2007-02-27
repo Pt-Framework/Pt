@@ -23,20 +23,24 @@
 namespace Pt {
 namespace Gfx {
 
-Pen::Pen(  PenStyle style )
-: _penData( new PenData( 1, ARgbColor(0,0,0) ,style ) )
+Pen::Pen()
+: _penData( new PenData( 1, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
 { }                
 
+Pen::Pen( size_t size )
+: _penData( new PenData( size, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
+{ }   
+
+Pen::Pen( PenStyle style )
+: _penData( new PenData( 1, ARgbColor(0,0,0) ,style, RoundCap, RoundJoin  ) )
+{ }
+
 Pen::Pen( const ARgbColor& color )
-: _penData( new PenData( 1, color , SolidStyle ) )
+: _penData( new PenData( 1, color ,SolidStyle, RoundCap, RoundJoin  ) )
 { }
 
-Pen::Pen( size_t size, PenStyle style )
-: _penData( new PenData( size, ARgbColor( 0,0,0) ,style ) )
-{ }
-
-Pen::Pen( size_t size, const ARgbColor& color, PenStyle style )
-: _penData( new PenData( size, color ,style ) )
+Pen::Pen( size_t size, const ARgbColor& color, PenStyle style, CapStyle cap,  JoinStyle join )
+: _penData( new PenData( size, color ,style, cap,  join ) )
 { }
 
 size_t Pen::size() const
@@ -52,6 +56,16 @@ const ARgbColor& Pen::color() const
 Pen::PenStyle Pen::style() const
 {
     return _penData->style();
+}
+
+Pen::CapStyle Pen::capStyle() const
+{
+    return _penData->capStyle();
+}
+
+Pen::JoinStyle Pen::joinStyle() const
+{
+    return _penData->joinStyle();
 }
 
 const ARgbImage& Pen::buffer() const

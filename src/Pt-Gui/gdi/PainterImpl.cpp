@@ -96,7 +96,7 @@ void PainterImpl::updatePen()
     brush.lbStyle = BS_SOLID ;
     brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
     
-    DWORD penStyle = PS_GEOMETRIC | PS_ENDCAP_FLAT;
+    DWORD penStyle = PS_GEOMETRIC | PS_ENDCAP_ROUND;
     
 //    penStsle |= PS_ENDCAP_ROUND;
 //    penStyle |= PS_JOIN_BEVEL;

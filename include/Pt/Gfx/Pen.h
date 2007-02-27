@@ -50,38 +50,39 @@ namespace Gfx {
     {
         public:            
                 
-            enum PenStyle{ SolidStyle = 0, DashStyle };
-            
-            /**
-             * @brief Create Pen by style.
-             *
-             * Creates a new pen object with the given style. The pen size will be 1 
-             * and the pen color black. 
-             *
-             * @param style The pen style.
-             */
-            Pen( PenStyle style );
-                
-            /**
-             * @brief Creates Pen by color.
-             *
-             * Creates a new pen with the given color. The pen size will be 1 and the pen style solid.
-             *
-             * @param color The color of the pen.
-             */
-            Pen( const ARgbColor& color );
-            
+            enum PenStyle{ SolidStyle = 0, DashStyle =1 };
+            enum CapStyle{ FlatCap = 0, RoundCap = 1 };
+            enum JoinStyle{ RoundJoin = 0,BevelJoin = 1 };
+  
             /**
              * @brief Creates a new Pen object.
              *
-             * The pen size and style are optional. The default pen size is 1. The
-             * default pen style is solid.
+             * The default pen size is 1. The default pen color is black, the default style is solid
+             * and the defauld cap und join style are round.
+             */             
+            Pen();
+            
+            /**
+             * @brief Creates a new Pen object with the specified size
              *
-             * @param size The size of the pen. This parameter is optional. The default is 1.
-             * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
-             */
-            Pen( size_t size = 1 , PenStyle style = SolidStyle );                                    
-                        
+             * The default pen color is black. The default style is solid. The defauld cap und join style are round.
+             */                         
+            Pen( size_t size );
+              
+            /**
+             * @brief Creates a new Pen object with the specified style
+             *
+             * The default pen size is 1. The default pen color is black. The defauld cap und join style are round.
+             */                         
+            Pen( PenStyle style );
+            
+            /**
+             * @brief Creates a new Pen object with the specified color
+             *
+             * The default pen size is 1. The default style is solid. The defauld cap und join style are round.
+             */                         
+            Pen( const ARgbColor& color );
+            
             /**
              * @brief Creates a new Pen object using the specified size, color and style.
              *
@@ -90,9 +91,12 @@ namespace Gfx {
              *
              * @param size The size of the pen. This parameter is optional. The default is 1.
              * @param color The color of the pen. This parameter is optional. The default is black.
-             * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
-             */
-            Pen( size_t size, const ARgbColor& color, PenStyle style = SolidStyle );
+             * @param penStyle The style of the pen. This parameter is optional. The default is SolidStyle.
+             * @param capStyle The cap style. This parameter is optional. The default is flat style.
+             * @param joinStyle The join style. This parameter is optional. The default is round style.
+             */            
+            Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = FlatCap, JoinStyle join = BevelJoin );
+             
 
 			/**
 			 * @brief Returns the size of the pen as specified when created.
@@ -109,11 +113,25 @@ namespace Gfx {
 			const ARgbColor& color() const;
 						
 			/**
-			 * @brief Returns a reference to the color of the pen as specified when created.
+			 * @brief Returns the pen style.
 			 *
-			 * @return The color of the pen.
+			 * @return The pen style.
 			 */
 			PenStyle style() const;			
+			
+            /**
+			 * @brief Returns the cap style
+			 *
+			 * @return The cap style.
+			 */
+			CapStyle capStyle() const;			
+						
+            /**
+			 * @brief Returns the join style
+			 *
+			 * @return The join style.
+			 */
+			JoinStyle joinStyle() const;			
 			
 			/**
 			 * @brief Returns a reference to the pen color buffer
@@ -144,10 +162,12 @@ namespace Gfx {
     class PT_GFX_API PenData
 	{
 		public:
-			PenData( size_t size, const ARgbColor& color, Pen::PenStyle style )
+			PenData( size_t size, const ARgbColor& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
 			: _size( size )			
 			, _style( style )
 			, _buffer( 64, 1, color )
+			, _capStyle( cap )
+			, _joinStyle( join )
 			{ }
 
 			~PenData()
@@ -165,10 +185,18 @@ namespace Gfx {
 			Pen::PenStyle style() const
 			{ return _style; }
 
+            Pen::CapStyle capStyle() const 
+            { return _capStyle;}
+            
+            Pen::JoinStyle joinStyle() const
+            { return _joinStyle; }
+            
 		private:
 	        size_t          _size;
 			Pen::PenStyle   _style;
 			ARgbImage       _buffer;	
+			Pen::CapStyle   _capStyle;
+			Pen::JoinStyle  _joinStyle;
     };
 	
 } // namespace Gfx

@@ -18,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <string>
 #include <Pt/Main.h>
 
 #include <Pt/Exception.h>
@@ -35,6 +34,7 @@
 #include <Pt/System/Clock.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace Pt;
 using namespace Pt::Gfx;
@@ -57,14 +57,14 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    Pen pen( 10, ARgbColor( 0,0,0), Pen::DashStyle );
+	    Pen pen( 10, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap );
 
 		_imagePainter.setPen( pen );
-		_imagePainter.drawLine( Point(30,300), Point( 100, 100 ) );
+		_imagePainter.drawLine( Point(30,30), Point( 30, 100 ) );
 		painter().drawImage( Point(0,0), _image );
 		
-		painter().setPen( Pen(1, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle)  );
-		painter().drawLine( Point(30,32), Point( 300, 82 ) );
+		painter().setPen( Pen(10, ARgbColor( 0, 0, 0xffff ), Pen::SolidStyle, Pen::RoundCap)  );
+		painter().drawLine( Point(30,30), Point( 100, 100 ) );
 	}
 
 	void drawEllipse()

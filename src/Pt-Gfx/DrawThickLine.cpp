@@ -233,6 +233,9 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
             this->drawDashSegment( image, pen, from, to, false, false, &leftFace, &rightFace);
         break;
     }
+    
+    lineArc( image, pen, &leftFace, &rightFace, from.x(), from.y(), false );
+    lineArc( image, pen, &leftFace, &rightFace, to.x(), to.y(), false );
 }
 
 void DrawThickLine::drawDashSegment( ARgbImage& image, const Pen& pen,
@@ -508,6 +511,358 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
     }
 }
 
-} // namespace Gfx
+void DrawThickLine::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt)
+{
+    std::vector<Pt::Math::Point>    points;
+    std::vector<size_t>             widths;
+    int             xorgi = 0, yorgi = 0;
+    int 		    n;
+    PolyEdge	    edge1, edge2;
+    int		        edgey1, edgey2;
+    bool	    	edgeleft1, edgeleft2;
 
+    if (isInt)
+    /* in integer case, take (xorgi,yorgi) from face; otherwise (0,0) */
+    {
+      xorgi = leftFace ? leftFace->x() : rightFace->x();
+      yorgi = leftFace ? leftFace->y() : rightFace->y();
+    }
+
+    edgey1 = INT_MAX;
+    edgey2 = INT_MAX;
+    edge1.setX( 0 );			/* not used, keep memory checkers happy */
+    edge1.setDY( -1 );
+    edge2.setX( 0 );			/* not used, keep memory checkers happy */
+    edge2.setDY( -1 );
+    
+    edgeleft1 = false;
+    edgeleft2 = false;
+    
+    if( (pen.style() != Pen::SolidStyle || pen.size() > 2) &&
+        ((pen.capStyle() == Pen::RoundCap && pen.joinStyle() != Pen::RoundJoin)  ||
+        ( pen.joinStyle() == Pen::RoundJoin/* && pen.capStyle() == (int)MI_CAP_BUTT*/)))
+        /* construct clipping edges from the passed line faces (otherwise,
+        ignore them; will just draw a disk) */
+    {
+        if (isInt)
+	    {
+	        xorg = (double) xorgi;
+	        yorg = (double) yorgi;
+        }
+        
+        if (leftFace && rightFace)
+	        /* have two faces, so construct clipping edges for pie wedge */
+	        //miRoundJoinClip (leftFace, rightFace, &edge1, &edge2, &edgey1, &edgey2, &edgeleft1, &edgeleft2);
+	        ;
+
+        else if (leftFace)
+	        /* will draw half-disk on left face, so construct clipping edge */
+	        //edgey1 = miRoundCapClip (leftFace, isInt, &edge1, &edgeleft1);      
+	        ;
+        
+        else if (rightFace)
+	        /* will draw half-disk on right face, so construct clipping edge */
+	        //edgey2 = miRoundCapClip (rightFace, isInt, &edge2, &edgeleft2);
+	        ;
+
+        /* due to clipping, switch to using floating-point coordinates */
+        isInt = false;
+    }
+
+    points.resize( pen.size() );
+    widths.resize( pen.size() );
+
+  /* construct a Spans by calling integer or floating point routine */
+  if (isInt)
+    /* integer routine, no clipping: just draw a disk */
+    n = lineArcI( pen, xorgi, yorgi, points, widths );
+  else
+    /* call floating point routine, supporting clipping by edge(s) */
+    n = lineArcD( pen, xorg, yorg, points, widths, &edge1, edgey1, edgeleft1, &edge2, edgey2, edgeleft2);
+  
+    //MI_PAINT_SPANS(paintedSet, pixel, n, points, widths)
+    
+    for( size_t i = 0; i < n; i++)
+    {
+        for( size_t j = 0; j < widths[i]; j++)
+            image.pixel(points[i].x() + j, points[i].y() ) = pen.color();
+
+    }   
+}
+
+
+int DrawThickLine::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
+{
+    Pt::Math::Point *tpts, *bpts;
+    unsigned int *twids, *bwids;
+    int x, y, e, ex;
+    int slw;
+
+    tpts = &points[0];
+    twids = &widths[0];
+    slw = (int)(pen.size());
+
+    if (slw == 1)
+    /* `disk' is a single pixel */
+    {
+        tpts->setX( xorg );
+        tpts->setY( yorg );
+        *twids = 1;
+        return 1;
+    }
+
+    /* otherwise, draw the disk scanline by scanline */
+    bpts = tpts + slw;
+    bwids = twids + slw;
+    y = (slw >> 1) + 1;
+
+    if (slw & 1)
+        e = - ((y << 2) + 3);
+    else
+        e = - (y << 3);
+    
+    ex = -4;
+    x = 0;
+    
+    while (y)
+    {
+        e += (y << 3) - 4;
+        while (e >= 0)
+        {
+            x++;
+            e += (ex = -((x << 3) + 4));
+        }
+        
+        y--;
+        slw = (x << 1) + 1;
+        
+        if ((e == ex) && (slw > 1))
+            slw--;
+            
+        tpts->setX( xorg - x );
+        tpts->setY( yorg - y );
+        tpts++;
+        *twids++ = slw;
+        
+        if ((y != 0) && ((slw > 1) || (e != ex)))
+        {
+            bpts--;
+            bpts->setX( xorg - x );
+            bpts->setY( yorg + y );
+            *--bwids = slw;
+        }
+    }
+
+    /* return linewidth (no. of spans in the Spans) */
+    return (int)( pen.size() );
+}
+
+#define CLIPSTEPEDGE( edgey, edge, edgeleft ) \
+if (ybase == edgey) \
+{ \
+    if (edgeleft) \
+      { \
+	if (edge->x() > xcl) \
+	  xcl = edge->x(); \
+} \
+  else \
+    { \
+      if (edge->x() < xcr) \
+	xcr = edge->x(); \
+} \
+  edgey++; \
+    edge->setX( edge->x() + edge->stepx() ); \
+      edge->setE( edge->e() + edge->dx()); \
+	if (edge->e() > 0) \
+	  { \
+	    edge->setX( edge->x() + edge->signdx() ); \
+	      edge->setE( edge->e() - edge->dy() ); \
+} \
+}
+
+
+int DrawThickLine::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, PolyEdge *edge1, int edgey1, bool edgeleft1, PolyEdge *edge2, int edgey2, bool edgeleft2)
+{
+    Pt::Math::Point *pts;
+    size_t *wids;
+    double radius, x0, y0, el, er, yk, xlk, xrk, k;
+    int xbase, ybase, y, boty, xl, xr, xcl, xcr;
+    int ymin, ymax;
+    bool edge1IsMin, edge2IsMin;
+    int ymin1, ymin2;
+
+    pts = &points[0];
+    wids = &widths[0];
+    xbase = (int)(floor(xorg));
+    x0 = xorg - xbase;
+    ybase = ceil(yorg);
+    y0 = yorg - ybase;
+    xlk = x0 + x0 + 1.0;
+    xrk = x0 + x0 - 1.0;
+    yk = y0 + y0 - 1.0;
+    radius = 0.5 * ((double)pen.size());
+    y = (int)(floor(radius - y0 + 1.0));
+    ybase -= y;
+    ymin = ybase;
+    ymax = std::numeric_limits<int>::max();
+    edge1IsMin = false;
+    ymin1 = edgey1;
+    
+    if( edge1->dy() >= 0 )
+    {
+        if( !edge1->dy() )
+        {
+            if (edgeleft1)
+                edge1IsMin = true;
+            else
+                ymax = edgey1;
+                
+            edgey1 = std::numeric_limits<int>::max();
+        }
+        else
+        {
+            if( (edge1->signdx() < 0 ) == edgeleft1)
+                edge1IsMin = true;
+        }
+    }
+    edge2IsMin = false;
+    ymin2 = edgey2;
+    
+    if( edge2->dy() >= 0 )
+    {
+        if( !edge2->dy() )
+        {
+            if( edgeleft2 )
+                edge2IsMin = true;
+            else
+                ymax = edgey2;
+                
+            edgey2 = std::numeric_limits<int>::max();
+        }
+        else
+        {
+            if( (edge2->signdx() < 0) == edgeleft2 )
+                edge2IsMin = true;
+        }
+    }
+    
+    if( edge1IsMin )
+    {
+        ymin = ymin1;
+        
+        if( edge2IsMin && ymin1 > ymin2 )
+            ymin = ymin2;
+    } 
+    else if (edge2IsMin)
+    {
+        ymin = ymin2;
+    }
+    
+    el = radius * radius - ((y + y0) * (y + y0)) - (x0 * x0);
+    er = el + xrk;
+    xl = 1;
+    xr = 0;
+    
+    if (x0 < 0.5)
+    {
+        xl = 0;
+        el -= xlk;
+    }
+    
+    boty = (y0 < -0.5) ? 1 : 0;
+    
+    if (ybase + y - boty > ymax)
+        boty = ymax - ybase - y;
+    
+    while (y > boty)
+    {
+        k = (y << 1) + yk;
+        er += k;
+        
+        while (er > 0.0)
+        {
+            xr++;
+            er += xrk - (xr << 1);
+        }
+        el += k;
+        
+        while (el >= 0.0)
+        {
+            xl--;
+            el += (xl << 1) - xlk;
+        }
+        
+        y--;
+        ybase++;
+        
+        if (ybase < ymin)
+            continue;
+        
+        xcl = xl + xbase;
+        xcr = xr + xbase;
+
+        CLIPSTEPEDGE(edgey1, edge1, edgeleft1);
+        CLIPSTEPEDGE(edgey2, edge2, edgeleft2);
+        
+        if (xcr >= xcl)
+        {
+            pts->setX( xcl );
+            pts->setY( ybase );
+            pts++;
+            *wids++ = (unsigned int)(xcr - xcl + 1);
+        }
+    }
+    
+    er = xrk - (xr << 1) - er;
+    el = (xl << 1) - xlk - el;
+    boty = (int)(floor(-y0 - radius + 1.0));
+
+    if (ybase + y - boty > ymax)
+        boty = ymax - ybase - y;
+        
+    while (y > boty)
+    {
+        k = (y << 1) + yk;
+        er -= k;
+        
+        while ((er >= 0.0) && (xr >= 0))
+        {
+            xr--;
+            er += xrk - (xr << 1);
+        }
+        
+        el -= k;
+        
+        while ((el > 0.0) && (xl <= 0))
+        {
+            xl++;
+            el += (xl << 1) - xlk;
+        }
+        
+        y--;
+        ybase++;
+        
+        if( ybase < ymin )
+            continue;
+            
+        xcl = xl + xbase;
+        xcr = xr + xbase;
+        
+        CLIPSTEPEDGE(edgey1, edge1, edgeleft1);
+        CLIPSTEPEDGE(edgey2, edge2, edgeleft2);
+        
+        if (xcr >= xcl)
+        {
+            pts->setX( xcl );
+            pts->setY( ybase );
+            pts++;
+            *wids++ = (unsigned int)(xcr - xcl + 1);
+        }
+    }
+
+    /* return number of spans in the Spans */
+    return (pts - &points[0]);
+}
+
+} // namespace Gfx
 } // namespace Pt
