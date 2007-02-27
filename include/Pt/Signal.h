@@ -45,26 +45,33 @@ namespace Pt {
 
             struct Sentry
             {
-                Sentry(const Signal& signal)
+                Sentry(const Signal* signal)
                 : _signal(signal)
-                , _released(false)
                 {
-                    _signal._sending = true;
-                    _signal._dirty = false;
+                    _signal->_sentry = this;
+                    _signal->_sending = true;
+                    _signal->_dirty = false;
                 }
 
                 ~Sentry()
                 {
-                    if( _released )
+                    if( this->disabled() )
                         return;
 
-                    _signal._sending = false;
+                    this->disable();
 
-                    if( _signal._dirty == false )
+                    _signal->_sentry = 0;
+                }
+
+                void disable()
+                {
+                    _signal->_sending = false;
+
+                    if( _signal->_dirty == false )
                         return;
 
-                    std::list<Connection>::iterator it = _signal._connections.begin();
-                    while( it != _signal._connections.end() )
+                    std::list<Connection>::iterator it = _signal->_connections.begin();
+                    while( it != _signal->_connections.end() )
                     {
                         if( it->valid() )
                         {
@@ -72,36 +79,41 @@ namespace Pt {
                         }
                         else
                         {
-                            it = _signal._connections.erase(it);
+                            it = _signal->_connections.erase(it);
                         }
                     }
 
-                    _signal._dirty = false;
+                    _signal->_dirty = false;
+                    _signal = 0;
                 }
 
-                void release()
-                { _released = true; }
+                bool disabled() const
+                { return _signal == 0; }
 
-                const Signal& _signal;
-                bool _released;
+                const Signal* _signal;
             };
 
         public:
             Signal()
-            : _destructing(false)
+            : _sentry(0)
             , _sending(false)
             { }
 
             Signal(const Signal& signal)
             : Connectable()
-            , _destructing(false)
+            ,  _sentry(0)
             , _sending(false)
             {
                 Signal::operator=(signal);
             }
 
             ~Signal()
-            { _destructing = true; }
+            {
+                if(_sentry)
+                {
+                    _sentry->disable();
+                }
+            }
 
             Signal& operator=(const Signal& other)
             {
@@ -138,10 +150,10 @@ namespace Pt {
 
             inline void send() const
             {
-                Sentry sentry(*this);
+                Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; !_destructing && it != _connections.end(); ++it)
+                for(; it != _connections.end(); ++it)
                 {
                     if( false == it->valid() || &( it->sender() ) != this  )
                         continue;
@@ -150,22 +162,18 @@ namespace Pt {
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke();
 
-                    // FIXME: this will stop slot invokation if callee gets
-                    // deleted or disconnected
-                    if( c.valid() == false) {
-                        sentry.release();
+                    if( _sentry->disabled() )
                         return;
-                    }
                 }
             }
 
             template <typename Arg1>
             inline void send(Arg1 a1) const
             {
-                Sentry sentry(*this);
+                Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; !_destructing && it != _connections.end(); ++it)
+                for(; it != _connections.end(); ++it)
                 {
                     if( false == it->valid() || &( it->sender() ) != this )
                         continue;
@@ -173,35 +181,19 @@ namespace Pt {
                     Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1);
-                    // If calling the slot leads to deletion or or disconnection
-                    // of the callee itself we do not modify the connection list
-                    // to keep the iterator valid. alternatively, Signal::closed
-                    // could advance the iterator before removing the current
-                    // connection and here we only advance if no disconnct
-                    // occurred.
 
-                    // What happens if calling the slot deletes this Signal?
-                    // It would probably be better to mark the sentry
-                    // since it will survive the deletion, unlike the
-                    // _destructing member valiable.
-                    // TODO: change Sentry to a caller object and the Signal
-                    // has a pointer to the current caller. If we get deleted,
-                    // the caller will survive and stop calling slots
-
-                    if( c.valid() == false) {
-                        sentry.release();
+                    if( _sentry->disabled() )
                         return;
-                    }
                 }
             }
 
             template <typename Arg1, typename Arg2>
             inline void send(Arg1 a1, Arg2 a2) const
             {
-                Sentry sentry(*this);
+                Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; !_destructing && it != _connections.end(); ++it)
+                for(; it != _connections.end(); ++it)
                 {
                     if( &( it->sender() ) != this || false == it->valid() )
                         continue;
@@ -210,20 +202,18 @@ namespace Pt {
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1, a2);
 
-                    if( c.valid() == false) {
-                        sentry.release();
+                    if( _sentry->disabled() )
                         return;
-                    }
                 }
             }
 
             template <typename Arg1, typename Arg2, typename Arg3>
             inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
             {
-                Sentry sentry(*this);
+                Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; !_destructing && it != _connections.end(); ++it)
+                for(; it != _connections.end(); ++it)
                 {
                     if( &( it->sender() ) != this || false == it->valid() )
                         continue;
@@ -232,10 +222,8 @@ namespace Pt {
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1, a2, a3);
 
-                    if( c.valid() == false) {
-                        sentry.release();
+                    if( _sentry->disabled() )
                         return;
-                    }
                 }
             }
 
@@ -255,7 +243,7 @@ namespace Pt {
             { this->send(a1, a2, a3); }
 
         private:
-            bool _destructing;
+            mutable Sentry* _sentry;
             mutable bool _sending;
             mutable bool _dirty;
     };

@@ -414,7 +414,7 @@ void functionTest3()
 
 
 void slotMethod()
-{ std::cerr << "\nslotMethod called." << std::endl;}
+{ std::cerr << "slotMethod called." << std::endl;}
 
 class DeleteTest : public Pt::Connectable
 {
@@ -432,14 +432,14 @@ public:
 
     void deleteCallee()
     {
-        //std::cerr << "\nSelfDisconnectTest::deleteCallee" << std::endl;
+        std::cerr << "SelfDisconnectTest::deleteCallee" << std::endl;
         delete _callee;
         _callee = 0;
     }
 
     void deleteCaller()
     {
-        //std::cerr << "\nSelfDisconnectTest::deleteCaller" << std::endl;
+        std::cerr << "\nSelfDisconnectTest::deleteCaller" << std::endl;
         delete _caller;
         _caller = 0;
     }
@@ -449,9 +449,13 @@ public:
         _caller = new Signal<>;
         _callee = new DeleteTest;
 
-        //connect(*_caller, *_callee, &DeleteTest::deleteCallee );
+        connect(*_caller, &slotMethod);
+        connect(*_caller, *_callee, &DeleteTest::deleteCallee );
         connect(*_caller, &slotMethod);
         connect(*_caller, *this, &DeleteTest::deleteCaller);
+        connect(*_caller, &slotMethod);
+        connect(*_caller, &slotMethod);
+        connect(*_caller, &slotMethod);
         connect(*_caller, &slotMethod);
         _caller->send();
     }
@@ -469,7 +473,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        std::cerr << "  DeleteTest: ";
+        std::cerr << "  DeleteTest:\n";
         DeleteTest delTest;
         delTest();
         std::cerr << "ok." << std::endl;

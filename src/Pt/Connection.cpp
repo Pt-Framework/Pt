@@ -69,7 +69,7 @@ void Connection::close()
 {
     if( !this->valid() )
         return;
-        
+
     _data->slot().closed( *this );
     _data->sender().closed( *this );
     _data->setValid(false);
