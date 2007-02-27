@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2004-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 by Tobias Mueller                             *
+ *   Copyright (C) 2006-2007 by Laurentiu-Gheorghe Crisan                  *
  *   Copyright (C) 2006-2007 by PTV AG                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -89,7 +90,39 @@ namespace Pt {
         static void input(std::basic_istream<Pt::Char>& is, char& value);
     };
 
+    template <>
+    struct PT_API AnyTraits<unsigned char> {
+        static void output(std::ostream& os, const unsigned char& value);
+        static void input(std::istream& is, unsigned char& value);
+        static void output(std::basic_ostream<Pt::Char>& os, const unsigned char& value);
+        static void input(std::basic_istream<Pt::Char>& is, unsigned char& value);
+    };
 
+    template <>
+    struct PT_API AnyTraits<signed char> {
+        static void output(std::ostream& os, const signed char& value);
+        static void input(std::istream& is, signed char& value);
+        static void output(std::basic_ostream<Pt::Char>& os, const signed char& value);
+        static void input(std::basic_istream<Pt::Char>& is, signed char& value);
+    };
+
+
+    template <>
+    struct PT_API AnyTraits<unsigned int> {
+        static void output(std::ostream& os, unsigned int value);
+        static void input(std::istream& is, unsigned int& value);
+        static void output(std::basic_ostream<Pt::Char>& os, unsigned int value);
+        static void input(std::basic_istream<Pt::Char>& is, unsigned int& value);
+    };    
+
+    template <>
+    struct PT_API AnyTraits<double> {
+        static void output(std::ostream& os, double value);
+        static void input(std::istream& is, double& value);
+        static void output(std::basic_ostream<Pt::Char>& os, double value);
+        static void input(std::basic_istream<Pt::Char>& is, double& value);
+    };    
+    
     template <>
     struct PT_API AnyTraits<std::string>
     {
@@ -99,9 +132,8 @@ namespace Pt {
         static void input(std::basic_istream<Pt::Char>& is, std::string& value);
     };
 
-
     template <>
-    struct AnyTraits< String > {
+    struct PT_API AnyTraits< String > {
         static void output(std::ostream& os, const String& value);
         static void input(std::istream& is, String& value);
         static void output(std::basic_ostream<Pt::Char>& os, const String& value);
