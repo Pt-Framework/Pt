@@ -174,11 +174,14 @@ namespace Gui {
             Gfx::Pen   _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-
+            
             mutable std::stringstream    _stringStream;
             mutable Pt::Text::TextStream _textStream;
 
             std::list<std::string> _fontNamesList;
+        
+        private:            
+            static DWORD getPenStyles( const Pt::Gfx::Pen& pen );
     };
 
 } // namespace Gui
