@@ -58,7 +58,7 @@ namespace Db {
 
             ValueImpl(const void* blob, int byteCount)
                 : _null(false)
-                , _data(blob, byteCount)
+                , _data(reinterpret_cast<const char*>(blob), byteCount)
             { }
 
             virtual bool isNull() const;
