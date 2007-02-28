@@ -57,14 +57,16 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    Pen pen( 10, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap );
+	    drawMap();
+	    /*
+	    Pen pen( 50, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap );
 
 		_imagePainter.setPen( pen );
-		_imagePainter.drawLine( Point(30,30), Point( 30, 100 ) );
+		_imagePainter.drawLine( Point(10,10), Point( 100, 100 ) );
 		painter().drawImage( Point(0,0), _image );
 		
 		painter().setPen( Pen(10, ARgbColor( 0, 0, 0xffff ), Pen::SolidStyle, Pen::RoundCap)  );
-		painter().drawLine( Point(30,30), Point( 100, 100 ) );
+		//painter().drawLine( Point(30,30), Point( 100, 100 ) );*/
 	}
 
 	void drawEllipse()
@@ -73,7 +75,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		Pt::Math::Point point( 40 ,50 );
 		Pt::Math::Size	size( 70, 50 );
 
-		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0)));
+		_imagePainter.setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap));
 		_imagePainter.drawEllipse( point, size ) ;
 
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );

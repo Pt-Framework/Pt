@@ -95,7 +95,7 @@ namespace Gfx {
              * @param capStyle The cap style. This parameter is optional. The default is flat style.
              * @param joinStyle The join style. This parameter is optional. The default is round style.
              */            
-            Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = FlatCap, JoinStyle join = BevelJoin );
+            Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
              
 
 			/**

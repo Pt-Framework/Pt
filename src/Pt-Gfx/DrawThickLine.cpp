@@ -118,8 +118,8 @@ static void fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int
             image.pixel( xpos, ypos) = pen.color();
 }
 
-static void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
 
+void DrawThickLine::fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
 {
     int left_x = 0, left_e = 0;
     int left_stepx = 0;
@@ -234,8 +234,14 @@ void DrawThickLine::draw( ARgbImage& image, const Pen& pen,
         break;
     }
     
-    lineArc( image, pen, &leftFace, &rightFace, from.x(), from.y(), false );
-    lineArc( image, pen, &leftFace, &rightFace, to.x(), to.y(), false );
+    if( pen.capStyle() == Pen::RoundCap )
+    {
+        //Left face 
+        lineArc( image, pen, &leftFace, 0, 0.0, 0.0 , true );
+    
+        //Right face
+        lineArc( image, pen, 0, &rightFace, 0.0, 0.0, true );
+    }
 }
 
 void DrawThickLine::drawDashSegment( ARgbImage& image, const Pen& pen,
@@ -425,9 +431,9 @@ void DrawThickLine::drawSegment(ARgbImage& image, const Pen& pen,
 
 
         if(projectLeft)
-            righty = buildLineEdge(xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), false, right);
+            righty = buildLineEdge( xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), false, right );
         else
-            righty = buildLineEdge(xa, ya, k, dx, dy, from.x(), from.y(), false, right);
+            righty = buildLineEdge( xa, ya, k, dx, dy, from.x(), from.y(), false, right );
 
         //
         // first long edge
@@ -517,7 +523,7 @@ void DrawThickLine::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFac
     std::vector<size_t>             widths;
     int             xorgi = 0, yorgi = 0;
     int 		    n;
-    PolyEdge	    edge1, edge2;
+    LineEdge	    edge1, edge2;
     int		        edgey1, edgey2;
     bool	    	edgeleft1, edgeleft2;
 
@@ -528,8 +534,8 @@ void DrawThickLine::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFac
       yorgi = leftFace ? leftFace->y() : rightFace->y();
     }
 
-    edgey1 = INT_MAX;
-    edgey2 = INT_MAX;
+    edgey1 = std::numeric_limits<int>::max();
+    edgey2 = std::numeric_limits<int>::max();
     edge1.setX( 0 );			/* not used, keep memory checkers happy */
     edge1.setDY( -1 );
     edge2.setX( 0 );			/* not used, keep memory checkers happy */
@@ -552,18 +558,16 @@ void DrawThickLine::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFac
         
         if (leftFace && rightFace)
 	        /* have two faces, so construct clipping edges for pie wedge */
-	        //miRoundJoinClip (leftFace, rightFace, &edge1, &edge2, &edgey1, &edgey2, &edgeleft1, &edgeleft2);
-	        ;
+	        roundJoinClip (leftFace, rightFace, &edge1, &edge2, &edgey1, &edgey2, &edgeleft1, &edgeleft2);
 
         else if (leftFace)
 	        /* will draw half-disk on left face, so construct clipping edge */
-	        //edgey1 = miRoundCapClip (leftFace, isInt, &edge1, &edgeleft1);      
-	        ;
+	        edgey1 = roundCapClip( leftFace, isInt, &edge1, &edgeleft1 );
+
         
         else if (rightFace)
 	        /* will draw half-disk on right face, so construct clipping edge */
-	        //edgey2 = miRoundCapClip (rightFace, isInt, &edge2, &edgeleft2);
-	        ;
+	        edgey2 = roundCapClip (rightFace, isInt, &edge2, &edgeleft2);
 
         /* due to clipping, switch to using floating-point coordinates */
         isInt = false;
@@ -582,14 +586,170 @@ void DrawThickLine::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFac
   
     //MI_PAINT_SPANS(paintedSet, pixel, n, points, widths)
     
-    for( size_t i = 0; i < n; i++)
+    for( ssize_t i = 0; i < n; i++)
     {
-        for( size_t j = 0; j < widths[i]; j++)
-            image.pixel(points[i].x() + j, points[i].y() ) = pen.color();
+        if( points[i].y() < 0 )
+            continue;
 
+        if( points[i].y() >= (Pt::ssize_t)image.height() )
+            continue;
+            
+        if( points[i].x() >= (Pt::ssize_t) image.width() )
+            continue;
+        
+            
+        if( points[i].x() < 0 )
+        {
+            if(  widths[i] > -points[i].x()  )
+            {
+                widths[i] += points[i].x();
+                points[i].setX( 0 );
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+       
+        if( points[i].x() +  widths[i] >  (ssize_t) image.width() )
+            widths[i] =  image.width() - points[i].x();
+                        
+        for( size_t j = 0; j < widths[i]; j++)
+            image.pixel(points[i].x() + j, points[i].y() ) = pen.color();        
     }   
 }
 
+/* From a line face, construct a clipping edge that will be used by
+   miLineArcD when drawing a half-disk.  */
+int DrawThickLine::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
+{
+    int	    y;
+    int 	dx, dy;
+    double  xa, ya, k;
+    bool	left;
+
+    dx = -face->dy();
+    dy = face->dx();
+    xa = face->xa();
+    ya = face->ya();
+    k = 0.0;
+    
+    if( !isInt )
+        k = face->k();
+        
+    left = true;
+    
+    if (dy < 0 || (dy == 0 && dx > 0))
+    {
+        dx = -dx;
+        dy = -dy;
+        xa = -xa;
+        ya = -ya;
+        left = (left ? false : true);
+    }
+    
+    if( dx == 0 && dy == 0 )
+        dy = 1;
+        
+    if( dy == 0 )
+    {
+        y = ceil( face->ya() ) + face->y();
+        edge->setX( std::numeric_limits<int>::min() );
+        edge->setStepX( 0 );
+        edge->setSignDX( 0 );
+        edge->setE( -1 );
+        edge->setDY( 0 );
+        edge->setDX( 0 );
+        edge->setHeight( 0 );
+    }
+    else
+    {
+        y = buildLineEdge( xa, ya, k, dx, dy, face->x(), face->y(), (left ? false : true), edge);
+        edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
+    }
+    
+    *leftEdge = (left ? false : true);
+
+    return y;
+}
+
+
+/* From two line faces, construct clipping edges that will be used by
+   miLineArcD when drawing a pie wedge.  The line faces may be modified. */
+void DrawThickLine::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
+{
+    int	denom;
+
+    denom = - pLeft->dx() * pRight->dy() + pRight->dx() * pLeft->dy();
+    
+    if (denom >= 0)
+    {
+        pLeft->setXA( -pLeft->xa() );
+        pLeft->setYA( -pLeft->ya() );
+    }
+    else
+    {
+        pRight->setXA( -pRight->xa() );
+        pRight->setYA( -pRight->ya() );
+    }
+    
+    *y1 = roundJoinFace( pLeft, edge1, left1 );
+    *y2 = roundJoinFace( pRight, edge2, left2 );
+}
+
+/* helper function called by the preceding */
+int DrawThickLine::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
+{
+    int	    y;
+    int	    dx, dy;
+    double  xa, ya;
+    bool    left;
+
+    dx = -face->dy();
+    dy = face->dx();
+    xa = face->xa();
+    ya = face->ya();
+    left = true;
+    
+    if (ya > 0)
+    {
+        ya = 0.0;
+        xa = 0.0;
+    }
+    
+    if (dy < 0 || (dy == 0 && dx > 0))
+    {
+        dx = -dx;
+        dy = -dy;
+        left = (left ? false : true);
+    }
+    
+    if (dx == 0 && dy == 0)
+        dy = 1;
+        
+    if (dy == 0)
+    {
+        y = ceil( face->ya() ) + face->y();
+        edge->setX( std::numeric_limits<int>::min() );
+        edge->setStepX( 0 );
+        edge->setSignDX( 0 );
+        edge->setE( -1 );
+        edge->setDY( 0 );
+        edge->setDX( 0 );
+        edge->setHeight( 0 );
+    }
+    else
+    {
+        y = buildLineEdge( xa, ya,  0.0, dx, dy, face->x(), face->y(), (left ? false : true), edge );
+        
+        edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
+    }
+    
+    *leftEdge = (left ? false : true);
+
+    return y;
+}
 
 int DrawThickLine::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
 {
@@ -680,8 +840,13 @@ if (ybase == edgey) \
 } \
 }
 
-
-int DrawThickLine::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, PolyEdge *edge1, int edgey1, bool edgeleft1, PolyEdge *edge2, int edgey2, bool edgeleft2)
+/* Draw as a Spans a filled disk of diameter equal to the linewidth, paying
+   attention to one or two clipping edges.  This is used for round caps and
+   round joins, respectively (it respectively yields a half-disk or a pie
+   wedge).  Floating point coordinates are used.  Returns number of spans
+   in the Spans.  The clipping edges may be modified. */
+   
+int DrawThickLine::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     Pt::Math::Point *pts;
     size_t *wids;

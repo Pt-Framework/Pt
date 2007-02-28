@@ -173,68 +173,6 @@ class LineFace
         double _k;
 };
 
-class PolyEdge
-{
-public:
-    PolyEdge()
-    :_height( 0 )
-    ,_x( 0)
-    ,_stepx(0)
-    ,_signdx( 0)
-    ,_e(0)
-    ,_dy(0)
-    ,_dx(0)  
-    {}
-    
-    ~PolyEdge()
-    { }
-
-    int x() const
-    { return _x; }
-
-    void setX(int x)
-    { _x = x; }
-  
-    int stepx() const
-    { return _stepx; }
-
-    void setStepX(int sdx)
-    { _stepx = sdx; }
-
-    int signdx() const
-    { return _signdx; }
-
-    void setSignDX(int sdx)
-    { _signdx = sdx; }
-
-    int e() const
-    { return _e; }
-
-    void setE(int e_)
-    { _e = e_; }
-
-    int dx() const
-    { return _dx; }
-
-    void setDX(int dx_)
-    { _dx = dx_; }
-
-    int dy() const
-    { return _dy; }
-
-    void setDY(int dy_)
-    { _dy = dy_; }  
-
-private:
-  unsigned int _height;		/* number of scanlines in edge */
-  int _x;			/* starting x coordinate of edge */
-  int _stepx;			/* fixed integer dx (usually 0) */
-  int _signdx;			/* additional (optional) integer dx */
-  int _e;			/* initial value for decision variable */
-  int _dy;			/* dy/dx is (rational) slope of edge */
-  int _dx;
-};
-
 /** @brief Draw thick lines on an image
 
     This class implements DrawLine and is specialised for the  drawing
@@ -267,7 +205,11 @@ class DrawThickLine : public DrawLine
     
         void lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt);
         int lineArcI( const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths );
-        int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, PolyEdge *edge1, int edgey1, bool edgeleft1, PolyEdge *edge2, int edgey2, bool edgeleft2 );
+        int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2 );
+        void fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count);
+        void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
+        int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
+        int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
         FillPolygon _fillPolygon;
         ClipPolygon _clipPolygon;
         RasterBuffer _rasterBuffer;
