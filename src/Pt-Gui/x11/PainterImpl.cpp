@@ -113,24 +113,52 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     if (pen == _pen) return;
 
-    if( _pen.color() != pen.color() ) {
+    if( _pen.color() != pen.color() )
+    {
         Display* display = X11EventLoop::instance().display();
         XSetForeground( display, _penGc, this->toXColor( pen.color() ) );
         XSetBackground( display, _penGc, this->toXColor( pen.color() ) );
     }
 
-    if( _pen.size() != pen.size() ) {
+    if( _pen.size() != pen.size() ||
+        _pen.style() != pen.style() ||
+        _pen.joinStyle() != pen.joinStyle() ||
+        _pen.capStyle() != pen.capStyle() )
+    {
         int lineStyle = LineSolid;
-        int capStyle  = CapButt;
-        int joinStyle = JoinBevel;
-        
         switch( _pen.style() )
         {
-            case Pen::SolidStyle:                
-            break;
+            case Pen::SolidStyle:
+                lineStyle = LineSolid;
+                break;
+
             case Pen::DashStyle:
                 lineStyle = LineOnOffDash;
-            break;
+                break;
+        }
+
+        int joinStyle = JoinBevel;
+        switch( _pen.joinStyle() )
+        {
+            case Pen::RoundJoin:
+                joinStyle = JoinRound;
+                break;
+
+            case Pen::BevelJoin:
+                joinStyle = JoinBevel;
+                break;
+        }
+
+        int capStyle  = CapButt;
+        switch( _pen.capStyle() )
+        {
+            case Pen::FlatCap:
+                capStyle = CapButt;
+                break;
+
+            case Pen::RoundCap:
+                capStyle = CapRound;
+                break;
         }
 
         Display* display = X11EventLoop::instance().display();
