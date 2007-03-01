@@ -8,8 +8,12 @@
 #include <Pt/Types.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
+#include <Pt/Math/Point.h>
 #include <cmath>
 #include <cassert>
+#ifdef __QNX__
+#include <math.h>
+#endif
 
 namespace Pt {
 
@@ -36,7 +40,11 @@ namespace Pt {
             return (angle * 180.0) / PI;
         }
 
-        static const double EPS    = 10e-9; // accuracy for equal comparison
+        // accuracy for equal comparison
+		static const double Eps9	= 10e-9; 
+        static const double Eps6	= 10e-6;
+        static const double Eps3	= 10e-3;
+        static const double Eps1	= 10e-1;
 
         template<typename T>
         inline bool equal(const T& val, const T& val2, const double& eps)
@@ -119,6 +127,12 @@ namespace Pt {
         
         inline int round(double d) 
         {  return static_cast<int>(d<0?d-.5:d+.5);  }
+
+  inline Point getCenterOfLine( const Point& begin, const Point& end )
+        {
+            return (begin + (( end - begin ) * 0.5) );
+        }
+
 
     } // namespace Math
 

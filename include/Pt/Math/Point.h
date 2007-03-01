@@ -119,7 +119,7 @@ namespace Pt {
                     return *this;
                 }
 
-                inline BasicPoint& operator+(const BasicVector2d<T>& vec) const
+                inline BasicPoint operator+(const BasicVector2d<T>& vec) const
                 {
                     return BasicPoint( (_x+vec.x()), (_y+vec.y()) );
                 }
@@ -131,9 +131,38 @@ namespace Pt {
                     return *this;
                 }
 
-                inline BasicPoint& operator-(const BasicVector2d<T>& vec) const
+                inline BasicPoint operator-(const BasicVector2d<T>& vec) const
                 {
                     return BasicPoint( (_x-vec.x()), (_y-vec.y()) );
+                }
+
+                inline const BasicPoint operator+=(const BasicPoint<T>& pt)
+                {
+                    _x += pt.x();
+                    _y += pt.y();
+                    return *this;
+                }
+
+                inline BasicPoint operator+(const BasicPoint<T>& pt) const
+                {
+                    return BasicPoint( (_x+pt.x()), (_y+pt.y()) );
+                }
+
+                inline const BasicPoint operator-=(const BasicPoint<T>& pt)
+                {
+                    _x -= pt.x();
+                    _y -= pt.y();
+                    return *this;
+                }
+
+                inline BasicPoint operator-(const BasicPoint<T>& pt) const
+                {
+                    return BasicPoint( (_x-pt.x()), (_y-pt.y()) );
+                }
+
+                inline BasicPoint operator*(const double factor) const
+                {
+                    return BasicPoint( (T)(_x * factor), (T)(_y * factor) );
                 }
 
             protected:

@@ -285,7 +285,7 @@ namespace Pt
                 \param matrix BasicMatrix for the Addition.
                 \return The resulting BasicMatrix.
             */
-            inline BasicMatrix<T, rowDim, colDim> operator+(const BasicMatrix<T, rowDim, colDim>& matrix)
+            inline BasicMatrix<T, rowDim, colDim> operator+(const BasicMatrix<T, rowDim, colDim>& matrix) const
             {
                 BasicMatrix<T, rowDim, colDim> resMatrix(*this);
                 resMatrix += matrix;
@@ -329,7 +329,7 @@ namespace Pt
                 \return The resulting BasicMatrix.
             */
             template <typename T2, size_t rightRowDim, size_t rightColDim>
-            inline BasicMatrix<T2, rowDim, rightColDim> operator*(const BasicMatrix<T2, rightRowDim, rightColDim>& matrix)
+            inline BasicMatrix<T2, rowDim, rightColDim> operator*(const BasicMatrix<T2, rightRowDim, rightColDim>& matrix) const
             {
 
                 BasicMatrix<T2, rowDim, rightColDim> resMatrix;
@@ -340,7 +340,8 @@ namespace Pt
                     {
                         for(size_t k = 0; k < colDim; ++k)
                         {
-                            resMatrix.addValue( this->getValue(r, k) * matrix.getValue(k,c), r, c);
+                            T2 value = (T2)(this->getValue(r, k) * matrix.getValue(k,c));
+                            resMatrix.addValue(value, r, c);
                         }
                     }
                 }
