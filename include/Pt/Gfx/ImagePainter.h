@@ -18,8 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_IMAGE_PAINTER_H
-#define PT_GFX_IMAGE_PAINTER_H
+#ifndef PT_GFX_IMAGEPAINTER_H
+#define PT_GFX_IMAGEPAINTER_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/String.h>
@@ -35,21 +35,21 @@ namespace Pt {
 
 namespace Gfx {
 
-class DrawLine;
-class DrawThinLine;
-class DrawThickLine;
 class DrawPolyline;
 class DrawThinPolyline;
+class DrawWidePolyline;
+
 class DrawEllipse;
 class DrawThinEllipse;
 class DrawThickEllipse;
+
 class FillPolygon;
 class FillEllipse;
+
 class DrawText;
 class FillSolid;
 class FillTexture;
 class Stroke;
-
 
 /**
     \brief A painter to draw on an ARgbImage.
@@ -137,9 +137,11 @@ class PT_GFX_API ImagePainter : public Painter
         Pen                  _pen;
         Brush                _brush;
         Font                 _font;
-        DrawLine*            _drawLine;
-        DrawThinLine*        _drawThinLine;
-        DrawThickLine*       _drawThickLine;
+        
+        DrawPolyline*        _drawPolyline;
+        DrawThinPolyline*    _drawThinPolyline;
+        DrawWidePolyline*    _drawWidePolyline;
+        
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;

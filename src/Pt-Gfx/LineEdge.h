@@ -18,52 +18,94 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_DRAWTHINLINE_H
-#define PT_GFX_DRAWTHINLINE_H
+#ifndef PT_GFX_LINEEDGE_H
+#define PT_GFX_LINEEDGE_H
+ 
+namespace Pt{
+namespace Gfx { 
+ 
+/**
+* @brief The line edge description.
+*
+*/
 
-#include "DrawLine.h"
-#include "ClipLine.h"
-
-namespace Pt {
-namespace Gfx {
-
-/** @brief Draw thin lines on an image
-
-    This class implements DrawPolyline and is specialised for the drawing
-    of thin lines.
- */
-class DrawThinLine : public DrawLine
+class LineEdge
 {
     public:
+        LineEdge()
+        : _height(0)
+        , _x(0)
+        , _stepx(0)
+        , _signdx(0)
+        , _e(0)
+        , _dx(0)
+        , _dy(0)
+        { }
 
-        DrawThinLine();
-        ~DrawThinLine();
-        /** @brief Draw a line on an image
+        unsigned int height() const
+        { return _height; }
 
-            @see DrawLine::draw
-        */
-        void draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
+        void setHeight( int height_ )
+        { _height = height_; }
+
+        int x() const
+        { return _x; }
+
+        void setX( int x_ )
+        { _x = x_; }
+
+        int stepx() const
+        { return _stepx; }
+
+        void setStepX( int sdx )
+        { _stepx = sdx; }
+
+        int signdx() const
+        { return _signdx; }
+
+        void setSignDX( int sdx )
+        { _signdx = sdx; }
+
+        int e() const
+        { return _e; }
+
+        void setE( int e_ )
+        { _e = e_; }
+
+        int dx() const
+        { return _dx; }
+
+        void setDX( int dx_ )
+        { _dx = dx_; }
+
+        int dy() const
+        { return _dy; }
+
+        void setDY( int dy_ )
+        { _dy = dy_; }
 
     private:
-        ClipLine _clipLine;
-        void drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to );
-        void drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to, const std::vector<bool>& pattern );
+        // Number of scanlines in edge
+        unsigned int _height;
 
-        inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t length )
-        {
-            memcpy( &image.pixel( x,  y ), &_colorBuffer[0], length * sizeof( ARgbColor)  );
-        }
+        // Starting x coordinate of edge
+        int _x;
 
-        inline void outputPixel( ARgbImage& image, const Pen& pen, size_t x, size_t y )
-        {
-            image.pixel( x,  y ) = pen.color();
-        }
+        // Fixed integer dx (usually 0)
+        int _stepx;
 
-        std::vector<bool> _dashPattern;
+        // Additional (optional) integer dx
+        int _signdx;
+
+        // Initial value for decision variable
+        int _e;
+
+        // dy/dx is (rational) slope of edge
+        int _dx;
+        int _dy;
 };
 
-} // namespace gfx
-
-} // namespace Pt
+} //namespace Gfx
+} //namespaec Pt
 
 #endif

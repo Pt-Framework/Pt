@@ -29,8 +29,10 @@
 #include "Pt/System/Clock.h"
 #include "Pt/Math/MathUtils.h"
 
-#include "DrawThinLine.h"
-#include "DrawThickLine.h"
+#include "DrawPolyline.h"
+#include "DrawThinPolyline.h"
+#include "DrawWidePolyline.h"
+
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
 #include "DrawThickEllipse.h"
@@ -48,9 +50,9 @@ namespace Gfx {
 ImagePainter::ImagePainter( ARgbImage& image )
 : _image( image )
 , _font("Vera", 12)
-, _drawLine( 0 )
-, _drawThinLine(0 )
-, _drawThickLine( 0)
+, _drawPolyline( 0 )
+, _drawThinPolyline(0 )
+, _drawWidePolyline( 0)
 , _drawEllipse( 0 )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
@@ -63,10 +65,10 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
     std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
     std::auto_ptr<Stroke>                 stroke( new Stroke() );    
-    std::auto_ptr<DrawThinLine>           dThinLine( new DrawThinLine );
-    dThinLine->setOutput( *stroke );
-    std::auto_ptr<DrawThickLine>          dThickLine( new DrawThickLine );
-    dThickLine->setOutput( *stroke );    
+    std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
+    dThinPolyline->setOutput( *stroke );
+    std::auto_ptr<DrawWidePolyline>       dWidePolyline( new DrawWidePolyline );
+    dWidePolyline->setOutput( *stroke );    
     std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
     std::auto_ptr<DrawThinEllipse>        dThinEllipse( new DrawThinEllipse() );
@@ -76,16 +78,16 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
     
     
-    _drawThinLine       = dThinLine.release();
-    _drawThickLine      = dThickLine.release();
-    _drawLine           = _drawThinLine;
+    _drawThinPolyline   = dThinPolyline.release();
+    _drawWidePolyline   = dWidePolyline.release();
+    _drawPolyline       = _drawThinPolyline;
     _drawText           = dText.release();
     _drawThinEllipse    = dThinEllipse.release();
-    _drawThickEllipse    = dThickEllipse.release();
+    _drawThickEllipse   = dThickEllipse.release();
     _drawEllipse        = _drawThinEllipse;
     _fillEllipse        = fillEllipse.release();
     _fillPolygon        = fillPolygon.release();
-    _fillSolid     = fillSolid.release();
+    _fillSolid          = fillSolid.release();
     _fillTexture        = fillTexture.release();
     _stroke             = stroke.release();
 }
@@ -93,8 +95,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
 ImagePainter::~ImagePainter()
 {
     try {
-        delete _drawThinLine;
-        delete _drawThickLine;
+        delete _drawThinPolyline;
+        delete _drawWidePolyline;
         delete _fillPolygon;
         delete _drawText;
         delete _drawThinEllipse;
@@ -111,15 +113,14 @@ void ImagePainter::setPen( const Pen& pen )
     
     if( _pen.size() == 1 )
     {
-        _drawLine       = _drawThinLine;
+        _drawPolyline   = _drawThinPolyline;
         _drawEllipse    = _drawThinEllipse;        
     }
     else
     {
-        _drawLine       = _drawThickLine;
+        _drawPolyline   = _drawWidePolyline;
         _drawEllipse    = _drawThickEllipse;
-    }
-        
+    }        
 }
 
 const Pen& ImagePainter::pen() const
@@ -185,7 +186,11 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
     if( _pen.size()  == 0 )
         return;
 
-    _drawLine->draw(_image, _pen, from, to );
+    std::vector<Pt::Math::Point> points;
+    
+    points.push_back( from );
+    points.push_back( to );
+    _drawPolyline->draw(_image, _pen, &points[0], points.size() );
 }
 
 void ImagePainter::drawText( const Math::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
@@ -236,8 +241,7 @@ void ImagePainter::drawPolyline( const  Math::Point* points, const size_t pointC
     if( _pen.size()  == 0 )
         return;
 
-    for( size_t i = 1; i < pointCount; ++i)
-        _drawLine->draw( _image, _pen, points[ i - 1], points[i] );
+    _drawPolyline->draw( _image, _pen, points, pointCount );
 }
 
 void ImagePainter::fillPolygon( const  Math::Point* points, const size_t pointCount )

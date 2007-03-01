@@ -57,16 +57,22 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    drawMap();
-	    /*
-	    Pen pen( 50, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap );
+	    Pen pen( 10, ARgbColor( 0,0,0), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin );
 
 		_imagePainter.setPen( pen );
-		_imagePainter.drawLine( Point(10,10), Point( 100, 100 ) );
+		
+		Pt::Math::Point poly[4];
+		
+		poly[0] = Pt::Math::Point( 30, 60 );
+		poly[1] = Pt::Math::Point( 60, 10 );
+		poly[2] = Pt::Math::Point( 100, 70 );
+		poly[3] = Pt::Math::Point( 150, 10 );
+		
+		_imagePainter.drawPolyline( poly, 4 );
 		painter().drawImage( Point(0,0), _image );
 		
-		painter().setPen( Pen(10, ARgbColor( 0, 0, 0xffff ), Pen::SolidStyle, Pen::RoundCap)  );
-		//painter().drawLine( Point(30,30), Point( 100, 100 ) );*/
+		painter().setPen( Pen(10, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin)  );
+		//painter().drawPolyline( poly, 4 );
 	}
 
 	void drawEllipse()

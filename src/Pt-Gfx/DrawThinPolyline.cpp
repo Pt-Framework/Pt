@@ -18,12 +18,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "DrawThinLine.h"
+#include "DrawThinPolyline.h"
 
 namespace Pt{
 namespace Gfx{
 
-DrawThinLine::DrawThinLine()
+DrawThinPolyline::DrawThinPolyline()
 {
     _dashPattern.push_back(true);
     _dashPattern.push_back(true);
@@ -31,19 +31,24 @@ DrawThinLine::DrawThinLine()
     _dashPattern.push_back(false);
 }
 
-DrawThinLine::~DrawThinLine()
+DrawThinPolyline::~DrawThinPolyline()
 { }
 
-void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
+void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Math::Point* points,  size_t pointCount )
+{
+    for( size_t i = 1; i < pointCount; i++)
+    {
+        drawLine( image, pen, points[i -1], points[i] );
+    }
+}
+
+void DrawThinPolyline::drawLine( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
 {
     Math::Point clippedFrom( from );
     Math::Point clippedTo( to );
 
     if( !_clipLine( clippedFrom, clippedTo , 0, image.width() - 1, 0, image.height() -1 ) )
         return;
-
-    if( _colorBuffer.size() < image.width() || _colorBuffer[0] != pen.color() )
-        _colorBuffer.assign( image.width(), pen.color() );
 
     switch( pen.style() )
     {
@@ -56,7 +61,7 @@ void DrawThinLine::draw( ARgbImage& image, const Pen& pen, const Math::Point& fr
     }
 }
 
-void DrawThinLine::drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, 
+void DrawThinPolyline::drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, 
                                const Math::Point& to, const std::vector<bool>& pattern )
 {
     ssize_t     x0      = from.x();
@@ -160,7 +165,7 @@ void DrawThinLine::drawPattern( ARgbImage& image, const Pen& pen, const Math::Po
 }
 
     
-void DrawThinLine::drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
+void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
 {
     ssize_t     x0      = from.x();
     ssize_t     y0      = from.y();

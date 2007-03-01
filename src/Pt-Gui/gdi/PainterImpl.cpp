@@ -558,16 +558,21 @@ void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Si
 
 void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const
 {
-/*
+    if (_pen.size() == 0) 
+       return;
+    
+    ensureActivePainter();
+    
     std::vector<POINT> winPoints(pointCount);
 
-    for (size_t i = 0; i < pointCount; i++) {
+    for (size_t i = 0; i < pointCount; i++) 
+    {
         winPoints[i].x = points[i].x();
         winPoints[i].y = points[i].y();
     }
 
     Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
-    */
+/*
     ensureActivePainter();
 
     if (_pen.size() == 0) {
@@ -580,7 +585,7 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
 
     for( size_t i = 1; i <  pointCount; i++) {
         LineTo(hdc, points[i].x(), points[i].y());
-    }
+    }*/
 }
 
 

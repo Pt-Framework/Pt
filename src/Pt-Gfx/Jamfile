@@ -18,8 +18,8 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        FontMetrics.cpp
                        ImagePainter.cpp
                        DrawText.cpp
-                       DrawThinLine.cpp
-                       DrawThickLine.cpp
+                       DrawThinPolyline.cpp
+                       DrawWidePolyline.cpp
                        FillPolygon.cpp
                        ClipPolygon.cpp
                        FreeType.cpp

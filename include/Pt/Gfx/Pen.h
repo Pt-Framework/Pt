@@ -52,7 +52,7 @@ namespace Gfx {
                 
             enum PenStyle{ SolidStyle = 0, DashStyle =1 };
             enum CapStyle{ FlatCap = 0, RoundCap = 1 };
-            enum JoinStyle{ RoundJoin = 0,BevelJoin = 1 };
+            enum JoinStyle{ RoundJoin = 0, BevelJoin = 1 };
   
             /**
              * @brief Creates a new Pen object.

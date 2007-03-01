@@ -18,8 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_DRAWLINE_H
-#define PT_GFX_DRAWLINE_H
+#ifndef PT_GFX_DRAWPOLYLINE_H
+#define PT_GFX_DRAWPOLYLINE_H
 
 #include <vector>
 
@@ -38,29 +38,20 @@ namespace Gfx {
     This class is an interface for all function objects that can
     draw lines.
  */
-class DrawLine
+class DrawPolyline
 {
     public:
         /** @brief Default Constructor
         */
-        DrawLine()
-        : _colorBuffer( 0 )
+        DrawPolyline()
         { }
 
         /** @brief Destructor
         */
-        virtual ~DrawLine()
+        virtual ~DrawPolyline()
         { }
 
-        /** @brief Draw a line on an image
-
-            @see DrawLine::draw
-        */
-        void operator() ( ARgbImage& image, const Pen& pen,
-                          const Math::Point& from,
-                          const Math::Point& to )
-        { this->draw(image, pen, from, to); }
-
+   
         /** @brief Draw a line on an image
 
             The line described by a two points will be drawn on an ARgbImage.
@@ -72,21 +63,17 @@ class DrawLine
             @param from Begin of the line
             @param end End of the line
         */
-        virtual void draw( ARgbImage& image, const Pen& pen,
-                           const Math::Point& from,
-                           const Math::Point& to ) = 0;
+        virtual void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount ) = 0;
 
-
-        inline void setOutput(Stroke& d)
+        inline void setOutput( Stroke& d )
         { _stroke = &d; }
         
+
     protected:
-        std::vector<ARgbColor>  _colorBuffer;
         Stroke*                 _stroke;
 };
 
 } // namespace Gfx
-
 } // namespace Pt
 
 #endif
