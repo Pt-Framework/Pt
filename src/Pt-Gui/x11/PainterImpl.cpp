@@ -300,7 +300,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
         // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
         size_t utf16Length = utf16Text.length() / 2;
 
-        XftTextExtents16(display, _xftFont, (const FcChar16*)utf16Text.c_str(), utf16Length, &info);
+        XftTextExtents16(display, _xftFont, (XftChar16*)utf16Text.c_str(), utf16Length, &info);
 
     return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, info.width, _xftFont->height);
 }
@@ -378,7 +378,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
     size_t utf16Length = utf16Text.length() / 2;
 
-    XftDrawString16(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (const FcChar16*)utf16Text.c_str(), utf16Length);
+    XftDrawString16(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (XftChar16*)utf16Text.c_str(), utf16Length);
 }
 
 
