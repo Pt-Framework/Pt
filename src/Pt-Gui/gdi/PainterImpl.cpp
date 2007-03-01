@@ -79,22 +79,26 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
     updatePen();
 }
 
-DWORD PainterImpl::getPenStyles( const Pt::Gfx::Pen& pen )
-{    
-    DWORD penStyle = PS_GEOMETRIC;
 
-    //Map pen style
+DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
+{
+#ifdef _WIN32_WCE
+	DWORD penStyle = 0;
+#else
+    DWORD penStyle = PS_GEOMETRIC;
+#endif
+
     switch( pen.style() )
     {
         case Gfx::Pen::SolidStyle:
             penStyle |= PS_SOLID;
         break;
         case Gfx::Pen::DashStyle:
-            penStyle |= PS_DASH;    
-        break;    
-    }    
-    
-    //Map cap style
+            penStyle |= PS_DASH;
+        break;
+    }
+
+#ifndef _WIN32_WCE
     switch( pen.capStyle() )
     {
         case Pt::Gfx::Pen::RoundCap:
@@ -104,8 +108,7 @@ DWORD PainterImpl::getPenStyles( const Pt::Gfx::Pen& pen )
             penStyle |= PS_ENDCAP_FLAT;
         break;
     }
-    
-    //Map join style
+
     switch( pen.joinStyle() )
     {
         case Pt::Gfx::Pen::RoundJoin:
@@ -113,12 +116,14 @@ DWORD PainterImpl::getPenStyles( const Pt::Gfx::Pen& pen )
         break;
         case Pt::Gfx::Pen::BevelJoin:
              penStyle |= PS_JOIN_BEVEL;
-        break;             
-    }    
-    
+        break;
+    }
+#endif
+
     return penStyle;
 }
- 
+
+
 void PainterImpl::updatePen()
 {
     if (!_drawable.isPainting()) {
@@ -127,16 +132,16 @@ void PainterImpl::updatePen()
 
     Gfx::Rgb888Color penCol;
     assign( penCol, _pen.color() );
-    
-    DWORD penStyle = getPenStyles( _pen );
-    
+
+    DWORD penStyle = toGdiPenStyle( _pen );
+
 #ifdef _WIN32_WCE
     HPEN newPen = CreatePen( penStyle, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()) );
 #else
     LOGBRUSH brush;
     brush.lbStyle = BS_SOLID ;
-    brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());      
-    
+    brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
+
     HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
 #endif
 
@@ -351,7 +356,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     // Calculate the width and height for the text.
     SIZE textSize;
     std::string utf16Text = _stringStream.str();
-    
+
     // Every UTF16 character uses 2 bytes, so divide by 2 to get the length of the encoded text.
     size_t utf16Length = utf16Text.length() / 2;
     GetTextExtentPoint32W(_drawable.deviceContext(), (wchar_t*)utf16Text.c_str(), utf16Length, &textSize);
@@ -564,7 +569,7 @@ void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t point
     Polyline( _drawable.deviceContext(), &(winPoints[0]), pointCount );
     */
     ensureActivePainter();
-    
+
     if (_pen.size() == 0) {
         return;
     }
