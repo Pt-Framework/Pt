@@ -69,8 +69,6 @@ namespace System {
                 }
             }
 
-
-        protected:
             void shutDown()
             {
                 Connectable::shutDown();

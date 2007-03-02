@@ -35,9 +35,24 @@ Connection::Connection()
 
 Connection::Connection(Connectable& sender, Slot* slot)
 {
-    _data = new ConnectionData(sender, slot);
-    sender.opened(*this);
+    std::auto_ptr<ConnectionData> data( new ConnectionData(sender, slot) );
+    _data = data.get();
+    _data->setValid(false);
+
+    if ( false == sender.opened(*this) )
+    {
+        return;
+    }
+
     slot->opened(*this);
+    //if( false == slot->opened(*this) )
+    //{
+    //    sender.closed(*this);
+    //    _data->setValid(false);
+    //}
+
+    _data->setValid(true);
+    data.release();
 }
 
 
