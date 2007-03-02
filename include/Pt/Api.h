@@ -27,34 +27,33 @@
   |  ___|                                         | |
   | |_ _ __ __ _ _ __ ___   _____      _____  _ __| | __
   |  _| '__/ _` | '_ ` _ \ / _ \ \ /\ / / _ \| '__| |/ /
-  | | | | | (_| | | | | | |  __/\ V  V / (_) | |  |   < 
+  | | | | | (_| | | | | | |  __/\ V  V / (_) | |  |   <
   \_| |_|  \__,_|_| |_| |_|\___| \_/\_/ \___/|_|  |_|\_\     */
 
 #ifndef Pt_Api_h
 #define Pt_Api_h
 
-
 #if defined(_MSC_VER)
-        //http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
-        //http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
-        //http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
+	//http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
+	//http://support.microsoft.com/support/kb/articles/Q168/9/58.ASP
+	//http://support.microsoft.com/support/kb/articles/Q172/3/96.ASP
 
-        // deprectated stdc++ functions
-        #pragma warning( disable : 4996 ) 
+	// deprectated stdc++ functions
+	#pragma warning( disable : 4996 )
 
-        // dll-linkage
-        #pragma warning( disable : 4251 ) 
+	// dll-linkage
+	#pragma warning( disable : 4251 )
 
-        //non dll-interface base class
-        #pragma warning( disable : 4275 )
+	//non dll-interface base class
+	#pragma warning( disable : 4275 )
 
-        // exception sepcification ignored
-        #pragma warning( disable : 4290 ) 
+	// exception sepcification ignored
+	#pragma warning( disable : 4290 )
 #endif
 
 #if defined (__INTEL_COMPILER)
     // field of class type without a DLL interface used in a class with a DLL interface
-        #pragma warning( disable : 1744 ) 
+    #pragma warning( disable : 1744 )
 
     //base class dllexport/dllimport specification differs from that of the derived class
     #pragma warning( disable : 1738 )
@@ -62,7 +61,7 @@
 
 #ifdef _WIN32_WCE
     // WinCE does not provide locale-classes
-    #define PT_WITHOUT_STD_LOCALE  
+    #define PT_WITHOUT_STD_LOCALE
 #endif
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
@@ -71,6 +70,9 @@
     #define PT_PACKED
     #define PT_ALIGN(value) __declspec( align( value ) )
 
+    // suppress min/max macros from win32 headers
+	#define NOMINMAX
+
     // Modify the following defines if you have to target a platform prior to the ones specified below.
     // Refer to MSDN for the latest info on corresponding values for different platforms.
     // INFO: Taken from stdafx.h of a Visual Studio MFC project.
@@ -78,7 +80,7 @@
     #define WINVER 0x0501 // Change this to the appropriate value to target other versions of Windows.
     #endif
 
-    #ifndef _WIN32_WINNT // Allow use of features specific to Windows XP or later.                   
+    #ifndef _WIN32_WINNT // Allow use of features specific to Windows XP or later.
     #define _WIN32_WINNT 0x0501 // Change this to the appropriate value to target other versions of Windows.
     #endif
 
