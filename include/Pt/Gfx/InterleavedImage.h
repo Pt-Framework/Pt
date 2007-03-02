@@ -45,7 +45,7 @@ namespace Pt {
          *  meant to be used for implementing interleaved images.
          */
         template <typename ColorT_>
-        class /*PT_GFX_API*/ InterleavedImage {
+        class InterleavedImage {
             public:
                 typedef ColorT_       ColorT;
 
@@ -109,7 +109,6 @@ namespace Pt {
                  */
                 void resize(uint width_, uint height_, const ColorT& fill);
 
-
                 /** @brief Assigns a color to all pixels.
                  */
                 InterleavedImage& operator=(const ColorT& fill);
@@ -117,7 +116,6 @@ namespace Pt {
                 /** @brief Assignment operator from the same image type.
                  */
                 InterleavedImage& operator=(const InterleavedImage& src);
-
 
                 /** @brief Raw data access.
                  */
@@ -323,11 +321,6 @@ namespace Pt {
 } // namespace Pt
 
 
-//
-// NOTE: Why these conditional compilation is always get deleted ???
-//
-// With GCC we should be able to use explicit template instantiation correctly
-// and thus we does not need to include the template implementation header
 #ifndef __GNUC__
 #include "InterleavedImage.tpp"
 #endif
