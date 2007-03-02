@@ -139,10 +139,11 @@ namespace System {
              */
             void exit();
 
-            virtual void opened(const Connection& c)
+            virtual bool opened(const Connection& c)
             {
                 MutexLock lock(_connectionMutex);
-                Connectable::opened(c);
+                bool accept = Connectable::opened(c);
+                return accept;
             }
 
             virtual void closed(const Connection& c)

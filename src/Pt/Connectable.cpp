@@ -30,6 +30,7 @@ Connectable::Connectable()
 : _shutDown( false )
 {}
 
+
 Connectable::Connectable(const Connectable& c)
 { this->operator=(c); }
 
@@ -39,13 +40,15 @@ Connectable::~Connectable()
     this->clear();
 }
 
+
 void Connectable::clear()
-{      
+{
     while( !_connections.empty() ) {
         Connection connection = _connections.front();
         connection.close();
     }
 }
+
 
 Connectable& Connectable::operator=(const Connectable& other)
 {
@@ -65,13 +68,17 @@ Connectable& Connectable::operator=(const Connectable& other)
     return (*this);
 }
 
-void Connectable::opened(const Connection& c)
+
+bool Connectable::opened(const Connection& c)
 {
     if( _shutDown )
-        return;
+        return false;
 
     _connections.push_back(c);
+
+    return true;
 }
+
 
 void Connectable::closed(const Connection& c)
 {
@@ -81,10 +88,12 @@ void Connectable::closed(const Connection& c)
     _connections.remove(c);
 }
 
+
 void Connectable::shutDown()
 {
     _shutDown = true;
 }
+
 
 bool Connectable::isDown() const 
 {

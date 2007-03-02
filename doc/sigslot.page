@@ -1,0 +1,10 @@
+/** \page sigslot Signals and Delegates
+
+@section Signals vs Delegates
+
+@section Connecting Signals to Slots
+
+@section Sending Signals
+
+@section Thread-Safety
+*/

@@ -17,6 +17,204 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+/***************************************************************************
+ *   Copyright (C) 2005-2006 by Marc Boris Duerner                          *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+#undef PT_API_EXPORT
+
+#include "Pt/Signal.h"
+
+#include <string>
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/TestSchedule.h"
+#include "Pt/Unit/RegisterTest.h"
+
+
+class Callee : public Pt::Connectable
+{
+    public:
+        Callee()
+        : _count(0)
+        {}
+
+        void slot0()
+        { ++_count; }
+
+        int count() const
+        { return _count; }
+
+        void reset()
+        { _count = 0; }
+
+    private:
+        int _count;
+};
+
+
+class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
+{
+    public:
+        SignalTest()
+        : Pt::Unit::TestSuite("SignalTest")
+        , _called0(false)
+        , _caller(0)
+        , _callee(0)
+        {
+            Pt::Unit::TestSuite::registerMethod( "DeleteWhileSend", *this, &SignalTest::DeleteWhileSend );
+            Pt::Unit::TestSuite::registerMethod( "CopySignal", *this, &SignalTest::CopySignal );
+            Pt::Unit::TestSuite::registerMethod( "Send0", *this, &SignalTest::Send0 );
+            Pt::Unit::TestSuite::registerMethod( "SignalToSignal0", *this, &SignalTest::SignalToSignal0 );
+        }
+
+        virtual void setUp()
+        {
+            _caller = new Pt::Signal<>;
+            _callee = new Callee;
+        }
+
+        virtual void tearDown()
+        {
+            delete _caller;
+            _caller = 0;
+            delete _callee;
+            _callee = 0;
+        }
+
+    protected:
+        void Send0()
+        {
+            Callee* recv = new Callee;
+            Pt::Signal<> signal;
+            connect( signal, slot(recv, &Callee::slot0) );
+            PT_UNIT_ASSERT(signal.connectionCount() == 1)
+
+            // A deleted receiver must remove itself from a signal
+            delete recv;
+            signal.send();
+            PT_UNIT_ASSERT(signal.connectionCount() == 0)
+
+            // A signal must call its slot when connected
+            recv = new Callee;
+            Pt::Connection connection = connect(signal, slot(recv, &Callee::slot0) );
+            signal.send();
+            PT_UNIT_ASSERT( recv->count() == 1)
+
+            recv->reset();
+
+            // Closing connections must remove them
+            connection.close();
+            signal.send();
+            PT_UNIT_ASSERT( recv->count() == 0 )
+            PT_UNIT_ASSERT( signal.connectionCount() == 0)
+
+            delete recv;
+        }
+
+        void SignalToSignal0()
+        {
+            Callee* recv = new Callee;
+            Pt::Signal<> signal1;
+            Pt::Signal<> signal2;
+
+            connect( signal1, slot(signal2) );
+            connect( signal2, slot(recv, &Callee::slot0) );
+
+            // Slot must be called via signal chain
+            signal1.send();
+            PT_UNIT_ASSERT( recv->count() == 1 )
+
+            delete recv;
+        }
+
+        void CopySignal()
+        {
+            Callee callee;
+            Pt::Signal<> signal1;
+            Pt::Signal<> signal2;
+
+            Pt::Connection connection1 = connect(signal1, callee, &Callee::slot0);
+            signal2 = signal1;
+
+            connection1.close();
+
+            signal2.send();
+            PT_UNIT_ASSERT( callee.count() == 1 )
+        }
+
+        void DeleteWhileSend()
+        {
+            connect(*_caller, *this, &SignalTest::slot0);
+            connect(*_caller, *this, &SignalTest::deleteCallee );
+            connect(*_caller, *this, &SignalTest::slot0);
+            connect(*_caller, *this, &SignalTest::deleteCaller);
+            connect(*_caller, *this, &SignalTest::slot0);
+
+            _caller->send();
+        }
+
+        void deleteCallee()
+        {
+            //std::cerr << "SignalTest::deleteCallee" << std::endl;
+            delete _callee;
+            _callee = 0;
+        }
+
+        void deleteCaller()
+        {
+            //std::cerr << "SignalTest::deleteCaller" << std::endl;
+            delete _caller;
+            _caller = 0;
+        }
+
+        void slot0()
+        { _called0 = true; }
+
+    private:
+        bool _called0;
+        Pt::Signal<>* _caller;
+        Callee* _callee;
+};
+
+Pt::Unit::RegisterTest<SignalTest> register_SignalTest;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 #undef PT_API_EXPORT
 
 #include "Pt/Signal.h"
@@ -78,7 +276,7 @@ class Receiver : public Pt::Connectable {
         bool _called;
 };
 
-/*
+
 void performanceTest()
 {
         clock_t begin, end;
@@ -106,59 +304,7 @@ void performanceTest()
         std::cerr << "Duration: " << (end - begin) << std::endl;
         std::cerr << "---------------------------------\n\n";
 }
-*/
 
-void CopyTest()
-{
-    Receiver* recv = new Receiver;
-    Signal<> signal1;
-    Signal<> signal2;
-
-    Connection connection = connect(signal1, *recv, &Receiver::onSignal0);
-    signal2 = signal1;
-
-    connection.close();
-
-    signal2.send();
-    if(recv->called() == false)
-        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
-
-    delete recv;
-}
-
-
-void methodTest0()
-{
-    Receiver* recv = new Receiver;
-    Signal<> signal;
-    connect( signal, slot(recv, &Receiver::onSignal0) );
-
-    // test that a deleted receiver removes itself from a sender
-    delete recv;
-    signal.send();
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-
-    recv = new Receiver;
-    Connection connection = connect(signal, slot(recv, &Receiver::onSignal0) );
-
-    // test that a signal is really transmitted
-    signal.send();
-    if(recv->called() == false)
-        throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
-
-    recv->reset();
-
-    // test disconnecting a signal/slot
-    connection.close();
-    signal.send();
-    if(recv->called() == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-
-    delete recv;
-}
 
 
 void methodTest1()
@@ -180,14 +326,14 @@ void methodTest1()
 
     recv->reset();
 
-/*
-    disconnect(signal, *recv, &Receiver::onSignal1);
-    signal.send(1);
-    if(recv->called() == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    disconnect(signal, *recv, &Receiver::onSignal1);
+//    signal.send(1);
+//    if(recv->called() == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+
 
     delete recv;
 }
@@ -212,14 +358,13 @@ void methodTest2()
 
     recv->reset();
 
-/*
-    disconnect(signal, *recv, &Receiver::onSignal2);
-    signal.send(1,2);
-    if(recv->called() == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+//    disconnect(signal, *recv, &Receiver::onSignal2);
+//    signal.send(1,2);
+//    if(recv->called() == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+
     delete recv;
 }
 
@@ -243,14 +388,13 @@ void methodTest3()
 
     recv->reset();
 
-/*
-    disconnect(signal, *recv, &Receiver::onSignal3);
-    signal.send(1,2,3);
-    if(recv->called() == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    disconnect(signal, *recv, &Receiver::onSignal3);
+//    signal.send(1,2,3);
+//    if(recv->called() == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 
     delete recv;
 }
@@ -335,15 +479,15 @@ void functionTest0()
     if(testFunction0Called == false)
         throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
 
-/*
-    testFunction0Called = false;
-    disconnect(signal, testFunction0);
-    signal.send();
-    if(testFunction0Called == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    testFunction0Called = false;
+//    disconnect(signal, testFunction0);
+//    signal.send();
+//    if(testFunction0Called == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+
 }
 
 
@@ -357,15 +501,15 @@ void functionTest1()
     signal.send(1);
     if(testFunction1Called == false)
         throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
-/*
-    testFunction1Called = false;
-    disconnect(signal, testFunction1);
-    signal.send(1);
-    if(testFunction1Called == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    testFunction1Called = false;
+//    disconnect(signal, testFunction1);
+//    signal.send(1);
+//    if(testFunction1Called == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+
 }
 
 
@@ -379,15 +523,14 @@ void functionTest2()
     signal.send(1, 2);
     if(testFunction2Called == false)
         throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
-/*
-    testFunction2Called = false;
-    disconnect(signal, testFunction2);
-    signal.send(1, 2);
-    if(testFunction2Called == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    testFunction2Called = false;
+//    disconnect(signal, testFunction2);
+//    signal.send(1, 2);
+//    if(testFunction2Called == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
 }
 
 
@@ -401,15 +544,15 @@ void functionTest3()
     signal.send(1, 2, 3);
     if(testFunction3Called == false)
         throw std::logic_error("Signal not sent to connected slot." + PT_SOURCEINFO);
-/*
-    testFunction3Called = false;
-    disconnect(signal, testFunction3);
-    signal.send(1, 2, 3);
-    if(testFunction3Called == true)
-        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
-    if(signal.connections().size() != 0)
-        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
-*/
+
+//    testFunction3Called = false;
+//    disconnect(signal, testFunction3);
+//    signal.send(1, 2, 3);
+//    if(testFunction3Called == true)
+//        throw std::logic_error("Signal sent to disconnected slot." + PT_SOURCEINFO);
+//    if(signal.connections().size() != 0)
+//        throw std::logic_error("Connections left after disconnect." + PT_SOURCEINFO);
+
 }
 
 
@@ -539,4 +682,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
+*/

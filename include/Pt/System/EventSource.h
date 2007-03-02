@@ -41,10 +41,11 @@ namespace System {
                 return Connection(*this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
 
-            virtual void opened(const Connection& c)
+            virtual bool opened(const Connection& c)
             {
                 MutexLock lock(_mutex);
-                Connectable::opened(c);
+                bool accept = Connectable::opened(c);
+                return accept;
             }
 
             virtual void closed(const Connection& c)

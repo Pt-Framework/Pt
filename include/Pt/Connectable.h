@@ -26,41 +26,116 @@
 
 namespace Pt {
 
+    /** @brief Connection management for signal and slot objects
+
+        This class implements connection management for signal and slot
+        objects. It makes sure that all connections where this object
+        is involved are closed on destruction. Deriving classes can
+        overload Connectable::opened and Connectable::closed to tune
+        connection managenment. If a %Connectable is shut down it will
+        refuse to accept any further connections. This can be used
+        to implement signal types that can be destructed in a
+        thread-safe way.
+    */
     class PT_API Connectable
     {
         public:
+            /** @brief Default constructor.
+
+                Creates an empty %Connectable.
+            */
             Connectable();
 
+            /** @brief Closes all connections.
+
+                When a %Connectable object is destroyed, it closes all its
+                connections automatically.
+            */
             virtual ~Connectable();
 
-            //! @brief Registers a Connection with the Connectable.
-            virtual void opened(const Connection& c);
+            /** @brief Registers a Connection with the %Connectable.
 
-            //! @brief Unregisters a Connection from the Connectable.
+                This function is called when a new Connection involving
+                this object is opened. The default implementation adds
+                the connection to a list, so the destructor can close it.
+
+                @param c Connection being opened
+                @return True if the Connection was accepted
+            */
+            virtual bool opened(const Connection& c);
+
+            /** @brief Unregisters a Connection from the %Connectable.
+
+                This function is called when a new Connection involving
+                this object is closed. The default implementation removes
+                the connection from its list of connections.
+
+                @param c Connection being opened
+            */
             virtual void closed(const Connection& c);
 
+            /** @brief Prevents the object from accepting connections.
+
+                A %Connectable can be shut down to initiate the destruction
+                phase. This function can be called from a derived classes
+                destructor to ensure that no more connections are accepted
+                during the object destruction phase. This is neccessary to
+                implement thread-safe singal types.
+            */
+            virtual void shutDown();
+
+            /** @brief Checks if a connectable is shut down.
+
+                @sa Connectable::shutDown();
+
+               @return True if shut down.
+            */
+            bool isDown() const;
+
+            //! @internal
+            size_t connectionCount() const
+            { return _connections.size(); }
+
+        protected:
+            /** @brief Copy constructor
+
+                @sa Connectable::operator=()
+            */
+            Connectable(const Connectable& c);
+
+            /** @brief Assignment operator
+
+                Connectables can be copy constructed if the derived class
+                provides a public copy constructor. Copying a %Connectable
+                will close all current connections and copy all the
+                Connections of the other %Connectable.
+
+                @param c %Connectable to copy
+            */
+            Connectable& operator=(const Connectable& rhs);
+
+            /** @brief Close all connections
+            */
+            void clear();
+
+            /** @brief Returns a list of all current connections
+            */
             const std::list<Connection>& connections() const
             { return _connections; }
 
+            /** @brief Returns a list of all current connections
+            */
             std::list<Connection>& connections()
             { return _connections; }
 
-            virtual void shutDown();
-            
-            bool isDown() const;
-            
         protected:
-            Connectable(const Connectable& c);
-
-            Connectable& operator=(const Connectable& rhs);
-
-            void clear();
-
-        protected:
+            /** @brief A list of all current connections
+            */
             mutable std::list<Connection> _connections;
-            
+
         private:
-            bool _shutDown;            
+            //! @internal
+            bool _shutDown;
     };
 
 } // !namespace Pt

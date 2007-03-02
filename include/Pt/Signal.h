@@ -55,20 +55,20 @@ namespace Pt {
 
                 ~Sentry()
                 {
-                    if( this->disabled() )
-                        return;
-
-                    this->disable();
-
-                    _signal->_sentry = 0;
+                    if( _signal )
+                        this->detach();
                 }
 
-                void disable()
+                void detach()
                 {
                     _signal->_sending = false;
 
                     if( _signal->_dirty == false )
+                    {
+                        _signal->_sentry = 0;
+                        _signal = 0;
                         return;
+                    }
 
                     std::list<Connection>::iterator it = _signal->_connections.begin();
                     while( it != _signal->_connections.end() )
@@ -84,11 +84,15 @@ namespace Pt {
                     }
 
                     _signal->_dirty = false;
+                    _signal->_sentry = 0;
                     _signal = 0;
                 }
 
-                bool disabled() const
+                bool operator!() const
                 { return _signal == 0; }
+
+                //bool detached() const
+                //{ return _signal == 0; }
 
                 const Signal* _signal;
             };
@@ -111,7 +115,7 @@ namespace Pt {
             {
                 if(_sentry)
                 {
-                    _sentry->disable();
+                    _sentry->detach();
                 }
             }
 
@@ -127,9 +131,9 @@ namespace Pt {
                 return Connection(*this, slot.clone() );
             }
 
-            virtual void opened(const Connection& c)
+            virtual bool opened(const Connection& c)
             {
-                Connectable::opened(c);
+                return Connectable::opened(c);
             }
 
             virtual void closed(const Connection& c)
@@ -150,19 +154,36 @@ namespace Pt {
 
             inline void send() const
             {
+                // The sentry will set the Signal to the sending state and
+                // reset it to not-sending upon destruction. In the sending
+                // state, removing connection will leave invalid connections
+                // in the connection list to keep the iterator valid, but mark
+                // the Signal dirty. If the Signal is dirty, all invalid
+                // connections will be removed by the Sentry when it destructs..
                 Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; it != _connections.end(); ++it)
+                std::list<Connection>::const_iterator end = Connectable::connections().end();
+
+                for(; it != end; ++it)
                 {
                     if( false == it->valid() || &( it->sender() ) != this  )
                         continue;
 
-                    Connection c = *it;
+                    // The following scenarios must be considered when the
+                    // slot is called:
+                    // - The slot might get deleted and thus disconnected from
+                    //   this signal
+                    // - The slot might delete this signal and we must end
+                    //   calling any slots immediately
+                    // - A new Connection might get added to this Signal in
+                    //   the slot
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke();
 
-                    if( _sentry->disabled() )
+                    // if this signal gets deleted by the slot, the Sentry
+                    // will be detached. In this case we bail out immediately
+                    if( !sentry )
                         return;
                 }
             }
@@ -178,11 +199,10 @@ namespace Pt {
                     if( false == it->valid() || &( it->sender() ) != this )
                         continue;
 
-                    Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1);
 
-                    if( _sentry->disabled() )
+                    if( !sentry )
                         return;
                 }
             }
@@ -198,11 +218,10 @@ namespace Pt {
                     if( &( it->sender() ) != this || false == it->valid() )
                         continue;
 
-                    Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1, a2);
 
-                    if( _sentry->disabled() )
+                    if( !sentry )
                         return;
                 }
             }
@@ -218,11 +237,10 @@ namespace Pt {
                     if( &( it->sender() ) != this || false == it->valid() )
                         continue;
 
-                    Connection c = *it;
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(a1, a2, a3);
 
-                    if( _sentry->disabled() )
+                    if( !sentry )
                         return;
                 }
             }
