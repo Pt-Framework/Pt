@@ -24,10 +24,37 @@
 #include <Pt/ICallable.h>
 #include <Pt/PropertyProxy.h>
 #include <Pt/Method.h>
+
 #include <map>
+#include <stdexcept>
 
 
 namespace Pt {
+
+
+class NoSuchProperty : public std::logic_error
+{
+    public:
+        NoSuchProperty(const std::string& propertyName, const SourceInfo& si);
+        
+        ~NoSuchProperty() throw();
+        
+    private:
+        std::string _propertyName;
+};
+
+
+class NoSuchMethod : public std::logic_error
+{
+    public:
+        NoSuchMethod(const std::string& methodName, const SourceInfo& si);
+        
+        ~NoSuchMethod() throw();
+        
+    private:
+        std::string _methodName;
+};
+
 
 
 template < typename R,
@@ -434,7 +461,7 @@ class PT_API Reflectable {
         Reflectable* self()
         { return this; }
 
-        const std::string& getIdentifierName()
+        const std::string& getIdentifierName() const
         {
             return _identiferName;
         }

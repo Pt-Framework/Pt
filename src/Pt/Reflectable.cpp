@@ -22,6 +22,30 @@
 
 namespace Pt {
 
+
+NoSuchProperty::NoSuchProperty(const std::string& propertyName, const SourceInfo& si)
+: std::logic_error("Property '" + propertyName + "' not found" + si)
+, _propertyName(propertyName)
+{
+}
+
+NoSuchProperty::~NoSuchProperty() throw()
+{
+}
+
+
+NoSuchMethod::NoSuchMethod(const std::string& methodName, const SourceInfo& si)
+: std::logic_error("Method '" + methodName + "' not found" + si)
+, _methodName(methodName)
+{
+}
+
+NoSuchMethod::~NoSuchMethod() throw()
+{
+}
+
+
+
 Reflectable::Reflectable(const std::string& name)
 : _identiferName(name)
 {
@@ -49,7 +73,7 @@ Pt::Any Reflectable::property(const std::string& name)
 {
     PropertyMap::iterator it = _properties.find(name);
     if(it == _properties.end())
-        throw std::invalid_argument("No such property." + PT_SOURCEINFO);
+        throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
     return it->second->value();
 }
@@ -59,8 +83,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 {
     PropertyMap::iterator it = _properties.find(name);
     if( it == _properties.end() ) {
-        std::cerr << "Reflectable: Could not set '" << name << "' = " << value << std::endl;
-        throw std::invalid_argument("No such property." + PT_SOURCEINFO);
+        throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
         return;
     }
 
@@ -72,7 +95,7 @@ const ICallable& Reflectable::method(const std::string& name) const
 {
     MethodMap::const_iterator it = _methods.find(name);
     if( it == _methods.end() )
-        throw std::invalid_argument("No such method." + PT_SOURCEINFO);
+        throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
     return *(it->second);
 }
@@ -82,7 +105,7 @@ void Reflectable::call(const std::string& name, const Args& args)
 {
     MethodMap::iterator it = _methods.find(name);
     if( it == _methods.end() )
-        throw std::invalid_argument("No such method." + PT_SOURCEINFO);
+        throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
     it->second->call(args);
 }
