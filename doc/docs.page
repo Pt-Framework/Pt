@@ -58,7 +58,7 @@
         </td>
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Signals and Delegates</a></li>
+        <li style="margin: 2px;"><a href="sigslot.html" style="text-decoration: none;">Signals and Delegates</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Reflection</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">CTTI</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Components</a></li>
