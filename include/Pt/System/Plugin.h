@@ -61,7 +61,7 @@ namespace System {
        In the plugin shared object global BasicPlugins have to be arranged
        in a null teminated array with C linkage. The PluginManager can be
        set up to resolve the symbol of this array and use the plugins.
-    
+
        <code>
        static Pt::BasicPlugin<SomeClass, MyIface> plugin0("some-feature");
        static Pt::BasicPlugin<OtherClass, MyIface> plugin1("other-feature");
@@ -124,7 +124,7 @@ namespace System {
 
             void openDir(const std::string& path);
 
-            void loadPlugin(const std::string& path) throw(SystemError);
+            void loadPlugin(const std::string& path);
 
             void registerPlugin(PluginT& plugin);
 
@@ -181,7 +181,7 @@ namespace System {
 
 
     template <class IfaceT, typename PluginT >
-    void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path) throw(SystemError)
+    void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path)
     {
         SharedLib* shlib = this->openPlugin(path);
         if(!shlib) {
