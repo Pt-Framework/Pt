@@ -38,6 +38,7 @@ namespace Pt {
 
         // Explicit instantiation of the standard interleaved image classes
         template class InterleavedImage<ARgbColor>;
+
         template class InterleavedImage<ARgbFColor>;
         template class InterleavedImage<ARgb8888Color>;
         template class InterleavedImage<Rgb888Color>;
