@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -298,10 +298,10 @@ class ConstMethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
         virtual const void* callable() const
         { return &_method; }
 
-        virtual void opened(const Connection& c)
+        virtual bool opened(const Connection& c)
         {
             Connectable& connectable = _method.object();
-            connectable.opened(c);
+            return connectable.opened(c);
         }
 
         virtual void closed(const Connection& c) 

@@ -284,10 +284,10 @@ namespace Pt {
                 return &_method;
             }
 
-            virtual void opened(const Connection& c)
+            virtual bool opened(const Connection& c)
             {
                 Connectable& connectable = _method.object();
-                connectable.opened(c);
+                return connectable.opened(c);
             }
 
             virtual void closed(const Connection& c)

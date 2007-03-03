@@ -39,18 +39,25 @@ Connection::Connection(Connectable& sender, Slot* slot)
     _data = data.get();
     _data->setValid(false);
 
+    // Return if the sender does not accept connections and keep the
+    // Connection in the invalid state
     if ( false == sender.opened(*this) )
     {
+        data.release();
         return;
     }
 
-    slot->opened(*this);
-    //if( false == slot->opened(*this) )
-    //{
-    //    sender.closed(*this);
-    //    _data->setValid(false);
-    //}
+    // It the sender did accept the connection, but the receiver does not,
+    // we close the connection for the sender and keep this connection
+    // in invalid state
+    if( false == slot->opened(*this) )
+    {
+        sender.closed(*this);
+        data.release();
+        return;
+    }
 
+    // Connection was opened successfully
     _data->setValid(true);
     data.release();
 }

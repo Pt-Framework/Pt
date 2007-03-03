@@ -28,6 +28,16 @@
 # Aloysius
 #
 
+ITEM P10 S5 "Variant class is implemented"
+    TASK "Review code" sgbeal
+    TASK "Write Documentation" sgbeal
+    TASK "Write test case" sgbeal
+
+ITEM P10 S8 "Signals are implemented"
+    TASK "Review code" d-marc
+    TASK "Write Documentation" d-marc
+    TASK "Write test case" d-marc
+
 ITEM P10 S8 "Dokumentation is based on doxygen"
 
 ITEM P10 S1 "The AtomicInt class implements atomic operations"

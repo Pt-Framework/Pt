@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Dürner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -235,8 +235,8 @@ class FunctionSlot : public BasicSlot<R, A1, A2, A3> {
         Slot* clone() const
         { return new FunctionSlot(*this); }
 
-        virtual void opened(const Connection& c)
-        { }
+        virtual bool opened(const Connection& c)
+        { return true; }
 
         virtual void closed(const Connection& c)
         { }

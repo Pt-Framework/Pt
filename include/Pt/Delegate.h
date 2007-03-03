@@ -33,8 +33,11 @@
 
 namespace Pt {
 
-    /** A Delegate can be connected to one target, but forwards the return
-        value of the target, when called. **/
+    /** @brief Single-cast signal type
+
+        A Delegate can only be connected to one target, but forwards the return
+        value of the target, when called.
+    */
     template <typename R, typename A1 = Pt::Void, typename A2 = Pt::Void, typename A3 = Pt::Void>
     class Delegate : public Connectable {
         public:
@@ -42,51 +45,46 @@ namespace Pt {
 
         public:
             Delegate()
-            : _targetConnection(0)
             { }
 
             Delegate(const Delegate& rhs)
-            : _targetConnection(0)
             { Delegate::operator=(rhs); }
 
             ~Delegate()
-            {
-                Delegate::disconnect();
-            }
+            { }
 
             Delegate& operator=(const Delegate& other)
             {
                 Connectable::operator=(other);
 
-                Delegate::disconnect();
+                _target.close();
 
-                if( other._targetConnection )
-                {
-                    const Slot& slot = other._targetConnection->slot();
-                    Connection connection( *this, slot.clone()  );
-                }
+                if( other._target.isInvalid() )
+                    return *this;
+
+
+                const Slot& slot = other._targetConnection->slot();
+                _target = Connection( *this, slot.clone()  );
 
                 return *this;
             }
 
-            virtual void opened(const Connection& c)
+            virtual bool opened(const Connection& c)
             {
                 if( this == &c.sender() )
                 {
-                    this->disconnect();
-                    _targetConnection = new Connection(c);
+                    _target.close();
+                    _target = Connection(c);
                 }
-                else
-                {
-                    Connectable::opened(c);
-                }
+
+                return Connectable::opened(c);
             }
 
             virtual void closed(const Connection& c)
             {
                 if( this == &c.sender() )
                 {
-                    this->disconnect();
+                    _target.close();
                 }
                 else
                 {
@@ -94,18 +92,17 @@ namespace Pt {
                 }
             }
 
-            void disconnect()
+            Connection connect(const BasicSlot<R, A1, A2, A3>& slot)
             {
-                delete _targetConnection;
-                 _targetConnection = 0;
+                return Connection(*this, slot.clone() );
             }
 
             inline R call() const
             {
-                if(!_targetConnection) {
-                    //throw Exception("Empty BasicDelegate called.", PT_SOURCEINFO);
+                if( !_target.valid() ) {
+                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call();
             }
 
@@ -113,69 +110,69 @@ namespace Pt {
             template <typename Arg1>
             inline R call(Arg1 a1) const
             {
-                if(!_targetConnection) {
-                    //throw Exception("Empty BasicDelegate called.", PT_SOURCEINFO);
+                if( !_target.valid() ) {
+                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1);
             }
 
             template <typename Arg1, typename Arg2>
             inline R call(Arg1 a1, Arg2 a2) const
             {
-                if(!_targetConnection) {
-                    //throw Exception("Empty BasicDelegate called.", PT_SOURCEINFO);
+                if( !_target.valid() ) {
+                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1, a2);
             }
 
             template <typename Arg1, typename Arg2, typename Arg3>
             inline R call(Arg1 a1, Arg2 a2, Arg3 a3) const
             {
-                if(!_targetConnection) {
-                    //throw Exception("Empty BasicDelegate called.", PT_SOURCEINFO);
+                if( !_target.valid() ) {
+                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1, a2, a3);
             }
 
             inline void invoke() const
             {
-                if(!_targetConnection) {
+                if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 cb->call();
             }
 
             template <typename Arg1>
             inline void invoke(Arg1 a1) const
             {
-                if(!_targetConnection) {
+                if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 cb->call(a1);
             }
 
             template <typename Arg1, typename Arg2>
             inline void invoke(Arg1 a1, Arg2 a2) const
             {
-                if(!_targetConnection) {
+                if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 cb->call(a1, a2);
             }
 
             template <typename Arg1, typename Arg2, typename Arg3>
             inline void invoke(Arg1 a1, Arg2 a2, Arg3 a3)
             {
-                if(!_targetConnection) {
+                if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _targetConnection->slot().callable() );
+                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 cb->call(a1, a2, a3);
             }
 
@@ -195,18 +192,68 @@ namespace Pt {
             { return this->call(a1,a2 ,a3); }
 
         private:
-            Connection* _targetConnection;
+            Connection _target;
     };
 
 
+    /** @internal
+    */
+    template < typename R,
+               typename A1 = Pt::Void,
+               typename A2 = Pt::Void,
+               typename A3 = Pt::Void >
+    class DelegateSlot : public BasicSlot<R, A1, A2, A3> {
+        public:
+            DelegateSlot(Delegate<R, A1, A2, A3>& delegate)
+            : _method( &delegate, &Delegate<R, A1, A2, A3>::call )
+            {}
+
+            BasicSlot<R, A1, A2, A3>* clone() const
+            { return new DelegateSlot(*this); }
+
+            virtual const void* callable() const
+            {
+                return &_method;
+            }
+
+            virtual bool opened(const Connection& c)
+            {
+                Connectable& connectable = _method.object();
+                return connectable.opened(c);
+            }
+
+            virtual void closed(const Connection& c)
+            {
+                Connectable& connectable = _method.object();
+                connectable.closed(c);
+            }
+
+        private:
+            mutable ConstMethod<R, Delegate<R, A1, A2, A3>, A1, A2, A3> _method;
+    };
+
+
+    template < typename R,
+               typename A1,
+               typename A2,
+               typename A3 >
+    DelegateSlot<R, A1, A2, A3> slot( Pt::DelegateSlot<R, A1, A2, A3>& delegate )
+    { return DelegateSlot<A1, A2, A3>( delegate ); }
+
+
+    /** @brief Connect a Delegate to another Delegate
+    */
+    template <typename R, typename A1, typename A2, typename A3>
+    Connection connect(Delegate<R, A1, A2, A3>& sender, Delegate<R, A1, A2, A3>& receiver)
+    {
+        return connect( sender, slot(receiver) );
+    }
 
 
     template <typename R, typename A1, typename A2, typename A3>
-    Connection connect(Delegate<R, A1, A2, A3>& delegate, const Function<R, A1, A2, A3>& func)
+    Connection connect(Delegate<A1, A2, A3>& delegate, const BasicSlot<R, A1, A2, A3>& slot)
     {
-        Function<R, A1, A2, A3>* function = func.clone();
-        delegate.attach(*function);
-        return Connection(delegate, function);
+        return Connection(delegate, slot.clone() );
     }
 
 
@@ -238,66 +285,15 @@ namespace Pt {
     }
 
 
-
-
-    template <typename R, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, const Function<R, A1, A2, A3>& func)
-    {
-        if( const Connection* connection = delegate.connection(func) ) {
-            Connection tmp = *connection;
-            tmp.close();
-        }
-    }
-
-
-    template <typename R>
-    void disconnect(Delegate<R>& delegate, R(*func)())
-    {
-        disconnect( delegate, slot(func) );
-    }
-
-
-    template <typename R, typename A1>
-    void disconnect(Delegate<R, A1>& delegate, R(*func)(A1))
-    {
-        disconnect( delegate, slot(func) );
-    }
-
-
-    template <typename R, typename A1, typename A2>
-    void disconnect(Delegate<R, A1, A2>& delegate, R(*func)(A1, A2))
-    {
-        disconnect( delegate, slot(func) );
-    }
-
-
-    template <typename R, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, R(*func)(A1, A2, A3))
-    {
-        disconnect( delegate, slot(func) );
-    }
-
-
-
-
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    Connection connect(Delegate<R, A1, A2, A3>& delegate, const Method<R, ClassT, A1, A2, A3>& m)
-    {
-        Method<R, ClassT, A1, A2, A3>* method = m.clone();
-        delegate.attach(*method);
-        return Connection(delegate, method->object(), method);
-    }
-
-
-    template <typename R, class ClassT>
-    Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)())
+    template <typename R, class BaseT, class ClassT>
+    Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)())
     {
         return connect( delegate, slot(&object, memFunc) );
     }
 
 
-    template <typename R, class ClassT, typename A1>
-    Connection connect(Delegate<R, A1>& delegate, ClassT& object, R(ClassT::*memFunc)(A1))
+    template <typename R, class BaseT, class ClassT, typename A1>
+    Connection connect(Delegate<R, A1>& delegate, BaseT& object, R(ClassT::*memFunc)(A1))
     {
         return connect( delegate, slot(&object, memFunc) );
     }
@@ -315,59 +311,6 @@ namespace Pt {
     {
         return connect( delegate, slot(&object, memFunc) );
     }
-
-
-
-
-    //! Disconnects a Signal from a member function.
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, const Method<R, ClassT, A1, A2, A3>& method )
-    {
-        if( const Connection* connection = delegate.connection( method ) ) {
-            Connection tmp = *connection;
-            tmp.close();
-        }
-    }
-
-
-    template <typename R, class ClassT>
-    void disconnect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)())
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1>
-    void disconnect(Delegate<R, A1>& delegate, ClassT& object, R(ClassT::*memFunc)(A1))
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1, typename A2>
-    void disconnect(Delegate<R, A1, A2>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2))
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2, A3))
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-
-
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    Connection connect(Delegate<R, A1, A2, A3>& delegate, const ConstMethod<R, ClassT, A1, A2, A3>& m)
-    {
-        ConstMethod<R, ClassT, A1, A2, A3>* method = m.clone();
-        delegate.attach(*method);
-        return Connection(delegate, method->object(), method);
-    }
-
 
     template <typename R, class ClassT>
     Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)() const)
@@ -396,46 +339,6 @@ namespace Pt {
         return connect( delegate, slot(&object, memFunc) );
     }
 
-
-
-
-    //! Disconnects a Delegate from a const member function.
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, const ConstMethod<R, ClassT, A1, A2, A3>& method )
-    {
-        if( const Connection* connection = delegate.connection( method ) ) {
-            Connection tmp = *connection;
-            tmp.close();
-        }
-    }
-
-
-    template <typename R, class ClassT>
-    void disconnect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)() const)
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1>
-    void disconnect(Delegate<R, A1>& delegate, ClassT& object, R(ClassT::*memFunc)(A1) const)
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1, typename A2>
-    void disconnect(Delegate<R, A1, A2>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2) const)
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
-
-
-    template <typename R, class ClassT, typename A1, typename A2, typename A3>
-    void disconnect(Delegate<R, A1, A2, A3>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2, A3) const)
-    {
-        disconnect( delegate, slot(&object, memFunc) );
-    }
 } // !namespace Pt
 
 #endif

@@ -19,7 +19,7 @@ namespace Pt {
 
             virtual const void* callable() const = 0;
 
-            virtual void opened(const Connection& c) = 0;
+            virtual bool opened(const Connection& c) = 0;
 
             virtual void closed(const Connection& c) = 0;
     };

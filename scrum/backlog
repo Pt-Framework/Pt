@@ -21,6 +21,11 @@
 # Aloysius
 #
 
+ITEM P10 S8 "Delegates are implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
 ITEM P8 S13 "The image-related algorithms are improved"
     TASK "Write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
     TASK "Write iterator based algorithm assign"
