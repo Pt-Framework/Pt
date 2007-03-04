@@ -28,25 +28,26 @@
 # Aloysius
 #
 
+########################################################################################
+
 ITEM P10 S5 "Variant class is implemented"
-    TASK "Review code" sgbeal
-    TASK "Write Documentation" sgbeal
-    TASK "Write test case" sgbeal
+    TASK "Review code" sgbeal 2007-03-01
+    TASK "Write Documentation" sgbeal 2007-03-01
+    TASK "Write test case" sgbeal 2007-03-01
 
 ITEM P10 S8 "Signals are implemented"
-    TASK "Review code" d-marc
-    TASK "Write Documentation" d-marc
-    TASK "Write test case" d-marc
+    TASK "Review code" d-marc 2007-03-01
+    TASK "Write Documentation" d-marc 2007-03-01
+    TASK "Write test case" d-marc 2007-03-01
 
 ITEM P10 S8 "Dokumentation is based on doxygen"
 
-ITEM P10 S1 "The AtomicInt class implements atomic operations"
-    TASK "Add fallback version that uses pthreads" blue_wind_25 2007-02-24
-
-ITEM P9 S8 "The image, subimage and their related iterator classes are improved"
+ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
     TASK "Implement ARgbColorRef" blue_wind_25 2007-02-24
     TASK "Implement ARgbPlanarImage" blue_wind_25 2007-02-24
     TASK "Implement ColorPtrT helper class in ColorTraits" blue_wind_25 2007-02-24
+    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
+    TASK "Make SubImage<T> and its PixelIterator and ConstInterator classes support both interleaved and planar images" blue_wind_25
 
 ITEM P10 S5 "SmartPtr class is implemented"
     TASK "Review code" d-marc 2007-02-10

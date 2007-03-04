@@ -20,13 +20,3 @@
 # regards,
 # Aloysius
 #
-
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Review asm" blue_wind_25
-    TASK "Write test case"
-    TASK "Write docs"
-
-ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
-    TASK "Check how to resolve conflict from the function blockScale() for image in ImageAlgo.h"
-    TASK "Make SubImage<T> and its PixelIterator and ConstInterator classes support both interleaved and planar images" blue_wind_25
-

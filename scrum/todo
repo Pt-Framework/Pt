@@ -20,24 +20,3 @@
 # regards,
 # Aloysius
 #
-
-ITEM P10 S5 "Object reflection API is documented"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "CTTI system is implemented"
-    TASK "Review IfElse template"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "Event based Application class is implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
-    TASK "Extend Jamrules.platinum"
-
-ITEM P5 S8 "The Db module has a dynamic driver API"
-    TASK "Review Pt::Plugin API"
