@@ -21,6 +21,12 @@
 # Aloysius
 #
 
+ITEM P10 S5 "PixelIterators are not nested in InterleavedImage"
+
+ITEM P10 S5 "A SubImage class for InterleavedImage exists"
+
+ITEM P10 S5 "A SubImage class for PlanarImage exists"
+
 ITEM P10 S8 "Delegates are implemented"
     TASK "Review code"
     TASK "Write Documentation"
