@@ -98,7 +98,7 @@ namespace Pt {
             inline R call() const
             {
                 if( !_target.valid() ) {
-                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
+                    throw std::logic_error("Delegate not connected" + PT_SOURCEINFO);
                 }
                 const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call();
@@ -109,7 +109,7 @@ namespace Pt {
             inline R call(Arg1 a1) const
             {
                 if( !_target.valid() ) {
-                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
+                    throw std::logic_error("Delegate not connected" + PT_SOURCEINFO);
                 }
                 const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1);
@@ -119,7 +119,7 @@ namespace Pt {
             inline R call(Arg1 a1, Arg2 a2) const
             {
                 if( !_target.valid() ) {
-                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
+                    throw std::logic_error("Delegate not connected" + PT_SOURCEINFO);
                 }
                 const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1, a2);
@@ -129,7 +129,7 @@ namespace Pt {
             inline R call(Arg1 a1, Arg2 a2, Arg3 a3) const
             {
                 if( !_target.valid() ) {
-                    throw std::runtime_error("Empty BasicDelegate called." + PT_SOURCEINFO);
+                    throw std::logic_error("Delegate not connected" + PT_SOURCEINFO);
                 }
                 const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(a1, a2, a3);
