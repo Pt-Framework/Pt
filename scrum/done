@@ -40,7 +40,7 @@ ITEM P10 S8 "Signals are implemented"
     TASK "Write Documentation" d-marc 2007-03-01
     TASK "Write test case" d-marc 2007-03-01
 
-ITEM P10 S8 "Dokumentation is based on doxygen"
+ITEM P10 S8 "Dokumentation is based on doxygen" 2007-03-01
 
 ITEM P9 S13 "The image, subimage and their related iterator classes are improved"
     TASK "Implement ARgbColorRef" blue_wind_25 2007-02-24
