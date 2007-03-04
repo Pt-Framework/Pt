@@ -36,7 +36,7 @@ class Callee : public Pt::Connectable
         {}
 
         int slot0()
-        { return ++_count; }
+        { ++_count; return 9;}
 
         int destroySelf()
         {
@@ -64,7 +64,7 @@ class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
         {
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileCall", *this, &DelegateTest::DeleteWhileCall );
             Pt::Unit::TestSuite::registerMethod( "Copy", *this, &DelegateTest::Copy );
-            Pt::Unit::TestSuite::registerMethod( "Send0", *this, &DelegateTest::Send0 );
+            Pt::Unit::TestSuite::registerMethod( "Call0", *this, &DelegateTest::Call0 );
             Pt::Unit::TestSuite::registerMethod( "ChainDelegates", *this, &DelegateTest::ChainDelegates );
         }
 
@@ -80,7 +80,7 @@ class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
         }
 
     protected:
-        void Send0()
+        void Call0()
         {
             // A connect must lead to a new connection
             Callee* recv = new Callee;
@@ -96,9 +96,9 @@ class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
             // A delegate must call its slot when connected
             recv = new Callee;
             Pt::Connection connection = connect(delegate, *recv, &Callee::slot0 );
-            delegate.call();
+            int ret = delegate.call();
             PT_UNIT_ASSERT( recv->count() == 1)
-
+            PT_UNIT_ASSERT( ret == 9)
             recv->reset();
 
             // Closing connections must remove them
