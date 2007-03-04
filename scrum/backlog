@@ -30,6 +30,12 @@ ITEM P10 S5 "InterleavedImage is improved"
 
 ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
 
+ITEM P10 S5 "Make new tag: struct ARgbPlanar : public ARgb as the tag for this image"
+    TASK "Make PixelIterators not nested in InterleavedImage"
+     TASK "Make PixelIterators not nested in PlanarImage"
+
+ITEM P10 S8 "PlanarImage is improved"
+
 ITEM P10 S5 "A SubImage class for PlanarImage is exists"
 
 ITEM P10 S5 "Algorithms in Gfx are improved"
