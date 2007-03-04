@@ -21,37 +21,6 @@
 # Aloysius
 #
 
-
-ITEM P10 S5 "Color classes are refactored"
-    TASK "Remove TypeT, the second parameter"
-    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
-
-ITEM P10 S5 "InterleavedImage is improved"
-    TASK "Make PixelIterators not nested in InterleavedImage"
-
-ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
-
-ITEM P10 S8 "PlanarImage is improved"
-    TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type"
-    TASK "Make PixelIterators not nested in PlanarImage"
-    TASK "Make ImageModel traits classes for this image type which is not a template nor having a base class"
-
-ITEM P10 S8 "A SubImage class for PlanarImage is exists"
-
-ITEM P10 S8 "Delegates are implemented"
-    TASK "Review code"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Review asm"
-    TASK "Write test case"
-    TASK "Write docs"
-
-ITEM P10 S5 "Object reflection API is documented"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
 ITEM P10 S5 "CTTI system is implemented"
     TASK "Review IfElse template"
     TASK "Review code"
@@ -68,12 +37,6 @@ ITEM P8 S13 "The image-related algorithms are improved"
     TASK "Write iterator based algorithm assign"
     TASK "Write iterator based algorithm blockScale"
     TASK "Write iterator based algorithm brighten/darken (using uniform scalling, division, addition, substraction, etc.)"
-
-ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
-    TASK "Extend Jamrules.platinum"
-
-ITEM P5 S8 "The Db module has a dynamic driver API"
-    TASK "Review Pt::Plugin API"
 
 ITEM P5 S8 "New color models and algorithms are implemented"
     TASK "Implement void blend(ColorT& dst, const& src, char alphaMask)"
