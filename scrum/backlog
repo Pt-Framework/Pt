@@ -24,6 +24,7 @@
 
 ITEM P10 S5 "Color classes are refactored"
     TASK "Remove TypeT, the second parameter"
+    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
 
 ITEM P10 S5 "InterleavedImage is improved"
     TASK "Make PixelIterators not nested in InterleavedImage"
@@ -33,13 +34,9 @@ ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
 ITEM P10 S8 "PlanarImage is improved"
     TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type"
     TASK "Make PixelIterators not nested in PlanarImage"
+    TASK "Make ImageModel traits classes for this image type which is not a template nor having a base class"
 
-ITEM P10 S5 "A SubImage class for PlanarImage is exists"
-
-ITEM P10 S5 "Algorithms in Gfx are improved"
-    TASK "Move some of the current Gfx's color and image classes to Gfx-NG for further experiment"
-    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
-    TASK "ImageModel traits class is not a template nor having a base class and it only exists for planar image"
+ITEM P10 S8 "A SubImage class for PlanarImage is exists"
 
 ITEM P10 S8 "Delegates are implemented"
     TASK "Review code"
