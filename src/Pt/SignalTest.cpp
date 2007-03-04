@@ -55,6 +55,12 @@ class Callee : public Pt::Connectable
         : _count(0)
         {}
 
+        int destroySelf()
+        {
+            delete this;
+            return 0;
+        }
+
         void slot0()
         { ++_count; }
 

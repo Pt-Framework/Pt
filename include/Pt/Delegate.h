@@ -26,9 +26,7 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Connectable.h>
-#include <Pt/Exception.h>
-
-#include <iostream>
+#include <stdexcept>
 
 
 namespace Pt {
@@ -59,11 +57,10 @@ namespace Pt {
 
                 _target.close();
 
-                if( other._target.isInvalid() )
+                if( !other._target )
                     return *this;
 
-
-                const Slot& slot = other._targetConnection->slot();
+                const Slot& slot = other._target.slot();
                 _target = Connection( *this, slot.clone()  );
 
                 return *this;
@@ -71,10 +68,18 @@ namespace Pt {
 
             virtual bool opened(const Connection& c)
             {
-                if( this == &c.sender() )
+                const Connectable& sender = c.sender();
+
+                if( &sender == this )
                 {
                     _target.close();
-                    _target = Connection(c);
+
+                    bool accept = Connectable::opened(c);
+
+                    if(accept)
+                        _target = c;
+
+                    return accept;
                 }
 
                 return Connectable::opened(c);
@@ -82,14 +87,7 @@ namespace Pt {
 
             virtual void closed(const Connection& c)
             {
-                if( this == &c.sender() )
-                {
-                    _target.close();
-                }
-                else
-                {
-                    Connectable::closed(c);
-                }
+                Connectable::closed(c);
             }
 
             Connection connect(const BasicSlot<R, A1, A2, A3>& slot)
@@ -237,26 +235,30 @@ namespace Pt {
                typename A1,
                typename A2,
                typename A3 >
-    DelegateSlot<R, A1, A2, A3> slot( Pt::DelegateSlot<R, A1, A2, A3>& delegate )
-    { return DelegateSlot<A1, A2, A3>( delegate ); }
+    DelegateSlot<R, A1, A2, A3> slot( Delegate<R, A1, A2, A3>& delegate )
+    { return DelegateSlot<R, A1, A2, A3>( delegate ); }
 
 
     /** @brief Connect a Delegate to another Delegate
     */
     template <typename R, typename A1, typename A2, typename A3>
-    Connection connect(Delegate<R, A1, A2, A3>& sender, Delegate<R, A1, A2, A3>& receiver)
+    Connection connect(Delegate<R, A1, A2, A3>& delegate, Delegate<R, A1, A2, A3>& receiver)
     {
-        return connect( sender, slot(receiver) );
+        return connect( delegate,  slot(receiver) );
     }
 
 
+    /** @brief Connect a Delegate to a slot
+    */
     template <typename R, typename A1, typename A2, typename A3>
-    Connection connect(Delegate<A1, A2, A3>& delegate, const BasicSlot<R, A1, A2, A3>& slot)
+    Connection connect(Delegate<R, A1, A2, A3>& delegate, const BasicSlot<R, A1, A2, A3>& slot)
     {
         return Connection(delegate, slot.clone() );
     }
 
 
+    /** @brief Connect a Delegate to a function
+    */
     template <typename R>
     Connection connect(Delegate<R>& delegate, R(*func)())
     {
@@ -285,6 +287,8 @@ namespace Pt {
     }
 
 
+    /** @brief Connect a Delegate to a member function
+    */
     template <typename R, class BaseT, class ClassT>
     Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)())
     {
@@ -312,6 +316,8 @@ namespace Pt {
         return connect( delegate, slot(&object, memFunc) );
     }
 
+    /** @brief Connect a Delegate to a const member function
+    */
     template <typename R, class ClassT>
     Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)() const)
     {

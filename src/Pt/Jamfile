@@ -9,7 +9,6 @@ SharedLibrary Pt : Any.cpp
                    Callable.cpp
                    Date.cpp
                    DateTime.cpp
-                   Delegate.cpp
                    Exception.cpp
                    Reflectable.cpp
                    Property.cpp
@@ -70,6 +69,10 @@ Main_MakeLocate TypeTraitsTest : bin ;
 Main SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
+
+Main DelegateTest : DelegateTest.cpp ;
+Main_LinkSharedLibraries DelegateTest : Pt ;
+Main_MakeLocate DelegateTest : bin ;
 
 PtUnitTest TypesTest : TypesTest.cpp ;
 Main_LinkSharedLibraries TypesTest : Pt ;

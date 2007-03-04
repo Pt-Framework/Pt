@@ -86,6 +86,9 @@ namespace Pt {
             const Slot& slot() const
             { return _data->slot(); }
 
+            bool operator!() const
+            { return this->valid() == false; }
+
             void close();
 
             Connection& operator=(const Connection& connection);

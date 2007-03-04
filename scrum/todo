@@ -39,7 +39,6 @@ ITEM P10 S8 "PlanarImage is improved"
 ITEM P10 S8 "A SubImage class for PlanarImage is exists"
 
 ITEM P10 S8 "Delegates are implemented"
-    TASK "Review code"
     TASK "Write Documentation"
     TASK "Write test case"
 
