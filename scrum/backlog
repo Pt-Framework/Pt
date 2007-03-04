@@ -21,17 +21,21 @@
 # Aloysius
 #
 
-ITEM P10 S5 "New generation Gfx (Gfx-NG) which has better algo is implemented"
-    TASK "Move some of the current Gfx's color and image classes to Gfx-NG for further experiment"
-    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
-    TASK "ImageModel traits class is not a template nor having a base class and it only exists for planar image"
 
-ITEM P10 S5 "New InterleavedImage in Gfx-NG is implemented"
+ITEM P10 S5 "Color classes are refactored"
+    TASK "Remove TypeT, the second parameter"
+
+ITEM P10 S5 "InterleavedImage is improved"
     TASK "Make PixelIterators not nested in InterleavedImage"
 
 ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
 
 ITEM P10 S5 "A SubImage class for PlanarImage is exists"
+
+ITEM P10 S5 "Algorithms in Gfx are improved"
+    TASK "Move some of the current Gfx's color and image classes to Gfx-NG for further experiment"
+    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
+    TASK "ImageModel traits class is not a template nor having a base class and it only exists for planar image"
 
 ITEM P10 S8 "Delegates are implemented"
     TASK "Review code"
