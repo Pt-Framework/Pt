@@ -1,16 +1,15 @@
 #ifndef PT_DB_H
 #define PT_DB_H
 
-
-/** \dir
-This module provides abstract access to sql-based databases. Backends exist for
-sqlite, postgresql and mysql.
-All classes and functions are in the namespace Db, which is nested
-in the Pt namespace.
-*/
-
 namespace Pt {
 
+    /** @namespace Pt::Db
+        @brief Transparent Database Access
+
+        This module provides abstract access to sql-based databases. Backends exist for
+        sqlite, postgresql and mysql. All classes and functions are in the namespace Db,
+        which is nested in the Pt namespace.
+    */
     namespace Db {
         class Connection;
         class Statement;

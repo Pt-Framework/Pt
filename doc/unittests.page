@@ -165,7 +165,7 @@ class MyTestSuite
 Alternatively, a protocol can be set using the Unit::TestSuite::setProtocol
 method. It is entirely possible to load and assign protocols at run-time.
 
-@section Running Tests
+@section unittests_RunningTests Running Tests
 
 All tests can be run by the Application object of the %Unit module. To register
 a test with the application object the RegisterTest class template can be used

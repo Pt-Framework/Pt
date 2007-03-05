@@ -40,7 +40,7 @@
         API Reference
         </th>
         <th bgcolor="#C30014">
-        Features
+        Concepts
         </th>
         <th bgcolor="#C30014">
         Tools
@@ -50,9 +50,10 @@
         <td valign="top">
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
         <li style="margin: 2px;"><a href="classes.html" style="text-decoration: none;">All Classes</a></li>
+        <li style="margin: 2px;"><a href="namespaces.html" style="text-decoration: none;">Namespaces</a></li>
         <li style="margin: 2px;"><a href="group__Unicode.html" style="text-decoration: none;">Unicode String Handling</a></li>
         <li style="margin: 2px;" style="margin: 2px;"><a href="group__Reflection.html" style="text-decoration: none;">Reflection</a></li>
-        <li style="margin: 2px;" style="margin: 2px;"><a href="group__CTTI.html" style="text-decoration: none;">CTTI</a></li>
+        <li style="margin: 2px;" style="margin: 2px;"><a href="group__CTTI.html" style="text-decoration: none;">Compile Time Type Information</a></li>
         <li style="margin: 2px;" style="margin: 2px;"><a href="group__UnitTests.html" style="text-decoration: none;">Unit Testing</a></li>
         </ul>
         </td>
@@ -60,10 +61,10 @@
         <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
         <li style="margin: 2px;"><a href="sigslot.html" style="text-decoration: none;">Signals and Delegates</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Reflection</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">CTTI</a></li>
+        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Compile Time Type Information</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Components</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Plugins</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">I/O Handling</a></li>
+        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Synchronous I/O Multiplexing</a></li>
         <li style="margin: 2px;"><a href="unittests.html" style="text-decoration: none;">Unit Testing</a></li>
         </ul>
         </td>

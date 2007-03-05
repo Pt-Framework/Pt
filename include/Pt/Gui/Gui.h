@@ -1,12 +1,13 @@
-/** \dir
-This module offers classes and concepts for programming of graphical
-applications. It provides an Application class containing the application-wide
-event queue, functionality for delivery of high-level events, creation of
-widgets, windows and pixmaps, layouting and painting on widget and pixmaps.
-*/
 
 namespace Pt {
+/** @namespace Pt::Gui
+    @brief Graphic User Interfaces
 
+    This module offers classes and concepts for programming of graphical
+    applications. It provides an Application class containing the application-wide
+    event queue, functionality for delivery of high-level events, creation of
+    widgets, windows and pixmaps, layouting and painting on widget and pixmaps.
+*/
 namespace Gui {
 
 }

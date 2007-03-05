@@ -1,13 +1,14 @@
 #ifndef PT_Text_Text_H
 #define PT_Text_Text_H
 
-/** \dir
-This module offers classes and concepts for String and Char-operations, streaming,
-conversion using Codec-classes and a StringList.
-*/
 
 namespace Pt {
+    /** @namespace Pt::Text
+        @brief Test Processing
 
+        This module offers classes and concepts for advanced text processing
+        , Encodings and character conversion.
+    */
     namespace Text {
 
     }
