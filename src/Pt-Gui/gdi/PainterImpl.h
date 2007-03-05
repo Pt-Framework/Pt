@@ -20,7 +20,6 @@
 #ifndef PT_GUI_GDI_PAINTERIMPL_H
 #define PT_GUI_GDI_PAINTERIMPL_H
 
-#include <windows.h>
 
 #include <Pt/Api.h>
 #include <Pt/Gfx/Font.h>
@@ -41,8 +40,9 @@
 #include "Pt/Text/Utf16Codec.h"
 #include "Pt/Text/TextStream.h"
 
-namespace Pt {
+#include <windows.h>
 
+namespace Pt {
 namespace Gui {
 
     class WidgetImpl;

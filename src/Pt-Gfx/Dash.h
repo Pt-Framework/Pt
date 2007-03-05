@@ -23,14 +23,12 @@
 #define PT_GFX_DASH_H
 
 namespace Pt{
-namespace Gfx
+namespace Gfx{
 
 class Dash
 {
     public:
-        Dash()
-        ~Dash();
-        
+       
          /** @brief Helper function called by dash drawing.
            
            Helper function, called by wide line  and also by thin poly arc
@@ -45,6 +43,11 @@ class Dash
            @param pDashOffset   Offset into current dash   
         */
         static void stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset );
+
+    private:
+         Dash()
+        ~Dash();
+        
 };
 
 } //namespace Gfx

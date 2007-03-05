@@ -18,67 +18,24 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Dash.h"
+
+#ifndef PT_GFX_DRAWWIDEPOLYLINE_H
+#define PT_GFX_DRAWWIDEPOLYLINE_H
+
+#include "DrawPolyline.h"
 
 namespace Pt{
 namespace Gfx{
 
-Dash::Dash()
-{ }
-
-Dash::~Dash()
-{ }
-        
-void Dash::stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset )
+class DrawWidePolyline : public DrawPolyline
 {
-    int	dashNum, dashIndex, dashOffset;
-    int totallen;
-    int	i;
+    public:
+        DrawWidePolyline();
+        ~DrawWidePolyline();
+        
+            
+};
 
-    dashNum     = *pDashNum;
-    dashIndex   = *pDashIndex;
-    dashOffset  = *pDashOffset;
-
-    // Offset won't take us beyond end of present dash. 
-    if( dashOffset + dist < (int)(pDash[dashIndex]) )
-    {
-        *pDashOffset = dashOffset + dist;
-        return;
-    }
-
-    // Move to next dash.
-    dist -= (int)(pDash[dashIndex]) - dashOffset;
-    dashNum++;
-    dashIndex++;
-    
-    // Wrap to beginning of dash list.
-    if( dashIndex == numInDashList )
-        dashIndex = 0;
-
-    // Make it easy on ourselves: work modulo iteration interval.
-    totallen = 0;
-    
-    for (i = 0; i < numInDashList; i++)
-        totallen += (int)(pDash[i]);
-
-    if (totallen <= dist)
-        dist = dist % totallen;
-
-    while (dist >= (int)(pDash[dashIndex]))
-    {
-        dist -= (int)(pDash[dashIndex]);
-        dashNum++;
-        dashIndex++;
-         
-         // Wrap to beginning of dash list.
-        if( dashIndex == numInDashList )    	   
-	        dashIndex = 0;
-    }
-    
-    *pDashNum = dashNum;
-    *pDashIndex = dashIndex;
-    *pDashOffset = dist;
-}
-
-}//namespace Gfx
-}//namespace Pt
+} //namespace Gfx
+} //namespaec Pt
+#endif

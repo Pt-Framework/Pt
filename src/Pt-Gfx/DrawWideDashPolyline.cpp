@@ -61,7 +61,7 @@ void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Math::
     dashIndex   = 0; // index into dash array 
     dashOffset  = 0; // index into selected dash
     
-    Dash::stepDash( 0, &dashNum, dashIndex, dashes, 2, &dashOffset );
+    Dash::stepDash( 0, &dashNum, &dashIndex, dashes, 2, &dashOffset );
     //miStepDash (pGC->dashOffset, &dashNum, &dashIndex, pGC->dash, pGC->numInDashList, &dashOffset);
 
     // How many paint types?  (Will cycle through 0..numPixels-1, beginning

@@ -23,9 +23,6 @@
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Exception.h"
-
-#include <iostream>
 
 using namespace Pt::Gfx;
 
