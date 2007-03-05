@@ -33,11 +33,6 @@ ITEM P10 S8 "Delegates are implemented"
     TASK "Write Documentation"
     TASK "Write test case"
 
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Review asm"
-    TASK "Write test case"
-    TASK "Write docs"
-
 ITEM P10 S5 "Object reflection API is documented"
     TASK "Write Documentation"
     TASK "Write test case"

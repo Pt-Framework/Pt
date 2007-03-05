@@ -22,15 +22,20 @@
 #
 
 
+ITEM P10 S8 "Delegates are implemented"
+    TASK "Review code" d-marc
+
+ITEM P10 S5 "The AtomicInt class implements atomic operations"
+    TASK "Review asm" blue_wind_25
+    TASK "Write test case"
+    TASK "Write docs"
+
 ITEM P10 S5 "Color classes are refactored"
-    TASK "Remove TypeT, the second parameter"
-    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image"
+    TASK "Remove TypeT, the second parameter" blue_wind_25
+    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image" blue_wind_25
 
 ITEM P10 S5 "InterleavedImage is improved"
     TASK "Make PixelIterators not nested in InterleavedImage"
 
 ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
-
-ITEM P10 S8 "Delegates are implemented"
-    TASK "Review code" d-marc 2007-03-05
 
