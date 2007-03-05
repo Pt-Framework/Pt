@@ -21,7 +21,7 @@
 #include <Pt/Math/Point.h>
 #include <Pt/Math/MathUtils.h>
 
-#include "DrawWidePolyline.h"
+#include "DrawWideSolidPolyline.h"
 #include "Pt/Math/MathUtils.h"
 
 #include <algorithm>
@@ -41,7 +41,7 @@ namespace Gfx {
  LineEdge *edge;	 integer edge data, to be filled in 
 */    
 
-int DrawWidePolyline::buildLineEdge (double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge)
+int DrawWideSolidPolyline::buildLineEdge (double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge)
 {
     int x, y, e;
     int xady;
@@ -102,7 +102,7 @@ int DrawWidePolyline::buildLineEdge (double x0, double y0, double k, int dx, int
 }
 
 
-void DrawWidePolyline::fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h)
+void DrawWideSolidPolyline::fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h)
 {
 
     Pt::ssize_t xbegin = std::max( 0, x );
@@ -125,7 +125,7 @@ void DrawWidePolyline::fillRect(ARgbImage& image,const Pen& pen, int x, int y, u
 }
 
 
-void DrawWidePolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
+void DrawWideSolidPolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
 {
     int left_x = 0, left_e = 0;
     int left_stepx = 0;
@@ -218,10 +218,10 @@ void DrawWidePolyline::fillLine(ARgbImage& image, const Pen& pen, int y, unsigne
 }
 
 
-DrawWidePolyline::DrawWidePolyline()
+DrawWideSolidPolyline::DrawWideSolidPolyline()
 { }
 
-void DrawWidePolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Math::Point* pPts, size_t npt)
+void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Math::Point* pPts, size_t npt)
 {
     int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -352,7 +352,7 @@ void DrawWidePolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Math::Po
 }
 
 
-void DrawWidePolyline::drawDashSegment( ARgbImage& image, const Pen& pen,
+void DrawWideSolidPolyline::drawDashSegment( ARgbImage& image, const Pen& pen,
                                     Pt::Math::Point from, Pt::Math::Point to,
                                     bool projectLeft, bool projectRight,
                                     LineFace* leftFace, LineFace* rightFace )
@@ -410,12 +410,12 @@ void DrawWidePolyline::drawDashSegment( ARgbImage& image, const Pen& pen,
 /* Draw a wide, dashed polyline, by dashing each line segment and joining
    appropriately.  miWideDashSegment() is called to dash each line
    segment. */
-void DrawWidePolyline::drawDashLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount )
+void DrawWideSolidPolyline::drawDashLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount )
 {
 }
 
 
-void DrawWidePolyline::drawSegment(ARgbImage& image, const Pen& pen,
+void DrawWideSolidPolyline::drawSegment(ARgbImage& image, const Pen& pen,
                                 Pt::Math::Point from, Pt::Math::Point to,
                                 bool projectLeft, bool projectRight,
                                 LineFace* leftFace, LineFace* rightFace)
@@ -642,7 +642,7 @@ void DrawWidePolyline::drawSegment(ARgbImage& image, const Pen& pen,
     }
 }
 
-void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt)
+void DrawWideSolidPolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt)
 {
     std::vector<Pt::Math::Point>    points;
     std::vector<size_t>             widths;
@@ -747,7 +747,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 
 /* From a line face, construct a clipping edge that will be used by
    miLineArcD when drawing a half-disk.  */
-int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
+int DrawWideSolidPolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int 	dx, dy;
@@ -802,7 +802,7 @@ int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *
 
 /* From two line faces, construct clipping edges that will be used by
    miLineArcD when drawing a pie wedge.  The line faces may be modified. */
-void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
+void DrawWideSolidPolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2)
 {
     int	denom;
 
@@ -824,7 +824,7 @@ void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdg
 }
 
 /* helper function called by the preceding */
-int DrawWidePolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
+int DrawWideSolidPolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge )
 {
     int	    y;
     int	    dx, dy;
@@ -876,7 +876,7 @@ int DrawWidePolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool 
     return y;
 }
 
-int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
+int DrawWideSolidPolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
 {
     Pt::Math::Point *tpts, *bpts;
     unsigned int *twids, *bwids;
@@ -971,7 +971,7 @@ if (ybase == edgey) \
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
    
-int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int DrawWideSolidPolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     Pt::Math::Point *pts;
     size_t *wids;
@@ -1157,7 +1157,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
 /* Paint all types of line join: round/miter/bevel/triangular.  Called by
    both miWideLine() and miWideDash().  Left and right line faces are
    supplied, each with its own value of k.  They may be modified. */
-void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLeft, LineFace *pRight )
+void DrawWideSolidPolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLeft, LineFace *pRight )
 {
     double	            mx = 0.0, my = 0.0;
     int		            denom = 0;	/* avoid compiler warnings */
@@ -1373,7 +1373,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
 
 #define StepAround(v, incr, max) (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)))
 
-int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const PolySlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
+int DrawWideSolidPolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const PolySlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
 {
     int	    top, bottom;
     double  miny, maxy;

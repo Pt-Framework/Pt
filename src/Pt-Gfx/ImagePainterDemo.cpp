@@ -57,13 +57,13 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    Pen pen( 10, ARgbColor( 0,0,0), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin );
+	    Pen pen( 30, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap, Pen::BevelJoin );
 
 		_imagePainter.setPen( pen );
 		
 		Pt::Math::Point poly[4];
 		
-		poly[0] = Pt::Math::Point( 30, 60 );
+		poly[0] = Pt::Math::Point( -10, -10 );
 		poly[1] = Pt::Math::Point( 60, 10 );
 		poly[2] = Pt::Math::Point( 100, 70 );
 		poly[3] = Pt::Math::Point( 150, 10 );

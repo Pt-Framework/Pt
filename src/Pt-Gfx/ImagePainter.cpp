@@ -31,7 +31,7 @@
 
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
-#include "DrawWidePolyline.h"
+#include "DrawWideSolidPolyline.h"
 
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
@@ -52,7 +52,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _font("Vera", 12)
 , _drawPolyline( 0 )
 , _drawThinPolyline(0 )
-, _drawWidePolyline( 0)
+, _drawWideSolidPolyline( 0)
 , _drawEllipse( 0 )
 , _drawThinEllipse( 0 )
 , _drawThickEllipse( 0 )
@@ -67,7 +67,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<Stroke>                 stroke( new Stroke() );    
     std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
     dThinPolyline->setOutput( *stroke );
-    std::auto_ptr<DrawWidePolyline>       dWidePolyline( new DrawWidePolyline );
+    std::auto_ptr<DrawWideSolidPolyline>  dWidePolyline( new DrawWideSolidPolyline );
     dWidePolyline->setOutput( *stroke );    
     std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
@@ -78,9 +78,9 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
     
     
-    _drawThinPolyline   = dThinPolyline.release();
-    _drawWidePolyline   = dWidePolyline.release();
-    _drawPolyline       = _drawThinPolyline;
+    _drawThinPolyline        = dThinPolyline.release();
+    _drawWideSolidPolyline   = dWidePolyline.release();
+    _drawPolyline            = _drawThinPolyline;
     _drawText           = dText.release();
     _drawThinEllipse    = dThinEllipse.release();
     _drawThickEllipse   = dThickEllipse.release();
@@ -96,7 +96,7 @@ ImagePainter::~ImagePainter()
 {
     try {
         delete _drawThinPolyline;
-        delete _drawWidePolyline;
+        delete _drawWideSolidPolyline;
         delete _fillPolygon;
         delete _drawText;
         delete _drawThinEllipse;
@@ -118,7 +118,7 @@ void ImagePainter::setPen( const Pen& pen )
     }
     else
     {
-        _drawPolyline   = _drawWidePolyline;
+        _drawPolyline   = _drawWideSolidPolyline;
         _drawEllipse    = _drawThickEllipse;
     }        
 }

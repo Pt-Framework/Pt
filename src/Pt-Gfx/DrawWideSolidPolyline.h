@@ -18,8 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_DRAWWIDEPOLYLINE_H
-#define PT_GFX_DRAWWIDEPOLYLINE_H
+#ifndef PT_GFX_DRAWWIDESOLIDPOLYLINE_H
+#define PT_GFX_DRAWWIDESOLIDPOLYLINE_H
 
 #include <vector>
 #include <Pt/Gfx/Brush.h>
@@ -45,12 +45,12 @@ typedef struct
 *  This class implements DrawLine and is specialised for the  drawing
 *  of thick lines.
 */
-class DrawWidePolyline : public DrawPolyline
+class DrawWideSolidPolyline : public DrawPolyline
 {
     public:
         /** @brief Default constructor
         */
-        DrawWidePolyline();
+        DrawWideSolidPolyline();
 
         /** @brief Draw a line on an image
 

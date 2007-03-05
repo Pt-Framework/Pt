@@ -19,7 +19,7 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ImagePainter.cpp
                        DrawText.cpp
                        DrawThinPolyline.cpp
-                       DrawWidePolyline.cpp
+                       DrawWideSolidPolyline.cpp
                        FillPolygon.cpp
                        ClipPolygon.cpp
                        FreeType.cpp
@@ -49,6 +49,10 @@ Main_MakeLocate ImagePainterDemo : bin ;
 Main DrawLineDemo : DrawLineDemo.cpp ;
 Main_LinkSharedLibraries DrawLineDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawLineDemo : bin ;
+
+Main DrawLineBenchmark : DrawLineBenchmark.cpp ;
+Main_LinkSharedLibraries DrawLineBenchmark : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate DrawLineBenchmark : bin ;
 
 Main DrawRectDemo : DrawRectDemo.cpp ;
 Main_LinkSharedLibraries DrawRectDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx Pt-Gui ;

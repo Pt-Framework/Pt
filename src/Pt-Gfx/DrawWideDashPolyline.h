@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,21 +18,27 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PT_GFX_DRAWWIDEDASHPOLYLINE_H
+#define PT_GFX_DRAWWIDEDASHPOLYLINE_H
 
-#ifndef PTV_TEXT_STRINGSTREAM_H
-#define PTV_TEXT_STRINGSTREAM_H
+#include "DrawPolyline.h"
 
-#include <Pt/Text/Api.h>
-#include <Pt/Char_ctype.h>
-#include <Pt/Char_numpunct.h>
+namespace Pt{
+namespace Gfx{
 
-#include <Pt/Char.h>
-#include <sstream>
+class DrawWideDashPolyline : public DrawPolyline
+{
+    public:
+        DrawWideDashPolyline();
+        ~DrawWideDashPolyline();
+        
+        virtual void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
+    
+    private:     
+        enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 }
+};
 
-namespace Pt {
-    namespace Text {
-        typedef std::basic_stringstream<Pt::Char> StringStream;
-    }
-}
+} //namespaec Gfx
+} //namespace Pt
 
 #endif

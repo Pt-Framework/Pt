@@ -71,6 +71,23 @@ class DrawPolyline
 
     protected:
         Stroke*                 _stroke;
+        
+        /** @brief Helper function called by draw dashed.
+           
+           Helper function, called by miWideDash() above and also by miZeroPolyArc
+   (in mi_zerarc.c) and miZeroDash (in mi_zerolin.c) to perform initial
+   offsetting into the dash array, before dash #0 is drawn.  In all cases,
+   dashNum=0, dashIndex=0 and dashOffset=0. 
+     int dist;			additional offset (assumed >= 0) 
+     int *pDashNum;		dash number 
+     int *pDashIndex;		current dash 
+     const unsigned int *pDash;	dash list 
+     int numInDashList;		dashlist length 
+     int *pDashOffset;		offset into current dash   
+   */
+       
+//        void stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset );
+        
 };
 
 } // namespace Gfx
