@@ -32,6 +32,7 @@
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
 #include "DrawWideSolidPolyline.h"
+#include "DrawWideDashPolyline.h"
 
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
@@ -68,7 +69,9 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
     dThinPolyline->setOutput( *stroke );
     std::auto_ptr<DrawWideSolidPolyline>  dWidePolyline( new DrawWideSolidPolyline );
+    std::auto_ptr<DrawWideDashPolyline>   dWideDashPolyline( new DrawWideDashPolyline );
     dWidePolyline->setOutput( *stroke );    
+    dWideDashPolyline->setOutput( *stroke );
     std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
     std::auto_ptr<DrawThinEllipse>        dThinEllipse( new DrawThinEllipse() );
@@ -80,16 +83,17 @@ ImagePainter::ImagePainter( ARgbImage& image )
     
     _drawThinPolyline        = dThinPolyline.release();
     _drawWideSolidPolyline   = dWidePolyline.release();
+    _drawWideDashPolyline    = dWideDashPolyline.release();
     _drawPolyline            = _drawThinPolyline;
-    _drawText           = dText.release();
-    _drawThinEllipse    = dThinEllipse.release();
-    _drawThickEllipse   = dThickEllipse.release();
-    _drawEllipse        = _drawThinEllipse;
-    _fillEllipse        = fillEllipse.release();
-    _fillPolygon        = fillPolygon.release();
-    _fillSolid          = fillSolid.release();
-    _fillTexture        = fillTexture.release();
-    _stroke             = stroke.release();
+    _drawText                = dText.release();
+    _drawThinEllipse         = dThinEllipse.release();
+    _drawThickEllipse        = dThickEllipse.release();
+    _drawEllipse             = _drawThinEllipse;
+    _fillEllipse             = fillEllipse.release();
+    _fillPolygon             = fillPolygon.release();
+    _fillSolid               = fillSolid.release();
+    _fillTexture             = fillTexture.release();
+    _stroke                  = stroke.release();
 }
 
 ImagePainter::~ImagePainter()
@@ -97,6 +101,7 @@ ImagePainter::~ImagePainter()
     try {
         delete _drawThinPolyline;
         delete _drawWideSolidPolyline;
+        delete _drawWideDashPolyline;
         delete _fillPolygon;
         delete _drawText;
         delete _drawThinEllipse;
@@ -118,7 +123,11 @@ void ImagePainter::setPen( const Pen& pen )
     }
     else
     {
-        _drawPolyline   = _drawWideSolidPolyline;
+        if( _pen.style() == Pen::SolidStyle )
+            _drawPolyline = _drawWideSolidPolyline;
+        else            
+            _drawPolyline = _drawWideDashPolyline;
+            
         _drawEllipse    = _drawThickEllipse;
     }        
 }

@@ -17,19 +17,19 @@ public:
     inline void setDX( int dx )
     { _dx = dx; }
     
-    inline int dx()
+    inline int dx() const 
     { return _dx;}
     
     inline void setDY( int dy )
     { _dy = dy; }
     
-    inline int dy()
+    inline int dy() const 
     { return _dy; }
     
     inline void setK( double k )
     { _k = k; }
     
-    inline double k()
+    inline double k() const
     { return _k; }
     
 private:

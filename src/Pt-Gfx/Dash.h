@@ -45,7 +45,7 @@ class Dash
         static void stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset );
 
     private:
-         Dash()
+         Dash();
         ~Dash();
         
 };

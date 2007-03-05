@@ -57,21 +57,24 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 	virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
 	{
-	    Pen pen( 30, ARgbColor( 0,0,0), Pen::SolidStyle, Pen::RoundCap, Pen::BevelJoin );
+	    Pen pen( 4, ARgbColor( 0,0,0), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin );
 
 		_imagePainter.setPen( pen );
 		
 		Pt::Math::Point poly[4];
 		
-		poly[0] = Pt::Math::Point( -10, -10 );
-		poly[1] = Pt::Math::Point( 60, 10 );
-		poly[2] = Pt::Math::Point( 100, 70 );
-		poly[3] = Pt::Math::Point( 150, 10 );
+//		poly[0] = Pt::Math::Point( 10, 10 );
+//		poly[1] = Pt::Math::Point( 60, 10 );
+//		poly[2] = Pt::Math::Point( 100, 70 );
+//		poly[3] = Pt::Math::Point( 150, 10 );
+
+		poly[0] = Pt::Math::Point( 10, 10 );
+		poly[1] = Pt::Math::Point( 100, 100 );
 		
-		_imagePainter.drawPolyline( poly, 4 );
+		_imagePainter.drawPolyline( poly, 2 );
 		painter().drawImage( Point(0,0), _image );
 		
-		painter().setPen( Pen(10, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin)  );
+		painter().setPen( Pen(4, ARgbColor( 0, 0, 0xffff ), Pen::DashStyle, Pen::RoundCap, Pen::BevelJoin)  );
 		//painter().drawPolyline( poly, 4 );
 	}
 

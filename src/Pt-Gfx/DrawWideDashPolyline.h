@@ -21,12 +21,12 @@
 #ifndef PT_GFX_DRAWWIDEDASHPOLYLINE_H
 #define PT_GFX_DRAWWIDEDASHPOLYLINE_H
 
-#include "DrawPolyline.h"
+#include "DrawWidePolyline.h"
 
 namespace Pt{
 namespace Gfx{
 
-class DrawWideDashPolyline : public DrawPolyline
+class DrawWideDashPolyline : public DrawWidePolyline
 {
     public:
         DrawWideDashPolyline();
@@ -34,8 +34,9 @@ class DrawWideDashPolyline : public DrawPolyline
         
         virtual void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
     
-    private:     
-        enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 }
+    private:    
+        void dashSegment( ARgbImage& image, const Pen& pen, int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash ); 
+        enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
 };
 
 } //namespaec Gfx

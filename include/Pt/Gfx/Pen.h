@@ -51,8 +51,8 @@ namespace Pt {
       {
           public:
 
-              enum PenStyle{ SolidStyle = 0, DashStyle =1 };
-              enum CapStyle{ FlatCap = 0, RoundCap = 1 };
+              enum PenStyle{ SolidStyle = 0, DashStyle =1, DoubleDash = 2};
+              enum CapStyle{ FlatCap = 0, RoundCap = 1, TriangularCap = 2, ProjectingCap = 3, ButtCap = 4 };
               enum JoinStyle{ RoundJoin = 0, BevelJoin = 1 };
 
               /**

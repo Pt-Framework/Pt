@@ -21,36 +21,24 @@
 #ifndef PT_GFX_DRAWWIDESOLIDPOLYLINE_H
 #define PT_GFX_DRAWWIDESOLIDPOLYLINE_H
 
+#include "DrawWidePolyline.h"
 #include <vector>
-#include <Pt/Gfx/Brush.h>
-
-#include "Span.h"
-#include "FillPolygon.h"
-#include "DrawPolyline.h"
-#include "RasterBuffer.h"
-#include "LineEdge.h"
-#include "LineFace.h"
 
 namespace Pt {
 namespace Gfx {
-
-typedef struct
-{
-  int dx, dy;			/* dy/dx is (rational) slope */
-  double k;			/* x0 * dy - y0 * dx */
-} PolySlope;
 
 /** @brief Draw thick lines on an image
 *
 *  This class implements DrawLine and is specialised for the  drawing
 *  of thick lines.
 */
-class DrawWideSolidPolyline : public DrawPolyline
+class DrawWideSolidPolyline : public DrawWidePolyline
 {
     public:
         /** @brief Default constructor
         */
         DrawWideSolidPolyline();
+         ~DrawWideSolidPolyline();
 
         /** @brief Draw a line on an image
 
@@ -58,42 +46,23 @@ class DrawWideSolidPolyline : public DrawPolyline
         */
         void draw( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
 
+
+    private:
+        void drawDashSegment( ARgbImage& image, const Pen& pen,
+                                    Pt::Math::Point from, Pt::Math::Point to,
+                                    bool projectLeft, bool projectRight,
+                                    LineFace* leftFace, LineFace* rightFace );
+
         void drawSegment(ARgbImage& image, const Pen& pen,
                          Pt::Math::Point from, Pt::Math::Point to,
                          bool projectLeft, bool projectRight,
                          LineFace* leftFace, LineFace* rightFace);
-
-        void drawDashSegment(ARgbImage& image, const Pen& pen,
-                         Pt::Math::Point from, Pt::Math::Point to,
-                         bool projectLeft, bool projectRight,
-                         LineFace* leftFace, LineFace* rightFace );
-
-    private:
     
         void drawLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
         void drawDashLine( ARgbImage& image, const Pen& pen, const  Math::Point* points, size_t pointCount );
         
-        void lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt);
-        int lineArcI( const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths );
-        int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2 );
-        
-        void fillLine( ARgbImage& image, const Pen& pen, int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count);
-        void fillRect(ARgbImage& image,const Pen& pen, int x, int y, unsigned int w, unsigned int h);
-        
-        
-        void lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLeft, LineFace *pRight );        
-        void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );        
-        int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
-        
-        int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );                
 
-        int buildLineEdge (double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-        int polyBuildPoly( const Pt::Math::PointF *vertices, const PolySlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h);
-
-                
-        FillPolygon _fillPolygon;
-        ClipPolygon _clipPolygon;
-        RasterBuffer _rasterBuffer;
+        
 };
 
 } // namespace Gfx

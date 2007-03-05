@@ -38,6 +38,7 @@ namespace Gfx {
 class DrawPolyline;
 class DrawThinPolyline;
 class DrawWideSolidPolyline;
+class DrawWideDashPolyline;
 
 class DrawEllipse;
 class DrawThinEllipse;
@@ -141,6 +142,7 @@ class PT_GFX_API ImagePainter : public Painter
         DrawPolyline*           _drawPolyline;
         DrawThinPolyline*       _drawThinPolyline;
         DrawWideSolidPolyline*  _drawWideSolidPolyline;
+        DrawWideDashPolyline*   _drawWideDashPolyline;
         
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;

@@ -19,7 +19,10 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        ImagePainter.cpp
                        DrawText.cpp
                        DrawThinPolyline.cpp
+                       Dash.cpp
                        DrawWideSolidPolyline.cpp
+                       DrawWideDashPolyline.cpp
+                       DrawWidePolyline.cpp
                        FillPolygon.cpp
                        ClipPolygon.cpp
                        FreeType.cpp
