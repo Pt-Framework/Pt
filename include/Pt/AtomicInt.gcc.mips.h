@@ -40,60 +40,85 @@ namespace Pt {
 
             inline void operator+=(atomic_t n)
             {
-                register atomic_t expected;
-                for (;;) {
-                    expected = _value;
-                    if(_mipsAtomicTestAndSet(&_value, expected, expected + n)) break;
-                }
+              atomic_t result;
+
+              asm volatile (
+                  "1:              \n\t"
+                  ".set  push      \n\t"
+#if _MIPS_SIM == _ABIO32
+                  ".set  mips2     \n\t"
+#endif
+                  " ll   %0, %2    \n\t"
+                  " addu %0, %3, %0\n\t"
+                  " sc   %0, %1    \n\t"
+                  ".set  pop       \n\t"
+                  " beqz %0, 1b"
+                  : "=&r"(result), "=m"(_value)
+                  :   "m"(_value),  "r"(val)
+                  : "memory");
             }
 
             inline void operator-=(atomic_t n)
             {
-                register atomic_t expected;
-                for (;;) {
-                    expected = _value;
-                    if(_mipsAtomicTestAndSet(&_value, expected, expected - n)) break;
-                }
+              atomic_t result;
+
+              asm volatile (
+                  "1:               \n\t"
+                  ".set  push       \n\t"
+#if _MIPS_SIM == _ABIO32
+                  ".set  mips2      \n\t"
+#endif
+                  " ll   %0, %2     \n\t"
+                  " subu %0, %3, %0 \n\t" // Check if "subu" is exist just as "addu" ?
+                  " sc   %0, %1     \n\t"
+                  ".set  pop        \n\t"
+                  " beqz %0,1b"
+                  : "=&r"(result), "=m"(_value)
+                  :   "m"(_value),  "r"(val)  // I don't use "r(-val)" until I'm sure that
+                  : "memory");                // "addu" is not actually an "add-unsigned"
             }
 
             inline void operator=(atomic_t n)
             {
-                register atomic_t expected;
-                for (;;) {
-                    expected = _value;
-                    if(_mipsAtomicTestAndSet(&_value, expected, n)) break;
-                }
+              compareExchange(_value, n);
             }
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
-                register atomic_t expected = oldval;
-                return _mipsAtomicTestAndSet(&_value, expected, newval);
+              atomic_t ret, temp;
+
+              asm volatile (
+                  "1:              \n\t"
+                  ".set  push      \n\t"
+#if _MIPS_SIM == _ABIO32
+                  ".set  mips2     \n\t"
+#endif
+#if _MIPS_SIM == _ABI64
+                  " lld  %1,%5     \n\t"
+#else
+                  " ll   %1,%5     \n\t"
+#endif
+                  " move %0, $0    \n\t"
+                  " bne  %1, %3, 2f\n\t"
+                  " move %0, %4    \n\t"
+#if _MIPS_SIM == _ABI64
+                  " scd  %0, %2    \n\t"
+#else
+                  " sc   %0, %2    \n\t"
+#endif
+                  ".set  pop       \n\t"
+                  " beqz %0, 1b    \n\t"
+                  "2: "
+                  : "=&r"(ret),  "=&r"(temp),  "=m"(_value)
+                  :   "r"(oldval), "r"(newval), "m"(_value)
+                  : "memory"
+               );
+
+              return ret;
             }
 
         private:
             volatile atomic_t _value;
-
-            inline atomic_t _mipsAtomicTestAndSet(volatile atomic_t* dst, atomic_t expected, atomic_t newval)
-            {
-                asm volatile (
-                    "0:                   \n\t"
-                    "1:    ll   $8, 0($4) \n\t"
-                    "      bne  $8, $5, 2f\n\t"
-                    "      move $2, $6    \n\t"
-                    "      sc   $2, 0($4) \n\t"
-                    "      beqz $2, 1b    \n\t"
-                    "      nop            \n\t"
-                    "      jr   $31       \n\t"
-                    "      nop            \n\t"
-                    "2:    jr   $31       \n\t"
-                    "      move %2, $0    \n\t"
-                    "      .end 0             "
-                );
-                // Is this correct ???
-                // How to return value in MIPS ???
-            }
-
     };
 
 } // namespace Pt

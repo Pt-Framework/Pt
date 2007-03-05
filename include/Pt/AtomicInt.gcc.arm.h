@@ -50,8 +50,8 @@ namespace Pt {
                     "      strex  %1, %0, [%2]\n\t"
                     "      teq    %1, #0      \n\t"
                     "      bne    1b              "
-                    : "=&r" (result), "=&r" (tmp)
-                    : "r" (&_value), "Ir" (n)
+                    : "=&r"(result), "=&r"(tmp)
+                    :   "r"(&_value), "Ir"(n)
                     : "cc"
                 );
             }
@@ -68,8 +68,8 @@ namespace Pt {
                     "      strex %1, %0, [%2]\n\t"
                     "      teq   %1, #0      \n\t"
                     "      bne   1b              "
-                    : "=&r" (result), "=&r" (tmp)
-                    : "r" (&_value), "Ir" (n)
+                    : "=&r"(result), "=&r"(tmp)
+                    :   "r"(&_value), "Ir"(n)
                     : "cc"
                 );
             }
@@ -84,8 +84,8 @@ namespace Pt {
                     "      strex %0, %2, [%1]\n\t"
                     "      teq   %0, #0      \n\t"
                     "      bne   1b              "
-                    : "=&r" (tmp)
-                    : "r" (&_value), "r" (n)
+                    : "=&r"(tmp)
+                    :   "r"(&_value), "r"(n)
                     : "cc"
                 );
             }
@@ -96,17 +96,17 @@ namespace Pt {
                 volatile register atomic_t result;
 
                 asm volatile (
-                    "0:    ldr   %1,[%2]   \n\t"
-                    "      cmp   %1,%4     \n\t"
-                    "      movne %0,%1     \n\t"
-                    "      bne   1f        \n\t"
-                    "      swp   %0,%3,[%2]\n\t"
-                    "      cmp   %1,%0     \n\t"
-                    "      swpne %1,%0,[%2]\n\t"
-                    "      bne   0b        \n\t"
-                    "1:                        "
-                    : "=&r" (result), "=&r" (tmp)
-                    : "r" (&_value), "r" (newval), "r" (oldval)
+                    "0:    ldr   %1, [%2]   \n\t"
+                    "      cmp   %1, %4     \n\t"
+                    "      movne %0, %1     \n\t"
+                    "      bne   1f         \n\t"
+                    "      swp   %0, %3,[%2]\n\t"
+                    "      cmp   %1, %0     \n\t"
+                    "      swpne %1, %0,[%2]\n\t"
+                    "      bne   0b         \n\t"
+                    "1:                         "
+                    : "=&r"(result), "=&r"(tmp)
+                    :   "r"(&_value),  "r"(newval), "r"(oldval)
                     : "cc", "memory"
                 );
 

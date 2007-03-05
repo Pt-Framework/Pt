@@ -49,8 +49,8 @@ namespace Pt {
                     "      stwcx. %0, %3, %1\n\t"
                     "      bne-   0b        \n\t"
                     "      isync                "
-                    : "=&r" (ret)
-                    : "r"(&_value), "r"(n), "r"(zero)
+                    : "=&r"(ret)
+                    :   "r"(&_value), "r"(n), "r"(zero)
                     : "cr0", "memory", "r0"
                 );
             }
@@ -66,8 +66,8 @@ namespace Pt {
                     "      stwcx. %0, %3, %1\n\t"
                     "      bne-   0b        \n\t"
                     "      isync                "
-                    : "=&r" (ret)
-                    : "r"(&_value), "r"(-n), "r"(zero)
+                    : "=&r"(ret)
+                    :   "r"(&_value),   "r"(-n), "r"(zero)
                     : "cr0", "memory", "r0"
                );
             }
@@ -77,13 +77,13 @@ namespace Pt {
                 volatile register atomic_t ret = 0;
 
                 asm volatile (
-                    "0:    lwarx  %0,0,%1\n\t"
-                    "      stwcx. %2,0,%1\n\t"
-                    "      bne-   0b     \n\t"
-                    "      isync             "
-                    : "=&r" (ret)
-                    : "r" (&_value),"r"(n)
-                    : "cr0","memory","r0"
+                    "0:    lwarx  %0, 0, %1\n\t"
+                    "      stwcx. %2, 0, %1\n\t"
+                    "      bne-   0b       \n\t"
+                    "      isync               "
+                    : "=&r"(ret)
+                    :   "r"(&_value),  "r"(n)
+                    : "cr0","memory", "r0"
                );
             }
 
@@ -92,15 +92,15 @@ namespace Pt {
                 volatile register atomic_t ret = 0;
 
                 asm volatile (
-                    "sync                  \n\t"
-                    "1:    lwarx   %0,0,%1 \n\t"
-                    "      subf.   %0,%2,%0\n\t"
-                    "      bne     2f      \n\t"
-                    "      stwcx.  %3,0,%1 \n\t"
-                    "      bne-    1b      \n\t"
-                    "2:    isync               "
-                    : "=&r" (ret)
-                    : "b" (&_value), "r" (oldval), "r" (newval)
+                    "sync                    \n\t"
+                    "1:    lwarx   %0,  0, %1\n\t"
+                    "      subf.   %0, %2, %0\n\t"
+                    "      bne     2f        \n\t"
+                    "      stwcx.  %3,  0, %1\n\t"
+                    "      bne-    1b        \n\t"
+                    "2:    isync                 "
+                    : "=&r"(ret)
+                    :   "b"(&_value), "r"(oldval), "r"(newval)
                     : "cr0", "memory"
                 );
 

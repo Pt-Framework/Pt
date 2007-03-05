@@ -44,9 +44,9 @@ namespace Pt {
 
                 asm volatile (
                     //"lock; xadd{l} {%0,%1|%1,%0}"
-                    "lock; xadd %0,%1"
-                    : "=r" (result), "=m" (_value)
-                    : "0" (n), "m" (_value)
+                    "lock xadd %0,%1"
+                    : "=r"(result), "=m"(_value)
+                    :  "0"(n),       "m"(_value)
                 );
             }
 
@@ -56,9 +56,9 @@ namespace Pt {
 
                 asm volatile (
                     //"lock; xadd{l} {%0,%1|%1,%0}"
-                    "lock; xadd %0,%1"
-                    : "=r" (result), "=m" (_value)
-                    : "0" (-n), "m" (_value)
+                    "lock xadd %0,%1"
+                    : "=r"(result), "=m"(_value)
+                    :  "0"(-n),      "m"(_value)
                 );
             }
 
@@ -69,7 +69,7 @@ namespace Pt {
                 asm volatile (
                     "xchgl %0, %1"
                     : "=r"(result), "=m"(_value)
-                    : "0"(n), "m"(_value)
+                    :  "0"(n),       "m"(_value)
                     : "memory"
                 );
             }
@@ -79,9 +79,9 @@ namespace Pt {
                 volatile register atomic_t result;
 
                 asm volatile (
-                    "lock; cmpxchgl %2, %1"
-                    : "=a" (result), "=m" (_value)
-                    : "r" (newval), "m" (_value), "0" (oldval)
+                    "lock cmpxchgl %2, %1"
+                    : "=a"(result), "=m"(_value)
+                    :  "r"(newval),  "m"(_value), "0"(oldval)
                 );
 
                 return result == oldval;

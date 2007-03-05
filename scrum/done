@@ -187,4 +187,4 @@ ITEM P0 S13 "The Pt::Unit module exists"
 ITEM P0 S5 "Object reflection API is implemented"
     TASK "Split property in property and property proxy" Laurentiu 2006-10-05
     TASK "Specialize property for Reflectable" Laurentiu 2006-10-05
- TASk "Add signal changed to property" Laurentiu 2006-10-05
+    TASK "Add signal changed to property" Laurentiu 2006-10-05
