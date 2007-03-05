@@ -29,6 +29,10 @@
 #
 
 
+ITEM P10 S5 "Color classes are refactored"
+    TASK "Remove TypeT, the second parameter" blue_wind_25 2007-03-05
+    TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image" blue_wind_25 2007-03-05
+
 ########################################################################################
 
 ITEM P10 S5 "Variant class is implemented"

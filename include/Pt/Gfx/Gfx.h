@@ -43,15 +43,11 @@ namespace Pt {
         // Foward declarations of color classes
         //
 
-        struct ContainerType;
-        struct ReferenceType;
-
-        template <typename TagT, typename TypeT>
+        template <typename TagT>
         class Color;
 
         template <typename ColorT>
         struct ColorTraits;
-
 
         struct ARgb;
         struct ARgbF;
@@ -60,19 +56,26 @@ namespace Pt {
         struct Rgb565;
         struct Rgb555;
 
-        typedef Color<ARgb,     ContainerType> ARgbColor;
-        typedef Color<ARgbF,    ContainerType> ARgbFColor;
-        typedef Color<ARgb8888, ContainerType> ARgb8888Color;
-        typedef Color<Rgb888,   ContainerType> Rgb888Color;
-        typedef Color<Rgb565,   ContainerType> Rgb565Color;
-        typedef Color<Rgb555,   ContainerType> Rgb555Color;
+        typedef Color<ARgb    > ARgbColor;
+        typedef Color<ARgbF   > ARgbFColor;
+        typedef Color<ARgb8888> ARgb8888Color;
+        typedef Color<Rgb888  > Rgb888Color;
+        typedef Color<Rgb565  > Rgb565Color;
+        typedef Color<Rgb555  > Rgb555Color;
 
-        //typedef Color<ARgb,     ReferenceType> ARgbColorRef;
-        typedef Color<ARgbF,    ReferenceType> ARgbFColorRef;
-        typedef Color<ARgb8888, ReferenceType> ARgb8888ColorRef;
-        typedef Color<Rgb888,   ReferenceType> Rgb888ColorRef;
-        typedef Color<Rgb565,   ReferenceType> Rgb565ColorRef;
-        typedef Color<Rgb555,   ReferenceType> Rgb555ColorRef;
+        struct ARgbProxy;
+        struct ARgbFProxy;
+        struct ARgb8888Proxy;
+        struct Rgb888Proxy;
+        struct Rgb565Proxy;
+        struct Rgb555Proxy;
+
+        typedef Color<ARgbProxy    > ARgbColorProxy;
+        typedef Color<ARgbFProxy   > ARgbFColorProxy;
+        typedef Color<ARgb8888Proxy> ARgb8888ColorProxy;
+        typedef Color<Rgb888Proxy  > Rgb888ColorProxy;
+        typedef Color<Rgb565Proxy  > Rgb565ColorProxy;
+        typedef Color<Rgb555Proxy  > Rgb555ColorProxy;
 
 
         //

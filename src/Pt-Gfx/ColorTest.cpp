@@ -66,15 +66,15 @@ int main( int argc, char* argv[] )
 
     ////////////////////////////////////////////////////////////////////////////
 
-    typedef std::vector<ColorTraits<ARgbColorRef>::ComponentT> PlaneT;
+    typedef std::vector<ColorTraits<ARgbColorProxy>::ComponentT> PlaneT;
 
     PlaneT ap(320 * 240);
     PlaneT rp(320 * 240);
     PlaneT gp(320 * 240);
     PlaneT bp(320 * 240);
 
-    ARgbColorRef argb_1_ref(ap[0], rp[0], gp[0], bp[0]);
-    ARgbColorRef argb_2_ref(ap[1], rp[1], gp[1], bp[1]);
+    ARgbColorProxy argb_1_ref(ap[0], rp[0], gp[0], bp[0]);
+    ARgbColorProxy argb_2_ref(ap[1], rp[1], gp[1], bp[1]);
 
     argb_1_ref = argb_1;
     argb_2 = argb_2_ref;

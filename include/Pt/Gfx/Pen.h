@@ -26,180 +26,181 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/SmartPtr.h>
 
+
 namespace Pt {
-namespace Gfx {
+  namespace Gfx {
 
-    class PenData;
-    
-    /**
-     * @brief A pen which contains of attributes (size, color) for the drawing of outlines.
-     *
-     * Pen objects are used as container of drawing attributes for Painter objects. A size
-     * and a color can be specified per pen. The size and color are used to draw outlined
-     * shapes by the Painter. Outlined shapes for example are lines, outlined rectangles
-     * or ellipses and text.
-     *
-     * Example: When setting the pen color to green and the pen size to 5 and setting this
-     * Pen object as pen for a Painter, painting a line would result in a 5-pixel-sized
-     * green line.
-     *
-     * The Pen object is immutable. Thus a new object has to be created when a pen with
-     * other attributes is needed.
-     */
-    class PT_GFX_API Pen
-    {
-        public:            
-                
-            enum PenStyle{ SolidStyle = 0, DashStyle =1 };
-            enum CapStyle{ FlatCap = 0, RoundCap = 1 };
-            enum JoinStyle{ RoundJoin = 0, BevelJoin = 1 };
-  
-            /**
-             * @brief Creates a new Pen object.
-             *
-             * The default pen size is 1. The default pen color is black, the default style is solid
-             * and the defauld cap und join style are round.
-             */             
-            Pen();
-            
-            /**
-             * @brief Creates a new Pen object with the specified size
-             *
-             * The default pen color is black. The default style is solid. The defauld cap und join style are round.
-             */                         
-            Pen( size_t size );
-              
-            /**
-             * @brief Creates a new Pen object with the specified style
-             *
-             * The default pen size is 1. The default pen color is black. The defauld cap und join style are round.
-             */                         
-            Pen( PenStyle style );
-            
-            /**
-             * @brief Creates a new Pen object with the specified color
-             *
-             * The default pen size is 1. The default style is solid. The defauld cap und join style are round.
-             */                         
-            Pen( const ARgbColor& color );
-            
-            /**
-             * @brief Creates a new Pen object using the specified size, color and style.
-             *
-             * The pen size, color and style are optional. The default pen size is 1. The
-             * default pen color is black and the default style is solid.
-             *
-             * @param size The size of the pen. This parameter is optional. The default is 1.
-             * @param color The color of the pen. This parameter is optional. The default is black.
-             * @param penStyle The style of the pen. This parameter is optional. The default is SolidStyle.
-             * @param capStyle The cap style. This parameter is optional. The default is flat style.
-             * @param joinStyle The join style. This parameter is optional. The default is round style.
-             */            
-            Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
-             
+      class PenData;
 
-			/**
-			 * @brief Returns the size of the pen as specified when created.
-			 *
-			 * @return The size of the pen.
-			 */
-            size_t size() const;
+      /**
+      * @brief A pen which contains of attributes (size, color) for the drawing of outlines.
+      *
+      * Pen objects are used as container of drawing attributes for Painter objects. A size
+      * and a color can be specified per pen. The size and color are used to draw outlined
+      * shapes by the Painter. Outlined shapes for example are lines, outlined rectangles
+      * or ellipses and text.
+      *
+      * Example: When setting the pen color to green and the pen size to 5 and setting this
+      * Pen object as pen for a Painter, painting a line would result in a 5-pixel-sized
+      * green line.
+      *
+      * The Pen object is immutable. Thus a new object has to be created when a pen with
+      * other attributes is needed.
+      */
+      class PT_GFX_API Pen
+      {
+          public:
 
-			/**
-			 * @brief Returns a reference to the color of the pen as specified when created.
-			 *
-			 * @return The color of the pen.
-			 */
-			const ARgbColor& color() const;
-						
-			/**
-			 * @brief Returns the pen style.
-			 *
-			 * @return The pen style.
-			 */
-			PenStyle style() const;			
-			
-            /**
-			 * @brief Returns the cap style
-			 *
-			 * @return The cap style.
-			 */
-			CapStyle capStyle() const;			
-						
-            /**
-			 * @brief Returns the join style
-			 *
-			 * @return The join style.
-			 */
-			JoinStyle joinStyle() const;			
-			
-			/**
-			 * @brief Returns a reference to the pen color buffer
-			 *
-			 * @return The color buffer of the pen.
-			 */			
-			const ARgbImage& buffer() const;						
+              enum PenStyle{ SolidStyle = 0, DashStyle =1 };
+              enum CapStyle{ FlatCap = 0, RoundCap = 1 };
+              enum JoinStyle{ RoundJoin = 0, BevelJoin = 1 };
 
-             /**
-             * @brief Equality-operator (==) which compares the given Pen's by comparing their
-             * properties.
-             *
-             * The size and color are compared. If all values are the same, $true$ is returned;
-             * $false$ otherwise.
-             *
-             * @param a The Pen object to compare with Pen object b.
-             * @param b The Pen object to compare with Pen object a.
-             * @return $true$ when the Pen objects are the same; $false$ otherwise.
-             */
-            friend PT_GFX_API bool operator==(const Pen& a, const Pen& b);
+              /**
+              * @brief Creates a new Pen object.
+              *
+              * The default pen size is 1. The default pen color is black, the default style is solid
+              * and the defauld cap und join style are round.
+              */
+              Pen();
 
-            friend PT_GFX_API bool operator<(const Pen& a, const Pen& b);
+              /**
+              * @brief Creates a new Pen object with the specified size
+              *
+              * The default pen color is black. The default style is solid. The defauld cap und join style are round.
+              */
+              Pen( size_t size );
 
-		private:	
-		    SmartPtr<PenData> _penData;	
-	};
-	
-    class PT_GFX_API PenData
-	{
-		public:
-			PenData( size_t size, const ARgbColor& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
-			: _size( size )			
-			, _style( style )
-			, _buffer( 64, 1, color )
-			, _capStyle( cap )
-			, _joinStyle( join )
-			{ }
+              /**
+              * @brief Creates a new Pen object with the specified style
+              *
+              * The default pen size is 1. The default pen color is black. The defauld cap und join style are round.
+              */
+              Pen( PenStyle style );
 
-			~PenData()
-			{ }
+              /**
+              * @brief Creates a new Pen object with the specified color
+              *
+              * The default pen size is 1. The default style is solid. The defauld cap und join style are round.
+              */
+              Pen( const ARgbColor& color );
 
-			const ARgbColor& color() const
-			{ return _buffer.pixel( 0, 0); }
+              /**
+              * @brief Creates a new Pen object using the specified size, color and style.
+              *
+              * The pen size, color and style are optional. The default pen size is 1. The
+              * default pen color is black and the default style is solid.
+              *
+              * @param size The size of the pen. This parameter is optional. The default is 1.
+              * @param color The color of the pen. This parameter is optional. The default is black.
+              * @param penStyle The style of the pen. This parameter is optional. The default is SolidStyle.
+              * @param capStyle The cap style. This parameter is optional. The default is flat style.
+              * @param joinStyle The join style. This parameter is optional. The default is round style.
+              */
+              Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
 
-			const ARgbImage& buffer() const
-			{ return _buffer; }
 
-			size_t size() const
-			{ return _size; }
-			
-			Pen::PenStyle style() const
-			{ return _style; }
+        /**
+        * @brief Returns the size of the pen as specified when created.
+        *
+        * @return The size of the pen.
+        */
+              size_t size() const;
 
-            Pen::CapStyle capStyle() const 
-            { return _capStyle;}
-            
-            Pen::JoinStyle joinStyle() const
-            { return _joinStyle; }
-            
-		private:
-	        size_t          _size;
-			Pen::PenStyle   _style;
-			ARgbImage       _buffer;	
-			Pen::CapStyle   _capStyle;
-			Pen::JoinStyle  _joinStyle;
+        /**
+        * @brief Returns a reference to the color of the pen as specified when created.
+        *
+        * @return The color of the pen.
+        */
+        const ARgbColor& color() const;
+
+        /**
+        * @brief Returns the pen style.
+        *
+        * @return The pen style.
+        */
+        PenStyle style() const;
+
+              /**
+        * @brief Returns the cap style
+        *
+        * @return The cap style.
+        */
+        CapStyle capStyle() const;
+
+              /**
+        * @brief Returns the join style
+        *
+        * @return The join style.
+        */
+        JoinStyle joinStyle() const;
+
+        /**
+        * @brief Returns a reference to the pen color buffer
+        *
+        * @return The color buffer of the pen.
+        */
+        const ARgbImage& buffer() const;
+
+              /**
+              * @brief Equality-operator (==) which compares the given Pen's by comparing their
+              * properties.
+              *
+              * The size and color are compared. If all values are the same, $true$ is returned;
+              * $false$ otherwise.
+              *
+              * @param a The Pen object to compare with Pen object b.
+              * @param b The Pen object to compare with Pen object a.
+              * @return $true$ when the Pen objects are the same; $false$ otherwise.
+              */
+              friend PT_GFX_API bool operator==(const Pen& a, const Pen& b);
+
+              friend PT_GFX_API bool operator<(const Pen& a, const Pen& b);
+
+      private:
+          SmartPtr<PenData> _penData;
     };
-	
-} // namespace Gfx
+
+      class PT_GFX_API PenData
+    {
+      public:
+        PenData( size_t size, const ARgbColor& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
+        : _size( size )
+        , _style( style )
+        , _buffer( 64, 1, color )
+        , _capStyle( cap )
+        , _joinStyle( join )
+        { }
+
+        ~PenData()
+        { }
+
+        const ARgbColor& color() const
+        { return _buffer.pixel( 0, 0); }
+
+        const ARgbImage& buffer() const
+        { return _buffer; }
+
+        size_t size() const
+        { return _size; }
+
+        Pen::PenStyle style() const
+        { return _style; }
+
+              Pen::CapStyle capStyle() const
+              { return _capStyle;}
+
+              Pen::JoinStyle joinStyle() const
+              { return _joinStyle; }
+
+      private:
+            size_t          _size;
+        Pen::PenStyle   _style;
+        ARgbImage       _buffer;
+        Pen::CapStyle   _capStyle;
+        Pen::JoinStyle  _joinStyle;
+      };
+
+  } // namespace Gfx
 
 template <>
 struct AnyTraits<Gfx::Pen> {
@@ -218,7 +219,7 @@ inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Pen& value)
     os << ' ' << value.style() << ')';
 }
 
-	
+
 inline void Pt::AnyTraits<Gfx::Pen>::output(std::ostream& os, const Gfx::Pen& value)
 {
 	outputGeneric(os, value);
@@ -235,7 +236,7 @@ template <typename CharT>
 inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Pen& value)
 {
     CharT ch;
-    	
+
     is >> ch;
     if (ch != '(')
     {

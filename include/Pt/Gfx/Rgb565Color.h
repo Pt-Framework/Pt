@@ -188,25 +188,9 @@ namespace Pt {
         typedef Color<Rgb565> Rgb565Color;
 
 
-        /** @brief Full specialisation of the color traits class for Rgb565Color.
+        /** @brief Convert a Color<Rgb565> to a Color<ARgb>.
          */
-        template <>
-        struct ColorTraits<Rgb565Color> {
-            typedef uint8_t  ComponentT;
-            typedef uint16_t TmpValueT;
-
-            typedef Color<Rgb565>*       ColorPtrT;
-            typedef const Color<Rgb565>* ConstColorPtrT;
-
-            typedef Color<Rgb565>*       ScanlineT;
-            typedef const Color<Rgb565>* ConstScanlineT;
-        };
-
-
-        /** @brief Convert a Color<Rgb565, SrcTypeT> to a Color<ARgb, DstTypeT>.
-         */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline const Color<ARgb>& toARgb(Color<ARgb, DstTypeT>& to, const Color<Rgb565, SrcTypeT>& from)
+        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<Rgb565>& from)
         {
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
@@ -219,10 +203,9 @@ namespace Pt {
             return to;
         }
 
-        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<Rgb565, DstTypeT>.
+        /** @brief Convert a Color<ARgb> to a Color<Rgb565>.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void fromARgb(Color<Rgb565, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
+        inline void fromARgb(Color<Rgb565>& to, const Color<ARgb>& from)
         {
             // 1111111100000000
             // 7654321076543210
@@ -235,25 +218,14 @@ namespace Pt {
         }
 
 
-        /** @brief Assign a Color<Rgb565, SrcTypeT> to a Color<Rgb565, DstTypeT>.
-         *
-         *  This function is implemented so that assignment between ContainerType
-         *  Rgb565 color and ReferenceType Rgb565 color is possible.
+        /** @brief Assign a Color<ARgb> to a Color<Rgb565>.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void assign(Color<Rgb565, DstTypeT>& to, const Color<Rgb565, SrcTypeT>& from)
-        { to.setValue(from.value()); }
-
-        /** @brief Assign a Color<ARgb, SrcTypeT> to a Color<Rgb565, DstTypeT>.
-         */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void assign(Color<Rgb565, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
+        inline void assign(Color<Rgb565>& to, const Color<ARgb>& from)
         { fromARgb(to, from); }
 
-        /** @brief Assign a Color<Rgb565, SrcTypeT> to a Color<ARgb, DstTypeT>.
+        /** @brief Assign a Color<Rgb565> to a Color<ARgb>.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void assign(Color<ARgb, DstTypeT>& to, const Color<Rgb565, SrcTypeT>& from)
+        inline void assign(Color<ARgb>& to, const Color<Rgb565>& from)
         {
             const uint16_t tr = from.red();
             const uint16_t tg = from.green();
@@ -265,10 +237,9 @@ namespace Pt {
             to.setBlue ( ((tb + !!tb) << 11) - !!tb );
         }
 
-        /** @brief Assign an Color<Rgb565, SrcTypeT> to an Color<ARgbF, DstTypeT>.
+        /** @brief Assign an Color<Rgb565> to an Color<ARgbF>.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void assign(Color<ARgbF, DstTypeT>& to, const Color<Rgb565, SrcTypeT>& from)
+        inline void assign(Color<ARgbF>& to, const Color<Rgb565>& from)
         {
             to.setAlpha( 1.0f                        );
             to.setRed  ( float(from.red  ()) / 31.0f );
@@ -277,34 +248,30 @@ namespace Pt {
         }
 
         // No need to overload for:
-        //   void assign(Color<Rgb565, DstTypeT>& to, const Color<ARgbF, SrcTypeT>& from)
+        //   void assign(Color<Rgb565>& to, const Color<ARgbF>& from)
         // beause there is no more direct method to do this yet instead of
         // converting to the master color format first.
 
 
-        /** @brief Equality operator for Color<Rgb565, TypeT> comparison.
+        /** @brief Equality operator for Color<Rgb565> comparison.
          */
-        template<typename TypeT>
-        inline bool operator==(const Color<Rgb565, TypeT>& c1, const Color<Rgb565, TypeT>& c2)
+        inline bool operator==(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
         { return c1.value()==c2.value(); }
 
-        /** @brief Less-than operator for Color<Rgb565, TypeT> comparison.
+        /** @brief Less-than operator for Color<Rgb565> comparison.
          */
-        template<typename TypeT>
-        inline bool operator<(const Color<Rgb565, TypeT>& c1, const Color<Rgb565, TypeT>& c2)
+        inline bool operator<(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
         { return c1.value()<c2.value(); }
 
-        /** @brief Greater-than operator for Color<Rgb565, TypeT> comparison.
+        /** @brief Greater-than operator for Color<Rgb565> comparison.
          */
-        template<typename TypeT>
-        inline bool operator>(const Color<Rgb565, TypeT>& c1, const Color<Rgb565, TypeT>& c2)
+        inline bool operator>(const Color<Rgb565>& c1, const Color<Rgb565>& c2)
         { return c1.value()>c2.value(); }
 
 
-        /** @brief Make the greyscale version of the source Color<Rgb565, TypeT> color.
+        /** @brief Make the greyscale version of the source Color<Rgb565> color.
          */
-        template<typename TypeT>
-        inline Color<Rgb565>& greyscale(Color<Rgb565, TypeT>& to, const Color<Rgb565, TypeT>& from)
+        inline Color<Rgb565>& greyscale(Color<Rgb565>& to, const Color<Rgb565>& from)
         {
             const uint16_t r = from.red();
             const uint16_t g = from.green();
@@ -325,10 +292,9 @@ namespace Pt {
         }
 
 
-        /** @brief Mix two Color<Rgb565, TypeT>s using the given mixing factor.
+        /** @brief Mix two Color<Rgb565>s using the given mixing factor.
          */
-        template <typename TypeT, typename FactorT>
-        inline void mixColor(Color<Rgb565, TypeT>& dst, const Color<Rgb565, TypeT>& src, const FactorT& factor)
+        inline void mixColor(Color<Rgb565>& dst, const Color<Rgb565>& src, uint8_t factor)
         {
             // TODO: Write it !!!
         }

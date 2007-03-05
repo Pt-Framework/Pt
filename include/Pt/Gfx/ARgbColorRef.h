@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbColorRef_h
-#define Pt_Gfx_ARgbColorRef_h
+#ifndef Pt_Gfx_ARgbColorProxy_h
+#define Pt_Gfx_ARgbColorProxy_h
 
 #include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Math/Rect.h>
@@ -31,18 +31,23 @@ namespace Pt {
 
     namespace Gfx {
 
+      /** @brief An empty structure used for tagging 64-bit ARGB color proxy class.
+       */
+      struct ARgbProxy : public ARgb {};
+
+
         /** @brief Reference-type 64-Bit ARGB color class.
          *  @ingroup Gfx
          *
          *  @see ARgbColor.
          */
         template <>
-        class PT_GFX_API Color<ARgb, ReferenceType> {
+        class PT_GFX_API Color<ARgbProxy> {
 
             public:
                 /** @brief Non-reference type (container type) of this color.
                  */
-                typedef Color<ARgb, ContainerType> NonRefT;
+                typedef Color<ARgb> NonRefT;
 
             public:
                 /** @brief This constructor will take reference to the real storage.
@@ -118,18 +123,18 @@ namespace Pt {
         /** @brief Convenience access to the reference-type 64-Bit ARGB color model.
          *  @ingroup Gfx
          */
-       typedef Color<ARgb, ReferenceType> ARgbColorRef;
+       typedef Color<ARgbProxy> ARgbColorProxy;
 
 
-        /** @brief Full specialisation of the color traits class for ARgbColorRef.
+        /** @brief Full specialisation of the color traits class for ARgbColorProxy.
          */
         template <>
-        struct ColorTraits<ARgbColorRef> {
+        struct ColorTraits<ARgbColorProxy> {
             typedef uint16_t ComponentT; // Value type of the components
             typedef uint32_t TmpValueT;  // Temporary value type to be used when
                                          // performing arithmetic on the components
 
-            // Color pointer class for ARgbColorRef color model.
+            // Color pointer class for ARgbColorProxy color model.
             class ColorPtrT {
                 public:
                     inline ColorPtrT(void*)
@@ -143,7 +148,7 @@ namespace Pt {
                                      size_t                    posY)
                     : _imgW(imageWidth), _imgH(imageHeight)
                     {
-                        // In this ARgbColorRef, all channel have the same full size
+                        // In this ARgbColorProxy, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth + posX;
@@ -156,8 +161,8 @@ namespace Pt {
                         _chnB = chanPtr[3] + pos; // B is channel #3
                     }
 
-                    inline ARgbColorRef operator*()
-                    { return ARgbColorRef(*_chnA, *_chnR, *_chnG, *_chnB); }
+                    inline ARgbColorProxy operator*()
+                    { return ARgbColorProxy(*_chnA, *_chnR, *_chnG, *_chnB); }
 
                     inline ColorPtrT& operator++()
                     { ++_chnA; ++_chnR; ++_chnG; ++_chnB; return *this; }
@@ -193,7 +198,7 @@ namespace Pt {
                     size_t    _imgW, _imgH;
             };
 
-            // Constant color pointer class for ARgbColorRef color model.
+            // Constant color pointer class for ARgbColorProxy color model.
             class ConstColorPtrT {
                 public:
                     inline ConstColorPtrT(void*)
@@ -207,7 +212,7 @@ namespace Pt {
                                           size_t                          posY)
                     : _imgW(imageWidth), _imgH(imageHeight)
                     {
-                        // In this ARgbColorRef, all channel have the same full size
+                        // In this ARgbColorProxy, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth + posX;
@@ -258,14 +263,14 @@ namespace Pt {
             };
 
 
-            // Scanline class for ARgbColorRef color model.
+            // Scanline class for ARgbColorProxy color model.
             class ScanlineT {
                 public:
                     inline ScanlineT(std::vector<ComponentT*>& chanPtr,
                                      size_t                    imageWidth,
                                      size_t                    posY)
                     {
-                        // In this ARgbColorRef, all channel have the same full size
+                        // In this ARgbColorProxy, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth;
@@ -276,8 +281,8 @@ namespace Pt {
                         _chnB = chanPtr[3] + pos; // B is channel #3
                     }
 
-                    inline ARgbColorRef operator[](size_t x)
-                    { return ARgbColorRef( *(_chnA+x), *(_chnR+x), *(_chnG+x), *(_chnB+x) ); }
+                    inline ARgbColorProxy operator[](size_t x)
+                    { return ARgbColorProxy( *(_chnA+x), *(_chnR+x), *(_chnG+x), *(_chnB+x) ); }
 
                 private:
                     uint16_t* _chnA;
@@ -286,14 +291,14 @@ namespace Pt {
                     uint16_t* _chnB;
             };
 
-            // Constant scanline class for ARgbColorRef color model.
+            // Constant scanline class for ARgbColorProxy color model.
             class ConstScanlineT {
                 public:
                     inline ConstScanlineT(const std::vector<ComponentT*>& chanPtr,
                                           size_t                          imageWidth,
                                           size_t                          posY)
                     {
-                        // In this ARgbColorRef, all channel have the same full size
+                        // In this ARgbColorProxy, all channel have the same full size
                         // (no subsampling) and thus simple pointer arithmetic will
                         // does the job :)
                         const size_t pos = posY*imageWidth;
@@ -322,7 +327,7 @@ namespace Pt {
             // We have 4 channels (A, R, G and B)
             static const size_t ChannelCount = 4;
 
-            // In this ARgbColorRef, all channel have the same full size
+            // In this ARgbColorProxy, all channel have the same full size
             // (no subsampling) and thus just return a constant value of '1'
             static inline size_t ChannelSubsamplingX(size_t channelIndex)
             {
@@ -330,7 +335,7 @@ namespace Pt {
                 return 1;
             }
 
-            // In this ARgbColorRef, all channel have the same full size
+            // In this ARgbColorProxy, all channel have the same full size
             // (no subsampling) and thus just return a constant value of '1'
             static inline size_t ChannelSubsamplingY(size_t channelIndex)
             {
@@ -338,6 +343,32 @@ namespace Pt {
                 return 1;
             }
         };
+
+        /** @brief Convert a Color<ARgbProxy> to a Color<ARgb>.
+         */
+        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<ARgbProxy>& from)
+        {
+            to.setAlpha(from.alpha());
+            to.setRed  (from.red  ());
+            to.setGreen(from.green());
+            to.setBlue (from.blue ());
+            return to;
+        }
+
+        /** @brief Convert a Color<ARgb> to a Color<ARgbProxy>.
+         */
+        inline void fromARgb(Color<ARgbProxy>& to, const Color<ARgb>& from)
+        { to = from; }
+
+        /** @brief Assign a Color<ARgbProxy> to a Color<ARgb>.
+         */
+        inline void assign(Color<ARgb>& to, const Color<ARgbProxy>& from)
+        { toARgb(to, from); }
+
+        /** @brief Assign a Color<ARgb> to a Color<ARgbProxy>.
+         */
+        inline void assign(Color<ARgbProxy>& to, const Color<ARgb>& from)
+        { to = from; }
 
     } // namespace Gfx
 

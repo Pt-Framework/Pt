@@ -49,11 +49,11 @@ namespace Pt {
                 typedef typename ColorRefT_::NonRefT ColorT;
                 typedef ColorTraitsT_                ColorTraitsT;
 
-                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
-                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
-
                 typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
                 typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
+
+                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
+                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
 
                 //
                 // Below are specific to planar image only

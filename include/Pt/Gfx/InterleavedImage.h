@@ -41,7 +41,7 @@ namespace Pt {
          *      color planes (blocks of memory). One block to the other blocks may or
          *      may not be in contiguous memory address.
          *
-         *  This InterleavedImage<typename ColorT, typename ColorTraitsT> class is
+         *  This InterleavedImage<typename ColorT> class is
          *  meant to be used for implementing interleaved images.
          */
         template <typename ColorT_>

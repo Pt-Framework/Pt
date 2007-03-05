@@ -28,9 +28,8 @@ namespace Pt {
         //
         // Foward declaration of some color-related classes
         //
-        struct ContainerType;
         struct ARgb;
-        template <typename TagT, typename TypeT> class Color;
+        template <typename TagT> class Color;
 
 
         /** @brief Assign a color model to another color model.
@@ -38,10 +37,10 @@ namespace Pt {
          *  A color models implementor should specialize this function as needed if
          *  the faster implementation for the two colors is exist.
          */
-        template <typename DstTagT, typename DstTypeT, typename SrcTagT, typename SrcTypeT> inline
-        void assign(Color<DstTagT, DstTypeT>& to, const Color<SrcTagT, SrcTypeT>& from)
+        template <typename DstTagT, typename SrcTagT> inline
+        void assign(Color<DstTagT>& to, const Color<SrcTagT>& from)
         {
-            Color<ARgb, ContainerType> tmp;
+            Color<ARgb> tmp;
             fromARgb(to, toARgb(tmp, from) );
         }
 
@@ -49,8 +48,8 @@ namespace Pt {
          *
          *  This function will just copy the value from the source to the destiantion.
          */
-        template <typename TagT, typename TypeT> inline
-        void assign(Color<TagT, TypeT>& to, const Color<TagT>, TypeT& from)
+        template <typename TagT> inline
+        void assign(Color<TagT>& to, const Color<TagT>& from)
         { to = from; }
 
 
@@ -62,10 +61,10 @@ namespace Pt {
          *  A color implementor must not rely on this function since this function
          *  will cause some overhead because of the conversion to and from ARgbColor.
          */
-        template <typename TagT, typename TypeT> inline
-        Color<TagT, TypeT>& greyscale(Color<TagT, TypeT>& to, const Color<TagT, TypeT>& from)
+        template <typename TagT> inline
+        Color<TagT>& greyscale(Color<TagT>& to, const Color<TagT>& from)
         {
-            Color<ARgb, ContainerType> tmp;
+            Color<ARgb> tmp;
 
             toARgb(tmp, from);
             greyscale(tmp, tmp);
@@ -76,8 +75,8 @@ namespace Pt {
 
         /** @brief Make the given color become greyscale.
          */
-        template <typename TagT, typename TypeT> inline
-        Color<TagT, TypeT>& greyscale(Color<TagT, TypeT>& c)
+        template <typename TagT> inline
+        Color<TagT>& greyscale(Color<TagT>& c)
         { return greyscale(c, c); }
 
     } // namespace Gfx

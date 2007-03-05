@@ -23,6 +23,7 @@
 
 
 ITEM P10 S8 "PlanarImage is improved"
+    TASK "Rename ARgbColorRef class to ARgbColorProxy"
     TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type"
     TASK "Make PixelIterators not nested in PlanarImage"
     TASK "Make ImageModel traits classes for this image type which is not a template nor having a base class"

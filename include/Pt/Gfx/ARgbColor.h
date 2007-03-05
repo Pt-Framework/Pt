@@ -158,76 +158,40 @@ namespace Pt {
         typedef Color<ARgb> ARgbColor;
 
 
-/*
-        template <>
-        struct ColorTraits<ARgbColor> {
-            typedef uint16_t ComponentT;
-            typedef uint32_t TmpValueT;
-
-            typedef Color<ARgb>*       ColorPtrT;
-            typedef const Color<ARgb>* ConstColorPtrT;
-
-            typedef Color<ARgb>*       ScanlineT;
-            typedef const Color<ARgb>* ConstScanlineT;
-        };
-*/
-
-        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
+        /** @brief Convert a Color<ARgb> to a Color<ARgb>.
          *
-         *  This function is implemented so that conversion between ContainerType
-         *  ARgb color and ReferenceType ARgb color is possible.
+         *  This function is implemented just for the sake of completeness.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline const Color<ARgb, DstTypeT>& toARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
-        {
-            to.setAlpha(from.alpha());
-            to.setRed  (from.red  ());
-            to.setGreen(from.green());
-            to.setBlue (from.blue ());
-            return to;
-        }
+        inline const Color<ARgb>& toARgb(Color<ARgb>& to, const Color<ARgb>& from)
+        { to = from; return to; }
 
-
-        /** @brief Convert a Color<ARgb, SrcTypeT> to a Color<ARgb, DstTypeT>.
+        /** @brief Convert a Color<ARgb> to a Color<ARgb>.
          *
-         *  This function is implemented so that conversion between ContainerType
-         *  ARgb color and ReferenceType ARgb color is possible.
+         *  This function is implemented just for the sake of completeness.
          */
-        template<typename DstTypeT, typename SrcTypeT>
-        inline void fromARgb(Color<ARgb, DstTypeT>& to, const Color<ARgb, SrcTypeT>& from)
-        {
-            to.setAlpha(from.alpha());
-            to.setRed  (from.red  ());
-            to.setGreen(from.green());
-            to.setBlue (from.blue ());
-        }
+        inline void fromARgb(Color<ARgb>& to, const Color<ARgb>& from)
+        { to = from; }
 
 
-        /** @brief Equality operator for Color<ARgb, TypeT> comparison.
+        /** @brief Equality operator for Color<ARgb> comparison.
          */
-        template<typename TypeT>
-        inline bool operator==(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
+        inline bool operator==(const Color<ARgb>& c1, const Color<ARgb>& c2)
         { return c1.alpha()==c2.alpha() && c1.red()==c2.red() && c1.green()==c2.green() && c1.blue()==c2.blue(); }
 
-
-        /** @brief Less-than operator for Color<ARgb, TypeT> comparison.
+        /** @brief Less-than operator for Color<ARgb> comparison.
          */
-        template<typename TypeT>
-        inline bool operator<(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
+        inline bool operator<(const Color<ARgb>& c1, const Color<ARgb>& c2)
         { return c1.alpha()<c2.alpha() || c1.red()<c2.red() || c1.green()<c2.green() || c1.blue()<c2.blue(); }
 
-
-        /** @brief Greater-than operator for Color<ARgb, TypeT> comparison.
+        /** @brief Greater-than operator for Color<ARgb> comparison.
          */
-        template<typename TypeT>
-        inline bool operator>(const Color<ARgb, TypeT>& c1, const Color<ARgb, TypeT>& c2)
+        inline bool operator>(const Color<ARgb>& c1, const Color<ARgb>& c2)
         { return c1.alpha()>c2.alpha() || c1.red()>c2.red() || c1.green()>c2.green() || c1.blue()>c2.blue(); }
 
 
-        /** @brief Make the greyscale version of the source Color<ARgb, TypeT>.
+        /** @brief Make the greyscale version of the source Color<ARgb>.
          */
-        template<typename TypeT>
-        inline Color<ARgb, TypeT>& greyscale(Color<ARgb, TypeT>& to, const Color<ARgb, TypeT>& from)
+        inline Color<ARgb>& greyscale(Color<ARgb>& to, const Color<ARgb>& from)
         {
             const uint16_t s = (from.red()*77 + from.green()*128 + from.blue()*51) >> 8;
 
@@ -240,15 +204,11 @@ namespace Pt {
         }
 
 
-        /** @brief Mix two Color<ARgb, TypeT>s using the given mixing factor.
+        /** @brief Mix two Color<ARgb>s using the given mixing factor.
          */
-        template <typename TypeT>
-        inline void blend(Color<ARgb, TypeT>& dst, const Color<ARgb, TypeT>& src, const uint16_t factor)
+        inline void blend(Color<ARgb>& dst, const Color<ARgb>& src, uint16_t factor)
         {
-            //assert(  std::numeric_limits<FactorT>::is_integer );
-            //assert( !std::numeric_limits<FactorT>::is_signed  );
-
-            typedef unsigned long ValueT;
+            typedef uint32_t ValueT;
 
             const ValueT oF = factor;
             const ValueT rF = std::numeric_limits<uint16_t>::max() - factor;

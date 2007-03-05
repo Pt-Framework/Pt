@@ -37,21 +37,20 @@ namespace Pt {
 #ifdef __GNUC__
 
         // Explicit instantiation of the standard interleaved image classes
-        template class InterleavedImage<ARgbColor>;
-
-        template class InterleavedImage<ARgbFColor>;
-        template class InterleavedImage<ARgb8888Color>;
-        template class InterleavedImage<Rgb888Color>;
-        template class InterleavedImage<Rgb565Color>;
-        template class InterleavedImage<Rgb555Color>;
+        template class PT_EXPORT InterleavedImage<ARgbColor>;
+        template class PT_EXPORT InterleavedImage<ARgbFColor>;
+        template class PT_EXPORT InterleavedImage<ARgb8888Color>;
+        template class PT_EXPORT InterleavedImage<Rgb888Color>;
+        template class PT_EXPORT InterleavedImage<Rgb565Color>;
+        template class PT_EXPORT InterleavedImage<Rgb555Color>;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
-        template class SubImage<ARgbInterleavedImage>;
-        template class SubImage<ARgbFInterleavedImage>;
-        template class SubImage<ARgb8888InterleavedImage>;
-        template class SubImage<Rgb888InterleavedImage>;
-        template class SubImage<Rgb565InterleavedImage>;
-        template class SubImage<Rgb555InterleavedImage>;
+        template class PT_EXPORT SubImage<ARgbInterleavedImage>;
+        template class PT_EXPORT SubImage<ARgbFInterleavedImage>;
+        template class PT_EXPORT SubImage<ARgb8888InterleavedImage>;
+        template class PT_EXPORT SubImage<Rgb888InterleavedImage>;
+        template class PT_EXPORT SubImage<Rgb565InterleavedImage>;
+        template class PT_EXPORT SubImage<Rgb555InterleavedImage>;
 
 #endif
 
