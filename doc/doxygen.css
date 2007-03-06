@@ -170,6 +170,7 @@ SPAN.preprocessor  { color: #806020 }
 SPAN.stringliteral { color: #002080 }
 SPAN.charliteral   { color: #008080 }
 .mdescLeft {
+    white-space: nowrap;
     padding: 0px 8px 4px 8px;
 	font-size: 80%;
 	font-style: italic;
@@ -181,6 +182,7 @@ SPAN.charliteral   { color: #008080 }
 	margin: 0px;
 }
 .mdescRight {
+    white-space: nowrap;
     padding: 0px 8px 4px 8px;
 	font-size: 80%;
 	font-style: italic;
@@ -192,6 +194,7 @@ SPAN.charliteral   { color: #008080 }
 	margin: 0px;
 }
 .memItemLeft {
+    white-space: nowrap;
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
     font-size: 100%;
@@ -211,6 +214,7 @@ SPAN.charliteral   { color: #008080 }
 
 }
 .memItemRight {
+    white-space: nowrap;
 	padding: 1px 8px 0px 8px;
 	margin: 4px;
     font-size: 100%;
@@ -230,6 +234,7 @@ SPAN.charliteral   { color: #008080 }
 
 }
 .memTemplItemLeft {
+    white-space: nowrap;
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
 	border-top-width: 1px;
@@ -248,6 +253,7 @@ SPAN.charliteral   { color: #008080 }
 	font-size: 100%;
 }
 .memTemplItemRight {
+    white-space: nowrap;
 	padding: 1px 8px 0px 8px;
 	margin: 4px;
 	border-top-width: 1px;
@@ -266,6 +272,7 @@ SPAN.charliteral   { color: #008080 }
 	font-size: 100%;
 }
 .memTemplParams {
+    white-space: nowrap;
 	padding: 1px 0px 0px 8px;
 	margin: 4px;
 	border-top-width: 1px;
@@ -321,8 +328,10 @@ HR { height: 1px;
   font-size: 80%;
   color: #606060;
   font-weight: normal;
+  white-space: nowrap;
 } 
-.memnav { 
+.memnav {
+  white-space: nowrap;
   background-color: #e8eef2;
   border: 1px solid #84b0c7;
   text-align: center;
@@ -331,6 +340,7 @@ HR { height: 1px;
   padding: 2px;
 }
 .memitem {
+  white-space: nowrap;
   background-color: #F0F0F0;
   -moz-border-radius: 8px 8px 8px 8px;
 }
@@ -340,15 +350,18 @@ HR { height: 1px;
   font-weight: bold;
 }
 .memdoc{
+  white-space: nowrap;
   padding-left: 10px;
 }
 .memproto {
+  white-space: nowrap;
   background-color: #CCCCCC;
   width: 100%;
   font-weight: bold;
   -moz-border-radius: 8px 8px 0px 0px;
 }
 .paramkey {
+  white-space: nowrap;
   text-align: right;
 }
 .paramtype {

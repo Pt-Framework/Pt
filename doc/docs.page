@@ -63,7 +63,7 @@
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Reflection</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Compile Time Type Information</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Components</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Plugins</a></li>
+        <li style="margin: 2px;"><a href="plugins.html" style="text-decoration: none;">Plugins</a></li>
         <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Synchronous I/O Multiplexing</a></li>
         <li style="margin: 2px;"><a href="unittests.html" style="text-decoration: none;">Unit Testing</a></li>
         </ul>

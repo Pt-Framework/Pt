@@ -73,7 +73,7 @@ namespace System {
     template <typename Class, typename Iface>
     class BasicPlugin : public Plugin<Iface> {
         public:
-            BasicPlugin(const std::string& feature, const std::string& info)
+            BasicPlugin(const std::string& feature, const std::string& info = "")
             : Plugin<Iface>( TypeInfo<Iface>::typeName(), feature, info)
             { }
 
