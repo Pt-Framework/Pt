@@ -59,6 +59,9 @@ inline basic_string<Pt::Char>::basic_string(size_type n, Pt::Char c)
 inline basic_string<Pt::Char>::basic_string(const basic_string& str)
 : _data(0)
 {
+	// if the other string is not being modified with iterators we can
+	// share the same data. Otherwise the other string is marked as
+	// busy and we need to copy on write
     if( str._data->busy() == false ) {
         _data = str._data;
         _data->ref();
@@ -92,9 +95,11 @@ inline basic_string<Pt::Char>::basic_string(Pt::Char* begin, Pt::Char* end)
 }
 
 
-
 inline basic_string<Pt::Char>::~basic_string()
 {
+	// Noone else references this data if the reference counter
+	// is at one or this string is marked as busy because someone
+	// has a mutating iterator on it.
     if( _data->busy() || _data->unref() < 1 ) {
         delete _data;
         _data = 0;
@@ -141,6 +146,9 @@ inline void basic_string<Pt::Char>::resize(size_t n, Pt::Char ch)
     }
 
     // do nothing if n == size
+
+    // mutation ends busy mode
+    _data->setInitial();
 }
 
 
@@ -170,8 +178,15 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
         newBuffer->reserve( reserveSize );
         newBuffer->assign( _data->str(), _data->length() );
 
-        _data->unref();
-        _data = newBuffer;
+        if( _data->unref() < 1)
+        {
+            // just in case two threads are trying this at once
+			delete newBuffer;
+        }
+        else
+        {
+			_data = newBuffer;
+		}
     }
     // just resizing
     else
@@ -195,7 +210,7 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::copy(Pt::Char* a, size_type n, size_type pos) const
 {
     if( pos > this->size() ) {
-        // throw out_of_range("basic_string::copy");
+        throw out_of_range("basic_string::copy");
     }
 
     if(n > this->size() - pos) {
@@ -245,15 +260,23 @@ inline const Pt::Char* basic_string<Pt::Char>::c_str() const
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
 {
-    if( str._data->busy() == false ) {
-        _data = str._data;
-        _data->ref();
-    }
-    else {
+    if( str._data->busy() ) 
+    {
         _data->assign( str._data->str(), str._data->length() );
-        // end busy mode
+
+        // caller modify ends busy mode
         _data->setInitial();
+		return *this;
     }
+    
+	if( _data->unref() < 1 ) 
+	{
+		delete _data;
+		_data = 0;
+	}
+
+    _data = str._data;
+    _data->ref();
 
     return *this;
 }
@@ -262,7 +285,6 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str, size_type pos, size_type n)
 {
     this->assign( str._data->str() + pos, n );
-
     return *this;
 }
 
@@ -278,7 +300,8 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* st
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str, size_type length)
 {
-    // copy if shared and not busy
+    // this is a modifying action and if multiple instances reference this
+    // data instance we need to copy on write first.
     if( _data->shared() ) {
         Pt::StringData* newBuffer = new Pt::StringData( str, length );
         _data->unref();
@@ -318,18 +341,6 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* st
 }
 
 
-/*
-inline void basic_string<Pt::Char>::detach(size_type reserveSize)
-{
-    // shared, not busy - make copy
-    if( _data->shared() ) {
-        Pt::StringData* newBuffer = new Pt::StringData( reserveSize, _data->str(), _data->length() );
-        _data->unref();
-        _data = newBuffer;
-    }
-}
-*/
-
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* str, size_type n)
 {
     // shared, not busy - work on copy
@@ -365,7 +376,6 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(size_type n, Pt::C
 
     return *this;
 }
-
 
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string& str)

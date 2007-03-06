@@ -18,6 +18,9 @@
  ***************************************************************************/
 #undef PT_TEXT_API_EXPORT
 
+//#include <vld.h>
+//#include <vldapi.h>
+
 #include "Pt/Api.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -116,7 +119,6 @@ void StringTest::testConstructor()
     String s7(s2, 1, 3);
     PT_UNIT_ASSERT(s7 == L"bcd");
 
-
     String s10;
     PT_UNIT_ASSERT(s10 == String(L""));
 
@@ -143,7 +145,6 @@ void StringTest::testConstructor()
     const Char c16[] = { 'b', 'c', 'd', '\0' };
     String s16(s11, 1, 3);
     PT_UNIT_ASSERT(s16 == c16);
-
 
 //  TODO API not implemented yet.
 //    String s20(s2.begin(), s2.end());
@@ -252,10 +253,9 @@ void StringTest::testAppend()
     s += t;
     PT_UNIT_ASSERT(s == L"ABCabcde");
 
-    // operator +
-/*    s = L"ABC";
+    s = L"ABC";
     String u = s + t;
-    PT_UNIT_ASSERT(u == L"ABCabcde");*/
+    PT_UNIT_ASSERT(u == L"ABCabcde");
 }
 
 void StringTest::testInsert()
