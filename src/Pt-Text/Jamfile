@@ -29,6 +29,6 @@ Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt ;
 Main_MakeLocate TextStreamTest : bin ;
 
 Main StringStreamTest : StringStreamTest.cpp ;
-Main_LinkLibraries StringStreamTest : Pt-Text-static Pt-System-static Pt-static ;
+Main_LinkLibraries StringStreamTest : Pt-Text Pt-System Pt ;
 Main_MakeLocate StringStreamTest : bin ;
 
