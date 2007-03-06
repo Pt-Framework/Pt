@@ -18,7 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <math.h>
+
 #include "DrawThinPolyline.h"
+
 
 namespace Pt{
 namespace Gfx{
@@ -61,7 +64,7 @@ void DrawThinPolyline::drawLine( ARgbImage& image, const Pen& pen, const Math::P
     }
 }
 
-void DrawThinPolyline::drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from, 
+void DrawThinPolyline::drawPattern( ARgbImage& image, const Pen& pen, const Math::Point& from,
                                const Math::Point& to, const std::vector<bool>& pattern )
 {
     ssize_t     x0      = from.x();
@@ -164,7 +167,7 @@ void DrawThinPolyline::drawPattern( ARgbImage& image, const Pen& pen, const Math
     }
 }
 
-    
+
 void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Math::Point& from, const Math::Point& to )
 {
     ssize_t     x0      = from.x();

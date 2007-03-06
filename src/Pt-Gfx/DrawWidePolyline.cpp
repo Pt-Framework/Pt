@@ -18,7 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <math.h>
+
 #include "DrawWidePolyline.h"
+
 
 namespace Pt{
 namespace Gfx{
@@ -49,7 +52,7 @@ DrawWidePolyline::DrawWidePolyline()
 { }
 
 DrawWidePolyline::~DrawWidePolyline()
-{ } 
+{ }
 
 int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
 {
@@ -64,7 +67,7 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
     int     y, lasty = 0, bottomy, topy = 0;
 
     // compute min, max y values for polygon (floating-point); also location
-    // of corresponding vertices in vertex array 
+    // of corresponding vertices in vertex array
     maxy = miny = vertices[0].y();
     bottom = top = 0;
 
@@ -75,7 +78,7 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
             top = i;
             miny = vertices[i].y();
         }
-        
+
         if (vertices[i].y() >= maxy)
         {
             bottom = i;
@@ -87,13 +90,13 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
     bottomy = ceil( maxy ) + yi;
 
     // determine whether should go `clockwise' or `counterclockwise'
-    // to move down the right side of the polygon 
+    // to move down the right side of the polygon
     i = top;
     j = stepAround (top, -1, count);
-    
+
     clockwise = 1;
     slopeoff = 0;
-    
+
     if( ( slopes[j].dy() *  slopes[i].dx() )  > (  slopes[i].dy() *  slopes[j].dx()  ) )
     {
         clockwise = -1;
@@ -110,12 +113,12 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
         if (slopes[s].dy() != 0)
         {
             y = buildLineEdge( vertices[i].x(), vertices[i].y(), slopes[s].k(), slopes[s].dx(), slopes[s].dy(), xi, yi, false, &right[nright]);
-            
+
             if( nright != 0 )
                 right[nright-1].setHeight( y - lasty );
             else			/* y is top of first edge */
                 topy = y;
-                
+
             nright++;
             lasty = y;
         }
@@ -123,7 +126,7 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
         i = stepAround (i, clockwise, count);
         s = stepAround (s, clockwise, count);
     }
-    
+
     if( nright != 0 )
         right[nright-1].setHeight( bottomy - lasty );
 
@@ -133,11 +136,11 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
         slopeoff = -1;
     else
         slopeoff = 0;
-        
+
     i = top;
     s = stepAround (top, slopeoff, count);
     nleft = 0;
-    
+
     while (i != bottom)
     {
         if( slopes[s].dy() != 0 )
@@ -146,7 +149,7 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
 
             if( nleft != 0 )
                 left[nleft-1].setHeight( y - lasty );
-                
+
             nleft++;
             lasty = y;
         }
@@ -349,7 +352,7 @@ void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdg
     int	denom;
 
     denom = - pLeft->dx() * pRight->dy() + pRight->dx() * pLeft->dy();
-    
+
     if (denom >= 0)
     {
         pLeft->setXA( -pLeft->xa() );
@@ -360,7 +363,7 @@ void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdg
         pRight->setXA( -pRight->xa() );
         pRight->setYA( -pRight->ya() );
     }
-    
+
     *y1 = roundJoinFace( pLeft, edge1, left1 );
     *y2 = roundJoinFace( pRight, edge2, left2 );
 }
@@ -389,10 +392,10 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
     edge1.setDY( -1 );
     edge2.setX( 0 );			/* not used, keep memory checkers happy */
     edge2.setDY( -1 );
-    
+
     edgeleft1 = false;
     edgeleft2 = false;
-    
+
     if( (pen.style() != Pen::SolidStyle || pen.size() > 2) &&
         ((pen.capStyle() == Pen::RoundCap && pen.joinStyle() != Pen::RoundJoin)  ||
         ( pen.joinStyle() == Pen::RoundJoin/* && pen.capStyle() == (int)MI_CAP_BUTT*/)))
@@ -404,7 +407,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 	        xorg = (double) xorgi;
 	        yorg = (double) yorgi;
         }
-        
+
         if (leftFace && rightFace)
 	        /* have two faces, so construct clipping edges for pie wedge */
 	        roundJoinClip (leftFace, rightFace, &edge1, &edge2, &edgey1, &edgey2, &edgeleft1, &edgeleft2);
@@ -413,7 +416,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 	        /* will draw half-disk on left face, so construct clipping edge */
 	        edgey1 = roundCapClip( leftFace, isInt, &edge1, &edgeleft1 );
 
-        
+
         else if (rightFace)
 	        /* will draw half-disk on right face, so construct clipping edge */
 	        edgey2 = roundCapClip (rightFace, isInt, &edge2, &edgeleft2);
@@ -432,9 +435,9 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
   else
     /* call floating point routine, supporting clipping by edge(s) */
     n = lineArcD( pen, xorg, yorg, points, widths, &edge1, edgey1, edgeleft1, &edge2, edgey2, edgeleft2);
-  
+
     //MI_PAINT_SPANS(paintedSet, pixel, n, points, widths)
-    
+
     for( ssize_t i = 0; i < n; i++)
     {
         //A stupide clipping.
@@ -443,11 +446,11 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 
         if( points[i].y() >= (Pt::ssize_t)image.height() )
             continue;
-            
+
         if( points[i].x() >= (Pt::ssize_t) image.width() )
             continue;
-        
-            
+
+
         if( points[i].x() < 0 )
         {
             if(  widths[i] > -points[i].x()  )
@@ -461,12 +464,12 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
             }
         }
 
-       
+
         if( points[i].x() +  widths[i] >  (ssize_t) image.width() )
             widths[i] =  image.width() - points[i].x();
-                        
+
          _stroke->stroke( image, pen, points[i].x(), points[i].y(), widths[i] );
-    }   
+    }
 }
 
 int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
@@ -498,10 +501,10 @@ int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<
         e = - ((y << 2) + 3);
     else
         e = - (y << 3);
-    
+
     ex = -4;
     x = 0;
-    
+
     while (y)
     {
         e += (y << 3) - 4;
@@ -510,18 +513,18 @@ int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<
             x++;
             e += (ex = -((x << 3) + 4));
         }
-        
+
         y--;
         slw = (x << 1) + 1;
-        
+
         if ((e == ex) && (slw > 1))
             slw--;
-            
+
         tpts->setX( xorg - x );
         tpts->setY( yorg - y );
         tpts++;
         *twids++ = slw;
-        
+
         if ((y != 0) && ((slw > 1) || (e != ex)))
         {
             bpts--;
@@ -540,7 +543,7 @@ int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-   
+
 int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     Pt::Math::Point *pts;
@@ -567,7 +570,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
     ymax = std::numeric_limits<int>::max();
     edge1IsMin = false;
     ymin1 = edgey1;
-    
+
     if( edge1->dy() >= 0 )
     {
         if( !edge1->dy() )
@@ -576,7 +579,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
                 edge1IsMin = true;
             else
                 ymax = edgey1;
-                
+
             edgey1 = std::numeric_limits<int>::max();
         }
         else
@@ -587,7 +590,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
     }
     edge2IsMin = false;
     ymin2 = edgey2;
-    
+
     if( edge2->dy() >= 0 )
     {
         if( !edge2->dy() )
@@ -596,7 +599,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
                 edge2IsMin = true;
             else
                 ymax = edgey2;
-                
+
             edgey2 = std::numeric_limits<int>::max();
         }
         else
@@ -605,65 +608,65 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
                 edge2IsMin = true;
         }
     }
-    
+
     if( edge1IsMin )
     {
         ymin = ymin1;
-        
+
         if( edge2IsMin && ymin1 > ymin2 )
             ymin = ymin2;
-    } 
+    }
     else if (edge2IsMin)
     {
         ymin = ymin2;
     }
-    
+
     el = radius * radius - ((y + y0) * (y + y0)) - (x0 * x0);
     er = el + xrk;
     xl = 1;
     xr = 0;
-    
+
     if (x0 < 0.5)
     {
         xl = 0;
         el -= xlk;
     }
-    
+
     boty = (y0 < -0.5) ? 1 : 0;
-    
+
     if (ybase + y - boty > ymax)
         boty = ymax - ybase - y;
-    
+
     while (y > boty)
     {
         k = (y << 1) + yk;
         er += k;
-        
+
         while (er > 0.0)
         {
             xr++;
             er += xrk - (xr << 1);
         }
         el += k;
-        
+
         while (el >= 0.0)
         {
             xl--;
             el += (xl << 1) - xlk;
         }
-        
+
         y--;
         ybase++;
-        
+
         if (ybase < ymin)
             continue;
-        
+
         xcl = xl + xbase;
         xcr = xr + xbase;
 
         CLIPSTEPEDGE(edgey1, edge1, edgeleft1);
         CLIPSTEPEDGE(edgey2, edge2, edgeleft2);
-        
+
         if (xcr >= xcl)
         {
             pts->setX( xcl );
@@ -672,45 +675,45 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
             *wids++ = (unsigned int)(xcr - xcl + 1);
         }
     }
-    
+
     er = xrk - (xr << 1) - er;
     el = (xl << 1) - xlk - el;
     boty = (int)(floor(-y0 - radius + 1.0));
 
     if (ybase + y - boty > ymax)
         boty = ymax - ybase - y;
-        
+
     while (y > boty)
     {
         k = (y << 1) + yk;
         er -= k;
-        
+
         while ((er >= 0.0) && (xr >= 0))
         {
             xr--;
             er += xrk - (xr << 1);
         }
-        
+
         el -= k;
-        
+
         while ((el > 0.0) && (xl <= 0))
         {
             xl++;
             el += (xl << 1) - xlk;
         }
-        
+
         y--;
         ybase++;
-        
+
         if( ybase < ymin )
             continue;
-            
+
         xcl = xl + xbase;
         xcr = xr + xbase;
-        
+
         CLIPSTEPEDGE(edgey1, edge1, edgeleft1);
         CLIPSTEPEDGE(edgey2, edge2, edgeleft2);
-        
+
         if (xcr >= xcl)
         {
             pts->setX( xcl );
@@ -737,12 +740,12 @@ int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *
     xa = face->xa();
     ya = face->ya();
     k = 0.0;
-    
+
     if( !isInt )
         k = face->k();
-        
+
     left = true;
-    
+
     if (dy < 0 || (dy == 0 && dx > 0))
     {
         dx = -dx;
@@ -751,10 +754,10 @@ int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *
         ya = -ya;
         left = (left ? false : true);
     }
-    
+
     if( dx == 0 && dy == 0 )
         dy = 1;
-        
+
     if( dy == 0 )
     {
         y = ceil( face->ya() ) + face->y();
@@ -771,7 +774,7 @@ int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *
         y = buildLineEdge( xa, ya, k, dx, dy, face->x(), face->y(), (left ? false : true), edge);
         edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
     }
-    
+
     *leftEdge = (left ? false : true);
 
     return y;
@@ -789,23 +792,23 @@ int DrawWidePolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool 
     xa = face->xa();
     ya = face->ya();
     left = true;
-    
+
     if (ya > 0)
     {
         ya = 0.0;
         xa = 0.0;
     }
-    
+
     if (dy < 0 || (dy == 0 && dx > 0))
     {
         dx = -dx;
         dy = -dy;
         left = (left ? false : true);
     }
-    
+
     if (dx == 0 && dy == 0)
         dy = 1;
-        
+
     if (dy == 0)
     {
         y = ceil( face->ya() ) + face->y();
@@ -820,10 +823,10 @@ int DrawWidePolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool 
     else
     {
         y = buildLineEdge( xa, ya,  0.0, dx, dy, face->x(), face->y(), (left ? false : true), edge );
-        
+
         edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
     }
-    
+
     *leftEdge = (left ? false : true);
 
     return y;
@@ -854,7 +857,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
     }
 
     denom = - pLeft->dx() * pRight->dy() + pRight->dx() * pLeft->dy();
-    
+
     if( denom == 0 )
         return;			/* no join to draw */
 
@@ -902,7 +905,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
     {
         double miterlimit = pGC->miterLimit;
 
-        // compute vertex (mx,my) of miter quadrilateral 
+        // compute vertex (mx,my) of miter quadrilateral
         my = (pLeft->dy  * (pRight->xa * pRight->dy - pRight->ya * pRight->dx) -
             pRight->dy * (pLeft->xa  * pLeft->dy  - pLeft->ya  * pLeft->dx )) /
             (double) denom;
@@ -916,10 +919,10 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         if ((mx * mx + my * my) * 4 > miterlimit * miterlimit * lw * lw)
             joinStyle = (int)MI_JOIN_BEVEL;
     }
-*/    
+*/
 
     double scale, dx, dy, adx, ady;
-    
+
     switch( pen.joinStyle() )
     {
 //        case (int)MI_JOIN_MITER:
@@ -930,7 +933,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         slopes[2].setDX( pLeft->dx() );
         slopes[2].setDY( pLeft->dy() );
         slopes[2].setK( pLeft->k() );
-        
+
         if( swapslopes )
         {
             slopes[2].setDX( -slopes[2].dx() );
@@ -944,7 +947,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         slopes[3].setDX( pRight->dx() );
         slopes[3].setDY( pRight->dy() );
         slopes[3].setK( pRight->k() );
-        
+
         if( swapslopes )
         {
             slopes[3].setDX( -slopes[3].dx() );
@@ -953,7 +956,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         }
     break;
 
-    case Pen::BevelJoin: //join by adding a triangle    
+    case Pen::BevelJoin: //join by adding a triangle
     {
         Pt::Math::PointF midpoint;
 
@@ -970,15 +973,15 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
         /* compute scale = max(|dx|,|dy|) */
         adx = dx;
         ady = dy;
-        
+
         if (adx < 0)
             adx = -adx;
-        
+
         if (ady < 0)
             ady = -ady;
-        
+
         scale = ady;
-        
+
         if (adx > ady)
             scale = adx;
 
@@ -1003,19 +1006,19 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
             mid2 = midpoint.x * midpoint.x + midpoint.y * midpoint.y;
             mid = sqrt (mid2);
             newpoint.x = 0.5 * lw * midpoint.x / mid;
-            newpoint.y = 0.5 * lw * midpoint.y / mid;	
+            newpoint.y = 0.5 * lw * midpoint.y / mid;
             vertices[3] = newpoint;
 
             // offset from vertices[2] to vertices[3]
             dx2 = vertices[3].x - vertices[2].x;
-            dy2 = vertices[3].y - vertices[2].y;	
+            dy2 = vertices[3].y - vertices[2].y;
 
-            // offset from vertices[3] back to vertices[0] 
+            // offset from vertices[3] back to vertices[0]
             dx3 = vertices[0].x - vertices[3].x;
-            dy3 = vertices[0].y - vertices[3].y;	
+            dy3 = vertices[0].y - vertices[3].y;
 
             // compute scale = max(|dx|,|dy|), where (dx,dy) is offset between
-            // the two corners, i.e. vertices[0] and vertices[2] 
+            // the two corners, i.e. vertices[0] and vertices[2]
             dx = pRight->xa - pLeft->xa;
             dy = pRight->ya - pLeft->ya;
             adx = dx;
@@ -1028,12 +1031,12 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
             if (adx > ady)
                 scale = adx;
 
-            // use integer dx, dy in range -65536..65536 
+            // use integer dx, dy in range -65536..65536
             slopes[2].dx = (int)((dx2 * 65536) / scale);
             slopes[2].dy = (int)((dy2 * 65536) / scale);
             slopes[2].k = newpoint.x * slopes[2].dy - newpoint.y * slopes[2].dx;
 
-            // use integer dx, dy in range -65536..65536 
+            // use integer dx, dy in range -65536..65536
             slopes[3].dx = (int)((dx3 * 65536) / scale);
             slopes[3].dy = (int)((dy3 * 65536) / scale);
             slopes[3].k = newpoint.x * slopes[3].dy - newpoint.y * slopes[3].dx;
@@ -1045,8 +1048,8 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
     /* compute lists of left and right edges for the small polygon, using the
     just-computed slopes array */
     y = polyBuildPoly( vertices, slopes, edgecount, pLeft->x(), pLeft->y(), left, right, &nleft, &nright, &height);
-    
-    /* fill the small polygon */    
+
+    /* fill the small polygon */
     fillLine( image, pen, y, height, left, right, nleft, nright);
 }
 
@@ -1067,28 +1070,28 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
     double	    projectXoff, projectYoff;
     double	    maxy;
     int		    finaly;
-    
-    // in integer case, take (xorgi,yorgi) from face; otherwise (0,0) 
+
+    // in integer case, take (xorgi,yorgi) from face; otherwise (0,0)
     if (isInt)
     {
         xorgi = face->x();
         yorgi = face->y();
     }
-    
+
     lw = (int)(pen.size() );
     dx = face->dx();
     dy = face->dy();
     k = face->k();
-    
+
     // special case: line face is horizontal
     if( dy == 0 )
     {
         lefts[0].setHeight( (unsigned int)lw );
         lefts[0].setX( xorgi );
-        
+
         if( isLeft )
             lefts[0].setX( lefts[0].x()  - (lw >> 1) );
-            
+
         lefts[0].setStepX( 0 );
         lefts[0].setSignDX( 1 );
         lefts[0].setE( -lw );
@@ -1097,10 +1100,10 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
 
         rights[0].setHeight( (unsigned int)lw );
         rights[0].setX( xorgi );
-        
+
         if( !isLeft )
 	        rights[0].setX( rights[0].x() + ((lw + 1) >> 1) );
-      
+
         rights[0].setStepX( 0 );
         rights[0].setSignDX( 1 );
         rights[0].setE( -lw );
@@ -1114,12 +1117,12 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
     {
         topy = yorgi;
         bottomy = yorgi + dy;
-        
+
         if (isLeft)
             topy -= (lw >> 1);
         else
             bottomy += (lw >> 1);
-            
+
         lefts[0].setHeight( (unsigned int)(bottomy - topy) );
         lefts[0].setX( xorgi - (lw >> 1) );
         lefts[0].setStepX( 0 );
@@ -1160,22 +1163,22 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
             top     = &lefts[0];
             bottom  = &rights[1];
 	    }
-    
+
         if( isLeft ) // Cap goes left; build four edges.
 	    {
-	        righty = buildLineEdge( xa, ya, k, dx, dy,  xorgi, yorgi, false, right );	    
+	        righty = buildLineEdge( xa, ya, k, dx, dy,  xorgi, yorgi, false, right );
 	        xa = -xa;
 	        ya = -ya;
 	        k = -k;
-	        
+
 	        lefty = buildLineEdge (xa - projectXoff, ya - projectYoff, k, dx, dy, xorgi, yorgi, true, left);
-	        
+
 	        if( dx > 0 )
 	        {
 	            ya = -ya;
 	            xa = -xa;
 	        }
-	        
+
 	        xap = xa - projectXoff;
 	        yap = ya - projectYoff;
 	        topy = buildLineEdge( xap, yap,  xap * dx + yap * dy, -dy, dx, xorgi, yorgi, (dx > 0 ? true : false), top );
@@ -1189,25 +1192,25 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
             xa = -xa;
             ya = -ya;
             k = -k;
-            
+
             lefty = buildLineEdge( xa, ya, k, dx, dy,  xorgi, yorgi, true, left );
-            
+
             if( dx > 0 )
             {
                 ya = -ya;
                 xa = -xa;
             }
-            
+
             xap = xa - projectXoff;
             yap = ya - projectYoff;
-            
+
 	        topy = buildLineEdge( xa, ya, 0.0, -dy, dx, xorgi, xorgi, (dx > 0 ? true : false), top);
 	        bottomy = buildLineEdge( xap, yap,  xap * dx + yap * dy, -dy, dx, xorgi, xorgi, (dx < 0 ? true : false), bottom );
 	        maxy = -ya + projectYoff;
 	    }
 
         finaly = ceil(maxy) + yorgi;
-        
+
         if (dx < 0)
         {
             left->setHeight( (unsigned int)(bottomy - lefty) );
