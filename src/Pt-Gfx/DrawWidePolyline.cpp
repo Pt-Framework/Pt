@@ -87,7 +87,7 @@ int DrawWidePolyline::polyBuildPoly( const Pt::Math::PointF *vertices, const Lin
     }
 
     // compute integer y-value for bottom of polygon (round up)
-    bottomy = ceil( maxy ) + yi;
+    bottomy = static_cast<ssize_t>( ceil( maxy ) + yi );
 
     // determine whether should go `clockwise' or `counterclockwise'
     // to move down the right side of the polygon
@@ -453,7 +453,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 
         if( points[i].x() < 0 )
         {
-            if(  widths[i] > -points[i].x()  )
+            if(  static_cast<ssize_t>(widths[i]) > -points[i].x()  )
             {
                 widths[i] += points[i].x();
                 points[i].setX( 0 );
@@ -465,7 +465,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
         }
 
 
-        if( points[i].x() +  widths[i] >  (ssize_t) image.width() )
+        if( (points[i].x() + widths[i]) > image.width() )
             widths[i] =  image.width() - points[i].x();
 
          _stroke->stroke( image, pen, points[i].x(), points[i].y(), widths[i] );
@@ -558,7 +558,7 @@ int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::
     wids = &widths[0];
     xbase = (int)(floor(xorg));
     x0 = xorg - xbase;
-    ybase = ceil(yorg);
+    ybase = static_cast<ssize_t>( ceil(yorg) );
     y0 = yorg - ybase;
     xlk = x0 + x0 + 1.0;
     xrk = x0 + x0 - 1.0;
@@ -760,7 +760,7 @@ int DrawWidePolyline::roundCapClip( const LineFace *face, bool isInt, LineEdge *
 
     if( dy == 0 )
     {
-        y = ceil( face->ya() ) + face->y();
+        y = static_cast<ssize_t>( ceil( face->ya() ) + face->y() );
         edge->setX( std::numeric_limits<int>::min() );
         edge->setStepX( 0 );
         edge->setSignDX( 0 );
@@ -811,7 +811,7 @@ int DrawWidePolyline::roundJoinFace( const LineFace *face, LineEdge *edge, bool 
 
     if (dy == 0)
     {
-        y = ceil( face->ya() ) + face->y();
+        y = static_cast<ssize_t>( ceil( face->ya() ) + face->y() );
         edge->setX( std::numeric_limits<int>::min() );
         edge->setStepX( 0 );
         edge->setSignDX( 0 );
@@ -847,7 +847,7 @@ void DrawWidePolyline::lineJoin( ARgbImage& image, const Pen& pen, LineFace *pLe
     int                 y;
     unsigned int        height;
     bool		        swapslopes;
-    int		            lw = pen.size();
+    //int		            lw = pen.size();
 
     if( pen.joinStyle() == Pen::RoundJoin )
     {
@@ -1204,12 +1204,12 @@ void DrawWidePolyline::lineProjectingCap( ARgbImage& image,const Pen& pen, const
             xap = xa - projectXoff;
             yap = ya - projectYoff;
 
-	        topy = buildLineEdge( xa, ya, 0.0, -dy, dx, xorgi, xorgi, (dx > 0 ? true : false), top);
-	        bottomy = buildLineEdge( xap, yap,  xap * dx + yap * dy, -dy, dx, xorgi, xorgi, (dx < 0 ? true : false), bottom );
-	        maxy = -ya + projectYoff;
-	    }
+	          topy = buildLineEdge( xa, ya, 0.0, -dy, dx, xorgi, xorgi, (dx > 0 ? true : false), top);
+	          bottomy = buildLineEdge( xap, yap,  xap * dx + yap * dy, -dy, dx, xorgi, xorgi, (dx < 0 ? true : false), bottom );
+	          maxy = -ya + projectYoff;
+	      }
 
-        finaly = ceil(maxy) + yorgi;
+        finaly = static_cast<ssize_t>( ceil(maxy) + yorgi );
 
         if (dx < 0)
         {

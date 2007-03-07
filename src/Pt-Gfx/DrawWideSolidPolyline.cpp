@@ -57,11 +57,11 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Mat
 
     /* determine whether polyline is closed */
     selfJoin = false;
-    
-    if( npt > 1 )    
+
+    if( npt > 1 )
         if (x2 == pPts[npt-1].x() && y2 == pPts[npt-1].y())
         	selfJoin = true;
-        
+
 
     /* line segments (except for the last) will not project right; they'll
     project left if the cap mode is "projecting" */
@@ -86,22 +86,24 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Mat
 
             /*
             if (npt == 1 && pen.capStyle() == (int)MI_CAP_PROJECTING && !selfJoin)
-                // last point; and need a projecting cap here 
+                // last point; and need a projecting cap here
                 projectRight = true;
-            */                
+            */
 
             /* draw segment (pixel=1), returning faces */
-            
+
             switch( pen.style() )
             {
                 case Pen::SolidStyle:
                     drawSegment( image, pen, Pt::Math::Point(x1, y1), Pt::Math::Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
-                break;
+                    break;
                 case Pen::DashStyle:
                     drawDashSegment( image, pen, Pt::Math::Point(x1, y1), Pt::Math::Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
-                break;
-            }                
-                     
+                    break;
+                default:
+                    throw std::runtime_error("Style is not implemented yet!" + PT_SOURCEINFO);
+            }
+
             if (first)
             /* first line segment, draw round cap if needed */
             {
@@ -117,7 +119,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Mat
                 /* general case: draw join at beginning of segment (pixel=1) */
 //               if( pen.style() == Pen::SolidStyle )
                     lineJoin( image, pen, &leftFace, &prevRightFace );
-                
+
             prevRightFace = rightFace;
             first = false;
             projectLeft = false;
@@ -140,7 +142,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Mat
     if( !somethingDrawn )
     {
         projectLeft = true; //(pGC->capStyle == (int)MI_CAP_PROJECTING) ? true : false;
-        
+
         switch( pen.style() )
         {
             case Pen::SolidStyle:
@@ -149,18 +151,18 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Pt::Mat
             case Pen::DashStyle:
                 drawDashSegment( image, pen, Pt::Math::Point(x1, y1), Pt::Math::Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
             break;
-        }                
+        }
 
 
         drawSegment(image, pen, Pt::Math::Point(x2, y2), Pt::Math::Point(x2, y2), projectLeft, projectLeft, &leftFace, &rightFace);
-        
+
         if( pen.capStyle() == Pen::RoundCap  ) //|| pGC->capStyle == (int)MI_CAP_TRIANGULAR
         {
-            // invoke miLineArc, isInt = true, to draw round cap in paint type #1 
+            // invoke miLineArc, isInt = true, to draw round cap in paint type #1
             lineArc( image, pen, &leftFace, (LineFace *)NULL, (double)0.0, (double)0.0, true );
-            
-            // invoke miLineArc, isInt = true, to draw other round cap in paint type #1 
-            rightFace.setDX( -1);	// sleazy hack to make it work 
+
+            // invoke miLineArc, isInt = true, to draw other round cap in paint type #1
+            rightFace.setDX( -1);	// sleazy hack to make it work
             lineArc( image, pen, (LineFace *) NULL, &rightFace, (double)0.0, (double)0.0, true );
         }
     }
@@ -177,7 +179,7 @@ void DrawWideSolidPolyline::drawDashSegment( ARgbImage& image, const Pen& pen,
     const size_t  spaceLength      = pen.size();
     const size_t  segmentLenght    = dashLength + spaceLength;
     const ssize_t dx               = to.x() - from.x();
-    const ssize_t dy               = to.y() - from.y();    
+    const ssize_t dy               = to.y() - from.y();
     const double  lineLength       = Math::hypot( dx , dy );
     const double  xincdashspace    = dx / (lineLength / segmentLenght);
     const double  yincdashspace    = dy / (lineLength / segmentLenght);
@@ -185,39 +187,39 @@ void DrawWideSolidPolyline::drawDashSegment( ARgbImage& image, const Pen& pen,
     const double  xincdash         = dx / noOfDashes;
     const double  yincdash         = dy / noOfDashes;
     LineFace face;
-        
+
     size_t  counter = 0;
     Point   segFrom;
     Point   segTo;
 
     for( size_t i = 0; i < lineLength - dashLength; i += segmentLenght )
-    {    
+    {
         segFrom.setX( ssize_t( from.x() + xincdashspace * counter ) );
         segFrom.setY( ssize_t( from.y() + yincdashspace * counter ) );
-        
+
         segTo.setX( ssize_t( from.x() + xincdashspace * counter + xincdash ) );
         segTo.setY( ssize_t( from.y() + yincdashspace * counter + yincdash ) );
-        
-                
+
+
         drawSegment( image, pen, segFrom,  segTo, false, false, leftFace, rightFace );
-        
+
         if( i == 0 )
             face = *leftFace;
-            
+
         counter++;
     }
-    
+
     if( ( dashLength + spaceLength ) * counter <= lineLength )
-    {    
+    {
         segFrom.setX( ssize_t( from.x() + xincdashspace * counter ) );
         segFrom.setY( ssize_t( from.y() + yincdashspace * counter ) );
-        
+
         segTo.setX( to.x() );
         segTo.setY( to.y() );
-                
+
         drawSegment( image, pen, segFrom, segTo, false, false, leftFace, rightFace );
     }
-    
+
     *leftFace = face;
 }
 

@@ -57,10 +57,12 @@ void DrawThinPolyline::drawLine( ARgbImage& image, const Pen& pen, const Math::P
     {
         case Pen::SolidStyle:
             drawSolid( image, pen, clippedFrom, clippedTo );
-        break;
+            break;
         case Pen::DashStyle:
             drawPattern( image, pen, clippedFrom, clippedTo, _dashPattern );
-        break;
+            break;
+        default:
+            throw std::runtime_error("Style is not implemented yet!" + PT_SOURCEINFO);
     }
 }
 
