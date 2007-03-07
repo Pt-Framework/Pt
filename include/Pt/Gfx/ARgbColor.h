@@ -229,6 +229,18 @@ namespace Pt {
             dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
         }
 
+        /*
+           Note: mixing equ for true ARgb alpha blending without mask:
+
+           A: upper layer (the color to be put)
+           B: lower layer (the color already in the image)
+           D: the result  (mixing result)
+
+           aD = 1 - (1-aA) * (1-aB)
+           [rD, gD, bD] = [rA, gA, bA] * aA/aD        +
+                          [rB, gB, bB] * aB*(1-aA)/aD
+        */
+
     } // namespace Gfx
 
 

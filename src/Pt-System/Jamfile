@@ -7,7 +7,7 @@ SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
-                          [ FDirName $(SYS:L) EnvironmentImpl.cpp ]                                          
+                          [ FDirName $(SYS:L) EnvironmentImpl.cpp ]
                           [ FDirName $(SYS:L) FileImpl.cpp ]
                           [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
                           [ FDirName $(SYS:L) FileSystemImpl.cpp ]
