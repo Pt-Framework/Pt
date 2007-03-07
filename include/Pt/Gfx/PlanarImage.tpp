@@ -26,11 +26,11 @@ namespace Pt {
     namespace Gfx {
 
         //
-        // PlanarImage<ColorRefT> implementation
+        // PlanarImage<ColorProxyT> implementation
         //
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        void PlanarImage<ColorRefT_, ColorTraitsT_>::resize(uint width_, uint height_)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        void PlanarImage<ColorProxyT_, ColorTraitsT_>::resize(uint width_, uint height_)
         {
             std::vector<size_t> _chanTSize;
 
@@ -69,16 +69,16 @@ namespace Pt {
             _height = height_;
         }
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        void PlanarImage<ColorRefT_, ColorTraitsT_>::resize(uint width_, uint height_, const ColorT& fill)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        void PlanarImage<ColorProxyT_, ColorTraitsT_>::resize(uint width_, uint height_, const ColorT& fill)
         {
             resize(width_, height_);
             *this = fill;
         }
 
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        PlanarImage<ColorRefT_, ColorTraitsT_>& PlanarImage<ColorRefT_, ColorTraitsT_>::operator=(const ColorT& fill)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        PlanarImage<ColorProxyT_, ColorTraitsT_>& PlanarImage<ColorProxyT_, ColorTraitsT_>::operator=(const ColorT& fill)
         {
             ColorPtrT ptr(_chanPtr, _width, _height, 0, 0);
 
@@ -90,8 +90,8 @@ namespace Pt {
             return *this;
         }
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        PlanarImage<ColorRefT_, ColorTraitsT_>& PlanarImage<ColorRefT_, ColorTraitsT_>::operator=(const PlanarImage& src)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        PlanarImage<ColorProxyT_, ColorTraitsT_>& PlanarImage<ColorProxyT_, ColorTraitsT_>::operator=(const PlanarImage& src)
         {
             if(src.empty()) {
                 clear();
@@ -106,8 +106,8 @@ namespace Pt {
         }
 
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        typename PlanarImage<ColorRefT_, ColorTraitsT_>::ColorRefT PlanarImage<ColorRefT_, ColorTraitsT_>::at(int x, int y)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        typename PlanarImage<ColorProxyT_, ColorTraitsT_>::ColorProxyT PlanarImage<ColorProxyT_, ColorTraitsT_>::at(int x, int y)
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
@@ -115,8 +115,8 @@ namespace Pt {
             return *ColorPtrT(_chanPtr, _width, _height, x, y);
         }
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        const typename PlanarImage<ColorRefT_, ColorTraitsT_>::ColorT PlanarImage<ColorRefT_, ColorTraitsT_>::at(int x, int y) const
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        const typename PlanarImage<ColorProxyT_, ColorTraitsT_>::ColorT PlanarImage<ColorProxyT_, ColorTraitsT_>::at(int x, int y) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height))
                 throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
@@ -126,8 +126,8 @@ namespace Pt {
             return col;
         }
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        const typename PlanarImage<ColorRefT_, ColorTraitsT_>::ColorT PlanarImage<ColorRefT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        const typename PlanarImage<ColorProxyT_, ColorTraitsT_>::ColorT PlanarImage<ColorProxyT_, ColorTraitsT_>::color(int x, int y, const ColorT& invalid) const
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return invalid;
 
@@ -136,8 +136,8 @@ namespace Pt {
             return col;
         }
 
-        template <typename ColorRefT_, typename ColorTraitsT_>
-        void PlanarImage<ColorRefT_, ColorTraitsT_>::setColor(int x, int y, const ColorT& color_)
+        template <typename ColorProxyT_, typename ColorTraitsT_>
+        void PlanarImage<ColorProxyT_, ColorTraitsT_>::setColor(int x, int y, const ColorT& color_)
         {
             if(empty() || x<0 || x>=int(_width) || y<0 || y>=int(_height)) return;
 

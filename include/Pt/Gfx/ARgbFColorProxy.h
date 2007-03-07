@@ -20,7 +20,8 @@
 #ifndef Pt_Gfx_ARgbFColorRef_h
 #define Pt_Gfx_ARgbFColorRef_h
 
-#include <Pt/Gfx/ARgbColorRef.h>
+#include <Pt/Gfx/ARgbFColor.h>
+#include <Pt/Gfx/ARgbColorProxy.h>
 
 
 namespace Pt {

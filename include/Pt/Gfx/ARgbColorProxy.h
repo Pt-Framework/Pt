@@ -31,9 +31,9 @@ namespace Pt {
 
     namespace Gfx {
 
-      /** @brief An empty structure used for tagging 64-bit ARGB color proxy class.
-       */
-      struct ARgbProxy : public ARgb {};
+        /** @brief An empty structure used for tagging 64-bit ARGB color proxy class.
+         */
+        struct ARgbProxy : public ARgb {};
 
 
         /** @brief Reference-type 64-Bit ARGB color class.
@@ -47,7 +47,7 @@ namespace Pt {
             public:
                 /** @brief Non-reference type (container type) of this color.
                  */
-                typedef Color<ARgb> NonRefT;
+                typedef Color<ARgb> ValueT;
 
             public:
                 /** @brief This constructor will take reference to the real storage.

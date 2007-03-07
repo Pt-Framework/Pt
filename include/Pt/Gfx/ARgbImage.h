@@ -20,8 +20,7 @@
 #ifndef Pt_Gfx_ARgbImage_h
 #define Pt_Gfx_ARgbImage_h
 
-#include <Pt/Gfx/ARgbFColor.h>
-#include <Pt/Gfx/ARgbFColorRef.h>
+#include <Pt/Gfx/ARgbFColorProxy.h>
 #include <Pt/Gfx/InterleavedImage.h>
 #include <Pt/Gfx/InterleavedSubImage.h>
 #include <Pt/Gfx/PlanarImage.h>

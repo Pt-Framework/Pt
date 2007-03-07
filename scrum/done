@@ -40,6 +40,11 @@ ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
     TASK "Rename the current SubImage class to InterleavedSubImage" blue_wind_25 2007-03-07
     TASK "Make PixelIterators not nested in InterleavedSubImage" blue_wind_25 2007-03-07
 
+ITEM P10 S8 "PlanarImage is improved"
+    TASK "Rename ARgbColorRef class to ARgbColorProxy" blue_wind_25 2007-03-07
+    TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type" blue_wind_25 2007-03-07
+    TASK "Make PixelIterators not nested in PlanarImage" blue_wind_25 2007-03-07
+
 ########################################################################################
 
 ITEM P10 S5 "Variant class is implemented"

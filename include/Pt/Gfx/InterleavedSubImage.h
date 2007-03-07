@@ -240,6 +240,7 @@ namespace Pt {
                 uint      _incr;
         };
 
+
         /** @brief Pixel-based constant iterator class for InterleavedSubImage<ImageT>.
          *  @ingroup Gfx
          */
