@@ -25,8 +25,8 @@
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/Gfx/InterleavedImage.tpp>
-#include <Pt/Gfx/SubImage.h>
-#include <Pt/Gfx/SubImage.tpp>
+#include <Pt/Gfx/InterleavedSubImage.h>
+#include <Pt/Gfx/InterleavedSubImage.tpp>
 
 namespace Pt {
 
@@ -45,12 +45,12 @@ namespace Pt {
         template class PT_EXPORT InterleavedImage<Rgb555Color>;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
-        template class PT_EXPORT SubImage<ARgbInterleavedImage>;
-        template class PT_EXPORT SubImage<ARgbFInterleavedImage>;
-        template class PT_EXPORT SubImage<ARgb8888InterleavedImage>;
-        template class PT_EXPORT SubImage<Rgb888InterleavedImage>;
-        template class PT_EXPORT SubImage<Rgb565InterleavedImage>;
-        template class PT_EXPORT SubImage<Rgb555InterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<ARgbInterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<ARgbFInterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<ARgb8888InterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<Rgb888InterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<Rgb565InterleavedImage>;
+        template class PT_EXPORT InterleavedSubImage<Rgb555InterleavedImage>;
 
 #endif
 

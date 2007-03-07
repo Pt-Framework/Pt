@@ -16,12 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_GFX_PRUSH_H
 #define PT_GFX_PRUSH_H
 
 #include <Pt/SmartPtr.h>
-
 #include <Pt/Gfx/ARgbImage.h>
 
 
@@ -101,12 +99,12 @@ inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Brush& value
     }
     else
     {
-//TODO write url for texture image path     
+//TODO write url for texture image path
         throw std::runtime_error("Textured brushes are not supported so far.");
     }
 }
 
-	
+
 inline void Pt::AnyTraits<Gfx::Brush>::output(std::ostream& os, const Gfx::Brush& value)
 {
 	outputGeneric(os, value);
@@ -123,7 +121,7 @@ template <typename CharT>
 inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Brush& value)
 {
     CharT ch;
-    	
+
     is >> ch;
     if (ch != '(')
     {
@@ -133,7 +131,7 @@ inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Brush& value)
     Gfx::ARgbColor  brushColor;
 
 //ToDo -> read texture as property
-// extend the url class with AnyTraits for image pathes -> load an ARgbImage 
+// extend the url class with AnyTraits for image pathes -> load an ARgbImage
 //    Gfx::ARgbImage* brushTexture;
 
     AnyTraits<Gfx::ARgbColor >::input(is, brushColor);

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_SubImage_h
-#define Pt_Gfx_SubImage_h
+#ifndef Pt_Gfx_InterleavedSubImage_h
+#define Pt_Gfx_InterleavedSubImage_h
 
 #include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/ImageAlgo.h>
@@ -28,11 +28,22 @@ namespace Pt {
 
     namespace Gfx {
 
+        //
+        // Foward declarations of pixel iterator classes
+        //
+        template <typename ColorT_> class InterleavedSubImage_PixelIterator;
+        template <typename ColorT_> class InterleavedSubImage_ConstPixelIterator;
+
+
         /** @brief Subimage class.
          *  @ingroup Gfx
          */
         template <typename ImageT_>
-        class /*PT_GFX_API*/ SubImage {
+        class /*PT_GFX_API*/ InterleavedSubImage {
+            public:
+                typedef InterleavedSubImage_PixelIterator<InterleavedSubImage>      PixelIterator;
+                typedef InterleavedSubImage_ConstPixelIterator<InterleavedSubImage> ConstPixelIterator;
+
             public:
                 typedef ImageT_  ImageT;
 
@@ -45,18 +56,14 @@ namespace Pt {
                 typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
 
             public:
-                class PixelIterator;
-                class ConstPixelIterator;
-
-            public:
                 /** @brief Construct a subimage using the given image and area.
                  */
-                SubImage(ImageT& image, const Pt::Gfx::Region& area);
+                InterleavedSubImage(ImageT& image, const Pt::Gfx::Region& area);
 
 
                 /** @brief Comparison based on the pixels' color values.
                  */
-                bool operator==(const SubImage& src);
+                bool operator==(const InterleavedSubImage& src);
 
 
                 /** @brief Check if the image is empty or not.
@@ -93,15 +100,15 @@ namespace Pt {
 
                 /** @brief Fill the subimage with the given color.
                  */
-                SubImage& operator=(const ColorT& color);
+                InterleavedSubImage& operator=(const ColorT& color);
 
                 /** @brief Fill the subimage with the given image.
                  */
-                SubImage& operator=(const ImageT& src);
+                InterleavedSubImage& operator=(const ImageT& src);
 
                 /** @brief Fill the subimage with the given subimage.
                  */
-                SubImage& operator=(const SubImage& src);
+                InterleavedSubImage& operator=(const InterleavedSubImage& src);
 
 
                 /** @brief ScanlineT access without range check.
@@ -172,116 +179,117 @@ namespace Pt {
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator(*this, _area.x()+y, _area.y()+x); }
 
+                // Make the pixel iterator classes as friend classes
+                friend class InterleavedSubImage_PixelIterator<ImageT_>;
+                friend class InterleavedSubImage_ConstPixelIterator<ImageT_>;
+
             protected:
                 ImageT& _image;
                 Region  _area;
+        };
+
+
+        /** @brief Pixel-based iterator class for InterleavedSubImage<ImageT>.
+         *  @ingroup Gfx
+         */
+        template <typename InterleavedSubImageT_>
+        class InterleavedSubImage_PixelIterator {
+            public:
+                typedef InterleavedSubImageT_                 InterleavedSubImageT;
+                typedef typename InterleavedSubImageT::ImageT ImageT;
+                typedef typename ImageT::ColorT    ColorT;
+                typedef typename ImageT::ColorPtrT ColorPtrT;
 
             public:
-                /** @brief Pixel-based iterator class.
-                 *  @ingroup Gfx
-                 */
-                class PixelIterator {
-                    public:
-                        typedef typename ImageT_::ColorT ColorT;
-                        typedef ImageT_ ImageT;
+                inline InterleavedSubImage_PixelIterator(InterleavedSubImageT& image)
+                : _pixel(&image.scanline(0)[0]),
+                  _currentX(0), _width(image.width()),
+                  _incr(image.fullImage().width() - image.width() + 1)
+                {}
 
-                    public:
-                        inline PixelIterator(SubImage& image)
-                        : _pixel(&image.scanline(0)[0]),
-                          _currentX(0), _width(image.width()),
-                          _incr(image.fullImage().width() - image.width() + 1)
-                        {}
+                inline InterleavedSubImage_PixelIterator(InterleavedSubImageT& image, uint x, uint y)
+                : _pixel(&image.scanline(y-1)[x-1]),
+                  _currentX(0), _width(image.width()),
+                  _incr(image.fullImage().width() - image.width() + 1)
+                {}
 
-                        inline PixelIterator(SubImage& image, uint x, uint y)
-                        : _pixel(&image.scanline(y-1)[x-1]),
-                          _currentX(0), _width(image.width()),
-                          _incr(image.fullImage().width() - image.width() + 1)
-                        {}
+                inline bool operator==(const InterleavedSubImage_PixelIterator& it) const
+                { return _pixel == it._pixel; }
 
-                        inline bool operator==(const PixelIterator& it) const
-                        { return _pixel == it._pixel; }
+                inline bool operator!=(const InterleavedSubImage_PixelIterator& it) const
+                { return _pixel != it._pixel; }
 
-                        inline bool operator!=(const PixelIterator& it) const
-                        { return _pixel != it._pixel; }
+                inline ColorT& operator*() const
+                { return *_pixel; }
 
-                        inline ColorT& operator*() const
-                        { return *_pixel; }
+                inline InterleavedSubImage_PixelIterator& operator++()
+                {
+                    if(++_currentX == _width ) { // At the end of line
+                        _currentX = 0;
+                        _pixel   += _incr;
+                        return *this;
+                    }
+                    ++_pixel;
+                    return *this;
+                }
 
-                        inline PixelIterator& operator++()
-                        {
-                            if(++_currentX == _width ) { // At the end of line
-                                _currentX = 0;
-                                _pixel   += _incr;
-                                return *this;
-                            }
-                            ++_pixel;
-                            return *this;
-                        }
+            private:
+                ColorPtrT _pixel;
+                uint      _currentX;
+                uint      _width;
+                uint      _incr;
+        };
 
-                    private:
-                        typedef typename ImageT::ColorPtrT ColorPtrT;
-
-                    private:
-                        ColorPtrT _pixel;
-                        uint      _currentX;
-                        uint      _width;
-                        uint      _incr;
-                };
-
-                /** @brief Pixel-based constant iterator class.
-                 *  @ingroup Gfx
-                 */
-                class ConstPixelIterator {
-                    public:
-                        typedef ImageT_ ImageT;
-                        typedef typename ImageT::ColorT ColorT;
+        /** @brief Pixel-based constant iterator class for InterleavedSubImage<ImageT>.
+         *  @ingroup Gfx
+         */
+        template <typename InterleavedSubImageT_>
+        class InterleavedSubImage_ConstPixelIterator {
+            public:
+                typedef InterleavedSubImageT_                      InterleavedSubImageT;
+                typedef typename InterleavedSubImageT::ImageT      ImageT;
+                typedef typename ImageT::ColorT         ColorT;
+                typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
 
 
-                    public:
-                        inline ConstPixelIterator(const SubImage& image)
-                        : _pixel(&image.scanline(0)[0]),
-                          _currentX(0), _width(image.width()),
-                          _incr(image.fullImage().width() - image.width() + 1)
-                        {
-                        }
+            public:
+                inline InterleavedSubImage_ConstPixelIterator(const InterleavedSubImageT& image)
+                : _pixel(&image.scanline(0)[0]),
+                  _currentX(0), _width(image.width()),
+                  _incr(image.fullImage().width() - image.width() + 1)
+                {}
 
-                        inline ConstPixelIterator(const SubImage& image, uint x, uint y)
-                        : _pixel(&image.scanline(y-1)[x-1]),
-                          _currentX(0), _width(image.width()),
-                          _incr(image.fullImage().width() - image.width() + 1)
-                        {
-                        }
+                inline InterleavedSubImage_ConstPixelIterator(const InterleavedSubImageT& image, uint x, uint y)
+                : _pixel(&image.scanline(y-1)[x-1]),
+                  _currentX(0), _width(image.width()),
+                  _incr(image.fullImage().width() - image.width() + 1)
+                {}
 
-                        inline bool operator==(const ConstPixelIterator& it) const
-                        { return _pixel == it._pixel; }
+                inline bool operator==(const InterleavedSubImage_ConstPixelIterator& it) const
+                { return _pixel == it._pixel; }
 
-                        inline bool operator!=(const ConstPixelIterator& it) const
-                        { return _pixel != it._pixel; }
+                inline bool operator!=(const InterleavedSubImage_ConstPixelIterator& it) const
+                { return _pixel != it._pixel; }
 
-                        inline const ColorT& operator*() const
-                        { return *_pixel; }
+                inline const ColorT& operator*() const
+                { return *_pixel; }
 
-                        inline ConstPixelIterator& operator++()
-                        {
-                            if(++_currentX == _width) { // At the end of line
-                                _currentX = 0;
-                                _pixel   += _incr;
-                                return *this;
-                            }
-                            ++_pixel;
-                            return *this;
-                        }
+                inline InterleavedSubImage_ConstPixelIterator& operator++()
+                {
+                    if(++_currentX == _width) { // At the end of line
+                        _currentX = 0;
+                        _pixel   += _incr;
+                        return *this;
+                    }
+                    ++_pixel;
+                    return *this;
+                }
 
-                    private:
-                        typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
-
-                    private:
-                        ConstColorPtrT _pixel;
-                        uint           _currentX;
-                        uint           _width;
-                        uint           _incr;
-            };
-
+            private:
+                ConstColorPtrT _pixel;
+                uint           _currentX;
+                uint           _width;
+                uint           _incr;
         };
 
     } // namespace Gfx
@@ -295,7 +303,7 @@ namespace Pt {
 // With GCC we should be able to use explicit template instantiation correctly
 // and thus we does not need to include the template implementation header
 #ifndef __GNUC__
-#include "SubImage.tpp"
+#include "InterleavedSubImage.tpp"
 #endif
 
 #endif

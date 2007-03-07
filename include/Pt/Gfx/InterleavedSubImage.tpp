@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_SubImage_tpp
-#define Pt_Gfx_SubImage_tpp
+#ifndef Pt_Gfx_InterleavedSubImage_tpp
+#define Pt_Gfx_InterleavedSubImage_tpp
 
 
 namespace Pt {
@@ -26,11 +26,11 @@ namespace Pt {
     namespace Gfx {
 
         //
-        // SubImage<ImageT_> implementation
+        // InterleavedSubImage<ImageT_> implementation
         //
 
         template <typename ImageT_>
-        SubImage<ImageT_>::SubImage(ImageT& image, const Region& area)
+        InterleavedSubImage<ImageT_>::InterleavedSubImage(ImageT& image, const Region& area)
         : _image(image), _area(area)
         {
             int x1 = area.x();
@@ -46,11 +46,11 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        bool SubImage<ImageT_>::operator==(const SubImage& src)
+        bool InterleavedSubImage<ImageT_>::operator==(const InterleavedSubImage& src)
         {
             for(size_t y = 0; y < _area.height(); y++) {
                 if( memcmp(scanline(y), src.scanline(y),
-                             sizeof(SubImage) * _area.width()) )
+                             sizeof(InterleavedSubImage) * _area.width()) )
                     return false;
             }
             return true;
@@ -58,7 +58,7 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ColorT& color)
+        InterleavedSubImage<ImageT_>& InterleavedSubImage<ImageT_>::operator=(const ColorT& color)
         {
             for(size_t y = 0; y < _area.height(); y++) {
                 for(size_t x = 0; x < _area.width(); x++) {
@@ -69,7 +69,7 @@ namespace Pt {
         }
 
         template <typename ImageT_>
-        SubImage<ImageT_>& SubImage<ImageT_>::operator=(const ImageT& src)
+        InterleavedSubImage<ImageT_>& InterleavedSubImage<ImageT_>::operator=(const ImageT& src)
         {
             // If the size is not the same, we need to scale it first then copy
             if(_area.width()!=src.width() || _area.height()!=src.height()) {
@@ -89,7 +89,7 @@ namespace Pt {
         }
 
         template <typename ImageT_>
-        SubImage<ImageT_>& SubImage<ImageT_>::operator=(const SubImage& src)
+        InterleavedSubImage<ImageT_>& InterleavedSubImage<ImageT_>::operator=(const InterleavedSubImage& src)
         {
             // If the size is not the same, we need to scale it first then copy
             if(_area.width()!=src.width() || _area.height()!=src.height()) {
@@ -135,7 +135,7 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y)
+        typename InterleavedSubImage<ImageT_>::ColorT& InterleavedSubImage<ImageT_>::at(int x, int y)
         {
             if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
         throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
@@ -144,7 +144,7 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::at(int x, int y) const
+        const typename InterleavedSubImage<ImageT_>::ColorT& InterleavedSubImage<ImageT_>::at(int x, int y) const
         {
             if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height()))
         throw std::range_error("Either the image is empty or the (y,x) coordinate is invalid" + PT_SOURCEINFO);
@@ -153,7 +153,7 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        const typename SubImage<ImageT_>::ColorT& SubImage<ImageT_>::color(int x, int y, const ColorT& invalid) const
+        const typename InterleavedSubImage<ImageT_>::ColorT& InterleavedSubImage<ImageT_>::color(int x, int y, const ColorT& invalid) const
         {
             if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return invalid;
             return _image.data()[(y+_area.y())*_image.width() + x+_area.x()];
@@ -161,7 +161,7 @@ namespace Pt {
 
 
         template <typename ImageT_>
-        void SubImage<ImageT_>::setColor(int x, int y, const ColorT& color_)
+        void InterleavedSubImage<ImageT_>::setColor(int x, int y, const ColorT& color_)
         {
             if(_image.empty() || x<0 || x>=int(_area.width()) || y<0 || y>int(_area.height())) return;
             _image.data()[(y+_area.y())*_image.width() + x+_area.x()] = color_;

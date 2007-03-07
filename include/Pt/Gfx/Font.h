@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Tobias Müller                              *
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Tobias Mller                              *
+ *   Copyright (C) 2006-2007 by Marc Boris Drner                          *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_GFX_FONT_H
 #define PT_GFX_FONT_H
 
@@ -28,6 +27,7 @@
 #include <Pt/SourceInfo.h>
 
 #include <Pt/String.h>
+
 
 namespace Pt {
 
@@ -56,7 +56,7 @@ namespace Gfx {
                 FontStyle          fontStyle = NormalStyle,
                 ssize_t            angle     = 0,
                 Direction          direction = LeftToRightDirection
-                
+
             );
 
             std::string name() const;
@@ -88,7 +88,7 @@ namespace Gfx {
     }
 
     inline bool operator<(const Font& a, const Font& b)
-    { 
+    {
         return a._size < b._size;
     }
 
@@ -114,7 +114,7 @@ inline void outputGeneric(std::basic_ostream<CharT>& os, const Gfx::Font& value)
     os << ' ' << value.size() << ' ' << value.fontStyle() << ' ' << value.angle() << ' ' << value.direction() << ')';
 }
 
-	
+
 inline void Pt::AnyTraits<Gfx::Font>::output(std::ostream& os, const Gfx::Font& value)
 {
 	outputGeneric(os, value);
@@ -131,14 +131,14 @@ template <typename CharT>
 inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Font& value)
 {
     CharT ch;
-    	
+
     is >> ch;
     if (ch != '(')
     {
 	    throw std::runtime_error("Could not read Font value" + PT_SOURCEINFO);
     }
 
-    std::string fontName;         
+    std::string fontName;
     size_t      fontSize;
     ssize_t     fontStyle;
     ssize_t     fontAngle;

@@ -46,6 +46,10 @@ namespace Pt {
         template <typename ColorRefT_, typename ColorTraitsT_ = ColorTraits< Color<ColorRefT_> > >
         class /*PT_GFX_API*/ PlanarImage {
             public:
+                class PixelIterator;
+                class ConstPixelIterator;
+
+            public:
                 typedef typename ColorRefT_::NonRefT ColorT;
                 typedef ColorTraitsT_                ColorTraitsT;
 
@@ -56,14 +60,10 @@ namespace Pt {
                 typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
 
                 //
-                // Below are specific to planar image only
+                // The typedefs below are specific to planar image only
                 //
                 typedef ColorRefT_                        ColorRefT;
                 typedef typename ColorTraitsT::ComponentT ComponentT;
-
-            public:
-                class PixelIterator;
-                class ConstPixelIterator;
 
             public:
                 /** @brief The default constructor; will construct an empty image.

@@ -31,6 +31,13 @@ namespace Pt {
 
     namespace Gfx {
 
+        //
+        // Foward declarations of pixel iterator classes
+        //
+        template <typename ColorT_> class InterleavedImage_PixelIterator;
+        template <typename ColorT_> class InterleavedImage_ConstPixelIterator;
+
+
         /** @brief Interleaved image class.
          *  @ingroup Gfx
          *
@@ -47,6 +54,10 @@ namespace Pt {
         template <typename ColorT_>
         class InterleavedImage {
             public:
+                typedef InterleavedImage_PixelIterator<ColorT_>      PixelIterator;
+                typedef InterleavedImage_ConstPixelIterator<ColorT_> ConstPixelIterator;
+
+            public:
                 typedef ColorT_       ColorT;
 
                 typedef ColorT*       ColorPtrT;
@@ -54,10 +65,6 @@ namespace Pt {
 
                 typedef ColorT*       ScanlineT;
                 typedef const ColorT* ConstScanlineT;
-
-            public:
-                class PixelIterator;
-                class ConstPixelIterator;
 
             public:
                 /** @brief The default constructor; will construct an empty image.
@@ -199,122 +206,132 @@ namespace Pt {
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator( *this, y, x ); }
 
+                // Make the pixel iterator classes as friend classes
+                friend class InterleavedImage_PixelIterator<ColorT_>;
+                friend class InterleavedImage_ConstPixelIterator<ColorT_>;
+
             protected:
                 std::vector<ColorT> _buff;
                 size_t              _width;
                 size_t              _height;
+        };
+
+
+        /** @brief Pixel-based iterator class for InterleavedImage<ColorT>.
+         *  @ingroup Gfx
+         */
+        template <typename ColorT_>
+        class InterleavedImage_PixelIterator
+        {
+            public:
+                typedef InterleavedImage<ColorT_>  ImageT;
+                typedef typename ImageT::ColorT    ColorT;
+                typedef typename ImageT::ColorPtrT ColorPtrT;
 
             public:
-                /** @brief Pixel-based iterator class.
-                 *  @ingroup Gfx
-                 */
-                class PixelIterator
+                inline InterleavedImage_PixelIterator()
+                : _image(0), _pixel(0)
+                {}
+
+                inline InterleavedImage_PixelIterator(ImageT& image, uint x = 0, uint y = 0)
+                : _image(&image), _pixel(&image.scanline(y)[x])
+                {}
+
+                inline InterleavedImage_PixelIterator operator=(InterleavedImage_PixelIterator other)
                 {
-                    public:
-                        typedef InterleavedImage<ColorT_> ImageT;
-                        typedef typename ImageT::ColorT   ColorT;
+                    _pixel = other._pixel;
+                    _image = other._image;
+                    return *this;
+                }
 
-                    public:
-                        inline PixelIterator()
-                        : _image(0), _pixel(0)
-                        {}
+                inline bool operator!=(const InterleavedImage_PixelIterator& it) const
+                { return this->_pixel != it._pixel; }
 
-                        inline PixelIterator(ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(&image.scanline(y)[x])
-                        {}
+                inline ColorT& operator*()
+                { return *_pixel; }
 
-                        inline PixelIterator operator=(PixelIterator other)
-                        {
-                            _pixel = other._pixel;
-                            _image = other._image;
-                            return *this;
-                        }
+                inline InterleavedImage_PixelIterator& operator++()
+                { ++_pixel; return *this; }
 
-                        inline bool operator!=(const PixelIterator& it) const
-                        { return this->_pixel != it._pixel; }
+                inline InterleavedImage_PixelIterator operator+=(size_t n)
+                { _pixel += n; return *this; }
 
-                        inline ColorT& operator*()
-                        { return *_pixel; }
-
-                        inline PixelIterator& operator++()
-                        { ++_pixel; return *this; }
-
-                        inline PixelIterator operator+=(size_t n)
-                        { _pixel += n; return *this; }
-
-                        inline Math::Size operator-(const PixelIterator& other) const
-                        {
-                            const size_t pos    = _pixel - _image->data();
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
-
-                            const size_t otherPos    = other._pixel - other._image->data();
-                            const size_t otherWidth  = otherPos / other._image->height();
-                            const size_t otherHeight = otherPos / other._image->width();
-
-                            return Math::Size(width - otherWidth, height - otherHeight);
-                        }
-
-                    private:
-                        ImageT*   _image;
-                        ColorPtrT _pixel;
-                };
-
-                /** @brief Pixel-based constant iterator class.
-                 *  @ingroup Gfx
-                 */
-                class ConstPixelIterator
+                inline Math::Size operator-(const InterleavedImage_PixelIterator& other) const
                 {
-                    public:
-                        typedef InterleavedImage<ColorT_> ImageT;
-                        typedef typename ImageT::ColorT   ColorT;
+                    const size_t pos    = _pixel - _image->data();
+                    const size_t width  = pos / _image->height();
+                    const size_t height = pos / _image->width();
 
-                    public:
-                        inline ConstPixelIterator()
-                        : _image(0) , _pixel(0)
-                        {}
+                    const size_t otherPos    = other._pixel - other._image->data();
+                    const size_t otherWidth  = otherPos / other._image->height();
+                    const size_t otherHeight = otherPos / other._image->width();
 
-                        inline ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
-                        : _image(&image), _pixel(&image.scanline(y)[x])
-                        {}
+                    return Math::Size(width - otherWidth, height - otherHeight);
+                }
 
-                        inline ConstPixelIterator operator=(ConstPixelIterator other)
-                        {
-                            _pixel = other._pixel;
-                            _image = other._image;
-                            return *this;
-                        }
-
-                        inline bool operator!=(const ConstPixelIterator& it) const
-                        { return this->_pixel != it._pixel; }
-
-                        inline const ColorT& operator*() const
-                        { return *_pixel; }
-
-                        inline ConstPixelIterator& operator++()
-                        { ++_pixel; return *this; }
-
-                        inline ConstPixelIterator operator+=(size_t n)
-                        { _pixel += n; return *this; }
-
-                        inline Math::Size operator-(const ConstPixelIterator& other) const
-                        {
-                            const size_t pos    = _pixel - _image->data();
-                            const size_t width  = pos / _image->height();
-                            const size_t height = pos / _image->width();
-
-                            const size_t otherPos    = other._pixel - other._image->data();
-                            const size_t otherWidth  = otherPos / other._image->height();
-                            const size_t otherHeight = otherPos / other._image->width();
-
-                            return Math::Size(width - otherWidth, height - otherHeight);
-                        }
-
-                    private:
-                        const ImageT*  _image;
-                        ConstColorPtrT _pixel;
-                };
+            private:
+                ImageT*   _image;
+                ColorPtrT _pixel;
         };
+
+
+        /** @brief Pixel-based constant iterator class for InterleavedImage<ColorT>.
+         *  @ingroup Gfx
+         */
+        template <typename ColorT_>
+        class InterleavedImage_ConstPixelIterator
+        {
+            public:
+                typedef InterleavedImage<ColorT_>       ImageT;
+                typedef typename ImageT::ColorT         ColorT;
+                typedef typename ImageT::ConstColorPtrT ConstColorPtrT;
+
+            public:
+                inline InterleavedImage_ConstPixelIterator()
+                : _image(0) , _pixel(0)
+                {}
+
+                inline InterleavedImage_ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
+                : _image(&image), _pixel(&image.scanline(y)[x])
+                {}
+
+                inline InterleavedImage_ConstPixelIterator operator=(InterleavedImage_ConstPixelIterator other)
+                {
+                    _pixel = other._pixel;
+                    _image = other._image;
+                    return *this;
+                }
+
+                inline bool operator!=(const InterleavedImage_ConstPixelIterator& it) const
+                { return this->_pixel != it._pixel; }
+
+                inline const ColorT& operator*() const
+                { return *_pixel; }
+
+                inline InterleavedImage_ConstPixelIterator& operator++()
+                { ++_pixel; return *this; }
+
+                inline InterleavedImage_ConstPixelIterator operator+=(size_t n)
+                { _pixel += n; return *this; }
+
+                inline Math::Size operator-(const InterleavedImage_ConstPixelIterator& other) const
+                {
+                    const size_t pos    = _pixel - _image->data();
+                    const size_t width  = pos / _image->height();
+                    const size_t height = pos / _image->width();
+
+                    const size_t otherPos    = other._pixel - other._image->data();
+                    const size_t otherWidth  = otherPos / other._image->height();
+                    const size_t otherHeight = otherPos / other._image->width();
+
+                    return Math::Size(width - otherWidth, height - otherHeight);
+                }
+
+            private:
+                const ImageT*  _image;
+                ConstColorPtrT _pixel;
+        };
+
 
     } // namespace Gfx
 

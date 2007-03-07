@@ -22,14 +22,6 @@
 #
 
 
-ITEM P10 S8 "PlanarImage is improved"
-    TASK "Rename ARgbColorRef class to ARgbColorProxy"
-    TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type"
-    TASK "Make PixelIterators not nested in PlanarImage"
-    TASK "Make ImageModel traits classes for this image type which is not a template nor having a base class"
-
-ITEM P10 S8 "A SubImage class for PlanarImage is exists"
-
 ITEM P10 S8 "Delegates are implemented"
     TASK "Write Documentation"
     TASK "Write test case"
@@ -43,3 +35,4 @@ ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
 
 ITEM P5 S8 "The Db module has a dynamic driver API"
     TASK "Review Pt::Plugin API"
+

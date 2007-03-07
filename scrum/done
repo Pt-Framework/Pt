@@ -33,6 +33,13 @@ ITEM P10 S5 "Color classes are refactored"
     TASK "Remove TypeT, the second parameter" blue_wind_25 2007-03-05
     TASK "Make sure all value-type color classes (like ARgbColor) are usable in both interleaved and planar image" blue_wind_25 2007-03-05
 
+ITEM P10 S5 "InterleavedImage is improved"
+    TASK "Make PixelIterators not nested in InterleavedImage" blue_wind_25 2007-03-07
+
+ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
+    TASK "Rename the current SubImage class to InterleavedSubImage" blue_wind_25 2007-03-07
+    TASK "Make PixelIterators not nested in InterleavedSubImage" blue_wind_25 2007-03-07
+
 ########################################################################################
 
 ITEM P10 S5 "Variant class is implemented"
@@ -192,3 +199,4 @@ ITEM P0 S5 "Object reflection API is implemented"
     TASK "Split property in property and property proxy" Laurentiu 2006-10-05
     TASK "Specialize property for Reflectable" Laurentiu 2006-10-05
     TASK "Add signal changed to property" Laurentiu 2006-10-05
+

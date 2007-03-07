@@ -39,7 +39,6 @@ namespace Pt {
         //
         // Foward declarations of drawing classes
         //
-
         class Pen;
         class Brush;
         class Font;
@@ -50,7 +49,6 @@ namespace Pt {
         //
         // Foward declarations of color classes
         //
-
         template <typename TagT>
         class Color;
 
@@ -87,9 +85,8 @@ namespace Pt {
 
 
         //
-        // Foward declarations of standards interleaved image classes
+        // Foward declarations of standards interleaved image and subimage classes
         //
-
         template <typename ColorT_>
         class InterleavedImage;
 
@@ -100,27 +97,35 @@ namespace Pt {
         typedef InterleavedImage<Rgb565Color>   Rgb565InterleavedImage;
         typedef InterleavedImage<Rgb555Color>   Rgb555InterleavedImage;
 
+        template <typename ImageT_>
+        class InterleavedSubImage;
+
+        typedef InterleavedSubImage<ARgbInterleavedImage>     ARgbInterleavedSubImage;
+        typedef InterleavedSubImage<ARgbFInterleavedImage>    ARgbFInterleavedSubImage;
+        typedef InterleavedSubImage<ARgb8888InterleavedImage> ARgb8888InterleavedSubImage;
+        typedef InterleavedSubImage<Rgb888InterleavedImage>   Rgb888InterleavedSubImage;
+        typedef InterleavedSubImage<Rgb565InterleavedImage>   Rgb565InterleavedSubImage;
+        typedef InterleavedSubImage<Rgb555InterleavedImage>   Rgb555InterleavedSubImage;
+
 
         //
-        // Foward declarations of standards interleaved subimage classes
+        // Foward declarations of standards planar image and subimage classes
         //
+        template <typename ColorT_, typename ColorTraitsT_>
+        class PlanarImage;
+
+        typedef PlanarImage<ARgbColorProxy, ColorTraits<ARgbColorProxy> > ARgbPlanarImage;
 
         template <typename ImageT_>
-        class SubImage;
+        class PlanarSubImage;
 
-        typedef SubImage<ARgbInterleavedImage>     ARgbInterleavedSubImage;
-        typedef SubImage<ARgbFInterleavedImage>    ARgbFInterleavedSubImage;
-        typedef SubImage<ARgb8888InterleavedImage> ARgb8888InterleavedSubImage;
-        typedef SubImage<Rgb888InterleavedImage>   Rgb888InterleavedSubImage;
-        typedef SubImage<Rgb565InterleavedImage>   Rgb565InterleavedSubImage;
-        typedef SubImage<Rgb555InterleavedImage>   Rgb555InterleavedSubImage;
+        typedef PlanarSubImage<ARgbPlanarImage> ARgbPlanarSubImage;
 
 
         //
         // Interleaved images and subimages will be the most used types
         // and so typedefs them for convenience
         //
-
         typedef ARgbInterleavedImage     ARgbImage;
         typedef ARgbFInterleavedImage    ARgbFImage;
         typedef ARgb8888InterleavedImage ARgb8888Image;

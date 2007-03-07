@@ -26,20 +26,23 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/SourceInfo.h>
 
+
 namespace Pt {
-namespace Gfx{
 
-    class PT_GFX_API InvalidFont : public std::invalid_argument 
-    {
-        public:
-            //! @see Exception()
-            InvalidFont(const std::string& what);
+    namespace Gfx{
 
-            //! @brief Destructor.
-            ~InvalidFont() throw();
-    };
+        class PT_GFX_API InvalidFont : public std::invalid_argument
+        {
+            public:
+                //! @see Exception()
+                InvalidFont(const std::string& what);
 
-} // namespace Gfx
+                //! @brief Destructor.
+                ~InvalidFont() throw();
+        };
+
+    } // namespace Gfx
+
 } // namespace Pt
 
 #endif

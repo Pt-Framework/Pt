@@ -22,7 +22,7 @@
 
 #include <Pt/Gfx/Rgb555Color.h>
 #include <Pt/Gfx/InterleavedImage.h>
-#include <Pt/Gfx/SubImage.h>
+#include <Pt/Gfx/InterleavedSubImage.h>
 
 
 namespace Pt {
@@ -35,7 +35,7 @@ namespace Pt {
 
         /** @brief Standard interleaved Rgb555 subimage class.
          */
-        typedef SubImage<Rgb555InterleavedImage> Rgb555InterleavedSubImage;
+        typedef InterleavedSubImage<Rgb555InterleavedImage> Rgb555InterleavedSubImage;
 
 
         //

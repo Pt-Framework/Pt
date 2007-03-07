@@ -107,3 +107,4 @@ ITEM P0 S99 "The image class (version 2) supports padding and different pixel da
     TASK "Implement proper tagging and class structure to cover those many formats"
 
 ITEM P0 S99 "Support for precompiled headers was added"
+

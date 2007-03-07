@@ -22,7 +22,7 @@
 
 #include <Pt/Gfx/ARgbFColor.h>
 #include <Pt/Gfx/InterleavedImage.h>
-#include <Pt/Gfx/SubImage.h>
+#include <Pt/Gfx/InterleavedSubImage.h>
 
 
 namespace Pt {
@@ -35,7 +35,7 @@ namespace Pt {
 
         /** @brief Standard interleaved ARgbF subimage class.
          */
-        typedef SubImage<ARgbFInterleavedImage> ARgbFInterleavedSubImage;
+        typedef InterleavedSubImage<ARgbFInterleavedImage> ARgbFInterleavedSubImage;
 
 
         //

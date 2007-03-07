@@ -25,8 +25,8 @@
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/Gfx/PlanarImage.tpp>
-#include <Pt/Gfx/SubImage.h>
-#include <Pt/Gfx/SubImage.tpp>
+//#include <Pt/Gfx/PlanarSubImage.h>
+//#include <Pt/Gfx/PlanarSubImage.tpp>
 
 namespace Pt {
 
@@ -40,7 +40,7 @@ namespace Pt {
         template class PT_EXPORT PlanarImage<ARgbColorProxy, ColorTraits<ARgbColorProxy> >;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
-        //template class SubImage<ARgbPlanarImage>;
+        //template class PlanarSubImage<ARgbPlanarImage>;
 
 #endif
 

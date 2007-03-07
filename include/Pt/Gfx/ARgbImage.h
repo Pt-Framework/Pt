@@ -23,8 +23,8 @@
 #include <Pt/Gfx/ARgbFColor.h>
 #include <Pt/Gfx/ARgbFColorRef.h>
 #include <Pt/Gfx/InterleavedImage.h>
+#include <Pt/Gfx/InterleavedSubImage.h>
 #include <Pt/Gfx/PlanarImage.h>
-#include <Pt/Gfx/SubImage.h>
 
 
 namespace Pt {
@@ -41,7 +41,7 @@ namespace Pt {
          *
          *  <B>This is the master interleaved subimage model</B>
          */
-        typedef SubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
+        typedef InterleavedSubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
 
 
         /** @brief Standard planar ARgb image class.
@@ -55,7 +55,7 @@ namespace Pt {
          *
          *  <B>This is the master planar subimage model</B>
          */
-        typedef SubImage<ARgbPlanarImage> ARgbPlanarSubImage;
+        //typedef PlanarSubImage<ARgbPlanarImage> ARgbPlanarSubImage;
 
 
         //
