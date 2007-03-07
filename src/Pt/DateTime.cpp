@@ -20,7 +20,9 @@
  ***************************************************************************/
 
 #include <Pt/DateTime.h>
-#include <Pt/Exception.h>
+#include "Pt/SourceInfo.h"
+
+#include <stdexcept>
 
 #include <ctype.h>
 
@@ -115,12 +117,12 @@ namespace Pt
             || s.at(16) != ':'
             || s.at(19) != '.')
             throw std::invalid_argument("Invalid date-time iso string" + PT_SOURCEINFO);
-            
+
         const char* d = s.data();
-        
+
         Date date( getNumber4(d), getNumber2(d + 5), getNumber2(d + 8) );
         Time time( getNumber2(d + 11), getNumber2(d + 14), getNumber2(d + 17), getNumber3(d + 20) );
-        
+
         return DateTime( date, time );
     }
 

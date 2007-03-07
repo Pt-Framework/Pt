@@ -1,7 +1,7 @@
 #ifndef PT_SQLITE_ERROR_H
 #define PT_SQLITE_ERROR_H
 
-#include "Pt/Exception.h"
+#include "Pt/Db/Exception.h"
 #include "Pt/IO/IOError.h"
 #include <stdexcept>
 #include "sqlite3.h"

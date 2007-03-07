@@ -17,10 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/Exception.h"
+#include "Pt/Db/Exception.h"
 
 
 namespace Pt {
+
+namespace Db {
 
 AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 : std::logic_error(what + si)
@@ -29,5 +31,7 @@ AccessError::AccessError(const std::string& what, const SourceInfo& si) throw()
 
 AccessError::~AccessError() throw()
 { }
+
+} // namespace Db
 
 } // namespace Ptv

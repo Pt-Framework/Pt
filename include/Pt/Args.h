@@ -21,7 +21,9 @@
 #define Pt_Args_h
 
 #include <Pt/Any.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
+
+#include <stdexcept>
 #include <vector>
 
 

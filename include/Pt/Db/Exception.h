@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris DÃ¼rner                             *
  *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,13 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Exception_h
-#define Pt_Exception_h
+#ifndef Pt_Db_Exception_h
+#define Pt_Db_Exception_h
 
-#include <Pt/Api.h>
+#include <Pt/Db/Api.h>
+#include <string>
 #include <exception>
 #include <stdexcept>
 #include <Pt/SourceInfo.h>
 
 
+namespace Pt {
+
+namespace Db {
+
+    /** @brief This indicates that a resource could not be accessed.
+        @ingroup Pt
+
+        An exception of class AccessError is used to report failed access
+        to a resource due to missing authorization, mising access rights
+        or if a resource is in an otherwise inaccessible state. This class
+        implements std::logic_error. Use the PT_SOURCEINFO macro to pass
+        SourceInfo to Exception.
+
+        TODO: rename AccessDenied
+    */
+    class PT_DB_API AccessError : public std::logic_error {
+        public:
+            //! @see Exception()
+            AccessError(const std::string& what, const SourceInfo& si) throw();
+
+            //! @brief Destructor.
+            ~AccessError() throw();
+    };
+
+} // namespace Db
+
+} // namespace Pt
+
 #endif
+

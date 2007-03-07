@@ -3,6 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 
 SharedLibrary Pt-Db : Connection.cpp
+                      Exception.cpp
                       Result.cpp
                       ResultImpl.cpp
                       Row.cpp

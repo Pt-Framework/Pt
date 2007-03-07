@@ -22,7 +22,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Invokable.h>
-#include <Pt/Exception.h>
 
 #include <typeinfo>
 

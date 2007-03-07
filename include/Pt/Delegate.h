@@ -22,6 +22,7 @@
 #define Pt_Delegate_h
 
 #include <Pt/Void.h>
+#include <Pt/Exception.h>
 #include <Pt/Function.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>

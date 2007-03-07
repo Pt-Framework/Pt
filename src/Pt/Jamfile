@@ -9,7 +9,6 @@ SharedLibrary Pt : Any.cpp
                    Callable.cpp
                    Date.cpp
                    DateTime.cpp
-                   Exception.cpp
                    Reflectable.cpp
                    Property.cpp
                    PropertyProxy.cpp

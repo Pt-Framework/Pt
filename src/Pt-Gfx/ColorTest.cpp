@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <vector>
 
 #include <Pt/Main.h>
 #include <Pt/Gfx/Gfx.h>
@@ -30,7 +29,9 @@
 #include <Pt/Gfx/Rgb565Color.h>
 #include <Pt/Gfx/ColorAlgo.h>
 
-#include <Pt/Gfx/ARgbColorRef.h>
+//#include <Pt/Gfx/ARgbColorRef.h>
+
+#include <vector>
 
 using namespace Pt;
 using namespace Pt::Gfx;
@@ -38,6 +39,7 @@ using namespace Pt::Gfx;
 
 int main( int argc, char* argv[] )
 {
+/*
 
     ARgbColor      argb_1, argb_2;
     ARgbFColor     float_1, float_2;
@@ -78,6 +80,6 @@ int main( int argc, char* argv[] )
 
     argb_1_ref = argb_1;
     argb_2 = argb_2_ref;
-
+*/
     return 0;
 }

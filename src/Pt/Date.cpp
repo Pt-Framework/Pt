@@ -19,9 +19,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Date.h>
-#include <Pt/Exception.h>
+#include "Pt/Date.h"
+#include "Pt/SourceInfo.h"
 
+#include <stdexcept>
 #include <ctype.h>
 
 
@@ -72,7 +73,7 @@ namespace Pt
         || !isdigit(s[2])
         || !isdigit(s[3]))
         throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
-      
+
         return (s[0] - '0') * 1000
             + (s[1] - '0') * 100
             + (s[2] - '0') * 10
@@ -86,7 +87,7 @@ namespace Pt
             || s.at(7) != '-') {
             throw std::invalid_argument("Illegal date format." + PT_SOURCEINFO);
         }
-        
+
         const char* d = s.data();
         return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
     }
