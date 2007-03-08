@@ -1,82 +1,85 @@
  /** \page docs Online Reference Documentation
-        <br>
-       <table style="color: rgb(255, 255, 255);" cellpadding="2" cellspacing="1" border="0" width="100%" bgcolor="#e5e5e5">
-        <tr>
-        <th bgcolor="#C30014" width="33%">
-        Getting Started
-        </th>
-        <th bgcolor="#C30014" width="33%">
-        General
-        </th>
-        <th bgcolor="#C30014" width="33%">
-        Developer Resources
-        </th>
-        </tr>
-        <tr style="color: rgb(0, 0, 0);">
-        <td valign="top" style="border: none;">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="download.html" style="text-decoration: none;">Download</a></li>
-        <li style="margin: 2px;"><a href="building.html" style="text-decoration: none;">Building</a></li>
-        </ul>
-        </td>
-        <td valign="top">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;" style="text-decoration: none;">
-        <li style="margin: 2px;"><a href="acknowledgements.html" style="text-decoration: none;">Acknowledgements</a></li>
-        <li style="margin: 2px;"><a href="http://www.gnu.org/licenses/lgpl.html" style="text-decoration: none;">License</a></li>
-        <li style="margin: 2px;"><a href="people.html" style="text-decoration: none;">People</a></li>
-        <li style="margin: 2px;"><a href="faq.html" style="text-decoration: none;">Frequently Asked Questions</a></li>
-        </ul>
-        </td>
-        <td valign="top">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="mailinglist.html" style="text-decoration: none;">Mailing Lists</a></li>
-        <li style="margin: 2px;"><a href="scrum.html" style="text-decoration: none;">Project Overview</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Recommended Reading</a></li>
-        </ul>
-        </td>
-        </tr>
-        <tr>
-        <th bgcolor="#C30014">
-        API Reference
-        </th>
-        <th bgcolor="#C30014">
-        Concepts
-        </th>
-        <th bgcolor="#C30014">
-        Tools
-        </th>
-        </tr>
-        <tr style="color: rgb(0, 0, 0);">
-        <td valign="top">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="classes.html" style="text-decoration: none;">All Classes</a></li>
-        <li style="margin: 2px;"><a href="namespaces.html" style="text-decoration: none;">Namespaces</a></li>
-        <li style="margin: 2px;"><a href="group__Unicode.html" style="text-decoration: none;">Unicode String Handling</a></li>
-        <li style="margin: 2px;" style="margin: 2px;"><a href="group__Reflection.html" style="text-decoration: none;">Reflection</a></li>
-        <li style="margin: 2px;" style="margin: 2px;"><a href="group__CTTI.html" style="text-decoration: none;">Compile Time Type Information</a></li>
-        <li style="margin: 2px;" style="margin: 2px;"><a href="group__UnitTests.html" style="text-decoration: none;">Unit Testing</a></li>
-        </ul>
-        </td>
-        <td valign="top">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="sigslot.html" style="text-decoration: none;">Signals and Delegates</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Reflection</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Compile Time Type Information</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Components</a></li>
-        <li style="margin: 2px;"><a href="plugins.html" style="text-decoration: none;">Plugins</a></li>
-        <li style="margin: 2px;"><a href="docs.html" style="text-decoration: none;">Synchronous I/O Multiplexing</a></li>
-        <li style="margin: 2px;"><a href="unittests.html" style="text-decoration: none;">Unit Testing</a></li>
-        </ul>
-        </td>
-        <td valign="top">
-        <ul style="border: none; background-color: rgb(229, 229, 229); padding-top: 10px; padding-bottom: 10px;">
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Jam Build Tool</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Doxygen</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">Subversion</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">GNU Toolset</a></li>
-        <li style="margin: 2px;"><a href="index.html" style="text-decoration: none;">GNU for Win32</a></li>
-        </ul>
-        </td>
-        </tr>
-        </table>
+<br>
+    
+    <div style="width:100%"> <!-- This div is a hack for IE so it does not make the table too wide -->
+    
+	<table cellpadding="2" cellspacing="20" border="0" width="100%">
+	<tr>
+		<td style="width:33%; vertical-align:top;">
+				<div class="docs-page-header">Getting Started</div>
+				<div class="docs-page-body">
+					<ul>
+					<li><a href="download.html">Download</a></li>
+					<li><a href="building.html">Building</a></li>
+					</ul>
+			</div>
+		</td>
+		<td style="width:33%; vertical-align:top;">
+			<div class="docs-page-header">General</div>
+			<div class="docs-page-body">
+				<ul>
+				<li><a href="acknowledgements.html">Acknowledgements</a></li>
+				<li><a href="http://www.gnu.org/licenses/lgpl.html">License</a></li>
+				<li><a href="people.html">People</a></li>
+				<li><a href="faq.html">Frequently Asked Questions</a></li>
+				</ul>
+			</div>
+		</td>
+		<td style="width:33%; vertical-align:top;">
+			<div class="docs-page-header">Developer Resources</div>
+			<div class="docs-page-body">
+				<ul>
+				<li><a href="mailinglist.html">Mailing Lists</a></li>
+				<li><a href="scrum.html">Project Overview</a></li>
+				<li><a href="index.html">Recommended Reading</a></li>
+				</ul>
+			</div>		        
+		</td>
+	</tr>
+
+	<tr>
+		<td style="width:33%; vertical-align:top;">
+			<div class="docs-page-header">API Reference</div>
+			<div class="docs-page-body">
+				<ul>
+				<li><a href="classes.html">All Classes</a></li>
+				<li><a href="namespaces.html">Namespaces</a></li>
+				<li><a href="group__Unicode.html">Unicode String Handling</a></li>
+				<li><a href="group__Reflection.html">Reflection</a></li>
+				<li><a href="group__CTTI.html">Compile Time Type Information</a></li>
+				<li><a href="group__UnitTests.html">Unit Testing</a></li>
+				</ul>
+			</div>
+		</td>
+		<td style="width:33%; vertical-align:top;">
+			<div class="docs-page-header">Concepts</div>
+			<div class="docs-page-body">
+				<ul>
+				<li><a href="sigslot.html">Signals and Delegates</a></li>
+				<li><a href="docs.html">Reflection</a></li>
+				<li><a href="docs.html">Compile Time Type Information</a></li>
+				<li><a href="docs.html">Components</a></li>
+				<li><a href="plugins.html">Plugins</a></li>
+				<li><a href="docs.html">Synchronous I/O Multiplexing</a></li>
+				<li><a href="unittests.html">Unit Testing</a></li>
+				</ul>
+			</div>
+		</td>
+		<td style="width:33%; vertical-align:top;">
+			<div class="docs-page-header">Tools</div>
+			<div class="docs-page-body">
+				<ul>
+				<li><a href="index.html">Jam Build Tool</a></li>
+				<li><a href="index.html">Doxygen</a></li>
+				<li><a href="index.html">Subversion</a></li>
+				<li><a href="index.html">GNU Toolset</a></li>
+				<li><a href="index.html">GNU for Win32</a></li>
+				</ul>
+			</div>		        
+		</td>
+	</tr>
+
+	</table>
+	
+	</div>
 */
