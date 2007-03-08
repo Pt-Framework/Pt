@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Api.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
 
 #include <windows.h>
@@ -36,27 +36,27 @@ namespace System {
         public:
             FileDeviceImpl();
 
-            FileDeviceImpl(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
+            FileDeviceImpl(const char* path, std::ios_base::openmode mode) throw(IOError);
 
             ~FileDeviceImpl() throw();
-            
-            void open(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
 
-            void close() throw(IO::IOError);
+            void open(const char* path, std::ios_base::openmode mode) throw(IOError);
 
-            pos_type seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError);
+            void close() throw(IOError);
 
-            size_t size() throw(IO::IOError);
+            pos_type seek(off_type offset, IODevice::SeekMode mode) throw(IOError);
 
-            size_t read(char* buffer, size_t count, bool& eof) throw(IO::IOError);
+            size_t size() throw(IOError);
 
-            size_t write(const char* buffer, size_t count) throw(IO::IOError);
+            size_t read(char* buffer, size_t count, bool& eof) throw(IOError);
 
-            size_t peek(char* buffer, size_t count) throw(IO::IOError);
+            size_t write(const char* buffer, size_t count) throw(IOError);
 
-            void sync() const throw(IO::IOError);
+            size_t peek(char* buffer, size_t count) throw(IOError);
 
-            bool wait(IO::IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError);
+            void sync() const throw(IOError);
+
+            bool wait(IODevice::WaitMode mode, unsigned int msec) throw(IOError);
 
         private:
             HANDLE _handle;

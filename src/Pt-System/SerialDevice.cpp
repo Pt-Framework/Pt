@@ -21,6 +21,7 @@
 #include "SerialDeviceImpl.h"
 
 namespace Pt{
+
 namespace System{
 
 SerialDevice::SerialDevice()
@@ -40,7 +41,7 @@ SerialDevice::~SerialDevice()
 {
     try
     {
-        close(); 
+        close();
     }
     catch( ... )
     { }
@@ -56,8 +57,8 @@ void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
 
     _impl->open( file, mode );
 
-    IO::IODevice::setValid(true);
-    IO::IODevice::setEof(false);
+    IODevice::setValid(true);
+    IODevice::setEof(false);
 }
 
 void SerialDevice::setBaudRate( BaudRate rate )
@@ -79,7 +80,7 @@ int SerialDevice::charSize() const
 {
     return _impl->charSize();
 }
-      
+
 void SerialDevice::setStopBits( StopBits bits )
 {
     _impl->setStopBits( bits );
@@ -89,7 +90,7 @@ SerialDevice::StopBits SerialDevice::stopBits() const
 {
     return _impl->stopBits();
 }
-        
+
 void SerialDevice::setParity( Parity parity )
 {
     _impl->setParity( parity );
@@ -99,7 +100,7 @@ SerialDevice::Parity SerialDevice::parity() const
 {
     return _impl->parity();
 }
-        
+
 void SerialDevice::setFlowControl( FlowControl flowControl )
 {
     _impl->setFlowControl(  flowControl );

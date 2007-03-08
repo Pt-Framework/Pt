@@ -2,7 +2,7 @@
 #define PT_SQLITE_ERROR_H
 
 #include "Pt/Db/Exception.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IOError.h"
 #include <stdexcept>
 #include "sqlite3.h"
 
@@ -45,7 +45,7 @@ namespace sqlite {
                 throw std::runtime_error("Operation terminated by sqlite3_interrupt" + srcInfo);
 
             case SQLITE_IOERR :
-                throw IO::IOError("Some kind of disk I/O error occurred", srcInfo);
+                throw System::IOError("Some kind of disk I/O error occurred", srcInfo);
 
             case SQLITE_CORRUPT :
                 throw std::runtime_error("The database disk image is malformed" + srcInfo);

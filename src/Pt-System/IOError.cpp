@@ -1,6 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004 Marc Boris Dürner                                  *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
+ *                                                                         *
+ *   This code is based on code written by Christian Prochnow              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,34 +20,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_IO_IOError_h
-#define Pt_IO_IOError_h
+#include "Pt/System/IOError.h"
 
-#include <Pt/IO/Api.h>
-#include <Pt/Exception.h>
-#include <ios>
+#include <string>
+using namespace std;
+
 
 namespace Pt {
 
-namespace IO {
+namespace System {
 
-    // DEPRECATED, use ios::failure instead
-    class PT_IO_API IOError : public std::ios::failure {
-        public:
-            IOError(const std::string& what, const SourceInfo& si);
+IOError::IOError(const std::string& what, const SourceInfo& si)
+: std::ios::failure(what + si)
+{
+}
 
-            ~IOError() throw();
-    };
 
-    class PT_IO_API OpenFailed : public std::ios::failure {
-        public:
-            OpenFailed(const std::string& what, const SourceInfo& si);
+IOError::~IOError() throw()
+{
+}
 
-            ~OpenFailed() throw();
-    };
+OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
+: std::ios::failure(what + si)
+{
+}
+
+
+OpenFailed::~OpenFailed() throw()
+{
+}
 
 } // namespace IO
 
 } // namespace Pt
-
-#endif

@@ -33,7 +33,7 @@ SharedLibrary_MakeLocate Pt-Gui : bin ;
 
 
 Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-IO Pt-Gfx Pt-Gui Pt-Text ;
+Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
 Main_MakeLocate Scribble : bin ;
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;

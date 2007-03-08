@@ -17,8 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "win32.h"
-#include "Pt/IO/IODevice.h"
-using namespace Pt::IO;
+#include "Pt/System/IODevice.h"
 
 #include "FileDeviceImpl.h"
 
@@ -42,7 +41,7 @@ FileDeviceImpl::FileDeviceImpl()
 FileDeviceImpl::~FileDeviceImpl() throw()
 { }
 
-void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IO::IOError)
+void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IOError)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -83,7 +82,7 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     _handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
     if(_handle == INVALID_HANDLE_VALUE) {
-        throw IO::IOError("Could not open file handle", PT_SOURCEINFO);
+        throw IOError("Could not open file handle", PT_SOURCEINFO);
     }
 
     try {
@@ -96,7 +95,7 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     }
 }
 
-void FileDeviceImpl::close() throw(IO::IOError)
+void FileDeviceImpl::close() throw(IOError)
 {
     if(_readOv.hEvent != NULL)
         ::CloseHandle(_readOv.hEvent);
@@ -107,13 +106,13 @@ void FileDeviceImpl::close() throw(IO::IOError)
     if(_handle != INVALID_HANDLE_VALUE)
     {
         if( FALSE == ::CloseHandle(_handle) )
-            throw IO::IOError("Could not close file handle", PT_SOURCEINFO);
+            throw IOError("Could not close file handle", PT_SOURCEINFO);
 
         _handle = INVALID_HANDLE_VALUE;
     }
 }
 
-FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError)
+FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode) throw(IOError)
 {
     DWORD whence = FILE_BEGIN;
     switch(mode)
@@ -134,7 +133,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::See
     DWORD ret = SetFilePointer(_handle, offset, NULL, whence);
 
     if(ret == INVALID_SET_FILE_POINTER)
-        throw IO::IOError("Could not set file pointer", PT_SOURCEINFO);
+        throw IOError("Could not set file pointer", PT_SOURCEINFO);
 
     _readOv.Offset = ret;
     _writeOv.Offset = ret;
@@ -143,7 +142,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IO::IODevice::See
 }
 
 /*
-void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
+void FileDeviceImpl::resize(off_type size) throw(IOError)
 {
     // remember current position
     off_type current = ::SetFilePointer(_handle, 0, NULL, FILE_CURRENT);
@@ -152,13 +151,13 @@ void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
     // and then call SetEndOfFile on the handle.
     DWORD ret = ::SetFilePointer(_handle, size, NULL, FILE_BEGIN);
     if(ret == INVALID_SET_FILE_POINTER)
-        throw IO::IOError("Could not set file pointer", PT_SOURCEINFO);
+        throw IOError("Could not set file pointer", PT_SOURCEINFO);
 
     if( false == ::SetEndOfFile(_handle) )
     {
         // go back to where we were before
         ::SetFilePointer(_handle, current, NULL, FILE_CURRENT);
-        throw IO::IOError("Could not truncate file", PT_SOURCEINFO);
+        throw IOError("Could not truncate file", PT_SOURCEINFO);
     }
 
     _readOv.Offset = size;
@@ -166,17 +165,17 @@ void FileDeviceImpl::resize(off_type size) throw(IO::IOError)
 }
 */
 
-size_t FileDeviceImpl::size() throw(IO::IOError)
+size_t FileDeviceImpl::size() throw(IOError)
 {
     DWORD sz = GetFileSize(_handle, NULL);
     if(sz == INVALID_FILE_SIZE)
-        throw IO::IOError("Could not get file size", PT_SOURCEINFO);
+        throw IOError("Could not get file size", PT_SOURCEINFO);
 
     return sz;
 }
 
 
-size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOError)
+size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IOError)
 {
     eof = false;
     DWORD readBytes = 0;
@@ -190,11 +189,11 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOE
         }
         else if( ERROR_IO_PENDING != GetLastError() )
         {
-            throw IO::IOError("Could not read from file handle", PT_SOURCEINFO);
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
 
         #ifndef _WIN32_WCE
-        else if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE ) 
+        else if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
         {
             readBytes = 0;
         }
@@ -207,7 +206,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IO::IOE
 }
 
 
-size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError)
+size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IOError)
 {
     DWORD writtenBytes = 0;
 
@@ -215,7 +214,7 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {
-            throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
+            throw IOError("Could not write to file handle", PT_SOURCEINFO);
         }
 
         #ifndef _WIN32_WCE
@@ -232,7 +231,7 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IO::IOError
 }
 
 
-size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IO::IOError)
+size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IOError)
 {
     bool eof;
     size_t ret = this->read(buffer, count, eof);
@@ -246,7 +245,7 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IO::IOError)
 void FileDeviceImpl::sync() const
 {
     if( false == ::FlushFileBuffers(_handle) ) {
-        throw IO::IOError("Could not flush file buffer", PT_SOURCEINFO);
+        throw IOError("Could not flush file buffer", PT_SOURCEINFO);
     }
 }
 
@@ -266,7 +265,7 @@ bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
 
     DWORD ret = ::WaitForMultipleObjects(count, handles, FALSE, msec);
     if(ret == WAIT_FAILED) {
-        throw IO::IOError ("Could not wait for file handle: ", PT_SOURCEINFO);
+        throw IOError ("Could not wait for file handle: ", PT_SOURCEINFO);
     }
     else if(ret == WAIT_TIMEOUT)
         return false;

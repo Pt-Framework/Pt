@@ -20,19 +20,19 @@
 #ifndef Pt_IOHandler_h
 #define Pt_IOHandler_h
 
-#include <Pt/IO/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/IO/IODevice.h>
-#include <Pt/IO/Url.h>
+#include <Pt/System/IODevice.h>
+#include <Pt/System/Url.h>
 
 namespace Pt {
 
-namespace IO {
+namespace System {
 
     class IOHandler;
 
 
-    class PT_IO_API IOTask : public NonCopyable {
+    class PT_SYSTEM_API IOTask : public NonCopyable {
         public:
             IOTask(IOHandler& handler, const Url& url)
             : _handler(handler), _url(url)
@@ -44,7 +44,7 @@ namespace IO {
             //! Returns a pointer to the IOHandler
             inline IOHandler& handler() const throw()
             { return _handler; }
-    
+
             //! Returns the Url addressed with this request
             inline const Url& url() const throw()
             { return _url; }
@@ -55,7 +55,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API GetTask : public IOTask {
+    class PT_SYSTEM_API GetTask : public IOTask {
         public:
             GetTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -68,7 +68,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API PutTask : public IOTask {
+    class PT_SYSTEM_API PutTask : public IOTask {
         public:
             PutTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -81,7 +81,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API UnlinkTask : public IOTask {
+    class PT_SYSTEM_API UnlinkTask : public IOTask {
         public:
             UnlinkTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -94,7 +94,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API MakeDirTask : public IOTask {
+    class PT_SYSTEM_API MakeDirTask : public IOTask {
         public:
             MakeDirTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -107,7 +107,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API RemoveDirTask: public IOTask {
+    class PT_SYSTEM_API RemoveDirTask: public IOTask {
         public:
             RemoveDirTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -120,7 +120,7 @@ namespace IO {
     };
 
 
-    class PT_IO_API ListDirTask : public IOTask {
+    class PT_SYSTEM_API ListDirTask : public IOTask {
         public:
             ListDirTask(IOHandler& handler, const Url& url)
             : IOTask(handler, url)
@@ -128,13 +128,13 @@ namespace IO {
 
             virtual ~ListDirTask()
             {}
-    
+
             virtual void list() throw (IOError) = 0;
     };
 
 
     //! Base class to handle protocol specific IO.
-    class PT_IO_API IOHandler {
+    class PT_SYSTEM_API IOHandler {
         public:
             IOHandler()
             {}
@@ -161,7 +161,7 @@ namespace IO {
             { throw IOError("IO operation not supported..", PT_SOURCEINFO); }
     };
 
-} // namespace IO
+} // namespace System
 
 } // namespace Pt
 

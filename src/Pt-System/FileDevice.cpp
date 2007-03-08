@@ -63,16 +63,16 @@ void FileDevice::open(const char* path, std::ios_base::openmode mode)
     _mode = mode;
     _path = path;
 
-    IO::IODevice::setValid(true);
-    IO::IODevice::setEof(false);
+    IODevice::setValid(true);
+    IODevice::setEof(false);
 }
 
 
 void FileDevice::_close()
 {
     _impl->close();
-    IO::IODevice::setValid(false);
-    IO::IODevice::setEof(false);
+    IODevice::setValid(false);
+    IODevice::setEof(false);
 }
 
 
@@ -100,7 +100,7 @@ size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
 
 size_t FileDevice::_write(const char* buffer, size_t count)
 {
-    if( _mode & std::ios_base::out ) 
+    if( _mode & std::ios_base::out )
         return _impl->write(buffer, count);
 
     return 0;
@@ -115,7 +115,7 @@ size_t FileDevice::_peek(char* buffer, size_t count)
 
 void FileDevice::_sync() const
 {
-    if( _mode & std::ios_base::out ) 
+    if( _mode & std::ios_base::out )
         _impl->sync();
 }
 

@@ -17,21 +17,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
 
-#ifndef Pt_IOManager_h
-#define Pt_IOManager_h
+#ifndef Pt_System_IOManager_h
+#define Pt_System_IOManager_h
 
-#include <Pt/IO/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Singleton.h>
-#include <Pt/IO/IOHandler.h>
-#include <Pt/IO/Url.h>
+#include <Pt/System/IOHandler.h>
+#include <Pt/System/Url.h>
 
 
 namespace Pt {
 
-namespace IO {
+namespace System {
 
     //! IOManager for protocol transparent IO.
-    class PT_IO_API IOManager : public Pt::Singleton<IOManager> {
+    class PT_SYSTEM_API IOManager : public Pt::Singleton<IOManager> {
         friend class Pt::Singleton<IOManager>;
 
         public:
@@ -73,7 +73,7 @@ namespace IO {
             std::map<std::string, IOHandler*> _handlerMap;
     };
 
-} // namespace IO
+} // namespace System
 
 } // namespace Pt
 

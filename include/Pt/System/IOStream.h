@@ -16,26 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IOStream_h
-#define Pt_IOStream_h
+#ifndef Pt_System_IOStream_h
+#define Pt_System_IOStream_h
 
-#include <Pt/IO/Api.h>
-#include <Pt/IO/IODevice.h>
-#include <Pt/IO/IOBuffer.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
+#include <Pt/System/IOBuffer.h>
 
 #include <iostream>
 #include <memory>
 
 
-namespace std
-{
-    class PT_API std::ios_base;
-}
-
-
 namespace Pt {
 
-namespace IO {
+namespace System {
 
     //! @brief An istream with peeking capability.
     template <typename CharT>
@@ -107,8 +101,8 @@ namespace IO {
                stream buffer get area and maybe less than requested,
                similar to istream::readsome().
             */
-            std::streamsize peek(char* buffer, std::streamsize size) throw(IOError)
-            { return _buffer->peek(buffer, size); }
+            std::streamsize peeksome(char* buffer, std::streamsize size) throw(IOError)
+            { return _buffer->peeksome(buffer, size); }
 
         protected:
             explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
@@ -125,7 +119,7 @@ namespace IO {
     typedef BasicOStream<char> OStream;
     typedef BasicIOStream<char> IOStream;
 
-} // namespace IO
+} // namespace System
 
 } // !namespace Pt
 

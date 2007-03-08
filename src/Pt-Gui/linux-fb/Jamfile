@@ -9,6 +9,6 @@ Library Pt-Gui-linux-fb : ApplicationImpl.cpp
                           ;
 
 Main LfbTest : LfbTest.cpp ;
-Main_LinkSharedLibraries LfbTest : Pt-Gui Pt-Gfx Pt-Text Pt-IO Pt-System Pt ;
+Main_LinkSharedLibraries LfbTest : Pt-Gui Pt-Gfx Pt-Text Pt-System Pt ;
 Main_LinkLibraries LfbTest : Pt-Gui-linux-fb ;
 Main_MakeLocate LfbTest : bin ;

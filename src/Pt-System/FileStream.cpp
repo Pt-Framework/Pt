@@ -25,18 +25,18 @@ namespace Pt {
 namespace System {
 
 
-FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode) throw(IO::IOError)
-: IO::IOBuffer(),
+FileBuffer::FileBuffer(const char* name, std::ios_base::openmode omode)
+: IOBuffer(),
   _file(name, omode)
 {
-    IO::IOBuffer::init(_file);
+    IOBuffer::init(_file);
 }
 
 
 
 
-FileStream::FileStream(const char* path, std::ios_base::openmode omode) throw(IO::IOError)
-: IO::IOStream( &_buffer ),
+FileStream::FileStream(const char* path, std::ios_base::openmode omode)
+: IOStream( &_buffer ),
   _buffer(path, omode)
 {
     // no std::locale on WinCE
@@ -52,7 +52,7 @@ FileStream::FileStream(const char* path, std::ios_base::openmode omode) throw(IO
 FileStream::~FileStream() throw()
 {
     try {
-        IO::IOStream::sync();
+        IOStream::sync();
     }
     catch(...) {}
 }

@@ -23,7 +23,7 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Socket.h>
-#include <Pt/IO/IODevice.h>
+#include <Pt/System/IODevice.h>
 
 namespace Pt {
 
@@ -32,7 +32,7 @@ namespace Net {
     class TcpSocketImpl;
     class TcpServerSocket;
 
-    class PT_NET_API TcpSocket : public Socket, public IO::IODevice
+    class PT_NET_API TcpSocket : public Socket, public System::IODevice
     {
         public:
             TcpSocket()

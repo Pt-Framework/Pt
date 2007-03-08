@@ -22,8 +22,8 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/IO/IOBuffer.h>
-#include <Pt/IO/IOStream.h>
+#include <Pt/System/IOBuffer.h>
+#include <Pt/System/IOStream.h>
 #include <Pt/System/FileDevice.h>
 
 
@@ -32,10 +32,10 @@ namespace Pt {
 namespace System {
 
 
-    class PT_SYSTEM_API FileBuffer : public IO::IOBuffer
+    class PT_SYSTEM_API FileBuffer : public IOBuffer
     {
         public:
-            FileBuffer(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
+            FileBuffer(const char* name, std::ios_base::openmode omode);
 
             const FileDevice& fileDevice() const
             {return _file;}
@@ -45,10 +45,10 @@ namespace System {
     };
 
 
-    class PT_SYSTEM_API FileStream : public IO::IOStream
+    class PT_SYSTEM_API FileStream : public IOStream
     {
         public:
-            FileStream(const char* name, std::ios_base::openmode omode) throw(IO::IOError);
+            FileStream(const char* name, std::ios_base::openmode omode);
 
             ~FileStream() throw();
 

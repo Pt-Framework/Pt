@@ -21,14 +21,14 @@
 #define Pt_System_FileDevice_h
 
 #include <Pt/NonCopyable.h>
-#include <Pt/IO/IODevice.h>
+#include <Pt/System/IODevice.h>
 #include <Pt/System/Api.h>
 
 namespace Pt {
 
 namespace System {
 
-    class PT_SYSTEM_API FileDevice : public IO::IODevice {
+    class PT_SYSTEM_API FileDevice : public IODevice {
         private:
             class FileDeviceImpl* _impl;
 
@@ -41,7 +41,7 @@ namespace System {
 
             void open(const char* path, std::ios_base::openmode mode);
 
-            const char* path() const 
+            const char* path() const
             { return _path.c_str(); }
 
             std::ios_base::openmode openMode() const
@@ -61,11 +61,11 @@ namespace System {
             pos_type _seek(off_type offset, SeekMode mode) ;
 
             size_t _read(char* buffer, size_t count, bool& eof);
-            
+
             size_t _write(const char* buffer, size_t count);
 
             size_t _peek(char* buffer, size_t count);
-            
+
             void _sync() const;
 
             bool _wait(WaitMode mode, unsigned int msec);

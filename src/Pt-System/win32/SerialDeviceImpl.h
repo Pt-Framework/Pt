@@ -23,8 +23,8 @@
 #include <string>
 #include <windows.h>
 
-#include "Pt/IO/IODevice.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IODevice.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 
 namespace Pt{
@@ -36,7 +36,7 @@ class SerialDeviceImpl
         SerialDeviceImpl();
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, std::ios_base::openmode mode );         
+        void open( const std::string& file, std::ios_base::openmode mode );
 
         //! @brief Closes the I/O device
         void close();
@@ -56,13 +56,13 @@ class SerialDeviceImpl
         int charSize() const;
 
         void setStopBits( SerialDevice::StopBits bits );
-        SerialDevice::StopBits stopBits() const;    
+        SerialDevice::StopBits stopBits() const;
 
         void setParity( SerialDevice::Parity parity );
         SerialDevice::Parity parity() const;
 
         void setFlowControl( SerialDevice::FlowControl flowControl );
-        SerialDevice::FlowControl flowControl() const;      
+        SerialDevice::FlowControl flowControl() const;
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
 

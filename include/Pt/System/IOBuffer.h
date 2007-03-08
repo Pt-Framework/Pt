@@ -16,17 +16,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IO_IOBuffer_h
-#define Pt_IO_IOBuffer_h
+#ifndef Pt_System_IOBuffer_h
+#define Pt_System_IOBuffer_h
 
-#include <Pt/IO/Api.h>
-#include <Pt/IO/IODevice.h>
-#include <Pt/IO/StreamBuffer.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
+#include <Pt/System/StreamBuffer.h>
 
 
 namespace Pt {
 
-namespace IO {
+namespace System {
 
     //! @brief a stream buffer for IODevices with linear buffer area.
     template <typename CharT>
@@ -70,7 +70,7 @@ namespace IO {
             void init(BasicIODevice<CharT>& ioDevice)
             { _ioDevice = &ioDevice; }
 
-            Pt::IO::IODevice* device()
+            IODevice* device()
             { return _ioDevice; }
 
         protected:
@@ -110,7 +110,7 @@ namespace IO {
             if( ch == traits_type::eof() ) {
                 return -1;
             }
-    
+
             _ioDevice->sync();
         }
 
@@ -133,7 +133,7 @@ namespace IO {
         if(size == 0) {
             return 0;
         }
-    
+
         std::memcpy(buffer, this->gptr(), sizeof(CharT) * size);
         return size;
     }
@@ -187,7 +187,7 @@ namespace IO {
         size_t leftover = 0;
 
         // if in writing mode pptr is valid, flush out the buffer
-        if( this->pptr() ) 
+        if( this->pptr() )
         {
             // write buffer to device
             const size_t avail = this->pptr() - this->pbase();
@@ -205,7 +205,7 @@ namespace IO {
         this->setp(_buffer + leftover, _buffer + _bufferSize);
 
         // if the overflow char is not EOF put it in buffer
-        if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false ) 
+        if( traits_type::eq_int_type(ch, traits_type::eof()) ==  false )
         {
             *this->pptr() = traits_type::to_char_type(ch);
             this->pbump(1);

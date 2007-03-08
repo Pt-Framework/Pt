@@ -10,6 +10,18 @@ namespace Pt {
         file system handling such as traversing through directories and files,
         File-IO, shared memory and shared libraries. All classes and functions
         are in the namespace system, which is nested in the ptv namespace.
+		The I/O classes extend the IOStreams of the C++ standard library. A
+		Pt::IOStream implements formatted IO through its std::locale and all
+		overloads of the input and output operator are usable as in the C++
+		standard library. The Pt::IOStream has additional peeking capability
+		compared to standard C++ IOStreams, so it can be peeked for multiple
+		characters at once. A Pt::IOStream combines a Pt::StreamBuffer and a
+		Pt::IODevice and allows for transparent IO this way.
+		Classes derived from Pt::StreamBuffer are used to implement a buffering
+		strategy for an IOStream. The IOBuffer included with the IO module
+		implements buffered IO with a linear buffer area.
+		IOStreams operate on IODevices, which are meant to implement low-level IO.
+        Examples of typical IODevices are the FileDevice or the Socket classes.
      */
     namespace System {
         class FileSystemMode;

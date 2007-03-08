@@ -29,6 +29,8 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           FileDevice.cpp
                           FileStream.cpp
                           FileSystem.cpp
+                          IOError.cpp
+                          IOManager.cpp
                           Mutex.cpp
                           MutexLock.cpp
                           Plugin.cpp
@@ -42,29 +44,30 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Thread.cpp
                           ThreadKey.cpp
                           TimeValue.cpp
+                          Url.cpp
                           SerialDevice.cpp
                           ;
 
-SharedLibrary_LinkSharedLibraries Pt-System : Pt Pt-IO ;
+SharedLibrary_LinkSharedLibraries Pt-System : Pt ;
 SharedLibrary_AddLibraries Pt-System : $(SYSLIBS) ;
 SharedLibrary_MakeLocate Pt-System : bin ;
 
 SharedLibrary TestPlugin : TestPlugin.cpp ;
-SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-IO Pt-System ;
+SharedLibrary_LinkSharedLibraries TestPlugin : Pt Pt-System ;
 SharedLibrary_MakeLocate TestPlugin : bin ;
 
 Main PluginDemo : PluginDemo.cpp ;
-Main_LinkSharedLibraries PluginDemo : Pt Pt-System Pt-IO ;
+Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : bin ;
 
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
-Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-IO Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text Pt-Gfx ;
 Main_MakeLocate SerialDeviceDemo : bin ;
 
 PtUnitTest SerialDeviceTest : SerialDeviceTest.cpp ;
-Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System Pt-IO ;
+Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System ;
 Main_MakeLocate SerialDeviceTest : bin ;
 
 Main EventLoopDemo : EventLoopDemo.cpp ;
-Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-IO Pt-Text  ;
+Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;

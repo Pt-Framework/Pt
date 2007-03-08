@@ -16,25 +16,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IODevice_h
-#define Pt_IODevice_h
+#ifndef Pt_System_IODevice_h
+#define Pt_System_IODevice_h
 
 
-#include <Pt/IO/Api.h>
+#include <Pt/System/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/IO/IOError.h>
+#include <Pt/System/IOError.h>
 
 #include <limits>
 #include <ios>
 
 
 namespace Pt {
-namespace IO {
+
+namespace System {
 
 
 /** @brief I/O Device base class
-    @ingroup Pt
 
     This class serves as the base class for all kinds of I/O devices. The
     interface supports synchronous and asynchronous I/O operations. Some
@@ -85,7 +85,7 @@ class BasicIODevice : public NonCopyable {
         }
 
         static const unsigned int WaitTimeInfinite = static_cast<unsigned int>(-1);
-        
+
         //! @brief Waits until data is available
         /*!
             If the device is in asynchronous mode this function waits for
@@ -99,7 +99,7 @@ class BasicIODevice : public NonCopyable {
         bool wait(WaitMode mode, unsigned int msec)
         { return this->_wait(mode, msec); }
 
-                
+
         //! @brief Read data from I/O device
         /*!
             Reads up to n bytes and stores them in buffer. Returns the number
@@ -276,7 +276,8 @@ class BasicIODevice : public NonCopyable {
 
 typedef BasicIODevice<char> IODevice;
 
-} // namespace IO
+} // namespace System
+
 } // namespace Pt
 
 #endif

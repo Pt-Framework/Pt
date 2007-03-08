@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
- *                                                                         *
+ *   Copyright (C) 2005 Marc Boris Dürner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,13 +16,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_System_StreamBuffer_h
+#define Pt_System_StreamBuffer_h
 
-#include "Pt/IO/IODevice.h"
-using namespace Pt;
+#include <ios>
+#include <streambuf>
+#include <Pt/System/Api.h>
 
-#include <sstream>
-#include <iostream>
-using namespace std;
 
+namespace Pt {
+
+namespace System {
+
+    template <typename CharT>
+    class BasicStreamBuffer : public std::basic_streambuf<CharT> {
+        public:
+            typedef typename std::basic_streambuf<CharT>::int_type IntT;
+            typedef typename std::basic_streambuf<CharT>::traits_type TraitsT;
+
+        public:
+            virtual std::streamsize peeksome(CharT* buffer, std::streamsize size)
+            { return this->_peeksome(buffer, size); }
+
+        protected:
+            virtual std::streamsize _peeksome(CharT* buffer, std::streamsize size)
+            { return 0; }
+    };
+
+    typedef BasicStreamBuffer<char> StreamBuffer;
+
+} // namespace System
+
+} // namespace Pt
+
+#endif
 
 

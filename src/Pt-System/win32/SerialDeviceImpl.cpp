@@ -28,7 +28,7 @@ namespace System{
 
 SerialDeviceImpl::SerialDeviceImpl()
 : _terminateEv( 0 )
-{ 
+{
     memset(&_overlapped, 0, sizeof(_overlapped) );
 }
 
@@ -50,61 +50,61 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
-        throw IO::IOError("Could not open port" , PT_SOURCEINFO);
+        throw IOError("Could not open port" , PT_SOURCEINFO);
 
     try
     {
         if( !GetCommState( _handle, &_orgCommState ) )
-            throw IO::IOError("Get port state failed" , PT_SOURCEINFO);
+            throw IOError("Get port state failed" , PT_SOURCEINFO);
 
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
         comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        comTimeOut.WriteTotalTimeoutConstant    = 1000;       
+        comTimeOut.WriteTotalTimeoutConstant    = 1000;
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
-            throw IO::IOError("Set port time outs failed" , PT_SOURCEINFO);
+            throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
-        //Create the wait events.            
+        //Create the wait events.
         memset( &_overlapped, 0, sizeof( _overlapped ) );
-        
+
         // The port event.
         _overlapped.hEvent = CreateEvent( 0, FALSE ,0, 0 );
-        
-        // The terminate event.   
-        _terminateEv = CreateEvent( 0, FALSE ,0, 0 ); 
-            
-    }        
+
+        // The terminate event.
+        _terminateEv = CreateEvent( 0, FALSE ,0, 0 );
+
+    }
     catch( ... )
     {
         CloseHandle( _handle );
         _handle = 0;
         throw;
-    }    
+    }
 }
 
 void SerialDeviceImpl::close()
 {
     if( _handle == 0 || _handle == INVALID_HANDLE_VALUE )
         return;
-    
+
     //Signalize the terminate event.
     SetEvent( _terminateEv );
-    
+
     //Reset the wait mask
     SetCommMask( _handle, 0 );
 
     //Restore the port state.
     SetCommState( _handle, &_orgCommState );
-    
+
     //Close the port handle.
     CloseHandle( _handle );
-    
+
     //Terminate event
     CloseHandle( _terminateEv );
-    
+
     //Port event.
     CloseHandle( _overlapped.hEvent );
 
@@ -121,7 +121,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 
     if( ReadFile( _handle, buffer, count, &length, &_overlapped ) )
         return length;
-    
+
     if( ERROR_HANDLE_EOF == GetLastError() )
     {
         eof = true;
@@ -129,13 +129,13 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     }
     else if( ERROR_IO_PENDING == GetLastError() )
     {
-        if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) ) 
+        if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) )
             length = 0;
     }
     else
     {
-        throw IO::IOError("Read port failed" , PT_SOURCEINFO);
-    }             
+        throw IOError("Read port failed" , PT_SOURCEINFO);
+    }
 
     return length;
 }
@@ -146,7 +146,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 
     if( WriteFile(  _handle,  buffer,  count, &length, &_overlapped ) )
         return length;
-    
+
     if( ERROR_IO_PENDING == GetLastError() )
     {
         if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) )
@@ -154,7 +154,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     }
     else
     {
-        throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
+        throw IOError("Could not write to file handle", PT_SOURCEINFO);
     }
 
     return length;
@@ -163,13 +163,13 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 void SerialDeviceImpl::writeCommState( DCB& commState )
 {
     if( !SetCommState( _handle, &commState ) )
-        throw IO::IOError( "Changing port state failed" , PT_SOURCEINFO );
+        throw IOError( "Changing port state failed" , PT_SOURCEINFO );
 }
 
 void SerialDeviceImpl::readCommState( DCB& commState ) const
 {
     if( !GetCommState( _handle, &commState ) )
-        throw IO::IOError( "Get port state failed" , PT_SOURCEINFO );
+        throw IOError( "Get port state failed" , PT_SOURCEINFO );
 }
 
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
@@ -206,10 +206,10 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
     DCB commState;
     readCommState( commState );
-    
+
     switch( bits )
     {
-        case SerialDevice::OneStopBit: 
+        case SerialDevice::OneStopBit:
             commState.StopBits  = ONESTOPBIT;
         break;
 
@@ -228,11 +228,11 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 {
     DCB commState;
-    
+
     readCommState( commState );
     switch( commState.StopBits )
     {
-        case ONESTOPBIT: 
+        case ONESTOPBIT:
             return SerialDevice::OneStopBit;
         break;
 
@@ -253,7 +253,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
     DCB commState;
-    
+
     readCommState( commState );
     switch( parity )
     {
@@ -276,9 +276,9 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 SerialDevice::Parity SerialDeviceImpl::parity() const
 {
     DCB commState;
-    
+
     readCommState( commState );
-    
+
     switch( commState.Parity )
     {
         case EVENPARITY:
@@ -299,14 +299,14 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 }
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
-{    
-    static const int ASCII_XON  = 0x11; 
+{
+    static const int ASCII_XON  = 0x11;
     static const int ASCII_XOFF = 0x13;
-    
+
     DCB commState;
-    
+
     readCommState( commState );
-    
+
     commState.XonChar  = ASCII_XON;
     commState.XoffChar = ASCII_XOFF;
     commState.XonLim   = 100;
@@ -332,9 +332,9 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
     DCB commState;
-    
+
     readCommState( commState );
-    
+
     //Check for both.
     if( commState.fInX == commState.fOutX && commState.fOutX == 1 &&
         commState.fOutxCtsFlow == 1 && commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
@@ -360,13 +360,13 @@ void SerialDeviceImpl::flush()
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
-    DWORD timeout = static_cast<DWORD>( msec );     
-    
+    DWORD timeout = static_cast<DWORD>( msec );
+
     if( msec != SerialDevice::WaitTimeInfinite )
-        timeout = INFINITE;            
+        timeout = INFINITE;
 
     if( mode == SerialDevice::WaitOutput)
-        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK);        
+        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK);
     else if ( mode == SerialDevice::WaitInput)
         SetCommMask( _handle, EV_RXCHAR | EV_BREAK);
 
@@ -383,12 +383,12 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
     eventHandles[1] = _terminateEv;
 
     const DWORD reason = WaitForMultipleObjects( 2, eventHandles, FALSE, timeout );
-    
+
     if( reason == WAIT_FAILED )
         throw std::runtime_error( "Could not wait for file handle: " + PT_SOURCEINFO);
-    
+
     GetCommMask( _handle, &waitMask );
-    
+
     if( mode == SerialDevice::WaitOutput )
         return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_TXEMPTY ) );
     else

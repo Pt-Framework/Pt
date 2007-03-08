@@ -20,7 +20,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/IO/Url.h"
+#include "Pt/System/Url.h"
 
 #include <sstream>
 #include <iomanip>
@@ -29,7 +29,7 @@ using namespace std;
 
 namespace Pt {
 
-namespace IO {
+namespace System {
 
 
 Url::Url()
