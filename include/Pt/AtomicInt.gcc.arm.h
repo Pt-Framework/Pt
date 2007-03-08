@@ -22,7 +22,7 @@
 #define PT_ATOMICINT_GCC_ARM_H
 
 #include <csignal>
-
+#include <cstdio>
 
 namespace Pt {
 
@@ -38,8 +38,24 @@ namespace Pt {
             inline atomic_t value() const
             { return _value; }
 
+
             inline void operator+=(atomic_t n)
             {
+                atomic_t tmp1;
+                atomic_t tmp2;
+                atomic_t tmp3;
+                asm volatile ("\n"
+                        "0:\tldr\t%0,[%3]\n\t"
+                        "add\t%1,%0,%4\n\t"
+                        "swp\t%2,%1,[%3]\n\t"
+                        "cmp\t%0,%2\n\t"
+                        "swpne\t%1,%2,[%3]\n\t"
+                        "bne\t0b"
+                        : "=&r" (tmp1), "=&r" (tmp2), "=&r" (tmp3)
+                        : "r" (&_value), "r"(n)
+                        : "cc", "memory");
+
+                /* ARMv6
                 volatile register atomic_t tmp;
                 volatile register atomic_t result;
 
@@ -53,11 +69,25 @@ namespace Pt {
                     : "=&r"(result), "=&r"(tmp)
                     :   "r"(&_value), "Ir"(n)
                     : "cc"
-                );
+                );*/
             }
 
             inline void operator-=(atomic_t n)
             {
+                atomic_t tmp1;
+                atomic_t tmp2;
+                atomic_t tmp3;
+                asm volatile ("\n"
+                        "0:\tldr\t%0,[%3]\n\t"
+                        "sub\t%1,%0,%4\n\t"
+                        "swp\t%2,%1,[%3]\n\t"
+                        "cmp\t%0,%2\n\t"
+                        "swpne\t%1,%2,[%3]\n\t"
+                        "bne\t0b"
+                        : "=&r" (tmp1), "=&r" (tmp2), "=&r" (tmp3)
+                        : "r" (&_value), "r"(n)
+                        : "cc", "memory");
+                /* ARMv6
                 volatile register atomic_t tmp;
                 volatile register atomic_t result;
 
@@ -71,11 +101,28 @@ namespace Pt {
                     : "=&r"(result), "=&r"(tmp)
                     :   "r"(&_value), "Ir"(n)
                     : "cc"
-                );
+                );*/
             }
 
             inline void operator=(atomic_t n)
             {
+                atomic_t result, tmp;
+                asm volatile ("\n"
+                    "0:\tldr\t%1,[%2]\n\t"
+                    "mov\t%0,#0\n\t"
+                    "cmp\t%1,%4\n\t"
+                    "bne\t1f\n\t"
+                    "swp\t%0,%3,[%2]\n\t"
+                    "cmp\t%1,%0\n\t"
+                    "swpne\t%1,%0,[%2]\n\t"
+                    "bne\t0b\n\t"
+                    "mov\t%0,#1\n"
+                    "1:"
+                    : "=&r" (result), "=&r" (tmp)
+                    : "r" (&_value), "r" (n), "r" (_value)
+                    : "cc", "memory");
+
+                /* ARMv6
                 volatile register atomic_t tmp;
 
                 asm volatile (
@@ -87,11 +134,29 @@ namespace Pt {
                     : "=&r"(tmp)
                     :   "r"(&_value), "r"(n)
                     : "cc"
-                );
+                );*/
             }
 
             inline bool compareExchange(atomic_t oldval, atomic_t newval)
             {
+                atomic_t result, tmp;
+                asm volatile ("\n"
+                    "0:\tldr\t%1,[%2]\n\t"
+                    "mov\t%0,#0\n\t"
+                    "cmp\t%1,%4\n\t"
+                    "bne\t1f\n\t"
+                    "swp\t%0,%3,[%2]\n\t"
+                    "cmp\t%1,%0\n\t"
+                    "swpne\t%1,%0,[%2]\n\t"
+                    "bne\t0b\n\t"
+                    "mov\t%0,#1\n"
+                    "1:"
+                    : "=&r" (result), "=&r" (tmp)
+                    : "r" (&_value), "r" (newval), "r" (oldval)
+                    : "cc", "memory");
+                return result;
+
+                /* ARMv6
                 volatile register atomic_t tmp;
                 volatile register atomic_t result;
 
@@ -110,7 +175,7 @@ namespace Pt {
                     : "cc", "memory"
                 );
 
-                return result;
+                return result;*/
             }
 
         private:
