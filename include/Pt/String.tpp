@@ -198,10 +198,25 @@ inline void basic_string<Pt::Char>::detach(size_type reserveSize)
 
 inline void basic_string<Pt::Char>::swap(basic_string& str)
 {
-    basic_string tmp1(this->c_str(), this->length(), this->get_allocator());
-    basic_string tmp2(str.c_str(), str.length(), str.get_allocator());
-    str = tmp1;
-    *this = tmp2;
+    // mutation ends busy states
+    if( _data->busy() )
+        _data->setInitial();
+
+    if( str._data->busy() )
+        str._data->setInitial();
+
+    // swap the data pointers
+    Pt::StringData* tmp = this->_data;
+    this->_data = str._data;
+    str._data = tmp;
+
+    // TODO: handle different allocator types when this class is
+    // templated for allocator types. We need to deep copy then
+    //
+    // basic_string tmp1(this->c_str(), this->length(), this->get_allocator());
+    // basic_string tmp2(str.c_str(), str.length(), str.get_allocator());
+    // str = tmp1;
+    // *this = tmp2;
 }
 
 

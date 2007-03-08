@@ -70,16 +70,16 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
 
     _fd = ::open(path.c_str(), flags, 0644);
     if(_fd == -1)
-        throw Pt::IO::OpenFailed("open failed", PT_SOURCEINFO);
+        throw OpenFailed("open failed", PT_SOURCEINFO);
 
     try
     {
         struct termios ios;
         if( ::tcgetattr(_fd, &ios) == -1 )
-            throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
+            throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
         if( ::tcgetattr(_fd, &_prevIos) == -1 )
-            throw Pt::IO::IOError("Could not get termios attributes", PT_SOURCEINFO);
+            throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
         // Disable line wise reading
         ios.c_lflag &= ~ICANON;
@@ -87,7 +87,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
 
         if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
         {
-            throw Pt::IO::IOError("Could not set termios attributes", PT_SOURCEINFO);
+            throw IOError("Could not set termios attributes", PT_SOURCEINFO);
         }
 
         // Open a pipe to send wake up messages
@@ -113,7 +113,7 @@ void SerialDeviceImpl::close()
         ::tcsetattr(_fd, TCSANOW, &_prevIos);
 
         if( ::close(_fd) != 0 )
-            throw IO::IOError("Could not close file handle", PT_SOURCEINFO);
+            throw IOError("Could not close file handle", PT_SOURCEINFO);
 
         _fd = -1;
     }
@@ -141,7 +141,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
         if(errno == EAGAIN) // non-blocking and no data yet
             return 0;
 
-        throw IO::IOError("Could not read from file handle", PT_SOURCEINFO);
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
     }
 
     if(ret == 0)
@@ -163,7 +163,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
         if(errno == EAGAIN) // non-blocking and no data yet
             return 0;
 
-        throw IO::IOError("Could not write to file handle", PT_SOURCEINFO);
+        throw IOError("Could not write to file handle", PT_SOURCEINFO);
     }
 
     return ret;
@@ -176,7 +176,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 
     if( ::tcgetattr(_fd, &ios) == -1  )
     {
-        throw Pt::IO::IOError( "Could not set baud rate", PT_SOURCEINFO);
+        throw IOError( "Could not set baud rate", PT_SOURCEINFO);
     }
 
     speed_t rate = B0;
@@ -209,7 +209,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 
     if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
     {
-        throw Pt::IO::IOError("Could not set baud rate", PT_SOURCEINFO);
+        throw IOError("Could not set baud rate", PT_SOURCEINFO);
     } 
 }
 
@@ -219,7 +219,7 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
     struct termios ios;
     if( ::tcgetattr(_fd, &ios) == -1 )
     {
-        throw Pt::IO::IOError("Could not get baud rate", PT_SOURCEINFO);
+        throw IOError("Could not get baud rate", PT_SOURCEINFO);
     }
 
     speed_t rate = ::cfgetispeed( &ios ) ;
@@ -254,7 +254,7 @@ void SerialDeviceImpl::setCharSize( int size )
 {
     struct termios ios;
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not set char size", PT_SOURCEINFO);
+        throw IOError("Could not set char size", PT_SOURCEINFO);
 
     ios.c_cflag &= ~CSIZE;
 
@@ -273,7 +273,7 @@ void SerialDeviceImpl::setCharSize( int size )
             ios.c_cflag |= CS8;
             break;
         default:
-            throw Pt::IO::IOError("Invalid char size", PT_SOURCEINFO);
+            throw IOError("Invalid char size", PT_SOURCEINFO);
     }
 
     tcsetattr(_fd, TCSANOW, &ios);
@@ -285,7 +285,7 @@ int SerialDeviceImpl::charSize() const
     struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not get char size", PT_SOURCEINFO);
+        throw IOError("Could not get char size", PT_SOURCEINFO);
 
     int size = ios.c_cflag & CSIZE;
     switch(size)
@@ -295,7 +295,7 @@ int SerialDeviceImpl::charSize() const
         case CS7: return 7;
         case CS8: return 8;
         default:
-            throw Pt::IO::IOError("Invalid char size", PT_SOURCEINFO);
+            throw IOError("Invalid char size", PT_SOURCEINFO);
     }
 
     return 0;
@@ -307,7 +307,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
     struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not get stop bits", PT_SOURCEINFO);
+        throw IOError("Could not get stop bits", PT_SOURCEINFO);
 
     ios.c_cflag &= ~CSTOPB;
 
@@ -320,7 +320,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
             ios.c_cflag |= CSTOPB;
             break;
         default:
-            throw Pt::IO::IOError("Invalid stop bits", PT_SOURCEINFO);
+            throw IOError("Invalid stop bits", PT_SOURCEINFO);
     }
 
     tcsetattr(_fd, TCSANOW, &ios);
@@ -332,7 +332,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
    struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not get stop bits", PT_SOURCEINFO);
+        throw IOError("Could not get stop bits", PT_SOURCEINFO);
 
     if( ios.c_cflag & CSTOPB )
     {
@@ -342,7 +342,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
         return SerialDevice::OneStopBit;
     }
 
-   throw Pt::IO::IOError("Invalid stop bits", PT_SOURCEINFO);
+   throw IOError("Invalid stop bits", PT_SOURCEINFO);
    return SerialDevice::OneStopBit;
 }
 
@@ -352,7 +352,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
    struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not get parity", PT_SOURCEINFO);
+        throw IOError("Could not get parity", PT_SOURCEINFO);
 
     ios.c_cflag &= ~(PARENB | PARODD);
 
@@ -367,7 +367,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
         case SerialDevice::ParityNone:
             break;
         default:
-            throw Pt::IO::IOError("Invalid parity", PT_SOURCEINFO);
+            throw IOError("Invalid parity", PT_SOURCEINFO);
     }
 
     tcsetattr(_fd, TCSANOW, &ios);
@@ -379,7 +379,7 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
    struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not get parity", PT_SOURCEINFO);
+        throw IOError("Could not get parity", PT_SOURCEINFO);
 
     if( ios.c_cflag & PARENB )
     {
@@ -405,7 +405,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
    struct termios ios;
 
     if( ::tcgetattr(_fd, &ios) == -1 )
-        throw Pt::IO::IOError("Could not set flow control", PT_SOURCEINFO);
+        throw IOError("Could not set flow control", PT_SOURCEINFO);
 
     ios.c_cflag &= ~CRTSCTS;
     ios.c_iflag &= ~(IXON | IXANY | IXOFF);
@@ -456,7 +456,7 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 
     struct timeval* timeout = NULL;
     struct timeval tv;
-    if(msec != IO::IODevice::WaitTimeInfinite)
+    if(msec != IODevice::WaitTimeInfinite)
     {
         tv.tv_sec = msec / 1000;
         tv.tv_usec = (msec % 1000) * 1000;
@@ -466,12 +466,12 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
     retry:
     int ret = -1;
 
-    if(mode & IO::IODevice::WaitInput)
+    if(mode & IODevice::WaitInput)
     {
         FD_SET(_fd, &rfds);
         ret = ::select(maxFd + 1, &rfds, 0, 0, timeout);
     }
-    else if(mode & IO::IODevice::WaitOutput)
+    else if(mode & IODevice::WaitOutput)
     {
         FD_SET(_fd, &wfds);
         ret = ::select(maxFd + 1, &rfds, &wfds, 0, timeout);
@@ -488,7 +488,7 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
         if(errno == EINTR)
             goto retry;
 
-        throw IO::IOError("Could not select on file descriptor", PT_SOURCEINFO);
+        throw IOError("Could not select on file descriptor", PT_SOURCEINFO);
     }
 
     if(ret == 1)

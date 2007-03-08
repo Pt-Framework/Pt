@@ -22,8 +22,8 @@
 
 #include <termios.h>
 
-#include "Pt/IO/IODevice.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IODevice.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 
 #include <string>

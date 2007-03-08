@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/Api.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
 
 
@@ -34,31 +34,31 @@ namespace System {
         public:
             FileDeviceImpl();
 
-            FileDeviceImpl(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
+            FileDeviceImpl(const char* path, std::ios_base::openmode mode);
 
-            ~FileDeviceImpl() throw();
+            ~FileDeviceImpl();
 
-            void open(const char* path, std::ios_base::openmode mode) throw(IO::IOError);
+            void open(const char* path, std::ios_base::openmode mode);
 
-            void close() throw(IO::IOError);
+            void close();
 
-            bool seekable() const throw();
+            bool seekable() const;
 
-            pos_type seek(off_type offset, IO::IODevice::SeekMode mode) throw(IO::IOError);
+            pos_type seek(off_type offset, IODevice::SeekMode mode);
 
-            void resize(off_type size) throw(IO::IOError);
+            void resize(off_type size);
 
-            size_t size() throw(IO::IOError);
+            size_t size();
 
-            size_t read(char* buffer, size_t count, bool& _eof) throw(IO::IOError);
+            size_t read(char* buffer, size_t count, bool& _eof);
 
-            size_t write(const char* buffer, size_t count) throw(IO::IOError);
+            size_t write(const char* buffer, size_t count);
 
-            size_t peek(char* buffer, size_t count) throw(IO::IOError);
+            size_t peek(char* buffer, size_t count);
 
-            void sync() const throw(IO::IOError);
+            void sync() const;
 
-            bool wait(IO::IODevice::WaitMode mode, unsigned int msec) throw(IO::IOError);
+            bool wait(IODevice::WaitMode mode, unsigned int msec);
 
         private:
             int _fd;
