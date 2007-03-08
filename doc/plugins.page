@@ -1,0 +1,62 @@
+/** \page plugins Plugins
+
+@section plugins_Introduction Introduction
+
+The Platinum plugin API allows to create classes that implement a common interface from a dynamically loadable library or module. The mechanism is non-intrusive and can be used with an existing class hierachy. Plugins can be loaded and unloded by client application code. The concrete type of the created class is opaque to the application that uses the plugin, it only need to know the interface.
+
+
+@section plugins1 Writing Plugins
+
+Lets assume the classes you want to create from a plugin are derived from a interface class called Greeter. The Greeter class has one abstract function called sayHello:
+
+@code
+class Greeter
+{
+    public:
+        virtual ~Greeter() {}
+        virtual void sayHello() const = 0;
+};
+@endcode
+
+Now, we want to write a plugin that implements Greeter to say "Hello World" in english. This simply means to derive from Greeter and implement the sayHello method:
+
+@code
+class EnglishGreeter
+{
+    public:
+        virtual void sayHello() const = 0;
+        { std::cout << "Hello World\n"; }
+};
+@endcode
+
+So far this has nothing to do with writing the plugin, it is pretty much the situation how object-oriented applications and frameworks are designed. To build the plugin, the EnglishGreeter must be build as a shared library and export the symbol PluginList that we will use later to resolve our plugin. PluginList must be a null-terminated array of PluginId* and be exported with C-linkage. This array will contain a number of BasicPlugin instances that serve as builder for the class we want to load from the plugin in our client application.
+
+@code
+static Pt::BasicPlugin<EnglishGreeter, Greeter> _enGreeter("en");
+
+extern "C"
+{
+    Pt:PluginId* PluginList[] = { &_enGreeter, 0 };
+}
+@endcode
+
+Here we create a BasicPlugin statically in the plugin library that is able to create an EnglishGreeter which implements the Greeter interface, hence the two template parameters. The constructor takes a feature string, in this case "en", that can be used later for named construction of objects. The address of the BasicPlugin is then placed in the PluginList, so it can be resolved by the loader code. This is pretty much all you need to do to write a plugin. If we decide to write a GermanGreeter and FrenchGreeter later and do not want to compile them into a separate file we can simply add them to the PluginList. Instead of using the BasicPlugin template, we can derive from Pt::Plugin and override the create and destroy methods if we need a special way of creating or destroying. BasicPlugin is also derived from Pt::Plugin, simply creates with new and destroys with delete.
+
+@section plugins_LoadingPlugins Loading Plugins
+
+To load a plugin in an application the Pt::PluginManager class is used. It is a class template that takes the Interface type , here Greeter, as parameter. It will load the plugin, resolve the pluginlist and get the Plugins which are used when a class needs to be created. It is very simple to use:
+
+@code
+PluginManager<Greeter> manager;
+manager.loadPlugin("/path/to/plugin.so");
+Greeter * greeter = manager.create("en");
+if(greeter)
+{
+    greeter->sayHello();
+    manager.destroy(greeter);
+}
+@endcode
+
+First we need to load the shared library with PluginManager::loadPlugin. Alternatively, we can try to open all plugins from a directory with PluginManager::openDir. Then we can create an instance of a Greeter by a feature string with PluginMaanager::create. Normally, one would ask the user for a language and then see if we can create a Greeter. if the instance could be created we use it like a normal C++ class, but will not delete it directly, but use the PluginManager::destroy method. The rationale behind this is that the allocator in a shared library can differ from the allocator in the application and the same code needs to delete what it created. The life-time of the created classes is bound to the life-time of the PluginManager. When the PluginManager goes out of scope it will not only destroy all created instances, it will also unload all loaded plugin libraries.
+
+*/
