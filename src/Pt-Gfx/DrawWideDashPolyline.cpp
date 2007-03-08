@@ -1,5 +1,4 @@
-#include <math.h>
-
+#include <Pt/Math/MathUtils.h>
 #include "DrawWideDashPolyline.h"
 #include "LineFace.h"
 #include "LineSlope.h"
@@ -286,7 +285,7 @@ void DrawWideDashPolyline::dashSegment( ARgbImage& image, const Pen& pen, int *p
     }
     else // Neither horizontal nor vertical.
     {
-        L = hypot ((double) dx, (double) dy);
+        L = Pt::Math::hypot ((double) dx, (double) dy);
         r = l / L;		/* this is ell / L, not 1 / L */
         rdx = r * dx;
         rdy = r * dy;

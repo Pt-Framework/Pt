@@ -46,6 +46,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           TimeValue.cpp
                           Url.cpp
                           SerialDevice.cpp
+                          IOMonitor.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;

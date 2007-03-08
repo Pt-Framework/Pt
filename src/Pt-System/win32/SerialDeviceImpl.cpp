@@ -360,8 +360,8 @@ void SerialDeviceImpl::flush()
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 {
-    DWORD timeout = static_cast<DWORD>( msec );
-
+    DWORD timeout = static_cast<DWORD>( msec );         
+    
     if( msec != SerialDevice::WaitTimeInfinite )
         timeout = INFINITE;
 

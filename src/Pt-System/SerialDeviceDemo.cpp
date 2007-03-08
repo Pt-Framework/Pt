@@ -135,7 +135,7 @@ void waitEventDemo()
 {
     try
     {
-        Pt::System::SerialDevice serDev("/dev/ttyS0", std::ios_base::in | std::ios_base::out);
+        Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
         Reader reader(serDev);    
         reader.start();
 
@@ -151,6 +151,8 @@ void waitEventDemo()
 
 int main( int argc, char* argv[] )
 {    
-    waitEventDemo();
+    Pt::System::Thread::sleep( 20000 );
+    Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
+    serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
     return 0;
 }
