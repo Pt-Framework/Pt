@@ -36,7 +36,7 @@ Pt::Signal<const std::string&, int> sig2; // Signal with two arguments
 A signal can be connected to a slot if the signatures are compatible. The function connect is overloaded for various types and provides the easiest way to form a connection. One important feature of Pt::Signal is that the return value of a slot is ignored and therefore a slot is compatible to a signal no matter what type it returns. The following code example shows how a signal is connected to a free function and a member function:
 
 @code
-class Callee : public connectable
+class Callee : public Pt::Connectable
 {
 public:
     void slot()
@@ -58,7 +58,7 @@ int main()
 }
 @endcode
 
-The first argument to connect is aleays the signal object. When a signal is connected to a free function the second parameter to the connect call is a function pointer. When a signal is connected to a member function of an object, the second argument is an object instance and the third one the member function pointer. Signals can only be connected to objects that derive from connectable to ensure that all connections are closed when the object goes out of scope and no dangling connections are left.
+The first argument to connect is aleays the signal object. When a signal is connected to a free function the second parameter to the connect call is a function pointer. When a signal is connected to a member function of an object, the second argument is an object instance and the third one the member function pointer. Signals can only be connected to objects that derive from Pt::Connectable to ensure that all connections are closed when the object goes out of scope and no dangling connections are left.
 
 The connecting functions return Connection objects, which can be used to disconnect signals from slots manually. The following code illustrates this:
 
@@ -124,7 +124,7 @@ int main()
     Pt::Delegate<int> delegate;
     connect( delegate, slotA );
     connect( delegate, slotB ); // disconnects from slotA
-f
+
     return 0;
 }
 @endcode
