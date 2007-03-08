@@ -39,7 +39,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             public:
                 Protocol()
                 {
-                    _args.push_back(42);
+                    _args.push_back(300);
 
                     this->includeTest( "ConstructorTest" );
                     this->includeTest( "AdditionTest" );
@@ -68,8 +68,6 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         {
             Pt::AtomicInt a(5);
             PT_UNIT_ASSERT( a.value() == 5 );
-
-
         }
 
         void AssignmentTest(int value)
@@ -87,8 +85,12 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
         void AdditionTest()
         {
-            _value += 3;
-            PT_UNIT_ASSERT( _value.value() == 8 );
+            Pt::AtomicInt value(5);
+            value += 3;
+            PT_UNIT_ASSERT( value.value() == 8 );
+
+            value.compareExchange(8, 10);
+            PT_UNIT_ASSERT( value.value() == 10 );
         }
 
 
