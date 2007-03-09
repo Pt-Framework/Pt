@@ -106,21 +106,19 @@ namespace Pt {
 
             inline void operator=(atomic_t n)
             {
-                atomic_t result, tmp;
+                atomic_t tmp1;
+                atomic_t tmp2;
+                atomic_t tmp3;
                 asm volatile ("\n"
-                    "0:\tldr\t%1,[%2]\n\t"
-                    "mov\t%0,#0\n\t"
-                    "cmp\t%1,%4\n\t"
-                    "bne\t1f\n\t"
-                    "swp\t%0,%3,[%2]\n\t"
-                    "cmp\t%1,%0\n\t"
-                    "swpne\t%1,%0,[%2]\n\t"
-                    "bne\t0b\n\t"
-                    "mov\t%0,#1\n"
-                    "1:"
-                    : "=&r" (result), "=&r" (tmp)
-                    : "r" (&_value), "r" (n), "r" (_value)
-                    : "cc", "memory");
+                "0:\tldr\t%0,[%3]\n\t"
+                "mov\t%1,%4\n"
+                "swp\t%2,%1,[%3]\n\t"
+                "cmp\t%0,%2\n\t"
+                "swpne\t%1,%2,[%3]\n\t"
+                "bne\t0b"
+                : "=&r" (tmp1), "=&r" (tmp2), "=&r" (tmp3)
+                : "r" (&_value), "r"(n)
+                : "cc", "memory");
 
                 /* ARMv6
                 volatile register atomic_t tmp;
