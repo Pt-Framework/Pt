@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,7 +21,6 @@
 #ifndef Pt_System_IODevice_h
 #define Pt_System_IODevice_h
 
-
 #include <Pt/System/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
@@ -33,6 +34,7 @@ namespace Pt {
 
 namespace System {
 
+class IODeviceImpl;
 
 /** @brief I/O Device base class
 
@@ -222,6 +224,9 @@ class BasicIODevice : public NonCopyable {
         */
         bool eof() const
         { return _eof; }
+        
+        
+        virtual IODeviceImpl* impl() = 0;
 
     protected:
         //! @brief Closes the I/O device

@@ -26,11 +26,12 @@
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
+#include "IODeviceImpl.h"
 
 namespace Pt{
 namespace System{
 
-class SerialDeviceImpl
+class SerialDeviceImpl : public IODeviceImpl
 {
     public:
         SerialDeviceImpl();

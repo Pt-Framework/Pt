@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,6 +21,7 @@
 #include "Pt/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
+#include "IODeviceImpl.h"
 
 #include <windows.h>
 #include <ios>
@@ -28,7 +31,8 @@ namespace Pt {
 
 namespace System {
 
-    class FileDeviceImpl {
+    class FileDeviceImpl  : public IODeviceImpl
+    {
         public:
             typedef FileDevice::pos_type pos_type;
             typedef FileDevice::off_type off_type;

@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_System_FileDevice_h
 #define Pt_System_FileDevice_h
 
@@ -49,6 +50,9 @@ namespace System {
 
             size_t size() const;
 
+            virtual IODeviceImpl* impl()
+            { return (IODeviceImpl*) _impl; }
+            
         protected:
             void _close();
 

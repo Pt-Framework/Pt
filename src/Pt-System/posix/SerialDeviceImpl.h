@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Drner                                  *
- *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,6 +26,7 @@
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
+#include "IODeviceImpl.h"
 
 #include <string>
 
@@ -33,7 +35,7 @@ namespace Pt {
 
 namespace System {
 
-class SerialDeviceImpl
+class SerialDeviceImpl : public IODeviceImpl
 {
     public:
         SerialDeviceImpl( );

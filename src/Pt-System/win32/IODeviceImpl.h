@@ -18,30 +18,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITOR_H
-#define PT_SYSTEM_IOMONITOR_H
-
-#include <Pt/System/IODevice.h>
+#ifndef PT_SYSTEM_IODEVICEIMPL_H
+#define PT_SYSTEM_IODEVICEIMPL_H
 
 namespace Pt{
 namespace System{
 
-class IOMonitor
+class IODeviceImpl
 {
     public:
-        IOMonitor();
-        virtual ~IOMonitor();
-        
-        void addDevice( IODevice& device );
-        void removeDevice( IODevice& device );
-        void wait();
-        void wake();
-
-    private:
-        class IOMonitorImpl* _impl;
+        IODeviceImpl();
+        ~IODeviceImpl();        
 };
 
-} //namespace System
-} //namespace Pt
+}//namespace 
+}//namespace
 
 #endif
