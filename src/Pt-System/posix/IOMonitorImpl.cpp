@@ -30,8 +30,10 @@ IOMonitorImpl::IOMonitorImpl()
 IOMonitorImpl::~IOMonitorImpl()
 { }
  
-void IOMonitorImpl::addDevice( IODeviceImpl& device )
+const Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
+    static const Signal<const IOEvent&> sig;
+    return sig;
 }
 
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )

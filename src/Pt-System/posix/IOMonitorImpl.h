@@ -21,8 +21,11 @@
 #ifndef PT_SYSTEM_IOMONITORIMPL_H
 #define PT_SYSTEM_IOMONITORIMPL_H
 
+#include <Pt/Signal.h>
+#include <Pt/System/IOEvent.h>
 
 namespace Pt{
+
 namespace System{
 
 class IODeviceImpl;
@@ -31,15 +34,20 @@ class IOMonitorImpl
 {
     public:
         IOMonitorImpl();
+        
         ~IOMonitorImpl();
         
-        void addDevice( IODeviceImpl& device );
+        const Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
+        
         void removeDevice( IODeviceImpl& device );
+        
         void wait();
+        
         void wake();    
 };
 
-}//namespace System 
+}//namespace System
+
 }//namespace Pt
 
 #endif

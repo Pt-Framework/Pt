@@ -35,7 +35,7 @@
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/Event.h>
+#include <Pt/Event.h>
 
 #include <map>
 #include <iostream>

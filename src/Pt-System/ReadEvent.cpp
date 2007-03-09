@@ -22,7 +22,7 @@
 namespace Pt{
 namespace System{
 
-const type_info& ReadEvent::TYPE_INFO = typeid(ReadEvent);
+const std::type_info& ReadEvent::TYPE_INFO = typeid(ReadEvent);
 
 ReadEvent::ReadEvent()
 { }
