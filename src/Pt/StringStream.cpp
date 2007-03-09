@@ -17,17 +17,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Text/StringStream.h"
-
+#include "Pt/StringStream.h"
 #include <sstream>
 
 
 namespace Pt {
-namespace Text {
 
 BasicStringStreamBuffer::BasicStringStreamBuffer(std::ios::openmode mode)
 : std::basic_stringbuf<Pt::Char>(mode)
-{ 
+{
 	// When building a DLL under Visual studio, we need to imbue here
     #ifndef PT_WITHOUT_STD_LOCALE
         if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
@@ -55,18 +53,17 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
     #endif
 }
 
-} // namespace Text
 } // namespace Pt
 
 
 namespace std {
 
 basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::Text::BasicStringStreamBuffer(mode))
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(mode))
 { }
 
 basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_iostream<Pt::Char>(_buffer = new Pt::Text::BasicStringStreamBuffer(str, mode))
+: basic_iostream<Pt::Char>(_buffer = new Pt::BasicStringStreamBuffer(str, mode))
 { }
 
 basic_stringstream<Pt::Char>::~basic_stringstream()

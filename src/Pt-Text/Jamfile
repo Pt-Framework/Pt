@@ -5,7 +5,6 @@ SubDirC++Flags [ FDefines PT_TEXT_API_EXPORT ] ;
 SharedLibrary Pt-Text : AsciiCodec.cpp
                         #Base64Codec.cpp
                         #Base64Stream.cpp
-                        StringStream.cpp
                         TextCodec.cpp
                         TextStream.cpp
                         Utf.cpp
@@ -16,19 +15,9 @@ SharedLibrary Pt-Text : AsciiCodec.cpp
 SharedLibrary_LinkSharedLibraries Pt-Text : Pt ;
 SharedLibrary_MakeLocate Pt-Text : bin ;
 
-PtUnitTest CharTest : CharTest.cpp ;
-Main_LinkSharedLibraries CharTest : Pt-Text Pt ;
-Main_MakeLocate CharTest : bin ;
-
-PtUnitTest StringTest : StringTest.cpp ;
-Main_LinkSharedLibraries StringTest : Pt-Text Pt ;
-Main_MakeLocate StringTest : bin ;
-
 PtUnitTest TextStreamTest : TextStreamTest.cpp ;
 Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt ;
 Main_MakeLocate TextStreamTest : bin ;
 
-PtUnitTest StringStreamTest : StringStreamTest.cpp ;
-Main_LinkSharedLibraries StringStreamTest : Pt-Text Pt-System Pt ;
-Main_MakeLocate StringStreamTest : bin ;
+
 

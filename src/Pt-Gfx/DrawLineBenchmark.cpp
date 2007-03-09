@@ -22,6 +22,7 @@
 #include <Pt/Main.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/Math/Point.h>
+#include <Pt/StringStream.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Region.h>
@@ -32,7 +33,6 @@
 #include <Pt/Gui/PaintEvent.h>
 #include <Pt/Gui/Label.h>
 #include <Pt/Gui/MouseEvent.h>
-#include <Pt/Text/StringStream.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -63,7 +63,7 @@ class DrawLineDemo : public Pt::Gui::Widget
 
 /*            painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()-120 ),
-                                    Pt::Math::Point( center.x(), center.y()-50 )); 
+                                    Pt::Math::Point( center.x(), center.y()-50 ));
 */
 
             painter.setPen( Pt::Gfx::Pen( lineWidth, Pt::Gfx::ARgbColor(0, 0xcccc, 0) ));
@@ -127,15 +127,15 @@ class DrawLineDemo : public Pt::Gui::Widget
             painter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor(0, 0, 0) ));
             painter.drawLine( Pt::Math::Point( center.x(), center.y()+120 ),
                                     Pt::Math::Point( center.x(), center.y()+50 ));
-*/                                    
+*/
         }
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
-            Pt::System::Clock clock;            
-            Pt::System::TimeValue time; 
-            Pt::Text::StringStream ss;
-            
+            Pt::System::Clock clock;
+            Pt::System::TimeValue time;
+            Pt::StringStream ss;
+
             clock.start();
             this->drawStar( _imagePainter, Pt::Math::Point(60, 150), 2);
             this->drawStar( _imagePainter, Pt::Math::Point(120, 150), 3);
@@ -143,16 +143,16 @@ class DrawLineDemo : public Pt::Gui::Widget
             this->drawStar( _imagePainter, Pt::Math::Point(240, 150), 5);
             this->drawStar( _imagePainter, Pt::Math::Point(300, 150), 6);
             this->drawStar( _imagePainter, Pt::Math::Point(360, 150), 8);
-            time = clock.stop();           
-            
+            time = clock.stop();
+
              ss << "Image: " << time.seconds() * 1000.0 + time.microSeconds() / 1000.0 << " ms";
             _imageTime.setText( ss.str() );
-            
+
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
             Gui::Painter widgetPainter = painter();
             clock.start();
-            
+
             this->drawStar( widgetPainter, Pt::Math::Point(60, 150), 2);
             this->drawStar( widgetPainter,Pt::Math::Point(120, 150), 3);
             this->drawStar( widgetPainter,Pt::Math::Point(180, 150), 4);
@@ -162,22 +162,22 @@ class DrawLineDemo : public Pt::Gui::Widget
             time = clock.stop();
             ss.str(L"");
             ss.clear();
-            
+
             ss << "Native: " << time.seconds() * 1000.0 + time.microSeconds() / 1000.0 << " ms";
             _nativeTime.setText( ss.str() );
-            
+
         }
 
         virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)
         {
             _image.resize(  event.width(), event.height(), Pt::Gfx::ARgbColor( 0xffff, 0, 0 ) );
         }
-        
+
         virtual void _mouseEvent( const Pt::Gui::MouseEvent& event )
-        {        
+        {
             if( event.action() == Pt::Gui::MouseEvent::Release)
             {
-                Pt::Gui::PaintEvent pevent(*this, Pt::Gfx::Region( Pt::Math::Point(0,0), Pt::Math::Size(0,0) ) );            
+                Pt::Gui::PaintEvent pevent(*this, Pt::Gfx::Region( Pt::Math::Point(0,0), Pt::Math::Size(0,0) ) );
                 _paintEvent( pevent );
             }
         }

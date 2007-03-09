@@ -13,6 +13,7 @@ SharedLibrary Pt : Any.cpp
                    Property.cpp
                    PropertyProxy.cpp
                    Signal.cpp
+                   StringStream.cpp
                    StringList.cpp
                    Time.cpp
                    TypeInfo.cpp
@@ -88,3 +89,15 @@ Main_MakeLocate ByteorderTest : bin ;
 PtUnitTest ExceptionTest : ExceptionTest.cpp ;
 Main_LinkSharedLibraries ExceptionTest : Pt ;
 Main_MakeLocate ExceptionTest : bin ;
+
+PtUnitTest CharTest : CharTest.cpp ;
+Main_LinkSharedLibraries CharTest : Pt ;
+Main_MakeLocate CharTest : bin ;
+
+PtUnitTest StringTest : StringTest.cpp ;
+Main_LinkSharedLibraries StringTest : Pt ;
+Main_MakeLocate StringTest : bin ;
+
+PtUnitTest StringStreamTest : StringStreamTest.cpp ;
+Main_LinkSharedLibraries StringStreamTest : Pt ;
+Main_MakeLocate StringStreamTest : bin ;
