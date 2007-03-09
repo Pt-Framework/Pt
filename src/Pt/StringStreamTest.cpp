@@ -17,8 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Text/StringStream.h>
+#undef PT_API_EXPORT
 
+#include "Pt/StringStream.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -28,16 +29,16 @@
 #include <iostream>
 
 
-class PropertiesPropertyIOTest : public Pt::Unit::TestSuite
+class StringStreamTest : public Pt::Unit::TestSuite
 {
 	public:
-        PropertiesPropertyIOTest()
-        : Pt::Unit::TestSuite("PropertiesPropertyIOTest")
-        { 
-            Pt::Unit::TestSuite::registerMethod("Getline", *this, &PropertiesPropertyIOTest::getline );
-            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &PropertiesPropertyIOTest::readInt );
-            Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &PropertiesPropertyIOTest::readFloat );
-            Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &PropertiesPropertyIOTest::rdbufTest );
+        StringStreamTest()
+        : Pt::Unit::TestSuite("StringStreamTest")
+        {
+            Pt::Unit::TestSuite::registerMethod("Getline", *this, &StringStreamTest::getline );
+            Pt::Unit::TestSuite::registerMethod("ReadFloat", *this, &StringStreamTest::readInt );
+            Pt::Unit::TestSuite::registerMethod("ReadInt", *this, &StringStreamTest::readFloat );
+            Pt::Unit::TestSuite::registerMethod("RdbufTest", *this, &StringStreamTest::rdbufTest );
 
         }
 
@@ -47,53 +48,53 @@ class PropertiesPropertyIOTest : public Pt::Unit::TestSuite
         void rdbufTest();
 };
 
-Pt::Unit::RegisterTest<PropertiesPropertyIOTest> _registerTestPropertiesPropertyIO;
+Pt::Unit::RegisterTest<StringStreamTest> _registerStringStreamTest;
 
 
 
-void PropertiesPropertyIOTest::getline()
+void StringStreamTest::getline()
 {
     Pt::String str = L"hier bin ich\n";
-    Pt::Text::StringStream s(str);
+    Pt::StringStream s(str);
 
-    Pt::String strLine;    
-    
+    Pt::String strLine;
+
     std::getline(s, strLine);
-    
+
     PT_UNIT_ASSERT(strLine == L"hier bin ich");
 }
 
 
-void PropertiesPropertyIOTest::readInt()
+void StringStreamTest::readInt()
 {
     Pt::String str = L"123";
-    Pt::Text::StringStream s(str);
+    Pt::StringStream s(str);
 
     int i;
     s >> i;
-    
+
     PT_UNIT_ASSERT(i == 123);
 }
 
-void PropertiesPropertyIOTest::readFloat()
+void StringStreamTest::readFloat()
 {
     Pt::String str = L"123.125";
-    Pt::Text::StringStream s(str);
+    Pt::StringStream s(str);
 
     float f;
     s >> f;
-    
+
     PT_UNIT_ASSERT(f == 123.125);
 }
 
 
-void PropertiesPropertyIOTest::rdbufTest()
+void StringStreamTest::rdbufTest()
 {
     Pt::String str = L"hier ist noch ein Test";
-    Pt::Text::StringStream s(str);
+    Pt::StringStream s(str);
 
     std::basic_stringbuf<Pt::Char>* buffer = s.rdbuf();
-    
+
     PT_UNIT_ASSERT(buffer->str() == L"hier ist noch ein Test");
 }
 

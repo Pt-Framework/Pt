@@ -79,7 +79,6 @@ namespace Pt {
 
     typedef std::basic_stringstream<Pt::Char> StringStream;
 
-
 } // namespace Pt
 
 #endif
