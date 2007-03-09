@@ -7,7 +7,7 @@ The Platinum plugin API allows to create classes that implement a common interfa
 
 @section plugins1 Writing Plugins
 
-Lets assume the classes you want to create from a plugin are derived from a interface class called Greeter. The Greeter class has one abstract function called sayHello:
+Lets assume the classes you want to create from a plugin are derived from an interface class called Greeter. The Greeter class has one abstract function called sayHello:
 
 @code
 class Greeter
@@ -21,11 +21,13 @@ class Greeter
 Now, we want to write a plugin that implements Greeter to say "Hello World" in english. This simply means to derive from Greeter and implement the sayHello method:
 
 @code
-class EnglishGreeter
+class EnglishGreeter : public Greeter
 {
     public:
-        virtual void sayHello() const = 0;
-        { std::cout << "Hello World\n"; }
+        void sayHello()
+        { 
+          std::cout << "Hello World\n";
+        }
 };
 @endcode
 
