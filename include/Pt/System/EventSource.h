@@ -9,7 +9,7 @@
 #include <Pt/Connectable.h>
 
 #include <Pt/System/Api.h>
-#include <Pt/System/Event.h>
+#include <Pt/Event.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/MutexLock.h>
 

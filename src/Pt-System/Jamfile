@@ -25,7 +25,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Condition.cpp
                           Directory.cpp
                           Environment.cpp
-                          Event.cpp
                           EventLoop.cpp
                           File.cpp
                           FileDevice.cpp
@@ -49,6 +48,9 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Url.cpp
                           SerialDevice.cpp
                           IOMonitor.cpp
+                          IOEvent.cpp
+                          WriteEvent.cpp
+                          ReadEvent.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;

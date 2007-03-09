@@ -21,14 +21,27 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
+#include <windows.h>
+#include <Pt/System/WriteEvent.h>
+#include <Pt/System/ReadEvent.h>
+
 namespace Pt{
 namespace System{
 
 class IODeviceImpl
 {
     public:
+    
         IODeviceImpl();
-        ~IODeviceImpl();        
+        virtual ~IODeviceImpl();     
+        
+        virtual HANDLE handle() const = 0;
+        virtual const IOEvent& waitEvent() const = 0;
+    
+    protected:
+            
+        WriteEvent  _writeEvent;
+        ReadEvent   _readEvent;        
 };
 
 }//namespace 

@@ -67,6 +67,11 @@ class SerialDeviceImpl : public IODeviceImpl
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
 
+        HANDLE handle() const
+        { return _handle; }
+        
+        virtual const IOEvent& waitEvent() const;
+        
     private:
         void writeCommState( DCB& commState );
         void readCommState( DCB& commState ) const;
@@ -75,6 +80,7 @@ class SerialDeviceImpl : public IODeviceImpl
         DCB              _orgCommState;
         OVERLAPPED       _overlapped;
         HANDLE           _terminateEv;
+
 };
 
 }//namespace System

@@ -8,7 +8,6 @@
 #include <Pt/Connectable.h>
 #include <Pt/Application.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Event.h>
 #include <Pt/System/EventLoop.h>
 
 namespace Pt {

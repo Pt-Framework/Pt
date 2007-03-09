@@ -22,6 +22,8 @@
 #define PT_SYSTEM_IOMONITOR_H
 
 #include <Pt/System/IODevice.h>
+#include <Pt/System/IOEvent.h>
+#include <Pt/Signal.h>
 
 namespace Pt{
 namespace System{
@@ -32,7 +34,7 @@ class IOMonitor
         IOMonitor();
         virtual ~IOMonitor();
         
-        void addDevice( IODevice& device );
+        const Signal<const IOEvent&>&  addDevice( IODevice& device );
         void removeDevice( IODevice& device );
         void wait();
         void wake();

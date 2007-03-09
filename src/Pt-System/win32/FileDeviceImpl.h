@@ -18,6 +18,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PT_SYSTEM_FILEDEVICEIMPL_H
+#define PT_SYSTEM_FILEDEVICEIMPL_H
+
 #include "Pt/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
@@ -26,9 +29,7 @@
 #include <windows.h>
 #include <ios>
 
-
 namespace Pt {
-
 namespace System {
 
     class FileDeviceImpl  : public IODeviceImpl
@@ -61,13 +62,21 @@ namespace System {
             void sync() const throw(IOError);
 
             bool wait(IODevice::WaitMode mode, unsigned int msec) throw(IOError);
+            
+            virtual HANDLE handle() const
+            { return _handle; } 
+            
+            virtual const IOEvent& waitEvent() const;
 
         private:
-            HANDLE _handle;
-            OVERLAPPED _readOv;
-            OVERLAPPED _writeOv;
+            enum { Reading, Writing, Idle } _state;
+            
+            HANDLE      _handle;
+            OVERLAPPED  _readOv;
+            OVERLAPPED  _writeOv;
+            
     };
 
-}
-
-}
+}//namespaec System
+}//namespaec Pt
+#endif

@@ -18,9 +18,8 @@
  ***************************************************************************/
 #include "Pt/Signal.h"
 
-#include "Pt/System/Event.h"
 #include "Pt/System/EventLoop.h"
-
+#include "Pt/Event.h"
 
 namespace Pt {
 

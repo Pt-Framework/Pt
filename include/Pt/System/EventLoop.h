@@ -10,9 +10,9 @@
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Condition.h>
-#include <Pt/System/Event.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/MutexLock.h>
+#include <Pt/Event.h>
 
 #include <list>
 

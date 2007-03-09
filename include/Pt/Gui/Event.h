@@ -20,7 +20,7 @@
 #ifndef Pt_Gui_Event_h
 #define Pt_Gui_Event_h
 
-#include <Pt/System/Event.h>
+#include <Pt/Event.h>
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Widget.h>
 
@@ -40,7 +40,7 @@ namespace Gui {
      * This class is a sub-class of system::Event, which is the root class of
      * all (non-GUI) events.
      */
-    class PT_GUI_API Event : public System::Event
+    class PT_GUI_API Event : public Pt::Event
     {
         public:
             /**

@@ -16,9 +16,9 @@ IOMonitor::~IOMonitor()
     delete _impl;
 }
 
-void IOMonitor::addDevice( IODevice& device )
+const Signal<const IOEvent&>&  IOMonitor::addDevice( IODevice& device )
 {
-    _impl->addDevice( *device.impl() );
+    return _impl->addDevice( *device.impl() );
 }
 
 void IOMonitor::removeDevice( IODevice& device )

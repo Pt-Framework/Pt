@@ -21,6 +21,10 @@
 #ifndef PT_SYSTEM_IOMONITORIMPL_H
 #define PT_SYSTEM_IOMONITORIMPL_H
 
+#include <Pt/Signal.h>
+#include <Pt/System/IOEvent.h>
+#include <windows.h>
+
 namespace Pt{
 namespace System{
 
@@ -32,10 +36,22 @@ class IOMonitorImpl
         IOMonitorImpl();
         ~IOMonitorImpl();
         
-        void addDevice( IODeviceImpl& device );
+        const Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
         void removeDevice( IODeviceImpl& device );
         void wait();
         void wake();    
+    
+    private:     
+    
+        struct DeviceItem
+        {
+            IODeviceImpl*               device;
+            Signal<const IOEvent&>*     signal;
+        };
+        
+        std::map<HANDLE,DeviceItem> _devices;
+        std::vector<HANDLE>         _waitHandles;
+        HANDLE                      _wakeHandle;
 };
 
 }//namespace System 

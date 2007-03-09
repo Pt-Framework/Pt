@@ -25,25 +25,69 @@ namespace Pt{
 namespace System{
 
 IOMonitorImpl::IOMonitorImpl()
-{ }
+{ 
+    _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+    _waitHandles.push_back( _wakeHandle );
+}
 
 IOMonitorImpl::~IOMonitorImpl()
-{ }
+{ 
+    std::map<HANDLE,DeviceItem>::iterator it = _devices.begin();
+
+    for( ; it != _devices.end(); ++it)
+        delete it->second.signal;
+
+    _devices.clear(); 
+    _waitHandles.clear();
+    CloseHandle( _wakeHandle );
+}
  
-void IOMonitorImpl::addDevice( IODeviceImpl& device )
+const Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
+    DeviceItem item;
+    
+    item.signal = new Signal<const IOEvent&>();
+    item.device = &device;
+    
+    _devices.insert( std::make_pair( device.handle(), item ) );
+    _waitHandles.push_back( device.handle() );
+    
+    return *item.signal;
 }
 
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 {
+    DeviceItem& item = _devices[ device.handle() ];
+    delete item.signal;
+    
+    _devices.erase( device.handle() );
+    
+    std::vector<HANDLE>::iterator it = _waitHandles.begin();
+    
+    for( ; it != _waitHandles.end(); ++it )
+    {
+        if( *it != device.handle() )
+            continue;
+        
+        _waitHandles.erase( it );            
+        break;        
+    }
 }
 
 void IOMonitorImpl::wait()
-{
+{      
+    DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, INFINITE );
+    
+    const Pt::ssize_t   handleIndex  = ( result - WAIT_OBJECT_0 );
+    DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
+    const IOEvent&      ev           = item.device->waitEvent();
+    
+    item.signal->send<const IOEvent&>( ev );    
 }
 
 void IOMonitorImpl::wake()
 {
+    SetEvent( _wakeHandle ); 
 }
 
 }//namespace System

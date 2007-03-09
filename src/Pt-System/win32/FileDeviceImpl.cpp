@@ -27,6 +27,7 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl()
 : _handle(INVALID_HANDLE_VALUE)
+, _state( Idle )
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -68,15 +69,17 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     if(mode & std::ios_base::trunc )
         create |= TRUNCATE_EXISTING;
 
-    //if(mode & IODevice::NonBlock)
-    //{
-    //    #ifdef _WIN32_WCE
-    //        throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
-    //    #endif
-    //    flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
-    //    _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
-    //    _writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-    //}
+//    if(mode & IODevice::NonBlock)
+//    {
+//        #ifdef _WIN32_WCE
+//            throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
+//        #endif
+//        flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
+//        _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
+//        _writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+//    }
+    
+     flags |= FILE_FLAG_OVERLAPPED;
 
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     _handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
@@ -179,6 +182,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IOError
 {
     eof = false;
     DWORD readBytes = 0;
+    _state = Reading;
 
     if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
     {
@@ -208,6 +212,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IOError
 
 size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IOError)
 {
+    _state = Writing;
     DWORD writtenBytes = 0;
 
     if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, &_writeOv) )
@@ -247,6 +252,26 @@ void FileDeviceImpl::sync() const
     if( false == ::FlushFileBuffers(_handle) ) {
         throw IOError("Could not flush file buffer", PT_SOURCEINFO);
     }
+}
+
+const IOEvent& FileDeviceImpl::waitEvent() const
+{
+    switch( _state )
+    {
+        case Reading:
+            return _readEvent;
+        break;
+        
+        case Writing:
+            return _writeEvent; 
+        break;
+        
+        case Idle:
+            throw std::logic_error("Wait on idle device"+ PT_SOURCEINFO );
+        break;        
+    }   
+    
+    return _readEvent;
 }
 
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)

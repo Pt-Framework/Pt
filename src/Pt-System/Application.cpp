@@ -18,8 +18,7 @@
  ***************************************************************************/
 
 #include "Pt/System/Application.h"
-#include "Pt/System/Event.h"
-
+#include "Pt/Event.h"
 #include <string>
 #include <iostream>
 using namespace std;

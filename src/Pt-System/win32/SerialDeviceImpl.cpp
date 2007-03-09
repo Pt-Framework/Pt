@@ -75,7 +75,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
 
         // The terminate event.
         _terminateEv = CreateEvent( 0, FALSE ,0, 0 );
-
+        
+        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK | EV_RXCHAR);
     }
     catch( ... )
     {
@@ -356,6 +357,21 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 void SerialDeviceImpl::flush()
 {
     PurgeComm( _handle, PURGE_RXABORT | PURGE_RXCLEAR);
+}
+
+const IOEvent& SerialDeviceImpl::waitEvent() const
+{
+    DWORD waitMask = 0;
+    
+    GetCommMask( _handle, &waitMask );
+
+    if( waitMask & EV_TXEMPTY )
+        return _writeEvent;    
+    else if( waitMask & EV_RXCHAR )
+        return _readEvent;
+
+    throw IOError("Unknow event", PT_SOURCEINFO);
+    return _readEvent;      
 }
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
