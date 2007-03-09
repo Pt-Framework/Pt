@@ -49,7 +49,7 @@ Pt::Unit::RegisterTest<SerialDeviceTest> register_SerialDeviceTest;
 void SerialDeviceTest::ReadPnp()
 {
 #if defined(WIN32) || defined(_WIN32)
-    std::string port("COM1:"); 
+    std::string port("COM1:");
 #else
     std::string port("/dev/ttyS0");
 #endif
@@ -104,7 +104,7 @@ void SerialDeviceTest::ReadPnp()
 
         PT_UNIT_ASSERT(pnpString.empty() == false);
     }
-    catch(const Pt::IO::OpenFailed& f)
+    catch(const Pt::System::OpenFailed& f)
     {
         message("No device found");
         // do not fail in case no device is connected.
