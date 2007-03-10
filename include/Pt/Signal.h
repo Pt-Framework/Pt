@@ -162,7 +162,7 @@ namespace Pt {
                 return Connection(*this, slot.clone() );
             }
 
-            inline void send() const
+            inline void send(A1 a1, A2 a2, A3 a3) const
             {
                 // The sentry will set the Signal to the sending state and
                 // reset it to not-sending upon destruction. In the sending
@@ -189,7 +189,7 @@ namespace Pt {
                     // - A new Connection might get added to this Signal in
                     //   the slot
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
-                    invokable->invoke();
+                    invokable->invoke(a1, a2, a3);
 
                     // if this signal gets deleted by the slot, the Sentry
                     // will be detached. In this case we bail out immediately
@@ -198,80 +198,13 @@ namespace Pt {
                 }
             }
 
-            template <typename Arg1>
-            inline void send(Arg1 a1) const
-            {
-                Sentry sentry(this);
-
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; it != _connections.end(); ++it)
-                {
-                    if( false == it->valid() || &( it->sender() ) != this )
-                        continue;
-
-                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
-                    invokable->invoke(a1);
-
-                    if( !sentry )
-                        return;
-                }
-            }
-
-            template <typename Arg1, typename Arg2>
-            inline void send(Arg1 a1, Arg2 a2) const
-            {
-                Sentry sentry(this);
-
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; it != _connections.end(); ++it)
-                {
-                    if( &( it->sender() ) != this || false == it->valid() )
-                        continue;
-
-                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
-                    invokable->invoke(a1, a2);
-
-                    if( !sentry )
-                        return;
-                }
-            }
-
-            template <typename Arg1, typename Arg2, typename Arg3>
-            inline void send(Arg1 a1, Arg2 a2, Arg3 a3) const
-            {
-                Sentry sentry(this);
-
-                std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; it != _connections.end(); ++it)
-                {
-                    if( &( it->sender() ) != this || false == it->valid() )
-                        continue;
-
-                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
-                    invokable->invoke(a1, a2, a3);
-
-                    if( !sentry )
-                        return;
-                }
-            }
-
-            inline void operator()() const
-            { this->send(); }
-
-            template <typename Arg1>
-            inline void operator()(Arg1 a1) const
-            { this->send(a1); }
-
-            template <typename Arg1, typename Arg2>
-            inline void operator()(Arg1 a1, Arg2 a2) const
-            { this->send(a1, a2); }
-
-            template <typename Arg1, typename Arg2, typename Arg3>
-            inline void operator()(Arg1 a1, Arg2 a2, Arg3 a3) const
+            inline void operator()(A1 a1, A2 a2, A3 a3) const
             { this->send(a1, a2, a3); }
     };
 
 
+    /** @internal
+    */
     template < typename A1,
                typename A2 >
     class Signal<A1, A2, Pt::Void> : public SignalBase {
@@ -317,6 +250,8 @@ namespace Pt {
     };
 
 
+    /** @internal
+    */
     template < typename A1 >
     class Signal<A1, Pt::Void, Pt::Void> : public SignalBase {
         public:
@@ -361,6 +296,8 @@ namespace Pt {
     };
 
 
+    /** @internal
+    */
     template <>
     class Signal<Pt::Void, Pt::Void, Pt::Void> : public SignalBase {
         public:
@@ -387,9 +324,11 @@ namespace Pt {
                 Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
-                for(; it != _connections.end(); ++it)
+                std::list<Connection>::const_iterator end = Connectable::connections().end();
+
+                for(; it != end; ++it)
                 {
-                    if( &( it->sender() ) != this || false == it->valid() )
+                    if( false == it->valid() || &( it->sender() ) != this  )
                         continue;
 
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
