@@ -1010,7 +1010,7 @@ void X11EventLoop::processEvents()
         _eventQueue.remove(ev);
         _queueMutex.unlock();
 
-        event.send<const Pt::Event&>(*ev);
+        event.send(*ev);
         delete ev;
     }
 }

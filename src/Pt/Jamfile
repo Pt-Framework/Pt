@@ -66,11 +66,11 @@ PtUnitTest TypeTraitsTest : TypeTraitsTest.cpp ;
 Main_LinkSharedLibraries TypeTraitsTest : Pt ;
 Main_MakeLocate TypeTraitsTest : bin ;
 
-Main SignalTest : SignalTest.cpp ;
+PtUnitTest SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt ;
 Main_MakeLocate SignalTest : bin ;
 
-Main DelegateTest : DelegateTest.cpp ;
+PtUnitTest DelegateTest : DelegateTest.cpp ;
 Main_LinkSharedLibraries DelegateTest : Pt ;
 Main_MakeLocate DelegateTest : bin ;
 

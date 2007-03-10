@@ -34,18 +34,14 @@
 
 namespace Pt {
 
-    /** @brief Multicast Signal.
-        A Signal can be connected to multiple targets. The return
-        value of the target is ignored, when the signal is sent.
+    /** @internal
     */
-    template <typename A1 = Pt::Void, typename A2 = Pt::Void, typename A3 = Pt::Void>
-    class Signal : public Connectable {
+    class SignalBase : public Connectable
+    {
         public:
-            typedef Pt::Invokable<A1, A2, A3> Invokable;
-
             struct Sentry
             {
-                Sentry(const Signal* signal)
+                Sentry(const SignalBase* signal)
                 : _signal(signal)
                 {
                     _signal->_sentry = this;
@@ -91,27 +87,15 @@ namespace Pt {
                 bool operator!() const
                 { return _signal == 0; }
 
-                //bool detached() const
-                //{ return _signal == 0; }
-
-                const Signal* _signal;
+                const SignalBase* _signal;
             };
 
-        public:
-            Signal()
+            SignalBase()
             : _sentry(0)
             , _sending(false)
             { }
 
-            Signal(const Signal& signal)
-            : Connectable()
-            ,  _sentry(0)
-            , _sending(false)
-            {
-                Signal::operator=(signal);
-            }
-
-            ~Signal()
+            ~SignalBase()
             {
                 if(_sentry)
                 {
@@ -119,16 +103,10 @@ namespace Pt {
                 }
             }
 
-            Signal& operator=(const Signal& other)
+            SignalBase& operator=(const SignalBase& other)
             {
                 Connectable::operator=(other);
                 return *this;
-            }
-
-            template <typename R>
-            Connection connect(const BasicSlot<R, A1, A2, A3>& slot)
-            {
-                return Connection(*this, slot.clone() );
             }
 
             virtual bool opened(const Connection& c)
@@ -150,6 +128,38 @@ namespace Pt {
                 {
                     Connectable::closed(c);
                 }
+            }
+
+        private:
+            mutable Sentry* _sentry;
+            mutable bool _sending;
+            mutable bool _dirty;
+    };
+
+
+    /** @brief Multicast Signal
+
+        A Signal can be connected to multiple targets. The return
+        value of the target is ignored, when the signal is sent.
+    */
+    template <typename A1 = Pt::Void, typename A2 = Pt::Void, typename A3 = Pt::Void>
+    class Signal : public SignalBase {
+        public:
+            typedef Pt::Invokable<A1, A2, A3> Invokable;
+
+        public:
+            Signal()
+            { }
+
+            Signal(const Signal& signal)
+            {
+                Signal::operator=(signal);
+            }
+
+            template <typename R>
+            Connection connect(const BasicSlot<R, A1, A2, A3>& slot)
+            {
+                return Connection(*this, slot.clone() );
             }
 
             inline void send() const
@@ -259,11 +269,139 @@ namespace Pt {
             template <typename Arg1, typename Arg2, typename Arg3>
             inline void operator()(Arg1 a1, Arg2 a2, Arg3 a3) const
             { this->send(a1, a2, a3); }
+    };
 
-        private:
-            mutable Sentry* _sentry;
-            mutable bool _sending;
-            mutable bool _dirty;
+
+    template < typename A1,
+               typename A2 >
+    class Signal<A1, A2, Pt::Void> : public SignalBase {
+        public:
+            typedef Pt::Invokable<A1, A2, Pt::Void> Invokable;
+
+        public:
+            Signal()
+            { }
+
+            Signal(const Signal& signal)
+            {
+                Signal::operator=(signal);
+            }
+
+            template <typename R>
+            Connection connect(const BasicSlot<R, A1, A2, Pt::Void>& slot)
+            {
+                return Connection(*this, slot.clone() );
+            }
+
+
+            inline void send(A1 a1, A2 a2) const
+            {
+                Sentry sentry(this);
+
+                std::list<Connection>::const_iterator it = Connectable::connections().begin();
+                for(; it != _connections.end(); ++it)
+                {
+                    if( &( it->sender() ) != this || false == it->valid() )
+                        continue;
+
+                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
+                    invokable->invoke(a1, a2);
+
+                    if( !sentry )
+                        return;
+                }
+            }
+
+            inline void operator()(A1 a1, A2 a2) const
+            { this->send(a1, a2); }
+    };
+
+
+    template < typename A1 >
+    class Signal<A1, Pt::Void, Pt::Void> : public SignalBase {
+        public:
+            typedef Pt::Invokable<A1, Pt::Void, Pt::Void> Invokable;
+
+        public:
+            Signal()
+            { }
+
+            Signal(const Signal& signal)
+            {
+                Signal::operator=(signal);
+            }
+
+            template <typename R>
+            Connection connect(const BasicSlot<R, A1, Pt::Void, Pt::Void>& slot)
+            {
+                return Connection(*this, slot.clone() );
+            }
+
+
+            inline void send(A1 a1) const
+            {
+                Sentry sentry(this);
+
+                std::list<Connection>::const_iterator it = Connectable::connections().begin();
+                for(; it != _connections.end(); ++it)
+                {
+                    if( &( it->sender() ) != this || false == it->valid() )
+                        continue;
+
+                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
+                    invokable->invoke(a1);
+
+                    if( !sentry )
+                        return;
+                }
+            }
+
+            inline void operator()(A1 a1) const
+            { this->send(a1); }
+    };
+
+
+    template <>
+    class Signal<Pt::Void, Pt::Void, Pt::Void> : public SignalBase {
+        public:
+            typedef Pt::Invokable<Pt::Void, Pt::Void, Pt::Void> Invokable;
+
+        public:
+            Signal()
+            { }
+
+            Signal(const Signal& signal)
+            {
+                Signal::operator=(signal);
+            }
+
+            template <typename R>
+            Connection connect(const BasicSlot<R, Pt::Void, Pt::Void, Pt::Void>& slot)
+            {
+                return Connection(*this, slot.clone() );
+            }
+
+
+            inline void send() const
+            {
+                Sentry sentry(this);
+
+                std::list<Connection>::const_iterator it = Connectable::connections().begin();
+                for(; it != _connections.end(); ++it)
+                {
+                    if( &( it->sender() ) != this || false == it->valid() )
+                        continue;
+
+                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
+                    invokable->invoke();
+
+                    if( !sentry )
+                        return;
+                }
+            }
+
+            inline void operator()() const
+            { this->send(); }
     };
 
 
@@ -302,8 +440,8 @@ namespace Pt {
 
 
     template < typename A1,
-                typename A2,
-                typename A3 >
+               typename A2,
+               typename A3 >
     SignalSlot<A1, A2, A3> slot( Pt::Signal<A1, A2, A3>& signal )
     { return SignalSlot<A1, A2, A3>( signal ); }
 

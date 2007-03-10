@@ -106,7 +106,7 @@ Widget::~Widget()
         w->unparent();
     }
 
-    destroyed.send<Widget&>(*this);
+    destroyed.send(*this);
     delete _impl;
 }
 

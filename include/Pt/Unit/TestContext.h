@@ -36,7 +36,7 @@ namespace Unit {
         public:
             virtual ~TestContext()
             {
-                _test.finished.send<const TestContext&>(*this);
+                _test.finished.send(*this);
             }
 
             virtual const std::string& testName() const
@@ -46,21 +46,21 @@ namespace Unit {
             {
                 try
                 {
-                    _test.started.send<const TestContext&>(*this);
+                    _test.started.send(*this);
                     this->_run();
-                    _test.success.send<const TestContext&>(*this);
+                    _test.success.send(*this);
                 }
                 catch(const Assertion& assertion)
                 {
-                    _test.assertion.send<const TestContext&>(*this, assertion);
+                    _test.assertion.send(*this, assertion);
                 }
                 catch(const std::exception& ex)
                 {
-                    _test.exception.send<const TestContext&>(*this, ex);
+                    _test.exception.send(*this, ex);
                 }
                 catch(...)
                 {
-                    _test.error.send<const TestContext&>(*this);
+                    _test.error.send(*this);
                 }
             }
 

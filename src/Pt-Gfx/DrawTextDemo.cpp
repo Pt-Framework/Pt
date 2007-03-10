@@ -77,7 +77,7 @@ class UpdateThread : public Pt::System::Thread, public Pt::Connectable
             while(!_stop)
             {
                 Thread::sleep(50);
-                nextEvent.send<const Pt::Event&>( UpdateEvent() );
+                nextEvent.send( UpdateEvent() );
             }
         }
 

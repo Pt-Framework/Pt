@@ -96,7 +96,7 @@ void EventLoop::processEvents()
 
         _mutex.unlock();
 
-        event.send<const Pt::Event&>(*ev);
+        event.send(*ev);
         delete ev;
     }
 }
