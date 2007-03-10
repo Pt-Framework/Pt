@@ -224,8 +224,8 @@ class BasicIODevice : public NonCopyable {
         */
         bool eof() const
         { return _eof; }
-        
-        
+
+
         virtual IODeviceImpl* impl() = 0;
 
     protected:

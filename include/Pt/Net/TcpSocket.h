@@ -27,6 +27,12 @@
 
 namespace Pt {
 
+namespace System {
+
+    class IODeviceImpl;
+
+}
+
 namespace Net {
 
     class TcpSocketImpl;
@@ -53,6 +59,9 @@ namespace Net {
 
             void connect(const std::string& ipaddr, unsigned short int port);
             void accept(const TcpServerSocket& server);
+
+            virtual System::IODeviceImpl* impl()
+            { return 0;}
 
         protected:
             size_t _read(char* buffer, size_t count, bool& eof);
