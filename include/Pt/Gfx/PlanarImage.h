@@ -22,6 +22,7 @@
 
 #include <Pt/Exception.h>
 #include <Pt/Gfx/ARgbFColorProxy.h>
+#include <Pt/Gfx/PlanarImageModel.h>
 
 #include <vector>
 

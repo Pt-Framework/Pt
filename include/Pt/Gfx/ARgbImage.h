@@ -24,6 +24,7 @@
 #include <Pt/Gfx/InterleavedImage.h>
 #include <Pt/Gfx/InterleavedSubImage.h>
 #include <Pt/Gfx/PlanarImage.h>
+#include <Pt/Gfx/PlanarImageModel1x1.h>
 
 
 namespace Pt {

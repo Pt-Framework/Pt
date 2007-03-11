@@ -27,6 +27,33 @@ namespace Pt {
 
     namespace Gfx {
 
+        /** @brief Planar image model class for non-subsampled planar images.
+         *  @ingroup Gfx
+         *
+         *  For now it just an empty foward declaration but later it will become
+         *  the generic implementation of the planar image model.
+         */
+        template<typename ColorProxyT_>
+        class PlanarImageModel<ColorProxyT_, 1, 1> {
+            // Value type of the components
+            //typedef typename ColorProxyTraits<ColorProxyT_> ComponentT ComponentT;
+
+            // Value type of the components
+            //static const size_t NumberOfChannels = ColorProxyTraits<ColorProxyT_>::NumberOfChannels;
+
+            // Color pointer class for ARgbColorProxy color model.
+            class ColorPtrT;
+
+            // Constant color pointer class for ARgbColorProxy color model.
+            class ConstColorPtrT;
+
+            // Scanline class for ARgbColorProxy color model.
+            class ScanlineT;
+
+            // Constant scanline class for ARgbColorProxy color model.
+            class ConstScanlineT;
+        };
+
     } // namespace Gfx
 
 } // namespace Pt
