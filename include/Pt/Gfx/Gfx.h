@@ -111,10 +111,13 @@ namespace Pt {
         //
         // Foward declarations of standards planar image and subimage classes
         //
-        template <typename ColorT_, typename ColorTraitsT_>
+        template<typename ColorProxyT_, uint8_t SubSamplingX_, uint8_t SubSamplingY_>
+        class PlanarImageModel;
+
+        template <typename PlanarImageModelT_>
         class PlanarImage;
 
-        typedef PlanarImage<ARgbColorProxy, ColorTraits<ARgbColorProxy> > ARgbPlanarImage;
+        typedef PlanarImage< PlanarImageModel<ARgbProxy, 1, 1> > ARgbPlanarImage;
 
         template <typename ImageT_>
         class PlanarSubImage;

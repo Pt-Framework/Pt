@@ -25,6 +25,8 @@ namespace Pt {
 
     namespace Gfx {
 
+#if 0
+
         //
         // PlanarImage<ColorProxyT> implementation
         //
@@ -143,6 +145,8 @@ namespace Pt {
 
             *ColorPtrT(_chanPtr, _width, _height, x, y) = color_;
         }
+
+#endif
 
     } // namespace Gfx
 

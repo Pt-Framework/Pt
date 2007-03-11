@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2007 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2007 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,31 +17,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef Pt_Gfx_PlanarImageModel1x1_h
+#define Pt_Gfx_PlanarImageModel1x1_h
 
-#include <Pt/Main.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/ARgbFImage.h>
-#include <Pt/Gfx/ARgb8888Image.h>
-#include <Pt/Gfx/Rgb888Image.h>
-#include <Pt/Gfx/Rgb555Image.h>
-#include <Pt/Gfx/Rgb565Image.h>
-#include <Pt/Gfx/ImageAlgo.h>
-
-using namespace Pt;
-using namespace Pt::Gfx;
+#include <Pt/Gfx/PlanarImageModel.h>
 
 
-int main( int argc, char* argv[] )
-{
-    ARgbInterleavedImage     iargb_1;
-    ARgbFInterleavedImage    iargbf_1;
-    ARgb8888InterleavedImage iargb8888_1;
-    Rgb888InterleavedImage   irgb888_1;
-    Rgb565InterleavedImage   irgb565_1;
-    Rgb555InterleavedImage   irgb555_1;
+namespace Pt {
 
-//    ARgbPlanarImage          pargb_1;
+    namespace Gfx {
 
-    return 0;
-}
+    } // namespace Gfx
+
+} // namespace Pt
+
+
+//
+// Include the template implementation header
+//
+#include "PlanarImageModel1x1.tpp"
+
+#endif
+

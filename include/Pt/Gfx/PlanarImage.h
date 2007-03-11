@@ -30,6 +30,8 @@ namespace Pt {
 
     namespace Gfx {
 
+#if 0
+
         //
         // Foward declarations of pixel iterator classes
         //
@@ -350,6 +352,8 @@ namespace Pt {
                 const ImageT*  _image;
                 ConstColorPtrT _pixel;
         };
+
+#endif
 
     } // namespace Gfx
 
