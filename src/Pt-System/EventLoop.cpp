@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Drner                                  *
+ *   Copyright (C) 2007 Marc Boris Duerner                                 *
+ *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,14 +23,12 @@
 #include "Pt/Event.h"
 
 namespace Pt {
-
 namespace System {
 
 EventLoop::EventLoop()
 : _exitLoop(false)
 {
 }
-
 
 EventLoop::~EventLoop()
 {
@@ -50,26 +49,24 @@ EventLoop::~EventLoop()
     _connectionMutex.unlock();
 }
 
-
-int EventLoop::run()
+void EventLoop::run()
 {
-    while(false == _exitLoop)
+    while( false == _exitLoop )
     {
         _mutex.lock();
 
         if( _eventQueue.empty() )
         {
-            _cond.wait( _mutex );
             _mutex.unlock();
+            _ioMonitor.wait();
         }
-        else {
+        else
+        {
             _mutex.unlock();
         }
 
         this->processEvents();
     }
-
-    return 0;
 }
 
 
@@ -79,14 +76,14 @@ void EventLoop::commitEvent(const Pt::Event& event)
     this->wake();
 }
 
-
 void EventLoop::processEvents()
 {
     while( false == _exitLoop )
     {
         _mutex.lock();
 
-        if( _eventQueue.empty() ) {
+        if( _eventQueue.empty() )
+        {
             _mutex.unlock();
             break;
         }
@@ -101,14 +98,11 @@ void EventLoop::processEvents()
     }
 }
 
-
 void EventLoop::wake()
 {
-    _mutex.lock();
-    _cond.signal();
-    _mutex.unlock();
+    MutexLock threadSave( _mutex );   
+    _ioMonitor.wake();
 }
-
 
 void EventLoop::exit()
 {
@@ -116,18 +110,25 @@ void EventLoop::exit()
     this->wake();
 }
 
-
 void EventLoop::queueEvent(const Pt::Event& event)
 {
-    _mutex.lock();
+    MutexLock threadSave( _mutex );
 
     Pt::Event* ev = event.clone();
     _eventQueue.push_back(ev);
-
-    _mutex.unlock();
 }
 
+Signal<const IOEvent&>&  EventLoop::addDevice( IODevice& device )
+{
+    MutexLock threadSave( _mutex );
+    return _ioMonitor.addDevice( device );
+}
 
-} // namespace Gui
+void EventLoop::removeDevice( IODevice& device )
+{
+    MutexLock threadSave( _mutex );
+    _ioMonitor.removeDevice( device );
+}
 
+} // namespace System
 } // namespace Pt

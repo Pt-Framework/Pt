@@ -36,7 +36,7 @@ class IODeviceImpl
         virtual ~IODeviceImpl();     
         
         virtual HANDLE handle() const = 0;
-        virtual const IOEvent& waitEvent() const = 0;
+        virtual const IOEvent& waitEvent() = 0;
     
     protected:
             

@@ -66,7 +66,7 @@ Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : bin ;
 
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
-Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SerialDeviceDemo : bin ;
 
 PtUnitTest SerialDeviceTest : SerialDeviceTest.cpp ;
@@ -76,3 +76,7 @@ Main_MakeLocate SerialDeviceTest : bin ;
 Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;
+
+Main IOMonitorDemo : IOMonitorDemo.cpp ;
+Main_LinkSharedLibraries IOMonitorDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate IOMonitorDemo : bin ;

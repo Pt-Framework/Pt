@@ -42,7 +42,7 @@ IOMonitorImpl::~IOMonitorImpl()
     CloseHandle( _wakeHandle );
 }
  
-const Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
+Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
     DeviceItem item;
     
@@ -79,10 +79,20 @@ void IOMonitorImpl::wait()
     DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, INFINITE );
     
     const Pt::ssize_t   handleIndex  = ( result - WAIT_OBJECT_0 );
-    DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
-    const IOEvent&      ev           = item.device->waitEvent();
     
-    item.signal->send( ev );    
+    if( handleIndex != InternalWake )
+    {            
+        DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
+        try
+        {
+            const IOEvent&      ev           = item.device->waitEvent();
+            item.signal->send( ev );    
+         }
+         catch(const std::exception& e )
+         {
+         
+         }
+    }
 }
 
 void IOMonitorImpl::wake()

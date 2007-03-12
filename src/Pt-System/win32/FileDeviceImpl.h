@@ -66,7 +66,7 @@ namespace System {
             virtual HANDLE handle() const
             { return _handle; } 
             
-            virtual const IOEvent& waitEvent() const;
+            virtual const IOEvent& waitEvent();
 
         private:
             enum { Reading, Writing, Idle } _state;

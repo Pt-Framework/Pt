@@ -28,13 +28,14 @@
 namespace Pt{
 namespace System{
 
-class IOMonitor
+class PT_SYSTEM_API IOMonitor
 {
     public:
         IOMonitor();
         virtual ~IOMonitor();
         
-        const Signal<const IOEvent&>&  addDevice( IODevice& device );
+        
+        Signal<const IOEvent&>&  addDevice( IODevice& device );
         void removeDevice( IODevice& device );
         void wait();
         void wake();

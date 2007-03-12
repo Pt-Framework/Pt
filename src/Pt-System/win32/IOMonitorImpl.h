@@ -36,13 +36,14 @@ class IOMonitorImpl
         IOMonitorImpl();
         ~IOMonitorImpl();
         
-        const Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
+        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
         void removeDevice( IODeviceImpl& device );
         void wait();
         void wake();    
     
     private:     
     
+        enum{ InternalWake = 0 };
         struct DeviceItem
         {
             IODeviceImpl*               device;

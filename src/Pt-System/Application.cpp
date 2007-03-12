@@ -37,7 +37,8 @@ Application::Application()
 
 int Application::run()
 {
-    return _loop.run();
+    _loop.run();
+    return 0;
 }
 
 

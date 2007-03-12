@@ -61,8 +61,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
-        comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        comTimeOut.WriteTotalTimeoutConstant    = 1000;
+        comTimeOut.WriteTotalTimeoutMultiplier  = 0;//10;
+        comTimeOut.WriteTotalTimeoutConstant    = 0;//1000;
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
@@ -71,13 +71,13 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         memset( &_overlapped, 0, sizeof( _overlapped ) );
 
         // The port event.
-        _overlapped.hEvent = CreateEvent( 0, FALSE ,0, 0 );
+        _overlapped.hEvent = CreateEvent( 0, FALSE ,TRUE, 0 );
 
         // The terminate event.
         _terminateEv = CreateEvent( 0, FALSE ,0, 0 );
-        
-        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK | EV_RXCHAR);
-    }
+                        
+        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK | EV_RXCHAR  );
+   }
     catch( ... )
     {
         CloseHandle( _handle );
@@ -137,7 +137,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     {
         throw IOError("Read port failed" , PT_SOURCEINFO);
     }
-
+    
     return length;
 }
 
@@ -145,6 +145,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
 
+   
     if( WriteFile(  _handle,  buffer,  count, &length, &_overlapped ) )
         return length;
 
@@ -356,19 +357,28 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 
 void SerialDeviceImpl::flush()
 {
-    PurgeComm( _handle, PURGE_RXABORT | PURGE_RXCLEAR);
+    //PurgeComm( _handle, PURGE_RXABORT | PURGE_TXABORT);
+    FlushFileBuffers( _handle );
 }
 
-const IOEvent& SerialDeviceImpl::waitEvent() const
-{
+const IOEvent& SerialDeviceImpl::waitEvent()
+{   
     DWORD waitMask = 0;
-    
-    GetCommMask( _handle, &waitMask );
 
-    if( waitMask & EV_TXEMPTY )
+    if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
+    {
+        if( GetLastError () != ERROR_IO_PENDING )
+            throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
+    }
+    
+    if( (waitMask & EV_BREAK)  == EV_BREAK)
+        throw IOError("Unknow event", PT_SOURCEINFO);
+        
+    if( (waitMask & EV_TXEMPTY) == EV_TXEMPTY )
         return _writeEvent;    
-    else if( waitMask & EV_RXCHAR )
-        return _readEvent;
+
+    if( (waitMask & EV_RXCHAR) == EV_RXCHAR)
+        return _readEvent;       
 
     throw IOError("Unknow event", PT_SOURCEINFO);
     return _readEvent;      

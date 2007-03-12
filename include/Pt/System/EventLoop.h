@@ -1,8 +1,23 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Drner                                  *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_SYSTEM_EVENTLOOP_H
 #define PT_SYSTEM_EVENTLOOP_H
 
@@ -12,7 +27,10 @@
 #include <Pt/System/Condition.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/MutexLock.h>
+#include <Pt/System/Runnable.h>
+#include <Pt/System/IOMonitor.h>
 #include <Pt/Event.h>
+
 
 #include <list>
 
@@ -20,6 +38,8 @@
 namespace Pt {
 
 namespace System {
+
+class IOMonitor;
 
     /** \brief An event loop which handles events from multiple sources.
      *
@@ -42,7 +62,7 @@ namespace System {
      *
      * This class is thread-safe, so any method may be called from any Thread.
      */
-    class PT_SYSTEM_API EventLoop : public Connectable {
+    class PT_SYSTEM_API EventLoop : public Connectable, public Runnable {
         public:
             //! Constructs the EventLoop.
             EventLoop();
@@ -62,7 +82,7 @@ namespace System {
              * "exit()" was called or this object is deleted. During its execution this
              * method delivers the events of the event queue to the registered slots.
              */
-            int run();
+            void run();
 
             /**
              * \brief Adds the given event to the event loop and wakes it up so it
@@ -139,6 +159,11 @@ namespace System {
              */
             void exit();
 
+
+            Signal<const IOEvent&>&  addDevice( IODevice& device );
+            
+            void removeDevice( IODevice& device );
+
             virtual bool opened(const Connection& c)
             {
                 MutexLock lock(_connectionMutex);
@@ -185,11 +210,10 @@ namespace System {
              * by one in method "processEvents()".
              * @see processEvents()
              */
-            std::list<Pt::Event*> _eventQueue;
-
-            System::Mutex _mutex;
-
-            Mutex _connectionMutex;
+            std::list<Pt::Event*>   _eventQueue;
+            Mutex                   _connectionMutex;
+            Mutex                   _mutex;
+            IOMonitor               _ioMonitor;
     };
 
 } // namespace System
