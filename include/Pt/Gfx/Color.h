@@ -23,9 +23,7 @@
 #include <limits>
 #include <assert.h>
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/IfElse.h>
-#include <Pt/Types.h>
+#include <Pt/Gfx/GenericAlgo.h>
 
 
 namespace Pt {
@@ -42,14 +40,6 @@ namespace Pt {
          */
         template <typename ColorT>
         struct ColorTraits;
-
-
-        /** @brief Choose the type which has greater size (from the two given types).
-         */
-        template <typename A, typename B>
-        struct LargestSizeOf {
-            typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
-        };
 
 
         /** @brief Greater-than operator for any color model comparison.

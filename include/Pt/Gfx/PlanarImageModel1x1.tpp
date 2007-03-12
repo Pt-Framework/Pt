@@ -25,6 +25,9 @@ namespace Pt {
 
     namespace Gfx {
 
+        //
+        // Static constants definitions
+        //
         template<typename ColorProxyT_>
         const size_t PlanarImageModel<ColorProxyT_, 1, 1>::NumberOfChannels;
 
@@ -46,12 +49,10 @@ namespace Pt {
                                  size_t                    posY)
                 : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
                 {
-                    const size_t pos = posY*imageWidth + posX;
-
                     _chnStart = chanPtr[0]; // Channel #0 is always the master channel
 
-                    for(size_t i = 0; i < NumberOfChannels; ++i)
-                        _chnCur[i] = chanPtr[i] + pos;
+                    const size_t pos = posY*imageWidth + posX;
+                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
                 }
 
                 inline ColorProxyT operator*()
@@ -59,44 +60,35 @@ namespace Pt {
 
                 inline ColorPtrT& operator++()
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) ++_chnCur[i];
+                    recursiveVectorInc<NumberOfChannels-1>(_chnCur);
                     return *this;
                 }
 
                 inline ColorPtrT& operator--()
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) --_chnCur[i];
+                    recursiveVectorDec<NumberOfChannels-1>(_chnCur);
                     return *this;
                 }
 
                 inline ColorPtrT& operator+=(size_t n)
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) _chnCur[i] += n;
+                    recursiveVectorAssignAdd<NumberOfChannels-1>(_chnCur, n);
                     return *this;
                 }
 
                 inline ColorPtrT& operator-=(size_t n)
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) _chnCur[i] -= n;
+                    recursiveVectorAssignSub<NumberOfChannels-1>(_chnCur, n);
                     return *this;
                 }
 
                 inline bool operator==(const ColorPtrT& c) const
-                {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) {
-                        if(_chnCur[i] != c._chnCur[i]) return(false);
-                    }
-                    return true;
-                }
+                { return recursiveVectorIsEqual<NumberOfChannels-1>(_chnCur, c._chnCur); }
 
                 inline bool operator!=(const ColorPtrT& c) const
-                {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) {
-                        if(_chnCur[i] == c._chnCur[i]) return(false);
-                    }
-                    return true;
-                }
+                { return recursiveVectorIsDiffer<NumberOfChannels-1>(_chnCur, c._chnCur); }
 
+                // Make the appropriate image class as a friend class
                 friend class PlanarImage<PlanarImageModel>;
 
             private:
@@ -133,12 +125,10 @@ namespace Pt {
                                       size_t                                posY)
                 : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
                 {
-                    const size_t pos = posY*imageWidth + posX;
-
                     _chnStart = chanPtr[0]; // Channel #0 is always the master channel
 
-                    for(size_t i = 0; i < NumberOfChannels; ++i)
-                        _chnCur[i] = chanPtr[i] + pos;
+                    const size_t pos = posY*imageWidth + posX;
+                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
                 }
 
                 inline const ValueT operator*() const
@@ -146,43 +136,33 @@ namespace Pt {
 
                 inline ConstColorPtrT& operator++()
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) ++_chnCur[i];
+                    recursiveVectorInc<NumberOfChannels-1>(_chnCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator--()
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) --_chnCur[i];
+                    recursiveVectorDec<NumberOfChannels-1>(_chnCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator+=(size_t n)
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) _chnCur[i] += n;
+                    recursiveVectorAssignAdd<NumberOfChannels-1>(_chnCur, n);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator-=(size_t n)
                 {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) _chnCur[i] -= n;
+                    recursiveVectorAssignSub<NumberOfChannels-1>(_chnCur, n);
                     return *this;
                 }
 
                 inline bool operator==(const ConstColorPtrT& c) const
-                {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) {
-                        if(_chnCur[i] != c._chnCur[i]) return(false);
-                    }
-                    return true;
-                }
+                { return recursiveVectorIsEqual<NumberOfChannels-1>(_chnCur, c._chnCur); }
 
                 inline bool operator!=(const ConstColorPtrT& c) const
-                {
-                    for(size_t i = 0; i < NumberOfChannels; ++i) {
-                        if(_chnCur[i] == c._chnCur[i]) return(false);
-                    }
-                    return true;
-                }
+                { return recursiveVectorIsDiffer<NumberOfChannels-1>(_chnCur, c._chnCur); }
 
                 friend class PlanarImage<PlanarImageModel>;
 
@@ -213,10 +193,8 @@ namespace Pt {
                                  size_t                    imageWidth,
                                  size_t                    posY)
                 {
-                    const size_t pos = posY*imageWidth;
-
-                    for(size_t i = 0; i < NumberOfChannels; ++i)
-                        _chnCur[i] = chanPtr[i] + pos;
+                    const size_t pos = posY * imageWidth;
+                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
                 }
 
                 inline ColorProxyT operator[](size_t x)
@@ -237,10 +215,8 @@ namespace Pt {
                                       size_t                                imageWidth,
                                       size_t                                posY)
                 {
-                    const size_t pos = posY*imageWidth;
-
-                    for(size_t i = 0; i < NumberOfChannels; ++i)
-                        _chnCur[i] = chanPtr[i] + pos;
+                    const size_t pos = posY * imageWidth;
+                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
                 }
 
                 inline const ValueT operator[](size_t x) const
