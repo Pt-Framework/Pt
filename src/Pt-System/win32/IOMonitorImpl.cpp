@@ -82,7 +82,7 @@ void IOMonitorImpl::wait()
     DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
     const IOEvent&      ev           = item.device->waitEvent();
     
-    item.signal->send<const IOEvent&>( ev );    
+    item.signal->send( ev );    
 }
 
 void IOMonitorImpl::wake()
