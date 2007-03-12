@@ -35,23 +35,30 @@ namespace Pt {
          */
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1> {
-            // Value type of the components
-            //typedef typename ColorProxyTraits<ColorProxyT_> ComponentT ComponentT;
+            public:
+                // Color proxy type type (value type) of the color model
+                typedef ColorProxyT_ ColorProxyT;
 
-            // Value type of the components
-            //static const size_t NumberOfChannels = ColorProxyTraits<ColorProxyT_>::NumberOfChannels;
+                // Non-reference type (value type) of the color
+                typedef typename ColorProxyT::ValueT ValueT;
 
-            // Color pointer class for ARgbColorProxy color model.
-            class ColorPtrT;
+                // Value type of each individual component of the color model
+                typedef typename ColorProxyT::ComponentT ComponentT;
 
-            // Constant color pointer class for ARgbColorProxy color model.
-            class ConstColorPtrT;
+                // Number of channels of the color model
+                static const size_t NumberOfChannels = ColorProxyT::NumberOfChannels;
 
-            // Scanline class for ARgbColorProxy color model.
-            class ScanlineT;
+                // Color pointer class for the color model
+                class ColorPtrT;
 
-            // Constant scanline class for ARgbColorProxy color model.
-            class ConstScanlineT;
+                // Constant color pointer class for the color model
+                class ConstColorPtrT;
+
+                // Scanline class for the color model
+                class ScanlineT;
+
+                // Constant scanline class for the color model
+                class ConstScanlineT;
         };
 
     } // namespace Gfx

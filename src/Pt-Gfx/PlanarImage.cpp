@@ -42,6 +42,9 @@ namespace Pt {
         // Explicit instantiation of the standard subimage classes of the above image classes
         //template class PlanarSubImage<ARgbPlanarImage>;
 
+        // Just for testing
+        template class PlanarImageModel<ARgbColorProxy, 1, 1>;
+
 #endif
 
     } // namespace Gfx

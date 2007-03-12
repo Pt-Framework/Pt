@@ -27,6 +27,13 @@ namespace Pt {
 
     namespace Gfx {
 
+        //
+        // Foward declarations of the planar image class
+        //
+        template <typename PlanarImageModelT_>
+        class PlanarImage;
+
+
         /** @brief Planar image model class.
          *  @ingroup Gfx
          *

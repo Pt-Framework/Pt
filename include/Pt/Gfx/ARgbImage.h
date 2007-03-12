@@ -25,6 +25,7 @@
 #include <Pt/Gfx/InterleavedSubImage.h>
 #include <Pt/Gfx/PlanarImage.h>
 #include <Pt/Gfx/PlanarImageModel1x1.h>
+#include <Pt/Gfx/PlanarImageModel2x2.h>
 
 
 namespace Pt {
@@ -48,7 +49,7 @@ namespace Pt {
          *
          *  <B>This is the master planar image model</B>
          */
-        //typedef PlanarImage<ARgbColorProxy, ColorTraits<ARgbColorProxy> > ARgbPlanarImage;
+        typedef PlanarImage< PlanarImageModel<ARgbProxy, 1, 1> > ARgbPlanarImage;
 
 
         /** @brief Standard planar ARgb subimage class.

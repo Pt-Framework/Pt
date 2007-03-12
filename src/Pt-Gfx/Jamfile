@@ -9,6 +9,7 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        Rgb888Color.cpp
                        Rgb565Color.cpp
                        Rgb555Color.cpp
+                       ColorProxy.cpp
                        PlanarImage.cpp
                        InterleavedImage.cpp
                        Pen.cpp

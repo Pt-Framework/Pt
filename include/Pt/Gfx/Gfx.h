@@ -52,9 +52,6 @@ namespace Pt {
         template <typename TagT>
         class Color;
 
-        template <typename ColorT>
-        struct ColorTraits;
-
         struct ARgb;
         struct ARgbF;
         struct ARgb8888;

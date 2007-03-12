@@ -20,12 +20,13 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
+#include <vector>
+
 #include <Pt/String.h>
 #include <Pt/Unicode.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
-#include <limits>
 
 
 namespace Pt {
@@ -77,6 +78,25 @@ namespace Pt {
                 inline Color(uint16_t r, uint16_t g, uint16_t b)
                 : _a(0xFFFF), _r(r), _g(g), _b(b)
                 {}
+
+                /** @brief Construct color using the given components (in vector form).
+                 */
+                inline Color(const std::vector<uint16_t>& chanVec)
+                : _a(chanVec[0]), _r(chanVec[1]), _g(chanVec[2]), _b(chanVec[3])
+                {}
+
+                /** @brief Construct color using the given components (in vector of pointers form).
+                 */
+                inline Color(const std::vector<const uint16_t*>& chanPtr)
+                : _a(*chanPtr[0]), _r(*chanPtr[1]), _g(*chanPtr[2]), _b(*chanPtr[3])
+                {}
+
+                /** @brief Construct color using the given components (in vector of pointers form plus offset).
+                 */
+                inline Color(const std::vector<const uint16_t*>& chanPtr, size_t offset)
+                : _a(*(chanPtr[0]+offset)), _r(*(chanPtr[1]+offset)), _g(*(chanPtr[2]+offset)), _b(*(chanPtr[3]+offset))
+                {}
+
 
                 /** @brief Assignment operator.
                  */
