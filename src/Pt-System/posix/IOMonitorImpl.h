@@ -37,7 +37,7 @@ class IOMonitorImpl
         
         ~IOMonitorImpl();
         
-        const Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
+        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
         
         void removeDevice( IODeviceImpl& device );
         
