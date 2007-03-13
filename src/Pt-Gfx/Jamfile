@@ -77,10 +77,13 @@ PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
 Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx ;
 Main_MakeLocate ImagePainterTest : bin ;
 
+PtUnitTest PlanarImageTest : PlanarImageTest.cpp ;
+Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Text Pt-System ;
+Main_MakeLocate PlanarImageTest : bin ;
+
 Main GfxPerf : GfxPerf.cpp ;
 Main_LinkSharedLibraries GfxPerf : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate GfxPerf : bin ;
-
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
 Main_MakeLocate MakeFontHeader : bin ;
