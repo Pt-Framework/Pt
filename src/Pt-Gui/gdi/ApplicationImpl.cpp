@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -198,7 +199,7 @@ void GDIEventLoop::processEvents()
         _queueMutex.unlock();
 
 
-        eventQueueSignal.send<const Pt::Event&>(*ev);
+        eventQueueSignal.send(*ev);
         delete ev;
     }
 }
