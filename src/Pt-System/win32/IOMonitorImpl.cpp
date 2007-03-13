@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "IOMonitorImpl.h"
 #include "IODeviceImpl.h"
+#include "Pt/System/MutexLock.h"
 
 namespace Pt{
 namespace System{
@@ -44,12 +45,16 @@ IOMonitorImpl::~IOMonitorImpl()
  
 Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
+    MutexLock lock( _mutex );
+    
     DeviceItem item;
     
     item.signal = new Signal<const IOEvent&>();
     item.device = &device;
     
-    _devices.insert( std::make_pair( device.handle(), item ) );
+    HANDLE handle = device.handle();
+    
+    _devices.insert( std::make_pair( handle, item ) );
     _waitHandles.push_back( device.handle() );
     
     return *item.signal;
@@ -57,6 +62,8 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 {
+    MutexLock lock( _mutex );
+    
     DeviceItem& item = _devices[ device.handle() ];
     delete item.signal;
     
@@ -79,18 +86,21 @@ void IOMonitorImpl::wait()
     DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, INFINITE );
     
     const Pt::ssize_t   handleIndex  = ( result - WAIT_OBJECT_0 );
-    
+        
     if( handleIndex != InternalWake )
     {            
-        DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
         try
         {
+            MutexLock lock( _mutex );
+
+            DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
             const IOEvent&      ev           = item.device->waitEvent();
             item.signal->send( ev );    
+
          }
          catch(const std::exception& e )
          {
-         
+            std::cerr<< e.what()<<std::endl;
          }
     }
 }

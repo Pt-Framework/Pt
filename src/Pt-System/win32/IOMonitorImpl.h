@@ -23,6 +23,7 @@
 
 #include <Pt/Signal.h>
 #include <Pt/System/IOEvent.h>
+#include <Pt/System/Mutex.h>
 #include <windows.h>
 
 namespace Pt{
@@ -53,6 +54,7 @@ class IOMonitorImpl
         std::map<HANDLE,DeviceItem> _devices;
         std::vector<HANDLE>         _waitHandles;
         HANDLE                      _wakeHandle;
+        Mutex                       _mutex;
 };
 
 }//namespace System 

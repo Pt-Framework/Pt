@@ -25,7 +25,6 @@
 namespace Pt{
 namespace System{
 
-
 SerialDeviceImpl::SerialDeviceImpl()
 : _terminateEv( 0 )
 {
@@ -75,13 +74,31 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
 
         // The terminate event.
         _terminateEv = CreateEvent( 0, FALSE ,0, 0 );
-                        
+
         SetCommMask( _handle, EV_TXEMPTY | EV_BREAK | EV_RXCHAR  );
-   }
+        
+        DWORD waitMask;
+        
+        if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
+        {
+            if( GetLastError () != ERROR_IO_PENDING )
+                throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
+        }
+
+    }
     catch( ... )
     {
         CloseHandle( _handle );
+        
+        if( _overlapped.hEvent != 0 )
+            CloseHandle( _overlapped.hEvent );
+            
+        if( _terminateEv != 0 )
+            CloseHandle( _terminateEv );
+             
+        _overlapped.hEvent = 0;            
         _handle = 0;
+        _terminateEv = 0;
         throw;
     }
 }
@@ -117,8 +134,6 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     DWORD   length;
     DWORD   error;
     COMSTAT cs;
-
-    ClearCommError( _handle, &error, &cs );
 
     if( ReadFile( _handle, buffer, count, &length, &_overlapped ) )
         return length;
@@ -357,7 +372,6 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 
 void SerialDeviceImpl::flush()
 {
-    //PurgeComm( _handle, PURGE_RXABORT | PURGE_TXABORT);
     FlushFileBuffers( _handle );
 }
 

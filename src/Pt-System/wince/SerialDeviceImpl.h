@@ -23,14 +23,19 @@
 #include <string>
 #include <windows.h>
 
-#include "Pt/IO/IODevice.h"
-#include "Pt/IO/IOError.h"
+#include "Pt/System/IODevice.h"
+#include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
+#include "Pt/System/Runnable.h"
+#include "Pt/System/Thread.h"
+#include "IODeviceImpl.h"
 
 namespace Pt{
 namespace System{
 
-class SerialDeviceImpl
+class IOEvent;
+
+class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::Runnable
 {
     public:
         SerialDeviceImpl();
@@ -65,15 +70,29 @@ class SerialDeviceImpl
         SerialDevice::FlowControl flowControl() const;      
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-
+        
+        HANDLE handle() const;
+        
+        
+        const IOEvent& waitEvent();
+        
     private:
+        SerialDeviceImpl* self()
+        { return this; }
+        
         void writeCommState( DCB& commState );
         void readCommState( DCB& commState ) const;
-
-        HANDLE           _handle;
-        DCB              _orgCommState;
-        DWORD            _waitCommMask;
-  
+        
+        void run();       
+       
+        enum { ReceiveEvent, SendCompleteEvent } _commEventType;
+        
+        HANDLE              _handle;
+        HANDLE              _commEvent;
+        DCB                 _orgCommState;
+        DWORD               _waitCommMask;
+        Thread              _eventThread;  
+        bool                _terminateThread;
 };
 
 }//namespace System

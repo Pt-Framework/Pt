@@ -28,12 +28,14 @@
 #include <Pt/System/WriteEvent.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
+#include <fstream>
 
 class SerialListener : public Pt::Connectable
 {
     public:    
         SerialListener( Pt::System::SerialDevice& device)
         : _device ( device )
+        , _out( "out.txt")
         { 
         }
         
@@ -43,6 +45,7 @@ class SerialListener : public Pt::Connectable
         void serialEvent( const Pt::System::IOEvent& ev )
         {
             std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
+            _out<< "Event: "<< typeid(ev).name()<<std::endl;
             
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
             
@@ -51,7 +54,8 @@ class SerialListener : public Pt::Connectable
                 char buffer[201];
                 memset( buffer, 0, 201);
                 size_t size = _device.read( buffer, 200);
-                std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;            
+                std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
+                _out<< "Read: " << buffer << " (" << size << " bytes)" << std::endl;
             }
             else
             {            
@@ -60,6 +64,7 @@ class SerialListener : public Pt::Connectable
                 if(writeEvent != 0)
                 {
                     std::cerr<<"Data transmission complete."<<std::endl;
+                    _out<<"Data transmission complete."<<std::endl;
                 }
             }
         }  
@@ -105,12 +110,13 @@ class SerialListener : public Pt::Connectable
         
         Pt::System::SerialDevice&   _device;
         char                        _buffer[BufferSize];
+        std::ofstream               _out;
 };
 
 int main( int argc, char* argv[] )
 {    
     try
-    {        
+    {
         Pt::System::EventLoop       eventLoop;
         Pt::System::Thread          thread( eventLoop ); 
         Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
@@ -140,16 +146,18 @@ int main( int argc, char* argv[] )
         Pt::System::Thread::sleep( 300 );
         
         //Wait a time periode. 
-        Pt::System::Thread::sleep(  10000 );
+        Pt::System::Thread::sleep(  1000 );
         
         //Write something.
         char* buffer = new char[500];
         memset( buffer, 23, 500 );
         size_t no = serialDevice.write( buffer, 500 );
+        delete []buffer;
+        
         //serialDevice.flush();
         
         //Wait again.
-        Pt::System::Thread::sleep(  20000 );
+        Pt::System::Thread::sleep(  2000 );
         
         //Exit the event loop.
         eventLoop.exit();
