@@ -79,12 +79,6 @@ namespace Pt {
                 : _a(0xFFFF), _r(r), _g(g), _b(b)
                 {}
 
-                /** @brief Construct color using the given components (in vector form).
-                 */
-                inline Color(const uint16_t chanVec[4])
-                : _a(chanVec[0]), _r(chanVec[1]), _g(chanVec[2]), _b(chanVec[3])
-                {}
-
                 /** @brief Construct color using the given components (in vector of pointers form).
                  */
                 inline Color(const uint16_t* const chanPtr[4])

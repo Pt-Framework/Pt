@@ -38,6 +38,8 @@ namespace Pt {
 
 
         /** @brief Manipulate all vector's elements recursively using template meta-programming.
+         *
+         *  @todo Extends it to template<size_t Min, size_t N, typename VectorT, typename OffsetT>
          */
         template<size_t N, typename VectorT, typename OffsetT>
         struct RecursiveVectorManipulator {
