@@ -27,8 +27,138 @@ namespace Pt {
 
     namespace Gfx {
 
+        /** @brief Implementation of a pointer to a color in planar images
+            @internal
+
+            This class derives as many times recursively from itself, as
+            the color model has planes. Each derivation handles a pointer
+            to an element in a plane. ComponentT is the value type of
+            an element in a plane. NumPlanes is the total number of planes.
+            N indexes the plane this class handles.
+        */
+        template <typename ComponentT, size_t NumPlanes, size_t N = NumPlanes-1>
+        struct ColorPtrImpl : public ColorPtrImpl<ComponentT, NumPlanes, N-1>
+        {
+            ColorPtrImpl()
+            { }
+
+            ColorPtrImpl(ComponentT** c)
+            : ColorPtrImpl<ComponentT, NumPlanes, N-1>(c)
+            { this->_components[N] = c[N]; }
+
+            /** @brief Set component pointer to appropriate offsets
+            */
+            void set(ComponentT* data, size_t xpos, size_t ypos, size_t width)
+            {
+                const size_t planeOffset = (N * width);
+                const size_t elemOffset = (xpos + (ypos * width));
+                this->_components[N] = data + planeOffset + elemOffset;
+
+                ColorPtrImpl<ComponentT, NumPlanes, N-1>::set(data, xpos, ypos, width);
+            }
+
+            void inc()
+            {
+                ++this->_components[N];
+                ColorPtrImpl<ComponentT, NumPlanes, N-1>::inc();
+            }
+
+            void dec()
+            {
+                --this->_components[N];
+                ColorPtrImpl<ComponentT, NumPlanes, N-1>::inc();
+            }
+
+            void advance(size_t val)
+            {
+                this->_components[N] += val;
+                ColorPtrImpl<ComponentT, NumPlanes, N-1>::advance(val);
+            }
+
+            void rewind(size_t val)
+            {
+                this->_components[N] -= val;
+                ColorPtrImpl<ComponentT, NumPlanes, N-1>::rewind(val);
+            }
+
+            bool equals(const ColorPtrImpl& other) const
+            {
+                if(this->_components[N] != other._components[N]) return false;
+                return ColorPtrImpl<ComponentT, NumPlanes, N-1>::equals(other);
+            }
+
+            bool notEquals(const ColorPtrImpl& other) const
+            {
+                if(this->_components[N] != other._components[N]) return true;
+                return ColorPtrImpl<ComponentT, NumPlanes, N-1>::notEquals(other);
+            }
+        };
+
+
+        /** @brief Terminates recursive derivation
+            @internal
+
+            This class has the actual array of pointers that point to
+            the component values in the planes of a planar image. It
+            also handles the 0th plane.
+        */
+        template <typename ComponentT, size_t NumPlanes>
+        struct ColorPtrImpl<ComponentT, NumPlanes, 0>
+        {
+            ColorPtrImpl()
+            { }
+
+            ColorPtrImpl(ComponentT** c)
+            { _components[0] = c[0]; }
+
+            ComponentT** components()
+            { return _components; }
+
+            ComponentT* const* components() const
+            { return _components; }
+
+            void set(ComponentT* data, size_t xpos, size_t ypos, size_t width)
+            {
+                const size_t offset = (ypos * width) + xpos;
+                this->_components[0] = data + offset;
+            }
+
+            void inc()
+            {
+                ++_components[0];
+            }
+
+            void dec()
+            {
+                --_components[0];
+            }
+
+            void advance(size_t val)
+            {
+                _components[0] += val;
+            }
+
+            void rewind(size_t val)
+            {
+                _components[0] -= val;
+            }
+
+            bool equals(const ColorPtrImpl& other) const
+            {
+                 return _components[0] == other._components[0];
+            }
+
+            bool notEquals(const ColorPtrImpl& other) const
+            {
+                return _components[0] != other._components[0];
+            }
+
+            ComponentT* _components[NumPlanes];
+        };
+
+
         /** @brief Planar image model class for non-subsampled planar images.
-         *  @ingroup Gfx
+         *  @internal
          *
          *  For now it just an empty foward declaration but later it will become
          *  the generic implementation of the planar image model.
@@ -49,10 +179,10 @@ namespace Pt {
                 typedef typename ColorProxyT::ComponentT ComponentT;
 
                 // Vector of channels' pointers
-                typedef ComponentT* ChanPtrVectorT[NumberOfChannels];
+                typedef ComponentT* PixelData[NumberOfChannels];
 
                 // Vector of channels' constant pointers
-                typedef const ComponentT* ConstChanPtrVectorT[NumberOfChannels];
+                typedef const ComponentT* ConstPixelData[NumberOfChannels];
 
                 // Color pointer class for the color model
                 class ColorPtrT;

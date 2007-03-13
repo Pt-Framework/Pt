@@ -37,125 +37,209 @@ namespace Pt {
         };
 
 
-        /** @brief Manipulate all vector's elements recursively using template meta-programming.
-         *
-         *  @todo Extends it to template<size_t Min, size_t N, typename VectorT, typename OffsetT>
-         */
-        template<size_t N, typename VectorT, typename OffsetT>
-        struct RecursiveVectorManipulator {
-            static inline void inc(VectorT& vec)
-            {
-                ++vec[N];
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::inc(vec);
-            }
+        /** @brief Test if all elements in an array are equal
+        */
+        template<size_t N, typename ArrayT>
+        struct EqualElements
+        {
+            static inline bool equal(const ArrayT& a, const ArrayT& b)
 
-            static inline void dec(VectorT& vec)
             {
-                --vec[N];
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::dec(vec);
-            }
-
-            static inline void add(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-            {
-                vecDst[N] = vecSrc[N] + ofs;
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::add(vecDst, vecSrc, ofs);
-            }
-
-            static inline void sub(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-            {
-                vecDst[N] = vecSrc[N] - ofs;
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::sub(vecDst, vecSrc, ofs);
-            }
-
-            static inline void assign_add(VectorT& vec, const OffsetT& ofs)
-            {
-                vec[N] += ofs;
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::assign_add(vec, ofs);
-            }
-
-            static inline void assign_sub(VectorT& vec, const OffsetT& ofs)
-            {
-                vec[N] -= ofs;
-                RecursiveVectorManipulator<N-1, VectorT, OffsetT>::assign_sub(vec, ofs);
-            }
-
-            static inline bool isEqual(const VectorT& vecA, const VectorT& vecB)
-            {
-                if(vecA[N] != vecB[N]) return false;
-                return RecursiveVectorManipulator<N-1, VectorT, OffsetT>::isEqual(vecA, vecB);
-            }
-
-            static inline bool isDiffer(const VectorT& vecA, const VectorT& vecB)
-            {
-                if(vecA[N] != vecB[N]) return true;
-                return RecursiveVectorManipulator<N-1, VectorT, OffsetT>::isDiffer(vecA, vecB);
+                if(a[N] != b[N]) return false;
+                return EqualElements<N-1, ArrayT>::equal(a, b);
             }
         };
 
-        /** @brief Partial specialization of the class in case N = 0.
-         */
-        template<typename VectorT, typename OffsetT>
-        struct RecursiveVectorManipulator<0, VectorT, OffsetT> {
-            static inline void inc(VectorT& vec)
-            { ++vec[0]; }
 
-            static inline void dec(VectorT& vec)
-            { --vec[0]; }
-
-            static inline void add(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-            { vecDst[0] = vecSrc[0] + ofs; }
-
-            static inline void sub(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-            { vecDst[0] = vecSrc[0] - ofs; }
-
-            static inline void assign_add(VectorT& vec, const OffsetT& ofs)
-            { vec[0] += ofs; }
-
-            static inline void assign_sub(VectorT& vec, const OffsetT& ofs)
-            { vec[0] -= ofs; }
-
-            static inline bool isEqual(const VectorT& vecA, const VectorT& vecB)
-            { return vecA[0] == vecB[0]; }
-
-            static inline bool isDiffer(const VectorT& vecA, const VectorT& vecB)
-            { return vecA[0] != vecB[0]; }
+        template<typename ArrayT>
+        struct EqualElements<0, ArrayT>
+        {
+            static bool equal(const ArrayT& a, const ArrayT& b)
+            { return a[0] == b[0];  }
         };
 
-        //
-        // Below are convenience wrapper function for the
-        // RecursiveVectorManipulator<N, T, O> class
-        //
-        template<size_t N, typename VectorT> inline
-        void recursiveVectorInc(VectorT& vec)
-        { RecursiveVectorManipulator<N, VectorT, size_t>::inc(vec); }
 
-        template<size_t N, typename VectorT> inline
-        void recursiveVectorDec(VectorT& vec)
-        { RecursiveVectorManipulator<N, VectorT, size_t>::dec(vec); }
+        template<size_t N, typename ArrayT> inline
+        bool equalElements(const ArrayT& a, const ArrayT& b)
+        { return EqualElements<N-1, ArrayT>::equal(a, b); }
 
-        template<size_t N, typename VectorT, typename OffsetT> inline
-        void recursiveVectorAdd(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-        { RecursiveVectorManipulator<N, VectorT, OffsetT>::add(vecDst, vecSrc, ofs); }
 
-        template<size_t N, typename VectorT, typename OffsetT> inline
-        void recursiveVectorSub(VectorT& vecDst, const VectorT& vecSrc, const OffsetT& ofs)
-        { RecursiveVectorManipulator<N, VectorT, OffsetT>::sub(vecDst, vecSrc, ofs); }
 
-        template<size_t N, typename VectorT, typename OffsetT> inline
-        void recursiveVectorAssignAdd(VectorT& vec, const OffsetT& ofs)
-        { RecursiveVectorManipulator<N, VectorT, OffsetT>::assign_add(vec, ofs); }
+        /** @brief Test if any elements in an array are not equal
+        */
+        template<size_t N, typename ArrayT>
+        struct NotEqualElements
+        {
+            static inline bool notEqual(const ArrayT& a, const ArrayT& b)
+            {
+                if(a[N] != b[N]) return true;
+                return NotEqualElements<N-1, ArrayT>::notEqual(a, b);
+            }
+        };
 
-        template<size_t N, typename VectorT, typename OffsetT> inline
-        void recursiveVectorAssignSub(VectorT& vec, OffsetT& ofs)
-        { RecursiveVectorManipulator<N, VectorT, OffsetT>::assign_sub(vec, ofs); }
 
-        template<size_t N, typename VectorT> inline
-        bool recursiveVectorIsEqual(const VectorT& vecA, const VectorT& vecB)
-        { return RecursiveVectorManipulator<N, VectorT, size_t>::isEqual(vecA, vecB); }
+        template<typename ArrayT>
+        struct NotEqualElements<0, ArrayT>
+        {
+            static bool notEqual(const ArrayT& a, const ArrayT& b)
+            { return a[0] != b[0];  }
+        };
 
-        template<size_t N, typename VectorT> inline
-        bool recursiveVectorIsDiffer(const VectorT& vecA, const VectorT& vecB)
-        { return RecursiveVectorManipulator<N, VectorT, size_t>::isDiffer(vecA, vecB); }
+
+        template<size_t N, typename ArrayT> inline
+        bool notEqualElements(const ArrayT& a, const ArrayT& b)
+        { return NotEqualElements<N-1, ArrayT>::notEqual(a, b); }
+
+
+
+
+        /** @brief Increments all elements in an array
+        */
+        template<size_t N, typename ArrayT>
+        struct IncrementElements
+        {
+            static void inc(ArrayT& array)
+            {
+                ++array[N];
+                IncrementElements<N-1, ArrayT>::inc(array);
+            }
+        };
+
+        template<typename ArrayT>
+        struct IncrementElements<0, ArrayT>
+        {
+            static void inc(ArrayT& array)
+            { ++array[0]; }
+        };
+
+        template<size_t N, typename ArrayT>
+        void incrementElements(ArrayT& array)
+        { IncrementElements<N-1, ArrayT>::inc(array); }
+
+
+
+        /** @brief Decrements all elements in an array
+        */
+        template<size_t N, typename ArrayT>
+        struct DecrementElements
+        {
+            static void inc(ArrayT& array)
+            {
+                ++array[N];
+                DecrementElements<N-1, ArrayT>::inc(array);
+            }
+        };
+
+        template<typename ArrayT>
+        struct DecrementElements<0, ArrayT>
+        {
+            static void inc(ArrayT& array)
+            { ++array[0]; }
+        };
+
+        template<size_t N, typename ArrayT>
+        void decrementElements(ArrayT& array)
+        { DecrementElements<N-1, ArrayT>::inc(array); }
+
+
+
+        /** @brief Adds a value to all elements of an array
+        */
+        template<size_t N, typename ArrayT, typename ElemT>
+        struct AddElements
+        {
+            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            {
+                to[N] = from[N] + val;
+                AddElements<N-1, ArrayT, ElemT>::add(to, from, val);
+            }
+        };
+
+        template<typename ArrayT, typename ElemT>
+        struct AddElements<0, ArrayT, ElemT>
+        {
+            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            { to[0] = from[0] + val; }
+        };
+
+        template<size_t N, typename ArrayT, typename ElemT>
+        void addElements(ArrayT& to, const ArrayT& from, const ElemT& val)
+        { AddElements<N-1, ArrayT, ElemT>::add(to, from, val); }
+
+
+
+        /** @brief Sustracts a value from all elements of an array
+        */
+        template<size_t N, typename ArrayT, typename ElemT>
+        struct SubElements
+        {
+            static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
+            {
+                to[N] = from[N] - val;
+                AddElements<N-1, ArrayT, ElemT>::add(to, from, val);
+            }
+        };
+
+        template<typename ArrayT, typename ElemT>
+        struct SubElements<0, ArrayT, ElemT>
+        {
+            static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
+            { to[0] = from[0] - val; }
+        };
+
+        template<size_t N, typename ArrayT, typename ElemT>
+        void subElements(ArrayT& to, const ArrayT& from, const ElemT& val)
+        { AddElements<N-1, ArrayT, ElemT>::sub(to, from, val); }
+
+
+
+        /** @brief Adds a value to all elements of an array
+        */
+        template<size_t N, typename ArrayT, typename ElemT>
+        struct AddAssignElements
+        {
+            static void add(ArrayT& to, const ElemT& val)
+            {
+                to[N] += val;
+                AddAssignElements<N-1, ArrayT, ElemT>::add(to, val);
+            }
+        };
+
+        template<typename ArrayT, typename ElemT>
+        struct AddAssignElements<0, ArrayT, ElemT>
+        {
+            static void add(ArrayT& to, const ElemT& val)
+            { to[0] += val; }
+        };
+
+        template<size_t N, typename ArrayT, typename ElemT>
+        void addAssignElements(ArrayT& to, const ElemT& val)
+        { AddAssignElements<N-1, ArrayT, ElemT>::add(to, val); }
+
+
+
+        /** @brief Substracts a value to all elements of an array
+        */
+        template<size_t N, typename ArrayT, typename ElemT>
+        struct SubAssignElements
+        {
+            static void sub(ArrayT& to, const ElemT& val)
+            {
+                to[N] -= val;
+                SubAssignElements<N-1, ArrayT, ElemT>::sub(to, val);
+            }
+        };
+
+        template<typename ArrayT, typename ElemT>
+        struct SubAssignElements<0, ArrayT, ElemT>
+        {
+            static void sub(ArrayT& to, const ElemT& val)
+            { to[0] += val; }
+        };
+
+        template<size_t N, typename ArrayT, typename ElemT>
+        void subAssignElements(ArrayT& to, const ElemT& val)
+        { SubAssignElements<N-1, ArrayT, ElemT>::sub(to, val); }
 
     } // namespace Gfx
 

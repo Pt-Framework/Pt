@@ -38,9 +38,28 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
         void ARgbModel()
         {
+            // image data, could be 4 planes with two elements each
+            uint16_t data[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
             typedef Pt::Gfx::PlanarImageModel< Pt::Gfx::ARgbColorProxy, 1, 1 > Model;
-            Model model;
             PT_UNIT_ASSERT( Model::NumberOfChannels == 4 )
+            Model model;
+
+            // Set a pointer to the first pixel. assume width = 2, height = 1
+            // We expect  A=0, R= 2, G=4, B=6, each component at begin of plane
+            Model::ColorPtrT ptr(data, 2, 1, 0, 0);
+            PT_UNIT_ASSERT( (*ptr).alpha() == 0 );
+            PT_UNIT_ASSERT( (*ptr).red() == 2 );
+            PT_UNIT_ASSERT( (*ptr).green() == 4 );
+            PT_UNIT_ASSERT( (*ptr).blue() == 6 );
+
+            // increment pointer we expect:
+            //  A=1, R= 3, G=5, B=7, first element in each plane
+            ++ptr;
+            PT_UNIT_ASSERT( (*ptr).alpha() == 1 );
+            PT_UNIT_ASSERT( (*ptr).red() == 3 );
+            PT_UNIT_ASSERT( (*ptr).green() == 5 );
+            PT_UNIT_ASSERT( (*ptr).blue() == 7 );
         }
 
     private:

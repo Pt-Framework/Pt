@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Aloysius Indrayanto                             *
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Duerner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,85 +25,97 @@ namespace Pt {
 
     namespace Gfx {
 
-        //
-        // Static constants definitions
-        //
+
         template<typename ColorProxyT_>
         const size_t PlanarImageModel<ColorProxyT_, 1, 1>::NumberOfChannels;
 
 
-        //
-        // ColorPtrT
-        //
         template<typename ColorProxyT_>
-        class PlanarImageModel<ColorProxyT_, 1, 1>::ColorPtrT {
+        class PlanarImageModel<ColorProxyT_, 1, 1>::ColorPtrT
+        {
+            friend class PlanarImage<PlanarImageModel>;
+
             public:
                 inline ColorPtrT(void*)
-                : _imgW(0), _imgH(0), _chnStart(0)
+                : _imgW(0)
+                , _imgH(0)
+                , _beginPlanes(0)
                 {}
 
-                inline ColorPtrT(ChanPtrVectorT& chanPtr,
-                                 size_t          imageWidth,
-                                 size_t          imageHeight,
-                                 size_t          posX,
-                                 size_t          posY)
-                : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
+                inline ColorPtrT(ComponentT* data,
+                                 size_t imageWidth, size_t imageHeight,
+                                 size_t posX, size_t posY)
+                : _imgW(imageWidth)
+                , _imgH(imageHeight)
+                , _beginPlanes(data)
                 {
-                    _chnStart = chanPtr[0]; // Channel #0 is always the master channel
-
-                    const size_t pos = posY*imageWidth + posX;
-                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
+                    _impl.set(data, posX, posY, imageWidth);
                 }
 
                 inline ColorProxyT operator*()
-                { return ColorProxyT(_chnCur); }
+                {
+                    return ColorProxyT( _impl.components() );
+                }
+
+                //inline ColorProxyT* operator->()
+                //{
+                //    return 0;
+                //}
 
                 inline ColorPtrT& operator++()
                 {
-                    recursiveVectorInc<NumberOfChannels-1>(_chnCur);
+                    _impl.inc();
                     return *this;
                 }
 
                 inline ColorPtrT& operator--()
                 {
-                    recursiveVectorDec<NumberOfChannels-1>(_chnCur);
+                    _impl.dec();
                     return *this;
                 }
 
                 inline ColorPtrT& operator+=(size_t n)
                 {
-                    recursiveVectorAssignAdd<NumberOfChannels-1>(_chnCur, n);
+                    _impl.advance(n);
                     return *this;
                 }
 
                 inline ColorPtrT& operator-=(size_t n)
                 {
-                    recursiveVectorAssignSub<NumberOfChannels-1>(_chnCur, n);
+                    _impl.rewind(n);
                     return *this;
                 }
 
                 inline bool operator==(const ColorPtrT& c) const
-                { return recursiveVectorIsEqual<NumberOfChannels-1>(_chnCur, c._chnCur); }
+                {
+                    return _impl.equals( c._impl );
+                }
 
                 inline bool operator!=(const ColorPtrT& c) const
-                { return recursiveVectorIsDiffer<NumberOfChannels-1>(_chnCur, c._chnCur); }
-
-                // Make the appropriate image class as a friend class
-                friend class PlanarImage<PlanarImageModel>;
+                {
+                    return _impl.notEquals( c._impl );
+                }
 
             private:
                 inline Math::Point currentXYPosition() const
                 {
-                    const size_t pos = _chnCur[0] - _chnStart;
+                    ComponentT* const* components = _impl.components();
+                    const size_t pos = components[0] - _beginPlanes;
                     return Math::Point(pos/_imgH, pos/_imgW);
                 }
 
             private:
-                size_t _imgW; // Image's width
-                size_t _imgH; // Image's height
+                //! @brief Image width
+                size_t _imgW;
 
-                ComponentT*    _chnStart; // Start pointer of the master channel
-                ChanPtrVectorT _chnCur;   // Pointer to current positions in the channes
+                //! @brief Image height
+                size_t _imgH;
+
+                //! @brief Master channel data
+                ComponentT* _beginPlanes;
+
+                //! @brief Implementation of the pointer to color
+                ColorPtrImpl<ComponentT, NumberOfChannels> _impl;
         };
 
 
@@ -117,7 +129,7 @@ namespace Pt {
                 : _imgW(0), _imgH(0), _chnStart(0)
                 {}
 
-                inline ConstColorPtrT(ConstChanPtrVectorT& chanPtr,
+                inline ConstColorPtrT(ConstPixelData& chanPtr,
                                       size_t               imageWidth,
                                       size_t               imageHeight,
                                       size_t               posX,
@@ -127,7 +139,7 @@ namespace Pt {
                     _chnStart = chanPtr[0]; // Channel #0 is always the master channel
 
                     const size_t pos = posY*imageWidth + posX;
-                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
                 }
 
                 inline const ValueT operator*() const
@@ -135,33 +147,33 @@ namespace Pt {
 
                 inline ConstColorPtrT& operator++()
                 {
-                    recursiveVectorInc<NumberOfChannels-1>(_chnCur);
+                    incrementElements<NumberOfChannels>(_chnCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator--()
                 {
-                    recursiveVectorDec<NumberOfChannels-1>(_chnCur);
+                    decrementElements< NumberOfChannels >(_chnCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator+=(size_t n)
                 {
-                    recursiveVectorAssignAdd<NumberOfChannels-1>(_chnCur, n);
+                    addAssignElements< NumberOfChannels >(_chnCur, n);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator-=(size_t n)
                 {
-                    recursiveVectorAssignSub<NumberOfChannels-1>(_chnCur, n);
+                    subAssignElements< NumberOfChannels >(_chnCur, n);
                     return *this;
                 }
 
                 inline bool operator==(const ConstColorPtrT& c) const
-                { return recursiveVectorIsEqual<NumberOfChannels-1>(_chnCur, c._chnCur); }
+                { return equalElements< NumberOfChannels >(_chnCur, c._chnCur); }
 
                 inline bool operator!=(const ConstColorPtrT& c) const
-                { return recursiveVectorIsDiffer<NumberOfChannels-1>(_chnCur, c._chnCur); }
+                { return notEqualElements< NumberOfChannels >(_chnCur, c._chnCur); }
 
                 friend class PlanarImage<PlanarImageModel>;
 
@@ -174,10 +186,15 @@ namespace Pt {
 
             private:
                 size_t _imgW; // Image's width
+
                 size_t _imgH; // Image's height
 
                 const ComponentT*   _chnStart; // Start pointer of the master channel
-                ConstChanPtrVectorT _chnCur;   // Pointer to current positions in the channes
+
+                ConstPixelData _chnCur;   // Pointer to current positions in the channes
+
+                //! @brief Implementation of the pointer to color
+                ColorPtrImpl<const ComponentT, NumberOfChannels> _impl;
         };
 
 
@@ -185,21 +202,22 @@ namespace Pt {
         // ScanlineT
         //
         template<typename ColorProxyT_>
-        class PlanarImageModel<ColorProxyT_, 1, 1>::ScanlineT {
+        class PlanarImageModel<ColorProxyT_, 1, 1>::ScanlineT
+        {
             public:
-                inline ScanlineT(ChanPtrVectorT& chanPtr,
+                inline ScanlineT(PixelData& chanPtr,
                                  size_t          imageWidth,
                                  size_t          posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
                 }
 
                 inline ColorProxyT operator[](size_t x)
                 { return ColorProxyT(_chnCur, x); }
 
             private:
-                ChanPtrVectorT _chnCur;
+                PixelData _chnCur;
         };
 
 
@@ -209,19 +227,19 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ConstScanlineT {
             public:
-                inline ConstScanlineT(ConstChanPtrVectorT& chanPtr,
+                inline ConstScanlineT(ConstPixelData& chanPtr,
                                       size_t               imageWidth,
                                       size_t               posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
                 }
 
                 inline const ValueT operator[](size_t x) const
                 { return ValueT(_chnCur, x); }
 
             private:
-                ConstChanPtrVectorT _chnCur;
+                ConstPixelData _chnCur;
         };
 
     } // namespace Gfx
