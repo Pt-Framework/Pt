@@ -42,14 +42,14 @@ namespace Pt {
         class PT_GFX_API Color<ARgbProxy> {
 
             public:
-                /** @brief Non-reference type (value type) of this color. */
-                typedef Color<ARgb> ValueT;
+                /** @brief Number of channels of this color. */
+                static const size_t NumberOfChannels = 4;
 
                 /** @brief Value type of each individual component of this color */
                 typedef uint16_t ComponentT;
 
-                /** @brief Number of channels of this color. */
-                static const size_t NumberOfChannels = 4;
+                /** @brief Non-reference type (value type) of this color. */
+                typedef Color<ARgb> ValueT;
 
             public:
                 /** @brief Copy constructor.
@@ -66,13 +66,13 @@ namespace Pt {
 
                 /** @brief This constructor will take reference to the real storage.
                  */
-                inline Color(const std::vector<ComponentT*>& chanPtr)
+                inline Color(ComponentT* const chanPtr[4])
                 : _a(*chanPtr[0]), _r(*chanPtr[1]), _g(*chanPtr[2]), _b(*chanPtr[3])
                 {}
 
                 /** @brief This constructor will take reference to the real storage (plus offset).
                  */
-                inline Color(const std::vector<ComponentT*>& chanPtr, size_t offset)
+                inline Color(ComponentT* const chanPtr[4], size_t offset)
                 : _a(*(chanPtr[0]+offset)), _r(*(chanPtr[1]+offset)), _g(*(chanPtr[2]+offset)), _b(*(chanPtr[3]+offset))
                 {}
 

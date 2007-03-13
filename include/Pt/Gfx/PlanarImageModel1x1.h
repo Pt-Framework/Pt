@@ -39,14 +39,20 @@ namespace Pt {
                 // Color proxy type type (value type) of the color model
                 typedef ColorProxyT_ ColorProxyT;
 
+                // Number of channels of the color model
+                static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
+
                 // Non-reference type (value type) of the color
                 typedef typename ColorProxyT::ValueT ValueT;
 
                 // Value type of each individual component of the color model
                 typedef typename ColorProxyT::ComponentT ComponentT;
 
-                // Number of channels of the color model
-                static const size_t NumberOfChannels = ColorProxyT::NumberOfChannels;
+                // Vector of channels' pointers
+                typedef ComponentT* ChanPtrVectorT[NumberOfChannels];
+
+                // Vector of channels' constant pointers
+                typedef const ComponentT* ConstChanPtrVectorT[NumberOfChannels];
 
                 // Color pointer class for the color model
                 class ColorPtrT;

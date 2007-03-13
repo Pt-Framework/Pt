@@ -42,11 +42,11 @@ namespace Pt {
                 : _imgW(0), _imgH(0), _chnStart(0)
                 {}
 
-                inline ColorPtrT(std::vector<ComponentT*>& chanPtr,
-                                 size_t                    imageWidth,
-                                 size_t                    imageHeight,
-                                 size_t                    posX,
-                                 size_t                    posY)
+                inline ColorPtrT(ChanPtrVectorT& chanPtr,
+                                 size_t          imageWidth,
+                                 size_t          imageHeight,
+                                 size_t          posX,
+                                 size_t          posY)
                 : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
                 {
                     _chnStart = chanPtr[0]; // Channel #0 is always the master channel
@@ -92,7 +92,6 @@ namespace Pt {
                 friend class PlanarImage<PlanarImageModel>;
 
             private:
-
                 inline Math::Point currentXYPosition() const
                 {
                     const size_t pos = _chnCur[0] - _chnStart;
@@ -103,8 +102,8 @@ namespace Pt {
                 size_t _imgW; // Image's width
                 size_t _imgH; // Image's height
 
-                ComponentT*              _chnStart; // Start pointer of the master channel
-                std::vector<ComponentT*> _chnCur;   // Pointer to current positions in the channes
+                ComponentT*    _chnStart; // Start pointer of the master channel
+                ChanPtrVectorT _chnCur;   // Pointer to current positions in the channes
         };
 
 
@@ -118,11 +117,11 @@ namespace Pt {
                 : _imgW(0), _imgH(0), _chnStart(0)
                 {}
 
-                inline ConstColorPtrT(const std::vector<const ComponentT*>& chanPtr,
-                                      size_t                                imageWidth,
-                                      size_t                                imageHeight,
-                                      size_t                                posX,
-                                      size_t                                posY)
+                inline ConstColorPtrT(ConstChanPtrVectorT& chanPtr,
+                                      size_t               imageWidth,
+                                      size_t               imageHeight,
+                                      size_t               posX,
+                                      size_t               posY)
                 : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
                 {
                     _chnStart = chanPtr[0]; // Channel #0 is always the master channel
@@ -167,7 +166,6 @@ namespace Pt {
                 friend class PlanarImage<PlanarImageModel>;
 
             private:
-
                 inline Math::Point currentXYPosition() const
                 {
                     const size_t pos = _chnCur[0] - _chnStart;
@@ -178,8 +176,8 @@ namespace Pt {
                 size_t _imgW; // Image's width
                 size_t _imgH; // Image's height
 
-                const ComponentT*              _chnStart; // Start pointer of the master channel
-                std::vector<const ComponentT*> _chnCur;   // Pointer to current positions in the channes
+                const ComponentT*   _chnStart; // Start pointer of the master channel
+                ConstChanPtrVectorT _chnCur;   // Pointer to current positions in the channes
         };
 
 
@@ -189,9 +187,9 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ScanlineT {
             public:
-                inline ScanlineT(std::vector<ComponentT*>& chanPtr,
-                                 size_t                    imageWidth,
-                                 size_t                    posY)
+                inline ScanlineT(ChanPtrVectorT& chanPtr,
+                                 size_t          imageWidth,
+                                 size_t          posY)
                 {
                     const size_t pos = posY * imageWidth;
                     recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
@@ -201,7 +199,7 @@ namespace Pt {
                 { return ColorProxyT(_chnCur, x); }
 
             private:
-                std::vector<ComponentT*> _chnCur;
+                ChanPtrVectorT _chnCur;
         };
 
 
@@ -211,9 +209,9 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ConstScanlineT {
             public:
-                inline ConstScanlineT(const std::vector<const ComponentT*>& chanPtr,
-                                      size_t                                imageWidth,
-                                      size_t                                posY)
+                inline ConstScanlineT(ConstChanPtrVectorT& chanPtr,
+                                      size_t               imageWidth,
+                                      size_t               posY)
                 {
                     const size_t pos = posY * imageWidth;
                     recursiveVectorAdd<NumberOfChannels-1>(_chnCur, chanPtr, pos);
@@ -223,7 +221,7 @@ namespace Pt {
                 { return ValueT(_chnCur, x); }
 
             private:
-                std::vector<const ComponentT*> _chnCur;
+                ConstChanPtrVectorT _chnCur;
         };
 
     } // namespace Gfx

@@ -81,19 +81,19 @@ namespace Pt {
 
                 /** @brief Construct color using the given components (in vector form).
                  */
-                inline Color(const std::vector<uint16_t>& chanVec)
+                inline Color(const uint16_t chanVec[4])
                 : _a(chanVec[0]), _r(chanVec[1]), _g(chanVec[2]), _b(chanVec[3])
                 {}
 
                 /** @brief Construct color using the given components (in vector of pointers form).
                  */
-                inline Color(const std::vector<const uint16_t*>& chanPtr)
+                inline Color(const uint16_t* const chanPtr[4])
                 : _a(*chanPtr[0]), _r(*chanPtr[1]), _g(*chanPtr[2]), _b(*chanPtr[3])
                 {}
 
                 /** @brief Construct color using the given components (in vector of pointers form plus offset).
                  */
-                inline Color(const std::vector<const uint16_t*>& chanPtr, size_t offset)
+                inline Color(const uint16_t* const chanPtr[4], size_t offset)
                 : _a(*(chanPtr[0]+offset)), _r(*(chanPtr[1]+offset)), _g(*(chanPtr[2]+offset)), _b(*(chanPtr[3]+offset))
                 {}
 
