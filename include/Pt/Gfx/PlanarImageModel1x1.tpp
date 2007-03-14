@@ -123,7 +123,8 @@ namespace Pt {
         // ConstColorPtrT
         //
         template<typename ColorProxyT_>
-        class PlanarImageModel<ColorProxyT_, 1, 1>::ConstColorPtrT {
+        class PlanarImageModel<ColorProxyT_, 1, 1>::ConstColorPtrT
+        {
             public:
                 inline ConstColorPtrT(const void*)
                 : _imgW(0), _imgH(0), _chnStart(0)
@@ -143,37 +144,51 @@ namespace Pt {
                 }
 
                 inline const ValueT operator*() const
-                { return ValueT(_chnCur); }
+                {
+                    return ValueT( _impl.components() );
+                    //return ValueT(_chnCur);
+                }
 
                 inline ConstColorPtrT& operator++()
                 {
-                    incrementElements<NumberOfChannels>(_chnCur);
+                    //incrementElements<NumberOfChannels>(_chnCur);
+                    _impl.inc();
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator--()
                 {
-                    decrementElements< NumberOfChannels >(_chnCur);
+                    //decrementElements< NumberOfChannels >(_chnCur);
+                    _impl.dec();
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator+=(size_t n)
                 {
-                    addAssignElements< NumberOfChannels >(_chnCur, n);
+                    //addAssignElements< NumberOfChannels >(_chnCur, n);
+                    _impl.advance(n);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator-=(size_t n)
                 {
-                    subAssignElements< NumberOfChannels >(_chnCur, n);
+                    //subAssignElements< NumberOfChannels >(_chnCur, n);
+                    _impl.rewind(n);
                     return *this;
                 }
 
-                inline bool operator==(const ConstColorPtrT& c) const
-                { return equalElements< NumberOfChannels >(_chnCur, c._chnCur); }
 
-                inline bool operator!=(const ConstColorPtrT& c) const
-                { return notEqualElements< NumberOfChannels >(_chnCur, c._chnCur); }
+                bool operator==(const ConstColorPtrT& c) const
+                {
+                    //return equalElements< NumberOfChannels >(_chnCur, c._chnCur);
+                    return _impl.equals( c._impl );
+                }
+
+                bool operator!=(const ConstColorPtrT& c) const
+                {
+                    //return notEqualElements< NumberOfChannels >(_chnCur, c._chnCur);
+                    return _impl.notEquals( c._impl );
+                }
 
                 friend class PlanarImage<PlanarImageModel>;
 
