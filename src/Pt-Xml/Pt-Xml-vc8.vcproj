@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="Pt-Xml"
 	ProjectGUID="{7B07CB50-60AE-4DB6-BD36-B1392A4B3AD7}"
+	RootNamespace="Pt-Xml"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>

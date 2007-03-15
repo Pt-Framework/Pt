@@ -46,7 +46,7 @@ class Method : public Callable<R, A1, A2, A3, A4, A5> {
         { }
 
         Method(const Method& method) throw()
-        : Callable<R, A1, A2, A3>()
+        :  Callable<R, A1, A2, A3, A4, A5>()
         { this->operator=(method); }
 
         C& object()

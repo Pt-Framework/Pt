@@ -121,12 +121,13 @@ int main( int argc, char* argv[] )
 {    
     try
     {
+        Pt::System::Thread::sleep( 20000 );
         Pt::System::EventLoop       eventLoop;
         Pt::System::Thread          thread( eventLoop ); 
-        Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
+        Pt::System::SerialDevice    serialDevice("COM5:", std::ios_base::in | std::ios_base::out);
        
         //Setup the device         
-        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
+        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate9600);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
@@ -158,7 +159,7 @@ int main( int argc, char* argv[] )
         size_t no = serialDevice.write( buffer, 2 );
         delete []buffer;
         
-        //serialDevice.flush();
+        serialDevice.flush();
         
         //Wait again.
         Pt::System::Thread::sleep(  1000 );
