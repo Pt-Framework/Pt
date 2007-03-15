@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2006 by PTV AG                                          *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 by PTV AG                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,46 +29,10 @@
 #include <iostream>
 
 
-namespace {
-
-std::string addSharedLibraryExtension(const std::string& path)
-{
-    Pt::ssize_t separatorPos = path.rfind( Pt::System::Directory::separator() );
-
-    std::string fileName((separatorPos != -1) ? path.substr(separatorPos + 1) : path);
-    std::string onlyPath((separatorPos != -1) ? path.substr(0, separatorPos + 1)  : "");
-
-    Pt::ssize_t extensionPos = fileName.rfind('.');
-
-    std::string extension((extensionPos != -1) ? fileName.substr(extensionPos + 1) : "");
-    std::string fileNameWithoutExtension((extensionPos != -1)
-                                    ? fileName.substr(0, fileName.length() - extension.length() - 1)
-                                    : fileName);
-
-    std::stringstream result;
-
-    result << onlyPath
-           << Pt::System::Environment::sharedLibraryPrefix()
-           << fileNameWithoutExtension;
-
-    if (extension.empty())
-    {
-        result << Pt::System::Environment::sharedLibraryExtension();
-    }
-    else
-    {
-        result << "." << extension;
-    }
-
-    return result.str();
-}
-
-}
-
-
 namespace Pt {
 
 namespace System {
+
 
 SharedLib::SharedLib()
 : _impl(0)
@@ -76,12 +41,19 @@ SharedLib::SharedLib()
 }
 
 
-SharedLib::SharedLib(const std::string& path)
+SharedLib::SharedLib(const Directory& baseDirectory, const std::string& libraryName)
 : _impl(0)
+, _libraryFile(createLibraryFile(baseDirectory, libraryName))
 {
-    std::string pathWithExtension = addSharedLibraryExtension(path);
+    _impl = new SharedLibImpl(_libraryFile);
+}
 
-    _impl = new SharedLibImpl(pathWithExtension);
+
+SharedLib::SharedLib(const File& libraryFile)
+: _impl(0)
+, _libraryFile(libraryFile)
+{
+    _impl = new SharedLibImpl(_libraryFile);
 }
 
 
@@ -91,12 +63,22 @@ SharedLib::~SharedLib()
 }
 
 
-SharedLib& SharedLib::open(const std::string& path)
+SharedLib& SharedLib::open(const File& libraryFile)
 {
-    std::string pathWithExtension = addSharedLibraryExtension(path);
-
-    _impl->open(pathWithExtension);
+    if (!_libraryFile.name().empty())
+    {
+        throw SystemError("Shared library " + _libraryFile.path() + " is already opened.", PT_SOURCEINFO);
+    }
+    
+    _impl->open(libraryFile);
+    _libraryFile = libraryFile;
+    
     return *this;
+}
+
+SharedLib& SharedLib::open(const Directory& baseDirectory, const std::string& libraryName)
+{
+    return this->open(createLibraryFile(baseDirectory, libraryName));
 }
 
 
@@ -124,13 +106,52 @@ bool SharedLib::operator!()
 }
 
 
-void* SharedLib::openResolve(const std::string& path, const char* symbol)
+const Pt::System::File& SharedLib::libraryFile() const
 {
-    std::string pathWithExtension = addSharedLibraryExtension(path);
-
-    return SharedLibImpl::openResolve(pathWithExtension, symbol);
+    return _libraryFile;
 }
 
+void* SharedLib::openResolve(const File& libraryFile, const char* symbol)
+{
+    return SharedLibImpl::openResolve(libraryFile, symbol);
+}
+
+
+void* SharedLib::openResolve(const Directory& baseDir, const std::string& libraryName, const char* symbol)
+{
+    return SharedLibImpl::openResolve(createLibraryFile(baseDir, libraryName), symbol);
+}
+
+
+File SharedLib::convertToPlatformSpecificLibraryFile(const File& file)
+{
+    std::string extension = file.extension();
+    
+    if (!extension.empty() && Pt::System::Environment::sharedLibraryPrefix().empty())
+    {
+        // Extension is set and no prefix has to be added. Just return the given file unchanged.
+        return file;
+    }
+    
+    if (extension.empty())
+    {
+        extension = Pt::System::Environment::sharedLibraryExtension();
+    }
+    else
+    {
+        extension = "." + extension;
+    }
+    
+    return File(file.parentPath(), Pt::System::Environment::sharedLibraryPrefix() + file.baseName() + extension);
+}
+
+
+File SharedLib::createLibraryFile(const Pt::System::Directory& baseDir, const std::string& libraryName)
+{
+    return Pt::System::File(baseDir,  Environment::sharedLibraryPrefix()
+                                    + libraryName
+                                    + Environment::sharedLibraryExtension());
+}
 
 } // namespace System
 
@@ -139,3 +160,4 @@ void* SharedLib::openResolve(const std::string& path, const char* symbol)
 
 void pt_system_testSharedLib()
 { std::cerr << "ptv_system_testSharedLib() called." << std::endl; }
+
