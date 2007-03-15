@@ -1,3 +1,24 @@
+/***************************************************************************
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 #include "Pt/System/Directory.h"
 
 #include "DirectoryImpl.h"
@@ -74,29 +95,54 @@ FileSystemNode& DirectoryIterator::operator*() const
     return _impl->node();
 }
 
-Directory::Directory(const std::string& path, mode m)
-: _path(path.c_str())
+Directory::Directory(const std::string& path)
+: _path(path)
 {
-    // TODO: consider better exception type
-    switch(m) {
-        case UseExisting:
-            if (!DirectoryImpl::exists(path.c_str()))
-                throw std::invalid_argument("Directory " + path + " does not exist." + PT_SOURCEINFO);
-            break;
-        case Create:
-            if (!DirectoryImpl::exists(path.c_str()))
-                DirectoryImpl::create(path.c_str());
-            break;
-        default:
-             throw std::invalid_argument("wrong mode for constructor" + PT_SOURCEINFO);
-             break;
-    }
 }
+
+
+Directory::~Directory()
+{
+}
+
+
+bool Directory::create() const
+{
+    if (this->exists())
+    {
+        return false; // The directory already exists. We don't have to create it.
+    }
+    
+    try
+    {
+        DirectoryImpl::create(_path);
+    }
+    catch (SystemError e)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 
 bool Directory::exists() const
 {
     return DirectoryImpl::exists(_path);
 }
+
+
+const std::string& Directory::path() const
+{
+    return _path;
+}
+
+
+std::size_t Directory::size() const
+{
+    return 0;
+}
+
 
 char Directory::separator()
 {
@@ -108,11 +154,49 @@ void Directory::remove()
     DirectoryImpl::remove(_path);
 }
 
-void Directory::move(const std::string& newname)
+void Directory::move(const std::string& newPath)
 {
-    DirectoryImpl::move(_path, newname);
-    _path = newname;
+    DirectoryImpl::move(_path, newPath);
+    _path = newPath;
 }
+
+
+// TODO This is identical to File::parentPath(). Maybe this should be moved into
+// the common base class FileSystemNode.
+std::string Directory::parentPath() const
+{
+    // Find last slash. This separates the last path segment from the rest of the path
+    std::string::size_type separatorPos = _path.find_last_of(separator());
+    
+    // If there is no separator, this directory is relative to the current current directory.
+    // So an empty path is returned.
+    if (separatorPos == std::string::npos)
+    {
+        return "";
+    }
+    
+    // Include trailing separator to be able to distinguish between no path ("") and a path
+    // which is relative to the root ("/"), for example.
+    return path().substr(0, separatorPos + 1);
+}
+
+
+// TODO This is identical to File::name(). Maybe this should be moved into
+// the common base class FileSystemNode.
+std::string Directory::name() const
+{
+    std::string::size_type separatorPos = _path.rfind(separator());
+    
+    if (separatorPos != std::string::npos)
+    {
+        return _path.substr(separatorPos + 1);
+    }
+    else
+    {
+        return _path;
+    }    
+}
+
 
 Directory Directory::current()
 {

@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -139,35 +141,44 @@ bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 
 bool DirectoryImpl::exists(const std::string& path)
 {
-    DWORD file_attr;
     std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
-    file_attr = ::GetFileAttributes( str.c_str() );
-    return (file_attr != 0xffffffff && (file_attr & FILE_ATTRIBUTE_DIRECTORY))
-            ? true : false;
+    DWORD file_attr = ::GetFileAttributes( str.c_str() );
+    
+    return (file_attr != 0xffffffff) && (file_attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 
-void DirectoryImpl::create(const char* dirpath)
+void DirectoryImpl::create(const std::string& path)
 {
-    std::basic_string<TCHAR> str = win32::fromMultiByte( dirpath );
+    std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
     if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
-        throw SystemError("Could not create directory" , PT_SOURCEINFO);
+    {
+        throw SystemError("Could not create directory '" + path + "'", PT_SOURCEINFO);
+    }
 }
 
 
-void DirectoryImpl::move(const std::string& oldname, const std::string& newname)
+void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
-    std::basic_string<TCHAR> from = win32::fromMultiByte( oldname );
-    std::basic_string<TCHAR> to = win32::fromMultiByte( newname );
+    std::basic_string<TCHAR> from = win32::fromMultiByte( oldName );
+    std::basic_string<TCHAR> to   = win32::fromMultiByte( newName );
 
     #ifdef _WIN32_WCE
+    
         if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
+        {
             throw SystemError("Could not move directory" , PT_SOURCEINFO);
+        }
+        
     #else
+    
         if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
-            throw SystemError("Could not move directory" , PT_SOURCEINFO);
+        {
+            throw SystemError("Could not move/rename directory '" + from + "' to '" + to + "'", PT_SOURCEINFO);
+        }
+            
     #endif
 }
 
@@ -177,18 +188,24 @@ void DirectoryImpl::remove(const std::string& path)
     std::basic_string<TCHAR> str = win32::fromMultiByte( path );
 
     if( FALSE == ::RemoveDirectory( str.c_str() ) )
-        throw SystemError("Could not remove directory" , PT_SOURCEINFO);
+    {
+        throw SystemError("Could not remove directory '" + path + "'" , PT_SOURCEINFO);
+    }
 }
 
 
 std::string DirectoryImpl::current()
 {
     #ifdef _WIN32_WCE
+    
         throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
+        
     #else
+    
         char path[MAX_PATH+2];
         DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
         return std::string(path, len);
+        
     #endif
 }
 
@@ -199,16 +216,21 @@ std::string DirectoryImpl::system()
 }
 
 
-void DirectoryImpl::changeCurrent(const char* dirpath)
+void DirectoryImpl::changeCurrent(const std::string& path)
 {
     #ifdef _WIN32_WCE
+    
         throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
+        
     #else
-        if(FALSE == ::SetCurrentDirectory(dirpath) )
-            throw SystemError("Could not change current directory" , PT_SOURCEINFO);
+    
+        if (FALSE == ::SetCurrentDirectory(path.c_str()))
+        {
+            throw SystemError("Could not change current directory to '" + path + "'", PT_SOURCEINFO);
+        }
+        
     #endif
 }
 
-}
-
-}
+} // namespace System
+} // namespace Pt

@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -35,7 +37,7 @@ namespace Pt {
 namespace System {
 
 FileImpl::FileImpl(const std::string& path)
-: _path(path)    
+: _path(path)   
 {
 
 }
@@ -86,7 +88,7 @@ void FileImpl::move(const std::string& to)
 {
     if (0 != ::rename(_path.c_str(), to.c_str()))
         throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
-     _path = to;    
+    _path = to;
 }
 
 void FileImpl::create()
@@ -98,7 +100,7 @@ void FileImpl::create()
     fclose(f);
 }
 
-bool FileImpl::exists()
+bool FileImpl::exists() const
 {
     struct stat buff;
 
@@ -112,7 +114,6 @@ bool FileImpl::exists()
     }
 
     return true;
-
 }
 
 }

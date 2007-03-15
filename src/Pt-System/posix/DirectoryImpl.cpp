@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -51,7 +53,9 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _current(0)
 {
     _handle = ::opendir( path );
-    if( !_handle ) {
+    
+    if( !_handle )
+    {
         throw SystemError("Could not open directory", PT_SOURCEINFO);
     }
 
@@ -134,21 +138,27 @@ bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
 }
 
 
-void DirectoryImpl::create(const char* dirpath)
+void DirectoryImpl::create(const std::string& path)
 {
-    if( -1 == ::mkdir(dirpath, 0777) )
-        throw SystemError("Could not create directory" , PT_SOURCEINFO);
+    if( -1 == ::mkdir(path.c_str(), 0777) )
+    {
+        throw SystemError("Could not create directory '" + path + "'" , PT_SOURCEINFO);
+    }
 }
 
 bool DirectoryImpl::exists(const std::string& path)
 {
     struct stat buff;
     int err = stat(path.c_str(), &buff);
+    
     if (err == -1 )
     {
         if (errno == ENOENT || errno == ENOTDIR)
+        {
             return false;
-        throw SystemError("Could not stat file " + path, PT_SOURCEINFO);
+        }
+        
+        throw SystemError("Could not stat file '" + path + "'", PT_SOURCEINFO);
     }
 
     return true;
@@ -158,15 +168,18 @@ bool DirectoryImpl::exists(const std::string& path)
 void DirectoryImpl::remove(const std::string& path)
 {
     if( -1 == ::rmdir(path.c_str()) )
-        throw SystemError("Could not remove directory" , PT_SOURCEINFO);
+    {
+        throw SystemError("Could not remove directory '" + path + "'", PT_SOURCEINFO);
+    }
 }
 
 
-void DirectoryImpl::move(const std::string& oldname, const std::string& newname)
+void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
-    if (0 != ::rename(oldname.c_str(), newname.c_str()))
-        throw SystemError("Could not move directory" + oldname + " to " + newname , PT_SOURCEINFO);
-
+    if (0 != ::rename(oldName.c_str(), newName.c_str()))
+    {
+        throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
+    }
 }
 
 
@@ -187,13 +200,14 @@ std::string DirectoryImpl::system()
 }
 
 
-void DirectoryImpl::changeCurrent(const char* dirpath)
+void DirectoryImpl::changeCurrent(const std::string& path)
 {
-    if( -1 == ::chdir(dirpath) )
-        throw SystemError("Could not change working directory", PT_SOURCEINFO);
+    if( -1 == ::chdir(path.c_str()) )
+    {
+        throw SystemError("Could not change working directory to '" + path + "'", PT_SOURCEINFO);
+    }
 }
 
 
 } // namespace System
-
 } // namespace Pt

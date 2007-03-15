@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -54,6 +56,7 @@ std::size_t FileImpl::size() const
     LARGE_INTEGER li;
     li.HighPart = data.nFileSizeHigh;
     li.LowPart = data.nFileSizeLow;
+    
     return static_cast<std::size_t>(li.QuadPart);
 }
 
@@ -99,7 +102,6 @@ void FileImpl::remove()
 
     if(FALSE == ::DeleteFile( tpath.c_str() ))
         throw SystemError("Could not unlink file", PT_SOURCEINFO);
-    _path = "";
 }
 
 
@@ -130,15 +132,14 @@ void FileImpl::move(const std::string& to)
 }
 
 
-bool FileImpl::exists()
+bool FileImpl::exists() const
 {
     DWORD file_attr;
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
 
     file_attr = ::GetFileAttributes( tpath.c_str() );
-    return (file_attr != 0xffffffff)
-            ? true : false;
 
+    return file_attr != 0xffffffff;
 }
 
 

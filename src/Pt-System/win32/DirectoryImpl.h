@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -47,35 +49,40 @@ class DirectoryIteratorImpl {
         bool operator==(const DirectoryIteratorImpl& impl) const;
 
     private:
-        unsigned int _refs;
-        std::string _path;
+        unsigned int    _refs;
+        std::string     _path;
         FileSystemNode* _node;
-        HANDLE _findHandle;
+        HANDLE          _findHandle;
         WIN32_FIND_DATA _current;
 };
 
 
-class DirectoryImpl {
+class DirectoryImpl
+{
     public:
         DirectoryImpl();
+        
         ~DirectoryImpl();
 
     public:
-        static void create(const char* dirpath);
+        static void create(const std::string& path);
+
         static void remove(const std::string& path);
 
-        static void move(const std::string& oldname, const std::string& newname);
+        static void move(const std::string& oldName, const std::string& newName);
+
         static bool exists(const std::string& path);
-
-        static char separator()
-        { return '\\'; }
-
 
         static std::string current();
 
         static std::string system();
 
-        static void changeCurrent(const char* dirpath);
+        static void changeCurrent(const std::string& path);
+
+        static char separator()
+        {
+            return '\\';
+        }
 };
 
 } // namespace System

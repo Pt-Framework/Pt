@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -70,11 +72,11 @@ namespace System {
             ~DirectoryImpl() {}
 
         public:
-            static void create(const char* dirpath);
+            static void create(const std::string& path);
 
             static void remove(const std::string& path);
 
-            static void move(const std::string& oldname, const std::string& newname);
+            static void move(const std::string& oldName, const std::string& newName);
 
             static bool exists(const std::string& path);
 
@@ -82,10 +84,12 @@ namespace System {
 
             static std::string system();
 
-            static char separator()
-            { return '/'; }
+            static void changeCurrent(const std::string& dirpath);
 
-            static void changeCurrent(const char* dirpath);
+            static char separator()
+            {
+                return '/';
+            }
     };
 
 } // namespace System

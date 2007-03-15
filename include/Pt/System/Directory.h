@@ -1,6 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2006 by PTV AG                                          *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
 #ifndef PTV_SYSTEM_DIRECTORY_H
@@ -32,7 +48,7 @@ namespace System {
         ++it;
     }
     \endcode
-     */
+    */
     class PT_SYSTEM_API DirectoryIterator {
         public:
             DirectoryIterator();
@@ -76,27 +92,23 @@ while (it != d.end())
         public:
             typedef DirectoryIterator Iterator;
 
-            enum mode { Create, UseExisting};
+            Directory(const std::string& path = "");
 
-            Directory(const std::string& path, mode m = UseExisting);
+            ~Directory();
 
-            ~Directory()
-            { }
+            bool create() const;
 
             bool exists() const;
 
-            ///< gives the system-specific path separator
-            static char separator();
+            virtual const std::string& path() const;
 
-            virtual const std::string& path() const
-            { return _path; }
-
-            virtual std::size_t size() const
-            { return 0; }
+            virtual std::size_t size() const;
 
             //! Returns an iterator to the node in the directory.
             DirectoryIterator begin() const
-            { return DirectoryIterator( _path.c_str() ); }
+            {
+                return DirectoryIterator( _path.c_str() );
+            }
 
             //! Returns an iterator to the end of the directory.
             DirectoryIterator end() const
@@ -107,9 +119,36 @@ while (it != d.end())
 
             virtual void remove();
 
-            virtual void move(const std::string& newname);
+            virtual void move(const std::string& newPath);
+
+            /**
+             * @brief Returns the directory in which this directory resides.
+             *
+             * If no directory is specified when the Directory object is created, so the
+             * directory is seen as relative to the current directory, an empty string is
+             * returned. If the directory is contained in the root directory of the file
+             * system, for linux a slash ("/") is returned.
+             *
+             * A returned directory always ends with a trailing path separator character.
+             * (A backslash in Windows and a slash in Linux, for example.)
+             *
+             * @return The directory in which this directory resides.
+             */
+            virtual std::string parentPath() const;
+            
+            /**
+             * @brief Returns the name of thi directory, excluding the complete path
+             * except the last element -- the directory name.
+             *
+             * @return The directory name of this Directory object.
+             */
+            virtual std::string name() const;
+        
 
         public:
+            ///< gives the system-specific path separator
+            static char separator();
+
             // DEPRECATED
             static Directory system();
 

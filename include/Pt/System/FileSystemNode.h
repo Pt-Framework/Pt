@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -40,10 +42,16 @@ class PT_SYSTEM_API FileSystemNode
         //! Returns the path of the file system node.
         virtual const std::string& path() const = 0;
 
+        virtual std::string parentPath() const = 0;
+
+        virtual std::string name() const = 0;
+
         //! Returns the size of the file system node.
         virtual std::size_t size() const = 0;
 
         virtual void remove() = 0;
+
+        virtual bool exists() const = 0;
 
         // virtual void rename(const std::string& newname);
         virtual void move(const std::string& newname) = 0;
