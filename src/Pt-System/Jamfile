@@ -30,6 +30,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           FileDevice.cpp
                           FileStream.cpp
                           FileSystem.cpp
+                          FileErrors.cpp
                           IOError.cpp
                           IOManager.cpp
                           Mutex.cpp
