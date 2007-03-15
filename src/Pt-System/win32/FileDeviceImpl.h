@@ -63,10 +63,13 @@ namespace System {
 
             bool wait(IODevice::WaitMode mode, unsigned int msec) throw(IOError);
             
-            virtual HANDLE handle() const
+            virtual HANDLE eventHandle() const
             { return _handle; } 
             
-            virtual const IOEvent& waitEvent();
+            virtual const IOEvent& event();
+            
+            virtual void resetEvent()
+            { }
 
         private:
             enum { Reading, Writing, Idle } _state;

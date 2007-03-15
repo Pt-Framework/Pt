@@ -71,10 +71,10 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
         
-        HANDLE handle() const;
+        HANDLE eventHandle() const;        
         
-        
-        const IOEvent& waitEvent();
+        const IOEvent& event();
+        void resetEvent();
         
     private:
         SerialDeviceImpl* self()

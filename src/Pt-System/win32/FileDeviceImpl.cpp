@@ -254,7 +254,7 @@ void FileDeviceImpl::sync() const
     }
 }
 
-const IOEvent& FileDeviceImpl::waitEvent()
+const IOEvent& FileDeviceImpl::event()
 {
     switch( _state )
     {

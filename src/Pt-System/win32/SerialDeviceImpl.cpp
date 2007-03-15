@@ -27,12 +27,24 @@ namespace System{
 
 SerialDeviceImpl::SerialDeviceImpl()
 : _terminateEv( 0 )
-{
-    memset(&_overlapped, 0, sizeof(_overlapped) );
+{        
+    memset( &_ovRead, 0, sizeof( _ovRead ) );
+    memset( &_ovWrite, 0, sizeof( _ovWrite ) );
+    memset( &_ovStatus, 0, sizeof( _ovStatus ) );
+
+    _ovWrite.hEvent  = CreateEvent( 0, TRUE ,FALSE, 0 );
+    _ovRead.hEvent   = CreateEvent( 0, TRUE ,FALSE, 0 );
+    _ovStatus.hEvent = CreateEvent( 0, TRUE ,FALSE, 0 );
+    _terminateEv     = CreateEvent( 0, TRUE , FALSE, 0 );
 }
 
 SerialDeviceImpl::~SerialDeviceImpl()
-{ }
+{ 
+    CloseHandle( _ovWrite.hEvent );
+    CloseHandle( _ovRead.hEvent );
+    CloseHandle( _ovStatus.hEvent );
+    CloseHandle( _terminateEv );
+}
 
 void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode )
 {
@@ -60,45 +72,19 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
-        comTimeOut.WriteTotalTimeoutMultiplier  = 0;//10;
-        comTimeOut.WriteTotalTimeoutConstant    = 0;//1000;
+        comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+        comTimeOut.WriteTotalTimeoutConstant    = 0;
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
-        //Create the wait events.
-        memset( &_overlapped, 0, sizeof( _overlapped ) );
-
-        // The port event.
-        _overlapped.hEvent = CreateEvent( 0, FALSE ,TRUE, 0 );
-
-        // The terminate event.
-        _terminateEv = CreateEvent( 0, FALSE ,0, 0 );
-
-        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK | EV_RXCHAR  );
-        
-        DWORD waitMask;
-        
-        if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
-        {
-            if( GetLastError () != ERROR_IO_PENDING )
-                throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
-        }
-
+        SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY  );
+        resetEvent();        
     }
     catch( ... )
     {
         CloseHandle( _handle );
-        
-        if( _overlapped.hEvent != 0 )
-            CloseHandle( _overlapped.hEvent );
-            
-        if( _terminateEv != 0 )
-            CloseHandle( _terminateEv );
-             
-        _overlapped.hEvent = 0;            
         _handle = 0;
-        _terminateEv = 0;
         throw;
     }
 }
@@ -118,13 +104,7 @@ void SerialDeviceImpl::close()
     SetCommState( _handle, &_orgCommState );
 
     //Close the port handle.
-    CloseHandle( _handle );
-
-    //Terminate event
-    CloseHandle( _terminateEv );
-
-    //Port event.
-    CloseHandle( _overlapped.hEvent );
+    CloseHandle( _handle );    
 
     _handle = 0;
 }
@@ -132,10 +112,8 @@ void SerialDeviceImpl::close()
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD   length;
-    DWORD   error;
-    COMSTAT cs;
 
-    if( ReadFile( _handle, buffer, count, &length, &_overlapped ) )
+    if( ReadFile( _handle, buffer, count, &length, &_ovRead ) )
         return length;
 
     if( ERROR_HANDLE_EOF == GetLastError() )
@@ -145,8 +123,8 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     }
     else if( ERROR_IO_PENDING == GetLastError() )
     {
-        if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) )
-            length = 0;
+        if( S_OK != GetOverlappedResult(_handle, &_ovRead, &length, FALSE) )
+            throw IOError("Read port failed" , PT_SOURCEINFO);
     }
     else
     {
@@ -159,15 +137,14 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
-
-   
-    if( WriteFile(  _handle,  buffer,  count, &length, &_overlapped ) )
+    
+    if( WriteFile(  _handle,  buffer,  count, &length, &_ovWrite ) )
         return length;
 
     if( ERROR_IO_PENDING == GetLastError() )
     {
-        if( FALSE == GetOverlappedResult(_handle, &_overlapped, &length, FALSE) )
-            length = 0;
+        if( S_OK != GetOverlappedResult(_handle, &_ovWrite, &length, FALSE) )
+            throw IOError("Could not write to file handle", PT_SOURCEINFO);
     }
     else
     {
@@ -375,27 +352,25 @@ void SerialDeviceImpl::flush()
     FlushFileBuffers( _handle );
 }
 
-const IOEvent& SerialDeviceImpl::waitEvent()
-{   
-    DWORD waitMask = 0;
-
-    if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
+void SerialDeviceImpl::resetEvent()
+{     
+    if( WaitCommEvent( _handle, &_eventMask, &_ovStatus ) == FALSE )
     {
         if( GetLastError () != ERROR_IO_PENDING )
             throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
     }
-    
-    if( (waitMask & EV_BREAK)  == EV_BREAK)
-        throw IOError("Unknow event", PT_SOURCEINFO);
-        
-    if( (waitMask & EV_TXEMPTY) == EV_TXEMPTY )
+}
+
+const IOEvent& SerialDeviceImpl::event()
+{           
+    if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
         return _writeEvent;    
 
-    if( (waitMask & EV_RXCHAR) == EV_RXCHAR)
+    if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
         return _readEvent;       
 
     throw IOError("Unknow event", PT_SOURCEINFO);
-    return _readEvent;      
+    return _readEvent;
 }
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
@@ -412,14 +387,14 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 
     DWORD waitMask = 0;
 
-    if( WaitCommEvent( _handle, &waitMask, &_overlapped ) == FALSE )
+    if( WaitCommEvent( _handle, &waitMask, &_ovWrite ) == FALSE )
     {
         if( GetLastError () != ERROR_IO_PENDING )
             throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
     }
 
     HANDLE  eventHandles[2];
-    eventHandles[0] = _overlapped.hEvent;
+    eventHandles[0] = _ovStatus.hEvent;
     eventHandles[1] = _terminateEv;
 
     const DWORD reason = WaitForMultipleObjects( 2, eventHandles, FALSE, timeout );

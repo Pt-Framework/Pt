@@ -86,8 +86,9 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         /** @brief Constructs a serial device and open the specified device file
 
-            \param file The serial device file
-            \param mode The open mode
+            \param file     The serial device file
+            \param mode     The open mode
+            \parm synchron  The Read/Write mode
         */
         SerialDevice( const std::string& file, std::ios_base::openmode mode );
 

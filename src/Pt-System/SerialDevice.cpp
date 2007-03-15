@@ -21,7 +21,6 @@
 #include "SerialDeviceImpl.h"
 
 namespace Pt{
-
 namespace System{
 
 SerialDevice::SerialDevice()
@@ -30,7 +29,7 @@ SerialDevice::SerialDevice()
     _impl = new SerialDeviceImpl();
 }
 
-SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode )
+SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode)
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl();

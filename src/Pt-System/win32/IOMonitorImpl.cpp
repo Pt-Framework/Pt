@@ -52,10 +52,10 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
     item.signal = new Signal<const IOEvent&>();
     item.device = &device;
     
-    HANDLE handle = device.handle();
+    HANDLE handle = device.eventHandle();
     
     _devices.insert( std::make_pair( handle, item ) );
-    _waitHandles.push_back( device.handle() );
+    _waitHandles.push_back( device.eventHandle() );
     
     return *item.signal;
 }
@@ -63,17 +63,18 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 {
     MutexLock lock( _mutex );
+    HANDLE eventHandle = device.eventHandle();
     
-    DeviceItem& item = _devices[ device.handle() ];
+    DeviceItem& item = _devices[ eventHandle ];
     delete item.signal;
     
-    _devices.erase( device.handle() );
+    _devices.erase( eventHandle );
     
     std::vector<HANDLE>::iterator it = _waitHandles.begin();
     
     for( ; it != _waitHandles.end(); ++it )
     {
-        if( *it != device.handle() )
+        if( *it != eventHandle )
             continue;
         
         _waitHandles.erase( it );            
@@ -94,8 +95,10 @@ void IOMonitorImpl::wait()
             MutexLock lock( _mutex );
 
             DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
-            const IOEvent&      ev           = item.device->waitEvent();
+            const IOEvent&      ev           = item.device->event();
             item.signal->send( ev );    
+            
+            item.device->resetEvent();
 
          }
          catch(const std::exception& e )

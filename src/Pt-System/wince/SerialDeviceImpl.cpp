@@ -62,7 +62,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
         comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        comTimeOut.WriteTotalTimeoutConstant    = 1000;       
+        comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);            
@@ -379,12 +379,17 @@ void SerialDeviceImpl::run()
     }
 }
 
-HANDLE SerialDeviceImpl::handle() const
+HANDLE SerialDeviceImpl::eventHandle() const
 { 
     return _commEvent; 
 }
 
-const IOEvent& SerialDeviceImpl::waitEvent()
+void SerialDeviceImpl::resetEvent()
+{
+    ResetEvent ( _commEvent );
+}
+
+const IOEvent& SerialDeviceImpl::event()
 {
     ResetEvent( _commEvent );
     

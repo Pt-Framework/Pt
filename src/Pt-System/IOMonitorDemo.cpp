@@ -53,9 +53,13 @@ class SerialListener : public Pt::Connectable
             {
                 char buffer[201];
                 memset( buffer, 0, 201);
-                size_t size = _device.read( buffer, 200);
-                std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
-                _out<< "Read: " << buffer << " (" << size << " bytes)" << std::endl;
+                size_t size = 0;
+                
+                while( size = _device.read( buffer, 200) )
+                {
+                    std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
+                    _out<< "Read: " << buffer << " (" << size << " bytes)" << std::endl;
+                }
             }
             else
             {            
@@ -123,7 +127,7 @@ int main( int argc, char* argv[] )
        
         //Setup the device         
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
-        serialDevice.setCharSize(7);
+        serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
         
@@ -146,25 +150,27 @@ int main( int argc, char* argv[] )
         Pt::System::Thread::sleep( 300 );
         
         //Wait a time periode. 
-        Pt::System::Thread::sleep(  1000 );
+        Pt::System::Thread::sleep(  5000 );
         
         //Write something.
-        char* buffer = new char[500];
-        memset( buffer, 23, 500 );
-        size_t no = serialDevice.write( buffer, 500 );
+        char* buffer = new char[100];
+        memset( buffer, 23, 100 );
+        size_t no = serialDevice.write( buffer, 2 );
         delete []buffer;
         
         //serialDevice.flush();
         
         //Wait again.
-        Pt::System::Thread::sleep(  2000 );
+        Pt::System::Thread::sleep(  1000 );
         
         //Exit the event loop.
         eventLoop.exit();
 
         //Remove the serial device. 
         eventLoop.removeDevice( serialDevice );
-        
+
+        serialDevice.close();
+                
         //Join the threads.
         thread.wait();
     }
