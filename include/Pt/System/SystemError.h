@@ -1,6 +1,8 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                   *
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
+ *   Copyright (C) 2004-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2005-2007 Aloysius Indrayanto                           *
+ *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This code is based on code written by Christian Prochnow              *
  *                                                                         *
@@ -33,9 +35,10 @@ namespace System {
 
     /** @brief Exception class indication a system error.
      */
-    class PT_SYSTEM_API SystemError : public std::runtime_error {
+    class PT_SYSTEM_API SystemError : public std::runtime_error
+    {
         public:
-            SystemError(const std::string & what, const SourceInfo& si) throw();
+            SystemError(const std::string & what, const SourceInfo& si);
 
             ~SystemError() throw();
     };
