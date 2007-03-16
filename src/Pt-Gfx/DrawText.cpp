@@ -180,7 +180,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
     FT_Vector            delta;
     FT_UInt                previous = 0;
     FT_Glyph            glyph;
-    FT_Glyph            glyphCopy;
+    FT_Glyph            glyphCopy = 0;
     FTC_Node            node;
     FT_Face                face;
     FTC_SBit            smalGlyphBitmap;
@@ -250,7 +250,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
             pitch        = glyphBitmap->bitmap.pitch;
             height        = glyphBitmap->bitmap.rows;
             width        = glyphBitmap->bitmap.width;
-            buffer        = glyphBitmap->bitmap.buffer;
+            buffer        = glyphBitmap->bitmap.buffer;            
         }
 
         if( false == Pt::Unicode::isSpace(*it) )
@@ -284,6 +284,12 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
         glyphPos.x   += incX;
         glyphPos.y   -= incY;
         previous     = glyph_index;
+        
+        if( glyphCopy != 0 )
+        {
+            FT_Done_Glyph( glyphCopy );
+            glyphCopy = 0;
+        }
     }
 }
 
