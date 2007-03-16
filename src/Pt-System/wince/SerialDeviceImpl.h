@@ -71,10 +71,14 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
         
-        HANDLE eventHandle() const;        
+        HANDLE deviceHandle() const
+        { return _handle; }
         
-        const IOEvent& event();
-        void resetEvent();
+        void eventHandles( std::vector<HANDLE>& handles ) const;
+        
+        const IOEvent& event( HANDLE handle );
+        
+        void resetEvent( HANDLE handle );
         
     private:
         SerialDeviceImpl* self()
@@ -87,12 +91,12 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
        
         enum { ReceiveEvent, SendCompleteEvent } _commEventType;
         
-        HANDLE              _handle;
-        HANDLE              _commEvent;
-        DCB                 _orgCommState;
-        DWORD               _waitCommMask;
-        Thread              _eventThread;  
-        bool                _terminateThread;
+        HANDLE _handle;
+        HANDLE _commEvent;
+        DCB    _orgCommState;
+        DWORD  _waitCommMask;
+        Thread _eventThread;  
+        bool   _terminateThread;
 };
 
 }//namespace System

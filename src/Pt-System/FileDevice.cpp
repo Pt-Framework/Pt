@@ -1,6 +1,7 @@
-
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,28 +20,22 @@
  ***************************************************************************/
 
 #include "Pt/System/FileDevice.h"
-
 #include "FileDeviceImpl.h"
 
-
 namespace Pt {
-
 namespace System {
-
 
 FileDevice::FileDevice()
 {
     _impl = new FileDeviceImpl();
 }
 
-
-FileDevice::FileDevice(const char* path, std::ios_base::openmode mode)
+FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode )
 : _mode(mode)
 {
     _impl = new FileDeviceImpl();
-    this->open(path, mode);
+    this->open( path, mode, rwMode );
 }
-
 
 FileDevice::~FileDevice()
 {
@@ -51,14 +46,13 @@ FileDevice::~FileDevice()
     delete _impl;
 }
 
-
-void FileDevice::open(const char* path, std::ios_base::openmode mode)
+void FileDevice::open( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode )
 {
     if( this->valid() ) {
         this->close();
     }
 
-    _impl->open(path, mode);
+    _impl->open(path, mode, rwMode);
 
     _mode = mode;
     _path = path;
@@ -67,14 +61,12 @@ void FileDevice::open(const char* path, std::ios_base::openmode mode)
     IODevice::setEof(false);
 }
 
-
 void FileDevice::_close()
 {
     _impl->close();
     IODevice::setValid(false);
     IODevice::setEof(false);
 }
-
 
 size_t FileDevice::size() const
 {
@@ -87,7 +79,6 @@ FileDevice::pos_type FileDevice::_seek(off_type offset, SeekMode mode)
     return _impl->seek(offset, mode);
 }
 
-
 size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
 {
     //if(count > SSIZE_MAX)
@@ -97,7 +88,6 @@ size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
     return ret;
 }
 
-
 size_t FileDevice::_write(const char* buffer, size_t count)
 {
     if( _mode & std::ios_base::out )
@@ -106,12 +96,10 @@ size_t FileDevice::_write(const char* buffer, size_t count)
     return 0;
 }
 
-
 size_t FileDevice::_peek(char* buffer, size_t count)
 {
     return _impl->peek(buffer, count);
 }
-
 
 void FileDevice::_sync() const
 {
@@ -119,13 +107,10 @@ void FileDevice::_sync() const
         _impl->sync();
 }
 
-
 bool FileDevice::_wait(WaitMode mode, unsigned int msec)
 {
     return _impl->wait(mode, msec);
 }
 
-
 } // namespace System
-
 } // namespace Pt

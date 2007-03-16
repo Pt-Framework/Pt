@@ -26,61 +26,60 @@
 #include <Pt/System/Api.h>
 
 namespace Pt {
-
 namespace System {
 
-    class PT_SYSTEM_API FileDevice : public IODevice {
-        private:
-            class FileDeviceImpl* _impl;
+class PT_SYSTEM_API FileDevice : public IODevice 
+{
+    private:
+        class FileDeviceImpl* _impl;
 
-        public:
-            FileDevice();
+    public:
+        FileDevice();
 
-            FileDevice(const char* path, std::ios_base::openmode mode);
+        FileDevice( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode = Synchronous );
 
-            ~FileDevice();
+        ~FileDevice();
 
-            void open(const char* path, std::ios_base::openmode mode);
+        void open( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode = Synchronous );
 
-            const char* path() const
-            { return _path.c_str(); }
+        const char* path() const
+        { return _path.c_str(); }
 
-            std::ios_base::openmode openMode() const
-            { return _mode; }
+        std::ios_base::openmode openMode() const
+        { return _mode; }
 
-            size_t size() const;
+        size_t size() const;
 
-            virtual IODeviceImpl* impl()
-            { return (IODeviceImpl*) _impl; }
-            
-        protected:
-            void _close();
+        virtual IODeviceImpl* impl()
+        { return (IODeviceImpl*) _impl; }
+        
+    protected:
+        void _close();
 
-            bool _remote() const
-            { return false; }
+        bool _remote() const
+        { return false; }
 
-            bool _seekable() const
-            { return true; }
+        bool _seekable() const
+        { return true; }
 
-            pos_type _seek(off_type offset, SeekMode mode) ;
+        pos_type _seek(off_type offset, SeekMode mode) ;
 
-            size_t _read(char* buffer, size_t count, bool& eof);
+        size_t _read(char* buffer, size_t count, bool& eof);
 
-            size_t _write(const char* buffer, size_t count);
+        size_t _write(const char* buffer, size_t count);
 
-            size_t _peek(char* buffer, size_t count);
+        size_t _peek(char* buffer, size_t count);
 
-            void _sync() const;
+        void _sync() const;
 
-            bool _wait(WaitMode mode, unsigned int msec);
+        bool _wait(WaitMode mode, unsigned int msec);
 
-        private:
-            std::string             _path;
-            std::ios_base::openmode _mode;
-    };
+    private:
+        std::string             _path;
+        std::ios_base::openmode _mode;
+};
 
 } // namespace System
-
 } // namespace Pt
 
 #endif

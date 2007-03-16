@@ -33,12 +33,16 @@ IOMonitorImpl::IOMonitorImpl()
 
 IOMonitorImpl::~IOMonitorImpl()
 { 
-    std::map<HANDLE,DeviceItem>::iterator it = _devices.begin();
+    std::map<HANDLE,DeviceItem*>::iterator it = _devHandleMap.begin();
 
-    for( ; it != _devices.end(); ++it)
-        delete it->second.signal;
+    for( ; it != _devHandleMap.end(); ++it)
+    {
+        delete it->second->signal;
+        delete it->second;
+    }
 
-    _devices.clear(); 
+    _devHandleMap.clear(); 
+    _waitHandleMap.clear();
     _waitHandles.clear();
     CloseHandle( _wakeHandle );
 }
@@ -47,39 +51,65 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
     MutexLock lock( _mutex );
     
-    DeviceItem item;
+    wake();
     
-    item.signal = new Signal<const IOEvent&>();
-    item.device = &device;
+    //Create a device description item.
+    DeviceItem* item = new DeviceItem();    
     
-    HANDLE handle = device.eventHandle();
+    item->signal     = new Signal<const IOEvent&>();
+    item->device     = &device;       
     
-    _devices.insert( std::make_pair( handle, item ) );
-    _waitHandles.push_back( device.eventHandle() );
+    //Initialize the device handle / device item map.
+    _devHandleMap.insert( std::make_pair( device.deviceHandle(), item ) );
     
-    return *item.signal;
+    //Initialize the wait handle / device item map.
+    device.eventHandles( item->waitHandles );
+    
+    for( size_t i = 0; i < item->waitHandles.size(); ++i )
+    {
+       _waitHandleMap.insert( std::make_pair( item->waitHandles[i] , item ) );
+       _waitHandles.push_back( item->waitHandles[i] );
+    }    
+   
+    return *(item->signal);
 }
 
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 {
     MutexLock lock( _mutex );
-    HANDLE eventHandle = device.eventHandle();
+
+    wake();
     
-    DeviceItem& item = _devices[ eventHandle ];
-    delete item.signal;
+    //Obtain the device item.
+    DeviceItem* item = _devHandleMap[ device.deviceHandle() ];
     
-    _devices.erase( eventHandle );
+    std::vector<HANDLE>::iterator it;
+    std::vector<HANDLE>::iterator itSearch;
     
-    std::vector<HANDLE>::iterator it = _waitHandles.begin();
-    
-    for( ; it != _waitHandles.end(); ++it )
-    {
-        if( *it != eventHandle )
-            continue;
+    for( it = item->waitHandles.begin(); it != item->waitHandles.end(); ++it )
+    {       
+        //Remove the wait Handles from the handle array.
+        for( itSearch = _waitHandles.begin(); itSearch != _waitHandles.end(); ++itSearch )
+        {
+            if( *it != *itSearch)
+                continue;
+                
+            itSearch = _waitHandles.erase( itSearch );
+            
+            if( itSearch == _waitHandles.end() )
+                break;
+        }
         
-        _waitHandles.erase( it );            
-        break;        
-    }
+         //Remove the wait handles from waitHandleMap.
+        _waitHandleMap.erase( *it );
+    }    
+
+    delete item->signal;
+
+    //Remove the device from the device handle map.
+    _devHandleMap.erase(  device.deviceHandle() );              
+    
+    delete item;
 }
 
 void IOMonitorImpl::wait()
@@ -87,18 +117,20 @@ void IOMonitorImpl::wait()
     DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, INFINITE );
     
     const Pt::ssize_t   handleIndex  = ( result - WAIT_OBJECT_0 );
+    
+    MutexLock lock( _mutex );        
         
     if( handleIndex != InternalWake )
     {            
         try
-        {
-            MutexLock lock( _mutex );
-
-            DeviceItem&         item         = _devices[ _waitHandles[ handleIndex ] ];
-            const IOEvent&      ev           = item.device->event();
-            item.signal->send( ev );    
+        {  
+            const HANDLE waitHandle = _waitHandles[ handleIndex ];
             
-            item.device->resetEvent();
+            DeviceItem*         item         = _waitHandleMap[ waitHandle ];
+            const IOEvent&      ev           = item->device->event( waitHandle );
+            item->signal->send( ev );    
+            
+            item->device->resetEvent( waitHandle );
 
          }
          catch(const std::exception& e )

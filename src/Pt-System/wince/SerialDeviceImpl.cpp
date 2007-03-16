@@ -379,18 +379,25 @@ void SerialDeviceImpl::run()
     }
 }
 
-HANDLE SerialDeviceImpl::eventHandle() const
-{ 
-    return _commEvent; 
+void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles ) const
+{
+    handles.clear();
+    handles.push_back( _commEvent );         
 }
 
-void SerialDeviceImpl::resetEvent()
+void SerialDeviceImpl::resetEvent( HANDLE handle )
 {
+    if( _commEvent != handle )
+        throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
+
     ResetEvent ( _commEvent );
 }
 
-const IOEvent& SerialDeviceImpl::event()
+const IOEvent& SerialDeviceImpl::event( HANDLE handle )
 {
+    if( _commEvent != handle )
+        throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
+        
     ResetEvent( _commEvent );
     
     if( _commEventType == SendCompleteEvent )

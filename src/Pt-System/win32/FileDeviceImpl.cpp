@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,7 +24,6 @@
 #include "FileDeviceImpl.h"
 
 namespace Pt {
-
 namespace System {
 
 FileDeviceImpl::FileDeviceImpl()
@@ -38,11 +39,10 @@ FileDeviceImpl::FileDeviceImpl()
     _writeOv.hEvent = NULL;
 }
 
-
-FileDeviceImpl::~FileDeviceImpl() throw()
+FileDeviceImpl::~FileDeviceImpl()
 { }
 
-void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(IOError)
+void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode )
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -52,53 +52,49 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode) throw(
     _writeOv.OffsetHigh = 0;
     _writeOv.hEvent = NULL;
 
-    DWORD access = GENERIC_READ; // open for reading
-    DWORD share = FILE_SHARE_READ|FILE_SHARE_WRITE; // unix always allows sharing
-    DWORD create = OPEN_EXISTING; // fail if not exist
-    DWORD flags = 0;
+    DWORD access = GENERIC_READ;
+    DWORD share  = FILE_SHARE_READ|FILE_SHARE_WRITE;
+    DWORD create = OPEN_EXISTING;
+    DWORD flags  = 0;
 
-    if(mode & std::ios_base::in ) {
-        access |= GENERIC_READ; // open for reading
+    if( mode & std::ios_base::in ) 
+        access |= GENERIC_READ;
+
+    if( mode & std::ios_base::out )
+    {
+        access |= GENERIC_WRITE;
+        create = OPEN_ALWAYS;
     }
 
-    if(mode & std::ios_base::out) {
-        access |= GENERIC_WRITE; // open for writing
-        create = OPEN_ALWAYS;    // create if not exist
-    }
-
-    if(mode & std::ios_base::trunc )
+    if( mode & std::ios_base::trunc )
         create |= TRUNCATE_EXISTING;
 
-//    if(mode & IODevice::NonBlock)
-//    {
-//        #ifdef _WIN32_WCE
-//            throw std::runtime_error("Overlapped I/O not supported under WinCE"+ PT_SOURCEINFO);
-//        #endif
-//        flags |= FILE_FLAG_OVERLAPPED; // open as non-blocking
-//        _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
-//        _writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-//    }
+    if( rwMode == IODevice::Asynchronous )
+    {
+        flags |= FILE_FLAG_OVERLAPPED;
+        _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
+        _writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    }
     
-     flags |= FILE_FLAG_OVERLAPPED;
-
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     _handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
-    if(_handle == INVALID_HANDLE_VALUE) {
-        throw IOError("Could not open file handle", PT_SOURCEINFO);
-    }
+    if(_handle == INVALID_HANDLE_VALUE)
+        throw IOError("Could not open file handle", PT_SOURCEINFO);    
 
-    try {
+    try 
+    {
         if(mode & std::ios_base::end )
             this->seek(0, IODevice::SeekEnd);
     }
-    catch(...) {
+    catch(...) 
+    {
         this->close();
         throw;
     }
 }
 
-void FileDeviceImpl::close() throw(IOError)
+void FileDeviceImpl::close()
 {
     if(_readOv.hEvent != NULL)
         ::CloseHandle(_readOv.hEvent);
@@ -115,7 +111,7 @@ void FileDeviceImpl::close() throw(IOError)
     }
 }
 
-FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode) throw(IOError)
+FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode)
 {
     DWORD whence = FILE_BEGIN;
     switch(mode)
@@ -168,7 +164,7 @@ void FileDeviceImpl::resize(off_type size) throw(IOError)
 }
 */
 
-size_t FileDeviceImpl::size() throw(IOError)
+size_t FileDeviceImpl::size()
 {
     DWORD sz = GetFileSize(_handle, NULL);
     if(sz == INVALID_FILE_SIZE)
@@ -178,7 +174,7 @@ size_t FileDeviceImpl::size() throw(IOError)
 }
 
 
-size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IOError)
+size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
     eof = false;
     DWORD readBytes = 0;
@@ -210,7 +206,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof) throw(IOError
 }
 
 
-size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IOError)
+size_t FileDeviceImpl::write(const char* buffer, size_t count)
 {
     _state = Writing;
     DWORD writtenBytes = 0;
@@ -236,7 +232,7 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count) throw(IOError)
 }
 
 
-size_t FileDeviceImpl::peek(char* buffer, size_t count) throw(IOError)
+size_t FileDeviceImpl::peek(char* buffer, size_t count)
 {
     bool eof;
     size_t ret = this->read(buffer, count, eof);
@@ -254,24 +250,14 @@ void FileDeviceImpl::sync() const
     }
 }
 
-const IOEvent& FileDeviceImpl::event()
+const IOEvent& FileDeviceImpl::event( HANDLE handle )
 {
-    switch( _state )
-    {
-        case Reading:
-            return _readEvent;
-        break;
-        
-        case Writing:
-            return _writeEvent; 
-        break;
-        
-        case Idle:
-            throw std::logic_error("Wait on idle device"+ PT_SOURCEINFO );
-        break;        
-    }   
+    if( handle == _readOv.hEvent )
+        return _readEvent;
+    else if( handle == _writeOv.hEvent ) 
+        return  _writeEvent;
     
-    return _readEvent;
+    throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
 }
 
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)

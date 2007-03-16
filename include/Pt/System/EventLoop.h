@@ -160,8 +160,25 @@ class IOMonitor;
             void exit();
 
 
-            Signal<const IOEvent&>&  addDevice( IODevice& device );
+            /**
+             * \brief Add a device to the event loop.
+             *
+             * The device events are proccesing throw the IO-Monitor from the
+             * event loop. A slot can by connected of the returned signal,
+             * to receive events from this device. Attention! the device use 
+             * not the signal from the event loop to notify, only the returned 
+             * signal from this method is used to notify a device event.
+             *
+             * @param device The IODevice
+             * @return The event notification signal for this device
+             */
+             Signal<const IOEvent&>& addDevice( IODevice& device );
             
+            /**
+             * \brief Remove a device from the event loop IO-Monitor.
+             *
+             * @param device The IODevice.
+             */
             void removeDevice( IODevice& device );
 
             virtual bool opened(const Connection& c)

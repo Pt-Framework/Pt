@@ -121,7 +121,7 @@ int main( int argc, char* argv[] )
 {    
     try
     {
-        Pt::System::Thread::sleep( 20000 );
+        Pt::System::Thread::sleep(20000);
         Pt::System::EventLoop       eventLoop;
         Pt::System::Thread          thread( eventLoop ); 
         Pt::System::SerialDevice    serialDevice("COM5:", std::ios_base::in | std::ios_base::out);
@@ -159,7 +159,7 @@ int main( int argc, char* argv[] )
         size_t no = serialDevice.write( buffer, 2 );
         delete []buffer;
         
-        serialDevice.flush();
+        //serialDevice.flush();
         
         //Wait again.
         Pt::System::Thread::sleep(  1000 );

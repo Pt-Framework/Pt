@@ -45,16 +45,19 @@ class IOMonitorImpl
     private:     
     
         enum{ InternalWake = 0 };
+        
         struct DeviceItem
         {
             IODeviceImpl*               device;
             Signal<const IOEvent&>*     signal;
+            std::vector<HANDLE>         waitHandles;
         };
         
-        std::map<HANDLE,DeviceItem> _devices;
-        std::vector<HANDLE>         _waitHandles;
-        HANDLE                      _wakeHandle;
-        Mutex                       _mutex;
+        std::map<HANDLE,DeviceItem*>    _devHandleMap;
+        std::map<HANDLE,DeviceItem*>    _waitHandleMap;
+        std::vector<HANDLE>             _waitHandles;
+        HANDLE                          _wakeHandle;
+        Mutex                           _mutex;
 };
 
 }//namespace System 

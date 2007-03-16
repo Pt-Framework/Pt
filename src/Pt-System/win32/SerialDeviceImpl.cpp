@@ -79,7 +79,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
         SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY  );
-        resetEvent();        
+        resetEvent( _ovStatus.hEvent );        
     }
     catch( ... )
     {
@@ -352,8 +352,11 @@ void SerialDeviceImpl::flush()
     FlushFileBuffers( _handle );
 }
 
-void SerialDeviceImpl::resetEvent()
+void SerialDeviceImpl::resetEvent( HANDLE handle )
 {     
+    if( handle != _ovStatus.hEvent )
+        throw std::logic_error("Unknown event handle ");
+        
     if( WaitCommEvent( _handle, &_eventMask, &_ovStatus ) == FALSE )
     {
         if( GetLastError () != ERROR_IO_PENDING )
@@ -361,8 +364,11 @@ void SerialDeviceImpl::resetEvent()
     }
 }
 
-const IOEvent& SerialDeviceImpl::event()
+const IOEvent& SerialDeviceImpl::event( HANDLE handle )
 {           
+   if( handle != _ovStatus.hEvent )
+        throw std::logic_error("Unknown event handle ");
+        
     if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
         return _writeEvent;    
 

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,6 +24,7 @@
 #include "Pt/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
+#include "Pt/System/IODevice.h"
 #include "IODeviceImpl.h"
 
 #include <windows.h>
@@ -32,54 +33,57 @@
 namespace Pt {
 namespace System {
 
-    class FileDeviceImpl  : public IODeviceImpl
-    {
-        public:
-            typedef FileDevice::pos_type pos_type;
-            typedef FileDevice::off_type off_type;
+class FileDeviceImpl  : public IODeviceImpl
+{
+    public:
+        typedef FileDevice::pos_type pos_type;
+        typedef FileDevice::off_type off_type;
 
-        public:
-            FileDeviceImpl();
+    public:
+        FileDeviceImpl();
 
-            FileDeviceImpl(const char* path, std::ios_base::openmode mode) throw(IOError);
+        FileDeviceImpl( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
 
-            ~FileDeviceImpl() throw();
+        ~FileDeviceImpl();
 
-            void open(const char* path, std::ios_base::openmode mode) throw(IOError);
+        void open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
 
-            void close() throw(IOError);
+        void close();
 
-            pos_type seek(off_type offset, IODevice::SeekMode mode) throw(IOError);
+        pos_type seek( off_type offset, IODevice::SeekMode mode );
 
-            size_t size() throw(IOError);
+        size_t size();
 
-            size_t read(char* buffer, size_t count, bool& eof) throw(IOError);
+        size_t read( char* buffer, size_t count, bool& eof );
 
-            size_t write(const char* buffer, size_t count) throw(IOError);
+        size_t write( const char* buffer, size_t count );
 
-            size_t peek(char* buffer, size_t count) throw(IOError);
+        size_t peek( char* buffer, size_t count );
 
-            void sync() const throw(IOError);
+        void sync() const;
 
-            bool wait(IODevice::WaitMode mode, unsigned int msec) throw(IOError);
-            
-            virtual HANDLE eventHandle() const
-            { return _handle; } 
-            
-            virtual const IOEvent& event();
-            
-            virtual void resetEvent()
-            { }
+        bool wait( IODevice::WaitMode mode, unsigned int msec );
+        
+        HANDLE deviceHandle() const
+        { return _handle; }
+        
+        void eventHandles( std::vector<HANDLE>& handles ) const
+        {
+            handles.clear();
+            handles.push_back( _writeOv.hEvent );
+            handles.push_back( _readOv.hEvent );
+        }
+        
+        const IOEvent& event( HANDLE handle );
 
-        private:
-            enum { Reading, Writing, Idle } _state;
-            
-            HANDLE      _handle;
-            OVERLAPPED  _readOv;
-            OVERLAPPED  _writeOv;
-            
-    };
+    private:
+        enum { Reading, Writing, Idle } _state;
+        
+        HANDLE      _handle;
+        OVERLAPPED  _readOv;
+        OVERLAPPED  _writeOv;        
+};
 
-}//namespaec System
-}//namespaec Pt
+}//namespace System
+}//namespace Pt
 #endif

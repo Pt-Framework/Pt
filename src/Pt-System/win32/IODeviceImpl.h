@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <Pt/System/WriteEvent.h>
 #include <Pt/System/ReadEvent.h>
+#include <vector>
 
 namespace Pt{
 namespace System{
@@ -35,9 +36,10 @@ class IODeviceImpl
         IODeviceImpl();
         virtual ~IODeviceImpl();     
         
-        virtual HANDLE eventHandle() const = 0;
-        virtual const IOEvent& event() = 0;
-        virtual void resetEvent()
+        virtual HANDLE deviceHandle() const  = 0;
+        virtual void eventHandles( std::vector<HANDLE>& handles ) const = 0;
+        virtual const IOEvent& event( HANDLE handle ) = 0;
+        virtual void resetEvent( HANDLE handle )
         { };
     
     protected:

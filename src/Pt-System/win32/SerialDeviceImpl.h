@@ -66,12 +66,18 @@ class SerialDeviceImpl : public IODeviceImpl
         SerialDevice::FlowControl flowControl() const;
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-
-        HANDLE eventHandle() const
-        { return _ovStatus.hEvent; }
         
-        virtual const IOEvent& event();
-        void resetEvent();
+        HANDLE deviceHandle() const
+        { return _handle; }
+                
+        void eventHandles( std::vector<HANDLE>& handles ) const
+        {
+            handles.clear();
+            handles.push_back( _ovStatus.hEvent );            
+        }
+        
+        const IOEvent& event( HANDLE handle );
+        void resetEvent( HANDLE handle );                
         
     private:
         void writeCommState( DCB& commState );
