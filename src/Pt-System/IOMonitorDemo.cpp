@@ -30,6 +30,10 @@
 #include <Pt/Signal.h>
 #include <fstream>
 
+#include <vld.h>
+#include <vldapi.h>    
+
+
 class SerialListener : public Pt::Connectable
 {
     public:    
@@ -121,10 +125,9 @@ int main( int argc, char* argv[] )
 {    
     try
     {
-        Pt::System::Thread::sleep(20000);
         Pt::System::EventLoop       eventLoop;
         Pt::System::Thread          thread( eventLoop ); 
-        Pt::System::SerialDevice    serialDevice("COM5:", std::ios_base::in | std::ios_base::out);
+        Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
        
         //Setup the device         
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate9600);

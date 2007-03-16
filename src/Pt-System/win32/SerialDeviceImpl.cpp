@@ -393,7 +393,7 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 
     DWORD waitMask = 0;
 
-    if( WaitCommEvent( _handle, &waitMask, &_ovWrite ) == FALSE )
+    if( WaitCommEvent( _handle, &waitMask, &_ovStatus ) == FALSE )
     {
         if( GetLastError () != ERROR_IO_PENDING )
             throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
