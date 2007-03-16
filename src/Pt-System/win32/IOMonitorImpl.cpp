@@ -58,13 +58,13 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
     
     item->signal     = new Signal<const IOEvent&>();
     item->device     = &device;       
-    
+
+    device.eventHandles( item->waitHandles );
+        
     //Initialize the device handle / device item map.
     _devHandleMap.insert( std::make_pair( device.deviceHandle(), item ) );
     
-    //Initialize the wait handle / device item map.
-    device.eventHandles( item->waitHandles );
-    
+    //Initialize the wait handle / device item map.    
     for( size_t i = 0; i < item->waitHandles.size(); ++i )
     {
        _waitHandleMap.insert( std::make_pair( item->waitHandles[i] , item ) );

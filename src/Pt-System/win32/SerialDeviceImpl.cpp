@@ -72,8 +72,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
-        comTimeOut.WriteTotalTimeoutMultiplier  = 0;
-        comTimeOut.WriteTotalTimeoutConstant    = 0;
+        comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+        comTimeOut.WriteTotalTimeoutConstant    = 100;
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
@@ -111,7 +111,7 @@ void SerialDeviceImpl::close()
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
-    DWORD   length;
+    DWORD length;
 
     if( ReadFile( _handle, buffer, count, &length, &_ovRead ) )
         return length;
@@ -407,8 +407,6 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
 
     if( reason == WAIT_FAILED )
         throw std::runtime_error( "Could not wait for file handle: " + PT_SOURCEINFO);
-
-    GetCommMask( _handle, &waitMask );
 
     if( mode == SerialDevice::WaitOutput )
         return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_TXEMPTY ) );
