@@ -30,6 +30,9 @@ namespace Pt {
         const size_t PlanarImageModel<ColorProxyT_, 1, 1>::NumberOfChannels;
 
 
+        //
+        // ColorPtrT
+        //
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ColorPtrT
         {
@@ -37,64 +40,37 @@ namespace Pt {
 
             public:
                 inline ColorPtrT(void*)
-                : _imgW(0)
-                , _imgH(0)
-                , _beginPlanes(0)
+                : _imgW(0), _imgH(0), _beginPlanes(0)
                 {}
 
                 inline ColorPtrT(ComponentT* data,
-                                 size_t imageWidth, size_t imageHeight,
-                                 size_t posX, size_t posY)
-                : _imgW(imageWidth)
-                , _imgH(imageHeight)
-                , _beginPlanes(data)
-                {
-                    _impl.set(data, posX, posY, imageWidth);
-                }
+                                 size_t      imageWidth,
+                                 size_t      imageHeight,
+                                 size_t      posX,
+                                 size_t      posY)
+                : _imgW(imageWidth), _imgH(imageHeight), _beginPlanes(data)
+                { _impl.set(data, posX, posY, imageWidth); }
 
                 inline ColorProxyT operator*()
-                {
-                    return ColorProxyT( _impl.components() );
-                }
-
-                //inline ColorProxyT* operator->()
-                //{
-                //    return 0;
-                //}
+                { return ColorProxyT( _impl.components() ); }
 
                 inline ColorPtrT& operator++()
-                {
-                    _impl.inc();
-                    return *this;
-                }
+                { _impl.inc();  return *this; }
 
                 inline ColorPtrT& operator--()
-                {
-                    _impl.dec();
-                    return *this;
-                }
+                { _impl.dec(); return *this; }
 
                 inline ColorPtrT& operator+=(size_t n)
-                {
-                    _impl.advance(n);
-                    return *this;
-                }
+                { _impl.advance(n); return *this; }
 
                 inline ColorPtrT& operator-=(size_t n)
-                {
-                    _impl.rewind(n);
-                    return *this;
-                }
+                { _impl.rewind(n); return *this; }
 
                 inline bool operator==(const ColorPtrT& c) const
-                {
-                    return _impl.equals( c._impl );
-                }
+                { return _impl.equals( c._impl ); }
 
                 inline bool operator!=(const ColorPtrT& c) const
-                {
-                    return _impl.notEquals( c._impl );
-                }
+                { return _impl.notEquals( c._impl ); }
 
             private:
                 inline Math::Point currentXYPosition() const
@@ -105,13 +81,13 @@ namespace Pt {
                 }
 
             private:
-                //! @brief Image width
+                //! @brief Width of the image
                 size_t _imgW;
 
-                //! @brief Image height
+                //! @brief Height of the image
                 size_t _imgH;
 
-                //! @brief Master channel data
+                //! @brief Pointer to the start of data of the master channel
                 ComponentT* _beginPlanes;
 
                 //! @brief Implementation of the pointer to color
