@@ -34,7 +34,7 @@ FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, ReadWrit
 : _mode(mode)
 {
     _impl = new FileDeviceImpl();
-    this->open( path, mode, rwMode );
+    this->open( path, mode/*, rwMode*/);
 }
 
 FileDevice::~FileDevice()
@@ -52,7 +52,7 @@ void FileDevice::open( const char* path, std::ios_base::openmode mode, ReadWrite
         this->close();
     }
 
-    _impl->open(path, mode, rwMode);
+    _impl->open(path, mode/*, rwMode*/);
 
     _mode = mode;
     _path = path;
