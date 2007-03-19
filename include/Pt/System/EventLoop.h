@@ -163,11 +163,12 @@ class IOMonitor;
             /**
              * \brief Add a device to the event loop.
              *
-             * The device events are proccesing throw the IO-Monitor from the
-             * event loop. A slot can by connected of the returned signal,
-             * to receive events from this device. Attention! the device use 
-             * not the signal from the event loop to notify, only the returned 
-             * signal from this method is used to notify a device event.
+             * The device events are proccesing throw the internal event loop IOMonitor.
+             * A slot can be connected to the returned signal. This signal emit the device 
+             * specific events.
+             *
+             * Attention! The device don't use the signal from the event loop to notify! 
+             * Only the returned signal from this method is used to notify a device event.
              *
              * @param device The IODevice
              * @return The event notification signal for this device
@@ -175,9 +176,9 @@ class IOMonitor;
              Signal<const IOEvent&>& addDevice( IODevice& device );
             
             /**
-             * \brief Remove a device from the event loop IO-Monitor.
+             * \brief Remove a device from the event loop IOMonitor.
              *
-             * @param device The IODevice.
+             * @param device The device to remove.
              */
             void removeDevice( IODevice& device );
 

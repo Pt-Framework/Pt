@@ -50,12 +50,12 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
 
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
-        throw IOError("Could not open port" , PT_SOURCEINFO);
+        throw OpenFailed("Could not open port" , PT_SOURCEINFO);
 
     try
     {
         if( !GetCommState( _handle, &_orgCommState ) )
-            throw IOError("Get port state failed" , PT_SOURCEINFO);
+            throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
 
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
@@ -65,7 +65,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
-            throw IOError("Set port time outs failed" , PT_SOURCEINFO);            
+            throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);            
             
         _commEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     }        

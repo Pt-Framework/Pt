@@ -28,16 +28,43 @@
 namespace Pt{
 namespace System{
 
+/** @brief The IOMonitor implements the wait functionality for a device event.
+
+    On the IOMonitor can one or more devices registered for event monitoring. 
+    At the registration time the client gets a signal object specific for this device.
+    This signal is emited if on the registered device an event occurred.
+    The registration, device removing, wait and wake are thread save. The client 
+    can implements an event loop by using the wait and wake methodes. The wait 
+    method waits until an IO event on device occurred. The wake methode call, 
+    signalize the IOMonitor to wake up from the wait state. The wake call 
+    doesn't emit an event.
+*/
 class PT_SYSTEM_API IOMonitor
 {
     public:
+        //! @brief Default constructor
         IOMonitor();
+        
+        //! @brief Destructor
         virtual ~IOMonitor();
-        
-        
-        Signal<const IOEvent&>&  addDevice( IODevice& device );
+
+        /** @brief Adds a device to the monitor
+            
+            @param device The device to add
+            @return A signal which signalize the device events            
+        */
+        Signal<const IOEvent&>& addDevice( IODevice& device );
+
+        /** @brief Removes a device from the monitor
+            
+            @param device The device to remove
+        */
         void removeDevice( IODevice& device );
+
+        //! @brief Wait until an event occurred
         void wait();
+        
+        //! @brief Wake the monitor from wait state
         void wake();
 
     private:

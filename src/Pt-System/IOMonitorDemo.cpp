@@ -30,27 +30,22 @@
 #include <Pt/Signal.h>
 #include <fstream>
 
-//#include <vld.h>
-//#include <vldapi.h>
-
-
 class SerialListener : public Pt::Connectable
 {
     public:
         SerialListener( Pt::System::SerialDevice& device)
         : _device ( device )
-        , _out( "out.txt")
-        {
-        }
+        { }
 
         ~SerialListener()
         { }
 
         void serialEvent( const Pt::System::IOEvent& ev )
         {
+            //Print event name.
             std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
-            _out<< "Event: "<< typeid(ev).name()<<std::endl;
-
+            
+            //Check the event type.( read/write? )
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
 
             if( readEvent != 0 )
@@ -58,78 +53,36 @@ class SerialListener : public Pt::Connectable
                 char buffer[201];
                 memset( buffer, 0, 201);
                 size_t size = 0;
-
+                
                 while( size = _device.read( buffer, 200) )
-                {
-                    std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
-                    _out<< "Read: " << buffer << " (" << size << " bytes)" << std::endl;
-                }
+                    std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;                
             }
             else
             {
                 const Pt::System::WriteEvent* writeEvent = dynamic_cast<const Pt::System::WriteEvent*>( &ev );
 
-                if(writeEvent != 0)
-                {
+                if( writeEvent != 0 )
                     std::cerr<<"Data transmission complete."<<std::endl;
-                    _out<<"Data transmission complete."<<std::endl;
-                }
             }
         }
-
-        void printMouseId()
-        {
-            char buffer[201];
-            char byte;
-            memset( buffer, 0, 201);
-
-            std::cerr << "Reading bytes " << std::endl;
-            size_t size = _device.read( buffer, 200);
-            std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;
-
-            std::cerr << "Parsing PnP data " << std::endl;
-            std::string pnpString;
-            for( size_t i = 0; i < size; i++)
-            {
-              byte = buffer[i];
-              if(byte == 0x08 || byte == 0x28)
-              {
-                int offset = 0x28 - byte;
-                int stop = byte + 1;
-                i++;
-                for( ; i < size; i++ )
-                {
-                   byte = buffer[i];
-                  if(byte == stop)
-                    break;
-
-                  byte += offset;
-                  pnpString.append(1, byte);
-                }
-                break;
-              }
-            }
-
-            std::cerr << pnpString << std::endl;
-        }
-
+        
     private:
-        enum{ BufferSize = 200 };
-
         Pt::System::SerialDevice&   _device;
-        char                        _buffer[BufferSize];
-        std::ofstream               _out;
 };
 
 int main( int argc, char* argv[] )
 {
     try
     {
+        //The event loop agregates an IOMonitor.
         Pt::System::EventLoop       eventLoop;
+        
+        //Pack the event loop in a thread.
         Pt::System::Thread          thread( eventLoop );
-        Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
 
-        //Setup the device
+        //Setup a serial device.
+        Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
+        
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate9600);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
@@ -138,41 +91,39 @@ int main( int argc, char* argv[] )
         //Create a device listener
         SerialListener listener( serialDevice );
 
-        //Add a device to the event loop.
+        //Add the serial device to the event loop.
         Pt::Signal<const Pt::System::IOEvent&>& signal = eventLoop.addDevice( serialDevice );
 
-        //Connect the device listener to the device.
+        //Connect the device listener to the serial device.
         Pt::connect( signal, listener, &SerialListener::serialEvent );
 
         //Start the loop.
         thread.start();
 
-        //Trigger the serial flags for plag&play mouse.
+        //Trigger the serial port flags for plag&play devices.
         serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
         Pt::System::Thread::sleep( 300 );
         serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
         Pt::System::Thread::sleep( 300 );
 
         //Wait a time periode.
-        Pt::System::Thread::sleep(  5000 );
+        Pt::System::Thread::sleep( 5000 );
 
         //Write something.
-        char* buffer = new char[100];
+        char buffer[100];
         memset( buffer, 23, 100 );
-        size_t no = serialDevice.write( buffer, 2 );
-        delete []buffer;
-
-        //serialDevice.flush();
+        size_t no = serialDevice.write( buffer, 100 );
 
         //Wait again.
-        Pt::System::Thread::sleep(  1000 );
+        Pt::System::Thread::sleep( 1000 );
 
         //Exit the event loop.
         eventLoop.exit();
 
-        //Remove the serial device.
+        //Remove the serial device from the event loop.
         eventLoop.removeDevice( serialDevice );
 
+        //Close teh serial device.
         serialDevice.close();
 
         //Join the threads.
