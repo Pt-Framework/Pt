@@ -44,7 +44,6 @@ namespace Pt {
         struct EqualElements
         {
             static inline bool equal(const ArrayT& a, const ArrayT& b)
-
             {
                 if(a[N] != b[N]) return false;
                 return EqualElements<N-1, Min, ArrayT>::equal(a, b);
