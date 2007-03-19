@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Aloysius Indrayanto                             *
- *   Copyright (C) 2007 by Marc Boris Duerner                               *
+ *   Copyright (C) 2007 by Marc Boris Dürner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
