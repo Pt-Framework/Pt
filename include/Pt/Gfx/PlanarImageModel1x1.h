@@ -82,6 +82,8 @@ namespace Pt {
 
                 // Allocate the needed memory for the image
                 inline void alloc(std::vector<ComponentT>& data, ChannelData& chanelsData, size_t imageWidth, size_t imageHeight);
+
+                inline void alloc(PlanarImage<PlanarImageModel>& image, size_t imageWidth, size_t imageHeight);
         };
 
     } // namespace Gfx

@@ -214,10 +214,10 @@ namespace Pt {
                 friend class PlanarImageModelT_::ImageModelT;
 
             protected:
-                std::vector<ComponentT> _buff;
-                ChannelData             _chanPtr;
-                size_t                  _width;
-                size_t                  _height;
+                std::vector<ComponentT> _buff;    // Image's data
+                ChannelData             _chanPtr; // List of pointers to each channel starting area
+                size_t                  _width;   // Image's width
+                size_t                  _height;  // Image's height
         };
 
 

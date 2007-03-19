@@ -58,6 +58,28 @@ namespace Pt {
             }
         }
 
+        template<typename ColorProxyT_>
+        inline void PlanarImageModel<ColorProxyT_, 1, 1>::alloc(PlanarImage<PlanarImageModel>& image, size_t imageWidth, size_t imageHeight)
+        {
+            // For subsampled planar image, these values won't be
+            // this easy to calculate
+            const size_t planeSize = imageWidth * imageHeight * sizeof(ComponentT);
+            const size_t imageSize = NumberOfChannels * planeSize;
+
+            image._buff.resize(imageSize);
+
+            image._chanPtr[0] = &image._buff[0];
+
+            // No need to use recursive template because this just to be called
+            // at initialization
+            for(size_t i = 1; i < NumberOfChannels; ++i) {
+                image._chanPtr[i] = image._chanPtr[i-1] + planeSize;
+            }
+
+            image._width  = imageWidth;
+            image._height = imageHeight;
+        }
+
 
         //
         // ColorPtrT
