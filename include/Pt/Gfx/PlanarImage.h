@@ -94,7 +94,7 @@ namespace Pt {
                 {
                     Pt::size_t bytes = _model.size(width, height);
                     _memory = _alloc.allocate(bytes);
-                    _model.init(_memory, width, height);
+                    _model.init(_memory, width, height); // should not throw
                     _size = bytes;
                 }
 
