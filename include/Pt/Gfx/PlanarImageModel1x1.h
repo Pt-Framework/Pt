@@ -36,10 +36,6 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1> {
             public:
-                // Myself :)
-                typedef PlanarImageModel<ColorProxyT_, 1, 1> ImageModelT;
-
-
                 // Number of channels of the color model
                 static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
 
@@ -81,9 +77,23 @@ namespace Pt {
 
 
                 // Allocate the needed memory for the image
-                inline void alloc(std::vector<ComponentT>& data, ChannelData& chanelsData, size_t imageWidth, size_t imageHeight);
+                inline void alloc(size_t imageWidth, size_t imageHeight);
 
-                inline void alloc(PlanarImage<PlanarImageModel>& image, size_t imageWidth, size_t imageHeight);
+
+            public:
+                inline PlanarImageModel()
+                : _width(0), _height(0)
+                {}
+
+                // Make the image class as a friend class
+                friend class PlanarImage<PlanarImageModel>;
+
+            private:
+                // Data
+                std::vector<ComponentT> _buff;    // Image's data
+                ChannelData             _chanPtr; // List of pointers to each channel starting area
+                size_t                  _width;   // Image's width
+                size_t                  _height;  // Image's height
         };
 
     } // namespace Gfx

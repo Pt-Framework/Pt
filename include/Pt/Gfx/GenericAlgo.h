@@ -38,6 +38,9 @@ namespace Pt {
 
 
 
+        // TODO For all recursive template -> make both the classes and the helper
+        //      functions use the same convention -> using Min/Max instead of N
+
         /** @brief Test if all elements in an array are equal
          */
         template<size_t N, size_t Min, typename ArrayT>

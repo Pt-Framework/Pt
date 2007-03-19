@@ -68,7 +68,6 @@ namespace Pt {
                 /** @brief The default constructor; will construct an empty image.
                  */
                 inline PlanarImage()
-                : _width(0), _height(0)
                 {}
 #if 0
                 /** @brief Copy constructor.
@@ -80,24 +79,25 @@ namespace Pt {
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
                 inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT() )
-                : _width(0), _height(0)
-                { }//resize(width_, height_, fill); }
+                { _model.alloc(width_, height_); }
 
 
                 /** @brief Check if the image is empty or not.
                  */
                 inline bool empty() const
-                { return _buff.empty(); }
+                { return _model._buff.empty(); }
 
                 /** @brief Return the width of the image.
                  */
                 inline uint width() const
-                { return _width; }
+                { return _model._width; }
 
                 /** @brief Return the height of the image.
                  */
                 inline uint height() const
-                { return _height; }
+                { return _model._height; }
+
+#if 0
 
                 /** @brief Clears the image (and sets its width and height to 0).
                  */
@@ -105,8 +105,7 @@ namespace Pt {
                 { _buff.clear(); _width = 0; _height = 0; }
 
 
-#if 0
-	              /** @brief Resizes the image to a new width and height and let it be initialized using the default color.
+                /** @brief Resizes the image to a new width and height and let it be initialized using the default color.
                  */
                 void resize(uint width_, uint height_);
 
@@ -210,14 +209,8 @@ namespace Pt {
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator( *this, y, x ); }
 #endif
-                // Make the image model class as a friend class
-                friend class PlanarImageModelT_::ImageModelT;
-
             protected:
-                std::vector<ComponentT> _buff;    // Image's data
-                ChannelData             _chanPtr; // List of pointers to each channel starting area
-                size_t                  _width;   // Image's width
-                size_t                  _height;  // Image's height
+                PlanarImageModelT_ _model;
         };
 
 
