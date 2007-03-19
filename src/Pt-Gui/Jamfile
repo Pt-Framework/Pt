@@ -21,6 +21,7 @@ SharedLibrary Pt-Gui :  Application.cpp
                         PaintEvent.cpp
                         Painter.cpp
                         Panel.cpp
+                        ProgressBar.cpp
                         ResizeEvent.cpp
                         SimpleGridLayout.cpp
                         VerticalLayout.cpp
