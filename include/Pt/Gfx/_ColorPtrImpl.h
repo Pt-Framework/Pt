@@ -1,3 +1,8 @@
+//
+// This is just a backup of the older algorithm
+//
+
+
         /** @brief Implementation of a pointer to a color in planar images
          *  @internal
          *

@@ -1,3 +1,7 @@
+//
+// This is just a backup of the older algorithm
+//
+
         //
         // ColorPtrT
         //

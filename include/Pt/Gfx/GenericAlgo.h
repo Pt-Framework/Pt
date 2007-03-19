@@ -37,209 +37,261 @@ namespace Pt {
         };
 
 
+
         /** @brief Test if all elements in an array are equal
-        */
-        template<size_t N, typename ArrayT>
+         */
+        template<size_t N, size_t Min, typename ArrayT>
         struct EqualElements
         {
             static inline bool equal(const ArrayT& a, const ArrayT& b)
 
             {
                 if(a[N] != b[N]) return false;
-                return EqualElements<N-1, ArrayT>::equal(a, b);
+                return EqualElements<N-1, Min, ArrayT>::equal(a, b);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT>
+        struct EqualElements<NEqualMin, NEqualMin, ArrayT>
+        {
+            static bool equal(const ArrayT& a, const ArrayT& b)
+            { return a[NEqualMin] == b[NEqualMin];  }
+        };
 
         template<typename ArrayT>
-        struct EqualElements<0, ArrayT>
+        struct EqualElements<0, 0, ArrayT>
         {
             static bool equal(const ArrayT& a, const ArrayT& b)
             { return a[0] == b[0];  }
         };
 
-
-        template<size_t N, typename ArrayT> inline
+        template<size_t N, size_t Min, typename ArrayT> inline
         bool equalElements(const ArrayT& a, const ArrayT& b)
-        { return EqualElements<N-1, ArrayT>::equal(a, b); }
+        { return EqualElements<N-1, Min, ArrayT>::equal(a, b); }
 
 
 
         /** @brief Test if any elements in an array are not equal
-        */
-        template<size_t N, typename ArrayT>
+         */
+        template<size_t N, size_t Min, typename ArrayT>
         struct NotEqualElements
         {
             static inline bool notEqual(const ArrayT& a, const ArrayT& b)
             {
                 if(a[N] != b[N]) return true;
-                return NotEqualElements<N-1, ArrayT>::notEqual(a, b);
+                return NotEqualElements<N-1, Min, ArrayT>::notEqual(a, b);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT>
+        struct NotEqualElements<NEqualMin, NEqualMin, ArrayT>
+        {
+            static bool notEqual(const ArrayT& a, const ArrayT& b)
+            { return a[NEqualMin] != b[NEqualMin];  }
+        };
 
         template<typename ArrayT>
-        struct NotEqualElements<0, ArrayT>
+        struct NotEqualElements<0, 0, ArrayT>
         {
             static bool notEqual(const ArrayT& a, const ArrayT& b)
             { return a[0] != b[0];  }
         };
 
-
-        template<size_t N, typename ArrayT> inline
+        template<size_t N, size_t Min, typename ArrayT> inline
         bool notEqualElements(const ArrayT& a, const ArrayT& b)
-        { return NotEqualElements<N-1, ArrayT>::notEqual(a, b); }
-
+        { return NotEqualElements<N-1, Min, ArrayT>::notEqual(a, b); }
 
 
 
         /** @brief Increments all elements in an array
-        */
-        template<size_t N, typename ArrayT>
+         */
+        template<size_t N, size_t Min, typename ArrayT>
         struct IncrementElements
         {
             static void inc(ArrayT& array)
             {
                 ++array[N];
-                IncrementElements<N-1, ArrayT>::inc(array);
+                IncrementElements<N-1, Min, ArrayT>::inc(array);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT>
+        struct IncrementElements<NEqualMin, NEqualMin, ArrayT>
+        {
+            static void inc(ArrayT& array)
+            { ++array[NEqualMin]; }
+        };
+
         template<typename ArrayT>
-        struct IncrementElements<0, ArrayT>
+        struct IncrementElements<0, 0, ArrayT>
         {
             static void inc(ArrayT& array)
             { ++array[0]; }
         };
 
-        template<size_t N, typename ArrayT>
+        template<size_t N, size_t Min, typename ArrayT>
         void incrementElements(ArrayT& array)
-        { IncrementElements<N-1, ArrayT>::inc(array); }
+        { IncrementElements<N-1, Min, ArrayT>::inc(array); }
 
 
 
         /** @brief Decrements all elements in an array
-        */
-        template<size_t N, typename ArrayT>
+         */
+        template<size_t N, size_t Min, typename ArrayT>
         struct DecrementElements
         {
             static void inc(ArrayT& array)
             {
                 ++array[N];
-                DecrementElements<N-1, ArrayT>::inc(array);
+                DecrementElements<N-1, Min, ArrayT>::inc(array);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT>
+        struct DecrementElements<NEqualMin, NEqualMin, ArrayT>
+        {
+            static void inc(ArrayT& array)
+            { ++array[NEqualMin]; }
+        };
+
         template<typename ArrayT>
-        struct DecrementElements<0, ArrayT>
+                struct DecrementElements<0, 0, ArrayT>
         {
             static void inc(ArrayT& array)
             { ++array[0]; }
         };
 
-        template<size_t N, typename ArrayT>
+        template<size_t N, size_t Min, typename ArrayT>
         void decrementElements(ArrayT& array)
-        { DecrementElements<N-1, ArrayT>::inc(array); }
+        { DecrementElements<N-1, Min, ArrayT>::inc(array); }
 
 
 
         /** @brief Adds a value to all elements of an array
-        */
-        template<size_t N, typename ArrayT, typename ElemT>
+         */
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct AddElements
         {
             static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
             {
                 to[N] = from[N] + val;
-                AddElements<N-1, ArrayT, ElemT>::add(to, from, val);
+                AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT, typename ElemT>
+        struct AddElements<NEqualMin, NEqualMin, ArrayT, ElemT>
+        {
+            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            { to[NEqualMin] = from[NEqualMin] + val; }
+        };
+
         template<typename ArrayT, typename ElemT>
-        struct AddElements<0, ArrayT, ElemT>
+        struct AddElements<0, 0, ArrayT, ElemT>
         {
             static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
             { to[0] = from[0] + val; }
         };
 
-        template<size_t N, typename ArrayT, typename ElemT>
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void addElements(ArrayT& to, const ArrayT& from, const ElemT& val)
-        { AddElements<N-1, ArrayT, ElemT>::add(to, from, val); }
+        { AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val); }
 
 
 
         /** @brief Sustracts a value from all elements of an array
-        */
-        template<size_t N, typename ArrayT, typename ElemT>
+         */
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct SubElements
         {
             static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
             {
                 to[N] = from[N] - val;
-                AddElements<N-1, ArrayT, ElemT>::add(to, from, val);
+                AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT, typename ElemT>
+        struct SubElements<NEqualMin, NEqualMin, ArrayT, ElemT>
+        {
+            static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
+            { to[NEqualMin] = from[NEqualMin] - val; }
+        };
+
         template<typename ArrayT, typename ElemT>
-        struct SubElements<0, ArrayT, ElemT>
+        struct SubElements<0, 0, ArrayT, ElemT>
         {
             static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
             { to[0] = from[0] - val; }
         };
 
-        template<size_t N, typename ArrayT, typename ElemT>
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void subElements(ArrayT& to, const ArrayT& from, const ElemT& val)
-        { AddElements<N-1, ArrayT, ElemT>::sub(to, from, val); }
+        { AddElements<N-1, Min, ArrayT, ElemT>::sub(to, from, val); }
 
 
 
-        /** @brief Adds a value to all elements of an array
-        */
-        template<size_t N, typename ArrayT, typename ElemT>
+        /** @brief Adds and assigns a value to all elements of an array
+         */
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct AddAssignElements
         {
             static void add(ArrayT& to, const ElemT& val)
             {
                 to[N] += val;
-                AddAssignElements<N-1, ArrayT, ElemT>::add(to, val);
+                AddAssignElements<N-1, Min, ArrayT, ElemT>::add(to, val);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT, typename ElemT>
+        struct AddAssignElements<NEqualMin, NEqualMin, ArrayT, ElemT>
+        {
+            static void add(ArrayT& to, const ElemT& val)
+            { to[NEqualMin] += val; }
+        };
+
         template<typename ArrayT, typename ElemT>
-        struct AddAssignElements<0, ArrayT, ElemT>
+        struct AddAssignElements<0, 0, ArrayT, ElemT>
         {
             static void add(ArrayT& to, const ElemT& val)
             { to[0] += val; }
         };
 
-        template<size_t N, typename ArrayT, typename ElemT>
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void addAssignElements(ArrayT& to, const ElemT& val)
-        { AddAssignElements<N-1, ArrayT, ElemT>::add(to, val); }
+        { AddAssignElements<N-1, Min, ArrayT, ElemT>::add(to, val); }
 
 
 
-        /** @brief Substracts a value to all elements of an array
-        */
-        template<size_t N, typename ArrayT, typename ElemT>
+        /** @brief Substracts and assigns a value to all elements of an array
+         */
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct SubAssignElements
         {
             static void sub(ArrayT& to, const ElemT& val)
             {
                 to[N] -= val;
-                SubAssignElements<N-1, ArrayT, ElemT>::sub(to, val);
+                SubAssignElements<N-1, Min, ArrayT, ElemT>::sub(to, val);
             }
         };
 
+        template<size_t NEqualMin, typename ArrayT, typename ElemT>
+        struct SubAssignElements<NEqualMin, NEqualMin, ArrayT, ElemT>
+        {
+            static void sub(ArrayT& to, const ElemT& val)
+            { to[NEqualMin] += val; }
+        };
+
         template<typename ArrayT, typename ElemT>
-        struct SubAssignElements<0, ArrayT, ElemT>
+        struct SubAssignElements<0, 0, ArrayT, ElemT>
         {
             static void sub(ArrayT& to, const ElemT& val)
             { to[0] += val; }
         };
 
-        template<size_t N, typename ArrayT, typename ElemT>
+        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void subAssignElements(ArrayT& to, const ElemT& val)
-        { SubAssignElements<N-1, ArrayT, ElemT>::sub(to, val); }
+        { SubAssignElements<N-1, Min, ArrayT, ElemT>::sub(to, val); }
 
     } // namespace Gfx
 

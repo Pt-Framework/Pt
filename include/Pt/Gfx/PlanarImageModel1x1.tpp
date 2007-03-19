@@ -84,7 +84,7 @@ namespace Pt {
                                                   //             the master channel
 
                     size_t pos = posY*imageWidth + posX;
-                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
+                    addElements< NumberOfChannels, 0 >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline ProxyT operator*()
@@ -101,33 +101,33 @@ namespace Pt {
 
                 inline ColorPtrT& operator++()
                 {
-                    incrementElements<NumberOfChannels>(_chnDataCur);
+                    incrementElements< NumberOfChannels, 0 >(_chnDataCur);
                     return *this;
                 }
 
                 inline ColorPtrT& operator--()
                 {
-                    decrementElements< NumberOfChannels >(_chnDataCur);
+                    decrementElements< NumberOfChannels, 0 >(_chnDataCur);
                     return *this;
                 }
 
                 inline ColorPtrT& operator+=(size_t n)
                 {
-                    addAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    addAssignElements< NumberOfChannels, 0 >(_chnDataCur, n);
                     return *this;
                 }
 
                 inline ColorPtrT& operator-=(size_t n)
                 {
-                    subAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    subAssignElements< NumberOfChannels, 0 >(_chnDataCur, n);
                     return *this;
                 }
 
                 bool operator==(const ColorPtrT& c) const
-                { return equalElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
+                { return equalElements< NumberOfChannels, 0 >(_chnDataCur, c._chnDataCur); }
 
                 bool operator!=(const ColorPtrT& c) const
-                { return notEqualElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
+                { return notEqualElements< NumberOfChannels, 0 >(_chnDataCur, c._chnDataCur); }
 
                 friend class PlanarImage<PlanarImageModel>;
 
@@ -176,7 +176,7 @@ namespace Pt {
                                                   //             the master channel
 
                     const size_t pos = posY*imageWidth + posX;
-                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
+                    addElements< NumberOfChannels, 0 >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline const ValueT operator*() const
@@ -187,33 +187,33 @@ namespace Pt {
 
                 inline ConstColorPtrT& operator++()
                 {
-                    incrementElements<NumberOfChannels>(_chnDataCur);
+                    incrementElements< NumberOfChannels, 0 >(_chnDataCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator--()
                 {
-                    decrementElements< NumberOfChannels >(_chnDataCur);
+                    decrementElements< NumberOfChannels, 0 >(_chnDataCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator+=(size_t n)
                 {
-                    addAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    addAssignElements< NumberOfChannels, 0 >(_chnDataCur, n);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator-=(size_t n)
                 {
-                    subAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    subAssignElements< NumberOfChannels, 0 >(_chnDataCur, n);
                     return *this;
                 }
 
                 bool operator==(const ConstColorPtrT& c) const
-                { return equalElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
+                { return equalElements< NumberOfChannels, 0 >(_chnDataCur, c._chnDataCur); }
 
                 bool operator!=(const ConstColorPtrT& c) const
-                { return notEqualElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
+                { return notEqualElements< NumberOfChannels, 0 >(_chnDataCur, c._chnDataCur); }
 
                 friend class PlanarImage<PlanarImageModel>;
 
@@ -249,7 +249,7 @@ namespace Pt {
                                  size_t       posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
+                    addElements< NumberOfChannels, 0 >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline ProxyT operator[](size_t x)
@@ -276,7 +276,7 @@ namespace Pt {
                                       size_t            posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
+                    addElements< NumberOfChannels, 0 >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline const ValueT operator[](size_t x) const
