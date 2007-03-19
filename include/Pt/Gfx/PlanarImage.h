@@ -63,7 +63,6 @@ namespace Pt {
                 typedef typename PlanarImageModelT_::ComponentT       ComponentT;
                 typedef typename PlanarImageModelT_::ChannelData      ChannelData;
                 typedef typename PlanarImageModelT_::ConstChannelData ConstChannelData;
-#if 0
 
             public:
                 /** @brief The default constructor; will construct an empty image.
@@ -71,18 +70,18 @@ namespace Pt {
                 inline PlanarImage()
                 : _width(0), _height(0)
                 {}
-
+#if 0
                 /** @brief Copy constructor.
                  */
                 inline PlanarImage(const PlanarImage& src)
                 : _width(0), _height(0)
                 { *this = src; }
-
+#endif
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
                 inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT() )
                 : _width(0), _height(0)
-                { resize(width_, height_, fill); }
+                { }//resize(width_, height_, fill); }
 
 
                 /** @brief Check if the image is empty or not.
@@ -100,13 +99,13 @@ namespace Pt {
                 inline uint height() const
                 { return _height; }
 
-
                 /** @brief Clears the image (and sets its width and height to 0).
                  */
                 inline void clear()
-                { _buff.clear(); _chanPtr.clear(); _chanSize.clear(); _width = 0; _height = 0; }
+                { _buff.clear(); _width = 0; _height = 0; }
 
 
+#if 0
 	              /** @brief Resizes the image to a new width and height and let it be initialized using the default color.
                  */
                 void resize(uint width_, uint height_);
@@ -210,23 +209,15 @@ namespace Pt {
                  */
                 inline ConstPixelIterator iterator(uint y, uint x) const
                 { return ConstPixelIterator( *this, y, x ); }
-
-                // Make the pixel iterator classes as friend classes
-                friend class PlanarImage_PixelIterator<ColorProxyT_, ColorTraitsT_>;
-                friend class PlanarImage_ConstPixelIterator<ColorProxyT_, ColorTraitsT_>;
+#endif
+                // Make the image model class as a friend class
+                friend class PlanarImageModelT_::ImageModelT;
 
             protected:
-                struct ChanSize {
-                    size_t width;
-                    size_t height;
-                };
-
-                std::vector<ComponentT>  _buff;
-                std::vector<ComponentT*> _chanPtr;
-                std::vector<size_t>      _chanSize;
-                size_t                   _width;
-                size_t                   _height;
-#endif
+                std::vector<ComponentT> _buff;
+                ChannelData             _chanPtr;
+                size_t                  _width;
+                size_t                  _height;
         };
 
 

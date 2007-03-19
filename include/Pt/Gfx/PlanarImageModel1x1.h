@@ -36,6 +36,10 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1> {
             public:
+                // Myself :)
+                typedef PlanarImageModel<ColorProxyT_, 1, 1> ImageModelT;
+
+
                 // Number of channels of the color model
                 static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
 
