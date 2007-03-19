@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Drner                               *
+ *   Copyright (C) 2005 by Marc Boris Drner                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +18,6 @@
  ***************************************************************************/
 #include "Pt/System/IODevice.h"
 #include "FileDeviceImpl.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
@@ -26,21 +25,17 @@
 #include <unistd.h>
 #include <errno.h>
 
-
-namespace Pt {
-
-namespace System {
+namespace Pt{
+namespace System{
 
 FileDeviceImpl::FileDeviceImpl()
 : _fd(-1)
 { }
 
-
 FileDeviceImpl::~FileDeviceImpl()
 { }
 
-
-void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode)
+void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode )
 {
     int flags = O_RDONLY;
 
@@ -52,18 +47,18 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode)
         flags |= O_WRONLY;
         flags |= O_CREAT;
     }
-    else if(mode & std::ios_base::in  ) {
+    else if(mode & std::ios_base::in) {
         flags |= O_RDONLY;
     }
 
-    //if(mode & IODevice::NonBlock) {
-    //    flags |= O_NONBLOCK;
-    //}
-
+    if( rwMode == IODevice::Asynchronous)
+        flags |= O_NONBLOCK;
+    
     if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
     _fd = ::open(path, flags, 0644);
+
     if(_fd == -1) {
         throw IOError("Could not open file handle", PT_SOURCEINFO);
     }
@@ -78,7 +73,6 @@ void FileDeviceImpl::open(const char* path, std::ios_base::openmode mode)
     }
 }
 
-
 void FileDeviceImpl::close()
 {
     if(_fd != -1)
@@ -89,7 +83,6 @@ void FileDeviceImpl::close()
         _fd = -1;
     }
 }
-
 
 bool FileDeviceImpl::seekable() const
 {
@@ -105,8 +98,7 @@ bool FileDeviceImpl::seekable() const
     return false;
 }
 
-
-FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode)
+FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode )
 {
     int whence = IODevice::SeekCurrent;
     switch(mode)
@@ -131,7 +123,6 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMod
     return ret;
 }
 
-
 void FileDeviceImpl::resize(off_type size)
 {
     int ret = ::ftruncate(_fd, size);
@@ -139,7 +130,6 @@ void FileDeviceImpl::resize(off_type size)
         throw IOError("Could not truncate file", PT_SOURCEINFO);
 
 }
-
 
 size_t FileDeviceImpl::size()
 {
@@ -150,7 +140,6 @@ size_t FileDeviceImpl::size()
 
     return buff.st_size;
 }
-
 
 size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
@@ -176,7 +165,6 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
     return ret;
 }
 
-
 size_t FileDeviceImpl::write(const char* buffer, size_t count)
 {
     retry:
@@ -195,7 +183,6 @@ size_t FileDeviceImpl::write(const char* buffer, size_t count)
     return ret;
 }
 
-
 size_t FileDeviceImpl::peek(char* buffer, size_t count)
 {
     bool eof;
@@ -208,14 +195,12 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
     return ret;
 }
 
-
 void FileDeviceImpl::sync() const
 {
     int ret = fsync(_fd);
     if(ret != 0)
         throw IOError("Could not sync handle", PT_SOURCEINFO);
 }
-
 
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
 {
@@ -259,7 +244,5 @@ bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
     return false;
 }
 
-
-}
-
-}
+} //namespace System 
+} //namespace Pt

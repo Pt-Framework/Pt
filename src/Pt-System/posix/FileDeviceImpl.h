@@ -18,55 +18,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/FileDevice.h"
+#include "Pt/System/IODevice.h"
 #include "IODeviceImpl.h"
 
 namespace Pt {
-
 namespace System {
 
-    class FileDeviceImpl : public IODeviceImpl
-    {
-        public:
-            typedef FileDevice::pos_type pos_type;
-            typedef FileDevice::off_type off_type;
+class FileDeviceImpl : public IODeviceImpl
+{
+    public:
+        typedef FileDevice::pos_type pos_type;
+        typedef FileDevice::off_type off_type;
 
-        public:
-            FileDeviceImpl();
+    public:
+        FileDeviceImpl();
+        ~FileDeviceImpl();
 
-            FileDeviceImpl(const char* path, std::ios_base::openmode mode);
+        void open(const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
 
-            ~FileDeviceImpl();
+        void close();
 
-            void open(const char* path, std::ios_base::openmode mode);
+        bool seekable() const;
 
-            void close();
+        pos_type seek(off_type offset, IODevice::SeekMode mode);
 
-            bool seekable() const;
+        void resize(off_type size);
 
-            pos_type seek(off_type offset, IODevice::SeekMode mode);
+        size_t size();
 
-            void resize(off_type size);
+        size_t read(char* buffer, size_t count, bool& _eof);
 
-            size_t size();
+        size_t write(const char* buffer, size_t count);
 
-            size_t read(char* buffer, size_t count, bool& _eof);
+        size_t peek(char* buffer, size_t count);
 
-            size_t write(const char* buffer, size_t count);
+        void sync() const;
 
-            size_t peek(char* buffer, size_t count);
+        bool wait(IODevice::WaitMode mode, unsigned int msec);
 
-            void sync() const;
+    private:
+        int _fd;
+};
 
-            bool wait(IODevice::WaitMode mode, unsigned int msec);
-
-        private:
-            int _fd;
-    };
-
-}
-
-}
+} //namespace System
+} //namespace Pt
