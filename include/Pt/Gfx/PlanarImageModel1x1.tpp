@@ -26,10 +26,37 @@ namespace Pt {
     namespace Gfx {
 
         //
-        // Static constants definition
+        // PlanarImageModel<ColorProxyT_, 1, 1> static constants definition
         //
         template<typename ColorProxyT_>
         const size_t PlanarImageModel<ColorProxyT_, 1, 1>::NumberOfChannels;
+
+
+        //
+        // PlanarImageModel<ColorProxyT_, 1, 1> member functions' implementation
+        //
+
+        // NOTE: Later if the PlanarImage<T> class has been implemented, this
+        //       function could take a reference to the image instead of 4
+        //       separated parameters
+        template<typename ColorProxyT_>
+        inline void PlanarImageModel<ColorProxyT_, 1, 1>::alloc(std::vector<ComponentT>& data, ChannelData& chanelsData, size_t imageWidth, size_t imageHeight)
+        {
+            // For subsampled planar image, these values won't be
+            // this easy to calculate
+            const size_t planeSize = imageWidth * imageHeight * sizeof(ComponentT);
+            const size_t imageSize = NumberOfChannels * planeSize;
+
+            data.resize(imageSize);
+
+            chanelsData[0] = &data[0];
+
+            // No need to use recursive template because this just to be called
+            // at initialization
+            for(size_t i = 1; i < NumberOfChannels; ++i) {
+                chanelsData[i] = chanelsData[i-1] + planeSize;
+            }
+        }
 
 
         //

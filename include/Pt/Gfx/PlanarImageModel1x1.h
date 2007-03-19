@@ -39,6 +39,7 @@ namespace Pt {
                 // Number of channels of the color model
                 static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
 
+
                 // Color-proxy type (value type) of the color model
                 typedef ColorProxyT_ ProxyT;
 
@@ -54,6 +55,7 @@ namespace Pt {
                 // Vector of channels' constant pointers (channels' data)
                 typedef const ComponentT* ConstChannelData[NumberOfChannels];
 
+
                 // Color-pointer class for the color model
                 class ColorPtrT;
 
@@ -65,6 +67,9 @@ namespace Pt {
 
                 // Constant scanline class for the color model
                 class ConstScanlineT;
+
+                // Allocate the needed memory for the image
+                inline void alloc(std::vector<ComponentT>& data, ChannelData& chanelsData, size_t imageWidth, size_t imageHeight);
         };
 
     } // namespace Gfx
