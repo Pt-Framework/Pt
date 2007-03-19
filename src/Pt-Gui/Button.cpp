@@ -21,7 +21,7 @@
 #include "Pt/Math/Size.h"
 #include "Pt/Math/Rect.h"
 #include "Pt/Gui/Button.h"
-#include <Pt/Gui/Painter.h>
+#include "Pt/Gui/Painter.h"
 #include "Pt/Gui/CloseEvent.h"
 #include "Pt/Gui/MouseEvent.h"
 #include "Pt/Gui/MouseMoveEvent.h"
@@ -101,19 +101,19 @@ void Button::drawPressed(Painter& painter)
     painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
     // ... then draw the border around the button.
-    Pen borderPen(1, ARgbColor(16384, 16384, 16384));
+    Pen borderPen(1, ARgbColor(16384, 16384, 16384), Pen::SolidStyle, Pen::FlatCap);
 
     painter.setPen(borderPen);
     painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
     painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
-    borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+    borderPen = Pen(1, ARgbColor(32768, 32768, 32768), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
     painter.drawLine(Math::Point(1, 1), Math::Point(size().width() - 2, 1));
     painter.drawLine(Math::Point(1, 1), Math::Point(1, size().height() - 2));
 
-    borderPen = Pen(1, ARgbColor(65535, 65535, 65535));
+    borderPen = Pen(1, ARgbColor(65535, 65535, 65535), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
     painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
@@ -131,7 +131,7 @@ void Button::drawPressed(Painter& painter)
         ssize_t y = (size().height() - metrics.height()) / 2 + metrics.ascent();
 
         // Draw the button's text.
-        painter.drawText( Math::Point(x + 1, y + 1), _text.c_str() );
+        painter.drawText( Math::Point(x + 1, y + 1), _text.c_str());
     }
 }
 
@@ -145,19 +145,19 @@ void Button::drawNormal(Painter& painter, bool focused)
     painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
 
     // ... then draw the border around the button.
-    Pen borderPen(1, ARgbColor(65535, 65535, 65535));
+    Pen borderPen(1, ARgbColor(65535, 65535, 65535), Pen::SolidStyle, Pen::FlatCap);
 
     painter.setPen(borderPen);
     painter.drawLine(Math::Point(0, 0), Math::Point(size().width() - 1, 0));
     painter.drawLine(Math::Point(0, 0), Math::Point(0, size().height() - 1));
 
-    borderPen = Pen(1, ARgbColor(16384, 16384, 16384));
+    borderPen = Pen(1, ARgbColor(16384, 16384, 16384), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
     painter.drawLine(Math::Point(size().width() - 1, 0), Math::Point(size().width() - 1, size().height()));
     painter.drawLine(Math::Point(0, size().height() - 1), Math::Point(size().width(), size().height() - 1));
 
-    borderPen = Pen(1, ARgbColor(32768, 32768, 32768));
+    borderPen = Pen(1, ARgbColor(32768, 32768, 32768), Pen::SolidStyle, Pen::FlatCap);
     painter.setPen(borderPen);
 
     painter.drawLine(Math::Point(size().width() - 2, 1), Math::Point(size().width() - 2, size().height() - 1));
