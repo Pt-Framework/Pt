@@ -47,23 +47,22 @@ namespace Pt {
         template <typename PlanarImageModelT_>
         class /*PT_GFX_API*/ PlanarImage {
             public:
-#if 0
-                typedef typename ColorProxyT_::ValueT ColorT;
-                typedef ColorTraitsT_                 ColorTraitsT;
+                typedef typename PlanarImageModelT_::PixelIterator      PixelIterator;
+                typedef typename PlanarImageModelT_::ConstPixelIterator ConstPixelIterator;
 
-                typedef typename ColorTraitsT::ColorPtrT      ColorPtrT;
-                typedef typename ColorTraitsT::ConstColorPtrT ConstColorPtrT;
+                typedef typename PlanarImageModelT_::ValueT ColorT;
+                typedef typename PlanarImageModelT_::ValueT ValueT;
+                typedef typename PlanarImageModelT_::ProxyT ProxyT;
 
-                typedef typename ColorTraitsT::ScanlineT      ScanlineT;
-                typedef typename ColorTraitsT::ConstScanlineT ConstScanlineT;
+                typedef typename PlanarImageModelT_::ColorPtrT      ColorPtrT;
+                typedef typename PlanarImageModelT_::ConstColorPtrT ConstColorPtrT;
 
-                //
-                // The typedefs below are specific to planar image only
-                //
-                typedef ColorProxyT_                        ColorProxyT;
-                typedef typename ColorTraitsT::ComponentT ComponentT;
-#endif
+                typedef typename PlanarImageModelT_::ScanlineT      ScanlineT;
+                typedef typename PlanarImageModelT_::ConstScanlineT ConstScanlineT;
 
+                typedef typename PlanarImageModelT_::ComponentT       ComponentT;
+                typedef typename PlanarImageModelT_::ChannelData      ChannelData;
+                typedef typename PlanarImageModelT_::ConstChannelData ConstChannelData;
 #if 0
 
             public:

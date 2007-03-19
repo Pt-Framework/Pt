@@ -68,6 +68,14 @@ namespace Pt {
                 // Constant scanline class for the color model
                 class ConstScanlineT;
 
+
+                // Pixel-iterator class for the color model
+                class PixelIterator;
+
+                // Pixel-iterator class for the color model
+                class ConstPixelIterator;
+
+
                 // Allocate the needed memory for the image
                 inline void alloc(std::vector<ComponentT>& data, ChannelData& chanelsData, size_t imageWidth, size_t imageHeight);
         };
