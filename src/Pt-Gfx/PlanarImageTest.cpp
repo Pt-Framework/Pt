@@ -47,7 +47,8 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
             // Set a pointer to the first pixel. assume width = 2, height = 1
             // We expect  A=0, R= 2, G=4, B=6, each component at begin of plane
-            Model::ColorPtrT ptr(data, 2, 1, 0, 0);
+            Model::ChannelData chnStart = { data, data + 2, data + 4, data + 6 };
+            Model::ColorPtrT ptr(chnStart, 2, 1, 0, 0);
             PT_UNIT_ASSERT( (*ptr).alpha() == 0 );
             PT_UNIT_ASSERT( (*ptr).red() == 2 );
             PT_UNIT_ASSERT( (*ptr).green() == 4 );
