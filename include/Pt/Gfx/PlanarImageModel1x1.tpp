@@ -25,7 +25,9 @@ namespace Pt {
 
     namespace Gfx {
 
-
+        //
+        // Static constants definition
+        //
         template<typename ColorProxyT_>
         const size_t PlanarImageModel<ColorProxyT_, 1, 1>::NumberOfChannels;
 
@@ -36,62 +38,89 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ColorPtrT
         {
-            friend class PlanarImage<PlanarImageModel>;
-
             public:
                 inline ColorPtrT(void*)
-                : _imgW(0), _imgH(0), _beginPlanes(0)
+                : _imageWidth(0), _imageHeight(0), _chn0Start(0)
                 {}
 
-                inline ColorPtrT(ComponentT* data,
-                                 size_t      imageWidth,
-                                 size_t      imageHeight,
-                                 size_t      posX,
-                                 size_t      posY)
-                : _imgW(imageWidth), _imgH(imageHeight), _beginPlanes(data)
-                { _impl.set(data, posX, posY, imageWidth); }
+                // NOTE: Later if the PlanarImage<T> class has been implemented, this
+                //       function should take a reference to the image instead of 3
+                //       separated parameters (chnDataStart, imageWidth and imageHeight)
+                inline ColorPtrT(ChannelData& chnDataStart,
+                                 size_t       imageWidth,
+                                 size_t       imageHeight,
+                                 size_t       posX,
+                                 size_t       posY)
+                : _imageWidth(imageWidth), _imageHeight(imageHeight), _chn0Start(0)
+                {
+                    _chn0Start = chnDataStart[0]; // Convention: channel #0 is always
+                                                  //             the master channel
 
-                inline ColorProxyT operator*()
-                { return ColorProxyT( _impl.components() ); }
+                    size_t pos = posY*imageWidth + posX;
+                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
+                }
+
+                inline ProxyT operator*()
+                { return ProxyT(_chnDataCur); }
+
+                inline const ProxyT operator*() const
+                { return ProxyT(_chnDataCur); }
+
+                inline ProxyT operator[](size_t offset)
+                { return ProxyT(_chnDataCur, offset); }
+
+                inline const ProxyT operator[](size_t offset) const
+                { return ProxyT(_chnDataCur, offset); }
 
                 inline ColorPtrT& operator++()
-                { _impl.inc();  return *this; }
+                {
+                    incrementElements<NumberOfChannels>(_chnDataCur);
+                    return *this;
+                }
 
                 inline ColorPtrT& operator--()
-                { _impl.dec(); return *this; }
+                {
+                    decrementElements< NumberOfChannels >(_chnDataCur);
+                    return *this;
+                }
 
                 inline ColorPtrT& operator+=(size_t n)
-                { _impl.advance(n); return *this; }
+                {
+                    addAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    return *this;
+                }
 
                 inline ColorPtrT& operator-=(size_t n)
-                { _impl.rewind(n); return *this; }
+                {
+                    subAssignElements< NumberOfChannels >(_chnDataCur, n);
+                    return *this;
+                }
 
-                inline bool operator==(const ColorPtrT& c) const
-                { return _impl.equals( c._impl ); }
+                bool operator==(const ColorPtrT& c) const
+                { return equalElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
 
-                inline bool operator!=(const ColorPtrT& c) const
-                { return _impl.notEquals( c._impl ); }
+                bool operator!=(const ColorPtrT& c) const
+                { return notEqualElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
+
+                friend class PlanarImage<PlanarImageModel>;
 
             private:
-                inline Math::Point currentXYPosition() const
+                inline const Math::Point currentXYPosition() const
                 {
-                    ComponentT* const* components = _impl.components();
-                    const size_t pos = components[0] - _beginPlanes;
-                    return Math::Point(pos/_imgH, pos/_imgW);
+                    size_t pos = _chnDataCur[0] - _chn0Start;
+                    return Math::Point(pos/_imageHeight, pos/_imageWidth);
                 }
 
             private:
-                //! @brief Width of the image
-                size_t _imgW;
+                size_t _imageWidth;
+                size_t _imageHeight;
 
-                //! @brief Height of the image
-                size_t _imgH;
+                // Pointer to the start of data of channel #0 (master channel)
+                ComponentT* _chn0Start;
 
-                //! @brief Pointer to the start of data of the master channel
-                ComponentT* _beginPlanes;
-
-                //! @brief Implementation of the pointer to color
-                ColorPtrImpl<ComponentT, NumberOfChannels> _impl;
+                // Pointers to the current data of all channels
+                // (the pixel at the current (x,y) coordinate)
+                ChannelData _chnDataCur;
         };
 
 
@@ -103,89 +132,81 @@ namespace Pt {
         {
             public:
                 inline ConstColorPtrT(const void*)
-                : _imgW(0), _imgH(0), _chnStart(0)
+                : _imageWidth(0), _imageHeight(0), _chn0Start(0)
                 {}
 
-                inline ConstColorPtrT(ConstPixelData& chanPtr,
-                                      size_t               imageWidth,
-                                      size_t               imageHeight,
-                                      size_t               posX,
-                                      size_t               posY)
-                : _imgW(imageWidth), _imgH(imageHeight), _chnStart(0)
+                // NOTE: Later if the PlanarImage<T> class has been implemented, this
+                //       function should take a constant reference to the image instead of
+                //       3 separated parameters (chnDataStart, imageWidth and imageHeight)
+                inline ConstColorPtrT(ConstChannelData& chnDataStart,
+                                      size_t            imageWidth,
+                                      size_t            imageHeight,
+                                      size_t            posX,
+                                      size_t            posY)
+                : _imageWidth(imageWidth), _imageHeight(imageHeight), _chn0Start(0)
                 {
-                    _chnStart = chanPtr[0]; // Channel #0 is always the master channel
+                    _chn0Start = chnDataStart[0]; // Convention: channel #0 is always
+                                                  //             the master channel
 
                     const size_t pos = posY*imageWidth + posX;
-                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline const ValueT operator*() const
-                {
-                    return ValueT( _impl.components() );
-                    //return ValueT(_chnCur);
-                }
+                { return ValueT(_chnDataCur); }
+
+                inline const ValueT operator[](size_t offset) const
+                { return ValueT(_chnDataCur, offset); }
 
                 inline ConstColorPtrT& operator++()
                 {
-                    //incrementElements<NumberOfChannels>(_chnCur);
-                    _impl.inc();
+                    incrementElements<NumberOfChannels>(_chnDataCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator--()
                 {
-                    //decrementElements< NumberOfChannels >(_chnCur);
-                    _impl.dec();
+                    decrementElements< NumberOfChannels >(_chnDataCur);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator+=(size_t n)
                 {
-                    //addAssignElements< NumberOfChannels >(_chnCur, n);
-                    _impl.advance(n);
+                    addAssignElements< NumberOfChannels >(_chnDataCur, n);
                     return *this;
                 }
 
                 inline ConstColorPtrT& operator-=(size_t n)
                 {
-                    //subAssignElements< NumberOfChannels >(_chnCur, n);
-                    _impl.rewind(n);
+                    subAssignElements< NumberOfChannels >(_chnDataCur, n);
                     return *this;
                 }
 
-
                 bool operator==(const ConstColorPtrT& c) const
-                {
-                    //return equalElements< NumberOfChannels >(_chnCur, c._chnCur);
-                    return _impl.equals( c._impl );
-                }
+                { return equalElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
 
                 bool operator!=(const ConstColorPtrT& c) const
-                {
-                    //return notEqualElements< NumberOfChannels >(_chnCur, c._chnCur);
-                    return _impl.notEquals( c._impl );
-                }
+                { return notEqualElements< NumberOfChannels >(_chnDataCur, c._chnDataCur); }
 
                 friend class PlanarImage<PlanarImageModel>;
 
             private:
-                inline Math::Point currentXYPosition() const
+                inline const Math::Point currentXYPosition() const
                 {
-                    const size_t pos = _chnCur[0] - _chnStart;
-                    return Math::Point(pos/_imgH, pos/_imgW);
+                    const size_t pos = _chnDataCur[0] - _chn0Start;
+                    return Math::Point(pos/_imageHeight, pos/_imageWidth);
                 }
 
             private:
-                size_t _imgW; // Image's width
+                size_t _imageWidth;
+                size_t _imageHeight;
 
-                size_t _imgH; // Image's height
+                // Pointer to the start of data of channel #0 (master channel)
+                const ComponentT* _chn0Start;
 
-                const ComponentT*   _chnStart; // Start pointer of the master channel
-
-                ConstPixelData _chnCur;   // Pointer to current positions in the channes
-
-                //! @brief Implementation of the pointer to color
-                ColorPtrImpl<const ComponentT, NumberOfChannels> _impl;
+                // Pointers to the current data of all channels
+                // (the pixel at the current (x,y) coordinate)
+                ConstChannelData  _chnDataCur;
         };
 
 
@@ -196,19 +217,24 @@ namespace Pt {
         class PlanarImageModel<ColorProxyT_, 1, 1>::ScanlineT
         {
             public:
-                inline ScanlineT(PixelData& chanPtr,
-                                 size_t          imageWidth,
-                                 size_t          posY)
+                inline ScanlineT(ChannelData& chnDataStart,
+                                 size_t       imageWidth,
+                                 size_t       posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
                 }
 
-                inline ColorProxyT operator[](size_t x)
-                { return ColorProxyT(_chnCur, x); }
+                inline ProxyT operator[](size_t x)
+                { return ProxyT(_chnDataCur, x); }
+
+                inline const ProxyT operator[](size_t x) const
+                { return ProxyT(_chnDataCur, x); }
 
             private:
-                PixelData _chnCur;
+                // Pointers to the current data of all channels
+                // (the pixel at the current (0,y) coordinate)
+                ChannelData _chnDataCur;
         };
 
 
@@ -218,19 +244,21 @@ namespace Pt {
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1>::ConstScanlineT {
             public:
-                inline ConstScanlineT(ConstPixelData& chanPtr,
-                                      size_t               imageWidth,
-                                      size_t               posY)
+                inline ConstScanlineT(ConstChannelData& chnDataStart,
+                                      size_t            imageWidth,
+                                      size_t            posY)
                 {
                     const size_t pos = posY * imageWidth;
-                    addElements< NumberOfChannels >(_chnCur, chanPtr, pos);
+                    addElements< NumberOfChannels >(_chnDataCur, chnDataStart, pos);
                 }
 
                 inline const ValueT operator[](size_t x) const
-                { return ValueT(_chnCur, x); }
+                { return ValueT(_chnDataCur, x); }
 
             private:
-                ConstPixelData _chnCur;
+                // Pointers to the current data of all channels
+                // (the pixel at the current (0,y) coordinate)
+                ConstChannelData _chnDataCur;
         };
 
     } // namespace Gfx
