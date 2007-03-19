@@ -29,9 +29,6 @@ namespace Pt {
 
         /** @brief Planar image model class for non-subsampled planar images.
          *  @internal
-         *
-         *  For now it just an empty foward declaration but later it will become
-         *  the generic implementation of the planar image model.
          */
         template<typename ColorProxyT_>
         class PlanarImageModel<ColorProxyT_, 1, 1> {
