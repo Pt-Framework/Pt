@@ -36,14 +36,14 @@ namespace Pt {
 // and thus we instantiate all the interleaved image and subimage classes here
 #ifdef __GNUC__
 
+        // Explicit instantiation of the standard planar image model classes
+        template class PT_EXPORT PlanarImageModel<ARgbColorProxy, 1, 1>;
+
         // Explicit instantiation of the standard planar image classes
-        //template class PT_EXPORT PlanarImage<ARgbColorProxy, ColorTraits<ARgbColorProxy> >;
+        template class PT_EXPORT PlanarImage< PlanarImageModel<ARgbColorProxy, 1, 1> >;
 
         // Explicit instantiation of the standard subimage classes of the above image classes
         //template class PlanarSubImage<ARgbPlanarImage>;
-
-        // Just for testing
-        template class PlanarImageModel<ARgbColorProxy, 1, 1>;
 
 #endif
 

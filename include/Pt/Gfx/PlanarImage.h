@@ -31,15 +31,6 @@ namespace Pt {
 
     namespace Gfx {
 
-#if 0
-
-        //
-        // Foward declarations of pixel iterator classes
-        //
-        template <typename ColorT_, typename ColorTraitsT_> class PlanarImage_PixelIterator;
-        template <typename ColorT_, typename ColorTraitsT_> class PlanarImage_ConstPixelIterator;
-
-
         /** @brief Planar image class.
          *  @ingroup Gfx
          *
@@ -50,16 +41,13 @@ namespace Pt {
          *      color planes (blocks of memory). One block to the other blocks may or
          *      may not be in contiguous memory address.
          *
-         *  This PlanarImage<typename ColorProxyT, typename ColorTraitsT> class is
+         *  This PlanarImage<typename PlanarImageModelT> class is
          *  meant to be used for implementing planar images.
          */
-        template <typename ColorProxyT_, typename ColorTraitsT_ = ColorTraits< Color<ColorProxyT_> > >
+        template <typename PlanarImageModelT_>
         class /*PT_GFX_API*/ PlanarImage {
             public:
-                typedef PlanarImage_PixelIterator<ColorProxyT_, ColorTraitsT_>      PixelIterator;
-                typedef PlanarImage_ConstPixelIterator<ColorProxyT_, ColorTraitsT_> ConstPixelIterator;
-
-            public:
+#if 0
                 typedef typename ColorProxyT_::ValueT ColorT;
                 typedef ColorTraitsT_                 ColorTraitsT;
 
@@ -74,6 +62,9 @@ namespace Pt {
                 //
                 typedef ColorProxyT_                        ColorProxyT;
                 typedef typename ColorTraitsT::ComponentT ComponentT;
+#endif
+
+#if 0
 
             public:
                 /** @brief The default constructor; will construct an empty image.
@@ -236,9 +227,11 @@ namespace Pt {
                 std::vector<size_t>      _chanSize;
                 size_t                   _width;
                 size_t                   _height;
+#endif
         };
 
 
+#if 0
        /** @brief Pixel-based iterator class for PlanarImage<ColorT>.
         *  @ingroup Gfx
         */
@@ -353,7 +346,6 @@ namespace Pt {
                 const ImageT*  _image;
                 ConstColorPtrT _pixel;
         };
-
 #endif
 
     } // namespace Gfx
