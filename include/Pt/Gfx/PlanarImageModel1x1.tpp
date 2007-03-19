@@ -35,22 +35,45 @@ namespace Pt {
         //
         // PlanarImageModel<ColorProxyT_, 1, 1> member functions' implementation
         //
-        template<typename ColorProxyT_>
-        inline void PlanarImageModel<ColorProxyT_, 1, 1>::alloc(size_t imageWidth, size_t imageHeight)
-        {
+        //template<typename ColorProxyT_>
+        //inline void PlanarImageModel<ColorProxyT_, 1, 1>::alloc(size_t imageWidth, size_t imageHeight)
+        //{
             // For subsampled planar image, these values won't be
             // this easy to calculate
-            const size_t planeSize = imageWidth * imageHeight * sizeof(ComponentT);
+            //const size_t planeSize = imageWidth * imageHeight * sizeof(ComponentT);
+            //const size_t imageSize = NumberOfChannels * planeSize;
+
+            // _buff.resize(imageSize);
+
+            // _chanPtr[0] = &_buff[0];
+            // for(size_t i = 1; i < NumberOfChannels; ++i)
+            //     _chanPtr[i] = _chanPtr[i-1] + planeSize;
+
+            // _width  = imageWidth;
+            // _height = imageHeight;
+        //}
+
+
+        template<typename ColorProxyT_>
+        inline Pt::size_t PlanarImageModel<ColorProxyT_, 1, 1>::size(size_t width, size_t height)
+        {
+            const size_t planeSize = width * height * sizeof(ComponentT);
             const size_t imageSize = NumberOfChannels * planeSize;
+            return imageSize;
+        }
 
-            _buff.resize(imageSize);
 
-            _chanPtr[0] = &_buff[0];
+        template<typename ColorProxyT_>
+        inline void PlanarImageModel<ColorProxyT_, 1, 1>::init(unsigned char* memory, size_t width, size_t height)
+        {
+            const size_t planeSize = width * height * sizeof(ComponentT);
+
+            _chanPtr[0] = reinterpret_cast<ComponentT*>(memory);
             for(size_t i = 1; i < NumberOfChannels; ++i)
                 _chanPtr[i] = _chanPtr[i-1] + planeSize;
 
-            _width  = imageWidth;
-            _height = imageHeight;
+            _width  = width;
+            _height = height;
         }
 
 

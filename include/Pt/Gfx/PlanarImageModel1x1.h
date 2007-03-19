@@ -36,7 +36,6 @@ namespace Pt {
                 // Number of channels of the color model
                 static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
 
-
                 // Color-proxy type (value type) of the color model
                 typedef ColorProxyT_ ProxyT;
 
@@ -52,7 +51,6 @@ namespace Pt {
                 // Vector of channels' constant pointers (channels' data)
                 typedef const ComponentT* ConstChannelData[NumberOfChannels];
 
-
                 // Color-pointer class for the color model
                 class ColorPtrT;
 
@@ -65,17 +63,20 @@ namespace Pt {
                 // Constant scanline class for the color model
                 class ConstScanlineT;
 
-
                 // Pixel-iterator class for the color model
                 class PixelIterator;
 
                 // Pixel-iterator class for the color model
                 class ConstPixelIterator;
 
-
                 // Allocate the needed memory for the image
-                inline void alloc(size_t imageWidth, size_t imageHeight);
+                //inline void alloc(size_t imageWidth, size_t imageHeight);
 
+                //! @brief Returns the required memory for the image data
+                inline Pt::size_t size(size_t width, size_t height);
+
+                //! @brief Initialises the model to a given memory block
+                inline void init(unsigned char* memory, size_t width, size_t height);
 
             public:
                 inline PlanarImageModel()
@@ -85,9 +86,15 @@ namespace Pt {
                 // Make the image class as a friend class
                 friend class PlanarImage<PlanarImageModel>;
 
+                size_t width() const
+                { return _width; }
+
+                size_t height() const
+                { return _height; }
+
             private:
                 // Data
-                std::vector<ComponentT> _buff;    // Image's data
+                // std::vector<ComponentT> _buff;    // Image's data
                 ChannelData             _chanPtr; // List of pointers to each channel starting area
                 size_t                  _width;   // Image's width
                 size_t                  _height;  // Image's height

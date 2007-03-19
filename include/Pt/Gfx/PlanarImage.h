@@ -21,6 +21,8 @@
 #define Pt_Gfx_PlanarImage_h
 
 #include <Pt/Exception.h>
+
+#include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbFColorProxy.h>
 #include <Pt/Gfx/PlanarImageModel.h>
 
@@ -44,7 +46,7 @@ namespace Pt {
          *  This PlanarImage<typename PlanarImageModelT> class is
          *  meant to be used for implementing planar images.
          */
-        template <typename PlanarImageModelT_>
+        template < typename PlanarImageModelT_, typename AllocatorT >
         class /*PT_GFX_API*/ PlanarImage {
             public:
                 typedef typename PlanarImageModelT_::PixelIterator      PixelIterator;
@@ -64,10 +66,17 @@ namespace Pt {
                 typedef typename PlanarImageModelT_::ChannelData      ChannelData;
                 typedef typename PlanarImageModelT_::ConstChannelData ConstChannelData;
 
+                typedef PlanarImageModelT_ Model;
+
+                typedef AllocatorT Allocator;
+
             public:
                 /** @brief The default constructor; will construct an empty image.
                  */
-                inline PlanarImage()
+                PlanarImage( const Allocator& a = Allocator() )
+                : _memory(0)
+                , _size(0)
+                , _alloc(a)
                 {}
 #if 0
                 /** @brief Copy constructor.
@@ -78,24 +87,39 @@ namespace Pt {
 #endif
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
-                inline PlanarImage(uint width_, uint height_, const ColorT& fill = ColorT() )
-                { _model.alloc(width_, height_); }
+                PlanarImage(uint width, uint height, const ColorT& fill = ColorT(), const Allocator& a = Allocator() )
+                : _memory(0)
+                , _size(0)
+                , _alloc(a)
+                {
+                    Pt::size_t bytes = _model.size(width, height);
+                    _memory = _alloc.allocate(bytes);
+                    _model.init(_memory, width, height);
+                    _size = bytes;
+                }
 
+                ~PlanarImage( )
+                {
+                    _alloc.deallocate(_memory, _size);
+                }
+
+                Model model() const
+                { return _model; }
 
                 /** @brief Check if the image is empty or not.
                  */
                 inline bool empty() const
-                { return _model._buff.empty(); }
+                { return _size == 0; }
 
                 /** @brief Return the width of the image.
                  */
                 inline uint width() const
-                { return _model._width; }
+                { return _model.width(); }
 
                 /** @brief Return the height of the image.
                  */
                 inline uint height() const
-                { return _model._height; }
+                { return _model.height(); }
 
 #if 0
 
@@ -211,6 +235,11 @@ namespace Pt {
 #endif
             protected:
                 PlanarImageModelT_ _model;
+
+            private:
+                unsigned char* _memory;
+                size_t _size;
+                Allocator _alloc;
         };
 
 

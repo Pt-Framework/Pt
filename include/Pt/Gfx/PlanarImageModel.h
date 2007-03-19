@@ -30,8 +30,8 @@ namespace Pt {
         //
         // Foward declarations of the planar image class
         //
-        template <typename PlanarImageModelT_>
-        class PlanarImage;
+        //template <typename PlanarImageModelT_, typename AllocatorT>
+        //class PlanarImage;
 
 
         /** @brief Planar image model class.

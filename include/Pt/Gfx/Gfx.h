@@ -23,6 +23,8 @@
 #include <Pt/Types.h>
 #include <Pt/Gfx/Api.h>
 
+#include <memory>
+
 
 namespace Pt {
 
@@ -111,7 +113,7 @@ namespace Pt {
         template<typename ColorProxyT_, uint8_t SubSamplingX_, uint8_t SubSamplingY_>
         class PlanarImageModel;
 
-        template <typename PlanarImageModelT_>
+        template <typename PlanarImageModelT_, typename AllocatorT = std::allocator<unsigned char> >
         class PlanarImage;
 
         typedef PlanarImage< PlanarImageModel<ARgbProxy, 1, 1> > ARgbPlanarImage;
