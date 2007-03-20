@@ -140,7 +140,7 @@ void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 
 void IOMonitorImpl::wait()
 {
-    int maxfd   = maxFd();
+    int maxfd   = maxFd() + 1;
     int ret     = -1;
 
     //Execute the select.
@@ -185,6 +185,10 @@ void IOMonitorImpl::wait()
            }
         }
     }    
+    
+    //Reset the wake pipe.
+    if( FD_ISSET( wakePipe[0], &_rfds ) )
+        FD_SET( _wakePipe[0], &_rfds );            
 }
 
 void IOMonitorImpl::wake()
