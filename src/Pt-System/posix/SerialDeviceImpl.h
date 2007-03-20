@@ -1,5 +1,4 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -76,13 +75,22 @@ class SerialDeviceImpl : public IODeviceImpl
         void flush();
 
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
+        
+        int fd() const
+        { return _fd; }
 
+        const IOEvent& event( FdsType fdsType );
+        
+        std::ios_base::openmode mode() const
+        { return _openMode; }
+                
     private:
         int                         _fd;
         int                         _pipe[2];
         //termios                     _ios;
         termios                     _prevIos;
         SerialDevice::FlowControl   _flowControl;
+        std::ios_base::openmode     _openMode;
 };
 
 } //namespace System

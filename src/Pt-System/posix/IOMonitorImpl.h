@@ -25,7 +25,6 @@
 #include <Pt/System/IOEvent.h>
 
 namespace Pt{
-
 namespace System{
 
 class IODeviceImpl;
@@ -33,21 +32,31 @@ class IODeviceImpl;
 class IOMonitorImpl
 {
     public:
-        IOMonitorImpl();
-        
+        IOMonitorImpl();       
         ~IOMonitorImpl();
         
-        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
+        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );        
+        void removeDevice( IODeviceImpl& device );        
+        void wait();        
+        void wake();   
+    
+    private:
+        int maxFd();
+               
+        struct DeviceItem
+        {
+            IODeviceImpl&               device;
+            Signal<const IOEvent&>*     signal;
+        };
         
-        void removeDevice( IODeviceImpl& device );
-        
-        void wait();
-        
-        void wake();    
+        std::map<int,DeviceItem>     _deviceMap;
+        fd_set                       _rfds
+        fd_set                       _wfds;
+        int                          _wakePipe[2];
+        Mutex                        _mutex;    
 };
 
 }//namespace System
-
 }//namespace Pt
 
 #endif

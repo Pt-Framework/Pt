@@ -58,9 +58,19 @@ class FileDeviceImpl : public IODeviceImpl
         void sync() const;
 
         bool wait(IODevice::WaitMode mode, unsigned int msec);
+        
+        int fd() const
+        { return _fd; }
+
+        const IOEvent& event( FdsType fdsType );
+        
+        std::ios_base::openmode mode() const
+        { return _openMode; }        
 
     private:
         int _fd;
+        std::ios_base::openmode _openMode;
+        
 };
 
 } //namespace System

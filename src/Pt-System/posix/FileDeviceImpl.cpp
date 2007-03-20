@@ -58,6 +58,8 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
         flags |= O_TRUNC;
 
     _fd = ::open(path, flags, 0644);
+    
+    _openMode = mode;
 
     if(_fd == -1) {
         throw IOError("Could not open file handle", PT_SOURCEINFO);
@@ -201,6 +203,20 @@ void FileDeviceImpl::sync() const
     if(ret != 0)
         throw IOError("Could not sync handle", PT_SOURCEINFO);
 }
+
+const IOEvent& FileDeviceImpl::event( FdsType fdsType )
+{
+    switch( fdsType )
+    {
+        case ReadFds:
+            return _readEvent;
+        break;
+        case WriteFds:
+            return _writeEvent;
+        break;
+    }
+}
+
 
 bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
 {
