@@ -108,6 +108,8 @@ ImagePainter::~ImagePainter()
         delete _drawThickEllipse;
         delete _fillEllipse;
         delete _stroke;
+        delete _fillTexture;
+        delete _fillSolid;
    }
    catch(...) {}
 }
