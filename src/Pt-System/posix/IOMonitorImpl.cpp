@@ -171,7 +171,7 @@ void IOMonitorImpl::wait()
         {
             if( FD_ISSET( device.fd(), &_rfds ) )
             {
-                item.signal->send( device.event( IODeviceImpl::ReadFds );
+                item.signal->send( device.event( IODeviceImpl::ReadFds ) ) ;
                 FD_SET( device.fd(), &_rfds);        
             }
         }        
@@ -180,8 +180,8 @@ void IOMonitorImpl::wait()
         {
            if( FD_ISSET( device.fd(), &_wfds  );        
            {
-                item.signal->send( device.event( IODeviceImpl::WriteFds );
-                FD_SET( device.fd(), &_wfds);
+                item.signal->send( device.event( IODeviceImpl::WriteFds ) );
+                FD_SET( device.fd(), &_wfds );
            }
         }
     }    

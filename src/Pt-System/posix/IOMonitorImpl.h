@@ -25,6 +25,7 @@
 #include <Pt/System/IOEvent.h>
 #include <Pt/System/Mutex.h>
 #include <sys/select.h> 
+#include <sys/time.h>
 
 namespace Pt{
 namespace System{
