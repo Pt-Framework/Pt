@@ -60,7 +60,7 @@ class SharedLibImpl {
         ~SharedLibImpl() throw()
         {
             if(_handle != 0) {
-                //::FreeLibrary(_handle);                
+                ::FreeLibrary(_handle);                
             }
         }
 
