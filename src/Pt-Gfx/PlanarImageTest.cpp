@@ -21,6 +21,7 @@
 #include "Pt/Gfx/PlanarImage.h"
 #include "Pt/Gfx/PlanarImage.tpp"
 #include "Pt/Gfx/PlanarImageModel1x1.h"
+#include "Pt/Gfx/Yv12Image.h"
 
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -34,6 +35,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
         : TestSuite( "PlanarImageTest" )
         {
             this->registerMethod("ARgbModel", *this, &PlanarImageTest::ARgbModel);
+            this->registerMethod("Yv12Model", *this, &PlanarImageTest::Yv12Model);
         }
 
         void ARgbModel()
@@ -61,6 +63,34 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( (*ptr).red() == 3 );
             PT_UNIT_ASSERT( (*ptr).green() == 5 );
             PT_UNIT_ASSERT( (*ptr).blue() == 7 );
+        }
+
+        void Yv12Model()
+        {
+            // 4x2 yuv12 data
+            Pt::uint8_t data[] = { 0, 1, 2, 3,       // y
+                                   4, 5, 6, 7,
+                                   8, 9, 10, 11,
+                                   12, 13, 14, 15,
+                                   16, 17, 18, 19,   // u
+                                   20, 21, 22, 23 }; // v
+
+            Pt::Gfx::Yv12Model model;
+            model.init(data, 4, 4);
+
+            Pt::Gfx::Yv12ColorPtr ptr(model, 0, 0);
+
+            std::cerr << std::endl;
+
+            for(int y = 0; y < 4; ++y)
+                for(int x = 0; x < 4; ++x)
+                {
+                    Pt::Gfx::Yv12ColorRef ref = *ptr;
+                    std::cerr << "[" << x << ", " << y << "]: "
+                              << (int)ref.y() << ":" << (int)ref.u() << ":" << (int)ref.v()
+                              << std::endl;
+                    ++ptr;
+                }
         }
 
     private:
