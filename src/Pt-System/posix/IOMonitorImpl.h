@@ -48,12 +48,12 @@ class IOMonitorImpl
                
         struct DeviceItem
         {
-            IODeviceImpl&               device;
+            IODeviceImpl*               device;
             Signal<const IOEvent&>*     signal;
         };
         
         std::map<int,DeviceItem>     _deviceMap;
-        fd_set                       _rfds
+        fd_set                       _rfds;
         fd_set                       _wfds;
         int                          _wakePipe[2];
         Mutex                        _mutex;    
