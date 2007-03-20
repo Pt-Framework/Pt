@@ -22,7 +22,7 @@
 #define PT_GFX_DRAWTHINPOLYLINE_H
 
 #include "DrawPolyline.h"
-#include "ClipLine.h"
+#include "Pt/Gfx/ClipLine.h"
 
 namespace Pt {
 namespace Gfx {
