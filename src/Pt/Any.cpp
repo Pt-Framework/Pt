@@ -7,11 +7,11 @@ using namespace Pt;
 #include <iostream>
 
 namespace Pt
-{     
+{
     std::map<std::string, void (Any::*)()>& Any::initMap()
     {
         static std::map<std::string, void (Any::*)()> _initMap;
-	    return _initMap;	    
+        return _initMap;
     }
 
 
