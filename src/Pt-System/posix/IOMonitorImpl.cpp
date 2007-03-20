@@ -20,6 +20,9 @@
  ***************************************************************************/
 #include "IOMonitorImpl.h"
 #include "IODeviceImpl.h"
+#include "Pt/System/MutexLock.h"
+#include "Pt/System/IOError.h"
+#include "Pt/System/Thread.h"
 
 #include <cerrno>
 #include <iostream>

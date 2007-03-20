@@ -23,6 +23,8 @@
 
 #include <Pt/Signal.h>
 #include <Pt/System/IOEvent.h>
+#include <Pt/System/Mutex.h>
+#include <sys/select.h> 
 
 namespace Pt{
 namespace System{

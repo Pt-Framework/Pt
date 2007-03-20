@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 Marc Boris Drner                                  *
+ *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -454,6 +455,9 @@ const IOEvent& SerialDeviceImpl::event( FdsType fdsType )
             return _writeEvent;
         break;
     }
+
+    throw IOError("Unknow event", PT_SOURCEINFO);
+    return _readEvent;    
 }
 
 bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
