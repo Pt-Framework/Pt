@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Property_h
 #define Pt_Property_h
 
@@ -66,8 +66,8 @@ class ReadProperty : public PropertyValue
         AbstractProperty* clone() const
         {  return new ReadProperty<T>(*this); }
 
-        T get() const
-        {  return any_cast<T>(_value); }
+        const T& get() const
+        {  return any_cast<const T&>(_value); }
 };
 
 
@@ -88,7 +88,7 @@ class WriteProperty : public PropertyValue
         AbstractProperty* clone() const
         { return new WriteProperty<T>(*this); }
 
-        void set( T value )
+        void set( const T& value )
         {
             _value = value;
             onValueChanged.send();
@@ -109,10 +109,10 @@ class Property : public PropertyValue
             _value = value;
         }
 
-        T get() const
-        {  return any_cast<T>(_value); }
+        const T& get()const
+        {  return any_cast<const T&>(_value); }
 
-        void set( T value )
+        void set( const T& value )
         {
             _value = value;
             onValueChanged.send();
