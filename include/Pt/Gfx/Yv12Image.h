@@ -29,6 +29,7 @@ namespace Pt {
 
         struct Yuv {};
 
+
         struct PlanarYuv : public Yuv {};
 
 
@@ -84,8 +85,6 @@ namespace Pt {
 
                 typedef uint8_t ComponentT;
 
-                typedef Color<Yuv> ValueT;
-
             public:
                 inline Color(const Color& c)
                 : _y(c._y), _u(c._u), _v(c._v)
@@ -117,44 +116,28 @@ namespace Pt {
                 ComponentT &_y, &_u, &_v;
         };
 
-        typedef Color<PlanarYuv> Yv12ColorRef;
+        typedef Color<PlanarYuv> Yv12Color;
 
 
-        class Yv12Model;
-
-
-        class Yv12ColorPtr
-        {
-            public:
-                typedef YuvColor::ComponentT ComponentT;
-                typedef Yv12ColorRef ColorRef;
-
-            public:
-                Yv12ColorPtr(Yv12Model& model, size_t xpos, size_t ypos);
-
-                ColorRef operator*()
-                { return ColorRef( *_y, *_u, *_v); }
-
-                Yv12ColorPtr& operator++();
-
-            private:
-                Yv12Model* _model;
-                ComponentT* _y;
-                ComponentT* _u;
-                ComponentT* _v;
-                size_t _xpos;
-                size_t _ypos;
-        };
-
+        template<typename ModelT, typename ColorT, typename ComponentT>
+        class Yv12PixelIterator;
 
         class Yv12Model
         {
             public:
-                typedef uint8_t ComponentT;
+                typedef uint8_t Component;
 
                 typedef Color<Yuv> ValueT;
 
-                typedef Yv12ColorPtr ColorPtrT;
+                typedef Yv12Color Color;
+
+                typedef YuvColor ConstColor;
+
+                typedef Yv12PixelIterator< Yv12Model, Yv12Color, Component> PixelIterator;
+
+                typedef Yv12PixelIterator< const Yv12Model, YuvColor, const Component> ConstPixelIterator;
+
+                typedef PixelIterator ColorPtrT;
 
                 static const size_t NumberOfChannels = 3;
 
@@ -164,20 +147,18 @@ namespace Pt {
 
                 Pt::size_t size(size_t width, size_t height)
                 {
-                    const size_t planeSize = width * height * sizeof(ComponentT);
+                    const size_t planeSize = width * height * sizeof(Component);
                     const size_t imageSize = planeSize + (2 * planeSize/4);
                     return imageSize;
                 }
 
                 void init(unsigned char* memory, size_t width, size_t height)
                 {
-                    const size_t planeSize = width * height * sizeof(ComponentT);
+                    const size_t planeSize = width * height * sizeof(Component);
 
-                    _ydata = reinterpret_cast<ComponentT*>(memory);
+                    _ydata = reinterpret_cast<Component*>(memory);
                     _udata = _ydata + planeSize;
                     _vdata =  _udata + planeSize/4;
-                    //for(size_t i = 1; i < NumberOfChannels; ++i)
-                    //    _chanPtr[i] = _chanPtr[i-1] + planeSize;
 
                     _width  = width;
                     _height = height;
@@ -189,19 +170,28 @@ namespace Pt {
                 size_t height() const
                 { return _height; }
 
-                ComponentT* data()
+                Component* data()
                 { return _ydata; }
 
-                ComponentT* udata()
+                const Component* data() const
+                { return _ydata; }
+
+                Component* udata()
                 { return _udata; }
 
-                ComponentT* vdata()
+                const Component* udata() const
+                { return _udata; }
+
+                Component* vdata()
+                { return _vdata; }
+
+                const Component* vdata() const
                 { return _vdata; }
 
             private:
-                ComponentT* _ydata;
-                ComponentT* _udata;
-                ComponentT* _vdata;
+                Component* _ydata;
+                Component* _udata;
+                Component* _vdata;
                 size_t _width;
                 size_t _height;
         };
@@ -209,37 +199,83 @@ namespace Pt {
         typedef PlanarImage<Yv12Model> Yv12Image;
 
 
-        inline Yv12ColorPtr::Yv12ColorPtr(Yv12Model& model, size_t xpos, size_t ypos)
-        : _model(&model)
-        , _xpos(xpos)
-        , _ypos(ypos)
+        template <typename ModelT, typename ColorT, typename ComponentT>
+        class Yv12PixelIterator
         {
-            const size_t channelOffset = _xpos + ( _ypos * _model->width() );
-            const size_t subchannelOffset = ( _xpos/2 ) + ( _ypos/2 * _model->width()/2 );
+            public:
+                inline Yv12PixelIterator()
+                : _model(0), _y(0), _u(0), _v(0), _xpos(0), _ypos(0)
+                {}
 
-            _y = _model->data() + channelOffset;
-            _u = _model->udata() + subchannelOffset;
-            _v = _model->vdata() + subchannelOffset;
-        }
+                Yv12PixelIterator(ModelT& model, size_t xpos, size_t ypos)
+                : _model(&model)
+                , _xpos(xpos)
+                , _ypos(ypos)
+                {
+                    const size_t channelOffset = _xpos + ( _ypos * _model->width() );
+                    const size_t subchannelOffset = ( _xpos/2 ) + ( _ypos/2 * _model->width()/2 );
 
+                    _y = _model->data() + channelOffset;
+                    _u = _model->udata() + subchannelOffset;
+                    _v = _model->vdata() + subchannelOffset;
+                }
 
-        inline Yv12ColorPtr& Yv12ColorPtr::operator++()
-        {
-            ++_y;
+                ColorT operator*()
+                { return ColorT( *_y, *_u, *_v); }
 
-            if(++_xpos == _model->width() )
-            {
-                _xpos = 0;
-                ++_ypos;
-            }
+                bool operator!=(const Yv12PixelIterator& it) const
+                { return this->_y != it._y; }
 
-            const size_t subchannelOffset = ((_xpos/2) + (_ypos/2 * _model->width()/2));
+                Yv12PixelIterator& operator++()
+                {
+                    ++_y;
 
-            _u = _model->udata() + subchannelOffset;
-            _v = _model->vdata() + subchannelOffset;
+                    if(++_xpos == _model->width() )
+                    {
+                        _xpos = 0;
+                        ++_ypos;
+                    }
 
-            return *this;
-        }
+                    const size_t subchannelOffset = ((_xpos/2) + (_ypos/2 * _model->width()/2));
+
+                    _u = _model->udata() + subchannelOffset;
+                    _v = _model->vdata() + subchannelOffset;
+
+                    return *this;
+                }
+
+                Yv12PixelIterator operator=(const Yv12PixelIterator& other)
+                {
+                    _model = other._model;
+                    _y     = other._y;
+                    _u     = other._u;
+                    _v     = other._v;
+                    _xpos  = other._xpos;
+                    _ypos  = other._ypos;
+                    return *this;
+                }
+
+                inline Math::Size operator-(const Yv12PixelIterator& other) const
+                {
+                    const size_t pos    = _y - _model->data();
+                    const size_t width  = pos / _model->height();
+                    const size_t height = pos / _model->width();
+
+                    const size_t otherPos    = other._y - other._model->data();
+                    const size_t otherWidth  = otherPos / other._model->height();
+                    const size_t otherHeight = otherPos / other._model->width();
+
+                    return Math::Size(width - otherWidth, height - otherHeight);
+                }
+
+            private:
+                ModelT* _model;
+                ComponentT* _y;
+                ComponentT* _u;
+                ComponentT* _v;
+                size_t _xpos;
+                size_t _ypos;
+        };
 
     }
 
