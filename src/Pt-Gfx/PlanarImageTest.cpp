@@ -95,6 +95,8 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
         void Yv12ConstPixelIterator()
         {
+            Pt::Gfx::PlanarPixelIterator2x2<Pt::Gfx::Yv12Model, Pt::Gfx::Yv12Color, uint8_t> pit;
+
             Pt::Gfx::Yv12Model model;
             model.init(yv12_data, 4, 4);
 

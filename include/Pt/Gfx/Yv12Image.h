@@ -277,6 +277,36 @@ namespace Pt {
                 size_t _ypos;
         };
 
+
+        template <typename ModelT, typename ColorT, typename ComponentT>
+        class PlanarPixelIterator2x2
+        {
+            public:
+                typedef ComponentT* Components[ ColorT::NumberOfChannels ];
+
+                inline PlanarPixelIterator2x2()
+                : _model(0),_xpos(0), _ypos(0)
+                {}
+
+                PlanarPixelIterator2x2(ModelT& model, size_t xpos, size_t ypos)
+                : _model(&model)
+                , _xpos(xpos)
+                , _ypos(ypos)
+                {
+                    //const size_t channelOffset = _xpos + ( _ypos * _model->width() );
+                    //const size_t subchannelOffset = ( _xpos/2 ) + ( _ypos/2 * _model->width()/2 );
+
+                    //_y = _model->data() + channelOffset;
+                    //_u = _model->udata() + subchannelOffset;
+                    //_v = _model->vdata() + subchannelOffset;
+                }
+
+            private:
+                ModelT*    _model;
+                Components _data;
+                size_t     _xpos;
+                size_t     _ypos;
+        };
     }
 
 }
