@@ -26,6 +26,7 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/ReadEvent.h>
 #include <Pt/System/WriteEvent.h>
+#include <Pt/System/EventSource.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <fstream>
@@ -35,7 +36,11 @@ class SerialListener : public Pt::Connectable
     public:
         SerialListener( Pt::System::SerialDevice& device)
         : _device ( device )
-        { }
+        {         
+            //The event source is a thread save sender.
+            //We connect us to the event source as the second consumer.
+            _eventSource.connect(  slot( this, &SerialListener::theSecondConsumer ).clone() );
+        }
 
         ~SerialListener()
         { }
@@ -45,7 +50,7 @@ class SerialListener : public Pt::Connectable
             //Print event name.
             std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
             
-            //Check the event type.( read/write? )
+            //Check the event type.( read/write? ).
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
 
             if( readEvent != 0 )
@@ -64,10 +69,19 @@ class SerialListener : public Pt::Connectable
                 if( writeEvent != 0 )
                     std::cerr<<"Data transmission complete."<<std::endl;
             }
+            
+            //Send the event to the second consumer.
+            _eventSource.send( ev );
+        }
+        
+        void theSecondConsumer( const Pt::System::IOEvent& ev )
+        {
+            std::cerr<< "Second consumer of the event: "<< typeid(ev).name()<<std::endl;
         }
         
     private:
         Pt::System::SerialDevice&   _device;
+        Pt::System::EventSource     _eventSource;
 };
 
 int main( int argc, char* argv[] )
@@ -75,13 +89,13 @@ int main( int argc, char* argv[] )
     try
     {
         //The event loop agregates an IOMonitor.
-        Pt::System::EventLoop       eventLoop;
+        Pt::System::EventLoop    eventLoop;        
         
         //Pack the event loop in a thread.
-        Pt::System::Thread          thread( eventLoop );
+        Pt::System::Thread       thread( eventLoop );
 
         //Setup a serial device.
-        Pt::System::SerialDevice    serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
+        Pt::System::SerialDevice serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
         
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate9600);
         serialDevice.setCharSize(8);
@@ -107,7 +121,7 @@ int main( int argc, char* argv[] )
         Pt::System::Thread::sleep( 300 );
 
         //Wait a time periode.
-        Pt::System::Thread::sleep( 5000 );
+        Pt::System::Thread::sleep( 50000 );
 
         //Write something.
         char buffer[100];
