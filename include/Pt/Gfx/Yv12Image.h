@@ -127,15 +127,15 @@ namespace Pt {
             public:
                 typedef uint8_t Component;
 
-                typedef Color<Yuv> ValueT;
+                typedef YuvColor ValueT;
 
                 typedef Yv12Color Color;
 
                 typedef YuvColor ConstColor;
 
-                typedef Yv12PixelIterator< Yv12Model, Yv12Color, Component> PixelIterator;
+                typedef Yv12PixelIterator< Yv12Model, Color, Component> PixelIterator;
 
-                typedef Yv12PixelIterator< const Yv12Model, YuvColor, const Component> ConstPixelIterator;
+                typedef Yv12PixelIterator< const Yv12Model, ConstColor, const Component> ConstPixelIterator;
 
                 typedef PixelIterator ColorPtrT;
 
