@@ -18,7 +18,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ClipPolygon.h"
+#include "Pt/Gfx/ClipPolygon.h"
 #include <cassert>
 
 
@@ -113,7 +113,7 @@ Pt::Math::Point ClipPolygon::intersect( const Pt::Math::Point& from, const Pt::M
 
 bool ClipPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0, Pt::Math::Point& edge1 )
 {
-/*  TODO: is very performant but at time has a logic bug.
+/*  TODO: is very performant but at time has a logic bug :).
       return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||
              ( (  edge0.x() == edge1.x() ) && ( edge0.y() >= edge1.y() ) && ( p.x() < edge1.x() ) ) ||
              ( (  edge0.y() == edge1.y() ) && ( edge0.x() < edge1.x()  ) && ( p.y() < edge0.y() ) ) ||
@@ -147,6 +147,5 @@ bool ClipPolygon::inside( const Pt::Math::Point& p, const Pt::Math::Point& edge0
     return false;
 }
 
-}
-
-}
+}//namespace Gfx
+}//namespace Pt

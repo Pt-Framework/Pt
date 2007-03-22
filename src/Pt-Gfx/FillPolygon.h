@@ -26,9 +26,10 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Math/Point.h>
 #include <Pt/System/Clock.h>
+#include <Pt/Gfx/ClipPolygon.h>
 #include "Edge.h"
 #include "EdgeTable.h"
-#include "ClipPolygon.h"
+
 #include "Fill.h"
 
 
