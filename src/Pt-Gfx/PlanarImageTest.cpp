@@ -80,6 +80,16 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             model.init(yv12_data, 4, 4);
 
             Pt::Gfx::Yv12Model::PixelIterator it(model, 0, 0);
+            Pt::Gfx::Yv12Model::PixelIterator end(model, 4, 3);
+
+            Pt::Math::Size size = end - it;
+            PT_UNIT_ASSERT( size.width() == 4);
+            PT_UNIT_ASSERT( size.height() == 4);
+
+            Pt::Gfx::Yv12Model::Color color = *it;
+            PT_UNIT_ASSERT( color.y() == 0);
+            PT_UNIT_ASSERT( color.u() == 16);
+            PT_UNIT_ASSERT( color.v() == 20);
 
             //std::cerr << std::endl;
             //for(int y = 0; y < 4; ++y)
@@ -95,12 +105,27 @@ class PlanarImageTest : public Pt::Unit::TestSuite
 
         void Yv12ConstPixelIterator()
         {
-            Pt::Gfx::PlanarPixelIterator2x2<Pt::Gfx::Yv12Model, Pt::Gfx::Yv12Color, uint8_t> pit;
-
             Pt::Gfx::Yv12Model model;
             model.init(yv12_data, 4, 4);
 
+            //Pt::Gfx::PlanarPixelIterator2x2<Pt::Gfx::Yv12Model, Pt::Gfx::Yv12Color, uint8_t> pit(model, 0, 0);
+            //Pt::Gfx::PlanarPixelIterator2x2<Pt::Gfx::Yv12Model, Pt::Gfx::Yv12Color, uint8_t> end(model, 4, 3);
+            //std::cerr  << std::endl;
+            //while(pit != end)
+            //{
+            //    Pt::Gfx::Yv12Color col = *pit;
+            //    std::cerr   << (int)col.y() << ":" << (int)col.u() << ":" << (int)col.v()
+            //                << std::endl;
+            //
+            //    ++pit;
+            //}
+
             Pt::Gfx::Yv12Model::ConstPixelIterator it(model, 0, 0);
+            Pt::Gfx::Yv12Model::ConstPixelIterator end(model, 4, 3);
+
+            Pt::Math::Size size = end - it;
+            PT_UNIT_ASSERT( size.width() == 4);
+            PT_UNIT_ASSERT( size.height() == 4);
 
             Pt::Gfx::Yv12Model::ConstColor color = *it;
             PT_UNIT_ASSERT( color.y() == 0);
