@@ -303,7 +303,7 @@ namespace Pt {
 
             private:
                 ModelT*    _model;
-                DataT      _data;
+                DataT      _data; // the array of channel pointers
                 size_t     _xpos;
                 size_t     _ypos;
         };
