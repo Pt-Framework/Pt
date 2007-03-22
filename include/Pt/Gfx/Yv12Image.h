@@ -139,8 +139,17 @@ namespace Pt {
                 ComponentT* _v;
         };
 
-        typedef Color<PlanarYuv> PlanarYuvColor;
+        typedef Color<PlanarYuv> Yv12Color;
 
+/*
+        struct Yv12 : public PlanarYuv {};
+
+
+        template <>
+        struct ColorTraits<Yv12>
+        {
+        };
+*/
 
         template<typename ModelT, typename ColorT, typename ComponentT>
         class PlanarPixelIterator2x2;
@@ -191,7 +200,10 @@ namespace Pt {
 
                     _data[0] = reinterpret_cast<Component*>(memory);
                     _data[1] = _data[0] + planeSize;
-                    _data[2] =  _data[1] + planeSize/4;
+
+
+                    for(size_t i = 2; i < Color::NumberOfChannels; ++i)
+                        _data[i] = _data[i-1] + planeSize/4;
 
                     _width  = width;
                     _height = height;
@@ -221,7 +233,7 @@ namespace Pt {
                 size_t    _height;
         };
 
-        typedef PlanarImageModel<PlanarYuvColor, 2, 2> Yv12Model;
+        typedef PlanarImageModel<Yv12Color, 2, 2> Yv12Model;
 
         typedef PlanarImage< Yv12Model > Yv12Image;
 
