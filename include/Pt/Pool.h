@@ -19,7 +19,8 @@
  ***************************************************************************/
 #ifndef PT_POOL_H
 #define PT_POOL_H
-
+#include <Pt/Types.h>
+#include <Pt/Exception.h>
 #include <queue>
 
 namespace Pt {
@@ -27,12 +28,12 @@ namespace Pt {
 template<typename T, typename AllocatorT = std::allocator<T> >
 class Pool 
 {
-
 public:
     Pool( size_t size )
+    : _allocCount( 0 )
     {
         for( size_t i = 0; i < size; i++ )
-            _items.push( this->allocate() );
+            _items.push( this->allocate() );            
     }
 
     ~Pool()
@@ -43,6 +44,9 @@ public:
             _allocator.deallocate(p, 1);
             _items.pop();
         }
+        
+        if( _allocCount != 0 )
+            std::runtime_error("Memory leaks detected" + PT_SOURCEINFO );        
     }
 
     T* alloc()
@@ -57,15 +61,14 @@ public:
         {
             item = _items.front();
             _items.pop();
-        }
-
-        ::new ( item ) T();        
-
+        }     
+        _allocCount++;
         return item;
     }
 
     void release(T* item)
     { 
+        _allocCount--;
         _items.push( item ); 
     }
 
@@ -87,6 +90,7 @@ private:
 
     std::queue<T*> _items;
     AllocatorT     _allocator;
+    Pt::ssize_t     _allocCount;
 };
 
 } //namespace Pt
