@@ -265,6 +265,40 @@ namespace Pt {
 
 
 
+
+        /** @brief Assigns the elements of an array to another one
+         */
+        template<size_t N, size_t Min, typename ArrayT>
+        struct AssignElements
+        {
+            static void assign(ArrayT& to, const ArrayT& from)
+            {
+                to[N] = from[N];
+                AssignElements<N-1, Min, ArrayT>::assign(to, from);
+            }
+        };
+
+        template<size_t NEqualMin, typename ArrayT>
+        struct AssignElements<NEqualMin, NEqualMin, ArrayT>
+        {
+            static void assign(ArrayT& to, const ArrayT& from)
+            { to[NEqualMin] = from[NEqualMin]; }
+        };
+
+        template<typename ArrayT>
+        struct AssignElements<0, 0, ArrayT>
+        {
+            static void assign(ArrayT& to, const ArrayT& from)
+            { to[0] = from[0]; }
+        };
+
+        template<size_t N, size_t Min, typename ArrayT>
+        void assignElements(ArrayT& to, const ArrayT& from)
+        { AssignElements<N-1, Min, ArrayT>::assign(to, from); }
+
+
+
+
         /** @brief Substracts and assigns a value to all elements of an array
          */
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>

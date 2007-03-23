@@ -22,6 +22,8 @@
 #include "Pt/Gfx/PlanarImage.tpp"
 #include "Pt/Gfx/PlanarImageModel1x1.h"
 #include "Pt/Gfx/Yv12Image.h"
+#include "Pt/Gfx/ImageAlgo.h"
+#include "Pt/Gfx/ColorAlgo.h"
 
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -43,6 +45,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
         : TestSuite( "PlanarImageTest" )
         {
             this->registerMethod("ARgbModel", *this, &PlanarImageTest::ARgbModel);
+            this->registerMethod("Yv12BlockScale", *this, &PlanarImageTest::Yv12BlockScale);
             this->registerMethod("Yv12PixelIterator", *this, &PlanarImageTest::Yv12PixelIterator);
             this->registerMethod("Yv12ConstPixelIterator", *this, &PlanarImageTest::Yv12ConstPixelIterator);
         }
@@ -74,6 +77,40 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( (*ptr).blue() == 7 );
         }
 
+        void Yv12BlockScale()
+        {
+            // 2x2 yv12 image data
+            Pt::uint8_t yv12_out[] = { 0, 0,  // y
+                                       0, 0,
+                                       0,     // u
+                                       0,  }; // v
+
+            // Block scale to a 2x2 image ...
+            Pt::Gfx::Yv12Model outmodel;
+            outmodel.init(yv12_out, 2, 2);
+            Pt::Gfx::Yv12Model::PixelIterator to(outmodel, 0, 0);
+            Pt::Gfx::Yv12Model::PixelIterator toEnd(outmodel, 3, 1);
+
+            // ... from a 4x4 image
+            Pt::Gfx::Yv12Model model;
+            model.init(yv12_data, 4, 4);
+            Pt::Gfx::Yv12Model::PixelIterator it(model, 0, 0);
+            Pt::Gfx::Yv12Model::PixelIterator end(model, 4, 3);
+
+            Pt::Gfx::blockScale(it, end, to, toEnd);
+
+            PT_UNIT_ASSERT( yv12_out[0] == 0 ); // y
+            PT_UNIT_ASSERT( yv12_out[1] == 2 );
+            PT_UNIT_ASSERT( yv12_out[2] == 8 );
+            PT_UNIT_ASSERT( yv12_out[3] == 10 );
+            PT_UNIT_ASSERT( yv12_out[4] == 19 ); // u
+            PT_UNIT_ASSERT( yv12_out[5] == 23 ); // v
+
+            //std::cerr << std::endl;
+            //for(int x = 0; x < 6; ++x)
+            //     std::cerr << (int)yv12_out[x] << std::endl;
+        }
+
         void Yv12PixelIterator()
         {
             Pt::Gfx::Yv12Model model;
@@ -86,10 +123,15 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( size.width() == 4);
             PT_UNIT_ASSERT( size.height() == 4);
 
-            Pt::Gfx::Yv12Model::Color color = *it;
+            Pt::Gfx::Yv12Model::ColorRef color = *it;
             PT_UNIT_ASSERT( color.y() == 0);
             PT_UNIT_ASSERT( color.u() == 16);
             PT_UNIT_ASSERT( color.v() == 20);
+
+            it += 10;
+            PT_UNIT_ASSERT( (*it).y() == 10);
+            PT_UNIT_ASSERT( (*it).u() == 19);
+            PT_UNIT_ASSERT( (*it).v() == 23);
 
             //std::cerr << std::endl;
             //for(int y = 0; y < 4; ++y)
@@ -127,7 +169,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( size.width() == 4);
             PT_UNIT_ASSERT( size.height() == 4);
 
-            Pt::Gfx::Yv12Model::ConstColor color = *it;
+            Pt::Gfx::Yv12Model::ConstColorRef color = *it;
             PT_UNIT_ASSERT( color.y() == 0);
             PT_UNIT_ASSERT( color.u() == 16);
             PT_UNIT_ASSERT( color.v() == 20);

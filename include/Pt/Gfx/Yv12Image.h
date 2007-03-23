@@ -85,11 +85,7 @@ namespace Pt {
         typedef Color<Yuv> YuvColor;
 
 
-        struct PlanarYuv : public Yuv {};
-
-
-        template <>
-        class Color<PlanarYuv>
+        class YuvColorRef
         {
             public:
                 static const size_t NumberOfChannels = 3;
@@ -103,17 +99,25 @@ namespace Pt {
                 typedef YuvColor ConstColor;
 
             public:
-                inline Color(const Color& c)
+                inline YuvColorRef(const YuvColorRef& c)
                 : _y( c._y ), _u( c._u ), _v( c._v )
                 {}
 
-                inline Color(ColorData c)
+                inline YuvColorRef(ColorData c)
                 : _y(c[0]), _u(c[1]), _v(c[2])
                 {}
 
-                inline Color(ComponentT &y, ComponentT &u, ComponentT &v)
+                inline YuvColorRef(ComponentT &y, ComponentT &u, ComponentT &v)
                 : _y(&y), _u(&u), _v(&v)
                 {}
+
+                YuvColorRef& operator=(const YuvColorRef& other)
+                {
+                    *_y = *(other._y);
+                    *_u = *(other._u);
+                    *_v = *(other._v);
+                    return *this;
+                }
 
                 inline ComponentT y() const
                 { return *_y; }
@@ -139,43 +143,65 @@ namespace Pt {
                 ComponentT* _v;
         };
 
-        typedef Color<PlanarYuv> Yv12Color;
 
-/*
-        struct Yv12 : public PlanarYuv {};
+        inline void assign(YuvColorRef to, const YuvColorRef& from)
+        { to = from; }
 
 
-        template <>
-        struct ColorTraits<Yv12>
+        /** @brief Color model for planar YUV images
+        */
+        struct PlanarYuv
         {
+            static const size_t NumberOfChannels = 3;
+
+            typedef uint8_t Component;
+
+            typedef YuvColor Color;
+
+            typedef const YuvColor ConstColor;
+
+            typedef YuvColorRef ColorRef;
+
+            typedef YuvColor ConstColorRef;
+
+            // TODO Should this be a ColorPtr?
+            typedef Component* ColorData [ NumberOfChannels ];
+
+            // TODO Should this be a ConstColorPtr?
+            typedef const Component* ConstColorData [ NumberOfChannels ];
         };
-*/
+
 
         template<typename ModelT, typename ColorT, typename ComponentT>
         class PlanarPixelIterator2x2;
 
-
-        template <typename ColorT>
-        class PlanarImageModel<ColorT, 2, 2>
+        /** @brief Image model for subsampled planar images
+        */
+        template <typename ColorModelT>
+        class PlanarImageModel<ColorModelT, 2, 2>
         {
             public:
-                typedef ColorT Color;
+                typedef typename ColorModelT::Color Color;
 
-                typedef typename Color::ComponentT Component;
+                typedef typename ColorModelT::ConstColor ConstColor;
 
-                typedef typename Color::ConstColor ConstColor;
+                typedef typename ColorModelT::ColorRef ColorRef;
 
-                typedef typename Color::ConstColor ValueT;
+                typedef typename ColorModelT::ConstColorRef ConstColorRef;
 
-                typedef typename Color::ColorData ColorData;
+                typedef typename ColorModelT::Component Component;
 
-                typedef typename Color::ConstColorData ConstColorData;
+                typedef typename ColorModelT::Color ValueT;
 
-                typedef PlanarImageModel<ColorT, 2, 2> Model;
+                typedef typename ColorModelT::ColorData ColorData;
 
-                typedef PlanarPixelIterator2x2< Model, Color, ColorData> PixelIterator;
+                typedef typename ColorModelT::ConstColorData ConstColorData;
 
-                typedef PlanarPixelIterator2x2< const Model, ConstColor, ConstColorData> ConstPixelIterator;
+                typedef PlanarImageModel<ColorModelT, 2, 2> ImageModel;
+
+                typedef PlanarPixelIterator2x2< ImageModel, ColorRef, ColorData> PixelIterator;
+
+                typedef PlanarPixelIterator2x2< const ImageModel, ConstColorRef, ConstColorData> ConstPixelIterator;
 
                 typedef PixelIterator ColorPtrT;
 
@@ -233,7 +259,7 @@ namespace Pt {
                 size_t    _height;
         };
 
-        typedef PlanarImageModel<Yv12Color, 2, 2> Yv12Model;
+        typedef PlanarImageModel< PlanarYuv, 2, 2> Yv12Model;
 
         typedef PlanarImage< Yv12Model > Yv12Image;
 
@@ -279,12 +305,24 @@ namespace Pt {
                     return *this;
                 }
 
-                PlanarPixelIterator2x2 operator=(const PlanarPixelIterator2x2& other)
+                PlanarPixelIterator2x2& operator+=(size_t n)
+                {
+                    _data[0] += n;
+                    _ypos += n / _model->width();
+                    _xpos += n % _model->width();
+
+                    const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _model->width()/2));
+                    addElements<ColorT::NumberOfChannels, 1>(_data, _model->colorData(), subsampleOffset);
+
+                    return *this;
+                }
+
+                PlanarPixelIterator2x2& operator=(const PlanarPixelIterator2x2& other)
                 {
                     _model = other._model;
                     _xpos  = other._xpos;
                     _ypos  = other._ypos;
-                    _data  = other._data;
+                    assignElements<ColorT::NumberOfChannels, 0>(_data, other._data);
                     return *this;
                 }
 

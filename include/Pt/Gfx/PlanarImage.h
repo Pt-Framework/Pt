@@ -50,13 +50,14 @@ namespace Pt {
         class /*PT_GFX_API*/ PlanarImage {
             public:
                 typedef typename PlanarImageModelT_::PixelIterator      PixelIterator;
+
                 typedef typename PlanarImageModelT_::ConstPixelIterator ConstPixelIterator;
 
                 typedef typename PlanarImageModelT_::ValueT ColorT;
                 //typedef typename PlanarImageModelT_::ValueT ValueT;
                 //typedef typename PlanarImageModelT_::ProxyT ProxyT;
 
-                typedef typename PlanarImageModelT_::ColorPtrT      ColorPtrT;
+                //typedef typename PlanarImageModelT_::ColorPtrT      ColorPtrT;
                 //typedef typename PlanarImageModelT_::ConstColorPtrT ConstColorPtrT;
 
                 //typedef typename PlanarImageModelT_::ScanlineT      ScanlineT;
