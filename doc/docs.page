@@ -81,5 +81,12 @@
 
 	</table>
 	
+	<!-- TODO This is just here to doxygen to add platinum-logo.png to the output directory as
+	     the file is only used in pt_header.html which is not enough for doxygen to add it to the
+	     output directory. As soon as we use platinum-logo.png somewhere in the documentation we
+	     can remove this line. -->
+	<div style="display:none">\image html platinum-logo.png</div>
+	
+	
 	</div>
 */
