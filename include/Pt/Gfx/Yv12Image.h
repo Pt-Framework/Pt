@@ -99,6 +99,10 @@ namespace Pt {
                 typedef YuvColor ConstColor;
 
             public:
+                inline YuvColorRef()
+                : _y( 0), _u( 0 ), _v( 0 )
+                {}
+
                 inline YuvColorRef(const YuvColorRef& c)
                 : _y( c._y ), _u( c._u ), _v( c._v )
                 {}
@@ -118,6 +122,9 @@ namespace Pt {
                     *_v = *(other._v);
                     return *this;
                 }
+
+                void set(ColorData c)
+                { _y = c[0]; _u = c[1]; _v = c[2]; }
 
                 inline ComponentT y() const
                 { return *_y; }
@@ -142,7 +149,6 @@ namespace Pt {
                 ComponentT* _u;
                 ComponentT* _v;
         };
-
 
         inline void assign(YuvColorRef to, const YuvColorRef& from)
         { to = from; }
@@ -175,6 +181,9 @@ namespace Pt {
         template<typename ModelT, typename ColorT, typename ComponentT>
         class PlanarPixelIterator2x2;
 
+        template<typename ModelT, typename ColorT, typename ComponentT>
+        class PlanarPixelIterator2x2Test;
+
         /** @brief Image model for subsampled planar images
         */
         template <typename ColorModelT>
@@ -199,7 +208,7 @@ namespace Pt {
 
                 typedef PlanarImageModel<ColorModelT, 2, 2> ImageModel;
 
-                typedef PlanarPixelIterator2x2< ImageModel, ColorRef, ColorData> PixelIterator;
+                typedef PlanarPixelIterator2x2Test< ImageModel, ColorRef, ColorData> PixelIterator;
 
                 typedef PlanarPixelIterator2x2< const ImageModel, ConstColorRef, ConstColorData> ConstPixelIterator;
 
@@ -342,6 +351,93 @@ namespace Pt {
             private:
                 ModelT*    _model;
                 DataT      _data; // the array of channel pointers
+                size_t     _xpos;
+                size_t     _ypos;
+        };
+
+
+        template <typename ModelT, typename ColorT, typename DataT>
+        class PlanarPixelIterator2x2Test
+        {
+            public:
+                inline PlanarPixelIterator2x2Test()
+                : _model(0),_xpos(0), _ypos(0)
+                {}
+
+                PlanarPixelIterator2x2Test(ModelT& model, size_t xpos, size_t ypos)
+                : _model(&model)
+                , _xpos(xpos)
+                , _ypos(ypos)
+                {
+                    const size_t planeOffset = _xpos + ( _ypos * _model->width() );
+                    const size_t subsampleOffset = ( _xpos/2 ) + ( _ypos/2 * _model->width()/2 );
+
+                    _data[0] = _model->data() + planeOffset;
+                    addElements<ColorT::NumberOfChannels, 1>(_data, _model->colorData(), subsampleOffset);
+                    _color.set(_data);
+                }
+
+                ColorT& operator*()
+                { return _color; }
+
+                bool operator!=(const PlanarPixelIterator2x2Test& it) const
+                { return this->_data[0] != it._data[0]; }
+
+                PlanarPixelIterator2x2Test& operator++()
+                {
+                    ++_data[0];
+
+                    if(++_xpos == _model->width() )
+                    {
+                        _xpos = 0;
+                        ++_ypos;
+                    }
+
+                    const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _model->width()/2));
+                    addElements<ColorT::NumberOfChannels, 1>(_data, _model->colorData(), subsampleOffset);
+                    _color.set(_data);
+                    return *this;
+                }
+
+                PlanarPixelIterator2x2Test& operator+=(size_t n)
+                {
+                    _data[0] += n;
+                    _ypos += n / _model->width();
+                    _xpos += n % _model->width();
+
+                    const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _model->width()/2));
+                    addElements<ColorT::NumberOfChannels, 1>(_data, _model->colorData(), subsampleOffset);
+                    _color.set(_data);
+                    return *this;
+                }
+
+                PlanarPixelIterator2x2Test& operator=(const PlanarPixelIterator2x2Test& other)
+                {
+                    _model = other._model;
+                    _xpos  = other._xpos;
+                    _ypos  = other._ypos;
+                    assignElements<ColorT::NumberOfChannels, 0>(_data, other._data);
+                    _color.set(_data);
+                    return *this;
+                }
+
+                inline Math::Size operator-(const PlanarPixelIterator2x2Test& other) const
+                {
+                    const size_t pos    = _data[0] - _model->data();
+                    const size_t width  = pos / _model->height();
+                    const size_t height = pos / _model->width();
+
+                    const size_t otherPos    = other._data[0] - other._model->data();
+                    const size_t otherWidth  = otherPos / other._model->height();
+                    const size_t otherHeight = otherPos / other._model->width();
+
+                    return Math::Size(width - otherWidth, height - otherHeight);
+                }
+
+            private:
+                ModelT*    _model;
+                DataT      _data; // the array of channel pointers
+                ColorT     _color;
                 size_t     _xpos;
                 size_t     _ypos;
         };
