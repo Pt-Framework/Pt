@@ -171,33 +171,33 @@ namespace Pt {
 
         /** @brief Adds a value to all elements of an array
          */
-        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
+        template<size_t N, size_t Min, typename ArrayA, typename ArrayB, typename ElemT>
         struct AddElements
         {
-            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            static void add(ArrayA& to, const ArrayB& from, const ElemT& val)
             {
                 to[N] = from[N] + val;
-                AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val);
+                AddElements<N-1, Min, ArrayA, ArrayB, ElemT>::add(to, from, val);
             }
         };
 
-        template<size_t NEqualMin, typename ArrayT, typename ElemT>
-        struct AddElements<NEqualMin, NEqualMin, ArrayT, ElemT>
+        template<size_t NEqualMin, typename ArrayA, typename ArrayB, typename ElemT>
+        struct AddElements<NEqualMin, NEqualMin, ArrayA, ArrayB, ElemT>
         {
-            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            static void add(ArrayA& to, const ArrayB& from, const ElemT& val)
             { to[NEqualMin] = from[NEqualMin] + val; }
         };
 
-        template<typename ArrayT, typename ElemT>
-        struct AddElements<0, 0, ArrayT, ElemT>
+        template<typename ArrayA, typename ArrayB, typename ElemT>
+        struct AddElements<0, 0, ArrayA, ArrayB, ElemT>
         {
-            static void add(ArrayT& to, const ArrayT& from, const ElemT& val)
+            static void add(ArrayA& to, const ArrayB& from, const ElemT& val)
             { to[0] = from[0] + val; }
         };
 
-        template<size_t N, size_t Min, typename ArrayT, typename ElemT>
-        void addElements(ArrayT& to, const ArrayT& from, const ElemT& val)
-        { AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val); }
+        template<size_t N, size_t Min, typename ArrayA, typename ArrayB, typename ElemT>
+        void addElements(ArrayA& to, const ArrayB& from, const ElemT& val)
+        { AddElements<N-1, Min, ArrayA, ArrayB, ElemT>::add(to, from, val); }
 
 
 
@@ -209,7 +209,7 @@ namespace Pt {
             static void sub(ArrayT& to, const ArrayT& from, const ElemT& val)
             {
                 to[N] = from[N] - val;
-                AddElements<N-1, Min, ArrayT, ElemT>::add(to, from, val);
+                SubElements<N-1, Min, ArrayT, ElemT>::add(to, from, val);
             }
         };
 
@@ -229,7 +229,7 @@ namespace Pt {
 
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void subElements(ArrayT& to, const ArrayT& from, const ElemT& val)
-        { AddElements<N-1, Min, ArrayT, ElemT>::sub(to, from, val); }
+        { SubElements<N-1, Min, ArrayT, ElemT>::sub(to, from, val); }
 
 
 

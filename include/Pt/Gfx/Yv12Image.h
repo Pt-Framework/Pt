@@ -123,6 +123,18 @@ namespace Pt {
                     return *this;
                 }
 
+                ComponentT*& operator[](size_t n)
+                {
+                    switch(n)
+                    {
+                        case 0: return _y;
+                        case 1: return _u;
+                        case 2: return _v;
+                    }
+
+                    return _v;
+                }
+
                 void set(ColorData c)
                 { _y = c[0]; _u = c[1]; _v = c[2]; }
 
@@ -150,7 +162,7 @@ namespace Pt {
                 ComponentT* _v;
         };
 
-        inline void assign(YuvColorRef to, const YuvColorRef& from)
+        inline void assign(YuvColorRef& to, const YuvColorRef& from)
         { to = from; }
 
 
@@ -374,7 +386,10 @@ namespace Pt {
 
                     _data[0] = _model->data() + planeOffset;
                     addElements<ColorT::NumberOfChannels, 1>(_data, _model->colorData(), subsampleOffset);
-                    _color.set(_data);
+
+                    _color[0] = _model->data() + planeOffset;
+                    addElements<ColorT::NumberOfChannels, 1>(_color, _model->colorData(), subsampleOffset);
+                    //_color.set(_data);
                 }
 
                 ColorT& operator*()
