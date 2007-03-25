@@ -55,14 +55,14 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             // image data, could be 4 planes with two elements each
             uint16_t data[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-            typedef Pt::Gfx::PlanarImageModel< Pt::Gfx::ARgbColorProxy, 1, 1 > Model;
-            PT_UNIT_ASSERT( Model::NumberOfChannels == 4 )
-            Model model;
+            typedef Pt::Gfx::PlanarImageView< Pt::Gfx::PlanarARgb, 1, 1 > View;
+            PT_UNIT_ASSERT( Pt::Gfx::PlanarARgb::NumberOfChannels == 4 )
+            View view;
 
             // Set a pointer to the first pixel. assume width = 2, height = 1
             // We expect  A=0, R= 2, G=4, B=6, each component at begin of plane
-            Model::ChannelData chnStart = { data, data + 2, data + 4, data + 6 };
-            Model::ColorPtrT ptr(chnStart, 2, 1, 0, 0);
+            View::ColorData chnStart = { data, data + 2, data + 4, data + 6 };
+            View::ColorPtrT ptr(chnStart, 2, 1, 0, 0);
             PT_UNIT_ASSERT( (*ptr).alpha() == 0 );
             PT_UNIT_ASSERT( (*ptr).red() == 2 );
             PT_UNIT_ASSERT( (*ptr).green() == 4 );
@@ -109,6 +109,9 @@ class PlanarImageTest : public Pt::Unit::TestSuite
             //std::cerr << std::endl;
             //for(int x = 0; x < 6; ++x)
             //     std::cerr << (int)yv12_out[x] << std::endl;
+            Pt::Gfx::Yv12Model::ConstPixelIterator cit(model, 0, 0);
+            Pt::Gfx::Yv12Model::ConstPixelIterator cend(model, 4, 3);
+            Pt::Gfx::blockScale(cit, cend, to, toEnd);
         }
 
         void Yv12PixelIterator()

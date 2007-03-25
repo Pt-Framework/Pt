@@ -46,30 +46,18 @@ namespace Pt {
          *  This PlanarImage<typename PlanarImageModelT> class is
          *  meant to be used for implementing planar images.
          */
-        template < typename PlanarImageModelT_, typename AllocatorT >
-        class /*PT_GFX_API*/ PlanarImage {
+        template < typename ImageViewT, typename AllocatorT >
+        class PlanarImage {
             public:
-                typedef typename PlanarImageModelT_::PixelIterator      PixelIterator;
-
-                typedef typename PlanarImageModelT_::ConstPixelIterator ConstPixelIterator;
-
-                typedef typename PlanarImageModelT_::ValueT ColorT;
-                //typedef typename PlanarImageModelT_::ValueT ValueT;
-                //typedef typename PlanarImageModelT_::ProxyT ProxyT;
-
-                //typedef typename PlanarImageModelT_::ColorPtrT      ColorPtrT;
-                //typedef typename PlanarImageModelT_::ConstColorPtrT ConstColorPtrT;
-
-                //typedef typename PlanarImageModelT_::ScanlineT      ScanlineT;
-                //typedef typename PlanarImageModelT_::ConstScanlineT ConstScanlineT;
-
-                typedef typename PlanarImageModelT_::ComponentT       ComponentT;
-                //typedef typename PlanarImageModelT_::ChannelData      ChannelData;
-                //typedef typename PlanarImageModelT_::ConstChannelData ConstChannelData;
-
-                typedef PlanarImageModelT_ Model;
+                typedef ImageViewT View;
 
                 typedef AllocatorT Allocator;
+
+                typedef typename View::Color Color;
+
+                typedef typename View::PixelIterator PixelIterator;
+
+                typedef typename View::ConstPixelIterator ConstPixelIterator;
 
             public:
                 /** @brief The default constructor; will construct an empty image.
@@ -88,14 +76,14 @@ namespace Pt {
 #endif
                 /** @brief Construct an image with the given size and fill all the pixels with the given color.
                  */
-                PlanarImage(uint width, uint height, const ColorT& fill = ColorT(), const Allocator& a = Allocator() )
+                PlanarImage(uint width, uint height, const Color& fill = Color(), const Allocator& a = Allocator() )
                 : _memory(0)
                 , _size(0)
                 , _alloc(a)
                 {
-                    Pt::size_t bytes = _model.size(width, height);
+                    Pt::size_t bytes = _view.size(width, height);
                     _memory = _alloc.allocate(bytes);
-                    _model.init(_memory, width, height); // should not throw
+                    _view.init(_memory, width, height); // should not throw
                     _size = bytes;
                 }
 
@@ -104,8 +92,8 @@ namespace Pt {
                     _alloc.deallocate(_memory, _size);
                 }
 
-                Model model() const
-                { return _model; }
+                View view() const
+                { return _view; }
 
                 /** @brief Check if the image is empty or not.
                  */
@@ -115,12 +103,12 @@ namespace Pt {
                 /** @brief Return the width of the image.
                  */
                 inline uint width() const
-                { return _model.width(); }
+                { return _view.width(); }
 
                 /** @brief Return the height of the image.
                  */
                 inline uint height() const
-                { return _model.height(); }
+                { return _view.height(); }
 
 #if 0
 
@@ -235,7 +223,7 @@ namespace Pt {
                 { return ConstPixelIterator( *this, y, x ); }
 #endif
             protected:
-                PlanarImageModelT_ _model;
+                ImageViewT _view;
 
             private:
                 unsigned char* _memory;

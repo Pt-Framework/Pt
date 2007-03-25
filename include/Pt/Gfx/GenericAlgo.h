@@ -268,33 +268,33 @@ namespace Pt {
 
         /** @brief Assigns the elements of an array to another one
          */
-        template<size_t N, size_t Min, typename ArrayT>
+        template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
         struct AssignElements
         {
-            static void assign(ArrayT& to, const ArrayT& from)
+            static void assign(ArrayA& to, const ArrayB& from)
             {
                 to[N] = from[N];
-                AssignElements<N-1, Min, ArrayT>::assign(to, from);
+                AssignElements<N-1, Min, ArrayA, ArrayB>::assign(to, from);
             }
         };
 
-        template<size_t NEqualMin, typename ArrayT>
-        struct AssignElements<NEqualMin, NEqualMin, ArrayT>
+        template<size_t NEqualMin, typename ArrayA, typename ArrayB>
+        struct AssignElements<NEqualMin, NEqualMin, ArrayA, ArrayB>
         {
-            static void assign(ArrayT& to, const ArrayT& from)
+            static void assign(ArrayA& to, const ArrayB& from)
             { to[NEqualMin] = from[NEqualMin]; }
         };
 
-        template<typename ArrayT>
-        struct AssignElements<0, 0, ArrayT>
+        template<typename ArrayA, typename ArrayB>
+        struct AssignElements<0, 0, ArrayA, ArrayB>
         {
-            static void assign(ArrayT& to, const ArrayT& from)
+            static void assign(ArrayA& to, const ArrayB& from)
             { to[0] = from[0]; }
         };
 
-        template<size_t N, size_t Min, typename ArrayT>
-        void assignElements(ArrayT& to, const ArrayT& from)
-        { AssignElements<N-1, Min, ArrayT>::assign(to, from); }
+        template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
+        void assignElements(ArrayA& to, const ArrayB& from)
+        { AssignElements<N-1, Min, ArrayA, ArrayB>::assign(to, from); }
 
 
 

@@ -30,38 +30,28 @@ namespace Pt {
         /** @brief Planar image model class for non-subsampled planar images.
          *  @internal
          */
-        template<typename ColorProxyT_>
-        class PlanarImageModel<ColorProxyT_, 1, 1> {
+        template<typename ColorModelT>
+        class PlanarImageView<ColorModelT, 1, 1> {
             public:
-                // Number of channels of the color model
-                static const size_t NumberOfChannels = ColorProxyT_::NumberOfChannels;
+                typedef typename ColorModelT::Color Color;
 
-                // Color-proxy type (value type) of the color model
-                typedef ColorProxyT_ ProxyT;
+                typedef typename ColorModelT::ConstColor ConstColor;
 
-                // Non-reference type (value type) of the color
-                typedef typename ColorProxyT_::ValueT ValueT;
+                typedef typename ColorModelT::ColorRef ColorRef;
 
-                // Value type of each individual component of the color model
-                typedef typename ColorProxyT_::ComponentT ComponentT;
+                typedef typename ColorModelT::ConstColorRef ConstColorRef;
 
-                // Vector of channels' pointers (channels' data)
-                typedef ComponentT* ChannelData[NumberOfChannels];
+                typedef typename ColorModelT::Component Component;
 
-                // Vector of channels' constant pointers (channels' data)
-                typedef const ComponentT* ConstChannelData[NumberOfChannels];
+                typedef typename ColorModelT::Color ValueT;
 
-                // Color-pointer class for the color model
+                typedef typename ColorModelT::ColorData ColorData;
+
+                typedef typename ColorModelT::ConstColorData ConstColorData;
+
                 class ColorPtrT;
 
-                // Constant color-pointer class for the color model
                 class ConstColorPtrT;
-
-                // Scanline class for the color model
-                class ScanlineT;
-
-                // Constant scanline class for the color model
-                class ConstScanlineT;
 
                 // Pixel-iterator class for the color model
                 class PixelIterator;
@@ -79,12 +69,12 @@ namespace Pt {
                 inline void init(unsigned char* memory, size_t width, size_t height);
 
             public:
-                inline PlanarImageModel()
+                inline PlanarImageView()
                 : _width(0), _height(0)
                 {}
 
                 // Make the image class as a friend class
-                friend class PlanarImage<PlanarImageModel>;
+                friend class PlanarImage<PlanarImageView>;
 
                 size_t width() const
                 { return _width; }
@@ -95,9 +85,9 @@ namespace Pt {
             private:
                 // Data
                 // std::vector<ComponentT> _buff;    // Image's data
-                ChannelData             _chanPtr; // List of pointers to each channel starting area
-                size_t                  _width;   // Image's width
-                size_t                  _height;  // Image's height
+                ColorData _chanPtr; // List of pointers to each channel starting area
+                size_t    _width;   // Image's width
+                size_t    _height;  // Image's height
         };
 
     } // namespace Gfx

@@ -54,7 +54,8 @@ namespace Gfx {
             do {
                 size_t dw = 0;
                 for(size_t x = 0; x < toWidth; ++x) {
-                    assign(*to, *from);
+                    //assign(*to, *from);
+                    *to = *from;
                     ++to;
                     for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth);
                 }

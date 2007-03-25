@@ -40,8 +40,8 @@ namespace Pt {
          *  For now it just an empty foward declaration but later it will become
          *  the generic implementation of the planar image model.
          */
-        template<typename ColorProxyT_, uint8_t SubSamplingX_, uint8_t SubSamplingY_>
-        class PlanarImageModel;
+        template<typename ColorModelT, uint8_t SubSamplingX, uint8_t SubSamplingY>
+        class PlanarImageView;
 
     } // namespace Gfx
 
