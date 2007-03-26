@@ -182,10 +182,12 @@ namespace Pt {
         { to = from; }
 
 
-        template <typename ComponentT, size_t NumberOfChannels>
+        template <typename ComponentT, size_t NumChannels>
         class PlanarColorPtr
         {
             public:
+                static const size_t NumberOfChannels = NumChannels;
+
                 typedef ComponentT* ColorData [ NumberOfChannels ];
 
                 typedef PlanarColorRef<ComponentT, NumberOfChannels> ColorRef;
@@ -234,10 +236,12 @@ namespace Pt {
         };
 
 
-        template <typename ComponentT, size_t NumberOfChannels>
+        template <typename ComponentT, size_t NumChannels>
         class PlanarConstColorPtr
         {
             public:
+                static const size_t NumberOfChannels = NumChannels;
+
                 typedef const ComponentT* ConstColorData [ NumberOfChannels ];
 
                 typedef PlanarColorPtr<ComponentT, NumberOfChannels> ColorPtr;
@@ -401,6 +405,15 @@ namespace Pt {
         typedef PlanarImage< Yv12Model > Yv12Image;
 
 
+        template <typename ViewT, typename ColorPtrT>
+        inline void advanceColorPtr(ViewT& view, ColorPtrT& ptr, size_t n, size_t xpos, size_t ypos)
+        {
+            ptr.colorData()[0] += n;
+            const size_t subsampleOffset = (xpos/2) + (ypos/2 * view.width()/2);
+            addElements<ColorPtrT::NumberOfChannels, 1>(ptr.colorData(), view.colorData(), subsampleOffset);
+        }
+
+
         template <typename ViewT, typename ColorPtr, size_t NumberOfChannels>
         class PlanarPixelIterator2x2
         {
@@ -448,12 +461,13 @@ namespace Pt {
 
                 PlanarPixelIterator2x2& operator+=(size_t n)
                 {
-                    _color.colorData()[0] += n;
+                    //_color.colorData()[0] += n;
                     _ypos += n / _view->width();
                     _xpos += n % _view->width();
 
-                    const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _view->width()/2));
-                    addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                    //const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _view->width()/2));
+                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                    advanceColorPtr(*_view, _color, n, _xpos, _ypos);
 
                     return *this;
                 }
