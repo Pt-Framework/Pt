@@ -405,15 +405,6 @@ namespace Pt {
         typedef PlanarImage< Yv12Model > Yv12Image;
 
 
-        template <typename ColorPtrT>
-        inline void advanceColorPtr(ColorPtrT& ptr, const ColorPtrT& from, size_t n, size_t xpos, size_t ypos, size_t width)
-        {
-            ptr.colorData()[0] += n;
-            const size_t subsampleOffset = (xpos/2) + (ypos/2 * width/2);
-            addElements<ColorPtrT::NumberOfChannels, 1>(ptr.colorData(), from, subsampleOffset);
-        }
-
-
         template <typename ViewT, typename ColorPtr, size_t NumberOfChannels>
         class PlanarPixelIterator2x2
         {
@@ -445,15 +436,14 @@ namespace Pt {
 
                 PlanarPixelIterator2x2& operator++()
                 {
-                    ++_color.colorData()[0];
-
                     if(++_xpos == _view->width() )
                     {
                         _xpos = 0;
                         ++_ypos;
                     }
 
-                    const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _view->width()/2));
+                    ++_color.colorData()[0];
+                    const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
                     addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
 
                     return *this;
@@ -461,15 +451,24 @@ namespace Pt {
 
                 PlanarPixelIterator2x2& operator+=(size_t n)
                 {
-                    //_color.colorData()[0] += n;
+                    this->advance(n);
+                    return *this;
+                }
+
+                void advance(size_t n)
+                {
                     _ypos += n / _view->width();
                     _xpos += n % _view->width();
 
-                    //const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _view->width()/2));
-                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-                    advanceColorPtr(_color, _view->colorData(), n, _xpos, _ypos, _view->width() );
+                    if(_xpos >= _view->width() )
+                    {
+                        _xpos -= _view->width();
+                        ++_ypos;
+                    }
 
-                    return *this;
+                    _color.colorData()[0] += n;
+                    const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
+                    addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
                 }
 
                 PlanarPixelIterator2x2& operator=(const PlanarPixelIterator2x2& other)
