@@ -42,5 +42,3 @@ const std::type_info& WriteEvent::typeInfo() const
         
 }//namespace System
 }//namespace Pt
-
- 

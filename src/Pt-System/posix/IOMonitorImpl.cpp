@@ -28,24 +28,26 @@
 #include <iostream>
 
 namespace Pt{
+
 namespace System{
 
 IOMonitorImpl::IOMonitorImpl()
-{ 
+{
     //Open a pipe to send wake up message.
     if( ::pipe( _wakePipe ) )
         throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
-        
+
     //Clear the file descriptors.
     FD_ZERO(&_rfds);
     FD_ZERO(&_wfds);
 
     //Add the wake pipe to the rdfs.
-    FD_SET( _wakePipe[0], &_rfds );        
+    FD_SET( _wakePipe[0], &_rfds );
 }
 
+
 IOMonitorImpl::~IOMonitorImpl()
-{   
+{
     //Clear the map.
     std::map<int,DeviceItem>::iterator it = _deviceMap.begin();
 
@@ -54,9 +56,9 @@ IOMonitorImpl::~IOMonitorImpl()
         const DeviceItem& item = it->second;
         delete item.signal;
     }
-    
+
     _deviceMap.clear();
-    
+
     //Close the pipe.
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
     {
@@ -64,38 +66,41 @@ IOMonitorImpl::~IOMonitorImpl()
         ::close(_wakePipe[1]);
     }
 }
- 
+
+
 Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 {
     //Exclusive access to the _deviceMap.
     MutexLock lock( _mutex );
-    
+
     //Wake up the monitor => it will wait on _mutex.
     this->wake();
-    
+
     //Create a new device description item.
     DeviceItem item;
-    
+
     //Create a new signal.
-    item.signal = new Signal<const IOEvent&>();    
+    item.signal = new Signal<const IOEvent&>();
     item.device = &device;
-    
+
     //Insert the new item to the device description map.
-    const int fd = device.fd();   
+    const int fd = device.fd();
+
     _deviceMap.insert( std::make_pair( fd, item ) );
-    
+
     //Set the bit in the device descriptor set.
     const std::ios_base::openmode mode = device.mode();
-    
+
     if( ( mode & std::ios_base::in )  == std::ios_base::in )
        FD_SET( fd, &_rfds );
-       
+
     if( ( mode & std::ios_base::out )  == std::ios_base::out )
        FD_SET( fd, &_wfds );
 
     //Return the new signal.
-    return *item.signal;    
+    return *item.signal;
 }
+
 
 int IOMonitorImpl::maxFd()
 {
@@ -106,11 +111,12 @@ int IOMonitorImpl::maxFd()
     for( ; it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
-        maxfd = std::max( maxfd , item.device->fd() );        
+        maxfd = std::max( maxfd , item.device->fd() );
     }
 
     return std::max( maxfd, _wakePipe[0] );
 }
+
 
 void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 {
@@ -118,25 +124,26 @@ void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 
     //Wake up the monitor.
     this->wake();
-    
+
     //Obtain the device item.
     DeviceItem& item = _deviceMap[ device.fd() ];
-    
+
     //Delete the device signal. 
     delete item.signal;
-    
+
     //Clear the bit for the device descriptor.
     const std::ios_base::openmode mode = device.mode();
-    
+
     if( ( mode & std::ios_base::in )  == std::ios_base::in )
        FD_CLR( device.fd(), &_rfds );
-       
+
     if( ( mode & std::ios_base::out )  == std::ios_base::out )
        FD_CLR( device.fd(), &_wfds  );
-    
+
     //Remove the device item from the map.
-    _deviceMap.erase( device.fd() );           
+    _deviceMap.erase( device.fd() );
 }
+
 
 void IOMonitorImpl::wait()
 {
@@ -146,7 +153,7 @@ void IOMonitorImpl::wait()
     timeval* timeout = 0;
 
     //Execute the select.
-    while( true ) 
+    while( true )
     {
         ret = ::select( maxfd, &_rfds, &_wfds, 0, timeout );
 
@@ -155,11 +162,11 @@ void IOMonitorImpl::wait()
 
         if( errno != EINTR ) //No positive return and no signal Interrupt =>  throw => else retry.
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
-    }    
-    
+    }
+
     //Exclusive access to the _deviceMap and device descriptors.
     MutexLock lock( _mutex );
-        
+
     //Select returned => test why and send an event if necessary.
     std::map<int,DeviceItem>::iterator  it = _deviceMap.begin();
     std::ios_base::openmode             mode;
@@ -168,30 +175,35 @@ void IOMonitorImpl::wait()
     {
         const DeviceItem& item = it->second;
         mode = item.device->mode();
-        
+
         if( ( mode & std::ios_base::in )  == std::ios_base::in )
         {
             if( FD_ISSET( item.device->fd(), &_rfds ) )
             {
                 item.signal->send( item.device->event( IODeviceImpl::ReadFds ) ) ;
-                FD_SET( item.device->fd(), &_rfds);        
+                FD_SET( item.device->fd(), &_rfds);
             }
-        }        
-       
+        }
+
         if( ( mode & std::ios_base::out )  == std::ios_base::out )
         {
-           if( FD_ISSET( item.device->fd(), &_wfds  ))        
+           if( FD_ISSET( item.device->fd(), &_wfds  ))
            {
                 item.signal->send( item.device->event( IODeviceImpl::WriteFds ) );
                 FD_SET( item.device->fd(), &_wfds );
            }
         }
-    }    
-    
+    }
+
     //Reset the wake pipe.
     if( FD_ISSET( _wakePipe[0], &_rfds ) )
-        FD_SET( _wakePipe[0], &_rfds );            
+    {
+        std::vector<char> msgbuf(100);
+        read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
+        FD_SET( _wakePipe[0], &_rfds );
+    }
 }
+
 
 void IOMonitorImpl::wake()
 {
@@ -200,4 +212,5 @@ void IOMonitorImpl::wake()
 }
 
 }//namespace System
+
 }//namespace Pt

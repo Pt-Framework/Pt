@@ -49,7 +49,7 @@ class SerialListener : public Pt::Connectable
         {
             //Print event name.
             //std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
-            
+
             //Check the event type.( read/write? ).
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
 
@@ -58,14 +58,14 @@ class SerialListener : public Pt::Connectable
                 char buffer[201];
                 memset( buffer, 0, 201);
                 size_t size = 0;
-                
+
                 if( size = _device.read( buffer, 200) )
                 {
                     std::cerr<<"Size= "<<size<<"(bytes)"<<std::endl;
                     std::cerr<<"Data: " << buffer << std::endl; 
                     if( size == 1)
                         std::cout<<"Char= "<<(int) buffer[0]<<std::endl;
-                        
+
                     //std::cerr<<"---"<<std::endl;
                     memset( buffer, 0, 200);
                 }
@@ -77,16 +77,16 @@ class SerialListener : public Pt::Connectable
                 if( writeEvent != 0 )
                     std::cerr<<"Data transmission complete."<<std::endl;
             }
-            
+
             //Send the event to the second consumer.
             //_eventSource.send( ev );
         }
-        
+
         void theSecondConsumer( const Pt::System::IOEvent& ev )
         {
             std::cerr<< "Second consumer of the event: "<< typeid(ev).name()<<std::endl;
         }
-        
+
     private:
         Pt::System::SerialDevice&   _device;
         Pt::System::EventSource     _eventSource;
@@ -97,20 +97,19 @@ int main( int argc, char* argv[] )
     try
     {
         //The event loop agregates an IOMonitor.
-        Pt::System::EventLoop    eventLoop;        
-        
+        Pt::System::EventLoop    eventLoop;
+
         //Pack the event loop in a thread.
         Pt::System::Thread       thread( eventLoop );
 
         //Setup a serial device.
-        Pt::System::SerialDevice serialDevice("COM3:", std::ios_base::in | std::ios_base::out);        
+        Pt::System::SerialDevice serialDevice("/dev/ttyUSB0", std::ios_base::in);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCanonical( 10 );
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
-        
-        
+
 
         //Create a device listener
         SerialListener listener( serialDevice );
@@ -124,19 +123,13 @@ int main( int argc, char* argv[] )
         //Start the loop.
         thread.start();
 
-        //Trigger the serial port flags for plag&play devices.
-        serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
-        Pt::System::Thread::sleep( 300 );
-        serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
-        Pt::System::Thread::sleep( 300 );
-
         //Wait a time periode.
-        Pt::System::Thread::sleep( 50000 );
+        Pt::System::Thread::sleep( 5000 );
 
         //Write something.
         char buffer[100];
         memset( buffer, 23, 100 );
-        size_t no = serialDevice.write( buffer, 100 );
+        //size_t no = serialDevice.write( buffer, 100 );
 
         //Wait again.
         Pt::System::Thread::sleep( 1000 );

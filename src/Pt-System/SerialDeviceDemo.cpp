@@ -8,8 +8,8 @@
 
 void readMouseData()
 {
-    //std::string port("/dev/ttyS0");
-    std::string port("COM1:");
+    std::string port("/dev/ttyS0");
+    //std::string port("COM1:");
     std::cerr << "Opening " <<port << std::endl;
     Pt::System::SerialDevice serdev( port,  std::ios_base::in );
 
@@ -135,7 +135,8 @@ void waitEventDemo()
 {
     try
     {
-        Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
+        std::string port("/dev/ttyS0");
+        Pt::System::SerialDevice serDev( port, std::ios_base::in | std::ios_base::out);
         Reader reader(serDev);    
         reader.start();
 
@@ -145,7 +146,7 @@ void waitEventDemo()
     }
     catch( const std::exception& e)
     {
-        std::cerr << "Exception: " << e.what() << std::endl;    
+        std::cerr << "Exception: " << e.what() << std::endl;
     }
 }
 
