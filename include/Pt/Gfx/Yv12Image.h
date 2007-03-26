@@ -405,12 +405,12 @@ namespace Pt {
         typedef PlanarImage< Yv12Model > Yv12Image;
 
 
-        template <typename ViewT, typename ColorPtrT>
-        inline void advanceColorPtr(ViewT& view, ColorPtrT& ptr, size_t n, size_t xpos, size_t ypos)
+        template <typename ColorPtrT>
+        inline void advanceColorPtr(ColorPtrT& ptr, const ColorPtrT& from, size_t n, size_t xpos, size_t ypos, size_t width)
         {
             ptr.colorData()[0] += n;
-            const size_t subsampleOffset = (xpos/2) + (ypos/2 * view.width()/2);
-            addElements<ColorPtrT::NumberOfChannels, 1>(ptr.colorData(), view.colorData(), subsampleOffset);
+            const size_t subsampleOffset = (xpos/2) + (ypos/2 * width/2);
+            addElements<ColorPtrT::NumberOfChannels, 1>(ptr.colorData(), from, subsampleOffset);
         }
 
 
@@ -467,7 +467,7 @@ namespace Pt {
 
                     //const size_t subsampleOffset = ((_xpos/2) + (_ypos/2 * _view->width()/2));
                     //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-                    advanceColorPtr(*_view, _color, n, _xpos, _ypos);
+                    advanceColorPtr(_color, _view->colorData(), n, _xpos, _ypos, _view->width() );
 
                     return *this;
                 }
