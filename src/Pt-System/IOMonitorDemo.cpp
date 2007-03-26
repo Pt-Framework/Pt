@@ -36,6 +36,7 @@ class SerialListener : public Pt::Connectable
     public:
         SerialListener( Pt::System::SerialDevice& device)
         : _device ( device )
+        , _out("ser.txt")
         {         
             //The event source is a thread save sender.
             //We connect us to the event source as the second consumer.
@@ -47,9 +48,6 @@ class SerialListener : public Pt::Connectable
 
         void serialEvent( const Pt::System::IOEvent& ev )
         {
-            //Print event name.
-            //std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
-
             //Check the event type.( read/write? ).
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
 
@@ -61,10 +59,11 @@ class SerialListener : public Pt::Connectable
 
                 if( size = _device.read( buffer, 200) )
                 {
-                    std::cerr<<"Size= "<<size<<"(bytes)"<<std::endl;
-                    std::cerr<<"Data: " << buffer << std::endl; 
-                    if( size == 1)
-                        std::cout<<"Char= "<<(int) buffer[0]<<std::endl;
+                    _out<<"Size= "<<size<<"(bytes)"<<std::endl;
+                    _out<<"Data: " << buffer << std::endl; 
+                    
+                    if( size == 1 )
+                        _out<<"Char= "<<(int) buffer[0]<<std::endl;
 
                     //std::cerr<<"---"<<std::endl;
                     memset( buffer, 0, 200);
@@ -75,7 +74,7 @@ class SerialListener : public Pt::Connectable
                 const Pt::System::WriteEvent* writeEvent = dynamic_cast<const Pt::System::WriteEvent*>( &ev );
 
                 if( writeEvent != 0 )
-                    std::cerr<<"Data transmission complete."<<std::endl;
+                    _out<<"Data transmission complete."<<std::endl;
             }
 
             //Send the event to the second consumer.
@@ -89,13 +88,15 @@ class SerialListener : public Pt::Connectable
 
     private:
         Pt::System::SerialDevice&   _device;
-        Pt::System::EventSource     _eventSource;
+        Pt::System::EventSource     _eventSource;        
+        std::ofstream  _out;
 };
 
 int main( int argc, char* argv[] )
 {
     try
-    {
+    {      
+        Pt::System::Thread::sleep( 20000 );  
         //The event loop agregates an IOMonitor.
         Pt::System::EventLoop    eventLoop;
 
@@ -103,12 +104,12 @@ int main( int argc, char* argv[] )
         Pt::System::Thread       thread( eventLoop );
 
         //Setup a serial device.
-        Pt::System::SerialDevice serialDevice("/dev/ttyUSB0", std::ios_base::in);
+        Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCanonical( 10 );
-        serialDevice.setCharSize(8);
+        serialDevice.setCharSize(7);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
-        serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
+        serialDevice.setParity(Pt::System::SerialDevice::ParityEven);
 
 
         //Create a device listener
@@ -124,7 +125,7 @@ int main( int argc, char* argv[] )
         thread.start();
 
         //Wait a time periode.
-        Pt::System::Thread::sleep( 5000 );
+        Pt::System::Thread::sleep( 10000 );
 
         //Write something.
         char buffer[100];

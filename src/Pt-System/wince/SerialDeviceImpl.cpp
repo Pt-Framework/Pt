@@ -58,9 +58,9 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
 
         COMMTIMEOUTS comTimeOut;
-        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-        comTimeOut.ReadTotalTimeoutConstant     = 0;
+        comTimeOut.ReadIntervalTimeout          = 10;
+        comTimeOut.ReadTotalTimeoutMultiplier   = 1;
+        comTimeOut.ReadTotalTimeoutConstant     = 100;
         comTimeOut.WriteTotalTimeoutMultiplier  = 10;
         comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
@@ -68,6 +68,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);            
             
         _commEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+            
+        _waitCommMask =  EV_RXCHAR | EV_TXEMPTY | EV_BREAK ;
     }        
     catch( ... )
     {
@@ -350,34 +352,68 @@ bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
     if( WaitForSingleObject( _commEvent, msec ) != WAIT_OBJECT_0 )
         return false;
         
-    return ( ( _commEventType == ReceiveEvent  && mode == SerialDevice::WaitInput) ||  
-             (  _commEventType == SendCompleteEvent && mode == SerialDevice::WaitOutput ) );
+    return ( ( _commEventType == CharReceived  && mode == SerialDevice::WaitInput ) ||  
+             ( _commEventType == EventCharReceived && mode == SerialDevice::WaitInput ) ||      
+             ( _commEventType == SendComplete && mode == SerialDevice::WaitOutput ) );
 }
 
 void SerialDeviceImpl::run()
 {
-    SetCommMask( _handle, EV_TXEMPTY | EV_RXCHAR | EV_BREAK );
-    
     DWORD waitMask = 0;
     
     while( !_terminateThread )
     {
         waitMask = 0;
-
+        
+        SetCommMask( _handle, _waitCommMask );    
+            
         bool retVal = ( WaitCommEvent( _handle, &waitMask, NULL )  == TRUE );
 
+        DWORD err = GetLastError();
+        
         if( retVal && ( waitMask & EV_TXEMPTY ) )
         {
-            _commEventType = SendCompleteEvent;        
+            _commEventType = SendComplete;        
             SetEvent( _commEvent );
         }
         else if(  retVal && ( waitMask & EV_RXCHAR ) )
         {
-            _commEventType = ReceiveEvent;
+            _commEventType = CharReceived;
+            SetEvent( _commEvent );
+        }
+        else if( retVal && ( waitMask & EV_RXFLAG ) )
+        {
+            _commEventType = EventCharReceived ;
             SetEvent( _commEvent );
         }
     }
 }
+
+void SerialDeviceImpl::setCanonical( char eol, char eof )
+{   
+/*
+    _waitCommMask = EV_RXFLAG | EV_TXEMPTY | EV_BREAK ;
+    DCB commState;
+    
+    readCommState( commState );
+    commState.EvtChar = eol;
+    commState.EofChar = eof;
+    writeCommState( commState );    
+  */  
+}
+
+void SerialDeviceImpl::disableCanonical()
+{
+    _waitCommMask =  EV_RXCHAR | EV_TXEMPTY | EV_BREAK ;
+    
+    DCB commState;
+    
+    readCommState( commState );
+    commState.EvtChar  = 0;
+    commState.EofChar  = 0;
+    writeCommState( commState );     
+    resetEvent( _commEvent );     
+} 
 
 void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles ) const
 {
@@ -400,10 +436,17 @@ const IOEvent& SerialDeviceImpl::event( HANDLE handle )
         
     ResetEvent( _commEvent );
     
-    if( _commEventType == SendCompleteEvent )
-        return _writeEvent;
-    else if( _commEventType == ReceiveEvent )
-        return _readEvent;
+    switch( _commEventType)
+    {
+        case SendComplete:
+            return _writeEvent;
+        break;
+        
+        case CharReceived:     
+        case EventCharReceived:   
+            return _readEvent;
+        break;        
+    }        
             
     throw IOError("Unknow event", PT_SOURCEINFO);
     return _readEvent;  

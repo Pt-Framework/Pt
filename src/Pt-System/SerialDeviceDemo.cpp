@@ -152,10 +152,16 @@ void waitEventDemo()
 
 int main( int argc, char* argv[] )
 {    
-/*    Pt::System::Thread::sleep( 20000 );
-    Pt::System::SerialDevice serDev("COM1:", std::ios_base::in | std::ios_base::out);
-    serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
-*/
-    readMouseData();    
+    Pt::System::Thread::sleep( 20000 );
+    Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
+    serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+    serialDevice.setCanonical( 10 );
+    serialDevice.setCharSize(8);
+    serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
+    serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
+        
+    serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
+
+//    readMouseData();    
     return 0;
 }

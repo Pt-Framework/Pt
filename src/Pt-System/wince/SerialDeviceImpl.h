@@ -68,7 +68,10 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
 
         void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;      
-
+        
+        void setCanonical( char eol, char eof );
+        void disableCanonical();
+        
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
         
         HANDLE deviceHandle() const
@@ -89,7 +92,7 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         
         void run();       
        
-        enum { ReceiveEvent, SendCompleteEvent } _commEventType;
+        enum { CharReceived, EventCharReceived, SendComplete } _commEventType;
         
         HANDLE _handle;
         HANDLE _commEvent;
