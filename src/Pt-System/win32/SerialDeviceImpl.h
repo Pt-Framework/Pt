@@ -65,6 +65,9 @@ class SerialDeviceImpl : public IODeviceImpl
         void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;
 
+        void setCanonical( char eol, char eof );
+        void disableCanonical();
+        
         bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
         
         HANDLE deviceHandle() const

@@ -67,7 +67,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     {
         if( !GetCommState( _handle, &_orgCommState ) )
             throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
-
+                   
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
@@ -78,7 +78,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
-        SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY  );
+        SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY );
         resetEvent( _ovStatus.hEvent );        
     }
     catch( ... )
@@ -173,6 +173,32 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
     commState.BaudRate = static_cast<DWORD>( rate );
     writeCommState( commState );
 }
+
+void SerialDeviceImpl::setCanonical( char eol, char eof )
+{   
+    DCB commState;
+    
+    readCommState( commState );
+    commState.EvtChar = eol;
+//    commState.EofChar = eof;
+    writeCommState( commState );    
+    
+    SetCommMask( _handle, EV_RXFLAG | EV_TXEMPTY );    
+    resetEvent( _ovStatus.hEvent );  
+}
+
+void SerialDeviceImpl::disableCanonical()
+{
+    SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY );
+    
+    DCB commState;
+    
+    readCommState( commState );
+    commState.EvtChar  = 0;
+    commState.EofChar  = 0;
+    writeCommState( commState );     
+    resetEvent( _ovStatus.hEvent );     
+} 
 
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
@@ -372,9 +398,12 @@ const IOEvent& SerialDeviceImpl::event( HANDLE handle )
     if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
         return _writeEvent;    
 
-    if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
+    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
         return _readEvent;       
 
+ /*   if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
+        return _readEvent;       */
+    
     throw IOError("Unknow event", PT_SOURCEINFO);
     return _readEvent;
 }

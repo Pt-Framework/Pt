@@ -48,7 +48,7 @@ class SerialListener : public Pt::Connectable
         void serialEvent( const Pt::System::IOEvent& ev )
         {
             //Print event name.
-            std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
+            //std::cerr<< "Event: "<< typeid(ev).name()<<std::endl;
             
             //Check the event type.( read/write? ).
             const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
@@ -59,8 +59,16 @@ class SerialListener : public Pt::Connectable
                 memset( buffer, 0, 201);
                 size_t size = 0;
                 
-                while( size = _device.read( buffer, 200) )
-                    std::cerr << "Read: " << buffer << " (" << size << " bytes)" << std::endl;                
+                if( size = _device.read( buffer, 200) )
+                {
+                    std::cerr<<"Size= "<<size<<"(bytes)"<<std::endl;
+                    std::cerr<<"Data: " << buffer << std::endl; 
+                    if( size == 1)
+                        std::cout<<"Char= "<<(int) buffer[0]<<std::endl;
+                        
+                    //std::cerr<<"---"<<std::endl;
+                    memset( buffer, 0, 200);
+                }
             }
             else
             {
@@ -71,7 +79,7 @@ class SerialListener : public Pt::Connectable
             }
             
             //Send the event to the second consumer.
-            _eventSource.send( ev );
+            //_eventSource.send( ev );
         }
         
         void theSecondConsumer( const Pt::System::IOEvent& ev )
@@ -95,12 +103,14 @@ int main( int argc, char* argv[] )
         Pt::System::Thread       thread( eventLoop );
 
         //Setup a serial device.
-        Pt::System::SerialDevice serialDevice("COM1:", std::ios_base::in | std::ios_base::out);
-        
-        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate9600);
+        Pt::System::SerialDevice serialDevice("COM3:", std::ios_base::in | std::ios_base::out);        
+        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+        serialDevice.setCanonical( 10 );
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
+        
+        
 
         //Create a device listener
         SerialListener listener( serialDevice );

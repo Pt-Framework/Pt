@@ -170,8 +170,12 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         */
         FlowControl flowControl() const;
 
+        
+        void setCanonical( char eol, char eof = std::char_traits<char>::eof() ); 
+        void disableCanonical();
+        
         //! @brief Transmit the current buffered characters.
-        void flush();
+        void flush();              
         
         virtual IODeviceImpl* impl()
         { return (IODeviceImpl*) _impl; }
