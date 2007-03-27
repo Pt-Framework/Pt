@@ -83,6 +83,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         // Disable chc
         ios.c_lflag &= ~ECHO;
         ios.c_lflag &= ~ICANON;
+        //ios.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
         //ios.c_iflag |= IGNCR;
         ios.c_cflag |= CLOCAL | CREAD;
         ios.c_cc[VMIN] = 8;
