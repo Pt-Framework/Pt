@@ -49,12 +49,10 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
     if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) )
     {
         flags |= O_RDWR;
-        flags |= O_CREAT;
     }
     else if(mode & std::ios_base::out)
     {
         flags |= O_WRONLY;
-        flags |= O_CREAT;
     }
     else if(mode & std::ios_base::in  )
     {
@@ -69,7 +67,7 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
     flags |= O_NONBLOCK | O_NOCTTY;
     _openMode = mode;
 
-    _fd = ::open(path.c_str(), flags, 0644);
+    _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
         throw OpenFailed("open failed", PT_SOURCEINFO);
 
@@ -84,9 +82,11 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
 
         // Disable chc
         ios.c_lflag &= ~ECHO;
-
-        //ios.c_cc[VMIN] = 0;
-        //ios.c_cc[VTIME] = 0;
+        ios.c_lflag &= ~ICANON;
+        //ios.c_iflag |= IGNCR;
+        ios.c_cflag |= CLOCAL | CREAD;
+        ios.c_cc[VMIN] = 8;
+        ios.c_cc[VTIME] = 0;
 
         if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
         {

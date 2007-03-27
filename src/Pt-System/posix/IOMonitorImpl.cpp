@@ -89,6 +89,7 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
     _deviceMap.insert( std::make_pair( fd, item ) );
 
     //Set the bit in the device descriptor set.
+/*
     const std::ios_base::openmode mode = device.mode();
 
     if( ( mode & std::ios_base::in )  == std::ios_base::in )
@@ -96,7 +97,7 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
 
     if( ( mode & std::ios_base::out )  == std::ios_base::out )
        FD_SET( fd, &_wfds );
-
+*/
     //Return the new signal.
     return *item.signal;
 }
@@ -150,17 +151,33 @@ void IOMonitorImpl::wait()
     int maxfd   = maxFd() + 1;
     int ret     = -1;
 
+    fd_set rfds;
+    fd_set wfds;
+
+    FD_ZERO(&rfds);
+    FD_ZERO(&wfds);
+
+    //Add the wake pipe to the rdfs.
+    FD_SET( _wakePipe[0], &rfds );
+
+    std::map<int,DeviceItem>::iterator it = _deviceMap.begin();
+    for( ; it != _deviceMap.end(); ++it )
+    {
+        int fd = it->first;
+        FD_SET(fd, &rfds);
+    }
+    
     timeval* timeout = 0;
 
     //Execute the select.
     while( true )
     {
-        ret = ::select( maxfd, &_rfds, &_wfds, 0, timeout );
+        ret = ::select( FD_SETSIZE, &rfds, &wfds, 0, timeout );
 
-        if( ret != -1 ) //Positive return => break.
+        if( ret != -1 )
             break;
 
-        if( errno != EINTR ) //No positive return and no signal Interrupt =>  throw => else retry.
+        if( errno != EINTR )
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
@@ -168,8 +185,8 @@ void IOMonitorImpl::wait()
     MutexLock lock( _mutex );
 
     //Select returned => test why and send an event if necessary.
-    std::map<int,DeviceItem>::iterator  it = _deviceMap.begin();
-    std::ios_base::openmode             mode;
+    it = _deviceMap.begin();
+    std::ios_base::openmode mode;
 
     for( ; it != _deviceMap.end(); ++it )
     {
@@ -178,29 +195,26 @@ void IOMonitorImpl::wait()
 
         if( ( mode & std::ios_base::in )  == std::ios_base::in )
         {
-            if( FD_ISSET( item.device->fd(), &_rfds ) )
+            if( FD_ISSET( item.device->fd(), &rfds ) )
             {
                 item.signal->send( item.device->event( IODeviceImpl::ReadFds ) ) ;
-                FD_SET( item.device->fd(), &_rfds);
             }
         }
 
         if( ( mode & std::ios_base::out )  == std::ios_base::out )
         {
-           if( FD_ISSET( item.device->fd(), &_wfds  ))
+           if( FD_ISSET( item.device->fd(), &wfds  ))
            {
                 item.signal->send( item.device->event( IODeviceImpl::WriteFds ) );
-                FD_SET( item.device->fd(), &_wfds );
            }
         }
     }
 
     //Reset the wake pipe.
-    if( FD_ISSET( _wakePipe[0], &_rfds ) )
+    if( FD_ISSET( _wakePipe[0], &rfds ) )
     {
         std::vector<char> msgbuf(100);
         read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
-        FD_SET( _wakePipe[0], &_rfds );
     }
 }
 

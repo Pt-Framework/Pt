@@ -31,121 +31,80 @@
 #include <Pt/Signal.h>
 #include <fstream>
 
-class SerialListener : public Pt::Connectable
+#include <termios.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <signal.h>
+
+
+class Multiplexer : public Pt::System::Thread, public Pt::Connectable
 {
     public:
-        SerialListener( Pt::System::SerialDevice& device)
-        : _device ( device )
-        , _out("ser.txt")
-        {         
-            //The event source is a thread save sender.
-            //We connect us to the event source as the second consumer.
-            _eventSource.connect(  slot( this, &SerialListener::theSecondConsumer ).clone() );
+        void exit()
+        {
+            _eloop.exit();
+            this->wait();
         }
 
-        ~SerialListener()
-        { }
-
-        void serialEvent( const Pt::System::IOEvent& ev )
+    protected:
+        void run()
         {
-            //Check the event type.( read/write? ).
-            const Pt::System::ReadEvent* readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
+            _device = new Pt::System::SerialDevice("/dev/ttyUSB0", std::ios_base::in);
+            _device->setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+            //_device->setCanonical( 10 );
+            //_device->disableCanonical();
+            _device->setCharSize(8);
+            _device->setStopBits(Pt::System::SerialDevice::OneStopBit);
+            _device->setParity(Pt::System::SerialDevice::ParityEven);
 
+                    //_device->setCanonical( 'G' );
+                        
+            Pt::Signal<const Pt::System::IOEvent&>& signal = _eloop.addDevice( *_device );
+            Pt::connect( signal, *this, &Multiplexer::onIOEvent );
+            //Pt::System::Thread::sleep(800);
+
+            _eloop.run();
+        }
+
+        void onIOEvent( const Pt::System::IOEvent& ev )
+        {
+            const Pt::System::ReadEvent* readEvent = 0;
+            readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
             if( readEvent != 0 )
             {
                 char buffer[201];
                 memset( buffer, 0, 201);
                 size_t size = 0;
 
-                if( size = _device.read( buffer, 200) )
+                if( size = _device->read( buffer, 200) )
                 {
-                    _out<<"Size= "<<size<<"(bytes)"<<std::endl;
-                    _out<<"Data: " << buffer << std::endl; 
+                    //std::cerr<<"Read "<<size<<"(bytes):";
+                    std::cerr.write(buffer, size);
+                    std::cerr << std::endl;
                     
-                    if( size == 1 )
-                        _out<<"Char= "<<(int) buffer[0]<<std::endl;
-
-                    //std::cerr<<"---"<<std::endl;
-                    memset( buffer, 0, 200);
+                    //if(size == 1)
+                        //std::cerr << (int)buffer[0];
                 }
             }
-            else
-            {
-                const Pt::System::WriteEvent* writeEvent = dynamic_cast<const Pt::System::WriteEvent*>( &ev );
-
-                if( writeEvent != 0 )
-                    _out<<"Data transmission complete."<<std::endl;
-            }
-
-            //Send the event to the second consumer.
-            //_eventSource.send( ev );
-        }
-
-        void theSecondConsumer( const Pt::System::IOEvent& ev )
-        {
-            std::cerr<< "Second consumer of the event: "<< typeid(ev).name()<<std::endl;
         }
 
     private:
-        Pt::System::SerialDevice&   _device;
-        Pt::System::EventSource     _eventSource;        
-        std::ofstream  _out;
+        Pt::System::SerialDevice* _device;
+        Pt::System::EventLoop _eloop;
 };
+
 
 int main( int argc, char* argv[] )
 {
     try
-    {      
-        Pt::System::Thread::sleep( 20000 );  
-        //The event loop agregates an IOMonitor.
-        Pt::System::EventLoop    eventLoop;
+    {
+        Multiplexer m;
+        m.start();
 
-        //Pack the event loop in a thread.
-        Pt::System::Thread       thread( eventLoop );
+        Pt::System::Thread::sleep( 5000 );
 
-        //Setup a serial device.
-        Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
-        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-        serialDevice.setCanonical( 10 );
-        serialDevice.setCharSize(7);
-        serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
-        serialDevice.setParity(Pt::System::SerialDevice::ParityEven);
-
-
-        //Create a device listener
-        SerialListener listener( serialDevice );
-
-        //Add the serial device to the event loop.
-        Pt::Signal<const Pt::System::IOEvent&>& signal = eventLoop.addDevice( serialDevice );
-
-        //Connect the device listener to the serial device.
-        Pt::connect( signal, listener, &SerialListener::serialEvent );
-
-        //Start the loop.
-        thread.start();
-
-        //Wait a time periode.
-        Pt::System::Thread::sleep( 10000 );
-
-        //Write something.
-        char buffer[100];
-        memset( buffer, 23, 100 );
-        //size_t no = serialDevice.write( buffer, 100 );
-
-        //Wait again.
-        Pt::System::Thread::sleep( 1000 );
-
-        //Exit the event loop.
-        eventLoop.exit();
-
-        //Remove the serial device from the event loop.
-        eventLoop.removeDevice( serialDevice );
-
-        //Close teh serial device.
-        serialDevice.close();
-
-        //Join the threads.
-        thread.wait();
+        m.exit();
     }
     catch( const std::exception& e )
     {
