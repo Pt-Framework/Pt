@@ -167,7 +167,7 @@ namespace Pt {
         };
 
 
-         template <typename ComponentT, size_t NumChannels>
+        template <typename ComponentT, size_t NumChannels>
         class PlanarConstColorPtr
         {
             public:
@@ -215,7 +215,7 @@ namespace Pt {
                 const ComponentT*& operator[](size_t n)
                 { return _data[n]; }
 
-                const ComponentT* operator[](size_t n) const 
+                const ComponentT* operator[](size_t n) const
                 { return _data[n]; }
 
                 ConstColorData& colorData()

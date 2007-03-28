@@ -53,7 +53,7 @@ class PlanarImageTest : public Pt::Unit::TestSuite
         void ARgbModel()
         {
             // image data, could be 4 planes with two elements each
-            uint16_t data[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+            Pt::uint16_t data[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
             typedef Pt::Gfx::PlanarImageView< Pt::Gfx::PlanarARgb, 1, 1 > View;
             PT_UNIT_ASSERT( Pt::Gfx::PlanarARgb::NumberOfChannels == 4 )
