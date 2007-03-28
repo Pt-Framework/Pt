@@ -146,11 +146,8 @@ namespace Pt {
             typedef PlanarColorPtr<Component, 3> ColorPtr;
 
             typedef YuvConstColorPtr ConstColorPtr;
-
-            typedef Component* ColorData [ NumberOfChannels ];
-
-            typedef const Component* ConstColorData [ NumberOfChannels ];
         };
+
 
         typedef PlanarImageView< PlanarYuv, 2, 2> Yv12View;
 
