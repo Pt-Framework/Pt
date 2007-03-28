@@ -52,10 +52,6 @@ class SerialDeviceImpl : public IODeviceImpl
         //! @brief Write bytes to device
         size_t write( const char* buffer, size_t count );
 
-        void setCanonical( char eol, char eof );
-
-        void disableCanonical();
-
         void setBaudRate( SerialDevice::BaudRate rate );
 
         SerialDevice::BaudRate baudRate() const;

@@ -59,11 +59,6 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         flags |= O_RDONLY;
     }
 
-    if(mode & std::ios::trunc)
-    {
-        flags |= O_TRUNC;
-    }
-
     flags |= O_NONBLOCK | O_NOCTTY;
     _openMode = mode;
 
@@ -81,12 +76,10 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
             throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
         // Disable chc
-        ios.c_lflag &= ~ECHO;
-        ios.c_lflag &= ~ICANON;
-        //ios.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-        //ios.c_iflag |= IGNCR;
+        ios.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+
         ios.c_cflag |= CLOCAL | CREAD;
-        ios.c_cc[VMIN] = 8;
+        ios.c_cc[VMIN] = 0;
         ios.c_cc[VTIME] = 0;
 
         if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
@@ -171,42 +164,6 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
     }
 
     return ret;
-}
-
-
-void SerialDeviceImpl::setCanonical( char eol, char eof )
-{
-    struct termios ios;
-    if( ::tcgetattr(_fd, &ios) == -1 )
-    {
-        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
-    }
-
-    ios.c_lflag |= ICANON;
-    ios.c_cc[VEOL] = eol;
-    ios.c_cc[VEOF] = eof;
-
-    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
-    {
-        throw IOError("Could not set baud rate", PT_SOURCEINFO);
-    }
-}
-
-
-void SerialDeviceImpl::disableCanonical()
-{
-    struct termios ios;
-    if( ::tcgetattr(_fd, &ios) == -1 )
-    {
-        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
-    }
-
-    ios.c_lflag &= ~ICANON;
-
-    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
-    {
-        throw IOError("Could not set baud rate", PT_SOURCEINFO);
-    }
 }
 
 

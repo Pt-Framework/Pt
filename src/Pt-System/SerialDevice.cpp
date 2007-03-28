@@ -110,15 +110,6 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
     return _impl->flowControl();
 }
 
-void SerialDevice::setCanonical( char eol, char eof )
-{
-    _impl->setCanonical( eol, eof );
-}
-
-void SerialDevice::disableCanonical()
-{
-    _impl->disableCanonical();
-}
 
 void SerialDevice::_close()
 {

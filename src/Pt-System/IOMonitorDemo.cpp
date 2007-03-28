@@ -31,12 +31,6 @@
 #include <Pt/Signal.h>
 #include <fstream>
 
-#include <termios.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <signal.h>
-
 
 class Multiplexer : public Pt::System::Thread, public Pt::Connectable
 {
@@ -50,19 +44,14 @@ class Multiplexer : public Pt::System::Thread, public Pt::Connectable
     protected:
         void run()
         {
-            _device = new Pt::System::SerialDevice("/dev/ttyUSB0", std::ios_base::in);
+            _device = new Pt::System::SerialDevice("/dev/ttyS0", std::ios_base::in);
             _device->setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-            //_device->setCanonical( 10 );
-            //_device->disableCanonical();
             _device->setCharSize(8);
             _device->setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device->setParity(Pt::System::SerialDevice::ParityEven);
 
-                    //_device->setCanonical( 'G' );
-                        
             Pt::Signal<const Pt::System::IOEvent&>& signal = _eloop.addDevice( *_device );
             Pt::connect( signal, *this, &Multiplexer::onIOEvent );
-            //Pt::System::Thread::sleep(800);
 
             _eloop.run();
         }
@@ -77,15 +66,16 @@ class Multiplexer : public Pt::System::Thread, public Pt::Connectable
                 memset( buffer, 0, 201);
                 size_t size = 0;
 
-                if( size = _device->read( buffer, 200) )
+                while( size = _device->read( buffer, 200) )
                 {
-                    //std::cerr<<"Read "<<size<<"(bytes):";
+                    std::cerr<<"Read "<<size<<"(bytes):";
                     std::cerr.write(buffer, size);
-                    std::cerr << std::endl;
                     
+                   
                     //if(size == 1)
                         //std::cerr << (int)buffer[0];
                 }
+                std::cerr << "---------" <<std::endl;
             }
         }
 
@@ -102,7 +92,7 @@ int main( int argc, char* argv[] )
         Multiplexer m;
         m.start();
 
-        Pt::System::Thread::sleep( 5000 );
+        Pt::System::Thread::sleep( 15000 );
 
         m.exit();
     }

@@ -155,7 +155,6 @@ int main( int argc, char* argv[] )
     Pt::System::Thread::sleep( 20000 );
     Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
     serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-    serialDevice.setCanonical( 10 );
     serialDevice.setCharSize(8);
     serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
