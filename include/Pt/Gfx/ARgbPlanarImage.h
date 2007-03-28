@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Marc Boris Duerner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,10 +28,10 @@ namespace Pt {
 
     namespace Gfx {
 
-        typedef PlanarImageView< PlanarARgb, 1, 1> ARgbView;
+        typedef PlanarImageView< PlanarARgb, 1, 1> PlanarARgbView;
 
 
-        typedef PlanarImage< ARgbView > PlanarARgbImage;
+        typedef PlanarImage< PlanarARgbView > PlanarARgbImage;
 
     }
 
