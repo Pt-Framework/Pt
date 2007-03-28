@@ -258,112 +258,112 @@ namespace Pt {
         }
 
 
+        template <typename ViewT, typename ColorPtrT, typename ColorRefT>
+        class PlanarPixelIterator
+        {
+            public:
+                typedef ColorRefT ColorRef;
+                typedef ColorPtrT ColorPtr;
+
+            public:
+                inline PlanarPixelIterator()
+                : _view(0),_xpos(0), _ypos(0)
+                {}
+
+                PlanarPixelIterator(ViewT& view, size_t xpos, size_t ypos)
+                : _view(&view)
+                , _xpos(xpos)
+                , _ypos(ypos)
+                {
+                    setptr( _color, view, _xpos, _ypos );
+                    //const size_t planeOffset = _xpos + ( _ypos * _view->width() );
+                    //const size_t subsampleOffset = ( _xpos/2 ) + ( _ypos/2 * _view->width()/2 );
+
+                    //_color.colorData()[0] = _view->data() + planeOffset;
+                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                }
+
+                ColorRef operator*()
+                { return *_color; }
+
+                bool operator!=(const PlanarPixelIterator& it) const
+                { return this->_color != it._color; }
+
+                PlanarPixelIterator& operator++()
+                {
+                    if(++_xpos == _view->width() )
+                    {
+                        _xpos = 0;
+                        ++_ypos;
+                    }
+
+                    incptr(_color, *_view, _xpos, _ypos);
+                    //++_color.colorData()[0];
+                    //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
+                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+
+                    return *this;
+                }
+
+                PlanarPixelIterator& operator+=(size_t n)
+                {
+                    this->advance(n);
+                    return *this;
+                }
+
+                void advance(size_t n)
+                {
+                    _ypos += n / _view->width();
+                    _xpos += n % _view->width();
+
+                    if(_xpos >= _view->width() )
+                    {
+                        _xpos -= _view->width();
+                        ++_ypos;
+                    }
+
+                    movptr(_color, n, *_view, _xpos, _ypos);
+                    //_color.colorData()[0] += n;
+                    //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
+                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                }
+
+                PlanarPixelIterator& operator=(const PlanarPixelIterator& other)
+                {
+                    _view = other._view;
+                    _xpos  = other._xpos;
+                    _ypos  = other._ypos;
+                    _color = other._color;
+
+                    return *this;
+                }
+
+                inline Math::Size operator-(const PlanarPixelIterator& other) const
+                {
+                    const size_t pos    = _color - _view->colorData();
+                    const size_t width  = pos / _view->height();
+                    const size_t height = pos / _view->width();
+
+                    const size_t otherPos    = other._color - other._view->colorData();
+                    const size_t otherWidth  = otherPos / other._view->height();
+                    const size_t otherHeight = otherPos / other._view->width();
+
+                    return Math::Size(width - otherWidth, height - otherHeight);
+                }
+
+            private:
+                ViewT*     _view;
+                ColorPtr   _color;
+                size_t     _xpos;
+                size_t     _ypos;
+        };
+
+
         /** @brief View of planar images.
         */
         template <typename ColorModelT, size_t SubX, size_t SubY>
         class PlanarImageView
         {
-            public:
-                template <typename ViewT, typename ColorPtrT, typename ColorRefT>
-                class PlanarPixelIterator
-                {
-                    public:
-                        typedef ColorRefT ColorRef;
-                        typedef ColorPtrT ColorPtr;
-
-                    public:
-                        inline PlanarPixelIterator()
-                        : _view(0),_xpos(0), _ypos(0)
-                        {}
-
-                        PlanarPixelIterator(ViewT& view, size_t xpos, size_t ypos)
-                        : _view(&view)
-                        , _xpos(xpos)
-                        , _ypos(ypos)
-                        {
-                            setptr( _color, view, _xpos, _ypos );
-                            //const size_t planeOffset = _xpos + ( _ypos * _view->width() );
-                            //const size_t subsampleOffset = ( _xpos/2 ) + ( _ypos/2 * _view->width()/2 );
-
-                            //_color.colorData()[0] = _view->data() + planeOffset;
-                            //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-                        }
-
-                        ColorRef operator*()
-                        { return *_color; }
-
-                        bool operator!=(const PlanarPixelIterator& it) const
-                        { return this->_color != it._color; }
-
-                        PlanarPixelIterator& operator++()
-                        {
-                            if(++_xpos == _view->width() )
-                            {
-                                _xpos = 0;
-                                ++_ypos;
-                            }
-
-                            incptr(_color, *_view, _xpos, _ypos);
-                            //++_color.colorData()[0];
-                            //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
-                            //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-
-                            return *this;
-                        }
-
-                        PlanarPixelIterator& operator+=(size_t n)
-                        {
-                            this->advance(n);
-                            return *this;
-                        }
-
-                        void advance(size_t n)
-                        {
-                            _ypos += n / _view->width();
-                            _xpos += n % _view->width();
-
-                            if(_xpos >= _view->width() )
-                            {
-                                _xpos -= _view->width();
-                                ++_ypos;
-                            }
-
-                            movptr(_color, n, *_view, _xpos, _ypos);
-                            //_color.colorData()[0] += n;
-                            //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
-                            //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-                        }
-
-                        PlanarPixelIterator& operator=(const PlanarPixelIterator& other)
-                        {
-                            _view = other._view;
-                            _xpos  = other._xpos;
-                            _ypos  = other._ypos;
-                            _color = other._color;
-
-                            return *this;
-                        }
-
-                        inline Math::Size operator-(const PlanarPixelIterator& other) const
-                        {
-                            const size_t pos    = _color - _view->colorData();
-                            const size_t width  = pos / _view->height();
-                            const size_t height = pos / _view->width();
-
-                            const size_t otherPos    = other._color - other._view->colorData();
-                            const size_t otherWidth  = otherPos / other._view->height();
-                            const size_t otherHeight = otherPos / other._view->width();
-
-                            return Math::Size(width - otherWidth, height - otherHeight);
-                        }
-
-                    private:
-                        ViewT*     _view;
-                        ColorPtr   _color;
-                        size_t     _xpos;
-                        size_t     _ypos;
-                };
-
             public:
                 static const size_t NumberOfChannels = ColorModelT::NumberOfChannels;
 
