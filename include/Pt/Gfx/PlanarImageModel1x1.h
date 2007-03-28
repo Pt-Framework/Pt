@@ -30,7 +30,7 @@ namespace Pt {
         /** @brief Planar image model class for non-subsampled planar images.
          *  @internal
          */
-        template<typename ColorModelT>
+        /*template<typename ColorModelT>
         class PlanarImageView<ColorModelT, 1, 1> {
             public:
                 typedef typename ColorModelT::Color Color;
@@ -89,7 +89,7 @@ namespace Pt {
                 size_t    _width;   // Image's width
                 size_t    _height;  // Image's height
         };
-
+*/
     } // namespace Gfx
 
 } // namespace Pt
@@ -98,7 +98,7 @@ namespace Pt {
 //
 // Include the template implementation header
 //
-#include "PlanarImageModel1x1.tpp"
+//#include "PlanarImageModel1x1.tpp"
 
 #endif
 

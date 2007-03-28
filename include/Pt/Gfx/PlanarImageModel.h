@@ -89,25 +89,7 @@ namespace Pt {
 
                     return *this;
                 }
-
-                inline ComponentT y() const
-                { return *_data[0]; }
-
-                inline ComponentT u() const
-                { return *_data[1]; }
-
-                inline ComponentT v() const
-                { return *_data[2]; }
-
-                inline void setY(ComponentT y)
-                { *_data[0] = y; }
-
-                inline void setU(ComponentT u)
-                { *_data[1] = u; }
-
-                inline void setV(ComponentT v)
-                { *_data[2] = v; }
-
+ 
             protected:
                 ColorData _data;
         };
@@ -162,7 +144,7 @@ namespace Pt {
                 const ColorData& colorData() const
                 { return _data; }
 
-            private:
+            protected:
                 ColorData _data;
         };
 
@@ -230,10 +212,10 @@ namespace Pt {
 
 
         template <typename ColorPtrT, typename ViewT>
-        void setptr(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
+        void set(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
         {
             const size_t planeOffset = xpos + ( ypos * view.width() );
-            const size_t subsampleOffset = ( xpos/2 ) + ( ypos/2 * view.width()/2 );
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
 
             color[0] = view.data() + planeOffset;
             addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
@@ -241,23 +223,27 @@ namespace Pt {
 
 
         template <typename ColorPtrT, typename ViewT>
-        void incptr(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
+        void increment(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
         {
             ++color.colorData()[0];
-            const size_t subsampleOffset = (xpos/2) + (ypos/2 * view.width()/2);
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
             addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
         }
 
 
         template <typename ColorPtrT, typename ViewT>
-        void movptr(ColorPtrT& color, size_t n, ViewT& view, size_t xpos, size_t ypos)
+        void advance(ColorPtrT& color, size_t n, ViewT& view, size_t xpos, size_t ypos)
         {
             color.colorData()[0] += n;
-            const size_t subsampleOffset = (xpos/2) + (ypos/2 * view.width()/2);
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
             addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
         }
 
 
+        template <typename ColorModelT, size_t SubX, size_t SubY>
+        class PlanarImageView;
+
+        //template <typename ColorModelT, size_t SubX, size_t SubY>
         template <typename ViewT, typename ColorPtrT, typename ColorRefT>
         class PlanarPixelIterator
         {
@@ -275,12 +261,7 @@ namespace Pt {
                 , _xpos(xpos)
                 , _ypos(ypos)
                 {
-                    setptr( _color, view, _xpos, _ypos );
-                    //const size_t planeOffset = _xpos + ( _ypos * _view->width() );
-                    //const size_t subsampleOffset = ( _xpos/2 ) + ( _ypos/2 * _view->width()/2 );
-
-                    //_color.colorData()[0] = _view->data() + planeOffset;
-                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                    set( _color, view, _xpos, _ypos );
                 }
 
                 ColorRef operator*()
@@ -297,21 +278,11 @@ namespace Pt {
                         ++_ypos;
                     }
 
-                    incptr(_color, *_view, _xpos, _ypos);
-                    //++_color.colorData()[0];
-                    //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
-                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
-
+                    increment(_color, *_view, _xpos, _ypos);
                     return *this;
                 }
 
                 PlanarPixelIterator& operator+=(size_t n)
-                {
-                    this->advance(n);
-                    return *this;
-                }
-
-                void advance(size_t n)
                 {
                     _ypos += n / _view->width();
                     _xpos += n % _view->width();
@@ -322,10 +293,8 @@ namespace Pt {
                         ++_ypos;
                     }
 
-                    movptr(_color, n, *_view, _xpos, _ypos);
-                    //_color.colorData()[0] += n;
-                    //const size_t subsampleOffset = (_xpos/2) + (_ypos/2 * _view->width()/2);
-                    //addElements<NumberOfChannels, 1>(_color.colorData(), _view->colorData(), subsampleOffset);
+                    advance(_color, n, *_view, _xpos, _ypos);
+                    return *this;
                 }
 
                 PlanarPixelIterator& operator=(const PlanarPixelIterator& other)
@@ -334,7 +303,6 @@ namespace Pt {
                     _xpos  = other._xpos;
                     _ypos  = other._ypos;
                     _color = other._color;
-
                     return *this;
                 }
 
@@ -361,11 +329,13 @@ namespace Pt {
 
         /** @brief View of planar images.
         */
-        template <typename ColorModelT, size_t SubX, size_t SubY>
+        template <typename ColorModelT, size_t SubX_, size_t SubY_>
         class PlanarImageView
         {
             public:
                 static const size_t NumberOfChannels = ColorModelT::NumberOfChannels;
+                static const size_t SubX = SubX_;
+                static const size_t SubY = SubY_;
 
                 typedef typename ColorModelT::Color Color;
 
@@ -395,18 +365,18 @@ namespace Pt {
                 Pt::size_t size(size_t width, size_t height)
                 {
                     const size_t planeSize = width * height * sizeof(Component);
-                    const size_t imageSize = planeSize + (Color::NumberOfChannels * planeSize/(SubX*SubY));
+                    const size_t imageSize = planeSize + ( (NumberOfChannels-1) * planeSize/(SubX*SubY));
                     return imageSize;
                 }
 
                 void init(unsigned char* memory, size_t width, size_t height)
                 {
-                    const size_t planeSize = width * height * sizeof(Component);
+                    const size_t planeSize = width * height ;//* sizeof(Component);
 
                     _imageData.colorData()[0] = reinterpret_cast<Component*>(memory);
                     _imageData.colorData()[1] = _imageData.colorData()[0] + planeSize;
 
-                    for(size_t i = 2; i < Color::NumberOfChannels; ++i)
+                    for(size_t i = 2; i < NumberOfChannels; ++i)
                         _imageData.colorData()[i] = _imageData.colorData()[i-1] + planeSize/(SubX*SubY);
 
                     _width  = width;

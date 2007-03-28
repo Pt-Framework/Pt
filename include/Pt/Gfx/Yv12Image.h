@@ -97,7 +97,57 @@ namespace Pt {
         };
 
 
-        typedef PlanarColorRef<uint8_t, 3> YuvColorRef;
+        class YuvColorRef : public PlanarColorRef<uint8_t, 3>
+        {
+            public:
+                YuvColorRef(const YuvColorRef& c)
+                : PlanarColorRef<uint8_t, 3>(c)
+                { }
+
+                YuvColorRef(ColorData& c)
+                : PlanarColorRef<uint8_t, 3>(c)
+                {  }
+
+                YuvColorRef& operator=(const ConstColorRef& other)
+                {
+                    PlanarColorRef<uint8_t, 3>::operator=(other);
+                    return *this;
+                }
+
+                Component y() const
+                { return *_data[0]; }
+
+                Component u() const
+                { return *_data[1]; }
+
+                Component v() const
+                { return *_data[2]; }
+
+                void setY(Component y)
+                { *_data[0] = y; }
+
+                void setU(Component u)
+                { *_data[1] = u; }
+
+                void setV(Component v)
+                { *_data[2] = v; }
+        };
+
+
+        class YuvColorPtr : public PlanarColorPtr<uint8_t, 3>
+        {
+            public:
+                YuvColorPtr()
+                : PlanarColorPtr<uint8_t, 3>()
+                { }
+
+                YuvColorPtr(ColorData& data)
+                : PlanarColorPtr<uint8_t, 3>(data)
+                { }
+
+                YuvColorRef operator*()
+                { return YuvColorRef(_data); }
+        };
 
 
         class YuvConstColorPtr : public PlanarConstColorPtr<uint8_t, 3>
@@ -120,13 +170,6 @@ namespace Pt {
         };
 
 
-        inline void assign(YuvColorRef to, const YuvColorRef& from)
-        { to = from; }
-
-        inline void assign(YuvColorRef to, const YuvConstColorRef& from)
-        { to = from; }
-
-
         /** @brief Color model for planar YUV images
         */
         struct PlanarYuv
@@ -143,7 +186,7 @@ namespace Pt {
 
             typedef YuvConstColorRef ConstColorRef;
 
-            typedef PlanarColorPtr<Component, 3> ColorPtr;
+            typedef YuvColorPtr ColorPtr;
 
             typedef YuvConstColorPtr ConstColorPtr;
         };

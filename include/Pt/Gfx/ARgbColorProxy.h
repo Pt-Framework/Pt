@@ -142,29 +142,6 @@ namespace Pt {
         typedef Color<ARgbProxy> ARgbColorProxy;
 
 
-        /** @brief Color model for planar YUV images
-        */
-        struct PlanarARgb
-        {
-            static const size_t NumberOfChannels = 4;
-
-            /** @brief Value type of each individual component of this color */
-            typedef uint16_t Component;
-
-            /** @brief Non-reference type (value type) of this color. */
-            typedef ARgbColor Color;
-
-            typedef const ARgbColor ConstColor;
-
-            typedef ARgbColorProxy ColorRef;
-
-            typedef ARgbColor ConstColorRef;
-
-            typedef Component* ColorData [ NumberOfChannels ];
-
-            typedef const Component* ConstColorData [ NumberOfChannels ];
-        };
-
 
         /** @brief Convert a Color<ARgbProxy> to a Color<ARgb>.
          */
