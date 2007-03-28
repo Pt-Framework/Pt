@@ -197,11 +197,8 @@ void ImagePainter::drawLine(const Math::Point& from, const  Math::Point& to)
     if( _pen.size()  == 0 )
         return;
 
-    std::vector<Pt::Math::Point> points;
-    
-    points.push_back( from );
-    points.push_back( to );
-    _drawPolyline->draw(_image, _pen, &points[0], points.size() );
+    const Pt::Math::Point points[] = { from, to };
+    _drawPolyline->draw(_image, _pen, points, 2);
 }
 
 void ImagePainter::drawText( const Math::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
