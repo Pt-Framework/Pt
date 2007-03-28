@@ -22,6 +22,9 @@ namespace Pt {
         template <typename PointT, typename SizeT>
         class BasicRect;
 
+        template <typename T>
+        class BasicRange;
+
         template <typename T, size_t rowDim, size_t colDim>
         class BasicMatrix;
 
@@ -31,26 +34,28 @@ namespace Pt {
         template <typename T>
         class BasicVector3d;
 
-        typedef BasicSize<Pt::size_t> Size;
-        typedef BasicSize<double>     SizeF;
+        typedef BasicSize<Pt::size_t>      Size;
+        typedef BasicSize<double>          SizeF;
 
-        typedef BasicPoint<Pt::ssize_t> Point;
-        typedef BasicPoint<double>      PointF;
+        typedef BasicPoint<Pt::ssize_t>    Point;
+        typedef BasicPoint<double>         PointF;
 
-        typedef BasicRect<Pt::ssize_t, Pt::size_t> Rect;
-        typedef BasicRect<double, double>          RectF;
+        typedef BasicRect<Pt::ssize_t, Pt::size_t>  Rect;
+        typedef BasicRect<double, double>           RectF;
 
-        typedef BasicVector2d<Pt::ssize_t> Vector2d;
-        typedef BasicVector2d<double>      Vector2dF;
+        typedef BasicRange<Pt::ssize_t>     Range;
+        typedef BasicRange<double>          RangeF;
 
-        typedef BasicVector3d<Pt::ssize_t> Vector3d;
-        typedef BasicVector3d<double>      Vector3dF;
+        typedef BasicVector2d<Pt::ssize_t>  Vector2d;
+        typedef BasicVector2d<double>       Vector2dF;
 
-        typedef BasicMatrix<Pt::ssize_t, 3, 3> Matrix3x3;
-        typedef BasicMatrix<double, 3, 3>      Matrix3x3F;
+        typedef BasicVector3d<Pt::ssize_t>  Vector3d;
+        typedef BasicVector3d<double>       Vector3dF;
 
-        typedef BasicMatrix<Pt::ssize_t, 4, 4> Matrix4x4;
-        typedef BasicMatrix<double, 4, 4>      Matrix4x4F;
+        typedef BasicMatrix<Pt::ssize_t, 3, 3>   Matrix3x3;
+        typedef BasicMatrix<double, 3, 3>        Matrix3x3F;
+        typedef BasicMatrix<Pt::ssize_t, 4, 4>   Matrix4x4;
+        typedef BasicMatrix<double, 4, 4>        Matrix4x4F;
 
     } // namespace Math
 
