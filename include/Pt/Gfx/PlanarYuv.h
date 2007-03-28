@@ -17,22 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbFColorRef_h
-#define Pt_Gfx_ARgbFColorRef_h
+#ifndef Pt_Gfx_PlanarYuv_h
+#define Pt_Gfx_PlanarYuv_h
 
-#include <Pt/Gfx/ARgbFColor.h>
-#include <Pt/Gfx/ARgbColorProxy.h>
+#include <Pt/Gfx/YuvColor.h>
 
 
 namespace Pt {
 
     namespace Gfx {
 
-        // Nothing is here yet
+        /** @brief Color model for planar YUV images
+        */
+        struct PlanarYuv
+        {
+            static const size_t NumberOfChannels = 3;
 
-    } // namespace Gfx
+            typedef uint8_t Component;
 
-} // namespace Pt
+            typedef YuvColor Color;
+
+            typedef const YuvColor ConstColor;
+
+            typedef YuvColorRef ColorRef;
+
+            typedef YuvConstColorRef ConstColorRef;
+
+            typedef YuvColorPtr ColorPtr;
+
+            typedef YuvConstColorPtr ConstColorPtr;
+        };
+
+    }
+
+}
 
 #endif
-

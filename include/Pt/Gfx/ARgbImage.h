@@ -20,15 +20,14 @@
 #ifndef Pt_Gfx_ARgbImage_h
 #define Pt_Gfx_ARgbImage_h
 
-#include <Pt/Gfx/ARgbFColorProxy.h>
+#include <Pt/Gfx/ARgbColor.h>
 #include <Pt/Gfx/InterleavedImage.h>
 #include <Pt/Gfx/InterleavedSubImage.h>
 #include <Pt/Gfx/PlanarImage.h>
-#include <Pt/Gfx/PlanarImageModel1x1.h>
-#include <Pt/Gfx/PlanarImageModel2x2.h>
 
 
 namespace Pt {
+
     namespace Gfx {
 
         /** @brief Standard interleaved ARgb image class.
@@ -49,7 +48,7 @@ namespace Pt {
          *
          *  <B>This is the master planar image model</B>
          */
-        typedef PlanarImage< PlanarImageModel<ARgbProxy, 1, 1> > ARgbPlanarImage;
+        //typedef PlanarImage< PlanarImageModel<ARgbProxy, 1, 1> > ARgbPlanarImage;
 
 
         /** @brief Standard planar ARgb subimage class.
@@ -67,6 +66,7 @@ namespace Pt {
         typedef ARgbInterleavedSubImage ARgbSubImage;
 
     }
+
 }
 
 #endif

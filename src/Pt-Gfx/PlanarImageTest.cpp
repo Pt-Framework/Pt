@@ -18,9 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "Pt/Gfx/ARgbColor.h"
 #include "Pt/Gfx/PlanarImage.h"
 #include "Pt/Gfx/PlanarImage.tpp"
-#include "Pt/Gfx/PlanarImageModel1x1.h"
+
 #include "Pt/Gfx/Yv12Image.h"
 #include "Pt/Gfx/ImageAlgo.h"
 #include "Pt/Gfx/ColorAlgo.h"
@@ -28,6 +29,102 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestSuite.h"
+
+
+namespace Pt {
+
+namespace Gfx {
+
+
+class ARgbColorRef : public PlanarColorRef<uint16_t, 4>
+{
+    public:
+        ARgbColorRef(const ARgbColorRef& c)
+        : PlanarColorRef<uint16_t, 4>(c)
+        { }
+
+        ARgbColorRef(ColorData& c)
+        : PlanarColorRef<uint16_t, 4>(c)
+        {  }
+
+        ARgbColorRef& operator=(const ConstColorRef& other)
+        {
+            PlanarColorRef<uint16_t, 4>::operator=(other);
+            return *this;
+        }
+
+        Component a() const
+        { return *_data[0]; }
+
+        Component r() const
+        { return *_data[1]; }
+
+        Component g() const
+        { return *_data[2]; }
+
+        Component b() const
+        { return *_data[3]; }
+
+        void setA(Component a)
+        { *_data[0] = a; }
+
+        void setR(Component r)
+        { *_data[1] = r; }
+
+        void setG(Component g)
+        { *_data[2] = g; }
+
+        void setB(Component b)
+        { *_data[3] = b; }
+};
+
+
+class ARgbColorPtr : public PlanarColorPtr<uint16_t, 4>
+{
+    public:
+        ARgbColorPtr()
+        : PlanarColorPtr<uint16_t, 4>()
+        { }
+
+        ARgbColorPtr(ColorData& data)
+        : PlanarColorPtr<uint16_t, 4>(data)
+        { }
+
+        ARgbColorRef operator*()
+        { return ARgbColorRef(_data); }
+};
+
+
+struct PlanarARgb
+{
+    static const size_t NumberOfChannels = 4;
+
+    typedef uint16_t Component;
+
+    typedef ARgbColor Color;
+
+    typedef const ARgbColor ConstColor;
+
+    typedef ARgbColorRef ColorRef;
+
+    typedef PlanarConstColorRef<Component, 4> ConstColorRef;
+
+    typedef ARgbColorPtr ColorPtr;
+
+    typedef PlanarConstColorPtr<Component, 4> ConstColorPtr;
+};
+
+
+typedef PlanarImageView< PlanarARgb, 1, 1> ARgbView;
+
+
+typedef PlanarImage< ARgbView > PlanarARgbImage;
+
+}
+
+}
+
+
 
 // 4x2 yuv12 data
 Pt::uint8_t yv12_data[] = { 0, 1, 2, 3,       // y
@@ -44,37 +141,51 @@ class PlanarImageTest : public Pt::Unit::TestSuite
         PlanarImageTest()
         : TestSuite( "PlanarImageTest" )
         {
-            this->registerMethod("ARgbModel", *this, &PlanarImageTest::ARgbModel);
+            this->registerMethod("ARgbPixelIterator", *this, &PlanarImageTest::ARgbPixelIterator);
             this->registerMethod("Yv12BlockScale", *this, &PlanarImageTest::Yv12BlockScale);
             this->registerMethod("Yv12PixelIterator", *this, &PlanarImageTest::Yv12PixelIterator);
             this->registerMethod("Yv12ConstPixelIterator", *this, &PlanarImageTest::Yv12ConstPixelIterator);
         }
 
-        void ARgbModel()
+        void ARgbPixelIterator()
         {
-            // image data, could be 4 planes with two elements each
-            Pt::uint16_t data[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+            // 2x2 ARGB planar data
+            Pt::uint16_t argb_data[] = { 0, 1, 2, 3,
+                                         4, 5, 6, 7,
+                                         8, 9, 10, 11,
+                                         12, 13, 14, 15 };
 
-            typedef Pt::Gfx::PlanarImageView< Pt::Gfx::PlanarARgb, 1, 1 > View;
             PT_UNIT_ASSERT( Pt::Gfx::PlanarARgb::NumberOfChannels == 4 )
-            View view;
+            Pt::Gfx::ARgbView view;
+            view.init( (unsigned char*)argb_data, 2, 2);
+            PT_UNIT_ASSERT( view.size(2,2) == 32 )
 
-            // Set a pointer to the first pixel. assume width = 2, height = 1
-            // We expect  A=0, R= 2, G=4, B=6, each component at begin of plane
-            View::ColorData chnStart = { data, data + 2, data + 4, data + 6 };
-            View::ColorPtrT ptr(chnStart, 2, 1, 0, 0);
-            PT_UNIT_ASSERT( (*ptr).alpha() == 0 );
-            PT_UNIT_ASSERT( (*ptr).red() == 2 );
-            PT_UNIT_ASSERT( (*ptr).green() == 4 );
-            PT_UNIT_ASSERT( (*ptr).blue() == 6 );
+            Pt::Gfx::ARgbView::PixelIterator it(view, 0, 0);
+            Pt::Gfx::ARgbView::PixelIterator end(view, 3, 1);
 
-            // increment pointer we expect:
-            //  A=1, R= 3, G=5, B=7, first element in each plane
-            ++ptr;
-            PT_UNIT_ASSERT( (*ptr).alpha() == 1 );
-            PT_UNIT_ASSERT( (*ptr).red() == 3 );
-            PT_UNIT_ASSERT( (*ptr).green() == 5 );
-            PT_UNIT_ASSERT( (*ptr).blue() == 7 );
+            Pt::Math::Size size = end - it;
+            PT_UNIT_ASSERT( size.width() == 2 );
+            PT_UNIT_ASSERT( size.height() == 2 );
+
+            Pt::Gfx::ARgbView::ColorRef color = *it;
+            PT_UNIT_ASSERT( color.a() == 0);
+            PT_UNIT_ASSERT( color.r() == 4);
+            PT_UNIT_ASSERT( color.g() == 8);
+            PT_UNIT_ASSERT( color.b() == 12);
+
+            ++it;
+            color = *it;
+            PT_UNIT_ASSERT( color.a() == 1);
+            PT_UNIT_ASSERT( color.r() == 5);
+            PT_UNIT_ASSERT( color.g() == 9);
+            PT_UNIT_ASSERT( color.b() == 13);
+
+            it += 2;
+            color = *it;
+            PT_UNIT_ASSERT( color.a() == 3);
+            PT_UNIT_ASSERT( color.r() == 7);
+            PT_UNIT_ASSERT( color.g() == 11);
+            PT_UNIT_ASSERT( color.b() == 15);
         }
 
         void Yv12BlockScale()

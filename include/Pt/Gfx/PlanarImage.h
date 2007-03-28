@@ -21,11 +21,8 @@
 #define Pt_Gfx_PlanarImage_h
 
 #include <Pt/Exception.h>
-
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/ARgbFColorProxy.h>
-#include <Pt/Gfx/PlanarImageModel.h>
-
+#include <Pt/Gfx/PlanarImageView.h>
 #include <vector>
 
 
@@ -230,124 +227,6 @@ namespace Pt {
                 size_t _size;
                 Allocator _alloc;
         };
-
-
-#if 0
-       /** @brief Pixel-based iterator class for PlanarImage<ColorT>.
-        *  @ingroup Gfx
-        */
-        template <typename ColorProxyT_, typename ColorTraitsT_>
-        class PlanarImage_PixelIterator
-        {
-            public:
-                typedef PlanarImage<ColorProxyT_, ColorTraitsT_> ImageT;
-                typedef typename ImageT::ColorT                  ColorT;
-                typedef typename ImageT::ColorProxyT             ColorProxyT;
-                typedef typename ImageT::ColorPtrT               ColorPtrT;
-                typedef typename ImageT::ColorTraitsT            ColorTraitsT;
-
-            public:
-                inline PlanarImage_PixelIterator()
-                : _image(0), _pixel(0)
-                {}
-
-                inline PlanarImage_PixelIterator(ImageT& image, uint x = 0, uint y = 0)
-                : _image(&image), _pixel(ColorPtrT(image._chanPtr, image._width, image._height, x, y))
-                {}
-
-                inline PlanarImage_PixelIterator operator=(PlanarImage_PixelIterator other)
-                {
-                    _pixel = other._pixel;
-                    _image = other._image;
-                    return *this;
-                }
-
-                inline bool operator!=(const PlanarImage_PixelIterator& it) const
-                { return this->_pixel != it._pixel; }
-
-                inline ColorProxyT operator*()
-                { return *_pixel; }
-
-                inline PlanarImage_PixelIterator& operator++()
-                { ++_pixel; return *this; }
-
-                inline PlanarImage_PixelIterator operator+=(size_t n)
-                { _pixel += n; return *this; }
-
-                inline Math::Size operator-(const PlanarImage_PixelIterator& other) const
-                {
-
-                    const Math::Point& a = _pixel.currentXYPosition();
-                    const Math::Point& b = other._pixel.currentXYPosition();
-
-                    return Math::Size(a.x()-b.x(), a.y()-b.y());
-                }
-
-            private:
-                ImageT*   _image;
-                ColorPtrT _pixel;
-        };
-
-
-        /** @brief Pixel-based constant iterator class for PlanarImage<ColorT>.
-         *  @ingroup Gfx
-         */
-        template <typename ColorProxyT_, typename ColorTraitsT_>
-        class PlanarImage_ConstPixelIterator
-        {
-            public:
-                typedef PlanarImage<ColorProxyT_, ColorTraitsT_> ImageT;
-                typedef typename ImageT::ColorT                  ColorT;
-                typedef typename ImageT::ColorProxyT             ColorProxyT;
-                typedef typename ImageT::ConstColorPtrT          ConstColorPtrT;
-                typedef typename ImageT::ColorTraitsT            ColorTraitsT;
-
-            public:
-                inline PlanarImage_ConstPixelIterator()
-                : _image(0), _pixel(0)
-                {}
-
-                inline PlanarImage_ConstPixelIterator(const ImageT& image, uint x = 0, uint y = 0)
-                : _image(&image), _pixel(ConstColorPtrT(image._chanPtr, image._width, image._height, x, y))
-                {}
-
-                inline PlanarImage_ConstPixelIterator operator=(PlanarImage_ConstPixelIterator other)
-                {
-                    _pixel = other._pixel;
-                    _image = other._image;
-                    return *this;
-                }
-
-                inline bool operator!=(const PlanarImage_ConstPixelIterator& it) const
-                { return this->_pixel != it._pixel; }
-
-                inline const ColorT operator*()
-                {
-                    ColorT col;
-                    assign(col, *_pixel);
-                    return col;
-                }
-
-                inline PlanarImage_ConstPixelIterator& operator++()
-                { ++_pixel; return *this; }
-
-                inline PlanarImage_ConstPixelIterator operator+=(size_t n)
-                { _pixel += n; return *this; }
-
-                inline Math::Size operator-(const PlanarImage_ConstPixelIterator& other) const
-                {
-
-                    const Math::Point& a = _pixel.currentXYPosition();
-                    const Math::Point& b = other._pixel.currentXYPosition();
-
-                    return Math::Size(a.x()-b.x(), a.y()-b.y());
-                }
-
-            private:
-                const ImageT*  _image;
-                ConstColorPtrT _pixel;
-        };
-#endif
 
     } // namespace Gfx
 
