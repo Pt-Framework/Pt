@@ -174,31 +174,6 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
     writeCommState( commState );
 }
 
-void SerialDeviceImpl::setCanonical( char eol, char eof )
-{   
-    DCB commState;
-    
-    readCommState( commState );
-    commState.EvtChar = eol;
-//    commState.EofChar = eof;
-    writeCommState( commState );    
-    
-    SetCommMask( _handle, EV_RXFLAG | EV_TXEMPTY );    
-    resetEvent( _ovStatus.hEvent );  
-}
-
-void SerialDeviceImpl::disableCanonical()
-{
-    SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY );
-    
-    DCB commState;
-    
-    readCommState( commState );
-    commState.EvtChar  = 0;
-    commState.EofChar  = 0;
-    writeCommState( commState );     
-    resetEvent( _ovStatus.hEvent );     
-} 
 
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
