@@ -407,7 +407,7 @@ namespace Pt {
                     _imageData.colorData()[1] = _imageData.colorData()[0] + planeSize;
 
                     for(size_t i = 2; i < Color::NumberOfChannels; ++i)
-                        _imageData.colorData()[i] = _imageData.colorData()[i-1] + planeSize/4;
+                        _imageData.colorData()[i] = _imageData.colorData()[i-1] + planeSize/(SubX*SubY);
 
                     _width  = width;
                     _height = height;
