@@ -20,13 +20,13 @@
 #ifndef Pt_Gfx_ARgbColor_h
 #define Pt_Gfx_ARgbColor_h
 
-#include <vector>
-
 #include <Pt/String.h>
 #include <Pt/Unicode.h>
-#include <Pt/Gfx/Color.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/PlanarImageView.h>
+#include <vector>
 
 
 namespace Pt {
@@ -40,17 +40,9 @@ namespace Pt {
 
 #pragma pack(push, 1)
         /** @brief 64-Bit ARGB color class.
-         *  @ingroup Gfx
          *
-         *  This is the master color model for Pt::Gfx.
-         *  \n\n
-         *  Valid range of the color components for this color model:
-         *  <TABLE>
-         *    <TR> <TD>Alpha</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Red  </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Green</TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *    <TR> <TD>Blue </TD> <TD>0</TD> <TD>to</TD> <TD>65535 (0xFFFF)</TD> </TR>
-         *  </TABLE>
+         *  This is the master color model for Pt::Gfx, since it is used by
+         *  the Painter interface. Each channel has 16 bit.
          */
         template <>
         class PT_GFX_API Color<ARgb> {
@@ -254,6 +246,107 @@ namespace Pt {
            [rD, gD, bD] = [rA, gA, bA] * aA/aD        +
                           [rB, gB, bB] * aB*(1-aA)/aD
         */
+
+
+        class ARgbConstColorRef : public PlanarConstColorRef<uint16_t, 4>
+        {
+            public:
+                ARgbConstColorRef(const ARgbConstColorRef& c)
+                : PlanarConstColorRef<uint16_t, 4>(c)
+                { }
+
+                ARgbConstColorRef(ConstColorData& data)
+                : PlanarConstColorRef<uint16_t, 4>(data)
+                { }
+
+                Component y() const
+                { return *_data[0]; }
+
+                Component u() const
+                { return *_data[1]; }
+
+                Component v() const
+                { return *_data[2]; }
+        };
+
+
+        class ARgbColorRef : public PlanarColorRef<uint16_t, 4>
+        {
+            public:
+                ARgbColorRef(const ARgbColorRef& c)
+                : PlanarColorRef<uint16_t, 4>(c)
+                { }
+
+                ARgbColorRef(ColorData& c)
+                : PlanarColorRef<uint16_t, 4>(c)
+                {  }
+
+                ARgbColorRef& operator=(const ConstColorRef& other)
+                {
+                    PlanarColorRef<uint16_t, 4>::operator=(other);
+                    return *this;
+                }
+
+                Component a() const
+                { return *_data[0]; }
+
+                Component r() const
+                { return *_data[1]; }
+
+                Component g() const
+                { return *_data[2]; }
+
+                Component b() const
+                { return *_data[3]; }
+
+                void setA(Component a)
+                { *_data[0] = a; }
+
+                void setR(Component r)
+                { *_data[1] = r; }
+
+                void setG(Component g)
+                { *_data[2] = g; }
+
+                void setB(Component b)
+                { *_data[3] = b; }
+        };
+
+
+        class ARgbColorPtr : public PlanarColorPtr<uint16_t, 4>
+        {
+            public:
+                ARgbColorPtr()
+                : PlanarColorPtr<uint16_t, 4>()
+                { }
+
+                ARgbColorPtr(ColorData& data)
+                : PlanarColorPtr<uint16_t, 4>(data)
+                { }
+
+                ARgbColorRef operator*()
+                { return ARgbColorRef(_data); }
+        };
+
+
+        class ARgbConstColorPtr : public PlanarConstColorPtr<uint16_t, 4>
+        {
+            public:
+                ARgbConstColorPtr()
+                : PlanarConstColorPtr<uint16_t, 4>()
+                { }
+
+                ARgbConstColorPtr(const ColorPtr& data)
+                : PlanarConstColorPtr<uint16_t, 4>(data)
+                { }
+
+                ARgbConstColorPtr(ConstColorData& data)
+                : PlanarConstColorPtr<uint16_t, 4>(data)
+                { }
+
+                ARgbConstColorRef operator*()
+                { return ARgbConstColorRef(_data); }
+        };
 
     } // namespace Gfx
 

@@ -21,6 +21,7 @@
 #define Pt_Gfx_YuvColor_h
 
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/PlanarImageView.h>
 
 
 namespace Pt {

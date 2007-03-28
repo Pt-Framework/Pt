@@ -17,36 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gfx_ARgbImage_h
-#define Pt_Gfx_ARgbImage_h
+#ifndef Pt_Gfx_PlanarARgb_h
+#define Pt_Gfx_PlanarARgb_h
 
 #include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/InterleavedImage.h>
-#include <Pt/Gfx/InterleavedSubImage.h>
 
 
 namespace Pt {
 
     namespace Gfx {
 
-        /** @brief Interleaved ARgb image class.
-         *
-         *  <B>This is the master interleaved image model</B>
-         */
-        typedef InterleavedImage<ARgbColor> ARgbInterleavedImage;
+        struct PlanarARgb
+        {
+            static const size_t NumberOfChannels = 4;
 
+            typedef uint16_t Component;
 
-        typedef ARgbInterleavedImage ARgbImage;
+            typedef ARgbColor Color;
 
+            typedef const ARgbColor ConstColor;
 
-        /** @brief Interleaved ARgb subimage class.
-         *
-         *  <B>This is the master interleaved subimage model</B>
-         */
-        typedef InterleavedSubImage<ARgbInterleavedImage> ARgbInterleavedSubImage;
+            typedef ARgbColorRef ColorRef;
 
+            typedef ARgbConstColorRef ConstColorRef;
 
-        typedef ARgbInterleavedSubImage ARgbSubImage;
+            typedef ARgbColorPtr ColorPtr;
+
+            typedef ARgbConstColorPtr ConstColorPtr;
+        };
 
     }
 

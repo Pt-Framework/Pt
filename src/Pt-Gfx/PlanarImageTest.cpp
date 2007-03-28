@@ -18,112 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Gfx/ARgbColor.h"
-#include "Pt/Gfx/PlanarImage.h"
-#include "Pt/Gfx/PlanarImage.tpp"
-
+#include "Pt/Gfx/ARgbPlanarImage.h"
 #include "Pt/Gfx/Yv12Image.h"
-#include "Pt/Gfx/ImageAlgo.h"
-#include "Pt/Gfx/ColorAlgo.h"
+#include "Pt/Gfx/Algorithm.h"
 
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestSuite.h"
-
-
-namespace Pt {
-
-namespace Gfx {
-
-
-class ARgbColorRef : public PlanarColorRef<uint16_t, 4>
-{
-    public:
-        ARgbColorRef(const ARgbColorRef& c)
-        : PlanarColorRef<uint16_t, 4>(c)
-        { }
-
-        ARgbColorRef(ColorData& c)
-        : PlanarColorRef<uint16_t, 4>(c)
-        {  }
-
-        ARgbColorRef& operator=(const ConstColorRef& other)
-        {
-            PlanarColorRef<uint16_t, 4>::operator=(other);
-            return *this;
-        }
-
-        Component a() const
-        { return *_data[0]; }
-
-        Component r() const
-        { return *_data[1]; }
-
-        Component g() const
-        { return *_data[2]; }
-
-        Component b() const
-        { return *_data[3]; }
-
-        void setA(Component a)
-        { *_data[0] = a; }
-
-        void setR(Component r)
-        { *_data[1] = r; }
-
-        void setG(Component g)
-        { *_data[2] = g; }
-
-        void setB(Component b)
-        { *_data[3] = b; }
-};
-
-
-class ARgbColorPtr : public PlanarColorPtr<uint16_t, 4>
-{
-    public:
-        ARgbColorPtr()
-        : PlanarColorPtr<uint16_t, 4>()
-        { }
-
-        ARgbColorPtr(ColorData& data)
-        : PlanarColorPtr<uint16_t, 4>(data)
-        { }
-
-        ARgbColorRef operator*()
-        { return ARgbColorRef(_data); }
-};
-
-
-struct PlanarARgb
-{
-    static const size_t NumberOfChannels = 4;
-
-    typedef uint16_t Component;
-
-    typedef ARgbColor Color;
-
-    typedef const ARgbColor ConstColor;
-
-    typedef ARgbColorRef ColorRef;
-
-    typedef PlanarConstColorRef<Component, 4> ConstColorRef;
-
-    typedef ARgbColorPtr ColorPtr;
-
-    typedef PlanarConstColorPtr<Component, 4> ConstColorPtr;
-};
-
-
-typedef PlanarImageView< PlanarARgb, 1, 1> ARgbView;
-
-
-typedef PlanarImage< ARgbView > PlanarARgbImage;
-
-}
-
-}
-
 
 
 // 4x2 yuv12 data
