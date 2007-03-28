@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 Tobias Mueller                                     *
+ *   Copyright (C) 2007 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
