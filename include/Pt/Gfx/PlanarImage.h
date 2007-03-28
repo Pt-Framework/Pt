@@ -31,17 +31,6 @@ namespace Pt {
     namespace Gfx {
 
         /** @brief Planar image class.
-         *  @ingroup Gfx
-         *
-         *  There are two common memory structures for an image:
-         *    - Interleaved image which is represented by grouping the pixels together
-         *      in memory and interleaving all channels together.
-         *    - Planar images which is represented by keeping the channels in separate
-         *      color planes (blocks of memory). One block to the other blocks may or
-         *      may not be in contiguous memory address.
-         *
-         *  This PlanarImage<typename PlanarImageModelT> class is
-         *  meant to be used for implementing planar images.
          */
         template < typename ImageViewT, typename AllocatorT >
         class PlanarImage {
@@ -233,14 +222,8 @@ namespace Pt {
 } // namespace Pt
 
 
-//
-// NOTE: Why these conditional compilation is always get deleted ???
-//
-// With GCC we should be able to use explicit template instantiation correctly
-// and thus we does not need to include the template implementation header
 #ifndef __GNUC__
 #include "PlanarImage.tpp"
 #endif
 
 #endif
-

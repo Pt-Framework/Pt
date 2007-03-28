@@ -25,7 +25,6 @@
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/PlanarImageView.h>
 #include <vector>
 
 

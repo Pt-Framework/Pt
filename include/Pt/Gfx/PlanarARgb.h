@@ -21,6 +21,7 @@
 #define Pt_Gfx_PlanarARgb_h
 
 #include <Pt/Gfx/ARgbColor.h>
+#include <Pt/Gfx/PlanarImageView.h>
 
 
 namespace Pt {
