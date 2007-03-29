@@ -32,28 +32,28 @@
 #include <fstream>
 
 
-class Multiplexer : public Pt::System::Thread, public Pt::Connectable
+class Multiplexer : public Pt::Connectable
 {
     public:
-        void exit()
+        Multiplexer()
+        : _device("/dev/ttyUSB0", std::ios_base::in)
         {
-            _eloop.exit();
-            this->wait();
+            _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+            _device.setCharSize(8);
+            _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
+            _device.setParity(Pt::System::SerialDevice::ParityEven);
+
+            Pt::Signal<const Pt::System::IOEvent&>& signal = _monitor.addDevice( _device );
+            Pt::connect( signal, *this, &Multiplexer::onIOEvent );
         }
 
-    protected:
         void run()
         {
-            _device = new Pt::System::SerialDevice("/dev/ttyS0", std::ios_base::in);
-            _device->setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-            _device->setCharSize(8);
-            _device->setStopBits(Pt::System::SerialDevice::OneStopBit);
-            _device->setParity(Pt::System::SerialDevice::ParityEven);
-
-            Pt::Signal<const Pt::System::IOEvent&>& signal = _eloop.addDevice( *_device );
-            Pt::connect( signal, *this, &Multiplexer::onIOEvent );
-
-            _eloop.run();
+            for(int i = 0; i < 10000; ++i)
+            {
+                if( !_monitor.wait() )
+                    std::cerr << "--- NO DATA ---" << std::endl;
+            }
         }
 
         void onIOEvent( const Pt::System::IOEvent& ev )
@@ -64,24 +64,14 @@ class Multiplexer : public Pt::System::Thread, public Pt::Connectable
             {
                 char buffer[201];
                 memset( buffer, 0, 201);
-                size_t size = 0;
-
-                while( size = _device->read( buffer, 200) )
-                {
-                    std::cerr<<"Read "<<size<<"(bytes):";
-                    std::cerr.write(buffer, size);
-                    
-                   
-                    //if(size == 1)
-                        //std::cerr << (int)buffer[0];
-                }
-                std::cerr << "---------" <<std::endl;
+                size_t size = _device.read( buffer, 200);
+                std::cerr.write(buffer, size);
             }
         }
 
     private:
-        Pt::System::SerialDevice* _device;
-        Pt::System::EventLoop _eloop;
+        Pt::System::SerialDevice _device;
+        Pt::System::IOMonitor _monitor;
 };
 
 
@@ -90,11 +80,7 @@ int main( int argc, char* argv[] )
     try
     {
         Multiplexer m;
-        m.start();
-
-        Pt::System::Thread::sleep( 15000 );
-
-        m.exit();
+        m.run();
     }
     catch( const std::exception& e )
     {
