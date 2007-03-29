@@ -26,6 +26,7 @@
 #include <Pt/Signal.h>
 
 namespace Pt{
+
 namespace System{
 
 /** @brief The IOMonitor implements the wait functionality for a device event.
@@ -42,6 +43,8 @@ namespace System{
 class PT_SYSTEM_API IOMonitor
 {
     public:
+        static const unsigned int WaitTimeInfinite = static_cast<unsigned int>(-1);
+
         //! @brief Default constructor
         IOMonitor();
         
@@ -62,7 +65,7 @@ class PT_SYSTEM_API IOMonitor
         void removeDevice( IODevice& device );
 
         //! @brief Wait until an event occurred
-        void wait();
+        bool wait(unsigned int msecs = WaitTimeInfinite);
         
         //! @brief Wake the monitor from wait state
         void wake();
@@ -72,6 +75,7 @@ class PT_SYSTEM_API IOMonitor
 };
 
 } //namespace System
+
 } //namespace Pt
 
 #endif

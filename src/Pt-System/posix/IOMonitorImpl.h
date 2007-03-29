@@ -40,7 +40,7 @@ class IOMonitorImpl
         
         Signal<const IOEvent&>& addDevice( IODeviceImpl& device );        
         void removeDevice( IODeviceImpl& device );        
-        void wait();        
+        bool wait(unsigned int msecs);
         void wake();   
     
     private:

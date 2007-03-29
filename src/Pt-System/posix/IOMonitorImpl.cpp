@@ -22,6 +22,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/MutexLock.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/IOMonitor.h"
 #include "Pt/System/Thread.h"
 
 #include <cerrno>
@@ -146,7 +147,7 @@ void IOMonitorImpl::removeDevice( IODeviceImpl& device )
 }
 
 
-void IOMonitorImpl::wait()
+bool IOMonitorImpl::wait(unsigned int msecs)
 {
     int maxfd   = maxFd() + 1;
     int ret     = -1;
@@ -168,7 +169,14 @@ void IOMonitorImpl::wait()
     }
     
     timeval* timeout = 0;
-
+    struct timeval tv;
+    if(msecs != IOMonitor::WaitTimeInfinite)
+    {
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        timeout = &tv;
+    }
+    
     //Execute the select.
     while( true )
     {
@@ -188,6 +196,7 @@ void IOMonitorImpl::wait()
     it = _deviceMap.begin();
     std::ios_base::openmode mode;
 
+    bool avail = false;
     for( ; it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
@@ -198,6 +207,7 @@ void IOMonitorImpl::wait()
             if( FD_ISSET( item.device->fd(), &rfds ) )
             {
                 item.signal->send( item.device->event( IODeviceImpl::ReadFds ) ) ;
+                avail = true;
             }
         }
 
@@ -206,6 +216,7 @@ void IOMonitorImpl::wait()
            if( FD_ISSET( item.device->fd(), &wfds  ))
            {
                 item.signal->send( item.device->event( IODeviceImpl::WriteFds ) );
+                avail = true;
            }
         }
     }
@@ -216,6 +227,8 @@ void IOMonitorImpl::wait()
         std::vector<char> msgbuf(100);
         read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
     }
+
+    return avail;
 }
 
 
