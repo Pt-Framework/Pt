@@ -28,7 +28,11 @@ void IOMonitor::removeDevice( IODevice& device )
 
 bool IOMonitor::wait(unsigned int msecs)
 {
-    return _impl->wait(msecs);
+    bool ret = _impl->wait(msecs);
+    if(ret == false)
+        timeout.send();
+
+    return ret;
 }
 
 void IOMonitor::wake()

@@ -47,28 +47,30 @@ class PT_SYSTEM_API IOMonitor
 
         //! @brief Default constructor
         IOMonitor();
-        
+
         //! @brief Destructor
         virtual ~IOMonitor();
 
         /** @brief Adds a device to the monitor
-            
+
             @param device The device to add
-            @return A signal which signalize the device events            
+            @return A signal which signalize the device events
         */
         Signal<const IOEvent&>& addDevice( IODevice& device );
 
         /** @brief Removes a device from the monitor
-            
+
             @param device The device to remove
         */
         void removeDevice( IODevice& device );
 
         //! @brief Wait until an event occurred
         bool wait(unsigned int msecs = WaitTimeInfinite);
-        
+
         //! @brief Wake the monitor from wait state
         void wake();
+
+        Signal<> timeout;
 
     private:
         class IOMonitorImpl* _impl;

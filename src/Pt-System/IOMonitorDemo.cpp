@@ -36,7 +36,7 @@ class Multiplexer : public Pt::Connectable
 {
     public:
         Multiplexer()
-        : _device("COM3:", std::ios_base::in)
+        : _device("/dev/ttyUSB0", std::ios_base::in)
         {
             _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
             _device.setCharSize(8);
@@ -45,15 +45,20 @@ class Multiplexer : public Pt::Connectable
 
             Pt::Signal<const Pt::System::IOEvent&>& signal = _monitor.addDevice( _device );
             Pt::connect( signal, *this, &Multiplexer::onIOEvent );
+            Pt::connect( _monitor.timeout, *this, &Multiplexer::onTimeout );
         }
 
         void run()
         {
-            for(int i = 0; i < 10000; ++i)
+            for(int i = 0; i < 1000; ++i)
             {
-                if( !_monitor.wait(200) )
-                    std::cerr << "--- NO DATA ---" << std::endl;
+                _monitor.wait(200);
             }
+        }
+
+        void onTimeout( )
+        {
+            std::cerr << "--- TIMEOUT ---" << std::endl;
         }
 
         void onIOEvent( const Pt::System::IOEvent& ev )
@@ -81,6 +86,7 @@ int main( int argc, char* argv[] )
     {
         Multiplexer m;
         m.run();
+        std::cerr << "\n\nSUCCESS\n";
     }
     catch( const std::exception& e )
     {

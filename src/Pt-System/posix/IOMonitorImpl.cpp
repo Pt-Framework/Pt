@@ -51,7 +51,7 @@ IOMonitorImpl::IOMonitorImpl()
 IOMonitorImpl::~IOMonitorImpl()
 {
     //Clear the map.
-    std::map<int,DeviceItem>::iterator it = _deviceMap.begin();
+    std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
 
     for( ; it != _deviceMap.end(); ++it )
     {
@@ -80,44 +80,15 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
 
     //Create a new device description item.
     DeviceItem item;
-
-    //Create a new signal.
     item.signal = new Signal<const IOEvent&>();
     item.device = &device;
 
     //Insert the new item to the device description map.
     const int fd = device.impl()->fd();
-
     _deviceMap.insert( std::make_pair( fd, item ) );
 
-    //Set the bit in the device descriptor set.
-/*
-    const std::ios_base::openmode mode = device.mode();
-
-    if( ( mode & std::ios_base::in )  == std::ios_base::in )
-       FD_SET( fd, &_rfds );
-
-    if( ( mode & std::ios_base::out )  == std::ios_base::out )
-       FD_SET( fd, &_wfds );
-*/
     //Return the new signal.
     return *item.signal;
-}
-
-
-int IOMonitorImpl::maxFd()
-{
-    //Determinate the max device descriptor.
-    std::map<int,DeviceItem>::iterator it = _deviceMap.begin();
-    int maxfd = -1;
-
-    for( ; it != _deviceMap.end(); ++it )
-    {
-        const DeviceItem& item = it->second;
-        maxfd = std::max( maxfd , item.device->impl()->fd() );
-    }
-
-    return std::max( maxfd, _wakePipe[0] );
 }
 
 
@@ -134,15 +105,6 @@ void IOMonitorImpl::removeDevice( IODevice& device )
     //Delete the device signal. 
     delete item.signal;
 
-    //Clear the bit for the device descriptor.
-    const std::ios_base::openmode mode = device.impl()->mode();
-
-    if( ( mode & std::ios_base::in )  == std::ios_base::in )
-       FD_CLR( device.impl()->fd(), &_rfds );
-
-    if( ( mode & std::ios_base::out )  == std::ios_base::out )
-       FD_CLR( device.impl()->fd(), &_wfds  );
-
     //Remove the device item from the map.
     _deviceMap.erase( device.impl()->fd() );
 }
@@ -150,8 +112,9 @@ void IOMonitorImpl::removeDevice( IODevice& device )
 
 bool IOMonitorImpl::wait(unsigned int msecs)
 {
-    int maxfd   = maxFd() + 1;
+    int maxfd   = 0;
     int ret     = -1;
+    bool avail = false;
 
     fd_set rfds;
     fd_set wfds;
@@ -161,14 +124,16 @@ bool IOMonitorImpl::wait(unsigned int msecs)
 
     //Add the wake pipe to the rdfs.
     FD_SET( _wakePipe[0], &rfds );
+    maxfd = _wakePipe[0];
 
-    std::map<int,DeviceItem>::iterator it = _deviceMap.begin();
+    std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
     for( ; it != _deviceMap.end(); ++it )
     {
         int fd = it->first;
         FD_SET(fd, &rfds);
+        maxfd = std::max( maxfd , fd );
     }
-    
+
     timeval* timeout = 0;
     struct timeval tv;
     if(msecs != IOMonitor::WaitTimeInfinite)
@@ -177,11 +142,10 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         tv.tv_usec = (msecs % 1000) * 1000;
         timeout = &tv;
     }
-    
-    //Execute the select.
+
     while( true )
     {
-        ret = ::select( FD_SETSIZE, &rfds, &wfds, 0, timeout );
+        ret = ::select( maxfd, &rfds, &wfds, 0, timeout );
 
         if( ret != -1 )
             break;
@@ -193,17 +157,12 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     //Exclusive access to the _deviceMap and device descriptors.
     MutexLock lock( _mutex );
 
-    //Select returned => test why and send an event if necessary.
-    it = _deviceMap.begin();
-    std::ios_base::openmode mode;
-
-    bool avail = false;
-    for( ; it != _deviceMap.end(); ++it )
+    for( it = _deviceMap.begin(); it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
-        mode = item.device->impl()->mode();
+        std::ios_base::openmode mode = item.device->impl()->mode();
 
-        if( ( mode & std::ios_base::in )  == std::ios_base::in )
+        if( mode & std::ios_base::in )
         {
             if( FD_ISSET( item.device->impl()->fd(), &rfds ) )
             {
@@ -213,7 +172,7 @@ bool IOMonitorImpl::wait(unsigned int msecs)
             }
         }
 
-        if( ( mode & std::ios_base::out )  == std::ios_base::out )
+        if( mode & std::ios_base::out )
         {
            if( FD_ISSET( item.device->impl()->fd(), &wfds  ))
            {

@@ -28,13 +28,13 @@ namespace System{
 class PT_SYSTEM_API IOTimeout : public IOEvent
 {
     public:
-        IOTimeout();        
+        IOTimeout();
         ~IOTimeout();
-        
+
         virtual Event* clone() const;
         virtual const std::type_info& typeInfo() const;
-        
-        static const std::type_info& TYPE_INFO;        
+
+        static const std::type_info& TYPE_INFO;
 };
 
 }//namespace System

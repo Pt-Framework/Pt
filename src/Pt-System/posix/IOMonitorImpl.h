@@ -41,22 +41,20 @@ class IOMonitorImpl
         Signal<const IOEvent&>& addDevice( IODevice& device );
         void removeDevice( IODevice& device );
         bool wait(unsigned int msecs);
-        void wake();   
+        void wake();
 
     private:
-        int maxFd();
-
         struct DeviceItem
         {
-            IODevice*               device;
-            Signal<const IOEvent&>*     signal;
+            IODevice* device;
+            Signal<const IOEvent&>* signal;
         };
 
         std::map<int,DeviceItem>     _deviceMap;
         fd_set                       _rfds;
         fd_set                       _wfds;
         int                          _wakePipe[2];
-        Mutex                        _mutex;    
+        Mutex                        _mutex;
 };
 
 }//namespace System
