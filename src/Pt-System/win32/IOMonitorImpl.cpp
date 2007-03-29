@@ -118,7 +118,7 @@ void IOMonitorImpl::removeDevice( IODevice& device )
 
 bool IOMonitorImpl::wait( unsigned int msecs )
 {      
-    if( msecs == IOMonitor::WaitTimeInfinite )
+    if( msecs == IOMonitor::WaitInfinite )
         msecs = INFINITE;
         
     DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, msecs );

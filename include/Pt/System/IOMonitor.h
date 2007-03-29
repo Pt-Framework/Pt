@@ -43,7 +43,12 @@ namespace System{
 class PT_SYSTEM_API IOMonitor
 {
     public:
-        static const unsigned int WaitTimeInfinite = static_cast<unsigned int>(-1);
+        enum {
+            WaitInput,
+            WaitOutput
+        };
+
+        static const unsigned int WaitInfinite = static_cast<unsigned int>(-1);
 
         //! @brief Default constructor
         IOMonitor();
@@ -65,7 +70,7 @@ class PT_SYSTEM_API IOMonitor
         void removeDevice( IODevice& device );
 
         //! @brief Wait until an event occurred
-        bool wait(unsigned int msecs = WaitTimeInfinite);
+        bool wait(unsigned int msecs = WaitInfinite);
 
         //! @brief Wake the monitor from wait state
         void wake();

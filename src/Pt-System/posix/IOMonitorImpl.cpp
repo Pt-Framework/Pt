@@ -136,7 +136,7 @@ bool IOMonitorImpl::wait(unsigned int msecs)
 
     timeval* timeout = 0;
     struct timeval tv;
-    if(msecs != IOMonitor::WaitTimeInfinite)
+    if(msecs != IOMonitor::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;
