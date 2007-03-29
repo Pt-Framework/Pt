@@ -77,15 +77,11 @@ class SerialDeviceImpl : public IODeviceImpl
         int fd() const
         { return _fd; }
 
-        //const IOEvent& event( FdsType fdsType );
-        
         std::ios_base::openmode mode() const
         { return _openMode; }
-                
+
     private:
         int                         _fd;
-        int                         _pipe[2];
-        //termios                     _ios;
         termios                     _prevIos;
         SerialDevice::FlowControl   _flowControl;
         std::ios_base::openmode     _openMode;

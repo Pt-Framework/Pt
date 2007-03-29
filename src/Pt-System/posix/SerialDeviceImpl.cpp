@@ -65,30 +65,18 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
     if(_fd == -1)
         throw OpenFailed("open failed", PT_SOURCEINFO);
 
-    try
-    {
-        struct termios ios;
-        if( ::tcgetattr(_fd, &ios) == -1 )
-            throw IOError("Could not get termios attributes", PT_SOURCEINFO);
+    struct termios ios;
+    if( ::tcgetattr(_fd, &ios) == -1 )
+        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
-        if( ::tcgetattr(_fd, &_prevIos) == -1 )
-            throw IOError("Could not get termios attributes", PT_SOURCEINFO);
+    if( ::tcgetattr(_fd, &_prevIos) == -1 )
+        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
-        // Disable canonical
-        ::cfmakeraw(&ios);
+    // Disable canonical
+    ::cfmakeraw(&ios);
 
-        if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
-            throw IOError("Could not set termios attributes", PT_SOURCEINFO);
-
-        // Open a pipe to send wake up messages
-        if( ::pipe(_pipe) )
-            throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
-    }
-    catch(...)
-    {
-        ::close(_fd);
-        throw;
-    }
+    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
+        throw IOError("Could not set termios attributes", PT_SOURCEINFO);
 
     _openMode = mode;
 }
@@ -99,21 +87,12 @@ void SerialDeviceImpl::close()
 
     if(_fd != -1)
     {
-        ::write( _pipe[1], "XXXXXXXXXXX", 11);
-        Thread::yield();
-
         ::tcsetattr(_fd, TCSANOW, &_prevIos);
 
         if( ::close(_fd) != 0 )
             throw IOError("Could not close file handle", PT_SOURCEINFO);
 
         _fd = -1;
-    }
-
-    if(_pipe[0] != -1 && _pipe[1] != -1)
-    {
-        ::close(_pipe[0]);
-        ::close(_pipe[1]);
     }
 }
 
@@ -441,22 +420,5 @@ void SerialDeviceImpl::flush()
     ::tcflush(_fd, TCIFLUSH);
 }
 
-/*
-const IOEvent& SerialDeviceImpl::event( FdsType fdsType )
-{
-    switch( fdsType )
-    {
-        case ReadFds:
-            return _readEvent;
-        break;
-        case WriteFds:
-            return _writeEvent;
-        break;
-    }
-
-    throw IOError("Unknow event", PT_SOURCEINFO);
-    return _readEvent;    
-}
-*/
 } //namespace System
 } //namespace Pt
