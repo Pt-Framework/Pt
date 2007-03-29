@@ -60,7 +60,6 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
     }
 
     flags |= O_NONBLOCK | O_NOCTTY;
-    _openMode = mode;
 
     _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
@@ -75,17 +74,11 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         if( ::tcgetattr(_fd, &_prevIos) == -1 )
             throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
-        // Disable chc
-        ios.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-
-        ios.c_cflag |= CLOCAL | CREAD;
-        ios.c_cc[VMIN] = 0;
-        ios.c_cc[VTIME] = 0;
+        // Disable canonical
+        ::cfmakeraw(&ios);
 
         if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
-        {
             throw IOError("Could not set termios attributes", PT_SOURCEINFO);
-        }
 
         // Open a pipe to send wake up messages
         if( ::pipe(_pipe) )
@@ -96,6 +89,8 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         ::close(_fd);
         throw;
     }
+
+    _openMode = mode;
 }
 
 
@@ -126,14 +121,18 @@ void SerialDeviceImpl::close()
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     eof = false;
+    ssize_t ret = 0;
 
-    retry:
-
-    ssize_t ret = ::read(_fd, (void*)buffer, count);
-    if(ret == -1) 
+    while(true)
     {
+        ret = ::read(_fd, (void*)buffer, count);
+        eof = (ret == 0) ;
+
+        if(ret >= 0)
+            break;
+
         if(errno == EINTR) // signal interrupt
-            goto retry;
+            continue;
 
         if(errno == EAGAIN) // non-blocking and no data yet
             return 0;
@@ -141,26 +140,28 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
         throw IOError("Could not read from file handle", PT_SOURCEINFO);
     }
 
-    if(ret == 0)
-        eof = true;
-
     return ret;
 }
 
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
-{ 
-    retry:
+{
+    ssize_t ret = 0;
 
-    ssize_t ret = ::write(_fd, (const void*)buffer, count);
-    if(ret == -1) {
+    while(true)
+    {
+        ret = ::write(_fd, (const void*)buffer, count);
+
+        if(ret >= 0)
+            break;
+
         if(errno == EINTR) // signal interrupt
-            goto retry;
+            continue;
 
         if(errno == EAGAIN) // non-blocking and no data yet
             return 0;
 
-        throw IOError("Could not write to file handle", PT_SOURCEINFO);
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
     }
 
     return ret;

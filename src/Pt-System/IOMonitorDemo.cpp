@@ -51,7 +51,7 @@ class Multiplexer : public Pt::Connectable
         {
             for(int i = 0; i < 10000; ++i)
             {
-                if( !_monitor.wait() )
+                if( !_monitor.wait(200) )
                     std::cerr << "--- NO DATA ---" << std::endl;
             }
         }
