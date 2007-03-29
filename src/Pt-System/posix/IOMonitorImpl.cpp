@@ -22,6 +22,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/MutexLock.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/IODevice.h"
 #include "Pt/System/IOMonitor.h"
 #include "Pt/System/Thread.h"
 
@@ -69,7 +70,7 @@ IOMonitorImpl::~IOMonitorImpl()
 }
 
 
-Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
+Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
 {
     //Exclusive access to the _deviceMap.
     MutexLock lock( _mutex );
@@ -85,7 +86,7 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODeviceImpl& device )
     item.device = &device;
 
     //Insert the new item to the device description map.
-    const int fd = device.fd();
+    const int fd = device.impl()->fd();
 
     _deviceMap.insert( std::make_pair( fd, item ) );
 
@@ -113,14 +114,14 @@ int IOMonitorImpl::maxFd()
     for( ; it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
-        maxfd = std::max( maxfd , item.device->fd() );
+        maxfd = std::max( maxfd , item.device->impl()->fd() );
     }
 
     return std::max( maxfd, _wakePipe[0] );
 }
 
 
-void IOMonitorImpl::removeDevice( IODeviceImpl& device )
+void IOMonitorImpl::removeDevice( IODevice& device )
 {
     MutexLock lock( _mutex );
 
@@ -128,22 +129,22 @@ void IOMonitorImpl::removeDevice( IODeviceImpl& device )
     this->wake();
 
     //Obtain the device item.
-    DeviceItem& item = _deviceMap[ device.fd() ];
+    DeviceItem& item = _deviceMap[ device.impl()->fd() ];
 
     //Delete the device signal. 
     delete item.signal;
 
     //Clear the bit for the device descriptor.
-    const std::ios_base::openmode mode = device.mode();
+    const std::ios_base::openmode mode = device.impl()->mode();
 
     if( ( mode & std::ios_base::in )  == std::ios_base::in )
-       FD_CLR( device.fd(), &_rfds );
+       FD_CLR( device.impl()->fd(), &_rfds );
 
     if( ( mode & std::ios_base::out )  == std::ios_base::out )
-       FD_CLR( device.fd(), &_wfds  );
+       FD_CLR( device.impl()->fd(), &_wfds  );
 
     //Remove the device item from the map.
-    _deviceMap.erase( device.fd() );
+    _deviceMap.erase( device.impl()->fd() );
 }
 
 
@@ -200,13 +201,13 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     for( ; it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
-        mode = item.device->mode();
+        mode = item.device->impl()->mode();
 
         if( ( mode & std::ios_base::in )  == std::ios_base::in )
         {
-            if( FD_ISSET( item.device->fd(), &rfds ) )
+            if( FD_ISSET( item.device->impl()->fd(), &rfds ) )
             {
-                ReadEvent ev( item.device );
+                ReadEvent ev( *item.device );
                 item.signal->send( ev ) ;
                 avail = true;
             }
@@ -214,9 +215,9 @@ bool IOMonitorImpl::wait(unsigned int msecs)
 
         if( ( mode & std::ios_base::out )  == std::ios_base::out )
         {
-           if( FD_ISSET( item.device->fd(), &wfds  ))
+           if( FD_ISSET( item.device->impl()->fd(), &wfds  ))
            {
-                WriteEvent ev( item.device );
+                WriteEvent ev( *item.device );
                 item.signal->send( ev );
                 avail = true;
            }

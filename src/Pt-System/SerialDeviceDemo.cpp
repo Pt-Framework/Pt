@@ -125,7 +125,7 @@ class Reader : public Pt::System::Thread
 
         void run()
         {
-            bool retVal = serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
+            //bool retVal = serDev.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );
         }
 
         Pt::System::SerialDevice& serDev;
@@ -151,7 +151,8 @@ void waitEventDemo()
 }
 
 int main( int argc, char* argv[] )
-{    
+{
+    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";
     Pt::System::Thread::sleep( 20000 );
     Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
     serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
@@ -159,7 +160,7 @@ int main( int argc, char* argv[] )
     serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
         
-    serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
+    //serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
 
 //    readMouseData();    
     return 0;

@@ -38,11 +38,11 @@ class IODeviceImpl
 
         virtual int fd() const  = 0;
         virtual  std::ios_base::openmode mode() const = 0;
-        virtual const IOEvent& event( FdsType fdsType ) = 0;
+        //virtual const IOEvent& event( FdsType fdsType ) = 0;
 
     protected:
-        ReadEvent   _readEvent;
-        WriteEvent  _writeEvent;
+        //ReadEvent   _readEvent;
+        //WriteEvent  _writeEvent;
 };
 
 }//namespace 

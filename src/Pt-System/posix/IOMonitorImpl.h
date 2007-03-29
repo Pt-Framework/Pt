@@ -27,31 +27,31 @@
 #include <sys/select.h> 
 #include <sys/time.h>
 
-namespace Pt{
-namespace System{
 
-class IODeviceImpl;
+namespace Pt{
+
+namespace System{
 
 class IOMonitorImpl
 {
     public:
-        IOMonitorImpl();       
+        IOMonitorImpl();
         ~IOMonitorImpl();
-        
-        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );        
-        void removeDevice( IODeviceImpl& device );        
+
+        Signal<const IOEvent&>& addDevice( IODevice& device );
+        void removeDevice( IODevice& device );
         bool wait(unsigned int msecs);
         void wake();   
-    
+
     private:
         int maxFd();
-               
+
         struct DeviceItem
         {
-            IODeviceImpl*               device;
+            IODevice*               device;
             Signal<const IOEvent&>*     signal;
         };
-        
+
         std::map<int,DeviceItem>     _deviceMap;
         fd_set                       _rfds;
         fd_set                       _wfds;
@@ -60,6 +60,7 @@ class IOMonitorImpl
 };
 
 }//namespace System
+
 }//namespace Pt
 
 #endif

@@ -441,6 +441,7 @@ void SerialDeviceImpl::flush()
     ::tcflush(_fd, TCIFLUSH);
 }
 
+/*
 const IOEvent& SerialDeviceImpl::event( FdsType fdsType )
 {
     switch( fdsType )
@@ -456,6 +457,6 @@ const IOEvent& SerialDeviceImpl::event( FdsType fdsType )
     throw IOError("Unknow event", PT_SOURCEINFO);
     return _readEvent;    
 }
-
+*/
 } //namespace System
 } //namespace Pt

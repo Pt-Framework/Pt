@@ -60,7 +60,7 @@ class FileDeviceImpl : public IODeviceImpl
         int fd() const
         { return _fd; }
 
-        const IOEvent& event( FdsType fdsType );
+        //const IOEvent& event( FdsType fdsType );
         
         std::ios_base::openmode mode() const
         { return _openMode; }        

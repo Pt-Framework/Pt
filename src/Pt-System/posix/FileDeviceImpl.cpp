@@ -203,7 +203,7 @@ void FileDeviceImpl::sync() const
     if(ret != 0)
         throw IOError("Could not sync handle", PT_SOURCEINFO);
 }
-
+/*
 const IOEvent& FileDeviceImpl::event( FdsType fdsType )
 {
     switch( fdsType )
@@ -216,7 +216,7 @@ const IOEvent& FileDeviceImpl::event( FdsType fdsType )
         break;
     }
 }
-
+*/
 
 } //namespace System 
 } //namespace Pt
