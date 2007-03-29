@@ -72,8 +72,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void _sync() const;
 
-        bool _wait(WaitMode mode, unsigned int msec);
-
     private:
         std::string             _path;
         std::ios_base::openmode _mode;

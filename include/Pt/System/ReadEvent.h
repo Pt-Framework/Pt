@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Drner                                   *
+ *   Copyright (C) 2007 Marc Boris Duerner                                 *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,7 +28,7 @@ namespace System{
 class PT_SYSTEM_API ReadEvent : public IOEvent
 {
     public:
-        ReadEvent();
+        ReadEvent(IODevice& device);
         ~ReadEvent();
         
                 
@@ -36,6 +36,13 @@ class PT_SYSTEM_API ReadEvent : public IOEvent
         virtual const std::type_info& typeInfo() const;
         
         static const std::type_info& TYPE_INFO;
+
+        inline IODevice& device()
+        { return _device; }
+    
+    private:
+        IODevice& _device;
+        
 };
  
 }//namespace System 

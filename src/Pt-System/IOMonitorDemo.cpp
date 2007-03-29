@@ -36,7 +36,7 @@ class Multiplexer : public Pt::Connectable
 {
     public:
         Multiplexer()
-        : _device("/dev/ttyUSB0", std::ios_base::in)
+        : _device("COM3:", std::ios_base::in)
         {
             _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
             _device.setCharSize(8);

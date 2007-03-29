@@ -22,8 +22,6 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include <windows.h>
-#include <Pt/System/WriteEvent.h>
-#include <Pt/System/ReadEvent.h>
 #include <vector>
 
 namespace Pt{
@@ -36,16 +34,16 @@ class IODeviceImpl
         IODeviceImpl();
         virtual ~IODeviceImpl();     
         
+        enum WaitResult{ ReadyRead, ReadyWrite };
+        
         virtual HANDLE deviceHandle() const  = 0;
+        
         virtual void eventHandles( std::vector<HANDLE>& handles ) const = 0;
-        virtual const IOEvent& event( HANDLE handle ) = 0;
+        
+        virtual WaitResult waitResult( HANDLE handle ) = 0;
+        
         virtual void resetEvent( HANDLE handle )
-        { };
-    
-    protected:
-            
-        WriteEvent  _writeEvent;
-        ReadEvent   _readEvent;        
+        { };    
 };
 
 }//namespace 

@@ -218,47 +218,5 @@ const IOEvent& FileDeviceImpl::event( FdsType fdsType )
 }
 
 
-bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
-{
-    fd_set rfds;
-    fd_set wfds;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_SET(_fd, &rfds);
-    FD_SET(_fd, &wfds);
-
-    struct timeval* timeout = NULL;
-    struct timeval tv;
-    if(msec != IODevice::WaitTimeInfinite)
-    {
-        tv.tv_sec = msec / 1000;
-        tv.tv_usec = (msec % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    retry:
-    int ret = -1;
-
-    if(mode & IODevice::WaitInput)
-        ret = ::select(_fd + 1, &rfds, 0, 0, &tv);
-    else if(mode & IODevice::WaitOutput)
-        ret = ::select(_fd + 1, 0, &wfds, 0, &tv);
-    else
-        ret = ::select(_fd + 1, &rfds, &wfds, 0, &tv);    
-
-    if(ret == -1)
-    {
-        if(errno == EINTR)
-            goto retry;
-
-        throw IOError("Could not select on socket", PT_SOURCEINFO);
-    }
-
-    if(ret == 1)
-        return true;
-
-    return false;
-}
-
 } //namespace System 
 } //namespace Pt

@@ -74,8 +74,6 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void flush();
 
-        bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-
         int fd() const
         { return _fd; }
 

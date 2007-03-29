@@ -206,7 +206,8 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         {
             if( FD_ISSET( item.device->fd(), &rfds ) )
             {
-                item.signal->send( item.device->event( IODeviceImpl::ReadFds ) ) ;
+                ReadEvent ev( item.device );
+                item.signal->send( ev ) ;
                 avail = true;
             }
         }
@@ -215,7 +216,8 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         {
            if( FD_ISSET( item.device->fd(), &wfds  ))
            {
-                item.signal->send( item.device->event( IODeviceImpl::WriteFds ) );
+                WriteEvent ev( item.device );
+                item.signal->send( ev );
                 avail = true;
            }
         }

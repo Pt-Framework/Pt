@@ -62,8 +62,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void sync() const;
 
-        bool wait( IODevice::WaitMode mode, unsigned int msec );
-        
+       
         HANDLE deviceHandle() const
         { return _handle; }
         
@@ -74,7 +73,7 @@ class FileDeviceImpl  : public IODeviceImpl
             handles.push_back( _readOv.hEvent );
         }
         
-        const IOEvent& event( HANDLE handle );
+        WaitResult waitResult( HANDLE handle );
 
     private:
         enum { Reading, Writing, Idle } _state;

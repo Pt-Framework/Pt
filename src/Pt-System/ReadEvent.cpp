@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Drner                                   *
+ *   Copyright (C) 2007 Marc Boris Duerner                                   *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,8 @@ namespace System{
 
 const std::type_info& ReadEvent::TYPE_INFO = typeid(ReadEvent);
 
-ReadEvent::ReadEvent()
+ReadEvent::ReadEvent(IODevice& device)
+: _device( device )
 { }
 
 ReadEvent::~ReadEvent()
@@ -32,7 +33,7 @@ ReadEvent::~ReadEvent()
 
 Event* ReadEvent::clone() const
 {
-    return new ReadEvent();
+    return new ReadEvent( _device );
 }
 
 const std::type_info& ReadEvent::typeInfo() const

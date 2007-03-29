@@ -186,7 +186,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
 
-        virtual bool _wait( WaitMode mode, unsigned int  msec);
 };
 
 } //namespace System

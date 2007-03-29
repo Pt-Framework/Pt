@@ -250,39 +250,16 @@ void FileDeviceImpl::sync() const
     }
 }
 
-const IOEvent& FileDeviceImpl::event( HANDLE handle )
+IODeviceImpl::WaitResult FileDeviceImpl::waitResult( HANDLE handle )
 {
     if( handle == _readOv.hEvent )
-        return _readEvent;
+        return IODeviceImpl::ReadyRead;
     else if( handle == _writeOv.hEvent ) 
-        return  _writeEvent;
+        return IODeviceImpl::ReadyWrite;
     
     throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
 }
 
-bool FileDeviceImpl::wait(IODevice::WaitMode mode, unsigned int msec)
-{
-    DWORD count = 0;
-    HANDLE handles[2];
-
-    if(mode & IODevice::WaitInput) {
-        handles[count] = _readOv.hEvent;
-        count++;
-    }
-    if(mode & IODevice::WaitOutput) {
-        handles[count] = _writeOv.hEvent;
-        count++;
-    }
-
-    DWORD ret = ::WaitForMultipleObjects(count, handles, FALSE, msec);
-    if(ret == WAIT_FAILED) {
-        throw IOError ("Could not wait for file handle: ", PT_SOURCEINFO);
-    }
-    else if(ret == WAIT_TIMEOUT)
-        return false;
-
-    return true;
-}
 
 } //namespace System
 } //namespace Pt

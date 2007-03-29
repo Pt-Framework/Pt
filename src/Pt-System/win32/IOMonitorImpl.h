@@ -24,12 +24,11 @@
 #include <Pt/Signal.h>
 #include <Pt/System/IOEvent.h>
 #include <Pt/System/Mutex.h>
+#include <Pt/System/IODevice.h>
 #include <windows.h>
 
 namespace Pt{
 namespace System{
-
-class IODeviceImpl;
 
 class IOMonitorImpl
 {
@@ -37,9 +36,9 @@ class IOMonitorImpl
         IOMonitorImpl();
         ~IOMonitorImpl();
         
-        Signal<const IOEvent&>& addDevice( IODeviceImpl& device );
-        void removeDevice( IODeviceImpl& device );
-        void wait();
+        Signal<const IOEvent&>& addDevice( IODevice& device );
+        void removeDevice( IODevice& device );
+        bool wait( unsigned int msecs );
         void wake();    
     
     private:     
@@ -48,7 +47,7 @@ class IOMonitorImpl
         
         struct DeviceItem
         {
-            IODeviceImpl*               device;
+            IODevice*                   device;
             Signal<const IOEvent&>*     signal;
             std::vector<HANDLE>         waitHandles;
         };

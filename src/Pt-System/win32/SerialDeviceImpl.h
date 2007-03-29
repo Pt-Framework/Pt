@@ -64,9 +64,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;
-        
-        bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-        
+               
         HANDLE deviceHandle() const
         { return _handle; }
                 
@@ -76,7 +74,7 @@ class SerialDeviceImpl : public IODeviceImpl
             handles.push_back( _ovStatus.hEvent );            
         }
         
-        const IOEvent& event( HANDLE handle );
+        WaitResult waitResult( HANDLE handle );
         void resetEvent( HANDLE handle );                
         
     private:

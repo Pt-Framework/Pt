@@ -18,12 +18,12 @@ IOMonitor::~IOMonitor()
 
 Signal<const IOEvent&>&  IOMonitor::addDevice( IODevice& device )
 {
-    return _impl->addDevice( *device.impl() );
+    return _impl->addDevice( device );
 }
 
 void IOMonitor::removeDevice( IODevice& device )
 {
-    _impl->removeDevice( *device.impl() );
+    _impl->removeDevice( device );
 }
 
 bool IOMonitor::wait(unsigned int msecs)

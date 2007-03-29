@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Duerner                                   *
+ *   Copyright (C) 2007 Marc Boris Dürner                                   *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,34 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_WRITEEVENT_H
-#define PT_SYSTEM_WRITEEVENT_H
-
-#include <Pt/System/IOEvent.h>
+#include "Pt/System/IOTimeout.h"
 
 namespace Pt{
 namespace System{
 
-class PT_SYSTEM_API WriteEvent : public IOEvent
+const std::type_info& IOTimeout::TYPE_INFO = typeid(IOTimeout);
+
+IOTimeout::IOTimeout()
+{ }
+
+IOTimeout::~IOTimeout()
+{ }
+
+Event* IOTimeout::clone() const
 {
-    public:
-        WriteEvent( IODevice& device );        
-        ~WriteEvent();
-        
-        virtual Event* clone() const;
-        virtual const std::type_info& typeInfo() const;
-        
-        static const std::type_info& TYPE_INFO;        
-        
-        inline IODevice& device()
-        { return _device; }
-    
-    private:
-        IODevice& _device;
-        
-};
+    return new IOTimeout();
+}
 
-}//namespace System
+const std::type_info& IOTimeout::typeInfo() const
+{
+    return TYPE_INFO;
+}
+ 
+}//namespace System 
 }//namespace Pt
-
-#endif

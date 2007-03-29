@@ -58,11 +58,6 @@ class BasicIODevice : public NonCopyable {
             SeekEnd
         };
 
-        enum WaitMode {
-            WaitInput = 1,
-            WaitOutput = 2
-        };
-
         enum ReadWriteMode
         {
             Synchronous = 1,
@@ -91,23 +86,7 @@ class BasicIODevice : public NonCopyable {
                 _valid = false;
             }
         }
-
-        static const unsigned int WaitTimeInfinite = static_cast<unsigned int>(-1);
-
-        //! @brief Waits until data is available
-        /*!
-            If the device is in asynchronous mode this function waits for
-            I/O events.
-
-            \param mode WaitInput or WaitOutput.
-            \param msec time interval to wait for infinete use msec = WaitTimeInfinite.
-            \return true if an I/O operatin has occured.
-            \throw IOError
-        */
-        bool wait(WaitMode mode, unsigned int msec)
-        { return this->_wait(mode, msec); }
-
-
+        
         //! @brief Read data from I/O device
         /*!
             Reads up to n bytes and stores them in buffer. Returns the number
@@ -237,10 +216,6 @@ class BasicIODevice : public NonCopyable {
     protected:
         //! @brief Closes the I/O device
         virtual void _close() = 0;
-
-        //! @brief Waits until data is available
-        virtual bool _wait(WaitMode, unsigned int)
-        { return false; }
 
         //! @brief Read bytes from device
         virtual size_t _read(CharT* buffer, size_t count, bool& eof) = 0;

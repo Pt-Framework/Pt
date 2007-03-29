@@ -347,16 +347,6 @@ void SerialDeviceImpl::flush()
     FlushFileBuffers( _handle );
 }
 
-bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
-{    
-    if( WaitForSingleObject( _commEvent, msec ) != WAIT_OBJECT_0 )
-        return false;
-        
-    return ( ( _commEventType == CharReceived  && mode == SerialDevice::WaitInput ) ||  
-             ( _commEventType == EventCharReceived && mode == SerialDevice::WaitInput ) ||      
-             ( _commEventType == SendComplete && mode == SerialDevice::WaitOutput ) );
-}
-
 void SerialDeviceImpl::run()
 {
     DWORD waitMask = 0;
@@ -389,31 +379,18 @@ void SerialDeviceImpl::run()
     }
 }
 
-void SerialDeviceImpl::setCanonical( char eol, char eof )
-{   
-/*
-    _waitCommMask = EV_RXFLAG | EV_TXEMPTY | EV_BREAK ;
-    DCB commState;
-    
-    readCommState( commState );
-    commState.EvtChar = eol;
-    commState.EofChar = eof;
-    writeCommState( commState );    
-  */  
-}
-
-void SerialDeviceImpl::disableCanonical()
+void SerialDeviceImpl::setReadMode( size_t timeout, size_t readBlockSize )
 {
-    _waitCommMask =  EV_RXCHAR | EV_TXEMPTY | EV_BREAK ;
-    
-    DCB commState;
-    
-    readCommState( commState );
-    commState.EvtChar  = 0;
-    commState.EofChar  = 0;
-    writeCommState( commState );     
-    resetEvent( _commEvent );     
-} 
+    COMMTIMEOUTS comTimeOut;
+    comTimeOut.ReadIntervalTimeout          = timeout;
+    comTimeOut.ReadTotalTimeoutMultiplier   = 0;
+    comTimeOut.ReadTotalTimeoutConstant     = 0;
+    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+    comTimeOut.WriteTotalTimeoutConstant    = 100;       
+
+    if( !SetCommTimeouts( _handle, &comTimeOut ) )
+        throw IOError("Set port timeouts failed" , PT_SOURCEINFO);                
+}
 
 void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles ) const
 {
@@ -429,7 +406,7 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
     ResetEvent ( _commEvent );
 }
 
-const IOEvent& SerialDeviceImpl::event( HANDLE handle )
+IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
 {
     if( _commEvent != handle )
         throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
@@ -439,17 +416,17 @@ const IOEvent& SerialDeviceImpl::event( HANDLE handle )
     switch( _commEventType)
     {
         case SendComplete:
-            return _writeEvent;
+            return ReadyWrite;
         break;
         
         case CharReceived:     
         case EventCharReceived:   
-            return _readEvent;
+            return ReadyRead;
         break;        
     }        
             
-    throw IOError("Unknow event", PT_SOURCEINFO);
-    return _readEvent;  
+    throw IOError("Unknown event", PT_SOURCEINFO);
+    return ReadyRead;  
 }
 
 }//namespace System

@@ -457,59 +457,5 @@ const IOEvent& SerialDeviceImpl::event( FdsType fdsType )
     return _readEvent;    
 }
 
-bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
-{
-    fd_set rfds;
-    FD_ZERO(&rfds);
-    FD_SET( _pipe[0], &rfds );
-
-    fd_set wfds;
-    FD_ZERO(&wfds);
-    int maxFd = std::max( _fd, _pipe[0] );
-
-    struct timeval* timeout = NULL;
-    struct timeval tv;
-    if(msec != IODevice::WaitTimeInfinite)
-    {
-        tv.tv_sec = msec / 1000;
-        tv.tv_usec = (msec % 1000) * 1000;
-        timeout = &tv;
-    }
-
-    retry:
-    int ret = -1;
-
-    if(mode & IODevice::WaitInput)
-    {
-        FD_SET(_fd, &rfds);
-        ret = ::select(maxFd + 1, &rfds, 0, 0, timeout);
-    }
-    else if(mode & IODevice::WaitOutput)
-    {
-        FD_SET(_fd, &wfds);
-        ret = ::select(maxFd + 1, &rfds, &wfds, 0, timeout);
-    }
-    else
-    {
-        FD_SET(_fd, &rfds);
-        FD_SET(_fd, &wfds);
-        ret = ::select(maxFd + 1, &rfds, &wfds, 0, timeout);
-    }
-
-    if(ret == -1)
-    {
-        if(errno == EINTR)
-            goto retry;
-
-        throw IOError("Could not select on file descriptor", PT_SOURCEINFO);
-    }
-
-    if(ret == 1)
-        return true;
-
-    return false;
-}
-
 } //namespace System
-
 } //namespace Pt

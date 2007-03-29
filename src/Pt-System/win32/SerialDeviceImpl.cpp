@@ -174,7 +174,6 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate rate )
     writeCommState( commState );
 }
 
-
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
     DCB commState;
@@ -365,57 +364,22 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
     }
 }
 
-const IOEvent& SerialDeviceImpl::event( HANDLE handle )
+IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
 {           
    if( handle != _ovStatus.hEvent )
         throw std::logic_error("Unknown event handle ");
         
     if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
-        return _writeEvent;    
+        return ReadyWrite;    
 
-    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
-        return _readEvent;       
-
- /*   if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
+/*    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
         return _readEvent;       */
+
+    if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
+        return ReadyRead;
     
     throw IOError("Unknow event", PT_SOURCEINFO);
-    return _readEvent;
-}
-
-bool SerialDeviceImpl::wait( SerialDevice::WaitMode mode, unsigned int  msec )
-{
-    DWORD timeout = static_cast<DWORD>( msec );         
-    
-    if( msec == SerialDevice::WaitTimeInfinite )
-        timeout = INFINITE;
-
-    if( mode == SerialDevice::WaitOutput)
-        SetCommMask( _handle, EV_TXEMPTY | EV_BREAK);
-    else if ( mode == SerialDevice::WaitInput)
-        SetCommMask( _handle, EV_RXCHAR | EV_BREAK);
-
-    DWORD waitMask = 0;
-
-    if( WaitCommEvent( _handle, &waitMask, &_ovStatus ) == FALSE )
-    {
-        if( GetLastError () != ERROR_IO_PENDING )
-            throw std::runtime_error( "WaitCommEvent failed" + PT_SOURCEINFO );
-    }
-
-    HANDLE  eventHandles[2];
-    eventHandles[0] = _ovStatus.hEvent;
-    eventHandles[1] = _terminateEv;
-
-    const DWORD reason = WaitForMultipleObjects( 2, eventHandles, FALSE, timeout );
-
-    if( reason == WAIT_FAILED )
-        throw std::runtime_error( "Could not wait for file handle: " + PT_SOURCEINFO);
-
-    if( mode == SerialDevice::WaitOutput )
-        return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_TXEMPTY ) );
-    else
-        return ( reason == WAIT_OBJECT_0 && ( waitMask & EV_RXCHAR ) );
+    return ReadyRead;
 }
 
 }//namespace System

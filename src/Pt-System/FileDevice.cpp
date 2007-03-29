@@ -107,10 +107,6 @@ void FileDevice::_sync() const
         _impl->sync();
 }
 
-bool FileDevice::_wait(WaitMode mode, unsigned int msec)
-{
-    return _impl->wait(mode, msec);
-}
 
 } // namespace System
 } // namespace Pt

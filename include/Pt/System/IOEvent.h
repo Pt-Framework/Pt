@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Drner                                   *
+ *   Copyright (C) 2007 Marc Boris Dürner                                   *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +21,7 @@
 #define PT_SYSTEM_IOEVENT_H
 
 #include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
 #include <Pt/Event.h>
 
 namespace Pt{
@@ -29,8 +30,8 @@ namespace System{
 class PT_SYSTEM_API IOEvent : public Pt::Event
 {
     public:
-        IOEvent();
-        virtual ~IOEvent();
+        IOEvent();        
+        virtual ~IOEvent();    
 };
 
 }//namespace System

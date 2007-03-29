@@ -52,6 +52,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           IOEvent.cpp
                           WriteEvent.cpp
                           ReadEvent.cpp
+                          IOTimeout.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;

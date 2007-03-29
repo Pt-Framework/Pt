@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Drner                                   *
+ *   Copyright (C) 2007 Marc Boris Duerner                                   *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,8 @@ namespace System{
 
 const std::type_info& WriteEvent::TYPE_INFO = typeid(WriteEvent);
 
-WriteEvent::WriteEvent()
+WriteEvent::WriteEvent( IODevice& device )
+: _device( device )
 { }
 
 WriteEvent::~WriteEvent()
@@ -32,7 +33,7 @@ WriteEvent::~WriteEvent()
 
 Event* WriteEvent::clone() const
 {
-    return new WriteEvent();
+    return new WriteEvent( _device );
 }
 
 const std::type_info& WriteEvent::typeInfo() const

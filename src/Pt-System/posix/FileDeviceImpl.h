@@ -56,9 +56,7 @@ class FileDeviceImpl : public IODeviceImpl
         size_t peek(char* buffer, size_t count);
 
         void sync() const;
-
-        bool wait(IODevice::WaitMode mode, unsigned int msec);
-        
+       
         int fd() const
         { return _fd; }
 

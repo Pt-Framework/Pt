@@ -69,17 +69,14 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;      
         
-        void setCanonical( char eol, char eof );
-        void disableCanonical();
-        
-        bool wait( SerialDevice::WaitMode mode, unsigned int  msec );
-        
+        void setReadMode( size_t timeout, size_t readBlockSize );       
+       
         HANDLE deviceHandle() const
         { return _handle; }
         
         void eventHandles( std::vector<HANDLE>& handles ) const;
         
-        const IOEvent& event( HANDLE handle );
+        WaitResult waitResult( HANDLE handle );
         
         void resetEvent( HANDLE handle );
         
