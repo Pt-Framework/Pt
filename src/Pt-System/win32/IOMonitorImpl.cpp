@@ -128,11 +128,11 @@ bool IOMonitorImpl::wait( unsigned int msecs )
     //Check for timeout. 
     if( result == WAIT_TIMEOUT )
     {               
-        IOTimeout ev; 
-        std::map<HANDLE,DeviceItem*>::iterator it = _devHandleMap.begin();
+        //IOTimeout ev; 
+        //std::map<HANDLE,DeviceItem*>::iterator it = _devHandleMap.begin();
         
-        for( ; it != _devHandleMap.end(); it++ )
-            it->second->signal->send( ev );
+        //for( ; it != _devHandleMap.end(); it++ )
+        //    it->second->signal->send( ev );
         
         return false;
     }
