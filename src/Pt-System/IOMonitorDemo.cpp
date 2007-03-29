@@ -37,23 +37,36 @@ class Multiplexer : public Pt::Connectable
     public:
         Multiplexer()
         : _device("/dev/ttyUSB0", std::ios_base::in)
+        , _device2("/dev/ttyS0", std::ios_base::in)
         {
             _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
             _device.setCharSize(8);
             _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device.setParity(Pt::System::SerialDevice::ParityEven);
 
+            _device2.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
+            _device2.setCharSize(8);
+            _device2.setStopBits(Pt::System::SerialDevice::OneStopBit);
+            _device2.setParity(Pt::System::SerialDevice::ParityEven);
+
             Pt::Signal<const Pt::System::IOEvent&>& signal = _monitor.addDevice( _device );
             Pt::connect( signal, *this, &Multiplexer::onIOEvent );
+
+            Pt::Signal<const Pt::System::IOEvent&>& signal2 = _monitor.addDevice( _device2 );
+            Pt::connect( signal2, *this, &Multiplexer::onIOEvent2 );
+
             Pt::connect( _monitor.timeout, *this, &Multiplexer::onTimeout );
         }
 
         void run()
         {
-            for(int i = 0; i < 1000; ++i)
+            for(int i = 0; i < 2000; ++i)
             {
                 _monitor.wait(200);
             }
+
+            _monitor.removeDevice( _device );
+            _monitor.removeDevice( _device2 );
         }
 
         void onTimeout( )
@@ -74,8 +87,24 @@ class Multiplexer : public Pt::Connectable
             }
         }
 
+        void onIOEvent2( const Pt::System::IOEvent& ev )
+        {
+            const Pt::System::ReadEvent* readEvent = 0;
+            readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
+            if( readEvent != 0 )
+            {
+                char buffer[201];
+                memset( buffer, 0, 201);
+                size_t size = _device2.read( buffer, 200);
+                std::cerr << "MOUSE IO:";
+                std::cerr.write(buffer, size);
+                std::cerr << std::endl;
+            }
+        }
+
     private:
         Pt::System::SerialDevice _device;
+        Pt::System::SerialDevice _device2;
         Pt::System::IOMonitor _monitor;
 };
 
