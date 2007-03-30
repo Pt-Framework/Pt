@@ -410,12 +410,25 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 
 void SerialDeviceImpl::setTimeout( size_t msec )
 {
+    struct termios ios;
+
+    if( ::tcgetattr(_fd, &ios) == -1 )
+        throw IOError("Could not set time out", PT_SOURCEINFO);
+        
+    ios.c_cc[VTIME]  = ( msec / 100 ) ;
     
+    tcsetattr(_fd, TCSANOW, &ios);
+        
 }
 
 size_t SerialDeviceImpl::timeout() const
 {
+    struct termios ios;
 
+    if( ::tcgetattr(_fd, &ios) == -1 )
+        throw IOError("Could not set time out", PT_SOURCEINFO);
+
+    return ios.c_cc[VTIME] * 100 ;
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const

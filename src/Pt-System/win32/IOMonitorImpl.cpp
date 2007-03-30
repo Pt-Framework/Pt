@@ -141,7 +141,7 @@ bool IOMonitorImpl::wait( unsigned int msecs )
     const Pt::ssize_t handleIndex  = ( result - WAIT_OBJECT_0 );        
         
     if( handleIndex == InternalWake )
-        return false;        
+        return true;        
              
     //Check for devices.             
     try
@@ -172,7 +172,6 @@ bool IOMonitorImpl::wait( unsigned int msecs )
      catch(const std::exception& e )
      {
         std::cerr<< e.what()<<std::endl;
-        return false;
      }
      
     return true;

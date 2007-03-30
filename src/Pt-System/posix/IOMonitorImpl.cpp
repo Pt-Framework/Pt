@@ -70,7 +70,7 @@ IOMonitorImpl::~IOMonitorImpl()
 }
 
 
-Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
+Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device, size_t waitMode )
 {
     //Exclusive access to the _deviceMap.
     MutexLock lock( _mutex );
@@ -80,8 +80,9 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
 
     //Create a new device description item.
     DeviceItem item;
-    item.signal = new Signal<const IOEvent&>();
-    item.device = &device;
+    item.signal     = new Signal<const IOEvent&>();
+    item.device     = &device;
+    item.waitMode   = waitMode;
 
     //Insert the new item to the device description map.
     const int fd = device.impl()->fd();
@@ -90,7 +91,6 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
     //Return the new signal.
     return *item.signal;
 }
-
 
 void IOMonitorImpl::removeDevice( IODevice& device )
 {
@@ -109,12 +109,11 @@ void IOMonitorImpl::removeDevice( IODevice& device )
     _deviceMap.erase( device.impl()->fd() );
 }
 
-
 bool IOMonitorImpl::wait(unsigned int msecs)
 {
     int maxfd   = 0;
     int ret     = -1;
-    bool avail = false;
+    bool avail  = false;
 
     fd_set rfds;
     fd_set wfds;
@@ -126,23 +125,38 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     FD_SET( _wakePipe[0], &rfds );
     maxfd = _wakePipe[0];
 
+    //Add the devices to the rfds and wfds.    
     std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
+    
     for( ; it != _deviceMap.end(); ++it )
     {
         int fd = it->first;
-        FD_SET(fd, &rfds);
-        maxfd = std::max( maxfd , fd );
+        
+        if( (it->second.waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+        {        
+            FD_SET( fd, &rfds );
+            maxfd = std::max( maxfd , fd );
+        }
+        
+        if( (it->second.waitMode & IODevice::WaitOutput ) == IODevice::WaitOutput )
+        {
+            FD_SET( fd, &wfds );
+            maxfd = std::max( maxfd , fd );            
+        }        
     }
 
+    //Setup the timeout. 
     timeval* timeout = 0;
-    struct timeval tv;
+    struct   timeval tv;
+    
     if(msecs != IOMonitor::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;
         timeout = &tv;
     }
-
+    
+    //Execute the select.
     while( true )
     {
         ret = ::select( maxfd, &rfds, &wfds, 0, timeout );
@@ -157,29 +171,23 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     //Exclusive access to the _deviceMap and device descriptors.
     MutexLock lock( _mutex );
 
+    //Check the the wake up reason.
     for( it = _deviceMap.begin(); it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
-        std::ios_base::openmode mode = item.device->impl()->mode();
 
-        if( mode & std::ios_base::in )
+        if( FD_ISSET( item.device->impl()->fd(), &rfds ) )
         {
-            if( FD_ISSET( item.device->impl()->fd(), &rfds ) )
-            {
-                ReadEvent ev( *item.device );
-                item.signal->send( ev ) ;
-                avail = true;
-            }
+            ReadEvent ev( *item.device );
+            item.signal->send( ev ) ;
+            avail = true;
         }
-
-        if( mode & std::ios_base::out )
+        
+        if( FD_ISSET( item.device->impl()->fd(), &wfds  ))
         {
-           if( FD_ISSET( item.device->impl()->fd(), &wfds  ))
-           {
-                WriteEvent ev( *item.device );
-                item.signal->send( ev );
-                avail = true;
-           }
+            WriteEvent ev( *item.device );
+            item.signal->send( ev );
+            avail = true;
         }
     }
 
@@ -193,7 +201,6 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     return avail;
 }
 
-
 void IOMonitorImpl::wake()
 {
     ::write( _wakePipe[1], "XXXXXXXXXXX", 11);
@@ -201,5 +208,4 @@ void IOMonitorImpl::wake()
 }
 
 }//namespace System
-
 }//namespace Pt
