@@ -21,11 +21,11 @@
 #ifndef PT_GFX_DRAWPOLYLINE_H
 #define PT_GFX_DRAWPOLYLINE_H
 
-#include <vector>
 
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Math/Point.h>
+#include <vector>
 
 #include "Stroke.h"
 
