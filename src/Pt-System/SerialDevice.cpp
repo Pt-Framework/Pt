@@ -110,6 +110,15 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
     return _impl->flowControl();
 }
 
+void SerialDevice::setTimeout( size_t msec )
+{
+    _impl->setTimeout( msec );
+}
+
+size_t SerialDevice::timeout() const
+{
+    return _impl->timeout();
+}
 
 void SerialDevice::_close()
 {

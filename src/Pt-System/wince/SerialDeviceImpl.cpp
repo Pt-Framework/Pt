@@ -58,9 +58,9 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
 
         COMMTIMEOUTS comTimeOut;
-        comTimeOut.ReadIntervalTimeout          = 10;
-        comTimeOut.ReadTotalTimeoutMultiplier   = 1;
-        comTimeOut.ReadTotalTimeoutConstant     = 100;
+        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
+        comTimeOut.ReadTotalTimeoutConstant     = 0;
         comTimeOut.WriteTotalTimeoutMultiplier  = 10;
         comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
@@ -379,17 +379,24 @@ void SerialDeviceImpl::run()
     }
 }
 
-void SerialDeviceImpl::setReadMode( size_t timeout, size_t readBlockSize )
+void SerialDeviceImpl::setTimeout( size_t msec )
 {
     COMMTIMEOUTS comTimeOut;
-    comTimeOut.ReadIntervalTimeout          = timeout;
-    comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-    comTimeOut.ReadTotalTimeoutConstant     = 0;
+    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutConstant     = msec;
     comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-    comTimeOut.WriteTotalTimeoutConstant    = 100;       
+    comTimeOut.WriteTotalTimeoutConstant    = 100;
 
     if( !SetCommTimeouts( _handle, &comTimeOut ) )
-        throw IOError("Set port timeouts failed" , PT_SOURCEINFO);                
+        throw IOError("Set port time outs failed" , PT_SOURCEINFO);
+}
+
+size_t SerialDeviceImpl::timeout() const
+{
+    COMMTIMEOUTS comTimeOut;
+    GetCommTimeouts( _handle, &comTimeOut );
+    return  comTimeOut.ReadTotalTimeoutConstant;    
 }
 
 void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles ) const

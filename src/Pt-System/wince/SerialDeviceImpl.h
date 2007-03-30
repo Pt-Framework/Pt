@@ -69,7 +69,8 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         void setFlowControl( SerialDevice::FlowControl flowControl );
         SerialDevice::FlowControl flowControl() const;      
         
-        void setReadMode( size_t timeout, size_t readBlockSize );       
+        void setTimeout( size_t timeout );       
+        size_t timeout() const;
        
         HANDLE deviceHandle() const
         { return _handle; }

@@ -71,7 +71,10 @@ class SerialDeviceImpl : public IODeviceImpl
         void setFlowControl( SerialDevice::FlowControl flowControl );
 
         SerialDevice::FlowControl flowControl() const;
-
+        
+        void setTimeout( size_t msec );
+        size_t timeout() const;
+        
         void flush();
 
         int fd() const

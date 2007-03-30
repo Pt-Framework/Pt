@@ -347,6 +347,26 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return SerialDevice::FlowControlBoth;
 }
 
+void SerialDeviceImpl::setTimeout( size_t msec )
+{
+    COMMTIMEOUTS comTimeOut;
+    comTimeOut.ReadIntervalTimeout          = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+    comTimeOut.ReadTotalTimeoutConstant     = msec;
+    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+    comTimeOut.WriteTotalTimeoutConstant    = 100;
+
+    if( !SetCommTimeouts( _handle, &comTimeOut ) )
+        throw IOError("Set port time outs failed" , PT_SOURCEINFO);
+}
+
+size_t SerialDeviceImpl::timeout() const
+{
+    COMMTIMEOUTS comTimeOut;
+    GetCommTimeouts( _handle, &comTimeOut );
+    return  comTimeOut.ReadTotalTimeoutConstant;    
+}
+
 void SerialDeviceImpl::flush()
 {
     FlushFileBuffers( _handle );

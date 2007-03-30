@@ -408,6 +408,15 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     _flowControl = flowControl;
 }
 
+void SerialDeviceImpl::setTimeout( size_t msec )
+{
+    
+}
+
+size_t SerialDeviceImpl::timeout() const
+{
+
+}
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {

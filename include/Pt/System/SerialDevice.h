@@ -170,6 +170,10 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         */
         FlowControl flowControl() const;
         
+        
+        void setTimeout( size_t msec );
+        size_t timeout() const;
+        
         //! @brief Transmit the current buffered characters.
         void flush();              
         
