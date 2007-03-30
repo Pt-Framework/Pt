@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -164,7 +165,7 @@ GDIEventLoop::~GDIEventLoop()
 
 void GDIEventLoop::commitEvent(const Pt::Event& e)
 {
-//    std::cout << "committing an event" << std::endl;
+//  std::cout << "committing an event" << std::endl;
 
     queueEvent(e);
     wake();
@@ -530,14 +531,14 @@ void GDIEventLoop::processMouseWheelMessage(Widget& widget, int wParam, int lPar
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
 
-
-    int x = LOWORD(lParam);
-    int y = HIWORD(lParam);
+    // Mouse position is relative to screen(!), so calculate the position relative to the widget.
+    int x = LOWORD(lParam) - widget.region().x();
+    int y = HIWORD(lParam) - widget.region().y();
 
     int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
-
+    
     MouseEvent mouseEvent(widget, x, y, (zDelta > 0) ? MouseEvent::WheelUp : MouseEvent::WheelDown, MouseEvent::Press, modifiers);
     eventQueueSignal.send(mouseEvent);
 }
