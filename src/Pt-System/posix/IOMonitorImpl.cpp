@@ -125,37 +125,37 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     FD_SET( _wakePipe[0], &rfds );
     maxfd = _wakePipe[0];
 
-    //Add the devices to the rfds and wfds.    
+    //Add the devices to the rfds and wfds
     std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
-    
+
     for( ; it != _deviceMap.end(); ++it )
     {
         int fd = it->first;
-        
+
         if( (it->second.waitMode & IODevice::WaitInput) == IODevice::WaitInput )
-        {        
+        {
             FD_SET( fd, &rfds );
             maxfd = std::max( maxfd , fd );
         }
-        
+
         if( (it->second.waitMode & IODevice::WaitOutput ) == IODevice::WaitOutput )
         {
             FD_SET( fd, &wfds );
-            maxfd = std::max( maxfd , fd );            
-        }        
+            maxfd = std::max( maxfd , fd );
+        }
     }
 
     //Setup the timeout. 
     timeval* timeout = 0;
     struct   timeval tv;
-    
+
     if(msecs != IOMonitor::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;
         timeout = &tv;
     }
-    
+
     //Execute the select.
     while( true )
     {
@@ -182,7 +182,7 @@ bool IOMonitorImpl::wait(unsigned int msecs)
             item.signal->send( ev ) ;
             avail = true;
         }
-        
+
         if( FD_ISSET( item.device->impl()->fd(), &wfds  ))
         {
             WriteEvent ev( *item.device );

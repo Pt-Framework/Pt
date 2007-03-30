@@ -36,7 +36,7 @@ class Multiplexer : public Pt::Connectable
 {
     public:
         Multiplexer()
-        : _device("COM5:", std::ios_base::in)
+        : _device("/dev/ttyS0", std::ios_base::in)
 //        , _device2("COM1:", std::ios_base::in)
         ,_out("ser.txt")
         {
