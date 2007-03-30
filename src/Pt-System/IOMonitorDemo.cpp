@@ -36,26 +36,25 @@ class Multiplexer : public Pt::Connectable
 {
     public:
         Multiplexer()
-        : _device("COM5:", std::ios_base::in)
-//        , _device2("/dev/ttyS0", std::ios_base::in)
-        ,_out("ser.txt")
+        : _device("/dev/ttyS0", std::ios_base::in)
+        , _device2("/dev/ttyS0", std::ios_base::in)
         {
             _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
             _device.setCharSize(8);
             _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device.setParity(Pt::System::SerialDevice::ParityEven);
-            _device.setTimeout( 1000 );
-/*
+            _device.setTimeout( 10 );
+
             _device2.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
             _device2.setCharSize(8);
             _device2.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device2.setParity(Pt::System::SerialDevice::ParityEven);
-*/
+
             Pt::Signal<const Pt::System::IOEvent&>& signal = _monitor.addDevice( _device );
             Pt::connect( signal, *this, &Multiplexer::onIOEvent );
-/*
+
             Pt::Signal<const Pt::System::IOEvent&>& signal2 = _monitor.addDevice( _device2 );
-            Pt::connect( signal2, *this, &Multiplexer::onIOEvent2 );*/
+            Pt::connect( signal2, *this, &Multiplexer::onIOEvent2 );
 
             Pt::connect( _monitor.timeout, *this, &Multiplexer::onTimeout );
         }
@@ -68,12 +67,12 @@ class Multiplexer : public Pt::Connectable
             }
 
             _monitor.removeDevice( _device );
-         //   _monitor.removeDevice( _device2 );
+            _monitor.removeDevice( _device2 );
         }
 
         void onTimeout( )
         {
-            _out << "--- TIMEOUT ---" << std::endl;
+            std::cerr << "--- TIMEOUT ---" << std::endl;
         }
 
         void onIOEvent( const Pt::System::IOEvent& ev )
@@ -85,7 +84,7 @@ class Multiplexer : public Pt::Connectable
                 char buffer[201];
                 memset( buffer, 0, 201);
                 size_t size = _device.read( buffer, 200);
-                _out.write(buffer, size);
+                std::cerr.write(buffer, size);
             }
         }
 
@@ -97,18 +96,17 @@ class Multiplexer : public Pt::Connectable
             {
                 char buffer[201];
                 memset( buffer, 0, 201);
-//                size_t size = _device2.read( buffer, 200);
-                _out << "MOUSE IO:";
-                //std::cerr.write(buffer, size);
-                _out << std::endl;
+                size_t size = _device2.read( buffer, 200);
+                std::cerr << "MOUSE IO:";
+                std::cerr.write(buffer, size);
+                std::cerr << std::endl;
             }
         }
 
     private:
         Pt::System::SerialDevice _device;
-//        Pt::System::SerialDevice _device2;
-        Pt::System::IOMonitor   _monitor;
-        std::ofstream           _out;
+        Pt::System::SerialDevice _device2;
+        Pt::System::IOMonitor    _monitor;
 };
 
 
@@ -118,7 +116,7 @@ int main( int argc, char* argv[] )
     {
         Multiplexer m;
         m.run();
-        //_out << "\n\nSUCCESS\n";
+        std::cerr << "\n\nSUCCESS\n";
     }
     catch( const std::exception& e )
     {
