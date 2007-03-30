@@ -29,6 +29,28 @@ namespace Pt{
 
 namespace System{
 
+/*
+class IOChannel
+{
+    public:
+        enum WaitMode
+        {
+            WaitInput = 1,
+            WaitOutput = 2
+        };
+
+        IOChannel(IODevice& device, WaitMode wm);
+
+        Signal<> inputReady;
+        Signal<> outputReady;
+
+    private:
+        WaitMode  _waitMode;
+        IODevice& _device;
+};
+*/
+
+
 /** @brief The IOMonitor implements the wait functionality for a device event.
 
     On the IOMonitor can one or more devices registered for event monitoring. 
