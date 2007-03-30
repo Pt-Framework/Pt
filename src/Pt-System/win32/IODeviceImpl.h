@@ -38,10 +38,11 @@ class IODeviceImpl
         
         virtual HANDLE deviceHandle() const  = 0;
         
-        virtual void eventHandles( std::vector<HANDLE>& handles ) const = 0;
+        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode ) = 0;
         
         virtual WaitResult waitResult( HANDLE handle ) = 0;
         
+       
         virtual void resetEvent( HANDLE handle )
         { };    
 };

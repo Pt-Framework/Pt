@@ -71,11 +71,7 @@ class SerialDeviceImpl : public IODeviceImpl
         HANDLE deviceHandle() const
         { return _handle; }
                 
-        void eventHandles( std::vector<HANDLE>& handles ) const
-        {
-            handles.clear();
-            handles.push_back( _ovStatus.hEvent );            
-        }
+        void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
         
         WaitResult waitResult( HANDLE handle );
         void resetEvent( HANDLE handle );                

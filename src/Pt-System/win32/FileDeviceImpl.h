@@ -66,14 +66,9 @@ class FileDeviceImpl  : public IODeviceImpl
         HANDLE deviceHandle() const
         { return _handle; }
         
-        void eventHandles( std::vector<HANDLE>& handles ) const
-        {
-            handles.clear();
-            handles.push_back( _writeOv.hEvent );
-            handles.push_back( _readOv.hEvent );
-        }
+        void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
         
-        WaitResult waitResult( HANDLE handle );
+        WaitResult waitResult( HANDLE handle );                
 
     private:
         enum { Reading, Writing, Idle } _state;

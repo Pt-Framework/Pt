@@ -173,7 +173,7 @@ class IOMonitor;
              * @param device The IODevice
              * @return The event notification signal for this device
              */
-             Signal<const IOEvent&>& addDevice( IODevice& device );
+             Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
             
             /**
              * \brief Remove a device from the event loop IOMonitor.

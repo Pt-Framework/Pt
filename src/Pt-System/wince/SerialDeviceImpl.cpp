@@ -69,7 +69,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             
         _commEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
             
-        _waitCommMask =  EV_RXCHAR | EV_TXEMPTY | EV_BREAK ;
+        _waitCommMask = EV_BREAK;
     }        
     catch( ... )
     {
@@ -399,10 +399,18 @@ size_t SerialDeviceImpl::timeout() const
     return  comTimeOut.ReadTotalTimeoutConstant;    
 }
 
-void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles ) const
+void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
     handles.clear();
     handles.push_back( _commEvent );         
+
+    _waitCommMask = EV_BREAK;
+
+    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+        _waitCommMask |= EV_RXCHAR;
+
+    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+        _waitCommMask |= EV_TXEMPTY;
 }
 
 void SerialDeviceImpl::resetEvent( HANDLE handle )

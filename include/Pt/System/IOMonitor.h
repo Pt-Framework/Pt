@@ -43,11 +43,6 @@ namespace System{
 class PT_SYSTEM_API IOMonitor
 {
     public:
-        enum {
-            WaitInput,
-            WaitOutput
-        };
-
         static const unsigned int WaitInfinite = static_cast<unsigned int>(-1);
 
         //! @brief Default constructor
@@ -61,7 +56,7 @@ class PT_SYSTEM_API IOMonitor
             @param device The device to add
             @return A signal which signalize the device events
         */
-        Signal<const IOEvent&>& addDevice( IODevice& device );
+        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
 
         /** @brief Removes a device from the monitor
 

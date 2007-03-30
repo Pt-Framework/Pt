@@ -78,8 +78,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
 
-        SetCommMask( _handle, EV_RXCHAR | EV_TXEMPTY );
-        resetEvent( _ovStatus.hEvent );        
+        SetCommMask( _handle, 0 );
     }
     catch( ... )
     {
@@ -384,6 +383,25 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
     }
 }
 
+void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
+{
+    handles.clear();
+    
+    DWORD waitMask = 0;
+    
+    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+        waitMask |= EV_RXCHAR;
+        
+    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+        waitMask |= EV_TXEMPTY;
+
+    SetCommMask( _handle, waitMask );
+    
+    handles.push_back( _ovStatus.hEvent );    
+
+    resetEvent( _ovStatus.hEvent );            
+}
+        
 IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
 {           
    if( handle != _ovStatus.hEvent )

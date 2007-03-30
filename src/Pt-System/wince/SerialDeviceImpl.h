@@ -75,7 +75,7 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         HANDLE deviceHandle() const
         { return _handle; }
         
-        void eventHandles( std::vector<HANDLE>& handles ) const;
+        void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
         
         WaitResult waitResult( HANDLE handle );
         

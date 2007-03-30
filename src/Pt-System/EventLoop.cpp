@@ -118,10 +118,10 @@ void EventLoop::queueEvent(const Pt::Event& event)
     _eventQueue.push_back(ev);
 }
 
-Signal<const IOEvent&>&  EventLoop::addDevice( IODevice& device )
+Signal<const IOEvent&>&  EventLoop::addDevice( IODevice& device, size_t waitMode )
 {
     MutexLock threadSave( _mutex );
-    return _ioMonitor.addDevice( device );
+    return _ioMonitor.addDevice( device, waitMode );
 }
 
 void EventLoop::removeDevice( IODevice& device )

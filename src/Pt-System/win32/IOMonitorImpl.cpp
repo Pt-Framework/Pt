@@ -51,7 +51,7 @@ IOMonitorImpl::~IOMonitorImpl()
     CloseHandle( _wakeHandle );
 }
  
-Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
+Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device, size_t waitMode )
 {
     MutexLock lock( _mutex );
     
@@ -60,10 +60,10 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device )
     //Create a device description item.
     DeviceItem* item = new DeviceItem();    
     
-    item->signal     = new Signal<const IOEvent&>();
-    item->device     = &device;       
-
-    device.impl()->eventHandles( item->waitHandles );
+    item->signal = new Signal<const IOEvent&>();
+    item->device = &device;       
+    
+    device.impl()->eventHandles( item->waitHandles, waitMode );
         
     //Initialize the device handle / device item map.
     _devHandleMap.insert( std::make_pair( device.impl()->deviceHandle(), item ) );

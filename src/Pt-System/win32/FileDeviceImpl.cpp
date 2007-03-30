@@ -250,6 +250,17 @@ void FileDeviceImpl::sync() const
     }
 }
 
+void FileDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
+{
+    handles.clear();
+    
+    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+        handles.push_back( _readOv.hEvent );
+    
+    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+        handles.push_back( _writeOv.hEvent );                
+}
+        
 IODeviceImpl::WaitResult FileDeviceImpl::waitResult( HANDLE handle )
 {
     if( handle == _readOv.hEvent )
