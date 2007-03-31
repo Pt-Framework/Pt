@@ -212,47 +212,45 @@ namespace Pt {
         };
 
 
-        template <typename IteratorT>
-        struct IteratorTraits
+        template <typename ColorPtrT, typename ViewT>
+        void set(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
         {
-            typedef typename IteratorT::View     View;
-            typedef typename IteratorT::ColorPtr ColorPtr;
-            typedef typename IteratorT::ColorRef ColorRef;
+            const size_t planeOffset = xpos + ( ypos * view.width() );
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
 
-            static void set(ColorPtr& color, View& view, size_t xpos, size_t ypos)
-            {
-                const size_t planeOffset = xpos + ( ypos * view.width() );
-                const size_t subsampleOffset = (xpos/View::SubX) + (ypos/View::SubY * view.width()/View::SubY);
-
-                color[0] = view.data() + planeOffset;
-                addElements<View::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
-            }
-
-            static void increment(ColorPtr& color, View& view, size_t xpos, size_t ypos)
-            {
-                ++color.colorData()[0];
-                const size_t subsampleOffset = (xpos/View::SubX) + (ypos/View::SubY * view.width()/View::SubY);
-                addElements<View::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
-            }
-
-            static void advance(ColorPtr& color, size_t n, View& view, size_t xpos, size_t ypos)
-            {
-                color.colorData()[0] += n;
-                const size_t subsampleOffset = (xpos/View::SubX) + (ypos/View::SubY * view.width()/View::SubY);
-                addElements<View::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
-            }
-        };
+            color[0] = view.data() + planeOffset;
+            addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
+        }
 
 
+        template <typename ColorPtrT, typename ViewT>
+        void increment(ColorPtrT& color, ViewT& view, size_t xpos, size_t ypos)
+        {
+            ++color.colorData()[0];
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
+            addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
+        }
+
+
+        template <typename ColorPtrT, typename ViewT>
+        void advance(ColorPtrT& color, size_t n, ViewT& view, size_t xpos, size_t ypos)
+        {
+            color.colorData()[0] += n;
+            const size_t subsampleOffset = (xpos/ViewT::SubX) + (ypos/ViewT::SubY * view.width()/ViewT::SubY);
+            addElements<ViewT::NumberOfChannels, 1>(color.colorData(), view.colorData(), subsampleOffset);
+        }
+
+
+        template <typename ColorModelT, size_t SubX, size_t SubY>
+        class PlanarImageView;
+
+        //template <typename ColorModelT, size_t SubX, size_t SubY>
         template <typename ViewT, typename ColorPtrT, typename ColorRefT>
         class PlanarPixelIterator
         {
             public:
-                typedef ViewT View;
                 typedef ColorRefT ColorRef;
                 typedef ColorPtrT ColorPtr;
-                typedef PlanarPixelIterator<View, ColorPtr, ColorRef> Iterator;
-                typedef IteratorTraits<Iterator> Traits;
 
             public:
                 inline PlanarPixelIterator()
@@ -264,7 +262,7 @@ namespace Pt {
                 , _xpos(xpos)
                 , _ypos(ypos)
                 {
-                    Traits::set( _color, view, _xpos, _ypos );
+                    set( _color, view, _xpos, _ypos );
                 }
 
                 ColorRef operator*()
@@ -281,7 +279,7 @@ namespace Pt {
                         ++_ypos;
                     }
 
-                    Traits::increment(_color, *_view, _xpos, _ypos);
+                    increment(_color, *_view, _xpos, _ypos);
                     return *this;
                 }
 
@@ -296,7 +294,7 @@ namespace Pt {
                         ++_ypos;
                     }
 
-                    Traits::advance(_color, n, *_view, _xpos, _ypos);
+                    advance(_color, n, *_view, _xpos, _ypos);
                     return *this;
                 }
 
