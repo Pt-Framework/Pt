@@ -30,8 +30,7 @@ namespace Pt {
 
         struct Yuv {};
 
-        template <>
-        class Color<Yuv>
+        class YuvColor
         {
             public:
                 static const size_t NumberOfChannels = 3;
@@ -39,15 +38,15 @@ namespace Pt {
                 typedef uint8_t ComponentT;
 
             public:
-                inline Color()
+                inline YuvColor()
                 : _y(0), _u(0), _v(0)
                 {}
 
-                inline Color(const Color& c)
+                inline YuvColor(const YuvColor& c)
                 : _y(c._y), _u(c._u), _v(c._v)
                 {}
 
-                inline Color(ComponentT y, ComponentT u, ComponentT v)
+                inline YuvColor(ComponentT y, ComponentT u, ComponentT v)
                 : _y(y), _u(u), _v(v)
                 {}
 
@@ -73,7 +72,7 @@ namespace Pt {
                 ComponentT _y, _u, _v;
         };
 
-        typedef Color<Yuv> YuvColor;
+        //typedef Color<Yuv> YuvColor;
 
 
         class YuvConstColorRef : public PlanarConstColorRef<uint8_t, 3>
