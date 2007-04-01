@@ -21,6 +21,21 @@
 # Aloysius
 #
 
+ITEM P10 S5 "The AtomicInt class implements atomic operations"
+    TASK "Write test case (using multi-threading)"
+    TASK "Write docs"
+
+ITEM P10 S8 "A SubImage class for PlanarImage is exists"
+
+ITEM P10 S5 "Object reflection API is documented"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
+    TASK "Extend Jamrules.platinum"
+
+ITEM P5 S8 "The Db module has a dynamic driver API"
+    TASK "Review Pt::Plugin API"
 
 ITEM P10 S5 "CTTI system is implemented"
     TASK "Review IfElse template"
@@ -61,11 +76,6 @@ ITEM P1 S5 "A base class for thread-safe refcounting exists"
     TASK "Write Documentation"
     TASK "Write test case"
 
-ITEM P1 S13 "The Image class supports planar, sub-sampled YUV image formats"
-    TASK "Find out which YUV formats are used for movie playback on linux and win32"
-    TASK "Implement YV12 image as template specialisation"
-    TASK "Implement the needed image conversion from and to the YV12 image"
-
 ITEM P0 S13 "Header files can be installed with jam"
     TASK "Write InstallHeaders rule"
     TASK "Write INstallAllHaders rule"
@@ -85,10 +95,6 @@ ITEM P0 S13 "X11 handles key-codes"
 ITEM P0 S13 "The IOError class is removed"
     TASK "Remove IOError class"
     TASK "Replace IOError with ios_base::failure"
-
-ITEM P0 S13 "The IODevice class is implemented"
-    TASK "Remove async IO stuff"
-    TASK "Replace IODevice flags with std::ios flags"
 
 ITEM P0 S13 "The IOManager supports async IO"
     TASK "Implement async IO as special stream type"

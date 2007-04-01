@@ -21,18 +21,17 @@
 # Aloysius
 #
 
+ITEM P10 S5 "DateTime classes are improved"
+    TASK "Write Timespan class"
+    TASK "Write Timestamp class"
+    TASK "Improve DateTime class"
+
+ITEM P10 S13 "Timers using an IOMonitor are implemented"
+    TASK "Implement Timer class"
+    TASK "Implement Timer scheduling"
+    TASK "Write Documentation"
+    TASK "Write test case"
 
 ITEM P10 S8 "Delegates are implemented"
     TASK "Write Documentation"
     TASK "Write test case"
-
-ITEM P10 S5 "Object reflection API is documented"
-    TASK "Write Documentation"
-    TASK "Write test case"
-
-ITEM P5 S5 "The Db module uses the sqlite library of the OS if possible"
-    TASK "Extend Jamrules.platinum"
-
-ITEM P5 S8 "The Db module has a dynamic driver API"
-    TASK "Review Pt::Plugin API"
-

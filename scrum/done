@@ -28,6 +28,17 @@
 # Aloysius
 #
 
+ITEM P0 S13 "The IODevice class is implemented"
+    TASK "Remove async IO stuff"
+    TASK "Replace IODevice flags with std::ios flags"
+
+ITEM P1 S13 "The Image class supports planar, sub-sampled YUV image formats"
+    TASK "Find out which YUV formats are used for movie playback on linux and win32"
+    TASK "Implement YV12 image as template specialisation"
+    TASK "Implement the needed image conversion from and to the YV12 image"
+
+ITEM P10 S8 "Delegates are implemented"
+    TASK "Review code" d-marc
 
 ITEM P10 S5 "Color classes are refactored"
     TASK "Remove TypeT, the second parameter" blue_wind_25 2007-03-05
@@ -41,6 +52,7 @@ ITEM P10 S5 "A SubImage class for InterleavedImage is exists"
     TASK "Make PixelIterators not nested in InterleavedSubImage" blue_wind_25 2007-03-07
 
 ITEM P10 S8 "PlanarImage is improved"
+    TASK "Make ImageModel traits classes for this image type", blue_wind_25,d-marc
     TASK "Rename ARgbColorRef class to ARgbColorProxy" blue_wind_25 2007-03-07
     TASK "Make a new tag 'struct ARgbPlanar : public ARgb {}' as the tag for this image type" blue_wind_25 2007-03-07
     TASK "Make PixelIterators not nested in PlanarImage" blue_wind_25 2007-03-07

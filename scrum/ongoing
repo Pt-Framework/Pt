@@ -22,16 +22,4 @@
 #
 
 
-ITEM P10 S8 "Delegates are implemented"
-    TASK "Review code" d-marc
-
-ITEM P10 S5 "The AtomicInt class implements atomic operations"
-    TASK "Review asm" blue_wind_25,d-marc
-    TASK "Write test case (using multi-threading)"
-    TASK "Write docs"
-
-ITEM P10 S8 "PlanarImage is improved"
-    TASK "Make ImageModel traits classes for this image type", blue_wind_25,d-marc
-
-ITEM P10 S8 "A SubImage class for PlanarImage is exists"
 
