@@ -196,6 +196,8 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     {
         std::vector<char> msgbuf(100);
         read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
+        printf("wake\n");
+        avail = true;
     }
 
     return avail;

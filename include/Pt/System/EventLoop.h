@@ -159,7 +159,6 @@ class IOMonitor;
              */
             void exit();
 
-
             /**
              * \brief Add a device to the event loop.
              *
@@ -174,13 +173,15 @@ class IOMonitor;
              * @return The event notification signal for this device
              */
              Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
-            
+
             /**
              * \brief Remove a device from the event loop IOMonitor.
              *
              * @param device The device to remove.
              */
             void removeDevice( IODevice& device );
+
+            void setIOTimeout(unsigned int msecs);
 
             virtual bool opened(const Connection& c)
             {
@@ -200,6 +201,8 @@ class IOMonitor;
              * any event that is committed to this event loop's event queue.
              */
             Signal<const Pt::Event&> event;
+
+            Signal<> ioTimeout;
 
         protected:
             //! Empty Copy-Constructor. Copying not allowed.
@@ -232,6 +235,7 @@ class IOMonitor;
             Mutex                   _connectionMutex;
             Mutex                   _mutex;
             IOMonitor               _ioMonitor;
+            unsigned int            _ioTimeout;
     };
 
 } // namespace System

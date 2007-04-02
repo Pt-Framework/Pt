@@ -23,9 +23,12 @@
 #include <Pt/Connectable.h>
 #include <Pt/System/Api.h>
 #include <Pt/Event.h>
+#include <Pt/Slot.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/MutexLock.h>
+#include <Pt/System/EventLoop.h>
 #include <list>
+
 
 namespace Pt {
 namespace System {
@@ -51,11 +54,11 @@ namespace System {
                 return Connection( *this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
             
-            Connection connect( Slot* aSlot )
+            Connection connect( const Slot& aSlot )
             {
                 // Do not lock here, the Connection will call
                 // Connectable::opened on this object
-                return Connection( *this, aSlot ); 
+                return Connection( *this, aSlot.clone() );
             }
             
             virtual bool opened( const Connection& c )

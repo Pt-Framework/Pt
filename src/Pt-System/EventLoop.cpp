@@ -27,7 +27,9 @@ namespace System {
 
 EventLoop::EventLoop()
 : _exitLoop(false)
+, _ioTimeout(IOMonitor::WaitInfinite)
 {
+    connect(_ioMonitor.timeout, ioTimeout);
 }
 
 EventLoop::~EventLoop()
@@ -58,7 +60,7 @@ void EventLoop::run()
         if( _eventQueue.empty() )
         {
             _mutex.unlock();
-            _ioMonitor.wait();
+            _ioMonitor.wait(_ioTimeout);
         }
         else
         {
@@ -118,17 +120,26 @@ void EventLoop::queueEvent(const Pt::Event& event)
     _eventQueue.push_back(ev);
 }
 
+
 Signal<const IOEvent&>&  EventLoop::addDevice( IODevice& device, size_t waitMode )
 {
     MutexLock threadSave( _mutex );
     return _ioMonitor.addDevice( device, waitMode );
 }
 
+
 void EventLoop::removeDevice( IODevice& device )
 {
     MutexLock threadSave( _mutex );
     _ioMonitor.removeDevice( device );
 }
+
+
+void EventLoop::setIOTimeout(unsigned int msecs)
+{
+    _ioTimeout = msecs;
+}
+
 
 } // namespace System
 } // namespace Pt

@@ -32,7 +32,7 @@ IOTimeout::~IOTimeout()
 
 Event* IOTimeout::clone() const
 {
-    return new IOTimeout();
+    return new IOTimeout(*this);
 }
 
 const std::type_info& IOTimeout::typeInfo() const
