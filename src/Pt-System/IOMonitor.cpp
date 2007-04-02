@@ -92,8 +92,13 @@ bool IOMonitor::wait(unsigned int msecs)
         //std::cerr << timerTimeout << std::endl;
     }
 
+    // If a timer becomes active before the given
+    // wait timeout we can always return true
     if(timerTimeout <= msecs)
-        return _impl->wait(timerTimeout);
+    {
+        _impl->wait(timerTimeout);
+        return true;
+    }
 
     bool ret = _impl->wait(msecs);
     if(ret == false)

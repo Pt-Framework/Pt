@@ -38,7 +38,7 @@ int main( int argc, char* argv[] )
     {
         Pt::System::Timer timer;
         connect(timer.timeout, onTimer);
-        timer.start(1000);
+        timer.start(2000);
 
         Pt::System::IOMonitor monitor;
         monitor.addTimer(timer);
