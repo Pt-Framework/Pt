@@ -24,6 +24,8 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/IOEvent.h>
 #include <Pt/Signal.h>
+#include <Pt/DateTime.h>
+
 
 namespace Pt{
 
@@ -49,6 +51,25 @@ class IOChannel
         IODevice& _device;
 };
 */
+
+
+class Timer
+{
+    public:
+        Timer();
+
+        ~Timer();
+
+        void start(unsigned interval);
+
+    public:
+        unsigned _started;
+        unsigned _interval;
+        unsigned _elapsed;
+
+    public:
+        Signal<> timeout;
+};
 
 
 /** @brief The IOMonitor implements the wait functionality for a device event.
@@ -94,8 +115,12 @@ class PT_SYSTEM_API IOMonitor
 
         Signal<> timeout;
 
+        void addTimer(Timer& timer)
+        { _timer = &timer; }
+
     private:
         class IOMonitorImpl* _impl;
+        Timer* _timer;
 };
 
 } //namespace System
