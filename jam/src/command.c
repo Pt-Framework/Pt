@@ -38,7 +38,7 @@ cmd_new(
      LIST    *logFile,
     LIST    *shell )
 {
-    char commandBuffer[1024];
+    char commandBuffer[12288];
     CMD *cmd = (CMD *)malloc( sizeof( CMD ) );
     /* lift line-length limitation entirely when JAMSHELL is just "%" */
     int no_limit = ( shell && !strcmp(shell->string,"%") && !list_next(shell) );
