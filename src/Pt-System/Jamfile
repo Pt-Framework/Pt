@@ -87,6 +87,10 @@ Main IOMonitorDemo : IOMonitorDemo.cpp ;
 Main_LinkSharedLibraries IOMonitorDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate IOMonitorDemo : bin ;
 
+#Main PipeDemo : PipeDemo.cpp ;
+#/Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
+#Main_MakeLocate PipeDemo : bin ;
+
 Main TimerDemo : TimerDemo.cpp ;
 Main_LinkSharedLibraries TimerDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate TimerDemo : bin ;
