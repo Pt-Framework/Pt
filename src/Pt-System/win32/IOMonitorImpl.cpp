@@ -32,7 +32,7 @@ namespace System{
 IOMonitorImpl::IOMonitorImpl()
 { 
     _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
-    _waitHandles.push_back( _wakeHandle );
+    //_waitHandles.push_back( _wakeHandle );
 }
 
 IOMonitorImpl::~IOMonitorImpl()
@@ -55,13 +55,14 @@ Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device, size_t waitM
 {
     MutexLock lock( _mutex );
     
-    wake();
+    //wake();
     
     //Create a device description item.
     DeviceItem* item = new DeviceItem();    
     
-    item->signal = new Signal<const IOEvent&>();
-    item->device = &device;       
+    item->signal    = new Signal<const IOEvent&>();
+    item->device    = &device; 
+    item->waitMode  = waitMode;
     
     device.impl()->eventHandles( item->waitHandles, waitMode );
         
@@ -82,7 +83,7 @@ void IOMonitorImpl::removeDevice( IODevice& device )
 {
     MutexLock lock( _mutex );
 
-    wake();
+   // wake();
     
     //Obtain the device item.
     DeviceItem* item = _devHandleMap[ device.impl()->deviceHandle() ];
@@ -120,7 +121,25 @@ bool IOMonitorImpl::wait( unsigned int msecs )
 {      
     if( msecs == IOMonitor::WaitInfinite )
         msecs = INFINITE;
-        
+
+    std::vector<HANDLE>::iterator           it;
+    std::map<HANDLE,DeviceItem*>::iterator  itDeviceItem;
+    DeviceItem *                            item;
+
+    for (it = _waitHandles.begin(); it !=  _waitHandles.end();  ++it)
+    {
+        itDeviceItem = _waitHandleMap.find(*it);
+
+        if (itDeviceItem == _waitHandleMap.end())
+            throw std::logic_error("Handle not available" + PT_SOURCEINFO);
+
+        item = itDeviceItem->second;
+        if ( item->waitMode == IODevice::WaitInput )
+        {
+            item->device->read(0, 0);
+        }
+    }
+
     DWORD result = WaitForMultipleObjects( _waitHandles.size(), &_waitHandles[0], false, msecs );
     
     MutexLock lock( _mutex );        

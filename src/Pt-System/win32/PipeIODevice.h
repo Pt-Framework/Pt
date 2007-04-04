@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         * 
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,49 +17,55 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITORIMPL_H
-#define PT_SYSTEM_IOMONITORIMPL_H
+#ifndef Pt_System_win32_PipeIODevice_h
+#define Pt_System_win32_PipeIODevice_h
 
-#include <Pt/Signal.h>
-#include <Pt/System/IOEvent.h>
-#include <Pt/System/Mutex.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include "IODeviceImpl.h"
 #include <windows.h>
 
-namespace Pt{
-namespace System{
+namespace Pt {
 
-class IOMonitorImpl
+namespace System {
+
+class PipeIODevice : public IODevice, private IODeviceImpl
 {
     public:
-        IOMonitorImpl();
-        ~IOMonitorImpl();
+        PipeIODevice();
+
+        virtual ~PipeIODevice();
+
+        virtual void open(HANDLE handle);
+
+        virtual HANDLE deviceHandle() const;
         
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
-        void removeDevice( IODevice& device );
-        bool wait( unsigned int msecs );
-        void wake();    
-    
-    private:     
-    
-        enum{ InternalWake = 0 };
-        
-        struct DeviceItem
-        {
-            IODevice*                   device;
-            size_t                      waitMode;
-            Signal<const IOEvent&>*     signal;
-            std::vector<HANDLE>         waitHandles;
-        };
-        
-        std::map<HANDLE,DeviceItem*>    _devHandleMap;
-        std::map<HANDLE,DeviceItem*>    _waitHandleMap;
-        std::vector<HANDLE>             _waitHandles;
-        HANDLE                          _wakeHandle;
-        Mutex                           _mutex;
+        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
+
+        virtual WaitResult waitResult( HANDLE handle );
+
+        virtual IODeviceImpl* impl()
+        { return this; }
+
+    protected:
+        //! @brief Closes the I/O device
+        virtual void _close();
+
+        //! @brief Read bytes from device
+        virtual size_t _read(char* buffer, size_t count, bool& eof);
+
+        //! @brief Write bytes to device
+        virtual size_t _write(const char* buffer, size_t count);
+
+
+     private:
+        HANDLE      _handle;
+        OVERLAPPED  _readOv;
+        OVERLAPPED  _writeOv;        
 };
 
-}//namespace System 
-}//namespace Pt
+} // namespace System
+
+} // namespace Pt
 
 #endif

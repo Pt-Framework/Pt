@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,49 +18,60 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITORIMPL_H
-#define PT_SYSTEM_IOMONITORIMPL_H
 
-#include <Pt/Signal.h>
-#include <Pt/System/IOEvent.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/IODevice.h>
+#include "PipeImpl.h"
 #include <windows.h>
 
-namespace Pt{
-namespace System{
 
-class IOMonitorImpl
+namespace Pt {
+
+namespace System {
+
+PipeImpl::PipeImpl()
+{    
+    HANDLE inputHandle = ::CreateNamedPipe("\\\\.\\pipe\\Test", 
+                                     PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+                                     PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+                                     1,
+                                     0,
+                                     0,
+                                     1000,
+                                     NULL );
+
+    if (inputHandle == INVALID_HANDLE_VALUE)
+        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);           
+
+    DWORD access = GENERIC_WRITE;
+    DWORD share  = 0;
+    DWORD create = OPEN_EXISTING;
+    DWORD flags  = FILE_FLAG_OVERLAPPED;    
+    
+    HANDLE outputHandle = ::CreateFile("\\\\.\\pipe\\Test", access, share, NULL, create, flags, NULL);
+
+    if(outputHandle == INVALID_HANDLE_VALUE)
+        throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
+
+    _inputDevice.open(inputHandle);
+    _outputDevice.open(outputHandle);
+}
+
+
+PipeImpl::~PipeImpl()
 {
-    public:
-        IOMonitorImpl();
-        ~IOMonitorImpl();
-        
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
-        void removeDevice( IODevice& device );
-        bool wait( unsigned int msecs );
-        void wake();    
-    
-    private:     
-    
-        enum{ InternalWake = 0 };
-        
-        struct DeviceItem
-        {
-            IODevice*                   device;
-            size_t                      waitMode;
-            Signal<const IOEvent&>*     signal;
-            std::vector<HANDLE>         waitHandles;
-        };
-        
-        std::map<HANDLE,DeviceItem*>    _devHandleMap;
-        std::map<HANDLE,DeviceItem*>    _waitHandleMap;
-        std::vector<HANDLE>             _waitHandles;
-        HANDLE                          _wakeHandle;
-        Mutex                           _mutex;
-};
+  
+}
 
-}//namespace System 
-}//namespace Pt
 
-#endif
+IODevice& PipeImpl::input()
+{
+    return _inputDevice;
+}
+
+IODevice& PipeImpl::output()
+{
+    return _outputDevice;
+}
+
+} // namespace System
+
+} // namespace Pt

@@ -93,11 +93,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EventLoopDemo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\File.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\FileDevice.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileErrors.cpp"
 				>
 			</File>
 			<File
@@ -109,6 +117,34 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IOError.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOEvent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOMonitor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOMonitorDemo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOMonitorTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\IOTimeout.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Mutex.cpp"
 				>
 			</File>
@@ -117,11 +153,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Pipe.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PipeDemo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Plugin.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\PluginDemo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Process.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ReadEvent.cpp"
 				>
 			</File>
 			<File
@@ -134,6 +186,14 @@
 			</File>
 			<File
 				RelativePath=".\SerialDevice.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SerialDeviceDemo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SerialDeviceTest.cpp"
 				>
 			</File>
 			<File
@@ -153,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestPlugin.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Thread.cpp"
 				>
 			</File>
@@ -165,11 +229,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TimerDemo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\TimerTest.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\TimeValue.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Url.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WriteEvent.cpp"
 				>
 			</File>
 			<Filter
@@ -205,6 +281,10 @@
 				</File>
 				<File
 					RelativePath=".\posix\MutexImpl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\posix\PipeImpl.cpp"
 					>
 				</File>
 				<File
@@ -340,7 +420,23 @@
 					>
 				</File>
 				<File
+					RelativePath=".\win32\IODeviceImpl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\IOMonitorImpl.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\win32\MutexImpl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\PipeImpl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\PipeIODevice.cpp"
 					>
 				</File>
 				<File
@@ -439,11 +535,51 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\System\IOBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IODevice.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOError.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOEvent.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOHandler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOMonitor.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOStream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOTimeout.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\System\Mutex.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\MutexLock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\Pipe.h"
 				>
 			</File>
 			<File
@@ -488,6 +624,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\SystemError.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestPlugin.h"
 				>
 			</File>
 			<File
@@ -610,6 +750,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\posix\PipeImpl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\posix\ProcessImpl.h"
 					>
 				</File>
@@ -674,7 +818,23 @@
 					>
 				</File>
 				<File
+					RelativePath=".\win32\IODeviceImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\IOMonitorImpl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\win32\MutexImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\PipeImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\PipeIODevice.h"
 					>
 				</File>
 				<File
@@ -719,6 +879,10 @@
 				</File>
 			</Filter>
 		</Filter>
+		<File
+			RelativePath=".\Jamfile"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

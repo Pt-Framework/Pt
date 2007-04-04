@@ -18,49 +18,33 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITORIMPL_H
-#define PT_SYSTEM_IOMONITORIMPL_H
+#ifndef Pt_System_win32_PipeImpl_h
+#define Pt_System_win32_PipeImpl_h
 
-#include <Pt/Signal.h>
-#include <Pt/System/IOEvent.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/IODevice.h>
-#include <windows.h>
+#include <Pt/System/Api.h>
+#include "PipeIODevice.h"
 
-namespace Pt{
-namespace System{
+namespace Pt {
 
-class IOMonitorImpl
+namespace System {
+
+class PipeImpl
 {
     public:
-        IOMonitorImpl();
-        ~IOMonitorImpl();
-        
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
-        void removeDevice( IODevice& device );
-        bool wait( unsigned int msecs );
-        void wake();    
-    
-    private:     
-    
-        enum{ InternalWake = 0 };
-        
-        struct DeviceItem
-        {
-            IODevice*                   device;
-            size_t                      waitMode;
-            Signal<const IOEvent&>*     signal;
-            std::vector<HANDLE>         waitHandles;
-        };
-        
-        std::map<HANDLE,DeviceItem*>    _devHandleMap;
-        std::map<HANDLE,DeviceItem*>    _waitHandleMap;
-        std::vector<HANDLE>             _waitHandles;
-        HANDLE                          _wakeHandle;
-        Mutex                           _mutex;
+        PipeImpl();
+
+        ~PipeImpl();
+
+        IODevice& input();
+
+        IODevice& output();
+    private:
+        PipeIODevice    _inputDevice;
+        PipeIODevice    _outputDevice;   
 };
 
-}//namespace System 
-}//namespace Pt
+} // namespace System
+
+} // namespace Pt
 
 #endif
