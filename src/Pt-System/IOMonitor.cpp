@@ -44,7 +44,7 @@ void Timer::start(unsigned interval)
 
 IOMonitor::IOMonitor()
 : _impl( 0 )
-, _timer(0)
+//, _timer(0)
 {
     _impl = new IOMonitorImpl();
 }
@@ -67,11 +67,7 @@ void IOMonitor::removeDevice( IODevice& device )
     _impl->removeDevice( device );
 }
 
-
-bool IOMonitor::wait(unsigned int msecs)
-{
-    size_t timerTimeout = IOMonitor::WaitInfinite;
-
+/*
     if(_timer)
     {
         size_t current = getCurrentMSecs();
@@ -91,9 +87,36 @@ bool IOMonitor::wait(unsigned int msecs)
 
         //std::cerr << timerTimeout << std::endl;
     }
+*/
+bool IOMonitor::wait(unsigned int msecs)
+{
+    size_t timerTimeout = IOMonitor::WaitInfinite;
 
-    // If a timer becomes active before the given
-    // wait timeout we can always return true
+	std::list<Timer*>::iterator it;
+    for(it = _timers.begin(); it != _timers.end(); ++it)
+    {
+		Timer* timer = *it;
+		
+		// update elapsed time in each timer
+        size_t current = getCurrentMSecs();
+        timer->_elapsed = current - timer->_started;
+        
+        // determine lowest timer timeout
+        timerTimeout = std::min(timerTimeout, timer->_interval - timer->_elapsed);
+
+        if(timer->_elapsed >= timer->_interval)
+        {
+            timer->_elapsed -= timer->_interval;
+            timer->_started = current - timer->_elapsed;
+            timer->timeout();
+			return true;
+        }
+
+        //std::cerr << timerTimeout << std::endl;
+    }
+
+    // If a timer will become active before the
+    // wait timeout we return true
     if(timerTimeout <= msecs)
     {
         _impl->wait(timerTimeout);
