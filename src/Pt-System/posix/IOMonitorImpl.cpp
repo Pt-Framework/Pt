@@ -159,7 +159,7 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     //Execute the select.
     while( true )
     {
-        ret = ::select( maxfd, &rfds, &wfds, 0, timeout );
+        ret = ::select( maxfd+1, &rfds, &wfds, 0, timeout );
 
         if( ret != -1 )
             break;
@@ -196,7 +196,6 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     {
         std::vector<char> msgbuf(100);
         read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
-        printf("wake\n");
         avail = true;
     }
 
