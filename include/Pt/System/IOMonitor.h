@@ -53,7 +53,7 @@ class IOChannel
 */
 
 
-class Timer
+class PT_SYSTEM_API Timer
 {
     public:
         Timer();
