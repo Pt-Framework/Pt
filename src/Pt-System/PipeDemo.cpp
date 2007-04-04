@@ -19,9 +19,7 @@ class IODeviceImpl
 
         virtual ~IODeviceImpl();
 
-        enum FdsType { ReadFds = 0, WriteFds };
-
-        virtual int fd() const  = 0;
+        virtual int fd() const = 0;
 };
 
 
@@ -54,7 +52,7 @@ class Pipe
 
             protected:
                 void _close()
-                { ::close(_fd); printf("closed\n"); }
+                { ::close(_fd); }
 
                 virtual size_t _read(char* buffer, size_t count, bool& eof)
                 {
@@ -150,19 +148,20 @@ class Pipe
 int main( int argc, char* argv[] )
 {
     Pt::System::Pipe pipe;
+
     const char* out = "Hello World!";
     pipe.output().write(out, 12);
 
     Pt::System::IOMonitor monitor;
     monitor.addDevice( pipe.input(), Pt::System::IODevice::WaitInput );
     bool ret = monitor.wait();
-    monitor.removeDevice( pipe.input() );
 
     std::cerr << "Data: " << std::boolalpha << ret << std::endl;
     char buffer[20];
     size_t sz = pipe.input().read(buffer, 20);
     std::cerr.write(buffer, sz);
 
+    monitor.removeDevice( pipe.input() );
     std::cerr << std::endl;
     return 0;
 }

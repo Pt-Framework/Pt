@@ -183,6 +183,8 @@ class IOMonitor;
 
             void setIOTimeout(unsigned int msecs);
 
+            unsigned int timeout() const;
+
             virtual bool opened(const Connection& c)
             {
                 MutexLock lock(_connectionMutex);

@@ -140,6 +140,11 @@ void EventLoop::setIOTimeout(unsigned int msecs)
     _ioTimeout = msecs;
 }
 
+unsigned int EventLoop::timeout() const
+{
+    return _ioTimeout;
+}
+
 
 } // namespace System
 } // namespace Pt

@@ -53,6 +53,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           WriteEvent.cpp
                           ReadEvent.cpp
                           IOTimeout.cpp
+                          Pipe.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;
@@ -87,9 +88,9 @@ Main IOMonitorDemo : IOMonitorDemo.cpp ;
 Main_LinkSharedLibraries IOMonitorDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate IOMonitorDemo : bin ;
 
-#Main PipeDemo : PipeDemo.cpp ;
-#/Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
-#Main_MakeLocate PipeDemo : bin ;
+Main PipeDemo : PipeDemo.cpp ;
+Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate PipeDemo : bin ;
 
 Main TimerDemo : TimerDemo.cpp ;
 Main_LinkSharedLibraries TimerDemo : Pt Pt-System Pt-Text ;
