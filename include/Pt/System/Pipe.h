@@ -23,13 +23,11 @@
 
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-
+#include <Pt/System/IODevice.h>
 
 namespace Pt {
 
 namespace System {
-
-class IODevice;
 
 class PT_SYSTEM_API Pipe : public NonCopyable
 {

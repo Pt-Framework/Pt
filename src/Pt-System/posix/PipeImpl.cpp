@@ -18,34 +18,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "PipeImpl.h"
-
+#include <memory>
+#include <cerrno>
+#include <unistd.h>
 
 namespace Pt {
 
 namespace System {
 
-PipImpl::PipeImpl()
+PipeImpl::PipeImpl()
 {
-    _impl = new PipeImpl();
+    int fds[2];
+    if(-1 == ::pipe(fds) )
+        throw OpenFailed("pipe", PT_SOURCEINFO);
 }
 
 
-PipeImpl::~PipImpl()
+PipeImpl::~PipeImpl()
 {
-    delete _impl;
+
 }
 
 
-IODevice& Pipe::input()
+IODevice& PipeImpl::input()
 {
-    return _impl->input();
+
 }
 
-IODevice& Pipe::output()
+IODevice& PipeImpl::output()
 {
-    return _impl->output();
+
 }
 
 } // namespace System
