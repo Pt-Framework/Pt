@@ -25,6 +25,7 @@
 #include <Pt/System/IOEvent.h>
 #include <Pt/Signal.h>
 #include <Pt/DateTime.h>
+#include <list>
 
 
 namespace Pt{
@@ -116,11 +117,15 @@ class PT_SYSTEM_API IOMonitor
         Signal<> timeout;
 
         void addTimer(Timer& timer)
-        { _timer = &timer; }
+        { 
+			//_timer = &timer;
+			_timers.push_back(&timer);
+        }
 
     private:
         class IOMonitorImpl* _impl;
-        Timer* _timer;
+        //Timer* _timer;
+        std::list<Timer*> _timers;
 };
 
 } //namespace System
