@@ -20,11 +20,15 @@
 #include <Pt/Main.h>
 #include <Pt/System/IOMonitor.h>
 
-void onTimer()
+void onTimer0()
 {
-    std::cerr << "TIMER\n";
+    std::cerr << "TIMER-0\n";
 }
 
+void onTimer1()
+{
+    std::cerr << "TIMER-1\n";
+}
 
 void onTimeout()
 {
@@ -36,16 +40,23 @@ int main( int argc, char* argv[] )
 {
     try
     {
-        Pt::System::Timer timer;
-        connect(timer.timeout, onTimer);
-        timer.start(2000);
+        Pt::System::Timer timer0;
+        connect(timer0.timeout, onTimer0);
+        timer0.start(2000);
+        
+        Pt::System::Timer timer1;
+        connect(timer1.timeout, onTimer1);
+        timer1.start(1000);
 
         Pt::System::IOMonitor monitor;
-        monitor.addTimer(timer);
+        monitor.addTimer(timer0);
+        monitor.addTimer(timer1);
         connect(monitor.timeout, onTimeout);
 
         while(true)
+        {
             monitor.wait(500);
+        }
     }
     catch( const std::exception& e )
     {
