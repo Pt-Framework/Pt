@@ -23,15 +23,86 @@
 #include <cerrno>
 #include <unistd.h>
 
+
+
 namespace Pt {
 
 namespace System {
+
+PipeIODevice::PipeIODevice()
+: _fd(-1)
+{  }
+
+
+PipeIODevice::~PipeIODevice()
+{
+    try
+    {
+        this->close();
+    }
+    catch(...)
+    {}
+
+}
+
+size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
+{
+    eof = false;
+    ssize_t ret = 0;
+
+    while(true)
+    {
+        ret = ::read(_fd, (void*)buffer, count);
+        eof = (ret == 0) ;
+
+        if(ret >= 0)
+            break;
+
+        if(errno == EINTR) // signal interrupt
+            continue;
+
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
+
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+    }
+
+    return ret;
+}
+
+
+size_t PipeIODevice::_write(const char* buffer, size_t count)
+{
+    ssize_t ret = 0;
+
+    while(true)
+    {
+        ret = ::write(_fd, (const void*)buffer, count);
+
+        if(ret >= 0)
+            break;
+
+        if(errno == EINTR) // signal interrupt
+            continue;
+
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
+
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+    }
+
+    return ret;
+}
+
 
 PipeImpl::PipeImpl()
 {
     int fds[2];
     if(-1 == ::pipe(fds) )
         throw OpenFailed("pipe", PT_SOURCEINFO);
+
+    _input.open( fds[0] );
+    _output.open( fds[1] );
 }
 
 
@@ -43,12 +114,12 @@ PipeImpl::~PipeImpl()
 
 IODevice& PipeImpl::input()
 {
-
+    return _input;
 }
 
 IODevice& PipeImpl::output()
 {
-
+    return _output;
 }
 
 } // namespace System

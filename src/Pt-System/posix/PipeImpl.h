@@ -23,11 +23,44 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-
+#include "IODeviceImpl.h"
 
 namespace Pt {
 
 namespace System {
+
+
+class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
+{
+    public:
+        PipeIODevice();
+
+        ~PipeIODevice();
+
+        void open(int fd)
+        {
+            _fd = fd;
+            this->setValid(true);
+        }
+
+        virtual IODeviceImpl* impl()
+        { return this; }
+
+        int fd() const
+        { return _fd;}
+
+    protected:
+        void _close()
+        { ::close(_fd); }
+
+        virtual size_t _read(char* buffer, size_t count, bool& eof);
+
+        virtual size_t _write(const char* buffer, size_t count);
+
+    private:
+        int _fd;
+};
+
 
 class PipeImpl
 {
@@ -39,7 +72,12 @@ class PipeImpl
         IODevice& input();
 
         IODevice& output();
+
+    private:
+        PipeIODevice _input;
+        PipeIODevice _output;
 };
+
 
 } // namespace System
 
