@@ -238,8 +238,8 @@ class BasicIODevice : public NonCopyable {
         { return false; }
 
         //! @brief Returns true if device is remote
-        virtual bool _waitable() const
-        { return false; }
+        virtual bool _waitable() const = 0;
+        
 
         //! @brief Move the next read position to the given offset
         virtual pos_type _seek(off_type, SeekMode)

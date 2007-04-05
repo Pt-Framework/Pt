@@ -25,7 +25,7 @@
 				Name="VCNMakeTool"
 				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=debug -q Pt-Systemd.dll"
 				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=debug -a Pt-Systemd.dll"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=debug clean Pt-Systemd.dll"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=debug clean"
 				Output=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""

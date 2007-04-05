@@ -22,11 +22,52 @@
 #define Pt_System_win32_PipeImpl_h
 
 #include <Pt/System/Api.h>
-#include "PipeIODevice.h"
+#include <Pt/System/IODevice.h>
+#include "IODeviceImpl.h"
+#include <windows.h>
 
 namespace Pt {
 
 namespace System {
+
+class PipeIODevice : public IODevice, private IODeviceImpl
+{
+    public:
+        PipeIODevice();
+
+        virtual ~PipeIODevice();
+
+        virtual void open(HANDLE handle);
+
+        virtual HANDLE deviceHandle() const;
+        
+        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
+
+        virtual WaitResult waitResult( HANDLE handle );
+
+        virtual void beginWait( size_t waitMode );
+
+        virtual IODeviceImpl* impl()
+        { return this; }
+
+    protected:
+        //! @brief Closes the I/O device
+        virtual void _close();
+
+        //! @brief Read bytes from device
+        virtual size_t _read(char* buffer, size_t count, bool& eof);
+
+        //! @brief Write bytes to device
+        virtual size_t _write(const char* buffer, size_t count);
+        
+        virtual bool _waitable() const
+        { return true; }
+
+     private:
+        HANDLE      _handle;
+        OVERLAPPED  _readOv;
+        OVERLAPPED  _writeOv;        
+};
 
 class PipeImpl
 {

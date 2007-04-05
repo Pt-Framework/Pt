@@ -72,6 +72,9 @@ namespace Net {
 
             void _close();
 
+            bool _waitable() const
+            { return true; }
+
         private:
             TcpSocketImpl* _impl;
     };

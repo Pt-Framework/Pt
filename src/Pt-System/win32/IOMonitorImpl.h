@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,30 +35,39 @@ class IOMonitorImpl
 {
     public:
         IOMonitorImpl();
+
         ~IOMonitorImpl();
         
         Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
+
         void removeDevice( IODevice& device );
+
         bool wait( unsigned int msecs );
-        void wake();    
+
+        void wake(); 
+
+    private:
+        void collectWaitHandles(std::vector<HANDLE>& waitHandles);
+
+        bool areNonWaitableDevicesAvailable();
     
+        void sendEvents(const HANDLE activeHandle);
+
     private:     
     
         enum{ InternalWake = 0 };
         
-        struct DeviceItem
+        struct IOChannel
         {
             IODevice*                   device;
             size_t                      waitMode;
             Signal<const IOEvent&>*     signal;
-            std::vector<HANDLE>         waitHandles;
         };
         
-        std::map<HANDLE,DeviceItem*>    _devHandleMap;
-        std::map<HANDLE,DeviceItem*>    _waitHandleMap;
-        std::vector<HANDLE>             _waitHandles;
-        HANDLE                          _wakeHandle;
-        Mutex                           _mutex;
+        std::vector<IOChannel>          _channels;
+        std::map<HANDLE, IOChannel*>    _channelMap;
+        HANDLE                          _wakeHandle;   
+        
 };
 
 }//namespace System 

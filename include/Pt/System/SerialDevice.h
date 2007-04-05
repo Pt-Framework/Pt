@@ -190,6 +190,10 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
 
+        //! @brief Returns true if device is remote
+        virtual bool _waitable() const
+        { return true; }
+
 };
 
 } //namespace System

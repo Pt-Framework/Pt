@@ -60,6 +60,8 @@ class FileDeviceImpl  : public IODeviceImpl
 
         size_t peek( char* buffer, size_t count );
 
+        bool waitable() const;
+        
         void sync() const;
 
        

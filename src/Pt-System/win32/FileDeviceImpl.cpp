@@ -272,5 +272,14 @@ IODeviceImpl::WaitResult FileDeviceImpl::waitResult( HANDLE handle )
 }
 
 
+bool FileDeviceImpl::waitable() const
+{
+#ifndef _WIN32_WCE
+    return true;
+#else
+    return false;
+#endif
+}
+
 } //namespace System
 } //namespace Pt

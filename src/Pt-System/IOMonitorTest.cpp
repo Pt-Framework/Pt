@@ -155,7 +155,7 @@ class IOMonitorTest : public Pt::Unit::TestSuite
                 SerialDeviceListener listener( serialDevice );
 
                 //Add a device to the event loop.
-                Pt::Signal<const Pt::System::IOEvent&>& signal = eventLoop.addDevice( serialDevice );
+                Pt::Signal<const Pt::System::IOEvent&>& signal = eventLoop.addDevice( serialDevice, Pt::System::IODevice::WaitInput );
 
                 //Connect the device listener to the device.
                 Pt::connect( signal, listener, &SerialDeviceListener::serialEvent );
