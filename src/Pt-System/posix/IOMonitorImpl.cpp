@@ -38,19 +38,11 @@ IOMonitorImpl::IOMonitorImpl()
     //Open a pipe to send wake up message.
     if( ::pipe( _wakePipe ) )
         throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
-
-    //Clear the file descriptors.
-    FD_ZERO(&_rfds);
-    FD_ZERO(&_wfds);
-
-    //Add the wake pipe to the rdfs.
-    FD_SET( _wakePipe[0], &_rfds );
 }
 
 
 IOMonitorImpl::~IOMonitorImpl()
 {
-    //Clear the map.
     std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
 
     for( ; it != _deviceMap.end(); ++it )
@@ -59,9 +51,6 @@ IOMonitorImpl::~IOMonitorImpl()
         delete item.signal;
     }
 
-    _deviceMap.clear();
-
-    //Close the pipe.
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
     {
         ::close(_wakePipe[0]);
@@ -72,64 +61,48 @@ IOMonitorImpl::~IOMonitorImpl()
 
 Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device, size_t waitMode )
 {
-    //Exclusive access to the _deviceMap.
-    MutexLock lock( _mutex );
-
-    //Wake up the monitor => it will wait on _mutex.
-    this->wake();
-
-    //Create a new device description item.
     DeviceItem item;
     item.signal     = new Signal<const IOEvent&>();
     item.device     = &device;
     item.waitMode   = waitMode;
 
-    //Insert the new item to the device description map.
     const int fd = device.impl()->fd();
     _deviceMap.insert( std::make_pair( fd, item ) );
 
-    //Return the new signal.
     return *item.signal;
 }
 
+
 void IOMonitorImpl::removeDevice( IODevice& device )
 {
-    MutexLock lock( _mutex );
-
-    //Wake up the monitor.
-    this->wake();
-
-    //Obtain the device item.
     DeviceItem& item = _deviceMap[ device.impl()->fd() ];
-
-    //Delete the device signal. 
     delete item.signal;
-
-    //Remove the device item from the map.
     _deviceMap.erase( device.impl()->fd() );
 }
+
 
 bool IOMonitorImpl::wait(unsigned int msecs)
 {
     int maxfd   = 0;
     int ret     = -1;
     bool avail  = false;
-
     fd_set rfds;
-    fd_set wfds;
-
     FD_ZERO(&rfds);
+    fd_set wfds;
     FD_ZERO(&wfds);
 
-    //Add the wake pipe to the rdfs.
+    // The pipe to wake a wait call is always passed to select
     FD_SET( _wakePipe[0], &rfds );
     maxfd = _wakePipe[0];
 
-    //Add the devices to the rfds and wfds
-    std::map<int, DeviceItem>::iterator it = _deviceMap.begin();
-
-    for( ; it != _deviceMap.end(); ++it )
+    // Add all waitable devices to the read and write descriptor
+    // sets. Not waitable devices are handled differently.
+    std::map<int, DeviceItem>::iterator it;
+    for( it = _deviceMap.begin(); it != _deviceMap.end(); ++it )
     {
+        if( it->second.device->waitable() == false )
+            continue;
+
         int fd = it->first;
 
         if( (it->second.waitMode & IODevice::WaitInput) == IODevice::WaitInput )
@@ -145,10 +118,53 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         }
     }
 
-    //Setup the timeout. 
+    // The first select checks if any data is immediately available
+    // on waitable devices, therefore no timeout for select. This
+    // way waitable devices get a chance to be serviced too when a
+    // non-waitable device is registered as well
+    struct  timeval no_timeout;
+    no_timeout.tv_sec = 0;
+    no_timeout.tv_usec = 0;
+    while( true )
+    {
+        ret = ::select( maxfd+1, &rfds, &wfds, 0, &no_timeout );
+
+        if( ret != -1 )
+            break;
+
+        if( errno != EINTR )
+            throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
+    }
+
+    // Now we service all devices that are not waitable and thus
+    // have always data available
+    for( it = _deviceMap.begin(); it != _deviceMap.end(); ++it )
+    {
+        const DeviceItem& item = it->second;
+
+        if( item.device->waitable() )
+            continue;
+
+        avail = true;
+        if( it->second.waitMode == IODevice::WaitInput)
+        {
+            ReadEvent ev( *item.device );
+            item.signal->send( ev ) ;
+        }
+        if( it->second.waitMode == IODevice::WaitOutput)
+        {
+            WriteEvent ev( *item.device );
+            item.signal->send( ev );
+        }
+    }
+
+    // if any not waitable devices were present we can bail
+    // out here and report activity
+    if(avail)
+        return true;
+
     timeval* timeout = 0;
     struct   timeval tv;
-
     if(msecs != IOMonitor::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
@@ -156,7 +172,8 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         timeout = &tv;
     }
 
-    //Execute the select.
+    // The second select waits until the timeout expires
+    // or a waitable device becomes available
     while( true )
     {
         ret = ::select( maxfd+1, &rfds, &wfds, 0, timeout );
@@ -168,10 +185,6 @@ bool IOMonitorImpl::wait(unsigned int msecs)
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    //Exclusive access to the _deviceMap and device descriptors.
-    MutexLock lock( _mutex );
-
-    //Check the the wake up reason.
     for( it = _deviceMap.begin(); it != _deviceMap.end(); ++it )
     {
         const DeviceItem& item = it->second;
@@ -191,7 +204,6 @@ bool IOMonitorImpl::wait(unsigned int msecs)
         }
     }
 
-    //Reset the wake pipe.
     if( FD_ISSET( _wakePipe[0], &rfds ) )
     {
         std::vector<char> msgbuf(100);
@@ -202,10 +214,10 @@ bool IOMonitorImpl::wait(unsigned int msecs)
     return avail;
 }
 
+
 void IOMonitorImpl::wake()
 {
     ::write( _wakePipe[1], "XXXXXXXXXXX", 11);
-    Thread::yield();
 }
 
 }//namespace System

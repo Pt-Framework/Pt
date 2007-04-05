@@ -57,6 +57,9 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         virtual size_t _write(const char* buffer, size_t count);
 
+        virtual bool _waitable() const
+        { return true; }
+
     private:
         int _fd;
 };

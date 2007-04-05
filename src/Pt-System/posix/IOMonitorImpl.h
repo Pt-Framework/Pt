@@ -51,11 +51,8 @@ class IOMonitorImpl
             size_t waitMode;
         };
 
-        std::map<int,DeviceItem>     _deviceMap;
-        fd_set                       _rfds;
-        fd_set                       _wfds;
+        std::map<int, DeviceItem>    _deviceMap;
         int                          _wakePipe[2];
-        Mutex                        _mutex;
 };
 
 }//namespace System

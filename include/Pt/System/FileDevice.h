@@ -56,8 +56,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
     protected:
         void _close();
 
-        bool _remote() const
-        { return false; }
+        bool _waitable() const;
 
         bool _seekable() const
         { return true; }

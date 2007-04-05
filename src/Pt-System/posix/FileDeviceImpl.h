@@ -56,19 +56,19 @@ class FileDeviceImpl : public IODeviceImpl
         size_t peek(char* buffer, size_t count);
 
         void sync() const;
-       
+
         int fd() const
         { return _fd; }
 
-        //const IOEvent& event( FdsType fdsType );
-        
+        bool waitable() const
+        { return true; }
+
         std::ios_base::openmode mode() const
-        { return _openMode; }        
+        { return _openMode; }
 
     private:
         int _fd;
         std::ios_base::openmode _openMode;
-        
 };
 
 } //namespace System
