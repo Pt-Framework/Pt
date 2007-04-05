@@ -21,7 +21,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) SerialDeviceImpl.cpp ]
                           [ FDirName $(SYS:L) IOMonitorImpl.cpp ]
                           [ FDirName $(SYS:L) IODeviceImpl.cpp ]
-                          [ FDirName $(SYS:L) PipeIODevice.cpp ]                          
                           Application.cpp
                           Clock.cpp
                           Condition.cpp
