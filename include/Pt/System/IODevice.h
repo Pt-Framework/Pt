@@ -134,14 +134,15 @@ class BasicIODevice : public NonCopyable {
         bool seekable() const
         { return _seekable(); }
 
-        //! @brief Returns true if device accesses remote data.
+        //! @brief Returns true if device is able to wait.
         /**
-            Tests if the device is on a remote location i.e. a network device.
+            Tests if the device is able to wait i.e. on a remote location 
+            like a network device.
 
-            \return true if the device is remote, false otherwise.
+            \return true if the device is able to wait, false otherwise.
         */
-        bool remote() const
-        { return _remote(); }
+        bool waitable() const
+        { return _waitable(); }
 
         //! @brief Move the next read position to the given offset
         /**
@@ -237,7 +238,7 @@ class BasicIODevice : public NonCopyable {
         { return false; }
 
         //! @brief Returns true if device is remote
-        virtual bool _remote() const
+        virtual bool _waitable() const
         { return false; }
 
         //! @brief Move the next read position to the given offset
