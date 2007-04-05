@@ -22,37 +22,37 @@
 #define PT_SYSTEM_IOMONITORIMPL_H
 
 #include <Pt/Signal.h>
-#include <Pt/System/IOEvent.h>
-#include <Pt/System/Mutex.h>
-#include <sys/select.h> 
+#include <sys/select.h>
 #include <sys/time.h>
 
 
-namespace Pt{
+namespace Pt {
 
-namespace System{
+namespace System {
+
+class IOChannel;
 
 class IOMonitorImpl
 {
     public:
         IOMonitorImpl();
+
         ~IOMonitorImpl();
 
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
-        void removeDevice( IODevice& device );
+        void addChannel( IOChannel& channel );
+
+        void removeChannel( IOChannel& device );
+
         bool wait(unsigned int msecs);
+
         void wake();
 
-    private:
-        struct DeviceItem
-        {
-            IODevice* device;
-            Signal<const IOEvent&>* signal;
-            size_t waitMode;
-        };
+    protected:
+        bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
 
-        std::map<int, DeviceItem>    _deviceMap;
-        int                          _wakePipe[2];
+    private:
+        std::map<int, IOChannel*> _channels;
+        int _wakePipe[2];
 };
 
 }//namespace System

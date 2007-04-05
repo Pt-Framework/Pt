@@ -121,17 +121,17 @@ void EventLoop::queueEvent(const Pt::Event& event)
 }
 
 
-Signal<const IOEvent&>&  EventLoop::addDevice( IODevice& device, size_t waitMode )
+void EventLoop::addChannel( IOChannel& channel )
 {
     MutexLock threadSave( _mutex );
-    return _ioMonitor.addDevice( device, waitMode );
+    return _ioMonitor.addChannel( channel );
 }
 
 
-void EventLoop::removeDevice( IODevice& device )
+void EventLoop::removeChannel( IOChannel& channel )
 {
     MutexLock threadSave( _mutex );
-    _ioMonitor.removeDevice( device );
+    _ioMonitor.removeChannel( channel );
 }
 
 

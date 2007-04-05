@@ -8,11 +8,45 @@
 #include <Pt/System/Thread.h>
 
 
-namespace Pt
-{
-namespace System
-{
+namespace Pt {
 
+namespace System {
+
+/** @brief Notifies receivers in constant intervals
+*/
+class PT_SYSTEM_API Timer
+{
+    public:
+        Timer();
+
+        ~Timer();
+
+        bool active() const;
+
+        size_t interval() const;
+
+        void setInterval(size_t msecs);
+
+        void start(unsigned interval);
+
+        void stop();
+
+        bool update();
+
+        size_t remaining() const;
+
+        Signal<> timeout;
+
+        Signal<Timer&> destroyed;
+
+    private:
+        bool     _active;
+        unsigned _started;
+        unsigned _interval;
+        unsigned _elapsed;
+};
+
+/*
 class PT_SYSTEM_API Timer : public Runnable
 {
 public:
@@ -35,8 +69,10 @@ private:
     bool            _run;
 
 };
+*/
 
 }
 
 }
+
 #endif

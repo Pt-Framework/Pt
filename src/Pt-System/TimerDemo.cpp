@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Main.h>
+#include <Pt/System/Timer.h>
 #include <Pt/System/IOMonitor.h>
 
 void onTimer0()
@@ -43,7 +44,7 @@ int main( int argc, char* argv[] )
         Pt::System::Timer timer0;
         connect(timer0.timeout, onTimer0);
         timer0.start(2000);
-        
+
         Pt::System::Timer timer1;
         connect(timer1.timeout, onTimer1);
         timer1.start(1000);
@@ -53,7 +54,7 @@ int main( int argc, char* argv[] )
         monitor.addTimer(timer1);
         connect(monitor.timeout, onTimeout);
 
-        while(true)
+        for(int n = 0; n < 9; ++n)
         {
             monitor.wait(500);
         }

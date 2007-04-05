@@ -63,12 +63,7 @@ class BasicIODevice : public NonCopyable {
             Synchronous = 1,
             Asynchronous
         };
-        
-        enum WaitMode{
-            WaitInput = 1,
-            WaitOutput = 2
-        };
-        
+
     public:
         //! @brief Default Constructor
         BasicIODevice()

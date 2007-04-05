@@ -52,12 +52,9 @@ class Multiplexer : public Pt::Connectable
             _device2.setTimeout( 10 );
 */
 
-            Pt::Signal<const Pt::System::IOEvent&>& signal = _monitor.addDevice( _device, Pt::System::IODevice::WaitInput);
-            Pt::connect( signal, *this, &Multiplexer::onIOEvent );
-
-            //Pt::Signal<const Pt::System::IOEvent&>& signal2 = _monitor.addDevice( _device2, Pt::System::IODevice::WaitOutput );
-            //Pt::connect( signal2, *this, &Multiplexer::onIOEvent2 );
-
+            _channel.attach(_device, Pt::System::IOChannel::WaitInput);
+            _monitor.addChannel( _channel );
+            Pt::connect( _channel.inputReady, *this, &Multiplexer::onInput );
             Pt::connect( _monitor.timeout, *this, &Multiplexer::onTimeout );
         }
 
@@ -67,9 +64,6 @@ class Multiplexer : public Pt::Connectable
             {
                 _monitor.wait(100);
             }
-
-            _monitor.removeDevice( _device );
-            //_monitor.removeDevice( _device2 );
         }
 
         void onTimeout( )
@@ -77,37 +71,24 @@ class Multiplexer : public Pt::Connectable
             std::cerr << "--- TIMEOUT ---" << std::endl;
         }
 
-        void onIOEvent( const Pt::System::IOEvent& ev )
+        void onInput()
         {
-            const Pt::System::ReadEvent* readEvent = 0;
-            readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
-            if( readEvent != 0 )
-            {
-                char buffer[201];
-                memset( buffer, 0, 201);
-                size_t size = _device.read( buffer, 200);
-                std::cerr.write(buffer, size);
-            }
+            char buffer[201];
+            memset( buffer, 0, 201);
+            size_t size = _device.read( buffer, 200);
+            std::cerr.write(buffer, size);
         }
 
-        void onIOEvent2( const Pt::System::IOEvent& ev )
+        void onInput2( const Pt::System::IOEvent& ev )
         {
-            const Pt::System::ReadEvent* readEvent = 0;
-            readEvent = dynamic_cast<const Pt::System::ReadEvent*>( &ev );
-            if( readEvent != 0 )
-            {
-                char buffer[201];
-                memset( buffer, 0, 201);
-                //size_t size = _device2.read( buffer, 200);
-                std::cerr << "MOUSE IO:";
-                //std::cerr.write(buffer, size);
-                std::cerr << std::endl;
-            }
+
         }
 
     private:
         Pt::System::SerialDevice _device;
+        Pt::System::IOChannel _channel;
         //Pt::System::SerialDevice _device2;
+        //Pt::System::IOChannel _channel2;
         Pt::System::IOMonitor    _monitor;
         std::ofstream            _out;
 };

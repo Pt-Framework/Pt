@@ -11,16 +11,17 @@ int main( int argc, char* argv[] )
     const char* out = "Hello World!";
     pipe.output().write(out, 12);
 
+    Pt::System::IOChannel channel( pipe.input(), Pt::System::IOChannel::WaitInput );
+
     Pt::System::IOMonitor monitor;
-    monitor.addDevice( pipe.input(), Pt::System::IODevice::WaitInput );
+    monitor.addChannel( channel );
     bool ret = monitor.wait();
 
     std::cerr << "Data: " << std::boolalpha << ret << std::endl;
     char buffer[20];
     size_t sz = pipe.input().read(buffer, 20);
     std::cerr.write(buffer, sz);
-
-    monitor.removeDevice( pipe.input() );
     std::cerr << std::endl;
+
     return 0;
 }

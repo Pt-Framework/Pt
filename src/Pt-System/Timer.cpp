@@ -1,11 +1,107 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
 
-namespace Pt
-{
-namespace System
-{
 
+namespace {
+
+size_t getCurrentMSecs()
+{
+    Pt::DateTime currentTime = Pt::System::Clock::getCurrentTime();
+    size_t msecs = currentTime.msecs();
+    msecs += currentTime.seconds() * 1000;
+    msecs += currentTime.minutes() * 60 * 1000;
+    msecs += currentTime.hours()   * 60 * 60 * 1000;
+    msecs += currentTime.days()    * 24 * 60 * 60 * 1000;
+    return msecs;
+}
+
+}
+
+namespace Pt {
+
+namespace System {
+
+
+Timer::Timer()
+: _active(false)
+, _started(-1)
+, _interval(-1)
+, _elapsed(0)
+{ }
+
+
+Timer::~Timer()
+{
+    this->destroyed(*this);
+}
+
+
+bool Timer::active() const
+{
+    return _active;
+}
+
+
+size_t Timer::interval() const
+{
+    return _interval;
+}
+
+
+void Timer::setInterval(size_t msecs)
+{
+    _interval = msecs;
+
+    if( _active )
+        this->update();
+}
+
+
+void Timer::start(unsigned interval)
+{
+    _active = true;
+    _interval = interval;
+    _started = getCurrentMSecs();
+    _elapsed = 0;
+}
+
+
+void Timer::stop()
+{
+    _active = false;
+    _started = -1;
+    _elapsed = 0;
+}
+
+
+bool Timer::update()
+{
+    if(_active == false)
+        return false;
+
+    size_t current = getCurrentMSecs();
+    _elapsed = current - _started;
+
+    if(_elapsed >= _interval)
+    {
+        _elapsed -= _interval;
+        _started = current - _elapsed;
+        timeout();
+        return true;
+    }
+
+    return false;
+}
+
+
+size_t Timer::remaining() const
+{
+    return _interval - _elapsed;
+}
+
+
+
+/*
 size_t Timer::_resolution = 10000;
 
 Timer::Timer()
@@ -70,6 +166,8 @@ void Timer::run()
         Thread::sleep( sleepTime );
     }
 }
+*/
 
 }
+
 }

@@ -21,31 +21,24 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include <Pt/System/ReadEvent.h>
-#include <Pt/System/WriteEvent.h>
 #include <ios>
 
 namespace Pt{
+
 namespace System{
 
 class IODeviceImpl
 {
     public:
         IODeviceImpl();
+
         virtual ~IODeviceImpl();
 
-        enum FdsType { ReadFds = 0, WriteFds };
-
-        virtual int fd() const  = 0;
-        //virtual  std::ios_base::openmode mode() const = 0;
-        //virtual const IOEvent& event( FdsType fdsType ) = 0;
-
-    protected:
-        //ReadEvent   _readEvent;
-        //WriteEvent  _writeEvent;
+        virtual int fd() const = 0;
 };
 
-}//namespace 
-}//namespace
+}//namespace System
+
+}//namespace Pt
 
 #endif

@@ -22,58 +22,55 @@
 #define PT_SYSTEM_IOMONITOR_H
 
 #include <Pt/System/IODevice.h>
-#include <Pt/System/IOEvent.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/DateTime.h>
 #include <list>
 
 
-namespace Pt{
+namespace Pt {
 
-namespace System{
+namespace System {
 
-/*
-class IOChannel
+class Timer;
+
+class IOChannel : public NonCopyable
 {
     public:
         enum WaitMode
         {
-            WaitInput = 1,
+            WaitInput  = 1,
             WaitOutput = 2
         };
 
+        IOChannel();
+
         IOChannel(IODevice& device, WaitMode wm);
 
+        ~IOChannel();
+
+        void attach(IODevice& device, WaitMode wm);
+
+        IODevice& device();
+
+        const IODevice& device() const;
+
+        WaitMode waitMode() const;
+
         Signal<> inputReady;
+
         Signal<> outputReady;
 
+        Signal<IOChannel&> destroyed;
+
     private:
+        IODevice* _device;
         WaitMode  _waitMode;
-        IODevice& _device;
-};
-*/
-
-
-class PT_SYSTEM_API Timer
-{
-    public:
-        Timer();
-
-        ~Timer();
-
-        void start(unsigned interval);
-
-    public:
-        unsigned _started;
-        unsigned _interval;
-        unsigned _elapsed;
-
-    public:
-        Signal<> timeout;
 };
 
 
-/** @brief The IOMonitor implements the wait functionality for a device event.
+
+/** @brief Reports activity on a set of devices.
 
     On the IOMonitor can one or more devices registered for event monitoring. 
     At the registration time the client gets a signal object specific for this device.
@@ -84,10 +81,10 @@ class PT_SYSTEM_API Timer
     signalize the IOMonitor to wake up from the wait state. The wake call 
     doesn't emit an event.
 */
-class PT_SYSTEM_API IOMonitor
+class PT_SYSTEM_API IOMonitor : public Connectable
 {
     public:
-        static const unsigned int WaitInfinite = static_cast<unsigned int>(-1);
+        static const unsigned int WaitInfinite = static_cast<size_t>(-1);
 
         //! @brief Default constructor
         IOMonitor();
@@ -100,13 +97,17 @@ class PT_SYSTEM_API IOMonitor
             @param device The device to add
             @return A signal which signalize the device events
         */
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
+        void addChannel( IOChannel& channel );
 
         /** @brief Removes a device from the monitor
 
             @param device The device to remove
         */
-        void removeDevice( IODevice& device );
+        void removeChannel( IOChannel& channel );
+
+        void addTimer(Timer& timer);
+
+        void removeTimer( Timer& timer );
 
         //! @brief Wait until an event occurred
         bool wait(unsigned int msecs = WaitInfinite);
@@ -116,15 +117,8 @@ class PT_SYSTEM_API IOMonitor
 
         Signal<> timeout;
 
-        void addTimer(Timer& timer)
-        { 
-			//_timer = &timer;
-			_timers.push_back(&timer);
-        }
-
     private:
         class IOMonitorImpl* _impl;
-        //Timer* _timer;
         std::list<Timer*> _timers;
 };
 
