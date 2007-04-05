@@ -60,6 +60,8 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         virtual bool _waitable() const
         { return true; }
 
+        virtual void _sync() const;
+
     private:
         int _fd;
 };

@@ -95,6 +95,12 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
 }
 
 
+void PipeIODevice::_sync() const
+{
+    fsync(_fd);
+}
+
+
 PipeImpl::PipeImpl()
 {
     int fds[2];
