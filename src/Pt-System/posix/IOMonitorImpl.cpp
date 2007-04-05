@@ -22,6 +22,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/IODevice.h"
+#include "Pt/System/IOChannel.h"
 #include "Pt/System/IOMonitor.h"
 
 #include <cerrno>

@@ -1,50 +1,48 @@
 #ifndef Pt_System_Timer_h
 #define Pt_System_Timer_h
 
-#include <vector>
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Runnable.h>
-#include <Pt/System/Thread.h>
+#include <vector>
 
 
 namespace Pt {
 
 namespace System {
 
-/** @brief Notifies receivers in constant intervals
-*/
-class PT_SYSTEM_API Timer
-{
-    public:
-        Timer();
+    /** @brief Notifies receivers in constant intervals
+    */
+    class PT_SYSTEM_API Timer
+    {
+        public:
+            Timer();
 
-        ~Timer();
+            ~Timer();
 
-        bool active() const;
+            bool active() const;
 
-        size_t interval() const;
+            size_t interval() const;
 
-        void setInterval(size_t msecs);
+            void setInterval(size_t msecs);
 
-        void start(unsigned interval);
+            void start(unsigned interval);
 
-        void stop();
+            void stop();
 
-        bool update();
+            bool update();
 
-        size_t remaining() const;
+            size_t remaining() const;
 
-        Signal<> timeout;
+            Signal<> timeout;
 
-        Signal<Timer&> destroyed;
+            Signal<Timer&> destroyed;
 
-    private:
-        bool     _active;
-        unsigned _started;
-        unsigned _interval;
-        unsigned _elapsed;
-};
+        private:
+            bool     _active;
+            unsigned _started;
+            unsigned _interval;
+            unsigned _elapsed;
+    };
 
 /*
 class PT_SYSTEM_API Timer : public Runnable

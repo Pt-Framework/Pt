@@ -20,12 +20,10 @@
 #include <Pt/Main.h>
 #include <Pt/System/IOMonitor.h>
 #include <Pt/System/SerialDevice.h>
-#include <Pt/System/IOEvent.h>
+#include <Pt/System/IOChannel.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/IODevice.h>
-#include <Pt/System/ReadEvent.h>
-#include <Pt/System/WriteEvent.h>
 #include <Pt/System/EventSource.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
@@ -79,7 +77,7 @@ class Multiplexer : public Pt::Connectable
             std::cerr.write(buffer, size);
         }
 
-        void onInput2( const Pt::System::IOEvent& ev )
+        void onInput2()
         {
 
         }

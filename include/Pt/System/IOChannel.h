@@ -18,27 +18,56 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IODEVICEIMPL_H
-#define PT_SYSTEM_IODEVICEIMPL_H
+#ifndef PT_SYSTEM_IOCHANNEL_H
+#define PT_SYSTEM_IOCHANNEL_H
 
-#include <ios>
+#include <Pt/NonCopyable.h>
+#include <Pt/Signal.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
+
 
 namespace Pt {
 
 namespace System {
 
-class IODeviceImpl
-{
-    public:
-        IODeviceImpl();
+    class IOChannel : public NonCopyable
+    {
+        public:
+            enum WaitMode
+            {
+                WaitInput  = 1,
+                WaitOutput = 2
+            };
 
-        virtual ~IODeviceImpl();
+            IOChannel();
 
-        virtual int fd() const = 0;
-};
+            IOChannel(IODevice& device, WaitMode wm);
 
-}//namespace System
+            ~IOChannel();
 
-}//namespace Pt
+            void attach(IODevice& device, WaitMode wm);
+
+            IODevice& device();
+
+            const IODevice& device() const;
+
+            WaitMode waitMode() const;
+
+            Signal<> inputReady;
+
+            Signal<> outputReady;
+
+            Signal<IOChannel&> destroyed;
+
+        private:
+            IODevice* _device;
+            WaitMode  _waitMode;
+    };
+
+
+} //namespace System
+
+} //namespace Pt
 
 #endif
