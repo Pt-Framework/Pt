@@ -436,10 +436,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\win32\PipeIODevice.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\win32\ProcessImpl.cpp"
 					>
 				</File>
@@ -831,10 +827,6 @@
 				</File>
 				<File
 					RelativePath=".\win32\PipeImpl.h"
-					>
-				</File>
-				<File
-					RelativePath=".\win32\PipeIODevice.h"
 					>
 				</File>
 				<File

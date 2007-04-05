@@ -21,6 +21,7 @@
 
 #include "PipeImpl.h"
 #include <windows.h>
+#include <sstream>
 
 
 namespace Pt {
@@ -43,13 +44,21 @@ PipeIODevice::PipeIODevice()
 
 PipeIODevice::~PipeIODevice()
 {
+    try
+    {
+        close();
+    }
+    catch(...)
+    {
+    }
 }
 
 
 
 void PipeIODevice::open(HANDLE handle)
 {
-    _handle = handle;    
+    _handle = handle; 
+    setValid(true);
 }
 
 HANDLE PipeIODevice::deviceHandle() const
@@ -69,12 +78,10 @@ IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 
 void PipeIODevice::beginWait( size_t waitMode )
 {
-    if (waitMode & IODevice::WaitInput)
-    {
+    if (waitMode & IODevice::WaitInput) {
         read(0, 0);
     }
-    if (waitMode & IODevice::WaitOutput)
-    {
+    if (waitMode & IODevice::WaitOutput) {
         write(0, 0);
     }
     
@@ -117,7 +124,7 @@ void PipeIODevice::_close()
 
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 {
-     eof = false;
+    eof = false;
     DWORD readBytes = 0;    
 
     if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
@@ -135,7 +142,6 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
         {
             readBytes = 0;
         }
-
     }
 
     _readOv.Offset += readBytes;
@@ -165,10 +171,21 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
     return writtenBytes;
 }
 
+void PipeIODevice::_sync() const
+{
+    if( FALSE == ::FlushFileBuffers(_handle) ) {
+        throw IOError("Could not flush file buffer", PT_SOURCEINFO);
+    }
+}
+
+
 
 PipeImpl::PipeImpl()
-{    
-    HANDLE inputHandle = ::CreateNamedPipe("\\\\.\\pipe\\Test", 
+{   
+    std::stringstream ss;
+    ss<<"\\\\.\\pipe\\ptpipe"<<_nameId;
+    
+    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(), 
                                      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
                                      1,
@@ -185,19 +202,20 @@ PipeImpl::PipeImpl()
     DWORD create = OPEN_EXISTING;
     DWORD flags  = FILE_FLAG_OVERLAPPED;    
     
-    HANDLE outputHandle = ::CreateFile("\\\\.\\pipe\\Test", access, share, NULL, create, flags, NULL);
+    HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
 
     if(outputHandle == INVALID_HANDLE_VALUE)
         throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
 
     _inputDevice.open(inputHandle);
     _outputDevice.open(outputHandle);
+    
+    _nameId++;
 }
-
 
 PipeImpl::~PipeImpl()
 {
-  
+    _nameId--;  
 }
 
 
@@ -210,6 +228,8 @@ IODevice& PipeImpl::output()
 {
     return _outputDevice;
 }
+
+Pt::uint32_t  PipeImpl::_nameId = 0;
 
 } // namespace System
 

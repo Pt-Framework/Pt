@@ -63,10 +63,12 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual bool _waitable() const
         { return true; }
 
+        virtual void _sync() const;
+
      private:
-        HANDLE      _handle;
-        OVERLAPPED  _readOv;
-        OVERLAPPED  _writeOv;        
+        HANDLE              _handle;
+        OVERLAPPED          _readOv;
+        OVERLAPPED          _writeOv;              
 };
 
 class PipeImpl
@@ -80,8 +82,9 @@ class PipeImpl
 
         IODevice& output();
     private:
-        PipeIODevice    _inputDevice;
-        PipeIODevice    _outputDevice;   
+        PipeIODevice        _inputDevice;
+        PipeIODevice        _outputDevice; 
+        static Pt::uint32_t _nameId;
 };
 
 } // namespace System
