@@ -25,7 +25,8 @@ Selector::~Selector()
 
 void Selector::addChannel( IOChannel& channel)
 {
-    return _impl->addChannel( channel );
+    _impl->addChannel( channel );
+    connect(channel.destroyed, *this, &Selector::removeChannel);
 }
 
 
