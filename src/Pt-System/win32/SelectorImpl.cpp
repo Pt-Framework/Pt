@@ -19,9 +19,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "IOMonitorImpl.h"
+#include "SelectorImpl.h"
 #include "IODeviceImpl.h"
-#include "Pt/System/MutexLock.h"
 #include "Pt/System/IOChannel.h"
 #include "Pt/System/Selector.h"
 #include <algorithm>
@@ -31,28 +30,28 @@ namespace Pt {
 
 namespace System {
 
-IOMonitorImpl::IOMonitorImpl()
+SelectorImpl::SelectorImpl()
 { 
     _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );    
 }
 
-IOMonitorImpl::~IOMonitorImpl()
+SelectorImpl::~SelectorImpl()
 { 
     CloseHandle( _wakeHandle );
 }
  
-void IOMonitorImpl::addChannel( IOChannel& channel )
+void SelectorImpl::addChannel( IOChannel& channel )
 {
     _channels.push_back(&channel);
 }
 
-void IOMonitorImpl::removeChannel( IOChannel& channel )
+void SelectorImpl::removeChannel( IOChannel& channel )
 {
 	_channels.erase( std::remove(_channels.begin(), _channels.end(), &channel),
 	                 _channels.end() );
 }
 
-void IOMonitorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
+void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 {
     std::vector<HANDLE>                 currentHandles;
     std::vector<IOChannel*>::iterator    it;
@@ -84,7 +83,7 @@ void IOMonitorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
     }
 }
 
-bool IOMonitorImpl::areNonWaitableDevicesAvailable()
+bool SelectorImpl::areNonWaitableDevicesAvailable()
 {
     std::vector<IOChannel*>::iterator it;    
     
@@ -119,7 +118,7 @@ bool IOMonitorImpl::areNonWaitableDevicesAvailable()
     return available;
 }
 
-void IOMonitorImpl::sendEvents(const HANDLE activeHandle)
+void SelectorImpl::sendEvents(const HANDLE activeHandle)
 {
     try
     {
@@ -150,7 +149,7 @@ void IOMonitorImpl::sendEvents(const HANDLE activeHandle)
      }
 }
 
-bool IOMonitorImpl::wait( unsigned int msecs )
+bool SelectorImpl::wait( unsigned int msecs )
 {   
     DWORD               result = 0;
     std::vector<HANDLE> waitHandles;
@@ -186,7 +185,7 @@ bool IOMonitorImpl::wait( unsigned int msecs )
     return true;
 }
 
-void IOMonitorImpl::wake()
+void SelectorImpl::wake()
 {
     SetEvent( _wakeHandle ); 
 }

@@ -1,7 +1,7 @@
 #include "Pt/System/Selector.h"
 #include "Pt/System/Timer.h"
 #include "Pt/System/IOChannel.h"
-#include "IOMonitorImpl.h"
+#include "SelectorImpl.h"
 
 
 namespace Pt {
@@ -13,7 +13,7 @@ Selector::Selector()
 : _impl( 0 )
 
 {
-    _impl = new IOMonitorImpl();
+    _impl = new SelectorImpl();
 }
 
 

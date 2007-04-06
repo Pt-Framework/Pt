@@ -460,6 +460,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\win32\SelectorImpl.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\win32\SemaphoreImpl.cpp"
 					>
 				</File>
@@ -883,6 +887,10 @@
 				</File>
 				<File
 					RelativePath=".\win32\RWLockImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\SelectorImpl.h"
 					>
 				</File>
 				<File

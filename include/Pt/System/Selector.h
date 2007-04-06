@@ -82,7 +82,7 @@ namespace System {
             Signal<> timeout;
 
         private:
-            class IOMonitorImpl* _impl;
+            class SelectorImpl* _impl;
             std::list<Timer*> _timers;
     };
 
