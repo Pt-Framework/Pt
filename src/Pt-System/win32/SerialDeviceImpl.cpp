@@ -17,10 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "SerialDeviceImpl.h"
 #include "win32.h"
+#include "SerialDeviceImpl.h"
+#include "Pt/System/Thread.h"
+#include "Pt/System/IOChannel.h"
 #include <iostream>
-#include <Pt/System/Thread.h>
+
 
 namespace Pt{
 namespace System{
@@ -389,10 +391,10 @@ void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMo
     
     DWORD waitMask = 0;
     
-    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+    if(waitMode & IOChannel::WaitInput)
         waitMask |= EV_RXCHAR;
         
-    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+    if(waitMode & IOChannel::WaitOutput)
         waitMask |= EV_TXEMPTY;
 
     SetCommMask( _handle, waitMask );

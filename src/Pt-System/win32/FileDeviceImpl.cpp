@@ -19,7 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "win32.h"
-#include "Pt/System/IODevice.h"
+#include "Pt/System/IOChannel.h"
 
 #include "FileDeviceImpl.h"
 
@@ -254,10 +254,10 @@ void FileDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode
 {
     handles.clear();
     
-    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+    if(waitMode & IOChannel::WaitInput)
         handles.push_back( _readOv.hEvent );
     
-    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+    if(waitMode & IOChannel::WaitOutput)
         handles.push_back( _writeOv.hEvent );                
 }
         

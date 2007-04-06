@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "PipeImpl.h"
+#include "Pt/System/IOChannel.h"
 #include <windows.h>
 #include <sstream>
 
@@ -78,10 +79,10 @@ IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 
 void PipeIODevice::beginWait( size_t waitMode )
 {
-    if (waitMode & IODevice::WaitInput) {
+    if (waitMode & IOChannel::WaitInput) {
         read(0, 0);
     }
-    if (waitMode & IODevice::WaitOutput) {
+    if (waitMode & IOChannel::WaitOutput) {
         write(0, 0);
     }
     
@@ -93,14 +94,14 @@ void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
     bool eof;
     handles.clear();
     
-    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+    if( waitMode & IOChannel::WaitInput )
     {
         this->_read(0, 0, eof);
         //ReadFile(_handle, 0, 0, &readBytes, &_readOv);
         handles.push_back( _readOv.hEvent );
     }
     
-    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+    if( waitMode & IOChannel::WaitOutput )
         handles.push_back( _writeOv.hEvent );          
 }
 

@@ -22,14 +22,17 @@
 #ifndef PT_SYSTEM_IOMONITORIMPL_H
 #define PT_SYSTEM_IOMONITORIMPL_H
 
-#include <Pt/Signal.h>
-#include <Pt/System/IOEvent.h>
-#include <Pt/System/Mutex.h>
-#include <Pt/System/IODevice.h>
+#include "Pt/System/Api.h"
+#include <vector>
+#include <map>
 #include <windows.h>
 
-namespace Pt{
-namespace System{
+
+namespace Pt {
+
+namespace System {
+
+class IOChannel;
 
 class IOMonitorImpl
 {
@@ -38,9 +41,9 @@ class IOMonitorImpl
 
         ~IOMonitorImpl();
         
-        Signal<const IOEvent&>& addDevice( IODevice& device, size_t waitMode );
+        void addChannel( IOChannel& channel );
 
-        void removeDevice( IODevice& device );
+        void removeChannel( IOChannel& channel );
 
         bool wait( unsigned int msecs );
 
@@ -54,23 +57,15 @@ class IOMonitorImpl
         void sendEvents(const HANDLE activeHandle);
 
     private:     
-    
         enum{ InternalWake = 0 };
         
-        struct IOChannel
-        {
-            IODevice*                   device;
-            size_t                      waitMode;
-            Signal<const IOEvent&>*     signal;
-        };
-        
-        std::vector<IOChannel>          _channels;
+        std::vector<IOChannel*>          _channels;
         std::map<HANDLE, IOChannel*>    _channelMap;
         HANDLE                          _wakeHandle;   
-        
 };
 
 }//namespace System 
+
 }//namespace Pt
 
 #endif

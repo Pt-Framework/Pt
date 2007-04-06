@@ -117,6 +117,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IOChannel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\IOError.cpp"
 				>
 			</File>
@@ -178,6 +182,18 @@
 			</File>
 			<File
 				RelativePath=".\RWLock.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Selector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SelectorDemo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SelectorTest.cpp"
 				>
 			</File>
 			<File
@@ -519,6 +535,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\System\FileErrors.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\System\FileStream.h"
 				>
 			</File>
@@ -532,6 +552,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\IOBuffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\IOChannel.h"
 				>
 			</File>
 			<File
@@ -587,11 +611,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\System\ReadEvent.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\System\Runnable.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\RWLock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\Selector.h"
 				>
 			</File>
 			<File
@@ -612,6 +644,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\Spinlock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\StreamBuffer.h"
 				>
 			</File>
 			<File
@@ -640,6 +676,14 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\System\TimeValue.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\Url.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\System\WriteEvent.h"
 				>
 			</File>
 			<Filter

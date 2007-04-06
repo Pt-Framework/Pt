@@ -1,6 +1,7 @@
 #ifndef PT_SYSTEM_WIN32_H
 #define PT_SYSTEM_WIN32_H
 
+#include "Pt/System/Api.h"
 #include <vector>
 #include <string>
 #include <string.h>

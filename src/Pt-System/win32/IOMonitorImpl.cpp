@@ -20,15 +20,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "IOMonitorImpl.h"
-#include "Pt/System/MutexLock.h"
-#include "Pt/System/ReadEvent.h"
-#include "Pt/System/WriteEvent.h"
-#include "Pt/System/IOTimeout.h"
-#include "Pt/System/IOMonitor.h"
 #include "IODeviceImpl.h"
+#include "Pt/System/MutexLock.h"
+#include "Pt/System/IOChannel.h"
+#include "Pt/System/Selector.h"
+#include <algorithm>
 
-namespace Pt{
-namespace System{
+
+namespace Pt {
+
+namespace System {
 
 IOMonitorImpl::IOMonitorImpl()
 { 
@@ -37,48 +38,24 @@ IOMonitorImpl::IOMonitorImpl()
 
 IOMonitorImpl::~IOMonitorImpl()
 { 
-    std::vector<IOChannel>::iterator it;
-
-    for (it = _channels.begin(); it != _channels.end(); ++it)
-    {
-        delete it->signal;
-    }
-
     CloseHandle( _wakeHandle );
 }
  
-Signal<const IOEvent&>& IOMonitorImpl::addDevice( IODevice& device, size_t waitMode )
+void IOMonitorImpl::addChannel( IOChannel& channel )
 {
-    IOChannel   channel;
-
-    channel.signal    = new Signal<const IOEvent&>();
-    channel.device    = &device; 
-    channel.waitMode  = waitMode;
-
-    _channels.push_back(channel);
-   
-    return *(channel.signal);
+    _channels.push_back(&channel);
 }
 
-void IOMonitorImpl::removeDevice( IODevice& device )
+void IOMonitorImpl::removeChannel( IOChannel& channel )
 {
-    std::vector<IOChannel>::iterator it;
-
-    for (it = _channels.begin(); it != _channels.end(); ++it)
-    {
-        if ( &device == it->device )
-        {
-            delete it->signal;
-            _channels.erase(it);
-            break;
-        }
-    }    
+	_channels.erase( std::remove(_channels.begin(), _channels.end(), &channel),
+	                 _channels.end() );
 }
 
 void IOMonitorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 {
     std::vector<HANDLE>                 currentHandles;
-    std::vector<IOChannel>::iterator    it;
+    std::vector<IOChannel*>::iterator    it;
     std::vector<HANDLE>::iterator       currentHandlesIt;
     
     _channelMap.clear();
@@ -87,18 +64,21 @@ void IOMonitorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
     
     for (it = _channels.begin(); it != _channels.end(); ++it)
     {
-        if (!it->device->waitable())
+		IOChannel& channel = **it;
+		IODevice& device = channel.device();
+		
+        if ( !device.waitable() )
             continue;       
         
         currentHandles.clear();
 
-        it->device->impl()->beginWait(it->waitMode);
+        device.impl()->beginWait( channel.waitMode() );
 
-        it->device->impl()->eventHandles(currentHandles, it->waitMode);
+        device.impl()->eventHandles( currentHandles, channel.waitMode() );
 
         for (currentHandlesIt = currentHandles.begin(); currentHandlesIt != currentHandles.end(); ++currentHandlesIt)
         {
-            _channelMap[*currentHandlesIt] = &(*it);
+            _channelMap[*currentHandlesIt] = &channel;
             waitHandles.push_back(*currentHandlesIt);
         }
     }
@@ -106,27 +86,28 @@ void IOMonitorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 
 bool IOMonitorImpl::areNonWaitableDevicesAvailable()
 {
-    std::vector<IOChannel>::iterator it;    
+    std::vector<IOChannel*>::iterator it;    
     
     bool available = false;
     try
     { 
         for (it = _channels.begin(); it != _channels.end(); ++it)
         {
-            if (it->device->waitable())
+			IOChannel& channel = **it;
+			IODevice& device = channel.device();
+
+            if( device.waitable() )
                 continue;
             
             available = true;
 
-            if (it->waitMode & IODevice::WaitInput)
+            if (channel.waitMode() & IOChannel::WaitInput)
             {
-                ReadEvent ev( *it->device );
-                it->signal->send( ev );    
+                channel.inputReady();    
             }
-            if (it->waitMode & IODevice::WaitOutput)
+            if (channel.waitMode() & IOChannel::WaitOutput)
             {
-                WriteEvent ev( *it->device );
-                it->signal->send( ev );
+                channel.outputReady();
             }            
         }
     }
@@ -142,25 +123,25 @@ void IOMonitorImpl::sendEvents(const HANDLE activeHandle)
 {
     try
     {
-        IOChannel* activeChannel = _channelMap[activeHandle];
+        IOChannel& activeChannel = *( _channelMap[activeHandle] );
+		IODevice& activeDevice = activeChannel.device();
 
-        switch( activeChannel->device->impl()->waitResult( activeHandle ) )
+        switch( activeDevice.impl()->waitResult( activeHandle ) )
         {
             case IODeviceImpl::ReadyRead:
-            {
-                ReadEvent ev( *activeChannel->device );                    
-                activeChannel->signal->send( ev );    
+            {                   
+                activeChannel.inputReady(); 
+                break;   
             }
-            break;
+
             case IODeviceImpl::ReadyWrite:
-            {
-                WriteEvent ev( *activeChannel->device );                    
-                activeChannel->signal->send( ev );                    
+            {                   
+                activeChannel.outputReady();
+                break;           
             }
-            break;
         }            
                 
-        activeChannel->device->impl()->endWait( activeHandle );
+        activeDevice.impl()->endWait( activeHandle );
         
      }
      catch(const std::exception& e )
@@ -174,7 +155,7 @@ bool IOMonitorImpl::wait( unsigned int msecs )
     DWORD               result = 0;
     std::vector<HANDLE> waitHandles;
 
-    if( msecs == IOMonitor::WaitInfinite ) {
+    if( msecs == Selector::WaitInfinite ) {
         msecs = INFINITE;    
     }
     

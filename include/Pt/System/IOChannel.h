@@ -31,7 +31,7 @@ namespace Pt {
 
 namespace System {
 
-    class IOChannel : public NonCopyable
+    class PT_SYSTEM_API IOChannel : public NonCopyable
     {
         public:
             enum WaitMode
