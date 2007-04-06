@@ -28,7 +28,7 @@
 #include <Pt/System/Mutex.h>
 #include <Pt/System/MutexLock.h>
 #include <Pt/System/Runnable.h>
-#include <Pt/System/IOMonitor.h>
+#include <Pt/System/Selector.h>
 #include <Pt/Event.h>
 
 
@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace System {
 
-class IOMonitor;
+class Selector;
 
     /** \brief An event loop which handles events from multiple sources.
      *
@@ -62,7 +62,8 @@ class IOMonitor;
      *
      * This class is thread-safe, so any method may be called from any Thread.
      */
-    class PT_SYSTEM_API EventLoop : public Connectable, public Runnable {
+    class PT_SYSTEM_API EventLoop : public Connectable, public Runnable
+    {
         public:
             //! Constructs the EventLoop.
             EventLoop();
@@ -181,10 +182,15 @@ class IOMonitor;
              */
             void removeChannel( IOChannel& channel );
 
-            void setIOTimeout(unsigned int msecs);
+            /** @brief Sets the idle timeout
+            */
+            void setIdleTimeout(unsigned int msecs);
 
-            unsigned int timeout() const;
+            /** @brief Returns the idle timeout
+            */
+            unsigned int idleTimeout() const;
 
+            //! @internal
             virtual bool opened(const Connection& c)
             {
                 MutexLock lock(_connectionMutex);
@@ -192,29 +198,24 @@ class IOMonitor;
                 return accept;
             }
 
+            //! @internal
             virtual void closed(const Connection& c)
             {
                 MutexLock lock(_connectionMutex);
                 Connectable::closed(c);
             }
 
-            /**
-             * \brief The signal to which slots can register themselves to listen for
-             * any event that is committed to this event loop's event queue.
-             */
+            /** @brief Reports all events
+                Clients can connect themselves to this signal to listen for
+                any event that is committed to this event loop's event queue.
+            */
             Signal<const Pt::Event&> event;
 
-            Signal<> ioTimeout;
-
-        protected:
-            //! Empty Copy-Constructor. Copying not allowed.
-            EventLoop(const EventLoop& app)
-            {}
-
-            //! Empty assignment operator. (Only returns a this-reference.)
-            //! Assignment not allowed.
-            EventLoop& operator=(const EventLoop& el)
-            { return *this; }
+            /** @brief Reports event loop idel timeuts
+                Clients connected to this signal will be called if there was
+                no activity in an idle time interval.
+            */
+            Signal<> timeout;
 
         private:
 
@@ -236,8 +237,8 @@ class IOMonitor;
             std::list<Pt::Event*>   _eventQueue;
             Mutex                   _connectionMutex;
             Mutex                   _mutex;
-            IOMonitor               _ioMonitor;
-            unsigned int            _ioTimeout;
+            Selector                _selector;
+            unsigned int            _timeout;
     };
 
 } // namespace System

@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include <Pt/Main.h>
 #include <Pt/System/Timer.h>
-#include <Pt/System/IOMonitor.h>
+#include <Pt/System/Selector.h>
 
 void onTimer0()
 {
@@ -49,14 +49,14 @@ int main( int argc, char* argv[] )
         connect(timer1.timeout, onTimer1);
         timer1.start(1000);
 
-        Pt::System::IOMonitor monitor;
-        monitor.addTimer(timer0);
-        monitor.addTimer(timer1);
-        connect(monitor.timeout, onTimeout);
+        Pt::System::Selector selector;
+        selector.addTimer(timer0);
+        selector.addTimer(timer1);
+        connect(selector.timeout, onTimeout);
 
         for(int n = 0; n < 9; ++n)
         {
-            monitor.wait(500);
+            selector.wait(500);
         }
     }
     catch( const std::exception& e )

@@ -27,9 +27,9 @@ namespace System {
 
 EventLoop::EventLoop()
 : _exitLoop(false)
-, _ioTimeout(IOMonitor::WaitInfinite)
+, _timeout(Selector::WaitInfinite)
 {
-    connect(_ioMonitor.timeout, ioTimeout);
+    connect(_selector.timeout, timeout);
 }
 
 EventLoop::~EventLoop()
@@ -60,7 +60,7 @@ void EventLoop::run()
         if( _eventQueue.empty() )
         {
             _mutex.unlock();
-            _ioMonitor.wait(_ioTimeout);
+            _selector.wait(_timeout);
         }
         else
         {
@@ -103,7 +103,7 @@ void EventLoop::processEvents()
 void EventLoop::wake()
 {
     MutexLock threadSave( _mutex );   
-    _ioMonitor.wake();
+    _selector.wake();
 }
 
 void EventLoop::exit()
@@ -124,25 +124,25 @@ void EventLoop::queueEvent(const Pt::Event& event)
 void EventLoop::addChannel( IOChannel& channel )
 {
     MutexLock threadSave( _mutex );
-    return _ioMonitor.addChannel( channel );
+    return _selector.addChannel( channel );
 }
 
 
 void EventLoop::removeChannel( IOChannel& channel )
 {
     MutexLock threadSave( _mutex );
-    _ioMonitor.removeChannel( channel );
+    _selector.removeChannel( channel );
 }
 
 
-void EventLoop::setIOTimeout(unsigned int msecs)
+void EventLoop::setIdleTimeout(unsigned int msecs)
 {
-    _ioTimeout = msecs;
+    _timeout = msecs;
 }
 
-unsigned int EventLoop::timeout() const
+unsigned int EventLoop::idleTimeout() const
 {
-    return _ioTimeout;
+    return _timeout;
 }
 
 

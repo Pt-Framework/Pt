@@ -1,7 +1,7 @@
 #include <Pt/Main.h>
 #include <Pt/System/Pipe.h>
 #include <Pt/System/IOChannel.h>
-#include <Pt/System/IOMonitor.h>
+#include <Pt/System/Selector.h>
 #include <iostream>
 
 
@@ -14,9 +14,9 @@ int main( int argc, char* argv[] )
 
     Pt::System::IOChannel channel( pipe.input(), Pt::System::IOChannel::WaitInput );
 
-    Pt::System::IOMonitor monitor;
-    monitor.addChannel( channel );
-    bool ret = monitor.wait();
+    Pt::System::Selector selector;
+    selector.addChannel( channel );
+    bool ret = selector.wait();
 
     std::cerr << "Data: " << std::boolalpha << ret << std::endl;
     char buffer[20];

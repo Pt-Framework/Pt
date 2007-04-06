@@ -23,7 +23,7 @@
 #include "Pt/System/IOError.h"
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOChannel.h"
-#include "Pt/System/IOMonitor.h"
+#include "Pt/System/Selector.h"
 
 #include <cerrno>
 #include <iostream>
@@ -155,7 +155,7 @@ bool IOMonitorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int mse
 
     timeval* timeout = 0;
     struct   timeval tv;
-    if(msecs != IOMonitor::WaitInfinite)
+    if(msecs != Selector::WaitInfinite)
     {
         tv.tv_sec = msecs / 1000;
         tv.tv_usec = (msecs % 1000) * 1000;

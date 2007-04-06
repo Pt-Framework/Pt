@@ -37,9 +37,12 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           IOManager.cpp
                           Mutex.cpp
                           MutexLock.cpp
+                          Pipe.cpp
                           Plugin.cpp
                           Process.cpp
                           RWLock.cpp
+                          Selector.cpp
+                          SerialDevice.cpp
                           Semaphore.cpp
                           SharedLib.cpp
                           SharedMemory.cpp
@@ -50,13 +53,10 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Timer.cpp
                           TimeValue.cpp
                           Url.cpp
-                          SerialDevice.cpp
-                          IOMonitor.cpp
-                          IOEvent.cpp
-                          WriteEvent.cpp
-                          ReadEvent.cpp
-                          IOTimeout.cpp
-                          Pipe.cpp
+                          #IOEvent.cpp
+                          #WriteEvent.cpp
+                          #ReadEvent.cpp
+                          #IOTimeout.cpp
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;
@@ -87,9 +87,9 @@ Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;
 
-Main IOMonitorDemo : IOMonitorDemo.cpp ;
-Main_LinkSharedLibraries IOMonitorDemo : Pt Pt-System Pt-Text ;
-Main_MakeLocate IOMonitorDemo : bin ;
+Main SelectorDemo : SelectorDemo.cpp ;
+Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate SelectorDemo : bin ;
 
 Main PipeDemo : PipeDemo.cpp ;
 Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
