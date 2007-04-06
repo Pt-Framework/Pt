@@ -18,7 +18,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "IOMonitorImpl.h"
+#include "SelectorImpl.h"
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/IODevice.h"
@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace System {
 
-IOMonitorImpl::IOMonitorImpl()
+SelectorImpl::SelectorImpl()
 {
     //Open a pipe to send wake up message.
     if( ::pipe( _wakePipe ) )
@@ -41,7 +41,7 @@ IOMonitorImpl::IOMonitorImpl()
 }
 
 
-IOMonitorImpl::~IOMonitorImpl()
+SelectorImpl::~SelectorImpl()
 {
     if( _wakePipe[0] != -1 && _wakePipe[1] != -1 )
     {
@@ -51,20 +51,20 @@ IOMonitorImpl::~IOMonitorImpl()
 }
 
 
-void IOMonitorImpl::addChannel( IOChannel& channel )
+void SelectorImpl::addChannel( IOChannel& channel )
 {
     const int fd = channel.device().impl()->fd();
     _channels.insert( std::make_pair( fd, &channel ) );
 }
 
 
-void IOMonitorImpl::removeChannel( IOChannel& channel )
+void SelectorImpl::removeChannel( IOChannel& channel )
 {
     _channels.erase( channel.device().impl()->fd() );
 }
 
 
-bool IOMonitorImpl::wait(unsigned int msecs)
+bool SelectorImpl::wait(unsigned int msecs)
 {
     int maxfd   = 0;
     bool avail  = false;
@@ -141,14 +141,14 @@ bool IOMonitorImpl::wait(unsigned int msecs)
 }
 
 
-void IOMonitorImpl::wake()
+void SelectorImpl::wake()
 {
     ::write( _wakePipe[1], "X", 1);
     ::fsync( _wakePipe[1] );
 }
 
 
-bool IOMonitorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs)
+bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs)
 {
     bool avail  = false;
     int ret     = -1;

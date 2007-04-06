@@ -18,10 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITORIMPL_H
-#define PT_SYSTEM_IOMONITORIMPL_H
+#ifndef PT_SYSTEM_POSIX_SELECTORIMPL_H
+#define PT_SYSTEM_POSIX_SELECTORIMPL_H
 
-#include <Pt/Signal.h>
+#include <map>
 #include <sys/select.h>
 #include <sys/time.h>
 
@@ -32,12 +32,12 @@ namespace System {
 
 class IOChannel;
 
-class IOMonitorImpl
+class SelectorImpl
 {
     public:
-        IOMonitorImpl();
+        SelectorImpl();
 
-        ~IOMonitorImpl();
+        ~SelectorImpl();
 
         void addChannel( IOChannel& channel );
 
