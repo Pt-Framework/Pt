@@ -16,6 +16,7 @@ SharedLibrary Pt : Any.cpp
                    StringStream.cpp
                    StringList.cpp
                    Time.cpp
+                   Timestamp.cpp
                    TypeInfo.cpp
                    codecvt.cpp
                    ctype.cpp

@@ -21,6 +21,7 @@
 #include <sstream>
 
 #include "Pt/Types.h"
+#include "Pt/Timestamp.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
@@ -37,6 +38,7 @@ class TypesTest : public Pt::Unit::TestCase
     protected:
         void test()
         {
+            Pt::Timestamp ts;
             PT_UNIT_ASSERT( sizeof(Pt::int8_t) == 1 );
             PT_UNIT_ASSERT( sizeof(Pt::uint8_t) == 1 );
             PT_UNIT_ASSERT( sizeof(Pt::int16_t) == 2 );

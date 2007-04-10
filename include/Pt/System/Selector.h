@@ -41,7 +41,9 @@ namespace System {
         a timeout and the respective timeout signal is sent if it occurs.
         Clients can be notified about Timer and IODevice activity by
         connecting to the appropriate signals of the Timer and IODevice
-        classes.
+        classes. A Selector is the heart of the event loops in Pt and
+        the event loop and application classes provide the same API
+        as the Selector itself.
     */
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
     {

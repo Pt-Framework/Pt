@@ -50,7 +50,7 @@ namespace System {
      * To start the event loop the method "run()" must be executed. It will only
      * return after the event loop was stopped. To stop the loop "exit()" can be
      * called or the EventLoop object must be deleted. The delivery of the events
-     * occurs inside the Thread that startet the execution of the event loop by
+     * occurs inside the Thread that started the execution of the event loop by
      * calling "run()".
      *
      * Events can be committed from arbitrary Threads as this class is thread-safe.

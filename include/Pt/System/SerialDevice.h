@@ -27,7 +27,6 @@ namespace Pt {
 namespace System {
 
 /** @brief Serial device
-    @ingroup Pt::System
 
     This class implements the serial device I/O operations.
 */
@@ -88,7 +87,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
             \param file     The serial device file
             \param mode     The open mode
-            \parm synchron  The Read/Write mode
+            \param synchron  The Read/Write mode
         */
         SerialDevice( const std::string& file, std::ios_base::openmode mode );
 

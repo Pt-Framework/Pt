@@ -14,9 +14,30 @@ namespace System {
 
         Timers can be used to be notified if a time interval expires. It
         usually works with a Selector or event loop, where the Timer
-        needs to be registered. Timers are set to send the timeout signal
-        in given intervals. The interval can be changed at any time and timers
+        needs to be registered. Timers send the timeout signal
+        in given intervals, to which the interested clients connect. The
+        interval can be changed at any time and timers
         can switch between an active and inactive state.
+        The following code calls the function onTimer every second:
+        @code
+        void onTimer()
+        {
+            std::cerr << "Time out!\n";
+        }
+
+        int main()
+        {
+            Pt::System::Timer timer;
+            connect(timer.timeout, onTimer);
+
+            Pt::System::EventLoop loop;
+            loop.addTimer(timer);
+            timer.start(1000);
+
+            loop.run();
+            return 0;
+        }
+        @endcode
     */
     class PT_SYSTEM_API Timer
     {
