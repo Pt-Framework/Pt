@@ -1,6 +1,5 @@
 #include "Pt/System/Selector.h"
 #include "Pt/System/Timer.h"
-#include "Pt/System/IOChannel.h"
 #include "SelectorImpl.h"
 
 

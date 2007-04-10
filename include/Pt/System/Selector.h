@@ -36,20 +36,23 @@ namespace System {
 
     /** @brief Reports activity on a set of devices.
 
-        On the IOMonitor can one or more devices registered for event monitoring. 
-        At the registration time the client gets a signal object specific for this device.
-        This signal is emited if on the registered device an event occurred.
-        The registration, device removing, wait and wake are thread save. The client 
-        can implements an event loop by using the wait and wake methodes. The wait 
-        method waits until an IO event on device occurred. The wake methode call, 
-        signalize the IOMonitor to wake up from the wait state. The wake call 
-        doesn't emit an event.
+        A Selector can be used to monitor a set of IODevices and Timers
+        and wait for activity on them. The wait call can be performed with
+        a timeout and the respective timeout signal is sent if it occurs.
+        Clients can be notified about Timer and IODevice activity by
+        connecting to the appropriate signals of the Timer and IODevice
+        classes.
     */
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
     {
         public:
             static const unsigned int WaitInfinite = static_cast<size_t>(-1);
 
+            /** @brief Wait for input or output
+
+                The WaitMode is passed to Selector::wait to indicate
+                if to wait for input, output or both.
+            */
             enum WaitMode
             {
                 WaitInput  = 1,
@@ -62,33 +65,65 @@ namespace System {
             //! @brief Destructor
             virtual ~Selector();
 
-            /** @brief Adds a device to the monitor
+            /** @brief Adds an IODevice
+
+                Adds an IODevice to the selector. IODevices are removed
+                automatically when they get destroyed.
 
                 @param device The device to add
-                @return A signal which signalize the device events
+                @param wm WaitMode used for the device
             */
             void addDevice( IODevice& dev, WaitMode wm );
 
-            /** @brief Removes a device from the monitor
+            /** @brief Removes an IODevice
 
                 @param device The device to remove
             */
             void removeDevice( IODevice& dev );
 
+            /** @brief Adds a Timer
+
+                Adds a Timer to the selector. Timers are removed
+                automatically when they get destroyed.
+
+                @param timer The device to add
+            */
             void addTimer(Timer& timer);
 
+            /** @brief Removes a Timer
+
+                @param timer The timer to remove
+            */
             void removeTimer( Timer& timer );
 
-            //! @brief Wait until an event occurred
+            /** @brief Wait for activity
+
+                This method will wait for activity on the registered
+                IODevices and Timers.
+
+                @param msecs timeout in miliseconds
+            */
             bool wait(unsigned int msecs = WaitInfinite);
 
-            //! @brief Wake the monitor from wait state
+            /** @brief Wakes the selctor from waiting
+
+                This method can be used to end a Selector::wait call
+                before the timeout expires. It is supposed to be used from
+                another thread and thus is thread-safe.
+            */
             void wake();
 
+            /** @brief Notifies about wait timeouts
+                This signal is send when the timeout given to a wait
+                call of the selector expires and no activity occured.
+            */
             Signal<> timeout;
 
         private:
+            //! @internal
             class SelectorImpl* _impl;
+
+            //! @internal
             std::list<Timer*> _timers;
     };
 

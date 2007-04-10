@@ -1,6 +1,5 @@
 #include <Pt/Main.h>
 #include <Pt/System/Pipe.h>
-#include <Pt/System/IOChannel.h>
 #include <Pt/System/Selector.h>
 #include <iostream>
 
