@@ -40,44 +40,52 @@ SelectorImpl::~SelectorImpl()
     CloseHandle( _wakeHandle );
 }
  
-void SelectorImpl::addChannel( IOChannel& channel )
+void SelectorImpl::addDevice( IODevice& device, int waitMode )
 {
-    _channels.push_back(&channel);
+    _items.push_back( Item(device, waitMode) );
 }
 
-void SelectorImpl::removeChannel( IOChannel& channel )
+void SelectorImpl::removeDevice( IODevice& device )
 {
-	_channels.erase( std::remove(_channels.begin(), _channels.end(), &channel),
-	                 _channels.end() );
+	std::vector<Item>::iterator it = _items.begin();
+	while(it != _items.end())
+	{
+		IODevice* dev = it->device;
+
+		if(dev == &device)
+			it = _items.erase(it);
+		else
+			++it;
+	}
 }
 
 void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 {
-    std::vector<HANDLE>                 currentHandles;
-    std::vector<IOChannel*>::iterator    it;
-    std::vector<HANDLE>::iterator       currentHandlesIt;
+    std::vector<HANDLE>           currentHandles;
+    std::vector<Item>::iterator   it;
+    std::vector<HANDLE>::iterator currentHandlesIt;
     
-    _channelMap.clear();
+    _itemMap.clear();
 
     waitHandles.push_back(_wakeHandle);
     
-    for (it = _channels.begin(); it != _channels.end(); ++it)
+    for (it = _items.begin(); it != _items.end(); ++it)
     {
-		IOChannel& channel = **it;
-		IODevice& device = channel.device();
+		int waitMode = it->waitMode;
+		IODevice& device = *it->device;
 		
         if ( !device.waitable() )
             continue;       
         
         currentHandles.clear();
 
-        device.impl()->beginWait( channel.waitMode() );
+        device.impl()->beginWait( waitMode );
 
-        device.impl()->eventHandles( currentHandles, channel.waitMode() );
+        device.impl()->eventHandles( currentHandles, waitMode );
 
         for (currentHandlesIt = currentHandles.begin(); currentHandlesIt != currentHandles.end(); ++currentHandlesIt)
         {
-            _channelMap[*currentHandlesIt] = &channel;
+            _itemMap[*currentHandlesIt] = *it;
             waitHandles.push_back(*currentHandlesIt);
         }
     }
@@ -85,28 +93,28 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 
 bool SelectorImpl::areNonWaitableDevicesAvailable()
 {
-    std::vector<IOChannel*>::iterator it;    
+    std::vector<Item>::iterator it;    
     
     bool available = false;
     try
     { 
-        for (it = _channels.begin(); it != _channels.end(); ++it)
+        for (it = _items.begin(); it != _items.end(); ++it)
         {
-			IOChannel& channel = **it;
-			IODevice& device = channel.device();
+			int waitMode = it->waitMode;
+			IODevice* device = it->device;
 
-            if( device.waitable() )
+            if( device->waitable() )
                 continue;
             
             available = true;
 
-            if (channel.waitMode() & IOChannel::WaitInput)
+            if (waitMode & IOChannel::WaitInput)
             {
-                channel.inputReady();    
+                device->inputReady();    
             }
-            if (channel.waitMode() & IOChannel::WaitOutput)
+            if (waitMode & IOChannel::WaitOutput)
             {
-                channel.outputReady();
+                device->outputReady();
             }            
         }
     }
@@ -122,25 +130,25 @@ void SelectorImpl::sendEvents(const HANDLE activeHandle)
 {
     try
     {
-        IOChannel& activeChannel = *( _channelMap[activeHandle] );
-		IODevice& activeDevice = activeChannel.device();
+        Item& activeItem = _itemMap[activeHandle];
+		IODevice* activeDevice = activeItem.device;
 
-        switch( activeDevice.impl()->waitResult( activeHandle ) )
+        switch( activeDevice->impl()->waitResult( activeHandle ) )
         {
             case IODeviceImpl::ReadyRead:
             {                   
-                activeChannel.inputReady(); 
+                activeDevice->inputReady(); 
                 break;   
             }
 
             case IODeviceImpl::ReadyWrite:
             {                   
-                activeChannel.outputReady();
+                activeDevice->outputReady();
                 break;           
             }
         }            
                 
-        activeDevice.impl()->endWait( activeHandle );
+        activeDevice->impl()->endWait( activeHandle );
         
      }
      catch(const std::exception& e )

@@ -23,6 +23,7 @@
 #define PT_SYSTEM_SelectorImpl_H
 
 #include "Pt/System/Api.h"
+#include "Pt/System/IODevice.h"
 #include <vector>
 #include <map>
 #include <windows.h>
@@ -32,8 +33,6 @@ namespace Pt {
 
 namespace System {
 
-class IOChannel;
-
 class SelectorImpl
 {
     public:
@@ -41,9 +40,9 @@ class SelectorImpl
 
         ~SelectorImpl();
         
-        void addChannel( IOChannel& channel );
+        void addDevice( IODevice& device, int waitMode );
 
-        void removeChannel( IOChannel& channel );
+        void removeDevice( IODevice& device );
 
         bool wait( unsigned int msecs );
 
@@ -59,9 +58,23 @@ class SelectorImpl
     private:     
         enum{ InternalWake = 0 };
         
-        std::vector<IOChannel*>          _channels;
-        std::map<HANDLE, IOChannel*>    _channelMap;
-        HANDLE                          _wakeHandle;   
+        struct Item
+        {
+			Item()
+			: device(0), waitMode(0)
+			{}
+
+			Item(IODevice& dev, int waitMode_)
+			: device(&dev), waitMode(waitMode_)
+			{}
+			
+			IODevice* device;
+			int waitMode;
+        };
+
+        std::vector<Item>	   _items;
+        std::map<HANDLE, Item> _itemMap;
+        HANDLE                 _wakeHandle;   
 };
 
 }//namespace System 
