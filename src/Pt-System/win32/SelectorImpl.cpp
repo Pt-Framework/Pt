@@ -21,7 +21,6 @@
  ***************************************************************************/
 #include "SelectorImpl.h"
 #include "IODeviceImpl.h"
-#include "Pt/System/IOChannel.h"
 #include "Pt/System/Selector.h"
 #include <algorithm>
 
@@ -31,15 +30,15 @@ namespace Pt {
 namespace System {
 
 SelectorImpl::SelectorImpl()
-{ 
-    _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );    
+{
+    _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
 }
 
 SelectorImpl::~SelectorImpl()
-{ 
+{
     CloseHandle( _wakeHandle );
 }
- 
+
 void SelectorImpl::addDevice( IODevice& device, int waitMode )
 {
     _items.push_back( Item(device, waitMode) );
@@ -64,19 +63,19 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
     std::vector<HANDLE>           currentHandles;
     std::vector<Item>::iterator   it;
     std::vector<HANDLE>::iterator currentHandlesIt;
-    
+
     _itemMap.clear();
 
     waitHandles.push_back(_wakeHandle);
-    
+
     for (it = _items.begin(); it != _items.end(); ++it)
     {
 		int waitMode = it->waitMode;
 		IODevice& device = *it->device;
-		
+
         if ( !device.waitable() )
-            continue;       
-        
+            continue;
+
         currentHandles.clear();
 
         device.impl()->beginWait( waitMode );
@@ -93,11 +92,11 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 
 bool SelectorImpl::areNonWaitableDevicesAvailable()
 {
-    std::vector<Item>::iterator it;    
-    
+    std::vector<Item>::iterator it;
+
     bool available = false;
     try
-    { 
+    {
         for (it = _items.begin(); it != _items.end(); ++it)
         {
 			int waitMode = it->waitMode;
@@ -105,17 +104,17 @@ bool SelectorImpl::areNonWaitableDevicesAvailable()
 
             if( device->waitable() )
                 continue;
-            
+
             available = true;
 
-            if (waitMode & IOChannel::WaitInput)
+            if (waitMode & Selector::WaitInput)
             {
-                device->inputReady();    
+                device->inputReady();
             }
-            if (waitMode & IOChannel::WaitOutput)
+            if (waitMode & Selector::WaitOutput)
             {
                 device->outputReady();
-            }            
+            }
         }
     }
     catch(const std::exception& e )
@@ -136,20 +135,20 @@ void SelectorImpl::sendEvents(const HANDLE activeHandle)
         switch( activeDevice->impl()->waitResult( activeHandle ) )
         {
             case IODeviceImpl::ReadyRead:
-            {                   
-                activeDevice->inputReady(); 
-                break;   
+            {
+                activeDevice->inputReady();
+                break;
             }
 
             case IODeviceImpl::ReadyWrite:
-            {                   
+            {
                 activeDevice->outputReady();
-                break;           
+                break;
             }
-        }            
-                
+        }
+
         activeDevice->impl()->endWait( activeHandle );
-        
+
      }
      catch(const std::exception& e )
      {
@@ -158,44 +157,44 @@ void SelectorImpl::sendEvents(const HANDLE activeHandle)
 }
 
 bool SelectorImpl::wait( unsigned int msecs )
-{   
+{
     DWORD               result = 0;
     std::vector<HANDLE> waitHandles;
 
     if( msecs == Selector::WaitInfinite ) {
-        msecs = INFINITE;    
+        msecs = INFINITE;
     }
-    
-    collectWaitHandles(waitHandles);   
+
+    collectWaitHandles(waitHandles);
 
     result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, 0 );
-    
-    if( result == WAIT_TIMEOUT &&
-        areNonWaitableDevicesAvailable() ) 
-    {    
-        return true;
-    }   
 
-    result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, msecs );    
-    
-    if( result == WAIT_TIMEOUT ) {    
+    if( result == WAIT_TIMEOUT &&
+        areNonWaitableDevicesAvailable() )
+    {
+        return true;
+    }
+
+    result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, msecs );
+
+    if( result == WAIT_TIMEOUT ) {
         return false;
-    }       
-    
+    }
+
     const Pt::ssize_t handleIndex  = (result - WAIT_OBJECT_0);
-        
+
     if (waitHandles[handleIndex] == _wakeHandle) {
-        return true;  
+        return true;
     }
 
     sendEvents(waitHandles[ handleIndex ]);
-     
+
     return true;
 }
 
 void SelectorImpl::wake()
 {
-    SetEvent( _wakeHandle ); 
+    SetEvent( _wakeHandle );
 }
 
 }//namespace System

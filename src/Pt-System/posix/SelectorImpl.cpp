@@ -22,7 +22,6 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/IODevice.h"
-#include "Pt/System/IOChannel.h"
 #include "Pt/System/Selector.h"
 
 #include <cerrno>
@@ -121,11 +120,11 @@ bool SelectorImpl::wait(unsigned int msecs)
             continue;
 
         avail = true;
-        if( waitMode & IOChannel::WaitInput)
+        if( waitMode & Selector::WaitInput)
         {
             device.inputReady();
         }
-        if( waitMode & IOChannel::WaitOutput)
+        if( waitMode & Selector::WaitOutput)
         {
             device.outputReady();
         }

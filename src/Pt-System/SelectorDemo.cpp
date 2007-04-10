@@ -44,7 +44,6 @@ class Multiplexer : public Pt::Connectable
             _device2.setTimeout( 10 );
 */
 
-            _channel.attach(_device, Pt::System::IOChannel::WaitInput);
             _selector.addDevice( _device, Pt::System::Selector::WaitInput );
             Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
             Pt::connect( _selector.timeout, *this, &Multiplexer::onTimeout );
@@ -78,9 +77,7 @@ class Multiplexer : public Pt::Connectable
 
     private:
         Pt::System::SerialDevice   _device;
-        Pt::System::IOChannel      _channel;
         //Pt::System::SerialDevice _device2;
-        //Pt::System::IOChannel    _channel2;
         Pt::System::Selector       _selector;
         std::ofstream              _out;
 };
