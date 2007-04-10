@@ -87,7 +87,7 @@ class BasicIODevice : public NonCopyable {
                 _valid = false;
             }
         }
-        
+
         //! @brief Read data from I/O device
         /*!
             Reads up to n bytes and stores them in buffer. Returns the number
