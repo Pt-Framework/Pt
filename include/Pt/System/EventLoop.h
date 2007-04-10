@@ -31,8 +31,8 @@
 #include <Pt/System/Selector.h>
 #include <Pt/Event.h>
 
-
 #include <list>
+#include <typeinfo>
 
 
 namespace Pt {
