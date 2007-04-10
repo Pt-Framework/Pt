@@ -20,7 +20,6 @@
 #include "win32.h"
 #include "SerialDeviceImpl.h"
 #include "Pt/System/Thread.h"
-#include "Pt/System/IOChannel.h"
 #include <iostream>
 
 
