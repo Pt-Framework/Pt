@@ -136,6 +136,19 @@ void EventLoop::removeDevice( IODevice& dev )
 }
 
 
+void EventLoop::addTimer( Timer& timer )
+{
+    MutexLock lock( _mutex );
+    return _selector.addTimer( timer );
+}
+
+void EventLoop::removeTimer( Timer& timer)
+{
+    MutexLock lock( _mutex );
+    _selector.removeTimer( timer );
+}
+
+
 void EventLoop::setIdleTimeout(unsigned int msecs)
 {
     _timeout = msecs;

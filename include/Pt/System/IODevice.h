@@ -212,8 +212,19 @@ class BasicIODevice : public NonCopyable {
         bool eof() const
         { return _eof; }
 
+        /** @brief Notifies about availavle data
+
+            This signal is send when the IODevice is monitored
+            in a Selector or EventLoop and data becomes available.
+        */
         Signal<> inputReady;
 
+        /** @brief Notifies when data can be written
+
+            This signal is send when the IODevice is monitored
+            in a Selector or EventLoop and the device is ready
+            to write data.
+        */
         Signal<> outputReady;
 
         Signal< BasicIODevice& > destroyed;

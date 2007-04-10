@@ -99,7 +99,8 @@ namespace System {
             /** @brief Wait for activity
 
                 This method will wait for activity on the registered
-                IODevices and Timers.
+                IODevices and Timers. Use Selector::WaitInfinite to
+                wait without timeout.
 
                 @param msecs timeout in miliseconds
             */

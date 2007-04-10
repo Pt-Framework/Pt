@@ -180,6 +180,21 @@ namespace System {
              */
             void removeDevice( IODevice& dev );
 
+            /** @brief Adds a Timer
+
+                Adds a Timer to the event loop. Timers are removed
+                automatically when they get destroyed.
+
+                @param timer The device to add
+            */
+            void addTimer( Timer& timer );
+
+            /** @brief Removes a Timer
+
+                @param timer The timer to remove
+            */
+            void removeTimer( Timer& timer );
+
             /** @brief Sets the idle timeout
             */
             void setIdleTimeout(unsigned int msecs);
