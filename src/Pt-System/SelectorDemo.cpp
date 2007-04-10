@@ -45,8 +45,8 @@ class Multiplexer : public Pt::Connectable
 */
 
             _channel.attach(_device, Pt::System::IOChannel::WaitInput);
-            _selector.addChannel( _channel );
-            Pt::connect( _channel.inputReady, *this, &Multiplexer::onInput );
+            _selector.addDevice( _device, Pt::System::Selector::WaitInput );
+            Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
             Pt::connect( _selector.timeout, *this, &Multiplexer::onTimeout );
         }
 

@@ -51,6 +51,7 @@ EventLoop::~EventLoop()
     _connectionMutex.unlock();
 }
 
+
 void EventLoop::run()
 {
     while( false == _exitLoop )
@@ -102,7 +103,7 @@ void EventLoop::processEvents()
 
 void EventLoop::wake()
 {
-    MutexLock threadSave( _mutex );   
+    MutexLock threadSave( _mutex );
     _selector.wake();
 }
 
@@ -114,24 +115,24 @@ void EventLoop::exit()
 
 void EventLoop::queueEvent(const Pt::Event& event)
 {
-    MutexLock threadSave( _mutex );
+    MutexLock lock( _mutex );
 
     Pt::Event* ev = event.clone();
     _eventQueue.push_back(ev);
 }
 
 
-void EventLoop::addChannel( IOChannel& channel )
+void EventLoop::addDevice( IODevice& dev, Selector::WaitMode wm  )
 {
-    MutexLock threadSave( _mutex );
-    return _selector.addChannel( channel );
+    MutexLock lock( _mutex );
+    return _selector.addDevice( dev, wm );
 }
 
 
-void EventLoop::removeChannel( IOChannel& channel )
+void EventLoop::removeDevice( IODevice& dev )
 {
-    MutexLock threadSave( _mutex );
-    _selector.removeChannel( channel );
+    MutexLock lock( _mutex );
+    _selector.removeDevice( dev );
 }
 
 

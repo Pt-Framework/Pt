@@ -24,6 +24,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
 #include <list>
 
 
@@ -32,7 +33,6 @@ namespace Pt {
 namespace System {
 
     class Timer;
-    class IOChannel;
 
     /** @brief Reports activity on a set of devices.
 
@@ -50,6 +50,12 @@ namespace System {
         public:
             static const unsigned int WaitInfinite = static_cast<size_t>(-1);
 
+            enum WaitMode
+            {
+                WaitInput  = 1,
+                WaitOutput = 2
+            };
+
             //! @brief Default constructor
             Selector();
 
@@ -61,13 +67,13 @@ namespace System {
                 @param device The device to add
                 @return A signal which signalize the device events
             */
-            void addChannel( IOChannel& channel );
+            void addDevice( IODevice& dev, WaitMode wm );
 
             /** @brief Removes a device from the monitor
 
                 @param device The device to remove
             */
-            void removeChannel( IOChannel& channel );
+            void removeDevice( IODevice& dev );
 
             void addTimer(Timer& timer);
 

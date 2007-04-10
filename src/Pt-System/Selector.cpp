@@ -23,16 +23,16 @@ Selector::~Selector()
 }
 
 
-void Selector::addChannel( IOChannel& channel)
+void Selector::addDevice( IODevice& dev, WaitMode wm )
 {
-    _impl->addChannel( channel );
-    connect(channel.destroyed, *this, &Selector::removeChannel);
+    _impl->addDevice( dev, wm );
+    connect(dev.destroyed, *this, &Selector::removeDevice);
 }
 
 
-void Selector::removeChannel( IOChannel& channel )
+void Selector::removeDevice( IODevice& dev )
 {
-    _impl->removeChannel( channel );
+    _impl->removeDevice( dev );
 }
 
 

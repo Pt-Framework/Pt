@@ -39,8 +39,6 @@ namespace Pt {
 
 namespace System {
 
-class Selector;
-
     /** \brief An event loop which handles events from multiple sources.
      *
      * Events can be added to the internal event queue from multiple sources using
@@ -173,14 +171,14 @@ class Selector;
              * @param device The IODevice
              * @return The event notification signal for this device
              */
-             void addChannel( IOChannel& channel );
+             void addDevice( IODevice& dev, Selector::WaitMode wm );
 
             /**
              * \brief Remove a device from the event loop IOMonitor.
              *
              * @param device The device to remove.
              */
-            void removeChannel( IOChannel& channel );
+            void removeDevice( IODevice& dev );
 
             /** @brief Sets the idle timeout
             */

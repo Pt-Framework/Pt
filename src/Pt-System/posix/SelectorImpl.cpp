@@ -51,16 +51,17 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::addChannel( IOChannel& channel )
+void SelectorImpl::addDevice( IODevice& dev, int wm )
 {
-    const int fd = channel.device().impl()->fd();
-    _channels.insert( std::make_pair( fd, &channel ) );
+    const int fd = dev.impl()->fd();
+    Item item(dev, wm);
+    _items.insert( std::make_pair( fd, item ) );
 }
 
 
-void SelectorImpl::removeChannel( IOChannel& channel )
+void SelectorImpl::removeDevice( IODevice& dev )
 {
-    _channels.erase( channel.device().impl()->fd() );
+    _items.erase( dev.impl()->fd() );
 }
 
 
@@ -79,24 +80,24 @@ bool SelectorImpl::wait(unsigned int msecs)
 
     // Add all waitable devices to the read and write descriptor
     // sets. Not waitable devices are handled differently.
-    std::map<int, IOChannel*>::iterator it;
-    for( it = _channels.begin(); it != _channels.end(); ++it )
+    std::map<int, Item>::iterator it;
+    for( it = _items.begin(); it != _items.end(); ++it )
     {
-        IOChannel& channel = *it->second;
-        IODevice& device = it->second->device();
+        int waitMode = it->second.waitMode;
+        IODevice& device = it->second.device;
 
         if( device.waitable() == false )
             continue;
 
         int fd = it->first;
 
-        if( channel.waitMode() & IOChannel::WaitInput)
+        if( waitMode & Selector::WaitInput)
         {
             FD_SET( fd, &rfds );
             maxfd = std::max( maxfd , fd );
         }
 
-        if( channel.waitMode() & IOChannel::WaitOutput )
+        if( waitMode & Selector::WaitOutput )
         {
             FD_SET( fd, &wfds );
             maxfd = std::max( maxfd , fd );
@@ -111,22 +112,22 @@ bool SelectorImpl::wait(unsigned int msecs)
 
     // Now we service all devices that are not waitable and thus
     // have always data available
-    for( it = _channels.begin(); it != _channels.end(); ++it )
+    for( it = _items.begin(); it != _items.end(); ++it )
     {
-        IOChannel& channel = *it->second;
-        IODevice& device = it->second->device();
+        int waitMode = it->second.waitMode;
+        IODevice& device = it->second.device;
 
         if( device.waitable() )
             continue;
 
         avail = true;
-        if( channel.waitMode() & IOChannel::WaitInput)
+        if( waitMode & IOChannel::WaitInput)
         {
-            channel.inputReady();
+            device.inputReady();
         }
-        if( channel.waitMode() & IOChannel::WaitOutput)
+        if( waitMode & IOChannel::WaitOutput)
         {
-            channel.outputReady();
+            device.outputReady();
         }
     }
 
@@ -173,21 +174,20 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    std::map<int, IOChannel*>::iterator it;
-    for( it = _channels.begin(); it != _channels.end(); ++it )
+    std::map<int, Item>::iterator it;
+    for( it = _items.begin(); it != _items.end(); ++it )
     {
-        IOChannel& channel = *it->second;
-        IODevice& device = it->second->device();
+        IODevice& device = it->second.device;
 
         if( FD_ISSET( device.impl()->fd(), &rfds ) )
         {
-            channel.inputReady();
+            device.inputReady();
             avail = true;
         }
 
         if( FD_ISSET( device.impl()->fd(), &wfds  ))
         {
-            channel.outputReady();
+            device.outputReady();
             avail = true;
         }
     }

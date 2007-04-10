@@ -12,10 +12,8 @@ int main( int argc, char* argv[] )
     const char* out = "Hello World!";
     pipe.output().write(out, 12);
 
-    Pt::System::IOChannel channel( pipe.input(), Pt::System::IOChannel::WaitInput );
-
     Pt::System::Selector selector;
-    selector.addChannel( channel );
+    selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
     bool ret = selector.wait();
 
     std::cerr << "Data: " << std::boolalpha << ret << std::endl;

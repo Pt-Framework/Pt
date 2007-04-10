@@ -21,6 +21,8 @@
 #ifndef PT_SYSTEM_POSIX_SELECTORIMPL_H
 #define PT_SYSTEM_POSIX_SELECTORIMPL_H
 
+#include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
 #include <map>
 #include <sys/select.h>
 #include <sys/time.h>
@@ -30,8 +32,6 @@ namespace Pt {
 
 namespace System {
 
-class IOChannel;
-
 class SelectorImpl
 {
     public:
@@ -39,9 +39,9 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void addChannel( IOChannel& channel );
+        void addDevice( IODevice& dev, int wm );
 
-        void removeChannel( IOChannel& device );
+        void removeDevice( IODevice& device );
 
         bool wait(unsigned int msecs);
 
@@ -51,7 +51,18 @@ class SelectorImpl
         bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
 
     private:
-        std::map<int, IOChannel*> _channels;
+        struct Item
+        {
+            Item(IODevice& dev, int waitMode_ )
+            : device(dev), waitMode(waitMode_)
+            {}
+
+            IODevice& device;
+            int waitMode;
+        };
+
+        std::map<int, Item> _items;
+
         int _wakePipe[2];
 };
 

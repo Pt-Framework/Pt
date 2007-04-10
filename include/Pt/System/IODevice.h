@@ -21,9 +21,10 @@
 #ifndef Pt_System_IODevice_h
 #define Pt_System_IODevice_h
 
-#include <Pt/System/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Signal.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/IOError.h>
 
 #include <limits>
@@ -211,6 +212,11 @@ class BasicIODevice : public NonCopyable {
         bool eof() const
         { return _eof; }
 
+        Signal<> inputReady;
+
+        Signal<> outputReady;
+
+        Signal< BasicIODevice& > destroyed;
 
         virtual IODeviceImpl* impl() = 0;
 
