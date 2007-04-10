@@ -74,7 +74,7 @@ class BasicIODevice : public NonCopyable {
 
         //! @brief Destructor
         virtual ~BasicIODevice()
-        { }
+        { this->destroyed(*this); }
 
         //! @brief Closes the I/O device
         /*!
