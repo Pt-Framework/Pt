@@ -130,8 +130,8 @@ class PT_API Timestamp
         static TimeVal resolution();
 
     #if defined(_WIN32)
-        static Timestamp fromFileTimeNP(UInt32 fileTimeLow, UInt32 fileTimeHigh);
-        void toFileTimeNP(UInt32& fileTimeLow, UInt32& fileTimeHigh) const;
+        static Timestamp fromFileTimeNP(Pt::uint32_t fileTimeLow, Pt::uint32_t fileTimeHigh);
+        void toFileTimeNP(Pt::uint32_t& fileTimeLow, Pt::uint32_t& fileTimeHigh) const;
     #endif
 
     private:

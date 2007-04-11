@@ -100,10 +100,13 @@ Timestamp Timestamp::fromUtcTime(UtcTimeVal val)
 
 void Timestamp::update()
 {
+
 #if defined(_WIN32)
 
 	FILETIME ft;
-	GetSystemTimeAsFileTime(&ft);
+    SYSTEMTIME st;
+    GetSystemTime(&st);
+    SystemTimeToFileTime(&st, &ft);	
 	ULARGE_INTEGER epoch; // UNIX epoch (1970-01-01 00:00:00) expressed in Windows NT FILETIME
 	epoch.LowPart  = 0xD53E8000;
 	epoch.HighPart = 0x019DB1DE;
@@ -122,13 +125,14 @@ void Timestamp::update()
 	_ts = TimeVal(tv.tv_sec)*resolution() + tv.tv_usec;
 	
 #endif
+
 }
 
 
 #if defined(_WIN32)
 
 
-Timestamp Timestamp::fromFileTimeNP(UInt32 fileTimeLow, UInt32 fileTimeHigh)
+Timestamp Timestamp::fromFileTimeNP(Pt::uint32_t fileTimeLow, Pt::uint32_t fileTimeHigh)
 {
 	ULARGE_INTEGER epoch; // UNIX epoch (1970-01-01 00:00:00) expressed in Windows NT FILETIME
 	epoch.LowPart  = 0xD53E8000;
@@ -143,7 +147,7 @@ Timestamp Timestamp::fromFileTimeNP(UInt32 fileTimeLow, UInt32 fileTimeHigh)
 }
 
 
-void Timestamp::toFileTimeNP(UInt32& fileTimeLow, UInt32& fileTimeHigh) const
+void Timestamp::toFileTimeNP(Pt::uint32_t& fileTimeLow, Pt::uint32_t& fileTimeHigh) const
 {
 	ULARGE_INTEGER epoch; // UNIX epoch (1970-01-01 00:00:00) expressed in Windows NT FILETIME
 	epoch.LowPart  = 0xD53E8000;
