@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="Pt-Xml"
-	ProjectGUID="{7B07CB50-60AE-4DB6-BD36-B1392A4B3AD7}"
-	RootNamespace="Pt-Xml"
+	Name="Pt-Test"
+	ProjectGUID="{AED4459E-0B3E-4C2A-9C10-A519FA97C3FE}"
+	RootNamespace="Pt-Test"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>
@@ -30,7 +30,7 @@
 				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
 				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
 				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt-Xmld.dll"
+				Output="$(OutDir)\PipeDemo.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -52,7 +52,7 @@
 				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetFileName) -q"
 				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -a"
 				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
-				Output="$(OutDir)\Pt-Xmld.dll"
+				Output="$(OutDir)\PipeDemod.exe"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -69,7 +69,7 @@
 			/>
 			<DeploymentTool
 				ForceDirty="-1"
-				RemoteDirectory="%CSIDL_PROGRAM_FILES%\Pt-Test"
+				RemoteDirectory=""
 				RegisterOutput="0"
 				AdditionalFiles=""
 			/>
@@ -88,7 +88,7 @@
 				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
 				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
 				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt-Xml.dll"
+				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -110,7 +110,7 @@
 				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -q"
 				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName) -a"
 				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
-				Output="$(OutDir)\Pt-Xml.dll"
+				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
 				ForcedIncludes=""
@@ -143,157 +143,13 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\CData.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Characters.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Comment.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DocTypeDeclaration.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EndDocument.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\EndElement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Namespace.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\NamespaceContext.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ParseError.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ProcessingInstruction.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\QName.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Resolver.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\StartElement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XmlDeclaration.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XmlReader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XmlReaderTest.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XmlStream.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Api.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\CData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Characters.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Comment.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\DocTypeDeclaration.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\EndDocument.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\EndElement.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Namespace.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\NamespaceContext.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Node.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\ParseError.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\ProcessingInstruction.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\QName.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\Resolver.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\StartElement.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\XmlDeclaration.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\XmlReader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\Pt\Xml\XmlStream.h"
-				>
-			</File>
 		</Filter>
-		<File
-			RelativePath=".\Jamfile"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
