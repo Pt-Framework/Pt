@@ -13,7 +13,7 @@ int main( int argc, char* argv[] )
     Pt::System::Selector selector;
     selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
     
-    const int size = 10;
+    const int size = 8;
     char buffer[size];
     size_t sz;
 

@@ -1,6 +1,6 @@
-/***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
+/*************************************************************************** 
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -74,8 +74,8 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         HANDLE                      _handle;  
         Mode                        _mode;
         DWORD                       _msgSize;
-        std::vector<char>           _buffer;
-        std::vector<char>           _tempBuffer;        
+        size_t                      _bufferSize;
+        std::vector<char>           _buffer;               
         bool                        _isWaitable;
 };
 
@@ -91,8 +91,7 @@ class PipeImpl
         IODevice& output();
     private:
         PipeIODevice        _inputDevice;
-        PipeIODevice        _outputDevice; 
-        static Pt::uint32_t _nameId;
+        PipeIODevice        _outputDevice;         
 };
 
 } // namespace System

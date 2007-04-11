@@ -23,6 +23,7 @@
 #include <windows.h>
 #include <sstream>
 #include <Msgqueue.h>
+#include <sstream>
 
 
 
@@ -35,6 +36,7 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _mode(mode)
 , _msgSize(0)
 , _isWaitable(true)
+, _bufferSize(0)
 {    
 }
 
@@ -59,8 +61,7 @@ void PipeIODevice::open(HANDLE handle)
     if ( TRUE == GetMsgQueueInfo(_handle, &info) )
     {
         _msgSize    = info.cbMaxMessage;        
-        _buffer.reserve(_msgSize);
-        _tempBuffer.resize(_msgSize);
+        _buffer.resize(_msgSize);        
     }
 
     setValid(true);
@@ -104,26 +105,24 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
     if( Read != _mode ) {
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
     }
+    
+    DWORD readBytes = 0;   
+    DWORD flags     = 0;    
 
     eof = false;
-    DWORD readBytes = 0;   
-    DWORD flags;    
 
-    if (!_buffer.empty())
-    {
-        readBytes = _buffer.size();
-        copy(_buffer.begin(), _buffer.end(), _tempBuffer.begin());
+    if (_bufferSize) {    
+        readBytes = _bufferSize;        
     }
-    else if ( FALSE == ReadMsgQueue(_handle, &_tempBuffer[0], _msgSize, &readBytes, 0, &flags) )
-    {
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+    else if ( FALSE == ReadMsgQueue(_handle, &_buffer[0], _msgSize, &readBytes, 0, &flags) ) {    
+        throw IOError("Could not read from message queue handle", PT_SOURCEINFO);
     }
     
-    memcpy(buffer, &_tempBuffer[0], count);
+    memcpy(buffer, &_buffer[0], count);
 
-    _isWaitable = true;
+    _isWaitable = true;    
 
-    _buffer.clear();
+    _bufferSize = 0;
 
     if (count >= readBytes)
         return readBytes;
@@ -133,10 +132,12 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
     
     _isWaitable = false;
     
-    std::vector<char>::iterator it = (_tempBuffer.begin() + count);        
-                   
-    _buffer.assign(it, _tempBuffer.end());        
-    _buffer.resize(readBytes - count); // get the real size of bytes readed    
+    std::vector<char>::iterator beginData = (_buffer.begin() + count);
+    std::vector<char>::iterator endData   = (_buffer.begin() + readBytes);
+
+    copy(beginData, endData, _buffer.begin());    
+    
+    _bufferSize = (readBytes - count);
     
     return count;
 }
@@ -196,21 +197,22 @@ PipeImpl::PipeImpl()
     readOpts = writeOpts;
     readOpts.bReadAccess     = TRUE;
 
-    HANDLE outputHandle= CreateMsgQueue(L"test", &writeOpts);
-    if (outputHandle == INVALID_HANDLE_VALUE)
+    HANDLE outputHandle= CreateMsgQueue(NULL, &writeOpts);
+    if (outputHandle == INVALID_HANDLE_VALUE) {
         throw IOError("Could not create message queue handle", PT_SOURCEINFO);
+    }
 
     HANDLE inputHandle  = OpenMsgQueue(::GetCurrentProcess(), outputHandle, &readOpts);
-    if (inputHandle == INVALID_HANDLE_VALUE)
+    if (inputHandle == INVALID_HANDLE_VALUE) {
         throw IOError("Could not open message queue handle", PT_SOURCEINFO);
+    }
 
     _inputDevice.open(inputHandle);
     _outputDevice.open(outputHandle);
 }
 
 PipeImpl::~PipeImpl()
-{
-   
+{   
 }
 
 
@@ -223,8 +225,6 @@ IODevice& PipeImpl::output()
 {
     return _outputDevice;
 }
-
-Pt::uint32_t  PipeImpl::_nameId = 0;
 
 } // namespace System
 
