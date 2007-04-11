@@ -19,8 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "win32.h"
-#include "Pt/System/IOChannel.h"
-
+#include "Pt/System/Selector.h"
 #include "FileDeviceImpl.h"
 
 namespace Pt {
@@ -254,10 +253,10 @@ void FileDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode
 {
     handles.clear();
     
-    if(waitMode & IOChannel::WaitInput)
+    if(waitMode & Selector::WaitInput)
         handles.push_back( _readOv.hEvent );
     
-    if(waitMode & IOChannel::WaitOutput)
+    if(waitMode & Selector::WaitOutput)
         handles.push_back( _writeOv.hEvent );                
 }
         

@@ -21,6 +21,7 @@
 #include "SerialDeviceImpl.h"
 #include "Pt/System/Thread.h"
 #include "Pt/System/IOEvent.h"
+#include "Pt/System/Selector.h"
 #include <iostream>
 
 namespace Pt{
@@ -406,10 +407,10 @@ void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMo
 
     _waitCommMask = EV_BREAK;
 
-    if( (waitMode & IODevice::WaitInput) == IODevice::WaitInput )
+    if( (waitMode & Selector::WaitInput) == Selector::WaitInput )
         _waitCommMask |= EV_RXCHAR;
 
-    if( (waitMode & IODevice::WaitOutput) == IODevice::WaitOutput )
+    if( (waitMode & Selector::WaitOutput) == Selector::WaitOutput )
         _waitCommMask |= EV_TXEMPTY;
 }
 

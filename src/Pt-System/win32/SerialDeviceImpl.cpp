@@ -20,6 +20,7 @@
 #include "win32.h"
 #include "SerialDeviceImpl.h"
 #include "Pt/System/Thread.h"
+#include "Pt/System/Selector.h"
 #include <iostream>
 
 
@@ -390,10 +391,10 @@ void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMo
     
     DWORD waitMask = 0;
     
-    if(waitMode & IOChannel::WaitInput)
+    if(waitMode & Selector::WaitInput)
         waitMask |= EV_RXCHAR;
         
-    if(waitMode & IOChannel::WaitOutput)
+    if(waitMode & Selector::WaitOutput)
         waitMask |= EV_TXEMPTY;
 
     SetCommMask( _handle, waitMask );

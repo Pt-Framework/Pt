@@ -39,9 +39,9 @@ PtUnitTest VariantTest : VariantTest.cpp ;
 Main_LinkSharedLibraries VariantTest : Pt ;
 Main_MakeLocate VariantTest : bin ;
 
-PtUnitTest PoolTest : PoolTest.cpp ;
-Main_LinkSharedLibraries PoolTest : Pt ;
-Main_MakeLocate PoolTest : bin ;
+#PtUnitTest PoolTest : PoolTest.cpp ;
+#Main_LinkSharedLibraries PoolTest : Pt ;
+#Main_MakeLocate PoolTest : bin ;
 
 PtUnitTest DateTest : DateTest.cpp ;
 Main_LinkSharedLibraries DateTest : Pt ;

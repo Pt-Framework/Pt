@@ -15,7 +15,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_API SharedMemoryImpl {
+class SharedMemoryImpl {
     public:
 
         //! @brief Constructor
