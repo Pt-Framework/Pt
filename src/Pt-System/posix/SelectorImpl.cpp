@@ -60,7 +60,13 @@ void SelectorImpl::addDevice( IODevice& dev, int wm )
 
 void SelectorImpl::removeDevice( IODevice& dev )
 {
-    _items.erase( dev.impl()->fd() );
+    std::map<int, Item>::iterator it;
+    for(it = _items.begin(); it != _items.end(); ++it)
+    {
+        IODevice* device = &(it->second.device);
+        if( device == &dev )
+            _items.erase(it);
+    }
 }
 
 
