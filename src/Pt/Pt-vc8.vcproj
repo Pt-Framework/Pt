@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="Pt"
 	ProjectGUID="{D6FC5308-A4A0-419B-929A-362C863FC786}"
+	RootNamespace="Pt"
 	Keyword="MakeFileProj"
 	>
 	<Platforms>

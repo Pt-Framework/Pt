@@ -55,6 +55,16 @@ TARGET_OSPLAT ?= $(OSPLAT:L) ;
 #
 CONFIG ?= debug ;
 
+# correct the setting to be undepended on lower or upper case
+if $(CONFIG:L) = debug 
+{
+    CONFIG = debug ;
+}
+else 
+{
+	CONFIG = release ;
+}
+
 
 
 # Include base rules
