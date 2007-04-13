@@ -123,6 +123,14 @@ namespace System {
             Signal<> timeout;
 
         private:
+            /** @brief Update all registered timers
+                @internal
+                @param timeout interval to next expiring timer
+                @return true if a timer fired
+            */
+            bool updateTimer(size_t& timeout);
+
+        private:
             //! @internal
             class SelectorImpl* _impl;
 

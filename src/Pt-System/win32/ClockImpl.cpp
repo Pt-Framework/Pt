@@ -86,6 +86,11 @@ DateTime ClockImpl::getCurrentTime()
     return dateTime;
 }
 
+Pt::size_t ClockImpl::getTime()
+{
+    return timeGetTime();
+}
+
 } // namespace Pt
 
 } // namespace System

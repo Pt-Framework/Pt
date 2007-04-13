@@ -31,6 +31,11 @@ DateTime Clock::getCurrentTime()
     return ClockImpl::getCurrentTime();
 }
 
+Pt::size_t Clock::getTime()
+{
+    return ClockImpl::getTime();
+}
+
 } //namespace System
 
 } //namespace Pt

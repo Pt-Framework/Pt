@@ -47,6 +47,17 @@ DateTime ClockImpl::getCurrentTime()
     return dateTime;
 }
 
+Pt::size_t ClockImpl::getTime()
+{
+    DateTime currentTime = ClockImpl::getCurrentTime();
+    size_t msecs = currentTime.msecs();
+    msecs += currentTime.seconds() * 1000;
+    msecs += currentTime.minutes() * 60 * 1000;
+    msecs += currentTime.hours()   * 60 * 60 * 1000;
+    msecs += currentTime.days()    * 24 * 60 * 60 * 1000;
+    return msecs;
+}
+
 } // namespace Pt
 
 } // namespace System

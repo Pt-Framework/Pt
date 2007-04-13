@@ -3,6 +3,10 @@
 #include "SelectorImpl.h"
 
 
+#include <Pt/System/Clock.h>
+#include <Pt/System/TimeValue.h>
+
+
 namespace Pt {
 
 namespace System {
@@ -48,10 +52,9 @@ void Selector::removeTimer( Timer& timer )
 }
 
 
-bool Selector::wait(unsigned int msecs)
+bool Selector::updateTimer(size_t& timeout)
 {
-    size_t timerTimeout = Selector::WaitInfinite;
-
+    bool timerActive = false;
     std::list<Timer*>::iterator it;
     for(it = _timers.begin(); it != _timers.end(); ++it)
     {
@@ -60,18 +63,33 @@ bool Selector::wait(unsigned int msecs)
         // update timer and return indicating activity
         // if it fires its timout signal
         if( timer->update() )
-            return true;
+        {
+            timerActive = true;
+            continue;
+        }
 
         // determine lowest timer timeout
-        timerTimeout = std::min( timerTimeout, timer->remaining() );
+        timeout = std::min( timeout, timer->remaining() );
     }
+    return timerActive;
+}
+
+Pt::System::Clock clock;
+bool Selector::wait(unsigned int msecs)
+{    
+    size_t timerTimeout = Selector::WaitInfinite;
+
+    if ( updateTimer(timerTimeout) )
+        return true;
 
     // If a timer will become active before the passed
     // timeout expires we can wait and return true
     if(timerTimeout <= msecs)
     {
-        _impl->wait(timerTimeout);
-        return true;
+        if (_impl->wait(timerTimeout))
+            return true;
+        
+        return updateTimer(timerTimeout);        
     }
 
     // This handles the case when no timer will become

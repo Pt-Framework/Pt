@@ -23,6 +23,8 @@ public:
 
     static DateTime getCurrentTime();
 
+    static Pt::size_t getTime();
+
 private:
     DWORD           _procAffinity;
     DWORD           _sysAffinity;

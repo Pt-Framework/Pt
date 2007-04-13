@@ -23,6 +23,8 @@ class PT_API ClockImpl
 
         static DateTime getCurrentTime();
 
+        static Pt::size_t getTime();
+
     private:
         struct timeval  _startTime;
         struct timeval  _stopTime;

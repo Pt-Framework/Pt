@@ -37,6 +37,13 @@ class PT_SYSTEM_API Clock
         */
         static DateTime getCurrentTime();
 
+        /** @brief Gets the system time
+            The getTime function retrieves the system time, in milliseconds. 
+            The system time is the time elapsed since the system was started.
+            @return Returns the system time, in milliseconds.
+        */  
+        static Pt::size_t getTime();
+
     private:
         class ClockImpl *_impl;
 };
