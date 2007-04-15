@@ -3,6 +3,9 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 
 SharedLibrary Pt-Net : AddrInfo.cpp
+                       HttpReply.cpp
+                       HttpRequest.cpp
+                       QueryParams.cpp
                        Socket.cpp
                        TcpSocket.cpp
                        TcpServerSocket.cpp
@@ -15,3 +18,4 @@ SharedLibrary_MakeLocate Pt-Net : bin ;
 PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
 Main_LinkSharedLibraries TcpSocketTest : Pt Pt-Net Pt-System ;
 Main_MakeLocate TcpSocketTest : bin ;
+
