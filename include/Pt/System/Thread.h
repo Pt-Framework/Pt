@@ -14,45 +14,73 @@ namespace Pt {
 
 namespace System {
 
-    //! @brief Thread class.
-    /**
-    *    A Thread represents a separate thread of control within the program.
-    *    It shares data with all the other threads within the process but
-    *    executes independently in the way that a separate program does on a
-    *    multitasking operating system. Threads can either run as Joinable,
-    *    so you can wait for them, or be Detached, so they run indepentently.
-    *    The execution of a thread starts either by calling its virtuals method
-    *    Thread::run(), which can be reimplemented in a derived class.
-    *    Alternatively, an instance of Runnable object can be passed to the
-    *    constructor. To create your own threads, subclass Runnable and
-    *    reimplement run().
-    *    For example:
-    *    @code
-    *    class MyRunnable : public Runnable
-    *    {
-    *       public:
-    *           void run();
-    *    };
-    *    @endcode
-    *    To start the thread, a instance of a Thread class needs to be created
-    *    from the derived Runnable class.
-    *    For example:
-    *    @code
-    *    MyRunnable runnable;
-    *    Thread     thread(runnable);
-    *
-    *    thread.start();
-    *    @endcode
-    *
-    *    Each thread gets its own stack, which size is determinated by the
-    *    operating system. A thread can be forced to terminate by calling
-    *    Thread::terminate(), however, doing so is dangerous and discouraged.
-    *    Thread also provides platform independent sleep function.
-    *    Thread::start begins the execution by calling the reimplemented
-    *    Thread::main member function. If the Thread is Joinable, it can be
-    *    waited on by calling Thread::wait on it.
-    *    A thread can give up CPU time either by calling Thread::yield() or
-    *    Thread::sleep() to stop for a specified periode of time.
+    /** @brief Platform independent threads
+
+        A Thread represents a separate thread of control within the program.
+        It shares data with all the other threads within the process but
+        executes independently in the way that a separate program does on a
+        multitasking operating system. Threads can either run as Joinable,
+        so you can wait for them, or be Detached, so they run indepentently.
+
+        The execution of a thread starts either by calling its virtual method
+        Thread::run(), which can be reimplemented in a derived class.
+        Alternatively, an instance of Runnable object can be passed to the
+        constructor. To create your own threads, subclass %Runnable and
+        reimplement run().
+
+        For example:
+        @code
+        class MyRunnable : public Runnable
+        {
+            public:
+                void run();
+        };
+
+        MyRunnable runnable;
+        Thread     thread(runnable);
+        thread.start();
+        @endcode
+
+        A Thread can be easily given its own Eventloop, since the EventLoop
+        is a %Runnable. This makes it possible to use certain classes that
+        require the presence of an %EventLoop such as a Timer or perform
+        I/O multiplexing in a dedicated thread. At the same time the %Thread
+        can be controlled by sending it %Events.
+
+        @code
+        class AsyncObject : public Pt::System::Thread
+        {
+            public:
+                AsyncObject()
+                : Thread( Pt::System::Thread::Joinable)
+                {
+                    Pt::System::Thread::setRunnable(_loop);
+                    connect(_loop.event, *this, AsyncObject::processEvent);
+                }
+
+                AsyncObject()
+                {
+                    _loop.exit();
+                    Pt::System::Thread::wait();
+                }
+
+                // callback to handle events
+                void processEvent(Pt& Event& ev);
+
+            private:
+                EventLoop _loop;
+        };
+        @endcode
+
+        Each thread gets its own stack, which size is determinated by the
+        operating system. A thread can be forced to terminate by calling
+        Thread::terminate(), however, doing so is dangerous and discouraged.
+        Thread also provides platform independent sleep function.
+        Thread::start begins the execution by calling the reimplemented
+        Thread::run member function. If the Thread is Joinable, it can be
+        waited on by calling Thread::wait on it.
+        A thread can give up CPU time either by calling Thread::yield() or
+        Thread::sleep() to stop for a specified periode of time.
     */
     class PT_SYSTEM_API Thread : public NonCopyable
     {

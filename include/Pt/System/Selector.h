@@ -41,8 +41,39 @@ namespace System {
         a timeout and the respective timeout signal is sent if it occurs.
         Clients can be notified about Timer and IODevice activity by
         connecting to the appropriate signals of the Timer and IODevice
-        classes. A Selector is the heart of the event loops in Pt and
-        the event loop and application classes provide the same API
+        classes. 
+
+        The following example uses a %Selector to wait on acitvity on
+        a %Pipe and a %Timer.
+        @code
+        // slot to handle timer activity
+        void onTimer();
+
+        // slot to handle pipe activity
+        void onPipeInput();
+
+        int main()
+        {
+            using Pt::System;
+
+            Pipe pipe;
+            connect(pipe.input().inputReady, onPipeInput);
+
+            Timer timer;
+            connect(timer.timeout, ontimer);
+            timer.start(1000);
+
+            Selector selector;
+            selector.addDevice( pipe.input(), Selector::WaitInput );
+            selector.addTimer(timer);
+            selector wait();
+
+            return 0;
+        }
+        @endcode
+
+        A Selector is the heart of the EventLoop in Pt and
+        the %EventLoop and %Application classes provide the same API
         as the Selector itself.
     */
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable

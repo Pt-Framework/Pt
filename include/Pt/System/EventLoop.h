@@ -39,167 +39,151 @@ namespace Pt {
 
 namespace System {
 
-    /** \brief An event loop which handles events from multiple sources.
-     *
-     * Events can be added to the internal event queue from multiple sources using
-     * the method "commitEvent(...)". Multiple events receivers (methods and
-     * functions) can be registered to the Signal "event". Events from these sources
-     * are delivered to these receivers in the order the events were added to this
-     * event loop.
-     *
-     * To start the event loop the method "run()" must be executed. It will only
-     * return after the event loop was stopped. To stop the loop "exit()" can be
-     * called or the EventLoop object must be deleted. The delivery of the events
-     * occurs inside the Thread that started the execution of the event loop by
-     * calling "run()".
-     *
-     * Events can be committed from arbitrary Threads as this class is thread-safe.
-     * Therefore a decoupling between multiple event sources and one or more receivers
-     * is possible, where all events from multiple sources are processed in one
-     * event loop.
-     *
-     * This class is thread-safe, so any method may be called from any Thread.
+    /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+
+        The System EventLoop can be used as the central entity of a thread or
+        process to dispatch application events and wait on multiple IODevices or
+        Timers for activity.
+
+        Events can be added to the internal event queue, even from other threads
+        using the method EventLoop::commitEvent or EventLoop::queueEvent. The
+        first method will add the event to the internal queue and wake the
+        event loop, the latter allows queing multiple event and it is up to
+        the caller to wake the event loop by calling EventLoop::wake when all
+        events are added. When the event loop processes its event, the signal
+        "event" is send for each processed event. Events are processes in the
+        order they were added.
+
+        To start the %EventLoop the method EventLoop::run must be executed. It block
+        until the event loop is stopped. To stop the %EventLoop, EventLoop::exit
+        must be called. The delivery of the events occurs inside the Thread that
+        started the execution of the event loop.
+
+        %IODevices and %Timers can be added to an %EventLoop just as to Selector.
+        In fact a %Selector is used internally to implement the %EventLoop.
+
+        Since the %EventLoop is a Runnable, it can be easily assigned to a Thread
+        to give it its own event loop.
      */
     class PT_SYSTEM_API EventLoop : public Connectable, public Runnable
     {
         public:
-            //! Constructs the EventLoop.
+            /** @brief Constructs the EventLoop
+            */
             EventLoop();
 
             /**
-             * \brief Destructs the EventLoop.
-             *
-             * Delivers all outstanding events, which are still inside the event queue
-             * to the registered methods and functions.
-             */
+                @brief Destructs the EventLoop
+
+                Delivers all outstanding events, which are still inside the event queue
+                to the registered methods and functions.
+             /
             ~EventLoop();
 
             /**
-             * \brief Starts the event loop and delivers events during its execution.
-             *
-             * This method is used to start the event loop. It will only return after
-             * "exit()" was called or this object is deleted. During its execution this
-             * method delivers the events of the event queue to the registered slots.
+                @brief Starts the event loop
+
+                This method is used to start the event loop. It will block until
+                EventLoop::exit is called. During its execution events will be
+                processed and send to the registered slots.
              */
             void run();
 
             /**
-             * \brief Adds the given event to the event loop and wakes it up so it
-             * will deliver all outstanding events.
-             *
-             * The event will be delivered as soon as possible. If the event queue is
-             * currently empty, the event will be delivered immediately. If there are
-             * still events left in the queue, the event will be delivered after all
-             * events that are still currently in the event queue have been delivered.
-             *
-             * As the given Event object is cloned before it is added to the event queue
-             * the Event object may be safely deleted or changed after it has been committed.
-             *
-             * This method is thread-safe, so the caller to this method is allowed to
-             * be any Thread.
-             *
-             * @param event The Event object to be added to the event queue for alter
-             * delivery.
+                @brief Adds an event and wakes up the loop.
+
+                The event will be processed as soon as possible. If the event queue is
+                currently empty, the event will be delivered immediately. If there are
+                still events left in the queue, the event will be delivered after all
+                events that are still currently in the event queue have been delivered.
+
+                Since the given Event object is cloned before it is added to the event
+                queue the Event object may be safely deleted or changed after it has
+                been committed.
+
+                This method is thread-safe, so the caller to this method is allowed to
+                be any Thread.
+
+                @param event Event to be added to the event loop.
              */
             void commitEvent(const Pt::Event& event);
 
             /**
-             * \brief Adds the given event to the event queue without waking up the event
-             * loop. Thus the event may be delivered only later.
-             *
-             * The event is added to the end of the event queue without actually starting
-             * the delivery. It will only be delivered after "wake()" was called or another
-             * event was committed to the event loop and which triggers the delivery.
-             * In case the event loop is currently delivering events the event queued
-             * with this method will also be delivered.
-             * You may use this method to batch-commit several events be queueing them
-             * and finally calling "wake()" only once to start the delivery of those events.
-             *
-             * As the given Event object is cloned before it is added to the event queue
-             * the Event object may be safely deleted or changed after it has been queued.
-             *
-             * This method is thread-safe, so the caller to this method is allowed to
-             * be any Thread.
-             *
-             * @param event The Event object to be added to the event queue for alter
-             * delivery.
+                @brief Adds an event without waking the event loop
+
+                The event is added to the end of the event queue without actually starting
+                to process it. It be processed after EventLoop::wake was called or another
+                event was committed to the event loop and which triggers the processing of
+                events. In case the event loop is currently processing events the event
+                queued with this method will also be delivered.
+                You may use this method to batch-commit several events be queueing them
+                and finally calling EventLoop::wake to start the processing of those events.
+
+                Since the given Event object is cloned before it is added to the event
+                queue the Event object may be safely deleted or changed after it has
+                been committed.
+
+                This method is thread-safe, so the caller to this method is allowed to
+                be any Thread.
+
+                @param event Event to be added to the event loop.
              */
             void queueEvent(const Pt::Event& event);
 
             /**
-             * \brief Delivers all events which are currently inside the event queue
-             * to the listeners (methods and functions) that are registered to the
-             * event-Signal.
-             *
-             * This method will return without work if there is no event in the event
-             * queue.
-             * This method is thread-safe, so the caller to this method is allowed to
-             * be in any Thread.
+                @brief Processes all events which are currently in the event queue
+
+                This method will return without work if there is no event in the event
+                queue.
+
+                This method is thread-safe, so the caller to this method is allowed to
+                be in any Thread.
              */
             void processEvents();
 
             /**
-             * \brief Sends a signal to wake up the "run" method to make it deliver
-             * outstanding events.
-             *
-             * This will only have an effect if the "run" method is currently waiting
-             * for new events. If it's not, the event queue is currently processed anyway.
-             * @see run()
+                @brief Wakes up the %EventLoop to process events.
+
+                This will only have an effect if the EventLoop::run method is currently waiting
+                for new events. If it's not, the event queue is currently processed anyway.
              */
             void wake();
 
             /**
-             * \brief Stops the execution of this event loop and makes the run()-method
-             * to return.
-             *
-             * Before the event loop is stopped, all events which are still in the
-             * event queue are delivered to the corresponding listeners.
-             * @see run()
+                @brief Stops the %EventLoop.
+
+                Before the event loop is stopped, all events which are still in the
+                event queue are processed. Calling this method will allow
+                EventLoop::run to return
              */
             void exit();
 
-            /**
-             * \brief Add a device to the event loop.
-             *
-             * The device events are proccesing throw the internal event loop IOMonitor.
-             * A slot can be connected to the returned signal. This signal emit the device 
-             * specific events.
-             *
-             * Attention! The device don't use the signal from the event loop to notify! 
-             * Only the returned signal from this method is used to notify a device event.
-             *
-             * @param device The IODevice
-             * @return The event notification signal for this device
-             */
+            /** @copydoc Selector::addDevice
+            */
              void addDevice( IODevice& dev, Selector::WaitMode wm );
 
-            /**
-             * \brief Remove a device from the event loop IOMonitor.
-             *
-             * @param device The device to remove.
-             */
+            /** @copydoc Selector::removeDevice
+            */
             void removeDevice( IODevice& dev );
 
-            /** @brief Adds a Timer
-
-                Adds a Timer to the event loop. Timers are removed
-                automatically when they get destroyed.
-
-                @param timer The device to add
+            /** @copydoc Selector::addTimer
             */
             void addTimer( Timer& timer );
 
-            /** @brief Removes a Timer
-
-                @param timer The timer to remove
+            /** @copydoc Selector::removeTimer
             */
             void removeTimer( Timer& timer );
 
             /** @brief Sets the idle timeout
+                It the set idle timeout expires without any acitvity on
+                the %EventtLoop, the signal timeout will be send.
+
+                @param msecs The timeout in milliseconds
             */
             void setIdleTimeout(unsigned int msecs);
 
             /** @brief Returns the idle timeout
+                Returns the idle timeout in milliseconds
             */
             unsigned int idleTimeout() const;
 
@@ -224,29 +208,15 @@ namespace System {
             */
             Signal<const Pt::Event&> event;
 
-            /** @brief Reports event loop idel timeuts
+            /** @brief Reports event loop idle timeuts
                 Clients connected to this signal will be called if there was
                 no activity in an idle time interval.
             */
             Signal<> timeout;
 
         private:
-
-            /**
-             * Flag to indicate that the event loop is (not) running or should be halted.
-             * As soon as this bool is set to 'true' the "run"-method will return an so the
-             * event delivery will stop.
-             */
             bool _exitLoop;
-
-            //! Condition to stop the execution of "run()" until a new event was committed.
             Condition _cond;
-
-            /**
-             * Contains the Event objects of the event queue that are delivered one
-             * by one in method "processEvents()".
-             * @see processEvents()
-             */
             std::list<Pt::Event*>   _eventQueue;
             Mutex                   _connectionMutex;
             Mutex                   _mutex;

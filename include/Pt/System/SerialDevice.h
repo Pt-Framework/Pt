@@ -28,7 +28,34 @@ namespace System {
 
 /** @brief Serial device
 
-    This class implements the serial device I/O operations.
+    This class implements access to a serial port as a %IODevice. A
+    %SerialDevice can be opened by passing a system dependent path
+    and an open mode. Then serial port attributes can be set before
+    read or write operations are performed. The following example
+    opens a COM port on windows, sets serial device attrubutes for
+    a serial mouse and toggles the flow control to cause the device
+    to send a PNP string which will be read subsequently:
+
+    @code
+        using Pt::System;
+
+        Pt::System::SerialDevice serdev( "COM1",  std::ios_base::in );
+        serdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
+        serdev.setCharSize(7);
+        serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
+        serdev.setParity(Pt::System::SerialDevice::ParityNone);
+
+        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
+        Thread::sleep( 300 );
+
+        serdev.setFlowControl(Pt::System::SerialDevice::FlowControlSoft);
+        Thread::sleep( 300 );
+
+        char pnp_id[200];
+        size_t size = serdev.read( pnp_id, 200);
+        std::cerr << "Mouse Id: ";
+        std::cerr.write(pnp_id, size) << std::endl;
+    @endcode
 */
 class PT_SYSTEM_API SerialDevice : public IODevice
 {
@@ -168,31 +195,26 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             \return The current flow control kind
         */
         FlowControl flowControl() const;
-        
-        
+
         void setTimeout( size_t msec );
+
         size_t timeout() const;
-        
+
         //! @brief Transmit the current buffered characters.
-        void flush();              
-        
+        void flush();
+
         virtual IODeviceImpl* impl()
         { return (IODeviceImpl*) _impl; }
 
     protected:
-        //! @brief Closes the I/O device
         virtual void _close();
 
-        //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);
 
-        //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
 
-        //! @brief Returns true if device is remote
         virtual bool _waitable() const
         { return true; }
-
 };
 
 } //namespace System

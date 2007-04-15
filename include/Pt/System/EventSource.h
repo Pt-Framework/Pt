@@ -35,32 +35,49 @@ namespace System {
 
 	class EventLoop;
 
+    /** Sends Events to receivers in other threads
+
+        The Signal class is not thread-safe and can only be used for
+        intra-thread communication. To pass Events between different threads
+        use an %EventSource instead. Thread-safety only refers to the usage
+        of the %EventSource itself (connection, disconnecting...) and not the
+        slot.
+    */
     class EventSource : public Connectable, public NonCopyable
     {
         public:
             typedef Pt::Invokable< const Pt::Event&, Pt::Void, Pt::Void> Invokable;
 
         public:
+            /** @brief Constructs a new EventSource
+            */
             EventSource()
             { }
 
+            /** @brief Destructs the EventSource
+            */
             ~EventSource()
             { this->shutDown(); }
 
+            /** @brief Connects to a EventLoop in another thread
+            */
             Connection connect( EventLoop& receiver )
             {
                 // Do not lock here, the Connection will call
                 // Connectable::opened on this object
                 return Connection( *this, slot(&receiver, &EventLoop::commitEvent).clone() );
             }
-            
+
+            /** @brief Connects to a slot in another thread
+            */
             Connection connect( const Slot& aSlot )
             {
                 // Do not lock here, the Connection will call
                 // Connectable::opened on this object
                 return Connection( *this, aSlot.clone() );
             }
-            
+
+            //! @internal
             virtual bool opened( const Connection& c )
             {
                 MutexLock lock(_mutex);
@@ -68,12 +85,15 @@ namespace System {
                 return accept;
             }
 
+            //! @internal
             virtual void closed( const Connection& c )
             {
                 MutexLock lock(_mutex);
                 Connectable::closed(c);
             }
 
+            /** @brief Send an Event to all receivers
+            */
             inline void send(const Pt::Event& ev) const
             {
                 MutexLock lock(_mutex);
@@ -89,6 +109,7 @@ namespace System {
                 }
             }
 
+            //! @internal
             void shutDown()
             {
                 Connectable::shutDown();

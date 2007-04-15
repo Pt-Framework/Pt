@@ -37,13 +37,17 @@ namespace System {
 
 class IODeviceImpl;
 
-/** @brief I/O Device base class
+/** @brief Endpoint for I/O operations
 
     This class serves as the base class for all kinds of I/O devices. The
-    interface supports synchronous and asynchronous I/O operations. Some
-    I/O buffers and I/O streams within use IODevices as endpoints. At
-    least _read(), _write() and _close() must be implemented for an IODevice
-    to be used.
+    interface supports synchronous and asynchronous I/O operations, peeking
+    and seeking. I/O buffers and I/O streams within the Pt framework use
+    IODevices as endpoints and therefore fully feaured standard C++ compliant
+    IOStreams can be constructed at runtime.
+    Examples of %IODevices are the SerialDevice, the endpoints of a Pipe
+    or the FileDevice. A Selector can be used to wait on activity on an
+    %IODevice, which will send the %Singal inputReady or outputReady of the
+    %IODevice that is ready to perform I/O.
 */
 template <typename CharT>
 class BasicIODevice : public NonCopyable {
@@ -251,7 +255,6 @@ class BasicIODevice : public NonCopyable {
 
         //! @brief Returns true if device is remote
         virtual bool _waitable() const = 0;
-        
 
         //! @brief Move the next read position to the given offset
         virtual pos_type _seek(off_type, SeekMode)

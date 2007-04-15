@@ -35,16 +35,18 @@ namespace System {
     readable input device. If bytes are written to the output device they
     can be read from the input device in exactly the order in which they
     were written. Whether or not the writer to a pipe will block until the
-    readerreads the data, or some previously-written bytes, from the pipe is
+    reader reads the data, or some previously-written bytes, from the pipe is
     system-dependent and therefore unspecified. Many pipe implementations will
     buffer up to a certain number of bytes between input and output, but such
     buffering should not be assumed.
+
     The following code writes data to a pipe and reads it afterwards:
     @code
     int main( )
     {
         Pt::System::Pipe pipe;
         pipe.output().write("Hello World!", 12);
+        pipe.output().sync();
 
         Pt::System::Selector selector;
         selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
