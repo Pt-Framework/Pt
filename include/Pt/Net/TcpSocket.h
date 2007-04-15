@@ -60,6 +60,8 @@ namespace Net {
             void connect(const std::string& ipaddr, unsigned short int port);
             void accept(const TcpServerSocket& server);
 
+            unsigned long availableBytes(void);
+
             virtual System::IODeviceImpl* impl()
             { return 0;}
 
