@@ -28,6 +28,13 @@
 #include "Pt/Types.h"
 #include "Pt/Net/Timeout.h"
 
+#ifdef __GNUC__
+#include <sys/ioctl.h>
+#endif
+
+#ifdef __QNX__
+#include <arpa/inet.h>
+#endif
 
 namespace Pt
 {
@@ -50,7 +57,7 @@ namespace Net
             {
                 // give some useful default values to use for getaddrinfo()
                 struct addrinfo hints;
-                memset(&hints, 0, sizeof(hints));
+                std::memset(&hints, 0, sizeof(hints));
                 hints.ai_socktype = SOCK_STREAM;
 
                 AddrInfo ai(ipaddr, port, hints);
@@ -62,7 +69,7 @@ namespace Net
                     if ( ::connect(handle(), it->ai_addr, it->ai_addrlen) == 0 )
                     {
                         // save our information
-                        memmove(&peeraddr, it->ai_addr, it->ai_addrlen);
+                        std::memmove(&peeraddr, it->ai_addr, it->ai_addrlen);
                         return;
                     }
 
@@ -71,7 +78,34 @@ namespace Net
 
                 throw std::runtime_error("connect" + PT_SOURCEINFO);
             }
-            
+
+            /**
+             * Returns the amount of data pending in the network's input buffer.
+             * This is the number of bytes that can be read from the socket and
+             * may not be the same as the total amount of data queued on the socket.
+             * @return the amount of data that can be read from the socket.
+             */
+            unsigned long availableBytes(void)
+            {
+                unsigned long pendingBytes = 0L;
+
+                #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32) || defined(_WIN32_WCE)
+                    if (SOCKET_ERROR != ::ioctlsocket(handle(), FIONREAD, &pendingBytes))
+                    {
+                        return pendingBytes;
+                    }
+                #elif defined(__GNUC__)
+                    if (-1 != ::ioctl(handle() ,FIONREAD, &pendingBytes))
+                    {
+                        return pendingBytes;
+                    }
+                #else
+                    throw std::runtime_error("Not yet implemented" + PT_SOURCEINFO);
+                #endif
+
+                throw std::runtime_error("availableBytes" + PT_SOURCEINFO);
+            }
+
             size_t read(char* buffer, size_t count, bool& eof)
             {
                 ssize_t n;

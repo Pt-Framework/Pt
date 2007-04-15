@@ -65,6 +65,15 @@ void TcpSocket::accept(const TcpServerSocket& server)
 }
 
 
+unsigned long TcpSocket::availableBytes(void)
+{
+    if (!_impl)
+        _impl = new TcpSocketImpl();
+
+    return _impl->availableBytes();
+}
+
+
 size_t TcpSocket::_read(char* buffer, size_t count, bool& eof)
 {
     if (!_impl)
