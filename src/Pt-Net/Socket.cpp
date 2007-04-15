@@ -20,13 +20,46 @@
 #include "Pt/Net/Socket.h"
 #include "SocketImpl.h"
 
+#ifdef __GNUC__
+#include <netinet/in.h>
+#endif
+
 namespace Pt {
 
 namespace Net {
 
-Socket::Socket()
-{ }
+unsigned long fromHost(unsigned long hostlong)
+{
+    return htonl(hostlong);
+}
 
+unsigned long toHost(unsigned long netlong)
+{
+    return ntohl(netlong);
+}
+
+unsigned int fromHost(unsigned int hostint)
+{
+    return htonl(hostint);
+}
+
+unsigned int toHost(unsigned int netint)
+{
+    return ntohl(netint);
+}
+
+unsigned short fromHost(unsigned short hostshort)
+{
+    return htons(hostshort);
+}
+
+unsigned short toHost(unsigned short netshort)
+{
+    return ntohs(netshort);
+}
+
+Socket::Socket()
+{}
 
 Socket::~Socket()
 {}
