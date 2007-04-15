@@ -23,14 +23,72 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Types.h>
-// #include <Pt/IO/IODevice.h>
-
 
 namespace Pt
 {
 
 namespace Net
 {
+
+    /** @brief Returns a 32-bit value from host to TCP/IP network
+        byte order (which is big endian).
+        
+        \param hostlong 32-bit value in host byte order. 
+        
+        \return 32-bit value in TCP/IP's network byte order.
+     */
+    unsigned long fromHost(unsigned long hostlong);
+    
+    /** @brief Returns a 32-bit value from TCP/IP network order to
+        host byte order (which is little-endian on Intel processors).
+        If the netlong parameter was already in host byte order, then
+        no operation is performed.
+        
+        \param netlong 32-bit value in TCP/IP network byte order.
+        
+        \return 32-bit value in host byte order.
+     */
+    unsigned long toHost(unsigned long netlong);
+    
+    /** @brief Returns a 32-bit value from host to TCP/IP network
+        byte order (which is big endian).
+        
+        \param hostint 32-bit value in host byte order. 
+        
+        \return 32-bit value in TCP/IP's network byte order.
+     */
+    unsigned int fromHost(unsigned int hostint);
+    
+    /** @brief Returns a 32-bit value from TCP/IP network order to
+        host byte order (which is little-endian on Intel processors).
+        If the netlong parameter was already in host byte order, then
+        no operation is performed.
+        
+        \param netint 32-bit value in TCP/IP network byte order.
+        
+        \return 32-bit value in host byte order.
+     */
+    unsigned int toHost(unsigned int netint);
+    
+   /** @brief Returns a 16-bit value from host to TCP/IP network
+        byte order (which is big endian).
+        
+        \param hostlong 16-bit value in host byte order. 
+        
+        \return 16-bit value in TCP/IP's network byte order.
+     */
+    unsigned short fromHost(unsigned short hostshort);
+    
+   /** @brief Returns a 16-bit value from TCP/IP network byte order to
+        host byte order (which is little-endian on Intel processors).
+        If the netshort parameter was already in host byte order, then
+        no operation is performed.
+        
+        \param netshort 16-bit value in network byte order.
+        
+        \return 16-bit value in host byte order.
+     */
+    unsigned short toHost(unsigned short netshort);
 
     class PT_NET_API Socket // : public IO::IODevice
     {
