@@ -77,7 +77,7 @@ namespace System {
 
                 Delivers all outstanding events, which are still inside the event queue
                 to the registered methods and functions.
-             /
+             */
             ~EventLoop();
 
             /**
