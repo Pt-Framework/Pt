@@ -1,18 +1,13 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
+#include "Windows.h"
 
 
 namespace {
 
 size_t getCurrentMSecs()
-{
-    Pt::DateTime currentTime = Pt::System::Clock::getCurrentTime();
-    size_t msecs = currentTime.msecs();
-    msecs += currentTime.seconds() * 1000;
-    msecs += currentTime.minutes() * 60 * 1000;
-    msecs += currentTime.hours()   * 60 * 60 * 1000;
-    msecs += currentTime.days()    * 24 * 60 * 60 * 1000;
-    return msecs;
+{    
+    return  Pt::System::Clock::getTime();
 }
 
 }
@@ -75,15 +70,16 @@ void Timer::stop()
 
 
 bool Timer::update()
-{
+{    
     if(_active == false)
         return false;
 
     size_t current = getCurrentMSecs();
     _elapsed = current - _started;
-
+    
+    
     if(_elapsed >= _interval)
-    {
+    {        
         _elapsed -= _interval;
         _started = current - _elapsed;
         timeout();
