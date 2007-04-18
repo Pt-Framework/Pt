@@ -40,7 +40,7 @@ namespace System {
         public:
             //! @brief Contructs an IOBuffer for an IODevice.
             BasicIOBuffer(BasicIODevice<CharT>& ioDevice, size_t bufferSize = 1024)
-            : _ioDevice(0),
+			: _ioDevice(&ioDevice),
               _buffer(0),
               _bufferSize(bufferSize),
               _putbackMax(4)
@@ -239,9 +239,9 @@ namespace System {
         return pos_type(-1);
     }
 
-} // namespace Pt
+} //namespace System
 
-} // !namespace Pt
+} //namespace Pt
 
 #endif
 

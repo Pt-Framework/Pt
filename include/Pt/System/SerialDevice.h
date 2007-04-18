@@ -27,6 +27,7 @@ namespace Pt {
 namespace System {
 
 /** @brief Serial device
+    @ingroup Pt::System
 
     This class implements access to a serial port as a %IODevice. A
     %SerialDevice can be opened by passing a system dependent path

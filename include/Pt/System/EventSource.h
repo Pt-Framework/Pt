@@ -29,7 +29,6 @@
 #include <Pt/System/EventLoop.h>
 #include <list>
 
-
 namespace Pt {
 namespace System {
 

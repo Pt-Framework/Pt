@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_IO_IOError_h
-#define Pt_IO_IOError_h
+#ifndef PT_SYSTEM_IOERROR_H
+#define PT_SYSTEM_IOERROR_H
 
 #include <Pt/System/Api.h>
 #include <Pt/Exception.h>

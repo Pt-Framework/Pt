@@ -28,7 +28,6 @@
 #include <string>
 
 namespace Pt {
-
 namespace System {
 
 class PT_SYSTEM_API InvalidUrl : public std::logic_error
