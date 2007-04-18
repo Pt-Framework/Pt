@@ -50,6 +50,6 @@ OpenFailed::~OpenFailed() throw()
 {
 }
 
-} // namespace IO
+} // namespace System
 
 } // namespace Pt

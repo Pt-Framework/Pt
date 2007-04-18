@@ -84,8 +84,11 @@ class SharedLibImpl {
             if(_handle)
                 return;
 
-            //since lazy loading is not supported by every target platform
-            int flags = RTLD_NOW;
+            /* RTLD_NOW: since lazy loading is not supported by every target platform
+               RTLD_GLOBAL: make the external symbols in the loaded library available for subsequent libraries.
+                           see also http://gcc.gnu.org/faq.html#dso
+            */
+            int flags = RTLD_NOW | RTLD_GLOBAL;
 
             _handle = ::dlopen(libraryFile.path().c_str(), flags);
             if( !_handle ) {

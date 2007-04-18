@@ -190,8 +190,8 @@ PipeImpl::PipeImpl()
 
     writeOpts.dwSize          = sizeof(MSGQUEUEOPTIONS);
     writeOpts.dwFlags         = MSGQUEUE_ALLOW_BROKEN;
-    writeOpts.dwMaxMessages   = 10; 
-    writeOpts.cbMaxMessage    = 20;
+    writeOpts.dwMaxMessages   = 100; 
+    writeOpts.cbMaxMessage    = 1024;
     writeOpts.bReadAccess     = FALSE;
     
     readOpts = writeOpts;

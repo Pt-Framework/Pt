@@ -573,6 +573,6 @@ std::string Url::decode(const std::string& str)
     return os.str();
 }
 
-} // namespace IO
+} // namespace System
 
 } // !namespace P

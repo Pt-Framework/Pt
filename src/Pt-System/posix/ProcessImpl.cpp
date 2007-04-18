@@ -64,14 +64,14 @@ void ProcessImpl::start()
         char* cpArgs[ buffer.size() ];
 
         unsigned int j = 0;
-        cpArgs[j++] = strtok(&buffer[0]," ");    // allocate the command to cpArgs
+		cpArgs[j++] = std::strtok(&buffer[0]," ");	// allocate the command to cpArgs
 
-        while( j < m_args.length()+1 && ( cpArgs[j++] = strtok(NULL," ") ) != NULL);    // allocate the arguments to cpArgs
+		while( j < m_args.length()+1 && ( cpArgs[j++] = std::strtok(NULL," ") ) != NULL);	// allocate the arguments to cpArgs
 
         if( 0 > execvp(cpArgs[0], cpArgs))
         {
             throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
-            exit(-1);
+			std::exit(-1);
         }
     }
     // Parent Process
@@ -83,11 +83,11 @@ void ProcessImpl::kill()
 {
     if( 0 > ::kill(m_pid,SIGINT) )
     {
-        throw SystemError(strerror(errno),PT_SOURCEINFO);
+		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
     if( m_pid != ::wait(NULL) )
     {
-        throw SystemError(strerror(errno),PT_SOURCEINFO);
+		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
 }
 
@@ -97,7 +97,7 @@ void ProcessImpl::wait()
     int iStatus;
     if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
     {
-        throw SystemError(strerror(errno),PT_SOURCEINFO);
+		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
 }
 

@@ -1,6 +1,5 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
-#include "Windows.h"
 
 
 namespace {
@@ -77,8 +76,7 @@ bool Timer::update()
     size_t current = getCurrentMSecs();
     _elapsed = current - _started;
     
-    
-    if(_elapsed >= _interval)
+        if(_elapsed >= _interval)
     {        
         _elapsed -= _interval;
         _started = current - _elapsed;

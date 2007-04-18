@@ -80,7 +80,52 @@ void FileImpl::remove()
 
 void FileImpl::copy(const std::string& to) const
 {
-    throw SystemError("Could not copy file", PT_SOURCEINFO);
+
+    int sd = open(_path.c_str(), O_RDONLY);
+    if (sd == -1) throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+
+    struct stat st;
+    if (fstat(sd, &st) != 0)
+    {
+        close(sd);
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+    }
+    const long blockSize = st.st_blksize;
+
+    int dd = open(to.c_str(), O_CREAT | O_TRUNC | O_WRONLY, st.st_mode & S_IRWXU);
+    if (dd == -1)
+    {
+        close(sd);
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+    }
+    char buffer[blockSize];
+    try
+    {
+        int n;
+        while ((n = read(sd, buffer, blockSize)) > 0)
+        {
+            if (write(dd, buffer, n) != n)
+                throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+        }
+        if (n < 0)
+            throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+    }
+    catch (...)
+    {
+        close(sd);
+        close(dd);
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);;
+    }
+    close(sd);
+    if (fsync(dd) != 0)
+    {
+        close(dd);
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+    }
+    if (close(dd) != 0)
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+
+
 }
 
 

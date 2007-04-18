@@ -42,7 +42,6 @@ PipeIODevice::~PipeIODevice()
     }
     catch(...)
     {}
-
 }
 
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
@@ -114,7 +113,6 @@ PipeImpl::PipeImpl()
 
 PipeImpl::~PipeImpl()
 {
-
 }
 
 
