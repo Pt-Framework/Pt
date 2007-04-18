@@ -76,11 +76,11 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
         if ( !device.waitable() )
             continue;
 
-        currentHandles.clear();
-
-        device.impl()->beginWait( waitMode );
+        currentHandles.clear();        
 
         device.impl()->eventHandles( currentHandles, waitMode );
+
+        device.impl()->beginWait( waitMode );
 
         for (currentHandlesIt = currentHandles.begin(); currentHandlesIt != currentHandles.end(); ++currentHandlesIt)
         {
