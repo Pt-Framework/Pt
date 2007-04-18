@@ -141,9 +141,9 @@ namespace System {
             /// @return true if the thread is joinable
             bool joinable() const;
 
-            //! @brief Starts the thread and calls Thread::main()
+            //! @brief Starts the thread and calls Thread::run()
             ///
-            /// This starts the execution of the thread. This mean Thread::main()
+            /// This starts the execution of the thread. This means Thread::run()
             /// will be called, which needs to be overriden in derived classes.
             ///
             /// @return a self reference for error checking
@@ -173,7 +173,7 @@ namespace System {
             //! @brief Exits a joinable thread.
             ///
             /// This function is meant to be called from within a thread. Thread::exit()
-            /// is implicitly called whenThread::main() returns.
+            /// is implicitly called when Thread::run() returns.
             static void exit();
 
             //! @brief Yield CPU time
