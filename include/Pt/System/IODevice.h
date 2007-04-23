@@ -36,6 +36,7 @@ namespace Pt {
 namespace System {
 
 class IODeviceImpl;
+class IOResult;
 
 /** @brief Endpoint for I/O operations
 
@@ -91,6 +92,10 @@ class BasicIODevice : public NonCopyable {
                 _valid = false;
             }
         }
+
+        virtual IOResult beginRead(CharT* buffer, size_t n);
+
+        virtual void endRead(IOResult& result);
 
         //! @brief Read data from I/O device
         /*!
@@ -282,6 +287,32 @@ class BasicIODevice : public NonCopyable {
 };
 
 typedef BasicIODevice<char> IODevice;
+
+
+class IOResult
+{
+    public:
+        IOResult(IODevice& device)
+        : _device(&device)
+        {}
+
+    private:
+        IODevice* _device;
+};
+
+
+template <typename CharT>
+inline IOResult BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
+{
+    return IOResult( *this );
+}
+
+
+template <typename CharT>
+inline void BasicIODevice<CharT>::endRead(IOResult& result)
+{
+}
+
 
 } // namespace System
 
