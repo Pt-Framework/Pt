@@ -39,10 +39,18 @@ SelectorImpl::~SelectorImpl()
     CloseHandle( _wakeHandle );
 }
 
+
 void SelectorImpl::addDevice( IODevice& device, int waitMode )
 {
     _items.push_back( Item(device, waitMode) );
 }
+
+
+void SelectorImpl::waitInput( IOResult& result )
+{
+	_waitHandles.push_back(0);
+}
+
 
 void SelectorImpl::removeDevice( IODevice& device )
 {
@@ -80,6 +88,7 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 
         device.impl()->eventHandles( currentHandles, waitMode );
 
+		/// use beginRead instead
         device.impl()->beginWait( waitMode );
 
         for (currentHandlesIt = currentHandles.begin(); currentHandlesIt != currentHandles.end(); ++currentHandlesIt)

@@ -45,6 +45,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual WaitResult waitResult( HANDLE handle );
 
+		IOResult beginRead(char* buffer, size_t n);
+
+		size_t endRead(IOResult& resule);
+
         virtual void beginWait( size_t waitMode );
 
         virtual IODeviceImpl* impl()

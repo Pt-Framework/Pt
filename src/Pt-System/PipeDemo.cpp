@@ -15,19 +15,36 @@ int main( int argc, char* argv[] )
     pipe.output().write(out.c_str(), out.size());
 
     Pt::System::Selector selector;
-    Pt::System::IOResult res = pipe.input().beginRead(buffer, size);
-
     selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
 
-    bool ret = selector.wait();
-    std::cerr << "Data: " << std::boolalpha << ret << std::endl;
+	while(true)
+	{
+		Pt::System::IOResult res = pipe.input().beginRead(buffer, size);
 
+		// TODO: Here we need to add the IOResult to the Selector
+
+		bool avail = selector.wait(100);
+
+		sz = pipe.input().endRead(res);
+		std::cerr.write( buffer, sz ) << "#";
+		
+		if(avail == false)
+			break;
+	}
+
+    /*bool ret = selector.wait(1000);
+	sz = pipe.input().endRead(res);
+	std::cerr.write( buffer, sz ) << "|";
+
+	res = pipe.input().beginRead(buffer, size);
     do
     {
-        sz = pipe.input().read(buffer, size);
-        std::cerr.write(buffer, sz);
+		sz = pipe.input().endRead(res);
+		std::cerr.write( buffer, sz ) << "|";
+
+		res = pipe.input().beginRead(buffer, size);
     }
-    while( selector.wait(100) );
+    while( selector.wait(100) );*/
 
     std::cerr << std::endl;
     return 0;

@@ -43,6 +43,7 @@ PipeIODevice::PipeIODevice()
     _writeOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
+
 PipeIODevice::~PipeIODevice()
 {
     try
@@ -62,10 +63,12 @@ void PipeIODevice::open(HANDLE handle)
     setValid(true);
 }
 
+
 HANDLE PipeIODevice::deviceHandle() const
 {
     return _handle;
 }
+
 
 IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 {
@@ -76,6 +79,73 @@ IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
     
     throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
 }
+
+
+IOResult PipeIODevice::beginRead(char* buffer, size_t n)
+{
+    DWORD readBytes = 0;    
+
+    if( FALSE == ReadFile(_handle, (void*)buffer, n, &readBytes, &_readOv) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }
+        else if( GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
+        {
+            readBytes = 0;
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+    
+    // Later IOResult should contain the appropriate wait handle
+    IOResult result( *this, buffer, n );
+    result.setSize(readBytes);
+    return result;
+}
+
+
+size_t PipeIODevice::endRead(IOResult& result)
+{
+	// just in case beginRead already used the whole buffer
+	if( result.size() == result.capacity() )
+		return result.size();
+
+    bool eof = false;
+    DWORD readBytes = 0;    
+	char* buffer = result.data() + result.size();
+	size_t count = result.capacity() - result.size();
+
+    if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+            eof = true;
+            readBytes = 0;
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }
+        else if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
+        {
+            readBytes = 0;
+        }
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+  
+	// return the bytes we read here and previously on beginRead
+    return readBytes + result.size();
+}
+
 
 void PipeIODevice::beginWait( size_t waitMode )
 {
@@ -96,7 +166,7 @@ void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
     
     if( waitMode & Selector::WaitInput )
     {
-        this->_read(0, 0, eof);
+        //this->_read(0, 0, eof);
         //ReadFile(_handle, 0, 0, &readBytes, &_readOv);
         handles.push_back( _readOv.hEvent );
     }
@@ -122,6 +192,7 @@ void PipeIODevice::_close()
         _handle = INVALID_HANDLE_VALUE;
     }
 }
+
 
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 {
@@ -172,12 +243,14 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
     return writtenBytes;
 }
 
+
 void PipeIODevice::_sync() const
 {
     if( FALSE == ::FlushFileBuffers(_handle) ) {
         throw IOError("Could not flush file buffer", PT_SOURCEINFO);
     }
 }
+
 
 
 

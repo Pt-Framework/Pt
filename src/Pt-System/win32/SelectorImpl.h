@@ -42,6 +42,8 @@ class SelectorImpl
         
         void addDevice( IODevice& device, int waitMode );
 
+		void waitInput( IOResult& result );
+
         void removeDevice( IODevice& device );
 
         bool wait( unsigned int msecs );
@@ -71,6 +73,8 @@ class SelectorImpl
 			IODevice* device;
 			int waitMode;
         };
+
+		std::vector<HANDLE> _waitHandles;
 
         std::vector<Item>	   _items;
         std::map<HANDLE, Item> _itemMap;

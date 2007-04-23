@@ -33,6 +33,12 @@ void Selector::addDevice( IODevice& dev, WaitMode wm )
 }
 
 
+void Selector::waitInput( IOResult& result )
+{
+	_impl->waitInput(result);
+}
+
+
 void Selector::removeDevice( IODevice& dev )
 {
     _impl->removeDevice( dev );
