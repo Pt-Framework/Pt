@@ -331,7 +331,7 @@ inline IOResult BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
 template <typename CharT>
 inline size_t BasicIODevice<CharT>::endRead(IOResult& result)
 {
-	return 0;
+    return 0;
 }
 
 

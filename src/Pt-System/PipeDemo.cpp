@@ -13,6 +13,7 @@ int main( int argc, char* argv[] )
 
     std::string out("Hello World, where do you want to GOTO day!");
     pipe.output().write(out.c_str(), out.size());
+    pipe.output().sync();
 
     Pt::System::Selector selector;
     selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
@@ -23,11 +24,11 @@ int main( int argc, char* argv[] )
 
 		// TODO: Here we need to add the IOResult to the Selector
 
-		bool avail = selector.wait(100);
+		bool avail = selector.wait(1);
 
 		sz = pipe.input().endRead(res);
 		std::cerr.write( buffer, sz ) << "#";
-		
+
 		if(avail == false)
 			break;
 	}

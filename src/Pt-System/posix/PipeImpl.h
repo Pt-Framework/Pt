@@ -49,6 +49,10 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         int fd() const
         { return _fd;}
 
+        IOResult beginRead(char* buffer, size_t n);
+
+        size_t endRead(IOResult& result);
+
     protected:
         void _close()
         { ::close(_fd); }

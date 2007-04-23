@@ -44,6 +44,20 @@ PipeIODevice::~PipeIODevice()
     {}
 }
 
+
+IOResult PipeIODevice::beginRead(char* buffer, size_t n)
+{
+    return IOResult(*this, buffer, n);
+}
+
+
+size_t PipeIODevice::endRead(IOResult& result)
+{
+    size_t n = this->read( result.data(), result.capacity() );
+    return n;
+}
+
+
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 {
     eof = false;

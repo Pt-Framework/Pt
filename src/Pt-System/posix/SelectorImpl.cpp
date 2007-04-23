@@ -171,7 +171,6 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
     while( true )
     {
         ret = ::select( maxfd + 1, &rfds, &wfds, 0, timeout );
-
         if( ret != -1 )
             break;
 
