@@ -1,53 +1,89 @@
 /** \mainpage Discover the Platinum C++ Framework...
 
-Boost your daily performance with the Platinum C++ framework! With %Pt your
-applications are portable to many platforms without change. Its clean and
-concise design assists you in writing robust and highly reusable code.
+\htmlonly
 
-<b>...unleash the power of %Pt and C++ onto your programs today!</b>
+    <div id="sidebar">
+        <h3>About Platinum</h3>
+        <ul>
+            <li><a href="news.html">News</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="http://www.gnu.org/licenses/lgpl.html">License</a></li>
+            <li><a href="acknowledgements.html">Acknowledgements</a></li>
+        </ul>
+        <h3>Community</h3>
+        <ul>
+            <li><a href="people.html">People</a></li>
+            <li><a href="mailinglist.html">Mailing Lists</a></li>
+            <li><a href="http://www.tntnet.org/">Tntnet</a></li>
+            <li><a href="http://www.s11n.net/">s11n</a></li>
+            <li><a href="http://www.t2-project.org/">T2 Project</a></li>
+        </ul>
+        <h3>Develop</h3>
+        <ul>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="scrum.html">Project Overview</a></li>
+            <li><a href="download.html">Subversion</a></li>
+        </ul>
+        <h3>Download</h3>
+        <ul>
+            <li><a href="http://pt-framework.sourceforge.net/Platinum-1.0.0-tr1.tar.gz">Latest Source</a></li>
+        </ul>
 
-- \b Portablility \n
-Platinum is extremely portable and runs on everything from embedded devices up
-to large servers. The supported platforms include Windows, Windows CE,
-Linux, QNX, Unix with many more to come. %Pt lets you spend your time on
-your application taking away the pain of low-level programming.
+    </div>
 
-- \b Performance \n
-A high degree of performance is achieved through the use of modern C++
-features. Your program will benefit from the many optimizations
-included in the framework.
+    <div id="content">
+        <h2>The Power in your Hands</h2>
+        <p>
+            Boost your daily performance with the Platinum C++ framework! With Pt your
+            applications are portable to many platforms without change. Its clean and
+            concise design assists you in writing robust and highly reusable code.
+        </p>
 
-- <b>Easy to use</b> \n
-Platinum is designed from the ground up to be flexible and extensible.
-It provides simple solutions to your problems. Programs written with
-Platinum tend to be significantly shorter and much easier to understand.
+        <b>...unleash the power of Pt and C++ onto your programs today!</b>
 
-- <b>Open Source</b> \n
-Its not just open, its free! Published under the LGPL it allows you
-to write commercial applications and be part of the great community that
-develops PPR and determines its future.
+        <br><br>
 
-<h1>News</h1>
+        <h3>Portablility</h3>
+        <p>
+            Platinum is extremely portable and runs on everything from embedded devices up
+            to large servers. The supported platforms include Windows, Windows CE,
+            Linux, QNX, Unix with many more to come. Pt lets you spend your time on
+            your application taking away the pain of low-level programming.
+        </p>
 
-<b> <em>25-02-2007, New Project Website</em> </b>\n
-The new project website integrates the generated doxygen documentation into the project pages. The online reference documentation was improved and contains class groups for easier navigation.
+        <h3>Performance</h3>
+        <p>
+            A high degree of performance is achieved through the use of modern C++
+            features. Your program will benefit from the many optimizations
+            included in the framework.
+        </p>
 
-<b> <em>05-02-2007, Sprint Results</em> </b>\n
-This slightly longer development sprint has lead to the TR-1 release. Many improvements have been made to the core module and the %Gfx module. A new module for network programming was added (%Pt::Net). %Pt can now be built wit the intel compiler on win32. The code is available as a tarball in the download section or as a tag in the subversion repository (tags/tr1).
+        <h3>Easy to use</h3>
+        <p>
+            Platinum is designed from the ground up to be flexible and extensible.
+            It provides simple solutions to your problems. Programs written with
+            Platinum tend to be significantly shorter and much easier to understand.
+        </p>
 
-<b> <em>01-12-2006, Sprint Results</em> </b>\n
-During the last sprint, enhancements have been made to the %Gfx module and the core module, Most notably to the image classes and the reflection API. A new module for unit testing was added. %Pt::Unit allows protocol- and data-driven testing.
+        <h3>Open Source</h3>
+        <p>
+            Its not just open, its free! Published under the LGPL it allows you
+            to write commercial applications and be part of the great community that
+            develops Pt and determines its future.
+        </p>
 
-<b> <em>01-11-2006, Scrum project management introduced</em> </b>\n
-The scrum system can now be used by developers to coordinate their efforts to
-improve %Pt. It is not mandatory to take part in the scrum process, but highly
-encouraged. Progress can be monitored on the "Project Status" link on the 
-%Pt website.
+        <br>
 
-<b> <em>14-10-2006, %Pt and Tntnet at LinuxWorldExpo in Cologne</em> </b>\n
-Platinum was presented together with Tntnet, the open-source web application server, at LinuxWorldExpo in Cologne in the open source pavillion.
+        <h2>Latest News</h2>
+        <li><b><a href="news.html">25-02-2007, New Project Website</a></b></li>
+        <li><b><a href="news.html">05-02-2007, Sprint Results</a></b></li>
+        <li><b><a href="news.html">01-12-2006, Sprint Results</a></b></li>
+        <li><b><a href="news.html">01-11-2006, Scrum project management introduced</a></b></li>
+        <li><b><a href="news.html">14-10-2006, Pt and Tntnet at LinuxWorldExpo in Cologne</a></b></li>
+        <li><b><a href="news.html">22-09-2006, Pt on Sourceforge</a></b></li>
 
-<b> <em>22-09-2006, %Pt on Sourceforge</em> </b>\n
-The Platinum C++ framework is now hosted on sourceforge.net. The source code is available through an SVN repository and generated documentation can be viewed online now.
+    </div>
+
+\endhtmlonly
 
 */

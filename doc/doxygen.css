@@ -6,7 +6,7 @@ BODY,TD {
        font-size: 90%;
 }
 H1 {
-       background-color:#faf6f6;
+       background-color:#f6f6f6;
        border-bottom: 2px solid gray;
        padding-bottom:7px;
        padding-top:7px;
@@ -65,7 +65,7 @@ DIV.navtab {
 	border: 1px solid gray;
 	border-top: none;
 	-moz-border-radius: 0px 0px 12px 12px;
-	height:9.5em;
+	height:11em;
 }
 
 .docs-page-body ul {
@@ -416,3 +416,33 @@ HR { height: 1px;
 .directory p { margin: 0px; white-space: nowrap; }
 .directory div { display: none; margin: 0px; }
 .directory img { vertical-align: -30%; }
+
+
+/* the main content of the page */
+#content    {
+    padding: 0em 1em 1em 1em;
+    margin-left: 18em;
+}
+
+/* A sidebar of links, etc */
+#sidebar    {
+    float: left;
+    width: 14em;
+    margin: 0em 0em;
+    padding: 1em 1.5em;
+    font-size: 100%;
+    background-color: #f6f6f6;
+    border: 1px solid #dddddd;
+}
+
+#sidebar ul {
+    list-style: none;
+    margin: 0em;
+    padding: 0em 1em;
+}
+
+/* make the first header in the resource menu have no margin on top so that the
+* padding of the sidebar and the margin don't add. */
+#sidebar > h3:first-child   {
+    margin-top: 0em;
+}
