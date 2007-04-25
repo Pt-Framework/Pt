@@ -218,7 +218,10 @@ namespace Db {
                 \return Self reference
             */
             Statement& set(const std::string& col, const DateTime& data)
-            { data.isNull() ? _stmt->setNull(col) : _stmt->setDatetime(col, data); return *this; }
+            {
+                ///data.isNull() ? _stmt->setNull(col) : _stmt->setDatetime(col, data);
+                _stmt->setDatetime(col, data);
+                return *this; }
 
             /** \brief Executes a query with the current parameters
 

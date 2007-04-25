@@ -35,26 +35,23 @@ DateTime ClockImpl::getCurrentTime()
     struct tm* currentTimeStruct;
     currentTimeStruct = localtime(&timeValue.tv_sec);
 
-    Date date(    currentTimeStruct->tm_year + 1900,
-                currentTimeStruct->tm_mon + 1,
-                currentTimeStruct->tm_mday    );
-    Time time(    currentTimeStruct->tm_hour,
-                currentTimeStruct->tm_min,
-                currentTimeStruct->tm_sec,
-                timeValue.tv_usec / 1000    );
-    DateTime dateTime(date, time);
-
-    return dateTime;
+    return DateTime( currentTimeStruct->tm_year + 1900,
+                     currentTimeStruct->tm_mon + 1,
+                     currentTimeStruct->tm_mday,
+                     currentTimeStruct->tm_hour,
+                     currentTimeStruct->tm_min,
+                     currentTimeStruct->tm_sec,
+                     timeValue.tv_usec / 1000 );
 }
 
 Pt::size_t ClockImpl::getTime()
 {
     DateTime currentTime = ClockImpl::getCurrentTime();
-    size_t msecs = currentTime.msecs();
-    msecs += currentTime.seconds() * 1000;
-    msecs += currentTime.minutes() * 60 * 1000;
-    msecs += currentTime.hours()   * 60 * 60 * 1000;
-    msecs += currentTime.days()    * 24 * 60 * 60 * 1000;
+    size_t msecs = currentTime.millisecond();
+    msecs += currentTime.second() * 1000;
+    msecs += currentTime.minute() * 60 * 1000;
+    msecs += currentTime.hour()   * 60 * 60 * 1000;
+    msecs += currentTime.day()    * 24 * 60 * 60 * 1000;
     return msecs;
 }
 
