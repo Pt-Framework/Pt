@@ -21,16 +21,6 @@
 # Aloysius
 #
 
-ITEM P10 S5 "DateTime classes are improved"
-    TASK "Write Timespan class"
-    TASK "Write Timestamp class"
-    TASK "Improve DateTime class"
-
-ITEM P10 S13 "Timers using an IOMonitor are implemented"
-    TASK "Implement Timer class"
-    TASK "Implement Timer scheduling"
-    TASK "Write Documentation"
-    TASK "Write test case"
 
 ITEM P10 S8 "Delegates are implemented"
     TASK "Write Documentation"

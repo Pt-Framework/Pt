@@ -28,6 +28,14 @@
 # Aloysius
 #
 
+ITEM P10 S13 "Timers using an IOMonitor are implemented"
+    TASK "Implement Timer class"
+    TASK "Implement Timer scheduling"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+##############################
+
 ITEM P0 S13 "The IODevice class is implemented"
     TASK "Remove async IO stuff"
     TASK "Replace IODevice flags with std::ios flags"
