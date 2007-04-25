@@ -202,11 +202,8 @@ public:
 	
 	double julianDay() const;
 		/// Returns the julian day for the date and time.
-		
-	Timestamp timestamp() const;
-		/// Returns the date and time expressed as a Timestamp.
 
-	Timestamp::UtcTimeVal utcTime() const;
+	int64_t utcTime() const;
 		/// Returns the date and time expressed in UTC-based
 		/// time. UTC base time is midnight, October 15, 1582.
 		/// Resolution is 100 nanoseconds.
@@ -243,14 +240,14 @@ public:
     std::string toIsoString() const;
 
 protected:	
-	static double toJulianDay(Timestamp::UtcTimeVal utcTime);
+	static double toJulianDay(int64_t utcTime);
 		/// Computes the Julian day for an UTC time.
 	
 	static double toJulianDay(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
 		/// Computes the Julian day for a gregorian calendar date and time.
 		/// See <http://vsg.cape.com/~pbaum/date/jdimp.htm>, section 2.3.1 for the algorithm.
 	
-	static Timestamp::UtcTimeVal toUtcTime(double julianDay);
+	static int64_t toUtcTime(double julianDay);
 		/// Computes the UTC time for a Julian day.
 		
 	void computeGregorian(double julianDay);
@@ -261,29 +258,21 @@ protected:
 		/// Extracts the daytime (hours, minutes, seconds, etc.) from the stored utcTime.
 
 private:
-	void checkLimit(short& lower, short& higher, short limit);
-	void normalize();
-		///utility functions used to correct the overflow in computeGregorian
+    void checkLimit(short& lower, short& higher, short limit);
+    void normalize();
+        ///utility functions used to correct the overflow in computeGregorian
 
-	Timestamp::UtcTimeVal _utcTime;
-	short  _year;
-	short  _month;
-	short  _day;
-	short  _hour;
-	short  _minute;
-	short  _second;
-	short  _millisecond;
-	short  _microsecond;
+    int64_t _utcTime;
+    short  _year;
+    short  _month;
+    short  _day;
+    short  _hour;
+    short  _minute;
+    short  _second;
+    short  _millisecond;
+    short  _microsecond;
 };
 
-
-//
-// inlines
-//
-inline Timestamp DateTime::timestamp() const
-{
-	return Timestamp::fromUtcTime(_utcTime);
-}
 
 
 inline Timestamp::UtcTimeVal DateTime::utcTime() const

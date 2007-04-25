@@ -53,8 +53,8 @@ DateTime::DateTime()
 }
 
 
-DateTime::DateTime(const Timestamp& timestamp):
-	_utcTime(timestamp.utcTime())
+DateTime::DateTime(const Timestamp& timestamp)
+: _utcTime( timestamp.utcTime() )
 {
 	computeGregorian(julianDay());
 	computeDaytime();
@@ -169,7 +169,13 @@ DateTime& DateTime::assign(int year, int month, int day, int hour, int minute, i
 	assert (millisecond >= 0 && millisecond <= 999);
 	assert (microsecond >= 0 && microsecond <= 999);
 
-	_utcTime     = toUtcTime(toJulianDay(year, month, day)) + 10*(hour*Timespan::Hours + minute*Timespan::Minutes + second*Timespan::Seconds + millisecond*Timespan::Milliseconds + microsecond);
+	_utcTime     = toUtcTime( toJulianDay(year, month, day) ) +
+	               10 * (hour * Timespan::Hours +
+	                     minute * Timespan::Minutes +
+	                     second * Timespan::Seconds +
+	                     millisecond * Timespan::Milliseconds +
+	                     microsecond);
+
 	_year        = year;
 	_month       = month;
 	_day         = day;

@@ -22,6 +22,7 @@
 
 #include "Pt/Types.h"
 #include "Pt/Timestamp.h"
+#include "Pt/DateTime.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
@@ -29,16 +30,6 @@
 
 #include <iostream>
 
-
-class MyStream : public std::iostream
-{
-    public:
-        MyStream()
-        : std::iostream(0)
-        {
-            this->rdbuf( std::cerr.rdbuf() );
-        }
-};
 
 class TypesTest : public Pt::Unit::TestCase
 {
@@ -50,8 +41,6 @@ class TypesTest : public Pt::Unit::TestCase
     protected:
         void test()
         {
-            MyStream ms;
-
             PT_UNIT_ASSERT( sizeof(Pt::int8_t) == 1 );
             PT_UNIT_ASSERT( sizeof(Pt::uint8_t) == 1 );
             PT_UNIT_ASSERT( sizeof(Pt::int16_t) == 2 );
