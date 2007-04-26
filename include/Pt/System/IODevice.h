@@ -37,6 +37,8 @@ namespace System {
 
 class IODeviceImpl;
 class IOResult;
+class IOResultImpl;
+
 
 /** @brief Endpoint for I/O operations
 
@@ -74,7 +76,7 @@ class BasicIODevice : public NonCopyable {
         //! @brief Default Constructor
         BasicIODevice()
         : _valid(false)
-        , _eof(false)
+        , _eof(false)        
         { }
 
         //! @brief Destructor
@@ -283,11 +285,10 @@ class BasicIODevice : public NonCopyable {
 
     private:
         bool _valid;
-        bool _eof;
+        bool _eof;        
 };
 
 typedef BasicIODevice<char> IODevice;
-
 
 class IOResult
 {
@@ -297,7 +298,7 @@ class IOResult
         , _capacity(capacity)
         , _size(0)
         , _device(&device)
-        {}
+        {}    
 
 		char* data() const
 		{ return _data; }
@@ -313,7 +314,8 @@ class IOResult
 		void setSize(size_t n)
 		{ _size = n; }
 
-        virtual IOResultImpl* impl() = 0;
+        virtual IOResultImpl* impl()
+        { return 0;}
         
 
     private:
@@ -327,7 +329,8 @@ class IOResult
 template <typename CharT>
 inline IOResult& BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
 {
-    return IOResult( *this, buffer, 0 );
+    static IOResult* result;
+    return *result;
 }
 
 
