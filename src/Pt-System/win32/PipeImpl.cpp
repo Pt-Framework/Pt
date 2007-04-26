@@ -32,6 +32,8 @@ namespace System {
 PipeIODevice::PipeIODevice()
 : _handle(INVALID_HANDLE_VALUE)
 {
+	_result.init(*this);
+
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
     _readOv.hEvent = NULL;
@@ -59,7 +61,7 @@ PipeIODevice::~PipeIODevice()
 
 void PipeIODevice::open(HANDLE handle)
 {
-    _handle = handle; 
+    _handle = handle;
     setValid(true);
 }
 
@@ -74,60 +76,49 @@ IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 {
     if( handle == _readOv.hEvent )
         return IODeviceImpl::ReadyRead;
-    else if( handle == _writeOv.hEvent ) 
+    else if( handle == _writeOv.hEvent )
         return IODeviceImpl::ReadyWrite;
-    
+
     throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
 }
 
 
 IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
 {
-    DWORD readBytes = 0;    
+    DWORD readBytes = 0;
 
     if( FALSE == ReadFile(_handle, (void*)buffer, n, &readBytes, &_readOv) )
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
+			//TODO: return eof as in/out argument
             readBytes = 0;
         }
         else if( ERROR_IO_PENDING != GetLastError() )
         {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
-        }      
+        }
     }
 
-    _readOv.Offset += readBytes;
-    _writeOv.Offset += readBytes;
-    
-    // Later IOResult should contain the appropriate wait handle
-    IOResult result( *this, buffer, n );
-    result.setSize(readBytes);
-    return result;
+    _result.setHandle(_readOv.hEvent);
+    return _result;
 }
 
 
 size_t PipeIODevice::endRead(IOResult& result)
 {
-	// just in case beginRead already used the whole buffer
-	if( result.size() == result.capacity() )
-		return result.size();
-
     bool eof = false;
-    DWORD readBytes = 0;    
-	char* buffer = result.data() + result.size();
-	size_t count = result.capacity() - result.size();
-
+    DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
         readBytes = 0;
-    }    
+    }
 
     _readOv.Offset += readBytes;
     _writeOv.Offset += readBytes;
-  
-	// return the bytes we read here and previously on beginRead
-    return readBytes + result.size();
+
+
+    return readBytes;
 }
 
 
@@ -139,24 +130,24 @@ void PipeIODevice::beginWait( size_t waitMode )
     if (waitMode & Selector::WaitOutput) {
         write(0, 0);
     }
-    
+
 }
 
 void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
-    DWORD readBytes = 0;    
+    DWORD readBytes = 0;
     bool eof;
     handles.clear();
-    
+
     if( waitMode & Selector::WaitInput )
     {
         //this->_read(0, 0, eof);
         //ReadFile(_handle, 0, 0, &readBytes, &_readOv);
         handles.push_back( _readOv.hEvent );
     }
-    
+
     if( waitMode & Selector::WaitOutput )
-        handles.push_back( _writeOv.hEvent );          
+        handles.push_back( _writeOv.hEvent );
 }
 
 
@@ -181,7 +172,7 @@ void PipeIODevice::_close()
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 {
     eof = false;
-    DWORD readBytes = 0;    
+    DWORD readBytes = 0;
 
     if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
     {
@@ -215,11 +206,11 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
         if( ERROR_IO_PENDING != GetLastError() )
         {
             throw IOError("Could not write to file handle", PT_SOURCEINFO);
-        }        
+        }
         if(GetOverlappedResult(_handle, &_readOv, &writtenBytes, FALSE) == FALSE )
         {
             writtenBytes = 0;
-        }        
+        }
     }
 
     _readOv.Offset += writtenBytes;
@@ -239,11 +230,11 @@ void PipeIODevice::_sync() const
 
 
 PipeImpl::PipeImpl()
-{   
+{
     std::stringstream ss;
     ss<<"\\\\.\\pipe\\ptpipe"<<_nameId;
-    
-    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(), 
+
+    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
                                      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
                                      1,
@@ -253,13 +244,13 @@ PipeImpl::PipeImpl()
                                      NULL );
 
     if (inputHandle == INVALID_HANDLE_VALUE)
-        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);           
+        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);
 
     DWORD access = GENERIC_WRITE;
     DWORD share  = 0;
     DWORD create = OPEN_EXISTING;
-    DWORD flags  = FILE_FLAG_OVERLAPPED;    
-    
+    DWORD flags  = FILE_FLAG_OVERLAPPED;
+
     HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
 
     if(outputHandle == INVALID_HANDLE_VALUE)
@@ -267,13 +258,13 @@ PipeImpl::PipeImpl()
 
     _inputDevice.open(inputHandle);
     _outputDevice.open(outputHandle);
-    
+
     _nameId++;
 }
 
 PipeImpl::~PipeImpl()
 {
-    _nameId--;  
+    _nameId--;
 }
 
 

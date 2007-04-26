@@ -39,7 +39,7 @@ class SelectorImpl
         SelectorImpl();
 
         ~SelectorImpl();
-        
+
         void addDevice( IODevice& device, int waitMode );
 
 		void waitInput( IOResult& result );
@@ -48,18 +48,18 @@ class SelectorImpl
 
         bool wait( unsigned int msecs );
 
-        void wake(); 
+        void wake();
 
     private:
         void collectWaitHandles(std::vector<HANDLE>& waitHandles);
 
         bool areNonWaitableDevicesAvailable();
-    
+
         void sendEvents(const HANDLE activeHandle);
 
-    private:     
+    private:
         enum{ InternalWake = 0 };
-        
+
         struct Item
         {
 			Item()
@@ -69,19 +69,19 @@ class SelectorImpl
 			Item(IODevice& dev, int waitMode_)
 			: device(&dev), waitMode(waitMode_)
 			{}
-			
+
 			IODevice* device;
 			int waitMode;
         };
 
-		std::vector<HANDLE> _waitHandles;
+		std::vector<IOResult*> _readers;
 
         std::vector<Item>	   _items;
         std::map<HANDLE, Item> _itemMap;
-        HANDLE                 _wakeHandle;   
+        HANDLE                 _wakeHandle;
 };
 
-}//namespace System 
+}//namespace System
 
 }//namespace Pt
 

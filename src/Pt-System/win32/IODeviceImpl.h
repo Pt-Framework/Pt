@@ -21,35 +21,63 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
+#include "Pt/System/IODevice.h"
+
 #include <windows.h>
 #include <vector>
 
-namespace Pt{
-namespace System{
 
-class IODeviceImpl
-{
-    public:
-        IODeviceImpl();
+namespace Pt {
 
-        virtual ~IODeviceImpl();     
-        
-        enum WaitResult{ ReadyRead, ReadyWrite };
-        
-        virtual HANDLE deviceHandle() const  = 0;
-        
-        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode ) = 0;
-        
-        virtual WaitResult waitResult( HANDLE handle ) = 0;
+namespace System {
 
-        virtual void beginWait( size_t waitMode )
-        {}
 
-        virtual void endWait( HANDLE handle )
-        { }
-};
+	class IODeviceImpl
+	{
+		public:
+			IODeviceImpl();
 
-}//namespace 
-}//namespace
+			virtual ~IODeviceImpl();
+
+			enum WaitResult{ ReadyRead, ReadyWrite };
+
+			virtual HANDLE deviceHandle() const  = 0;
+
+			virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode ) = 0;
+
+			virtual WaitResult waitResult( HANDLE handle ) = 0;
+
+			virtual void beginWait( size_t waitMode )
+			{}
+
+			virtual void endWait( HANDLE handle )
+			{ }
+	};
+
+
+    class IOResultImpl : public IOResult
+    {
+        public:
+            IOResultImpl()
+            : IOResult()
+            , _handle(INVALID_HANDLE_VALUE)
+            {}
+
+            virtual IOResultImpl* impl()
+            { return this; }
+
+            void setHandle(HANDLE h)
+            { _handle = h; }
+
+            HANDLE handle() const
+            { return _handle; }
+
+		private:
+            HANDLE _handle;
+    };
+
+} //namespace
+
+} //namespace
 
 #endif

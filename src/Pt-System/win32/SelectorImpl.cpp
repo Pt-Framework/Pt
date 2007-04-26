@@ -48,7 +48,7 @@ void SelectorImpl::addDevice( IODevice& device, int waitMode )
 
 void SelectorImpl::waitInput( IOResult& result )
 {
-	_waitHandles.push_back(0);
+	_readers.push_back(&result);
 }
 
 
@@ -69,13 +69,13 @@ void SelectorImpl::removeDevice( IODevice& device )
 void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
 {
     std::vector<HANDLE>           currentHandles;
-    std::vector<Item>::iterator   it;
     std::vector<HANDLE>::iterator currentHandlesIt;
 
     _itemMap.clear();
 
     waitHandles.push_back(_wakeHandle);
 
+    std::vector<Item>::iterator   it;
     for (it = _items.begin(); it != _items.end(); ++it)
     {
 		int waitMode = it->waitMode;
@@ -84,7 +84,7 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
         if ( !device.waitable() )
             continue;
 
-        currentHandles.clear();        
+        currentHandles.clear();
 
         device.impl()->eventHandles( currentHandles, waitMode );
 
@@ -96,6 +96,15 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
             _itemMap[*currentHandlesIt] = *it;
             waitHandles.push_back(*currentHandlesIt);
         }
+    }
+
+	// IOResult transaction handles
+    std::vector<IOResult*>::iterator iter;
+    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
+    {
+        IOResult* result = *iter;
+        HANDLE handle = result->impl()->handle();
+        waitHandles.push_back( handle );
     }
 }
 
@@ -136,7 +145,7 @@ bool SelectorImpl::areNonWaitableDevicesAvailable()
 
 void SelectorImpl::sendEvents(const HANDLE activeHandle)
 {
-    try
+/*    try
     {
         Item& activeItem = _itemMap[activeHandle];
 		IODevice* activeDevice = activeItem.device;
@@ -163,6 +172,25 @@ void SelectorImpl::sendEvents(const HANDLE activeHandle)
      {
         std::cerr<< e.what()<<std::endl;
      }
+*/
+
+	// IOResult transaction handles
+    std::vector<IOResult*>::iterator iter;
+    for( iter = _readers.begin(); iter != _readers.end();  )
+    {
+        IOResult* result = *iter;
+        HANDLE handle = result->impl()->handle();
+        if(handle == activeHandle)
+        {
+            result->device()->inputReady();
+            iter = _readers.erase(iter);
+
+        }
+        else
+        {
+            ++iter;
+        }
+    }
 }
 
 bool SelectorImpl::wait( unsigned int msecs )

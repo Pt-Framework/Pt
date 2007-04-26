@@ -76,7 +76,7 @@ class BasicIODevice : public NonCopyable {
         //! @brief Default Constructor
         BasicIODevice()
         : _valid(false)
-        , _eof(false)        
+        , _eof(false)
         { }
 
         //! @brief Destructor
@@ -143,7 +143,7 @@ class BasicIODevice : public NonCopyable {
 
         //! @brief Returns true if device is able to wait.
         /**
-            Tests if the device is able to wait i.e. on a remote location 
+            Tests if the device is able to wait i.e. on a remote location
             like a network device.
 
             \return true if the device is able to wait, false otherwise.
@@ -285,7 +285,7 @@ class BasicIODevice : public NonCopyable {
 
     private:
         bool _valid;
-        bool _eof;        
+        bool _eof;
 };
 
 typedef BasicIODevice<char> IODevice;
@@ -295,48 +295,21 @@ class IOResult
 {
     public:
         IOResult()
-        : _data(0)
-        , _capacity(0)
-        , _size(0)
-        , _device(0)
+        : _device(0)
         {}
 
         IODevice* device() const
         { return _device; }
 
-        char* data() const
-        { return _data; }
+		virtual IOResultImpl* impl()
+		{ return 0;}
 
-        // total buffer size
-        size_t capacity() const
-        { return _capacity; }
+		void init(IODevice& device)
+		{
+			_device = &device;
+		}
 
-        // available bytes
-        size_t size() const
-        { return _size; }
-
-        void setSize(size_t n)
-        { _size = n; }
-
-        virtual IOResultImpl* impl()
-        { return 0;}
-
-        void init(IODevice& device)
-        {
-            _device = &device;
-        }
-
-        void attach( char* buffer, size_t size )
-        {
-            _data = buffer;
-            _capacity = size;
-            _size = 0;
-        }
-
-    private:
-        char* _data;
-        size_t _capacity;
-        size_t _size;
+	private:
         IODevice* _device;
 };
 

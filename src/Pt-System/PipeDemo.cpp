@@ -18,7 +18,7 @@ int main( int argc, char* argv[] )
     Pt::System::Pipe pipe;
     connect(pipe.input().inputReady, onInput);
     pipe.output().write(out.c_str(), out.size());
-    pipe.output().sync();
+    //pipe.output().sync();
 
     Pt::System::Selector selector;
 

@@ -40,7 +40,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void open(HANDLE handle);
 
         virtual HANDLE deviceHandle() const;
-        
+
         virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
 
         virtual WaitResult waitResult( HANDLE handle );
@@ -63,16 +63,17 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         //! @brief Write bytes to device
         virtual size_t _write(const char* buffer, size_t count);
-        
+
         virtual bool _waitable() const
         { return true; }
 
         virtual void _sync() const;
 
      private:
-        HANDLE              _handle;
-        OVERLAPPED          _readOv;
-        OVERLAPPED          _writeOv;              
+     	IOResultImpl	_result;
+        HANDLE      	_handle;
+        OVERLAPPED  	_readOv;
+        OVERLAPPED  	_writeOv;
 };
 
 class PipeImpl
@@ -87,7 +88,7 @@ class PipeImpl
         IODevice& output();
     private:
         PipeIODevice        _inputDevice;
-        PipeIODevice        _outputDevice; 
+        PipeIODevice        _outputDevice;
         static Pt::uint32_t _nameId;
 };
 
