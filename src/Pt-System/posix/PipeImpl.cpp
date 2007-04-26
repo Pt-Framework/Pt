@@ -65,7 +65,7 @@ IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
 
 size_t PipeIODevice::endRead(IOResult& result)
 {
-    size_t n = this->read( result.data(), result.capacity() );
+    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize() );
     return n;
 }
 

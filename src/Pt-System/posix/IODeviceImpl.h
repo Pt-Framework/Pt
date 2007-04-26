@@ -57,8 +57,22 @@ namespace System {
             int fd() const
             { return _fd; }
 
+            void attach(char* buffer, size_t size)
+            {
+                _buffer = buffer;
+                _bufferSize = size;
+            }
+
+            char* buffer() const
+            { return _buffer; }
+
+            size_t bufferSize() const
+            { return _bufferSize; }
+
         private:
             int _fd;
+            char* _buffer;
+            size_t _bufferSize;
     };
 
 }//namespace System

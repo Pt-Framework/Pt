@@ -298,16 +298,19 @@ class IOResult
         : _device(0)
         {}
 
+        virtual ~IOResult()
+        {}
+
         IODevice* device() const
         { return _device; }
 
-		virtual IOResultImpl* impl()
-		{ return 0;}
+        virtual IOResultImpl* impl()
+        { return 0;}
 
-		void init(IODevice& device)
-		{
-			_device = &device;
-		}
+        void init(IODevice& device)
+        {
+            _device = &device;
+        }
 
 	private:
         IODevice* _device;
