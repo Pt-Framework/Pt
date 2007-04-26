@@ -93,7 +93,7 @@ class BasicIODevice : public NonCopyable {
             }
         }
 
-        virtual IOResult beginRead(CharT* buffer, size_t n);
+        virtual IOResult& beginRead(CharT* buffer, size_t n);
 
         virtual size_t endRead(IOResult& result);
 
@@ -313,6 +313,9 @@ class IOResult
 		void setSize(size_t n)
 		{ _size = n; }
 
+        virtual IOResultImpl* impl() = 0;
+        
+
     private:
 		char* _data;
 		size_t _capacity;
@@ -322,7 +325,7 @@ class IOResult
 
 
 template <typename CharT>
-inline IOResult BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
+inline IOResult& BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
 {
     return IOResult( *this, buffer, 0 );
 }
