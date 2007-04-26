@@ -20,7 +20,7 @@ int main( int argc, char* argv[] )
 
 	while(true)
 	{
-		Pt::System::IOResult res = pipe.input().beginRead(buffer, size);
+		Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
 
 		// TODO: Here we need to add the IOResult to the Selector
 

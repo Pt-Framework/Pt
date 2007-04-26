@@ -69,21 +69,18 @@ TimeValue ClockImpl::stop()
     return result;
 }
 
-DateTime ClockImpl::getCurrentTime()
+Pt::DateTime ClockImpl::getCurrentTime()
 {
     SYSTEMTIME systemTime;
     GetSystemTime(&systemTime);
 
-    Date date(    systemTime.wYear,
+    return DateTime (    systemTime.wYear,
                 systemTime.wMonth,
-                systemTime.wDay    );
-    Time time(    systemTime.wHour,
+                systemTime.wDay,
+                systemTime.wHour,
                 systemTime.wMinute,
                 systemTime.wSecond,
-                systemTime.wMilliseconds    );
-    DateTime dateTime(date, time);
-
-    return dateTime;
+                systemTime.wMilliseconds    );    
 }
 
 Pt::size_t ClockImpl::getTime()

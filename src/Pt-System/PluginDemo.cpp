@@ -1,14 +1,21 @@
 #include "TestPlugin.h"
 #include "Pt/System/Plugin.h"
 #include "Pt/System/Environment.h"
-
+#include "Pt/Char.h"
+#include "Pt/String.h"
 #include <iostream>
+
 
 
 int main(int argc, char** argv)
 {
 	try
 	{
+	 /*   std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+*/
 		std::string  shlibName = "TestPlugin";
 
 		#ifndef NDEBUG
