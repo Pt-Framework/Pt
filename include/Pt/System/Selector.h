@@ -108,7 +108,7 @@ namespace System {
             */
             void addDevice( IODevice& dev, WaitMode wm );
 
-			void waitInput( IOResult& result );
+            void waitInput( IOResult& result );
 
             /** @brief Removes an IODevice
 

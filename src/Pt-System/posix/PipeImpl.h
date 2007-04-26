@@ -29,7 +29,6 @@ namespace Pt {
 
 namespace System {
 
-
 class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 {
     public:
@@ -37,11 +36,7 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         ~PipeIODevice();
 
-        void open(int fd)
-        {
-            _fd = fd;
-            this->setValid(true);
-        }
+        void open(int fd);
 
         virtual IODeviceImpl* impl()
         { return this; }
@@ -49,7 +44,7 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         int fd() const
         { return _fd;}
 
-        IOResult beginRead(char* buffer, size_t n);
+        IOResult& beginRead(char* buffer, size_t n);
 
         size_t endRead(IOResult& result);
 
@@ -68,6 +63,7 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
     private:
         int _fd;
+        IOResultImpl _result;
 };
 
 

@@ -22,20 +22,44 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include <ios>
+#include <Pt/System/IODevice.h>
+
 
 namespace Pt {
 
 namespace System {
 
-class IODeviceImpl
-{
-    public:
-        IODeviceImpl();
+    class IODeviceImpl
+    {
+        public:
+            IODeviceImpl();
 
-        virtual ~IODeviceImpl();
+            virtual ~IODeviceImpl();
 
-        virtual int fd() const = 0;
-};
+            virtual int fd() const = 0;
+    };
+
+
+    class IOResultImpl : public IOResult
+    {
+        public:
+            IOResultImpl()
+            : IOResult()
+            , _fd(-1)
+            {}
+
+            virtual IOResultImpl* impl()
+            { return this; }
+
+            void setFd(int fd)
+            { _fd = fd; }
+
+            int fd() const
+            { return _fd; }
+
+        private:
+            int _fd;
+    };
 
 }//namespace System
 

@@ -22,7 +22,7 @@
 #include <memory>
 #include <cerrno>
 #include <unistd.h>
-
+#include <fcntl.h>
 
 
 namespace Pt {
@@ -31,7 +31,9 @@ namespace System {
 
 PipeIODevice::PipeIODevice()
 : _fd(-1)
-{  }
+{
+    _result.init(*this);
+}
 
 
 PipeIODevice::~PipeIODevice()
@@ -45,9 +47,19 @@ PipeIODevice::~PipeIODevice()
 }
 
 
-IOResult PipeIODevice::beginRead(char* buffer, size_t n)
+void PipeIODevice::open(int fd)
 {
-    return IOResult(*this, buffer, n);
+    _fd = fd;
+    fcntl(_fd, F_SETFL, O_NONBLOCK);
+    this->setValid(true);
+}
+
+
+IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
+{
+    _result.setFd(_fd);
+    _result.attach(buffer, n);
+    return _result;
 }
 
 

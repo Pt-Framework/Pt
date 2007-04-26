@@ -58,6 +58,12 @@ void SelectorImpl::addDevice( IODevice& dev, int wm )
 }
 
 
+void SelectorImpl::waitInput( IOResult& result )
+{
+    _readers.push_back( &result );
+}
+
+
 void SelectorImpl::removeDevice( IODevice& dev )
 {
     std::map<int, Item>::iterator it;
@@ -107,6 +113,15 @@ bool SelectorImpl::wait(unsigned int msecs)
             FD_SET( fd, &wfds );
             maxfd = std::max( maxfd , fd );
         }
+    }
+
+    std::vector<IOResult*>::iterator iter;
+    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
+    {
+        IOResult* result = *iter;
+        int fd = result->impl()->fd();
+        FD_SET( fd, &rfds );
+        maxfd = std::max( maxfd , fd );
     }
 
     // The first select checks if any data is immediately available
@@ -193,6 +208,24 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
         {
             device.outputReady();
             avail = true;
+        }
+    }
+
+    std::vector<IOResult*>::iterator iter = _readers.begin();
+    while( iter != _readers.end() )
+    {
+        IOResult* result = *iter;
+        int fd = result->impl()->fd();
+
+        if( FD_ISSET(fd, &rfds) )
+        {
+            result->device()->inputReady();
+            iter = _readers.erase(iter);
+            avail = true;
+        }
+        else
+        {
+            ++iter;
         }
     }
 

@@ -41,8 +41,7 @@ class SelectorImpl
 
         void addDevice( IODevice& dev, int wm );
 
-        void waitInput( IOResult& result )
-        {}
+        void waitInput( IOResult& result );
 
         void removeDevice( IODevice& device );
 
@@ -65,6 +64,8 @@ class SelectorImpl
         };
 
         std::map<int, Item> _items;
+
+        std::vector<IOResult*> _readers;
 
         int _wakePipe[2];
 };

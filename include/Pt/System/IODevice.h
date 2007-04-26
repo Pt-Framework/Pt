@@ -290,38 +290,53 @@ class BasicIODevice : public NonCopyable {
 
 typedef BasicIODevice<char> IODevice;
 
+
 class IOResult
 {
     public:
-        IOResult(IODevice& device, char* data, size_t capacity)
-        : _data(data)
-        , _capacity(capacity)
+        IOResult()
+        : _data(0)
+        , _capacity(0)
         , _size(0)
-        , _device(&device)
-        {}    
+        , _device(0)
+        {}
 
-		char* data() const
-		{ return _data; }
-		
-		// total size of buffer area
-		size_t capacity() const
-		{ return _capacity; }
+        IODevice* device() const
+        { return _device; }
 
-		// used size of buffer area
-		size_t size() const
-		{ return _size; }
+        char* data() const
+        { return _data; }
 
-		void setSize(size_t n)
-		{ _size = n; }
+        // total buffer size
+        size_t capacity() const
+        { return _capacity; }
+
+        // available bytes
+        size_t size() const
+        { return _size; }
+
+        void setSize(size_t n)
+        { _size = n; }
 
         virtual IOResultImpl* impl()
         { return 0;}
-        
+
+        void init(IODevice& device)
+        {
+            _device = &device;
+        }
+
+        void attach( char* buffer, size_t size )
+        {
+            _data = buffer;
+            _capacity = size;
+            _size = 0;
+        }
 
     private:
-		char* _data;
-		size_t _capacity;
-		size_t _size;
+        char* _data;
+        size_t _capacity;
+        size_t _size;
         IODevice* _device;
 };
 
