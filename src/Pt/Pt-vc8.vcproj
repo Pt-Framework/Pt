@@ -256,6 +256,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringStream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StringStreamTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Time.cpp"
 				>
 			</File>

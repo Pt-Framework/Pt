@@ -20,7 +20,6 @@
 #include "../win32/win32.h"
 #include "SerialDeviceImpl.h"
 #include "Pt/System/Thread.h"
-#include "Pt/System/IOEvent.h"
 #include "Pt/System/Selector.h"
 #include <iostream>
 
@@ -50,6 +49,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
 
     _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
 
+    size_t err = GetLastError();
+    
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
         throw OpenFailed("Could not open port" , PT_SOURCEINFO);
 
@@ -62,6 +63,8 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
+        //comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+        //comTimeOut.ReadTotalTimeoutConstant     = 100;
         comTimeOut.WriteTotalTimeoutMultiplier  = 10;
         comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
@@ -70,7 +73,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
             
         _commEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
             
-        _waitCommMask = EV_BREAK;
+        _waitCommMask = EV_BREAK | EV_RXCHAR | EV_TXEMPTY;
     }        
     catch( ... )
     {

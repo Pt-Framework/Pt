@@ -33,8 +33,6 @@
 namespace Pt{
 namespace System{
 
-class IOEvent;
-
 class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::Runnable
 {
     public:

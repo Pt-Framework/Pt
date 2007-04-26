@@ -1,6 +1,7 @@
 #include <Pt/Main.h>
 #include <Pt/System/SerialDevice.h>
 #include <Pt/System/Thread.h>
+#include <Pt/System/Selector.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -150,15 +151,32 @@ void waitEventDemo()
     }
 }
 
+Pt::System::SerialDevice serialDevice("COM2:", std::ios_base::in);
+void read()
+{
+    const int size = 300;
+    char buffer[size];
+
+    const size_t readCount = serialDevice.read(buffer, size);
+    std::cerr.write(buffer, readCount);    
+}
+
 int main( int argc, char* argv[] )
 {
-    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";
-    Pt::System::Thread::sleep( 20000 );
-    Pt::System::SerialDevice serialDevice("COM5:", std::ios_base::in);
+    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";    
+    Pt::System::Selector selector;
+
+    
     serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
     serialDevice.setCharSize(8);
     serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
+
+    selector.addDevice(serialDevice, Pt::System::Selector::WaitInput);
+    connect(serialDevice.inputReady, &read);
+    for ( int i = 0; i < 5000; i++)
+        selector.wait();
+    Pt::System::Thread::sleep( 20000 );
         
     //serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
 

@@ -14,6 +14,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Net", "src\Pt-Net\Pt-Net-vc8.vcproj", "{741C349B-F0B9-40A4-BDAE-50575EA41E80}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-System", "src\Pt-System\Pt-System-vc8.vcproj", "{D79858C0-34A5-42DB-B136-456DFC6FB50E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Text", "src\Pt-Text\Pt-Text-vc8.vcproj", "{1CC82693-DB84-4C33-8858-95215DF38754}"
 EndProject
@@ -21,6 +24,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Xml", "src\Pt-Xml\Pt-Xml
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Test", "src\Pt-Test\Pt-Test.vcproj", "{AED4459E-0B3E-4C2A-9C10-A519FA97C3FE}"
 	ProjectSection(ProjectDependencies) = postProject
+		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
 		{D79858C0-34A5-42DB-B136-456DFC6FB50E} = {D79858C0-34A5-42DB-B136-456DFC6FB50E}
 	EndProjectSection
 EndProject
