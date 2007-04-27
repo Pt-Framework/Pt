@@ -16,11 +16,11 @@ int main( int argc, char* argv[] )
     char buffer[size];
     size_t sz;
 
-    //Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
-    //file.write(out.c_str(), out.size());
-    //file.close();
+    Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
+    file.write(out.c_str(), out.size());
+    file.close();
 
-    Pt::System::FileDevice  file("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
+    file.open("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
 	file.seek(0, Pt::System::IODevice::SeekBegin);
 
     //Pt::System::Pipe pipe;
