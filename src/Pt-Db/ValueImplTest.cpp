@@ -138,9 +138,7 @@ void ValueImplTest::testTime()
 
 void ValueImplTest::testDateTime()
 {
-    Date date(2001, 11, 30);
-    Time time(11, 55, 59, 999);
-    DateTime dateTime(date, time);
+    DateTime dateTime(2001, 11, 30, 11, 55, 59, 999);
     ValueImpl valImp(dateTime.toIsoString());
     CPPUNIT_ASSERT( valImp.getDateTime() == dateTime );
 }
