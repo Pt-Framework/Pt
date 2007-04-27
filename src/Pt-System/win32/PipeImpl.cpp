@@ -83,7 +83,7 @@ IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 }
 
 
-IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
+IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 {
     DWORD readBytes = 0;
 
@@ -91,8 +91,7 @@ IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
-			//TODO: return eof as in/out argument
-            readBytes = 0;
+			eof = true;            
         }
         else if( ERROR_IO_PENDING != GetLastError() )
         {
@@ -105,18 +104,23 @@ IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::endRead(IOResult& result)
-{
-    bool eof = false;
+size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
+{    
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
-        readBytes = 0;
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+			eof = true;            
+        }
+        else
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }        
     }
 
     _readOv.Offset += readBytes;
     _writeOv.Offset += readBytes;
-
 
     return readBytes;
 }

@@ -43,11 +43,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
 
-        virtual WaitResult waitResult( HANDLE handle );
-
-		IOResult& beginRead(char* buffer, size_t n);
-
-		size_t endRead(IOResult& resule);
+        virtual WaitResult waitResult( HANDLE handle );		
 
         virtual void beginWait( size_t waitMode );
 
@@ -55,6 +51,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         { return this; }
 
     protected:
+        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+
+		size_t _endRead(IOResult& resule, bool& eof);
+
         //! @brief Closes the I/O device
         virtual void _close();
 

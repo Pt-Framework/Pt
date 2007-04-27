@@ -68,6 +68,16 @@ void FileDevice::_close()
     IODevice::setEof(false);
 }
 
+IOResult& FileDevice::_beginRead(char* buffer, size_t n, bool& eof)
+{
+    return _impl->beginRead(buffer, n, eof);
+}
+
+size_t FileDevice::_endRead(IOResult& result, bool& eof)
+{
+    return _impl->endRead(result, eof);
+}
+
 size_t FileDevice::size() const
 {
     return _impl->size();

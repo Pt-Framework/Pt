@@ -110,6 +110,48 @@ void FileDeviceImpl::close()
     }
 }
 
+IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    DWORD readBytes = 0;
+
+    if( FALSE == ReadFile(_handle, (void*)buffer, n, &readBytes, &_readOv) )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+			eof = true;            
+        }
+        else if( ERROR_IO_PENDING != GetLastError() )
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }
+    }
+
+    _result.setHandle(_readOv.hEvent);
+    return _result;
+}
+
+
+size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
+{    
+    DWORD readBytes = 0;
+    if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
+    {
+        if( ERROR_HANDLE_EOF == GetLastError() )
+        {
+			eof = true;            
+        }
+        else
+        {
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }        
+    }
+
+    _readOv.Offset += readBytes;
+    _writeOv.Offset += readBytes;
+
+    return readBytes;
+}
+
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode)
 {
     DWORD whence = FILE_BEGIN;

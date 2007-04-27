@@ -54,6 +54,10 @@ class PT_SYSTEM_API FileDevice : public IODevice
         { return (IODeviceImpl*) _impl; }
         
     protected:
+        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+
+		size_t _endRead(IOResult& result, bool& eof);
+
         void _close();
 
         bool _waitable() const;

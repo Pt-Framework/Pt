@@ -95,9 +95,15 @@ class BasicIODevice : public NonCopyable {
             }
         }
 
-        virtual IOResult& beginRead(CharT* buffer, size_t n);
+        IOResult& beginRead(CharT* buffer, size_t n)
+        { 
+            return _beginRead(buffer, n, _eof);
+        }
 
-        virtual size_t endRead(IOResult& result);
+        size_t endRead(IOResult& result)
+        {
+            return _endRead(result, _eof);
+        }
 
         //! @brief Read data from I/O device
         /*!
@@ -243,6 +249,10 @@ class BasicIODevice : public NonCopyable {
         virtual IODeviceImpl* impl() = 0;
 
     protected:
+        virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof);
+
+        virtual size_t _endRead(IOResult& result, bool& eof);
+
         //! @brief Closes the I/O device
         virtual void _close() = 0;
 
@@ -318,7 +328,7 @@ class IOResult
 
 
 template <typename CharT>
-inline IOResult& BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
+inline IOResult& BasicIODevice<CharT>::_beginRead(CharT* buffer, size_t n, bool& eof)
 {
     static IOResult* result;
     return *result;
@@ -326,7 +336,7 @@ inline IOResult& BasicIODevice<CharT>::beginRead(CharT* buffer, size_t n)
 
 
 template <typename CharT>
-inline size_t BasicIODevice<CharT>::endRead(IOResult& result)
+inline size_t BasicIODevice<CharT>::_endRead(IOResult& result, bool& eof)
 {
     return 0;
 }
