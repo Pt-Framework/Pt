@@ -48,7 +48,7 @@ namespace Pt {
             { ::InterlockedExchange(const_cast<long*>(&_value), n); }
 
             inline bool compareExchange(atomic_t cmp, atomic_t ex)
-            { return (::InterlockedCompareExchange(const_cast<long*>(&_value), ex, cmp) == 1); }
+            { return (::InterlockedCompareExchange(const_cast<long*>(&_value), ex, cmp) == cmp); }
 
         private:
             volatile atomic_t _value;

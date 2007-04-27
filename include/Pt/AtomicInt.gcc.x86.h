@@ -74,17 +74,17 @@ namespace Pt {
                 );
             }
 
-            inline bool compareExchange(atomic_t oldval, atomic_t newval)
+            inline bool compareExchange(atomic_t cmp, atomic_t newval)
             {
                 volatile register atomic_t result;
 
                 asm volatile (
                     "lock cmpxchgl %2, %1"
                     : "=a"(result), "=m"(_value)
-                    :  "r"(newval),  "m"(_value), "0"(oldval)
+                    :  "r"(newval),  "m"(_value), "0"(cmp)
                 );
 
-                return result == oldval;
+                return result == cmp;
             }
 
         private:

@@ -45,6 +45,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
                     this->includeTest( "AdditionTest" );
                     this->includeTest( "AssignmentTest", _args );
                     this->includeTest( "SubstractionTest" );
+                    this->includeTest( "CompareExchange" );
                 }
         } _protocol;
 
@@ -56,6 +57,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
             Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
             Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
+            Pt::Unit::TestSuite::registerMethod( "CompareExchange", *this, &AtomicTestSuite::CompareExchange );
         }
 
         virtual void setUp()
@@ -88,11 +90,23 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::AtomicInt value(5);
             value += 3;
             PT_UNIT_ASSERT( value.value() == 8 );
-
-            value.compareExchange(8, 10);
-            PT_UNIT_ASSERT( value.value() == 10 );
         }
 
+        void CompareExchange()
+        {
+            Pt::AtomicInt value(8);
+            PT_UNIT_ASSERT( value.value() == 8 );
+
+            bool res = value.compareExchange(8, 10);
+            PT_UNIT_ASSERT( value.value() == 10 );
+            PT_UNIT_ASSERT( res );
+
+            res = value.compareExchange(10, 10);
+            PT_UNIT_ASSERT( res );
+
+            res = value.compareExchange(8, 10);
+            PT_UNIT_ASSERT( res == false );
+        }
 
     private:
         Pt::AtomicInt _value;
