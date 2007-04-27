@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include "EnvironmentImpl.h"
+#include "win32.h"
+#include "Pt/System/SystemError.h"
 
 namespace Pt {
 
@@ -33,18 +35,40 @@ EnvironmentImpl::~EnvironmentImpl()
 {
 }
 
-const std::string&    EnvironmentImpl::sharedLibraryExtension()
+const std::string& EnvironmentImpl::sharedLibraryExtension()
 {
     static std::string sharedLibraryExtention(".dll");
 
     return sharedLibraryExtention;
 }
 
-const std::string&    EnvironmentImpl::sharedLibraryPrefix()
+const std::string& EnvironmentImpl::sharedLibraryPrefix()
 {
     static std::string sharedLibraryPrefix("");
 
     return sharedLibraryPrefix;
+}
+
+const std::string& EnvironmentImpl::systemDirectory()
+{
+    static std::string systemDir("c:\\");
+    
+    return systemDir;
+}
+
+const std::string EnvironmentImpl::currentDirectory()
+{
+    #ifdef _WIN32_WCE
+    
+        throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
+        
+    #else
+    
+        char path[MAX_PATH+2];
+        DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
+        return std::string(path, len);
+        
+    #endif
 }
 
 } // namespace Pt

@@ -183,23 +183,6 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 }
 
 
-std::string DirectoryImpl::current()
-{
-    char cwd[PATH_MAX];
-
-    if( !getcwd(cwd, PATH_MAX) )
-        throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
-
-    return std::string(cwd);
-}
-
-
-std::string DirectoryImpl::system()
-{
-    return "/";
-}
-
-
 void DirectoryImpl::changeCurrent(const std::string& path)
 {
     if( -1 == ::chdir(path.c_str()) )

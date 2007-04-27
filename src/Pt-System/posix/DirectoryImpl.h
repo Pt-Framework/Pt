@@ -80,16 +80,8 @@ namespace System {
 
             static bool exists(const std::string& path);
 
-            static std::string current();
-
-            static std::string system();
-
             static void changeCurrent(const std::string& dirpath);
 
-            static char separator()
-            {
-                return '/';
-            }
     };
 
 } // namespace System

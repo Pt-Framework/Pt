@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "Pt/System/Directory.h"
+#include "Pt/System/Environment.h"
 
 #include "DirectoryImpl.h"
 
@@ -144,11 +145,6 @@ std::size_t Directory::size() const
 }
 
 
-char Directory::separator()
-{
-    return DirectoryImpl::separator();
-}
-
 void Directory::remove()
 {
     DirectoryImpl::remove(_path);
@@ -166,7 +162,7 @@ void Directory::move(const std::string& newPath)
 std::string Directory::parentPath() const
 {
     // Find last slash. This separates the last path segment from the rest of the path
-    std::string::size_type separatorPos = _path.find_last_of(separator());
+    std::string::size_type separatorPos = _path.find_last_of(Environment::pathSeparator());
     
     // If there is no separator, this directory is relative to the current current directory.
     // So an empty path is returned.
@@ -185,7 +181,7 @@ std::string Directory::parentPath() const
 // the common base class FileSystemNode.
 std::string Directory::name() const
 {
-    std::string::size_type separatorPos = _path.rfind(separator());
+    std::string::size_type separatorPos = _path.rfind(Environment::pathSeparator());
     
     if (separatorPos != std::string::npos)
     {
@@ -196,21 +192,6 @@ std::string Directory::name() const
         return _path;
     }    
 }
-
-
-Directory Directory::current()
-{
-    std::string path = DirectoryImpl::current();
-    return Directory( path.c_str() );
-}
-
-
-Directory Directory::system()
-{
-    std::string path = DirectoryImpl::system();
-    return Directory( path.c_str() );
-}
-
 
 } // namespace System
 

@@ -21,6 +21,7 @@
 
 #include "Pt/System/File.h"
 #include "Pt/System/Directory.h"
+#include "Pt/System/Environment.h"
 
 #include "FileImpl.h"
 
@@ -43,13 +44,13 @@ File::File(const Directory& baseDir, const std::string& fileName)
     // is not yet a separator at the end of the path and if the path
     // is not empty. (In the latter case, adding a separator would lead
     // to a path which is relative to root (/).)
-    if (baseDirPath.empty() || baseDirPath[baseDirPath.length() - 1] == Directory::separator())
+    if (baseDirPath.empty() || baseDirPath[baseDirPath.length() - 1] == Environment::pathSeparator())
     {
         _impl = new FileImpl(baseDir.path() + fileName);
     }
     else
     {
-        _impl = new FileImpl(baseDir.path() + Directory::separator() + fileName);
+        _impl = new FileImpl(baseDir.path() + Environment::pathSeparator() + fileName);
     }
 }
 
@@ -143,7 +144,7 @@ void File::move(const std::string& newPath)
 std::string File::parentPath() const
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type separatorPos = path().find_last_of(Pt::System::Directory::separator());
+    std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
     
     // If there is no separator, the file is relative to the current directory. So an empty path is returned.
     if (separatorPos == std::string::npos)
@@ -160,7 +161,7 @@ std::string File::parentPath() const
 // the common base class FileSystemNode.
 std::string File::name() const
 {
-    std::string::size_type separatorPos = path().rfind(Pt::System::Directory::separator());
+    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
     
     if (separatorPos != std::string::npos)
     {

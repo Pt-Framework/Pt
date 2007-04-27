@@ -194,28 +194,6 @@ void DirectoryImpl::remove(const std::string& path)
 }
 
 
-std::string DirectoryImpl::current()
-{
-    #ifdef _WIN32_WCE
-    
-        throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
-        
-    #else
-    
-        char path[MAX_PATH+2];
-        DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
-        return std::string(path, len);
-        
-    #endif
-}
-
-
-std::string DirectoryImpl::system()
-{
-    return "c:\\";
-}
-
-
 void DirectoryImpl::changeCurrent(const std::string& path)
 {
     #ifdef _WIN32_WCE

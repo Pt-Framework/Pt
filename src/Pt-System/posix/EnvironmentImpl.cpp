@@ -33,18 +33,35 @@ EnvironmentImpl::~EnvironmentImpl()
 {
 }
 
-const std::string&    EnvironmentImpl::sharedLibraryExtension()
+const std::string& EnvironmentImpl::sharedLibraryExtension()
 {
     static std::string sharedLibraryExtention(".so");
 
     return sharedLibraryExtention;
 }
 
-const std::string&    EnvironmentImpl::sharedLibraryPrefix()
+const std::string& EnvironmentImpl::sharedLibraryPrefix()
 {
     static std::string sharedLibraryPrefix("lib");
 
     return sharedLibraryPrefix;
+}
+
+const std::string& EnvironmentImpl::systemDirectory()
+{
+    static std::string systemDir("/");
+    
+    return systemDir
+}
+
+const std::string EnvironmentImpl::currentDirectory()
+{
+    char cwd[PATH_MAX];
+
+    if( !getcwd(cwd, PATH_MAX) )
+        throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
+
+    return std::string(cwd);
 }
 
 } // namespace Pt

@@ -144,17 +144,6 @@ while (it != d.end())
              */
             virtual std::string name() const;
         
-
-        public:
-            ///< gives the system-specific path separator
-            static char separator();
-
-            // DEPRECATED
-            static Directory system();
-
-            // DEPRECATED
-            static Directory current();
-
         private:
             std::string _path;
     };

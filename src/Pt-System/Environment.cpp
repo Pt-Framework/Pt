@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "Pt/System/Environment.h"
+#include "Pt/System/Directory.h"
 #include "EnvironmentImpl.h"
 
 namespace Pt {
@@ -45,6 +46,24 @@ const std::string& Environment::sharedLibraryPrefix()
 {
     return EnvironmentImpl::sharedLibraryPrefix();
 }
+
+char Environment::pathSeparator()
+{
+    return EnvironmentImpl::pathSeparator();
+}
+
+Directory Environment::systemDirectory()
+{
+    std::string path = EnvironmentImpl::systemDirectory();
+    return Directory( path.c_str() );
+}
+
+Directory Environment::currentDirectory()
+{
+    std::string path = EnvironmentImpl::currentDirectory();
+    return Directory( path.c_str() );
+}
+
 
 } // namespace Pt
 } // namespace System

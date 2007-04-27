@@ -21,6 +21,7 @@
 #define PT_Environment_H
 
 #include "Pt/System/Api.h"
+#include "Pt/System/Directory.h"
 #include <string>
 
 namespace Pt {
@@ -41,11 +42,35 @@ namespace System {
             ~Environment();
 
         public:
-            //! @brief Returns the extension for a shared library on the current system.
-            ///
+            /**
+             *  @brief Returns the extension for a shared library on the current system.
+             *  E.g. ".so" on Linux, ".dll" on Windows             
+             */
             static const std::string& sharedLibraryExtension();
 
+            /**
+             *  @brief Returns the prefix for a shared library on the current system.
+             *  E.g. "lib" on Linux, "" on Windows             
+             */
             static const std::string& sharedLibraryPrefix();
+
+            /**
+             *  @brief Returns the path separator on the current system.
+             *  E.g. "/" on Linux, "\" on Windows             
+             */
+            static char pathSeparator();
+
+            /**
+             *  @brief Returns the system path on the current system.
+             *  E.g. "/" (root) on Linux, "c:\" on Windows             
+             */
+            static Directory systemDirectory();
+
+            /**
+             *  @brief Returns the current working directory.
+             */
+            static Directory currentDirectory();
+
     };
 
 } // !namespace system
