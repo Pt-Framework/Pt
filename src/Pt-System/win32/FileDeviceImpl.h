@@ -48,7 +48,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         IOResult& beginRead(char* buffer, size_t n, bool& eof);
 
-		size_t endRead(IOResult& resule, bool& eof);
+		size_t endRead(IOResult& result, bool& eof);
 
         void open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
 
@@ -65,23 +65,23 @@ class FileDeviceImpl  : public IODeviceImpl
         size_t peek( char* buffer, size_t count );
 
         bool waitable() const;
-        
+
         void sync() const;
 
-       
+
         HANDLE deviceHandle() const
         { return _handle; }
-        
+
         void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
-        
-        WaitResult waitResult( HANDLE handle );                
+
+        WaitResult waitResult( HANDLE handle );
 
     private:
         enum { Reading, Writing, Idle } _state;
-        
+
         HANDLE          _handle;
         OVERLAPPED      _readOv;
-        OVERLAPPED      _writeOv;  
+        OVERLAPPED      _writeOv;
         IOResultImpl    _result;
 };
 

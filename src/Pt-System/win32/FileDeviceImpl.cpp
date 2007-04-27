@@ -56,7 +56,7 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
     DWORD create = OPEN_EXISTING;
     DWORD flags  = 0;
 
-    if( mode & std::ios_base::in ) 
+    if( mode & std::ios_base::in )
         access |= GENERIC_READ;
 
     if( mode & std::ios_base::out )
@@ -74,19 +74,19 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
         _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
         _writeOv.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     }
-    
+
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     _handle = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
 
     if(_handle == INVALID_HANDLE_VALUE)
-        throw IOError("Could not open file handle", PT_SOURCEINFO);    
+        throw IOError("Could not open file handle", PT_SOURCEINFO);
 
-    try 
+    try
     {
-        if(mode & std::ios_base::end )
+        if(mode & std::ios_base::ate )
             this->seek(0, IODevice::SeekEnd);
     }
-    catch(...) 
+    catch(...)
     {
         this->close();
         throw;
@@ -118,7 +118,7 @@ IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
-			eof = true;            
+			eof = true;
         }
         else if( ERROR_IO_PENDING != GetLastError() )
         {
@@ -132,18 +132,19 @@ IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 
 
 size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
-{    
+{
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
+		DWORD err=GetLastError();
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
-			eof = true;            
+			eof = true;
         }
         else
         {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
-        }        
+        }
     }
 
     _readOv.Offset += readBytes;
@@ -294,21 +295,21 @@ void FileDeviceImpl::sync() const
 void FileDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
     handles.clear();
-    
+
     if(waitMode & Selector::WaitInput)
         handles.push_back( _readOv.hEvent );
-    
+
     if(waitMode & Selector::WaitOutput)
-        handles.push_back( _writeOv.hEvent );                
+        handles.push_back( _writeOv.hEvent );
 }
-        
+
 IODeviceImpl::WaitResult FileDeviceImpl::waitResult( HANDLE handle )
 {
     if( handle == _readOv.hEvent )
         return IODeviceImpl::ReadyRead;
-    else if( handle == _writeOv.hEvent ) 
+    else if( handle == _writeOv.hEvent )
         return IODeviceImpl::ReadyWrite;
-    
+
     throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
 }
 

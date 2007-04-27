@@ -16,11 +16,12 @@ int main( int argc, char* argv[] )
     char buffer[size];
     size_t sz;
 
-    Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
-    file.write(out.c_str(), out.size());
-    file.close();
+    //Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
+    //file.write(out.c_str(), out.size());
+    //file.close();
 
-    file.open("test.txt", std::ios::in | std::ios::out, Pt::System::IODevice::Asynchronous);
+    Pt::System::FileDevice  file("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
+	file.seek(0, Pt::System::IODevice::SeekBegin);
 
     //Pt::System::Pipe pipe;
     //connect(pipe.input().inputReady, onInput);
@@ -32,17 +33,20 @@ int main( int argc, char* argv[] )
     while(true)
     {
         Pt::System::IOResult& res = file.beginRead(buffer, size);
+        if ( file.eof() )
+           break;
+
         //Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
         selector.waitInput(res);
 
-        bool avail = selector.wait(1000);
+        bool avail = selector.wait();
         //if(avail == false)
         //    break;
 
         sz = file.endRead(res);
-
         if ( file.eof() )
             break;
+
         //sz = pipe.input().endRead(res);
         std::cerr.write( buffer, sz ) << "\n";
     }
