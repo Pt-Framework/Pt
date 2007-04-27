@@ -48,6 +48,10 @@ class FileDeviceImpl : public IODeviceImpl
         void resize(off_type size);
 
         size_t size();
+ 
+        IOResult& beginRead(char* buffer, size_t n, bool& eof);
+
+        size_t endRead(IOResult& result, bool& eof);
 
         size_t read(char* buffer, size_t count, bool& _eof);
 
@@ -69,6 +73,7 @@ class FileDeviceImpl : public IODeviceImpl
     private:
         int _fd;
         std::ios_base::openmode _openMode;
+        IOResultImpl _result;
 };
 
 } //namespace System

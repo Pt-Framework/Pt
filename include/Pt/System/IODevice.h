@@ -26,6 +26,7 @@
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/IOError.h>
+#include <Pt/System/IOResult.h>
 
 #include <limits>
 #include <ios>
@@ -37,7 +38,6 @@ namespace System {
 
 class IODeviceImpl;
 class IOResult;
-class IOResultImpl;
 
 
 /** @brief Endpoint for I/O operations
@@ -96,8 +96,10 @@ class BasicIODevice : public NonCopyable {
         }
 
         IOResult& beginRead(CharT* buffer, size_t n)
-        { 
-            return _beginRead(buffer, n, _eof);
+        {
+            IOResult& result = _beginRead(buffer, n, _eof);
+            result.init(*this);
+            return result;
         }
 
         size_t endRead(IOResult& result)
@@ -249,9 +251,9 @@ class BasicIODevice : public NonCopyable {
         virtual IODeviceImpl* impl() = 0;
 
     protected:
-        virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof);
+        virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof) = 0;
 
-        virtual size_t _endRead(IOResult& result, bool& eof);
+        virtual size_t _endRead(IOResult& result, bool& eof) = 0;
 
         //! @brief Closes the I/O device
         virtual void _close() = 0;
@@ -299,48 +301,6 @@ class BasicIODevice : public NonCopyable {
 };
 
 typedef BasicIODevice<char> IODevice;
-
-
-class IOResult
-{
-    public:
-        IOResult()
-        : _device(0)
-        {}
-
-        virtual ~IOResult()
-        {}
-
-        IODevice* device() const
-        { return _device; }
-
-        virtual IOResultImpl* impl()
-        { return 0;}
-
-        void init(IODevice& device)
-        {
-            _device = &device;
-        }
-
-	private:
-        IODevice* _device;
-};
-
-
-template <typename CharT>
-inline IOResult& BasicIODevice<CharT>::_beginRead(CharT* buffer, size_t n, bool& eof)
-{
-    static IOResult* result;
-    return *result;
-}
-
-
-template <typename CharT>
-inline size_t BasicIODevice<CharT>::_endRead(IOResult& result, bool& eof)
-{
-    return 0;
-}
-
 
 } // namespace System
 

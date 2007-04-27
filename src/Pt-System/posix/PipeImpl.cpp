@@ -55,7 +55,7 @@ void PipeIODevice::open(int fd)
 }
 
 
-IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
+IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 {
     _result.setFd(_fd);
     _result.attach(buffer, n);
@@ -63,9 +63,9 @@ IOResult& PipeIODevice::beginRead(char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::endRead(IOResult& result)
+size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
 {
-    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize() );
+    size_t n = this->_read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
     return n;
 }
 

@@ -86,6 +86,7 @@ void FileDeviceImpl::close()
     }
 }
 
+
 bool FileDeviceImpl::seekable() const
 {
     struct stat s;
@@ -99,6 +100,27 @@ bool FileDeviceImpl::seekable() const
 
     return false;
 }
+
+
+IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    _result.setFd(_fd);
+    _result.attach(buffer, n);
+    return _result;
+}
+
+
+size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
+{
+    size_t ret = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
+
+    if(ret == 0)
+    {
+        eof = true;
+    }
+    return ret;
+}
+
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode )
 {

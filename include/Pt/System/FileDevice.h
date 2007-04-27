@@ -26,6 +26,7 @@
 #include <Pt/System/Api.h>
 
 namespace Pt {
+
 namespace System {
 
 class PT_SYSTEM_API FileDevice : public IODevice 
@@ -52,11 +53,11 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         virtual IODeviceImpl* impl()
         { return (IODeviceImpl*) _impl; }
-        
+
     protected:
         IOResult& _beginRead(char* buffer, size_t n, bool& eof);
 
-		size_t _endRead(IOResult& result, bool& eof);
+        size_t _endRead(IOResult& result, bool& eof);
 
         void _close();
 

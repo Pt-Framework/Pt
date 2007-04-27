@@ -18,71 +18,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_System_posix_PipeImpl_h
-#define Pt_System_posix_PipeImpl_h
+#ifndef Pt_System_IOResult_h
+#define Pt_System_IOResult_h
 
+#include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/IODevice.h>
-#include "IODeviceImpl.h"
+
 
 namespace Pt {
 
 namespace System {
 
-class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
-{
-    public:
-        PipeIODevice();
+    template <typename CharT>
+    class BasicIODevice;
 
-        ~PipeIODevice();
+    class IOResultImpl;
 
-        void open(int fd);
+    class IOResult : protected NonCopyable
+    {
+        public:
+            IOResult()
+            : _device(0)
+            {}
 
-        virtual IODeviceImpl* impl()
-        { return this; }
+            virtual ~IOResult()
+            {}
 
-        int fd() const
-        { return _fd;}
+            BasicIODevice<char>* device() const
+            { return _device; }
 
-    protected:
-        void _close()
-        { ::close(_fd); }
+            virtual IOResultImpl* impl() = 0;
 
-        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+            void init(BasicIODevice<char>& device)
+            {
+                _device = &device;
+            }
 
-        size_t _endRead(IOResult& result, bool& eof);
-
-        virtual size_t _read(char* buffer, size_t count, bool& eof);
-
-        virtual size_t _write(const char* buffer, size_t count);
-
-        virtual bool _waitable() const
-        { return true; }
-
-        virtual void _sync() const;
-
-    private:
-        int _fd;
-        IOResultImpl _result;
-};
-
-
-class PipeImpl
-{
-    public:
-        PipeImpl();
-
-        ~PipeImpl();
-
-        IODevice& input();
-
-        IODevice& output();
-
-    private:
-        PipeIODevice _input;
-        PipeIODevice _output;
-};
-
+        private:
+            BasicIODevice<char>* _device;
+    };
 
 } // namespace System
 

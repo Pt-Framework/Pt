@@ -24,7 +24,6 @@
 #include <ios>
 #include <Pt/System/IODevice.h>
 
-
 namespace Pt {
 
 namespace System {
