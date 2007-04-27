@@ -34,73 +34,52 @@ class DateTimeTest : public Pt::Unit::TestSuite
         DateTimeTest()
         : Pt::Unit::TestSuite("DateTimeTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Null", *this, &DateTimeTest::Null );
             Pt::Unit::TestSuite::registerMethod( "Assign", *this, &DateTimeTest::Assign );
             Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &DateTimeTest::IsoConvert );
         }
 
     protected:
-        void Null();
         void Assign();
         void IsoConvert();
 };
 
 Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;
 
-
-void DateTimeTest::Null()
-{
-    Pt::DateTime dt;
-    PT_UNIT_ASSERT( dt.isNull() );
-
-    Pt::Date date;
-    Pt::Time time;
-    Pt::DateTime dt2(date, time);
-    PT_UNIT_ASSERT( dt.isNull() );
-}
-
 void DateTimeTest::Assign()
 {
-    Pt::Date date(2001, 11, 15);
-    Pt::Time time(12, 45, 23, 956);
-    Pt::DateTime dt(date, time);
-    PT_UNIT_ASSERT( !dt.isNull() );
-    PT_UNIT_ASSERT( dt.years() == 2001 );
-    PT_UNIT_ASSERT( dt.months() == 11 );
-    PT_UNIT_ASSERT( dt.days() == 15 );
-    PT_UNIT_ASSERT( dt.hours() == 12 );
-    PT_UNIT_ASSERT( dt.minutes() == 45 );
-    PT_UNIT_ASSERT( dt.seconds() == 23 );
-    PT_UNIT_ASSERT( dt.msecs() == 956 );
+    Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
+    PT_UNIT_ASSERT( dt.year() == 2001 );
+    PT_UNIT_ASSERT( dt.month() == 11 );
+    PT_UNIT_ASSERT( dt.day() == 15 );
+    PT_UNIT_ASSERT( dt.hour() == 12 );
+    PT_UNIT_ASSERT( dt.minute() == 45 );
+    PT_UNIT_ASSERT( dt.second() == 23 );
+    PT_UNIT_ASSERT( dt.millisecond() == 956 );
 
-    dt.set(1789, 5, 12, 23, 59, 59, 999);
-    PT_UNIT_ASSERT( !dt.isNull() );
-    PT_UNIT_ASSERT( dt.years() == 1789 );
-    PT_UNIT_ASSERT( dt.months() == 5 );
-    PT_UNIT_ASSERT( dt.days() == 12 );
-    PT_UNIT_ASSERT( dt.hours() == 23 );
-    PT_UNIT_ASSERT( dt.minutes() == 59 );
-    PT_UNIT_ASSERT( dt.seconds() == 59 );
-    PT_UNIT_ASSERT( dt.msecs() == 999 );
+	dt.assign(1789, 5, 12, 23, 59, 59, 999);
+    PT_UNIT_ASSERT( dt.year() == 1789 );
+    PT_UNIT_ASSERT( dt.month() == 5 );
+    PT_UNIT_ASSERT( dt.day() == 12 );
+    PT_UNIT_ASSERT( dt.hour() == 23 );
+    PT_UNIT_ASSERT( dt.minute() == 59 );
+    PT_UNIT_ASSERT( dt.second() == 59 );
+    PT_UNIT_ASSERT( dt.millisecond() == 999 );
 }
 
 
 void DateTimeTest::IsoConvert()
 {
-    Pt::Date date(2001, 11, 15);
-    Pt::Time time(12, 45, 23, 956);
-    Pt::DateTime dt(date, time);
+    Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     std::string isoString = dt.toIsoString();
     PT_UNIT_ASSERT( isoString == "2001-11-15 12:45:23.956" );
 
     dt = Pt::DateTime::fromIsoString("1789-05-12 23:59:59.999");
-    PT_UNIT_ASSERT( !dt.isNull() );
-    PT_UNIT_ASSERT( dt.years() == 1789 );
-    PT_UNIT_ASSERT( dt.months() == 5 );
-    PT_UNIT_ASSERT( dt.days() == 12 );
-    PT_UNIT_ASSERT( dt.hours() == 23 );
-    PT_UNIT_ASSERT( dt.minutes() == 59 );
-    PT_UNIT_ASSERT( dt.seconds() == 59 );
-    PT_UNIT_ASSERT( dt.msecs() == 999 );
+    PT_UNIT_ASSERT( dt.year() == 1789 );
+    PT_UNIT_ASSERT( dt.month() == 5 );
+    PT_UNIT_ASSERT( dt.day() == 12 );
+    PT_UNIT_ASSERT( dt.hour() == 23 );
+    PT_UNIT_ASSERT( dt.minute() == 59 );
+    PT_UNIT_ASSERT( dt.second() == 59 );
+    PT_UNIT_ASSERT( dt.millisecond() == 999 );
 }
 
