@@ -94,6 +94,8 @@ namespace Unit {
 
     #define PT_UNIT_ASSERT(cond) if( !(cond) ) throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO);
 
+    #define PT_UNIT_ASSERT_MSG(cond, what) if( !(cond) ) throw Pt::Unit::Assertion((what), PT_SOURCEINFO);
+
 } // namespace Unit
 
 } // namespace Pt
