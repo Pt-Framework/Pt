@@ -112,13 +112,8 @@ IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 
 size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
 {
-    size_t ret = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
-
-    if(ret == 0)
-    {
-        eof = true;
-    }
-    return ret;
+    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
+    return n;
 }
 
 

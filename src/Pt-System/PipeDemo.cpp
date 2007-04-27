@@ -44,7 +44,7 @@ int main( int argc, char* argv[] )
         if ( file.eof() )
             break;
         //sz = pipe.input().endRead(res);
-        std::cerr.write( buffer, sz ) << "#\n";
+        std::cerr.write( buffer, sz ) << "\n";
     }
 
     std::cerr << std::endl;

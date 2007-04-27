@@ -53,7 +53,7 @@ class IOResult;
     %IODevice that is ready to perform I/O.
 */
 template <typename CharT>
-class BasicIODevice : public NonCopyable {
+class BasicIODevice : protected NonCopyable {
     public:
         typedef typename std::char_traits<CharT>::pos_type pos_type;
         typedef typename std::char_traits<CharT>::off_type off_type;
