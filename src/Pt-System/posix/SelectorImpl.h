@@ -39,11 +39,13 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void addDevice( IODevice& dev, int wm );
+        void addDevice( IODevice& dev, int wm )
+        {}
 
         void waitInput( IOResult& result );
 
-        void removeDevice( IODevice& device );
+        void removeDevice( IODevice& device )
+        {}
 
         bool wait(unsigned int msecs);
 
@@ -53,18 +55,6 @@ class SelectorImpl
         bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
 
     private:
-        struct Item
-        {
-            Item(IODevice& dev, int waitMode_ )
-            : device(dev), waitMode(waitMode_)
-            {}
-
-            IODevice& device;
-            int waitMode;
-        };
-
-        std::map<int, Item> _items;
-
         std::vector<IOResult*> _readers;
 
         int _wakePipe[2];

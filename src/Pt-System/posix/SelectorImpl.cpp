@@ -50,29 +50,9 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::addDevice( IODevice& dev, int wm )
-{
-    const int fd = dev.impl()->fd();
-    Item item(dev, wm);
-    _items.insert( std::make_pair( fd, item ) );
-}
-
-
 void SelectorImpl::waitInput( IOResult& result )
 {
     _readers.push_back( &result );
-}
-
-
-void SelectorImpl::removeDevice( IODevice& dev )
-{
-    std::map<int, Item>::iterator it;
-    for(it = _items.begin(); it != _items.end(); ++it)
-    {
-        IODevice* device = &(it->second.device);
-        if( device == &dev )
-            _items.erase(it);
-    }
 }
 
 
@@ -89,66 +69,38 @@ bool SelectorImpl::wait(unsigned int msecs)
     FD_SET( _wakePipe[0], &rfds );
     maxfd = _wakePipe[0];
 
-    // Add all waitable devices to the read and write descriptor
-    // sets. Not waitable devices are handled differently.
-    std::map<int, Item>::iterator it;
-    for( it = _items.begin(); it != _items.end(); ++it )
-    {
-        int waitMode = it->second.waitMode;
-        IODevice& device = it->second.device;
-
-        if( device.waitable() == false )
-            continue;
-
-        int fd = it->first;
-
-        if( waitMode & Selector::WaitInput)
-        {
-            FD_SET( fd, &rfds );
-            maxfd = std::max( maxfd , fd );
-        }
-
-        if( waitMode & Selector::WaitOutput )
-        {
-            FD_SET( fd, &wfds );
-            maxfd = std::max( maxfd , fd );
-        }
-    }
-
+    // Add all waitable handles to the read descriptor sets.
+    // Not waitable handles are handled differently later
     std::vector<IOResult*>::iterator iter;
     for( iter = _readers.begin(); iter != _readers.end(); ++iter )
     {
         IOResult* result = *iter;
+
+        if( result->device()->waitable() == false )
+            continue;
+
         int fd = result->impl()->fd();
         FD_SET( fd, &rfds );
         maxfd = std::max( maxfd , fd );
     }
 
     // The first select checks if any data is immediately available
-    // on the waitable devices, therefore no timeout for select. This
+    // on the waitable handles, therefore no timeout for select. This
     // way waitable devices get a chance to be serviced too when a
     // non-waitable device is registered as well
     avail = this->select(maxfd, rfds, wfds, 0);
 
     // Now we service all devices that are not waitable and thus
     // have always data available
-    for( it = _items.begin(); it != _items.end(); ++it )
+    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
     {
-        int waitMode = it->second.waitMode;
-        IODevice& device = it->second.device;
+        IOResult* result = *iter;
 
-        if( device.waitable() )
+        if( result->device()->waitable() )
             continue;
 
         avail = true;
-        if( waitMode & Selector::WaitInput)
-        {
-            device.inputReady();
-        }
-        if( waitMode & Selector::WaitOutput)
-        {
-            device.outputReady();
-        }
+        result->device()->inputReady();
     }
 
     // if any not-waitable devices were present we can bail
@@ -193,24 +145,6 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    std::map<int, Item>::iterator it;
-    for( it = _items.begin(); it != _items.end(); ++it )
-    {
-        IODevice& device = it->second.device;
-
-        if( FD_ISSET( device.impl()->fd(), &rfds ) )
-        {
-            device.inputReady();
-            avail = true;
-        }
-
-        if( FD_ISSET( device.impl()->fd(), &wfds  ))
-        {
-            device.outputReady();
-            avail = true;
-        }
-    }
-
     std::vector<IOResult*>::iterator iter = _readers.begin();
     while( iter != _readers.end() )
     {
@@ -220,6 +154,12 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
         if( FD_ISSET(fd, &rfds) )
         {
             result->device()->inputReady();
+            iter = _readers.erase(iter);
+            avail = true;
+        }
+        else if( FD_ISSET(fd, &wfds) )
+        {
+            result->device()->outputReady();
             iter = _readers.erase(iter);
             avail = true;
         }
