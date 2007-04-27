@@ -19,6 +19,9 @@
  ***************************************************************************/
 
 #include "EnvironmentImpl.h"
+#include "Pt/System/SystemError.h"
+
+#include <unistd.h>
 
 namespace Pt {
 
@@ -51,7 +54,7 @@ const std::string& EnvironmentImpl::systemDirectory()
 {
     static std::string systemDir("/");
     
-    return systemDir
+    return systemDir;
 }
 
 const std::string EnvironmentImpl::currentDirectory()
