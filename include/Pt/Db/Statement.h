@@ -195,7 +195,7 @@ namespace Db {
                 \return Self reference
             */
             Statement& set(const std::string& col, const Date& data)
-            { data.isNull() ? _stmt->setNull(col) : _stmt->setDate(col, data); return *this; }
+            { _stmt->setDate(col, data); return *this; }
                                 
             /** Set a host-variable to a time
             
@@ -206,8 +206,7 @@ namespace Db {
                 \return Self reference
             */
             Statement& set(const std::string& col, const Time& data)
-            { data.isNull() ? _stmt->setNull(col)
-                                : _stmt->setTime(col, data); return *this; }
+            { _stmt->setTime(col, data); return *this; }
                                 
             /** Set a host-variable to a date-time
             

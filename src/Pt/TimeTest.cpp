@@ -35,7 +35,6 @@ class TimeTest : public Pt::Unit::TestSuite
         TimeTest()
         : Pt::Unit::TestSuite("TimeTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Null", *this, &TimeTest::Null );
             Pt::Unit::TestSuite::registerMethod( "Assign", *this, &TimeTest::Assign );
             Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &TimeTest::IsoConvert );
         }
@@ -49,27 +48,19 @@ class TimeTest : public Pt::Unit::TestSuite
 Pt::Unit::RegisterTest<TimeTest> register_TimeTest;
 
 
-void TimeTest::Null()
-{
-    Pt::Time time;
-    PT_UNIT_ASSERT( time.isNull() );
-}
-
 void TimeTest::Assign()
 {
     Pt::Time time(12, 45, 23, 956);
-    PT_UNIT_ASSERT( !time.isNull() );
-    PT_UNIT_ASSERT( time.hours() == 12 );
-    PT_UNIT_ASSERT( time.minutes() == 45 );
-    PT_UNIT_ASSERT( time.seconds() == 23 );
-    PT_UNIT_ASSERT( time.msecs() == 956 );
+    PT_UNIT_ASSERT( time.hour() == 12 );
+    PT_UNIT_ASSERT( time.minute() == 45 );
+    PT_UNIT_ASSERT( time.second() == 23 );
+    PT_UNIT_ASSERT( time.msec() == 956 );
 
     time.set(23, 59, 59, 999);
-    PT_UNIT_ASSERT( !time.isNull() );
-    PT_UNIT_ASSERT( time.hours() == 23 );
-    PT_UNIT_ASSERT( time.minutes() == 59 );
-    PT_UNIT_ASSERT( time.seconds() == 59 );
-    PT_UNIT_ASSERT( time.msecs() == 999 );
+    PT_UNIT_ASSERT( time.hour() == 23 );
+    PT_UNIT_ASSERT( time.minute() == 59 );
+    PT_UNIT_ASSERT( time.second() == 59 );
+    PT_UNIT_ASSERT( time.msec() == 999 );
 }
 
 
@@ -80,10 +71,9 @@ void TimeTest::IsoConvert()
     PT_UNIT_ASSERT( isoString == "12:45:23.956" );
 
     time = Pt::Time::fromIsoString("23:59:59.999");
-    PT_UNIT_ASSERT( !time.isNull() );
-    PT_UNIT_ASSERT( time.hours() == 23 );
-    PT_UNIT_ASSERT( time.minutes() == 59 );
-    PT_UNIT_ASSERT( time.seconds() == 59 );
-    PT_UNIT_ASSERT( time.msecs() == 999 );
+    PT_UNIT_ASSERT( time.hour() == 23 );
+    PT_UNIT_ASSERT( time.minute() == 59 );
+    PT_UNIT_ASSERT( time.second() == 59 );
+    PT_UNIT_ASSERT( time.msec() == 999 );
 }
 

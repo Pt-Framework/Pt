@@ -1,7 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Stefan Büder                                    *
+ *   Copyright (C) 2004-2007 Marc Boris Dürner                             *
+ *   Copyright (C) 2005,2007 by Jeroen van der Zijp.                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,199 +17,197 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_DATE_H
 #define PT_DATE_H
 
 #include <Pt/Api.h>
-
-#include <string>
+#include <Pt/Exception.h>
 
 
 namespace Pt {
 
-    /** \brief Chronological Date class.
-        
-        The date is used to contain the number of years, months and days.
-    */
-    class PT_API Date
-    {
-        protected:
-            unsigned short _year;
-            unsigned short _month;
-            unsigned short _day;
+class InvalidDate : public std::invalid_argument
+{
+    public:
+        InvalidDate(const SourceInfo& si);
 
-        public:
-            /** \brief Default constructor.
-            
-                Initializes the Date-object with empty values.
-            */
-            Date()
-                : _year(0), 
-                _month(0), 
-                _day(0)
-            { }
-
-            /** \brief Initializes the date-object with the given values.
-                
-                No range-checks are done.
-                
-                \param year Year component of date.
-                \param month Month component of date.
-                \param day Day component of date.
-            */
-            Date(unsigned short year,
-                unsigned short month,
-                unsigned short day)
-            : _year(year)
-            , _month(month)
-            , _day(day)
-            { }
-
-            /** \brief Returns the year-part of the date.
-                
-                Returns the year-part of the date.
-                
-                \return Year component of date.
-            */
-            unsigned short years() const     
-            { return _year; }
-            
-            /** \brief Returns the month-part of the date.
-            
-                Returns the month-part of the date.
-                
-                \return Month component of date.
-            */
-            unsigned short months() const    
-            { return _month; }
-            
-            /** \brief Returns the day-part of the date.
-            
-                Returns the day-part of the date.
-            
-                \return Day component of date.
-            */
-            unsigned short days() const      
-            { return _day; }
+        ~InvalidDate() throw();
+};
 
 
-            /** \brief Check if Date value is valid.
-            
-                Check if Date value is valid.
-            
-                \return True if invalid date.
-            */
-            bool isNull() const  
-            { return _month == 0; }
+/*
+  Notes:
+  - Henry F. Fliegel and Thomas C. Van Flandern, "A Machine Algorithm for
+    Processing Calendar Dates". CACM, Vol. 11, No. 10, October 1968, pp 657.
+*/
+/** @brief Date expressed in year, month, and day
+*/
+class PT_API Date
+{
+    public:
+        enum
+        {
+            Jan = 1, Feb, Mar,  Apr, May, Jun,
+            Jul, Aug, Sep, Oct, Nov, Dec
+        };
 
-            /** \brief Sets the date.
-            
-                Sets the date to a new year, month and day.
-                No range-checks are done.
+        enum
+        {
+            Sun = 0, Mon, Tue, Wed, Thu, Fri, Sat
+        };
 
-                \param year Year component of date.
-                \param month Month component of date.
-                \param day Day component of date.
-            */
-            void set(unsigned short year,
-                unsigned short month,
-                unsigned short day)
-            {
-                _year = year;
-                _month = month;
-                _day = day;
-            }
+    public:
+        /** \brief Default constructor.
+        */
+        Date()
+        : _julian(0)
+        {}
 
-            /** \brief returns the date in ISO-format.
-            
-                Converts the date in ISO-format (yyyy-mm-dd).
-                
-                \return Date as iso formated string.
-            */
-            std::string toIsoString() const;
+        /** \brief copy constructor.
+        */
+        Date(const Date& date)
+        : _julian(date._julian)
+        {}
 
-            /** \brief Interprets a string as a date-string in ISO-format 
-            
-                Interprets a string as a date-string in ISO-format (yyyy-mm-dd) and 
-                returns a Date-object. When the string is not in ISO-format, an 
-                exception is thrown.
-                
-                \param Iso formated date string.
-                \return Date result
-                \throw IllegalArgument
-            */
-            static Date fromIsoString(const std::string& s);
+        /** \brief Constructs a Date from given values
 
-            /** \brief Equality comparison operator
-            
-                Returns true if both dates have the same year, month and day.
-            
-                \param dt other Date
-                \return true if equal
-            */
-            bool operator== (const Date& dt) const
-            { 
-                return _year == dt._year
-                    && _month == dt._month
-                    && _day == dt._day; }
+            Sets the date to a new year, month and day.
+            InvalidDate is thrown if any of the values is out of range
+        */
+        Date(int y, int m, int d);
 
-            /** \brief Inequality comparison operator
-            
-                Returns true if the dates differ in year, month or day.
-            
-                \param dt other Date
-                \return true if not equal
-            */
-            bool operator!= (const Date& dt) const
-            { return !operator==(dt); }
+        /** \brief Constructs a Date from julian days
+        */
+        Date(unsigned j)
+        : _julian(j)
+        {}
 
-            /** \brief Less-than comparison operator
-            
-                Returns true if the date is earier than the other date.
-            
-                \param dt other Date
-                \return true if this date is  earlier
-            */
-            bool operator< (const Date& dt) const
-            { 
-                return _year < dt._year
-                    || _year == dt._year
-                    && ( _month < dt._month
-                    || _month == dt._month
-                    && _day < dt._day
-                    ); }
+        void setJulian(unsigned d)
+        { _julian=d; }
 
-            /** \brief Greater-than comparison operator
-            
-                Returns true if the date is later than the other date.
-            
-                \param dt other Date
-                \return true if this date is later
-            */
-            bool operator> (const Date& dt) const
-            { return dt < *this; }
+        unsigned julian() const
+        { return _julian; }
 
-            /** \brief Less-than or equal comparison operator
-            
-                Returns true if the date is earier or equal to the other date.
-            
-                \param dt other Date
-                \return true if this date is earlier or equal
-            */
-            bool operator<= (const Date& dt) const
-            { return !(*this > dt); }
+        /** \brief Sets the date.
 
-            /** \brief Greater-than or equal comparison operator
-            
-                Returns true if the date is later or equal to the other date.
-            
-                \param dt other Date
-                \return true if this date is later or equal
-            */
-            bool operator>= (const Date& dt) const
-            { return !(*this < dt); }
-    };
+            Sets the date to a new year, month and day.
+            InvalidDate is thrown if any of the values is out of range
+        */
+        void set(int y, int m, int d);
+
+        void get(int& y, int& m, int& d) const;
+
+        /** \brief Returns the day-part of the date.
+        */
+        int day() const;
+
+        /** \brief Returns the month-part of the date.
+        */
+        int month() const;
+
+        /** \brief Returns the year-part of the date.
+        */
+        int year() const;
+
+        //! @brief Return day of the week, starting with sunday
+        int dayOfWeek() const;
+
+        int daysInMonth() const;
+
+        int dayOfYear() const;
+
+        bool leapYear() const;
+
+        // TODO: move to Pt:.System
+        //static Date localDate();
+
+        // TODO: move to Pt:.System
+        //static Date universalDate();
+
+        Date& operator=(const Date& date)
+        { _julian=date._julian;return *this; }
+
+        Date& operator+=(int x)
+        { _julian+=x; return *this; }
+
+        Date& operator-=(int x)
+        { _julian-=x; return *this; }
+
+        Date& operator++()
+        { _julian++; return *this; }
+
+        Date& operator--()
+        { _julian--; return *this; }
+
+        bool operator==(const Date& date) const
+        { return _julian==date._julian; }
+
+        bool operator!=(const Date& date) const
+        { return _julian!=date._julian; }
+
+        bool operator<(const Date& date) const
+        { return _julian<date._julian; }
+
+        bool operator<=(const Date& date) const
+        { return _julian<=date._julian; }
+
+        bool operator>(const Date& date) const
+        { return _julian>date._julian; }
+
+        bool operator>=(const Date& date) const
+        { return _julian>=date._julian; }
+
+        friend inline Date operator+(const Date& d,int x);
+
+        friend inline Date operator+(int x,const Date& d);
+
+        friend inline int operator-(const Date& a,const Date& b);
+
+        /** \brief returns the date in ISO-format.
+
+            Converts the date in ISO-format (yyyy-mm-dd).
+
+            \return Date as iso formated string.
+        */
+        std::string toIsoString() const;
+
+        /** \brief Interprets a string as a date-string in ISO-format
+
+            Interprets a string as a date-string in ISO-format (yyyy-mm-dd) and
+            returns a Date-object. When the string is not in ISO-format, an
+            exception is thrown.
+
+            \param Iso formated date string.
+            \return Date result
+            \throw IllegalArgument
+        */
+        static Date fromIsoString(const std::string& s);
+
+    public:
+        /** \brief Returns true if values describe a valid date.
+        */
+        static bool isValid(int y,int m,int d);
+
+        static bool leapYear(int y);
+
+        static void greg2jul(unsigned& jd,int y,int m,int d);
+
+        // Converts julian days to a gregorian date
+        static void jul2greg(unsigned jd,int& y,int& m,int& d);
+
+    private:
+        unsigned _julian;
+};
+
+inline Date operator+(const Date& d,int x)
+{ return Date(d._julian+x); }
+
+inline Date operator+(int x,const Date& d)
+{ return Date(x+d._julian); }
+
+inline int operator-(const Date& a,const Date& b)
+{ return a._julian-b._julian; }
+
 }
 
-#endif // PT_DATE_H
+#endif

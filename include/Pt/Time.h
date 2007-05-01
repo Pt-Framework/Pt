@@ -18,195 +18,119 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_TIME_H
 #define PT_TIME_H
 
 #include <Pt/Api.h>
-
+#include <Pt/Exception.h>
 #include <string>
-#include <limits>
-
-
-#undef max
 
 
 namespace Pt {
 
-    /**    \brief This class holds a time.
-    */
-    class PT_API Time
-    {
-        protected:
-            unsigned short _hour;
-            unsigned short _minute;
-            unsigned short _second;
-            unsigned short _msec;
-
+class InvalidTime : public std::invalid_argument
+{
     public:
-        /** \brief Creates a Time-object with null values.
+        InvalidTime(const SourceInfo& si);
+
+        ~InvalidTime() throw();
+};
+
+
+/** @brief Time expressed in hours, minutes, seconds and milliseconds
+*/
+class PT_API Time
+{
+    public:
+        /** \brief Creates a Time set to zero.
         */
         Time()
-            : _hour( std::numeric_limits<unsigned short>::max() ),
-            _minute(0),
-            _second(0),
-            _msec(0)
-        { }
+        : _msecs(0)
+        {}
 
-        /** \brief Creates a Time-object from given values.
+        /** \brief Creates a Time from given values.
 
-            No range-checks are done.
-
-            \param hour hours
-            \param minute minutes
-            \param second seconds
-            \param msec milli-seconds
+            InvalidTime is thrown if one or more of the values are out of range
         */
-        Time(unsigned short hour,
-            unsigned short minute,
-            unsigned short second,
-            unsigned short msec = 0)
-        : _hour(hour)
-        , _minute(minute)
-        , _second(second)
-        , _msec(msec)
-        { }
+        // throws InvalidTime
+        Time(unsigned hour, unsigned min, unsigned ses = 0, unsigned msec = 0);
 
         /** \brief Returns the hour-part of the Time.
         */
-        unsigned short hours() const
-        { return _hour; }
+        unsigned hour() const;
 
         /** \brief Returns the minute-part of the Time.
         */
-        unsigned short minutes() const
-        { return _minute; }
+        unsigned minute() const;
 
         /** \brief Returns the second-part of the Time.
         */
-        unsigned short seconds() const
-        { return _second; }
+        unsigned second() const;
 
         /** \brief Returns the millisecond-part of the Time.
         */
-        unsigned short msecs() const
-        { return _msec; }
-
-        /** \brief Check if Time value is valid
-        */
-        bool isNull() const
-        { return _hour == std::numeric_limits<unsigned short>::max(); }
+        unsigned msec() const;
 
         /** \brief Sets the time.
 
             Sets the time to a new hour, minute, second, milli-second.
-            No range-checks are done.
-
-            \param hour Hour component of time.
-            \param minute Minute component of time.
-            \param second Second component of time.
-            \param msec Milli-Second component of time.
+            InvalidTime is thrown if one or more of the values are out of range
         */
-        void set(unsigned short hour,
-            unsigned short minute,
-            unsigned short second,
-            unsigned short msec = 0)
-        {
-            _hour = hour;
-            _minute = minute;
-            _second = second;
-            _msec = msec;
-        }
+        void set(unsigned hour, unsigned min, unsigned sec, unsigned mssec = 0);
+
+        void get(unsigned& h, unsigned& m, unsigned& s, unsigned& ms) const;
+
+        Time addSecs(int secs) const;
+
+        int secsTo(const Time &) const;
+
+        Time addMSecs(int ms) const;
+
+        int msecsTo(const Time &) const;
+
+        Time& operator=(const Time& other)
+        { _msecs=other._msecs; return *this; }
+
+        bool operator==(const Time& other) const
+        { return _msecs == other._msecs; }
+
+        bool operator!=(const Time& other) const
+        { return _msecs != other._msecs; }
+
+        bool operator<(const Time& other) const
+        { return _msecs < other._msecs; }
+
+        bool operator<=(const Time& other) const
+        { return _msecs <= other._msecs; }
+
+        bool operator>(const Time& other) const
+        { return _msecs > other._msecs; }
+
+        bool operator>=(const Time& other) const
+        { return _msecs >= other._msecs; }
 
         /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
         */
         std::string toIsoString() const;
 
+    public:
+        // TODO: move to Pt::System
+        //static Time currentTime();
+
+        /** \brief Returns true if values are a valid time
+        */
+        static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms = 0);
+
         /** \brief Convert from an ISO time string
 
             Interprets the passed string as a time-string in ISO-format
-            (hh:mm:ss.hhh) and returns a Time-object. When the string is not
-            in ISO-format, an exception is thrown.
-
-            \param s time as iso-string (hh:mm:ss.hhh)
-            \return Time object
-            \throw IllegalArgument xxx
+            (hh:mm:ss.hhh) and returns a Time-object. If the string is not
+            in ISO-format, InvalidTime is thrown.
         */
         static Time fromIsoString(const std::string& s);
 
-        /** \brief Equality comparison operator
-
-            Returns true if both times are equal.
-            \param dt time object
-            \return true if equal
-        */
-        bool operator==(const Time& dt) const
-        {
-            return _hour == dt._hour
-                && _minute == dt._minute
-                && _second == dt._second
-                && _msec == dt._msec;
-        }
-
-        /** \brief Inequality comparison operator
-
-            Returns true if times are different.
-            \param dt time object
-            \return true if not equal
-        */
-        bool operator!= (const Time& dt) const
-        { return !operator==(dt); }
-
-        /** \brief Less-than comparison operator
-
-            Returns true if this time is earlier.
-            \param dt time object
-            \return true if earlier
-        */
-        bool operator< (const Time& dt) const
-        {
-            return _hour < dt._hour
-                || _hour == dt._hour
-                && ( _minute < dt._minute
-                || _minute == dt._minute
-                && ( _second < dt._second
-                || _second == dt._second
-                && _msec < dt._msec
-                )
-                );
-        }
-
-        /** \brief Greater-than comparison operator
-
-            Returns true if this time is later.
-            \param dt time object
-            \return true if later
-        */
-        bool operator> (const Time& dt) const
-        { return dt < *this; }
-
-        /** \brief Less-than-equal comparison operator
-
-            Returns true if this time is earlier or equal.
-            \param dt time object
-            \return true if earlier or equal
-        */
-        bool operator<= (const Time& dt) const
-        { return !(*this > dt); }
-
-        /** \brief Greater-than-equal comparison operator
-
-            Returns true if this time is later or equal.
-            \param dt time object
-            \return true if later or equal
-        */
-        bool operator>= (const Time& dt) const
-        { return !(*this < dt); }
-              
-        double toSeconds()
-        {
-            return (hours() * 3600) + (minutes() * 60) + seconds() + ( msecs() /1000.0 );
-        }      
+    private:
+        unsigned _msecs;
     };
 }
 
