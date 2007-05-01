@@ -424,25 +424,39 @@ HR { height: 1px;
     margin-left: 18em;
 }
 
-/* A sidebar of links, etc */
-#sidebar    {
+
+.sidebar    {
     float: left;
-    width: 14em;
+    width: 17em;
     margin: 0em 0em;
-    padding: 1em 1.5em;
+    padding: 0em 0em;
     font-size: 100%;
     background-color: #f6f6f6;
+    text-decoration: none;
+    font-style: none;
     border: 1px solid #dddddd;
+    -moz-border-radius: 0px 12px 0px 0px;
 }
 
-#sidebar ul {
+.sidebar-major {
+       background-color:rgb(195, 0, 20);
+       color:white;
+       padding-bottom:7px;
+       padding-top:7px;
+       padding-left:1.5em;
+       font-size: 120%;
+        -moz-border-radius: 0px 12px 12px 0px;
+}
+
+.sidebar ul {
     list-style: none;
-    margin: 0em;
-    padding: 0em 1em;
 }
 
-/* make the first header in the resource menu have no margin on top so that the
-* padding of the sidebar and the margin don't add. */
-#sidebar > h3:first-child   {
-    margin-top: 0em;
+.sidebar a {
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    text-decoration: none;
+    font-weight: bold;
 }
