@@ -19,13 +19,12 @@
 #undef PT_API_EXPORT
 
 #include "Pt/AtomicInt.h"
-
-#include <string>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/TestSchedule.h"
 #include "Pt/Unit/RegisterTest.h"
+#include <string>
 
 
 class AtomicTestSuite : public Pt::Unit::TestSuite
@@ -77,6 +76,17 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::AtomicInt a;
             a = value;
             PT_UNIT_ASSERT( a.value() == value );
+#ifdef _MSC_VER
+			const char* p = "Hallo";
+			void* null = 0;
+			Pt::atomic_compare_exchange((void**)&p, (void*)p, (void*)null);
+            PT_UNIT_ASSERT( p == 0 );
+
+			const char* p2 = "Hallo";
+			void* null2 = 0;
+			Pt::atomic_exchange((void**)&p2,(void*)null2);
+            PT_UNIT_ASSERT( p2 == 0 );
+#endif
         }
 
         void SubstractionTest()

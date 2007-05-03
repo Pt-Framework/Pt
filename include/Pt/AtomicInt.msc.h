@@ -54,6 +54,16 @@ namespace Pt {
             volatile atomic_t _value;
     };
 
+	bool atomic_compare_exchange(void* volatile* atomic, void* cmp, void* ex)
+	{
+        return InterlockedCompareExchangePointer(atomic, ex, cmp) == cmp;
+	}
+
+	void atomic_exchange(void* volatile* atomic, void* ex)
+	{
+        InterlockedExchangePointer(atomic, ex);
+	}
+
 } // namespace Pt
 
 #endif
