@@ -31,9 +31,7 @@ namespace Pt {
 
     namespace Gfx {
 
-        //
-        // Foward declarations of pixel iterator classes
-        //
+
         template <typename ColorT_> class InterleavedImage_PixelIterator;
         template <typename ColorT_> class InterleavedImage_ConstPixelIterator;
 
@@ -217,7 +215,8 @@ namespace Pt {
         };
 
 
-        /** @brief Pixel-based iterator class for InterleavedImage<ColorT>.
+        /** @internal
+            @brief Pixel-based iterator class for InterleavedImage<ColorT>.
          *  @ingroup Gfx
          */
         template <typename ColorT_>
@@ -275,7 +274,8 @@ namespace Pt {
         };
 
 
-        /** @brief Pixel-based constant iterator class for InterleavedImage<ColorT>.
+        /** @internal
+            @brief Pixel-based constant iterator class for InterleavedImage<ColorT>.
          *  @ingroup Gfx
          */
         template <typename ColorT_>

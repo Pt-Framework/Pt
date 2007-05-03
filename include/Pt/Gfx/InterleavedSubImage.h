@@ -189,7 +189,8 @@ namespace Pt {
         };
 
 
-        /** @brief Pixel-based iterator class for InterleavedSubImage<ImageT>.
+        /** @internal
+            @brief Pixel-based iterator class for InterleavedSubImage<ImageT>.
          *  @ingroup Gfx
          */
         template <typename InterleavedSubImageT_>
@@ -241,7 +242,8 @@ namespace Pt {
         };
 
 
-        /** @brief Pixel-based constant iterator class for InterleavedSubImage<ImageT>.
+        /** @internal
+            @brief Pixel-based constant iterator class for InterleavedSubImage<ImageT>.
          *  @ingroup Gfx
          */
         template <typename InterleavedSubImageT_>

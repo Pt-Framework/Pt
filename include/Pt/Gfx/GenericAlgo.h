@@ -29,8 +29,7 @@ namespace Pt {
 
     namespace Gfx {
 
-        /** @brief Choose the type which has greater size (from the two given types).
-         */
+        //! \internal
         template <typename A, typename B>
         struct LargestSizeOf {
             typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
@@ -41,8 +40,7 @@ namespace Pt {
         // TODO For all recursive template -> make both the classes and the helper
         //      functions use the same convention -> using Min/Max instead of N
 
-        /** @brief Test if all elements in an array are equal
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         struct EqualElements
         {
@@ -53,6 +51,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT>
         struct EqualElements<NEqualMin, NEqualMin, ArrayT>
         {
@@ -60,6 +59,7 @@ namespace Pt {
             { return a[NEqualMin] == b[NEqualMin];  }
         };
 
+        //! \internal
         template<typename ArrayT>
         struct EqualElements<0, 0, ArrayT>
         {
@@ -67,14 +67,14 @@ namespace Pt {
             { return a[0] == b[0];  }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT> inline
         bool equalElements(const ArrayT& a, const ArrayT& b)
         { return EqualElements<N-1, Min, ArrayT>::equal(a, b); }
 
 
 
-        /** @brief Test if any elements in an array are not equal
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         struct NotEqualElements
         {
@@ -85,6 +85,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT>
         struct NotEqualElements<NEqualMin, NEqualMin, ArrayT>
         {
@@ -92,6 +93,7 @@ namespace Pt {
             { return a[NEqualMin] != b[NEqualMin];  }
         };
 
+        //! \internal
         template<typename ArrayT>
         struct NotEqualElements<0, 0, ArrayT>
         {
@@ -99,14 +101,14 @@ namespace Pt {
             { return a[0] != b[0];  }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT> inline
         bool notEqualElements(const ArrayT& a, const ArrayT& b)
         { return NotEqualElements<N-1, Min, ArrayT>::notEqual(a, b); }
 
 
 
-        /** @brief Increments all elements in an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         struct IncrementElements
         {
@@ -117,6 +119,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT>
         struct IncrementElements<NEqualMin, NEqualMin, ArrayT>
         {
@@ -124,6 +127,7 @@ namespace Pt {
             { ++array[NEqualMin]; }
         };
 
+        //! \internal
         template<typename ArrayT>
         struct IncrementElements<0, 0, ArrayT>
         {
@@ -131,14 +135,14 @@ namespace Pt {
             { ++array[0]; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         void incrementElements(ArrayT& array)
         { IncrementElements<N-1, Min, ArrayT>::inc(array); }
 
 
 
-        /** @brief Decrements all elements in an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         struct DecrementElements
         {
@@ -149,6 +153,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT>
         struct DecrementElements<NEqualMin, NEqualMin, ArrayT>
         {
@@ -156,6 +161,7 @@ namespace Pt {
             { ++array[NEqualMin]; }
         };
 
+        //! \internal
         template<typename ArrayT>
                 struct DecrementElements<0, 0, ArrayT>
         {
@@ -163,14 +169,14 @@ namespace Pt {
             { ++array[0]; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT>
         void decrementElements(ArrayT& array)
         { DecrementElements<N-1, Min, ArrayT>::inc(array); }
 
 
 
-        /** @brief Adds a value to all elements of an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB, typename ElemT>
         struct AddElements
         {
@@ -181,6 +187,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayA, typename ArrayB, typename ElemT>
         struct AddElements<NEqualMin, NEqualMin, ArrayA, ArrayB, ElemT>
         {
@@ -188,6 +195,7 @@ namespace Pt {
             { to[NEqualMin] = from[NEqualMin] + val; }
         };
 
+        //! \internal
         template<typename ArrayA, typename ArrayB, typename ElemT>
         struct AddElements<0, 0, ArrayA, ArrayB, ElemT>
         {
@@ -195,14 +203,14 @@ namespace Pt {
             { to[0] = from[0] + val; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB, typename ElemT>
         void addElements(ArrayA& to, const ArrayB& from, const ElemT& val)
         { AddElements<N-1, Min, ArrayA, ArrayB, ElemT>::add(to, from, val); }
 
 
 
-        /** @brief Sustracts a value from all elements of an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct SubElements
         {
@@ -213,6 +221,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT, typename ElemT>
         struct SubElements<NEqualMin, NEqualMin, ArrayT, ElemT>
         {
@@ -220,6 +229,7 @@ namespace Pt {
             { to[NEqualMin] = from[NEqualMin] - val; }
         };
 
+        //! \internal
         template<typename ArrayT, typename ElemT>
         struct SubElements<0, 0, ArrayT, ElemT>
         {
@@ -227,14 +237,14 @@ namespace Pt {
             { to[0] = from[0] - val; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void subElements(ArrayT& to, const ArrayT& from, const ElemT& val)
         { SubElements<N-1, Min, ArrayT, ElemT>::sub(to, from, val); }
 
 
 
-        /** @brief Adds and assigns a value to all elements of an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct AddAssignElements
         {
@@ -245,6 +255,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT, typename ElemT>
         struct AddAssignElements<NEqualMin, NEqualMin, ArrayT, ElemT>
         {
@@ -252,6 +263,7 @@ namespace Pt {
             { to[NEqualMin] += val; }
         };
 
+        //! \internal
         template<typename ArrayT, typename ElemT>
         struct AddAssignElements<0, 0, ArrayT, ElemT>
         {
@@ -259,6 +271,7 @@ namespace Pt {
             { to[0] += val; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void addAssignElements(ArrayT& to, const ElemT& val)
         { AddAssignElements<N-1, Min, ArrayT, ElemT>::add(to, val); }
@@ -266,8 +279,7 @@ namespace Pt {
 
 
 
-        /** @brief Assigns the elements of an array to another one
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
         struct AssignElements
         {
@@ -278,6 +290,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayA, typename ArrayB>
         struct AssignElements<NEqualMin, NEqualMin, ArrayA, ArrayB>
         {
@@ -285,6 +298,7 @@ namespace Pt {
             { to[NEqualMin] = from[NEqualMin]; }
         };
 
+        //! \internal
         template<typename ArrayA, typename ArrayB>
         struct AssignElements<0, 0, ArrayA, ArrayB>
         {
@@ -292,6 +306,7 @@ namespace Pt {
             { to[0] = from[0]; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
         void assignElements(ArrayA& to, const ArrayB& from)
         { AssignElements<N-1, Min, ArrayA, ArrayB>::assign(to, from); }
@@ -299,8 +314,7 @@ namespace Pt {
 
 
 
-        /** @brief Substracts and assigns a value to all elements of an array
-         */
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         struct SubAssignElements
         {
@@ -311,6 +325,7 @@ namespace Pt {
             }
         };
 
+        //! \internal
         template<size_t NEqualMin, typename ArrayT, typename ElemT>
         struct SubAssignElements<NEqualMin, NEqualMin, ArrayT, ElemT>
         {
@@ -318,6 +333,7 @@ namespace Pt {
             { to[NEqualMin] += val; }
         };
 
+        //! \internal
         template<typename ArrayT, typename ElemT>
         struct SubAssignElements<0, 0, ArrayT, ElemT>
         {
@@ -325,6 +341,7 @@ namespace Pt {
             { to[0] += val; }
         };
 
+        //! \internal
         template<size_t N, size_t Min, typename ArrayT, typename ElemT>
         void subAssignElements(ArrayT& to, const ElemT& val)
         { SubAssignElements<N-1, Min, ArrayT, ElemT>::sub(to, val); }
