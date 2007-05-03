@@ -48,12 +48,12 @@
         <br>
 
         <h2>Latest News</h2>
-        <li><b><a href="news.html">25-02-2007, New Project Website</a></b></li>
-        <li><b><a href="news.html">05-02-2007, Sprint Results</a></b></li>
-        <li><b><a href="news.html">01-12-2006, Sprint Results</a></b></li>
-        <li><b><a href="news.html">01-11-2006, Scrum project management introduced</a></b></li>
-        <li><b><a href="news.html">14-10-2006, Pt and Tntnet at LinuxWorldExpo in Cologne</a></b></li>
-        <li><b><a href="news.html">22-09-2006, Pt on Sourceforge</a></b></li>
+        <b><a href="news.html">25-02-2007, New Project Website</a></b><br>
+        <b><a href="news.html">05-02-2007, Sprint Results</a></b><br>
+        <b><a href="news.html">01-12-2006, Sprint Results</a></b><br>
+        <b><a href="news.html">01-11-2006, Scrum project management introduced</a></b><br>
+        <b><a href="news.html">14-10-2006, Pt and Tntnet at LinuxWorldExpo in Cologne</a></b><br>
+        <b><a href="news.html">22-09-2006, Pt on Sourceforge</a></b><br>
 
     </div>
 

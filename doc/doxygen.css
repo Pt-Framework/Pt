@@ -6,20 +6,22 @@ BODY,TD {
        font-size: 90%;
 }
 H1 {
-       background-color:#f6f6f6;
-       border-bottom: 2px solid gray;
+       color: #154374;
+	background-color: #f0f0f0;
+	border: 1px solid #CCCCCC;
        padding-bottom:7px;
        padding-top:7px;
-       margin-top:30px;
        text-align: center;
        font-size: 180%;
-       	-moz-border-radius: 12px 12px 0px 0px;
+       	-moz-border-radius: 12px 12px 12px 12px;
 }
 H2 {
-       font-size: 150%;
+	font-size: 150%;
+	color: #154374;
 }
 H3 {
        font-size: 120%;
+       color: #154374;
 }
 CAPTION { font-weight: bold }
 DIV.qindex {
@@ -31,7 +33,10 @@ DIV.qindex {
 	padding: 2px;
 	line-height: 140%;
 }
+
+/* Do not display navigation on top of class doc */
 DIV.nav {
+	display:none;
 	width: 100%;
 	text-align: center;
 	margin: 2px;
@@ -421,7 +426,14 @@ HR { height: 1px;
 /* the main content of the page */
 #content    {
     padding: 0em 1em 1em 1em;
-    margin-left: 18em;
+    margin-left: 19em;
+}
+
+#content h2 {
+  padding-left: 28px;
+  background: url(section_head.png) no-repeat left center;
+  position: relative;
+  left: -30px;
 }
 
 
@@ -431,10 +443,10 @@ HR { height: 1px;
     margin: 0em 0em;
     padding: 0em 0em;
     font-size: 100%;
-    background-color: #f6f6f6;
+    background-color: #f0f0f0;
     text-decoration: none;
     font-style: none;
-    border: 1px solid #dddddd;
+    border-left: 1px solid #CCCCCC;
     -moz-border-radius: 0px 12px 0px 0px;
 }
 
