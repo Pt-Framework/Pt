@@ -430,10 +430,10 @@ HR { height: 1px;
 }
 
 #content h2 {
-  padding-left: 28px;
+  padding-left: 24px;
   background: url(section_head.png) no-repeat left center;
   position: relative;
-  left: -30px;
+  left: -26px;
 }
 
 
@@ -447,7 +447,7 @@ HR { height: 1px;
     text-decoration: none;
     font-style: none;
     border-left: 1px solid #CCCCCC;
-    -moz-border-radius: 0px 12px 0px 0px;
+    -moz-border-radius: 0px 12px 12px 0px;
 }
 
 .sidebar-major {

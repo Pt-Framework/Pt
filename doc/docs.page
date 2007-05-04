@@ -86,6 +86,7 @@
 	     output directory. As soon as we use platinum-logo.png somewhere in the documentation we
 	     can remove this line. -->
 	<div style="display:none">\image html platinum-logo.png</div>
+	<div style="display:none">\image html platinum-logo.gif</div>
 	<div style="display:none">\image html section_head.png</div>
 	
 	</div>
