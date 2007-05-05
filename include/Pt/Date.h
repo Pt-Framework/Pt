@@ -22,6 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
+#include <string>
 
 
 namespace Pt {
@@ -74,7 +75,7 @@ class PT_API Date
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        Date(int y, int m, int d);
+        Date(int y, unsigned m, unsigned d);
 
         /** \brief Constructs a Date from julian days
         */
@@ -93,28 +94,28 @@ class PT_API Date
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        void set(int y, int m, int d);
+        void set(int y, unsigned m, unsigned d);
 
-        void get(int& y, int& m, int& d) const;
+        void get(int& y, unsigned& m, unsigned& d) const;
 
         /** \brief Returns the day-part of the date.
         */
-        int day() const;
+        unsigned day() const;
 
         /** \brief Returns the month-part of the date.
         */
-        int month() const;
+        unsigned month() const;
 
         /** \brief Returns the year-part of the date.
         */
         int year() const;
 
         //! @brief Return day of the week, starting with sunday
-        int dayOfWeek() const;
+        unsigned dayOfWeek() const;
 
-        int daysInMonth() const;
+        unsigned daysInMonth() const;
 
-        int dayOfYear() const;
+        unsigned dayOfYear() const;
 
         bool leapYear() const;
 
@@ -157,11 +158,11 @@ class PT_API Date
         bool operator>=(const Date& date) const
         { return _julian>=date._julian; }
 
-        friend inline Date operator+(const Date& d,int x);
+        friend inline Date operator+(const Date& d, int days);
 
-        friend inline Date operator+(int x,const Date& d);
+        friend inline Date operator+(int days, const Date& d);
 
-        friend inline int operator-(const Date& a,const Date& b);
+        friend inline int operator-(const Date& a, const Date& b);
 
         /** \brief returns the date in ISO-format.
 
@@ -199,14 +200,14 @@ class PT_API Date
         unsigned _julian;
 };
 
-inline Date operator+(const Date& d,int x)
-{ return Date(d._julian+x); }
+inline Date operator+(const Date& d, int days)
+{ return Date(d._julian + days); }
 
-inline Date operator+(int x,const Date& d)
-{ return Date(x+d._julian); }
+inline Date operator+(int days, const Date& d)
+{ return Date(days + d._julian); }
 
-inline int operator-(const Date& a,const Date& b)
-{ return a._julian-b._julian; }
+inline int operator-(const Date& a, const Date& b)
+{ return a._julian - b._julian; }
 
 }
 

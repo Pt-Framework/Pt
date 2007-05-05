@@ -90,14 +90,6 @@ Timestamp Timestamp::fromEpochTime(time_t t)
 }
 
 
-Timestamp Timestamp::fromUtcTime(UtcTimeVal val)
-{
-	val -= (TimeDiff(0x01b21dd2) << 32) + 0x13814000;
-	val /= 10;
-	return Timestamp(val);
-}
-
-
 void Timestamp::update()
 {
 

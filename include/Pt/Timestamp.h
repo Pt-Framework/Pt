@@ -93,17 +93,11 @@ class PT_API Timestamp
         */
         time_t epochTime() const;
 
-        /** @brief Returns the timestamp expressed in UTC-based time
-            UTC base time is midnight, October 15, 1582. The resolution
-            is 100 nanoseconds.
-        */
-        UtcTimeVal utcTime() const;
-
         /** @brief Returns the timestamp in microseconds
             Returns the timestamp expressed in microseconds since the Unix
             epoch, midnight, January 1, 1970.
         */
-        TimeVal epochMicroseconds() const;
+        TimeVal epochMSecs() const;
 
         /** @brief Returns the elapsed time
             Returns the time elapsed since the time denoted by
@@ -117,13 +111,13 @@ class PT_API Timestamp
         */
         bool isElapsed(TimeDiff interval) const;
 
-        //! @brief Creates a timestamp from a time_t.
+        //! @brief Creates a timestamp from a time_t
         static Timestamp fromEpochTime(time_t t);
 
-        //! @brief Creates a timestamp from a UTC time value.
+        //! @brief Creates a timestamp from a UTC time value
         static Timestamp fromUtcTime(UtcTimeVal val);
 
-        /** @brief Returns the resolution in units per second.
+        /** @brief Returns the resolution in units per second
             Since the timestamp has microsecond resolution,
             the returned value is always 1000000.
         */
@@ -209,17 +203,11 @@ inline Timestamp& Timestamp::operator -= (Timestamp::TimeDiff d)
 
 inline time_t Timestamp::epochTime() const
 {
-	return time_t(_ts/resolution());
+	return time_t( _ts/resolution() );
 }
 
 
-inline Timestamp::UtcTimeVal Timestamp::utcTime() const
-{
-	return _ts*10 + (TimeDiff(0x01b21dd2) << 32) + 0x13814000;
-}
-
-
-inline Timestamp::TimeVal Timestamp::epochMicroseconds() const
+inline Timestamp::TimeVal Timestamp::epochMSecs() const
 {
 	return _ts;
 }

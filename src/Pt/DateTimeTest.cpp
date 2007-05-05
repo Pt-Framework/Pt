@@ -45,25 +45,26 @@ class DateTimeTest : public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;
 
+
 void DateTimeTest::Assign()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
-    PT_UNIT_ASSERT( dt.year() == 2001 );
-    PT_UNIT_ASSERT( dt.month() == 11 );
-    PT_UNIT_ASSERT( dt.day() == 15 );
-    PT_UNIT_ASSERT( dt.hour() == 12 );
-    PT_UNIT_ASSERT( dt.minute() == 45 );
-    PT_UNIT_ASSERT( dt.second() == 23 );
-    PT_UNIT_ASSERT( dt.millisecond() == 956 );
+    PT_UNIT_ASSERT( dt.date().year() == 2001 );
+    PT_UNIT_ASSERT( dt.date().month() == 11 );
+    PT_UNIT_ASSERT( dt.date().day() == 15 );
+    PT_UNIT_ASSERT( dt.time().hour() == 12 );
+    PT_UNIT_ASSERT( dt.time().minute() == 45 );
+    PT_UNIT_ASSERT( dt.time().second() == 23 );
+    PT_UNIT_ASSERT( dt.time().msec() == 956 );
 
-	dt.assign(1789, 5, 12, 23, 59, 59, 999);
-    PT_UNIT_ASSERT( dt.year() == 1789 );
-    PT_UNIT_ASSERT( dt.month() == 5 );
-    PT_UNIT_ASSERT( dt.day() == 12 );
-    PT_UNIT_ASSERT( dt.hour() == 23 );
-    PT_UNIT_ASSERT( dt.minute() == 59 );
-    PT_UNIT_ASSERT( dt.second() == 59 );
-    PT_UNIT_ASSERT( dt.millisecond() == 999 );
+	dt.set(1789, 5, 12, 23, 59, 59, 999);
+    PT_UNIT_ASSERT( dt.date().year() == 1789 );
+    PT_UNIT_ASSERT( dt.date().month() == 5 );
+    PT_UNIT_ASSERT( dt.date().day() == 12 );
+    PT_UNIT_ASSERT( dt.time().hour() == 23 );
+    PT_UNIT_ASSERT( dt.time().minute() == 59 );
+    PT_UNIT_ASSERT( dt.time().second() == 59 );
+    PT_UNIT_ASSERT( dt.time().msec() == 999 );
 }
 
 
@@ -74,12 +75,12 @@ void DateTimeTest::IsoConvert()
     PT_UNIT_ASSERT( isoString == "2001-11-15 12:45:23.956" );
 
     dt = Pt::DateTime::fromIsoString("1789-05-12 23:59:59.999");
-    PT_UNIT_ASSERT( dt.year() == 1789 );
-    PT_UNIT_ASSERT( dt.month() == 5 );
-    PT_UNIT_ASSERT( dt.day() == 12 );
-    PT_UNIT_ASSERT( dt.hour() == 23 );
-    PT_UNIT_ASSERT( dt.minute() == 59 );
-    PT_UNIT_ASSERT( dt.second() == 59 );
-    PT_UNIT_ASSERT( dt.millisecond() == 999 );
+    PT_UNIT_ASSERT( dt.date().year() == 1789 );
+    PT_UNIT_ASSERT( dt.date().month() == 5 );
+    PT_UNIT_ASSERT( dt.date().day() == 12 );
+    PT_UNIT_ASSERT( dt.time().hour() == 23 );
+    PT_UNIT_ASSERT( dt.time().minute() == 59 );
+    PT_UNIT_ASSERT( dt.time().second() == 59 );
+    PT_UNIT_ASSERT( dt.time().msec() == 999 );
 }
 

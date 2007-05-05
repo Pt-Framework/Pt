@@ -56,8 +56,7 @@ void Date::greg2jul(unsigned& jd, int y, int m, int d)
 }
 
 
-
-void Date::jul2greg(unsigned jd,int& y,int& m,int& d)
+void Date::jul2greg(unsigned jd, int& y, int& m, int& d)
 {
   register int l,n,i,j;
   l=jd+68569;
@@ -73,21 +72,24 @@ void Date::jul2greg(unsigned jd,int& y,int& m,int& d)
 }
 
 
-Date::Date(int y, int m, int d)
+Date::Date(int y, unsigned m, unsigned d)
 {
-    greg2jul(_julian,y,m,d);
+    greg2jul(_julian, y, m, d);
 }
 
 
-void Date::set(int y, int m, int d)
+void Date::set(int y, unsigned m, unsigned d)
 {
-    greg2jul(_julian,y,m,d);
+    greg2jul(_julian, y, m, d);
 }
 
 
-void Date::get(int& y,int& m,int& d) const
+void Date::get(int& y, unsigned& m, unsigned& d) const
 {
-  jul2greg(_julian,y,m,d);
+    int mon, day;
+    jul2greg(_julian, y, mon, day);
+    m = mon;
+    d = day;
 }
 
 
@@ -97,7 +99,7 @@ bool Date::leapYear(int y)
 }
 
 
-int Date::day() const
+unsigned Date::day() const
 {
     int d,m,y;
     jul2greg(_julian, y ,m, d);
@@ -105,7 +107,7 @@ int Date::day() const
 }
 
 
-int Date::month() const
+unsigned Date::month() const
 {
     int d,m,y;
     jul2greg(_julian, y, m, d);
@@ -121,14 +123,14 @@ int Date::year() const
 }
 
 
-int Date::dayOfWeek() const
+unsigned Date::dayOfWeek() const
 {
     //return (((_julian+1)%7)+6)%7;        // Monday is day 0 of week
     return (_julian+1)%7;                  // Sunday is day 0 of week
 }
 
 
-int Date::daysInMonth() const
+unsigned Date::daysInMonth() const
 {
     int y, m, d;
     jul2greg(_julian, y, m, d);
@@ -140,7 +142,7 @@ int Date::daysInMonth() const
 }
 
 
-int Date::dayOfYear() const
+unsigned Date::dayOfYear() const
 {
     int y,m,d;
     unsigned jd;

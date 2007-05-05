@@ -47,11 +47,11 @@ DateTime ClockImpl::getCurrentTime()
 Pt::size_t ClockImpl::getTime()
 {
     DateTime currentTime = ClockImpl::getCurrentTime();
-    size_t msecs = currentTime.millisecond();
-    msecs += currentTime.second() * 1000;
-    msecs += currentTime.minute() * 60 * 1000;
-    msecs += currentTime.hour()   * 60 * 60 * 1000;
-    msecs += currentTime.day()    * 24 * 60 * 60 * 1000;
+    size_t msecs = currentTime.time().msec();
+    msecs += currentTime.time().second() * 1000;
+    msecs += currentTime.time().minute() * 60 * 1000;
+    msecs += currentTime.time().hour()   * 60 * 60 * 1000;
+    msecs += currentTime.date().day()    * 24 * 60 * 60 * 1000;
     return msecs;
 }
 
