@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Drner                             *
  *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -22,9 +22,8 @@
 #define Pt_Exception_h
 
 #include <Pt/Api.h>
+#include <Pt/SourceInfo.h>
 #include <exception>
 #include <stdexcept>
-#include <Pt/SourceInfo.h>
-
 
 #endif

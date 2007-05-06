@@ -52,7 +52,6 @@ class PT_API Time
 
             InvalidTime is thrown if one or more of the values are out of range
         */
-        // throws InvalidTime
         Time(unsigned hour, unsigned min, unsigned ses = 0, unsigned msec = 0);
 
         /** \brief Returns the hour-part of the Time.

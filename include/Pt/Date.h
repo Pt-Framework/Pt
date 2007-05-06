@@ -59,12 +59,14 @@ class PT_API Date
 
     public:
         /** \brief Default constructor.
+
+            The default constructed date is undefined.
         */
         Date()
         : _julian(0)
         {}
 
-        /** \brief copy constructor.
+        /** \brief Copy constructor.
         */
         Date(const Date& date)
         : _julian(date._julian)
@@ -77,26 +79,32 @@ class PT_API Date
         */
         Date(int y, unsigned m, unsigned d);
 
-        /** \brief Constructs a Date from julian days
+        /** \brief Constructs a Date from a julian day
         */
         Date(unsigned j)
         : _julian(j)
         {}
 
+        /** @brief Sets the Date to a julian day
+        */
         void setJulian(unsigned d)
         { _julian=d; }
 
+        /** @brief Returns the Date as a julian day
+        */
         unsigned julian() const
         { return _julian; }
 
-        /** \brief Sets the date.
+        /** \brief Sets the date to a year, month and day
 
             Sets the date to a new year, month and day.
             InvalidDate is thrown if any of the values is out of range
         */
-        void set(int y, unsigned m, unsigned d);
+        void set(int year, unsigned month, unsigned day);
 
-        void get(int& y, unsigned& m, unsigned& d) const;
+        /** @brief Gets the year, month and day
+        */
+        void get(int& year, unsigned& month, unsigned& day) const;
 
         /** \brief Returns the day-part of the date.
         */
@@ -110,13 +118,20 @@ class PT_API Date
         */
         int year() const;
 
-        //! @brief Return day of the week, starting with sunday
+        /** @brief Return day of the week, starting with sunday
+        */
         unsigned dayOfWeek() const;
 
+        /** @brief Returns the days of the month of the date
+        */
         unsigned daysInMonth() const;
 
+        /** @brief Returns the day of the year
+        */
         unsigned dayOfYear() const;
 
+        /** @brief Returns true if the date is in a leap year
+        */
         bool leapYear() const;
 
         // TODO: move to Pt:.System
@@ -125,36 +140,58 @@ class PT_API Date
         // TODO: move to Pt:.System
         //static Date universalDate();
 
+        /** @brief Assignment operator
+        */
         Date& operator=(const Date& date)
-        { _julian=date._julian;return *this; }
+        { _julian = date._julian; return *this; }
 
-        Date& operator+=(int x)
-        { _julian+=x; return *this; }
+        /** @brief Add days to the date
+        */
+        Date& operator+=(int days)
+        { _julian += days; return *this; }
 
-        Date& operator-=(int x)
-        { _julian-=x; return *this; }
+        /** @brief Substract days from the date
+        */
+        Date& operator-=(int days)
+        { _julian -= days; return *this; }
 
+        /** @brief Increments the date by one day
+        */
         Date& operator++()
         { _julian++; return *this; }
 
+        /** @brief Decrements the date by one day
+        */
         Date& operator--()
         { _julian--; return *this; }
 
+        /** @brief Returns true if the dates are equal
+        */
         bool operator==(const Date& date) const
         { return _julian==date._julian; }
 
+        /** @brief Returns true if the dates are not equal
+        */
         bool operator!=(const Date& date) const
         { return _julian!=date._julian; }
 
+        /** @brief Less-than comparison operator
+        */
         bool operator<(const Date& date) const
         { return _julian<date._julian; }
 
+        /** @brief Less-than-equal comparison operator
+        */
         bool operator<=(const Date& date) const
         { return _julian<=date._julian; }
 
+        /** @brief Greater-than comparison operator
+        */
         bool operator>(const Date& date) const
         { return _julian>date._julian; }
 
+        /** @brief Greater-than-equal comparison operator
+        */
         bool operator>=(const Date& date) const
         { return _julian>=date._julian; }
 
@@ -164,7 +201,7 @@ class PT_API Date
 
         friend inline int operator-(const Date& a, const Date& b);
 
-        /** \brief returns the date in ISO-format.
+        /** \brief Returns the date in ISO-format
 
             Converts the date in ISO-format (yyyy-mm-dd).
 
@@ -185,18 +222,24 @@ class PT_API Date
         static Date fromIsoString(const std::string& s);
 
     public:
-        /** \brief Returns true if values describe a valid date.
+        /** \brief Returns true if values describe a valid date
         */
-        static bool isValid(int y,int m,int d);
+        static bool isValid(int y, int m, int d);
 
-        static bool leapYear(int y);
+        /** @brief Returns true if the year is in a leap year
+        */
+        static bool leapYear(int year);
 
-        static void greg2jul(unsigned& jd,int y,int m,int d);
+        /** @brief Converts a gergorian date to a julian day
+        */
+        static void greg2jul(unsigned& jd, int y, int m, int d);
 
-        // Converts julian days to a gregorian date
-        static void jul2greg(unsigned jd,int& y,int& m,int& d);
+        /** @brief Converts a julian day to a gregorian date
+        */
+        static void jul2greg(unsigned jd, int& y, int& m, int& d);
 
     private:
+        //! @internal
         unsigned _julian;
 };
 

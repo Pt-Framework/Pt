@@ -159,3 +159,8 @@ include/Pt/AtomicInt.msc.h
 include/Pt/Blob.h
 include/Pt/Main.h
 include/Pt/locale.h
+include/Pt/StringStream.h
+include/Pt/StringList.h
+include/Pt/Timespan.h
+include/Pt/Timestamp.h
+include/Pt/Unicode.h
