@@ -135,6 +135,7 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
             case Pen::DashStyle:
                 lineStyle = LineOnOffDash;
                 break;
+	  default: break;
         }
 
         int joinStyle = JoinBevel;
@@ -159,6 +160,11 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
             case Pen::RoundCap:
                 capStyle = CapRound;
                 break;
+
+	  case Pen::TriangularCap:
+	  case Pen::ProjectingCap:
+	  case Pen::ButtCap:
+	  default: break;
         }
 
         Display* display = X11EventLoop::instance().display();
