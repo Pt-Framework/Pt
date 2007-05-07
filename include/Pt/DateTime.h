@@ -30,7 +30,8 @@
 
 namespace Pt {
 
-/** @brief Combined Date and Time value
+/** @brief Combined %Date and %Time value
+    @ingroup DateTime
 */
 class PT_API DateTime
 {
@@ -80,6 +81,39 @@ class PT_API DateTime
 
         static bool isValid(int year, unsigned month, unsigned day,
                             unsigned hour, unsigned minute, unsigned second, unsigned msec);
+
+        /** @brief Assignment by sum operator
+        */
+        DateTime& operator+=(const Timespan& ts)
+        {
+            Pt::int64_t totalMSecs = ts.totalMSecs();
+            int days = totalMSecs / Time::MSecsPerDay;
+
+            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
+            if( overrun + _time.totalMSecs() > Time::MSecsPerDay)
+                days += 1;
+
+            _date += days;
+
+            _time += Timespan(overrun);
+            return *this;
+        }
+
+        /** @brief Assignment by difference operator
+        */
+        DateTime& operator-=(const Timespan& ts)
+        {
+            Pt::int64_t totalMSecs = ts.totalMSecs();
+            int days = totalMSecs / Time::MSecsPerDay;
+
+            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
+            if( overrun > _time.totalMSecs() )
+                days += 1;
+            _date -= days;
+
+            _time -= Timespan( overrun );
+            return *this;
+        }
 
     private:
         Date _date;

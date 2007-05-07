@@ -20,6 +20,14 @@
 #ifndef Pt_h
 #define Pt_h
 
+/** @defgroup DateTime
+    @brief Dates and Times
+
+    The Pt core module contains some simple types to represent times and
+    dates. They can be used for comparison, sorting and in calculations
+    including other dates, times and timespans.
+*/
+
 /** @defgroup Reflection
     @brief Object reflection system
 

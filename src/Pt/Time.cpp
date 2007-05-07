@@ -118,7 +118,6 @@ Time Time::addMSecs(int ms) const
     Time t;
     if (ms < 0)
     {
-        // % not well-defined for -ve, but / is.
         int negdays = (MSECS_PER_DAY - ms) / MSECS_PER_DAY;
         t._msecs = (_msecs + ms + negdays * MSECS_PER_DAY) % MSECS_PER_DAY;
     }

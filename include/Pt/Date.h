@@ -41,7 +41,8 @@ class InvalidDate : public std::invalid_argument
   - Henry F. Fliegel and Thomas C. Van Flandern, "A Machine Algorithm for
     Processing Calendar Dates". CACM, Vol. 11, No. 10, October 1968, pp 657.
 */
-/** @brief Date expressed in year, month, and day
+/** @brief %Date expressed in year, month, and day
+    @ingroup DateTime
 */
 class PT_API Date
 {

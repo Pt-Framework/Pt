@@ -44,6 +44,7 @@
 				<ul>
 				<li><a href="classes.html">All Classes</a></li>
 				<li><a href="namespaces.html">Namespaces</a></li>
+                <li><a href="group__DateTime.html">Dates and Times</a></li>
 				<li><a href="group__Unicode.html">Unicode</a></li>
 				<li><a href="group__Reflection.html">Reflection</a></li>
 				<li><a href="group__CTTI.html">Compile Time Type Information</a></li>
@@ -57,6 +58,7 @@
 				<ul>
 				<li><a href="sigslot.html">Signals and Delegates</a></li>
 				<li><a href="docs.html">Reflection</a></li>
+                <li><a href="docs.html">Dates and Times</a></li>
 				<li><a href="docs.html">Compile Time Type Information</a></li>
 				<li><a href="docs.html">Components</a></li>
 				<li><a href="plugins.html">Plugins</a></li>

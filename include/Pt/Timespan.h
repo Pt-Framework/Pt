@@ -33,16 +33,16 @@
 namespace Pt {
 
 /** @brief  Represents time spans up to microsecond resolution.
+    @ingroup DateTime
 */
 class PT_API Timespan
 {
     public:
-        typedef Timestamp::TimeDiff TimeDiff;
         //! @brief Creates a zero Timespan.
         Timespan();
 
         //! @brief Creates a Timespan.
-        Timespan(TimeDiff microseconds);
+        Timespan(Pt::int64_t microseconds);
 
         /** @brief Creates a Timespan.
             Useful for creating a Timespan from a struct timeval.
@@ -59,46 +59,61 @@ class PT_API Timespan
         ~Timespan();
 
         //! @brief Assignment operator.
-        Timespan& operator = (const Timespan& timespan);
+        Timespan& operator=(const Timespan& timespan);
 
         //! @brief Assignment operator.
-        Timespan& operator = (TimeDiff microseconds);
+        Timespan& operator=(Pt::int64_t microseconds);
 
         //! @brief Assigns a new span.
-        Timespan& assign(int days, int hours, int minutes, int seconds, int microseconds);
+        Timespan& set(int days, int hours, int minutes, int seconds, int microseconds);
 
         /** @brief Assigns a new span.
             Useful for assigning from a struct timeval.
         */
-        Timespan& assign(long seconds, long microseconds);
+        Timespan& set(long seconds, long microseconds);
 
         //! @brief Swaps the Timespan with another one.
         void swap(Timespan& timespan);
 
+        bool operator==(const Timespan& ts) const;
 
-        bool operator == (const Timespan& ts) const;
-        bool operator != (const Timespan& ts) const;
-        bool operator >  (const Timespan& ts) const;
-        bool operator >= (const Timespan& ts) const;
-        bool operator <  (const Timespan& ts) const;
-        bool operator <= (const Timespan& ts) const;
+        bool operator!=(const Timespan& ts) const;
 
-        bool operator == (TimeDiff microseconds) const;
-        bool operator != (TimeDiff microseconds) const;
-        bool operator >  (TimeDiff microseconds) const;
-        bool operator >= (TimeDiff microseconds) const;
-        bool operator <  (TimeDiff microseconds) const;
-        bool operator <= (TimeDiff microseconds) const;
+        bool operator>(const Timespan& ts) const;
 
-        Timespan operator + (const Timespan& d) const;
-        Timespan operator - (const Timespan& d) const;
-        Timespan& operator += (const Timespan& d);
-        Timespan& operator -= (const Timespan& d);
+        bool operator>=(const Timespan& ts) const;
 
-        Timespan operator + (TimeDiff microseconds) const;
-        Timespan operator - (TimeDiff microseconds) const;
-        Timespan& operator += (TimeDiff microseconds);
-        Timespan& operator -= (TimeDiff microseconds);
+        bool operator<(const Timespan& ts) const;
+
+        bool operator<=(const Timespan& ts) const;
+
+        bool operator==(Pt::int64_t microseconds) const;
+
+        bool operator!=(Pt::int64_t microseconds) const;
+
+        bool operator>(Pt::int64_t microseconds) const;
+
+        bool operator>=(Pt::int64_t microseconds) const;
+
+        bool operator<(Pt::int64_t microseconds) const;
+
+        bool operator<=(Pt::int64_t microseconds) const;
+
+        Timespan operator+(const Timespan& d) const;
+
+        Timespan operator-(const Timespan& d) const;
+
+        Timespan& operator+=(const Timespan& d);
+
+        Timespan& operator-=(const Timespan& d);
+
+        Timespan operator+(Pt::int64_t microseconds) const;
+
+        Timespan operator-(Pt::int64_t microseconds) const;
+
+        Timespan& operator+=(Pt::int64_t microseconds);
+
+        Timespan& operator-=(Pt::int64_t microseconds);
 
         //! @brief Returns the number of days.
         int days() const;
@@ -122,10 +137,10 @@ class PT_API Timespan
         int totalSeconds() const;
 
         //! @brief Returns the number of milliseconds (0 to 999).
-        int milliseconds() const;
+        int msecs() const;
 
         //! @brief Returns the total number of milliseconds.
-        TimeDiff totalMilliseconds() const;
+        Pt::int64_t totalMSecs() const;
 
         /** @brief Returns the fractions of a millisecond in microseconds (0 to 999).
         */ 
@@ -136,31 +151,28 @@ class PT_API Timespan
         int useconds() const;
  
         //! @brief Returns the total number of microseconds.
-        TimeDiff totalMicroseconds() const;
+        Pt::int64_t totalMicroseconds() const;
 
         //! @brief The number of microseconds in a millisecond.
-        static const TimeDiff Milliseconds;
+        static const Pt::int64_t Milliseconds;
 
         //! @brief The number of microseconds in a second.
-        static const TimeDiff Seconds;
+        static const Pt::int64_t Seconds;
 
         //! @brief The number of microseconds in a minute.
-        static const TimeDiff Minutes;
+        static const Pt::int64_t Minutes;
 
         //! @brief The number of microseconds in a hour.
-        static const TimeDiff Hours;
+        static const Pt::int64_t Hours;
 
         //! @brief The number of microseconds in a day.
-        static const TimeDiff Days;
+        static const Pt::int64_t Days;
 
     private:
-        TimeDiff _span;
+        Pt::int64_t _span;
 };
 
 
-//
-// inlines
-//
 inline int Timespan::days() const
 {
 	return int(_span/Days);
@@ -203,13 +215,13 @@ inline int Timespan::totalSeconds() const
 }
 
 	
-inline int Timespan::milliseconds() const
+inline int Timespan::msecs() const
 {
 	return int((_span/Milliseconds) % 1000);
 }
 
 	
-inline Timespan::TimeDiff Timespan::totalMilliseconds() const
+inline Pt::int64_t Timespan::totalMSecs() const
 {
 	return _span/Milliseconds;
 }
@@ -227,7 +239,7 @@ inline int Timespan::useconds() const
 }
 
 	
-inline Timespan::TimeDiff Timespan::totalMicroseconds() const
+inline Pt::int64_t Timespan::totalMicroseconds() const
 {
 	return _span;
 }
@@ -269,37 +281,37 @@ inline bool Timespan::operator <= (const Timespan& ts) const
 }
 
 
-inline bool Timespan::operator == (TimeDiff microseconds) const
+inline bool Timespan::operator == (Pt::int64_t microseconds) const
 {
 	return _span == microseconds;
 }
 
 
-inline bool Timespan::operator != (TimeDiff microseconds) const
+inline bool Timespan::operator != (Pt::int64_t microseconds) const
 {
 	return _span != microseconds;
 }
 
 
-inline bool Timespan::operator >  (TimeDiff microseconds) const
+inline bool Timespan::operator >  (Pt::int64_t microseconds) const
 {
 	return _span > microseconds;
 }
 
 
-inline bool Timespan::operator >= (TimeDiff microseconds) const
+inline bool Timespan::operator >= (Pt::int64_t microseconds) const
 {
 	return _span >= microseconds;
 }
 
 
-inline bool Timespan::operator <  (TimeDiff microseconds) const
+inline bool Timespan::operator <  (Pt::int64_t microseconds) const
 {
 	return _span < microseconds;
 }
 
 
-inline bool Timespan::operator <= (TimeDiff microseconds) const
+inline bool Timespan::operator <= (Pt::int64_t microseconds) const
 {
 	return _span <= microseconds;
 }

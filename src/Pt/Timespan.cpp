@@ -29,11 +29,11 @@
 
 namespace Pt {
 
-const Timespan::TimeDiff Timespan::Milliseconds = 1000;
-const Timespan::TimeDiff Timespan::Seconds      = 1000*Timespan::Milliseconds;
-const Timespan::TimeDiff Timespan::Minutes      =   60*Timespan::Seconds;
-const Timespan::TimeDiff Timespan::Hours        =   60*Timespan::Minutes;
-const Timespan::TimeDiff Timespan::Days         =   24*Timespan::Hours;
+const Pt::int64_t Timespan::Milliseconds = 1000;
+const Pt::int64_t Timespan::Seconds      = 1000*Timespan::Milliseconds;
+const Pt::int64_t Timespan::Minutes      =   60*Timespan::Seconds;
+const Pt::int64_t Timespan::Hours        =   60*Timespan::Minutes;
+const Pt::int64_t Timespan::Days         =   24*Timespan::Hours;
 
 
 Timespan::Timespan():
@@ -42,24 +42,24 @@ Timespan::Timespan():
 }
 
 	
-Timespan::Timespan(TimeDiff microseconds):
-	_span(microseconds)
+Timespan::Timespan(Pt::int64_t microseconds)
+: _span(microseconds)
 {
 }
 
 
-Timespan::Timespan(long seconds, long microseconds):
-	_span(TimeDiff(seconds)*Seconds + microseconds)
+Timespan::Timespan(long seconds, long microseconds)
+: _span(Pt::int64_t(seconds)*Seconds + microseconds)
 {
 }
 
 	
 Timespan::Timespan(int days, int hours, int minutes, int seconds, int microseconds)
-: _span( TimeDiff(microseconds) +
-         TimeDiff(seconds)*Seconds +
-         TimeDiff(minutes)*Minutes +
-         TimeDiff(hours)*Hours +
-         TimeDiff(days)*Days )
+: _span( Pt::int64_t(microseconds) +
+         Pt::int64_t(seconds)*Seconds +
+         Pt::int64_t(minutes)*Minutes +
+         Pt::int64_t(hours)*Hours +
+         Pt::int64_t(days)*Days )
 {
 }
 
@@ -82,27 +82,27 @@ Timespan& Timespan::operator = (const Timespan& timespan)
 }
 
 
-Timespan& Timespan::operator = (TimeDiff microseconds)
+Timespan& Timespan::operator = (Pt::int64_t microseconds)
 {
 	_span = microseconds;
 	return *this;
 }
 
 
-Timespan& Timespan::assign(int days, int hours, int minutes, int seconds, int microseconds)
+Timespan& Timespan::set(int days, int hours, int minutes, int seconds, int microseconds)
 {
-	_span = TimeDiff(microseconds) +
-            TimeDiff(seconds)*Seconds +
-            TimeDiff(minutes)*Minutes +
-            TimeDiff(hours)*Hours +
-            TimeDiff(days)*Days;
+	_span = Pt::int64_t(microseconds) +
+            Pt::int64_t(seconds)*Seconds +
+            Pt::int64_t(minutes)*Minutes +
+            Pt::int64_t(hours)*Hours +
+            Pt::int64_t(days)*Days;
 	return *this;
 }
 
 
-Timespan& Timespan::assign(long seconds, long microseconds)
+Timespan& Timespan::set(long seconds, long microseconds)
 {
-	_span = TimeDiff(seconds)*Seconds + TimeDiff(microseconds);
+	_span = Pt::int64_t(seconds)*Seconds + Pt::int64_t(microseconds);
 	return *this;
 }
 
@@ -139,26 +139,26 @@ Timespan& Timespan::operator -= (const Timespan& d)
 }
 
 
-Timespan Timespan::operator + (TimeDiff microseconds) const
+Timespan Timespan::operator + (Pt::int64_t microseconds) const
 {
 	return Timespan(_span + microseconds);
 }
 
 
-Timespan Timespan::operator - (TimeDiff microseconds) const
+Timespan Timespan::operator - (Pt::int64_t microseconds) const
 {
 	return Timespan(_span - microseconds);
 }
 
 
-Timespan& Timespan::operator += (TimeDiff microseconds)
+Timespan& Timespan::operator += (Pt::int64_t microseconds)
 {
 	_span += microseconds;
 	return *this;
 }
 
 
-Timespan& Timespan::operator -= (TimeDiff microseconds)
+Timespan& Timespan::operator -= (Pt::int64_t microseconds)
 {
 	_span -= microseconds;
 	return *this;

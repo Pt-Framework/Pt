@@ -33,7 +33,8 @@
 
 namespace Pt {
 
-/** @brief Monotonic time value
+/** @internal
+    @brief Monotonic time value DEPRECATED !!!
     A Timestamp stores a monotonic time value with (theoretical)
     microseconds resolution. Timestamps can be compared with each other
     and simple arithmetics are supported.Timestamps are UTC
