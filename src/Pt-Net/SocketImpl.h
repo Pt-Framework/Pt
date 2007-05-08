@@ -36,6 +36,10 @@
     #include <sys/socket.h>
     #include <sys/poll.h>
     #include <cerrno>
+    #ifdef __QNX__
+        #include <unistd.h>
+        #include <sys/select.h>
+    #endif
     typedef int SOCKET;
     #define PT_INVALID_SOCKET -1
     #define PT_EINTR EINTR
@@ -56,7 +60,7 @@ namespace Net {
         public:
             SocketImpl()
             : _sd(PT_INVALID_SOCKET)
-            { 
+            {
                 #ifdef WIN32
                 {   // TODO: concurrency
                     WSADATA wsadata;
@@ -85,7 +89,7 @@ namespace Net {
             }
 
             void create(int domain, int type, int protocol)
-            {  
+            {
                 _sd = ::socket(domain, type, protocol);
                 if (_sd == PT_INVALID_SOCKET)
                     throw std::runtime_error("cannot create socket" + PT_SOURCEINFO);

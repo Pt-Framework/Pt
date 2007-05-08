@@ -47,18 +47,39 @@ class DrawRectDemo : public Pt::Gui::Widget
 
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
-            Pt::Math::Rect rect1( Pt::Math::Point(10, 10), Pt::Math::Size(40, 14) );
+            Pt::Math::Rect rect1( Pt::Math::Point(10, 10), Pt::Math::Size(40, 15) );
             _imagePainter.setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             _imagePainter.setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
-            _imagePainter.fillRect( rect1 ) ;
+			_imagePainter.fillRect( rect1 ) ;
+           // _imagePainter.drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
+           // _imagePainter.drawLine( Pt::Math::Point(10 + 40, 10 + 2), Pt::Math::Point(10 + 40, 10 + 14));
+            _imagePainter.drawLine( Pt::Math::Point(10 + 40, 10), Pt::Math::Point(10 + 40, 10 + 15));
+            _imagePainter.setPen(Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0x0000, 0x0000, 0xffff ) ) );
+            _imagePainter.drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
+
+
             //_imagePainter.drawRect( rect1 ) ;
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 
-            Pt::Math::Rect rect2( Pt::Math::Point(55, 10), Pt::Math::Size(40, 14) );
+            Pt::Math::Rect rect2( Pt::Math::Point(55, 10), Pt::Math::Size(40, 15) );
             this->painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
             this->painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
             this->painter().fillRect( rect2 ) ;
-            //this->painter().drawRect( rect2 ) ;
+            this->painter().drawLine( Pt::Math::Point(10 + 40, 10), Pt::Math::Point(10 + 40, 10 + 15));
+			this->painter().setPen(Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0x0000, 0x0000, 0xffff ) ) );
+			this->painter().drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(10 + 40, 10));
+
+            //this->painter().drawLine( Pt::Math::Point(55 , 10), Pt::Math::Point(55 + 40, 10));
+			//this->painter().drawRect( rect2 ) ;
+
+            Pt::Math::Rect rect3( Pt::Math::Point(10, 30), Pt::Math::Size(40, 14) );
+			this->painter().setBrush( Pt::Gfx::Brush( Pt::Gfx::ARgbColor( 0, 0xffff, 0 ) ) );
+			this->painter().setPen( Pt::Gfx::Pen( 1, Pt::Gfx::ARgbColor( 0xffff, 0xffff, 0xffff ) ) );
+			this->painter().fillRect( rect3 ) ;
+			//this->painter().drawLine( Pt::Math::Point(10, 30), Pt::Math::Point(10 + 40, 30));
+			//this->painter().drawRect( rect3 ) ;
+
+
         }
 
         virtual void _resizeEvent(const Pt::Gui::ResizeEvent& event)

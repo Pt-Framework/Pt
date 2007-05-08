@@ -38,12 +38,12 @@ namespace Net
         public:
             ~TcpServerSocketImpl()
             {}
-            
+
             void bind(const std::string& ipaddr, unsigned short int port)
             {
                 // give some useful default values to use for getaddrinfo()
                 struct addrinfo hints;
-                memset(&hints, 0, sizeof(hints));
+                std::memset(&hints, 0, sizeof(hints));
                 hints.ai_socktype = SOCK_STREAM;
 
                 AddrInfo ai(ipaddr, port, hints);
@@ -69,15 +69,15 @@ namespace Net
                 }
 
                 throw std::runtime_error("bind" + PT_SOURCEINFO); //TODO: Exception
-            }    
-        
+            }
+
             void listen(unsigned backlog)
             {
                 int ret = ::listen(this->handle(), backlog);
                 if(ret == -1)
                     throw std::runtime_error("Could not listen on socket" + PT_SOURCEINFO); //TODO: Exception
             }
-            
+
             TcpSocketImpl* accept()
             {
                 struct sockaddr_storage peeraddr;

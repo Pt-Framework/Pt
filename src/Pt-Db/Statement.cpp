@@ -88,7 +88,7 @@ namespace Db {
 
         return *this;
     }
-    
+
 } // namespace Db
 
 } // namespace Pt

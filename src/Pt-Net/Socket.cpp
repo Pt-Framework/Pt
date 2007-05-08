@@ -22,7 +22,11 @@
 
 #ifdef __GNUC__
 #include <netinet/in.h>
+    #ifdef __QNX__
+        #include <arpa/inet.h>
+    #endif
 #endif
+
 
 namespace Pt {
 

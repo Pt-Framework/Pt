@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2007 Dr. Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -38,8 +38,8 @@ FillPolygon::FillPolygon()
 void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Math::Point* points_, size_t pointCount )
 {
     std::vector<Math::Point> points( pointCount );
-    memcpy( &points[0], points_ , sizeof( Math::Point) * pointCount );
-    
+    std::memcpy( &points[0], points_ , sizeof( Math::Point) * pointCount );
+
     // find unclipped origin coordinates
     //
     Math::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );

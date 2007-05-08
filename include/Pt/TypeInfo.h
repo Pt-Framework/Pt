@@ -126,7 +126,7 @@ namespace Pt {
     /** @brief CTTI for for fixed-size array types
         @ingroup CTTI
     */
-    template <typename T, size_t N>
+    template <typename T, std::size_t N>
     struct TypeInfo<T[N]> : public TypeInfoBase<T> {
         static const char* typeName()
         { return _typeName.c_str(); }
@@ -134,7 +134,7 @@ namespace Pt {
         static const std::string _typeName;
     };
 
-    template <typename T, size_t N>
+    template <typename T, std::size_t N>
     const std::string TypeInfo<T[N]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[N]";
 
 
@@ -229,7 +229,7 @@ namespace Pt {
     };
 
 
-    template <typename T, size_t N>
+    template <typename T, std::size_t N>
     struct isArray<T[N]> : public isTrue {
     };
 
@@ -266,7 +266,7 @@ namespace Pt {
     };
 
 
-    template <typename T, size_t N>
+    template <typename T, std::size_t N>
     struct isPointer<T[N]> : public isTrue {
     };
 

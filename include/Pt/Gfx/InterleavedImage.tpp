@@ -64,7 +64,7 @@ namespace Pt {
             _width  = src._width;
             _height = src._height;
             };
-            memcpy(&_buff[0], &src._buff[0], _width * _height * sizeof(ColorT));
+            std::memcpy(&_buff[0], &src._buff[0], _width * _height * sizeof(ColorT));
 
             return *this;
         }

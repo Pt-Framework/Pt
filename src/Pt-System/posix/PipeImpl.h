@@ -25,6 +25,10 @@
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
 
+#ifdef __QNX__
+#include <unistd.h>
+#endif
+
 namespace Pt {
 
 namespace System {

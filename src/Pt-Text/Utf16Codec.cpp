@@ -32,7 +32,7 @@ Utf16Codec::~Utf16Codec()
 
 
 //! decodes UTF-16 to UTF-32
-Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
+Utf16Codec::result Utf16Codec::do_in(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, const char*& fromNext,
                                      Pt::Char* toBegin, Pt::Char* toEnd, Pt::Char*& toNext) const
 {
     result retstat = ok;
@@ -93,7 +93,7 @@ Utf16Codec::result Utf16Codec::do_in(mbstate_t& s, const char* fromBegin, const 
 }
 
 //! encodes UTF-32 to UTF-16
-Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
+Utf16Codec::result Utf16Codec::do_out(std::mbstate_t& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
                                       char* toBegin, char* toEnd, char*& toNext) const
 {
     result retstat = ok;
@@ -155,7 +155,7 @@ Utf16Codec::result Utf16Codec::do_out(mbstate_t& s, const Pt::Char* fromBegin, c
 }
 
 
-int Utf16Codec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int Utf16Codec::do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
     return fromEnd-fromBegin;
 }

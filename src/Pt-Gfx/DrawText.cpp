@@ -81,13 +81,13 @@ void DrawText::setFont( const Font& font )
         _fontAngle += 3600;
 
     const double angle     = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
-    const double cosinus = cos( angle ) * 0x10000L;
-    const double sinus   = sin( angle ) * 0x10000L;
+    const double cosinus = std::cos( angle ) * 0x10000L;
+    const double sinus   = std::sin( angle ) * 0x10000L;
 
-    _matrix.xx = (FT_Fixed) ceil( cosinus );
-    _matrix.xy = (FT_Fixed) ceil( -sinus );
-    _matrix.yx = (FT_Fixed) ceil( sinus );
-    _matrix.yy = (FT_Fixed) ceil( cosinus );
+    _matrix.xx = (FT_Fixed) std::ceil( cosinus );
+    _matrix.xy = (FT_Fixed) std::ceil( -sinus );
+    _matrix.yx = (FT_Fixed) std::ceil( sinus );
+    _matrix.yy = (FT_Fixed) std::ceil( cosinus );
 
     //Search the unicode charmap.
     FT_Face    face;
@@ -122,7 +122,7 @@ FontMetrics DrawText::fontMetrics( const String& text )
     FT_UInt                glyph_index;
 
     //
-    // Lookup global data of the face be getting a Size struct from the 
+    // Lookup global data of the face be getting a Size struct from the
     // manager.
     //
     FT_Size size;
@@ -169,7 +169,7 @@ FontMetrics DrawText::fontMetrics( const String& text )
         previous = glyph_index;
     }
 
-    return FontMetrics(size->metrics.ascender >> 6, (-size->metrics.descender) >> 6, 
+    return FontMetrics(size->metrics.ascender >> 6, (-size->metrics.descender) >> 6,
                        tbbox.xMax - tbbox.xMin, size->metrics.height >> 6 );
 }
 
@@ -250,7 +250,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
             pitch        = glyphBitmap->bitmap.pitch;
             height        = glyphBitmap->bitmap.rows;
             width        = glyphBitmap->bitmap.width;
-            buffer        = glyphBitmap->bitmap.buffer;            
+            buffer        = glyphBitmap->bitmap.buffer;
         }
 
         if( false == Pt::Unicode::isSpace(*it) )
@@ -284,7 +284,7 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Math::Point
         glyphPos.x   += incX;
         glyphPos.y   -= incY;
         previous     = glyph_index;
-        
+
         if( glyphCopy != 0 )
         {
             FT_Done_Glyph( glyphCopy );

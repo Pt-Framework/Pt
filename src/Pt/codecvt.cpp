@@ -26,7 +26,7 @@ namespace std {
 std::locale::id codecvt<Pt::Char, char, mbstate_t>::id;
 
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || __QNX__
 
 codecvt<Pt::Char, char, mbstate_t>::codecvt(size_t ref)
 : codecvt_base(ref)

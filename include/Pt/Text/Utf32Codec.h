@@ -44,15 +44,15 @@ namespace Text {
             //! Empty destructor
             virtual ~Utf32Codec();
 
-            virtual Utf32Codec::result do_in(mbstate_t& s, const char* fromBegin,
+            virtual Utf32Codec::result do_in(std::mbstate_t& s, const char* fromBegin,
                                              const char* fromEnd, const char*& fromNext,
                                              Char* toBegin, Char* toEnd, Char*& toNext) const;
 
-            virtual Utf32Codec::result do_out(mbstate_t& s, const Char* fromBegin, const Char* fromEnd, const Char*& fromNext,
+            virtual Utf32Codec::result do_out(std::mbstate_t& s, const Char* fromBegin, const Char* fromEnd, const Char*& fromNext,
                                              char* toBegin, char* toEnd, char*& toNext) const;
 
             // inheritdoc
-            virtual int do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+            virtual int do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const;
 
             // inheritdoc
             virtual int do_max_length() const throw();

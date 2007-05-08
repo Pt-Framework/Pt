@@ -178,7 +178,9 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
         case SerialDevice::BaudRate38400: rate = B38400; break;
         case SerialDevice::BaudRate57600: rate = B57600; break;
         case SerialDevice::BaudRate115200: rate = B115200; break;
-        case SerialDevice::BaudRate230400: rate = B230400; break;
+        #ifdef B230400
+            case SerialDevice::BaudRate230400: rate = B230400; break;
+        #endif
     }
 
     ::cfsetispeed( &ios, rate );
@@ -187,7 +189,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
     if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
     {
         throw IOError("Could not set baud rate", PT_SOURCEINFO);
-    } 
+    }
 }
 
 
@@ -220,7 +222,9 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
         case B38400:  return SerialDevice::BaudRate38400;
         case B57600:  return SerialDevice::BaudRate57600;
         case B115200: return SerialDevice::BaudRate115200;
-        case B230400: return SerialDevice::BaudRate230400;
+        #ifdef B230400
+            case B230400: return SerialDevice::BaudRate230400;
+        #endif
     }
 
     return SerialDevice::BaudRate0;
@@ -384,7 +388,12 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     if( ::tcgetattr(_fd, &ios) == -1 )
         throw IOError("Could not set flow control", PT_SOURCEINFO);
 
-    ios.c_cflag &= ~CRTSCTS;
+    #ifdef linux
+        ios.c_cflag &= ~CRTSCTS;
+    #else
+        ios.c_cflag &= ~IHFLOW; // INPUT hardware control
+        ios.c_cflag &= ~OHFLOW; // OUTPUT hardware control
+    #endif
     ios.c_iflag &= ~(IXON | IXANY | IXOFF);
 
     switch(flowControl)
@@ -398,7 +407,12 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         case SerialDevice::FlowControlBoth:
             ios.c_iflag |= (IXON | IXANY | IXOFF);
         case SerialDevice::FlowControlHard:
-            ios.c_cflag |= CRTSCTS;
+            #ifdef linux
+               ios.c_cflag |= CRTSCTS;
+            #else
+               ios.c_cflag |= IHFLOW; // INPUT hardware control
+               ios.c_cflag |= OHFLOW; // OUTPUT hardware control
+            #endif
             ios.c_cc[VSTART] = _POSIX_VDISABLE;
             ios.c_cc[VSTOP] = _POSIX_VDISABLE;
             break;
@@ -414,11 +428,11 @@ void SerialDeviceImpl::setTimeout( size_t msec )
 
     if( ::tcgetattr(_fd, &ios) == -1 )
         throw IOError("Could not set time out", PT_SOURCEINFO);
-        
+
     ios.c_cc[VTIME]  = ( msec / 100 ) ;
-    
+
     tcsetattr(_fd, TCSANOW, &ios);
-        
+
 }
 
 size_t SerialDeviceImpl::timeout() const

@@ -38,6 +38,7 @@
 #include "Pt/Db/Value.h"
 
 #include <sstream>
+#include <limits>
 
 
 namespace Pt {

@@ -302,7 +302,7 @@ inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Color<Gfx::ARgb>& v
 
 inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::input(std::istream& is, Gfx::Color<Gfx::ARgb>& value)
 {
-    while ( isspace( is.peek() ) )
+    while ( std::isspace( is.peek() ) )
     {
         is.get();
     }

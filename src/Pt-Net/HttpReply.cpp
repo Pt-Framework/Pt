@@ -339,7 +339,7 @@ void HttpReply::receive()
     }
 
     std::string value = getHeader("Content-Length", "0");
-    const size_t contentLength = atol(value.data());
+    const size_t contentLength = std::atol(value.data());
     size_t totalBufferSize = 0;
 
     // read binary data.

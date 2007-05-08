@@ -34,7 +34,7 @@ Utf32Codec::~Utf32Codec()
 }
 
 
-Utf32Codec::result Utf32Codec::do_in(mbstate_t& s, const char* fromBegin,
+Utf32Codec::result Utf32Codec::do_in(std::mbstate_t& s, const char* fromBegin,
                                     const char* fromEnd, const char*& fromNext,
                                     Char* toBegin, Char* toEnd, Char*& toNext) const
 {
@@ -42,7 +42,7 @@ Utf32Codec::result Utf32Codec::do_in(mbstate_t& s, const char* fromBegin,
 }
 
 
-Utf32Codec::result Utf32Codec::do_out(mbstate_t& s, const Char* fromBegin,
+Utf32Codec::result Utf32Codec::do_out(std::mbstate_t& s, const Char* fromBegin,
                                      const Char* fromEnd, const Char*& fromNext,
                                      char* toBegin, char* toEnd, char*& toNext) const
 {
@@ -50,7 +50,7 @@ Utf32Codec::result Utf32Codec::do_out(mbstate_t& s, const Char* fromBegin,
 }
 
 
-int Utf32Codec::do_length(mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int Utf32Codec::do_length(std::mbstate_t& s, const char* fromBegin, const char* fromEnd, size_t max) const
 {
     return (fromEnd - fromBegin)/4;
 }

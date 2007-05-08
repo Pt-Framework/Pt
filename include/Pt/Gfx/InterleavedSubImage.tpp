@@ -49,7 +49,7 @@ namespace Pt {
         bool InterleavedSubImage<ImageT_>::operator==(const InterleavedSubImage& src)
         {
             for(size_t y = 0; y < _area.height(); y++) {
-                if( memcmp(scanline(y), src.scanline(y),
+                if( std::memcmp(scanline(y), src.scanline(y),
                              sizeof(InterleavedSubImage) * _area.width()) )
                     return false;
             }

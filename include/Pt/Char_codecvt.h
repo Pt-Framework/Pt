@@ -29,7 +29,7 @@
 
 namespace std {
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || __QNX__
 
     class PT_API codecvt_base;
 
@@ -95,14 +95,14 @@ namespace std {
                                                const char*& from_next, Pt::Char* to, Pt::Char* to_end,
                                                Pt::Char*& to_next) const = 0;
 
-            virtual int do_encoding() const = 0;
+            virtual int do_encoding() const throw() = 0;
 
-            virtual bool do_always_noconv() const = 0;
+            virtual bool do_always_noconv() const throw() = 0;
 
             virtual int do_length(mbstate_t&, const char* from,
                                   const char* end, size_t max) const = 0;
 
-            virtual int do_max_length() const = 0;
+            virtual int do_max_length() const throw() = 0;
     };
 
 }

@@ -113,7 +113,7 @@ namespace Text {
             std::basic_streambuf<ExternT>* _streambuf;
 
             //! Contains the state of conversion.
-            mbstate_t _state;
+            std::mbstate_t _state;
 
             //! The codec which is used to convert character data from or to the external device.
             CodecT* _codec;

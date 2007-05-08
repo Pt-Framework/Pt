@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         if(argv[i][0] != '-')
             break;
 
-        if( !strncmp(argv[i], "--help", 6) )
+        if( !std::strncmp(argv[i], "--help", 6) )
         {
             std::cerr << "Available Tests:\n";
             std::list<Pt::Unit::Test*>::const_iterator it;
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
             }
             return 0;
         }
-        else if( !strncmp(argv[i], "-t", 2) )
+        else if( !std::strncmp(argv[i], "-t", 2) )
         {
             testName = argv[++i];
         }

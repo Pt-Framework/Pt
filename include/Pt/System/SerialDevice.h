@@ -83,8 +83,10 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             BaudRate19200   = 19200,
             BaudRate38400   = 38400,
             BaudRate57600   = 57600,
-            BaudRate115200  = 115200,
-            BaudRate230400  = 230400
+            BaudRate115200  = 115200
+            #ifdef B230400
+            , BaudRate230400  = 230400
+            #endif
         };
 
         enum Parity

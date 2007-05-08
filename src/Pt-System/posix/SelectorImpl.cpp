@@ -27,6 +27,9 @@
 #include <cerrno>
 #include <iostream>
 
+#ifdef __QNX__
+#include <unistd.h>
+#endif
 
 namespace Pt {
 
