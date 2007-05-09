@@ -24,6 +24,7 @@
 
 #include "Pt/System/Api.h"
 #include "Pt/System/IODevice.h"
+#include "IODeviceImpl.h"
 #include <vector>
 #include <map>
 #include <windows.h>
@@ -32,6 +33,29 @@
 namespace Pt {
 
 namespace System {
+
+class WakeResult : public IOResultImpl
+{
+    public:
+
+        WakeResult()
+        {
+            HANDLE wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+            setHandle(wakeHandle);
+        }
+
+        virtual ~WakeResult()
+        {
+            CloseHandle( handle() );
+        }
+
+        virtual void onComplete()
+        {
+        }
+
+        void wake()
+        { SetEvent( handle() ); }    
+};
 
 class SelectorImpl
 {
@@ -42,43 +66,18 @@ class SelectorImpl
 
         void addDevice( IODevice& device, int waitMode );
 
-		void waitInput( IOResult& result );
+		void complete( IOResult& result );
 
-        void removeDevice( IODevice& device );
+        void cancel( IOResult& result );
 
         bool wait( unsigned int msecs );
 
         void wake();
-
-    private:
-        void collectWaitHandles(std::vector<HANDLE>& waitHandles);
-
-        bool areNonWaitableDevicesAvailable();
-
-        void sendEvents(const HANDLE activeHandle);
-
-    private:
-        enum{ InternalWake = 0 };
-
-        struct Item
-        {
-			Item()
-			: device(0), waitMode(0)
-			{}
-
-			Item(IODevice& dev, int waitMode_)
-			: device(&dev), waitMode(waitMode_)
-			{}
-
-			IODevice* device;
-			int waitMode;
-        };
+    
+    private:        
 
 		std::vector<IOResult*> _readers;
-
-        std::vector<Item>	   _items;
-        std::map<HANDLE, Item> _itemMap;
-        HANDLE                 _wakeHandle;
+        WakeResult             _wakeResult;        
 };
 
 }//namespace System

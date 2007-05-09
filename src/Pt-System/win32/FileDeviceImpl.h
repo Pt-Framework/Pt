@@ -68,13 +68,8 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void sync() const;
 
-
         HANDLE deviceHandle() const
-        { return _handle; }
-
-        void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
-
-        WaitResult waitResult( HANDLE handle );
+        { return _handle; }        
 
     private:
         enum { Reading, Writing, Idle } _state;

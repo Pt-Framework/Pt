@@ -30,75 +30,41 @@ namespace Pt {
 namespace System {
 
 SelectorImpl::SelectorImpl()
-{
-    _wakeHandle = CreateEvent( NULL, FALSE, FALSE, NULL );
+{    
+    _readers.push_back( &_wakeResult );
 }
 
 SelectorImpl::~SelectorImpl()
-{
-    CloseHandle( _wakeHandle );
+{    
 }
 
-
-void SelectorImpl::addDevice( IODevice& device, int waitMode )
-{
-    _items.push_back( Item(device, waitMode) );
-}
-
-
-void SelectorImpl::waitInput( IOResult& result )
-{
+void SelectorImpl::complete( IOResult& result )
+{   
+    //TODO: check if result exists.
 	_readers.push_back(&result);
 }
 
-
-void SelectorImpl::removeDevice( IODevice& device )
+void SelectorImpl::cancel( IOResult& result )
 {
-	std::vector<Item>::iterator it = _items.begin();
-	while(it != _items.end())
+    std::vector<IOResult*>::iterator it = _readers.begin();
+	for (;it != _readers.end(); ++it)
 	{
-		IODevice* dev = it->device;
-
-		if(dev == &device)
-			it = _items.erase(it);
-		else
-			++it;
+        if (*it != &result) 
+            continue;
+        
+		it = _readers.erase(it);    
+        break;        
 	}
 }
 
-void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
-{
-    std::vector<HANDLE>           currentHandles;
-    std::vector<HANDLE>::iterator currentHandlesIt;
+bool SelectorImpl::wait( unsigned int msecs )
+{    
+    std::vector<HANDLE> waitHandles;
 
-    _itemMap.clear();
-
-    waitHandles.push_back(_wakeHandle);
-
-    std::vector<Item>::iterator   it;
-    for (it = _items.begin(); it != _items.end(); ++it)
-    {
-		int waitMode = it->waitMode;
-		IODevice& device = *it->device;
-
-        if ( !device.waitable() )
-            continue;
-
-        currentHandles.clear();
-
-        device.impl()->eventHandles( currentHandles, waitMode );
-
-		/// use beginRead instead
-        device.impl()->beginWait( waitMode );
-
-        for (currentHandlesIt = currentHandles.begin(); currentHandlesIt != currentHandles.end(); ++currentHandlesIt)
-        {
-            _itemMap[*currentHandlesIt] = *it;
-            waitHandles.push_back(*currentHandlesIt);
-        }
+    if( msecs == Selector::WaitInfinite ) {
+        msecs = INFINITE;
     }
 
-	// IOResult transaction handles
     std::vector<IOResult*>::iterator iter;
     for( iter = _readers.begin(); iter != _readers.end(); ++iter )
     {
@@ -106,113 +72,8 @@ void SelectorImpl::collectWaitHandles(std::vector<HANDLE>& waitHandles)
         HANDLE handle = result->impl()->handle();
         waitHandles.push_back( handle );
     }
-}
 
-bool SelectorImpl::areNonWaitableDevicesAvailable()
-{
-    std::vector<Item>::iterator it;
-
-    bool available = false;
-    try
-    {
-        for (it = _items.begin(); it != _items.end(); ++it)
-        {
-			int waitMode = it->waitMode;
-			IODevice* device = it->device;
-
-            if( device->waitable() )
-                continue;
-
-            available = true;
-
-            if (waitMode & Selector::WaitInput)
-            {
-                device->inputReady();
-            }
-            if (waitMode & Selector::WaitOutput)
-            {
-                device->outputReady();
-            }
-        }
-    }
-    catch(const std::exception& e )
-    {
-        std::cerr<< e.what()<<std::endl;
-    }
-
-    return available;
-}
-
-void SelectorImpl::sendEvents(const HANDLE activeHandle)
-{
-/*    try
-    {
-        Item& activeItem = _itemMap[activeHandle];
-		IODevice* activeDevice = activeItem.device;
-
-        switch( activeDevice->impl()->waitResult( activeHandle ) )
-        {
-            case IODeviceImpl::ReadyRead:
-            {
-                activeDevice->inputReady();
-                break;
-            }
-
-            case IODeviceImpl::ReadyWrite:
-            {
-                activeDevice->outputReady();
-                break;
-            }
-        }
-
-        activeDevice->impl()->endWait( activeHandle );
-
-     }
-     catch(const std::exception& e )
-     {
-        std::cerr<< e.what()<<std::endl;
-     }
-*/
-
-	// IOResult transaction handles
-    std::vector<IOResult*>::iterator iter;
-    for( iter = _readers.begin(); iter != _readers.end();  )
-    {
-        IOResult* result = *iter;
-        HANDLE handle = result->impl()->handle();
-        if(handle == activeHandle)
-        {
-            result->device()->inputReady();
-            iter = _readers.erase(iter);
-
-        }
-        else
-        {
-            ++iter;
-        }
-    }
-}
-
-bool SelectorImpl::wait( unsigned int msecs )
-{
-    DWORD               result = 0;
-    std::vector<HANDLE> waitHandles;
-
-    if( msecs == Selector::WaitInfinite ) {
-        msecs = INFINITE;
-    }
-
-    collectWaitHandles(waitHandles);
-
-    result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, 0 );
-
-    if( result == WAIT_TIMEOUT &&
-        areNonWaitableDevicesAvailable() )
-    {
-        return true;
-    }
-
-    result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, msecs );
+    DWORD result = WaitForMultipleObjects( waitHandles.size(), &waitHandles[0], false, msecs );
 
     if( result == WAIT_TIMEOUT ) {
         return false;
@@ -220,18 +81,19 @@ bool SelectorImpl::wait( unsigned int msecs )
 
     const Pt::ssize_t handleIndex  = (result - WAIT_OBJECT_0);
 
-    if (waitHandles[handleIndex] == _wakeHandle) {
-        return true;
-    }
+    IOResult* activResult = _readers[handleIndex];
+    activResult->onComplete();
 
-    sendEvents(waitHandles[ handleIndex ]);
+    if (activResult != (IOResult*) &_wakeResult) {    
+        _readers.erase(_readers.begin() + handleIndex);
+    }
 
     return true;
 }
 
 void SelectorImpl::wake()
 {
-    SetEvent( _wakeHandle );
+    _wakeResult.wake();
 }
 
 }//namespace System

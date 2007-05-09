@@ -16,38 +16,37 @@ int main( int argc, char* argv[] )
     char buffer[size];
     size_t sz;
 
-    Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
+  /*  Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
     file.write(out.c_str(), out.size());
     file.close();
 
     file.open("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
-	file.seek(0, Pt::System::IODevice::SeekBegin);
+	file.seek(0, Pt::System::IODevice::SeekBegin);*/
 
-    //Pt::System::Pipe pipe;
-    //connect(pipe.input().inputReady, onInput);
-    //pipe.output().write(out.c_str(), out.size());
-    //pipe.output().sync();
+    Pt::System::Pipe pipe;
+    connect(pipe.input().inputReady, onInput);
+    pipe.output().write(out.c_str(), out.size());    
 
     Pt::System::Selector selector;
 
     while(true)
     {
-        Pt::System::IOResult& res = file.beginRead(buffer, size);
+       /* Pt::System::IOResult& res = file.beginRead(buffer, size);
         if ( file.eof() )
-           break;
+           break;*/
 
-        //Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
-        selector.waitInput(res);
+        Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
+        selector.complete(res);
 
-        bool avail = selector.wait();
-        //if(avail == false)
-        //    break;
-
-        sz = file.endRead(res);
-        if ( file.eof() )
+        bool avail = selector.wait(500);
+        if(avail == false)
             break;
 
-        //sz = pipe.input().endRead(res);
+        /*sz = file.endRead(res);
+        if ( file.eof() )
+            break;*/
+
+        sz = pipe.input().endRead(res);
         std::cerr.write( buffer, sz ) << "\n";
     }
 

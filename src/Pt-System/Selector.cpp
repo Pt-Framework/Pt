@@ -26,22 +26,16 @@ Selector::~Selector()
 }
 
 
-void Selector::addDevice( IODevice& dev, WaitMode wm )
+void Selector::complete( IOResult& result )
 {
-    _impl->addDevice( dev, wm );
-    connect(dev.destroyed, *this, &Selector::removeDevice);
+	_impl->complete(result);
+     connect(result.canceled, *this, &Selector::cancel);
 }
 
 
-void Selector::waitInput( IOResult& result )
+void Selector::cancel( IOResult& result )
 {
-	_impl->waitInput(result);
-}
-
-
-void Selector::removeDevice( IODevice& dev )
-{
-    _impl->removeDevice( dev );
+    _impl->cancel(result);
 }
 
 

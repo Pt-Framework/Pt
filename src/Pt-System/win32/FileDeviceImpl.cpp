@@ -292,28 +292,6 @@ void FileDeviceImpl::sync() const
     }
 }
 
-void FileDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
-{
-    handles.clear();
-
-    if(waitMode & Selector::WaitInput)
-        handles.push_back( _readOv.hEvent );
-
-    if(waitMode & Selector::WaitOutput)
-        handles.push_back( _writeOv.hEvent );
-}
-
-IODeviceImpl::WaitResult FileDeviceImpl::waitResult( HANDLE handle )
-{
-    if( handle == _readOv.hEvent )
-        return IODeviceImpl::ReadyRead;
-    else if( handle == _writeOv.hEvent )
-        return IODeviceImpl::ReadyWrite;
-
-    throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
-}
-
-
 bool FileDeviceImpl::waitable() const
 {
 #ifndef _WIN32_WCE

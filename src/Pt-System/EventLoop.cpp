@@ -122,17 +122,17 @@ void EventLoop::queueEvent(const Pt::Event& event)
 }
 
 
-void EventLoop::addDevice( IODevice& dev, Selector::WaitMode wm  )
+void EventLoop::complete( IOResult& result )
 {
     MutexLock lock( _mutex );
-    return _selector.addDevice( dev, wm );
+    return _selector.complete( result );
 }
 
 
-void EventLoop::removeDevice( IODevice& dev )
+void EventLoop::cancel( IOResult& result )
 {
     MutexLock lock( _mutex );
-    _selector.removeDevice( dev );
+    _selector.cancel( result );
 }
 
 

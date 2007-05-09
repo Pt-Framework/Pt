@@ -39,13 +39,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual void open(HANDLE handle);
 
-        virtual HANDLE deviceHandle() const;
-
-        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
-
-        virtual WaitResult waitResult( HANDLE handle );		
-
-        virtual void beginWait( size_t waitMode );
+        virtual HANDLE deviceHandle() const;        
 
         virtual IODeviceImpl* impl()
         { return this; }

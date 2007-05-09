@@ -42,7 +42,7 @@ namespace System {
             {}
 
             virtual ~IOResult()
-            {}
+            { this->canceled(*this); }
 
             BasicIODevice<char>* device() const
             { return _device; }
@@ -53,6 +53,11 @@ namespace System {
             {
                 _device = &device;
             }
+
+            virtual void onComplete();
+          
+
+            Signal< IOResult& > canceled;
 
         private:
             BasicIODevice<char>* _device;

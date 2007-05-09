@@ -23,10 +23,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Xml", "src\Pt-Xml\Pt-Xml-vc8.vcproj", "{7B07CB50-60AE-4DB6-BD36-B1392A4B3AD7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pt-Test", "src\Pt-Test\Pt-Test.vcproj", "{AED4459E-0B3E-4C2A-9C10-A519FA97C3FE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D6FC5308-A4A0-419B-929A-362C863FC786} = {D6FC5308-A4A0-419B-929A-362C863FC786}
-		{D79858C0-34A5-42DB-B136-456DFC6FB50E} = {D79858C0-34A5-42DB-B136-456DFC6FB50E}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

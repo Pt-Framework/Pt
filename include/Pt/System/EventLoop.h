@@ -160,11 +160,11 @@ namespace System {
 
             /** @copydoc Selector::addDevice
             */
-             void addDevice( IODevice& dev, Selector::WaitMode wm );
+             void complete( IOResult& result );
 
             /** @copydoc Selector::removeDevice
             */
-            void removeDevice( IODevice& dev );
+            void cancel( IOResult& result );
 
             /** @copydoc Selector::addTimer
             */

@@ -71,18 +71,6 @@ HANDLE PipeIODevice::deviceHandle() const
     return _handle;
 }
 
-
-IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
-{
-    if( handle == _readOv.hEvent )
-        return IODeviceImpl::ReadyRead;
-    else if( handle == _writeOv.hEvent )
-        return IODeviceImpl::ReadyWrite;
-
-    throw std::logic_error( "Unkonw event handle" + PT_SOURCEINFO );
-}
-
-
 IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 {
     DWORD readBytes = 0;
@@ -124,36 +112,6 @@ size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
 
     return readBytes;
 }
-
-
-void PipeIODevice::beginWait( size_t waitMode )
-{
-    if (waitMode & Selector::WaitInput) {
-        read(0, 0);
-    }
-    if (waitMode & Selector::WaitOutput) {
-        write(0, 0);
-    }
-
-}
-
-void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
-{
-    DWORD readBytes = 0;
-    bool eof;
-    handles.clear();
-
-    if( waitMode & Selector::WaitInput )
-    {
-        //this->_read(0, 0, eof);
-        //ReadFile(_handle, 0, 0, &readBytes, &_readOv);
-        handles.push_back( _readOv.hEvent );
-    }
-
-    if( waitMode & Selector::WaitOutput )
-        handles.push_back( _writeOv.hEvent );
-}
-
 
 void PipeIODevice::_close()
 {

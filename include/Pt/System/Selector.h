@@ -79,18 +79,7 @@ namespace System {
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
     {
         public:
-            static const unsigned int WaitInfinite = static_cast<size_t>(-1);
-
-            /** @brief Wait for input or output
-
-                The WaitMode is passed to Selector::wait to indicate
-                if to wait for input, output or both.
-            */
-            enum WaitMode
-            {
-                WaitInput  = 1,
-                WaitOutput = 2
-            };
+            static const unsigned int WaitInfinite = static_cast<size_t>(-1);         
 
             //! @brief Default constructor
             Selector();
@@ -98,23 +87,16 @@ namespace System {
             //! @brief Destructor
             virtual ~Selector();
 
-            /** @brief Adds an IODevice
+            /** @brief Adds an IOResult
 
-                Adds an IODevice to the selector. IODevices are removed
-                automatically when they get destroyed.
-
-                @param device The device to add
-                @param wm WaitMode used for the device
+                Adds an IOResult to the selector. IOResult are removed
+                automatically when they get destroyed.                
             */
-            void addDevice( IODevice& dev, WaitMode wm );
+            void complete( IOResult& result );            
 
-            void waitInput( IOResult& result );
-
-            /** @brief Removes an IODevice
-
-                @param device The device to remove
+            /** @brief Cancel an IOResult.
             */
-            void removeDevice( IODevice& dev );
+            void cancel( IOResult& result );
 
             /** @brief Adds a Timer
 

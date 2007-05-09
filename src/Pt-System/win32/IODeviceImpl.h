@@ -37,21 +37,9 @@ namespace System {
 		public:
 			IODeviceImpl();
 
-			virtual ~IODeviceImpl();
+			virtual ~IODeviceImpl();			
 
-			enum WaitResult{ ReadyRead, ReadyWrite };
-
-			virtual HANDLE deviceHandle() const  = 0;
-
-			virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode ) = 0;
-
-			virtual WaitResult waitResult( HANDLE handle ) = 0;
-
-			virtual void beginWait( size_t waitMode )
-			{}
-
-			virtual void endWait( HANDLE handle )
-			{ }
+			virtual HANDLE deviceHandle() const  = 0;			
 	};
 
 

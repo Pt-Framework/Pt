@@ -385,7 +385,7 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
     }
 }
 
-void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
+/*void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
     handles.clear();
     
@@ -413,14 +413,14 @@ IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
         return ReadyWrite;    
 
 /*    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
-        return _readEvent;       */
+        return _readEvent;       *//*
 
     if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
         return ReadyRead;
     
     throw IOError("Unknow event", PT_SOURCEINFO);
     return ReadyRead;
-}
+}*/
 
 }//namespace System
 }//namespace Pt

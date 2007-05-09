@@ -60,6 +60,12 @@ class BasicIODevice : protected NonCopyable {
 
     public:
 
+        enum AsyncState {
+            Reading,
+            Writing,
+            Idle
+        };
+
         enum SeekMode {
             SeekCurrent,
             SeekBegin,
@@ -77,11 +83,12 @@ class BasicIODevice : protected NonCopyable {
         BasicIODevice()
         : _valid(false)
         , _eof(false)
+        , _asyncState(Idle)
         { }
 
         //! @brief Destructor
         virtual ~BasicIODevice()
-        { this->destroyed(*this); }
+        { }
 
         //! @brief Closes the I/O device
         /*!
@@ -95,10 +102,14 @@ class BasicIODevice : protected NonCopyable {
             }
         }
 
+        AsyncState asyncState() const
+        { return _asyncState; }
+
         IOResult& beginRead(CharT* buffer, size_t n)
         {
             IOResult& result = _beginRead(buffer, n, _eof);
             result.init(*this);
+            _asyncState = Reading;
             return result;
         }
 
@@ -246,8 +257,6 @@ class BasicIODevice : protected NonCopyable {
         */
         Signal<> outputReady;
 
-        Signal< BasicIODevice& > destroyed;
-
         virtual IODeviceImpl* impl() = 0;
 
     protected:
@@ -296,11 +305,29 @@ class BasicIODevice : protected NonCopyable {
         { _eof = eof; }
 
     private:
-        bool _valid;
-        bool _eof;
+        bool        _valid;
+        bool        _eof;
+        AsyncState  _asyncState;
 };
 
 typedef BasicIODevice<char> IODevice;
+
+inline void IOResult::onComplete()
+{
+            switch (_device->asyncState())
+            {
+                case IODevice::Reading:
+                    _device->inputReady();
+                    break;
+
+                case IODevice::Writing:
+                    _device->outputReady();
+                    break;
+
+                default:
+                    throw std::logic_error("Invalid async state" + PT_SOURCEINFO);
+            }
+        }
 
 } // namespace System
 

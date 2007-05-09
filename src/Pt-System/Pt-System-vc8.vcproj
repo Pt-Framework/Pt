@@ -677,6 +677,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\System\IOResult.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\System\IOStream.h"
 				>
 			</File>
