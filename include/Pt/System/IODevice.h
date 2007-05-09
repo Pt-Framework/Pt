@@ -36,9 +36,8 @@ namespace Pt {
 
 namespace System {
 
-class IODeviceImpl;
 class IOResult;
-
+class IODeviceImpl;
 
 /** @brief Endpoint for I/O operations
 
@@ -59,7 +58,6 @@ class BasicIODevice : protected NonCopyable {
         typedef typename std::char_traits<CharT>::off_type off_type;
 
     public:
-
         enum AsyncState {
             Reading,
             Writing,
@@ -257,9 +255,6 @@ class BasicIODevice : protected NonCopyable {
         */
         Signal<> outputReady;
 
-        // TODO: remove this method and IODeviceImpl altogether
-        virtual IODeviceImpl* impl() = 0;
-
     protected:
         virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof) = 0;
 
@@ -312,23 +307,6 @@ class BasicIODevice : protected NonCopyable {
 };
 
 typedef BasicIODevice<char> IODevice;
-
-inline void IOResult::onComplete()
-{
-            switch (_device->asyncState())
-            {
-                case IODevice::Reading:
-                    _device->inputReady();
-                    break;
-
-                case IODevice::Writing:
-                    _device->outputReady();
-                    break;
-
-                default:
-                    throw std::logic_error("Invalid async state" + PT_SOURCEINFO);
-            }
-        }
 
 } // namespace System
 

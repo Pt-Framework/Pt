@@ -60,6 +60,23 @@ namespace System {
             HANDLE handle() const
             { return _handle; }
 
+			virtual void onComplete()
+			{
+				switch ( this->device()->asyncState() )
+				{
+					case IODevice::Reading:
+						this->device()->inputReady();
+						break;
+
+					case IODevice::Writing:
+						this->device()->outputReady();
+						break;
+
+					default:
+						throw std::logic_error("Invalid async state" + PT_SOURCEINFO);
+				}
+			}
+
 		private:
             HANDLE _handle;
     };
