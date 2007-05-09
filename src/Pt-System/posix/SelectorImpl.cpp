@@ -53,16 +53,29 @@ SelectorImpl::~SelectorImpl()
 }
 
 
-void SelectorImpl::waitInput( IOResult& result )
+void SelectorImpl::complete( IOResult& result )
 {
     _readers.push_back( &result );
+}
+
+
+void SelectorImpl::cancel( IOResult& result )
+{
+    std::vector<IOResult*>::iterator it;
+    for( it = _readers.begin(); it != _readers.end(); ++it )
+    {
+        if(&result == *it)
+        {
+            _readers.erase(it);
+            return;
+        }
+    }
 }
 
 
 bool SelectorImpl::wait(unsigned int msecs)
 {
     int maxfd   = 0;
-    bool avail  = false;
     fd_set rfds;
     FD_ZERO(&rfds);
     fd_set wfds;
@@ -86,30 +99,6 @@ bool SelectorImpl::wait(unsigned int msecs)
         FD_SET( fd, &rfds );
         maxfd = std::max( maxfd , fd );
     }
-
-    // The first select checks if any data is immediately available
-    // on the waitable handles, therefore no timeout for select. This
-    // way waitable devices get a chance to be serviced too when a
-    // non-waitable device is registered as well
-    avail = this->select(maxfd, rfds, wfds, 0);
-
-    // Now we service all devices that are not waitable and thus
-    // have always data available
-    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
-    {
-        IOResult* result = *iter;
-
-        if( result->device()->waitable() )
-            continue;
-
-        avail = true;
-        result->device()->inputReady();
-    }
-
-    // if any not-waitable devices were present we can bail
-    // out here and report activity
-    if(avail)
-        return true;
 
     // The second select waits until the timeout expires
     // or a waitable device becomes available

@@ -81,10 +81,11 @@ bool SelectorImpl::wait( unsigned int msecs )
 
     const Pt::ssize_t handleIndex  = (result - WAIT_OBJECT_0);
 
-    IOResult* activResult = _readers[handleIndex];
-    activResult->onComplete();
+    IOResult* result = _readers[handleIndex];
+    result->onComplete();
 
-    if (activResult != (IOResult*) &_wakeResult) {    
+    if (result != static_cast<IOResult*>(&_wakeResult) )
+    {
         _readers.erase(_readers.begin() + handleIndex);
     }
 

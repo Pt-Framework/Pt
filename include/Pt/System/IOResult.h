@@ -54,8 +54,8 @@ namespace System {
                 _device = &device;
             }
 
+            // TODO; move to impl
             virtual void onComplete();
-          
 
             Signal< IOResult& > canceled;
 

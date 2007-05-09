@@ -43,7 +43,7 @@ class Multiplexer : public Pt::Connectable
             _device2.setTimeout( 10 );
 */
 
-            _selector.addDevice( _device, Pt::System::Selector::WaitInput );
+            //_selector.addDevice( _device, Pt::System::Selector::WaitInput );
             Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
             Pt::connect( _selector.timeout, *this, &Multiplexer::onTimeout );
         }

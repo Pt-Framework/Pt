@@ -151,35 +151,40 @@ void waitEventDemo()
     }
 }
 
-Pt::System::SerialDevice serialDevice("COM2:", std::ios_base::in);
-void read()
-{
-    const int size = 300;
-    char buffer[size];
 
-    const size_t readCount = serialDevice.read(buffer, size);
-    std::cerr.write(buffer, readCount);    
-}
+
+
 
 int main( int argc, char* argv[] )
 {
-    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";    
-    Pt::System::Selector selector;
+    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";
+    const int size = 300;
+    char buffer[size];
 
-    
+    Pt::System::SerialDevice serialDevice("COM2:", std::ios_base::in);
     serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
     serialDevice.setCharSize(8);
     serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
     serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
 
-    selector.addDevice(serialDevice, Pt::System::Selector::WaitInput);
-    connect(serialDevice.inputReady, &read);
+    Pt::System::Selector selector;
+
     for ( int i = 0; i < 5000; i++)
-        selector.wait();
+    {
+        Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
+        selector.complete(res);
+        bool available = selector.wait();
+        if(available)
+        {
+            size_t n = serialDevice.endRead(res);
+            std::cerr.write(buffer, n);
+        }
+    }
+
     Pt::System::Thread::sleep( 20000 );
-        
+
     //serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
 
-//    readMouseData();    
+    //readMouseData();
     return 0;
 }

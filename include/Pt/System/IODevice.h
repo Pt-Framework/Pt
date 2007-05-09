@@ -257,6 +257,7 @@ class BasicIODevice : protected NonCopyable {
         */
         Signal<> outputReady;
 
+        // TODO: remove this method and IODeviceImpl altogether
         virtual IODeviceImpl* impl() = 0;
 
     protected:

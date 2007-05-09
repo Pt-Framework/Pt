@@ -39,13 +39,9 @@ class SelectorImpl
 
         ~SelectorImpl();
 
-        void addDevice( IODevice& dev, int wm )
-        {}
+        void complete( IOResult& result );
 
-        void waitInput( IOResult& result );
-
-        void removeDevice( IODevice& device )
-        {}
+        void cancel( IOResult& result );
 
         bool wait(unsigned int msecs);
 
