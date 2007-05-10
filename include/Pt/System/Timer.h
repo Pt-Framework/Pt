@@ -122,6 +122,7 @@ namespace System {
             unsigned _started;
             unsigned _interval;
             unsigned _elapsed;
+            static const unsigned InvalidTime;
     };
 
 /*

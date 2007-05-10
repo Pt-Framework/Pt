@@ -1,5 +1,6 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
+#include <limits>
 
 
 namespace {
@@ -15,11 +16,13 @@ namespace Pt {
 
 namespace System {
 
+const unsigned Timer::InvalidTime = std::numeric_limits<unsigned>::max();
+
 
 Timer::Timer()
 : _active(false)
-, _started(-1)
-, _interval(-1)
+, _started(InvalidTime)
+, _interval(InvalidTime)
 , _elapsed(0)
 { }
 
@@ -63,7 +66,7 @@ void Timer::start(unsigned interval)
 void Timer::stop()
 {
     _active = false;
-    _started = -1;
+    _started = InvalidTime;
     _elapsed = 0;
 }
 
