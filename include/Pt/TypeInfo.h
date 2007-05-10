@@ -309,7 +309,7 @@ namespace Pt {
         { return long(); }
     };
 
-
+ #if __GNUC__ > 3
     //! CTTI predicate for class/struct types
     template <typename T,
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) != 1, isTrue, isFalse>::ResultT >
@@ -322,7 +322,7 @@ namespace Pt {
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) == 1, isTrue, isFalse>::ResultT >
     struct isValue : public Base {
     };
-
+#endif
 } // !namespace Pt
 
 
