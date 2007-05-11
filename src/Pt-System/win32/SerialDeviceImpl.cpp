@@ -110,7 +110,49 @@ void SerialDeviceImpl::close()
     _handle = 0;
 }
 
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+{ 
+    DWORD length;
+
+    if( ReadFile( _handle, buffer, n, &length, &_ovRead ) == FALSE )
+    {
+
+        DWORD error = GetLastError();
+        if (ERROR_HANDLE_EOF == error)
+        {
+            eof = true;        
+        }
+        else if (ERROR_IO_PENDING != error)
+        {        
+            throw IOError("Read port failed" , PT_SOURCEINFO);
+        }        
+    }   
+
+    _result.setHandle(_ovRead.hEvent);
+    
+    return _result;
+}
+
+size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
+{
+    DWORD readBytes = 0;
+    if (GetOverlappedResult(_handle, &_ovRead, &readBytes, FALSE) == FALSE )
+    {
+		DWORD err=GetLastError();
+        if( ERROR_HANDLE_EOF == GetLastError() ) {
+			eof = true;
+        }
+        else{
+            throw IOError("Could not read from file handle", PT_SOURCEINFO);
+        }
+    }
+
+    _ovRead.Offset += readBytes;    
+
+    return readBytes;
+}
+
+/*size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD length;
 
@@ -133,7 +175,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     }
     
     return length;
-}
+}*/
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {

@@ -42,10 +42,11 @@ class SerialDeviceImpl : public IODeviceImpl
         //! @brief Closes the I/O device
         void close();
 
-        //! @brief Read bytes from device
-        size_t read( char* buffer, size_t count, bool& eof );
+        IOResult& beginRead(char* buffer, size_t n, bool& eof);    
 
-        //! @brief Write bytes to device
+        size_t endRead(IOResult& result, bool& eof);
+       
+        //size_t read( char* buffer, size_t count, bool& eof );        
         size_t write( const char* buffer, size_t count );
 
         void flush();
@@ -84,6 +85,7 @@ class SerialDeviceImpl : public IODeviceImpl
         OVERLAPPED       _ovStatus;
         HANDLE           _terminateEv;
         DWORD            _eventMask;
+        IOResultImpl     _result;
 };
 
 }//namespace System

@@ -157,31 +157,41 @@ void waitEventDemo()
 
 int main( int argc, char* argv[] )
 {
-    std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";
-    const int size = 300;
-    char buffer[size];
-
-    Pt::System::SerialDevice serialDevice("COM2:", std::ios_base::in);
-    serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-    serialDevice.setCharSize(8);
-    serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
-    serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
-
-    Pt::System::Selector selector;
-
-    for ( int i = 0; i < 5000; i++)
+    try
     {
-        Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
-        selector.complete(res);
-        bool available = selector.wait();
-        if(available)
+        std::cerr << "CHECK DEMO IMPLEMENTATION !!!\n";
+        const int size = 300;
+        char buffer[size];
+
+        Pt::System::SerialDevice serialDevice("COM1:", std::ios_base::in);
+        serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+        serialDevice.setCharSize(8);
+        serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
+        serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
+        serialDevice.setTimeout(100000);
+
+        Pt::System::Selector selector;
+
+        while ( true)
         {
-            size_t n = serialDevice.endRead(res);
-            std::cerr.write(buffer, n);
+            Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
+            selector.complete(res);
+            bool available = selector.wait();
+            if(available)
+            {
+                size_t n = serialDevice.endRead(res);
+                std::cerr.write(buffer, n);
+            }
         }
+
+    }    
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
     }
 
-    Pt::System::Thread::sleep( 20000 );
+   // Pt::System::Thread::sleep( 20000 );
+
 
     //serialDevice.wait( Pt::System::SerialDevice::WaitInput, Pt::System::SerialDevice::WaitTimeInfinite );       
 

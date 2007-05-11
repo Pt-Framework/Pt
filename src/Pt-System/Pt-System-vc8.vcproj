@@ -836,6 +836,30 @@
 					>
 				</File>
 				<File
+					RelativePath=".\wince\SelectorImpl.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Pocket PC 2003 (ARMV4)"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Pocket PC 2003 (ARMV4)"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\wince\SelectorImpl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\wince\SemaphoreImpl.h"
 					>
 				</File>

@@ -60,6 +60,16 @@ void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
     IODevice::setEof(false);
 }
 
+IOResult& SerialDevice::_beginRead(char* buffer, size_t n, bool& eof)
+{ 
+    return _impl->beginRead(buffer, n, eof); 
+}   
+
+size_t SerialDevice::_endRead(IOResult& result, bool& eof)
+{
+    return _impl->endRead(result, eof); 
+}
+
 void SerialDevice::setBaudRate( BaudRate rate )
 {
     _impl->setBaudRate( rate );
@@ -123,11 +133,6 @@ size_t SerialDevice::timeout() const
 void SerialDevice::_close()
 {
     _impl->close();
-}
-
-size_t SerialDevice::_read( char* buffer, size_t count, bool& eof )
-{
-    return _impl->read( buffer, count, eof );
 }
 
 size_t SerialDevice::_write(const char* buffer, size_t count)
