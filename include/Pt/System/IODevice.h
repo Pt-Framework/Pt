@@ -58,18 +58,21 @@ class BasicIODevice : protected NonCopyable {
         typedef typename std::char_traits<CharT>::off_type off_type;
 
     public:
+        // TODO: move to IOResultImpl where needed
         enum AsyncState {
             Reading,
             Writing,
             Idle
         };
 
+        //TODO use std::seekmode
         enum SeekMode {
             SeekCurrent,
             SeekBegin,
             SeekEnd
         };
 
+        //TODO: implement  open() and openAsync()
         enum ReadWriteMode
         {
             Synchronous = 1,
@@ -113,6 +116,7 @@ class BasicIODevice : protected NonCopyable {
 
         size_t endRead(IOResult& result)
         {
+            _asyncState = Idle;
             return _endRead(result, _eof);
         }
 
