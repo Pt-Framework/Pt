@@ -102,6 +102,10 @@ rule SharedLibrary_LinkSharedLibraries
 
 	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
 
+    #TODO: use this instead of setting LINKFLAGS and LINKLIBS below.
+    #      This also makes SEARCH_SHLIB obsolete
+    #NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+
 	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;	
 	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
 }
