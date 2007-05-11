@@ -67,12 +67,23 @@ void PipeIODevice::open(HANDLE handle)
     setValid(true);
 }
 
+IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
+{
+    throw std::runtime_error("endRead not implemented" + PT_SOURCEINFO);
+}
+
+size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
+{
+    throw std::runtime_error("endRead not implemented" + PT_SOURCEINFO);
+}
+
+
 HANDLE PipeIODevice::deviceHandle() const
 {
     return _handle;
 }
 
-IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
+/*IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
 {
     if( Read == _mode ) {
         return IODeviceImpl::ReadyRead;
@@ -86,7 +97,7 @@ void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
     handles.clear();
 
     handles.push_back(_handle);    
-}
+}*/
 
 
 void PipeIODevice::_close()

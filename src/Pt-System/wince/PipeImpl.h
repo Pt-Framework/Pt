@@ -44,11 +44,11 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual HANDLE deviceHandle() const;
         
-        virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
+        //virtual void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
 
-        virtual WaitResult waitResult( HANDLE handle );
+        //virtual WaitResult waitResult( HANDLE handle );
 
-        virtual void beginWait( size_t waitMode ) {}        
+        //virtual void beginWait( size_t waitMode ) {}        
 
         virtual IODeviceImpl* impl()
         { return this; }
@@ -56,6 +56,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
     protected:
         //! @brief Closes the I/O device
         virtual void _close();
+
+        virtual IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+
+        virtual size_t _endRead(IOResult& result, bool& eof);
 
         //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);
@@ -89,6 +93,7 @@ class PipeImpl
         IODevice& input();
 
         IODevice& output();
+
     private:
         PipeIODevice        _inputDevice;
         PipeIODevice        _outputDevice;         

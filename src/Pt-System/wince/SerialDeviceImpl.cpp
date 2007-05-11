@@ -30,7 +30,9 @@ SerialDeviceImpl::SerialDeviceImpl()
 : _eventThread( *self() )
 , _terminateThread( false )
 , _commEvent( 0 )
-{ }
+{ 
+    _readEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+}
 
 SerialDeviceImpl::~SerialDeviceImpl()
 { }
@@ -117,7 +119,8 @@ void SerialDeviceImpl::close()
     _commEvent = 0;
 }
 
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+//size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t count, bool& eof) 
 {
     DWORD   length;
     DWORD   error;
@@ -125,8 +128,31 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 
     ClearCommError( _handle, &error, &cs );
 
-    if( !ReadFile( _handle, buffer, count, &length, 0 ) )
+    SetCommMask( _handle, EV_BREAK | EV_RXCHAR );    
+
+  /*  if( !ReadFile( _handle, buffer, count, &length, 0 ) )
         throw IOError("Read port failed" , PT_SOURCEINFO);        
+
+    if( length == 0 ) 
+       eof = true;*/
+
+    _result.setHandle(_readEvent);
+
+    return _result;    
+}
+
+size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
+{
+    DWORD   length;
+    DWORD   error;
+    COMSTAT cs;
+
+    ClearCommError( _handle, &error, &cs );
+
+    ResetEvent(_readEvent);
+
+  /*  if( !ReadFile( _handle, buffer, count, &length, 0 ) )
+        throw IOError("Read port failed" , PT_SOURCEINFO);        */
 
     if( length == 0 ) 
        eof = true;
@@ -373,7 +399,8 @@ void SerialDeviceImpl::run()
         else if(  retVal && ( waitMask & EV_RXCHAR ) )
         {
             _commEventType = CharReceived;
-            SetEvent( _commEvent );
+            //SetEvent( _commEvent );
+            SetEvent(_readEvent);
         }
         else if( retVal && ( waitMask & EV_RXFLAG ) )
         {
@@ -403,7 +430,7 @@ size_t SerialDeviceImpl::timeout() const
     return  comTimeOut.ReadTotalTimeoutConstant;    
 }
 
-void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
+/*void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
     handles.clear();
     handles.push_back( _commEvent );         
@@ -415,7 +442,7 @@ void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMo
 
     if( (waitMode & Selector::WaitOutput) == Selector::WaitOutput )
         _waitCommMask |= EV_TXEMPTY;
-}
+}*/
 
 void SerialDeviceImpl::resetEvent( HANDLE handle )
 {
@@ -425,7 +452,7 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
     ResetEvent ( _commEvent );
 }
 
-IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
+/*IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
 {
     if( _commEvent != handle )
         throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
@@ -446,7 +473,7 @@ IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
             
     throw IOError("Unknown event", PT_SOURCEINFO);
     return ReadyRead;  
-}
+}*/
 
 }//namespace System
 }//namespace Pt

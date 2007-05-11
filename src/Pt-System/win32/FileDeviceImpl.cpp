@@ -134,6 +134,7 @@ IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
 {
     DWORD readBytes = 0;
+#ifndef _WIN32_WCE
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
 		DWORD err=GetLastError();
@@ -146,6 +147,9 @@ size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
     }
+#else
+    throw std::runtime_error("endRead not implemented for WinCe" + PT_SOURCEINFO);
+#endif
 
     _readOv.Offset += readBytes;
     _writeOv.Offset += readBytes;

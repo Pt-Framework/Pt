@@ -44,8 +44,12 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         //! @brief Closes the I/O device
         void close();
 
+        IOResult& beginRead(char* buffer, size_t n, bool& eof);    
+
+        size_t endRead(IOResult& result, bool& eof);
+
         //! @brief Read bytes from device
-        size_t read( char* buffer, size_t count, bool& eof );
+        //size_t read( char* buffer, size_t count, bool& eof );
 
         //! @brief Write bytes to device
         size_t write( const char* buffer, size_t count );
@@ -73,9 +77,9 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         HANDLE deviceHandle() const
         { return _handle; }
         
-        void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
+       // void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
         
-        WaitResult waitResult( HANDLE handle );
+        //WaitResult waitResult( HANDLE handle );
         
         void resetEvent( HANDLE handle );
         
@@ -96,6 +100,8 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         DWORD  _waitCommMask;
         Thread _eventThread;  
         bool   _terminateThread;
+        IOResultImpl     _result;
+        HANDLE           _readEvent;
 };
 
 }//namespace System
