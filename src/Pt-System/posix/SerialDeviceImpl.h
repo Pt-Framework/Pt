@@ -43,14 +43,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void open(const std::string& path, std::ios_base::openmode mode);
 
-        //! @brief Closes the I/O device
         void close();
-
-        //! @brief Read bytes from device
-        size_t read( char* buffer, size_t count, bool& eof );
-
-        //! @brief Write bytes to device
-        size_t write( const char* buffer, size_t count );
 
         void setBaudRate( SerialDevice::BaudRate rate );
 
@@ -71,23 +64,16 @@ class SerialDeviceImpl : public IODeviceImpl
         void setFlowControl( SerialDevice::FlowControl flowControl );
 
         SerialDevice::FlowControl flowControl() const;
-        
+
         void setTimeout( size_t msec );
+
         size_t timeout() const;
-        
+
         void flush();
 
-        int fd() const
-        { return _fd; }
-
-        std::ios_base::openmode mode() const
-        { return _openMode; }
-
     private:
-        int                         _fd;
         termios                     _prevIos;
         SerialDevice::FlowControl   _flowControl;
-        std::ios_base::openmode     _openMode;
 };
 
 } //namespace System

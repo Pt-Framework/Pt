@@ -18,51 +18,54 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_System_IOResult_h
-#define Pt_System_IOResult_h
+#ifndef PT_SYSTEM_IORESULTIMPL_H
+#define PT_SYSTEM_IORESULTIMPL_H
 
-#include <Pt/Signal.h>
-#include <Pt/NonCopyable.h>
-#include <Pt/System/Api.h>
+#include <Pt/System/IOResult.h>
+#include <ios>
 
 
 namespace Pt {
 
 namespace System {
 
-    template <typename CharT>
-    class BasicIODevice;
-
-    class IOResultImpl;
-
-    class IOResult : protected NonCopyable
+    class IOResultImpl : public IOResult
     {
         public:
-            IOResult()
-            : _device(0)
+            IOResultImpl()
+            : IOResult()
+            , _fd(-1)
             {}
 
-            virtual ~IOResult()
-            { this->canceled(*this); }
+            virtual IOResultImpl* impl()
+            { return this; }
 
-            BasicIODevice<char>* device() const
-            { return _device; }
+            void setFd(int fd)
+            { _fd = fd; }
 
-            virtual IOResultImpl* impl() = 0;
+            int fd() const
+            { return _fd; }
 
-            void init(BasicIODevice<char>& device)
+            void attach(char* buffer, size_t size)
             {
-                _device = &device;
+                _buffer = buffer;
+                _bufferSize = size;
             }
 
-            Signal< IOResult& > canceled;
+            char* buffer() const
+            { return _buffer; }
+
+            size_t bufferSize() const
+            { return _bufferSize; }
 
         private:
-            BasicIODevice<char>* _device;
+            int _fd;
+            char* _buffer;
+            size_t _bufferSize;
     };
 
-} // namespace System
+}//namespace System
 
-} // namespace Pt
+}//namespace Pt
 
 #endif

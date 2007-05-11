@@ -30,17 +30,14 @@ namespace Pt {
 namespace System {
 
 PipeIODevice::PipeIODevice()
-: _fd(-1)
-{
-    _result.init(*this);
-}
+{}
 
 
 PipeIODevice::~PipeIODevice()
 {
     try
     {
-        this->close();
+        IODevice::close();
     }
     catch(...)
     {}
@@ -49,81 +46,41 @@ PipeIODevice::~PipeIODevice()
 
 void PipeIODevice::open(int fd)
 {
-    _fd = fd;
-    fcntl(_fd, F_SETFL, O_NONBLOCK);
+    IODeviceImpl::open(fd);
     this->setValid(true);
 }
 
 
 IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 {
-    _result.setFd(_fd);
-    _result.attach(buffer, n);
-    return _result;
+    return IODeviceImpl::beginRead(buffer, n, eof);
 }
 
 
 size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
 {
-    size_t n = this->_read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
-    return n;
+    return IODeviceImpl::endRead(result, eof);
 }
 
 
 size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 {
-    eof = false;
-    ssize_t ret = 0;
-
-    while(true)
-    {
-        ret = ::read(_fd, (void*)buffer, count);
-        eof = (ret == 0) ;
-
-        if(ret >= 0)
-            break;
-
-        if(errno == EINTR) // signal interrupt
-            continue;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
-    }
-
-    return ret;
+    return IODeviceImpl::read(buffer, count, eof);
 }
 
 
 size_t PipeIODevice::_write(const char* buffer, size_t count)
 {
-    ssize_t ret = 0;
-
-    while(true)
-    {
-        ret = ::write(_fd, (const void*)buffer, count);
-
-        if(ret >= 0)
-            break;
-
-        if(errno == EINTR) // signal interrupt
-            continue;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
-    }
-
-    return ret;
+    return IODeviceImpl::write(buffer, count);
 }
 
 
 void PipeIODevice::_sync() const
 {
-    fsync(_fd);
+    fsync( IODeviceImpl::fd() );
 }
+
+
 
 
 PipeImpl::PipeImpl()

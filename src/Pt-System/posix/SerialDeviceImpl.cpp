@@ -32,7 +32,6 @@ namespace Pt {
 namespace System {
 
 SerialDeviceImpl::SerialDeviceImpl( )
-: _fd(-1)
 {
 }
 
@@ -44,106 +43,32 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode)
 {
-    int flags = O_RDONLY;
-
-    if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) )
-    {
-        flags |= O_RDWR;
-    }
-    else if(mode & std::ios_base::out)
-    {
-        flags |= O_WRONLY;
-    }
-    else if(mode & std::ios_base::in  )
-    {
-        flags |= O_RDONLY;
-    }
-
-    flags |= O_NONBLOCK | O_NOCTTY;
-
-    _fd = ::open( path.c_str(), flags );
-    if(_fd == -1)
-        throw OpenFailed("open failed", PT_SOURCEINFO);
+    IODeviceImpl::open(path, mode);
 
     struct termios ios;
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
-    if( ::tcgetattr(_fd, &_prevIos) == -1 )
+    if( ::tcgetattr( IODeviceImpl::fd(), &_prevIos) == -1 )
         throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
     // Disable canonical
     ::cfmakeraw(&ios);
 
-    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
+    if( ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &ios) == -1  )
         throw IOError("Could not set termios attributes", PT_SOURCEINFO);
-
-    _openMode = mode;
 }
 
 
 void SerialDeviceImpl::close()
 {
 
-    if(_fd != -1)
+    if( IODeviceImpl::fd() != -1)
     {
-        ::tcsetattr(_fd, TCSANOW, &_prevIos);
+        ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &_prevIos );
 
-        if( ::close(_fd) != 0 )
-            throw IOError("Could not close file handle", PT_SOURCEINFO);
-
-        _fd = -1;
+        IODeviceImpl::close();
     }
-}
-
-
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
-{
-    eof = false;
-    ssize_t ret = 0;
-
-    while(true)
-    {
-        ret = ::read(_fd, (void*)buffer, count);
-        eof = (ret == 0) ;
-
-        if(ret >= 0)
-            break;
-
-        if(errno == EINTR) // signal interrupt
-            continue;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
-    }
-
-    return ret;
-}
-
-
-size_t SerialDeviceImpl::write( const char* buffer, size_t count )
-{
-    ssize_t ret = 0;
-
-    while(true)
-    {
-        ret = ::write(_fd, (const void*)buffer, count);
-
-        if(ret >= 0)
-            break;
-
-        if(errno == EINTR) // signal interrupt
-            continue;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
-    }
-
-    return ret;
 }
 
 
@@ -151,7 +76,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 {
     struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1  )
+    if( ::tcgetattr( IODeviceImpl::fd(), &ios ) == -1  )
     {
         throw IOError( "Could not set baud rate", PT_SOURCEINFO);
     }
@@ -186,7 +111,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
     ::cfsetispeed( &ios, rate );
     ::cfsetospeed( &ios, rate );
 
-    if( ::tcsetattr(_fd, TCSANOW, &ios) == -1  )
+    if( ::tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios) == -1  )
     {
         throw IOError("Could not set baud rate", PT_SOURCEINFO);
     }
@@ -196,7 +121,7 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
     struct termios ios;
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
     {
         throw IOError("Could not get baud rate", PT_SOURCEINFO);
     }
@@ -234,7 +159,7 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 void SerialDeviceImpl::setCharSize( int size )
 {
     struct termios ios;
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set char size", PT_SOURCEINFO);
 
     ios.c_cflag &= ~CSIZE;
@@ -257,7 +182,7 @@ void SerialDeviceImpl::setCharSize( int size )
             throw IOError("Invalid char size", PT_SOURCEINFO);
     }
 
-    tcsetattr(_fd, TCSANOW, &ios);
+    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
 }
 
 
@@ -265,7 +190,7 @@ int SerialDeviceImpl::charSize() const
 {
     struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get char size", PT_SOURCEINFO);
 
     int size = ios.c_cflag & CSIZE;
@@ -287,7 +212,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
     struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get stop bits", PT_SOURCEINFO);
 
     ios.c_cflag &= ~CSTOPB;
@@ -304,7 +229,7 @@ void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
             throw IOError("Invalid stop bits", PT_SOURCEINFO);
     }
 
-    tcsetattr(_fd, TCSANOW, &ios);
+    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
 }
 
 
@@ -312,7 +237,7 @@ SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 {
    struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get stop bits", PT_SOURCEINFO);
 
     if( ios.c_cflag & CSTOPB )
@@ -332,7 +257,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
    struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get parity", PT_SOURCEINFO);
 
     ios.c_cflag &= ~(PARENB | PARODD);
@@ -351,7 +276,7 @@ void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
             throw IOError("Invalid parity", PT_SOURCEINFO);
     }
 
-    tcsetattr(_fd, TCSANOW, &ios);
+    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
 }
 
 
@@ -359,7 +284,7 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 {
    struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not get parity", PT_SOURCEINFO);
 
     if( ios.c_cflag & PARENB )
@@ -385,7 +310,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 
    struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set flow control", PT_SOURCEINFO);
 
     #ifdef linux
@@ -418,7 +343,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
             break;
     }
 
-    tcsetattr(_fd, TCSANOW, &ios);
+    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
     _flowControl = flowControl;
 }
 
@@ -426,12 +351,12 @@ void SerialDeviceImpl::setTimeout( size_t msec )
 {
     struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set time out", PT_SOURCEINFO);
 
     ios.c_cc[VTIME]  = ( msec / 100 ) ;
 
-    tcsetattr(_fd, TCSANOW, &ios);
+    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
 
 }
 
@@ -439,7 +364,7 @@ size_t SerialDeviceImpl::timeout() const
 {
     struct termios ios;
 
-    if( ::tcgetattr(_fd, &ios) == -1 )
+    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set time out", PT_SOURCEINFO);
 
     return ios.c_cc[VTIME] * 100 ;
@@ -453,7 +378,7 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 
 void SerialDeviceImpl::flush()
 {
-    ::tcflush(_fd, TCIFLUSH);
+    ::tcflush(IODeviceImpl::fd(), TCIFLUSH);
 }
 
 } //namespace System

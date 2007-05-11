@@ -212,9 +212,11 @@ class PT_SYSTEM_API SerialDevice : public IODevice
     protected:
         virtual void _close();
 
-        virtual IOResult& _beginRead(char* buffer, size_t n, bool& eof);        
+        virtual IOResult& _beginRead(char* buffer, size_t n, bool& eof);
 
-        virtual size_t _endRead(IOResult& result, bool& eof);        
+        virtual size_t _endRead(IOResult& result, bool& eof);
+
+        virtual size_t _read(char* buffer, size_t count, bool& eof);
 
         virtual size_t _write(const char* buffer, size_t count);
 

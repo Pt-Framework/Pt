@@ -42,15 +42,9 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         void open(int fd);
 
-        virtual IODeviceImpl* impl()
-        { return this; }
-
-        int fd() const
-        { return _fd;}
-
     protected:
         void _close()
-        { ::close(_fd); }
+        { IODeviceImpl::close(); }
 
         IOResult& _beginRead(char* buffer, size_t n, bool& eof);
 
@@ -64,10 +58,6 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         { return true; }
 
         virtual void _sync() const;
-
-    private:
-        int _fd;
-        IOResultImpl _result;
 };
 
 

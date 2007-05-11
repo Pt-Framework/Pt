@@ -21,8 +21,8 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include <ios>
-#include <Pt/System/IODevice.h>
+#include "IOResultImpl.h"
+
 
 namespace Pt {
 
@@ -35,43 +35,30 @@ namespace System {
 
             virtual ~IODeviceImpl();
 
-            virtual int fd() const = 0;
-    };
-
-
-    class IOResultImpl : public IOResult
-    {
-        public:
-            IOResultImpl()
-            : IOResult()
-            , _fd(-1)
-            {}
-
-            virtual IOResultImpl* impl()
-            { return this; }
-
-            void setFd(int fd)
-            { _fd = fd; }
-
             int fd() const
             { return _fd; }
 
-            void attach(char* buffer, size_t size)
-            {
-                _buffer = buffer;
-                _bufferSize = size;
-            }
+            virtual void open(const std::string& path, std::ios_base::openmode mode);
 
-            char* buffer() const
-            { return _buffer; }
+            virtual void open(int fd)
+            { _fd = fd; }
 
-            size_t bufferSize() const
-            { return _bufferSize; }
+            //! @brief Closes the I/O device
+            virtual void close();
+
+            virtual IOResult& beginRead(char* buffer, size_t n, bool& eof);
+
+            virtual size_t endRead(IOResult& result, bool& eof);
+
+            //! @brief Read bytes from device
+            virtual size_t read( char* buffer, size_t count, bool& eof );
+
+            //! @brief Write bytes to device
+            virtual size_t write( const char* buffer, size_t count );
 
         private:
             int _fd;
-            char* _buffer;
-            size_t _bufferSize;
+            IOResultImpl _result;
     };
 
 }//namespace System

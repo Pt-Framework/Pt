@@ -20,15 +20,129 @@
  ***************************************************************************/
 #include "IODeviceImpl.h"
 
-namespace Pt{ 
+#include <Pt/System/IOError.h>
+#include <cerrno>
+#include <unistd.h>
+#include <fcntl.h>
+
+
+namespace Pt{
+
 namespace System{
+
+IODeviceImpl::IODeviceImpl()
+: _fd(-1)
+{ }
+
+
 
 IODeviceImpl::~IODeviceImpl()
 { }
 
-IODeviceImpl::IODeviceImpl()
-{ }
+
+void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode)
+{
+    int flags = O_RDONLY;
+
+    if( (mode & std::ios_base::in ) && (mode & std::ios_base::out) )
+    {
+        flags |= O_RDWR;
+    }
+    else if(mode & std::ios_base::out)
+    {
+        flags |= O_WRONLY;
+    }
+    else if(mode & std::ios_base::in  )
+    {
+        flags |= O_RDONLY;
+    }
+
+    flags |= O_NONBLOCK | O_NOCTTY;
+
+    _fd = ::open( path.c_str(), flags );
+    if(_fd == -1)
+        throw OpenFailed("open failed", PT_SOURCEINFO);
+}
+
+
+void IODeviceImpl::close()
+{
+
+    if(_fd != -1)
+    {
+        if( ::close(_fd) != 0 )
+            throw IOError("Could not close file handle", PT_SOURCEINFO);
+
+        _fd = -1;
+    }
+}
+
+
+IOResult& IODeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    _result.setFd(_fd);
+    _result.attach(buffer, n);
+    return _result;
+}
+
+
+size_t IODeviceImpl::endRead(IOResult& result, bool& eof)
+{
+    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
+    return n;
+}
+
+
+size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
+{
+    eof = false;
+    ssize_t ret = 0;
+
+    while(true)
+    {
+        ret = ::read(_fd, (void*)buffer, count);
+        eof = (ret == 0) ;
+
+        if(ret >= 0)
+            break;
+
+        if(errno == EINTR) // signal interrupt
+            continue;
+
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
+
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+    }
+
+    return ret;
+}
+
+
+size_t IODeviceImpl::write( const char* buffer, size_t count )
+{
+    ssize_t ret = 0;
+
+    while(true)
+    {
+        ret = ::write(_fd, (const void*)buffer, count);
+
+        if(ret >= 0)
+            break;
+
+        if(errno == EINTR) // signal interrupt
+            continue;
+
+        if(errno == EAGAIN) // non-blocking and no data yet
+            return 0;
+
+        throw IOError("Could not read from file handle", PT_SOURCEINFO);
+    }
+
+    return ret;
+}
 
 
 }//namespaec System
+
 }//namespace Pt

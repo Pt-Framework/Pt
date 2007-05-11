@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Drner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,8 +20,10 @@
 #include "Pt/System/SerialDevice.h"
 #include "SerialDeviceImpl.h"
 
-namespace Pt{
-namespace System{
+
+namespace Pt {
+
+namespace System {
 
 SerialDevice::SerialDevice()
 : _impl( 0 )
@@ -29,12 +31,14 @@ SerialDevice::SerialDevice()
     _impl = new SerialDeviceImpl();
 }
 
+
 SerialDevice::SerialDevice( const std::string& file, std::ios_base::openmode mode)
 : _impl( 0 )
 {
     _impl = new SerialDeviceImpl();
     this->open( file, mode );
 }
+
 
 SerialDevice::~SerialDevice()
 {
@@ -48,6 +52,7 @@ SerialDevice::~SerialDevice()
     delete _impl;
 }
 
+
 void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
 {
     if( this->valid() ) {
@@ -60,85 +65,108 @@ void SerialDevice::open( const std::string& file, std::ios_base::openmode mode )
     IODevice::setEof(false);
 }
 
+
 IOResult& SerialDevice::_beginRead(char* buffer, size_t n, bool& eof)
 { 
     return _impl->beginRead(buffer, n, eof); 
-}   
+}
+
 
 size_t SerialDevice::_endRead(IOResult& result, bool& eof)
 {
     return _impl->endRead(result, eof); 
 }
 
+
 void SerialDevice::setBaudRate( BaudRate rate )
 {
     _impl->setBaudRate( rate );
 }
+
 
 SerialDevice::BaudRate SerialDevice::baudRate() const
 {
     return _impl->baudRate();
 }
 
+
 void SerialDevice::setCharSize( int size )
 {
     _impl->setCharSize( size );
 }
+
 
 int SerialDevice::charSize() const
 {
     return _impl->charSize();
 }
 
+
 void SerialDevice::setStopBits( StopBits bits )
 {
     _impl->setStopBits( bits );
 }
+
 
 SerialDevice::StopBits SerialDevice::stopBits() const
 {
     return _impl->stopBits();
 }
 
+
 void SerialDevice::setParity( Parity parity )
 {
     _impl->setParity( parity );
 }
+
 
 SerialDevice::Parity SerialDevice::parity() const
 {
     return _impl->parity();
 }
 
+
 void SerialDevice::setFlowControl( FlowControl flowControl )
 {
     _impl->setFlowControl(  flowControl );
 }
+
 
 SerialDevice::FlowControl SerialDevice::flowControl() const
 {
     return _impl->flowControl();
 }
 
+
 void SerialDevice::setTimeout( size_t msec )
 {
     _impl->setTimeout( msec );
 }
+
 
 size_t SerialDevice::timeout() const
 {
     return _impl->timeout();
 }
 
+
 void SerialDevice::_close()
 {
     _impl->close();
 }
 
+
+size_t SerialDevice::_read(char* buffer, size_t count, bool& eof)
+{
+    return _impl->read( buffer, count, eof );
+}
+
+
 size_t SerialDevice::_write(const char* buffer, size_t count)
 {
     return _impl->write( buffer, count );
 }
+
 
 void SerialDevice::flush()
 {
