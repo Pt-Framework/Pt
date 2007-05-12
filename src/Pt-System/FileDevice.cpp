@@ -84,9 +84,9 @@ size_t FileDevice::size() const
 }
 
 
-FileDevice::pos_type FileDevice::_seek(off_type offset, SeekMode mode)
+FileDevice::pos_type FileDevice::_seek(off_type offset, std::ios::seekdir sd)
 {
-    return _impl->seek(offset, mode);
+    return _impl->seek(offset, sd);
 }
 
 size_t FileDevice::_read( char* buffer, size_t count, bool& eof )

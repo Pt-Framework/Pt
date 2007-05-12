@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Drner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -224,17 +224,6 @@ namespace System {
 
         if(!_ioDevice || !_ioDevice->seekable() )
             return pos_type(-1);
-
-        typename BasicIODevice<CharT>::SeekMode sm = BasicIODevice<CharT>::SeekCurrent;
-        if(sd == std::ios_base::beg) {
-            sm = BasicIODevice<CharT>::SeekBegin;
-        }
-        else if(sd == std::ios_base::cur) {
-            sm = BasicIODevice<CharT>::SeekCurrent;
-        }
-        else { // ios::end
-            sm = BasicIODevice<CharT>::SeekEnd;
-        }
 
         return pos_type(-1);
     }

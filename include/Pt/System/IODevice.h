@@ -65,12 +65,17 @@ class BasicIODevice : protected NonCopyable {
             Idle
         };
 
-        //TODO use std::seekmode
-        enum SeekMode {
-            SeekCurrent,
-            SeekBegin,
-            SeekEnd
-        };
+        //TODO use std::ios::seekmode
+        //enum SeekMode {
+        //    SeekCurrent,
+        //    SeekBegin,
+        //    SeekEnd
+        //};
+        //
+        // NOTE: we use std::ios::seekdir now which has the same three values:
+        //       enum seekdir {
+        //            beg, cur, end
+        //       }
 
         //TODO: implement  open() and openAsync()
         enum ReadWriteMode
@@ -182,9 +187,9 @@ class BasicIODevice : protected NonCopyable {
             \return the new abosulte read positing.
             \throw IOError
         */
-        pos_type seek(off_type offset, SeekMode mode)
+        pos_type seek(off_type offset, std::ios::seekdir sd)
         {
-            off_type ret = this->_seek(offset, mode);
+            off_type ret = this->_seek(offset, sd);
             if( ret != off_type(-1) )
                 setEof(false);
 
@@ -223,7 +228,7 @@ class BasicIODevice : protected NonCopyable {
             \throw IOError
         */
         pos_type position()
-        { return this->seek(0, SeekCurrent); }
+        { return this->seek(0, std::ios::cur); }
 
         //! @brief Test if the I/O device object is valid
         /*!
@@ -285,7 +290,7 @@ class BasicIODevice : protected NonCopyable {
         virtual bool _waitable() const = 0;
 
         //! @brief Move the next read position to the given offset
-        virtual pos_type _seek(off_type, SeekMode)
+        virtual pos_type _seek(off_type, std::ios::seekdir)
         { throw IOError("Could not seek on device.", PT_SOURCEINFO); }
 
         //! @brief Synchronize device

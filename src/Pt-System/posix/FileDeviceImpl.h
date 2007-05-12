@@ -43,7 +43,7 @@ class FileDeviceImpl : public IODeviceImpl
 
         bool seekable() const;
 
-        pos_type seek(off_type offset, IODevice::SeekMode mode);
+        pos_type seek(off_type offset, std::ios::seekdir sd);
 
         void resize(off_type size);
 
