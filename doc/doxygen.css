@@ -18,6 +18,9 @@ H1 {
 H2 {
 	font-size: 150%;
 	color: #154374;
+    padding-left: 24px;
+    background: url(section_head.png) no-repeat left center;
+    position: relative;
 }
 H3 {
        font-size: 120%;
@@ -51,38 +54,6 @@ DIV.navtab {
        margin-right: 15px;
        padding: 2px;
 }
-
-.docs-page-header {
-	padding:5px 10px 5px 15px;
-	color:white;
-	font-weight:bold;
-	background:#C30014;
-	border: 1px solid gray;
-	border-bottom: none;
-	-moz-border-radius: 12px 12px 0px 0px;
-	height:1.1em;
-}
-
-.docs-page-body {
-	background:rgb(229, 229, 229);
-	margin:0px;
-	padding:10px;
-	border: 1px solid gray;
-	border-top: none;
-	-moz-border-radius: 0px 0px 12px 12px;
-	height:11em;
-}
-
-.docs-page-body ul {
-	padding:0px;
-	margin:0px;
-	margin-left:35px;
-}
-
-.docs-page-body a {
-	text-decoration: none;
-}
-
 
 TD.navtab {
        font-size: 70%;
@@ -426,14 +397,14 @@ HR { height: 1px;
 /* the main content of the page */
 #content    {
     padding: 0em 1em 1em 1em;
-    margin-left: 19em;
+    margin-left: 18em;
 }
 
 #content h2 {
   padding-left: 24px;
   background: url(section_head.png) no-repeat left center;
   position: relative;
-  left: -26px;
+  /*left: -26px;*/
 }
 
 
@@ -471,4 +442,36 @@ HR { height: 1px;
 .sidebar a:hover {
     text-decoration: none;
     font-weight: bold;
+}
+
+
+.docs-page-header {
+    padding:5px 10px 5px 15px;
+    color:white;
+    font-weight:bold;
+    background:#C30014;
+    border: 1px solid gray;
+    border-bottom: none;
+    -moz-border-radius: 12px 12px 0px 0px;
+    height:1.1em;
+}
+
+.docs-page-body {
+    background:rgb(229, 229, 229);
+    margin:0px;
+    padding:10px;
+    border: 1px solid gray;
+    border-top: none;
+    -moz-border-radius: 0px 0px 12px 12px;
+    height:11em;
+}
+
+.docs-page-body ul {
+    padding:0px;
+    margin:0px;
+    margin-left:35px;
+}
+
+.docs-page-body a {
+    text-decoration: none;
 }

@@ -7,45 +7,51 @@
     <div id="content">
         <h2>The Power in your Hands</h2>
         <p>
-            Boost your daily performance with the Platinum C++ framework! With Pt your
-            applications are portable to many platforms without change. Its clean and
-            concise design assists you in writing robust and highly reusable code.
+            Platinum is a comprehensive C++ framework, that allows
+            developers to write high-performance applications for many
+            platforms with only one codebase. It provides a large amount of
+            featurs and is still remarkably easy to use. It intergrates well
+            into existing toolkits and frameworks.
         </p>
 
-        <b>...unleash the power of Pt and C++ onto your programs today!</b>
+        <b>...unleash the power of Pt today!</b>
 
         <br><br>
 
-        <h3>Portablility</h3>
         <p>
-            Platinum is extremely portable and runs on everything from embedded devices up
-            to large servers. The supported platforms include Windows, Windows CE,
-            Linux, QNX, Unix with many more to come. Pt lets you spend your time on
-            your application taking away the pain of low-level programming.
+            A consistent API for advanced object modeling, multithreading,
+            synchronous and asynchronous I/O, file-system access, system
+            programming, plugins, networking, database access, graphics, XML
+            processing and graphical user interfaces is provided on all
+            supported platforms.
         </p>
 
-        <h3>Performance</h3>
+        <p>
+            Pt can be used on embedded devices, desktops or large servers.
+            The supported platforms include Windows, Windows CE, Linux, QNX,
+            and Unix. It lets you spend your time on your application without
+            tedious low-level programming.
+        </p>
+
         <p>
             A high degree of performance is achieved through the use of modern C++
-            features. Your program will benefit from the many optimizations
-            included in the framework.
+            features. Programs will benefit from the many optimizations included
+            in the framework.
         </p>
 
-        <h3>Easy to use</h3>
         <p>
-            Platinum is designed from the ground up to be flexible and extensible.
-            It provides simple solutions to your problems. Programs written with
-            Platinum tend to be significantly shorter and much easier to understand.
+            Pt is designed from the ground up to be flexible and extensible.
+            It provides simple solutions to your problems without being intrusive.
+            It integrates well with existing code bases or other toolkits and
+            frameworks. Programs written with Pt tend to be significantly
+            shorter and much easier to understand.
         </p>
 
-        <h3>Open Source</h3>
         <p>
             Its not just open, its free! Published under the LGPL it allows you
-            to write commercial applications and be part of the great community that
-            develops Pt and determines its future.
+            to write commercial and open-source applications and be part of the
+            great community that develops Pt and determines its future.
         </p>
-
-        <br>
 
         <h2>Latest News</h2>
         <b><a href="news.html">25-02-2007, New Project Website</a></b><br>
