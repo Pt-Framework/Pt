@@ -54,7 +54,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
         void close();
 
-        pos_type seek( off_type offset, IODevice::SeekMode mode );
+        pos_type seek( off_type offset, std::ios::seekdir sd );
 
         size_t size();
 

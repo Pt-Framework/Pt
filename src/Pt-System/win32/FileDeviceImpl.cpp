@@ -84,7 +84,7 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
     try
     {
         if(mode & std::ios_base::ate )
-            this->seek(0, IODevice::SeekEnd);
+            this->seek(0, std::ios::end);
     }
     catch(...)
     {
@@ -157,20 +157,20 @@ size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
     return readBytes;
 }
 
-FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, IODevice::SeekMode mode)
+FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd)
 {
     DWORD whence = FILE_BEGIN;
-    switch(mode)
+    switch(sd)
     {
-        case IODevice::SeekBegin:
+        case std::ios::beg:
             whence = FILE_BEGIN;
             break;
 
-        case IODevice::SeekCurrent:
+        case std::ios::cur:
             whence = FILE_CURRENT;
             break;
 
-        case IODevice::SeekEnd:
+        case std::ios::end:
             whence = FILE_END;
             break;
     }
@@ -283,7 +283,7 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
     bool eof;
     size_t ret = this->read(buffer, count, eof);
     if(ret > 0)
-        this->seek(-((off_type)ret), IODevice::SeekCurrent);
+        this->seek(-((off_type)ret), std::ios::cur);
 
     return ret;
 }
