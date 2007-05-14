@@ -46,7 +46,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         size_t endRead(IOResult& result, bool& eof);
        
-        //size_t read( char* buffer, size_t count, bool& eof );        
+        size_t read( char* buffer, size_t count, bool& eof );        
         size_t write( const char* buffer, size_t count );
 
         void flush();

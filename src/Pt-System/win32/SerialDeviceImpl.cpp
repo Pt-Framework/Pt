@@ -152,7 +152,7 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     return readBytes;
 }
 
-/*size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD length;
 
@@ -175,7 +175,7 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     }
     
     return length;
-}*/
+}
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
