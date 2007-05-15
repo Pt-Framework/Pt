@@ -136,38 +136,42 @@ class SelectorTest : public Pt::Unit::TestSuite, public Pt::Connectable
 
         void WaitIODevice()
         {
-            Selector    selector;
-            Pipe        pipe;
+            const int size = 10;
+            char buffer[size];
+            std::string out("Hello World, where do you want to GOTO day!");
 
-            selector.addDevice( pipe.input(), Selector::WaitInput );
+            Pipe pipe;
+            pipe.output().write( out.c_str(), out.size() );            
 
-            const int           size = 10;
-            char                buffer[size];
-            size_t              sz;
-            std::stringstream   input;
-            std::string         out("Hello World, where do you want to GOTO day!");
-            
-            pipe.output().write(out.c_str(), out.size());            
-            
-            while (selector.wait(100))
+            std::string readData;
+            Selector selector;
+            while( true )
             {
-                memset(&buffer, 0, size);
-                sz = pipe.input().read(buffer, size);
-                input.write(buffer, sz);        
-            }            
+                IOResult& result = pipe.input().beginRead(buffer, size);
+                selector.complete(result);
+                bool avail = selector.wait(1000);
+                if(!avail)
+                    break;
 
-            PT_UNIT_ASSERT(input.str() == out);
+                size_t sz = pipe.input().endRead(result);
+                readData.append(buffer, sz);
+            }
+
+            PT_UNIT_ASSERT(readData == out);
         }        
 
         void WaitIODeviceTimeOut()
         {
+            const int size = 10;
+            char buffer[size];
             Selector    selector;
             Pipe        pipe;
             Clock       clock;
             TimeValue   TimeValue;
             size_t      timeout = 100; //ms
 
-            selector.addDevice( pipe.input(), Selector::WaitInput );
+            IOResult& result = pipe.input().beginRead(buffer, size);
+            selector.complete( result );
 
             clock.start();
             bool sucess = selector.wait(timeout);
