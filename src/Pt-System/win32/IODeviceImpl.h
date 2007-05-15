@@ -46,11 +46,6 @@ namespace System {
     class IOResultImpl : public IOResult
     {
         public:
-            IOResultImpl()
-            : IOResult()
-            , _handle(INVALID_HANDLE_VALUE)
-            {}
-
             virtual IOResultImpl* impl()
             { return this; }
 
@@ -60,26 +55,42 @@ namespace System {
             HANDLE handle() const
             { return _handle; }
 
-			virtual void onComplete()
-			{
-				switch ( this->device()->asyncState() )
-				{
-					case IODevice::Reading:
-						this->device()->inputReady();
-						break;
+			virtual void onComplete() = 0;
 
-					case IODevice::Writing:
-						this->device()->outputReady();
-						break;
-
-					default:
-						throw std::logic_error("Invalid async state" + PT_SOURCEINFO);
-				}
-			}
-
+		protected:
+            IOResultImpl()
+            : IOResult()
+            , _handle(INVALID_HANDLE_VALUE)
+            {}
+ 
 		private:
             HANDLE _handle;
     };
+
+	class ReadResult : public IOResultImpl
+	{
+        public:
+            ReadResult()
+            {}
+
+			virtual void onComplete()
+			{
+				this->device()->inputReady();
+			}
+	};
+
+
+	class WriteResult : public IOResultImpl
+	{
+        public:
+            WriteResult()
+            {}
+
+			virtual void onComplete()
+			{
+				this->device()->outputReady();
+			}
+	};
 
 } //namespace
 

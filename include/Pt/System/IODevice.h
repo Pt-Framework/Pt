@@ -39,6 +39,17 @@ namespace System {
 class IOResult;
 class IODeviceImpl;
 
+struct IO
+{
+    enum Mode {
+        Sync  = 0x0000,
+        Async = 0x0001
+    };
+
+	virtual ~IO() 
+	{}
+};
+
 /** @brief Endpoint for I/O operations
 
     This class serves as the base class for all kinds of I/O devices. The
@@ -52,33 +63,12 @@ class IODeviceImpl;
     %IODevice that is ready to perform I/O.
 */
 template <typename CharT>
-class BasicIODevice : protected NonCopyable {
+class BasicIODevice : public IO, protected NonCopyable {
     public:
         typedef typename std::char_traits<CharT>::pos_type pos_type;
         typedef typename std::char_traits<CharT>::off_type off_type;
 
     public:
-        // TODO: move to IOResultImpl where needed
-        enum AsyncState {
-            Reading,
-            Writing,
-            Idle
-        };
-
-        enum Mode {
-            Sync  = 0x0000,
-            Async = 0x0001
-        };
-
-    public:
-        //! @brief Default Constructor
-        BasicIODevice()
-        : _valid(false)
-        , _eof(false)
-        , _async(false)
-        , _asyncState(Idle)
-        { }
-
         //! @brief Destructor
         virtual ~BasicIODevice()
         { }
@@ -95,20 +85,15 @@ class BasicIODevice : protected NonCopyable {
             }
         }
 
-        AsyncState asyncState() const
-        { return _asyncState; }
-
         IOResult& beginRead(CharT* buffer, size_t n)
         {
             IOResult& result = _beginRead(buffer, n, _eof);
             result.init(*this);
-            _asyncState = Reading;
             return result;
         }
 
         size_t endRead(IOResult& result)
         {
-            _asyncState = Idle;
             return _endRead(result, _eof);
         }
 
@@ -247,6 +232,13 @@ class BasicIODevice : protected NonCopyable {
         Signal<> outputReady;
 
     protected:
+        //! @brief Default Constructor
+        BasicIODevice()
+        : _valid(false)
+        , _eof(false)
+        , _async(false)
+        { }
+
         virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof) = 0;
 
         virtual size_t _endRead(IOResult& result, bool& eof) = 0;
@@ -296,7 +288,6 @@ class BasicIODevice : protected NonCopyable {
         bool _valid;
         bool _eof;
         bool _async;
-        AsyncState  _asyncState;
 };
 
 typedef BasicIODevice<char> IODevice;

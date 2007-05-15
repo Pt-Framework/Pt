@@ -32,7 +32,7 @@ namespace System {
 PipeIODevice::PipeIODevice()
 : _handle(INVALID_HANDLE_VALUE)
 {
-	_result.init(*this);
+	_readResult.init(*this);
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -59,10 +59,12 @@ PipeIODevice::~PipeIODevice()
 
 
 
-void PipeIODevice::open(HANDLE handle)
+void PipeIODevice::open(HANDLE handle, bool isAsync)
 {
     _handle = handle;
-    setValid(true);
+    this->setValid(true);
+    this->setEof(false);
+    this->setAsync(isAsync);
 }
 
 
@@ -87,13 +89,15 @@ IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
         }
     }
 
-    _result.setHandle(_readOv.hEvent);
-    return _result;
+    _readResult.setHandle(_readOv.hEvent);
+    return _readResult;
 }
 
 
 size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
 {    
+	assert(&result == &_readResult);
+    
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
@@ -191,7 +195,7 @@ void PipeIODevice::_sync() const
 
 
 
-PipeImpl::PipeImpl()
+PipeImpl::PipeImpl(bool isAsync)
 {
     std::stringstream ss;
     ss<<"\\\\.\\pipe\\ptpipe"<<_nameId;
@@ -218,8 +222,8 @@ PipeImpl::PipeImpl()
     if(outputHandle == INVALID_HANDLE_VALUE)
         throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
 
-    _inputDevice.open(inputHandle);
-    _outputDevice.open(outputHandle);
+    _inputDevice.open(inputHandle, isAsync);
+    _outputDevice.open(outputHandle, isAsync);
 
     _nameId++;
 }

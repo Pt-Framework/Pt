@@ -37,7 +37,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual ~PipeIODevice();
 
-        virtual void open(HANDLE handle);
+        virtual void open(HANDLE handle, bool isAsync);
 
         virtual HANDLE deviceHandle() const;        
 
@@ -64,16 +64,16 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         virtual void _sync() const;
 
      private:
-     	IOResultImpl	_result;
-        HANDLE      	_handle;
-        OVERLAPPED  	_readOv;
-        OVERLAPPED  	_writeOv;
+     	ReadResult _readResult;
+        HANDLE     _handle;
+        OVERLAPPED _readOv;
+        OVERLAPPED _writeOv;
 };
 
 class PipeImpl
 {
     public:
-        PipeImpl();
+        PipeImpl(bool isAsync);
 
         ~PipeImpl();
 

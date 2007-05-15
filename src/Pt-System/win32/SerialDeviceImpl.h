@@ -37,7 +37,7 @@ class SerialDeviceImpl : public IODeviceImpl
         SerialDeviceImpl();
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, std::ios_base::openmode mode );
+        void open( const std::string& file, std::ios_base::openmode mode, bool isAsync );
 
         //! @brief Closes the I/O device
         void close();
@@ -78,14 +78,14 @@ class SerialDeviceImpl : public IODeviceImpl
         void writeCommState( DCB& commState );
         void readCommState( DCB& commState ) const;
 
-        HANDLE           _handle;
-        DCB              _orgCommState;
-        OVERLAPPED       _ovRead;
-        OVERLAPPED       _ovWrite;
-        OVERLAPPED       _ovStatus;
-        HANDLE           _terminateEv;
-        DWORD            _eventMask;
-        IOResultImpl     _result;
+        HANDLE      _handle;
+        DCB         _orgCommState;
+        OVERLAPPED  _ovRead;
+        OVERLAPPED  _ovWrite;
+        OVERLAPPED  _ovStatus;
+        HANDLE     _terminateEv;
+        DWORD      _eventMask;
+        ReadResult _result;
 };
 
 }//namespace System

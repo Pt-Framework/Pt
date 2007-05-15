@@ -26,6 +26,7 @@
 #include <Pt/SourceInfo.h>
 #include <Pt/Gfx/Color.h>
 #include <vector>
+#include <string.h>
 
 
 namespace Pt {
@@ -302,7 +303,7 @@ inline void inputGeneric(std::basic_istream<CharT>& is, Gfx::Color<Gfx::ARgb>& v
 
 inline void Pt::AnyTraits<Gfx::Color<Gfx::ARgb> >::input(std::istream& is, Gfx::Color<Gfx::ARgb>& value)
 {
-    while ( std::isspace( is.peek() ) )
+    while ( isspace( is.peek() ) )
     {
         is.get();
     }

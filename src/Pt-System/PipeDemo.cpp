@@ -3,6 +3,7 @@
 #include <Pt/System/Selector.h>
 #include <Pt/System/FileDevice.h>
 #include <iostream>
+#include <fstream>
 
 void onInput()
 {

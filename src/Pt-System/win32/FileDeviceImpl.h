@@ -42,7 +42,7 @@ class FileDeviceImpl  : public IODeviceImpl
     public:
         FileDeviceImpl();
 
-        FileDeviceImpl( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
+        //FileDeviceImpl( const char* path, std::ios_base::openmode mode, bool isAsync );
 
         ~FileDeviceImpl();
 
@@ -50,7 +50,7 @@ class FileDeviceImpl  : public IODeviceImpl
 
 		size_t endRead(IOResult& result, bool& eof);
 
-        void open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
+        void open( const char* path, std::ios_base::openmode mode, bool isAsync );
 
         void close();
 
@@ -74,10 +74,10 @@ class FileDeviceImpl  : public IODeviceImpl
     private:
         enum { Reading, Writing, Idle } _state;
 
-        HANDLE          _handle;
-        OVERLAPPED      _readOv;
-        OVERLAPPED      _writeOv;
-        IOResultImpl    _result;
+        HANDLE     _handle;
+        OVERLAPPED _readOv;
+        OVERLAPPED _writeOv;
+        ReadResult _readResult;
 };
 
 }//namespace System

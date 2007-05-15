@@ -41,7 +41,7 @@ FileDeviceImpl::FileDeviceImpl()
 FileDeviceImpl::~FileDeviceImpl()
 { }
 
-void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode )
+void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool isAsync )
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -68,7 +68,7 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
     if( mode & std::ios_base::trunc )
         create |= TRUNCATE_EXISTING;
 
-    if( rwMode == IODevice::Asynchronous )
+    if( isAsync )
     {
         flags |= FILE_FLAG_OVERLAPPED;
         _readOv.hEvent  = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -126,13 +126,15 @@ IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
         }
     }
 
-    _result.setHandle(_readOv.hEvent);
-    return _result;
+    _readResult.setHandle(_readOv.hEvent);
+    return _readResult;
 }
 
 
 size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
 {
+	assert(&result == &_readResult);
+	
     DWORD readBytes = 0;
 #ifndef _WIN32_WCE
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )

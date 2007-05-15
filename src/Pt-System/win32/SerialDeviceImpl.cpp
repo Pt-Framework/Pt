@@ -48,7 +48,7 @@ SerialDeviceImpl::~SerialDeviceImpl()
     CloseHandle( _terminateEv );
 }
 
-void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode )
+void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode, bool isAsync )
 {
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
 
