@@ -211,7 +211,9 @@ namespace Pt {
                 @param val Value to assign
             */
             template <typename T>
-            Any(const T& type);
+            Any(const T& type)
+            : _value(0)
+            { (*this) = type; }
 
             /** @brief Default constructor
 
@@ -261,8 +263,14 @@ namespace Pt {
                 an exception is thrown, the Any remains unaltered and the
                 exception is propagated.
             */
-            template <typename T>
-            void init();
+	    template <typename T>
+	    void Any::init()
+	    {
+		Any::Value* tmp = new BasicValue<T>;
+		delete _value;
+		_value = tmp;
+	    }
+
 
             /** @brief Init by typename
 
@@ -342,7 +350,13 @@ namespace Pt {
                 @param val Value to assign
             */
             template <typename T>
-            Any& operator=(const T& rhs);
+            Any& operator=(const T& rhs)
+            {
+                Any::Value* tmp = new BasicValue<T>(rhs);
+                delete _value;
+                _value = tmp;
+                return *this;
+            }
 
             /** @brief Assign value of other Any
 
@@ -363,7 +377,10 @@ namespace Pt {
                 @return True if equal
             */
             template <typename T>
-            bool operator==(const T& a) const;
+            bool Any::operator==(const T& value) const
+            {
+                return _value->equal( BasicValue<T>(value) );
+            }
 
             /** @brief Check if equal
 
@@ -508,6 +525,7 @@ namespace Pt {
 
 namespace Pt {
 
+/* CAUSES COMPILER ERROR ON MINGW
     template <typename T>
     Any::Any(const T& type)
     : _value(0)
@@ -536,7 +554,7 @@ namespace Pt {
     {
         return _value->equal( BasicValue<T>(value) );
     }
-
+*/
 }
 
 

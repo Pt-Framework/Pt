@@ -26,12 +26,13 @@ class PT_EXPORT MyPlugin : public TestPlugin
 				throw std::runtime_error("a != 5");
 				
 			std::fstream fs;
-			
+
 			int n = 0;
 			std::stringstream ss("1");
-		    Pt::Text::TextStream ts(ss, new Pt::Text::Utf8Codec);
-		    std::basic_iostream<Pt::Char>& bs = ts;
+		 	Pt::Text::TextStream ts(ss, new Pt::Text::Utf8Codec);
+			std::basic_iostream<Pt::Char>& bs = ts;
 			bs >> n;
+
 			
 			float f = 0;
 			Pt::String s(L"5.0");
