@@ -26,9 +26,9 @@ namespace Pt {
 
 namespace System {
 
-Pipe::Pipe()
+Pipe::Pipe(bool isAsync)
 {
-    _impl = new PipeImpl();
+    _impl = new PipeImpl(isAsync);
 }
 
 

@@ -119,7 +119,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             \param mode     The open mode
             \param synchron  The Read/Write mode
         */
-        SerialDevice( const std::string& file, std::ios_base::openmode mode );
+        SerialDevice( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
 
         //! @brief Destructor
         virtual ~SerialDevice();
@@ -129,7 +129,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             \param file The serial device file
             \param mode The open mode
         */
-        void open( const std::string& file, std::ios_base::openmode mode );
+        void open( const std::string& file, std::ios_base::openmode mode, bool isAsync = Sync );
 
         //! @brief Sets the baud rate
         /*!

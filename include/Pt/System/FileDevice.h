@@ -37,11 +37,11 @@ class PT_SYSTEM_API FileDevice : public IODevice
     public:
         FileDevice();
 
-        FileDevice( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode = Synchronous );
+        FileDevice( const char* path, std::ios_base::openmode mode, bool m = Sync );
 
         ~FileDevice();
 
-        void open( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode = Synchronous );
+        void open( const char* path, std::ios_base::openmode mode, bool m = Sync );
 
         const char* path() const
         { return _path.c_str(); }

@@ -70,7 +70,7 @@ class PT_SYSTEM_API Pipe : public NonCopyable
             The default constructor will create the pipe and the appropriate
             IODevices to read and write to the pipe.
         */
-        Pipe();
+        Pipe(bool isAsync = IODevice::Sync);
 
         /** @brief Destructor
 

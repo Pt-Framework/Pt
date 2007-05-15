@@ -40,7 +40,7 @@ IODeviceImpl::~IODeviceImpl()
 { }
 
 
-void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode)
+void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
 {
     int flags = O_RDONLY;
 
@@ -57,11 +57,30 @@ void IODeviceImpl::open(const std::string& path, std::ios_base::openmode mode)
         flags |= O_RDONLY;
     }
 
-    flags |= O_NONBLOCK | O_NOCTTY;
+    if(isAsync)
+        flags |= O_NONBLOCK;
+
+    if(mode & std::ios::trunc)
+        flags |= O_TRUNC;
+
+    flags |=  O_NOCTTY;
 
     _fd = ::open( path.c_str(), flags );
     if(_fd == -1)
         throw OpenFailed("open failed", PT_SOURCEINFO);
+}
+
+
+void IODeviceImpl::open(int fd, bool isAsync)
+{
+    _fd = fd;
+
+    if(isAsync)
+    {
+        int flags = fcntl(_fd, F_GETFL);
+        flags |= O_NONBLOCK ;
+        fcntl(_fd, F_SETFL, O_NONBLOCK);
+    }
 }
 
 
@@ -140,6 +159,14 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
     }
 
     return ret;
+}
+
+
+void IODeviceImpl::sync() const
+{
+    int ret = fsync(_fd);
+    if(ret != 0)
+        throw IOError("Could not sync handle", PT_SOURCEINFO);
 }
 
 

@@ -44,10 +44,11 @@ PipeIODevice::~PipeIODevice()
 }
 
 
-void PipeIODevice::open(int fd)
+void PipeIODevice::open(int fd, bool isAsync)
 {
-    IODeviceImpl::open(fd);
+    IODeviceImpl::open(fd, isAsync);
     this->setValid(true);
+    this->setAsync(isAsync);
 }
 
 
@@ -77,20 +78,20 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
 
 void PipeIODevice::_sync() const
 {
-    fsync( IODeviceImpl::fd() );
+    IODeviceImpl::sync();
 }
 
 
 
 
-PipeImpl::PipeImpl()
+PipeImpl::PipeImpl(bool isAsync)
 {
     int fds[2];
     if(-1 == ::pipe(fds) )
         throw OpenFailed("pipe", PT_SOURCEINFO);
 
-    _input.open( fds[0] );
-    _output.open( fds[1] );
+    _input.open( fds[0] ,isAsync );
+    _output.open( fds[1], isAsync );
 }
 
 

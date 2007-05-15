@@ -41,7 +41,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open(const std::string& path, std::ios_base::openmode mode);
+        void open(const std::string& path, std::ios_base::openmode mode, bool isAsync );
 
         void close();
 

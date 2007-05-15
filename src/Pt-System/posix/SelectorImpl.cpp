@@ -91,10 +91,6 @@ bool SelectorImpl::wait(unsigned int msecs)
     for( iter = _readers.begin(); iter != _readers.end(); ++iter )
     {
         IOResult* result = *iter;
-
-        if( result->device()->waitable() == false )
-            continue;
-
         int fd = result->impl()->fd();
         FD_SET( fd, &rfds );
         maxfd = std::max( maxfd , fd );

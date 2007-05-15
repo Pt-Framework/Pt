@@ -23,7 +23,7 @@ int main( int argc, char* argv[] )
     file.open("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
 	file.seek(0, Pt::System::IODevice::SeekBegin);*/
 
-    Pt::System::Pipe pipe;
+    Pt::System::Pipe pipe(Pt::System::IODevice::Sync);
     connect(pipe.input().inputReady, onInput);
     pipe.output().write(out.c_str(), out.size());    
 

@@ -30,11 +30,11 @@ FileDevice::FileDevice()
     _impl = new FileDeviceImpl();
 }
 
-FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode )
+FileDevice::FileDevice( const char* path, std::ios_base::openmode mode, bool isAsync )
 : _mode(mode)
 {
     _impl = new FileDeviceImpl();
-    this->open( path, mode, rwMode);
+    this->open( path, mode, isAsync);
 }
 
 FileDevice::~FileDevice()
@@ -46,19 +46,20 @@ FileDevice::~FileDevice()
     delete _impl;
 }
 
-void FileDevice::open( const char* path, std::ios_base::openmode mode, ReadWriteMode rwMode )
+void FileDevice::open( const char* path, std::ios_base::openmode mode, bool isAsync )
 {
     if( this->valid() ) {
         this->close();
     }
 
-    _impl->open(path, mode, rwMode );
+    _impl->open(path, mode, isAsync );
 
     _mode = mode;
     _path = path;
 
     IODevice::setValid(true);
     IODevice::setEof(false);
+    IODevice::setAsync(isAsync);
 }
 
 void FileDevice::_close()

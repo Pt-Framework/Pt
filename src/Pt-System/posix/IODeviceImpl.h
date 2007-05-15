@@ -38,10 +38,9 @@ namespace System {
             int fd() const
             { return _fd; }
 
-            virtual void open(const std::string& path, std::ios_base::openmode mode);
+            virtual void open(const std::string& path, std::ios_base::openmode mode, bool isAsync);
 
-            virtual void open(int fd)
-            { _fd = fd; }
+            virtual void open(int fd, bool isAsync);
 
             //! @brief Closes the I/O device
             virtual void close();
@@ -55,6 +54,8 @@ namespace System {
 
             //! @brief Write bytes to device
             virtual size_t write( const char* buffer, size_t count );
+
+            virtual void sync() const;
 
         private:
             int _fd;

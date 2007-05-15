@@ -65,23 +65,9 @@ class BasicIODevice : protected NonCopyable {
             Idle
         };
 
-        //TODO use std::ios::seekmode
-        //enum SeekMode {
-        //    SeekCurrent,
-        //    SeekBegin,
-        //    SeekEnd
-        //};
-        //
-        // NOTE: we use std::ios::seekdir now which has the same three values:
-        //       enum seekdir {
-        //            beg, cur, end
-        //       }
-
-        //TODO: implement  open() and openAsync()
-        enum ReadWriteMode
-        {
-            Synchronous = 1,
-            Asynchronous
+        enum Mode {
+            Sync  = 0x0000,
+            Async = 0x0001
         };
 
     public:
@@ -89,6 +75,7 @@ class BasicIODevice : protected NonCopyable {
         BasicIODevice()
         : _valid(false)
         , _eof(false)
+        , _async(false)
         , _asyncState(Idle)
         { }
 
@@ -167,16 +154,6 @@ class BasicIODevice : protected NonCopyable {
         bool seekable() const
         { return _seekable(); }
 
-        //! @brief Returns true if device is able to wait.
-        /**
-            Tests if the device is able to wait i.e. on a remote location
-            like a network device.
-
-            \return true if the device is able to wait, false otherwise.
-        */
-        bool waitable() const
-        { return _waitable(); }
-
         //! @brief Move the next read position to the given offset
         /**
             Tries to move the current read position to the given offset.
@@ -249,6 +226,11 @@ class BasicIODevice : protected NonCopyable {
         bool eof() const
         { return _eof; }
 
+        /** @brief Returns true if the device operates in asynchronous mode
+        */
+        bool async() const
+        { return _async; }
+
         /** @brief Notifies about availavle data
 
             This signal is send when the IODevice is monitored
@@ -286,9 +268,6 @@ class BasicIODevice : protected NonCopyable {
         virtual bool _seekable() const
         { return false; }
 
-        //! @brief Returns true if device is remote
-        virtual bool _waitable() const = 0;
-
         //! @brief Move the next read position to the given offset
         virtual pos_type _seek(off_type, std::ios::seekdir)
         { throw IOError("Could not seek on device.", PT_SOURCEINFO); }
@@ -309,9 +288,14 @@ class BasicIODevice : protected NonCopyable {
         void setEof(bool eof)
         { _eof = eof; }
 
+        //! @brief Sets or unsets the device to eof
+        void setAsync(bool async)
+        { _async = async; }
+
     private:
-        bool        _valid;
-        bool        _eof;
+        bool _valid;
+        bool _eof;
+        bool _async;
         AsyncState  _asyncState;
 };
 

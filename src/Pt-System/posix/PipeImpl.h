@@ -40,7 +40,7 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         ~PipeIODevice();
 
-        void open(int fd);
+        void open(int fd, bool isAsync);
 
     protected:
         void _close()
@@ -54,9 +54,6 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         virtual size_t _write(const char* buffer, size_t count);
 
-        virtual bool _waitable() const
-        { return true; }
-
         virtual void _sync() const;
 };
 
@@ -64,7 +61,7 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 class PipeImpl
 {
     public:
-        PipeImpl();
+        PipeImpl(bool isAsync);
 
         ~PipeImpl();
 

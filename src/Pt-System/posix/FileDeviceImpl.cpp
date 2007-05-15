@@ -35,7 +35,7 @@ FileDeviceImpl::FileDeviceImpl()
 FileDeviceImpl::~FileDeviceImpl()
 { }
 
-void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode )
+void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool isAsync )
 {
     int flags = O_RDONLY;
 
@@ -51,18 +51,16 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, IODev
         flags |= O_RDONLY;
     }
 
-    if( rwMode == IODevice::Asynchronous)
+    if(isAsync)
         flags |= O_NONBLOCK;
-    
+
     if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
     _fd = ::open(path, flags, 0644);
-    
-    _openMode = mode;
 
     if(_fd == -1) {
-        throw IOError("Could not open file handle", PT_SOURCEINFO);
+        throw OpenFailed("open failed", PT_SOURCEINFO);
     }
 
     try {
@@ -101,20 +99,6 @@ bool FileDeviceImpl::seekable() const
     return false;
 }
 
-
-IOResult& FileDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
-{
-    _result.setFd(_fd);
-    _result.attach(buffer, n);
-    return _result;
-}
-
-
-size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
-{
-    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
-    return n;
-}
 
 
 FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir sd )
@@ -163,47 +147,6 @@ size_t FileDeviceImpl::size()
     return buff.st_size;
 }
 
-size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
-{
-    eof = false;
-
-    retry:
-
-    ssize_t ret = ::read(_fd, (void*)buffer, count);
-    if(ret == -1) 
-    {
-        if(errno == EINTR) // signal interrupt
-            goto retry;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not read from file handle", PT_SOURCEINFO);
-    }
-
-    if(ret == 0)
-        eof = true;
-
-    return ret;
-}
-
-size_t FileDeviceImpl::write(const char* buffer, size_t count)
-{
-    retry:
-
-    ssize_t ret = ::write(_fd, (const void*)buffer, count);
-    if(ret == -1) {
-        if(errno == EINTR) // signal interrupt
-            goto retry;
-
-        if(errno == EAGAIN) // non-blocking and no data yet
-            return 0;
-
-        throw IOError("Could not write to file handle", PT_SOURCEINFO);
-    }
-
-    return ret;
-}
 
 size_t FileDeviceImpl::peek(char* buffer, size_t count)
 {
@@ -217,12 +160,7 @@ size_t FileDeviceImpl::peek(char* buffer, size_t count)
     return ret;
 }
 
-void FileDeviceImpl::sync() const
-{
-    int ret = fsync(_fd);
-    if(ret != 0)
-        throw IOError("Could not sync handle", PT_SOURCEINFO);
-}
+
 /*
 const IOEvent& FileDeviceImpl::event( FdsType fdsType )
 {

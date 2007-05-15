@@ -37,7 +37,7 @@ class FileDeviceImpl : public IODeviceImpl
         FileDeviceImpl();
         ~FileDeviceImpl();
 
-        void open(const char* path, std::ios_base::openmode mode, IODevice::ReadWriteMode rwMode );
+        void open(const char* path, std::ios_base::openmode mode, bool isAsync );
 
         void close();
 
@@ -48,18 +48,8 @@ class FileDeviceImpl : public IODeviceImpl
         void resize(off_type size);
 
         size_t size();
- 
-        IOResult& beginRead(char* buffer, size_t n, bool& eof);
-
-        size_t endRead(IOResult& result, bool& eof);
-
-        size_t read(char* buffer, size_t count, bool& _eof);
-
-        size_t write(const char* buffer, size_t count);
 
         size_t peek(char* buffer, size_t count);
-
-        void sync() const;
 
         int fd() const
         { return _fd; }
@@ -67,12 +57,8 @@ class FileDeviceImpl : public IODeviceImpl
         bool waitable() const
         { return true; }
 
-        std::ios_base::openmode mode() const
-        { return _openMode; }
-
     private:
         int _fd;
-        std::ios_base::openmode _openMode;
         IOResultImpl _result;
 };
 
