@@ -118,10 +118,5 @@ void FileDevice::_sync() const
         _impl->sync();
 }
 
-bool FileDevice::_waitable() const
-{
-    return _impl->waitable();
-}
-
 } // namespace System
 } // namespace Pt

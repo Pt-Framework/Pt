@@ -54,9 +54,6 @@ class FileDeviceImpl : public IODeviceImpl
         int fd() const
         { return _fd; }
 
-        bool waitable() const
-        { return true; }
-
     private:
         int _fd;
         IOResultImpl _result;

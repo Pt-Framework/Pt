@@ -219,9 +219,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         virtual size_t _read(char* buffer, size_t count, bool& eof);
 
         virtual size_t _write(const char* buffer, size_t count);
-
-        virtual bool _waitable() const
-        { return true; }
 };
 
 } //namespace System
