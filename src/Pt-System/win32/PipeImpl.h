@@ -24,6 +24,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include "IODeviceImpl.h"
+#include "ReadResult.h"
 #include <windows.h>
 
 namespace Pt {

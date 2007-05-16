@@ -24,7 +24,7 @@ int main( int argc, char* argv[] )
     file.open("test.txt", std::ios::in|std::ios::out, Pt::System::IODevice::Asynchronous);
 	file.seek(0, Pt::System::IODevice::SeekBegin);*/
 
-    Pt::System::Pipe pipe(Pt::System::IODevice::Sync);
+    Pt::System::Pipe pipe(Pt::System::IODevice::Async);
     connect(pipe.input().inputReady, onInput);
     pipe.output().write(out.c_str(), out.size());    
 
@@ -50,6 +50,11 @@ int main( int argc, char* argv[] )
         sz = pipe.input().endRead(res);
         std::cerr.write( buffer, sz ) << "\n";
     }
+
+    Pt::System::Pipe pipe2(Pt::System::IODevice::Async);
+    pipe2.output().write(out.c_str(), out.size());    
+
+    size_t readedBytes = pipe2.input().read(buffer, size);
 
     std::cerr << std::endl;
     return 0;

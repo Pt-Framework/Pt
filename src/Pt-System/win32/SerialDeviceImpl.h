@@ -27,6 +27,7 @@
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 #include "IODeviceImpl.h"
+#include "ReadResult.h"
 
 namespace Pt{
 namespace System{

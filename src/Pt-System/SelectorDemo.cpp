@@ -17,7 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Main.h>
+/*#include <Pt/Main.h>
 #include <Pt/System/Selector.h>
 #include <Pt/System/SerialDevice.h>
 #include <fstream>
@@ -41,7 +41,7 @@ class Multiplexer : public Pt::Connectable
             _device2.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device2.setParity(Pt::System::SerialDevice::ParityEven);
             _device2.setTimeout( 10 );
-*/
+*//*
 
             //_selector.addDevice( _device, Pt::System::Selector::WaitInput );
             Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
@@ -79,12 +79,16 @@ class Multiplexer : public Pt::Connectable
         //Pt::System::SerialDevice _device2;
         Pt::System::Selector       _selector;
         std::ofstream              _out;
-};
+};*/
 
-
+#include "windows.h"
 int main( int argc, char* argv[] )
 {
-    try
+    HANDLE h = CreateEvent(NULL, TRUE, TRUE, NULL);
+
+    WaitForSingleObject(h, INFINITE);
+ 
+    /*try
     {
         Multiplexer m;
         m.run();
@@ -93,7 +97,7 @@ int main( int argc, char* argv[] )
     catch( const std::exception& e )
     {
         std::cerr << e.what() << std::endl;
-    }
+    }*/
 
     return 0;
 }

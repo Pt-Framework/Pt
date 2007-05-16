@@ -26,6 +26,7 @@
 #include "Pt/System/FileDevice.h"
 #include "Pt/System/IODevice.h"
 #include "IODeviceImpl.h"
+#include "ReadResult.h"
 
 #include <windows.h>
 #include <ios>

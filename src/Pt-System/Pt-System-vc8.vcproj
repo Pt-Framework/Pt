@@ -816,6 +816,26 @@
 					>
 				</File>
 				<File
+					RelativePath=".\posix\IODeviceImpl.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Pocket PC 2003 (ARMV4)"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Pocket PC 2003 (ARMV4)"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\wince\IODeviceImpl.h"
 					>
 				</File>
@@ -836,7 +856,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\wince\SelectorImpl.cpp"
+					RelativePath=".\posix\SelectorImpl.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Pocket PC 2003 (ARMV4)"
@@ -920,6 +940,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\posix\IODeviceImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\posix\IOResultImpl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\posix\MutexImpl.h"
 					>
 				</File>
@@ -933,6 +961,10 @@
 				</File>
 				<File
 					RelativePath=".\posix\RWLockImpl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\posix\SelectorImpl.h"
 					>
 				</File>
 				<File
@@ -1000,6 +1032,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\win32\IOResultImpl.h"
+					>
+				</File>
+				<File
 					RelativePath=".\win32\MutexImpl.h"
 					>
 				</File>
@@ -1013,6 +1049,10 @@
 				</File>
 				<File
 					RelativePath=".\win32\ProcessImplBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\ReadResult.h"
 					>
 				</File>
 				<File
@@ -1049,6 +1089,10 @@
 				</File>
 				<File
 					RelativePath=".\win32\win32.h"
+					>
+				</File>
+				<File
+					RelativePath=".\win32\WriteResult.h"
 					>
 				</File>
 			</Filter>

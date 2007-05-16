@@ -83,7 +83,7 @@ Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;
 
 Main SelectorDemo : SelectorDemo.cpp ;
-Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
+#Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SelectorDemo : bin ;
 
 Main PipeDemo : PipeDemo.cpp ;

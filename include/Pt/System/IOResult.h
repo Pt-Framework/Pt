@@ -38,6 +38,8 @@ namespace System {
     class IOResult : protected NonCopyable
     {
         public:
+            static const unsigned int WaitInfinite = static_cast<size_t>(-1);         
+
             IOResult()
             : _device(0)
             {}
@@ -54,6 +56,8 @@ namespace System {
             {
                 _device = &device;
             }
+
+            virtual bool wait(unsigned int msecs = WaitInfinite) = 0;            
 
             Signal< IOResult& > canceled;
 

@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "SerialDeviceImpl.h"
+
 
 void readMousePnp()
 {
@@ -83,27 +85,54 @@ int main( int argc, char* argv[] )
         const int size = 300;
         char buffer[size];
 
-        std::string port = "/dev/ttyS0";
+        //std::string port = "/dev/ttyS0";
+        std::string port = "COM8:";
         std::cerr << "Opening " << port << std::endl;
         Pt::System::SerialDevice serialDevice(port, std::ios_base::in);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
         serialDevice.setParity(Pt::System::SerialDevice::ParityNone);
-        serialDevice.setTimeout(100000);
+        serialDevice.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
+        serialDevice.setTimeout(100);
 
         Pt::System::Selector selector;
 
+        size_t count = 0;
+
+        DWORD waitMask = 0;
+
+ 
+    DWORD length;
+
+        DWORD waitCommMask = EV_BREAK | EV_RXCHAR | EV_RXFLAG;
+        SetCommMask( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, waitCommMask );    
+
         while(true)
         {
-            Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
+           /* Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
             selector.complete(res);
             bool available = selector.wait();
             if(available)
             {
                 size_t n = serialDevice.endRead(res);
-                std::cerr.write(buffer, n);
+                count += n;
+                std::cerr<<count<<std::endl;
+                //std::cerr.write(buffer, n);
+            }*/
+
+            DWORD waitMask = 0;        
+        
+            std::cerr<<"Start waiting: "<<waitCommMask<<std::endl;
+            bool retVal = ( WaitCommEvent( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, &waitMask, NULL )  == TRUE );
+
+            std::cerr<<"ComEvent: "<<waitMask<<std::endl;
+
+            if (ReadFile( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, buffer, size, &length, 0 ) == FALSE)
+            {
+                std::cerr<<"Read error"<<std::endl;
             }
+            std::cerr.write(buffer, length) << std::endl;
         }
 
     }

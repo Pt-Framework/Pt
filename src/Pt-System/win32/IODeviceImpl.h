@@ -42,56 +42,6 @@ namespace System {
 			virtual HANDLE deviceHandle() const  = 0;			
 	};
 
-
-    class IOResultImpl : public IOResult
-    {
-        public:
-            virtual IOResultImpl* impl()
-            { return this; }
-
-            void setHandle(HANDLE h)
-            { _handle = h; }
-
-            HANDLE handle() const
-            { return _handle; }
-
-			virtual void onComplete() = 0;
-
-		protected:
-            IOResultImpl()
-            : IOResult()
-            , _handle(INVALID_HANDLE_VALUE)
-            {}
- 
-		private:
-            HANDLE _handle;
-    };
-
-	class ReadResult : public IOResultImpl
-	{
-        public:
-            ReadResult()
-            {}
-
-			virtual void onComplete()
-			{
-				this->device()->inputReady();
-			}
-	};
-
-
-	class WriteResult : public IOResultImpl
-	{
-        public:
-            WriteResult()
-            {}
-
-			virtual void onComplete()
-			{
-				this->device()->outputReady();
-			}
-	};
-
 } //namespace
 
 } //namespace

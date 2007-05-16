@@ -264,7 +264,7 @@ namespace Pt {
                 exception is propagated.
             */
 	    template <typename T>
-	    void Any::init()
+	    void init()
 	    {
 		Any::Value* tmp = new BasicValue<T>;
 		delete _value;
@@ -377,7 +377,7 @@ namespace Pt {
                 @return True if equal
             */
             template <typename T>
-            bool Any::operator==(const T& value) const
+            bool operator==(const T& value) const
             {
                 return _value->equal( BasicValue<T>(value) );
             }

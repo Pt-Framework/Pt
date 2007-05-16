@@ -159,7 +159,8 @@ void SerialDevice::_close()
 
 size_t SerialDevice::_read(char* buffer, size_t count, bool& eof)
 {
-    return _impl->read( buffer, count, eof );
+    return 0;
+    //return _impl->read( buffer, count, eof );
 }
 
 

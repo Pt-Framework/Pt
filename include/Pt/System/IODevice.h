@@ -50,6 +50,8 @@ struct IO
 	{}
 };
 
+
+
 /** @brief Endpoint for I/O operations
 
     This class serves as the base class for all kinds of I/O devices. The
@@ -87,6 +89,9 @@ class BasicIODevice : public IO, protected NonCopyable {
 
         IOResult& beginRead(CharT* buffer, size_t n)
         {
+            if ( !async() )
+                throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
+
             IOResult& result = _beginRead(buffer, n, _eof);
             result.init(*this);
             return result;
@@ -111,8 +116,15 @@ class BasicIODevice : public IO, protected NonCopyable {
          */
         size_t read(CharT* buffer, size_t n)
         {
+            if ( async() )
+            {
+                IOResult& ioResult = beginRead(buffer, n);
+                ioResult.wait();
+                return endRead(ioResult);
+            }          
+
             size_t ret = this->_read(buffer, n, _eof);
-            return ret;
+            return ret;            
         }
 
         //! @brief Write data to I/O device

@@ -74,7 +74,6 @@ bool Selector::updateTimer(size_t& timeout)
     return timerActive;
 }
 
-Pt::System::Clock clock;
 bool Selector::wait(unsigned int msecs)
 {    
     size_t timerTimeout = Selector::WaitInfinite;
