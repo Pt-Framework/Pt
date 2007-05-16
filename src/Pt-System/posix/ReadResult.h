@@ -18,48 +18,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IODEVICEIMPL_H
-#define PT_SYSTEM_IODEVICEIMPL_H
+#ifndef PT_SYSTEM_READRESULT_H
+#define PT_SYSTEM_READRESULT_H
 
-#include "ReadResult.h"
+#include "IOResultImpl.h"
+
+#include <sys/select.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <cerrno>
 
 
 namespace Pt {
 
 namespace System {
 
-    class IODeviceImpl
+    class ReadResult : public IOResultImpl
     {
         public:
-            IODeviceImpl();
+            ReadResult()
+            {}
 
-            virtual ~IODeviceImpl();
+        protected:
+            virtual bool _wait(unsigned int msecs)
+            {
+                fd_set wfds;
+                FD_ZERO(&wfds);
 
-            int fd() const
-            { return _fd; }
+                fd_set fds;
+                FD_ZERO(&fds);
+                FD_SET(  this->fd(), &fds );
 
-            virtual void open(const std::string& path, std::ios_base::openmode mode, bool isAsync);
-
-            virtual void open(int fd, bool isAsync);
-
-            //! @brief Closes the I/O device
-            virtual void close();
-
-            virtual IOResult& beginRead(char* buffer, size_t n, bool& eof);
-
-            virtual size_t endRead(IOResult& result, bool& eof);
-
-            //! @brief Read bytes from device
-            virtual size_t read( char* buffer, size_t count, bool& eof );
-
-            //! @brief Write bytes to device
-            virtual size_t write( const char* buffer, size_t count );
-
-            virtual void sync() const;
-
-        private:
-            int _fd;
-            ReadResult _result;
+                return select( this->fd(), fds, wfds, msecs);
+            }
     };
 
 }//namespace System

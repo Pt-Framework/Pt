@@ -95,46 +95,6 @@ namespace System {
             size_t _bufferSize;
     };
 
-    class ReadResult : public IOResultImpl
-    {
-        public:
-            ReadResult()
-            {}
-
-        protected:
-            virtual bool _wait(unsigned int msecs)
-            {
-                fd_set wfds;
-                FD_ZERO(&wfds);
-
-                fd_set fds;
-                FD_ZERO(&fds);
-                FD_SET(  this->fd(), &fds );
-
-                return select( this->fd(), fds, wfds, msecs);
-            }
-    };
-
-    class WriteResult : public IOResultImpl
-    {
-        public:
-            WriteResult()
-            {}
-
-        protected:
-            virtual bool _wait(unsigned int msecs)
-            {
-                fd_set rfds;
-                FD_ZERO(&rfds);
-
-                fd_set fds;
-                FD_ZERO(&fds);
-                FD_SET(  this->fd(), &fds );
-
-                return select( this->fd(), rfds, fds, msecs);
-            }
-    };
-
 }//namespace System
 
 }//namespace Pt
