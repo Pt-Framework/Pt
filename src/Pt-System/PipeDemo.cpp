@@ -51,10 +51,12 @@ int main( int argc, char* argv[] )
         std::cerr.write( buffer, sz ) << "\n";
     }
 
+    std::cerr << "\nSync read with async pipe:\n";
     Pt::System::Pipe pipe2(Pt::System::IODevice::Async);
-    pipe2.output().write(out.c_str(), out.size());    
+    pipe2.output().write(out.c_str(), out.size());
 
-    size_t readedBytes = pipe2.input().read(buffer, size);
+    size_t readBytes = pipe2.input().read(buffer, size);
+    std::cerr.write(buffer, readBytes);
 
     std::cerr << std::endl;
     return 0;

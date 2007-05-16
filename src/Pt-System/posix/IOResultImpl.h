@@ -21,8 +21,13 @@
 #ifndef PT_SYSTEM_IORESULTIMPL_H
 #define PT_SYSTEM_IORESULTIMPL_H
 
+#include <Pt/System/IOError.h>
 #include <Pt/System/IOResult.h>
 #include <ios>
+
+#include <sys/select.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 
 namespace Pt {
@@ -32,11 +37,6 @@ namespace System {
     class IOResultImpl : public IOResult
     {
         public:
-            IOResultImpl()
-            : IOResult()
-            , _fd(-1)
-            {}
-
             virtual IOResultImpl* impl()
             { return this; }
 
@@ -58,10 +58,79 @@ namespace System {
             size_t bufferSize() const
             { return _bufferSize; }
 
+        protected:
+            IOResultImpl()
+            : IOResult()
+            , _fd(-1)
+            {}
+
+            bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs)
+            {
+                timeval* timeout = 0;
+                struct   timeval tv;
+                if(msecs != IOResult::WaitInfinite)
+                {
+                    tv.tv_sec = msecs / 1000;
+                    tv.tv_usec = (msecs % 1000) * 1000;
+                    timeout = &tv;
+                }
+
+                int ret = -1;
+                while( true )
+                {
+                    ret = ::select( maxfd + 1, &rfds, &wfds, 0, timeout );
+                    if( ret != -1 )
+                        break;
+
+                    if( errno != EINTR )
+                        throw IOError( "select failed", PT_SOURCEINFO );
+                }
+
+                return ret > 0;
+            }
+
         private:
             int _fd;
             char* _buffer;
             size_t _bufferSize;
+    };
+
+    class ReadResult : public IOResultImpl
+    {
+        public:
+            ReadResult()
+            {}
+
+            virtual bool wait(unsigned int msecs)
+            {
+                fd_set wfds;
+                FD_ZERO(&wfds);
+
+                fd_set fds;
+                FD_ZERO(&fds);
+                FD_SET(  this->fd(), &fds );
+
+                return select( this->fd(), fds, wfds, msecs);
+            }
+    };
+
+    class WriteResult : public IOResultImpl
+    {
+        public:
+            WriteResult()
+            {}
+
+            virtual bool wait(unsigned int msecs)
+            {
+                fd_set rfds;
+                FD_ZERO(&rfds);
+
+                fd_set fds;
+                FD_ZERO(&fds);
+                FD_SET(  this->fd(), &fds );
+
+                return select( this->fd(), rfds, fds, msecs);
+            }
     };
 
 }//namespace System

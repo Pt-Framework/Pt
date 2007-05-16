@@ -56,7 +56,6 @@ class FileDeviceImpl : public IODeviceImpl
 
     private:
         int _fd;
-        IOResultImpl _result;
 };
 
 } //namespace System

@@ -100,17 +100,9 @@ int main( int argc, char* argv[] )
 
         size_t count = 0;
 
-        DWORD waitMask = 0;
-
- 
-    DWORD length;
-
-        DWORD waitCommMask = EV_BREAK | EV_RXCHAR | EV_RXFLAG;
-        SetCommMask( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, waitCommMask );    
-
         while(true)
         {
-           /* Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
+            Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
             selector.complete(res);
             bool available = selector.wait();
             if(available)
@@ -119,20 +111,7 @@ int main( int argc, char* argv[] )
                 count += n;
                 std::cerr<<count<<std::endl;
                 //std::cerr.write(buffer, n);
-            }*/
-
-            DWORD waitMask = 0;        
-        
-            std::cerr<<"Start waiting: "<<waitCommMask<<std::endl;
-            bool retVal = ( WaitCommEvent( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, &waitMask, NULL )  == TRUE );
-
-            std::cerr<<"ComEvent: "<<waitMask<<std::endl;
-
-            if (ReadFile( ((Pt::System::SerialDeviceImpl*)serialDevice.impl())->_handle, buffer, size, &length, 0 ) == FALSE)
-            {
-                std::cerr<<"Read error"<<std::endl;
             }
-            std::cerr.write(buffer, length) << std::endl;
         }
 
     }

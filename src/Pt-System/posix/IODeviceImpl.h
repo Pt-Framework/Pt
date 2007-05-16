@@ -59,7 +59,7 @@ namespace System {
 
         private:
             int _fd;
-            IOResultImpl _result;
+            ReadResult _result;
     };
 
 }//namespace System

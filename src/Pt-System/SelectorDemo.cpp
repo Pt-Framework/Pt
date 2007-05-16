@@ -35,13 +35,15 @@ class Multiplexer : public Pt::Connectable
             _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device.setParity(Pt::System::SerialDevice::ParityEven);
             _device.setTimeout( 10 );
+*/
 /*
             _device2.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
             _device2.setCharSize(7);
             _device2.setStopBits(Pt::System::SerialDevice::OneStopBit);
             _device2.setParity(Pt::System::SerialDevice::ParityEven);
             _device2.setTimeout( 10 );
-*//*
+*/
+/*
 
             //_selector.addDevice( _device, Pt::System::Selector::WaitInput );
             Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
@@ -81,13 +83,9 @@ class Multiplexer : public Pt::Connectable
         std::ofstream              _out;
 };*/
 
-#include "windows.h"
+
 int main( int argc, char* argv[] )
 {
-    HANDLE h = CreateEvent(NULL, TRUE, TRUE, NULL);
-
-    WaitForSingleObject(h, INFINITE);
- 
     /*try
     {
         Multiplexer m;

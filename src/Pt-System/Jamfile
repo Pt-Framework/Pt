@@ -4,6 +4,11 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 
+Main PipeDemo : PipeDemo.cpp ;
+Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate PipeDemo : bin ;
+
+
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
@@ -86,9 +91,7 @@ Main SelectorDemo : SelectorDemo.cpp ;
 #Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SelectorDemo : bin ;
 
-Main PipeDemo : PipeDemo.cpp ;
-Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
-Main_MakeLocate PipeDemo : bin ;
+
 
 Main TimerDemo : TimerDemo.cpp ;
 Main_LinkSharedLibraries TimerDemo : Pt Pt-System Pt-Text ;
