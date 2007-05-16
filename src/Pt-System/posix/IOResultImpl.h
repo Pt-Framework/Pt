@@ -101,7 +101,8 @@ namespace System {
             ReadResult()
             {}
 
-            virtual bool wait(unsigned int msecs)
+        protected:
+            virtual bool _wait(unsigned int msecs)
             {
                 fd_set wfds;
                 FD_ZERO(&wfds);
@@ -120,7 +121,8 @@ namespace System {
             WriteResult()
             {}
 
-            virtual bool wait(unsigned int msecs)
+        protected:
+            virtual bool _wait(unsigned int msecs)
             {
                 fd_set rfds;
                 FD_ZERO(&rfds);

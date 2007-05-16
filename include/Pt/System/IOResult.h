@@ -57,9 +57,13 @@ namespace System {
                 _device = &device;
             }
 
-            virtual bool wait(unsigned int msecs = WaitInfinite) = 0;
+            bool wait(unsigned int msecs = WaitInfinite)
+            { return this->_wait(msecs); }
 
             Signal< IOResult& > canceled;
+
+        protected:
+            virtual bool _wait(unsigned int msecs) = 0;
 
         private:
             BasicIODevice<char>* _device;
