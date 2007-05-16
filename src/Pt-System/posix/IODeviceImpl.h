@@ -22,6 +22,7 @@
 #define PT_SYSTEM_IODEVICEIMPL_H
 
 #include "ReadResult.h"
+#include "WriteResult.h"
 
 
 namespace Pt {
@@ -42,24 +43,26 @@ namespace System {
 
             virtual void open(int fd, bool isAsync);
 
-            //! @brief Closes the I/O device
             virtual void close();
 
             virtual IOResult& beginRead(char* buffer, size_t n, bool& eof);
 
             virtual size_t endRead(IOResult& result, bool& eof);
 
-            //! @brief Read bytes from device
             virtual size_t read( char* buffer, size_t count, bool& eof );
 
-            //! @brief Write bytes to device
+            virtual IOResult& beginWrite(const char* buffer, size_t n);
+
+            virtual size_t endWrite(IOResult& result);
+
             virtual size_t write( const char* buffer, size_t count );
 
             virtual void sync() const;
 
         private:
             int _fd;
-            ReadResult _result;
+            ReadResult _readResult;
+            WriteResult _writeResult;
     };
 
 }//namespace System

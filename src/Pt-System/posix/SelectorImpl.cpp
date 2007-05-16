@@ -55,13 +55,13 @@ SelectorImpl::~SelectorImpl()
 
 void SelectorImpl::complete( IOResult& result )
 {
-    _readers.push_back( &result );
+    _readers.push_back( result.impl() );
 }
 
 
 void SelectorImpl::cancel( IOResult& result )
 {
-    std::vector<IOResult*>::iterator it;
+    std::vector<IOResultImpl*>::iterator it;
     for( it = _readers.begin(); it != _readers.end(); ++it )
     {
         if(&result == *it)
@@ -87,12 +87,14 @@ bool SelectorImpl::wait(unsigned int msecs)
 
     // Add all waitable handles to the read descriptor sets.
     // Not waitable handles are handled differently later
-    std::vector<IOResult*>::iterator iter;
+    std::vector<IOResultImpl*>::iterator iter;
     for( iter = _readers.begin(); iter != _readers.end(); ++iter )
     {
-        IOResult* result = *iter;
+        IOResultImpl* result = *iter;
         int fd = result->impl()->fd();
-        FD_SET( fd, &rfds );
+
+        result->add(rfds, wfds);
+        //FD_SET( fd, &rfds );
         maxfd = std::max( maxfd , fd );
     }
 
@@ -133,7 +135,7 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    std::vector<IOResult*>::iterator iter = _readers.begin();
+    std::vector<IOResultImpl*>::iterator iter = _readers.begin();
     while( iter != _readers.end() )
     {
         IOResult* result = *iter;

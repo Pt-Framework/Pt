@@ -79,6 +79,18 @@ size_t SerialDevice::_endRead(IOResult& result, bool& eof)
 }
 
 
+IOResult& SerialDevice::_beginWrite(const char* buffer, size_t n)
+{
+    return _impl->beginWrite(buffer, n);
+}
+
+
+size_t SerialDevice::_endWrite(IOResult& result)
+{
+    return _impl->endWrite(result);
+}
+
+
 void SerialDevice::setBaudRate( BaudRate rate )
 {
     _impl->setBaudRate( rate );

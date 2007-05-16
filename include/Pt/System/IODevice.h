@@ -41,13 +41,18 @@ class IODeviceImpl;
 
 struct IO
 {
-    enum Mode {
-        Sync  = 0x0000,
-        Async = 0x0001
+    enum OpenMode {
+        Sync   = 0x0000,
+        Async  = 0x0001,
+        Read   = 0x0002,
+        Write  = 0x0004,
+        AtEnd  = 0x0008,
+        Append = 0x0016,
+        Trunc  = 0x0032
     };
 
-	virtual ~IO() 
-	{}
+    virtual ~IO()
+    {}
 };
 
 
@@ -126,6 +131,21 @@ class BasicIODevice : public IO, protected NonCopyable {
             return this->_read(buffer, n, _eof);
         }
 
+        IOResult& beginWrite(const CharT* buffer, size_t n)
+        {
+            if ( !async() )
+                throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
+
+            IOResult& result = _beginWrite(buffer, n);
+            result.init(*this);
+            return result;
+        }
+
+        size_t endWrite(IOResult& result)
+        {
+            return _endWrite(result);
+        }
+
         //! @brief Write data to I/O device
         /**
             Writes n bytes from buffer to this I/O device. Returns the number
@@ -139,7 +159,16 @@ class BasicIODevice : public IO, protected NonCopyable {
             \throw IOError
          */
         size_t write(const CharT* buffer, size_t n)
-        { return this->_write(buffer, n); }
+        {
+            if ( async() )
+            {
+                IOResult& ioResult = beginWrite(buffer, n);
+                ioResult.wait();
+                return endWrite(ioResult);
+            }
+
+            return this->_write(buffer, n);
+        }
 
         //! @brief Returns true if device is seekable
         /**
@@ -250,15 +279,19 @@ class BasicIODevice : public IO, protected NonCopyable {
         , _async(false)
         { }
 
+        //! @brief Closes the I/O device
+        virtual void _close() = 0;
+
         virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof) = 0;
 
         virtual size_t _endRead(IOResult& result, bool& eof) = 0;
 
-        //! @brief Closes the I/O device
-        virtual void _close() = 0;
-
         //! @brief Read bytes from device
         virtual size_t _read(CharT* buffer, size_t count, bool& eof) = 0;
+
+        virtual IOResult& _beginWrite(const CharT* buffer, size_t n) = 0;
+
+        virtual size_t _endWrite(IOResult& result) = 0;
 
         //! @brief Write bytes to device
         virtual size_t _write(const CharT* buffer, size_t count) = 0;

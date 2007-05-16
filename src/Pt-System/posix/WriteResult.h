@@ -21,7 +21,7 @@
 #ifndef PT_SYSTEM_WRITERESULT_H
 #define PT_SYSTEM_WRITERESULT_H
 
-#include "IOResult.h"
+#include "IOResultImpl.h"
 
 #include <sys/select.h>
 #include <sys/time.h>
@@ -38,6 +38,9 @@ namespace System {
         public:
             WriteResult()
             {}
+
+            virtual void add(fd_set& readFds, fd_set writeFds)
+            { FD_SET( this->fd(), &writeFds ); }
 
         protected:
             virtual bool _wait(unsigned int msecs)

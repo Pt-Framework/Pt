@@ -70,6 +70,18 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 }
 
 
+IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
+{
+    return IODeviceImpl::beginWrite(buffer, n);
+}
+
+
+size_t PipeIODevice::_endWrite(IOResult& result)
+{
+    return IODeviceImpl::endWrite(result);
+}
+
+
 size_t PipeIODevice::_write(const char* buffer, size_t count)
 {
     return IODeviceImpl::write(buffer, count);

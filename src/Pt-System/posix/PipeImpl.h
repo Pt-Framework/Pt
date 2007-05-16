@@ -52,6 +52,10 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
 
         virtual size_t _read(char* buffer, size_t count, bool& eof);
 
+        virtual IOResult& _beginWrite(const char* buffer, size_t n);
+
+        virtual size_t _endWrite(IOResult& result);
+
         virtual size_t _write(const char* buffer, size_t count);
 
         virtual void _sync() const;

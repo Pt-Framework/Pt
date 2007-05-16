@@ -79,6 +79,19 @@ size_t FileDevice::_endRead(IOResult& result, bool& eof)
     return _impl->endRead(result, eof);
 }
 
+
+IOResult& FileDevice::_beginWrite(const char* buffer, size_t n)
+{
+    return _impl->beginWrite(buffer, n);
+}
+
+
+size_t FileDevice::_endWrite(IOResult& result)
+{
+    return _impl->endWrite(result);
+}
+
+
 size_t FileDevice::size() const
 {
     return _impl->size();

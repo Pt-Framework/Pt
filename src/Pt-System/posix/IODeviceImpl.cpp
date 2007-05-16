@@ -99,14 +99,16 @@ void IODeviceImpl::close()
 
 IOResult& IODeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
-    _result.setFd(_fd);
-    _result.attach(buffer, n);
-    return _result;
+    _readResult.setFd(_fd);
+    _readResult.attach(buffer, n);
+    return _readResult;
 }
 
 
 size_t IODeviceImpl::endRead(IOResult& result, bool& eof)
 {
+    assert( &result == &_readResult );
+
     size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
     return n;
 }
@@ -135,6 +137,23 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
     }
 
     return ret;
+}
+
+
+IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+    _writeResult.setFd(_fd);
+    _writeResult.attach( (char*)buffer, n);
+    return _writeResult;
+}
+
+
+size_t IODeviceImpl::endWrite(IOResult& result)
+{
+    assert( &result == &_writeResult );
+
+    size_t n = this->write( result.impl()->buffer(), result.impl()->bufferSize() );
+    return n;
 }
 
 

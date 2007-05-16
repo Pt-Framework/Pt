@@ -59,6 +59,10 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         size_t _endRead(IOResult& result, bool& eof);
 
+        IOResult& _beginWrite(const char* buffer, size_t n);
+
+        size_t _endWrite(IOResult& result);
+
         void _close();
 
         bool _waitable() const;

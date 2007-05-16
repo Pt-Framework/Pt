@@ -51,8 +51,7 @@ class SelectorImpl
         bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
 
     private:
-        std::vector<IOResult*> _readers;
-
+        std::vector<IOResultImpl*> _readers;
         int _wakePipe[2];
 };
 
