@@ -16,14 +16,14 @@
     </ignoreparts>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>bin/IOMonitorDemod</mainprogram>
-      <directoryradio>executable</directoryradio>
+      <mainprogram>bin/PipeDemod</mainprogram>
+      <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs/>
+      <programargs></programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars>
@@ -32,7 +32,7 @@
     </run>
     <build>
       <buildtool>make</buildtool>
-      <builddir/>
+      <builddir></builddir>
     </build>
     <make>
       <abortonerror>true</abortonerror>
@@ -40,7 +40,7 @@
       <prio>0</prio>
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
-      <defaulttarget/>
+      <defaulttarget></defaulttarget>
       <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
@@ -55,12 +55,12 @@
   </kdevcustomproject>
   <kdevdebugger>
     <general>
-      <dbgshell/>
-      <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <dbgshell></dbgshell>
+      <programargs></programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -145,7 +145,7 @@
       <root>/usr/lib/qt3-gcc3.4</root>
     </qt>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>

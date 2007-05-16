@@ -39,8 +39,6 @@ class FileDeviceImpl : public IODeviceImpl
 
         void open(const char* path, std::ios_base::openmode mode, bool isAsync );
 
-        void close();
-
         bool seekable() const;
 
         pos_type seek(off_type offset, std::ios::seekdir sd);

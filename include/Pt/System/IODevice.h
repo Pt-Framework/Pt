@@ -121,10 +121,9 @@ class BasicIODevice : public IO, protected NonCopyable {
                 IOResult& ioResult = beginRead(buffer, n);
                 ioResult.wait();
                 return endRead(ioResult);
-            }          
+            }
 
-            size_t ret = this->_read(buffer, n, _eof);
-            return ret;            
+            return this->_read(buffer, n, _eof);
         }
 
         //! @brief Write data to I/O device

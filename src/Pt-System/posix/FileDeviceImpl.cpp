@@ -73,16 +73,6 @@ void FileDeviceImpl::open( const char* path, std::ios_base::openmode mode, bool 
     }
 }
 
-void FileDeviceImpl::close()
-{
-    if(_fd != -1)
-    {
-        if( ::close(_fd) != 0 )
-            throw IOError("Could not close file handle", PT_SOURCEINFO);
-
-        _fd = -1;
-    }
-}
 
 
 bool FileDeviceImpl::seekable() const
