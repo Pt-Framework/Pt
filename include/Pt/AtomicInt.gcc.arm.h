@@ -180,6 +180,130 @@ namespace Pt {
             volatile atomic_t _value;
     };
 
+inline atomic_t atomicIncrement(volatile atomic_t& dest)
+{
+       int a, b, c;
+
+       asm volatile (  "0:\n\t"
+                               "ldr %0, [%3]\n\t"
+                               "add %1, %0, %4\n\t"
+                               "swp %2, %1, [%3]\n\t"
+                               "cmp %0, %2\n\t"
+                               "swpne %1, %2, [%3]\n\t"
+                               "bne 0b"
+                               : "=&r" (a), "=&r" (b), "=&r" (c)
+                               : "r" (&dest), "r" (1)
+                               : "cc", "memory");
+
+       return b;
+}
+
+inline atomic_t atomicDecrement(volatile atomic_t& dest)
+{
+       int a, b, c;
+
+       asm volatile (  "0:\n\t"
+                               "ldr %0, [%3]\n\t"
+                               "add %1, %0, %4\n\t"
+                               "swp %2, %1, [%3]\n\t"
+                               "cmp %0, %2\n\t"
+                               "swpne %1, %2, [%3]\n\t"
+                               "bne 0b"
+                               : "=&r" (a), "=&r" (b), "=&r" (c)
+                               : "r" (&dest), "r" (-1)
+                               : "cc", "memory");
+
+       return b;
+}
+
+
+
+
+inline atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
+{
+       int a, b;
+
+       asm volatile (    "0:\n\t"
+                                 "ldr %1, [%2]\n\t"
+                                 "cmp %1, %4\n\t"
+                                 "bne 1f\n\t"
+                                 "swp %0, %3, [%2]\n\t"
+                                 "cmp %0, %1\n\t"
+                                 "swpne %3, %0, [%2]\n\t"
+                                 "bne 0b\n\t"
+                                 "1:"
+                                 : "=&r" (a), "=&r" (b)
+                                 : "r" (&dest), "r" (exch), "r" (comp)
+                                 : "cc", "memory");
+
+       return a;
+}
+
+inline volatile void* atomicCompareExchange(volatile void*& dest, void* exch, void* comp)
+{
+       volatile void* a;
+       volatile void* b;
+
+       asm volatile (    "0:\n\t"
+                                 "ldr %1, [%2]\n\t"
+                                 "cmp %1, %4\n\t"
+                                 "bne 1f\n\t"
+                                 "swpeq %0, %3, [%2]\n\t"
+                                 "cmp %0, %1\n\t"
+                                 "swpne %3, %0, [%2]\n\t"
+                                 "bne 0b\n\t"
+                                 "1:"
+                                 : "=&r" (a), "=&r" (b)
+                                 : "r" (&dest), "r" (exch), "r" (comp)
+                                 : "cc", "memory");
+
+       return a;
+}
+
+
+inline atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
+{
+       int a;
+
+       asm volatile (  "swp %0, %2, [%1]"
+                               : "=&r" (a)
+                               : "r" (&dest), "r" (exch));
+
+       return a;
+}
+
+template <typename T>
+T* atomicExchange(volatile T*& dest, T* exch)
+{
+       T* a;
+
+       asm volatile ( "swp %0, %2, [%1]"
+                      : "=&r" (a)
+                      : "r" (&dest), "r" (exch));
+
+       return a;
+}
+
+
+inline atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
+{
+       int a, b, c;
+
+       asm volatile (  "0:\n\t"
+                               "ldr %0, [%3]\n\t"
+                               "add %1, %0, %4\n\t"
+                               "swp %2, %1, [%3]\n\t"
+                               "cmp %0, %2\n\t"
+                               "swpne %1, %2, [%3]\n\t"
+                               "bne 0b"
+                               : "=&r" (a), "=&r" (b), "=&r" (c)
+                               : "r" (&dest), "r" (add)
+                               : "cc", "memory");
+
+       return a;
+}
+
+
 } // namespace Pt
 
 #endif

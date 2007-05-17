@@ -82,6 +82,65 @@ namespace Pt {
             volatile atomic_t _value;
     };
 
+
+inline atomic_t atomicIncrement(volatile atomic_t& dest)
+{
+    return dest++;
+}
+
+
+inline atomic_t atomicDecrement(volatile atomic_t& dest)
+{
+    return dest--;
+}
+
+
+inline atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, atomic_t comp)
+{
+    atomic_t tmp = dest;
+
+    if(dest== comp)
+        dest = exch;
+
+    return tmp;
+}
+
+inline volatile void* atomicCompareExchange(volatile void*& dest, void* exch, void* comp)
+{
+    volatile void* tmp = dest;
+
+    if(dest== comp)
+        dest = exch;
+
+    return tmp;
+}
+
+
+inline atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
+{
+    atomic_t tmp = dest;
+    dest = exch;
+    return tmp;
+}
+
+
+template <typename T>
+T* atomicExchange(volatile T*& dest, T* exch)
+{
+    volatile T* tmp = dest;
+    dest = exch;
+    return tmp;
+}
+
+
+inline atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
+{
+    atomic_t tmp = dest;
+    dest += add;
+    return tmp;
+}
+
+
 } // namespace Pt
 
 #endif
