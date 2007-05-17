@@ -30,25 +30,25 @@
     #if defined( _i386_     ) || defined( __i386__ ) || \
         defined( __x86_64__ ) || defined( _M_IX86  )
 
-        #include "AtomicInt.gcc.x86.h"
+        #include "Atomicity.gcc.x86.h"
 
     #elif defined( __arm__ )
 
-        #include "AtomicInt.gcc.arm.h"
+        #include "Atomicity.gcc.arm.h"
 
     #elif defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
           defined( __ppc__ )
 
-        #include "AtomicInt.gcc.ppc.h"
+        #include "Atomicity.gcc.ppc.h"
 
     #elif defined( __mips__ )
 
-        #include "AtomicInt.gcc.mips.h"
+        #include "Atomicity.gcc.mips.h"
 
     #else
 
-       #include "AtomicInt.gcc.pthread.h"
+       #include "Atomicity.generic.h"
 
     #endif
 

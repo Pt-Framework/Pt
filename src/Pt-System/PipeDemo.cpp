@@ -5,12 +5,10 @@
 #include <iostream>
 #include <fstream>
 
-
 void onInput()
 {
     std::cerr << "Input: ";
 }
-
 
 int main( int argc, char* argv[] )
 {
@@ -28,8 +26,7 @@ int main( int argc, char* argv[] )
 
     Pt::System::Pipe pipe(Pt::System::IODevice::Async);
     connect(pipe.input().inputReady, onInput);
-  
-    pipe.output().write(out.c_str(), out.size());
+    pipe.output().write(out.c_str(), out.size());    
 
     Pt::System::Selector selector;
 

@@ -18,11 +18,10 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include "Pt/AtomicInt.h"
+#include "Pt/Atomicity.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
-#include "Pt/Unit/TestSchedule.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
@@ -30,96 +29,51 @@
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
     public:
-        class Protocol : public Pt::Unit::TestSchedule
-        {
-            private:
-                Pt::Args _args;
-
-            public:
-                Protocol()
-                {
-                    _args.push_back(300);
-
-                    this->includeTest( "ConstructorTest" );
-                    this->includeTest( "AdditionTest" );
-                    this->includeTest( "AssignmentTest", _args );
-                    this->includeTest( "SubstractionTest" );
-                    this->includeTest( "CompareExchange" );
-                }
-        } _protocol;
-
-    public:
         AtomicTestSuite()
-        : Pt::Unit::TestSuite("AtomicIntTest", _protocol)
+        : Pt::Unit::TestSuite("AtomicityTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "ConstructorTest", *this, &AtomicTestSuite::ConstructorTest );
-            Pt::Unit::TestSuite::registerMethod( "AssignmentTest", *this, &AtomicTestSuite::AssignmentTest );
-            Pt::Unit::TestSuite::registerMethod( "SubstractionTest", *this, &AtomicTestSuite::SubstractionTest );
-            Pt::Unit::TestSuite::registerMethod( "AdditionTest", *this, &AtomicTestSuite::AdditionTest );
-            Pt::Unit::TestSuite::registerMethod( "CompareExchange", *this, &AtomicTestSuite::CompareExchange );
-        }
-
-        virtual void setUp()
-        {
-            _value = 5;
+            Pt::Unit::TestSuite::registerMethod( "Integer", *this, &AtomicTestSuite::Integer );
+            Pt::Unit::TestSuite::registerMethod( "Pointer", *this, &AtomicTestSuite::Pointer );
         }
 
     protected:
-        void ConstructorTest()
+        void Integer()
         {
-            Pt::AtomicInt a(5);
-            PT_UNIT_ASSERT( a.value() == 5 );
+            Pt::atomic_t v = 0;
+
+            Pt::atomicIncrement(v);
+            PT_UNIT_ASSERT(v == 1);
+
+            Pt::atomicDecrement(v);
+            PT_UNIT_ASSERT(v == 0);
+
+            Pt::atomicExchange(v, 1);
+            PT_UNIT_ASSERT(v == 1);
+
+            Pt::atomicExchangeAdd(v, 3);
+            PT_UNIT_ASSERT(v == 4);
+
+            Pt::atomicCompareExchange(v, 5, 4);
+            PT_UNIT_ASSERT(v == 5);
+
+            Pt::atomicCompareExchange(v, 9, 7);
+            PT_UNIT_ASSERT(v == 5);
         }
 
-        void AssignmentTest(int value)
+        void Pointer()
         {
-            Pt::AtomicInt a;
-            a = value;
-            PT_UNIT_ASSERT( a.value() == value );
-#ifdef _MSC_VER
-			const char* p = "Hallo";
-			void* null = 0;
-			Pt::atomic_compare_exchange((void**)&p, (void*)p, (void*)null);
-            PT_UNIT_ASSERT( p == 0 );
+            int a = 0, b = 1;
+            volatile void* p = 0;
 
-			const char* p2 = "Hallo";
-			void* null2 = 0;
-			Pt::atomic_exchange((void**)&p2,(void*)null2);
-            PT_UNIT_ASSERT( p2 == 0 );
-#endif
+            Pt::atomicExchange( p, (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&a);
+
+            Pt::atomicCompareExchange( p, (void*)(&b), (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&b);
+
+            Pt::atomicCompareExchange( p, (void*)(&a), (void*)&a );
+            PT_UNIT_ASSERT(p == (void*)&b);
         }
-
-        void SubstractionTest()
-        {
-            _value -= 3;
-            PT_UNIT_ASSERT( _value.value() == 2 );
-        }
-
-        void AdditionTest()
-        {
-            Pt::AtomicInt value(5);
-            value += 3;
-            PT_UNIT_ASSERT( value.value() == 8 );
-        }
-
-        void CompareExchange()
-        {
-            Pt::AtomicInt value(8);
-            PT_UNIT_ASSERT( value.value() == 8 );
-
-            bool res = value.compareExchange(8, 10);
-            PT_UNIT_ASSERT( value.value() == 10 );
-            PT_UNIT_ASSERT( res );
-
-            res = value.compareExchange(10, 10);
-            PT_UNIT_ASSERT( res );
-
-            res = value.compareExchange(8, 10);
-            PT_UNIT_ASSERT( res == false );
-        }
-
-    private:
-        Pt::AtomicInt _value;
 };
 
 Pt::Unit::RegisterTest<AtomicTestSuite> register_AtomicTestSuite;
