@@ -117,6 +117,19 @@ size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
     return readBytes;
 }
 
+
+IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
+{ 
+	return IODeviceImpl::beginWrite(buffer, n); 
+}
+
+
+size_t PipeIODevice::_endWrite(IOResult& result)
+{
+	return IODeviceImpl::endWrite(result);
+}
+      
+
 void PipeIODevice::_close()
 {
     if(_readOv.hEvent != NULL)
@@ -204,8 +217,8 @@ PipeImpl::PipeImpl(bool isAsync)
                                      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
                                      1,
-                                     0,
-                                     0,
+                                     256,
+                                     256,
                                      1000,
                                      NULL );
 

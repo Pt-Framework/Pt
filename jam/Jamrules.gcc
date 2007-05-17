@@ -57,6 +57,11 @@ if $(TARGET_OS:L) = "nt"
 }
 
 
+# Add a compiler define
+#
+# The specified string will be returnd as a define compiler
+# option, i.e. -D on gcc or /D on vc++
+#
 rule FDefines
 { return -D$(<) ; }
 
@@ -65,35 +70,74 @@ rule FIncludes
 { return -I$(<) ; }
 
 
+# @brief Links a shared library to an executable
+#
+# @param < the target name
+# @param > list of shared libraries
 rule Main_LinkSharedLibraries
 {
-    local _target = $(<)$(SUFEXE) ;
-    Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-    NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+	local _target = $(<)$(SUFEXE) ;
+
+	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;
+	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
 }
 
 
 rule SharedLibrary_MakeLocate
 {
-    MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
+	MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
+	SEARCH_SHLIB += $(>) ;
 }
 
 
+# @brief Links a shared library to an executable
+#
+# @param < the target name
+# @param > list of shared libraries
 rule SharedLibrary_LinkSharedLibraries
 {
-    local _target = $(PRELIB)$(<)$(SUFDLL) ;
-    Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-    NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+	Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+
+    #TODO: use this instead of setting LINKFLAGS and LINKLIBS below.
+    #      This also makes SEARCH_SHLIB obsolete
+    #NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+	LINKFLAGS on $(_target) += -L$(SEARCH_SHLIB) ;	
+	LINKLIBS on $(_target) += -l$(>)$(SUFDBG) $(LINKLIBS) ;
+}
+
+# Set outputdirectory for binary files
+#
+# param 1 target name
+# param 2 file name with suffix
+# param 3 directory name
+#
+rule SetOutputDirectory
+{
+	local _outputDir = $(LOCATE_TARGET) ;
+
+	if $(3)	{
+		_outputDir = $(3) ;
+	}
+	MakeLocate $(2) : $(_outputDir) ;
+	LINKFLAGS on $(2) += -L$(3) ;
 }
 
 
+# @brief builds a shared library from object files
+#
 rule SharedLibraryFromObjects
 {
 	# Add grist to file names
-	local _sources = [ FGristFiles $(>) ] ;
+	local _sources = [ FGristObjectFiles $(>) ] ;
 
 	# Add library name decorations <lib><name><.so>
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
 
 	# setup dependencies
 	Depends exe : $(_target) ;
@@ -101,7 +145,10 @@ rule SharedLibraryFromObjects
 	Depends $(_target) : $(_sources) ;
 	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
 
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+	#MakeLocate $(_target) : $(LOCATE_TARGET) ;
+
+	# include library path
+	SEARCH_SHLIB += $(LOCATE_TARGET) ;
 
 	Clean clean : $(_target) ;
 

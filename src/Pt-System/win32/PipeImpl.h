@@ -50,6 +50,10 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
 		size_t _endRead(IOResult& resule, bool& eof);
 
+        IOResult& _beginWrite(const char* buffer, size_t n);
+
+        size_t _endWrite(IOResult& result);
+
         //! @brief Closes the I/O device
         virtual void _close();
 

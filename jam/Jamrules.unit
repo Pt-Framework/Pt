@@ -20,6 +20,9 @@ rule PtUnitTest
 
 	DEPENDS test : $(_target) ;
 
+	SetObjectOutput $(1) ;
+	SetOutputDirectory $(1) : $(_target) : $(3) ;
+
 	if $(TARGET_OS:L) = "wince"
 	{
 		LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;

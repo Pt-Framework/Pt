@@ -2,8 +2,11 @@
 #define Pt_System_WriteResult_h
 
 #include "IOResultImpl.h"
+#include "Pt/System/IODevice.h"
+
 
 namespace Pt {
+
 namespace System {
 
 class WriteResult : public IOResultImpl
@@ -17,7 +20,9 @@ class WriteResult : public IOResultImpl
 			this->device()->outputReady();
 		}
 };
+
 }
+
 }
 
 #endif

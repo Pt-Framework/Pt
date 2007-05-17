@@ -21,7 +21,7 @@ class IOResultImpl : public IOResult
 
 		virtual void onComplete() = 0;
 
-        virtual bool wait(unsigned int msecs)
+        virtual bool _wait(unsigned int msecs)
         {
            const DWORD result = WaitForSingleObject(_handle, msecs);
            return (result == WAIT_OBJECT_0);

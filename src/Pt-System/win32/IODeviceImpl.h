@@ -21,10 +21,9 @@
 #ifndef PT_SYSTEM_IODEVICEIMPL_H
 #define PT_SYSTEM_IODEVICEIMPL_H
 
-#include "Pt/System/IODevice.h"
-
-#include <windows.h>
+#include "WriteResult.h"
 #include <vector>
+#include <windows.h>
 
 
 namespace Pt {
@@ -39,7 +38,15 @@ namespace System {
 
 			virtual ~IODeviceImpl();			
 
-			virtual HANDLE deviceHandle() const  = 0;			
+			virtual HANDLE deviceHandle() const  = 0;
+			
+			virtual IOResult& beginWrite(const char* buffer, size_t n);
+
+			virtual size_t endWrite(IOResult& result);		
+			
+		private:
+		    OVERLAPPED _writeOvl;
+			WriteResult _writeResult;
 	};
 
 } //namespace

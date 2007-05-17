@@ -23,12 +23,61 @@
 namespace Pt{ 
 namespace System{
 
-IODeviceImpl::~IODeviceImpl()
-{ }
-
 IODeviceImpl::IODeviceImpl()
-{ }
+{
+    _writeOvl.Offset = 0;
+    _writeOvl.OffsetHigh = 0;
+    _writeOvl.hEvent = NULL;
+    _writeOvl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+}
 
 
+IODeviceImpl::~IODeviceImpl()
+{ 
+    if(_writeOvl.hEvent != NULL)
+        ::CloseHandle(_writeOvl.hEvent);
+}
+
+
+IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+	DWORD writtenBytes = 0;
+
+	HANDLE h = deviceHandle();
+
+	if( FALSE == WriteFile( h, (void*)buffer, n, &writtenBytes, &_writeOvl) )
+	{
+		DWORD err = GetLastError();
+		if( ERROR_IO_PENDING != GetLastError() )
+		{
+			throw IOError("Could not read from file handle", PT_SOURCEINFO);
+		}
+	}
+
+	_writeResult.setHandle(_writeOvl.hEvent);
+	return _writeResult;
+}
+
+
+size_t IODeviceImpl::endWrite(IOResult& result)
+{
+	assert(&result == &_writeResult);
+	
+	DWORD writtenBytes = 0;
+
+#ifndef _WIN32_WCE
+	if (GetOverlappedResult( deviceHandle(), &_writeOvl, &writtenBytes, FALSE) == FALSE )
+	{
+		DWORD err = GetLastError();
+		throw IOError("Could not read from file handle", PT_SOURCEINFO);
+	}
+#else
+	throw std::runtime_error("endRead not implemented for WinCe" + PT_SOURCEINFO);
+#endif
+
+	_writeOvl.Offset += writtenBytes;
+	return writtenBytes;
+}	
+			
 }//namespaec System
 }//namespace Pt
