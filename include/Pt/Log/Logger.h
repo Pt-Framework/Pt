@@ -67,7 +67,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
     private:
         class Target*     _target;
         LogLevel          _level;
-        class Message*           _msg;
+        class Message*    _msg;
         std::stringstream _ss;
 };
 

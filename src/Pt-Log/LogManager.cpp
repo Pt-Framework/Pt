@@ -49,7 +49,6 @@ LogManager::LogManager()
 
     // logger for Pt::Log
     Target* logTarget = new Target("Pt-Log", _rootTarget);
-    logTarget->setLogLevel(Pt::Log::Trace);
     _targetMap["Pt-Log"] = logTarget;
     _logger = new Logger( *logTarget );
 
