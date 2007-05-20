@@ -21,6 +21,7 @@
 #include "DllLoggerTest.h"
 
 #include "Pt/Log/Logger.h"
+#include "Pt/Log/Target.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -43,7 +44,8 @@ class LoggerTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "LogTrace", *this, &LoggerTest::LogTrace );
             Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );
 
-            
+            Pt::Log::Target::get("Pt-Log").setLogLevel(Pt::Log::Fatal);
+            Pt::Log::Target::get("LoggerTest").setLogLevel(Pt::Log::Fatal);
         }
 
     protected:

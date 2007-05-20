@@ -26,7 +26,7 @@ namespace Log {
 
 Target::Target(const std::string& name, Target* parent, Channel* channel)
 : _name(name)
-, _logLevel(Info)
+, _logLevel(Error)
 , _parent(parent)
 , _channel(channel)
 {
@@ -65,6 +65,12 @@ void Target::setChannel(const std::string& url)
 void Target::log(const Message& message)
 {
     LogManager::instance().log(this, message);
+}
+
+
+Target& Target::get(const std::string& name)
+{
+    return LogManager::instance().target(name);
 }
 
 
