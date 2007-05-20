@@ -115,7 +115,7 @@ inline Logger& trace(Logger& str)
 { str.setLogLevel(Pt::Log::Trace); return str; }
 
 
-inline Logger& endl(Logger& str)
+inline Logger& endlog(Logger& str)
 { str.endlog(); return str; }
 
 }

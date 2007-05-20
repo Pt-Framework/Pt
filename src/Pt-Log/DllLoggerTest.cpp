@@ -28,7 +28,7 @@ namespace Log {
 void DllLoggerTest()
 {
 	Pt::Log::Logger logger("DllLoggerTest");
-	logger << Pt::Log::info << "Message from a DLL" << Pt::Log::endl;
+	logger << Pt::Log::info << "Message from a DLL" << Pt::Log::endlog;
 }
 
 }
