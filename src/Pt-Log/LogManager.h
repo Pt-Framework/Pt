@@ -41,7 +41,7 @@ class PT_LOG_API Target : protected Pt::NonCopyable
     friend class LogManager;
 
     protected:
-        Target(const std::string& name, Target* parent = 0);
+        Target(const std::string& name, Target* parent = 0, Channel* channel = 0);
 
     public:
         virtual ~Target();
@@ -50,14 +50,15 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 
         LogLevel logLevel() const;
 
+        void setLogLevel(LogLevel level);
+
         void setChannel(const std::string& url);
 
         void log(const Message& msg);
 
-        static Target& get(const std::string& name);
-
     private:
         std::string _name;
+        LogLevel _logLevel;
         Target* _parent;
         Channel* _channel;
 };

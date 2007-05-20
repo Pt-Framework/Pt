@@ -33,10 +33,11 @@ namespace Pt {
 namespace Log {
 
 
-Target::Target(const std::string& name, Target* parent)
+Target::Target(const std::string& name, Target* parent, Channel* channel)
 : _name(name)
+, _logLevel(Info)
 , _parent(parent)
-, _channel(0)
+, _channel(channel)
 {
 }
 
@@ -54,7 +55,12 @@ const std::string& Target::name() const
 
 LogLevel Target::logLevel() const
 {
-    return Log::Trace;
+    return _logLevel;
+}
+
+void Target::setLogLevel(LogLevel level)
+{
+    _logLevel = level;
 }
 
 
@@ -84,15 +90,6 @@ void Target::log(const Message& message)
 }
 
 
-Target& Target::get(const std::string& name)
-{
-    Pt::System::MutexLock lock( LogManager::instance().mutex() );
-
-    return LogManager::instance().target(name);
-}
-
-
-
 
 LogManager::LogManager()
 : _rootTarget(0)
@@ -101,13 +98,19 @@ LogManager::LogManager()
     // builtin plugins
     _pluginManager.registerPlugin( consolePlugin );
 
+    Channel* ch = _pluginManager.create("console");
+    ch->open("console://");
+    _channelMap["console://"] =  ch;
+
     // root of the target hierachy
-    _rootTarget = new Target("");
-    _rootTarget->setChannel("console://");
+    _rootTarget = new Target("", 0, ch);
     _targetMap[""] = _rootTarget;
+    //_rootTarget->setChannel("console://");
 
     // logger for Pt::Log
-    Target* logTarget = new Target("Pt.Log", _rootTarget);
+    Target* logTarget = new Target("Pt-Log", _rootTarget);
+    logTarget->setLogLevel(Pt::Log::Fatal);
+    _targetMap["Pt-Log"] = logTarget;
     _logger = new Logger( *logTarget );
 
     *_logger << info << "Logging system initialized" << endl;
@@ -145,6 +148,8 @@ LogManager::~LogManager()
 
 Target& LogManager::target(const std::string& name)
 {
+    Pt::System::MutexLock lock( LogManager::instance().mutex() );
+
     *_logger << debug << "Requested target: " << name << endl;
 
     // find requested logger amongst the existing ones
@@ -179,7 +184,7 @@ Target& LogManager::target(const std::string& name)
         if( token.empty() )
         {
             *_logger << error << "invalid target: " << name << endl;
-            throw std::logic_error("Invalid logger name" + PT_SOURCEINFO);
+            throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
         }
 
         // insert a '.' before the next token unless its the first
@@ -194,7 +199,7 @@ Target& LogManager::target(const std::string& name)
         if( begin >= name.size() )
         {
             *_logger << error << "invalid target: " << name << endl;
-            throw std::logic_error("Invalid logger name" + PT_SOURCEINFO);
+            throw std::invalid_argument("Invalid logger name" + PT_SOURCEINFO);
         }
 
         // create the logger if not existing. We might want to iterate the
@@ -220,8 +225,7 @@ Target& LogManager::target(const std::string& name)
 
 Channel& LogManager::channel(const std::string& url)
 {
-    if(_logger)
-        *_logger << debug << "Requested channel: " << url << endl;
+    *_logger << debug << "Requested channel: " << url << endl;
 
     std::map<std::string, Channel*>::iterator it = _channelMap.find(url);
     if( it != _channelMap.end() )
@@ -229,15 +233,14 @@ Channel& LogManager::channel(const std::string& url)
         return *it->second;
     }
 
-    if(_logger)
-        *_logger << info << "New channel: " << url << endl;
+
+    *_logger << info << "New channel: " << url << endl;
 
     size_t colon = url.find(':');
     if(colon == std::string::npos)
     {
-        if(_logger)
-            *_logger << error << "invalid channel url: " << url << endl;
-        throw  std::logic_error("Invalid channel url" + PT_SOURCEINFO);
+        *_logger << error << "invalid channel url: " << url << endl;
+        throw  std::invalid_argument("Invalid channel url" + PT_SOURCEINFO);
     }
 
     std::string protocol = url.substr(0, colon);
@@ -245,15 +248,14 @@ Channel& LogManager::channel(const std::string& url)
     Channel* ch = _pluginManager.create(protocol);
     if(ch == 0)
     {
-        if(_logger)
-            *_logger << error << "No such channel: " << url << endl;
-        throw std::logic_error("No such channel" + PT_SOURCEINFO);
+        *_logger << error << "No such channel: " << url << endl;
+        throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
     }
 
     ch->open(url);
 
-    if(_logger)
-        *_logger << info << "Opened channel: " << url << endl;
+
+    *_logger << info << "Opened channel: " << url << endl;
 
     _channelMap[url] =  ch;
     return *ch;

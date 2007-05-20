@@ -26,7 +26,7 @@ namespace Pt {
 namespace Log {
 
 Logger::Logger(const std::string& name, LogLevel level)
-: _target( &Target::get(name) )
+: _target( &LogManager::instance().target(name) )
 , _level(level)
 , _msg( 0 )
 {
