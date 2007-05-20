@@ -89,6 +89,12 @@ Logger& operator<<(Logger& logger, const T& value)
 }
 
 
+inline Logger& operator<<(Logger& logger, std::ios_base& (*pf)(std::ios_base&))
+{
+    return logger;
+}
+
+
 inline Logger& operator<<(Logger& stream, Logger& (*pf)(Logger&))
 {
     return pf(stream);

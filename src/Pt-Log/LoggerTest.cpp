@@ -18,6 +18,8 @@
  ***************************************************************************/
 #undef PT_API_LOG_EXPORT
 
+#include "DllLoggerTest.h"
+
 #include "Pt/Log/Logger.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -33,6 +35,7 @@ class LoggerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("LoggerTest")
         {
             Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
+            Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );
         }
 
     protected:
@@ -68,6 +71,11 @@ class LoggerTest : public Pt::Unit::TestSuite
             catch(const std::invalid_argument& e)
             {  }
         }
+
+	void DllLoggerTest()
+	{
+            Pt::Log::DllLoggerTest();
+	}
 
 };
 

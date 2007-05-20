@@ -87,13 +87,13 @@ class PT_API DateTime
         DateTime& operator+=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            int days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
 
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
             if( overrun + _time.totalMSecs() > Time::MSecsPerDay)
                 days += 1;
 
-            _date += days;
+            _date += static_cast<int>(days);
 
             _time += Timespan(overrun);
             return *this;
@@ -104,12 +104,12 @@ class PT_API DateTime
         DateTime& operator-=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            int days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
 
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
             if( overrun > _time.totalMSecs() )
                 days += 1;
-            _date -= days;
+            _date -= static_cast<int>(days);
 
             _time -= Timespan( overrun );
             return *this;

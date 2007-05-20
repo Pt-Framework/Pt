@@ -57,13 +57,13 @@ namespace Pt {
 
 inline atomic_t atomicIncrement(volatile atomic_t& value)
 {
-    return InterlockedIncrementconst_cast<long*>(&value)();
+    return InterlockedIncrement( const_cast<long*>(&value) );
 }
 
 
 inline atomic_t atomicDecrement(volatile atomic_t& value)
 {
-    return InterlockedDecrement(const_cast<long*>(&value));
+    return InterlockedDecrement( const_cast<long*>(&value) );
 }
 
 
@@ -79,21 +79,21 @@ inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t new_val)
 }
 
 
-inline void* atomicExchange(volatile void*& val, void* new_val)
+inline void* atomicExchange(volatile void*& ptr, void* new_val)
 {
-    return InterlockedExchangePointer(atomvalic, new_val);
+    return InterlockedExchangePointer(&ptr, new_val);
 }
 
 
 inline atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t cmp)
 {
-    return InterlockedCompareExchange(const_cast<long*>(&value), ex, cmp)
+    return InterlockedCompareExchange(const_cast<long*>(&value), ex, cmp);
 }
 
 
-inline void* atomicCompareExchange(volatile void*& dest, void* ex, void* cmp)
+inline void* atomicCompareExchange(volatile void*& ptr, void* ex, void* cmp)
 {
-    return InterlockedCompareExchangePointer(dest, ex, cmp);
+    return InterlockedCompareExchangePointer((volatile PVOID *)&ptr, ex, cmp);
 }
 
 

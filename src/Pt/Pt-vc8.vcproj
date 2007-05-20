@@ -40,6 +40,27 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(IntDir)\$(TargetName).htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				Output="$(OutDir)\Pt.dll"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
 			Name="Debug|Pocket PC 2003 (ARMV4)"
 			OutputDirectory="..\..\bin"
 			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
@@ -74,27 +95,6 @@
 				AdditionalFiles=""
 			/>
 			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
-			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
-			>
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt.dll"
-				PreprocessorDefinitions="WIN32;NDEBUG"
-				IncludeSearchPath=""
-				ForcedIncludes=""
-				AssemblySearchPath=""
-				ForcedUsingAssemblies=""
-				CompileAsManaged=""
 			/>
 		</Configuration>
 		<Configuration
@@ -322,31 +322,31 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.gcc.arm.h"
+				RelativePath="..\..\include\Pt\Atomicity.gcc.arm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.gcc.mips.h"
+				RelativePath="..\..\include\Pt\Atomicity.gcc.mips.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.gcc.ppc.h"
+				RelativePath="..\..\include\Pt\Atomicity.gcc.ppc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.gcc.pthread.h"
+				RelativePath="..\..\include\Pt\Atomicity.gcc.x86.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.gcc.x86.h"
+				RelativePath="..\..\include\Pt\Atomicity.generic.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.h"
+				RelativePath="..\..\include\Pt\Atomicity.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\Pt\AtomicInt.msc.h"
+				RelativePath="..\..\include\Pt\Atomicity.windows.h"
 				>
 			</File>
 			<File
@@ -498,7 +498,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\StringList.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\StringStream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Timespan.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Timestamp.h"
 				>
 			</File>
 			<File

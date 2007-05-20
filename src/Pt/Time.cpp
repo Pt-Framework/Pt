@@ -113,7 +113,7 @@ int Time::secsTo(const Time &t) const
 }
 
 
-Time Time::addMSecs(int ms) const
+Time Time::addMSecs(Pt::int64_t ms) const
 {
     Time t;
     if (ms < 0)

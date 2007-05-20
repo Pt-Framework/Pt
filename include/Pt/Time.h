@@ -111,7 +111,7 @@ class PT_API Time
             This method does not change the time, but returns the time
             with the milliseconds added.
         */
-        Time addMSecs(int ms) const;
+        Time addMSecs(Pt::int64_t ms) const;
 
         /** @brief Determines milliseconds until another time
         */
@@ -156,7 +156,8 @@ class PT_API Time
         */
         Time& operator+=(const Timespan& ts)
         {
-            _msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
+            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
+            msecs = static_cast<unsigned>(msecs);
             return *this;
         }
 
@@ -165,8 +166,9 @@ class PT_API Time
         Time& operator-=(const Timespan& ts)
         {
             Pt::int64_t msecs = ts.totalMSecs();
-            int days = ( MSecsPerDay - msecs ) / MSecsPerDay;
-            _msecs = (_msecs + msecs + days * MSecsPerDay) % MSecsPerDay;
+            Pt::int64_t days = ( MSecsPerDay - msecs ) / MSecsPerDay;
+            msecs = (_msecs + msecs + days * MSecsPerDay) % MSecsPerDay;
+            _msecs = static_cast<unsigned>(msecs);
             return *this;
         }
 
