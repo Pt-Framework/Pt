@@ -55,8 +55,7 @@ namespace Log {
             static Target& get(const std::string& name);
 
         protected:
-            void setChannel(Channel& ch)
-            { _channel = &ch; }
+            void setChannel(Channel& ch);
 
         private:
             std::string _name;

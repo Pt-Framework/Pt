@@ -74,6 +74,11 @@ Target& Target::get(const std::string& name)
 }
 
 
+void Target::setChannel(Channel& ch)
+{
+    _channel = &ch;
+}
+
 }
 
 }
