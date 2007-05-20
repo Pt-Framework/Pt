@@ -44,7 +44,7 @@ enum LogLevel {
 };
 
 
-class Logger : protected Pt::NonCopyable
+class PT_LOG_API Logger : protected Pt::NonCopyable
 {
     public:
         Logger(const std::string& name, LogLevel level = Trace);
