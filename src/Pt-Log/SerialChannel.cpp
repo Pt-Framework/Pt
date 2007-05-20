@@ -16,38 +16,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Log_ConsoleChannel_h
-#define Pt_Log_ConsoleChannel_h
 
-#include <Pt/Log/Api.h>
-#include <Pt/Log/Channel.h>
-#include <string>
+#include "SerialChannel.h"
+#include <Pt/System/Url.h>
+#include <iostream>
 
 
 namespace Pt {
 
 namespace Log {
 
-class PT_LOG_API ConsoleChannel : public Channel
+SerialChannel::SerialChannel()
+: Channel()
 {
-    public:
-        ConsoleChannel();
+}
 
-        ~ConsoleChannel();
 
-    protected:
-        virtual void _open(const std::string& url);
+SerialChannel::~SerialChannel()
+{
+}
 
-        virtual void _close();
 
-        virtual void _write(const std::string& message);
-};
+void SerialChannel::_open(const std::string& urlstr)
+{
+    System::Url url(urlstr);
+    _device.open( url.path(), std::ios::out );
+}
+
+
+void SerialChannel::_close()
+{
+    _device.close();
+}
+
+
+void SerialChannel::_write(const std::string& message)
+{
+    _device.write( message.data(), message.size() );
+}
 
 } // namespace Log
 
 } // namespace Pt
-
-
-#endif
-
-

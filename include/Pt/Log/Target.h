@@ -62,6 +62,7 @@ namespace Log {
             LogLevel _logLevel;
             Target* _parent;
             Channel* _channel;
+            void* _reserved;
     };
 
 } // namespace Log

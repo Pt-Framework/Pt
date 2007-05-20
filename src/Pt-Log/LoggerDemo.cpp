@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include <Pt/Main.h>
 #include "Pt/Log/Logger.h"
+#include "Pt/Log/Target.h"
 #include "Pt/System/Thread.h"
 
 #include <iostream>
@@ -39,7 +40,7 @@ class LogThread : public Pt::System::Thread
             while(true)
             {
                 Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
-                logger.setChannel("console://");
+                logger.target().setChannel("console://");
                 logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
 
                 this->yield();
@@ -56,7 +57,7 @@ int main( int argc, char* argv[] )
 {
     try {
         Pt::Log::Logger logger("LoggerDemo.test");
-        logger.setChannel("console://");
+        logger.target().setChannel("console://");
         logger << Pt::Log::info << "start" << Pt::Log::endlog;
 
         LogThread lt0("thread 0", "logger1");

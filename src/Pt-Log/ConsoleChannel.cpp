@@ -36,7 +36,7 @@ ConsoleChannel::~ConsoleChannel()
 }
 
 
-void ConsoleChannel::_open(const std::string url)
+void ConsoleChannel::_open(const std::string& url)
 {
 }
 

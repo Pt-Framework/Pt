@@ -49,7 +49,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         bool enabled() const;
 
-        void setChannel(const std::string& url);
+        Target& target() const;
 
         template <typename T>
         Logger& write(const T& value)
@@ -69,6 +69,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
         LogLevel          _level;
         class Message*    _msg;
         std::stringstream _ss;
+        void* _reserved;
 };
 
 

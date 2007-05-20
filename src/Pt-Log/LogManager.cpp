@@ -18,6 +18,7 @@
  ***************************************************************************/
 #include "LogManager.h"
 #include "ConsoleChannel.h"
+#include "SerialChannel.h"
 #include "Pt/Exception.h"
 #include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
@@ -26,6 +27,7 @@
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
+static Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> serialPlugin("comm", "0.0.1");
 
 
 namespace Pt {
@@ -39,6 +41,7 @@ LogManager::LogManager()
 {
     // builtin plugins
     _pluginManager.registerPlugin( consolePlugin );
+    _pluginManager.registerPlugin( serialPlugin );
 
     Channel* ch = _pluginManager.create("console");
     ch->open("console://");
@@ -55,6 +58,10 @@ LogManager::LogManager()
 
     _logger = new Logger( *logTarget );
     *_logger << info << "Logging system initialized" << endlog;
+
+    //
+    // TODO: initialise Targets with properties
+    //
 
     logTarget.release();
     rootTarget.release();
@@ -152,7 +159,7 @@ Target& LogManager::target(const std::string& name)
         std::map<std::string, Target*>::iterator it = _targetMap.find(targetName);
         if( it != _targetMap.end() )
         {
-            *_logger << debug << "Using existing target: " << targetName << endlog;
+            *_logger << debug << "Found target: " << targetName << endlog;
             foundTarget = it->second;
         }
         else
@@ -203,9 +210,6 @@ Channel& LogManager::channel(const std::string& url)
         return *it->second;
     }
 
-
-    *_logger << info << "New channel: " << url << endlog;
-
     size_t colon = url.find(':');
     if(colon == std::string::npos)
     {
@@ -222,9 +226,11 @@ Channel& LogManager::channel(const std::string& url)
         throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
     }
 
+    //
+    // TODO: initialise channel with properties
+    //
+
     ch->open(url);
-
-
     *_logger << info << "Opened channel: " << url << endlog;
 
     _channelMap[url] =  ch;

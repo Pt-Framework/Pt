@@ -58,12 +58,14 @@ void Logger::setLogLevel(LogLevel level)
 
 
 LogLevel Logger::logLevel() const
-{ return _level; }
-
-
-void Logger::setChannel(const std::string& url)
 {
-    _target->setChannel(url);
+    return _level;
+}
+
+
+Target& Logger::target() const
+{
+    return *_target;
 }
 
 

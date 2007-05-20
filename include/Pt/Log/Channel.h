@@ -52,7 +52,7 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
         }
 
     protected:
-        virtual void _open(const std::string url) = 0;
+        virtual void _open(const std::string& url) = 0;
 
         virtual void _close() = 0;
 

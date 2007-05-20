@@ -16,13 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Log_Message_h
-#define Pt_Log_Message_h
+#ifndef Pt_Log_SerialChannel_h
+#define Pt_Log_SerialChannel_h
 
 #include <Pt/Log/Api.h>
-#include <Pt/Log/LogLevel.h>
-#include <Pt/SourceInfo.h>
-#include <Pt/DateTime.h>
+#include <Pt/Log/Channel.h>
+#include <Pt/System/SerialDevice.h>
 #include <string>
 
 
@@ -30,61 +29,22 @@ namespace Pt {
 
 namespace Log {
 
-class PT_LOG_API Message
+class PT_LOG_API SerialChannel : public Channel
 {
     public:
-        Message(const std::string& target, LogLevel level);
+        SerialChannel();
 
-        ~Message();
+        ~SerialChannel();
 
-        const std::string& target() const
-        { return _target; }
+    protected:
+        virtual void _open(const std::string& url);
 
-        void setText(const std::string& text)
-        { _text = text; }
+        virtual void _close();
 
-        const std::string& text() const
-        { return _text; }
-
-        void setLogLevel(LogLevel level)
-        { _level = level; }
-
-        LogLevel logLevel() const
-        { return _level; }
-
-        const DateTime& timestamp() const
-        { return _dateTime; }
-
-        void setTimestamp(const Pt::DateTime& dateTime)
-        { _dateTime = dateTime; }
-
-        const Pt::SourceInfo& sourceInfo() const
-        { return _source; }
-
-        void setSourceInfo(const SourceInfo& source)
-        { _source = source; }
-
-        long threadId() const
-        { return _threadId; }
-
-        void setThreadId(long id)
-        { _threadId = id; }
-
-        long processId() const
-        { return _procId; }
-
-        void setProcessId(long id)
-        { _procId = id; }
+        virtual void _write(const std::string& message);
 
     private:
-        std::string    _target;
-        std::string    _text;
-        LogLevel       _level;
-        Pt::SourceInfo _source;
-        Pt::DateTime   _dateTime;
-        long           _threadId;
-        long           _procId;
-        void*          _reserved;
+        Pt::System::SerialDevice _device;
 };
 
 } // namespace Log
