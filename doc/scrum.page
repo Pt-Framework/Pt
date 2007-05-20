@@ -1,22 +1,38 @@
-
 /** \page scrum Project Status
 
-The Scrum development system is used to make the development transparent to
-all developers and the audience. The backlog is a list of all featured that
-will be implemented in Platinum. Todo and Ongoing show what is currently
-under development. Done shows what has been accomplished so far.
+@htmlinclude sidebar.html
 
-- <b>Backlog</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/backlog
+\htmlonly
 
-- <b>Todo</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/todo
+    <div id="content">
+        <p>
+            The project managemenr system is used to make the development transparent to
+            all developers and the audience. The backlog is a list of all features that
+            will be implemented in Platinum. Todo and Ongoing show what is currently
+            under development. Done shows what has been accomplished so far.
 
-- <b>Ongoing</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/ongoing
+            <br>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/backlog">
+                Backlog
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/todo">
+                Todo
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/ongoing">
+                Ongoing
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/done">
+                Done
+            </a>
+       </p>
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+    </div>
 
-- <b>Done</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/done
+\endhtmlonly
 
 */
-

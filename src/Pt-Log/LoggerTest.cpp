@@ -44,8 +44,8 @@ class LoggerTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "LogTrace", *this, &LoggerTest::LogTrace );
             Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );
 
-            Pt::Log::Target::get("Pt-Log").setLogLevel(Pt::Log::Fatal);
-            Pt::Log::Target::get("LoggerTest").setLogLevel(Pt::Log::Fatal);
+            Pt::Log::Target::get("Pt-Log").setLogLevel(Pt::Log::Trace);
+            Pt::Log::Target::get("LoggerTest").setLogLevel(Pt::Log::Trace);
         }
 
     protected:

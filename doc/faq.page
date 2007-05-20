@@ -1,5 +1,17 @@
 /** \page faq FAQ
 
-No FAQs are available yet.
+@htmlinclude sidebar.html
+
+\htmlonly
+
+    <div id="content">
+        <h3>No FAQs are available yet.</h3>
+
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+    </div>
+
+\endhtmlonly
 
 */

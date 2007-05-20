@@ -1,6 +1,22 @@
 /** \page mailinglist Mailing-Lists
 
-- <b>General mailing list (Subscribe/Unsubscribe)</b> \n
-  https://lists.sourceforge.net/lists/listinfo/pt-framework-general
-*/
+@htmlinclude sidebar.html
 
+\htmlonly
+
+    <div id="content">
+        <h3>General mailing list (Subscribe/Unsubscribe)</h3>
+        <p>
+            <a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">
+                https://lists.sourceforge.net/lists/listinfo/pt-framework-general
+            </a>
+        </p>
+
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+    </div>
+
+\endhtmlonly
+
+*/

@@ -16,7 +16,7 @@
 
         <b>...unleash the power of Pt today!</b>
 
-        <br><br>
+        <br>
 
         <p>
             A consistent API for advanced object modeling, multithreading,
@@ -52,12 +52,13 @@
             to write commercial and open-source applications and be part of the
             great community that develops Pt and determines its future.
         </p>
-
+        <br>
         <h2>Latest News</h2>
+        <b><a href="news.html">21-05-2007, TR2 coming soon</a></b><br>
         <b><a href="news.html">25-02-2007, New Project Website</a></b><br>
-        <b><a href="news.html">05-02-2007, Sprint Results</a></b><br>
-        <b><a href="news.html">01-12-2006, Sprint Results</a></b><br>
-        <b><a href="news.html">01-11-2006, Scrum project management introduced</a></b><br>
+        <b><a href="news.html">05-02-2007, Development News</a></b><br>
+        <b><a href="news.html">01-12-2006, Development News</a></b><br>
+        <b><a href="news.html">01-11-2006, New Project Management</a></b><br>
         <b><a href="news.html">14-10-2006, Pt and Tntnet at LinuxWorldExpo in Cologne</a></b><br>
         <b><a href="news.html">22-09-2006, Pt on Sourceforge</a></b><br>
 

@@ -1,25 +1,47 @@
 /** \page download Download
 
-@section releases Releases
+@htmlinclude sidebar.html
 
-- <b>Platinum 1.0.0 TR-1 %Pt</b> \n
-  http://pt-framework.sourceforge.net/Platinum-1.0.0-tr1.tar.gz
+\htmlonly
 
-@section docs Documentation
+    <div id="content">
+        <h2>Releases</h2>
+        <p>
+            <a href="http://pt-framework.sourceforge.net/Platinum-1.0.0-tr1.tar.gz">
+                Platinum 1.0.0 TR-1
+            </a>
+        </p>
+        <br>
+        <h2>Documentation</h2>
+        <p>
+            <a href="http://pt-framework.sourceforge.net/platinum-programming20061013.pdf">
+                Effective Library Design with Pt
+            </a>
+        </p>
+        <br>
+        <h2>Subversion</h2>
+        <p>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk">
+                Trunk
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/tags">
+                Tags
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/branches">
+                Branches
+            </a>
+            <br>
+            <a href="https://svn.sourceforge.net/svnroot/pt-framework/tools">
+                Precompiled Development Tools
+            </a>
+        </p>
 
-- <b>Effective Library Design with %Pt</b> \n
-  http://pt-framework.sourceforge.net/platinum-programming20061013.pdf
+        <br><br><br><br><br><br><br><br><br><br>
+        <br><br><br><br><br><br><br><br><br><br>
+    </div>
 
-@section svn Subversion
+\endhtmlonly
 
-- <b>Current Development Version</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/trunk
-
-- <b>Branches and tags</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/tags \n
-  https://svn.sourceforge.net/svnroot/pt-framework/branches
-
-- <b>Precompiled Development Tools</b> \n
-  https://svn.sourceforge.net/svnroot/pt-framework/tools
 */
-

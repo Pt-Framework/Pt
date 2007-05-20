@@ -5,6 +5,14 @@
 \htmlonly
 
     <div id="content">
+        <h3>21-05-2007, TR2 coming soon</h3>
+        <p>
+            The release of a second techincal review will include support for
+            async I/O and I/O multiplexing on all available I/O devices, atomic
+            operations for integers and pointers, a logging framework and date
+            and time classes.
+        </p>
+
         <h3>25-02-2007, New Project Website</h3>
         <p>
             The new project website integrates the generated doxygen
@@ -13,7 +21,7 @@
             navigation.
         </p>
 
-        <h3>05-02-2007, Development Updates</h3>
+        <h3>05-02-2007, Development News</h3>
         <p>
                 This slightly longer development sprint has lead to the TR-1
                 release. Many improvements have been made to the core module
@@ -23,9 +31,9 @@
                 section or as a tag in the subversion repository (tags/tr1).
         </p>
 
-        <h3>05-02-2007, Sprint Results</h3>
+        <h3>05-02-2007, Development News</h3>
         <p>
-                During the last sprint, enhancements have been made to the
+                During the last month, enhancements have been made to the
                 Gfx module and the core module, Most notably to the image
                 classes and the reflection API. A new module for unit testing
                 was added. Pt::Unit allows protocol- and data-driven testing.
@@ -33,9 +41,9 @@
 
         <h3>01-11-2006, New Project Management</h3>
         <p>
-                The scrum system can now be used by developers to coordinate
-                their efforts to improve %Pt. It is not mandatory to take
-                part in the scrum process, but highly encouraged. Progress
+                The project management can now be used by developers to coordinate
+                their efforts to improve Pt. It is not mandatory to take
+                part in this process, but highly encouraged. Progress
                 can be monitored on the "Project Status" link on the Pt website.
         </p>
 
