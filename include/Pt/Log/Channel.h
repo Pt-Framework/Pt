@@ -47,32 +47,7 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
 
         void write(const Message& message)
         {
-            std::string level;
-            switch( message.logLevel() )
-            {
-                case Fatal:
-                    level = "FATAL";
-                    break;
-
-                case Error:
-                    level = "ERROR";
-                    break;
-
-                case Warn:
-                    level = "WARN";
-                    break;
-
-                case Info:
-                    level = "INFO";
-                    break;
-
-                case Debug:
-                    level = "DEBUG";
-                    break;
-
-                default: level = "TRACE";
-            };
-
+            std::string level = toString( message.logLevel() );
             this->_write(message.timestamp().toIsoString() + " [" + message.target() + "] " + level + " - "  + message.text() + "\n" );
         }
 

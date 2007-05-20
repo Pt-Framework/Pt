@@ -20,7 +20,6 @@
 #define Pt_LogManager_h
 
 #include <Pt/Log/Api.h>
-#include <Pt/Log/Logger.h>
 #include <Pt/Singleton.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Plugin.h>
@@ -34,38 +33,8 @@ namespace Log {
 
 class Channel;
 class Message;
-
-
-class PT_LOG_API Target : protected Pt::NonCopyable
-{
-    friend class LogManager;
-
-    protected:
-        Target(const std::string& name, Target* parent = 0, Channel* channel = 0);
-
-    public:
-        virtual ~Target();
-
-        const std::string& name() const;
-
-        LogLevel logLevel() const;
-
-        void setLogLevel(LogLevel level);
-
-        void setChannel(const std::string& url);
-
-        void log(const Message& msg);
-
-    protected:
-        void setChannel(Channel& ch)
-        { _channel = &ch; }
-
-    private:
-        std::string _name;
-        LogLevel _logLevel;
-        Target* _parent;
-        Channel* _channel;
-};
+class Target;
+class Logger;
 
 
 class PT_LOG_API LogManager : public Pt::Singleton<LogManager>

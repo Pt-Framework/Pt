@@ -20,7 +20,7 @@
 #define Pt_Log_Message_h
 
 #include <Pt/Log/Api.h>
-#include <Pt/Log/Logger.h>
+#include <Pt/Log/LogLevel.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/DateTime.h>
 #include <string>

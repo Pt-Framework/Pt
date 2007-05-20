@@ -20,6 +20,7 @@
 #define Pt_LogDevice_h
 
 #include <Pt/Log/Api.h>
+#include <Pt/Log/LogLevel.h>
 #include <Pt/NonCopyable.h>
 #include <list>
 #include <string>
@@ -30,18 +31,7 @@ namespace Pt {
 
 namespace Log {
 
-class Message;
 class Target;
-
-
-enum LogLevel {
-    Fatal = 0,
-    Error = 100,
-    Warn  = 200,
-    Info  = 300,
-    Debug = 400,
-    Trace = 500
-};
 
 
 class PT_LOG_API Logger : protected Pt::NonCopyable
@@ -77,7 +67,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
     private:
         class Target*     _target;
         LogLevel          _level;
-        Message*           _msg;
+        class Message*           _msg;
         std::stringstream _ss;
 };
 

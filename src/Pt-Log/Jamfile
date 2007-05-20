@@ -7,6 +7,7 @@ SharedLibrary Pt-Log : ConsoleChannel.cpp
                        Logger.cpp
                        LogManager.cpp
                        Message.cpp
+                       Target.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-System ;

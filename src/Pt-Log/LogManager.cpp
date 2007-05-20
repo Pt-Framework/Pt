@@ -18,11 +18,10 @@
  ***************************************************************************/
 #include "LogManager.h"
 #include "ConsoleChannel.h"
-#include "Pt/Log/Logger.h"
-#include "Pt/Log/Message.h"
 #include "Pt/Exception.h"
 #include "Pt/System/MutexLock.h"
-#include <iostream>
+#include <Pt/Log/Target.h>
+#include <Pt/Log/Logger.h>
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
@@ -31,51 +30,6 @@ static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consol
 namespace Pt {
 
 namespace Log {
-
-
-Target::Target(const std::string& name, Target* parent, Channel* channel)
-: _name(name)
-, _logLevel(Info)
-, _parent(parent)
-, _channel(channel)
-{
-}
-
-
-Target::~Target()
-{
-}
-
-
-const std::string& Target::name() const
-{
-    return _name;
-}
-
-
-LogLevel Target::logLevel() const
-{
-    return _logLevel;
-}
-
-
-void Target::setLogLevel(LogLevel level)
-{
-    _logLevel = level;
-}
-
-
-void Target::setChannel(const std::string& url)
-{
-    LogManager::instance().setChannel(this, url);
-}
-
-
-void Target::log(const Message& message)
-{
-    LogManager::instance().log(this, message);
-}
-
 
 
 LogManager::LogManager()

@@ -35,7 +35,15 @@ class LoggerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("LoggerTest")
         {
             Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
+            Pt::Unit::TestSuite::registerMethod( "LogFatal", *this, &LoggerTest::LogFatal );
+            Pt::Unit::TestSuite::registerMethod( "LogError", *this, &LoggerTest::LogError );
+            Pt::Unit::TestSuite::registerMethod( "LogWarn", *this, &LoggerTest::LogWarn );
+            Pt::Unit::TestSuite::registerMethod( "LogInfo", *this, &LoggerTest::LogInfo );
+            Pt::Unit::TestSuite::registerMethod( "LogDebug", *this, &LoggerTest::LogDebug );
+            Pt::Unit::TestSuite::registerMethod( "LogTrace", *this, &LoggerTest::LogTrace );
             Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );
+
+            
         }
 
     protected:
@@ -72,10 +80,46 @@ class LoggerTest : public Pt::Unit::TestSuite
             {  }
         }
 
-	void DllLoggerTest()
-	{
-            Pt::Log::DllLoggerTest();
-	}
+        void LogFatal()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::fatal << "Fatal message" << Pt::Log::endl;
+        }
+
+        void LogError()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::error << "Error message" << Pt::Log::endl;
+        }
+
+        void LogWarn()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::warn << "Warn message" << Pt::Log::endl;
+        }
+
+        void LogInfo()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::info << "Info message" << Pt::Log::endl;
+        }
+
+        void LogDebug()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::debug << "Debug message" << Pt::Log::endl;
+        }
+
+        void LogTrace()
+        {
+            Pt::Log::Logger logger("LoggerTest");
+            logger << Pt::Log::trace << "Trace message" << Pt::Log::endl;
+        }
+
+        void DllLoggerTest()
+        {
+                Pt::Log::DllLoggerTest();
+        }
 
 };
 

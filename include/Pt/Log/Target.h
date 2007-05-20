@@ -16,75 +16,60 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/Log/Logger.h"
-#include "Pt/Log/Target.h"
-#include "Pt/Log/Message.h"
-#include "LogManager.h"
+#ifndef Pt_Log_Target_h
+#define Pt_Log_Target_h
+
+#include <Pt/Log/Api.h>
+#include <Pt/Log/Logger.h>
+#include <string>
 
 
 namespace Pt {
 
 namespace Log {
 
-Logger::Logger(const std::string& name, LogLevel level)
-: _target( &LogManager::instance().target(name) )
-, _level(level)
-, _msg( 0 )
-{
-    _msg = new Message(name, level);
-}
+    class Channel;
+    class Message;
 
 
-Logger::Logger(Target& target, LogLevel level)
-: _target( &target )
-, _level(level)
-, _msg( 0 )
-{
-    _msg = new Message(target.name(), level);
-}
-
-
-Logger::~Logger()
-{
-    delete _msg;
-}
-
-
-void Logger::setLogLevel(LogLevel level)
-{
-    _level = level;
-    _msg->setLogLevel(level);
-}
-
-
-LogLevel Logger::logLevel() const
-{ return _level; }
-
-
-void Logger::setChannel(const std::string& url)
-{
-    _target->setChannel(url);
-}
-
-
-void Logger::endlog()
-{
-    if( this->enabled() )
+    class PT_LOG_API Target : protected Pt::NonCopyable
     {
-        _msg->setText(_ss.str() );
-        _target->log( *_msg );
+        friend class LogManager;
 
-        _ss.str("");
-        _ss.clear();
-    }
-}
+        protected:
+            Target(const std::string& name, Target* parent = 0, Channel* channel = 0);
 
+        public:
+            virtual ~Target();
 
-bool Logger::enabled() const
-{
-    return this->logLevel() <= _target->logLevel();
-}
+            const std::string& name() const;
+
+            LogLevel logLevel() const;
+
+            void setLogLevel(LogLevel level);
+
+            void setChannel(const std::string& url);
+
+            void log(const Message& msg);
+
+            static Target& get(const std::string& name);
+
+        protected:
+            void setChannel(Channel& ch)
+            { _channel = &ch; }
+
+        private:
+            std::string _name;
+            LogLevel _logLevel;
+            Target* _parent;
+            Channel* _channel;
+    };
 
 } // namespace Log
 
 } // namespace Pt
+
+
+#endif
+
+
