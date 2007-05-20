@@ -40,7 +40,7 @@ class LogThread : public Pt::System::Thread
             {
                 Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
                 logger.setChannel("console://");
-                logger << Pt::Log::warn << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endl;
+                logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endl;
 
                 this->yield();
             }
@@ -57,8 +57,8 @@ int main( int argc, char* argv[] )
     try {
         Pt::Log::Logger logger("LoggerDemo.test");
         logger.setChannel("console://");
-        logger << Pt::Log::info << "application started" << Pt::Log::endl;
-/*
+        logger << Pt::Log::info << "start" << Pt::Log::endl;
+
         LogThread lt0("thread 0", "logger1");
         lt0.start();
 
@@ -80,8 +80,8 @@ int main( int argc, char* argv[] )
         lt4.wait();
 
         lt0.wait();
-*/
-        logger << Pt::Log::info << "application ending" << Pt::Log::endl;
+
+        logger << Pt::Log::info << "end" << Pt::Log::endl;
         return 0;
     }
     catch(const std::exception& e)

@@ -58,6 +58,7 @@ LogLevel Target::logLevel() const
     return _logLevel;
 }
 
+
 void Target::setLogLevel(LogLevel level)
 {
     _logLevel = level;
@@ -66,27 +67,13 @@ void Target::setLogLevel(LogLevel level)
 
 void Target::setChannel(const std::string& url)
 {
-    Pt::System::MutexLock lock( LogManager::instance().mutex() );
-
-    Channel& chan = LogManager::instance().channel(url);
-    _channel = &chan;
+    LogManager::instance().setChannel(this, url);
 }
 
 
 void Target::log(const Message& message)
 {
-    Pt::System::MutexLock lock( LogManager::instance().mutex() );
-
-    Target* logger = this;;
-    while( logger != 0 )
-    {
-        if( logger->_channel )
-        {
-            logger->_channel->write(message);
-            return;
-        }
-        logger = logger->_parent;
-    }
+    LogManager::instance().log(this, message);
 }
 
 
@@ -105,7 +92,6 @@ LogManager::LogManager()
     // root of the target hierachy
     _rootTarget = new Target("", 0, ch);
     _targetMap[""] = _rootTarget;
-    //_rootTarget->setChannel("console://");
 
     // logger for Pt::Log
     Target* logTarget = new Target("Pt-Log", _rootTarget);
@@ -148,7 +134,7 @@ LogManager::~LogManager()
 
 Target& LogManager::target(const std::string& name)
 {
-    Pt::System::MutexLock lock( LogManager::instance().mutex() );
+    Pt::System::MutexLock lock( _mutex );
 
     *_logger << debug << "Requested target: " << name << endl;
 
@@ -221,6 +207,33 @@ Target& LogManager::target(const std::string& name)
 
     return *foundTarget;
 }
+
+
+void LogManager::setChannel(Target* target, const std::string& url)
+{
+    Pt::System::MutexLock lock( _mutex );
+
+    Channel& chan = this->channel(url);
+    target->setChannel( chan );
+}
+
+
+void LogManager::log(Target* target, const Message& message)
+{
+    Pt::System::MutexLock lock( _mutex );
+
+    Target* current = target;
+    while( current != 0 )
+    {
+        if( current->_channel )
+        {
+            current->_channel->write(message);
+            return;
+        }
+        current = current->_parent;
+    }
+}
+
 
 
 Channel& LogManager::channel(const std::string& url)

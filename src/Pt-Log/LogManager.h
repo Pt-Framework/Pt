@@ -56,6 +56,10 @@ class PT_LOG_API Target : protected Pt::NonCopyable
 
         void log(const Message& msg);
 
+    protected:
+        void setChannel(Channel& ch)
+        { _channel = &ch; }
+
     private:
         std::string _name;
         LogLevel _logLevel;
@@ -76,10 +80,12 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 
         Target& target(const std::string& name = "");
 
-        Channel& channel(const std::string& url);
+        void setChannel(Target* target, const std::string& url);
 
-        Pt::System::Mutex& mutex()
-        { return _mutex; }
+        void log(Target* target, const Message& message);
+
+    protected:
+        Channel& channel(const std::string& url);
 
     private:
         Target* _rootTarget;

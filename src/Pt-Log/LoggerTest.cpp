@@ -47,28 +47,28 @@ class LoggerTest : public Pt::Unit::TestSuite
                 Pt::Log::Logger logger(".");
                 PT_UNIT_ASSERT(false);
             }
-            catch(const std::invalid_argument& e)
+            catch(const std::invalid_argument&)
             {}
 
             try {
                 Pt::Log::Logger logger("a..b");
                 PT_UNIT_ASSERT(false);
             }
-            catch(const std::invalid_argument& e)
+            catch(const std::invalid_argument&)
             {}
 
             try {
                 Pt::Log::Logger logger("a.");
                 PT_UNIT_ASSERT(false);
             }
-            catch(const std::invalid_argument& e)
+            catch(const std::invalid_argument&)
             { }
 
             try {
                 Pt::Log::Logger logger(".a");
                 PT_UNIT_ASSERT(false);
             }
-            catch(const std::invalid_argument& e)
+            catch(const std::invalid_argument&)
             {  }
         }
 
