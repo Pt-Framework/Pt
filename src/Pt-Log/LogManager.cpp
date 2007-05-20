@@ -22,6 +22,7 @@
 #include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
 #include <Pt/Log/Logger.h>
+#include <memory>
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
@@ -44,15 +45,19 @@ LogManager::LogManager()
     _channelMap["console://"] =  ch;
 
     // root of the target hierachy
-    _rootTarget = new Target("", 0, ch);
-    _targetMap[""] = _rootTarget;
+    std::auto_ptr<Target> rootTarget( new Target("", 0, ch) );
+    _rootTarget = rootTarget.get();
+    _targetMap[""] = rootTarget.get();
 
     // logger for Pt::Log
-    Target* logTarget = new Target("Pt-Log", _rootTarget);
-    _targetMap["Pt-Log"] = logTarget;
-    _logger = new Logger( *logTarget );
+    std::auto_ptr<Target> logTarget( new Target("Pt-Log", _rootTarget) );
+    _targetMap["Pt-Log"] = logTarget.get();
 
+    _logger = new Logger( *logTarget );
     *_logger << info << "Logging system initialized" << endlog;
+
+    logTarget.release();
+    rootTarget.release();
 }
 
 
@@ -186,7 +191,6 @@ void LogManager::log(Target* target, const Message& message)
         current = current->_parent;
     }
 }
-
 
 
 Channel& LogManager::channel(const std::string& url)
