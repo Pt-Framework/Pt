@@ -6,7 +6,7 @@
 #define PT_SYSTEM_SPINLOCK_H
 
 #include <Pt/System/Api.h>
-#include <Pt/AtomicInt.h>
+#include <Pt/Atomicity.h>
 #include <Pt/NonCopyable.h>
 
 
@@ -17,12 +17,12 @@ namespace System {
     //! @brief Spnilock class.
     /**
     *  The most lightweight synchronisation object is the Spinlock. It is
-    *  usually implemented with a status variable that can be set to “Locked”
-    *  and “Unlocked” and atomic operations to change and inspect the status.
-    *  When Spinlock::lock is called, the status is changed to “Locked”.
+    *  usually implemented with a status variable that can be set to Locked
+    *  and Unlocked and atomic operations to change and inspect the status.
+    *  When Spinlock::lock is called, the status is changed to Locked.
     *  Subsequent calls of Spinlock::lock from other threads will block until
     *  the first thread has called Spinlock::unlock and the state of
-    *  the Spinlock has changed to “Unlocked”. Note that Spinlocks are not recursive.
+    *  the Spinlock has changed to Unlocked. Note that Spinlocks are not recursive.
     *  When a Spinlock::lock blocks a busy-wait happens, therefore a Spinlock is only
     *  usable in cases where resources need to be locked for a very short time, but in
     *  these cases a higher performance can be achieved.
@@ -52,7 +52,7 @@ namespace System {
         public:
             //! Default Constructor.
             Spinlock()
-                : _count(0)
+            : _count(0)
             {}
 
             //! Destructor.
@@ -69,7 +69,7 @@ namespace System {
             inline void lock()
             {
                 // busy loop until unlock
-                while(_count.compareExchange(0, 1) ) {
+                while( atomicCompareExchange(_count, 1, 0) ) {
                     ;
                 }
             }
@@ -79,14 +79,15 @@ namespace System {
             inline void unlock()
             {
                 // set unlocked
-                _count = 0;
+                atomicExchange(_count, 0);
             }
 
+            /// @internal for unit test only
             bool testIsLocked() const
-            { return _count.value() != 0; }
+            { return _count != 0; }
 
     private:
-        AtomicInt _count;
+        atomic_t _count;
     };
 
 } // !namespace System

@@ -15,3 +15,7 @@ SharedLibrary_MakeLocate Pt-Log : bin ;
 Main LoggerDemo : LoggerDemo.cpp ;
 Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-System ;
 Main_MakeLocate LoggerDemo : bin ;
+
+Main LoggerTest : LoggerTest.cpp ;
+Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-System ;
+Main_MakeLocate LoggerTest : bin ;

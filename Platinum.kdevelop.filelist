@@ -155,7 +155,6 @@ include/Pt/AtomicInt.gcc.mips.h
 include/Pt/AtomicInt.gcc.ppc.h
 include/Pt/AtomicInt.gcc.pthread.h
 include/Pt/AtomicInt.gcc.x86.h
-include/Pt/AtomicInt.msc.h
 include/Pt/Blob.h
 include/Pt/Main.h
 include/Pt/locale.h
@@ -164,3 +163,10 @@ include/Pt/StringList.h
 include/Pt/Timespan.h
 include/Pt/Timestamp.h
 include/Pt/Unicode.h
+include/Pt/Atomicity.h
+include/Pt/Atomicity.gcc.arm.h
+include/Pt/Atomicity.gcc.mips.h
+include/Pt/Atomicity.gcc.ppc.h
+include/Pt/Atomicity.gcc.x86.h
+include/Pt/Atomicity.generic.h
+include/Pt/Atomicity.windows.h
