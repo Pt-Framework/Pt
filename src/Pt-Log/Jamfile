@@ -1,0 +1,17 @@
+SubDir TOP src Pt-Log ;
+
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_LOG_API_EXPORT ] ;
+
+SharedLibrary Pt-Log : ConsoleChannel.cpp
+                       Logger.cpp
+                       LogManager.cpp
+                       Message.cpp
+                       ;
+
+SharedLibrary_LinkSharedLibraries Log : Pt Pt-System ;
+SharedLibrary_MakeLocate Pt-Log : bin ;
+
+Main LoggerDemo : LoggerDemo.cpp ;
+Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-System ;
+Main_MakeLocate LoggerDemo : bin ;
