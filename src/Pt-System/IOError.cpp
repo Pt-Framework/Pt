@@ -41,7 +41,7 @@ IOError::~IOError() throw()
 }
 
 OpenFailed::OpenFailed(const std::string& what, const SourceInfo& si)
-: std::ios::failure(what + si)
+: IOError(what , si)
 {
 }
 

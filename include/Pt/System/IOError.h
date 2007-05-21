@@ -37,7 +37,7 @@ namespace System {
             ~IOError() throw();
     };
 
-    class PT_SYSTEM_API OpenFailed : public std::ios::failure {
+    class PT_SYSTEM_API OpenFailed : public IOError {
         public:
             OpenFailed(const std::string& what, const SourceInfo& si);
 
