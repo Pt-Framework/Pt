@@ -175,6 +175,7 @@ LN          ?= ln ;
 MANDIR      ?= /usr/local/man ;
 MKDIR       ?= mkdir ;
 MV          ?= mv -f ;
+NOARSCAN    ?= true ;
 OPTIM       ?= ;
 PRELIB      ?= "" ;
 RANLIB      ?= ;
