@@ -177,6 +177,7 @@ MKDIR       ?= mkdir ;
 MV          ?= mv -f ;
 OPTIM       ?= ;
 PRELIB      ?= "" ;
+RANLIB      ?= ;
 RCP         ?= rcp ;
 RM          ?= rm -f ;
 RSH         ?= rsh ;
@@ -193,6 +194,8 @@ YACC        ?= ;
 YACCFILES   ?= ;
 YACCFLAGS   ?= ;
 TEMP_TARGET ?= ;
+
+OBJECT_TARGET ?= tmp ;
 
 HDRPATTERN = 
     "^[     ]*#[    ]*include[  ]*[<\"]([^\">]*)[\">].*$" ;
@@ -537,15 +540,8 @@ rule Lex
 
 rule Library
 {
-	local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
-	
-	SetObjectOutput $(1) ;
-	
-	SetOutputDirectory $(1) : $(_target) : $(3) ;	
-	
-	Objects $(2) : $(3) ;
-    
     LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
+    Objects $(2) : $(1) ;
 }
 
 rule LibraryFromObjects
@@ -553,31 +549,64 @@ rule LibraryFromObjects
     local _i _l _s ;
 
     # Add grist to file names
-    _s = [ FGristObjectFiles $(>) ] ;
+
+    _s = [ FGristFiles $(>) ] ;
     _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
 
-    # abstract "lib" target depends on this library and library 
-    # depends on its member objects
-    DEPENDS lib : $(_l) ;
-    DEPENDS $(_l) : $(_s) ;
-    
+    # library depends on its member objects
+
+    if $(KEEPOBJS)
+    {
+        DEPENDS obj : $(_s) ;
+    }
+    else
+    {
+        DEPENDS lib : $(_l) ;
+    }
+
     # Set LOCATE for the library and its contents.  The bound
     # value shows up as $(NEEDLIBS) on the Link actions.
     # For compatibility, we only do this if the library doesn't
     # already have a path.
-    #if ! $(_l:D)
-    #{
-    #    MakeLocate $(_l) : $(LOCATE_TARGET) ;
-    #    
-    #}    
+
+    if ! $(_l:D)
+    {
+        MakeLocate $(_l) $(_l)($(_s:BS)) : $(LOCATE_TARGET) ;
+    }
+
+    if $(NOARSCAN) 
+    { 
+        # If we can't scan the library to timestamp its contents,
+        # we have to just make the library depend directly on the
+        # on-disk object files.  
+
+        DEPENDS $(_l) : $(_s) ;
+    }
+    else
+    {
+        # If we can scan the library, we make the library depend
+        # on its members and each member depend on the on-disk
+        # object file.
+
+        DEPENDS $(_l) : $(_l)($(_s:BS)) ;
+
+        for _i in $(_s)
+        {
+        DEPENDS $(_l)($(_i:BS)) : $(_i) ;
+        }
+    }
 
     Clean clean : $(_l) ;
-    
+
     if $(CRELIB) { CreLib $(_l) : $(_s[1]) ; }
 
     Archive $(_l) : $(_s) ;
 
     if $(RANLIB) { Ranlib $(_l) ; }
+
+    # If we can't scan the library, we have to leave the .o's around.
+
+    #if ! ( $(NOARSCAN) || $(KEEPOBJS) ) { RmTemps $(_l) : $(_s) ; }
 }
 
 
@@ -585,8 +614,6 @@ rule Library_MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
     MakeLocate $(_l) : $(2) ;
-    # MakeLocate $(_l) : $(3) ;
-    # MakeLocate $(_l)($(2:BS=$(SUFOBJ))) : $(3) ;
 }
 
 
@@ -615,7 +642,6 @@ rule Main_LinkLibraries
 }
 
 
-
 rule Main_MakeLocate
 {
 	MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
@@ -624,46 +650,18 @@ rule Main_MakeLocate
 
 rule Main
 {
-	local _target = $(1:S=$(SUFEXE)) ;
+    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+    Objects $(>) ;
+}
 
+rule Main
+{
+	  local _target = $(1:S=$(SUFEXE)) ;
     DEPENDS exe : $(_target) ;
 
-	SetObjectOutput $(1) ;	
-	
-	SetOutputDirectory $(1) : $(_target) : $(3) ;
-	
-	Objects $(2) : $(3) ;
-	
-    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) : $(3) ;    
+    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+    Objects $(2) : $(1) ;
 }
-
-# Set outputdirectory for binary files
-#
-# param 1 target name
-# param 2 file name with suffix
-# param 3 directory name
-#
-rule SetOutputDirectory
-{
-	local _outputDir = $(LOCATE_TARGET) ;
-	
-	if $(3)	{	
-		_outputDir = $(3) ;		
-	}	
-	MakeLocate $(2) : $(_outputDir) ;
-}
-
-
-# Set outputdirectory for object files
-#
-# param 1 target name
-#
-rule SetObjectOutput
-{
-	TEMP_TARGET 	= [ FDirName  $(ALL_LOCATE_TARGET) tmp $(TARGET_OS:L) $(TARGET_OSPLAT:L) $(BYTEORDER:L) $(TOOLSET:L) $(CONFIG:L)  $(1) ] ;
-	OBJECT_GRIST 	= [ FGrist    $(ALL_LOCATE_TARGET) tmp $(TARGET_OS:L) $(TARGET_OSPLAT:L) $(BYTEORDER:L) $(TOOLSET:L) $(CONFIG:L)  $(1) ] ;
-}
-
 
 
 rule MainFromObjects
@@ -673,7 +671,7 @@ rule MainFromObjects
     # Add grist to file names
     # Add suffix to exe
 
-    _s = [ FGristObjectFiles $(>) ] ;
+    _s = [ FGristFiles $(>) ] ;
     _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
     if $(_t) != $(<)
@@ -684,9 +682,8 @@ rule MainFromObjects
 
     # make compiled sources a dependency of target
 
-    # DEPENDS exe : $(_t) ;
     DEPENDS $(_t) : $(_s) ;
-    #MakeLocate $(_t) : $(LOCATE_TARGET) ;
+    MakeLocate $(_t) : $(LOCATE_TARGET) ;
 
     Clean clean : $(_t) ;
 
@@ -696,7 +693,8 @@ rule MainFromObjects
 
 rule Main_LinkSharedLibraries
 {
-	Exit  "LinkSharedLibraries rule not implemented in Jamrules.base. Must be implemented in Jamrules.$(TOOLSET)" ;
+	Echo "LinkSharedLibraries rule not implemented in Jamrules.base." ;
+	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
 
 }
 
@@ -728,6 +726,13 @@ rule MakeLocate
         LOCATE on $(<) = $(>) ;
         Depends $(<) : $(>[1]) ;
         MkDir $(>[1]) ;
+    }
+
+    if $(<:D)
+    {
+        local _dir = [ FDirName $(>) $(_i:D) ] ;
+        Depends $(<) : $(_dir) ;
+        MkDir $(_dir) ;
     }
 }
 
@@ -778,53 +783,6 @@ rule MkDir
     }
 }
 
-rule Module 
-{
-	local _library = $(PRELIB)$(1)"-static" ; 
-	_library = $(_library:S=$(SUFLIB)) ;
-	
-	local _sharedLibrary = $(PRELIB)$(1:S=$(SUFDLL)) ;
-	
-	SetObjectOutput $(<) ;
-
-	SetOutputDirectory $(1) : $(_library) : $(3) ;
-	SetOutputDirectory $(1) : $(_sharedLibrary) : $(3) ;
-
-	Objects $(2) : $(3) ;
-
-	LibraryFromObjects $(1)"-static" : $(2:S=$(SUFOBJ)) ;
-	SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
-	
-}
-
-
-rule Module_LinkLibraries
-{
-	SharedLibrary_LinkLibraries $(<) : $(>) ;
-}
-
-
-rule Module_LinkSharedLibraries
-{
-	SharedLibrary_LinkSharedLibraries $(<) : $(>) ;
-}
-
-rule Module_MakeLocate
-{
-    local _s = $(<)"-static" ;
-    Library_MakeLocate $(_s) : $(>) ;
-    SharedLibrary_MakeLocate $(<) : $(>) ;
-}
-
-
-# @brief Adds libraries as linker flags to a module target
-#
-# @param < the target
-# @param > list of flags
-rule Module_AddLibraries
-{
-	SharedLibrary_AddLibraries $(<) : $(>) ;
-}
 
 rule Object
 {
@@ -833,21 +791,9 @@ rule Object
     # locate object and search for source, if wanted
 
     Clean clean : $(<) ;
-   
-    if $(3)
-    {    	
-   	 	Depends $(<) : $(3) ;
-    }    
-    
-    if $(TEMP_TARGET)
-    {    	
-    	MakeLocate $(<) : $(TEMP_TARGET) ;
-    }
-    else
-    {   	 
-    	MakeLocate $(<) : $(LOCATE_TARGET) ;
-    }
-        
+
+    MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
+
     SEARCH on $(>) = $(SEARCH_SOURCE) ;
 
     # Save HDRS for -I$(HDRS) on compile.
@@ -924,14 +870,14 @@ rule ObjectHdrs
 
 rule Objects
 {
-    local _i _source _obj ;
+    local _i ;
+
+    local _targetDir = [ FDirName $(OBJECT_TARGET) $(>) ] ;
     
-    for _i in $(1)
+    for _i in [ FGristFiles $(<) ]
     {
-    	_source = [ FGristFiles $(_i) ] ;
-    	_obj = [ FGristObjectFiles $(_i:S=$(SUFOBJ)) ] ;    	
-        Object $(_obj) : $(_source) : $(2) ;
-        #DEPENDS obj : $(_obj) ;
+        Object $(_i:S=$(SUFOBJ)) : $(_i) ;
+        DEPENDS obj : $(_i:S=$(SUFOBJ)) ;
     }
 }
 
@@ -952,17 +898,11 @@ rule Setuid
 #
 # @param < the target name
 # @param > list of source files
+#
 rule SharedLibrary
 {
-	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-	
-	SetObjectOutput $(<) ;
-
-	SetOutputDirectory $(1) : $(_target) : $(3) ;		
-
-	Objects $(2) : $(3) ;
-	
-	SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;	
+    SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
+    Objects $(2) ;
 }
 
 
@@ -970,6 +910,7 @@ rule SharedLibrary
 #
 # @param < the target
 # @param > list of flags
+#
 rule SharedLibrary_AddLibraries
 {
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -981,7 +922,8 @@ rule SharedLibrary_AddLibraries
 #
 rule SharedLibraryFromObjects
 {
-	Exit  "SharedLibraryFromObjects rule not implemented in Jamrules.base. Must be implemented in Jamrules.$(TOOLSET)" ;
+	Echo "SharedLibraryFromObjects rule not implemented in Jamrules.base." ;
+	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
 }
 
 
@@ -992,10 +934,11 @@ rule SharedLibrary_Install
 }
 
 
-# @brief Links a static libraries to a shared library
+# @brief Links static libraries to a shared library
 #
 # @param < the target name
 # @param > list of libraries to link
+#
 rule SharedLibrary_LinkLibraries
 {
 	local _t = $(PRELIB)$(<)$(SUFDLL) ;
@@ -1006,8 +949,8 @@ rule SharedLibrary_LinkLibraries
 
 rule SharedLibrary_MakeLocate
 {
-	Exit  "SharedLibrary_MakeLocate rule not implemented in Jamrules.base. 
-	       Must be implemented in Jamrules.$(TOOLSET)" ;
+	Echo "SharedLibrary_MakeLocate rule not implemented in Jamrules.base." ;
+	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
 }
 
 
@@ -1015,9 +958,11 @@ rule SharedLibrary_MakeLocate
 #
 # @param < the target name
 # @param > list of shared libraries to link
+#
 rule SharedLibrary_LinkSharedLibraries
 {
-	Exit  "SharedLibrary_LinkSharedLibraries rule not implemented in Jamrules.base. Must be implemented in Jamrules.$(TOOLSET)" ;
+	Exit "SharedLibrary_LinkSharedLibraries rule not implemented in Jamrules.base." ;
+	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
 }
 
 
@@ -1090,7 +1035,7 @@ rule SubDir
 
     _s = [ FDirName $(<[2-]) ] ;
     SUBDIR = $(_s:R=$($(<[1]))) ;
-        SUBDIR_TOKENS = $(<[2-]) ;
+    SUBDIR_TOKENS = $(<[2-]) ;
 
     # Now set up SEARCH_SOURCE, LOCATE_TARGET, SOURCE_GRIST
     # These can be reset if needed.  For example, if the source
@@ -1222,22 +1167,6 @@ rule FGristFiles
     else 
     {
         return $(<:G=$(SOURCE_GRIST)) ;
-    }
-}
-
-
-rule FGristObjectFiles 
-{
-    local _objFile = $(1:B) ;
-    _objFile = $(_objFile:S=$(1[1]:S)) ;
-    
-    if ! $(OBJECT_GRIST)
-    {
-        return $(_objFile) ;
-    }
-    else 
-    {
-        return $(_objFile:G=$(OBJECT_GRIST)) ;
     }
 }
 
