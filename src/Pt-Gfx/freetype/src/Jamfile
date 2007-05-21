@@ -6,41 +6,41 @@ SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 CCFLAGS += [ FDefines FT2_BUILD_LIBRARY ] ;
 
 Library Pt-Gfx-freetype :
-	autofit/autofit.c
-	bdf/bdf.c
-	cff/cff.c
-	base/ftbase.c
-	base/ftbitmap.c
-	base/ftdebug.c
-	base/ftglyph.c
-	base/ftinit.c
-	base/ftstroke.c
-	base/ftsystem.c
-	base/ftbbox.c
-	base/ftmm.c
-	base/ftpfr.c
-	base/ftsynth.c
-	base/fttype1.c
-	base/ftwinfnt.c
-	base/ftlcdfil.c
-	base/ftgasp.c
-	cache/ftcache.c
-	gzip/ftgzip.c
-	lzw/ftlzw.c
-	smooth/ftsmooth.c
-	smooth/ftgrays.c
-	pcf/pcf.c
-	pfr/pfr.c
-	psaux/psaux.c
-	pshinter/pshinter.c
-	psnames/psmodule.c
-	raster/raster.c
-	sfnt/sfnt.c
-	truetype/truetype.c
-	type1/type1.c
-	cid/type1cid.c
-	type42/type42.c
-	winfonts/winfnt.c
+	[ FDirName autofit autofit.c ]
+	[ FDirName bdf bdf.c ]
+	[ FDirName cff cff.c ]
+	[ FDirName base ftbase.c ]
+	[ FDirName base ftbitmap.c ]
+	[ FDirName base ftdebug.c ]
+	[ FDirName base ftglyph.c ]
+	[ FDirName base ftinit.c ]
+	[ FDirName base ftstroke.c ]
+	[ FDirName base ftsystem.c ]
+	[ FDirName base ftbbox.c ]
+	[ FDirName base ftmm.c ]
+	[ FDirName base ftpfr.c ]
+	[ FDirName base ftsynth.c ]
+	[ FDirName base fttype1.c ]
+	[ FDirName base ftwinfnt.c ]
+	[ FDirName base ftlcdfil.c ]
+	[ FDirName base ftgasp.c ]
+	[ FDirName cache ftcache.c ]
+	[ FDirName gzip ftgzip.c ]
+	[ FDirName lzw ftlzw.c ]
+	[ FDirName smooth ftsmooth.c ]
+	[ FDirName smooth ftgrays.c ]
+	[ FDirName pcf pcf.c ]
+	[ FDirName pfr pfr.c ]
+	[ FDirName psaux psaux.c ]
+	[ FDirName pshinter pshinter.c ]
+	[ FDirName psnames psmodule.c ]
+	[ FDirName raster raster.c ]
+	[ FDirName sfnt sfnt.c ]
+	[ FDirName truetype truetype.c ]
+	[ FDirName type1 type1.c ]
+	[ FDirName cid type1cid.c ]
+	[ FDirName type42 type42.c ]
+	[ FDirName winfonts winfnt.c ]
 	;
 
 Library_MakeLocate Pt-Gfx-freetype : bin ;

@@ -3,6 +3,7 @@
 DOT = . ;
 JAMDIR ?= jam ;
 
+
 # Return path to jamrules
 #
 rule JamInclude
@@ -21,11 +22,9 @@ rule JamInclude
 }
 
 
-
 # Set Target OS to host OS if unset
 #
 TARGET_OS ?= $(OS:L) ;
-
 
 
 # Set target platform to host platform if unset
@@ -33,38 +32,12 @@ TARGET_OS ?= $(OS:L) ;
 TARGET_OSPLAT ?= $(OSPLAT:L) ;
 
 
-
-# Set byte order
-#
-# Can be set with 'jam -sBYTEORDER=BE' or 'jam -sBYTEORDER=LE'. Default
-# is processor specific.
-#
-#if $(TARGET_OSPLAT:U) = PPC
-#{
-#	BYTEORDER ?= be ;
-#}
-#else
-#{
-#	BYTEORDER ?= le ;
-#}
-
-
 # Set configuration
 #
 # Can be set with 'jam -s CONFIG=debug' or 'jam -s CONFIG=release'.
 #
 CONFIG ?= debug ;
-
-# correct the setting to be undepended on lower or upper case
-if $(CONFIG:L) = debug 
-{
-    CONFIG = debug ;
-}
-else 
-{
-	CONFIG = release ;
-}
-
+CONFIG = $(CONFIG:L) ;
 
 
 # Include base rules
@@ -72,7 +45,6 @@ else
 # This adds/sets basic rules and variables.
 #
 JamInclude Jamrules.base ;
-
 
 
 # Include host platform specifics
@@ -83,7 +55,6 @@ JamInclude Jamrules.base ;
 JamInclude Jamrules.host_$(OS:L) ;
 
 
-
 # Include target platform specifics
 #
 # This adds/sets platform specific rules and variables. May override base 
@@ -92,14 +63,12 @@ JamInclude Jamrules.host_$(OS:L) ;
 JamInclude Jamrules.target_$(TARGET_OS:L) ;
 
 
-
 # Include toolset specifics
 #
 # This adds/sets toolset specific rules and variables. May override platform
 # specific rules and variables.
 #
 JamInclude Jamrules.$(TOOLSET:L) ;
-
 
 
 # include the project top level Jamfile

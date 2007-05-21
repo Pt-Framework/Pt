@@ -657,7 +657,7 @@ rule Main
 
 rule Main
 {
-	  local _target = $(1:S=$(SUFEXE)) ;
+    local _target = $(1:S=$(SUFEXE)) ;
     DEPENDS exe : $(_target) ;
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;

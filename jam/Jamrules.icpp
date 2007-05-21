@@ -90,10 +90,10 @@ actions As
 }
 
 
-actions Cc
+actions Cc bind PDB
 {
 	set PATH=$(INTELC)\bin;$(VISUALC)\Common7/IDE;%PATH%
-	"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /Fd$(PROGRAMDATABASE) /I$(HDRS) /I$(STDHDRS) $(>)
+	"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
 }
 
 

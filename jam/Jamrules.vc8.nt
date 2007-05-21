@@ -26,12 +26,14 @@ CCFLAGS += /DWIN32 ;
 
 if $(CONFIG:L) = debug 
 {
-	CCFLAGS += /MDd /Zi /MDd /Od /RTC1 ;
+	CCFLAGS += /MDd /Zi /MDd  /RTC1 ;
+	OPTIM   ?= /Od ;
 	LINKFLAGS += /DEBUG ;
 }
 else
 {
-	CCFLAGS += /MD /Ox /Ot /Oy /D "NDEBUG" ;
+	CCFLAGS += /MD /D "NDEBUG" ;
+	OPTIM   ?= /Ox /Ot /Oy ;
 }
 
 C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /W3  ;

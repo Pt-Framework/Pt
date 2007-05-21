@@ -29,7 +29,6 @@ C++FLAGS	+= $(CCFLAGS) ;
 LINK		= $(VISUALC)\\vc\\bin\\link /nologo ;
 #LINKFLAGS	+= /MANIFEST:NO ;
 LINKLIBS        ?= "" ;
-OPTIM	 	?= "" ;
 UNDEFFLAG	= "/u _" ;
 
 
