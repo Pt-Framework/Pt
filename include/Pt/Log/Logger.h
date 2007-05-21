@@ -34,6 +34,9 @@ namespace Log {
 class Target;
 
 
+/** @brief Logging client
+    @ingroup Logging
+*/
 class PT_LOG_API Logger : protected Pt::NonCopyable
 {
     public:

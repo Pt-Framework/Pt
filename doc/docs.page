@@ -49,6 +49,7 @@
 				<li><a href="group__Reflection.html">Reflection</a></li>
 				<li><a href="group__CTTI.html">Compile Time Type Information</a></li>
 				<li><a href="group__UnitTests.html">Unit Testing</a></li>
+                <li><a href="group__Logging.html">Logging</a></li>
 				</ul>
 			</div>
 		</td>

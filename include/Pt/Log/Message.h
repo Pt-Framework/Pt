@@ -30,6 +30,9 @@ namespace Pt {
 
 namespace Log {
 
+/** @brief %Log message
+    @ingroup Logging
+*/
 class PT_LOG_API Message
 {
     public:

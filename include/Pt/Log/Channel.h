@@ -29,6 +29,9 @@ namespace Pt {
 
 namespace Log {
 
+/** @brief Logging channel
+    @ingroup Logging
+*/
 class PT_LOG_API Channel : protected Pt::NonCopyable
 {
     protected:

@@ -31,7 +31,9 @@ namespace Log {
     class Channel;
     class Message;
 
-
+    /** @brief Logging target
+        @ingroup Logging
+    */
     class PT_LOG_API Target : protected Pt::NonCopyable
     {
         friend class LogManager;

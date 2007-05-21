@@ -27,4 +27,20 @@
 #    define PT_LOG_API PT_IMPORT
 #  endif
 
+/** @defgroup Logging Logging
+    @brief Logging and tracing
+
+*/
+
+namespace Pt {
+
+/** @namespace Pt::Log
+    @brief Logging and tracing
+*/
+namespace Log {
+
+}
+
+}
+
 #endif
