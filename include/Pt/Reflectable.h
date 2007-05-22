@@ -37,9 +37,9 @@ class NoSuchProperty : public std::logic_error
 {
     public:
         NoSuchProperty(const std::string& propertyName, const SourceInfo& si);
-        
+
         ~NoSuchProperty() throw();
-        
+
     private:
         std::string _propertyName;
 };
@@ -49,9 +49,9 @@ class NoSuchMethod : public std::logic_error
 {
     public:
         NoSuchMethod(const std::string& methodName, const SourceInfo& si);
-        
+
         ~NoSuchMethod() throw();
-        
+
     private:
         std::string _methodName;
 };
@@ -370,8 +370,15 @@ class PT_API Reflectable {
 
         void setProperty(const std::string& name, const Pt::Any& value);
 
+        const ICallable& method(const std::string& name) const;
+
+        void call(const std::string& name, const Args& args);
+
         const PropertyMap& properties() const
         { return _properties; }
+
+        const MethodMap& methods() const
+        { return _methods; }
 
         template <typename R, typename Parent, typename Object>
         void registerWriteProperty(const std::string& name, Parent* parent, R (Object::*setter)() )
@@ -468,13 +475,6 @@ class PT_API Reflectable {
             ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
-
-        const MethodMap& methods() const
-        { return _methods; }
-
-        const ICallable& method(const std::string& name) const;
-
-        void call(const std::string& name, const Args& args);
 
         Reflectable* self()
         { return this; }
