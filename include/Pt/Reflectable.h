@@ -22,6 +22,7 @@
 
 #include <Pt/Args.h>
 #include <Pt/ICallable.h>
+#include <Pt/Property.h>
 #include <Pt/PropertyProxy.h>
 #include <Pt/Method.h>
 
@@ -352,8 +353,7 @@ class MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publ
 
 
 
-
-typedef std::multimap<std::string, AbstractProperty*> PropertyMap;
+typedef std::multimap<std::string, IProperty*> PropertyMap;
 typedef std::multimap<std::string, ICallable*> MethodMap;
 
 /** @brief Make objects reflectable
@@ -407,6 +407,30 @@ class PT_API Reflectable {
         void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
             _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) );
+        }
+
+        template <typename R, typename Parent, typename Object>
+        void registerProperty(PropertyValue<R>& pv, Parent* parent, R (Object::*getter)() const)
+        {
+            _properties.insert( std::make_pair(pv.name(), new ReadProperty<R>(pv, parent, getter)) );
+        }
+
+        template <typename R, typename Parent, typename Object>
+        void registerProperty(PropertyValue<R>& pv, Parent* parent, R (Object::*getter)())
+        {
+            _properties.insert( std::make_pair(pv.name(), new ReadProperty<R>(pv, parent, getter)) );
+        }
+
+        template <typename R1, typename R2, typename A, typename Parent, typename Object>
+        void registerProperty(PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
+        {
+            _properties.insert( std::make_pair(pv.name(), new Property<R1, A>(pv, parent, getter, setter)) );
+        }
+
+        template <typename R1, typename R2, typename A, typename Parent, typename Object>
+        void registerProperty(PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
+        {
+            _properties.insert( std::make_pair(pv.name(), new Property<R1, A>(pv, parent, getter, setter)) );
         }
 
         template <typename ParentT>

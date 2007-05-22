@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Drner                               *
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,16 +30,17 @@
 
 namespace Pt {
 
-class PT_API AbstractProperty
+/** @brief Property interface
+    @ingroup Reflection
+*/
+class PT_API IProperty
 {
     public:
-        AbstractProperty()
+        IProperty()
         {}
 
-        virtual ~AbstractProperty()
+        virtual ~IProperty()
         {}
-
-        virtual AbstractProperty* clone() const = 0;
 
         virtual Pt::Any value()
         { throw std::logic_error("AbstractProperty is not readable" + PT_SOURCEINFO); }
@@ -53,35 +54,26 @@ class PT_API AbstractProperty
 
 
 template <typename T>
-class ReadPropertyProxy : virtual public AbstractProperty
+class ReadPropertyProxy : virtual public IProperty
 {
     public:
 
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() const )
-        : AbstractProperty()
+        : IProperty()
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
 
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() )
-        : AbstractProperty()
+        : IProperty()
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
         }
 
-        ReadPropertyProxy( const ReadPropertyProxy& property )
-        : AbstractProperty()
-        {
-            _getter = property._getter->clone();
-        }
-
         ~ReadPropertyProxy()
         { delete _getter; }
-
-        AbstractProperty* clone() const
-        { return new ReadPropertyProxy<T>( *this ); }
 
         virtual Pt::Any value()
         {
@@ -102,30 +94,19 @@ class ReadPropertyProxy : virtual public AbstractProperty
 
 
 template <typename T>
-class WritePropertyProxy : virtual public AbstractProperty
+class WritePropertyProxy : virtual public IProperty
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
         WritePropertyProxy(Object* parent, R (ObjectBase::*setter)(T type) )
-        : AbstractProperty()
+        : IProperty()
         {
             _setter = new Pt::Method<R, Object, T>(parent, setter);
-        }
-
-        WritePropertyProxy(const WritePropertyProxy& property)
-        : AbstractProperty()
-        {
-            _setter = property._setter->cloneInvokable();
         }
 
         ~WritePropertyProxy()
         {
             delete _setter;
-        }
-
-        AbstractProperty* clone() const
-        {
-            return new WritePropertyProxy( *this );
         }
 
         virtual void setValue(const Pt::Any& a)
@@ -169,15 +150,6 @@ class PropertyProxy : public ReadPropertyProxy<R>, public WritePropertyProxy<A> 
         : ReadPropertyProxy<R>(parent, getter)
         , WritePropertyProxy<A>(parent, setter)
         { }
-
-        PropertyProxy(const PropertyProxy& property)
-        : AbstractProperty()
-        , ReadPropertyProxy<R>(property)
-        , WritePropertyProxy<A>(property)
-        {}
-
-        AbstractProperty* clone() const
-        { return new PropertyProxy(*this);}
 
         virtual Pt::Any value()
         {

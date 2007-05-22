@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Drner                               *
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,21 +29,20 @@
 #include "Pt/Unit/RegisterTest.h"
 
 
+
 class TestReflectable : public Pt::Reflectable
 {
     public:
         TestReflectable()
         : Pt::Reflectable("TestReflectable")
-        , intProperty( "intProperty", self() , 20 )
+        , _number("number", 3)
         {
-            this->registerProperty("value", this, &TestReflectable::value, &TestReflectable::setValue);
+            this->registerProperty(_number, this, &TestReflectable::value, &TestReflectable::setValue);
 
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);
             this->registerMethod("method3", *this, &TestReflectable::method3);
         }
-
-        Pt::Property<int> intProperty;
 
         void method1(int)
         {}
@@ -54,14 +53,14 @@ class TestReflectable : public Pt::Reflectable
         void method3(int, bool, char)
         {}
 
-        void setValue(int i)
-        { _value = i; }
+        bool setValue(int i)
+        { _number.set(i); return true; }
 
-        int value()
-        { return _value; }
+        int value() const
+        { return _number.get(); }
 
     private:
-        int _value;
+        Pt::PropertyValue<int> _number;
 
         TestReflectable* self()
         { return this; }
@@ -75,90 +74,39 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
         : Pt::Unit::TestSuite( "ReflectableTest" )
         , _onValueChanged(false)
         {
-            Pt::Unit::TestSuite::registerMethod( "PropertyTest", *this, &ReflectableTest::PropertyTest );
-            Pt::Unit::TestSuite::registerMethod( "Method1Test", *this, &ReflectableTest::Method1Test );
-            Pt::Unit::TestSuite::registerMethod( "Method2Test", *this, &ReflectableTest::Method2Test );
-            Pt::Unit::TestSuite::registerMethod( "Method3Test", *this, &ReflectableTest::Method3Test );
+            Pt::Unit::TestSuite::registerMethod( "Property", *this, &ReflectableTest::Property );
+            Pt::Unit::TestSuite::registerMethod( "Method1", *this, &ReflectableTest::Method1 );
+            Pt::Unit::TestSuite::registerMethod( "Method2", *this, &ReflectableTest::Method2 );
+            Pt::Unit::TestSuite::registerMethod( "Method3", *this, &ReflectableTest::Method3 );
         }
 
     protected:
-        void PropertyTest()
+        void Property()
         {
-            TestReflectable    refl;
-            int    value = 0;
-            Pt::Any    any;
+            TestReflectable reflectable;
 
-            //Test the getter.
-            value = refl.intProperty.get();;
-            PT_UNIT_ASSERT( value == 20 );
+            Pt::Any number = reflectable.property("number");
+            PT_UNIT_ASSERT( number == 3 )
 
-            //Test the setter.
-            refl.intProperty.set( 10 );
-            value = refl.intProperty.get();;
-            PT_UNIT_ASSERT( value == 10 );
-
-            //Test the any setter.
-            any = -3;
-            refl.intProperty.setValue( any );
-            value = refl.intProperty.get();;
-            PT_UNIT_ASSERT( value == -3 );
-
-            //Test the any getter
-            any = refl.intProperty.value();;
-            value = Pt::any_cast<int>(any);
-            PT_UNIT_ASSERT( value == -3 );
-
-            //Test the reflection getter.
-            any = refl.property("intProperty");
-            value = Pt::any_cast<int>(any);
-            PT_UNIT_ASSERT( value == -3 );
-
-            //Test the reflection setter.
-            any =  5;
-            refl.setProperty( "intProperty", any );
-            value = refl.intProperty.get();;
-            PT_UNIT_ASSERT( value == 5 );
-
-            //Test the property signal "onValueChanged".
-            connect( refl.intProperty.onValueChanged, *this, &ReflectableTest::onValueChanged );
-
-            //Test the setter.
-            refl.intProperty.set( 2 );
-            PT_UNIT_ASSERT( _onValueChanged == true );
-
-            //Test the any setter.
-            _onValueChanged = false;
-            any = 3;
-            refl.intProperty.setValue( any );
-            PT_UNIT_ASSERT( _onValueChanged == true);
-
-            //Test the reflection setter.
-            _onValueChanged = false;
-            any =  1;
-            refl.setProperty( "intProperty", any );
-            PT_UNIT_ASSERT( _onValueChanged == true );
-
-            std::stringstream ss("123");
-            any = refl.property( "intProperty" );
-            ss >> any;
-            refl.setProperty("intProperty", any);
-            PT_UNIT_ASSERT( any == 123 );
+            reflectable.setProperty("number", Pt::Any( int(5) ) );
+            number = reflectable.property("number");
+            PT_UNIT_ASSERT( number == 5 )
         }
 
-        void Method1Test()
+        void Method1()
         {
             TestReflectable refl;
             PT_UNIT_ASSERT( refl.method("method1").argName(0) == std::string("int") );
         }
 
-        void Method2Test()
+        void Method2()
         {
             TestReflectable refl;
             PT_UNIT_ASSERT( refl.method("method2").argName(0) == std::string("int") );
             PT_UNIT_ASSERT( refl.method("method2").argName(1) == std::string("bool") );
         }
 
-        void Method3Test()
+        void Method3()
         {
             TestReflectable refl;
             PT_UNIT_ASSERT( refl.method("method3").argName(0) == std::string("int") );

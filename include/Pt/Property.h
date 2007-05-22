@@ -27,14 +27,168 @@
 #include <Pt/ConstMethod.h>
 #include <Pt/Signal.h>
 #include <Pt/PropertyProxy.h>
-#include <Pt/Reflectable.h>
 
 
 namespace Pt {
 
-class PT_API PropertyValue : public AbstractProperty
+/** @brief Value type registerable as property
+    @ingroup Reflection
+*/
+template <typename T>
+class PT_API PropertyValue
 {
     public:
+        PropertyValue(const std::string& name, const T& value = T() )
+        : _name(name)
+        , _value(value)
+        {}
+
+        const T& get()const
+        {  return any_cast<const T&>(_value); }
+
+        void set( const T& value )
+        { _value = value; }
+
+        const std::string& name() const
+        { return _name; }
+
+        const Pt::Any value() const
+        { return _value; }
+
+    protected:
+        std::string _name;
+        Pt::Any _value;
+};
+
+
+template <typename T>
+class ReadProperty : public IProperty
+{
+    public:
+        template <typename Object, typename ObjectBase>
+        ReadProperty( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
+        : _value(&value)
+        {
+            _getter = new Pt::ConstMethod<T, Object>( parent, getter );
+        }
+
+        template <typename Object, typename ObjectBase>
+        ReadProperty( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
+        : IProperty()
+        , _value(&value)
+        {
+            _getter = new Pt::Method<T, Object>( parent, getter );
+        }
+
+        ~ReadProperty()
+        { delete _getter; }
+
+        virtual Pt::Any value()
+        { return _value->value(); }
+
+    private:
+        PropertyValue<T>* _value;
+        Pt::Callable<T>* _getter;
+};
+
+
+template <typename T>
+class WriteProperty : virtual public IProperty
+{
+    public:
+        template <typename R, typename Object, typename ObjectBase>
+        WriteProperty(Object* parent, R (ObjectBase::*setter)(T type) )
+        {
+            _setter = new Pt::Method<R, Object, T>(parent, setter);
+        }
+
+        ~WriteProperty()
+        { delete _setter; }
+
+        virtual void setValue(const Pt::Any& a)
+        {
+            try {
+                const T& value = Pt::any_cast<const T&>(a) ;
+                _setter->invoke( value );
+            }
+            catch(...) {
+                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+            }
+        }
+
+    private:
+        Pt::Invokable<T>* _setter;
+};
+
+
+template <typename T, typename U = T>
+class Property : public IProperty
+{
+    public:
+        template <typename R, typename Object, typename ObjectBase>
+        Property(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
+        : _value(&value)
+        {
+            _getter = new Pt::ConstMethod<T, Object>(parent, getter) ;
+            _setter = new Pt::Method<R, Object, U>(parent, setter);
+        }
+
+        template <typename R, typename Object, typename ObjectBase>
+        Property(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
+        : IProperty()
+        , _value(&value)
+        {
+            _getter = new Pt::Method<T, Object>(parent, getter);
+            _setter = new Pt::Method<R, Object, U>(parent, setter);
+        }
+
+        ~Property()
+        {
+            delete _getter;
+            delete _setter;
+        }
+
+        virtual Pt::Any value()
+        { return _value->value(); }
+
+        virtual void setValue(const Pt::Any& a)
+        {
+            try {
+                const T& value = Pt::any_cast<const T&>(a) ;
+                _setter->invoke( value );
+            }
+            catch(...) {
+                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+            }
+        }
+
+    private:
+        PropertyValue<T>* _value;
+        Pt::Callable<T>* _getter;
+        Pt::Invokable<T>* _setter;
+};
+
+}
+
+
+/*
+namespace Pt {
+
+
+template <typename T>
+class ReadProperty : public IProperty
+{
+    public:
+        ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
+        : PropertyValue()
+        {
+            parent->registerProperty( name, this, &ReadProperty<T>::get );
+            _value = value;
+        }
+
+        const T& get() const
+        {  return any_cast<const T&>(_value); }
+
         virtual Pt::Any value()
         {  return _value; }
 
@@ -49,33 +203,9 @@ class PT_API PropertyValue : public AbstractProperty
 };
 
 
-/** @brief Read-only property
-    @ingroup Reflection
-*/
+
 template <typename T>
-class ReadProperty : public PropertyValue
-{
-    public:
-        ReadProperty( const std::string& name, Reflectable* parent, const T& value = T() )
-        : PropertyValue()
-        {
-            parent->registerProperty( name, this, &ReadProperty<T>::get );
-            _value = value;
-        }
-
-        AbstractProperty* clone() const
-        {  return new ReadProperty<T>(*this); }
-
-        const T& get() const
-        {  return any_cast<const T&>(_value); }
-};
-
-
-/** @brief Write-only property
-    @ingroup Reflection
-*/
-template <typename T>
-class WriteProperty : public PropertyValue
+class WriteProperty : public IProperty
 {
     public:
         WriteProperty( const std::string& name, Reflectable* parent, const T& value = T() )
@@ -85,21 +215,27 @@ class WriteProperty : public PropertyValue
             _value = value;
         }
 
-        AbstractProperty* clone() const
-        { return new WriteProperty<T>(*this); }
-
         void set( const T& value )
         {
             _value = value;
             onValueChanged.send();
         }
+
+        virtual Pt::Any value()
+        {  return _value; }
+
+        virtual void setValue(const Pt::Any& value)
+        {
+            _value = value;
+            onValueChanged.send();
+        }
+
+    protected:
+        Pt::Any _value;
 };
 
-/** @brief Readable and writable property
-    @ingroup Reflection
-*/
 template <typename T>
-class Property : public PropertyValue
+class Property : public IProperty
 {
     public:
         Property( const std::string& name, Reflectable* parent, const T& value = T() )
@@ -118,11 +254,20 @@ class Property : public PropertyValue
             onValueChanged.send();
         }
 
-        AbstractProperty* clone() const
-        { return new Property<T>(*this); }
+        virtual Pt::Any value()
+        {  return _value; }
+
+        virtual void setValue(const Pt::Any& value)
+        {
+            _value = value;
+            onValueChanged.send();
+        }
+
+    protected:
+        Pt::Any _value;
 };
 
 
 } // namespace Pt
-
+*/
 #endif
