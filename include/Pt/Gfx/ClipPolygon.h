@@ -22,7 +22,8 @@
 #define PT_GFX_CLIPPOLYGON_H
 
 #include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/Rect.h>
 
 #include <vector>
 
@@ -34,7 +35,7 @@ namespace Gfx{
 /** @brief Polygon clipper
 
     This class is a function object that can perform clipping
-    of polygons against a specified area. The polygon may have 
+    of polygons against a specified area. The polygon may have
     a complex shape.
  */
 class ClipPolygon
@@ -50,7 +51,7 @@ class ClipPolygon
             @see ClipPolygon::clip
         */
         void operator() (std::vector<Pt::Math::Point>& in,
-                         const Pt::Math::Rect& clippingArea )
+                         const Pt::Gfx::Rect& clippingArea )
         { this-> clip(in, clippingArea); }
 
         /** @brief Perform clipping
@@ -64,7 +65,7 @@ class ClipPolygon
 
         */
         void clip( std::vector<Pt::Math::Point>& in,
-                   const Pt::Math::Rect& clippingArea );
+                   const Pt::Gfx::Rect& clippingArea );
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;

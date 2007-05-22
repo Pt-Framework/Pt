@@ -81,14 +81,14 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             this->registerMethod("drawCircleTest", *this, &ImagePainterTest::drawCircleTest);
             this->registerMethod("drawThinEllipseTest", *this, &ImagePainterTest::drawThinEllipseTest);
             this->registerMethod("drawThickEllipseTest", *this, &ImagePainterTest::drawThickEllipseTest);
-            this->registerMethod("drawPolylineTest", *this, &ImagePainterTest::drawPolylineTest);            
-            this->registerMethod("drawImageTest", *this, &ImagePainterTest::drawImageTest);            
-            this->registerMethod("fontMetricTest", *this, &ImagePainterTest::fontMetricTest);            
+            this->registerMethod("drawPolylineTest", *this, &ImagePainterTest::drawPolylineTest);
+            this->registerMethod("drawImageTest", *this, &ImagePainterTest::drawImageTest);
+            this->registerMethod("fontMetricTest", *this, &ImagePainterTest::fontMetricTest);
             this->registerMethod("drawTextTest", *this, &ImagePainterTest::drawTextTest);
 
             this->registerMethod("fillEllipseTest", *this, &ImagePainterTest::fillEllipseTest);
             this->registerMethod("fillCircleTest", *this, &ImagePainterTest::fillCircleTest);
-            this->registerMethod("fillPolygonTest", *this, &ImagePainterTest::fillPolygonTest);            
+            this->registerMethod("fillPolygonTest", *this, &ImagePainterTest::fillPolygonTest);
             this->registerMethod("fillRectTest", *this, &ImagePainterTest::fillRectTest);
         }
 
@@ -104,9 +104,9 @@ class ImagePainterTest : public Pt::Unit::TestSuite
                 _imagePainter.drawLine( Point( 100,10 ), Point ( 10,100 ) );
                 _imagePainter.drawLine( Point( 55,10 ), Point ( 55,100 ) );
                 _imagePainter.drawLine( Point( 10,55 ), Point ( 100,55 ) );
-            }      
+            }
         }
-                
+
         void drawThickLineTest()
         {
             _imagePainter.setPen( Pen( 10, ARgbColor( 0, 0, 0 ) ) );
@@ -118,15 +118,15 @@ class ImagePainterTest : public Pt::Unit::TestSuite
                 _imagePainter.drawLine( Point( 10,10 ), Point (100,100 ) );
                 _imagePainter.drawLine( Point( 100,10 ), Point ( 10,100 ) );
                 _imagePainter.drawLine( Point( 55,10 ), Point ( 55,100 ) );
-                _imagePainter.drawLine( Point( 10,55 ), Point ( 100,55 ) );                
+                _imagePainter.drawLine( Point( 10,55 ), Point ( 100,55 ) );
             }
-            
+
             _image.resize(  300, 300, _bkColor );
             _imagePainter.setPen( Pen( Pen::DashStyle ) );
             _imagePainter.drawLine( Point( 55,10 ), Point ( 55,100 ) );
-            PT_UNIT_ASSERT( checkImage() );                   
+            PT_UNIT_ASSERT( checkImage() );
         }
- 
+
         void fillPolygonTest()
         {
             _image.resize(  800, 600, _bkColor );
@@ -155,61 +155,61 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             _imagePainter.setPen( Pen( 1, ARgbColor( 0,0,0) ) );
 
             _image.resize(  800, 600, _bkColor );
-            _imagePainter.drawRect( Rect( Point( 10, 10), Size( 100,100) ) );
+            _imagePainter.drawRect( Gfx::Rect( Point( 10, 10), Size( 100,100) ) );
             PT_UNIT_ASSERT( checkImage() );
 
             _image.resize(  800, 600, _bkColor );
-            _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,1000) ) );
+            _imagePainter.drawRect( Gfx::Rect( Point( -10, -10), Size( 1000,1000) ) );
             PT_UNIT_ASSERT( !checkImage() );
 
             _image.resize(  800, 600, _bkColor );
-            _imagePainter.drawRect( Rect( Point( -10, -10), Size( 1000,40) ) );
+            _imagePainter.drawRect( Gfx::Rect( Point( -10, -10), Size( 1000,40) ) );
             PT_UNIT_ASSERT( checkImage() );
         }
 
         void fillRectTest()
-        {             
+        {
             _imagePainter.setBrush( Brush( ARgbColor( 0,0,0) ) );
-            
-            _image.resize(  800, 600, _bkColor );                                    
-            _imagePainter.fillRect( Rect( Point( 10, 10), Size( 100,100) ) );
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.fillRect( Gfx::Rect( Point( 10, 10), Size( 100,100) ) );
             PT_UNIT_ASSERT( checkImage() );
-            
-            _image.resize(  800, 600, _bkColor );            
-            _imagePainter.fillRect( Rect( Point( -10, -10), Size( 1000, 1000 ) ) );            
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.fillRect( Gfx::Rect( Point( -10, -10), Size( 1000, 1000 ) ) );
             PT_UNIT_ASSERT( checkImage() );
-            
-            _image.resize(  800, 600, _bkColor );                        
-            _imagePainter.fillRect( Rect( Point( -10, -10), Size( 1000, 50) ) );
-            PT_UNIT_ASSERT( checkImage() );        
+
+            _image.resize(  800, 600, _bkColor );
+            _imagePainter.fillRect( Gfx::Rect( Point( -10, -10), Size( 1000, 50) ) );
+            PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void drawCircleTest()
-        { 
+        {
             _imagePainter.setPen( Pen( 1, ARgbColor( 0, 0, 0 ) ) );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawCircle( Point( 10,10), 100 );
             PT_UNIT_ASSERT( checkImage() );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawCircle( Point( -10,10), 100 );
-            PT_UNIT_ASSERT( checkImage() );            
+            PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void fillCircleTest()
-        { 
+        {
             _imagePainter.setBrush( Brush( ARgbColor( 0, 0, 0 ) ) );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.fillCircle( Point( 10,10), 100 );
             PT_UNIT_ASSERT( checkImage() );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawCircle( Point( -10, 10 ), 100 );
-            PT_UNIT_ASSERT( checkImage() );                    
+            PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void drawThickEllipseTest()
         {
             _imagePainter.setPen( Pen( 10, ARgbColor( 0, 0, 0 ) ) );
@@ -226,24 +226,24 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             _imagePainter.drawEllipse( Point( -10,10), Size( 1000,100) );
             //PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void drawThinEllipseTest()
-        { 
+        {
             _imagePainter.setPen( Pen( 1, ARgbColor( 0, 0, 0 ) ) );
-            
-            _image.resize(  800, 600, _bkColor );            
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawEllipse( Point( 10,10), Size( 100,100) );
-            PT_UNIT_ASSERT( checkImage() );            
-            
-            _image.resize(  800, 600, _bkColor );            
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawEllipse( Point( -10,10), Size( 100,100) );
-            PT_UNIT_ASSERT( checkImage() );                        
-            
-            _image.resize(  800, 600, _bkColor );            
+            PT_UNIT_ASSERT( checkImage() );
+
+            _image.resize(  800, 600, _bkColor );
             _imagePainter.drawEllipse( Point( -10,10), Size( 1000,100) );
-            PT_UNIT_ASSERT( checkImage() );                                    
+            PT_UNIT_ASSERT( checkImage() );
         }
-        
+
         void fillEllipseTest()
         {
             _imagePainter.setBrush( Brush( ARgbColor( 0, 0, 0 ) ) );
@@ -326,7 +326,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             //Right clipping
             _image.resize( 800, 600, _bkColor );
             _imagePainter.drawText( Point( 782, 40 ), text, &backgroundColor );
-            PT_UNIT_ASSERT( checkImage() ); 
+            PT_UNIT_ASSERT( checkImage() );
 
             //Bottom clipping
             _image.resize( 800, 600, _bkColor );
@@ -347,7 +347,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             for( size_t j = 0; j < _image.height(); ++j )
                 if( _image.pixel( i, j ) != _bkColor )
                     return true;
-        
+
         return false;
     }
 

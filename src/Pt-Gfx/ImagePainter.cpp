@@ -65,12 +65,12 @@ ImagePainter::ImagePainter( ARgbImage& image )
 {
     std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
     std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
-    std::auto_ptr<Stroke>                 stroke( new Stroke() );    
+    std::auto_ptr<Stroke>                 stroke( new Stroke() );
     std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
     dThinPolyline->setOutput( *stroke );
     std::auto_ptr<DrawWideSolidPolyline>  dWidePolyline( new DrawWideSolidPolyline );
     std::auto_ptr<DrawWideDashPolyline>   dWideDashPolyline( new DrawWideDashPolyline );
-    dWidePolyline->setOutput( *stroke );    
+    dWidePolyline->setOutput( *stroke );
     dWideDashPolyline->setOutput( *stroke );
     std::auto_ptr<DrawText>               dText( new DrawText() );
     dText->setFont(_font);
@@ -79,8 +79,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
     std::auto_ptr<FillPolygon>            fillPolygon( new FillPolygon() );
     fillPolygon->setOutput( *fillSolid );
     std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
-    
-    
+
+
     _drawThinPolyline        = dThinPolyline.release();
     _drawWideSolidPolyline   = dWidePolyline.release();
     _drawWideDashPolyline    = dWideDashPolyline.release();
@@ -116,22 +116,22 @@ ImagePainter::~ImagePainter()
 
 void ImagePainter::setPen( const Pen& pen )
 {
-    _pen = pen;    
-    
+    _pen = pen;
+
     if( _pen.size() == 1 )
     {
         _drawPolyline   = _drawThinPolyline;
-        _drawEllipse    = _drawThinEllipse;        
+        _drawEllipse    = _drawThinEllipse;
     }
     else
     {
         if( _pen.style() == Pen::SolidStyle )
             _drawPolyline = _drawWideSolidPolyline;
-        else            
+        else
             _drawPolyline = _drawWideDashPolyline;
-            
+
         _drawEllipse    = _drawThickEllipse;
-    }        
+    }
 }
 
 const Pen& ImagePainter::pen() const
@@ -206,7 +206,7 @@ void ImagePainter::drawText( const Math::Point& to, const String& text, const Pt
     _drawText->draw( _image, _pen.color(),  to, text, outline );
 }
 
-void ImagePainter::drawRect(const  Math::Rect& rect)
+void ImagePainter::drawRect(const  Gfx::Rect& rect)
 {
     //
     // Emulate ImagePainter::drawRect with four calls to
@@ -224,7 +224,7 @@ void ImagePainter::drawRect(const  Math::Rect& rect)
                    rect.topLeft() );
 }
 
-void ImagePainter::fillRect(const  Math::Rect& rect)
+void ImagePainter::fillRect(const  Gfx::Rect& rect)
 {
     std::vector<Pt::Math::Point> points(4);
     points[0] = rect.topLeft();
@@ -258,7 +258,7 @@ void ImagePainter::fillPolygon( const  Math::Point* points, const size_t pointCo
 }
 
 void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image )
-{    
+{
 }
 
 void ImagePainter::drawImage( const  Math::Point& to, const ARgbImage& image, const Region& imageRegion )

@@ -19,7 +19,7 @@
 
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/ImageButton.h"
 #include <Pt/Gui/Painter.h>
 #include "Pt/Gui/CloseEvent.h"
@@ -81,7 +81,7 @@ void ImageButton::update()
 void ImageButton::drawPressed(Painter& painter)
 {
     painter.setBrush(Brush(backgroundColor()));
-    painter.fillRect(Rect(Point(0, 0), this->size()));
+    painter.fillRect(Gfx::Rect(Point(0, 0), this->size()));
 
     ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
     ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
@@ -92,7 +92,7 @@ void ImageButton::drawPressed(Painter& painter)
 void ImageButton::drawNormal(Painter& painter, bool focused)
 {
     painter.setBrush(Brush(backgroundColor()));
-    painter.fillRect(Rect(Point(0, 0), this->size()));
+    painter.fillRect(Gfx::Rect(Point(0, 0), this->size()));
 
     ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
     ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;

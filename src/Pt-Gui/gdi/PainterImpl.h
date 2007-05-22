@@ -84,9 +84,9 @@ namespace Gui {
 
             void drawText(const Pt::Math::Point& to, const Pt::String& Text);
 
-            void drawRect(const Pt::Math::Rect& rectangle);
+            void drawRect(const Pt::Gfx::Rect& rectangle);
 
-            void fillRect(const Pt::Math::Rect& rectangle);
+            void fillRect(const Pt::Gfx::Rect& rectangle);
 
             void drawEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Size& size);
 

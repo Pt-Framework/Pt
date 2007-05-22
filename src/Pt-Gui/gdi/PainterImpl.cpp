@@ -22,7 +22,7 @@
 
 #include "Pt/Types.h"
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/Region.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Gfx/Rgb888Color.h"
@@ -83,7 +83,7 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
 {
 #ifdef _WIN32_WCE
-	DWORD penStyle = 0;
+    DWORD penStyle = 0;
 #else
     DWORD penStyle = PS_GEOMETRIC;
 #endif
@@ -481,7 +481,7 @@ void PainterImpl::drawText(const Pt::Math::Point& to, const Pt::String& text)
 }
 
 
-void PainterImpl::fillRect(const Pt::Math::Rect& rect)
+void PainterImpl::fillRect(const Pt::Gfx::Rect& rect)
 {
     ensureActivePainter();
 
@@ -495,7 +495,7 @@ void PainterImpl::fillRect(const Pt::Math::Rect& rect)
 }
 
 
-void PainterImpl::drawRect(const Pt::Math::Rect& rect)
+void PainterImpl::drawRect(const Pt::Gfx::Rect& rect)
 {
     ensureActivePainter();
 
@@ -558,14 +558,14 @@ void PainterImpl::fillEllipse(const Pt::Math::Point& topLeft, const Pt::Math::Si
 
 void PainterImpl::drawPolyline(const Pt::Math::Point* points, const size_t pointCount) const
 {
-    if (_pen.size() == 0) 
+    if (_pen.size() == 0)
        return;
-    
+
     ensureActivePainter();
-    
+
     std::vector<POINT> winPoints(pointCount);
 
-    for (size_t i = 0; i < pointCount; i++) 
+    for (size_t i = 0; i < pointCount; i++)
     {
         winPoints[i].x = points[i].x();
         winPoints[i].y = points[i].y();

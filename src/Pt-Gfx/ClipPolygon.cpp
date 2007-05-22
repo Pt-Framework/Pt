@@ -29,14 +29,14 @@ namespace Gfx{
 ClipPolygon::ClipPolygon()
 { }
 
-void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Math::Rect& clippingArea )
+void ClipPolygon::clip( std::vector<Pt::Math::Point>& in, const Pt::Gfx::Rect& clippingArea )
 {
     if( clippingArea.isNull())
     {
         in.clear();
-        return;        
+        return;
     }
-    
+
     std::vector<Pt::Math::Point> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );

@@ -28,6 +28,8 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Gfx.h>
+#include <Pt/Gfx/Rect.h>
 #include <memory>
 
 
@@ -109,10 +111,10 @@ class PT_GFX_API ImagePainter : public Painter
                               const Pt::Gfx::ARgbColor* outline = 0 );
 
         //!@see Pt::Gfx::Painter
-        virtual void drawRect(const  Math::Rect& rect);
+        virtual void drawRect(const  Gfx::Rect& rect);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillRect(const  Math::Rect& rect);
+        virtual void fillRect(const  Gfx::Rect& rect);
 
         //!@see Pt::Gfx::Painter
         virtual void drawEllipse(const  Math::Point& topLeft, const  Math::Size& size);
@@ -138,12 +140,12 @@ class PT_GFX_API ImagePainter : public Painter
         Pen                  _pen;
         Brush                _brush;
         Font                 _font;
-        
+
         DrawPolyline*           _drawPolyline;
         DrawThinPolyline*       _drawThinPolyline;
         DrawWideSolidPolyline*  _drawWideSolidPolyline;
         DrawWideDashPolyline*   _drawWideDashPolyline;
-        
+
         DrawEllipse*         _drawEllipse;
         DrawThinEllipse*     _drawThinEllipse;
         DrawThickEllipse*    _drawThickEllipse;

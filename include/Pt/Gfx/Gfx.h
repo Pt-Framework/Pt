@@ -142,6 +142,13 @@ namespace Pt {
         typedef Rgb565InterleavedSubImage   Rgb565SubImage;
         typedef Rgb555InterleavedSubImage   Rgb555SubImage;
 
+        template <typename PointT, typename SizeT>
+        class BasicRect;
+
+        typedef BasicRect<Pt::ssize_t, Pt::size_t>  Rect;
+        typedef BasicRect<double, double>           RectF;
+
+
     } // namespace Gfx
 
 } // namespace Pt

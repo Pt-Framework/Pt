@@ -21,7 +21,7 @@
 #include "Pt/Gui/Panel.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Painter.h"
 #include "Pt/Gui/PaintEvent.h"
 #include "Pt/Gui/ResizeEvent.h"
@@ -53,7 +53,7 @@ void Panel::update()
 
     Painter p = painter();
     p.setBrush(brush);
-    p.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    p.fillRect(Gfx::Rect(Math::Point(0, 0), size()));
 }
 
 

@@ -46,7 +46,7 @@ namespace Gui {
              * @see begin()
              */
             Painter(PainterImpl* painterImpl);
-        
+
             /**
              * @brief Ends the painting (in PainterImpl) and destructs this painter.
              */
@@ -78,7 +78,7 @@ namespace Gui {
 
             // inerhit doc
             virtual const std::list<std::string>& fontFamilyNames();
-            
+
             // inerhit doc
             virtual void drawPixel(const Math::Point& to);
 
@@ -89,10 +89,10 @@ namespace Gui {
             virtual void drawText(const Pt::Math::Point& to, const Pt::String& Text, const Pt::Gfx::ARgbColor* outline = 0);
 
             // inerhit doc
-            virtual void drawRect(const Math::Rect& rect);
+            virtual void drawRect(const Gfx::Rect& rect);
 
             // inerhit doc
-            virtual void fillRect(const Math::Rect& rect);
+            virtual void fillRect(const Gfx::Rect& rect);
 
             // inerhit doc
             virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
@@ -126,7 +126,7 @@ namespace Gui {
              * If begin() was not called, the painter may throw an exception.
              */
             void begin() const;
-            
+
         private:
             // mutable because some getters require non-const access
             mutable PainterImpl* _painterImpl;

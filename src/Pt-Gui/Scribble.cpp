@@ -1,6 +1,6 @@
 #include <Pt/Main.h>
 #include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Rect.h>
 #include "Pt/Gui/Application.h"
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Button.h>
@@ -48,7 +48,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
             // Clear the backbuffer (pixmap) with white color.
             pixmapPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
-            pixmapPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
 
             _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
             connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
@@ -85,10 +85,10 @@ class ScribbleWidget : public Pt::Gui::Widget
             Gui::Painter pixmapPainter = _pixmap->painter();
 
             widgetPainter.setBrush(brush);
-            widgetPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
+            widgetPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
 
             pixmapPainter.setBrush(brush);
-            pixmapPainter.fillRect( Math::Rect(Math::Point(0, 0), this->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
         }
 
         void setPenColor(const ARgbColor& color)
@@ -147,7 +147,7 @@ class ScribbleWidget : public Pt::Gui::Widget
             Gui::Painter pixmapPainter = newPixmap->painter();
 
             pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
-            pixmapPainter.fillRect( Math::Rect( Math::Point(0, 0), newPixmap->size() ) );
+            pixmapPainter.fillRect( Gfx::Rect( Math::Point(0, 0), newPixmap->size() ) );
 
             pixmapPainter.drawPixmap( Math::Point(0, 0), *_pixmap );
             _pixmap.reset(newPixmap);

@@ -19,7 +19,7 @@
 
 #include "PainterImpl.h"
 
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
@@ -89,7 +89,7 @@ FontMetrics Painter::fontMetrics() const
 }
 
 
-FontMetrics Painter::fontMetrics(Pt::String text) const 
+FontMetrics Painter::fontMetrics(Pt::String text) const
 {
     this->begin();
     return _painterImpl->fontMetrics(text);
@@ -123,14 +123,14 @@ void Painter::drawText( const Math::Point& to, const Pt::String& text, const Pt:
 
 }
 
-void Painter::drawRect(const Math::Rect& rect)
+void Painter::drawRect(const Gfx::Rect& rect)
 {
     this->begin();
     _painterImpl->drawRect(rect);
 }
 
 
-void Painter::fillRect(const Math::Rect& rect)
+void Painter::fillRect(const Gfx::Rect& rect)
 {
     this->begin();
     _painterImpl->fillRect(rect);

@@ -234,7 +234,7 @@ namespace Gfx {
              * @param rect The rectangle is drawn at this rectangular location.
              * @see setPen()
              */
-            virtual void drawRect(const Pt::Math::Rect& rect) = 0;
+            virtual void drawRect(const Pt::Gfx::Rect& rect) = 0;
 
             /**
              * @brief Draws a filled rectangle (without an outline)
@@ -245,7 +245,7 @@ namespace Gfx {
              * @param rect The rectangle is drawn at this rectangular location.
              * @see setBrush()
              */
-            virtual void fillRect(const Pt::Math::Rect& rect) = 0;
+            virtual void fillRect(const Pt::Gfx::Rect& rect) = 0;
 
             /**
              * @brief Draws a circle outline with the given diameter at the specified position.

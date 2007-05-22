@@ -19,7 +19,7 @@
 
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Button.h"
 #include "Pt/Gui/Painter.h"
 #include "Pt/Gui/CloseEvent.h"
@@ -98,7 +98,7 @@ void Button::drawPressed(Painter& painter)
     Brush brush(this->backgroundColor());
 
     painter.setBrush(brush);
-    painter.fillRect( Math::Rect( Math::Point(0, 0), size() ) );
+    painter.fillRect( Gfx::Rect ( Math::Point(0, 0), size() ) );
 
     // ... then draw the border around the button.
     Pen borderPen(1, ARgbColor(16384, 16384, 16384), Pen::SolidStyle, Pen::FlatCap);

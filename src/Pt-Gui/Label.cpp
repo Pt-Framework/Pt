@@ -22,7 +22,7 @@
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Label.h"
 #include "Pt/Gui/MouseEvent.h"
 #include "Pt/Gui/PaintEvent.h"
@@ -75,10 +75,10 @@ void Label::update()
     Brush brush(backgroundColor());
 
     widgetPainter.setBrush(brush);
-    widgetPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    widgetPainter.fillRect(Gfx::Rect(Math::Point(0, 0), size()));
 
     backbufferPainter.setBrush(brush);
-    backbufferPainter.fillRect(Math::Rect(Math::Point(0, 0), size()));
+    backbufferPainter.fillRect(Gfx::Rect(Math::Point(0, 0), size()));
 
     if( !_text.empty() ) {
         Pen pen(1, foregroundColor());
