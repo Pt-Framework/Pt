@@ -358,12 +358,6 @@ typedef std::multimap<std::string, ICallable*> MethodMap;
 
 /** @brief Make objects reflectable
     @ingroup Reflection
-
-    This module is the base module for all other modules and has no dependency
-    to any system specific libraries except the standard c++ library. It
-    provides some basic types, support for byte-order handling, a CTTI system,
-    an unicode string and character class, reflection and a signals/delegates
-    based callback mechanism.
 */
 class PT_API Reflectable {
     public:
