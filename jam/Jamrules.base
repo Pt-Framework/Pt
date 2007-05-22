@@ -793,7 +793,14 @@ rule Object
 
     Clean clean : $(<) ;
 
-    MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
+    if $(OBJECT_TARGET)
+    {
+    	MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
+    }
+    else
+    {
+        MakeLocate $(<) : $(LOCATE_TARGET) ;
+    }
 
     SEARCH on $(>) = $(SEARCH_SOURCE) ;
 
