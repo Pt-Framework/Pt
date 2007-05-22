@@ -655,16 +655,6 @@ rule Main
     Objects $(>) ;
 }
 
-rule Main
-{
-    local _target = $(1:S=$(SUFEXE)) ;
-    DEPENDS exe : $(_target) ;
-
-    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-    Objects $(2) : $(1) ;
-}
-
-
 rule MainFromObjects
 {
     local _s _t ;
