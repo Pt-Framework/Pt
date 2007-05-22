@@ -26,7 +26,7 @@
 #include <math.h>
 
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Math/Rect.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf16Codec.h"
@@ -388,7 +388,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 }
 
 
-void PainterImpl::drawRect(const Math::Rect& rect)
+void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
     // Rectangle which has 0 width or height does not have to be drawn.
     // (Its not possible to draw a 0 pixel wide/high rectangle in X11.)
@@ -430,7 +430,7 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
-void PainterImpl::fillRect(const Math::Rect& rect)
+void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
     Display* display = X11EventLoop::instance().display();
     XFillRectangle(display, _drawable->x11Drawable(), _brushGc, rect.x(), rect.y(), rect.width(), rect.height());

@@ -97,13 +97,13 @@ namespace Gui {
 
             void drawText(const Math::Point& to, const Pt::String& text);
 
-            void drawRect(const Math::Rect& rect);
+            void drawRect(const Gfx::Rect& rect);
 
             void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
             void drawPolyline(const Math::Point* points, const size_t pointCount);
 
-            void fillRect(const Math::Rect& rect);
+            void fillRect(const Gfx::Rect& rect);
 
             void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
