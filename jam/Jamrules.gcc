@@ -67,6 +67,19 @@ rule FIncludes
 { return -I$(<) ; }
 
 
+rule Main
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+	
+    # linker flag -E: export global symbols from the executable
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+
+    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+    Objects $(>) ;
+}
+
+
 rule Main_LinkSharedLibraries
 {
     local _target = $(<)$(SUFEXE) ;
