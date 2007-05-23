@@ -35,7 +35,7 @@ namespace Pt {
     @ingroup Reflection
 */
 template <typename T>
-class PT_API PropertyValue
+class PropertyValue
 {
     public:
         PropertyValue(const std::string& name, const T& value = T() )
