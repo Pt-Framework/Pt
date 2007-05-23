@@ -24,6 +24,7 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Socket.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/System/IOResult.h>
 
 namespace Pt {
 
