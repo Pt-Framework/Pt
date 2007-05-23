@@ -541,6 +541,9 @@ rule Lex
 
 rule Library
 {
+    local _l = $(PRELIB)$(<)$(SUFLIB) ;
+    Depends $(<) : $(_l) ;
+
     LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) : $(1) ;
 }
@@ -651,6 +654,12 @@ rule Main_MakeLocate
 
 rule Main
 {
+    local _l = $(<)$(SUFEXE) ;
+    if $(<) != $(_l)
+    {
+        Depends $(<) : $(_l) ;
+    }
+
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
     Objects $(>) ;
 }
@@ -899,6 +908,9 @@ rule Setuid
 #
 rule SharedLibrary
 {
+    local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+    Depends $(<) : $(_target) ;
+
     SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) ;
 }
