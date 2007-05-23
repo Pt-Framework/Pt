@@ -68,13 +68,13 @@ namespace Net {
 
         protected:
             System::IOResult& _beginRead(char* buffer, size_t n, bool& eof)
-            { System::IOResult* res; return *res; }
+            { System::IOResult* res = 0; return *res; }
 
             size_t _endRead(System::IOResult& result, bool& eof)
             { return 0;}
 
             System::IOResult& _beginWrite(const char* buffer, size_t n)
-            { System::IOResult* res; return *res; }
+            { System::IOResult* res = 0; return *res; }
 
             size_t _endWrite(System::IOResult& result)
             { return 0;}

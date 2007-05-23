@@ -40,7 +40,7 @@ class Args
         {}
 
         template <typename A>
-        Args(A a)
+        explicit Args(A a)
         {
             _args.push_back( Any(a) );
         }

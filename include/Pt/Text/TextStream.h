@@ -27,11 +27,6 @@
 #include <Pt/Text/BasicTextStream.h>
 
 
-namespace std {
-    class PT_TEXT_API ios_base;
-}
-
-
 namespace Pt {
 
 namespace Text {

@@ -25,6 +25,8 @@
 //! \addtogroup Pt
 namespace Pt {
 
+    class Args;
+
     /** @brief Interface for callable entities
         @ingroup Reflection
     */
