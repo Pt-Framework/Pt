@@ -654,11 +654,10 @@ rule Main_MakeLocate
 
 rule Main
 {
-    local _l = $(<)$(SUFEXE) ;
-    if $(<) != $(_l)
-    {
-        Depends $(<) : $(_l) ;
-    }
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    Depends exe : $(1) ;
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
     Objects $(>) ;
