@@ -35,10 +35,10 @@ namespace Pt {
     @ingroup Reflection
 */
 template <typename T>
-class PropertyValue
+class Property
 {
     public:
-        PropertyValue(const std::string& name, const T& value = T() )
+        Property(const std::string& name, const T& value = T() )
         : _name(name)
         , _value(value)
         {}
@@ -66,14 +66,14 @@ class ReadProperty : public IProperty
 {
     public:
         template <typename Object, typename ObjectBase>
-        ReadProperty( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
+        ReadProperty( Property<T>& value, Object* parent, T (ObjectBase::*getter)() const )
         : _value(&value)
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
 
         template <typename Object, typename ObjectBase>
-        ReadProperty( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
+        ReadProperty( Property<T>& value, Object* parent, T (ObjectBase::*getter)() )
         : IProperty()
         , _value(&value)
         {
@@ -87,7 +87,7 @@ class ReadProperty : public IProperty
         { return _value->value(); }
 
     private:
-        PropertyValue<T>* _value;
+        Property<T>* _value;
         Pt::Callable<T>* _getter;
 };
 
@@ -112,7 +112,7 @@ class WriteProperty : virtual public IProperty
                 _setter->invoke( value );
             }
             catch(...) {
-                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+                std::cerr << "WriteProperty: Type mismatch: " << a.typeName() << std::endl;
             }
         }
 
@@ -122,11 +122,11 @@ class WriteProperty : virtual public IProperty
 
 
 template <typename T, typename U = T>
-class Property : public IProperty
+class ReadWriteProperty : public IProperty
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
-        Property(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
+        ReadWriteProperty(Property<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
         : _value(&value)
         {
             _getter = new Pt::ConstMethod<T, Object>(parent, getter) ;
@@ -134,7 +134,7 @@ class Property : public IProperty
         }
 
         template <typename R, typename Object, typename ObjectBase>
-        Property(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
+        ReadWriteProperty(Property<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
         : IProperty()
         , _value(&value)
         {
@@ -142,7 +142,7 @@ class Property : public IProperty
             _setter = new Pt::Method<R, Object, U>(parent, setter);
         }
 
-        ~Property()
+        ~ReadWriteProperty()
         {
             delete _getter;
             delete _setter;
@@ -163,7 +163,7 @@ class Property : public IProperty
         }
 
     private:
-        PropertyValue<T>* _value;
+        Property<T>* _value;
         Pt::Callable<T>* _getter;
         Pt::Invokable<T>* _setter;
 };

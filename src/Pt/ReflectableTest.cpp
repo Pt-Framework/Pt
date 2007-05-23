@@ -28,6 +28,16 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
+/*
+#define PT_PROPERTY( name, type, get, set )       \
+        void setName(const type& x)           \
+        { _number.set(x); return true; }  \
+                                          \
+        const type& int name() const       \
+        { return _number.get(); }         \
+                                          \
+        Pt::Property<type> nameValue;       \
+*/
 
 
 class TestReflectable : public Pt::Reflectable
@@ -60,7 +70,7 @@ class TestReflectable : public Pt::Reflectable
         { return _number.get(); }
 
     private:
-        Pt::PropertyValue<int> _number;
+        Pt::Property<int> _number;
 
         TestReflectable* self()
         { return this; }
