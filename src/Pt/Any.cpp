@@ -8,16 +8,33 @@ using namespace Pt;
 
 namespace Pt
 {
-    std::map<std::string, void (Any::*)()>& Any::initMap()
+
+    AnyFactory::AnyFactory()
     {
-        static std::map<std::string, void (Any::*)()> _initMap;
-        return _initMap;
     }
+
+
+    std::multimap<std::string, AnyIO*>& AnyFactory::map()
+    { return _initMap; }
+
+
+    const std::multimap<std::string, AnyIO*>& AnyFactory::map() const
+    { return _initMap; }
 
 
     Any::Any()
     : _value(0)
     { }
+
+
+    Any& Any::assign(Value* value)
+    {
+        if(_value)
+            delete _value;
+
+        _value = value;
+        return *this;
+    }
 
 
     Any::Any(const Any& val)
@@ -34,6 +51,21 @@ namespace Pt
     }
 
 
+    Any Any::create(const std::string& name, std::istream& is)
+    {
+        std::multimap<std::string, AnyIO*>::iterator it;
+        it = AnyFactory::instance().map().find(name);
+
+        if( it == AnyFactory::instance().map().end() ) {
+            return Any();
+        }
+
+        Pt::Any a;
+        it->second->input(is, a);
+        return a;
+    }
+
+
     void Any::clear()
     {
 	    if(_value) {
@@ -43,51 +75,10 @@ namespace Pt
     }
 
 
-    void  Any::init(const std::string& typeName)
-    {
-	    std::map<std::string, void (Any::*)()>::iterator it;
-	    it = initMap().find(typeName);
-
-	    if( it == initMap().end() ) {
-		    return;
-	    }
-
-	    ( this->*(it->second) )();
-    }
-
-
     Any& Any::swap(Any& rhs)
     {
 	    std::swap(_value, rhs._value);
 	    return *this;
-    }
-
-
-    void Any::output(std::ostream& os) const
-    {
-	    if(_value)
-		    _value->output(os);
-    }
-
-
-    void Any::input(std::istream& is)
-    {
-	    if(_value)
-		    _value->input(is);
-    }
-
-
-    void Any::output(std::basic_ostream<Pt::Char>& os) const
-    {
-	    if(_value)
-		    _value->output(os);
-    }
-
-
-    void Any::input(std::basic_istream<Pt::Char>& is)
-    {
-	    if(_value)
-		    _value->input(is);
     }
 
 
@@ -130,38 +121,11 @@ namespace Pt
     }
 
 
-    std::ostream& operator<<(std::ostream& os, const Pt::Any& any)
-    {
-	    any.output(os);
-	    return os;
-    }
+    static AnyBind<bool> fbind_bool("bool");
+    static AnyBind<char> fbind_char("char");
+    static AnyBind<int> fbind_int("int");
+    static AnyBind<float> fbind_float("float");
+    static AnyBind<double> fbind_double("double");
+    static AnyBind<std::string> fbind_std_string("std::string");
 
-
-    std::istream& operator>>(std::istream& is, Pt::Any& any)
-    {
-	    any.input(is);
-	    return is;
-    }
-
-
-    std::basic_ostream<Pt::Char>& operator<<(std::basic_ostream<Pt::Char>& os, const Pt::Any& any)
-    {
-	    any.output(os);
-	    return os;
-    }
-
-
-    std::basic_istream<Pt::Char>& operator>>(std::basic_istream<Pt::Char>& is, Pt::Any& any)
-    {
-	    any.input(is);
-	    return is;
-    }
-    
 } // namespace Pt
-
-
-static Pt::Any::Bind<bool> bind_bool;
-static Pt::Any::Bind<int> bind_int;
-static Pt::Any::Bind<float> bind_float;
-static Pt::Any::Bind<double> bind_double;
-static Pt::Any::Bind<std::string> bind_std_string;

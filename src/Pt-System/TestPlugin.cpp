@@ -19,11 +19,11 @@ class PT_EXPORT MyPlugin : public TestPlugin
 	public:
 		virtual void test()
 		{ 
-			Pt::Any a( int(7) );
+			/*Pt::Any a( int(7) );
 			std::stringstream anyStream("5");
 			anyStream >> a;
 			if(a != 5)
-				throw std::runtime_error("a != 5");
+				throw std::runtime_error("a != 5");*/
 				
 			std::fstream fs;
 

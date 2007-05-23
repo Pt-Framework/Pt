@@ -22,12 +22,38 @@
 #include <Pt/Api.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/TypeInfo.h>
+#include <Pt/Singleton.h>
 
 #include <iostream>
 #include <map>
 
 
 namespace Pt {
+
+    class Any;
+    class AnyIO;
+
+
+    //! @internal
+    class PT_API AnyFactory : public Singleton<AnyFactory>
+    {
+        friend class Singleton<AnyFactory>;
+
+        public:
+            //! @internal
+            std::multimap<std::string, AnyIO*>& map();
+
+            //! @internal
+            const std::multimap<std::string, AnyIO*>& map() const;
+
+        protected:
+            AnyFactory();
+
+        private:
+            //! @internal
+            std::multimap<std::string, AnyIO*> _initMap;
+    };
+
 
     /** @brief Contains an arbitrary type
         @ingroup Reflection
@@ -127,10 +153,6 @@ namespace Pt {
                     virtual Value* clone() const = 0;
                     virtual const char* typeName() const = 0;
                     virtual const std::type_info& type() const = 0;
-                    virtual void output(std::ostream& os) const = 0;
-                    virtual void input(std::istream& is) = 0;
-                    virtual void output(std::basic_ostream<Pt::Char>& os) const = 0;
-                    virtual void input(std::basic_istream<Pt::Char>& is) = 0;
                     virtual bool equal(const Value& value) const = 0;
                     virtual bool lt(const Value& value) const = 0;
             };
@@ -159,18 +181,6 @@ namespace Pt {
 
                     virtual Any::Value* clone() const
                     { return new BasicValue(_value); }
-
-                    virtual void output(std::ostream& os) const
-                    { AnyTraits<T>::output(os, _value); }
-
-                    virtual void input(std::istream& is)
-                    { AnyTraits<T>::input(is, _value); }
-
-                    virtual void output(std::basic_ostream<Pt::Char>& os) const
-                    { AnyTraits<T>::output(os, _value); }
-
-                    virtual void input(std::basic_istream<Pt::Char>& is)
-                    { AnyTraits<T>::input(is, _value); }
 
                     virtual bool equal(const Value& value) const
                     {
@@ -222,6 +232,14 @@ namespace Pt {
             */
             Any();
 
+            /** @brief Create an Any from a stream
+            */
+            static Any create(const std::string& name, std::istream& is);
+
+            /** @brief Assigns an abstract value
+            */
+            Any& assign(Value* value);
+
             /** @brief Copy constructor
 
                 Constructs the Any by copying the value of the other Any. It
@@ -257,35 +275,6 @@ namespace Pt {
             inline bool empty() const
             { return !_value; }
 
-            /** @brief Init by type
-
-                Initializes the Any to hold a default constructed type. If
-                an exception is thrown, the Any remains unaltered and the
-                exception is propagated.
-            */
-	    template <typename T>
-	    void init()
-	    {
-		Any::Value* tmp = new BasicValue<T>;
-		delete _value;
-		_value = tmp;
-	    }
-
-
-            /** @brief Init by typename
-
-                Initializes the Any to hold a default constructed type which
-                has been previously registered under a typename using
-                Any::Bind. If the typename is not found or an exception is
-                thrown the Any remains unaltered and the exception is
-                propagated.
-
-                TODO: should this throw on unknown typenames?
-
-                @typeName the registered typename
-            */
-            void init(const std::string& typeName);
-
             /** @brief Swap values
 
                 The member function swaps the assigned values between *this and right.
@@ -315,30 +304,6 @@ namespace Pt {
             */
             const std::type_info& type() const
             { return _value ? _value->type() : typeid(void); }
-
-            /** @brief Write value to stream
-
-                This member function writes the stored value to a std::ostream
-                as defined in the AnyTraits for the stored type.
-
-                @param os Output stream
-            */
-            void output(std::ostream& os) const;
-
-            /** @brief Read value from stream
-
-                This member function reads a value from the stream and stores
-                it in the Any. The same type that is currently assigned to the
-                Any will be read from the stream and its value assigned to the
-                Any. If the Any is empty nothing is read.
-
-                @param is Input stream
-            */
-            void input(std::istream& is);
-
-            void output(std::basic_ostream<Pt::Char>& os) const;
-
-            void input(std::basic_istream<Pt::Char>& is);
 
             /** @brief Assign value
 
@@ -379,6 +344,9 @@ namespace Pt {
             template <typename T>
             bool operator==(const T& value) const
             {
+                if(_value == 0)
+                    return false;
+
                 return _value->equal( BasicValue<T>(value) );
             }
 
@@ -410,71 +378,10 @@ namespace Pt {
             */
             bool operator<(const Any& a) const;
 
-            /** @brief Type binder for types used in Any
-
-                If you want to use the named type initialisation of Any,
-                you can bind your types to typenames. Your types need to
-                be bound to a name before Any::init(const std::string&) is
-                going to work.
-
-                /sa Any
-            */
-            template <typename T>
-            struct Bind
-            {
-                /** @brief Binds a type to a name
-
-                    With the use of Any::Bind objects you can bind your types
-                    at static initialisation time. By default the typename
-                    will be taken from the TypeTraits of the to be bound type.
-                */
-                Bind( const std::string& typeName = TypeTraits<T>::typeName() )
-                { Any::bind<T>( typeName ); }
-            };
-
-        protected:
-            /** @brief Binds a type to a name
-
-                With this function you can bind your types to be used under
-                a typename  by Any. This function is not thread-safe, do not
-                call it from threads other than the main thread. a better
-                approach would be to register your types with Any::Bind.
-            */
-            template <typename T>
-            static void bind(const std::string& typeName)
-            { Any::initMap().insert( std::make_pair<std::string, void (Any::*)()>(typeName, &Any::init<T>) ); }
-
         private:
-            /** @internal */
-            static std::map<std::string, void (Any::*)()>& initMap();
-
             /** @internal */
             Value* _value;
     };
-
-    /** @brief Read value from stream
-
-        @sa Any::output
-
-        @param is Output stream
-        @param val Any to write
-        @return Output stream reference
-    */
-    PT_API std::ostream& operator<<(std::ostream& os, const Pt::Any& val);
-
-    /** @brief Read value from stream
-
-        @sa Any::input
-
-        @param is Input stream
-        @param val Any to read to
-        @return Input stream reference
-    */
-    PT_API std::istream& operator>>(std::istream& is, Pt::Any& val);
-
-    PT_API std::basic_ostream<Pt::Char>& operator<<(std::basic_ostream<Pt::Char>& os, const Pt::Any& val);
-
-    PT_API std::basic_istream<Pt::Char>& operator>>(std::basic_istream<Pt::Char>& is, Pt::Any& val);
 
 
     /** @brief Get contained value
@@ -520,44 +427,61 @@ namespace Pt {
         throw std::bad_cast();
     }
 
+
+    struct AnyIO
+    {
+        virtual ~AnyIO() {}
+        virtual void input(std::istream& is, Pt::Any& a) = 0;
+        virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const = 0;
+        virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a) = 0;
+    };
+
+
+    template <typename T>
+    struct BasicAnyIO : public AnyIO
+    {
+        virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const
+        {
+            //AnyTraits<T>::output(os, a);
+        }
+
+        virtual void input(std::istream& is, Pt::Any& a)
+        {
+            Pt::Any::BasicValue<T>* value = new Any::BasicValue<T>;
+            a.assign(value);
+            AnyTraits<T>::input( is, value->value() );
+        }
+
+        virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a)
+        {
+            Pt::Any::BasicValue<T>* value = new Any::BasicValue<T>;
+            a.assign(value);
+            AnyTraits<T>::input( is, value->value() );
+        }
+    };
+
+
+    /** @brief Type binder for types used in Any
+
+        With the use of AnyBind objects you can bind your types
+        at static initialisation time. By default the typename
+        will be determined by the TypeTraits.
+
+        /sa Any
+    */
+    template <typename T>
+    struct AnyBind
+    {
+        /** @brief Binds a type to a name
+
+            With the use of AnyBind objects you can bind your types
+            at static initialisation time. By default the typename
+            will be determined by the TypeTraits.
+        */
+        AnyBind( const std::string& typeName = TypeTraits<T>::typeName() )
+        { AnyFactory::instance().map().insert( std::make_pair( typeName, new BasicAnyIO<T> ) ); }
+    };
+
 }
-
-
-namespace Pt {
-
-/* CAUSES COMPILER ERROR ON MINGW
-    template <typename T>
-    Any::Any(const T& type)
-    : _value(0)
-    { (*this) = type; }
-
-    template <typename T>
-    Any& Any::operator=(const T& rhs)
-    {
-        Any::Value* tmp = new BasicValue<T>(rhs);
-        delete _value;
-        _value = tmp;
-        return *this;
-    }
-
-    template <typename T>
-    void Any::init()
-    {
-        Any::Value* tmp = new BasicValue<T>;
-        delete _value;
-        _value = tmp;
-    }
-
-
-    template <typename T>
-    bool Any::operator==(const T& value) const
-    {
-        return _value->equal( BasicValue<T>(value) );
-    }
-*/
-}
-
 
 #endif
-
-
