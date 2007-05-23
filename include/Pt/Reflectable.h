@@ -22,7 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
-#include <Pt/IMethod.h>
+#include <Pt/MethodProxy.h>
 #include <Pt/Property.h>
 #include <Pt/PropertyProxy.h>
 #include <map>
@@ -141,42 +141,42 @@ class PT_API Reflectable
         template <typename ParentT>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
         {
-            ICallable* cb = new IMethod<void, ParentT>(&parent, memFunc);
+            ICallable* cb = new MethodProxy<void, ParentT>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
         {
-            ICallable* cb =  new IMethod<void, ParentT, A1>(&parent, memFunc);
+            ICallable* cb =  new MethodProxy<void, ParentT, A1>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
         {
-            ICallable* cb =  new IMethod<void, ParentT, A1, A2>(&parent, memFunc);
+            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
         {
-            ICallable* cb =  new IMethod<void, ParentT, A1, A2, A3>(&parent, memFunc);
+            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
         {
-            ICallable* cb =  new IMethod<void, ParentT, A1, A2, A3, A4>(&parent, memFunc);
+            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
         {
-            ICallable* cb =  new IMethod<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
+            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 

@@ -68,27 +68,21 @@ class ReadProperty : public IProperty
         template <typename Object, typename ObjectBase>
         ReadProperty( Property<T>& value, Object* parent, T (ObjectBase::*getter)() const )
         : _value(&value)
-        {
-            _getter = new Pt::ConstMethod<T, Object>( parent, getter );
-        }
+        { }
 
         template <typename Object, typename ObjectBase>
         ReadProperty( Property<T>& value, Object* parent, T (ObjectBase::*getter)() )
-        : IProperty()
-        , _value(&value)
-        {
-            _getter = new Pt::Method<T, Object>( parent, getter );
-        }
+        : _value(&value)
+        { }
 
         ~ReadProperty()
-        { delete _getter; }
+        { }
 
         virtual Pt::Any value()
         { return _value->value(); }
 
     private:
         Property<T>* _value;
-        Pt::Callable<T>* _getter;
 };
 
 
@@ -129,7 +123,6 @@ class ReadWriteProperty : public IProperty
         ReadWriteProperty(Property<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
         : _value(&value)
         {
-            _getter = new Pt::ConstMethod<T, Object>(parent, getter) ;
             _setter = new Pt::Method<R, Object, U>(parent, setter);
         }
 
@@ -138,13 +131,11 @@ class ReadWriteProperty : public IProperty
         : IProperty()
         , _value(&value)
         {
-            _getter = new Pt::Method<T, Object>(parent, getter);
             _setter = new Pt::Method<R, Object, U>(parent, setter);
         }
 
         ~ReadWriteProperty()
         {
-            delete _getter;
             delete _setter;
         }
 
@@ -164,7 +155,6 @@ class ReadWriteProperty : public IProperty
 
     private:
         Property<T>* _value;
-        Pt::Callable<T>* _getter;
         Pt::Invokable<T>* _setter;
 };
 

@@ -61,6 +61,7 @@ class ReadPropertyProxy : virtual public IProperty
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() const )
         : IProperty()
+        //, _value(0)
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
@@ -68,6 +69,7 @@ class ReadPropertyProxy : virtual public IProperty
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() )
         : IProperty()
+        //, _value(0)
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
         }
@@ -77,6 +79,9 @@ class ReadPropertyProxy : virtual public IProperty
 
         virtual Pt::Any value()
         {
+            //if(_value)
+                //return _value->value();
+
             Pt::Any any;
             any = this->get();
             return any;
@@ -89,6 +94,7 @@ class ReadPropertyProxy : virtual public IProperty
         { return get(); }
 
     private:
+        //Property<T>* _value;
         Pt::Callable<T>* _getter;
 };
 
