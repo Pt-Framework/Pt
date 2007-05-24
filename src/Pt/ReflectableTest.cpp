@@ -28,15 +28,23 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
-/*
-#define PT_PROPERTY( name, type, get, set )       \
-        void setName(const type& x)           \
-        { _number.set(x); return true; }  \
-                                          \
-        const type& int name() const       \
-        { return _number.get(); }         \
-                                          \
-        Pt::Property<type> nameValue;       \
+
+/*#define PT_PROPERTY( name, Name, type )       \
+                                                  \
+class Property##name : public Pt::Property<type>       \
+        {                                         \
+            public:                               \
+                Property##name()                  \
+                : Pt::Property<type>("number")             \
+                {}                                \
+        };                                        \
+         void set##Name(type x)            \
+        { _##name.set(x); }          \
+                                                  \
+        type name () const             \
+        { return _##name.get(); }                 \
+                                                  \
+        Property##name _number;            \
 */
 
 
@@ -47,8 +55,7 @@ class TestReflectable : public Pt::Reflectable
         : Pt::Reflectable("TestReflectable")
         , _number("number", 3)
         {
-            this->registerProperty(_number, this, &TestReflectable::value, &TestReflectable::setValue);
-
+            this->registerProperty(_number, this, &TestReflectable::number, &TestReflectable::setNumber);
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);
             this->registerMethod("method3", *this, &TestReflectable::method3);
@@ -63,10 +70,12 @@ class TestReflectable : public Pt::Reflectable
         void method3(int, bool, char)
         {}
 
-        bool setValue(int i)
-        { _number.set(i); return true; }
+        //PT_PROPERTY( number, Number, int)
 
-        int value() const
+        void setNumber(int i)
+        { _number.set(i); }
+
+        int number() const
         { return _number.get(); }
 
     private:

@@ -44,7 +44,11 @@ class Property
         {}
 
         const T& get()const
-        {  return any_cast<const T&>(_value); }
+        { 
+            const Any::Value* v = _value.value(); 
+            const Any::BasicValue<T>* b = static_cast< const Any::BasicValue<T>* >(v);
+            return b->value();
+        }
 
         void set( const T& value )
         { _value = value; }

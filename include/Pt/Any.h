@@ -31,7 +31,7 @@
 namespace Pt {
 
     class Any;
-    class AnyIO;
+    struct AnyIO;
 
 
     //! @internal
@@ -378,6 +378,8 @@ namespace Pt {
             */
             bool operator<(const Any& a) const;
 
+            const Any::Value* value() const
+            { return _value; }
         private:
             /** @internal */
             Value* _value;
