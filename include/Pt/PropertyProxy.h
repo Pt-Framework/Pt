@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Drner                               *
+ *   Copyright (C) 2007 by Marc Boris Drner                                *
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

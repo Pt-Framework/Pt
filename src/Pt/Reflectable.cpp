@@ -72,6 +72,7 @@ Reflectable::~Reflectable()
 Pt::Any Reflectable::property(const std::string& name)
 {
     PropertyMap::iterator it = _properties.find(name);
+
     if(it == _properties.end())
         throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
@@ -82,6 +83,7 @@ Pt::Any Reflectable::property(const std::string& name)
 void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 {
     PropertyMap::iterator it = _properties.find(name);
+
     if( it == _properties.end() ) {
         throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
         return;
@@ -94,6 +96,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 const ICallable& Reflectable::method(const std::string& name) const
 {
     MethodMap::const_iterator it = _methods.find(name);
+
     if( it == _methods.end() )
         throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
@@ -104,6 +107,7 @@ const ICallable& Reflectable::method(const std::string& name) const
 void Reflectable::call(const std::string& name, const Args& args)
 {
     MethodMap::iterator it = _methods.find(name);
+
     if( it == _methods.end() )
         throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
