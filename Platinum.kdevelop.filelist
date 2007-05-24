@@ -170,3 +170,5 @@ include/Pt/Atomicity.gcc.ppc.h
 include/Pt/Atomicity.gcc.x86.h
 include/Pt/Atomicity.generic.h
 include/Pt/Atomicity.windows.h
+include/Pt/Unit/TextProtocol.h
+include/Pt/IMethod.h

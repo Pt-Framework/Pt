@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Drner                               *
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,44 +17,39 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Property_h
-#define Pt_Property_h
+#ifndef Pt_IProperty_h
+#define Pt_IProperty_h
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>
 #include <Pt/Exception.h>
+#include <Pt/Signal.h>
 
 
 namespace Pt {
 
-/** @brief Value type registerable as property
+/** @brief Property interface
     @ingroup Reflection
 */
-template <typename T>
-class PropertyValue
+class PT_API IProperty
 {
     public:
-        PropertyValue( const T& value = T() )
-        : _value(value)
+        IProperty()
         {}
 
-        const T& get()const
-        { 
-            const Any::Value* v = _value.value(); 
-            const Any::BasicValue<T>* b = static_cast< const Any::BasicValue<T>* >(v);
-            return b->value();
-        }
+        virtual ~IProperty()
+        {}
 
-        void set( const T& value )
-        { _value = value; }
+        virtual Pt::Any value()
+        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
 
-        const Pt::Any value() const
-        { return _value; }
+        // Set value and notify all listeners
+        virtual void setValue(const Pt::Any& value)
+        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
 
-    protected:
-        Pt::Any _value;
+        Signal<> valueChanged;
 };
 
-}
+} // namespace Pt
 
 #endif

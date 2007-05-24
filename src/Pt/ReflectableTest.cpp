@@ -53,9 +53,8 @@ class TestReflectable : public Pt::Reflectable
     public:
         TestReflectable()
         : Pt::Reflectable("TestReflectable")
-        , _number("number", 3)
         {
-            this->registerProperty(_number, this, &TestReflectable::number, &TestReflectable::setNumber);
+            this->registerProperty("number", _number, this, &TestReflectable::number, &TestReflectable::setNumber);
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);
             this->registerMethod("method3", *this, &TestReflectable::method3);
@@ -70,8 +69,6 @@ class TestReflectable : public Pt::Reflectable
         void method3(int, bool, char)
         {}
 
-        //PT_PROPERTY( number, Number, int)
-
         void setNumber(int i)
         { _number.set(i); }
 
@@ -79,7 +76,7 @@ class TestReflectable : public Pt::Reflectable
         { return _number.get(); }
 
     private:
-        Pt::Property<int> _number;
+        Pt::PropertyValue<int> _number;
 
         TestReflectable* self()
         { return this; }
@@ -104,11 +101,8 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
         {
             TestReflectable reflectable;
 
-            Pt::Any number = reflectable.property("number");
-            PT_UNIT_ASSERT( number == 3 )
-
             reflectable.setProperty("number", Pt::Any( int(5) ) );
-            number = reflectable.property("number");
+            Pt::Any number = reflectable.property("number");
             PT_UNIT_ASSERT( number == 5 )
         }
 

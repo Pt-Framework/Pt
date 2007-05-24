@@ -20,48 +20,24 @@
 #ifndef Pt_PropertyProxy_h
 #define Pt_PropertyProxy_h
 
-#include <Pt/Exception.h>
-#include <Pt/TypeInfo.h>
+#include <Pt/Api.h>
 #include <Pt/Any.h>
+#include <Pt/Exception.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
-#include <Pt/Signal.h>
+#include <Pt/Property.h>
+#include <Pt/IProperty.h>
 
 
 namespace Pt {
-
-/** @brief Property interface
-    @ingroup Reflection
-*/
-class PT_API IProperty
-{
-    public:
-        IProperty()
-        {}
-
-        virtual ~IProperty()
-        {}
-
-        virtual Pt::Any value()
-        { throw std::logic_error("AbstractProperty is not readable" + PT_SOURCEINFO); }
-
-        // Set value and notify all listeners
-        virtual void setValue(const Pt::Any& value)
-        { throw std::logic_error("AbstractProperty is not writable" + PT_SOURCEINFO); }
-
-        Signal<> onValueChanged;
-};
-
 
 template <typename T>
 class ReadPropertyProxy : virtual public IProperty
 {
     public:
-
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() const )
         : IProperty()
-        //, _value(0)
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
@@ -69,7 +45,6 @@ class ReadPropertyProxy : virtual public IProperty
         template <typename Object, typename ObjectBase>
         ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() )
         : IProperty()
-        //, _value(0)
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
         }
@@ -79,9 +54,6 @@ class ReadPropertyProxy : virtual public IProperty
 
         virtual Pt::Any value()
         {
-            //if(_value)
-                //return _value->value();
-
             Pt::Any any;
             any = this->get();
             return any;
@@ -94,8 +66,32 @@ class ReadPropertyProxy : virtual public IProperty
         { return get(); }
 
     private:
-        //Property<T>* _value;
         Pt::Callable<T>* _getter;
+};
+
+
+template <typename T>
+class ReadPropertyValueProxy : public IProperty
+{
+    public:
+        template <typename Object, typename ObjectBase>
+        ReadPropertyValueProxy( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
+        : _value(&value)
+        { }
+
+        template <typename Object, typename ObjectBase>
+        ReadPropertyValueProxy( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
+        : _value(&value)
+        { }
+
+        ~ReadPropertyValueProxy()
+        { }
+
+        virtual Pt::Any value()
+        { return _value->value(); }
+
+    private:
+        PropertyValue<T>* _value;
 };
 
 
@@ -134,7 +130,6 @@ class WritePropertyProxy : virtual public IProperty
         void set(T type)
         {
             _setter->invoke(type);
-            onValueChanged.send();
         }
 
     private:
@@ -166,6 +161,50 @@ class PropertyProxy : public ReadPropertyProxy<R>, public WritePropertyProxy<A> 
 
         virtual void setValue(const Pt::Any& any)
         { WritePropertyProxy<A>::setValue(any); }
+};
+
+
+template <typename T, typename U = T>
+class ReadWritePropertyValueProxy : public IProperty
+{
+    public:
+        template <typename R, typename Object, typename ObjectBase>
+        ReadWritePropertyValueProxy(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
+        : _value(&value)
+        {
+            _setter = new Pt::Method<R, Object, U>(parent, setter);
+        }
+
+        template <typename R, typename Object, typename ObjectBase>
+        ReadWritePropertyValueProxy(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
+        : IProperty()
+        , _value(&value)
+        {
+            _setter = new Pt::Method<R, Object, U>(parent, setter);
+        }
+
+        ~ReadWritePropertyValueProxy()
+        {
+            delete _setter;
+        }
+
+        virtual Pt::Any value()
+        { return _value->value(); }
+
+        virtual void setValue(const Pt::Any& a)
+        {
+            try {
+                const T& value = Pt::any_cast<const T&>(a) ;
+                _setter->invoke( value );
+            }
+            catch(...) {
+                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+            }
+        }
+
+    private:
+        PropertyValue<T>* _value;
+        Pt::Invokable<T>* _setter;
 };
 
 } // namespace Pt

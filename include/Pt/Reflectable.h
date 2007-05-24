@@ -115,27 +115,27 @@ class PT_API Reflectable
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerProperty(Property<R>& pv, Parent* parent, R (Object::*getter)() const)
+        void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)() const)
         {
-            _properties.insert( std::make_pair(pv.name(), new ReadProperty<R>(pv, parent, getter)) );
+            _properties.insert( std::make_pair(name, new ReadPropertyValueProxy<R>(pv, parent, getter)) );
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerProperty(Property<R>& pv, Parent* parent, R (Object::*getter)())
+        void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)())
         {
-            _properties.insert( std::make_pair(pv.name(), new ReadProperty<R>(pv, parent, getter)) );
+            _properties.insert( std::make_pair(name, new ReadPropertyValueProxy<R>(pv, parent, getter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(Property<R1>& pv,Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
+        void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(pv.name(), new ReadWriteProperty<R1, A>(pv, parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new ReadWritePropertyValueProxy<R1, A>(pv, parent, getter, setter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(Property<R1>& pv,Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
+        void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(pv.name(), new ReadWriteProperty<R1, A>(pv, parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new ReadWritePropertyValueProxy<R1, A>(pv, parent, getter, setter)) );
         }
 
         template <typename ParentT>
