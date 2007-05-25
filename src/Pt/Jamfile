@@ -4,9 +4,10 @@ SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : Any.cpp
                    AnyTraits.cpp
+                   Callable.cpp
+                   Char.cpp
                    Connection.cpp
                    Connectable.cpp
-                   Callable.cpp
                    Date.cpp
                    DateTime.cpp
                    Reflectable.cpp

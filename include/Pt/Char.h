@@ -23,7 +23,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-
+#include <iosfwd>
 #include <string>
 
 
@@ -468,6 +468,22 @@ namespace Pt {
 
         return def;
     }
+
+
+    //! @internal instantiate stream class in Pt and clients import symbols
+    class PT_API CharDummyStream : public std::basic_iostream<Pt::Char>
+    {
+        public:
+          CharDummyStream();
+    };
+
+
+    //! @internal instantiate streambuf class in Pt and clients import symbols 
+    class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
+    {
+        public:
+          CharDummyStreamBuf();
+    };    
 
 } // namespace Pt
 
