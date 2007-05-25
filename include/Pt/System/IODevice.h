@@ -336,6 +336,13 @@ class BasicIODevice : public IO, protected NonCopyable {
 
 typedef BasicIODevice<char> IODevice;
 
+//! @internal provide import information for linking DLLs
+class PT_SYSTEM_API DummyIODevice : public IODevice
+{
+    public:
+      DummyIODevice();     
+};
+
 } // namespace System
 
 } // namespace Pt
