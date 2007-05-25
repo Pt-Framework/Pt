@@ -28,15 +28,43 @@ namespace Pt
     template<typename T>
     bool isEqual(const size_t row, const size_t col, const T* leftData, const T* rightData)
     {
-        return !memcmp(leftData, rightData, row * col * sizeof(T));
+        return !std::memcmp(leftData, rightData, row * col * sizeof(T));
     };
 
 
     template<>
-    bool isEqual<double>(const size_t row, const size_t col, const double* leftData, const double* rightData);
-
+    inline bool isEqual<float>(const size_t row, const size_t col, const float* leftData, const float* rightData)
+    {
+      for(size_t r = 0; r < row; ++r)
+      {
+        for(size_t c = 0; c < col; ++c,  ++leftData, ++rightData)
+        {
+          // use the epsilon equal function for doubles -> with accuracy of EPS
+          if( !Pt::Math::equal(*leftData, *rightData, Pt::Math::Eps9) )
+          {
+                    return false;
+          }
+        }
+      }
+      return true;
+    };
+    
     template<>
-    bool isEqual<float>(const size_t row, const size_t col, const float* leftData, const float* rightData);
+    inline bool isEqual<double>(const size_t row, const size_t col, const double* leftData, const double* rightData)
+    {
+      for(size_t r = 0; r < row; ++r)
+      {
+        for(size_t c = 0; c < col; ++c, ++leftData, ++rightData)
+        {
+          // use the epsilon equal function for doubles -> with accuracy of EPS
+          if( !Pt::Math::equal(*leftData, *rightData, Pt::Math::Eps9) )
+          {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
 
 
 
@@ -392,12 +420,6 @@ namespace Pt
             T m_matrixData[rowDim][colDim];
 
     };
-
-
-
-
-
-
 
 } // namespace Math
 
