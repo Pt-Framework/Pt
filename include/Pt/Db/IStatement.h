@@ -24,7 +24,6 @@
 
 #include <string>
 
-#include <Pt/Api.h>
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
 
