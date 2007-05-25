@@ -23,7 +23,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <iosfwd>
+#include <iostream>
 #include <string>
 
 
@@ -483,7 +483,7 @@ namespace Pt {
     {
         public:
           CharDummyStreamBuf();
-    };    
+    };
 
 } // namespace Pt
 

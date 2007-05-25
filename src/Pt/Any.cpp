@@ -2,9 +2,7 @@
 #include "Pt/String.h"
 #include <string>
 #include <iostream>
-using namespace Pt;
 
-#include <iostream>
 
 namespace Pt
 {
