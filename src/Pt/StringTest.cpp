@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#undef PT_TEXT_API_EXPORT
+#undef PT_API_EXPORT
 
 //#include <vld.h>
 //#include <vldapi.h>

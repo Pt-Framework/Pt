@@ -17,13 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <stdexcept>
+#undef PT_API_EXPORT
+
 #include "Pt/SourceInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
+#include <stdexcept>
 
 class ExceptionTest : public Pt::Unit::TestCase
 {

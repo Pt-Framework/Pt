@@ -17,14 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <iostream>
-using namespace std;
+#undef PT_API_EXPORT
 
 #include "Pt/Byteorder.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
+
+#include <iostream>
 
 
 class ByteorderTest : public Pt::Unit::TestCase
