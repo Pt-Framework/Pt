@@ -19,12 +19,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "DrawText.h"
-#include <cmath>
 #include "Pt/Gfx/Exception.h"
 #include "Pt/Gfx/Font.h"
 #include "Vera.h"
 #include <Pt/System/Clock.h>
 #include "Pt/Unicode.h"
+#include <cmath>
 
 namespace Pt {
 namespace Gfx {
