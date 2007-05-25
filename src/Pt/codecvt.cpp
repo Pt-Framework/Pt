@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include <Pt/Api.h>
+#include <Pt/String.h>
 #include "Pt/Char_codecvt.h"
 
 

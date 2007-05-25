@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include <Pt/Char_ctype.h>
+#include <Pt/String.h>
 #include <Pt/Unicode.h>
 
 #include <iostream>
