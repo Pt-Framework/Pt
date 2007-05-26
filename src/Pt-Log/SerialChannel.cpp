@@ -40,6 +40,7 @@ SerialChannel::~SerialChannel()
 {
     _threadLoop.exit();
     System::Thread::wait();
+    this->close();
 }
 
 
