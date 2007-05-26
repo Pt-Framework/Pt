@@ -187,15 +187,19 @@ void LogManager::log(Target& target, const Message& message, bool isAsync)
 {
     Pt::System::MutexLock lock( _mutex );
 
-    Target* current = &target;
-    while( current != 0 )
+    // sreach target hierachy upwards for a valid channel
+    for( Target* current = &target; current != 0; current = current->_parent )
     {
         if( current->_channel )
         {
-            current->_channel->write(message, isAsync);
+            // format the message string
+            std::string level = toString( message.logLevel() );
+            std::string str = message.timestamp().toIsoString() + " [" + message.target() + "] " + level + " - "  + message.text() + "\n";
+
+            // write data to channel
+            current->_channel->write(str, isAsync);
             return;
         }
-        current = current->_parent;
     }
 }
 
