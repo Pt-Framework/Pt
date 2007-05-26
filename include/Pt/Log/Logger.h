@@ -148,8 +148,6 @@ class LoggedScope
         LogLevel _level;
 };
 
-#define PT_LOG_LOGGEDSCOPE(logger, level) Pt::Log::LoggedScope(logger, level, PT_SOURCEINFO)
-
 }
 
 }
