@@ -109,8 +109,9 @@ Target& LogManager::target(const std::string& name)
     // logger needs to be created as a child of an existing logger
     Target* foundTarget = _rootTarget;
 
-    // ad-hoc parsing code. We might want to replace this with a state
-    // machine if it gets more complicated, like allowing wildcards etc
+    // parse the target name dot syntax
+    // ad-hoc parsing code. We might want to replace this with a real
+    // parser if it gets more complicated, like allowing wildcards etc
     size_t begin = 0;
     size_t end = 0;
     std::string targetName;
@@ -214,6 +215,7 @@ Channel& LogManager::channel(const std::string& url)
         return *it->second;
     }
 
+    // use the url schema to create a new channel
     size_t colon = url.find(':');
     if(colon == std::string::npos)
     {
