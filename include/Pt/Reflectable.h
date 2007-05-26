@@ -55,8 +55,8 @@ class NoSuchMethod : public std::logic_error
 };
 
 
-typedef std::multimap<std::string, IProperty*> PropertyMap;
-typedef std::multimap<std::string, ICallable*> MethodMap;
+typedef std::multimap<std::string, PropertyInfo*> PropertyMap;
+typedef std::multimap<std::string, CallableInfo*> MethodMap;
 
 
 /** @brief Make objects reflectable
@@ -74,7 +74,7 @@ class PT_API Reflectable
 
         void setProperty(const std::string& name, const Pt::Any& value);
 
-        const ICallable& method(const std::string& name) const;
+        const CallableInfo& method(const std::string& name) const;
 
         void call(const std::string& name, const Args& args);
 
@@ -87,96 +87,96 @@ class PT_API Reflectable
         template <typename R, typename Parent, typename Object>
         void registerWriteProperty(const std::string& name, Parent* parent, R (Object::*setter)() )
         {
-            _properties.insert( std::make_pair(name, new WritePropertyProxy<R>(parent, setter)) );
+            _properties.insert( std::make_pair(name, new WritePropertyInfo<R>(parent, setter)) );
         }
 
         template <typename R, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
         {
-            _properties.insert( std::make_pair(name, new ReadPropertyProxy<R>(parent, getter)) );
+            _properties.insert( std::make_pair(name, new ReadPropertyInfo<R>(parent, getter)) );
         }
 
         template <typename R, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)())
         {
-            _properties.insert( std::make_pair(name, new ReadPropertyProxy<R>(parent, getter)) );
+            _properties.insert( std::make_pair(name, new ReadPropertyInfo<R>(parent, getter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new ReadWritePropertyInfo<R1, A>(parent, getter, setter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new PropertyProxy<R1, A>(parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new ReadWritePropertyInfo<R1, A>(parent, getter, setter)) );
         }
 
         template <typename R, typename Parent, typename Object>
         void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)() const)
         {
-            _properties.insert( std::make_pair(name, new ReadPropertyValueProxy<R>(pv, parent, getter)) );
+            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(pv, parent, getter)) );
         }
 
         template <typename R, typename Parent, typename Object>
         void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)())
         {
-            _properties.insert( std::make_pair(name, new ReadPropertyValueProxy<R>(pv, parent, getter)) );
+            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(pv, parent, getter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new ReadWritePropertyValueProxy<R1, A>(pv, parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<R1, A>(pv, parent, getter, setter)) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new ReadWritePropertyValueProxy<R1, A>(pv, parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<R1, A>(pv, parent, getter, setter)) );
         }
 
         template <typename ParentT>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
         {
-            ICallable* cb = new MethodProxy<void, ParentT>(&parent, memFunc);
+            CallableInfo* cb = new MethodProxy<void, ParentT>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
         {
-            ICallable* cb =  new MethodProxy<void, ParentT, A1>(&parent, memFunc);
+            CallableInfo* cb =  new MethodProxy<void, ParentT, A1>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
         {
-            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2>(&parent, memFunc);
+            CallableInfo* cb =  new MethodProxy<void, ParentT, A1, A2>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
         {
-            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3>(&parent, memFunc);
+            CallableInfo* cb =  new MethodProxy<void, ParentT, A1, A2, A3>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
         {
-            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4>(&parent, memFunc);
+            CallableInfo* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
         {
-            ICallable* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
+            CallableInfo* cb =  new MethodProxy<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
             _methods.insert( std::make_pair(name, cb) );
         }
 

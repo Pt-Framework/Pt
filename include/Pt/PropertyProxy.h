@@ -32,24 +32,24 @@
 namespace Pt {
 
 template <typename T>
-class ReadPropertyProxy : virtual public IProperty
+class ReadPropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename Object, typename ObjectBase>
-        ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() const )
-        : IProperty()
+        ReadPropertyInfo( Object* parent, T (ObjectBase::*getter)() const )
+        : PropertyInfo()
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
 
         template <typename Object, typename ObjectBase>
-        ReadPropertyProxy( Object* parent, T (ObjectBase::*getter)() )
-        : IProperty()
+        ReadPropertyInfo( Object* parent, T (ObjectBase::*getter)() )
+        : PropertyInfo()
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
         }
 
-        ~ReadPropertyProxy()
+        ~ReadPropertyInfo()
         { delete _getter; }
 
         virtual Pt::Any value()
@@ -71,20 +71,20 @@ class ReadPropertyProxy : virtual public IProperty
 
 
 template <typename T>
-class ReadPropertyValueProxy : public IProperty
+class InternalReadPropertyInfo : public PropertyInfo
 {
     public:
         template <typename Object, typename ObjectBase>
-        ReadPropertyValueProxy( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
+        InternalReadPropertyInfo( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
         : _value(&value)
         { }
 
         template <typename Object, typename ObjectBase>
-        ReadPropertyValueProxy( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
+        InternalReadPropertyInfo( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
         : _value(&value)
         { }
 
-        ~ReadPropertyValueProxy()
+        ~InternalReadPropertyInfo()
         { }
 
         virtual Pt::Any value()
@@ -96,17 +96,17 @@ class ReadPropertyValueProxy : public IProperty
 
 
 template <typename T>
-class WritePropertyProxy : virtual public IProperty
+class WritePropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
-        WritePropertyProxy(Object* parent, R (ObjectBase::*setter)(T type) )
-        : IProperty()
+        WritePropertyInfo(Object* parent, R (ObjectBase::*setter)(T type) )
+        : PropertyInfo()
         {
             _setter = new Pt::Method<R, Object, T>(parent, setter);
         }
 
-        ~WritePropertyProxy()
+        ~WritePropertyInfo()
         {
             delete _setter;
         }
@@ -120,7 +120,7 @@ class WritePropertyProxy : virtual public IProperty
                 this->set( val );
             }
             catch(...) {
-                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }
 
@@ -138,52 +138,52 @@ class WritePropertyProxy : virtual public IProperty
 
 
 template <typename R, typename A = R>
-class PropertyProxy : public ReadPropertyProxy<R>, public WritePropertyProxy<A> {
+class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyInfo<A> {
     public:
         template <typename R2, typename Object, typename ObjectBase>
-        PropertyProxy(Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
-        : ReadPropertyProxy<R>(parent, getter)
-        , WritePropertyProxy<A>(parent, setter)
+        ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
+        : ReadPropertyInfo<R>(parent, getter)
+        , WritePropertyInfo<A>(parent, setter)
         { }
 
         template <typename R2, typename Object, typename ObjectBase>
-        PropertyProxy(Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
-        : ReadPropertyProxy<R>(parent, getter)
-        , WritePropertyProxy<A>(parent, setter)
+        ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
+        : ReadPropertyInfo<R>(parent, getter)
+        , WritePropertyInfo<A>(parent, setter)
         { }
 
         virtual Pt::Any value()
         {
             Pt::Any any;
-            any = ReadPropertyProxy<R>::get();
+            any = ReadPropertyInfo<R>::get();
             return any;
         }
 
         virtual void setValue(const Pt::Any& any)
-        { WritePropertyProxy<A>::setValue(any); }
+        { WritePropertyInfo<A>::setValue(any); }
 };
 
 
 template <typename T, typename U = T>
-class ReadWritePropertyValueProxy : public IProperty
+class InternalReadWritePropertyInfo : public PropertyInfo
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
-        ReadWritePropertyValueProxy(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
+        InternalReadWritePropertyInfo(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const, R (ObjectBase::*setter)(U type) )
         : _value(&value)
         {
             _setter = new Pt::Method<R, Object, U>(parent, setter);
         }
 
         template <typename R, typename Object, typename ObjectBase>
-        ReadWritePropertyValueProxy(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
-        : IProperty()
+        InternalReadWritePropertyInfo(PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)(), R (ObjectBase::*setter)(U type) )
+        : PropertyInfo()
         , _value(&value)
         {
             _setter = new Pt::Method<R, Object, U>(parent, setter);
         }
 
-        ~ReadWritePropertyValueProxy()
+        ~InternalReadWritePropertyInfo()
         {
             delete _setter;
         }
@@ -198,7 +198,7 @@ class ReadWritePropertyValueProxy : public IProperty
                 _setter->invoke( value );
             }
             catch(...) {
-                std::cerr << "WritePropertyProxy: Type mismatch: " << a.typeName() << std::endl;
+                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }
 

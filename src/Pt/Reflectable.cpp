@@ -93,7 +93,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
-const ICallable& Reflectable::method(const std::string& name) const
+const CallableInfo& Reflectable::method(const std::string& name) const
 {
     MethodMap::const_iterator it = _methods.find(name);
 

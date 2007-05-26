@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IProperty_h
-#define Pt_IProperty_h
+#ifndef Pt_PropertyInfo_h
+#define Pt_PropertyInfo_h
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>
@@ -31,13 +31,13 @@ namespace Pt {
 /** @brief Property interface
     @ingroup Reflection
 */
-class PT_API IProperty
+class PT_API PropertyInfo
 {
     public:
-        IProperty()
+        PropertyInfo()
         {}
 
-        virtual ~IProperty()
+        virtual ~PropertyInfo()
         {}
 
         virtual Pt::Any value()

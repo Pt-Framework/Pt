@@ -30,10 +30,10 @@ namespace Pt {
     /** @brief Interface for callable entities
         @ingroup Reflection
     */
-    class PT_API ICallable
+    class PT_API CallableInfo
     {
         public:
-            virtual ~ICallable()
+            virtual ~CallableInfo()
             {}
 
             virtual size_t argSize() const = 0;
@@ -45,6 +45,8 @@ namespace Pt {
             virtual void call(const Args& args) = 0;
     };
 
+    //rename CallableInfo
+    // make getter for actual Invokable and callable()
 } // namespace Pt
 
 #endif

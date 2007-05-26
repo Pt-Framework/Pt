@@ -36,7 +36,7 @@ template < typename R,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
-class MethodProxy : public ICallable, private Method<R, C, A1, A2, A3, A4, A5>
+class MethodProxy : public CallableInfo, private Method<R, C, A1, A2, A3, A4, A5>
 {
     public:
         typedef C ClassT;
@@ -95,7 +95,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4>
-class MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public ICallable
+class MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
                                                   , private Method<R, C, A1, A2, A3, A4>
 {
     public:
@@ -151,7 +151,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public ICallable
+class MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
                                                         , private Method<R, C, A1, A2, A3>
 {
     public:
@@ -203,7 +203,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                               , private Method<R, C, A1, A2>
 {
     public:
@@ -251,7 +251,7 @@ class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public ICallable
 template < typename R,
            class C,
            typename A1>
-class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                                     , private Method<R, C, A1>
 {
     public:
@@ -295,7 +295,7 @@ class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICa
 
 template < typename R,
            class C>
-class MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public ICallable
+class MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                                           , private Method<R, C>
 {
     public:
