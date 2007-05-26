@@ -21,6 +21,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Logger.h>
+#include <Pt/Reflectable.h>
 #include <string>
 
 
@@ -34,21 +35,27 @@ namespace Log {
     /** @brief Logging target
         @ingroup Logging
     */
-    class PT_LOG_API Target : protected Pt::NonCopyable
+    class PT_LOG_API Target : public Reflectable, protected Pt::NonCopyable
     {
         friend class LogManager;
 
         protected:
-            Target(const std::string& name, Target* parent = 0, Channel* channel = 0);
+            Target(const std::string& name, Target* parent = 0);
 
         public:
             virtual ~Target();
 
             const std::string& name() const;
 
+            bool async() const;
+
+            void setAsync(bool isAsync);
+
             LogLevel logLevel() const;
 
             void setLogLevel(LogLevel level);
+
+            std::string channel() const;
 
             void setChannel(const std::string& url);
 
@@ -57,10 +64,11 @@ namespace Log {
             static Target& get(const std::string& name);
 
         protected:
-            void setChannel(Channel& ch);
+            void assignChannel(Channel& ch);
 
         private:
             std::string _name;
+            bool _async;
             LogLevel _logLevel;
             Target* _parent;
             Channel* _channel;

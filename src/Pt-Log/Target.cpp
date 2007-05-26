@@ -24,12 +24,16 @@ namespace Pt {
 
 namespace Log {
 
-Target::Target(const std::string& name, Target* parent, Channel* channel)
-: _name(name)
+Target::Target(const std::string& name, Target* parent)
+: Reflectable(name)
+, _name(name)
 , _logLevel(Error)
 , _parent(parent)
-, _channel(channel)
+, _channel(0)
 {
+    this->registerProperty("logLevel", this, &Target::logLevel, &Target::setLogLevel);
+    this->registerProperty("channel", this, &Target::channel, &Target::setChannel);
+    this->registerProperty("async", this, &Target::async, &Target::setAsync);
 }
 
 
@@ -41,6 +45,18 @@ Target::~Target()
 const std::string& Target::name() const
 {
     return _name;
+}
+
+
+bool Target::async() const
+{
+    return _async;
+}
+
+
+void Target::setAsync(bool isAsync)
+{
+    _async = isAsync;
 }
 
 
@@ -56,15 +72,21 @@ void Target::setLogLevel(LogLevel level)
 }
 
 
+std::string Target::channel() const
+{
+    return "";
+}
+
+
 void Target::setChannel(const std::string& url)
 {
-    LogManager::instance().setChannel(this, url);
+    LogManager::instance().setChannel(*this, url);
 }
 
 
 void Target::log(const Message& message)
 {
-    LogManager::instance().log(this, message);
+    LogManager::instance().log(*this, message, _async);
 }
 
 
@@ -74,7 +96,7 @@ Target& Target::get(const std::string& name)
 }
 
 
-void Target::setChannel(Channel& ch)
+void Target::assignChannel(Channel& ch)
 {
     _channel = &ch;
 }

@@ -21,6 +21,9 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Channel.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Thread.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/System/SerialDevice.h>
 #include <string>
 
@@ -29,7 +32,9 @@ namespace Pt {
 
 namespace Log {
 
-class PT_LOG_API SerialChannel : public Channel
+class PT_LOG_API SerialChannel : public Pt::System::Thread
+                               , public Pt::Connectable
+                               , public Channel
 {
     public:
         SerialChannel();
@@ -37,13 +42,18 @@ class PT_LOG_API SerialChannel : public Channel
         ~SerialChannel();
 
     protected:
+        void processEvent(const Pt::Event& ev);
+
         virtual void _open(const std::string& url);
 
         virtual void _close();
 
-        virtual void _write(const std::string& message);
+        virtual void _write(const std::string& message, bool isAsync);
 
     private:
+        size_t _n;
+        Pt::System::Mutex _mutex;
+        Pt::System::EventLoop _threadLoop;
         Pt::System::SerialDevice _device;
 };
 

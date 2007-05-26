@@ -21,6 +21,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/LogLevel.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/NonCopyable.h>
 #include <list>
 #include <string>
@@ -121,6 +122,31 @@ inline Logger& trace(Logger& str)
 
 inline Logger& endlog(Logger& str)
 { str.endlog(); return str; }
+
+
+class LoggedScope
+{
+    public:
+        LoggedScope(Logger& logger, LogLevel level, const Pt::SourceInfo& si)
+        : _logger(logger)
+        , _si(si)
+        , _level(level)
+        {
+            _logger.setLogLevel(_level);
+            _logger << "Enter " << _si.func() << endlog;
+        }
+
+        ~LoggedScope()
+        {
+            _logger.setLogLevel(_level);
+            _logger << "Leave " << _si.func() << endlog;
+        }
+
+    private:
+        Logger& _logger;
+        Pt::SourceInfo _si;
+        LogLevel _level;
+};
 
 }
 

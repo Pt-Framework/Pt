@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Property_h
-#define Pt_Property_h
+#ifndef Pt_PropertyValue_h
+#define Pt_PropertyValue_h
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>

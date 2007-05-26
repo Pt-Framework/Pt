@@ -48,10 +48,11 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
         void close()
         { this->_close(); }
 
-        void write(const Message& message)
+        void write(const Message& message, bool isAsync = false)
         {
             std::string level = toString( message.logLevel() );
-            this->_write(message.timestamp().toIsoString() + " [" + message.target() + "] " + level + " - "  + message.text() + "\n" );
+            this->_write( message.timestamp().toIsoString() + " [" + message.target() + "] " + level + " - "  + message.text() + "\n"
+                        , isAsync );
         }
 
     protected:
@@ -59,7 +60,7 @@ class PT_LOG_API Channel : protected Pt::NonCopyable
 
         virtual void _close() = 0;
 
-        virtual void _write(const std::string& message) = 0;
+        virtual void _write(const std::string& message, bool isAsync) = 0;
 };
 
 }

@@ -27,18 +27,36 @@ namespace Pt {
 namespace Log {
 
 SerialChannel::SerialChannel()
-: Channel()
+: Pt::System::Thread( _threadLoop )
+, Channel()
 {
+    _n = 0;
+    Pt::connect( _threadLoop.event, *this, &SerialChannel::processEvent);
+    System::Thread::start();
 }
 
 
 SerialChannel::~SerialChannel()
 {
+    _threadLoop.exit();
+    System::Thread::wait();
+}
+
+
+void SerialChannel::processEvent(const Pt::Event& ev)
+{
+    const LogEvent* lev = dynamic_cast<const LogEvent*>(&ev);
+    if(lev)
+        this->_write( lev->message(), false );
+
+     --_n;
 }
 
 
 void SerialChannel::_open(const std::string& urlstr)
 {
+    Pt::System::MutexLock lock( _mutex );
+
     System::Url url(urlstr);
     _device.open( url.path(), std::ios::out );
 }
@@ -46,12 +64,34 @@ void SerialChannel::_open(const std::string& urlstr)
 
 void SerialChannel::_close()
 {
+    Pt::System::MutexLock lock( _mutex );
+
     _device.close();
 }
 
 
-void SerialChannel::_write(const std::string& message)
+void SerialChannel::_write(const std::string& message, bool isAsync)
 {
+    if( isAsync )
+    {
+        if(_n > 10)
+        {
+            return;
+        }
+
+        ++_n;
+
+        LogEvent lev(message);
+        _threadLoop.commitEvent(lev);
+
+        return;
+    }
+
+    Pt::System::MutexLock lock( _mutex );
+
+    if(_device.valid() == false)
+        return;
+
     _device.write( message.data(), message.size() );
 }
 

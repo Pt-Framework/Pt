@@ -21,6 +21,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Logger.h>
+#include <Pt/Event.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/DateTime.h>
 #include <string>
@@ -30,7 +31,7 @@ namespace Pt {
 
 namespace Log {
 
-class PT_LOG_API Message
+class PT_LOG_API Message : public Pt::Event
 {
     public:
         Message(const std::string& target);

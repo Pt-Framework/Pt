@@ -43,25 +43,21 @@ LogManager::LogManager()
     _pluginManager.registerPlugin( consolePlugin );
     _pluginManager.registerPlugin( serialPlugin );
 
-    Channel* ch = _pluginManager.create("console");
-    ch->open("console://");
-    _channelMap["console://"] =  ch;
-
     // root of the target hierachy
-    std::auto_ptr<Target> rootTarget( new Target("", 0, ch) );
+    std::auto_ptr<Target> rootTarget( new Target("", 0) );
     _rootTarget = rootTarget.get();
-    _targetMap[""] = rootTarget.get();
+    _targetMap[""] = _rootTarget;
 
     // logger for Pt::Log
     std::auto_ptr<Target> logTarget( new Target("Pt-Log", _rootTarget) );
     _targetMap["Pt-Log"] = logTarget.get();
 
-    _logger = new Logger( *logTarget );
-    *_logger << info << "Logging system initialized" << endlog;
-
     //
     // TODO: initialise Targets with properties
     //
+
+    _logger = new Logger( *logTarget );
+    *_logger << info << "Logging system initialized" << endlog;
 
     logTarget.release();
     rootTarget.release();
@@ -99,9 +95,9 @@ LogManager::~LogManager()
 
 Target& LogManager::target(const std::string& name)
 {
-    Pt::System::MutexLock lock( _mutex );
+    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
 
-    *_logger << debug << "Requested target: " << name << endlog;
+    Pt::System::MutexLock lock( _mutex );
 
     // find requested logger amongst the existing ones
     std::map<std::string, Target*>::iterator it = _targetMap.find(name);
@@ -174,25 +170,29 @@ Target& LogManager::target(const std::string& name)
 }
 
 
-void LogManager::setChannel(Target* target, const std::string& url)
+void LogManager::setChannel(Target& target, const std::string& url)
 {
     Pt::System::MutexLock lock( _mutex );
 
+    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
+
+    *_logger << info << target.name()<< " set to " << url << endlog;
+
     Channel& chan = this->channel(url);
-    target->setChannel( chan );
+    target.assignChannel( chan );
 }
 
 
-void LogManager::log(Target* target, const Message& message)
+void LogManager::log(Target& target, const Message& message, bool isAsync)
 {
     Pt::System::MutexLock lock( _mutex );
 
-    Target* current = target;
+    Target* current = &target;
     while( current != 0 )
     {
         if( current->_channel )
         {
-            current->_channel->write(message);
+            current->_channel->write(message, isAsync);
             return;
         }
         current = current->_parent;
@@ -202,7 +202,7 @@ void LogManager::log(Target* target, const Message& message)
 
 Channel& LogManager::channel(const std::string& url)
 {
-    *_logger << debug << "Requested channel: " << url << endlog;
+    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
 
     std::map<std::string, Channel*>::iterator it = _channelMap.find(url);
     if( it != _channelMap.end() )
@@ -225,10 +225,6 @@ Channel& LogManager::channel(const std::string& url)
         *_logger << error << "No such channel: " << url << endlog;
         throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
     }
-
-    //
-    // TODO: initialise channel with properties
-    //
 
     ch->open(url);
     *_logger << info << "Opened channel: " << url << endlog;

@@ -40,7 +40,6 @@ class LogThread : public Pt::System::Thread
             while(true)
             {
                 Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
-                logger.target().setChannel("console://");
                 logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
 
                 this->yield();
@@ -56,9 +55,18 @@ class LogThread : public Pt::System::Thread
 int main( int argc, char* argv[] )
 {
     try {
-        Pt::Log::Logger logger("LoggerDemo.test");
-        logger.target().setChannel("console://");
-        logger << Pt::Log::info << "start" << Pt::Log::endlog;
+        Pt::Log::Target::get("").setProperty( "logLevel", Pt::Any( Pt::Log::Error ) );
+        Pt::Log::Target::get("").setProperty( "channel", Pt::Any( std::string("console://") ) );
+
+        Pt::Log::Target::get("Pt-Log").setProperty( "logLevel", Pt::Log::Info );
+        Pt::Log::Target::get("Pt-Log").setProperty( "async", true);
+
+        Pt::Log::Target::get("logger1").setProperty( "channel", std::string("comm:///dev/ttyS0") );
+        Pt::Log::Target::get("logger1").setProperty( "logLevel", Pt::Log::Fatal );
+        Pt::Log::Target::get("logger1").setProperty( "async", true);
+
+        Pt::Log::Target::get("logger2").setProperty( "channel", std::string("console://") );
+        Pt::Log::Target::get("logger2").setProperty( "logLevel", Pt::Log::Fatal );
 
         LogThread lt0("thread 0", "logger1");
         lt0.start();
@@ -81,8 +89,6 @@ int main( int argc, char* argv[] )
         lt4.wait();
 
         lt0.wait();
-
-        logger << Pt::Log::info << "end" << Pt::Log::endlog;
         return 0;
     }
     catch(const std::exception& e)

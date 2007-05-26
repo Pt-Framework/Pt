@@ -49,9 +49,9 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 
         Target& target(const std::string& name = "");
 
-        void setChannel(Target* target, const std::string& url);
+        void setChannel(Target& target, const std::string& url);
 
-        void log(Target* target, const Message& message);
+        void log(Target& target, const Message& message, bool isAsync = false);
 
     protected:
         Channel& channel(const std::string& url);
