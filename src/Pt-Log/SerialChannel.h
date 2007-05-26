@@ -32,6 +32,39 @@ namespace Pt {
 
 namespace Log {
 
+
+class PT_LOG_API WriteEvent : public Pt::Event
+{
+    public:
+        WriteEvent(const std::string& msg)
+        : _msg(msg)
+        {
+        }
+
+        const std::string& message() const
+        { return _msg; }
+
+        ~WriteEvent()
+        {
+        }
+
+
+        Event* clone() const
+        {
+            return new WriteEvent(*this);
+        }
+
+
+        const std::type_info& typeInfo() const
+        {
+            return typeid(WriteEvent);
+        }
+
+    private:
+        std::string _msg;
+};
+
+
 class PT_LOG_API SerialChannel : public Pt::System::Thread
                                , public Pt::Connectable
                                , public Channel

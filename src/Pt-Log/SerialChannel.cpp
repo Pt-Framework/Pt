@@ -45,9 +45,9 @@ SerialChannel::~SerialChannel()
 
 void SerialChannel::processEvent(const Pt::Event& ev)
 {
-    const LogEvent* lev = dynamic_cast<const LogEvent*>(&ev);
-    if(lev)
-        this->_write( lev->message(), false );
+    const WriteEvent* wev = dynamic_cast<const WriteEvent*>(&ev);
+    if(wev)
+        this->_write( wev->message(), false );
 
      --_n;
 }
@@ -81,8 +81,8 @@ void SerialChannel::_write(const std::string& message, bool isAsync)
 
         ++_n;
 
-        LogEvent lev(message);
-        _threadLoop.commitEvent(lev);
+        WriteEvent wev(message);
+        _threadLoop.commitEvent(wev);
 
         return;
     }

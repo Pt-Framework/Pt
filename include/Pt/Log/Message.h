@@ -94,26 +94,6 @@ class PT_LOG_API Message
         void*          _reserved;
 };
 
-
-class PT_LOG_API LogEvent : public Pt::Event
-{
-    public:
-        LogEvent(const std::string& msg);
-
-        ~LogEvent();
-
-        const std::string& message() const
-        { return _msg; }
-
-        virtual Event* clone() const;
-
-        virtual const std::type_info& typeInfo() const;
-
-    private:
-        std::string _msg;
-};
-
-
 } // namespace Log
 
 } // namespace Pt

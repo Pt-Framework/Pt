@@ -37,32 +37,6 @@ Message::~Message()
 {
 }
 
-
-
-
-LogEvent::LogEvent(const std::string& msg)
-: _msg(msg)
-{
-}
-
-
-LogEvent::~LogEvent()
-{
-}
-
-
-Event* LogEvent::clone() const
-{
-    return new LogEvent(*this);
-}
-
-
-const std::type_info& LogEvent::typeInfo() const
-{
-    return typeid(LogEvent);
-}
-
-
 } // namespace Log
 
 } // namespace Pt
