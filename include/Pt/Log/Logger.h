@@ -33,6 +33,7 @@ namespace Pt {
 namespace Log {
 
 class Target;
+class Message;
 
 
 /** @brief Logging client
@@ -55,6 +56,8 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         Target& target() const;
 
+        Logger& beginLog(const Pt::SourceInfo& si);
+
         template <typename T>
         Logger& write(const T& value)
         {
@@ -68,10 +71,13 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         void endlog();
 
+    protected:
+        Message* init(const std::string& name, LogLevel level);
+
     private:
-        class Target*     _target;
+        Target*     _target;
         LogLevel          _level;
-        class Message*    _msg;
+        Message*    _msg;
         std::stringstream _ss;
         void* _reserved;
 };
@@ -132,12 +138,14 @@ class LoggedScope
         , _si(si)
         , _level(level)
         {
+            _logger.beginLog(_si);
             _logger.setLogLevel(_level);
             _logger << "Enter " << _si.func() << endlog;
         }
 
         ~LoggedScope()
         {
+            _logger.beginLog(_si);
             _logger.setLogLevel(_level);
             _logger << "Leave " << _si.func() << endlog;
         }

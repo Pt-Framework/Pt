@@ -16,10 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "LogManager.h"
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
 #include "Pt/Log/Message.h"
-#include "LogManager.h"
+#include "Pt/System/Clock.h"
+#include <memory>
 
 
 namespace Pt {
@@ -31,7 +33,7 @@ Logger::Logger(const std::string& name, LogLevel level)
 , _level(level)
 , _msg( 0 )
 {
-    _msg = new Message(name, level);
+    _msg = this->init( name, level );
 }
 
 
@@ -40,7 +42,7 @@ Logger::Logger(Target& target, LogLevel level)
 , _level(level)
 , _msg( 0 )
 {
-    _msg = new Message(target.name(), level);
+    _msg = this->init( target.name(), level );
 }
 
 
@@ -69,6 +71,17 @@ Target& Logger::target() const
 }
 
 
+Logger& Logger::beginLog(const Pt::SourceInfo& si)
+{
+    if( this->enabled() )
+    {
+        _msg->setSourceInfo(si);
+    }
+
+    return *this;
+}
+
+
 void Logger::endlog()
 {
     if( this->enabled() )
@@ -86,6 +99,17 @@ bool Logger::enabled() const
 {
     return this->logLevel() <= _target->logLevel();
 }
+
+
+Message* Logger::init(const std::string& name, LogLevel level)
+{
+    std::auto_ptr<Message> msg( new Message(name, level) );
+    msg->setThreadId(0);
+    msg->setProcessId(0);
+    msg->setTimestamp( System::Clock::getCurrentTime() );
+    return msg.release();
+}
+
 
 } // namespace Log
 
