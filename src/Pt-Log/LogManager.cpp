@@ -95,9 +95,9 @@ LogManager::~LogManager()
 
 Target& LogManager::target(const std::string& name)
 {
-    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
-
     Pt::System::MutexLock lock( _mutex );
+
+    PT_LOG_LOGGEDSCOPE(*_logger, Pt::Log::Trace);
 
     // find requested logger amongst the existing ones
     std::map<std::string, Target*>::iterator it = _targetMap.find(name);
@@ -174,7 +174,7 @@ void LogManager::setChannel(Target& target, const std::string& url)
 {
     Pt::System::MutexLock lock( _mutex );
 
-    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
+    PT_LOG_LOGGEDSCOPE(*_logger, Pt::Log::Trace);
 
     *_logger << info << target.name()<< " set to " << url << endlog;
 
@@ -202,7 +202,7 @@ void LogManager::log(Target& target, const Message& message, bool isAsync)
 
 Channel& LogManager::channel(const std::string& url)
 {
-    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
+    PT_LOG_LOGGEDSCOPE(*_logger, Pt::Log::Trace);
 
     std::map<std::string, Channel*>::iterator it = _channelMap.find(url);
     if( it != _channelMap.end() )
