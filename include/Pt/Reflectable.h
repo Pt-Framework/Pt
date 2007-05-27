@@ -126,14 +126,16 @@ class PT_API Reflectable
             _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(pv, parent, getter)) );
         }
 
-        template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
+        template <typename T, typename R1, typename R2, typename A, typename Parent, typename Object>
+        void registerProperty(const std::string& name, PropertyValue<T>& pv, Parent* parent,
+                              R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
             _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<R1, A>(pv, parent, getter, setter)) );
         }
 
-        template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<R1>& pv,Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
+        template <typename T, typename R1, typename R2, typename A, typename Parent, typename Object>
+        void registerProperty(const std::string& name, PropertyValue<T>& pv,Parent* parent,
+                              R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
             _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<R1, A>(pv, parent, getter, setter)) );
         }
