@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_MethodProxy_h
-#define Pt_MethodProxy_h
+#ifndef Pt_MethodInfo_h
+#define Pt_MethodInfo_h
 
 #include <Pt/Args.h>
 #include <Pt/Exception.h>
@@ -36,14 +36,14 @@ template < typename R,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
-class MethodProxy : public CallableInfo, private Method<R, C, A1, A2, A3, A4, A5>
+class MethodInfo : public CallableInfo, private Method<R, C, A1, A2, A3, A4, A5>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         : Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
@@ -95,7 +95,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4>
-class MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
+class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
                                                   , private Method<R, C, A1, A2, A3, A4>
 {
     public:
@@ -103,7 +103,7 @@ class MethodProxy<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
         typedef R (C::*MemFuncT)(A1, A2, A3, A4);
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         : Method<R, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
@@ -151,7 +151,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
                                                         , private Method<R, C, A1, A2, A3>
 {
     public:
@@ -159,7 +159,7 @@ class MethodProxy<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
         typedef R (C::*MemFuncT)(A1, A2, A3);
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         : Method<R, C, A1, A2, A3>(object, memFunc)
         {}
 
@@ -203,7 +203,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                               , private Method<R, C, A1, A2>
 {
     public:
@@ -211,7 +211,7 @@ class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableI
         typedef R (C::*MemFuncT)(A1, A2);
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         : Method<R, C, A1, A2>(object, memFunc)
         {}
 
@@ -251,7 +251,7 @@ class MethodProxy<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableI
 template < typename R,
            class C,
            typename A1>
-class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                                     , private Method<R, C, A1>
 {
     public:
@@ -259,7 +259,7 @@ class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Cal
         typedef R (C::*MemFuncT)(A1);
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         : Method<R, C, A1>(object, memFunc)
         {}
 
@@ -295,7 +295,7 @@ class MethodProxy<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Cal
 
 template < typename R,
            class C>
-class MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
                                                                           , private Method<R, C>
 {
     public:
@@ -303,7 +303,7 @@ class MethodProxy<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publ
         typedef R (C::*MemFuncT)();
 
     public:
-        MethodProxy(C* object, MemFuncT memFunc)
+        MethodInfo(C* object, MemFuncT memFunc)
         :  Method<R, C>(object, memFunc)
         {}
 
