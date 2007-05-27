@@ -22,7 +22,7 @@
 
 #include <Pt/Args.h>
 #include <Pt/Exception.h>
-#include <Pt/ICallable.h>
+#include <Pt/CallableInfo.h>
 #include <Pt/Method.h>
 
 

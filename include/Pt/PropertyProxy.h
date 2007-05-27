@@ -26,7 +26,7 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Property.h>
-#include <Pt/IProperty.h>
+#include <Pt/PropertyInfo.h>
 
 
 namespace Pt {
