@@ -20,7 +20,6 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Pt.h"
-#include "Pt/Property.h"
 #include "Pt/Reflectable.h"
 
 #include "Pt/Unit/Assertion.h"

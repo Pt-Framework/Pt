@@ -26,7 +26,7 @@
 #include <Pt/Exception.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
-#include <Pt/Property.h>
+#include <Pt/PropertyValue.h>
 
 
 namespace Pt {

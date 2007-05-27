@@ -23,7 +23,7 @@
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/MethodInfo.h>
-#include <Pt/Property.h>
+#include <Pt/PropertyValue.h>
 #include <Pt/PropertyInfo.h>
 #include <map>
 
