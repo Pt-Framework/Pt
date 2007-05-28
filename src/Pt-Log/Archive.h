@@ -26,7 +26,34 @@
 
 namespace Pt {
 
-class Archive
+class Archive;
+
+
+class ArchiveBase
+{
+    public:
+        ArchiveBase()
+        {}
+
+        virtual ~ArchiveBase()
+        {}
+
+        template <typename T>
+        bool extract(T& type, const Pt::String& typeName)
+        {
+            const Archive* archive = this->_extract(typeName);
+            if(archive == 0)
+                return false;
+
+            return *archive >> type;
+        }
+
+    protected:
+        virtual const Archive* _extract(const Pt::String& typeName) = 0;
+};
+
+
+class Archive : public ArchiveBase
 {
     public:
         Archive()
@@ -42,30 +69,6 @@ class Archive
         virtual const Archive* subArchive(const Pt::String& name) const = 0;
 
         virtual Archive& addArchive(const Pt::String& name) = 0;
-};
-
-
-class ArchiveReader
-{
-    public:
-        ArchiveReader()
-        {}
-
-        virtual ~ArchiveReader()
-        {}
-
-        template <typename T>
-        bool extract(T& type, const Pt::String& typeName)
-        {
-            const Archive* archive = this->_extract(typeName);
-            if(archive == 0)
-                return false;
-
-            return *archive >> type;
-        }
-
-    protected:
-        virtual const Archive* _extract(const Pt::String& typeName) = 0;
 };
 
 

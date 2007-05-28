@@ -59,7 +59,7 @@ LogManager::LogManager()
     // initialise Targets with properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    std::auto_ptr<IniArchiveReader> archiveReader( new IniArchiveReader(ts) );
+    std::auto_ptr<IniArchive> archiveReader( new IniArchive(ts) );
     _archiveReader = archiveReader.get();
     _archiveReader->extract(*this, L"Pt-Log");
 

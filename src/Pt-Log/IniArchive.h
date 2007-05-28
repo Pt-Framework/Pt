@@ -30,20 +30,20 @@
 
 namespace Pt {
 
-class IniArchive : public Archive
+class IniSubArchive : public Archive
 {
-    typedef std::multimap< Pt::String, IniArchive> NodeMap;
+    typedef std::multimap< Pt::String, IniSubArchive> NodeMap;
     typedef std::multimap< Pt::String, Pt::String> ValueMap;
 
     public:
-        IniArchive()
+        IniSubArchive()
         {}
 
-        IniArchive(const Pt::String& name)
+        IniSubArchive(const Pt::String& name)
         : _name(name)
         { }
 
-        ~IniArchive()
+        ~IniSubArchive()
         { }
 
         const Pt::String* value(const Pt::String& name) const
@@ -75,9 +75,16 @@ class IniArchive : public Archive
             if( it != _nodes.end() )
                 return it->second;
 
-            IniArchive node(name);
+            IniSubArchive node(name);
             it = _nodes.insert( std::make_pair(name, node) );
             return it->second;
+        }
+
+    protected:
+        virtual const Archive* _extract(const Pt::String& typeName)
+        {
+            const Archive* archive = this->subArchive(typeName);
+            return archive;
         }
 
     private:
@@ -87,20 +94,20 @@ class IniArchive : public Archive
 };
 
 
-class IniArchiveReader : public ArchiveReader
+class IniArchive : public ArchiveBase
 {
     private:
         std::basic_istream<Pt::Char>& _is;
-        IniArchive _archive;
+        IniSubArchive _archive;
 
     public:
-        IniArchiveReader(std::basic_istream<Pt::Char>& is)
+        IniArchive(std::basic_istream<Pt::Char>& is)
         : _is(is)
         {
             this->beforeName();
         }
 
-        ~IniArchiveReader()
+        ~IniArchive()
         {}
 
     protected:
