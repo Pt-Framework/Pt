@@ -20,8 +20,7 @@
 #define Pt_Log_Message_h
 
 #include <Pt/Log/Api.h>
-#include <Pt/Log/Logger.h>
-#include <Pt/Event.h>
+#include <Pt/Log/LogLevel.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/DateTime.h>
 #include <string>
@@ -31,28 +30,69 @@ namespace Pt {
 
 namespace Log {
 
-class PT_LOG_API Message : public Pt::Event
-{
-    public:
-        Message(const std::string& target);
+    /** @brief %Log message
+        @ingroup Logging
+    */
+    class PT_LOG_API Message
+    {
+        public:
+            Message(const std::string& target, LogLevel level);
 
-        ~Message();
+            ~Message();
 
-    private:
-        std::string    _target;
-        std::string    _text;
-        LogLevel       _level;
-        Pt::SourceInfo _source;
-        Pt::DateTime   _dateTime;
-        long           _threadId;
-        long           _procId;
-};
+            const std::string& target() const
+            { return _target; }
+
+            void setText(const std::string& text)
+            { _text = text; }
+
+            const std::string& text() const
+            { return _text; }
+
+            void setLogLevel(LogLevel level)
+            { _level = level; }
+
+            LogLevel logLevel() const
+            { return _level; }
+
+            const DateTime& timestamp() const
+            { return _dateTime; }
+
+            void setTimestamp(const Pt::DateTime& dateTime)
+            { _dateTime = dateTime; }
+
+            const Pt::SourceInfo& sourceInfo() const
+            { return _source; }
+
+            void setSourceInfo(const SourceInfo& source)
+            { _source = source; }
+
+            long threadId() const
+            { return _threadId; }
+
+            void setThreadId(long id)
+            { _threadId = id; }
+
+            long processId() const
+            { return _procId; }
+
+            void setProcessId(long id)
+            { _procId = id; }
+
+        private:
+            std::string    _target;
+            std::string    _text;
+            LogLevel       _level;
+            Pt::SourceInfo _source;
+            Pt::DateTime   _dateTime;
+            long           _threadId;
+            long           _procId;
+            void*          _reserved;
+    };
 
 } // namespace Log
 
 } // namespace Pt
 
-
 #endif
-
 

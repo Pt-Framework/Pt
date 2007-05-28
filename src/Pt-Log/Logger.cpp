@@ -17,9 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "LogManager.h"
+#include "Message.h"
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
-#include "Pt/Log/Message.h"
 #include "Pt/System/Clock.h"
 #include <memory>
 

@@ -83,18 +83,21 @@ std::string Target::channel() const
 
 void Target::setChannel(const std::string& url)
 {
+    // thread-safe
     LogManager::instance().setChannel(*this, url);
 }
 
 
 void Target::log(const Message& message)
 {
+    // thread-safe
     LogManager::instance().log(*this, message, _async);
 }
 
 
 Target& Target::get(const std::string& name)
 {
+    // thread-safe
     return LogManager::instance().target(name);
 }
 

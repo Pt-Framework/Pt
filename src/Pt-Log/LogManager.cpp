@@ -17,6 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "LogManager.h"
+#include "Message.h"
 #include "ConsoleChannel.h"
 #include "SerialChannel.h"
 #include "Pt/Exception.h"
@@ -56,7 +57,7 @@ LogManager::LogManager()
     std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
     _logger = logger.get();
 
-    // initialise Targets with properties
+    // initialise properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
     std::auto_ptr<IniArchive> archiveReader( new IniArchive(ts) );

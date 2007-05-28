@@ -28,14 +28,14 @@
 #  endif
 
 /** @defgroup Logging Logging
-    @brief Logging and tracing
+    @brief Configurable and thread-safe logging framework
 
 */
 
 namespace Pt {
 
 /** @namespace Pt::Log
-    @brief Logging and tracing
+    @brief Configurable and thread-safe logging framework
 */
 namespace Log {
 

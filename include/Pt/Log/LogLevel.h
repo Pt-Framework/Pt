@@ -28,6 +28,9 @@ namespace Pt {
 namespace Log {
 
 
+/** @brief Severity of the log-message
+    @ingroup Logging
+*/
 enum LogLevel {
     Fatal = 0,
     Error = 100,
@@ -38,6 +41,9 @@ enum LogLevel {
 };
 
 
+/** @brief Converts a log-level to a string
+    @ingroup Logging
+*/
 inline std::string toString(LogLevel level)
 {
     std::string s;
