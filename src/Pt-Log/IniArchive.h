@@ -127,7 +127,7 @@ class IniArchive : public ArchiveBase
                 if( Pt::Unicode::isSpace(ch) )
                     continue;
 
-                if( ch == L'\n' )
+                if( ch == Pt::Char(L'\n') )
                     continue;
 
                 if(ch == equal)
@@ -200,7 +200,7 @@ class IniArchive : public ArchiveBase
                 if( Pt::Unicode::isSpace(ch) )
                     continue;
 
-                if(ch == L'=')
+                if(ch == Pt::Char(L'='))
                     std::logic_error("malformed property value");
 
                 break;
@@ -219,7 +219,7 @@ class IniArchive : public ArchiveBase
             value += ch;
             while( _is.get(ch) )
             {
-                if(ch == L'=')
+                if(ch == Pt::Char(L'='))
                     std::logic_error("malformed property value");
 
                 if( Pt::Unicode::isSpace(ch) )
@@ -227,7 +227,7 @@ class IniArchive : public ArchiveBase
                     break;
                 }
 
-                if( ch == L'\n' )
+                if( ch == Pt::Char(L'\n') )
                 {
                     break;
                 }

@@ -19,12 +19,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Net/HttpRequest.h>
 #include <sstream>
 #include <cctype>
 
-#include <Pt/Net/HttpRequest.h>
 
 namespace Pt {
+
 namespace Net {
 
 const std::string HttpRequest::STR_CONTENT_LENGTH("Content-Length: ");

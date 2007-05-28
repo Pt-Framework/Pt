@@ -19,12 +19,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <sstream>
 #include "Pt/Blob.h"
 #include "Pt/Net/HttpReply.h"
 #include "Pt/Net/HttpRequest.h"
-
+#include <sstream>
 #include <cctype>
+
 
 namespace Pt {
 

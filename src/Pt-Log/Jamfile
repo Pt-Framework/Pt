@@ -11,7 +11,7 @@ SharedLibrary Pt-Log : ConsoleChannel.cpp
                        Target.cpp
                        ;
 
-SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-System ;
+SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-Text Pt-System ;
 SharedLibrary_MakeLocate Pt-Log : bin ;
 
 SharedLibrary DllLoggerTest : DllLoggerTest.cpp ;
