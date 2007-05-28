@@ -73,7 +73,7 @@ int main( int argc, char* argv[] )
         Pt::Log::Target::get("logger2").setProperty( "channel", std::string("console://") );
         Pt::Log::Target::get("logger2").setProperty( "logLevel", Pt::Log::Fatal );*/
 
-        return 0;
+        //return 0;
         LogThread lt0("thread 0", "logger1");
         lt0.start();
 

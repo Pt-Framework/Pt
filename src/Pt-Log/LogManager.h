@@ -62,16 +62,16 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
         Pt::System::Mutex _mutex;
-        IniArchive* _archive;
+        IniArchiveReader* _archiveReader;
         Pt::System::PluginManager<Channel> _pluginManager;
         Logger* _logger;
 };
 
 
-inline bool extractNode(LogManager& manager, const ArchiveNode& node)
+inline bool operator>>(const Archive& archive, LogManager& manager)
 {
     Target& ptLog = Target::get("Pt-Log");
-    extractNode(ptLog, node);
+    archive >> ptLog;
     return true;
 }
 
