@@ -35,18 +35,15 @@ class LoggerTest : public Pt::Unit::TestSuite
         LoggerTest()
         : Pt::Unit::TestSuite("LoggerTest")
         {
-            /*Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
+            Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
             Pt::Unit::TestSuite::registerMethod( "LogFatal", *this, &LoggerTest::LogFatal );
             Pt::Unit::TestSuite::registerMethod( "LogError", *this, &LoggerTest::LogError );
             Pt::Unit::TestSuite::registerMethod( "LogWarn", *this, &LoggerTest::LogWarn );
             Pt::Unit::TestSuite::registerMethod( "LogInfo", *this, &LoggerTest::LogInfo );
             Pt::Unit::TestSuite::registerMethod( "LogDebug", *this, &LoggerTest::LogDebug );
             Pt::Unit::TestSuite::registerMethod( "LogTrace", *this, &LoggerTest::LogTrace );
-            Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );*/
+            Pt::Unit::TestSuite::registerMethod( "DllLoggerTest", *this, &LoggerTest::DllLoggerTest );
             Pt::Unit::TestSuite::registerMethod( "SerialChannel", *this, &LoggerTest::SerialChannel );
-
-            Pt::Log::Target::get("Pt-Log").setLogLevel(Pt::Log::Trace);
-            Pt::Log::Target::get("LoggerTest").setLogLevel(Pt::Log::Trace);
         }
 
     protected:
