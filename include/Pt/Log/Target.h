@@ -64,6 +64,10 @@ namespace Log {
             static Target& get(const std::string& name);
 
         protected:
+            std::string logLevelString() const;
+
+            void setLogLevel(const std::string&);
+
             void assignChannel(Channel& ch);
 
         private:

@@ -173,3 +173,8 @@ include/Pt/Atomicity.windows.h
 include/Pt/Unit/TextProtocol.h
 include/Pt/IMethod.h
 include/Pt/IProperty.h
+include/Pt/MethodProxy.h
+include/Pt/CallableInfo.h
+include/Pt/MethodInfo.h
+include/Pt/PropertyInfo.h
+include/Pt/PropertyValue.h

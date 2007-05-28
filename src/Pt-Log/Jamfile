@@ -15,13 +15,13 @@ SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Log : bin ;
 
 SharedLibrary DllLoggerTest : DllLoggerTest.cpp ;
-SharedLibrary_LinkSharedLibraries DllLoggerTest : Pt Pt-Log ;
+SharedLibrary_LinkSharedLibraries DllLoggerTest : Pt Pt-Text Pt-Log ;
 SharedLibrary_MakeLocate DllLoggerTest : bin ;
 
 Main LoggerDemo : LoggerDemo.cpp ;
-Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-System ;
+Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-Text Pt-System ;
 Main_MakeLocate LoggerDemo : bin ;
 
 Main LoggerTest : LoggerTest.cpp ;
-Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-System DllLoggerTest ;
+Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System DllLoggerTest ;
 Main_MakeLocate LoggerTest : bin ;

@@ -55,6 +55,11 @@ class LogThread : public Pt::System::Thread
 int main( int argc, char* argv[] )
 {
     try {
+        Pt::Log::Target::get("");
+
+        /*Pt::Log::Logger logger("logger1", Pt::Log::Trace);
+        logger << Pt::Log::info << "test " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
+
         Pt::Log::Target::get("").setProperty( "logLevel", Pt::Any( Pt::Log::Error ) );
         Pt::Log::Target::get("").setProperty( "channel", Pt::Any( std::string("console://") ) );
 
@@ -66,8 +71,9 @@ int main( int argc, char* argv[] )
         Pt::Log::Target::get("logger1").setProperty( "async", true);
 
         Pt::Log::Target::get("logger2").setProperty( "channel", std::string("console://") );
-        Pt::Log::Target::get("logger2").setProperty( "logLevel", Pt::Log::Fatal );
+        Pt::Log::Target::get("logger2").setProperty( "logLevel", Pt::Log::Fatal );*/
 
+        return 0;
         LogThread lt0("thread 0", "logger1");
         lt0.start();
 

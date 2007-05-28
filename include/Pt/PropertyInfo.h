@@ -94,31 +94,6 @@ class ReadPropertyInfo : virtual public PropertyInfo
 
 
 template <typename T>
-class InternalReadPropertyInfo : public PropertyInfo
-{
-    public:
-        template <typename Object, typename ObjectBase>
-        InternalReadPropertyInfo( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() const )
-        : _value(&value)
-        { }
-
-        template <typename Object, typename ObjectBase>
-        InternalReadPropertyInfo( PropertyValue<T>& value, Object* parent, T (ObjectBase::*getter)() )
-        : _value(&value)
-        { }
-
-        ~InternalReadPropertyInfo()
-        { }
-
-        virtual Pt::Any value()
-        { return _value->value(); }
-
-    private:
-        PropertyValue<T>* _value;
-};
-
-
-template <typename T>
 class WritePropertyInfo : virtual public PropertyInfo
 {
     public:
@@ -187,24 +162,35 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
 };
 
 
+template <typename T>
+class InternalReadPropertyInfo : public PropertyInfo
+{
+    public:
+        template <typename Object>
+        InternalReadPropertyInfo( Object* parent, PropertyValue<T>& value )
+        : _value(&value)
+        { }
+
+        ~InternalReadPropertyInfo()
+        { }
+
+        virtual Pt::Any value()
+        { return _value->value(); }
+
+    private:
+        PropertyValue<T>* _value;
+};
+
+
 template <typename T, typename A = T>
 class InternalReadWritePropertyInfo : public PropertyInfo
 {
     public:
-        template <typename R1, typename R2,typename Object, typename ObjectBase>
-        InternalReadWritePropertyInfo(PropertyValue<T>& value, Object* parent,
-                                      R1 (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
+        template <typename R,typename Class, typename Base>
+        InternalReadWritePropertyInfo( Class* parent, PropertyValue<T>& value,  R (Base::*setter)(A type) )
         : _value(&value)
         {
-            _setter = new Pt::Method<R2, ObjectBase, A>(parent, setter);
-        }
-
-        template <typename R1, typename R2, typename Object, typename ObjectBase>
-        InternalReadWritePropertyInfo(PropertyValue<T>& value, Object* parent,
-                                      R1 (ObjectBase::*getter)() , R2 (ObjectBase::*setter)(A type) )
-        : _value(&value)
-        {
-            _setter = new Pt::Method<R2, Object, A>(parent, setter);
+            _setter = new Pt::Method<R, Base, A>(parent, setter);
         }
 
         ~InternalReadWritePropertyInfo()

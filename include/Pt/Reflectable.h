@@ -81,6 +81,9 @@ class PT_API Reflectable
         const PropertyMap& properties() const
         { return _properties; }
 
+        PropertyMap& properties()
+        { return _properties; }
+
         const MethodMap& methods() const
         { return _methods; }
 
@@ -114,30 +117,18 @@ class PT_API Reflectable
             _properties.insert( std::make_pair(name, new ReadWritePropertyInfo<R1, A>(parent, getter, setter)) );
         }
 
-        template <typename R, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)() const)
+
+        template <typename R, typename Parent>
+        void registerProperty(const std::string& name, Parent* parent, PropertyValue<R>& value)
         {
-            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(pv, parent, getter)) );
+            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(parent, value)) );
         }
 
-        template <typename R, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<R>& pv, Parent* parent, R (Object::*getter)())
-        {
-            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(pv, parent, getter)) );
-        }
 
-        template <typename T, typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<T>& pv, Parent* parent,
-                              R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
+        template <typename T, typename R, typename A, typename Parent, typename Object>
+        void registerProperty(const std::string& name, Parent* parent, PropertyValue<T>& value, R (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<T, A>(pv, parent, getter, setter)) );
-        }
-
-        template <typename T, typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, PropertyValue<T>& pv, Parent* parent,
-                              R1 (Object::*getter)(), R2 (Object::*setter)(A type))
-        {
-            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<T, A>(pv, parent, getter, setter)) );
+            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<T, A>(parent, value, setter)) );
         }
 
         template <typename ParentT>

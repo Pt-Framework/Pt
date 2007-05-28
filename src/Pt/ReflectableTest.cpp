@@ -27,7 +27,6 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
-
 /*#define PT_PROPERTY( name, Name, type )       \
                                                   \
 class Property##name : public Pt::Property<type>       \
@@ -53,7 +52,9 @@ class TestReflectable : public Pt::Reflectable
         TestReflectable()
         : Pt::Reflectable("TestReflectable")
         {
-            this->registerProperty("number", _number, this, &TestReflectable::number, &TestReflectable::setNumber);
+            this->registerProperty("number", this, _number, &TestReflectable::setNumber);
+            this->registerProperty("count", this, _number );
+
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);
             this->registerMethod("method3", *this, &TestReflectable::method3);

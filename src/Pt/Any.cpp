@@ -64,6 +64,21 @@ namespace Pt
     }
 
 
+    Any Any::create(const std::string& name, std::basic_istream<Pt::Char>& is)
+    {
+        std::multimap<std::string, AnyIO*>::iterator it;
+        it = AnyFactory::instance().map().find(name);
+
+        if( it == AnyFactory::instance().map().end() ) {
+            return Any();
+        }
+
+        Pt::Any a;
+        it->second->input(is, a);
+        return a;
+    }
+
+
     void Any::clear()
     {
 	    if(_value) {

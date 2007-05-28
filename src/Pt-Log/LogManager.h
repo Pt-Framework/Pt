@@ -19,7 +19,9 @@
 #ifndef Pt_LogManager_h
 #define Pt_LogManager_h
 
+#include "IniArchive.h"
 #include <Pt/Log/Api.h>
+#include <Pt/Log/Target.h>
 #include <Pt/Singleton.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Plugin.h>
@@ -33,7 +35,6 @@ namespace Log {
 
 class Channel;
 class Message;
-class Target;
 class Logger;
 
 
@@ -61,15 +62,22 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
         Pt::System::Mutex _mutex;
+        IniArchive* _archive;
         Pt::System::PluginManager<Channel> _pluginManager;
         Logger* _logger;
 };
 
+
+inline bool extractNode(LogManager& manager, const ArchiveNode& node)
+{
+    Target& ptLog = Target::get("Pt-Log");
+    extractNode(ptLog, node);
+    return true;
 }
 
 }
 
+}
 
 #endif
-
 

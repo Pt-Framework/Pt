@@ -27,11 +27,14 @@ namespace Log {
 Target::Target(const std::string& name, Target* parent)
 : Reflectable(name)
 , _name(name)
-, _logLevel(Error)
+, _logLevel(Fatal)
 , _parent(parent)
 , _channel(0)
 {
-    this->registerProperty("logLevel", this, &Target::logLevel, &Target::setLogLevel);
+    void (Target::*setter)(const std::string&);
+    setter = &Target::setLogLevel;
+
+    this->registerProperty("logLevel", this, &Target::logLevelString, setter);
     this->registerProperty("channel", this, &Target::channel, &Target::setChannel);
     this->registerProperty("async", this, &Target::async, &Target::setAsync);
 }
@@ -93,6 +96,41 @@ void Target::log(const Message& message)
 Target& Target::get(const std::string& name)
 {
     return LogManager::instance().target(name);
+}
+
+
+std::string Target::logLevelString() const
+{
+    return toString(_logLevel);
+}
+
+
+void Target::setLogLevel(const std::string& level)
+{
+    if(level == "Fatal")
+    {
+        _logLevel = Fatal;
+    }
+    else if(level == "Error")
+    {
+        _logLevel = Error;
+    }
+    else if(level == "Warn")
+    {
+        _logLevel = Warn;
+    }
+    else if(level == "Info")
+    {
+        _logLevel = Info;
+    }
+    else if( level == "Debug")
+    {
+        _logLevel = Debug;
+    }
+    else if(level == "Trace")
+    {
+        _logLevel = Trace;
+    }
 }
 
 

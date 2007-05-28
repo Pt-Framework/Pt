@@ -236,6 +236,10 @@ namespace Pt {
             */
             static Any create(const std::string& name, std::istream& is);
 
+            /** @brief Create an Any from a stream
+            */
+            static Any create(const std::string& name, std::basic_istream<Pt::Char>& is);
+
             /** @brief Assigns an abstract value
             */
             Any& assign(Value* value);
@@ -436,6 +440,7 @@ namespace Pt {
         virtual void input(std::istream& is, Pt::Any& a) = 0;
         virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const = 0;
         virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a) = 0;
+        //virtual void input(const ArchiveNode& node, Pt::Any& a) = 0;
     };
 
 
@@ -460,6 +465,10 @@ namespace Pt {
             a.assign(value);
             AnyTraits<T>::input( is, value->value() );
         }
+
+        //virtual void input(const ArchiveNode& node, Pt::Any& a)
+        //{
+        //}
     };
 
 

@@ -193,7 +193,7 @@ void input_std_string(std::basic_istream<CharT>& is, std::basic_string<CharT2>& 
     CharT ch;
     is >> ch;
 
-    if( ch != '"' )
+    if( ch != CharT('"') )
         throw std::runtime_error("Could not read string value" + PT_SOURCEINFO);
 
     bool isEscaped = false;

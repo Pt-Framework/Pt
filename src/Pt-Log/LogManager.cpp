@@ -23,7 +23,10 @@
 #include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
 #include <Pt/Log/Logger.h>
+#include <Pt/Text/TextStream.h>
+#include <Pt/Text/Utf8Codec.h>
 #include <memory>
+#include <fstream>
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
@@ -33,7 +36,6 @@ static Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> serialP
 namespace Pt {
 
 namespace Log {
-
 
 LogManager::LogManager()
 : _rootTarget(0)
@@ -51,14 +53,20 @@ LogManager::LogManager()
     // logger for Pt::Log
     std::auto_ptr<Target> logTarget( new Target("Pt-Log", _rootTarget) );
     _targetMap["Pt-Log"] = logTarget.get();
+    std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
+    _logger = logger.get();
 
-    //
-    // TODO: initialise Targets with properties
-    //
+    // initialise Targets with properties
+    std::ifstream fs("Pt-Log.properties");
+    Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+    std::auto_ptr<IniArchive> archive( new IniArchive(ts) );
+    _archive = archive.get();
+    _archive->extract(*this, L"Pt-Log");
 
-    _logger = new Logger( *logTarget );
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
+    logger.release();
+    archive.release();
     logTarget.release();
     rootTarget.release();
 }
@@ -164,6 +172,12 @@ Target& LogManager::target(const std::string& name)
             _logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName << ", parent: " << foundTarget->name() << endlog;
             foundTarget = new Target(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
+
+            Pt::String str;
+            for(size_t n = 0; n < targetName.size(); ++n)
+                str += Pt::Char( targetName[n] );
+
+            _archive->extract(*foundTarget, str);
         }
     }
 
