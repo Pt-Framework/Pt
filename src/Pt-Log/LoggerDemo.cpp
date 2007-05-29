@@ -42,8 +42,9 @@ class LogThread : public Pt::System::Thread
                 try
                 {
                     Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
-                    logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
+                    logger << Pt::Log::info << _message << Pt::Log::endlog;
 
+                    Pt::System::Thread::sleep(1000);
                     this->yield();
                 }
                 catch(const std::exception& e)
@@ -81,19 +82,19 @@ int main( int argc, char* argv[] )
         Pt::Log::Target::get("logger2").setProperty( "logLevel", Pt::Log::Fatal );*/
 
         //return 0;
-        LogThread lt0("thread 0", "logger1");
+        LogThread lt0("Message from thread 0", "LoggerDemo");
         lt0.start();
 
-        LogThread lt1("thread 1", "logger1");
+        LogThread lt1("Thread 1 sends a message", "LoggerDemo");
         lt1.start();
 
-        LogThread lt2("thread 2", "logger1");
+        LogThread lt2("Another message from thread 2", "LoggerDemo");
         lt2.start();
 
-        LogThread lt3("thread 3", "logger2");
+        LogThread lt3("thread 3", "LoggerDemo2");
         lt3.start();
 
-        LogThread lt4("thread 4", "logger2");
+        LogThread lt4("thread 4", "LoggerDemo2");
         lt4.start();
 
         lt1.wait();
