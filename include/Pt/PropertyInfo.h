@@ -117,7 +117,8 @@ class WritePropertyInfo : virtual public PropertyInfo
                 ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
                 this->set( val );
             }
-            catch(...) {
+            catch(const std::exception& e) {
+                std::cerr << e.what() << std::endl;
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }

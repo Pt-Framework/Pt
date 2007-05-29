@@ -247,6 +247,8 @@ Channel& LogManager::channel(const std::string& url)
         throw std::invalid_argument("No such channel" + PT_SOURCEINFO);
     }
 
+
+    // TODO: handle exceptions from open()
     ch->open(url);
     _logger->beginLog(PT_SOURCEINFO) << info << "Opened channel: " << url << endlog;
 
