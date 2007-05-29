@@ -39,10 +39,17 @@ class LogThread : public Pt::System::Thread
         {
             while(true)
             {
-                Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
-                logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
+                try
+                {
+                    Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
+                    logger << Pt::Log::info << _message << ": " << std::boolalpha << true << " " << 123.123 << Pt::Log::endlog;
 
-                this->yield();
+                    this->yield();
+                }
+                catch(const std::exception& e)
+                {
+                    std::cerr << e.what() << std::endl;
+                }
             }
         }
 
