@@ -98,13 +98,17 @@ class IniArchive : public Archive
 {
     private:
         std::basic_istream<Pt::Char>& _is;
+        typedef void (IniArchive::*Parse)(const Pt::Char&);
+        Parse _parse;
+        Pt::String _currentName;
+        Pt::String _currentValue;
         IniArchiveNode _root;
 
     public:
         IniArchive(std::basic_istream<Pt::Char>& is)
         : _is(is)
         {
-            this->beforeName();
+            this->parse();
         }
 
         ~IniArchive()
@@ -136,15 +140,28 @@ class IniArchive : public Archive
             const Archive* archive = _root.findArchive(typeName);
             return archive;
         }
-/*
-        typedef void (IniArchive::*Parse)(const Pt::Char&);
 
-        Parse _parse;
+        void parse()
+        {
+            IniArchive& self = *this;
+            _parse = &IniArchive::parseBeforeName;
+
+            Pt::Char ch;
+            while( _is.get(ch) )
+            {
+                (self.*_parse)(ch);
+            }
+
+            typedef std::char_traits<Pt::Char> CharTraits;
+            ch = CharTraits::to_int_type( CharTraits::eof() );
+
+            (self.*_parse)(ch);
+
+            exit(0);
+        }
 
         void parseBeforeName(const Pt::Char& ch)
         {
-            Pt::Char equal(L'=');
-
             if( Pt::Unicode::isSpace(ch) )
                 return;
 
@@ -153,152 +170,94 @@ class IniArchive : public Archive
 
             if( ch == Pt::Char(L'#') )
             {
-                //_parse = ;
+                _parse = &IniArchive::parseComment ;
                 return;
             }
 
-            if(ch == equal)
+            if( ch == Pt::Char(L'=') )
                 throw std::logic_error("expected property name");
+
+            _currentName.clear();
+            _currentValue.clear();
+
+            _currentName += ch;
+            _parse = &IniArchive::parseName;
         }
-*/
-        void beforeName()
+
+        void parseComment(const Pt::Char& ch)
         {
-            Pt::Char equal(L'=');
-
-            Pt::Char ch;
-            while( _is.get(ch) )
-            {
-                if( Pt::Unicode::isSpace(ch) )
-                    continue;
-
-                if( ch == Pt::Char(L'\n') )
-                    continue;
-
-                if( ch == Pt::Char(L'#') )
-                {
-                    this->onComment();
-                    return;
-                }
-
-                if(ch == equal)
-                    throw std::logic_error("expected property name");
-
-                break;
-            }
-
-            if( !_is )
+            if( ch != Pt::Char(L'\n') )
                 return;
 
-            this->onName(ch);
+            _parse = &IniArchive::parseBeforeName;
         }
 
-        void onComment()
+        void parseName(const Pt::Char& ch)
         {
-            Pt::Char ch;
-            while( _is.get(ch) )
+            if( ch == Pt::Char(L'=') )
             {
-                if( ch == Pt::Char(L'\n') )
-                    break;
+                _parse = &IniArchive::parseAfterEqual;
+                return;
             }
 
-            this->beforeName();
+            if( Pt::Unicode::isSpace(ch) )
+            {
+                _parse = &IniArchive::parseAfterName;
+                return;
+            }
+
+            _currentName += ch;
         }
 
-        void onName(Pt::Char ch)
+        void parseAfterName(const Pt::Char& ch)
         {
-            Pt::Char equal(L'=');
-            Pt::String name;
-            name += ch;
-            while( true )
+            if( Pt::Unicode::isSpace(ch) )
+                return;
+
+            if(ch == Pt::Char(L'='))
             {
-                _is.get(ch);
-
-                if( !_is )
-                    throw std::logic_error("expected property value");
-
-                if(ch == equal)
-                {
-                    this->onEqual(name);
-                    break;
-                }
-                if( Pt::Unicode::isSpace(ch) )
-                {
-                    this->afterName(name);
-                    break;
-                }
-
-                name += ch;
+                _parse = &IniArchive::parseAfterEqual;
+                return;
             }
+
+            throw std::logic_error("space in property name");
         }
 
-        void afterName(Pt::String& name)
+        void parseAfterEqual(const Pt::Char& ch)
         {
-            Pt::Char equal(L'=');
-            Pt::Char ch;
-            while( _is.get(ch) )
-            {
-                if(ch == equal)
-                    break;
+            if( Pt::Unicode::isSpace(ch) ||
+                ch == Pt::Char(L'\n') ) // should we allow \n?
+                return;
 
-                if( Pt::Unicode::isSpace(ch) )
-                    continue;
+            if( ch == Pt::Char(L'=') )
+                throw std::logic_error("expected value");
 
-                throw std::logic_error("space in property name");
-            }
+            if( ch == Pt::Char(L'#') )
+                throw std::logic_error("expected value");
 
-            if( !_is )
-                throw std::logic_error("malformed property name EOF");
-
-            this->onEqual(name);
+            _currentValue += ch;
+            _parse = &IniArchive::parseValue;
         }
 
-        void onEqual(Pt::String& name)
+        void parseValue(const Pt::Char& ch)
         {
-            Pt::Char equal(L'=');
-            Pt::Char ch;
+            typedef std::char_traits<Pt::Char> CharTraits;
+            static Pt::Char eof = CharTraits::to_int_type( CharTraits::eof() );
 
-            while( _is.get(ch) )
+            if( ch == Pt::Char(L'=') )
+                std::logic_error("malformed property value");
+
+            if( Pt::Unicode::isSpace(ch) ||
+                ch == Pt::Char(L'\n') ||
+                ch == eof )
             {
-                if( Pt::Unicode::isSpace(ch) )
-                    continue;
-
-                if(ch == Pt::Char(L'='))
-                    std::logic_error("malformed property value");
-
-                break;
+                std::cerr << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                this->addNode(_currentName, _currentValue);
+                _parse = &IniArchive::parseBeforeName;
+                return;
             }
 
-            if( !_is )
-                throw std::logic_error("malformed property value EOF");
-
-            this->onValue(name, ch);
-        }
-
-        void onValue(Pt::String& name, Pt::Char ch)
-        {
-            Pt::Char equal(L'=');
-            Pt::String value;
-            value += ch;
-            while( _is.get(ch) )
-            {
-                if(ch == Pt::Char(L'='))
-                    std::logic_error("malformed property value");
-
-                if( Pt::Unicode::isSpace(ch) )
-                {
-                    break;
-                }
-
-                if( ch == Pt::Char(L'\n') )
-                {
-                    break;
-                }
-
-                value += ch;
-            }
-
-            this->addNode(name, value);
-            this->beforeName();
+            _currentValue += ch;
         }
 
         void addNode(const Pt::String& name, const Pt::String value)
