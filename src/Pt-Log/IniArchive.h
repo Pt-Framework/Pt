@@ -130,6 +130,12 @@ class IniArchive : public ArchiveBase
                 if( ch == Pt::Char(L'\n') )
                     continue;
 
+                if( ch == Pt::Char(L'#') )
+                {
+                    this->onComment();
+                    return;
+                }
+
                 if(ch == equal)
                     throw std::logic_error("expected property name");
 
@@ -140,6 +146,18 @@ class IniArchive : public ArchiveBase
                 return;
 
             this->onName(ch);
+        }
+
+        void onComment()
+        {
+            Pt::Char ch;
+            while( _is.get(ch) )
+            {
+                if( ch == Pt::Char(L'\n') )
+                    break;
+            }
+
+            this->beforeName();
         }
 
         void onName(Pt::Char ch)
