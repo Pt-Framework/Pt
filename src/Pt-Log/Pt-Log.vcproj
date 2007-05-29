@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="Pt-Log"
+	ProjectGUID="{11954EFF-97AA-48FA-B458-4734FB45B184}"
+	Keyword="MakeFileProj"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+		<Platform
+			Name="Pocket PC 2003 (ARMV4)"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(IntDir)\$(TargetName).htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				Output="$(OutDir)\Pt-Logd.dll"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Pocket PC 2003 (ARMV4)"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(IntDir)\$(TargetName).htm"
+			ExcludeBuckets="7"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				Output="$(OutDir)\Pt-Logd.dll"
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory="%CSIDL_PROGRAM_FILES%\Pt-Test"
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=release -q Pt-System.dll"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=release -a Pt-System.dll"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sCONFIG=release clean Pt-System.dll"
+				Output="$(OutDir)\Pt-Log.dll"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Pocket PC 2003 (ARMV4)"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(IntDir)\$(TargetName).htm"
+			ExcludeBuckets="7"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName) -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				Output="$(OutDir)\Pt-Log.dll"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory="MapViewer"
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\ConsoleChannel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DllLoggerTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Logger.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LoggerDemo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LoggerTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LogManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Message.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SerialChannel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Target.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\Archive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConsoleChannel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DllLoggerTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IniArchive.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LogManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Message.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SerialChannel.h"
+				>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
