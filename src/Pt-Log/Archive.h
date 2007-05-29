@@ -26,17 +26,22 @@
 
 namespace Pt {
 
-class Archive;
-
-
-class ArchiveBase
+class Archive
 {
     public:
-        ArchiveBase()
+        Archive()
         {}
 
-        virtual ~ArchiveBase()
+        virtual ~Archive()
         {}
+
+        virtual const Pt::String* value(const Pt::String& name) const = 0;
+
+        virtual void addValue(const Pt::String& name, const Pt::String& value) = 0;
+
+        virtual const Archive* findArchive(const Pt::String& name) const = 0;
+
+        virtual Archive& addArchive(const Pt::String& name) = 0;
 
         template <typename T>
         bool extract(T& type, const Pt::String& typeName)
@@ -50,25 +55,6 @@ class ArchiveBase
 
     protected:
         virtual const Archive* _extract(const Pt::String& typeName) = 0;
-};
-
-
-class Archive : public ArchiveBase
-{
-    public:
-        Archive()
-        {}
-
-        virtual ~Archive()
-        {}
-
-        virtual const Pt::String* value(const Pt::String& name) const = 0;
-
-        virtual void addValue(const Pt::String& name, const Pt::String& value) = 0;
-
-        virtual const Archive* subArchive(const Pt::String& name) const = 0;
-
-        virtual Archive& addArchive(const Pt::String& name) = 0;
 };
 
 
@@ -92,7 +78,7 @@ inline bool operator>>(const Archive& archive, Reflectable& r)
             it->second->setValue(a);
         }
 
-        const Archive* subarchive = archive.subArchive(name);
+        const Archive* subarchive = archive.findArchive(name);
         if(subarchive)
         {
             //Pt::Any::create(typeName, *subnode);

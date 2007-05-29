@@ -30,20 +30,20 @@
 
 namespace Pt {
 
-class IniSubArchive : public Archive
+class IniArchiveNode : public Archive
 {
-    typedef std::multimap< Pt::String, IniSubArchive> NodeMap;
+    typedef std::multimap< Pt::String, IniArchiveNode> NodeMap;
     typedef std::multimap< Pt::String, Pt::String> ValueMap;
 
     public:
-        IniSubArchive()
+        IniArchiveNode()
         {}
 
-        IniSubArchive(const Pt::String& name)
+        IniArchiveNode(const Pt::String& name)
         : _name(name)
         { }
 
-        ~IniSubArchive()
+        ~IniArchiveNode()
         { }
 
         const Pt::String* value(const Pt::String& name) const
@@ -60,7 +60,7 @@ class IniSubArchive : public Archive
             _values.insert( std::make_pair(name, value) );
         }
 
-        const Archive* subArchive(const Pt::String& name) const
+        const Archive* findArchive(const Pt::String& name) const
         {
             NodeMap::const_iterator it = _nodes.find(name);
             if( it == _nodes.end() )
@@ -75,7 +75,7 @@ class IniSubArchive : public Archive
             if( it != _nodes.end() )
                 return it->second;
 
-            IniSubArchive node(name);
+            IniArchiveNode node(name);
             it = _nodes.insert( std::make_pair(name, node) );
             return it->second;
         }
@@ -83,7 +83,7 @@ class IniSubArchive : public Archive
     protected:
         virtual const Archive* _extract(const Pt::String& typeName)
         {
-            const Archive* archive = this->subArchive(typeName);
+            const Archive* archive = this->findArchive(typeName);
             return archive;
         }
 
@@ -94,11 +94,11 @@ class IniSubArchive : public Archive
 };
 
 
-class IniArchive : public ArchiveBase
+class IniArchive : public Archive
 {
     private:
         std::basic_istream<Pt::Char>& _is;
-        IniSubArchive _archive;
+        IniArchiveNode _root;
 
     public:
         IniArchive(std::basic_istream<Pt::Char>& is)
@@ -110,13 +110,57 @@ class IniArchive : public ArchiveBase
         ~IniArchive()
         {}
 
+        const Pt::String* value(const Pt::String& name) const
+        {
+            return _root.value(name);
+        }
+
+        void addValue(const Pt::String& name, const Pt::String& value)
+        {
+            _root.addValue(name, value);
+        }
+
+        const Archive* findArchive(const Pt::String& name) const
+        {
+            return _root.findArchive(name);
+        }
+
+        Archive& addArchive(const Pt::String& name)
+        {
+            return _root.addArchive(name);
+        }
+
     protected:
         virtual const Archive* _extract(const Pt::String& typeName)
         {
-            const Archive* archive = _archive.subArchive(typeName);
+            const Archive* archive = _root.findArchive(typeName);
             return archive;
         }
+/*
+        typedef void (IniArchive::*Parse)(const Pt::Char&);
 
+        Parse _parse;
+
+        void parseBeforeName(const Pt::Char& ch)
+        {
+            Pt::Char equal(L'=');
+
+            if( Pt::Unicode::isSpace(ch) )
+                return;
+
+            if( ch == Pt::Char(L'\n') )
+                return;
+
+            if( ch == Pt::Char(L'#') )
+            {
+                //_parse = ;
+                return;
+            }
+
+            if(ch == equal)
+                throw std::logic_error("expected property name");
+        }
+*/
         void beforeName()
         {
             Pt::Char equal(L'=');
@@ -262,7 +306,7 @@ class IniArchive : public ArchiveBase
             //std::cerr << "READ: " << "'"<< name.narrow() << "' = '" << value.narrow() << "'" << std::endl;
 
             // parse the target name dot syntax
-            Archive* archive = &_archive;
+            Archive* archive = &_root;
 
             size_t begin = 0;
             size_t end = 0;
