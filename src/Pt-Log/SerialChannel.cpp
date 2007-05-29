@@ -59,7 +59,11 @@ void SerialChannel::_open(const std::string& urlstr)
     Pt::System::MutexLock lock( _mutex );
 
     System::Url url(urlstr);
-    _device.open( url.path(), std::ios::out );
+    _device.open( url.path(), std::ios::out, System::IODevice::Async );
+    _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
+	_device.setCharSize(8);
+	_device.setStopBits(Pt::System::SerialDevice::OneStopBit);
+	_device.setParity(Pt::System::SerialDevice::ParityNone);
 }
 
 
@@ -94,6 +98,8 @@ void SerialChannel::_write(const std::string& message, bool isAsync)
         return;
 
     _device.write( message.data(), message.size() );
+    _device.write("\r\n", 2);
+    _device.sync();
 }
 
 } // namespace Log
