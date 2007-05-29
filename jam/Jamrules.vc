@@ -51,6 +51,9 @@ rule Main_MakeLocate
 	MakeLocate $(_target:S=.pdb) : $(>) ;
 	MakeLocate $(_target:S=.ilk) : $(>) ;
 	MakeLocate $(_target:S=.exe.manifest) : $(>) ;
+    
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
 }
 
 
@@ -65,12 +68,12 @@ rule SharedLibraryFromObjects
 	Clean clean : $(_target) ;
 	Clean clean : $(_target:S=.lib) ;
 	Clean clean : $(_target:S=.exp) ;	
-	Clean clean : $(_target:S=.pdb) ;
+    Clean clean : $(_target:LS=.pdb) ;
 	Clean clean : $(_target:S=.ilk) ;
 	Clean clean : $(_target:S=.idb) ;
 	Clean clean : $(_target).manifest ;
 
-	PDB on $(_sources) = $(_target:S=.pdb) ;
+	PDB on $(_sources) = $(_target:LS=.pdb) ;
 
 	# setup dependencies
 	Depends exe : $(_target) ;
@@ -104,10 +107,13 @@ rule SharedLibrary_MakeLocate
 	MakeLocate $(_target) : $(>) ;
 	MakeLocate $(_target:S=.lib) : $(>) ;
 	MakeLocate $(_target:S=.exp) : $(>) ;
-	MakeLocate $(_target:S=.pdb) : $(>) ;
+    MakeLocate $(_target:LS=.pdb) : $(>) ;   
 	MakeLocate $(_target:S=.ilk) : $(>) ;
 	MakeLocate $(_target:S=.idb) : $(>) ;
 	MakeLocate $(_target:S=.dll.manifest) : $(>) ;
+    
+    # create dir before C++ rule creates .pdb files
+    Depends first : $(>) ;
 }
 
 
