@@ -40,39 +40,18 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
-			ConfigurationType="0"
-			BuildLogFile="$(IntDir)\$(TargetName).htm"
-			>
-			<Tool
-				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
-				Output="$(OutDir)\Pt.dll"
-				PreprocessorDefinitions="WIN32;NDEBUG"
-				IncludeSearchPath=""
-				ForcedIncludes=""
-				AssemblySearchPath=""
-				ForcedUsingAssemblies=""
-				CompileAsManaged=""
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|Pocket PC 2003 (ARMV4)"
 			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
+			IntermediateDirectory="..\..\tmp\wince\arm\le\vc8\$(ConfigurationName)"
 			ConfigurationType="0"
 			BuildLogFile="$(IntDir)\$(TargetName).htm"
 			ExcludeBuckets="7"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetFileName) -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
 				Output="$(OutDir)\Ptd.dll"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
@@ -98,18 +77,39 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\..\bin"
+			IntermediateDirectory="..\..\tmp\nt\x86\le\vc8\$(ConfigurationName)"
+			ConfigurationType="0"
+			BuildLogFile="$(IntDir)\$(TargetName).htm"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetFileName) -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) $(TargetName)  -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName) clean"
+				Output="$(OutDir)\Pt.dll"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|Pocket PC 2003 (ARMV4)"
 			OutputDirectory="..\..\bin"
-			IntermediateDirectory="..\..\temp\wince\arm\le\vc8\$(ConfigurationName)"
+			IntermediateDirectory="..\..\tmp\wince\arm\le\vc8\$(ConfigurationName)"
 			ConfigurationType="0"
 			BuildLogFile="$(IntDir)\$(TargetName).htm"
 			ExcludeBuckets="7"
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -q"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName) -a"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=debug  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName)  -q"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm $(TargetName) -a"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sVISUALC=&quot;$(VSInstallDir)\&quot; -sCONFIG=$(ConfigurationName)  -sTARGET_OS=wince -sTARGET_OSPLAT=arm clean"
 				Output="$(OutDir)\Pt.dll"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""

@@ -86,9 +86,9 @@ int main( int argc, char* argv[] )
         char buffer[size];
 
         //std::string port = "/dev/ttyS0";
-        std::string port = "COM8:";
+        std::string port = "COM5:";
         std::cerr << "Opening " << port << std::endl;
-        Pt::System::SerialDevice serialDevice(port, std::ios_base::in);
+        Pt::System::SerialDevice serialDevice(port, std::ios_base::in, Pt::System::IODevice::Async);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
@@ -100,7 +100,7 @@ int main( int argc, char* argv[] )
 
         size_t count = 0;
 
-        while(true)
+        while(count < 500)
         {
             Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
             selector.complete(res);
@@ -109,10 +109,12 @@ int main( int argc, char* argv[] )
             {
                 size_t n = serialDevice.endRead(res);
                 count += n;
-                std::cerr<<count<<std::endl;
-                //std::cerr.write(buffer, n);
+                //std::cerr<<count<<std::endl;
+                std::cerr.write(buffer, n);
             }
         }
+
+        serialDevice.close();
 
     }
     catch (const std::exception& e)

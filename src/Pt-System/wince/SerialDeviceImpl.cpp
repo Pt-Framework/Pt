@@ -29,15 +29,17 @@ namespace System{
 SerialDeviceImpl::SerialDeviceImpl()
 : _eventThread( *self() )
 , _terminateThread( false )
-, _commEvent( 0 )
+, _comEvent( 0 )
+, _waitForComEvent( 0 )
 { 
-    _readEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    _comEvent        = CreateEvent(NULL, TRUE, FALSE, NULL);    
+    _waitForComEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 SerialDeviceImpl::~SerialDeviceImpl()
 { }
 
-void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode )
+void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode mode, bool isAsync )
 {
     std::basic_string<TCHAR> port = win32::fromMultiByte( port_.c_str() );
 
@@ -65,32 +67,27 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
-        //comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
-        //comTimeOut.ReadTotalTimeoutConstant     = 100;
-        comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        comTimeOut.WriteTotalTimeoutConstant    = 100;       
+        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutConstant     = 100;
+        //comTimeOut.WriteTotalTimeoutMultiplier  = 10;
+        //comTimeOut.WriteTotalTimeoutConstant    = 100;       
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
-            throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);            
-            
-        _commEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-            
-        _waitCommMask = EV_BREAK | EV_RXCHAR | EV_TXEMPTY;
+            throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);        
     }        
     catch( ... )
     {
         CloseHandle( _handle );
-        
-        if( _commEvent != 0 )
-            CloseHandle( _commEvent );
-            
-        _handle = 0;
-        _commEvent = 0;
+
+        _handle = 0;        
         throw;
     }    
     
     _terminateThread = false;
-    _eventThread.start();    
+    if (isAsync)
+    {
+        _eventThread.start();    
+    }
 }
 
 void SerialDeviceImpl::close()
@@ -104,6 +101,8 @@ void SerialDeviceImpl::close()
     //Reset the wait mask, to wake up the comm event thread.
     SetCommMask( _handle, 0 );
 
+    SetEvent(_waitForComEvent);
+
     //Wait of comm event thread termination.
     _eventThread.wait();
 
@@ -113,48 +112,50 @@ void SerialDeviceImpl::close()
     //Close the port handle.
     CloseHandle( _handle );
     
-    CloseHandle( _commEvent );
+    CloseHandle( _comEvent );
+
+    CloseHandle( _waitForComEvent );
 
     _handle = 0;
-    _commEvent = 0;
+    _comEvent = 0;
 }
 
-//size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
-IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t count, bool& eof) 
+size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
     DWORD   length;
-    DWORD   error;
-    COMSTAT cs;
 
-    ClearCommError( _handle, &error, &cs );
+    if( !ReadFile( _handle, buffer, count, &length, 0 ) )
+        throw IOError("Read port failed" , PT_SOURCEINFO);
 
-    SetCommMask( _handle, EV_BREAK | EV_RXCHAR );    
+    if( length == 0 )     
+       eof = true;
 
-  /*  if( !ReadFile( _handle, buffer, count, &length, 0 ) )
-        throw IOError("Read port failed" , PT_SOURCEINFO);        
+    return length;
+}
 
-    if( length == 0 ) 
-       eof = true;*/
+IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t count, bool& eof) 
+{
+    SetCommMask( _handle, EV_RXCHAR );
 
-    _result.setHandle(_readEvent);
+    _readResult.attach(buffer, count);
 
-    return _result;    
+    _readResult.setHandle(_comEvent);
+
+    SetEvent(_waitForComEvent);
+
+    return _readResult;    
 }
 
 size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
 {
-    DWORD   length;
-    DWORD   error;
-    COMSTAT cs;
+    DWORD   length;    
 
-    ClearCommError( _handle, &error, &cs );
+    ResetEvent(_comEvent); 
 
-    ResetEvent(_readEvent);
+    if( !ReadFile( _handle, _readResult.buffer(), _readResult.bufferSize(), &length, 0 ) )
+        throw IOError("Read port failed" , PT_SOURCEINFO);
 
-  /*  if( !ReadFile( _handle, buffer, count, &length, 0 ) )
-        throw IOError("Read port failed" , PT_SOURCEINFO);        */
-
-    if( length == 0 ) 
+    if( length == 0 )     
        eof = true;
 
     return length;
@@ -164,8 +165,13 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
 
+    
+
     if( !WriteFile(  _handle,  buffer,  count, &length, 0 ) )
+    {
+        DWORD error = GetLastError();
         throw IOError("Could not write to file handle", PT_SOURCEINFO);
+    }
 
     return length;
 }
@@ -379,33 +385,35 @@ void SerialDeviceImpl::flush()
 
 void SerialDeviceImpl::run()
 {
-    DWORD waitMask = 0;
+    DWORD   eventMask = 0;   
+    DWORD   error;
+    COMSTAT cs;    
     
     while( !_terminateThread )
-    {
-        waitMask = 0;
-        
-        SetCommMask( _handle, _waitCommMask );    
-            
-        bool retVal = ( WaitCommEvent( _handle, &waitMask, NULL )  == TRUE );
+    {   
+        eventMask = 0;
+
+        WaitForSingleObject(_waitForComEvent,  INFINITE);
+
+        if (_terminateThread)
+            return;
+
+        bool retVal = ( WaitCommEvent( _handle, &eventMask, NULL )  == TRUE ); 
+
+        ClearCommError( _handle, &error, &cs );
+
+        //ToDo: Handle com errors
 
         DWORD err = GetLastError();
         
-        if( retVal && ( waitMask & EV_TXEMPTY ) )
+        if( retVal && ( eventMask & (EV_TXEMPTY | EV_RXCHAR)) )
+        {         
+            SetEvent( _comEvent );
+        }        
+        else
         {
-            _commEventType = SendComplete;        
-            SetEvent( _commEvent );
-        }
-        else if(  retVal && ( waitMask & EV_RXCHAR ) )
-        {
-            _commEventType = CharReceived;
-            //SetEvent( _commEvent );
-            SetEvent(_readEvent);
-        }
-        else if( retVal && ( waitMask & EV_RXFLAG ) )
-        {
-            _commEventType = EventCharReceived ;
-            SetEvent( _commEvent );
+            // ToDo: Handling for unexpected events
+            DebugBreak();
         }
     }
 }
@@ -429,51 +437,6 @@ size_t SerialDeviceImpl::timeout() const
     GetCommTimeouts( _handle, &comTimeOut );
     return  comTimeOut.ReadTotalTimeoutConstant;    
 }
-
-/*void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
-{
-    handles.clear();
-    handles.push_back( _commEvent );         
-
-    _waitCommMask = EV_BREAK;
-
-    if( (waitMode & Selector::WaitInput) == Selector::WaitInput )
-        _waitCommMask |= EV_RXCHAR;
-
-    if( (waitMode & Selector::WaitOutput) == Selector::WaitOutput )
-        _waitCommMask |= EV_TXEMPTY;
-}*/
-
-void SerialDeviceImpl::resetEvent( HANDLE handle )
-{
-    if( _commEvent != handle )
-        throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
-
-    ResetEvent ( _commEvent );
-}
-
-/*IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
-{
-    if( _commEvent != handle )
-        throw std::logic_error( "Uknown event handle" + PT_SOURCEINFO );
-        
-    ResetEvent( _commEvent );
-    
-    switch( _commEventType)
-    {
-        case SendComplete:
-            return ReadyWrite;
-        break;
-        
-        case CharReceived:     
-        case EventCharReceived:   
-            return ReadyRead;
-        break;        
-    }        
-            
-    throw IOError("Unknown event", PT_SOURCEINFO);
-    return ReadyRead;  
-}*/
 
 }//namespace System
 }//namespace Pt

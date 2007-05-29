@@ -26,6 +26,7 @@
 #include "IODeviceImpl.h"
 #include <windows.h>
 #include <vector>
+#include "..\win32\ReadResult.h"
 
 namespace Pt {
 
@@ -61,6 +62,18 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual size_t _endRead(IOResult& result, bool& eof);
 
+        IOResult& _beginWrite(const char* buffer, size_t n)
+        {
+            ReadResult result;
+            return result;
+        }
+
+        size_t _endWrite(IOResult& result)
+        {
+           return 0;
+        }
+
+
         //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);
 
@@ -86,7 +99,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 class PipeImpl
 {
     public:
-        PipeImpl();
+        PipeImpl(bool isAsync);
 
         ~PipeImpl();
 

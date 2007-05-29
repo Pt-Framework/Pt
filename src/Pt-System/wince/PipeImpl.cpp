@@ -190,7 +190,7 @@ void PipeIODevice::_sync() const
 
 
 
-PipeImpl::PipeImpl()
+PipeImpl::PipeImpl(bool isAsync)
 : _inputDevice(PipeIODevice::Read)
 , _outputDevice(PipeIODevice::Write)
 {    

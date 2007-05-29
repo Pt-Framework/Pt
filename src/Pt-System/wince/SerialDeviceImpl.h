@@ -33,13 +33,54 @@
 namespace Pt{
 namespace System{
 
+class IOResultSerial : public IOResultImpl
+{
+public:
+    virtual ~IOResultSerial()
+    {}
+
+    void attach(char* buffer, size_t size)
+    {
+        _buffer = buffer;
+        _bufferSize = size;
+    }
+
+    char* buffer() const
+    { return _buffer; }
+
+    size_t bufferSize() const
+    { return _bufferSize; }    
+
+private:
+    char*   _buffer;
+    size_t  _bufferSize;
+};
+
+class ReadResultSerial : public IOResultSerial
+{
+public:
+    virtual void onComplete()
+    {
+        this->device()->inputReady();        
+    }
+};
+
+class WriteResultSerial : public IOResultSerial
+{
+public:
+    virtual void onComplete()
+    {
+        this->device()->outputReady();        
+    }
+};
+
 class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::Runnable
 {
     public:
         SerialDeviceImpl();
         ~SerialDeviceImpl();
 
-        void open( const std::string& file, std::ios_base::openmode mode );         
+        void open( const std::string& file, std::ios_base::openmode mode, bool isAsync);         
 
         //! @brief Closes the I/O device
         void close();
@@ -49,7 +90,7 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         size_t endRead(IOResult& result, bool& eof);
 
         //! @brief Read bytes from device
-        //size_t read( char* buffer, size_t count, bool& eof );
+        size_t read( char* buffer, size_t count, bool& eof );
 
         //! @brief Write bytes to device
         size_t write( const char* buffer, size_t count );
@@ -75,13 +116,7 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         size_t timeout() const;
        
         HANDLE deviceHandle() const
-        { return _handle; }
-        
-       // void eventHandles( std::vector<HANDLE>& handles, size_t waitMode );
-        
-        //WaitResult waitResult( HANDLE handle );
-        
-        void resetEvent( HANDLE handle );
+        { return _handle; }   
         
     private:
         SerialDeviceImpl* self()
@@ -94,14 +129,16 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
        
         enum { CharReceived, EventCharReceived, SendComplete } _commEventType;
         
-        HANDLE _handle;
-        HANDLE _commEvent;
-        DCB    _orgCommState;
-        DWORD  _waitCommMask;
-        Thread _eventThread;  
-        bool   _terminateThread;
-        IOResultImpl     _result;
-        HANDLE           _readEvent;
+public:
+        HANDLE                 _handle;        
+        HANDLE                 _comEvent;
+        HANDLE                 _waitForComEvent;
+        DCB                    _orgCommState;        
+        Thread                 _eventThread;  
+        bool                   _terminateThread;
+        ReadResultSerial       _readResult;
+        WriteResultSerial      _writeResult;
+        
 };
 
 }//namespace System

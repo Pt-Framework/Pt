@@ -23,9 +23,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug ptv-db-all"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug -a ptv-db-all"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) ptv-db-all"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) -a ptv-db-all"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) clean"
 				Output=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				IncludeSearchPath=""
@@ -63,9 +63,9 @@
 			>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug ptv-db-all"
-				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug -a ptv-db-all"
-				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=debug clean"
+				BuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) ptv-db-all"
+				ReBuildCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) -a ptv-db-all"
+				CleanCommandLine="cd $(SolutionDir) &amp;&amp; call &quot;%VS80COMNTOOLS%vsvars32.bat&quot; &amp;&amp; $(SolutionDir)jam/jam.exe -fJambase -sBYTEORDER=LE -sTOOLSET=vc8 -sCONFIG=$(ConfigurationName) clean"
 				Output=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				IncludeSearchPath=""
