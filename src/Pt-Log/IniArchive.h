@@ -156,8 +156,6 @@ class IniArchive : public Archive
             ch = CharTraits::to_int_type( CharTraits::eof() );
 
             (self.*_parse)(ch);
-
-            exit(0);
         }
 
         void parseBeforeName(const Pt::Char& ch)
