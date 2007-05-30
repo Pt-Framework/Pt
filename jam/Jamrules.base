@@ -546,7 +546,15 @@ rule Library
 
     LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) : $(1) ;
+
+    LibraryImpl $(<) : $(>) ;
 }
+
+
+rule LibraryImpl
+{
+}
+
 
 rule LibraryFromObjects
 {

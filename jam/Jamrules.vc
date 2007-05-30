@@ -17,11 +17,38 @@ rule FIncludes
 }
 
 
+rule LibraryImpl
+{
+	local _target = $(PRELIB)$(<)$(SUFLIB) ;
+	
+	Clean clean : $(_target:S=.pdb) ;
+	Clean clean : $(_target:S=.idb) ;
+
+	local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+	PDB on $(_objects) = $(_target:S=.pdb) ;
+	Depends $(_objects) : first ;
+}
+
+
+rule Library_MakeLocate
+{
+	local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+	MakeLocate $(_target) : $(>) ;
+	
+	MakeLocate $(_target:S=.pdb) : $(>) ;
+  	MakeLocate $(_target:S=.idb) : $(>) ;
+  
+	# create dir before C++ rule creates .pdb files
+	Depends first : $(>) ;
+}
+
+
 rule Main
 {
 	local _target = $(1:S=$(SUFEXE)) ;
 	DEPENDS exe : $(_target) ;
 
+# MainImpl
 	Clean clean : $(_target) ;
 	Clean clean : $(_target:S=.lib) ;
 	Clean clean : $(_target:S=.exp) ;	
@@ -29,6 +56,11 @@ rule Main
 	Clean clean : $(_target:S=.ilk) ;
 	Clean clean : $(_target:S=.idb) ;
 	Clean clean : $(_target:S=.exe.manifest) ;
+
+	local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+	PDB on $(_objects) = $(_target:S=.pdb) ;
+	Depends $(_objects) : first ;
+# MainImpl
 
 	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
 	Objects $(2) : $(1) ;
@@ -49,11 +81,12 @@ rule Main_MakeLocate
 	MakeLocate $(_target:S=.lib) : $(>) ;
 	MakeLocate $(_target:S=.exp) : $(>) ;
 	MakeLocate $(_target:S=.pdb) : $(>) ;
+	MakeLocate $(_target:S=.idb) : $(>) ;
 	MakeLocate $(_target:S=.ilk) : $(>) ;
 	MakeLocate $(_target:S=.exe.manifest) : $(>) ;
     
-    # create dir before C++ rule creates .pdb files
-    Depends first : $(>) ;
+	# create dir before C++ rule creates .pdb files
+	Depends first : $(>) ;
 }
 
 
@@ -68,7 +101,7 @@ rule SharedLibraryFromObjects
 	Clean clean : $(_target) ;
 	Clean clean : $(_target:S=.lib) ;
 	Clean clean : $(_target:S=.exp) ;	
-    Clean clean : $(_target:LS=.pdb) ;
+	Clean clean : $(_target:LS=.pdb) ;
 	Clean clean : $(_target:S=.ilk) ;
 	Clean clean : $(_target:S=.idb) ;
 	Clean clean : $(_target).manifest ;
@@ -78,6 +111,7 @@ rule SharedLibraryFromObjects
 	# setup dependencies
 	Depends exe : $(_target) ;
 	Depends lib : $(_target) ;
+	Depends $(_sources) : first ;
 	Depends $(_target) : $(_sources) ;
 	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
 	
