@@ -82,13 +82,15 @@ int main( int argc, char* argv[] )
 {
     try
     {
-        const int size = 300;
+        const size_t size = 5000 * 1024;
         char buffer[size];
 
+        memset(buffer, 1, size);
+
         //std::string port = "/dev/ttyS0";
-        std::string port = "COM5:";
+        std::string port = "COM8:";
         std::cerr << "Opening " << port << std::endl;
-        Pt::System::SerialDevice serialDevice(port, std::ios_base::in, Pt::System::IODevice::Async);
+        Pt::System::SerialDevice serialDevice(port, std::ios_base::out, Pt::System::IODevice::Async);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
         serialDevice.setStopBits(Pt::System::SerialDevice::OneStopBit);
@@ -99,18 +101,20 @@ int main( int argc, char* argv[] )
         Pt::System::Selector selector;
 
         size_t count = 0;
+        std::string msg("Dies ist ein Test\r\n");
 
-        while(count < 500)
+        while(true)
         {
-            Pt::System::IOResult& res = serialDevice.beginRead(buffer, 300);
+            Pt::System::IOResult& res = serialDevice.beginWrite(buffer, size);
             selector.complete(res);
             bool available = selector.wait();
             if(available)
             {
-                size_t n = serialDevice.endRead(res);
+                size_t n = serialDevice.endWrite(res);
+                std::cerr << "Bytes written: " << n << std::endl;
                 count += n;
                 //std::cerr<<count<<std::endl;
-                std::cerr.write(buffer, n);
+                //std::cerr.write(buffer, n);
             }
         }
 

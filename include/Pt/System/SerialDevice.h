@@ -199,6 +199,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         */
         FlowControl flowControl() const;
 
+        // If device is async this call has no effect.
         void setTimeout( size_t msec );
 
         size_t timeout() const;

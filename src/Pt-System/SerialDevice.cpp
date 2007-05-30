@@ -153,7 +153,8 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
 
 void SerialDevice::setTimeout( size_t msec )
 {
-    _impl->setTimeout( msec );
+    if ( !this->async() )
+        _impl->setTimeout( msec );
 }
 
 

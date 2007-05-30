@@ -35,14 +35,31 @@ namespace System{
 
 class IOResultSerial : public IOResultImpl
 {
-public:
+protected:
+    IOResultSerial()
+    : _writtenBytes(0)
+    , _bufferSize(0)
+    , _buffer(0)
+    {}
+public:    
     virtual ~IOResultSerial()
     {}
 
     void attach(char* buffer, size_t size)
     {
+        _writtenBytes = 0;
         _buffer = buffer;
         _bufferSize = size;
+    }
+
+    void setWrittenBytes(size_t bytes)
+    {
+        _writtenBytes = bytes;
+    }
+
+    size_t writtenBytes() const
+    {
+        return _writtenBytes;
     }
 
     char* buffer() const
@@ -54,6 +71,7 @@ public:
 private:
     char*   _buffer;
     size_t  _bufferSize;
+    size_t  _writtenBytes;
 };
 
 class ReadResultSerial : public IOResultSerial
@@ -88,6 +106,10 @@ class SerialDeviceImpl :  public Pt::System::IODeviceImpl , public Pt::System::R
         IOResult& beginRead(char* buffer, size_t n, bool& eof);    
 
         size_t endRead(IOResult& result, bool& eof);
+
+        IOResult& beginWrite(const char* buffer, size_t n);
+
+        size_t endWrite(IOResult& result);
 
         //! @brief Read bytes from device
         size_t read( char* buffer, size_t count, bool& eof );

@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2007 Marc Boris Dürner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (C) 2007 Bjoern Oliver Streule                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -61,17 +62,22 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     try
     {
         if( !GetCommState( _handle, &_orgCommState ) )
-            throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
+            throw OpenFailed("Get port state failed" , PT_SOURCEINFO);       
 
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
         comTimeOut.ReadTotalTimeoutConstant     = 0;
-        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutConstant     = 100;
-        //comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        //comTimeOut.WriteTotalTimeoutConstant    = 100;       
-
+        comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+        if ( isAsync )
+        {            
+            comTimeOut.WriteTotalTimeoutConstant    = 1;               
+        }
+        else
+        {   
+            comTimeOut.WriteTotalTimeoutConstant    = 0;
+        }
+        
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);        
     }        
@@ -101,23 +107,22 @@ void SerialDeviceImpl::close()
     //Reset the wait mask, to wake up the comm event thread.
     SetCommMask( _handle, 0 );
 
+    // Wake up the thread.
     SetEvent(_waitForComEvent);
+    
+    // Closing the com handle will end WaitComEvent.
+    CloseHandle( _handle );
 
     //Wait of comm event thread termination.
-    _eventThread.wait();
+    _eventThread.wait();    
 
-    //Restore the port state.
-    SetCommState( _handle, &_orgCommState );            
-    
-    //Close the port handle.
-    CloseHandle( _handle );
-    
     CloseHandle( _comEvent );
 
     CloseHandle( _waitForComEvent );
 
-    _handle = 0;
-    _comEvent = 0;
+    _handle             = 0;
+    _comEvent           = 0;
+    _waitForComEvent    = 0;
 }
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
@@ -161,11 +166,50 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     return length;
 }
 
+IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+	DWORD writtenBytes = 0;
+
+    _writeResult.attach((char*) buffer, n);
+
+    _writeResult.setHandle(_comEvent);
+
+    size_t bytes = this->write(buffer, n); 
+
+    _writeResult.setWrittenBytes(bytes);
+
+    if (bytes == 0)
+    {
+        SetCommMask( _handle, EV_TXEMPTY );
+
+        SetEvent(_waitForComEvent);
+    }
+    else
+    {
+        SetEvent(_comEvent);
+    }
+
+	return _writeResult;
+}
+
+size_t SerialDeviceImpl::endWrite(IOResult& result)
+{
+	assert(&result == &_writeResult);
+
+    ResetEvent(_comEvent); 
+
+    size_t bytes = 0;
+    if ( _writeResult.writtenBytes() == 0 )
+    {
+        bytes = this->write(_writeResult.buffer(), _writeResult.bufferSize());
+    }   
+	
+	return _writeResult.writtenBytes() + bytes;
+}	
+
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
-
-    
 
     if( !WriteFile(  _handle,  buffer,  count, &length, 0 ) )
     {
@@ -419,13 +463,14 @@ void SerialDeviceImpl::run()
 }
 
 void SerialDeviceImpl::setTimeout( size_t msec )
-{
+{    
     COMMTIMEOUTS comTimeOut;
     comTimeOut.ReadIntervalTimeout          = MAXDWORD;
     comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
     comTimeOut.ReadTotalTimeoutConstant     = msec;
-    comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-    comTimeOut.WriteTotalTimeoutConstant    = 100;
+
+    comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+    comTimeOut.WriteTotalTimeoutConstant    = msec;
 
     if( !SetCommTimeouts( _handle, &comTimeOut ) )
         throw IOError("Set port time outs failed" , PT_SOURCEINFO);
