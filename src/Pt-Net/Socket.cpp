@@ -20,11 +20,11 @@
 #include "Pt/Net/Socket.h"
 #include "SocketImpl.h"
 
-#ifdef __GNUC__
-#include <netinet/in.h>
-    #ifdef __QNX__
-        #include <arpa/inet.h>
-    #endif
+#if defined(WIN32) || defined(_WIN32)
+    #include <winsock2.h>
+#else
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
 #endif
 
 

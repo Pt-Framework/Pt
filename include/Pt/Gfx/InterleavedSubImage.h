@@ -305,8 +305,10 @@ namespace Pt {
 //
 // With GCC we should be able to use explicit template instantiation correctly
 // and thus we does not need to include the template implementation header
-#ifndef __GNUC__
+//
+// Unfortunately not under gcc 3.3.4
+//#ifndef __GNUC__
 #include "InterleavedSubImage.tpp"
-#endif
+//#endif
 
 #endif

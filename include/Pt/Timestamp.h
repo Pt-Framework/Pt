@@ -122,7 +122,11 @@ class PT_API Timestamp
             Since the timestamp has microsecond resolution,
             the returned value is always 1000000.
         */
-        static TimeVal resolution();
+        static TimeVal resolution()
+        {
+	    return 1000000;
+        }
+
 
     #if defined(_WIN32)
         static Timestamp fromFileTimeNP(Pt::uint32_t fileTimeLow, Pt::uint32_t fileTimeHigh);
@@ -226,12 +230,6 @@ inline bool Timestamp::isElapsed(Timestamp::TimeDiff interval) const
 	Timestamp now;
 	Timestamp::TimeDiff diff = now - *this;
 	return diff >= interval;
-}
-
-
-inline Timestamp::TimeVal Timestamp::resolution()
-{
-	return 1000000;
 }
 
 

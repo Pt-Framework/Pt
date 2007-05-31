@@ -338,9 +338,9 @@ namespace Pt {
 } // namespace Pt
 
 
-#ifndef __GNUC__
+//#ifndef __GNUC__
 #include "InterleavedImage.tpp"
-#endif
+//#endif
 
 #endif
 

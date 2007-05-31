@@ -28,12 +28,11 @@
 #include "Pt/Types.h"
 #include "Pt/Net/Timeout.h"
 
-#ifdef __GNUC__
-#include <sys/ioctl.h>
-#endif
-
-#ifdef __QNX__
-#include <arpa/inet.h>
+#if defined(WIN32) || defined(_WIN32)
+    #include <winsock2.h>
+#else
+    #include <sys/ioctl.h>
+    #include <arpa/inet.h>
 #endif
 
 namespace Pt

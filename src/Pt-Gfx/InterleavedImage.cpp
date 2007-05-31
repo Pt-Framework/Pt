@@ -24,9 +24,9 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
-#include <Pt/Gfx/InterleavedImage.tpp>
+//#include <Pt/Gfx/InterleavedImage.tpp>
 #include <Pt/Gfx/InterleavedSubImage.h>
-#include <Pt/Gfx/InterleavedSubImage.tpp>
+//#include <Pt/Gfx/InterleavedSubImage.tpp>
 
 namespace Pt {
 
@@ -34,6 +34,8 @@ namespace Pt {
 
 // With GCC we should be able to use explicit template instantiation correctly
 // and thus we instantiate all the interleaved image and subimage classes here
+//
+// Unfortunately not under gcc 3.3.4
 #ifdef __GNUC__
 
         // Explicit instantiation of the standard interleaved image classes

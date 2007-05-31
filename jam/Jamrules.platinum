@@ -29,7 +29,8 @@ if $(SYS:L) = "win32"
 	if $(MINGW)
 	{
 		SYSLIBS = $(MINGW)\\lib\\libversion.a
-		          $(MINGW)\\lib\\libwinmm.a ;
+		          $(MINGW)\\lib\\libwinmm.a
+                          $(MINGW)\\lib\\libpsapi.a ;
 		NETLIBS = $(MINGW)\\lib\\libwsock32.a 
 		          $(MINGW)\\lib\\libws2_32.a ;
 	}

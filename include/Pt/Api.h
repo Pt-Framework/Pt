@@ -71,7 +71,9 @@
     #define PT_ALIGN(value) __declspec( align( value ) )
 
     // suppress min/max macros from win32 headers
-	#define NOMINMAX
+    #ifndef NOMINMAX
+    	#define NOMINMAX
+    #endif
 
     // Modify the following defines if you have to target a platform prior to the ones specified below.
     // Refer to MSDN for the latest info on corresponding values for different platforms.
