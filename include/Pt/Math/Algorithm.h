@@ -1,6 +1,7 @@
 #ifndef PT_MATH_ALGORITH_H
 #define PT_MATH_ALGORITH_H
 
+#include <iostream>
 
 namespace Pt {
 namespace Math {
@@ -53,21 +54,6 @@ int quadrant( T x, T y, U xmin, U xmax, U ymin, U ymax )
     return code;
 }
 
-
-template <typename T, typename U>
-bool horizontalIntersect( T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin)
-{
-    U m = (x2-x1) / (y2-y1); // slope
-    U b = y1 - (m * x1);  // intersection point from line2 at Y-axis
-    T xi = (ymin - b) / m;
-
-    if( xi > xmax || xi < xmin)
-    {
-        return false;
-    }
-    return true;
-}
-
 }//namespace
 
 
@@ -83,7 +69,7 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
 {
     int q1 = quadrant( x1, y1, xmin, xmax, ymin, ymax);
     int q2 = quadrant( x2, y2, xmin, xmax, ymin, ymax);
-
+    
     // if both of the end points are in the same side, outside of the rect
     if(q1 & q2)
     {
@@ -99,19 +85,13 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     {
         return true;
     }
-
-    bool retValue = false;
-    retValue = horizontalIntersect(x1, y1, x2, y2, xmin, xmax, ymin);
-    if(retValue)
-    {
-        return true;
-    }
-    retValue = horizontalIntersect(x1, y1, x2, y2, xmin, xmax, ymax);
-    if(retValue)
-    {
-        return true;
-    }
-    return false;
+    
+    T m = (x2-x1) / (y2-y1); // slope
+    T b = y1 - (m * x1);  // intersection point from line2 at Y-axis
+    T xi1 = (ymin - b) / m;
+    T xi2 = (ymax - b) / m;
+    
+    return( (xi1 <= xmax || xi1 >= xmin) || (xi2 <= xmax || xi2 >= xmin));
 }
 
 
