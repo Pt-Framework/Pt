@@ -72,8 +72,9 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     
     // if both of the end points are above, below, 
     // left or right of the rectangle
+    
     if(q1 & q2)
-    {
+    {   
         return false;
     }
 
@@ -90,11 +91,10 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     // line intersects rect if it intersects with the top
     // or bottom line. Previous checks exclude horizontal
     // and vertical crossing
-    T m = (x2-x1) / (y2-y1); // slope
-    T b = y1 - (m * x1);  // intersection point from line2 at Y-axis
-    T xi1 = (ymin - b) / m;
-    T xi2 = (ymax - b) / m;
-    
+    double m = double(x2-x1) / double(y2-y1); // slope
+    double b = y1 - (m * x1);  // intersection point from line2 at Y-axis
+    double xi1 = (ymin - b) / m;
+    double xi2 = (ymax - b) / m;
     return( (xi1 <= xmax || xi1 >= xmin) || (xi2 <= xmax || xi2 >= xmin));
 }
 
