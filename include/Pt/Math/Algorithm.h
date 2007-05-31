@@ -70,7 +70,8 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     int q1 = quadrant( x1, y1, xmin, xmax, ymin, ymax);
     int q2 = quadrant( x2, y2, xmin, xmax, ymin, ymax);
     
-    // if both of the end points are in the same side, outside of the rect
+    // if both of the end points are above, below, 
+    // left or right of the rectangle
     if(q1 & q2)
     {
         return false;
@@ -79,13 +80,16 @@ bool intersect(T x1, T y1, T x2, T y2, U xmin, U xmax, U ymin, U ymax)
     const int LR = Left | Right;
     const int TB = Top | Bottom;
 
-    // if neither of the points is left or right of the rect it intersects
+    // check strict horizontal and vertical crossing
     if((!(q1 & LR) && !(q2 & LR)) ||
        (!(q1 & TB) && !(q2 & TB)))
     {
         return true;
     }
     
+    // line intersects rect if it intersects with the top
+    // or bottom line. Previous checks exclude horizontal
+    // and vertical crossing
     T m = (x2-x1) / (y2-y1); // slope
     T b = y1 - (m * x1);  // intersection point from line2 at Y-axis
     T xi1 = (ymin - b) / m;
