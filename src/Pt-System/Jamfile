@@ -76,7 +76,7 @@ Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SerialDeviceDemo : bin ;
 
 PtUnitTest SerialDeviceTest : SerialDeviceTest.cpp ;
-Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System ;
+Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System Pt-Unit ;
 Main_MakeLocate SerialDeviceTest : bin ;
 
 #PtUnitTest SelectorTest : SelectorTest.cpp ;

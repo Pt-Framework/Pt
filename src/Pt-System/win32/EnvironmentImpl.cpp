@@ -18,9 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "EnvironmentImpl.h"
+#include <Windows.h>
+#ifndef _WIN32_WCE
+    #include <Psapi.h>
+#endif
 #include "win32.h"
+#include "EnvironmentImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/Process.h"
 
 namespace Pt {
 
@@ -70,6 +75,67 @@ const std::string EnvironmentImpl::currentDirectory()
         
     #endif
 }
+
+const std::string EnvironmentImpl::tempDirectory()
+{
+    std::string tmpDir = Process::getEnvVar("TEMP");
+    if (tmpDir.length() == 0)
+    {
+        tmpDir = Process::getEnvVar("TMP");
+    }
+    
+    return tmpDir;
+}
+
+unsigned long EnvironmentImpl::getTotalMemory()
+{
+
+    MEMORYSTATUS memoryStatus;
+    memoryStatus.dwLength = sizeof(MEMORYSTATUS);
+    GlobalMemoryStatus(&memoryStatus);
+
+    return (unsigned long)(memoryStatus.dwTotalPhys / 1024);
+}
+
+unsigned long EnvironmentImpl::getFreeMemory()
+{
+    MEMORYSTATUS memoryStatus;
+    memoryStatus.dwLength = sizeof(MEMORYSTATUS);
+    GlobalMemoryStatus(&memoryStatus);
+
+    return (unsigned long)(memoryStatus.dwAvailPhys / 1024);
+}
+
+unsigned long EnvironmentImpl::getProcessMemoryUsage()
+{
+#ifndef _WIN32_WCE
+
+
+
+
+    //SYSTEM_INFO sysInfo;
+    //GetSystemInfo(&sysInfo);
+    //printf("dwPageSize: %d\n", sysInfo.dwPageSize);
+
+
+
+
+    PROCESS_MEMORY_COUNTERS pmc;
+
+    if(GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
+    {
+        return (unsigned long)(pmc.PagefileUsage / 1024);
+    }
+
+    else
+    {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+}
+
 
 } // namespace Pt
 } // namespace System

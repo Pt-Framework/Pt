@@ -19,8 +19,8 @@
 #ifndef PT_UNIT_ASSERTION_H
 #define PT_UNIT_ASSERTION_H
 
-#include <Pt/Exception.h>
 #include <Pt/Unit/Api.h>
+#include <Pt/Exception.h>
 
 #include <iostream>
 
@@ -48,7 +48,7 @@ namespace Unit {
             }
         @endcode
     */
-    class Assertion : public std::exception
+    class PT_UNIT_API Assertion : public std::exception
     {
         public:
             /** @brief Construct from a message and source info.
@@ -74,18 +74,14 @@ namespace Unit {
             //: Exception(a)
             //{}
 
-            const Pt::SourceInfo& sourceInfo() const
-            { return _sourceInfo; }
+            const Pt::SourceInfo& sourceInfo() const;
 
             /** @brief Destructor.
             */
             ~Assertion() throw()
             {}
 
-            const char* what() const throw()
-            {
-                return _what.c_str();
-            }
+            const char* what() const throw();
 
         private:
             std::string _what;

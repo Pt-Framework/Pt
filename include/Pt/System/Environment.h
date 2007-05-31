@@ -71,6 +71,32 @@ namespace System {
              */
             static Directory currentDirectory();
 
+            /**
+             *  @brief Returns the systems tmp directory.
+             *               
+             *  On Windows, the environment variables TEMP and TMP are checked.
+             *  On Linux, the environment variable TMPDIR is checked and if not set, 
+             *  "/tmp" is returned.
+             *  If none of the environment variables are set and the default system 
+             *  tmp directory does not exist, the current directory is returned.                                       
+             */
+            static Directory tempDirectory();
+            
+            /*
+             * @return the total physical memory in kiloByte (kB)
+             */
+            static unsigned long getTotalMemory();
+            /*
+             * @return the available physical memory in kiloByte (kB)
+             */
+            static unsigned long getFreeMemory();
+
+            /*
+             * @return the amount of memory used by the calling process in kiloByte (kB)
+             */
+            static unsigned long getProcessMemoryUsage();
+            
+
     };
 
 } // !namespace system

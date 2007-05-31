@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,7 +34,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Test event reporter
-        @ingroup UnitTests
 
         This class is the base class for all reporters for test events. It
         lets the implementor override several virtual methods that are called
@@ -42,7 +41,7 @@ namespace Unit {
         information to the console or write XML logs. The default
         implementation will report events to a stream in a simple Text format.
     */
-    class Reporter
+    class PT_UNIT_API Reporter
     {
     public:
         /** @brief Constructs a reporter to use an ostream
@@ -54,7 +53,7 @@ namespace Unit {
             @param reporter Reporeter to be used
         */
         Reporter(std::ostream* out = &std::cerr)
-        : _out(out)
+        : m_out(out)
         {}
 
         /** @brief Destructor
@@ -128,11 +127,11 @@ namespace Unit {
     protected:
         /** @brief Ostream to print output to
         */
-        std::ostream* _out;
+        std::ostream* m_out;
     };
 
 
-    class BriefTextReporter : public Reporter
+    class PT_UNIT_API BriefTextReporter : public Reporter
     {
     public:
         BriefTextReporter(std::ostream* out = &std::cerr)
@@ -142,42 +141,23 @@ namespace Unit {
         virtual ~BriefTextReporter()
         {}
 
-        virtual void started(const TestContext& test)
-        {
-            *_out << test.testName() << ": ";
-        }
+        virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test)
-        {}
+        virtual void finished(const TestContext& test);
 
-        virtual void message(const std::string& msg)
-        {
-            *_out << "INFO: " << msg << std::endl;
-        }
+        virtual void message(const std::string& msg);
 
-        virtual void success(const TestContext& test)
-        {
-            *_out << "OK" << std::endl;
-        }
+        virtual void success(const TestContext& test);
 
-        virtual void assertion(const TestContext& test, const Assertion& a)
-        {
-            *_out << "ASSERTION: " << a.what() << std::endl;
-        }
+        virtual void assertion(const TestContext& test, const Assertion& a);
 
-        virtual void exception(const TestContext& test, const std::exception& ex)
-        {
-            *_out << "EXCEPTION: " << ex.what() << std::endl;
-        }
+        virtual void exception(const TestContext& test, const std::exception& ex);
 
-        virtual void error(const TestContext& test)
-        {
-            *_out << "ERROR" << std::endl;
-        }
+        virtual void error(const TestContext& test);
     };
 
 
-    class TextReporter : public BriefTextReporter
+    class PT_UNIT_API TextReporter : public BriefTextReporter
     {
     public:
         TextReporter(std::ostream* out = &std::cerr)
@@ -187,238 +167,107 @@ namespace Unit {
         virtual ~TextReporter()
         {}
 
-        virtual void started(const TestContext& test)
-        {
-            BriefTextReporter::started(test);
-            *_out << std::endl;
-        }
+        virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test)
-        {
-            *_out << std::endl;
-        }
+        virtual void finished(const TestContext& test);
 
-        virtual void message(const std::string& msg)
-        {
-            *_out << msg << std::endl;
-        }
+        virtual void message(const std::string& msg);
 
-        virtual void success(const TestContext& test)
-        {
-            BriefTextReporter::success(test);
-        }
+        virtual void success(const TestContext& test);
 
-        virtual void assertion(const TestContext& test, const Assertion& a)
-        {
-            BriefTextReporter::assertion(test, a);
-            *_out << '\t' << "Condition: " << a.what() << std::endl;
-            *_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
-        }
+        virtual void assertion(const TestContext& test, const Assertion& a);
 
-        virtual void exception(const TestContext& test, const std::exception& ex)
-        {
-            BriefTextReporter::exception(test, ex);
-            *_out << '\t' << ex.what() << std::endl;
-        }
+        virtual void exception(const TestContext& test, const std::exception& ex);
 
-        virtual void error(const TestContext& test)
-        {
-            BriefTextReporter::error(test);
-        }
+        virtual void error(const TestContext& test);
     };
 
 
-    class XMLReporter : public Reporter
+    class PT_UNIT_API XMLReporter : public Reporter
     {
     public:
         XMLReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
         : Reporter(out)
-        , _indentWidth(indentWidth)
-        , _indent(0)
+        , m_indentWidth(indentWidth)
+        , m_indent(0)
         {
-            *_out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
-            *_out << std::endl;
-            *_out << "<ComponentTester>" << std::endl;
-            *_out << std::endl;
+            *m_out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+            *m_out << std::endl;
+            *m_out << "<ComponentTester>" << std::endl;
+            *m_out << std::endl;
         }
 
         virtual ~XMLReporter()
         {
-            *_out << std::endl;
-            *_out << "</ComponentTester>" << std::endl;
+            *m_out << std::endl;
+            *m_out << "</ComponentTester>" << std::endl;
         }
 
-        virtual void started(const TestContext& test)
-        {
-            beginTag(std::string("test name=\"") + test.testName() + std::string("\""));
-        }
+        virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test)
-        {
-           endTag("test");
-           *_out << std::endl;
-        }
+        virtual void finished(const TestContext& test);
 
-        virtual void message(const std::string& msg)
-        {
-            *_out << "<!--" << std::endl;
-            *_out << msg << std::endl;
-            *_out << "-->" << std::endl;
-        }
+        virtual void message(const std::string& msg);
 
-        virtual void success(const TestContext& test)
-        {
-            beginTag("success");
-            writeData("OK");
-            endTag("success");
-        }
+        virtual void success(const TestContext& test);
 
-        virtual void assertion(const TestContext& test, const Assertion& a)
-        {
-            beginTag("assertion");
+        virtual void assertion(const TestContext& test, const Assertion& a);
 
-            beginTag("condition");
-            writeData(a.what());
-            endTag("condition");
+        virtual void exception(const TestContext& test, const std::exception& ex);
 
-            beginTag("file");
-            std::stringstream s;
-            s << a.sourceInfo().line();
-            writeData(std::string(a.sourceInfo().file()) + std::string(":") + s.str());
-            endTag("file");
-
-            endTag("assertion");
-        }
-
-        virtual void exception(const TestContext& test, const std::exception& ex)
-        {
-            beginTag("exception");
-            writeData(ex.what());
-            endTag("exception");
-        }
-
-        virtual void error(const TestContext& test)
-        {
-            beginTag("error");
-            writeData("ERROR");
-            endTag("error");
-        }
+        virtual void error(const TestContext& test);
 
     private:
-        int _indentWidth;
-        int _indent;
+        int m_indentWidth;
+        int m_indent;
 
-        void beginTag(std::string tag)
-        {
-            *_out << std::string(_indentWidth * _indent, ' ');
-            *_out << "<" << tag << ">" << std::endl;
-            _indent++;
-        }
+        void beginTag(std::string tag);
 
-        void endTag(std::string tag)
-        {
-            _indent--;
+        void endTag(std::string tag);
 
-            if(_indent < 0)
-            {
-                _indent = 0;
-            }
-
-            *_out << std::string(_indentWidth * _indent, ' ');
-            *_out << "</" << tag << ">" << std::endl;
-        }
-
-        void writeData(std::string data)
-        {
-            *_out << std::string(_indentWidth * _indent, ' ');
-            *_out << data << std::endl;
-        }
+        void writeData(std::string data);
     };
 
 
-    class CSVReporter : public Reporter
+    class PT_UNIT_API CSVReporter : public Reporter
     {
     public:
         CSVReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
         : Reporter(out)
-        , _performanceSaved(false)
+        , m_timestampSaved(false)
+        , m_performanceSaved(false)
         {
-            *_out << "\"ComponentTester\"" << std::endl;
-            *_out << std::endl;
-            *_out << std::endl;
-            *_out << "\"Timestamp\";\"Test\";\"Duration\";\"Result\"" << std::endl;
-            *_out << std::endl;
+            *m_out << "\"ComponentTester\"" << std::endl;
+            *m_out << std::endl;
+            *m_out << std::endl;
+            *m_out << "\"Timestamp\";\"Test\";\"Performance\";\"Result\"" << std::endl;
+            *m_out << std::endl;
         }
 
         virtual ~CSVReporter()
         {}
 
-        virtual void started(const TestContext& test)
-        {
-            _performanceSaved = false;
-            *_out << "\"" << "Time and Date" << "\"";
-            *_out << ";\"" << test.testName() << "\"";
-        }
+        virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test)
-        {
-           *_out << std::endl;
-        }
+        virtual void finished(const TestContext& test);
 
-        virtual void message(const std::string& msg)
-        {
-            if(msg.substr(0, 10).compare("Duration: ") == 0)
-            {
-                *_out << ";\"" << msg.substr(10) << "\"";
-                _performanceSaved = true;
-            }
-        }
+        virtual void message(const std::string& msg);
 
-        virtual void success(const TestContext& test)
-        {
-            if(!_performanceSaved)
-            {
-                *_out << ";\"\"";
-            }
+        virtual void success(const TestContext& test);
 
-            *_out << ";\"OK\"";
-        }
+        virtual void assertion(const TestContext& test, const Assertion& a);
 
-        virtual void assertion(const TestContext& test, const Assertion& a)
-        {
-            if(!_performanceSaved)
-            {
-                *_out << ";\"\"";
-            }
+        virtual void exception(const TestContext& test, const std::exception& ex);
 
-            *_out << ";\"ASSERTION\"";
-            *_out << ";\"Condition: " << a.what() << "\"";
-            *_out << ";\"" << a.sourceInfo().file() << ":" << a.sourceInfo().line() << "\"";
-        }
-
-        virtual void exception(const TestContext& test, const std::exception& ex)
-        {
-            if(!_performanceSaved)
-            {
-                *_out << ";\"\"";
-            }
-
-            *_out << ";\"EXCEPTION\"";
-            *_out << ";\"" << ex.what() << "\"";
-        }
-
-        virtual void error(const TestContext& test)
-        {
-            if(!_performanceSaved)
-            {
-                *_out << ";\"\"";
-            }
-
-            *_out << ";\"ERROR\"";
-        }
+        virtual void error(const TestContext& test);
 
     private:
-        bool _performanceSaved;
+        std::string m_testName;
+        std::string m_allMessages;
+        bool m_timestampSaved;
+        bool m_performanceSaved;
+
+        bool extractData(std::string key, const std::string& msg, bool isFirstColumn = false);
     };
 
 } // namespace Unit

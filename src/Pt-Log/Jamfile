@@ -23,5 +23,5 @@ Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-Text Pt-System ;
 Main_MakeLocate LoggerDemo : bin ;
 
 Main LoggerTest : LoggerTest.cpp ;
-Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System DllLoggerTest ;
+Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit DllLoggerTest ;
 Main_MakeLocate LoggerTest : bin ;

@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2006 by PTV AG                                          *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,46 +17,47 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_EnvironmentImpl_H
-#define PT_EnvironmentImpl_H
+#include <Pt/Unit/TestSuite.h>
 
-#include <string>
 
-namespace Pt {
+using namespace Pt;
+using namespace Unit;
 
-namespace System {
 
-class EnvironmentImpl
+TestProtocol TestSuite::defaultProtocol;
+
+
+inline void TestProtocol::run(TestSuite& suite)
 {
-public:
-    EnvironmentImpl();
-    
-    ~EnvironmentImpl();
+    const MethodMap& methods = suite.methods();
 
-    static const std::string& sharedLibraryExtension();
-
-    static const std::string& sharedLibraryPrefix();
-
-    static const std::string& systemDirectory();
-    
-    static const std::string currentDirectory();
-
-    static const std::string tempDirectory();
-
-    static char pathSeparator()
+    for(MethodMap::const_iterator it = methods.begin(); it != methods.end(); ++it)
     {
-        return '/';
+        suite.runTest( it->first, Args() );
     }
-    
-    static unsigned long getTotalMemory();
-    
-    static unsigned long getFreeMemory();
-    
-    static unsigned long getProcessMemoryUsage();
+}
 
-};
 
-} // namespace ptv
-} // namespace system
+void TestSuite::setProtocol(TestProtocol* protocol)
+{
+    _protocol = protocol;
+}
 
-#endif //PT_EnvironmentImpl_H
+void TestSuite::setUp()
+{
+}
+
+void TestSuite::tearDown()
+{
+}
+
+void TestSuite::run()
+{
+    _protocol->run(*this);
+}
+
+void TestSuite::runTest(const std::string& name, const Args& args)
+{
+    ConText ctx(*this, name, args);
+    ctx.run();
+}

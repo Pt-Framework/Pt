@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -35,14 +35,13 @@ namespace Unit {
     class TestContext;
 
     /** @brief Test base class
-        @ingroup UnitTests
 
         This is the base class for all types of tests that can be registered
         and run in a test application. It provides a virtual method run that
         is overriden by the derived classes and signals to inform about
         events that occur while the test is run.
     */
-    class Test : protected NonCopyable
+    class PT_UNIT_API Test : protected NonCopyable
     {
         public:
             /** @brief Destructor
@@ -65,8 +64,7 @@ namespace Unit {
             */
             virtual void run() = 0;
 
-            const std::string& name() const
-            { return _name; }
+            const std::string& name() const;
 
             /** @brief Start notification
 

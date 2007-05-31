@@ -16,56 +16,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_TESTPROTOCOL_H
-#define PT_UNIT_TESTPROTOCOL_H
 
-#include <Pt/Unit/Api.h>
-#include <Pt/Unit/Test.h>
-#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestSchedule.h>
 
 
-namespace Pt {
+using namespace Pt;
+using namespace Unit;
 
-namespace Unit {
 
-    class TestSuite;
+void TestSchedule::includeTest(const std::string& testName)
+{
+    _items.insert( std::make_pair(testName, &_nullArgs) );
+}
 
-    /** @brief Protocol for test suites
+void TestSchedule::includeTest(const std::string& testName, const Args& args)
+{
+    _items.insert( std::make_pair(testName, &args) );
+}
 
-        This is the base class for protocols that can be used to run a test
-        suite. The default implementation will simply run each registered
-        test of the test suite without passing it any data. Implementors
-        need to override the method TestProtocol::run.
-    */
-    class PT_UNIT_API TestProtocol
+void TestSchedule::run(TestSuite& suite)
+{
+    for(TestMap::iterator it = _items.begin(); it != _items.end(); ++it)
     {
-        public:
-            /** @brief Destructor
-            */
-            virtual ~TestProtocol()
-            {}
-
-            /** @brief Executes the protocol
-
-                This method can be overriden to specify a custom protocol
-                for a test suite. The default implementation will simply
-                call each registered method of the test suite. Implementors
-                will most likely call TestSuite::runTest to resolve a test
-                method by name and pass it required arguments.
-
-                @param test The test suite to apply the protocol
-            */
-            virtual void run(TestSuite& test);
-
-        protected:
-            void runTest(TestSuite& suite, const std::string& name, const Args& args);
-    };
-
-
-
-} // namespace Unit
-
-} // namespace Pt
-
-#endif // for header
-
+        suite.runTest(it->first, *it->second);
+    }
+}

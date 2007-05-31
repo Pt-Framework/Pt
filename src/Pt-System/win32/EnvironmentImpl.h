@@ -44,11 +44,19 @@ public:
     
     static const std::string currentDirectory();
 
+    static const std::string tempDirectory();
+
     static char pathSeparator()
     {
         return '\\';
     }
-    
+
+    static unsigned long getTotalMemory();
+
+    static unsigned long getFreeMemory();
+
+    static unsigned long getProcessMemoryUsage();
+
 };
 
 } // namespace Pt

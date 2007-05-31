@@ -28,15 +28,15 @@ SharedLibrary_MakeLocate Pt : bin ;
 SharedLibrary_Install Pt ;
 
 PtUnitTest ReflectableTest : ReflectableTest.cpp ;
-Main_LinkSharedLibraries ReflectableTest : Pt ;
+Main_LinkSharedLibraries ReflectableTest : Pt Pt-Unit ;
 Main_MakeLocate ReflectableTest : bin ;
 
 PtUnitTest AnyTest : AnyTest.cpp ;
-Main_LinkSharedLibraries AnyTest : Pt ;
+Main_LinkSharedLibraries AnyTest : Pt Pt-Unit ;
 Main_MakeLocate AnyTest : bin ;
 
 PtUnitTest VariantTest : VariantTest.cpp ;
-Main_LinkSharedLibraries VariantTest : Pt ;
+Main_LinkSharedLibraries VariantTest : Pt Pt-Unit ;
 Main_MakeLocate VariantTest : bin ;
 
 #PtUnitTest PoolTest : PoolTest.cpp ;
@@ -44,61 +44,61 @@ Main_MakeLocate VariantTest : bin ;
 #Main_MakeLocate PoolTest : bin ;
 
 PtUnitTest DateTest : DateTest.cpp ;
-Main_LinkSharedLibraries DateTest : Pt ;
+Main_LinkSharedLibraries DateTest : Pt Pt-Unit ;
 Main_MakeLocate DateTest : bin ;
 
 PtUnitTest DateTimeTest : DateTimeTest.cpp ;
-Main_LinkSharedLibraries DateTimeTest : Pt ;
+Main_LinkSharedLibraries DateTimeTest : Pt Pt-Unit ;
 Main_MakeLocate DateTimeTest : bin ;
 
 PtUnitTest TimeTest : TimeTest.cpp ;
-Main_LinkSharedLibraries TimeTest : Pt ;
+Main_LinkSharedLibraries TimeTest : Pt Pt-Unit ;
 Main_MakeLocate TimeTest : bin ;
 
 PtUnitTest SmartPtrTest : SmartPtrTest.cpp ;
-Main_LinkSharedLibraries SmartPtrTest : Pt ;
+Main_LinkSharedLibraries SmartPtrTest : Pt Pt-Unit ;
 Main_MakeLocate SmartPtrTest : bin ;
 
 PtUnitTest AtomicTest : AtomicTest.cpp ;
-Main_LinkSharedLibraries AtomicTest : Pt ;
+Main_LinkSharedLibraries AtomicTest : Pt Pt-Unit ;
 Main_MakeLocate AtomicTest : bin ;
 
 PtUnitTest TypeTraitsTest : TypeTraitsTest.cpp ;
-Main_LinkSharedLibraries TypeTraitsTest : Pt ;
+Main_LinkSharedLibraries TypeTraitsTest : Pt Pt-Unit ;
 Main_MakeLocate TypeTraitsTest : bin ;
 
 PtUnitTest SignalTest : SignalTest.cpp ;
-Main_LinkSharedLibraries SignalTest : Pt ;
+Main_LinkSharedLibraries SignalTest : Pt Pt-Unit ;
 Main_MakeLocate SignalTest : bin ;
 
 PtUnitTest DelegateTest : DelegateTest.cpp ;
-Main_LinkSharedLibraries DelegateTest : Pt ;
+Main_LinkSharedLibraries DelegateTest : Pt Pt-Unit ;
 Main_MakeLocate DelegateTest : bin ;
 
 PtUnitTest TypesTest : TypesTest.cpp ;
-Main_LinkSharedLibraries TypesTest : Pt ;
+Main_LinkSharedLibraries TypesTest : Pt Pt-Unit ;
 Main_MakeLocate TypesTest : bin ;
 
 PtUnitTest SingletonTest : SingletonTest.cpp ;
-Main_LinkSharedLibraries SingletonTest : Pt ;
+Main_LinkSharedLibraries SingletonTest : Pt Pt-Unit ;
 Main_MakeLocate SingletonTest : bin ;
 
 PtUnitTest ByteorderTest : ByteorderTest.cpp ;
-Main_LinkSharedLibraries ByteorderTest : Pt ;
+Main_LinkSharedLibraries ByteorderTest : Pt Pt-Unit ;
 Main_MakeLocate ByteorderTest : bin ;
 
 PtUnitTest ExceptionTest : ExceptionTest.cpp ;
-Main_LinkSharedLibraries ExceptionTest : Pt ;
+Main_LinkSharedLibraries ExceptionTest : Pt Pt-Unit ;
 Main_MakeLocate ExceptionTest : bin ;
 
 PtUnitTest CharTest : CharTest.cpp ;
-Main_LinkSharedLibraries CharTest : Pt ;
+Main_LinkSharedLibraries CharTest : Pt Pt-Unit ;
 Main_MakeLocate CharTest : bin ;
 
 PtUnitTest StringTest : StringTest.cpp ;
-Main_LinkSharedLibraries StringTest : Pt ;
+Main_LinkSharedLibraries StringTest : Pt Pt-Unit ;
 Main_MakeLocate StringTest : bin ;
 
 PtUnitTest StringStreamTest : StringStreamTest.cpp ;
-Main_LinkSharedLibraries StringStreamTest : Pt ;
+Main_LinkSharedLibraries StringStreamTest : Pt Pt-Unit ;
 Main_MakeLocate StringStreamTest : bin ;

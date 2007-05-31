@@ -30,7 +30,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Protocol and data driven testing
-        @ingroup UnitTests
 
         The TestSuite is used to implement protocol and data driven tests.
         It inherits its ability to register methods and properties from
@@ -60,7 +59,7 @@ namespace Unit {
         one and reflection can be used to call any method multiple times with
         the required data.
     */
-    class TestSuite : public Reflectable, public Test
+    class PT_UNIT_API TestSuite : public Reflectable, public Test
     {
         public:
             class ConText : public TestContext
@@ -124,18 +123,14 @@ namespace Unit {
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
             */
-            void setProtocol(TestProtocol* protocol)
-            {
-                _protocol = protocol;
-            }
+            void setProtocol(TestProtocol* protocol);
 
             /** \brief Set up conText before running a test.
 
                 This function is called before each registered tester function
                 is invoked. It is meant to initialize any required resources.
             */
-            virtual void setUp()
-            {}
+            virtual void setUp();
 
             /** \brief Clean up after the test run.
 
@@ -143,18 +138,14 @@ namespace Unit {
                 is invoked. It is meant to remove any resources previously
                 initialized in TestSuite::setUp.
             */
-            virtual void tearDown()
-            {}
+            virtual void tearDown();
 
             /** @brief Runs the test suite
 
                 The TestProtocol assosiated with the test will be executed.
                 The default protocol will simply call all registered tests.
             */
-            virtual void run()
-            {
-                _protocol->run(*this);
-            }
+            virtual void run();
 
             /** @brief Runs a registered test
 
@@ -167,11 +158,7 @@ namespace Unit {
                 @param name Name of the method to be run
                 @param args Arguments to invoke the method
             */
-            void runTest( const std::string& name, const Args& args = Args() )
-            {
-                ConText ctx(*this, name, args);
-                ctx.run();
-            }
+            void runTest( const std::string& name, const Args& args = Args() );
 
         protected:
             /** @brief The assoziated test protocol
@@ -181,19 +168,6 @@ namespace Unit {
         public:
             static TestProtocol defaultProtocol;
     };
-
-    TestProtocol TestSuite::defaultProtocol;
-
-
-    inline void TestProtocol::run(TestSuite& suite)
-    {
-        const MethodMap& methods = suite.methods();
-
-        for(MethodMap::const_iterator it = methods.begin(); it != methods.end(); ++it)
-        {
-            suite.runTest( it->first, Args() );
-        }
-    }
 
 } // namespace Unit
 

@@ -74,11 +74,11 @@ Main_LinkSharedLibraries DrawTextDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawTextDemo : bin ;
 
 PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
-Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx ;
+Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx Pt-Unit ;
 Main_MakeLocate ImagePainterTest : bin ;
 
 PtUnitTest PlanarImageTest : PlanarImageTest.cpp ;
-Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Text Pt-System ;
+Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Text Pt-System Pt-Unit ;
 Main_MakeLocate PlanarImageTest : bin ;
 
 Main GfxPerf : GfxPerf.cpp ;

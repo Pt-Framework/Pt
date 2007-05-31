@@ -22,6 +22,7 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/System/Clock.h>
+#include <Pt/System/Environment.h>
 #include <Pt/System/TimeValue.h>
 
 #include <sstream>
@@ -33,21 +34,21 @@ namespace Pt
 namespace Unit
 {
 
-/** @brief Performance test
-  @ingroup UnitTests
-
+/**
  * Performance tests can be done by creating and destroying an object of this class (for example in a scope).
  */
-class PerformanceTest
+class PT_UNIT_API PerformanceTest
 {
 public:
     /**
      * The constructor initializes the test member for logging and starts the clock.
      */
-    PerformanceTest(Test& test)
-    : _test(test)
+    PerformanceTest(Test& test, std::string msg = "")
+    : m_test(test)
+    , m_msg(msg)
     {
-        _clock.start();
+        m_initialMemoryInUse = Pt::System::Environment::getProcessMemoryUsage();
+        m_clock.start();
     }
 
     /**
@@ -55,17 +56,39 @@ public:
      */
     ~PerformanceTest()
     {
-        Pt::System::TimeValue delta = _clock.stop();
+        Pt::System::TimeValue delta = m_clock.stop();
+        // get free memory in kiloByte
+        unsigned long usedMemory = Pt::System::Environment::getProcessMemoryUsage() - m_initialMemoryInUse;
         std::stringstream msg;
+
         msg << "Duration: "
             << (delta.seconds() * 1000.0 + delta.microSeconds() / 1000.0)
             << " ms";
-        _test.message.send(msg.str());
+
+        if(!m_msg.empty())
+        {
+            msg << " [" << m_msg << "]";
+        }
+
+        m_test.message.send(msg.str());
+
+
+        msg.str("");
+        msg << "Used mem: " << usedMemory / 1024.0 << " MB";
+
+        if(!m_msg.empty())
+        {
+            msg << " [" << m_msg << "]";
+        }
+
+        m_test.message.send(msg.str());
     }
 
 private:
-    Test& _test;
-    Pt::System::Clock _clock;
+    Test& m_test;
+    unsigned long m_initialMemoryInUse;
+    Pt::System::Clock m_clock;
+    std::string m_msg;
 };
 
 }

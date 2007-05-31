@@ -1,0 +1,21 @@
+SubDir TOP src Pt-Unit ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_UNIT_API_EXPORT ] ;
+
+PT_UNIT_SOURCES = Application.cpp
+                  Assertion.cpp
+                  PerformanceTest.cpp
+                  RegisterTest.cpp
+                  Reporter.cpp
+                  Test.cpp
+                  TestCase.cpp
+                  TestContext.cpp
+                  TestProtocol.cpp
+                  TestSchedule.cpp
+                  TestSuite.cpp
+                  TextProtocol.cpp
+                 ;
+
+SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
+SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-System ;
+SharedLibrary_MakeLocate Pt-Unit : bin ;

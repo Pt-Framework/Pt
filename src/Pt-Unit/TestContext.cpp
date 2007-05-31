@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2006 by PTV AG                                          *
+ *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,46 +17,52 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_EnvironmentImpl_H
-#define PT_EnvironmentImpl_H
+#include <Pt/Unit/TestContext.h>
 
-#include <string>
 
-namespace Pt {
+using namespace Pt;
+using namespace Unit;
 
-namespace System {
 
-class EnvironmentImpl
+const std::string& TestContext::testName() const
 {
-public:
-    EnvironmentImpl();
-    
-    ~EnvironmentImpl();
+    return _test.name();
+}
 
-    static const std::string& sharedLibraryExtension();
-
-    static const std::string& sharedLibraryPrefix();
-
-    static const std::string& systemDirectory();
-    
-    static const std::string currentDirectory();
-
-    static const std::string tempDirectory();
-
-    static char pathSeparator()
+void TestContext::run()
+{
+    try
     {
-        return '/';
+        _test.started.send(*this);
+        this->_run();
+        _test.success.send(*this);
     }
-    
-    static unsigned long getTotalMemory();
-    
-    static unsigned long getFreeMemory();
-    
-    static unsigned long getProcessMemoryUsage();
+    catch(const Assertion& assertion)
+    {
+        _test.assertion.send(*this, assertion);
+    }
+    catch(const std::range_error& ex)
+    {
+        _test.exception.send(*this, ex);
+    }
+    catch(const std::runtime_error& ex)
+    {
+        _test.exception.send(*this, ex);
+    }
+    catch(const std::logic_error& ex)
+    {
+        _test.exception.send(*this, ex);
+    }
+    catch(const std::exception& ex)
+    {
+        _test.exception.send(*this, ex);
+    }
+    catch(...)
+    {
+        _test.error.send(*this);
+    }
+}
 
-};
-
-} // namespace ptv
-} // namespace system
-
-#endif //PT_EnvironmentImpl_H
+void TestContext::_run()
+{
+}

@@ -21,6 +21,7 @@
 
 #include <Pt/Args.h>
 #include <Pt/Unit/Api.h>
+#include <Pt/Unit/TestProtocol.h>
 #include <Pt/Unit/TestSuite.h>
 
 #include <map>
@@ -29,9 +30,7 @@
 namespace Pt {
 
 namespace Unit {
-
     /** @brief Protocol and data driven tests
-        @ingroup UnitTests
 
         This is a simple implementation of a TestProtocol where methods and
         data can be added to a schedule. When the TestSchedule is applied to
@@ -41,7 +40,7 @@ namespace Unit {
         multiple times. The methods must be registered as usual in the test
         suite.
     */
-    class TestSchedule : public TestProtocol
+    class PT_UNIT_API TestSchedule : public TestProtocol
     {
         public:
             typedef std::multimap<std::string, const Args*> TestMap;
@@ -55,10 +54,7 @@ namespace Unit {
 
                 @param testName Name of the test to be run.
             */
-            void includeTest(const std::string& testName)
-            {
-                _items.insert( std::make_pair(testName, &_nullArgs) );
-            }
+            void includeTest(const std::string& testName);
 
             /** @brief Include a method in the schedule
 
@@ -73,10 +69,7 @@ namespace Unit {
                 @param testName Name of the test to be run
                 @param args Arguments to be passed to the test
             */
-            void includeTest(const std::string& testName, const Args& args)
-            {
-                _items.insert( std::make_pair(testName, &args) );
-            }
+            void includeTest(const std::string& testName, const Args& args);
 
             /** @brief Executes the protocol
 
@@ -86,13 +79,7 @@ namespace Unit {
 
                 @param test The test suite to apply the protocol
             */
-            void run(TestSuite& suite)
-            {
-                for(TestMap::iterator it = _items.begin(); it != _items.end(); ++it)
-                {
-                    suite.runTest(it->first, *it->second);
-                }
-            }
+            void run(TestSuite& suite);
 
         private:
             Args _nullArgs;

@@ -64,6 +64,27 @@ Directory Environment::currentDirectory()
     return Directory( path.c_str() );
 }
 
+Directory Environment::tempDirectory()
+{
+    std::string path = EnvironmentImpl::tempDirectory();
+    return Directory( path.c_str() );
+}
+
+unsigned long Environment::getTotalMemory()
+{
+    return EnvironmentImpl::getTotalMemory();
+}
+
+unsigned long Environment::getFreeMemory()
+{
+    return EnvironmentImpl::getFreeMemory();
+}
+
+unsigned long Environment::getProcessMemoryUsage()
+{
+    return EnvironmentImpl::getProcessMemoryUsage();
+}
+
 
 } // namespace Pt
 } // namespace System

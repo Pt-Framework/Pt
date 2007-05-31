@@ -28,10 +28,8 @@
 namespace Pt {
 
 namespace Unit {
-    /** @brief TestContext
-        @ingroup UnitTests
-    */
-    class TestContext
+
+    class PT_UNIT_API TestContext
     {
         public:
             virtual ~TestContext()
@@ -39,34 +37,12 @@ namespace Unit {
                 _test.finished.send(*this);
             }
 
-            virtual const std::string& testName() const
-            { return _test.name(); }
+            virtual const std::string& testName() const;
 
-            void run()
-            {
-                try
-                {
-                    _test.started.send(*this);
-                    this->_run();
-                    _test.success.send(*this);
-                }
-                catch(const Assertion& assertion)
-                {
-                    _test.assertion.send(*this, assertion);
-                }
-                catch(const std::exception& ex)
-                {
-                    _test.exception.send(*this, ex);
-                }
-                catch(...)
-                {
-                    _test.error.send(*this);
-                }
-            }
+            void run();
 
         protected:
-            virtual void _run()
-            {}
+            virtual void _run();
 
             TestContext(Test& test)
             : _test(test)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,7 +32,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Single test with setup and teardown
-        @ingroup UnitTests
 
         A %TestCase can be used for simple tests that require a initialization
         and deinitialization of resources. The implementor is supposed to
@@ -68,7 +67,7 @@ namespace Unit {
         Once the test is written it can be registered to an application by
         using the RegisterTest class template.
     */
-    class TestCase : public Test
+    class PT_UNIT_API TestCase : public Test
     {
         public:
             class ConText : public TestContext
@@ -123,19 +122,14 @@ namespace Unit {
                 'test' and finally 'tearDown'. Signals inherited from
                 Unit::Test are sent appropriatly.
             */
-            virtual void run()
-            {
-                ConText ctx(*this);
-                ctx.run();
-            }
+            virtual void run();
 
             /** \brief Set up conText before running a test.
 
                 This function is called before each registered tester function
                 is invoked. It is meant to initialize any required resources.
             */
-            virtual void setUp()
-            {}
+            virtual void setUp();
 
             /** \brief Clean up after the test run.
 
@@ -143,8 +137,7 @@ namespace Unit {
                 is invoked. It is meant to remove any resources previously
                 initialized in TestCase::setUp.
             */
-            virtual void tearDown()
-            {}
+            virtual void tearDown();
 
         protected:
             /** @brief Performs the actual test
@@ -153,8 +146,7 @@ namespace Unit {
                 is called between 'setUp' and 'tearDown'. Assertions may be
                 thrown to indicate failed test assertions.
             */
-            virtual void test()
-            { }
+            virtual void test();
     };
 
 } // namespace Unit

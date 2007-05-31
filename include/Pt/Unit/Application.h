@@ -19,8 +19,9 @@
 #ifndef PT_UNIT_APPLICATION_H
 #define PT_UNIT_APPLICATION_H
 
-#include<Pt/Unit/Reporter.h>
-#include<Pt/Unit/Test.h>
+#include <Pt/Unit/Api.h>
+#include <Pt/Unit/Reporter.h>
+#include <Pt/Unit/Test.h>
 
 #include <sstream>
 
@@ -30,7 +31,6 @@ namespace Pt {
 namespace Unit {
 
     /** @brief Run registered tests
-        @ingroup UnitTests
 
         The application class serves as an environment for a number of tests
         to be run. An application object is usually created in the main loop
@@ -52,7 +52,7 @@ namespace Unit {
         The TestMain.h include already defines a main loop with an application
         for the common use case.
     */
-    class Application
+    class PT_UNIT_API Application
     {
         template <typename TestT>
         friend struct RegisterTest;
@@ -76,13 +76,9 @@ namespace Unit {
 
                 @param reporter Reporeter to be used
             */
-            void setReporter(Reporter& reporter)
-            { Application::_reporter = &reporter; }
+            void setReporter(Reporter& reporter);
 
-            void addReporter(Reporter& reporter)
-            {
-                Application::_reporterList.push_back(&reporter);
-            }
+            void addReporter(Reporter& reporter);
 
             /** @brief Register a test
 
@@ -94,17 +90,7 @@ namespace Unit {
 
                 @param test Test to register
             */
-            static void registerTest(Test& test)
-            {
-                connect(test.started, &Application::started);
-                connect(test.finished, &Application::finished);
-                connect(test.success, &Application::success);
-                connect(test.assertion, &Application::assertion);
-                connect(test.exception, &Application::exception);
-                connect(test.error, &Application::error);
-                connect(test.message, &Application::message);
-                _allTests.push_back(&test);
-            }
+            static void registerTest(Test& test);
 
             /** @brief Run all tests
 
@@ -116,18 +102,7 @@ namespace Unit {
 
                 @return Number of failed tests.
             */
-            int run()
-            {
-                _errors = 0;
-
-                std::list<Test*>::iterator it;
-                for(it = _allTests.begin(); it != _allTests.end(); ++it)
-                {
-                        (*it)->run();
-                }
-
-                return _errors;
-            }
+            int run();
 
             /** @brief Run test by name
 
@@ -140,152 +115,42 @@ namespace Unit {
                 @param testName name of the test to be run
                 @return Number of failed tests.
             */
-            int run(const std::string& testName)
-            {
-                _errors = 0;
-
-                std::list<Test*>::iterator it;
-                for(it = _allTests.begin(); it != _allTests.end(); ++it)
-                {
-                    if(testName == "" || (*it)->name() == testName)
-                        (*it)->run();
-                }
-
-                return _errors;
-            }
+            int run(const std::string& testName);
 
             /** @brief Returns a list of all registered test
 
                 @return Reference to the registered tests.
             */
-            const std::list<Test*>& tests() const
-            { return _allTests; }
+            const std::list<Test*>& tests() const;
 
             /** @brief Process started event
             */
-            static void started(const TestContext& test)
-            {
-                if(_reporter)
-                {
-                    _reporter->started(test);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->started(test);
-                }
-            }
+            static void started(const TestContext& test);
 
             /** @brief Process finished event
             */
-            static void finished(const TestContext& test)
-            {
-                if(_reporter)
-                {
-                    _reporter->finished(test);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->finished(test);
-                }
-            }
+            static void finished(const TestContext& test);
 
             /** @brief Process success event
             */
-            static void success(const TestContext& test)
-            {
-                if(_reporter)
-                {
-                    _reporter->success(test);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->success(test);
-                }
-            }
+            static void success(const TestContext& test);
 
             /** @brief Process assertion event
             */
-            static void assertion(const TestContext& test, const Assertion& a)
-            {
-                ++_errors;
-
-                if(_reporter)
-                {
-                    _reporter->assertion(test, a);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->assertion(test, a);
-                }
-            }
+            static void assertion(const TestContext& test, const Assertion& a);
 
             /** @brief Process exception event
             */
-            static void exception(const TestContext& test, const std::exception& ex)
-            {
-                ++_errors;
-
-                if(_reporter)
-                {
-                    _reporter->exception(test, ex);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->exception(test, ex);
-                }
-            }
+            static void exception(const TestContext& test, const std::exception& ex);
 
             /** @brief Process error event
             */
-            static void error(const TestContext& test)
-            {
-                ++_errors;
-
-                if(_reporter)
-                {
-                    _reporter->error(test);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->error(test);
-                }
-            }
+            static void error(const TestContext& test);
 
 
             /** @brief Process informational messages
             */
-            static void message(const std::string& msg)
-            {
-                if(_reporter)
-                {
-                    _reporter->message(msg);
-                }
-
-
-                std::list<Reporter*>::iterator it;
-                for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-                {
-                    (*it)->message(msg);
-                }
-            }
+            static void message(const std::string& msg);
 
         private:
             /** @brief Number of errors that occured during a run
@@ -303,13 +168,6 @@ namespace Unit {
             static std::list<Reporter*> _reporterList;
     };
 
-    size_t Application::_errors = 0;
-
-    std::list<Test*> Application::_allTests;
-
-    Reporter* Application::_reporter = 0;
-
-    std::list<Reporter*> Application::_reporterList;
 
 } // namespace Unit
 

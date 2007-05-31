@@ -23,7 +23,7 @@ if $(TARGET_OS:L) = wince
 
 if $(SYS:L) = "win32"
 {
-	SYSLIBS = version.lib Winmm.lib ;
+	SYSLIBS = version.lib Winmm.lib Psapi.lib ;
 	NETLIBS = wsock32.lib ws2_32.lib ;
 
 	if $(MINGW)

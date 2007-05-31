@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,49 +16,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_UNIT_REGISTERTEST_H
-#define PT_UNIT_REGISTERTEST_H
 
-#include <Pt/Unit/Api.h>
-#include <Pt/Unit/Application.h>
+#include <Pt/Unit/TestCase.h>
 
 
-namespace Pt {
+using namespace Pt;
+using namespace Unit;
 
-namespace Unit {
 
-    /**
-        @param TestT The type of test to register
-    */
-    template <class TestT>
-    /** @brief Registers tests to an application
+void TestCase::run()
+{
+    ConText ctx(*this);
+    ctx.run();
+}
 
-        Tests can be registered easily with the RegisterTest<> class
-        template to an Unit::Application at program initialisation.
-        A typical example looks like this:
+void TestCase::setUp()
+{
+}
 
-        @code
-            class MyTest : public Unit::TestCase
-            { ... };
+void TestCase::tearDown()
+{
+}
 
-            RegisterTest<MyTest> _registerMyTest;
-        @endcode
-
-        The constructor of the RegisterTest class template will
-        register an instance of its template parameter to the
-        application.
-    */
-    struct RegisterTest
-    {
-        RegisterTest()
-        {
-            static TestT test;
-            Application::registerTest(test);
-        }
-    };
-
-} // namespace Unit
-
-} // namespace Pt
-
-#endif
+void TestCase::test()
+{
+}
