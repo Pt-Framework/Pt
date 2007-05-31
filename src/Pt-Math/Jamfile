@@ -1,0 +1,10 @@
+SubDir TOP src Pt-Math ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_MATH_API_EXPORT ] ;
+
+
+PtUnitTest AlgorithmTest : AlgorithmTest.cpp ;
+Main_LinkSharedLibraries AlgorithmTest : Pt Pt-Unit ;
+Main_MakeLocate AlgorithmTest : $(PPR_BINDIR) ;
+
+
