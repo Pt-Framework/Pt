@@ -61,6 +61,13 @@ typedef std::multimap<std::string, CallableInfo*> MethodMap;
 
 /** @brief Make objects reflectable
     @ingroup Reflection
+
+    TODO: PropertyMap and MethodMap: MemberInfo mapping?
+    TODO: rename CallableInfo to MethodInfo
+    TODO: registerXXX names for Read Write properties
+    TODO: rename method() to methodInfo()
+    TODO: remove self()
+    TODO: rename getIdentifierName()
 */
 class PT_API Reflectable
 {
