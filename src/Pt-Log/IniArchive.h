@@ -98,6 +98,7 @@ class IniArchive : public Archive
 {
     private:
         std::basic_istream<Pt::Char>& _is;
+        std::basic_ostream<Pt::Char>* _os;
         typedef void (IniArchive::*Parse)(const Pt::Char&);
         Parse _parse;
         Pt::String _currentName;
@@ -111,8 +112,21 @@ class IniArchive : public Archive
             this->parse();
         }
 
+        IniArchive(std::basic_iostream<Pt::Char>& ios)
+        : _is(ios)
+        , _os(&ios)
+        {
+            this->parse();
+        }
+
         ~IniArchive()
         {}
+
+        void commit()
+        {
+            //if(_os)
+            //
+        }
 
         const Pt::String* value(const Pt::String& name) const
         {
