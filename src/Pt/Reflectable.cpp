@@ -104,14 +104,14 @@ const CallableInfo& Reflectable::method(const std::string& name) const
 }
 
 
-void Reflectable::call(const std::string& name, const Args& args)
+Pt::Any Reflectable::call(const std::string& name, const Args& args)
 {
     MethodMap::iterator it = _methods.find(name);
 
     if( it == _methods.end() )
         throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
-    it->second->call(args);
+    return it->second->call(args);
 }
 
 } // namespace Pt

@@ -170,3 +170,7 @@ include/Pt/Atomicity.gcc.ppc.h
 include/Pt/Atomicity.gcc.x86.h
 include/Pt/Atomicity.generic.h
 include/Pt/Atomicity.windows.h
+include/Pt/CallableInfo.h
+include/Pt/PropertyInfo.h
+include/Pt/PropertyValue.h
+include/Pt/MethodInfo.h

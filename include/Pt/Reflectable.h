@@ -66,17 +66,22 @@ class PT_API Reflectable
 {
     public:
         Reflectable(const std::string& name);
-//        Reflectable(const std::string& name = "Reflectable");
 
         virtual ~Reflectable();
+
+        Reflectable* self()
+        { return this; }
+
+        const std::string& getIdentifierName() const
+        { return _identiferName; }
 
         Pt::Any property(const std::string& name);
 
         void setProperty(const std::string& name, const Pt::Any& value);
 
-        const CallableInfo& method(const std::string& name) const;
+        Pt::Any call(const std::string& name, const Args& args);
 
-        void call(const std::string& name, const Args& args);
+        const CallableInfo& method(const std::string& name) const;
 
         const PropertyMap& properties() const
         { return _properties; }
@@ -173,18 +178,11 @@ class PT_API Reflectable
             _methods.insert( std::make_pair(name, cb) );
         }
 
-        Reflectable* self()
-        { return this; }
-
-        const std::string& getIdentifierName() const
-        {
-            return _identiferName;
-        }
-
     private:
         MethodMap   _methods;
         PropertyMap _properties;
         std::string _identiferName;
+        void* _reserved;
 };
 
 } // namespace Pt

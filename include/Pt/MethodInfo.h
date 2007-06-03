@@ -22,12 +22,11 @@
 
 #include <Pt/Args.h>
 #include <Pt/Exception.h>
-#include <Pt/CallableInfo.h>
 #include <Pt/Method.h>
+#include <Pt/MethodInfoBase.h>
 
 
 namespace Pt {
-
 
 template < typename R,
            class C,
@@ -36,7 +35,8 @@ template < typename R,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
-class MethodInfo : public CallableInfo, private Method<R, C, A1, A2, A3, A4, A5>
+class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
+                 , private Method<R, C, A1, A2, A3, A4, A5>
 {
     public:
         typedef C ClassT;
@@ -47,44 +47,44 @@ class MethodInfo : public CallableInfo, private Method<R, C, A1, A2, A3, A4, A5>
         : Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 5; }
-
-        const char* argName(size_t index) const
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-                case 3: return TypeTraits<A4>::typeName();
-                case 4: return TypeTraits<A5>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+            return Method<R, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( a.get(0) ),
+                                                           any_cast<A2>( a.get(1) ),
+                                                           any_cast<A3>( a.get(2) ),
+                                                           any_cast<A4>( a.get(3) ),
+                                                           any_cast<A5>( a.get(4) ));
         }
+};
 
-        const std::type_info& argType(size_t index) const
+
+template < class C,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4,
+           typename A5>
+class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A1, A2, A3, A4, A5>
+                                              , private Method<void, C, A1, A2, A3, A4, A5>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        : Method<void, C, A1, A2, A3, A4, A5>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return typeid(A1);
-                case 1: return typeid(A2);
-                case 2: return typeid(A3);
-                case 3: return typeid(A4);
-                case 4: return typeid(A5);
-            }
+            Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( a.get(0) ),
+                                                       any_cast<A2>( a.get(1) ),
+                                                       any_cast<A3>( a.get(2) ),
+                                                       any_cast<A4>( a.get(3) ),
+                                                       any_cast<A5>( a.get(4) ) );
 
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        void call(const Args& a)
-        {
-            Method<R, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( a.get(0) ),
-                                                    any_cast<A2>( a.get(1) ),
-                                                    any_cast<A3>( a.get(2) ),
-                                                    any_cast<A4>( a.get(3) ),
-                                                    any_cast<A5>( a.get(4) ));
+            return Any();
         }
 };
 
@@ -95,8 +95,8 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4>
-class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
-                                                  , private Method<R, C, A1, A2, A3, A4>
+class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A1, A2, A3, A4>
+                                                 , private Method<R, C, A1, A2, A3, A4>
 {
     public:
         typedef C ClassT;
@@ -107,41 +107,40 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
         : Method<R, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 4; }
-
-        const char* argName(size_t index) const
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-                case 3: return TypeTraits<A4>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        const std::type_info& argType(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return typeid(A1);
-                case 1: return typeid(A2);
-                case 2: return typeid(A3);
-                case 3: return typeid(A4);
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        void call(const Args& a)
-        {
-            Method<R, C, A1, A2, A3, A4>::call( any_cast<A1>( a.get(0) ),
+            return Method<R, C, A1, A2, A3, A4>::call( any_cast<A1>( a.get(0) ),
                                                 any_cast<A2>( a.get(1) ),
                                                 any_cast<A3>( a.get(2) ),
                                                 any_cast<A4>( a.get(3) ) );
+        }
+};
+
+
+template < class C,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4>
+class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void, C, A1, A2, A3, A4>
+                                                    , private Method<void, C, A1, A2, A3, A4>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)(A1, A2, A3, A4);
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        : Method<void, C, A1, A2, A3, A4>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
+        {
+            Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( a.get(0) ),
+                                                   any_cast<A2>( a.get(1) ),
+                                                   any_cast<A3>( a.get(2) ),
+                                                   any_cast<A4>( a.get(3) ) );
+            return Any();
         }
 };
 
@@ -151,8 +150,8 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
-                                                        , private Method<R, C, A1, A2, A3>
+class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1, A2, A3>
+                                                       , private Method<R, C, A1, A2, A3>
 {
     public:
         typedef C ClassT;
@@ -163,38 +162,37 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
         : Method<R, C, A1, A2, A3>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 3; }
-
-        const char* argName(size_t index) const
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+            return Method<R, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
+                                                   any_cast<A2>( a.get(1) ),
+                                                   any_cast<A3>( a.get(2) ));
         }
+};
 
-        const std::type_info& argType(size_t index) const
+
+template < class C,
+           typename A1,
+           typename A2,
+           typename A3>
+class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1, A2, A3>
+                                                          , private Method<void, C, A1, A2, A3>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)(A1, A2, A3);
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        : Method<void, C, A1, A2, A3>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return typeid(A1);
-                case 1: return typeid(A2);
-                case 2: return typeid(A3);
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        void call(const Args& a)
-        {
-            Method<R, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
-                                            any_cast<A2>( a.get(1) ),
-                                            any_cast<A3>( a.get(2) ));
+            Method<void, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
+                                               any_cast<A2>( a.get(1) ),
+                                               any_cast<A3>( a.get(2) ));
+            return Any();
         }
 };
 
@@ -203,8 +201,8 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
-                                                              , private Method<R, C, A1, A2>
+class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1, A2>
+                                                             , private Method<R, C, A1, A2>
 {
     public:
         typedef C ClassT;
@@ -215,35 +213,35 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableIn
         : Method<R, C, A1, A2>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 2; }
-
-        const char* argName(size_t index) const
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+            return Method<R, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
+                                               any_cast<A2>( a.get(1) ) );
         }
+};
 
-        const std::type_info& argType(size_t index) const
+
+template < class C,
+           typename A1,
+           typename A2>
+class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1, A2>
+                                                                , private Method<void, C, A1, A2>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)(A1, A2);
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        : Method<void, C, A1, A2>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return typeid(A1);
-                case 1: return typeid(A2);
-            }
+            Method<void, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
+                                           any_cast<A2>( a.get(1) ) );
 
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        void call(const Args& a)
-        {
-            Method<R, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
-                                        any_cast<A2>( a.get(1) ) );
+            return Any();
         }
 };
 
@@ -251,8 +249,8 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableIn
 template < typename R,
            class C,
            typename A1>
-class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
-                                                                    , private Method<R, C, A1>
+class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1>
+                                                                   , private Method<R, C, A1>
 {
     public:
         typedef C ClassT;
@@ -263,40 +261,39 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Call
         : Method<R, C, A1>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 1; }
-
-        const char* argName(size_t index) const
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+            return Method<R, C, A1>::call( any_cast<A1>( a.get(0) ) );
         }
+};
 
-        const std::type_info& argType(size_t index) const
+
+template < class C,
+           typename A1>
+class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1>
+                                                                      , private Method<void , C, A1>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)(A1);
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        : Method<void, C, A1>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
         {
-            switch(index)
-            {
-                case 0: return typeid(A1);
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
-        void call(const Args& a)
-        {
-            Method<R, C, A1>::call( any_cast<A1>( a.get(0) ) );
+            Method<void, C, A1>::call( any_cast<A1>( a.get(0) ) );
+            return Any();
         }
 };
 
 
 template < typename R,
-           class C>
-class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
-                                                                          , private Method<R, C>
+           class C >
+class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C>
+                                                                         , private Method<R, C>
 {
     public:
         typedef C ClassT;
@@ -307,18 +304,30 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
         :  Method<R, C>(object, memFunc)
         {}
 
-        size_t argSize() const
-        { return 0; }
-
-        const char* argName(size_t index) const
-        { throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
-
-        const std::type_info& argType(size_t index) const
-        { throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
-
-        void call(const Args& a)
+        Pt::Any call(const Args& a)
         {
-            Method<R, C>::call();
+            return Method<R, C>::call();
+        }
+};
+
+
+template < class C >
+class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C>
+                                                                            , private Method<void, C>
+{
+    public:
+        typedef C ClassT;
+        typedef void (C::*MemFuncT)();
+
+    public:
+        MethodInfo(C* object, MemFuncT memFunc)
+        :  Method<void, C>(object, memFunc)
+        {}
+
+        Pt::Any call(const Args& a)
+        {
+            Method<void, C>::call();
+            return Any();
         }
 };
 

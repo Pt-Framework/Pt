@@ -25,6 +25,7 @@
 #include <Pt/Signal.h>
 #include <Pt/Exception.h>
 #include <Pt/Method.h>
+#include <Pt/MemberInfo.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/PropertyValue.h>
 
@@ -34,7 +35,7 @@ namespace Pt {
 /** @brief Property interface
     @ingroup Reflection
 */
-class PT_API PropertyInfo
+class PT_API PropertyInfo  : public MemberInfo
 {
     public:
         PropertyInfo()
