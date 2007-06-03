@@ -1,0 +1,14 @@
+SubDir TOP src Pt-Cma ;
+SubDirHdrs $(TOP)/include ;
+
+SubDirC++Flags [ FDefines PT_CMA_API_EXPORT ] ;
+
+PT_CMA_SOURCES = Component.cpp
+                 ComponentFactory.cpp
+                 ComponentLibrary.cpp
+                 IUnknown.cpp
+                 ;
+
+SharedLibrary Pt-Cma : $(PT_CMA_SOURCES) ;
+SharedLibrary_LinkSharedLibraries Pt-Cma : Pt Pt-System Pt-Text ;
+SharedLibrary_MakeLocate Pt-Cma : bin ;
