@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-/*#include <Pt/Main.h>
-#include <Pt/System/Selector.h>
+#include <Pt/Main.h>
+/*#include <Pt/System/Selector.h>
 #include <Pt/System/SerialDevice.h>
 #include <fstream>
 
