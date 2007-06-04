@@ -2,6 +2,7 @@
 #include "Pt/System/Plugin.h"
 #include "Pt/System/Environment.h"
 #include "Pt/Char.h"
+#include "Pt/Main.h"
 #include "Pt/String.h"
 #include <iostream>
 
