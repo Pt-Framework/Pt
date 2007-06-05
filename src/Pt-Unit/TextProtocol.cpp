@@ -17,9 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Pt/Unit/TextProtocol.h>
 #include <fstream>
 #include <sstream>
-#include <Pt/Unit/TextProtocol.h>
 
 
 using namespace Pt;
@@ -40,10 +40,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
     while(getline(iniFile, line))
     {
-        std::cout << "WARNING: method is not fully implemented:\n\tvoid TextProtocol::run(Pt::Unit::TestSuite& suite)" << std::endl;
-
-
-        /*lineNumber++;
+        lineNumber++;
 
         // remove '\r' (Windows files on Linux)
         while(line.find(13, 0) != std::string::npos)
@@ -136,6 +133,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             std::stringstream msg;
             msg << "Invalid protocol format in " << m_iniFileName << ", line " << lineNumber << ": " << token;
             throw std::logic_error(msg.str() + PT_SOURCEINFO);
-        }*/
+        }
     }
 }
