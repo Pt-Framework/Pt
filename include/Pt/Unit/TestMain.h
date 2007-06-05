@@ -23,11 +23,22 @@
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Application.h>
 
+#include <fstream>
 #include <cstring>
+
+
+namespace TestMain
+{
+    static int argc = 0;
+    static char** argv = 0;
+}
 
 
 int main(int argc, char** argv)
 {
+    TestMain::argc = argc;
+    TestMain::argv = argv;
+
     // CppUnit(mini) test launcher
     // command line option syntax:
     // test [OPTIONS]
@@ -35,11 +46,12 @@ int main(int argc, char** argv)
     //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
     //     -f=FILE           save output in file FILE instead of stdout
 
-    Pt::Unit::TextReporter reporter;
+    Pt::Unit::TextReporter fileReporter;
+    Pt::Unit::TextReporter consoleReporter;    
     Pt::Unit::Application app;
-      app.setReporter(reporter);
+    bool fileLoggingEnabled = false;
 
-    //char* fileName = 0;
+    char* fileName = "";
     char* testName = "";
 
     for(int i = 1; i < argc; ++i)
@@ -49,6 +61,7 @@ int main(int argc, char** argv)
 
         if( !std::strncmp(argv[i], "--help", 6) )
         {
+            std::cerr << "Usage: " << argv[0] << " [-t<testname>] [-f<logfile>]\n";
             std::cerr << "Available Tests:\n";
             std::list<Pt::Unit::Test*>::const_iterator it;
             for( it = app.tests().begin(); it != app.tests().end(); ++it)
@@ -59,13 +72,22 @@ int main(int argc, char** argv)
         }
         else if( !std::strncmp(argv[i], "-t", 2) )
         {
-            testName = argv[++i];
+            testName = argv[i] + 2;
         }
-        //else if( !strncmp(argv[i], "-f=", 3) )
-        //{
-        //  fileName = argv[i] + 3;
-        //}
+        else if( !strncmp(argv[i], "-f", 2) )
+        {
+          fileName = argv[i] + 2;
+          fileLoggingEnabled = true;
+        }
     }
+    
+    std::ofstream logFile(fileName);
+    if (fileLoggingEnabled)
+    {
+      fileReporter = Pt::Unit::TextReporter(&logFile);
+      app.addReporter(fileReporter);
+    }    
+    app.addReporter(consoleReporter);
 
     try {
         return app.run(testName);
