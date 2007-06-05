@@ -40,7 +40,10 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
     while(getline(iniFile, line))
     {
-        lineNumber++;
+        std::cout << "WARNING: method is not fully implemented:\n\tvoid TextProtocol::run(Pt::Unit::TestSuite& suite)" << std::endl;
+
+
+        /*lineNumber++;
 
         // remove '\r' (Windows files on Linux)
         while(line.find(13, 0) != std::string::npos)
@@ -133,6 +136,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             std::stringstream msg;
             msg << "Invalid protocol format in " << m_iniFileName << ", line " << lineNumber << ": " << token;
             throw std::logic_error(msg.str() + PT_SOURCEINFO);
-        }
+        }*/
     }
 }
