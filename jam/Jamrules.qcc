@@ -6,7 +6,7 @@ JamInclude Jamrules.gcc ;
 #
 GCCVERSION ?= 3.3.5 ;
 C++		= QCC ;
-CC		= qcc ;
+CC      = qcc ;
 LINK		= $(CC) ;
 CCFLAGS		+= -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC ;
 BYTEORDER ?= LE ;
@@ -15,11 +15,28 @@ CCFLAGS		+= -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC ;
 #SH4 and X86 both are little endian CPUs, but only for x86 qcc doesn't want the endianess to be specified
 if $(TARGET_OSPLAT:L) = x86
 {
-	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+    if $(GCCVERSION) = 2.95.3
+    {
+        CCFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
+	}
+    else
+    {
+        CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+    }
 }
 else
 {
-	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+    # only use -fPIC for non-X86 CPUs
+    CCFLAGS += -fPIC ;
+
+    if $(GCCVERSION) = 2.95.3
+    {
+        CCFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+    }
+    else
+    {
+    	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+    }
 }	
 
 
@@ -45,8 +62,19 @@ LINKFLAGS	= $(CCFLAGS) -lang-c++ ;
 LINKLIBS	=  -lc -lcpp -lm -lc  ;
 OPTIM		= -O ;
 
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    # linker flag -E: export global symbols from the executable
+    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+}
+
+
 actions Link bind NEEDLIBS
 {
-    $(CC) $(LINKFLAGS) -lang-c++ -o $(<) $(UNDEFS) $(>) -Wl, $(NEEDLIBS) $(NEEDLIBS) $(NEEDLIBS) $(NEEDLIBS)  $(NETLIBS)  $(LINKLIBS) 
+    $(C++) $(LINKFLAGS) -lang-c++ -o $(<) $(UNDEFS) $(>) -Wl,--start-group  $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
 }
 

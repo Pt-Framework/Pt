@@ -1,9 +1,6 @@
-#Resource-Compiler für MFC - Applikationen
-RC = RC ;
+#Resource-Compiler for MFC - Applications
 RCFLAGS += /d \"_DEBUG\" /d \"_AFXDLL\" /l 0x407  ;
 
-
-	
 rule  MfcMain
 {
 	C++FLAGS += [ FDefines _AFXDLL ] ; 
@@ -30,7 +27,6 @@ rule Resource
     local _r = $(_s:S=.res) ;       # Chris Antos has some stuff here to set grist ...:G=)
     local _e = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
-	
     # Make the executable depend on the .res file, and
     # make the .res file depend on the .rc file.
     DEPENDS $(_e) : $(_r) ;
@@ -50,7 +46,6 @@ rule Resource
     HDRSEARCH on $(_s) = $(SEARCH_SOURCE) $(SUBDIRHDRS) ;
     HDRGRIST on $(_s) = $(HDRGRIST) ;
 
-	
     Rc $(_r) : $(_s) ;
 
     Clean clean : $(<) ;
@@ -58,6 +53,5 @@ rule Resource
 
 actions Rc
 {	
-
-    $(RC) $(RCFLAGS) /I$(HDRS) /I$(RCHDRS) /Fo $(<) $(>)
+  "$(RC)" $(RCFLAGS) /I$(HDRS) /I$(RCHDRS) /Fo $(<) $(>)
 }

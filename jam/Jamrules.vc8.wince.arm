@@ -11,22 +11,19 @@ LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\SmartDevices\\SDK\\PocketPC2003\\Lib\\armv4
 LINKFLAGS += /LIBPATH:"\"$(VISUALC)\\VC\\ce\\lib\\armv4"\" ;
 LINKFLAGS += /ARMPADCODE ;
 LINKFLAGS += /machine:ARM ;
-#C++FLAGS +=  /D ARM /D _ARM_ /QRarch4 ;
-CCFLAGS  += /D ARM /D _ARM_ /QRarch4 ;
+CCFLAGS   += /D ARM /D _ARM_ /QRarch4 ;
 
 LINKLIBS += coredll.lib 
-	    corelibc.lib
-            ole32.lib
-	    oleaut32.lib
-	    uuid.lib
-            commctrl.lib
+	          corelibc.lib
             ccrtrtti.lib
             secchk.lib 
-            comsuppwd.lib
-            winsock.lib
-            Ws2.lib
-            mmtimer.lib
-	    ;
+            
+            #ole32.lib
+      	    #oleaut32.lib
+      	    #uuid.lib
+            #commctrl.lib
+            #comsuppwd.lib
+	          ;
  
 # also possible:
 # /QRarch4

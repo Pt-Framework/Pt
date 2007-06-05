@@ -30,31 +30,32 @@ if $(SYS:L) = "win32"
 	{
 		SYSLIBS = $(MINGW)\\lib\\libversion.a
 		          $(MINGW)\\lib\\libwinmm.a
-                          $(MINGW)\\lib\\libpsapi.a ;
+		          $(MINGW)\\lib\\libpsapi.a ;
 		NETLIBS = $(MINGW)\\lib\\libwsock32.a 
 		          $(MINGW)\\lib\\libws2_32.a ;
 	}
 }
-if $(SYS:L) = "posix"
+if $(TARGET_OS:L) = linux
 {
 	SYSLIBS     = -ldl -lpthread -lrt ;
-    NETLIBS     = -lnsl ;
+  NETLIBS     = -lnsl ;
 }
 if $(SYS:L) = wince
 {
-
+	SYSLIBS = mmtimer.lib ;
+	NETLIBS = winsock.lib Ws2.lib ;
 }
-
 
 if $(GUI:L) = "gdi"
 {
 	if $(TARGET_OS:L) = "nt"
 	{
-		GUILIBS = gdi32.lib ;
+		GUILIBS = gdi32.lib user32.lib ;
 	}
 	if $(MINGW)
 	{
-		GUILIBS = $(MINGW)\\lib\\libgdi32.a ;
+		GUILIBS = $(MINGW)\\lib\\libgdi32.a 
+              $(MINGW)\\lib\\libuser32.a  ;
 	}
 }
 if $(GUI:L) = "x11"
@@ -145,6 +146,10 @@ if $(GUI:L) = "x11"
 	# Check if Xft includes are installed
 	#
 	local _xftIncludes = [ GLOB  /usr/include/X11 : Xft ] ;
+    if  $(_xftIncludes) = ""
+    {
+            _xftIncludes = [ GLOB  /opt/X11R6/include/X11 : Xft ] ;
+    }
 	if  $(_xftIncludes) = ""
 	{
 		Exit "Checking for Xft includes... FAILED" ;
@@ -162,6 +167,10 @@ if $(GUI:L) = "x11"
 	{
 		_libXmu = [ GLOB  /usr/X11R6/lib : *Xmu.so ] ;
 	}
+    if  $(_libXmu) = ""
+    {
+            _libXmu = [ GLOB  /opt/X11R6/lib : *Xmu.so ] ;
+    }
 	if  $(_libXmu) = ""
 	{
 		Exit "Checking for Xmu library... FAILED" ;
@@ -171,7 +180,7 @@ if $(GUI:L) = "x11"
 		Echo "Checking for Xmu library... " $(_libXmu) ;
 	}
 
-	GUILIBS  = -L/usr/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
+	GUILIBS  = -L/usr/X11R6/lib -L/opt/X11R6/lib -lX11 -lXext -lXmu -lXft -lXrender ;
 }
 if $(GUI:L) = "gf"
 {

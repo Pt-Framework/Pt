@@ -1,10 +1,4 @@
 
-if $(VISUALC) 
-{
-	VISUALC = $(VISUALC:J=" ") ;
-}
-
-
 rule FDefines 
 { 
 	return /D$(<) ; 
@@ -30,25 +24,22 @@ rule LibraryImpl
 }
 
 
-rule Library_MakeLocate
+rule Library_MakeLocateImpl
 {
 	local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
-	MakeLocate $(_target) : $(>) ;
 	
 	MakeLocate $(_target:S=.pdb) : $(>) ;
-  	MakeLocate $(_target:S=.idb) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
   
 	# create dir before C++ rule creates .pdb files
 	Depends first : $(>) ;
 }
 
 
-rule Main
+rule MainImpl
 {
-	local _target = $(1:S=$(SUFEXE)) ;
-	DEPENDS exe : $(_target) ;
+  local _target = $(<:S=$(SUFEXE)) ;
 
-# MainImpl
 	Clean clean : $(_target) ;
 	Clean clean : $(_target:S=.lib) ;
 	Clean clean : $(_target:S=.exp) ;	
@@ -59,24 +50,22 @@ rule Main
 
 	local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
 	PDB on $(_objects) = $(_target:S=.pdb) ;
-	Depends $(_objects) : first ;
-# MainImpl
+	
+	LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
 
-	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-	Objects $(2) : $(1) ;
+	Depends $(_objects) : first ;
 }
 
 
-rule Main_LinkSharedLibraries
+rule Main_LinkSharedLibrariesImpl
 {
 	LinkLibraries $(<) : $(>) ;
 }
 
 
-rule Main_MakeLocate
+rule Main_MakeLocateImpl
 {
 	local _target = $(<:S=$(SUFEXE)) ;
-	MakeLocate $(_target) : $(>) ;
 	
 	MakeLocate $(_target:S=.lib) : $(>) ;
 	MakeLocate $(_target:S=.exp) : $(>) ;
@@ -90,10 +79,11 @@ rule Main_MakeLocate
 }
 
 
-rule SharedLibraryFromObjects
+rule SharedLibraryImpl
 {
 	# Add grist to file names
 	local _sources = [ FGristFiles $(>) ] ;
+	local _objects = $(_sources:S=$(SUFOBJ)) ;
 
 	# Add library name decorations <name><.dll/.so>
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -101,26 +91,19 @@ rule SharedLibraryFromObjects
 	Clean clean : $(_target) ;
 	Clean clean : $(_target:S=.lib) ;
 	Clean clean : $(_target:S=.exp) ;	
-	Clean clean : $(_target:LS=.pdb) ;
+	Clean clean : $(_target:S=.pdb) ;
 	Clean clean : $(_target:S=.ilk) ;
 	Clean clean : $(_target:S=.idb) ;
 	Clean clean : $(_target).manifest ;
 
-	PDB on $(_sources) = $(_target:LS=.pdb) ;
-
-	# setup dependencies
-	Depends exe : $(_target) ;
-	Depends lib : $(_target) ;
+	PDB on $(_objects) = $(_target:S=.pdb) ;
 	Depends $(_sources) : first ;
-	Depends $(_target) : $(_sources) ;
 	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
-	
 	LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
-	Link $(_target) : $(_sources) ;
 }
 
 
-rule SharedLibrary_LinkSharedLibraries
+rule SharedLibrary_LinkSharedLibrariesImpl
 {
 	# Add library name decorations <name><.dll/.so>
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
@@ -134,20 +117,19 @@ rule SharedLibrary_LinkSharedLibraries
 }
 
 
-rule SharedLibrary_MakeLocate
+rule SharedLibrary_MakeLocateImpl
 {
 	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
 
-	MakeLocate $(_target) : $(>) ;
 	MakeLocate $(_target:S=.lib) : $(>) ;
 	MakeLocate $(_target:S=.exp) : $(>) ;
-    MakeLocate $(_target:LS=.pdb) : $(>) ;   
+  MakeLocate $(_target:S=.pdb) : $(>) ;   
 	MakeLocate $(_target:S=.ilk) : $(>) ;
 	MakeLocate $(_target:S=.idb) : $(>) ;
 	MakeLocate $(_target:S=.dll.manifest) : $(>) ;
     
-    # create dir before C++ rule creates .pdb files
-    Depends first : $(>) ;
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
 }
 
 
@@ -179,18 +161,19 @@ actions As
 actions Cc bind PDB
 {
 	set PATH=$(VISUALC)\Common7/IDE;%PATH%
-	"$(CC)" /c $(CCFLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+	"$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
 }
 
 
 actions C++ bind PDB
 {	
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	"$(C++)" /c $(C++FLAGS) $(OPTIM) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+	"$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
 }
 
 actions together Link bind NEEDLIBS
 {
+	set PATH=$(VISUALC)\vc\bin;%PATH%
 	set PATH=$(VISUALC)\Common7\IDE;%PATH%
 	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
 	"$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)

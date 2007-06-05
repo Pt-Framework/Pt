@@ -5,29 +5,14 @@ if $(TARGET_OSPLAT:L) != x86
 	Exit "This target-platform is not supported on this toolset" ;
 }
 
-
-CC = $(VISUALC)\\vc\\bin\\cl /nologo ;
-
-# Replaced by setting LINKFLAGS and LINKLIBS
-# 
-#LINKLIBS += \"$(PLATFORMSDK)\\lib\\advapi32.lib\"
-#	    \"$(PLATFORMSDK)\\lib\\gdi32.lib\"
-#	    \"$(PLATFORMSDK)\\lib\\user32.lib\"
-#	    \"$(PLATFORMSDK)\\lib\\kernel32.lib\" ;
-
 LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
-
-LINKLIBS += advapi32.lib
-	    gdi32.lib
-	    user32.lib
-	    kernel32.lib ;
 
 CCFLAGS += /DWIN32 ;
 
 if $(CONFIG:L) = debug 
 {
-	CCFLAGS += /MDd /Zi /MDd  /RTC1 ;
-	OPTIM   ?= /Od ;
+	CCFLAGS   += /MDd /Zi /RTC1 ;
+	OPTIM     ?= /Od ;
 	LINKFLAGS += /DEBUG ;
 }
 else
@@ -36,17 +21,12 @@ else
 	OPTIM   ?= /Ox /Ot /Oy ;
 }
 
-C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /W3  ;
+WARN     ?= /W3 ;
+C++FLAGS += $(CCFLAGS) /EHsc /GR /FD ;
 
 
 # set directories to standard header 
 #
 STDHDRS = \"$(VISUALC)\\vc\\include\" 
-	  \"$(PLATFORMSDK)\\include\" ;
-
-
-# set directory to mfc for this toolset
-#
-MFCDIR = \"$(VISUALC)\\vc\\atlmfc\" ;
-	
+          \"$(PLATFORMSDK)\\include\" ;
 

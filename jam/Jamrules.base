@@ -191,12 +191,13 @@ SUFEXE      ?= "" ;
 SUFLIB      ?= .a ;
 SUFOBJ      ?= .o ;
 UNDEFFLAG   ?= "-u _" ;
+WARN        ?= ;
 YACC        ?= ;
 YACCFILES   ?= ;
 YACCFLAGS   ?= ;
 TEMP_TARGET ?= ;
-
 OBJECT_TARGET ?= tmp ;
+
 
 HDRPATTERN = 
     "^[     ]*#[    ]*include[  ]*[<\"]([^\">]*)[\">].*$" ;
@@ -626,6 +627,12 @@ rule Library_MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
     MakeLocate $(_l) : $(2) ;
+    
+    Library_MakeLocateImpl $(<) : $(>) ;
+}
+
+rule Library_MakeLocateImpl
+{
 }
 
 
@@ -648,18 +655,6 @@ rule LinkLibraries
 }
 
 
-rule Main_LinkLibraries
-{
-	LinkLibraries $(<) : $(>) ;
-}
-
-
-rule Main_MakeLocate
-{
-	MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
-}
-
-
 rule Main
 {
     # Add executable name decoration
@@ -669,7 +664,15 @@ rule Main
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
     Objects $(>) ;
+    
+    MainImpl $(<) : $(>) ;
 }
+
+
+rule MainImpl
+{
+}
+
 
 rule MainFromObjects
 {
@@ -698,13 +701,33 @@ rule MainFromObjects
 }
 
 
-rule Main_LinkSharedLibraries
+rule Main_LinkLibraries
 {
-	Echo "LinkSharedLibraries rule not implemented in Jamrules.base." ;
-	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
-
+	LinkLibraries $(<) : $(>) ;
 }
 
+
+rule Main_LinkSharedLibraries
+{
+  Main_LinkSharedLibrariesImpl $(<) : $(>) ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+}
+
+
+rule Main_MakeLocate
+{
+	MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
+	Main_MakeLocateImpl $(<) : $(>) ;
+}
+
+
+rule Main_MakeLocateImpl
+{
+}
 
 # @brief Adds libraries as linker flags to a shared library target
 #
@@ -915,11 +938,18 @@ rule Setuid
 #
 rule SharedLibrary
 {
-    local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     Depends $(<) : $(_target) ;
 
     SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) ;
+    
+    SharedLibraryImpl $(<) : $(>) ;
+}
+
+
+rule SharedLibraryImpl
+{
 }
 
 
@@ -939,8 +969,21 @@ rule SharedLibrary_AddLibraries
 #
 rule SharedLibraryFromObjects
 {
-	Echo "SharedLibraryFromObjects rule not implemented in Jamrules.base." ;
-	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
+	# Add grist to file names
+	local _objects = [ FGristFiles $(>) ] ;
+
+	# Add library name decorations <name><.dll/.so>
+	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+	# setup dependencies
+	Depends exe : $(_target) ;
+	Depends lib : $(_target) ;
+	Depends $(_target) : $(_objects) ;
+
+	Clean clean : $(_target) ;
+	MakeLocate $(_target) : $(LOCATE_TARGET) ;
+	
+	Link $(_target) : $(_objects) ;
 }
 
 
@@ -966,8 +1009,13 @@ rule SharedLibrary_LinkLibraries
 
 rule SharedLibrary_MakeLocate
 {
-	Echo "SharedLibrary_MakeLocate rule not implemented in Jamrules.base." ;
-	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
+    MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
+    SharedLibrary_MakeLocateImpl $(<) : $(>) ;
+}
+
+
+rule SharedLibrary_MakeLocateImpl
+{
 }
 
 
@@ -977,11 +1025,13 @@ rule SharedLibrary_MakeLocate
 # @param > list of shared libraries to link
 #
 rule SharedLibrary_LinkSharedLibraries
-{
-	Exit "SharedLibrary_LinkSharedLibraries rule not implemented in Jamrules.base." ;
-	Exit "Must be implemented in Jamrules.$(TOOLSET)" ;
+{  
+    SharedLibrary_LinkSharedLibrariesImpl $(<) : $(>) ;
 }
 
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+}
 
 rule Shell
 {
@@ -1430,12 +1480,12 @@ actions As
 
 actions C++
 {
-    $(C++) -c $(C++FLAGS) $(OPTIM) -I$(HDRS) -o $(<) $(>) 
+    $(C++) -c $(C++FLAGS) $(OPTIM) $(WARN) -I$(HDRS) -o $(<) $(>) 
 }
 
 actions Cc
 {
-    $(CC) -c $(CCFLAGS) $(OPTIM) -I$(HDRS) -o $(<) $(>)
+    $(CC) -c $(CCFLAGS) $(OPTIM) $(WARN) -I$(HDRS) -o $(<) $(>)
 }
 
 actions Chgrp

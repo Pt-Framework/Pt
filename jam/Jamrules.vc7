@@ -2,6 +2,22 @@
 #
 JamInclude Jamrules.vc ;
 
+# Set path to Visual Studio installation using environment variable VSINSTALLDIR 
+# if it was not passed to jam using -sVISUALC=<path> 
+if $(VISUALC) 
+{
+	VISUALC = $(VISUALC:J=" ") ;
+} 
+else
+{
+  VISUALC ?= $(VCINSTALLDIR:J=" ") ;
+}
+if ! $(VISUALC)
+{
+  Exit "No Visual Studio installation path defined. 
+Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" ;
+}
+
 if $(TARGET_OS:L) != nt 
 {
 	exit "This target-os is not supported on this toolset" ;
@@ -12,11 +28,6 @@ if $(TARGET_OSPLAT:L) != x86
 	exit "This target-platform is not supported on this toolset" ;
 }
 
-# Set Path to Visual Studio 2003 installation from envvar if 
-# not set by user
-#
-VISUALC ?= $(VCINSTALLDIR:J=" ") ;
-
 
 # Path to VC/C++ module of visual studio installation 
 #
@@ -26,40 +37,30 @@ VCDIR = $(VISUALC)\\vc7 ;
 PLATFORMSDK ?= $(VISUALC)\\vc7\\PlatformSDK ;
 
 
-# This probably shouldnt be here...
-#
-JamInclude Jamrules.mfc ;
-
-
-if $(CONFIG) = debug 
+if $(CONFIG:L) = debug 
 {
 	LINKFLAGS += /DEBUG ;
-	CCFLAGS += /MDd /Zi ;
+	CCFLAGS   += /MDd /Zi ;
+  OPTIM     ?= /Od ;
 }
 else
 {
-	LINKFLAGS += "" ;
-	CCFLAGS += /MD /O1 /Oy ;
+	CCFLAGS += /MD ;
+	OPTIM   ?= /O1 /Oy ;
 }
 
 AR		= $(VISUALC)\\vc7\\bin\\lib ;
 AS		= masm386 ;
 CC		= $(VISUALC)\\vc7\\bin\\cl /nologo ;
 C++		= $(CC) ;
-C++FLAGS	+= $(CCFLAGS) /EHsc /GR /W3 /DWIN32 /Zc:wchar_t ; #/FD /Gm
-LINK		= $(VISUALC)\\vc7\\bin\\link /nologo ;
-LINKFLAGS       += "/INCREMENTAL:NO" ;
-LINKLIBS        += \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\advapi32.lib\"
-                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\gdi32.lib\"
-                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\user32.lib\"
-                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\kernel32.lib\" 
-                  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\version.lib\"
-		  \"$(VISUALC)\\vc7\\PlatformSDK\\lib\\wsock32.lib\" ;
-OPTIM	 	?= "" ;
-STDHDRS         = \"$(VISUALC)\\vc7\\include\" 
-	          \"$(VISUALC)\\vc7\\PlatformSDK\\include\" ;
-UNDEFFLAG	= "/u _" ;
+LINK		   = $(VISUALC)\\vc7\\bin\\link /nologo ;
+RC    = $(VISUALC)\\vc7\\bin\\rc ;
 
-# set directory to mfc for this toolset
-MFCDIR = \"$(VCDIR)\\atlmfc\" ;
+C++FLAGS	+= $(CCFLAGS) /EHsc /GR /DWIN32 /Zc:wchar_t ;
+LINKFLAGS += "/INCREMENTAL:NO" ;
+LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
+STDHDRS    = \"$(VISUALC)\\vc7\\include\" 
+	           \"$(PLATFORMSDK)\\include\" ;
+UNDEFFLAG	 = "/u _" ;
+WARN      ?= /W3 ;
 

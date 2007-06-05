@@ -8,54 +8,44 @@ JamInclude Jamrules.vc8.wince.$(TARGET_OSPLAT:L) ;
 CCFLAGS += /D "_WIN32_WCE=0x420" /D "WINCE" /D "UNDER_CE" /D "WIN32_PLATFORM_PSPC" ;
 CCFLAGS += /D "_CONSOLE" /D "_UNICODE" /D "UNICODE" /W3 ;
 
-LINKFLAGS += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
-LINKFLAGS += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
+LINKFLAGS     += /MANIFEST:NO /NODEFAULTLIB:"oldnames.lib" ;
+LINKFLAGS     += /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT ;
+MAINLINKFLAGS += /ENTRY:"mainWCRTStartup" ;
+
 
 if $(CONFIG:L) = debug 
 {
-	CCFLAGS += /Os /Od /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
+	CCFLAGS   +=  /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
+	OPTIM     ?=  /Os /Od ;
 	LINKFLAGS += /DEBUG ;
 }
 else
 {
-	#C++FLAGS += /MD /O1 /Oy /D "NDEBUG" ;
-	CCFLAGS += /MD /O1 /Oy /D "NDEBUG" ;
+	CCFLAGS += /MD /D "NDEBUG" ;
+	OPTIM   ?=  /O1 /Oy ;
 }
 
+WARN      ?= /W3 ;
 C++FLAGS  +=  $(CCFLAGS) ;
 C++FLAGS  +=  /EHsc /fp:fast /GR /TP ;
 
 
-# set MFC directory
-#
-MFCDIR = \"$(VISUALC)\\vc\\ce\\atlmfc\" ;
-
-
 STDHDRS = \"$(VISUALC)\\vc\\ce\\include\" 
-	  \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
+          \"$(VISUALC)\\smartdevices\\sdk\\pocketpc2003\\include\" ;
 
 
-# TODO: entry flags might go to global linkflags
-rule Main
-{
-	local _target = $(1:S=$(SUFEXE)) ;
-	LINKFLAGS on $(_target) += $(LINKFLAGS) /ENTRY:"mainWCRTStartup" ;
-	
-	Clean clean : $(_target) ;
-	Clean clean : $(_target:S=.lib) ;
-	Clean clean : $(_target:S=.exp) ;	
-	Clean clean : $(_target:S=.pdb) ;
-	Clean clean : $(_target:S=.ilk) ;
-	Clean clean : $(_target:S=.idb) ;
-	Clean clean : $(_target:S=.exe.manifest) ;
-	
-	MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-	Objects $(2) : $(1) ;   
-}
+###################################################################################################
+# Die hier folgende Implementierung der Rule Link ist ein Workaround, um die Zeilenlängen-
+# beschränkung der Shell unter Windows für den VC Linker zu umgehen. Dazu wird ein Response-File
+# mit den zu linkenden Object-Files angelegt, der dann dem Linker übergeben wird.
+# Problematisch ist diese Rule, wenn JAM mit dem Parameter -r aufgerufen wird (z.B. im Autobuild)
+# Dann verursacht das von JAM genutzte Pipen der Logausgabe mittels >> in Kombination mit dem Pipen
+# in den Responsefile einen Konflikt
+###################################################################################################
+#actions win32-Link bind RESPONSEFILE NEEDLIBS
+#{
+#	set PATH=$(VISUALC)\Common7\IDE;%PATH%
+#	set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB%	
+#	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) @$(RESPONSEFILE) $(NEEDLIBS) $(LINKLIBS)
+#}
 
-
-actions win32-Link bind NEEDLIBS RESPONSEFILE
-{
-	set PATH=$(VISUALC)\Common7\IDE;%PATH%
-	"$(LINK)" $(LINKFLAGS) /out:$(<) $(UNDEFS) @$(RESPONSEFILE) $(NEEDLIBS) $(LINKLIBS)
-}

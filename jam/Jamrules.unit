@@ -17,19 +17,26 @@ NOTFILE all-test ;
 rule PtUnitTest
 {
 	local _target = $(1:S=$(SUFEXE)) ;
-
-	DEPENDS test : $(_target) ;
-
+	local _output = $(1:S=.unit) ;
+	
 	Main $(<) : $(>) ;
 
-	local _output = $(1:S=.unit) ;
-	Depends $(_output) : $(_target) ;
-	Clean clean : $(_output) ;
+	DEPENDS $(_output) : $(_target) ;
+	DEPENDS test : $(_output) ;
 
-	testExe on $(_target) = $(_target) ;
-	PtUnitTestAction $(_target) : $(_output) ;
+	Clean clean : $(_output) ;
+	MakeLocate $(_output) : $(LOCATE_TARGET) ;
+
+	PtUnitTestAction $(_output) : $(_target) ;
 }
 
+rule PtUnitTest_MakeLocate
+{
+	local _output = $(1:S=.unit) ;
+
+  Main_MakeLocate $(<) : $(>) ;
+  MakeLocate $(_output) : $(>) ;
+}
 
 # Actions
 #
@@ -38,14 +45,14 @@ if $(UNIX)
 
 	actions PtUnitTestAction bind testExe
 	{
-		sh -c "export LD_LIBRARY_PATH=`pwd`/bin && $(testExe) -f$(1:S=.unit)"
+		sh -c "export LD_LIBRARY_PATH=`pwd`/$(>:P) && $(>) -f$(>:S=.unit)"
 	}
 
 }
 else if $(TARGET_OS:L) = "wince"
 {
 	#TODO: run device emulator
-	actions PtUnitTestAction bind testExe
+	actions PtUnitTestAction
 	{
 		echo ### WARNING: Can not run WinCE unit test.
 	}
@@ -53,9 +60,9 @@ else if $(TARGET_OS:L) = "wince"
 else
 {
 
-	actions PtUnitTestAction bind testExe
+	actions PtUnitTestAction
 	{
-		$(testExe) -f$(1:S=.unit)
+		$(>) -f$(>:S=.unit)
 	}
 
 }

@@ -15,8 +15,8 @@ RANLIB		?= ranlib ;
 # TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
 #       options below can be enabled ???
 #
-CCFLAGS 	+= -Wall ; #-fvisibility-inlines-hidden -fvisibility=hidden ;
-LINKFLAGS	?= -Wall ; #-fvisibility-inlines-hidden -fvisibility=hidden ;
+#CCFLAGS 	+= -fvisibility-inlines-hidden -fvisibility=hidden ;
+#LINKFLAGS	?= -fvisibility-inlines-hidden -fvisibility=hidden ;
 LINKLIBS	+= -lstdc++ ;
 
 if $(CONFIG) = debug
@@ -27,8 +27,10 @@ if $(CONFIG) = debug
 else
 {
 	CCFLAGS += -DNDEBUG ;
-	OPTIM	?= -O1 ;
+	OPTIM	  ?= -O1 ;
 }
+
+WARN ?= -Wall ;
 
 # only use -fPIC for non-X86 CPUs
 if $(TARGET_OSPLAT:U) != X86
@@ -67,68 +69,61 @@ rule FIncludes
 { return -I$(<) ; }
 
 
-rule Main
+rule MainImpl
 {
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
     # linker flag -E: export global symbols from the executable
     LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
-
-    Depends exe : $(1) ;
-
-    MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-    Objects $(>) ;
 }
 
 
-rule Main_LinkSharedLibraries
+rule Main_LinkSharedLibrariesImpl
 {
     local _target = $(<)$(SUFEXE) ;
     Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-    NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    local _l = $(>:S=$(SUFDLL)) ;
+    SHLIBS on $(_target) += $(_l) ;
 }
 
 
-rule SharedLibrary_MakeLocate
+# Adds a resource to be linked with a binary.
+# Not implemented for GCC - on Windows, it can be 
+# used to add an icon to the binary
+#
+# param 1 executable
+# param 2 resource file
+# param 3 output directory of compiled resource file
+#
+# Resource prog : resources.rc : output_directory ;
+rule Resource
 {
-    MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
 }
 
 
-rule SharedLibrary_LinkSharedLibraries
+rule SharedLibraryImpl
 {
-    local _target = $(PRELIB)$(<)$(SUFDLL) ;
-    Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
-    NEEDLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
-}
-
-
-rule SharedLibraryFromObjects
-{
-	# Add grist to file names
-	local _sources = [ FGristFiles $(>) ] ;
-
 	# Add library name decorations <lib><name><.so>
 	local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-	# setup dependencies
-	Depends exe : $(_target) ;
-	Depends lib : $(_target) ;
-	Depends $(_target) : $(_sources) ;
-	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
-
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
-
-	Clean clean : $(_target) ;
-
 	LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
-	Link $(_target) : $(_sources) ;
 }
 
 
-actions Link bind NEEDLIBS
+rule SharedLibrary_LinkSharedLibrariesImpl
 {
-    $(CC) $(LINKFLAGS) -o $(<) $(UNDEFS) $(>) -Wl,--start-group $(LINKLIBS) $(NEEDLIBS) --end-group
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+
+    local _l = $(>:S=$(SUFDLL)) ;
+    SHLIBS on $(_target) += $(_l) ;
+}
+
+
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(SHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
 }
 
