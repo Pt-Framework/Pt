@@ -30,31 +30,6 @@
 
 namespace Pt {
 
-    class Any;
-    struct AnyIO;
-
-
-    //! @internal
-    class PT_API AnyFactory : public Singleton<AnyFactory>
-    {
-        friend class Singleton<AnyFactory>;
-
-        public:
-            //! @internal
-            std::multimap<std::string, AnyIO*>& map();
-
-            //! @internal
-            const std::multimap<std::string, AnyIO*>& map() const;
-
-        protected:
-            AnyFactory();
-
-        private:
-            //! @internal
-            std::multimap<std::string, AnyIO*> _initMap;
-    };
-
-
     /** @brief Contains an arbitrary type
         @ingroup Reflection
 
@@ -469,6 +444,27 @@ namespace Pt {
         //virtual void input(const ArchiveNode& node, Pt::Any& a)
         //{
         //}
+    };
+
+
+    //! @internal
+    class PT_API AnyFactory : public Singleton<AnyFactory>
+    {
+        friend class Singleton<AnyFactory>;
+
+        public:
+            //! @internal
+            std::multimap<std::string, AnyIO*>& map();
+
+            //! @internal
+            const std::multimap<std::string, AnyIO*>& map() const;
+
+        protected:
+            AnyFactory();
+
+        private:
+            //! @internal
+            std::multimap<std::string, AnyIO*> _initMap;
     };
 
 

@@ -42,8 +42,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
     {
         std::cout << "WARNING: method is not fully implemented:\n\tvoid TextProtocol::run(Pt::Unit::TestSuite& suite)" << std::endl;
 
-
-        /*lineNumber++;
+        lineNumber++;
 
         // remove '\r' (Windows files on Linux)
         while(line.find(13, 0) != std::string::npos)
@@ -110,8 +109,12 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         {
             lineReader >> propertyName;
 
-            value.init(suite.property(propertyName).typeName());
-            lineReader >> value;
+            // old code
+            //value.init(suite.property(propertyName).typeName());
+            //lineReader >> value;
+
+            std::string typeName = suite.property(propertyName).typeName();
+            value = Any::create(typeName, lineReader);
 
             suite.setProperty(propertyName, value);
         }
@@ -122,9 +125,16 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
             while(getline(lineReader, paramType, ':'))
             {
-                paramType.erase(0, paramType.find_first_not_of(", \t"));
-                value.init(paramType);
-                lineReader >> value;
+                paramType.erase( 0, paramType.find_first_not_of(", \t") );
+
+                // old code
+                //value.init(paramType);
+                //lineReader >> value;
+
+                // TODO: use reflection to get paramType instead of writing
+                // the type in the file
+                value = Any::create(paramType, lineReader);
+
                 args.push_back(value);
             }
 
@@ -136,6 +146,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             std::stringstream msg;
             msg << "Invalid protocol format in " << m_iniFileName << ", line " << lineNumber << ": " << token;
             throw std::logic_error(msg.str() + PT_SOURCEINFO);
-        }*/
+        }
     }
 }
