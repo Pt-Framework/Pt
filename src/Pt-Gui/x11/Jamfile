@@ -5,11 +5,12 @@ SubDirHdrs /usr/include/X11 ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
 Library Pt-Gui-x11 : ApplicationImpl.cpp
-                      Drawable.cpp
-                      PixmapImpl.cpp
-                      PixmapPainterImpl.cpp
-                      WidgetImpl.cpp
-                      WidgetPainterImpl.cpp
-                      PainterImpl.cpp
-                      ;
+                     Drawable.cpp
+                     PixmapImpl.cpp
+                     PixmapPainterImpl.cpp
+                     WidgetImpl.cpp
+                     WidgetPainterImpl.cpp
+                     PainterImpl.cpp
+                     ;
 
+Library_LocateLibrary Pt-Gui-x11 : bin ;

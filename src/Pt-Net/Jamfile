@@ -17,5 +17,5 @@ SharedLibrary_MakeLocate Pt-Net : bin ;
 
 PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
 Main_LinkSharedLibraries TcpSocketTest : Pt Pt-Net Pt-System Pt-Unit ;
-Main_MakeLocate TcpSocketTest : bin ;
+PtUnitTest_MakeLocate TcpSocketTest : bin ;
 

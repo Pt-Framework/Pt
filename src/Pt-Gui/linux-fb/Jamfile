@@ -8,6 +8,8 @@ Library Pt-Gui-linux-fb : ApplicationImpl.cpp
                           PixmapImpl.cpp
                           ;
 
+Library_MakeLocate Pt-Gui-linux-fb : bin ;
+
 Main LfbTest : LfbTest.cpp ;
 Main_LinkSharedLibraries LfbTest : Pt-Gui Pt-Gfx Pt-Text Pt-System Pt ;
 Main_LinkLibraries LfbTest : Pt-Gui-linux-fb ;

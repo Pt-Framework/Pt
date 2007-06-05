@@ -17,7 +17,7 @@ SharedLibrary_MakeLocate Pt-Text : bin ;
 
 PtUnitTest TextStreamTest : TextStreamTest.cpp ;
 Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt Pt-Unit ;
-Main_MakeLocate TextStreamTest : bin ;
+PtUnitTest_MakeLocate TextStreamTest : bin ;
 
 
 
