@@ -37,6 +37,7 @@
 #include "Pt/Db/Row.h"
 #include "Pt/Db/Value.h"
 
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
