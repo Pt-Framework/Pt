@@ -217,8 +217,8 @@ inline StringData::value_type* StringData::erase(value_type* pos, size_type n)
     _length -= n;
     _str[_length] = Pt::Char::null();
 
-    return _str + rpos;
     this->updateInternalStringData();
+    return _str + rpos;
 }
 
 
