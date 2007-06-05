@@ -38,7 +38,7 @@
 #include "Pt/Db/Value.h"
 
 #include <sstream>
-#include <limits>
+#include <stdexcept>
 
 
 namespace Pt {
@@ -289,7 +289,30 @@ namespace sqlite {
 
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
+            
             int ret = ::sqlite3_bind_text(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
+
+            if(ret != SQLITE_OK)
+            {
+                Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
+            }
+        }
+    }
+
+    void Statement::setBlob(const std::string& col, const Pt::Blob& data)
+    {
+        int idx = getBindIndex(col);
+        sqlite3_stmt* stmt = getBindStmt();
+
+        if (idx != 0)
+        {
+            reset();
+
+            //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+            //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
+            
+            int ret = ::sqlite3_bind_blob(stmt, idx, data.m_data, data.m_length, SQLITE_TRANSIENT);
+
             if(ret != SQLITE_OK)
             {
                 Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);

@@ -64,6 +64,7 @@ PT_SQLITE_SOURCES = alter.c
 PT_SQLITE_SOURCES += Connection.cpp 
                      Connector.cpp
                      Cursor.cpp
+                     Error.cpp
                      Statement.cpp
                      StmtRow.cpp
                      StmtValue.cpp
