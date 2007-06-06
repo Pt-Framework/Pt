@@ -76,6 +76,7 @@ Logger& Logger::beginLog(const Pt::SourceInfo& si)
     if( this->enabled() )
     {
         _msg->setSourceInfo(si);
+        _msg->setTimestamp( System::Clock::getCurrentTime() );
     }
 
     return *this;
