@@ -964,5 +964,16 @@ inline std::string basic_string<Pt::Char>::narrow() const
     return ret;
 }
 
+
+inline basic_string<Pt::Char> basic_string<Pt::Char>::widen(const std::string& str)
+{
+    std::basic_string<Pt::Char> ret;
+
+    for(size_t n = 0; n < str.size(); ++n)
+        ret += Pt::Char( str[n] );
+
+    return ret;
+}
+
 }
 

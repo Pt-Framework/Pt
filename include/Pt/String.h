@@ -319,6 +319,8 @@ class basic_string< Pt::Char > {
 
         std::string narrow() const;
 
+        static basic_string widen(const std::string& str);
+
     public:
         basic_string& operator=(const basic_string& str)
         {return this->assign(str);}
