@@ -44,6 +44,8 @@ class PT_API PropertyInfo  : public MemberInfo
         virtual ~PropertyInfo()
         {}
 
+        virtual const char* typeName() const = 0;
+
         virtual Pt::Any value()
         { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
 
@@ -75,6 +77,11 @@ class ReadPropertyInfo : virtual public PropertyInfo
 
         ~ReadPropertyInfo()
         { delete _getter; }
+
+        virtual const char* typeName() const
+        {
+            return TypeTraits<T>::typeName();
+        }
 
         virtual Pt::Any value()
         {
@@ -108,6 +115,11 @@ class WritePropertyInfo : virtual public PropertyInfo
         ~WritePropertyInfo()
         {
             delete _setter;
+        }
+
+        virtual const char* typeName() const
+        {
+            return TypeTraits<T>::typeName();
         }
 
         virtual void setValue(const Pt::Any& a)
@@ -152,6 +164,11 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
         , WritePropertyInfo<A>(parent, setter)
         { }
 
+        virtual const char* typeName() const
+        {
+            return TypeTraits<R>::typeName();
+        }
+
         virtual Pt::Any value()
         {
             Pt::Any any;
@@ -176,6 +193,11 @@ class InternalReadPropertyInfo : public PropertyInfo
         ~InternalReadPropertyInfo()
         { }
 
+        virtual const char* typeName() const
+        {
+            return TypeTraits<T>::typeName();
+        }
+
         virtual Pt::Any value()
         { return _value->value(); }
 
@@ -198,6 +220,11 @@ class InternalReadWritePropertyInfo : public PropertyInfo
         ~InternalReadWritePropertyInfo()
         {
             delete _setter;
+        }
+
+        virtual const char* typeName() const
+        {
+            return TypeTraits<T>::typeName();
         }
 
         virtual Pt::Any value()

@@ -60,7 +60,7 @@ class TestReflectable : public Pt::Reflectable
             this->registerMethod("method3", *this, &TestReflectable::method3);
         }
 
-        void method1(int)
+        void method1(int) const
         {}
 
         void method2(int, bool)

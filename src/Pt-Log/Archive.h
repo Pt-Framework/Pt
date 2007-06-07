@@ -58,30 +58,128 @@ class Archive
 };
 
 
+    struct AnyBuilder
+    {
+        virtual ~AnyBuilder()
+        {}
+
+        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+    };
+
+
+    template <typename T>
+    struct BasicAnyBuilder : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+    };
+
+
+    template <>
+    struct BasicAnyBuilder<bool> : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const
+        {
+            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
+        }
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const
+        {
+            value == L"true"? a = true : a = false;
+        }
+    };
+
+
+    template <>
+    struct BasicAnyBuilder<std::string> : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const
+        {
+            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
+        }
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const
+        {
+            std::string s = value.narrow();
+            a = s;
+        }
+    };
+
+
+    class PT_API AnyFactory2 : public Singleton<AnyFactory2>
+    {
+        friend class Singleton<AnyFactory2>;
+
+        public:
+            static Any create(const std::string typeName, const Pt::String& value)
+            {
+                const AnyBuilder* builder = AnyFactory2::findBuilder(typeName);
+                if( builder == 0 )
+                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
+
+                Pt::Any a;
+                builder->build(a, value);
+                return a;
+            }
+
+            static Any create(const std::string typeName, const Archive& archive)
+            {
+                const AnyBuilder* builder = AnyFactory2::findBuilder(typeName);
+                if( builder == 0 )
+                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
+
+                Pt::Any a;
+                builder->build(a, archive);
+                return a;
+            }
+
+        protected:
+            AnyFactory2()
+            {
+                _builder.insert( std::make_pair("bool", new BasicAnyBuilder<bool>) );
+                _builder.insert( std::make_pair("std::string", new BasicAnyBuilder<std::string>) );
+            }
+
+            static const AnyBuilder* findBuilder(const std::string typeName)
+            {
+                std::multimap<std::string, AnyBuilder*>::iterator it;
+                it = AnyFactory2::instance()._builder.find(typeName);
+
+                if( it != AnyFactory2::instance()._builder.end() )
+                    return it->second;
+
+                return 0;
+            }
+
+        private:
+            //! @internal
+            std::multimap<std::string, AnyBuilder*> _builder;
+    };
+
+
 inline bool operator>>(const Archive& archive, Reflectable& r)
 {
     PropertyMap& pmap = r.properties();
     for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
     {
-        Pt::String name;
-        const std::string& pname = it->first;
-        for(size_t n = 0; n < pname.size(); ++n)
-            name += Pt::Char( pname[n] );
+        PropertyInfo& propInfo = *( it->second );
+        Pt::String propName = Pt::String::widen( it->first );
 
-        std::string typeName = it->second->value().typeName();
-
-        const Pt::String* value = archive.value(name);
+        const Pt::String* value = archive.value(propName);
         if(value)
         {
-            Pt::StringStream ss(*value);
-            Pt::Any a = Pt::Any::create(typeName, ss);
+            Any a = AnyFactory2::create( propInfo.typeName(), *value );
             it->second->setValue(a);
         }
 
-        const Archive* subarchive = archive.findArchive(name);
+        const Archive* subarchive = archive.findArchive(propName);
         if(subarchive)
         {
-            //Pt::Any::create(typeName, *subnode);
+            Any a = AnyFactory2::create( propInfo.typeName(), *subarchive );
+            it->second->setValue(a);
         }
     }
 

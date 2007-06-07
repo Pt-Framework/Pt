@@ -176,3 +176,4 @@ include/Pt/PropertyValue.h
 include/Pt/MethodInfo.h
 include/Pt/MemberInfo.h
 include/Pt/MethodInfoBase.h
+include/Pt/Unit/TextProtocol.h

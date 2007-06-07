@@ -23,6 +23,7 @@
 #include <Pt/Args.h>
 #include <Pt/Exception.h>
 #include <Pt/Method.h>
+#include <Pt/ConstMethod.h>
 #include <Pt/MethodInfoBase.h>
 
 
@@ -271,22 +272,32 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
 template < class C,
            typename A1>
 class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1>
-                                                                      , private Method<void , C, A1>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)(A1);
+        typedef void (C::*ConstMemFuncT)(A1) const;
 
     public:
         MethodInfo(C* object, MemFuncT memFunc)
-        : Method<void, C, A1>(object, memFunc)
+        : _cb( new Method<void, C, A1>(object, memFunc) )
         {}
+
+        MethodInfo(C* object, ConstMemFuncT memFunc)
+        : _cb( new ConstMethod<void, C, A1>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Args& a)
         {
-            Method<void, C, A1>::call( any_cast<A1>( a.get(0) ) );
+            _cb->call( any_cast<A1>( a.get(0) ) );
             return Any();
         }
+
+    private:
+        Callable<void, A1>* _cb;
 };
 
 

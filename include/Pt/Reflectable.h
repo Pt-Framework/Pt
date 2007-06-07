@@ -157,6 +157,13 @@ class PT_API Reflectable
             _methods.insert( std::make_pair(name, cb) );
         }
 
+        template <class ParentT, typename A1>
+        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) const )
+        {
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(&parent, memFunc);
+            _methods.insert( std::make_pair(name, cb) );
+        }
+
         template <class ParentT, typename A1, typename A2>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
         {
