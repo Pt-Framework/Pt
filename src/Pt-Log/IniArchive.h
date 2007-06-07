@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_IniArchive_h
-#define Pt_IniArchive_h
+#ifndef Pt_PropertiesArchive_h
+#define Pt_PropertiesArchive_h
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
@@ -30,23 +30,24 @@
 
 namespace Pt {
 
-class IniArchiveElement : public Archive
+class PropertiesArchive : public Archive
 {
-    typedef std::multimap< Pt::String, IniArchiveElement> NodeMap;
+    typedef std::multimap< Pt::String, PropertiesArchive> NodeMap;
     typedef std::multimap< Pt::String, Pt::String> ValueMap;
 
     public:
-        IniArchiveElement()
+        PropertiesArchive()
         {}
 
-        IniArchiveElement(const Pt::String& name)
+        PropertiesArchive(const Pt::String& name)
         : _name(name)
         { }
 
-        ~IniArchiveElement()
+        ~PropertiesArchive()
         { }
 
-        const Pt::String* value(const Pt::String& name) const
+    protected:
+        const Pt::String* _value(const Pt::String& name) const
         {
             ValueMap::const_iterator it = _values.find(name);
             if( it == _values.end() )
@@ -55,12 +56,12 @@ class IniArchiveElement : public Archive
             return &(it->second);
         }
 
-        void addValue(const Pt::String& name, const Pt::String& value)
+        void _addValue(const Pt::String& name, const Pt::String& value)
         {
             _values.insert( std::make_pair(name, value) );
         }
 
-        const Archive* findArchive(const Pt::String& name) const
+        const Archive* _findArchive(const Pt::String& name) const
         {
             NodeMap::const_iterator it = _nodes.find(name);
             if( it == _nodes.end() )
@@ -69,22 +70,15 @@ class IniArchiveElement : public Archive
             return &(it->second);
         }
 
-        Archive& addArchive(const Pt::String& name)
+        Archive& _addArchive(const Pt::String& name)
         {
             NodeMap::iterator it = _nodes.find(name);
             if( it != _nodes.end() )
                 return it->second;
 
-            IniArchiveElement node(name);
+            PropertiesArchive node(name);
             it = _nodes.insert( std::make_pair(name, node) );
             return it->second;
-        }
-
-    protected:
-        virtual const Archive* _extract(const Pt::String& typeName)
-        {
-            const Archive* archive = this->findArchive(typeName);
-            return archive;
         }
 
     private:
@@ -94,71 +88,33 @@ class IniArchiveElement : public Archive
 };
 
 
-class IniArchive : public Archive
+class PropertiesReader
 {
-    private:
-        std::basic_istream<Pt::Char>& _is;
-        std::basic_ostream<Pt::Char>* _os;
-        typedef void (IniArchive::*Parse)(const Pt::Char&);
-        Parse _parse;
-        Pt::String _currentName;
-        Pt::String _currentValue;
-        IniArchiveElement _root;
+    public:
+        Pt::Char eof;
 
     public:
-        IniArchive(std::basic_istream<Pt::Char>& is)
+        PropertiesReader(std::basic_istream<Pt::Char>& is)
         : _is(is)
         {
-            this->parse();
+            typedef std::char_traits<Pt::Char> Traits;
+            eof = Traits::to_char_type( Traits::eof() );
         }
 
-        IniArchive(std::basic_iostream<Pt::Char>& ios)
-        : _is(ios)
-        , _os(&ios)
-        {
-            this->parse();
-        }
-
-        ~IniArchive()
+        ~PropertiesReader()
         {}
 
-        void commit()
+        void read(Archive& archive)
         {
-            //if(_os)
-            //
-        }
-
-        const Pt::String* value(const Pt::String& name) const
-        {
-            return _root.value(name);
-        }
-
-        void addValue(const Pt::String& name, const Pt::String& value)
-        {
-            _root.addValue(name, value);
-        }
-
-        const Archive* findArchive(const Pt::String& name) const
-        {
-            return _root.findArchive(name);
-        }
-
-        Archive& addArchive(const Pt::String& name)
-        {
-            return _root.addArchive(name);
+            _root = &archive;
+            this->parse();
         }
 
     protected:
-        virtual const Archive* _extract(const Pt::String& typeName)
-        {
-            const Archive* archive = _root.findArchive(typeName);
-            return archive;
-        }
-
         void parse()
         {
-            IniArchive& self = *this;
-            _parse = &IniArchive::parseBeforeName;
+            PropertiesReader& self = *this;
+            _parse = &PropertiesReader::parseBeforeName;
 
             Pt::Char ch;
             while( _is.get(ch) )
@@ -166,21 +122,17 @@ class IniArchive : public Archive
                 (self.*_parse)(ch);
             }
 
-            // push context in case line ends with EOF
-            (self.*_parse)( Pt::Char('\n') );
+            (self.*_parse)( eof );
         }
 
         void parseBeforeName(const Pt::Char& ch)
         {
-            if( Pt::Unicode::isSpace(ch) )
-                return;
-
-            if( ch == Pt::Char(L'\n') )
+            if( ch == eof || Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
 
             if( ch == Pt::Char(L'#') )
             {
-                _parse = &IniArchive::parseComment ;
+                _parse = &PropertiesReader::parseComment ;
                 return;
             }
 
@@ -191,7 +143,7 @@ class IniArchive : public Archive
             _currentValue.clear();
 
             _currentName += ch;
-            _parse = &IniArchive::parseName;
+            _parse = &PropertiesReader::parseName;
         }
 
         void parseComment(const Pt::Char& ch)
@@ -199,75 +151,149 @@ class IniArchive : public Archive
             if( ch != Pt::Char(L'\n') )
                 return;
 
-            _parse = &IniArchive::parseBeforeName;
+            _parse = &PropertiesReader::parseBeforeName;
         }
 
         void parseName(const Pt::Char& ch)
         {
             if( ch == Pt::Char(L'=') )
             {
-                _parse = &IniArchive::parseAfterEqual;
+                _parse = &PropertiesReader::parseAfterEqual;
                 return;
             }
 
             if( Pt::Unicode::isSpace(ch) )
             {
-                _parse = &IniArchive::parseAfterName;
+                _parse = &PropertiesReader::parseAfterName;
                 return;
             }
+
+            if( ch == eof )
+                throw std::logic_error("expected \'=\'");
 
             _currentName += ch;
         }
 
         void parseAfterName(const Pt::Char& ch)
         {
+            if( ch == eof )
+                throw std::logic_error("expected \'=\'");
+
             if( Pt::Unicode::isSpace(ch) )
                 return;
 
             if(ch == Pt::Char(L'='))
             {
-                _parse = &IniArchive::parseAfterEqual;
+                _parse = &PropertiesReader::parseAfterEqual;
                 return;
             }
 
-            throw std::logic_error("space in property name");
+            throw std::logic_error("expected \'=\'");
         }
 
         void parseAfterEqual(const Pt::Char& ch)
         {
-            if( Pt::Unicode::isSpace(ch) ||
-                ch == Pt::Char(L'\n') ) // should we allow \n?
+            if( ch == eof )
+                throw std::logic_error("expected value");
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
 
-            if( ch == Pt::Char(L'=') )
+            if( ch == Pt::Char(L'=') || ch == Pt::Char(L'#') )
                 throw std::logic_error("expected value");
 
-            if( ch == Pt::Char(L'#') )
-                throw std::logic_error("expected value");
-
-            _currentValue += ch;
-            _parse = &IniArchive::parseValue;
-        }
-
-        void parseValue(const Pt::Char& ch)
-        {
-            typedef std::char_traits<Pt::Char> CharTraits;
-            static Pt::Char eof = CharTraits::to_int_type( CharTraits::eof() );
-
-            if( ch == Pt::Char(L'=') )
-                std::logic_error("malformed property value");
-
-            if( Pt::Unicode::isSpace(ch) ||
-                ch == Pt::Char(L'\n') ||
-                ch == eof )
+            if( ch == Pt::Char('"') )
             {
-                //std::cerr << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
-                this->addNode(_currentName, _currentValue);
-                _parse = &IniArchive::parseBeforeName;
+                _parse = &PropertiesReader::parseQoutedValue;
                 return;
             }
 
             _currentValue += ch;
+            _parse = &PropertiesReader::parseValue;
+        }
+
+        void parseValue(const Pt::Char& ch)
+        {
+            if( ch == Pt::Char(L'=') )
+                std::logic_error("malformed property value");
+
+            if( ch == eof || Pt::Unicode::isSpace(ch) ||
+                ch == Pt::Char(L'\n') )
+            {
+                //std::cerr << "Unqouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                this->addNode(_currentName, _currentValue);
+                _parse = &PropertiesReader::parseBeforeName;
+                return;
+            }
+
+            _currentValue += ch;
+        }
+
+        void parseQoutedValue(const Pt::Char& ch)
+        {
+            if( ch == Pt::Char(L'\n') || ch == Pt::Char(L'\r') )
+            {
+                throw std::logic_error("missing \" after value" + PT_SOURCEINFO);
+            }
+
+            if( ch == Pt::Char(L'\\') )
+            {
+                _parse = &PropertiesReader::parseEscaped;
+                return;
+            }
+
+            if( ch == Pt::Char(L'"') )
+            {
+                _parse = &PropertiesReader::parseAfterQoutedValue;
+                return;
+            }
+
+            _currentValue += ch;
+        }
+
+        void parseEscaped(const Pt::Char& ch)
+        {
+            switch( ch.value() )
+            {
+                case L'n':
+                    _currentValue += Pt::Char(L'\n');
+                    break;
+
+                case L'r':
+                    _currentValue += Pt::Char(L'\r');
+                    break;
+
+                default:
+                    _currentValue += ch;
+                    break;
+            }
+
+            _parse = &PropertiesReader::parseQoutedValue;
+        }
+
+        void parseAfterQoutedValue(const Pt::Char& ch)
+        {
+            if( ch == eof )
+            {
+                //std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                this->addNode(_currentName, _currentValue);
+                return;
+            }
+
+            if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
+                return;
+
+            if( ch == Pt::Char('"') )
+            {
+                _parse = &PropertiesReader::parseQoutedValue;
+                return;
+            }
+
+            //std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+            this->addNode(_currentName, _currentValue);
+
+            _parse = &PropertiesReader::parseBeforeName;
+            this->parseBeforeName(ch);
         }
 
         void addNode(const Pt::String& name, const Pt::String value)
@@ -275,7 +301,7 @@ class IniArchive : public Archive
             //std::cerr << "READ: " << "'"<< name.narrow() << "' = '" << value.narrow() << "'" << std::endl;
 
             // parse the target name dot syntax
-            Archive* archive = &_root;
+            Archive* archive = _root;
 
             size_t begin = 0;
             size_t end = 0;
@@ -314,7 +340,16 @@ class IniArchive : public Archive
 
             archive->addValue(token, value);
         }
+
+    private:
+        std::basic_istream<Pt::Char>& _is;
+        typedef void (PropertiesReader::*Parse)(const Pt::Char&);
+        Parse _parse;
+        Pt::String _currentName;
+        Pt::String _currentValue;
+        Archive* _root;
 };
+
 
 }
 

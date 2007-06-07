@@ -62,7 +62,7 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
         std::map<std::string, Target*> _targetMap;
         std::map<std::string, Channel*> _channelMap;
         Pt::System::Mutex _mutex;
-        IniArchive* _archiveReader;
+        PropertiesArchive _archive;
         Pt::System::PluginManager<Channel> _pluginManager;
         Logger* _logger;
 };

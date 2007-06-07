@@ -60,14 +60,13 @@ LogManager::LogManager()
     // initialise properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    std::auto_ptr<IniArchive> archiveReader( new IniArchive(ts) );
-    _archiveReader = archiveReader.get();
-    _archiveReader->extract(*this, L"Pt-Log");
+    PropertiesReader reader(ts);
+    reader.read(_archive);
+    _archive.extract(*this, L"Pt-Log");
 
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
     logger.release();
-    archiveReader.release();
     logTarget.release();
     rootTarget.release();
 }
@@ -178,7 +177,7 @@ Target& LogManager::target(const std::string& name)
             for(size_t n = 0; n < targetName.size(); ++n)
                 str += Pt::Char( targetName[n] );
 
-            _archiveReader->extract(*foundTarget, str);
+            _archive.extract(*foundTarget, str);
         }
     }
 

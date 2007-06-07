@@ -57,7 +57,7 @@ class AnyTest : public Pt::Unit::TestSuite
         void FactoryTest()
         {
             std::stringstream ss("5");
-            Pt::Any a = Pt::Any::create("int", ss);
+            Pt::Any a = Pt::AnyFactory::create("int", ss);
             PT_UNIT_ASSERT( a == 5 );
         }
 
@@ -68,7 +68,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( b == true );
 
             std::istringstream ss("true");
-            a = Pt::Any::create("bool", ss);
+            a = Pt::AnyFactory::create("bool", ss);
             PT_UNIT_ASSERT( a == true );
         }
 
@@ -79,7 +79,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( c == 'c' );
 
             std::istringstream ss("c");
-            a = Pt::Any::create("char", ss);
+            a = Pt::AnyFactory::create("char", ss);
             PT_UNIT_ASSERT( a == 'c' );
         }
 
@@ -90,7 +90,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( i == 5 );
 
             std::istringstream ss("7");
-            a = Pt::Any::create("int", ss);
+            a = Pt::AnyFactory::create("int", ss);
             PT_UNIT_ASSERT( a == 7 );
         }
 
@@ -101,7 +101,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( f == 1.5 );
 
             std::istringstream ss("2.5");
-            a = Pt::Any::create("float", ss);
+            a = Pt::AnyFactory::create("float", ss);
             PT_UNIT_ASSERT( a == 2.5f );
         }
 
@@ -112,7 +112,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( d == 1.5 );
 
             std::istringstream ss("2.5");
-            a = Pt::Any::create("double", ss);
+            a = Pt::AnyFactory::create("double", ss);
             PT_UNIT_ASSERT( a == 2.5 );
         }
 
@@ -123,7 +123,7 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( s == "hello" );
 
             std::istringstream ss("\"world\"");
-            a = Pt::Any::create("std::string", ss);
+            a = Pt::AnyFactory::create("std::string", ss);
             PT_UNIT_ASSERT( a == std::string("world") );
         }
 };

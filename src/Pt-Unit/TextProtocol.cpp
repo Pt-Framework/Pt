@@ -114,7 +114,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             //lineReader >> value;
 
             std::string typeName = suite.property(propertyName).typeName();
-            value = Any::create(typeName, lineReader);
+            value = AnyFactory::create(typeName, lineReader);
 
             suite.setProperty(propertyName, value);
         }
@@ -133,7 +133,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
                 // TODO: use reflection to get paramType instead of writing
                 // the type in the file
-                value = Any::create(paramType, lineReader);
+                value = AnyFactory::create(paramType, lineReader);
 
                 args.push_back(value);
             }

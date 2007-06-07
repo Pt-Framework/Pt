@@ -9,6 +9,8 @@ namespace Pt
 
     AnyFactory::AnyFactory()
     {
+        _builder.insert( std::make_pair("bool", new BasicAnyBuilder<bool>) );
+        _builder.insert( std::make_pair("std::string", new BasicAnyBuilder<std::string>) );
     }
 
 
@@ -46,36 +48,6 @@ namespace Pt
     {
 	    if(_value)
 		    delete _value;
-    }
-
-
-    Any Any::create(const std::string& name, std::istream& is)
-    {
-        std::multimap<std::string, AnyIO*>::iterator it;
-        it = AnyFactory::instance().map().find(name);
-
-        if( it == AnyFactory::instance().map().end() ) {
-            return Any();
-        }
-
-        Pt::Any a;
-        it->second->input(is, a);
-        return a;
-    }
-
-
-    Any Any::create(const std::string& name, std::basic_istream<Pt::Char>& is)
-    {
-        std::multimap<std::string, AnyIO*>::iterator it;
-        it = AnyFactory::instance().map().find(name);
-
-        if( it == AnyFactory::instance().map().end() ) {
-            return Any();
-        }
-
-        Pt::Any a;
-        it->second->input(is, a);
-        return a;
     }
 
 

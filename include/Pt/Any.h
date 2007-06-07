@@ -20,9 +20,11 @@
 #define Pt_Any_h
 
 #include <Pt/Api.h>
+#include <Pt/Archive.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/Singleton.h>
+#include <Pt/SourceInfo.h>
 
 #include <iostream>
 #include <map>
@@ -70,47 +72,6 @@ namespace Pt {
 
             // implementation dependent
             d \< c;
-        @endcode
-
-        Any supports named initialisation from a typename string or a type.
-        Before this feature can be used all required types must be bound to
-        typenames. This can be done conveniently with Any::Bind objects. By
-        default the C++ built-in types are bound already, as well as
-        std::string and the types of the Pt framework.
-
-        @code
-            Any::Bind bindMyType<MyType>("MyType");
-
-            // An empty Any
-            Any a;
-
-            // Any will contain a default constructed int
-            a.init<int>();
-
-            // Any will contain a default constructed MyType
-            a.init("MyType");
-
-            // any_cast will return the contained MyType
-            MyType mt = any_cast<MyType>( a ); 
-        @endcode
-
-        Anys can be written to streams easily, however reading from a stream
-        into an Any requires initialisation if the Any. If the Any is not
-        initialised to a type nothing will be read. If the Any is initalised
-        the contained type will be tried to read from the stream.
-
-        @code
-            std::istringstream ss("5");
-            Any a;
-
-            // This reads nothing
-            ss >> i;
-
-            // Set Any to hold an int
-            a.init<int>();
-
-            // Now read from the stream
-            ss >> a;
         @endcode
     */
     class PT_API Any
@@ -206,14 +167,6 @@ namespace Pt {
                 empty Anys.
             */
             Any();
-
-            /** @brief Create an Any from a stream
-            */
-            static Any create(const std::string& name, std::istream& is);
-
-            /** @brief Create an Any from a stream
-            */
-            static Any create(const std::string& name, std::basic_istream<Pt::Char>& is);
 
             /** @brief Assigns an abstract value
             */
@@ -411,20 +364,32 @@ namespace Pt {
 
     struct AnyIO
     {
-        virtual ~AnyIO() {}
+        virtual ~AnyIO()
+        {}
+
+        virtual void output(std::ostream& os, const Pt::Any& a) const = 0;
+
         virtual void input(std::istream& is, Pt::Any& a) = 0;
+
         virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const = 0;
+
         virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a) = 0;
-        //virtual void input(const ArchiveNode& node, Pt::Any& a) = 0;
     };
 
 
     template <typename T>
     struct BasicAnyIO : public AnyIO
     {
+        virtual void output(std::ostream& os, const Pt::Any& a) const
+        {
+            const T& type = any_cast<const T&>(a);
+            AnyTraits<T>::output(os, type);
+        }
+
         virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const
         {
-            //AnyTraits<T>::output(os, a);
+            const T& type = any_cast<const T&>(a);
+            AnyTraits<T>::output(os, type);
         }
 
         virtual void input(std::istream& is, Pt::Any& a)
@@ -440,10 +405,57 @@ namespace Pt {
             a.assign(value);
             AnyTraits<T>::input( is, value->value() );
         }
+    };
 
-        //virtual void input(const ArchiveNode& node, Pt::Any& a)
-        //{
-        //}
+
+    struct AnyBuilder
+    {
+        virtual ~AnyBuilder()
+        {}
+
+        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+    };
+
+
+    template <typename T>
+    struct BasicAnyBuilder : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+    };
+
+
+    template <>
+    struct BasicAnyBuilder<bool> : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const
+        {
+            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
+        }
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const
+        {
+            value == L"true" ? a = true : a = false;
+        }
+    };
+
+
+    template <>
+    struct BasicAnyBuilder<std::string> : public AnyBuilder
+    {
+        virtual void build(Pt::Any& a, const Archive& archive) const
+        {
+            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
+        }
+
+        virtual void build(Pt::Any& a, const Pt::String& value) const
+        {
+            std::string s = value.narrow();
+            a = s;
+        }
     };
 
 
@@ -452,6 +464,9 @@ namespace Pt {
     {
         friend class Singleton<AnyFactory>;
 
+        template <typename T>
+        friend class BasicAnyBuilder;
+
         public:
             //! @internal
             std::multimap<std::string, AnyIO*>& map();
@@ -459,12 +474,87 @@ namespace Pt {
             //! @internal
             const std::multimap<std::string, AnyIO*>& map() const;
 
+            static Any create(const std::string typeName, const Pt::String& value)
+            {
+                const AnyBuilder* builder = AnyFactory::findBuilder(typeName);
+                if( builder == 0 )
+                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
+
+                Pt::Any a;
+                builder->build(a, value);
+                return a;
+            }
+
+            static Any create(const std::string typeName, const Archive& archive)
+            {
+                const AnyBuilder* builder = AnyFactory::findBuilder(typeName);
+                if( builder == 0 )
+                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
+
+                Pt::Any a;
+                builder->build(a, archive);
+                return a;
+            }
+
+            static Any create(const std::string& name, std::istream& is)
+            {
+                std::multimap<std::string, AnyIO*>::iterator it;
+                it = AnyFactory::instance().map().find(name);
+
+                if( it == AnyFactory::instance().map().end() ) {
+                    return Any();
+                }
+
+                Pt::Any a;
+                it->second->input(is, a);
+                return a;
+            }
+
+
+            static Any create(const std::string& name, std::basic_istream<Pt::Char>& is)
+            {
+                std::multimap<std::string, AnyIO*>::iterator it;
+                it = AnyFactory::instance().map().find(name);
+
+                if( it == AnyFactory::instance().map().end() ) {
+                    return Any();
+                }
+
+                Pt::Any a;
+                it->second->input(is, a);
+                return a;
+            }
+
         protected:
             AnyFactory();
 
+            static const AnyBuilder* findBuilder(const std::string typeName)
+            {
+                std::multimap<std::string, AnyBuilder*>::iterator it;
+                it = AnyFactory::instance()._builder.find(typeName);
+
+                if( it != AnyFactory::instance()._builder.end() )
+                    return it->second;
+
+                return 0;
+            }
+
         private:
             //! @internal
+            std::multimap<std::string, AnyBuilder*> _builder;
+
+            //! @internal
             std::multimap<std::string, AnyIO*> _initMap;
+    };
+
+
+    template <typename T>
+    struct RegisterAnyBuilder
+    {
+        RegisterAnyBuilder( const std::string& typeName = TypeTraits<T>::typeName() )
+        {
+            AnyFactory::instance()._builder.insert( std::make_pair( typeName, new BasicAnyBuilder<T> ) );
+        }
     };
 
 

@@ -21,6 +21,7 @@
 #define Pt_Reflectable_h
 
 #include <Pt/Api.h>
+#include <Pt/Archive.h>
 #include <Pt/Exception.h>
 #include <Pt/MethodInfo.h>
 #include <Pt/PropertyValue.h>
@@ -198,6 +199,33 @@ class PT_API Reflectable
         std::string _identiferName;
         void* _reserved;
 };
+
+
+inline bool operator>>(const Archive& archive, Reflectable& r)
+{
+    PropertyMap& pmap = r.properties();
+    for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
+    {
+        PropertyInfo& propInfo = *( it->second );
+        Pt::String propName = Pt::String::widen( it->first );
+
+        const Pt::String* value = archive.value(propName);
+        if(value)
+        {
+            Any a = AnyFactory::create( propInfo.typeName(), *value );
+            it->second->setValue(a);
+        }
+
+        const Archive* subarchive = archive.findArchive(propName);
+        if(subarchive)
+        {
+            Any a = AnyFactory::create( propInfo.typeName(), *subarchive );
+            it->second->setValue(a);
+        }
+    }
+
+    return true;
+}
 
 } // namespace Pt
 
