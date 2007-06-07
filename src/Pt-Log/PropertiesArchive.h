@@ -32,8 +32,9 @@ namespace Pt {
 
 class PropertiesArchive : public Archive
 {
-    typedef std::multimap< Pt::String, PropertiesArchive> NodeMap;
-    typedef std::multimap< Pt::String, Pt::String> ValueMap;
+    public:
+        typedef std::multimap< Pt::String, PropertiesArchive> NodeMap;
+        typedef std::multimap< Pt::String, Pt::String> ValueMap;
 
     public:
         PropertiesArchive()
@@ -45,6 +46,12 @@ class PropertiesArchive : public Archive
 
         ~PropertiesArchive()
         { }
+
+        const ValueMap& values() const
+        { return _values; }
+
+        const Pt::String& name() const
+        { return _name; }
 
     protected:
         const Pt::String* _value(const Pt::String& name) const
@@ -85,6 +92,38 @@ class PropertiesArchive : public Archive
         Pt::String _name;
         ValueMap _values;
         NodeMap _nodes;
+};
+
+
+class PropertiesWriter
+{
+    public:
+        PropertiesWriter(std::basic_ostream<Pt::Char> os)
+        : _os(os)
+        {}
+
+        void write(const PropertiesArchive& archive)
+        {
+            Pt::String prefix = archive.name();
+            this->writeValues( archive, prefix );
+        }
+
+    protected:
+        void writeValues(const PropertiesArchive& archive, const Pt::String& prefix)
+        {
+            PropertiesArchive::ValueMap::const_iterator it;
+            for(it = archive.values().begin() ; it != archive.values().end(); ++it)
+            {
+                if( false == prefix.empty() )
+                {
+                    _os << prefix << ".";
+                }
+                _os << it->first << " = \"" << it->second << "\"" << std::endl;
+            }
+        }
+
+    private:
+        std::basic_ostream<Pt::Char>& _os;
 };
 
 
@@ -301,13 +340,10 @@ class PropertiesReader
             Pt::String token;
             while(end != std::string::npos)
             {
-                // get next token either until '.' or rest if the string
+                // get next token until '.' if not found we are leaf and bail out
                 end = name.find('.', begin);
                 if(end == Pt::String::npos)
-                {
-                    token = name.substr( begin );
                     break;
-                }
 
                 token = name.substr( begin, end - begin );
                 if( token.empty() )
