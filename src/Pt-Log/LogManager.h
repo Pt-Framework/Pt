@@ -19,7 +19,7 @@
 #ifndef Pt_LogManager_h
 #define Pt_LogManager_h
 
-#include "IniArchive.h"
+#include "PropertiesArchive.h"
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Target.h>
 #include <Pt/Singleton.h>

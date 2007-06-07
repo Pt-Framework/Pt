@@ -116,9 +116,16 @@ class PropertiesReader
             PropertiesReader& self = *this;
             _parse = &PropertiesReader::parseBeforeName;
 
+            Pt::String comment;
             Pt::Char ch;
             while( _is.get(ch) )
             {
+                if( ch == Pt::Char(L'#') )
+                {
+                    getline( _is, comment, Pt::Char(L'\n') );
+                    ch = Pt::Char(L'\n');
+                }
+
                 (self.*_parse)(ch);
             }
 
@@ -130,12 +137,6 @@ class PropertiesReader
             if( ch == eof || Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
 
-            if( ch == Pt::Char(L'#') )
-            {
-                _parse = &PropertiesReader::parseComment ;
-                return;
-            }
-
             if( ch == Pt::Char(L'=') )
                 throw std::logic_error("expected property name");
 
@@ -144,14 +145,6 @@ class PropertiesReader
 
             _currentName += ch;
             _parse = &PropertiesReader::parseName;
-        }
-
-        void parseComment(const Pt::Char& ch)
-        {
-            if( ch != Pt::Char(L'\n') )
-                return;
-
-            _parse = &PropertiesReader::parseBeforeName;
         }
 
         void parseName(const Pt::Char& ch)
@@ -220,7 +213,7 @@ class PropertiesReader
             if( ch == eof || Pt::Unicode::isSpace(ch) ||
                 ch == Pt::Char(L'\n') )
             {
-                //std::cerr << "Unqouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                std::cerr << "Unqouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
                 this->addNode(_currentName, _currentValue);
                 _parse = &PropertiesReader::parseBeforeName;
                 return;
@@ -275,7 +268,7 @@ class PropertiesReader
         {
             if( ch == eof )
             {
-                //std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
                 this->addNode(_currentName, _currentValue);
                 return;
             }
@@ -289,7 +282,7 @@ class PropertiesReader
                 return;
             }
 
-            //std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+            std::cerr << "Qouted: " << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
             this->addNode(_currentName, _currentValue);
 
             _parse = &PropertiesReader::parseBeforeName;
