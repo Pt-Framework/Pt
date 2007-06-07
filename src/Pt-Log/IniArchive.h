@@ -24,26 +24,26 @@
 #include <Pt/StringStream.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/Unicode.h>
+#include <Pt/Archive.h>
 #include <map>
-#include "Archive.h"
 
 
 namespace Pt {
 
-class IniArchiveNode : public Archive
+class IniArchiveElement : public Archive
 {
-    typedef std::multimap< Pt::String, IniArchiveNode> NodeMap;
+    typedef std::multimap< Pt::String, IniArchiveElement> NodeMap;
     typedef std::multimap< Pt::String, Pt::String> ValueMap;
 
     public:
-        IniArchiveNode()
+        IniArchiveElement()
         {}
 
-        IniArchiveNode(const Pt::String& name)
+        IniArchiveElement(const Pt::String& name)
         : _name(name)
         { }
 
-        ~IniArchiveNode()
+        ~IniArchiveElement()
         { }
 
         const Pt::String* value(const Pt::String& name) const
@@ -75,7 +75,7 @@ class IniArchiveNode : public Archive
             if( it != _nodes.end() )
                 return it->second;
 
-            IniArchiveNode node(name);
+            IniArchiveElement node(name);
             it = _nodes.insert( std::make_pair(name, node) );
             return it->second;
         }
@@ -103,7 +103,7 @@ class IniArchive : public Archive
         Parse _parse;
         Pt::String _currentName;
         Pt::String _currentValue;
-        IniArchiveNode _root;
+        IniArchiveElement _root;
 
     public:
         IniArchive(std::basic_istream<Pt::Char>& is)
