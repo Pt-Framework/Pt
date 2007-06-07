@@ -166,10 +166,8 @@ class IniArchive : public Archive
                 (self.*_parse)(ch);
             }
 
-            typedef std::char_traits<Pt::Char> CharTraits;
-            ch = CharTraits::to_int_type( CharTraits::eof() );
-
-            (self.*_parse)(ch);
+            // push context in case line ends with EOF
+            (self.*_parse)( Pt::Char('\n') );
         }
 
         void parseBeforeName(const Pt::Char& ch)
@@ -263,7 +261,7 @@ class IniArchive : public Archive
                 ch == Pt::Char(L'\n') ||
                 ch == eof )
             {
-                std::cerr << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
+                //std::cerr << _currentName.narrow() << " " << _currentValue.narrow() << std::endl;
                 this->addNode(_currentName, _currentValue);
                 _parse = &IniArchive::parseBeforeName;
                 return;
