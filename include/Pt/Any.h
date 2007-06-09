@@ -465,7 +465,7 @@ namespace Pt {
         friend class Singleton<AnyFactory>;
 
         template <typename T>
-        friend class BasicAnyBuilder;
+        friend struct BasicAnyBuilder;
 
         public:
             //! @internal
@@ -482,8 +482,7 @@ namespace Pt {
 
                 Pt::Any a;
                 builder->build(a, value);
-                return a;
-            }
+                return a;            }
 
             static Any create(const std::string typeName, const Archive& archive)
             {
