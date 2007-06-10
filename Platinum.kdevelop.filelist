@@ -177,3 +177,4 @@ include/Pt/MethodInfo.h
 include/Pt/MemberInfo.h
 include/Pt/MethodInfoBase.h
 include/Pt/Unit/TextProtocol.h
+include/Pt/Archive.h

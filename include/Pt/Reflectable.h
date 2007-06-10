@@ -209,14 +209,14 @@ inline bool operator>>(const Archive& archive, Reflectable& r)
         PropertyInfo& propInfo = *( it->second );
         Pt::String propName = Pt::String::widen( it->first );
 
-        const Pt::String* value = archive.value(propName);
+        const Pt::String* value = archive.getValue(propName);
         if(value)
         {
             Any a = AnyFactory::create( propInfo.typeName(), *value );
             it->second->setValue(a);
         }
 
-        const Archive* subarchive = archive.findArchive(propName);
+        const Archive* subarchive = archive.getArchive(propName);
         if(subarchive)
         {
             Any a = AnyFactory::create( propInfo.typeName(), *subarchive );
