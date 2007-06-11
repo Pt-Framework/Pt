@@ -16,7 +16,9 @@ namespace Unit
  * defined in component test protocol files (ctp).
  */
 class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
-    {
+{
+    friend const Archive& operator>>(const Archive& ar, TextProtocol& suite);
+
     public:
 
         /**

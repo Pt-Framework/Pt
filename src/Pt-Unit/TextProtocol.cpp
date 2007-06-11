@@ -18,13 +18,77 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TextProtocol.h>
+#include "Pt/Text/TextStream.h"
+#include "Pt/Text/Utf8Codec.h"
+#include "../Pt-Log/PropertiesArchive.h"
+#include "../Pt-Log/PropertiesReader.h"
+
 #include <fstream>
 #include <sstream>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
 
+namespace Unit {
+
+
+const Archive& operator>>(const Archive& ar, TextProtocol& suite)
+{
+    return ar;
+}
+
+/*
+MyTest.property1 = 5
+MyTest.property2 = Hello
+
+[ MyTest.protocol.tests.testMethod1 ]
+arg = 10
+
+# Should this create a new testMethod1 Archive?
+[ MyTest.protocol.tests.testMethod1 ]
+arg = 20
+*/
+
+void TextProtocol::run(Pt::Unit::TestSuite& suite)
+{
+    std::ifstream file(_path.c_str());
+
+    if( ! file )
+    {
+        throw std::logic_error(_path + " not found" + PT_SOURCEINFO);
+    }
+
+    Text::TextIStream ts(file, new Pt::Text::Utf8Codec);
+    PropertiesReader reader(ts);
+
+    PropertiesArchive archive;
+    reader.read(archive);
+
+    // extract the suite itself
+    Pt::String suiteName = Pt::String::widen( suite.name() );
+    archive.extract( suite, suiteName );
+
+    // extract this protocol as element of the test
+    const Archive* protocol = archive.getArchive(suiteName);
+    if( ! protocol )
+        return;
+
+    protocol = archive.getArchive(L"protocol");
+    if( ! protocol )
+        return;
+
+    Archive::ConstIterator it = protocol->begin();
+    for( ; it != protocol->end(); ++it )
+    {
+        
+    }
+}
+
+} // namespace Unit
+
+} // namespace Pt
+
+/*
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
@@ -149,3 +213,4 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         }
     }
 }
+*/

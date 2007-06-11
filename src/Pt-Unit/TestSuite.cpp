@@ -20,8 +20,9 @@
 #include <Pt/Unit/TestSuite.h>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
+
+namespace Unit {
 
 
 TestProtocol TestSuite::defaultProtocol;
@@ -60,4 +61,8 @@ void TestSuite::runTest(const std::string& name, const Args& args)
 {
     ConText ctx(*this, name, args);
     ctx.run();
+}
+
+}
+
 }
