@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions>-s TOOLSET=gcc -sGUI=x11 LoggerTest -q</makeoptions>
+      <makeoptions>-s TOOLSET=gcc -sGUI=x11 PropertiesArchiveTest -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

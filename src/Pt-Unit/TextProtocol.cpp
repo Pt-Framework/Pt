@@ -28,14 +28,14 @@ using namespace Unit;
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
-    std::ifstream iniFile(m_iniFileName.c_str());
+    std::ifstream iniFile(_path.c_str());
     std::string line;
     std::string lineBuffer;
     int lineNumber = 0;
 
     if(!iniFile)
     {
-        throw std::logic_error("Test protocol "  + m_iniFileName + " not found" + PT_SOURCEINFO);
+        throw std::logic_error("Test protocol "  + _path + " not found" + PT_SOURCEINFO);
     }
 
     while(getline(iniFile, line))
@@ -144,7 +144,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         else
         {
             std::stringstream msg;
-            msg << "Invalid protocol format in " << m_iniFileName << ", line " << lineNumber << ": " << token;
+            msg << "Invalid protocol format in " << _path << ", line " << lineNumber << ": " << token;
             throw std::logic_error(msg.str() + PT_SOURCEINFO);
         }
     }

@@ -20,9 +20,11 @@
  ***************************************************************************/
 
 #include <Pt/DateTime.h>
+#include <Pt/Archive.h>
 #include "Pt/SourceInfo.h"
 
 #include <algorithm>
+#include <sstream>
 #include <stdexcept>
 #include <cctype>
 #include <cmath>
@@ -30,6 +32,25 @@
 
 
 namespace Pt {
+
+
+const Archive& operator>>(const Archive& ar, DateTime& dt)
+{
+    ar >> dt._date;
+    ar >> dt._time;
+
+    return ar;
+}
+
+
+Archive& operator<<(Archive& ar, const DateTime& dt)
+{
+    ar << dt._date;
+    ar << dt._time;
+
+    return ar;
+}
+
 
 DateTime::DateTime()
 {

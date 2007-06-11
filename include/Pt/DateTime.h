@@ -35,6 +35,9 @@ namespace Pt {
 */
 class PT_API DateTime
 {
+    friend const Archive& operator>>(const Archive&, DateTime& );
+    friend Archive& operator<<(Archive&, const DateTime& );
+
     public:
         DateTime();
 

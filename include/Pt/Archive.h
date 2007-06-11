@@ -209,13 +209,13 @@ class Archive : public ArchiveNode
         { return this->_addArchive(name); }
 
         template <typename T>
-        bool extract(T& type, const Pt::String& typeName)
+        void extract(T& type, const Pt::String& typeName)
         {
             const Archive* archive = this->getArchive(typeName);
             if(archive == 0)
-                return false;
+                return;
 
-            return *archive >> type;
+            *archive >> type;
         }
 
     protected:

@@ -20,11 +20,13 @@
 #define Pt_PropertiesReader_h
 
 #include <Pt/Api.h>
+#include <Pt/Archive.h>
 #include <Pt/String.h>
 #include <Pt/Exception.h>
 #include <Pt/Unicode.h>
 #include <Pt/ArchiveReader.h>
 #include <iostream>
+#include <sstream>
 
 
 namespace Pt {
@@ -34,18 +36,50 @@ class PropertiesReader : public ArchiveReader
     public:
         Pt::Char eof;
 
+        class ParseError : public std::logic_error
+        {
+            public:
+                ParseError(const std::string& what, unsigned line)
+                : std::logic_error("Line " + ParseError::str(line) + ":" + what)
+                {}
+
+                static std::string str(unsigned n)
+                {
+                    std::stringstream ss;
+                    ss << n;
+                    return ss.str();
+                }
+        };
+
         class ParseContext
         {
             public:
                 ParseContext(Archive& archive)
                 : _archive( &archive )
+                , _line(1)
                 {}
 
-                void clear()
+                void reset()
                 {
-                    _name.clear();
+                    if( _section.empty() )
+                        _name.clear();
+                    else
+                        _name = _section + Pt::Char(L'.');
+
                     _value.clear();
                 }
+
+                unsigned line() const
+                { return _line; }
+
+                std::string lineString() const
+                { std::stringstream ss; ss << _line; return ss.str(); }
+
+                void endl()
+                { ++_line; }
+
+                Pt::String& section()
+                { return _section; }
 
                 Pt::String& name()
                 { return _name; }
@@ -76,7 +110,7 @@ class PropertiesReader : public ArchiveReader
                         token = _name.substr( begin, end - begin );
                         if( token.empty() )
                         {
-                            throw std::invalid_argument("Invalid property name" + PT_SOURCEINFO);
+                            throw ParseError("Invalid property name", _line);
                         }
 
                         // create sub-archive
@@ -86,14 +120,14 @@ class PropertiesReader : public ArchiveReader
                         begin = end + 1;
                         if( begin >= _name.size() )
                         {
-                            throw std::invalid_argument("Invalid property name" + PT_SOURCEINFO);
+                            throw ParseError("Invalid property name", _line);
                         }
                     }
 
                     token = _name.substr( begin );
                     if( token.empty() )
                     {
-                        throw std::invalid_argument("Invalid property name" + PT_SOURCEINFO);
+                        throw ParseError("Invalid property name", _line);
                     }
 
                     archive->addValue(token, _value);
@@ -101,8 +135,10 @@ class PropertiesReader : public ArchiveReader
 
             private:
                 Archive* _archive;
+                unsigned _line;
                 Pt::String _name;
                 Pt::String _value;
+                Pt::String _section;
         };
 
     public:
@@ -138,6 +174,11 @@ class PropertiesReader : public ArchiveReader
                     ch = Pt::Char(L'\n');
                 }
 
+                if( ch == Pt::Char(L'\n') )
+                {
+                    context.endl();
+                }
+
                 (this->*_parse)(ch, context);
             }
 
@@ -149,17 +190,78 @@ class PropertiesReader : public ArchiveReader
             if( ch == eof || Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
 
-            if( ch == Pt::Char(L'=') )
-                throw std::logic_error("expected property name");
+            if( ch == Pt::Char(L'[') )
+            {
+                _parse = &PropertiesReader::parseSection;
+                context.section().clear();
+                return;
+            }
 
-            context.clear();
+            if( ch == Pt::Char(L'=') )
+                throw ParseError( "expected token before =", context.line() );
+
+            context.reset();
 
             context.name() += ch;
             _parse = &PropertiesReader::parseName;
         }
 
+        void parseSection(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof )
+                throw ParseError("Section not closed", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            context.section() += ch;
+            _parse = &PropertiesReader::parseSectionName;
+        }
+
+        void parseSectionName(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof )
+                throw ParseError("Section not closed", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+            {
+                _parse = &PropertiesReader::parseSectionEnd;
+                return;
+            }
+
+            if( ch == Pt::Char(L']') )
+            {
+                context.reset();
+                _parse = &PropertiesReader::parseBeforeName;
+                return;
+            }
+
+            context.section() += ch;
+        }
+
+        void parseSectionEnd(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof )
+                throw ParseError("Section not closed", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            if( ch == Pt::Char(L']') )
+            {
+                context.reset();
+                _parse = &PropertiesReader::parseBeforeName;
+                return;
+            }
+
+            throw ParseError("Invalid section name", context.line());
+        }
+
         void parseName(const Pt::Char& ch, ParseContext& context)
         {
+            if( ch == eof )
+                throw ParseError("Expected \'=\' token", context.line());
+
             if( ch == Pt::Char(L'=') )
             {
                 _parse = &PropertiesReader::parseAfterEqual;
@@ -172,16 +274,13 @@ class PropertiesReader : public ArchiveReader
                 return;
             }
 
-            if( ch == eof )
-                throw std::logic_error("expected \'=\'");
-
             context.name() += ch;
         }
 
         void parseAfterName(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
-                throw std::logic_error("expected \'=\'");
+                throw ParseError("Expected \'=\' token", context.line());
 
             if( Pt::Unicode::isSpace(ch) )
                 return;
@@ -192,19 +291,19 @@ class PropertiesReader : public ArchiveReader
                 return;
             }
 
-            throw std::logic_error("expected \'=\'");
+            throw ParseError("Expected \'=\' token", context.line());
         }
 
         void parseAfterEqual(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
-                throw std::logic_error("expected value");
+                throw ParseError("Expected token after \'=\'", context.line());
 
             if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
 
-            if( ch == Pt::Char(L'=') || ch == Pt::Char(L'#') )
-                throw std::logic_error("expected value");
+            if( ch == Pt::Char(L'=') || ch == Pt::Char(L'[') )
+                throw ParseError("Invalid token after \'=\'", context.line());
 
             if( ch == Pt::Char('"') )
             {
@@ -219,7 +318,7 @@ class PropertiesReader : public ArchiveReader
         void parseValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == Pt::Char(L'=') )
-                std::logic_error("malformed property value");
+                throw ParseError("Invalid token after \'=\'", context.line());
 
             if( ch == eof || Pt::Unicode::isSpace(ch) ||
                 ch == Pt::Char(L'\n') )
@@ -237,7 +336,7 @@ class PropertiesReader : public ArchiveReader
         {
             if( ch == Pt::Char(L'\n') || ch == Pt::Char(L'\r') )
             {
-                throw std::logic_error("missing \" after value" + PT_SOURCEINFO);
+                throw ParseError("Expected closing\" token", context.line());
             }
 
             if( ch == Pt::Char(L'\\') )

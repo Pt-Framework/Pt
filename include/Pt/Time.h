@@ -29,6 +29,9 @@
 
 namespace Pt {
 
+class Archive;
+
+
 class InvalidTime : public std::invalid_argument
 {
     public:
@@ -43,6 +46,9 @@ class InvalidTime : public std::invalid_argument
 */
 class PT_API Time
 {
+    friend const Archive& operator>>(const Archive&, Time& );
+    friend Archive& operator<<(Archive&, const Time& );
+
     public:
         static const int SecsPerDay = 86400;
         static const int MSecsPerDay = 86400000;

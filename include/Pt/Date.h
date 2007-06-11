@@ -27,6 +27,9 @@
 
 namespace Pt {
 
+class Archive;
+
+
 class InvalidDate : public std::invalid_argument
 {
     public:
@@ -46,6 +49,9 @@ class InvalidDate : public std::invalid_argument
 */
 class PT_API Date
 {
+    friend const Archive& operator>>(const Archive&, Date& );
+    friend Archive& operator<<(Archive&, const Date& );
+
     public:
         enum
         {
@@ -252,6 +258,12 @@ inline Date operator+(int days, const Date& d)
 
 inline int operator-(const Date& a, const Date& b)
 { return a._julian - b._julian; }
+
+
+const Archive& operator>>(const Archive& ar, Date& d);
+
+
+Archive& operator<<(Archive& ar, const Date& d);
 
 }
 

@@ -19,7 +19,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Time.h>
+#include <Pt/Archive.h>
 #include <Pt/Exception.h>
+#include <sstream>
 #include <cctype>
 
 
@@ -49,6 +51,30 @@ InvalidTime::~InvalidTime() throw()
 {
 }
 
+
+const Archive& operator>>(const Archive& ar, Time& time)
+{
+    const Pt::String* value = ar.getValue(L"msecs");
+    if( value )
+    {
+        std::stringstream ss( value->narrow() );
+        ss >> time._msecs;
+    }
+
+    return ar;
+}
+
+
+Archive& operator<<(Archive& ar, const Time& time)
+{
+    std::stringstream ss;
+    ss << time._msecs;
+    Pt::String value = Pt::String::widen( ss.str() );
+
+    ar.addValue( L"msecs", value );
+
+    return ar;
+}
 
 
 Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)

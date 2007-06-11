@@ -201,7 +201,7 @@ class PT_API Reflectable
 };
 
 
-inline bool operator>>(const Archive& archive, Reflectable& r)
+inline const Archive& operator>>(const Archive& archive, Reflectable& r)
 {
     PropertyMap& pmap = r.properties();
     for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
@@ -224,7 +224,7 @@ inline bool operator>>(const Archive& archive, Reflectable& r)
         }
     }
 
-    return true;
+    return archive;
 }
 
 } // namespace Pt

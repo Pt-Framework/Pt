@@ -17,6 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Date.h"
+#include "Pt/Archive.h"
+#include <sstream>
 #include <cctype>
 
 
@@ -236,6 +238,31 @@ Date Date::fromIsoString(const std::string& s)
 
     const char* d = s.data();
     return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+}
+
+
+const Archive& operator>>(const Archive& ar, Date& date)
+{
+    const Pt::String* value = ar.getValue(L"julianDays");
+    if( value )
+    {
+        std::stringstream ss( value->narrow() );
+        ss >> date._julian;
+    }
+
+    return ar;
+}
+
+
+Archive& operator<<(Archive& ar, const Date& date)
+{
+    std::stringstream ss;
+    ss << date._julian;
+    Pt::String value = Pt::String::widen( ss.str() );
+
+    ar.addValue( L"julianDays", value );
+
+    return ar;
 }
 
 

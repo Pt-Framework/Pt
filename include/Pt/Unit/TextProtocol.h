@@ -24,8 +24,8 @@ class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
          *
          * @param iniFileName initializes the component test protocol file name
          */
-        TextProtocol(const std::string& iniFileName)
-        : m_iniFileName(iniFileName)
+        TextProtocol(const std::string& path)
+        : _path(path)
         {
         }
 
@@ -37,7 +37,7 @@ class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
         virtual void run(Pt::Unit::TestSuite& suite);
 
     private:
-        std::string m_iniFileName;
+        std::string _path;
     };
 
 }   // namespace Unit
