@@ -1,0 +1,127 @@
+/***************************************************************************
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+#undef PT_API_LOG_EXPORT
+
+#include "PropertiesArchive.h"
+#include "PropertiesReader.h"
+#include "PropertiesWriter.h"
+
+#include "Pt/Archive.h"
+#include "Pt/Date.h"
+#include "Pt/Time.h"
+#include "Pt/DateTime.h"
+#include "Pt/Text/TextStream.h"
+#include "Pt/Text/Utf8Codec.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
+#include <string>
+
+
+class PropertiesArchiveTest : public Pt::Unit::TestSuite
+{
+    public:
+        PropertiesArchiveTest()
+        : Pt::Unit::TestSuite("PropertiesArchiveTest")
+        {
+            Pt::Unit::TestSuite::registerMethod( "Parse", *this, &PropertiesArchiveTest::Parse );
+            Pt::Unit::TestSuite::registerMethod( "Date", *this, &PropertiesArchiveTest::Date );
+            Pt::Unit::TestSuite::registerMethod( "Time", *this, &PropertiesArchiveTest::Time );
+            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &PropertiesArchiveTest::DateTime );
+        }
+
+    protected:
+        void Parse()
+        {
+            std::stringstream ss;
+            ss << "[ a.b.c]\n";
+            ss << "d.v = 3\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            const Pt::String* s = archive.getArchive(L"a")->getArchive(L"b")->getArchive(L"c")->getArchive(L"d")->getValue(L"v");
+            PT_UNIT_ASSERT( s->narrow() == "3")
+        }
+
+        void Date()
+        {
+            std::stringstream ss;
+            ss << "myDate.julianDays = 400000";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            Pt::Date date;
+            archive.extract(date, L"myDate");
+
+            std::cerr << date.julian() << " days."<< std::endl;
+            std::cerr << date.toIsoString() << std::endl;
+
+            PT_UNIT_ASSERT(date.julian() == 400000);
+        }
+
+        void Time()
+        {
+            std::stringstream ss;
+            ss << "myTime.msecs = 50000000";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            Pt::Time time;
+            archive.extract(time, L"myTime");
+
+            std::cerr << time.totalMSecs() << " msecs."<< std::endl;
+            std::cerr << time.toIsoString() << std::endl;
+
+            PT_UNIT_ASSERT(time.totalMSecs() == 50000000);
+        }
+
+        void DateTime()
+        {
+            std::stringstream ss;
+            ss << "myDateTime.msecs = 50000000 \n";
+            ss << "myDateTime.julianDays = 400000 \n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            Pt::DateTime date;
+            archive.extract(date, L"myDateTime");
+
+            std::cerr << date.date().julian() << " days."<< std::endl;
+            std::cerr << date.time().totalMSecs() << std::endl;
+            std::cerr << date.toIsoString() << std::endl;
+
+            PT_UNIT_ASSERT(date.date().julian() == 400000);
+            PT_UNIT_ASSERT(date.time().totalMSecs() == 50000000);
+        }
+};
+
+Pt::Unit::RegisterTest<PropertiesArchiveTest> register_PropertiesArchiveTest;
