@@ -46,9 +46,6 @@ class InvalidTime : public std::invalid_argument
 */
 class PT_API Time
 {
-    friend const Archive& operator>>(const Archive&, Time& );
-    friend Archive& operator<<(Archive&, const Time& );
-
     public:
         static const int SecsPerDay = 86400;
         static const int MSecsPerDay = 86400000;
@@ -87,6 +84,9 @@ class PT_API Time
 
         unsigned totalMSecs() const
         { return _msecs; }
+
+        void setTotalMSecs(unsigned msecs)
+        { _msecs = msecs; }
 
         /** \brief Sets the time.
 
@@ -224,6 +224,10 @@ class PT_API Time
         //! @internal
         unsigned _msecs;
     };
+
+    PT_API const Archive& operator>>(const Archive&, Time& );
+
+    PT_API Archive& operator<<(Archive&, const Time& );
 }
 
 #endif // PT_TIME_H

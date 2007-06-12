@@ -247,7 +247,9 @@ const Archive& operator>>(const Archive& ar, Date& date)
     if( value )
     {
         std::stringstream ss( value->narrow() );
-        ss >> date._julian;
+        unsigned julian = 0;
+        ss >> julian;
+        date.setJulian(julian);
     }
 
     return ar;
@@ -257,7 +259,7 @@ const Archive& operator>>(const Archive& ar, Date& date)
 Archive& operator<<(Archive& ar, const Date& date)
 {
     std::stringstream ss;
-    ss << date._julian;
+    ss << date.julian();
     Pt::String value = Pt::String::widen( ss.str() );
 
     ar.addValue( L"julianDays", value );

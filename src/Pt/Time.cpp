@@ -58,7 +58,9 @@ const Archive& operator>>(const Archive& ar, Time& time)
     if( value )
     {
         std::stringstream ss( value->narrow() );
-        ss >> time._msecs;
+        unsigned msecs = 0;
+        ss >> msecs;
+        time.setTotalMSecs(msecs);
     }
 
     return ar;
@@ -68,7 +70,7 @@ const Archive& operator>>(const Archive& ar, Time& time)
 Archive& operator<<(Archive& ar, const Time& time)
 {
     std::stringstream ss;
-    ss << time._msecs;
+    ss << time.totalMSecs();
     Pt::String value = Pt::String::widen( ss.str() );
 
     ar.addValue( L"msecs", value );

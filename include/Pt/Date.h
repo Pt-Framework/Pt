@@ -49,9 +49,6 @@ class InvalidDate : public std::invalid_argument
 */
 class PT_API Date
 {
-    friend const Archive& operator>>(const Archive&, Date& );
-    friend Archive& operator<<(Archive&, const Date& );
-
     public:
         enum
         {
@@ -250,6 +247,10 @@ class PT_API Date
         unsigned _julian;
 };
 
+PT_API const Archive& operator>>(const Archive& ar, Date& d);
+
+PT_API Archive& operator<<(Archive& ar, const Date& d);
+
 inline Date operator+(const Date& d, int days)
 { return Date(d._julian + days); }
 
@@ -259,11 +260,6 @@ inline Date operator+(int days, const Date& d)
 inline int operator-(const Date& a, const Date& b)
 { return a._julian - b._julian; }
 
-
-const Archive& operator>>(const Archive& ar, Date& d);
-
-
-Archive& operator<<(Archive& ar, const Date& d);
 
 }
 
