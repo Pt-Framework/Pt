@@ -30,16 +30,28 @@ namespace Pt {
 class PropertiesArchiveValue : public ArchiveValue
 {
     public:
-        PropertiesArchiveValue(const Pt::String& name)
-        : _nodeName(name)
+        PropertiesArchiveValue(Archive* parent, const Pt::String& name)
+        : _parentArchive(parent)
+        , _nodeName(name)
         {}
 
-        PropertiesArchiveValue(const Pt::String& name, const Pt::String value)
-        : _nodeName(name)
+        PropertiesArchiveValue(Archive* parent, const Pt::String& name, const Pt::String value)
+        : _parentArchive(parent)
+        , _nodeName(name)
         , _nodeValue(value)
         {}
 
     protected:
+        virtual Archive* _parent()
+        {
+            return _parentArchive;
+        }
+
+        virtual const Archive* _parent() const
+        {
+            return _parentArchive;
+        }
+
         virtual const Pt::String& _name() const
         { return _nodeName; }
 
@@ -47,6 +59,7 @@ class PropertiesArchiveValue : public ArchiveValue
         { return _nodeValue; }
 
     private:
+        Archive* _parentArchive;
         Pt::String _nodeName;
         Pt::String _nodeValue;
 };
@@ -80,14 +93,26 @@ class PropertiesArchive : public Archive
         };
 
     public:
-        PropertiesArchive()
+        PropertiesArchive(Archive* parent = 0)
+        : _parentArchive(parent)
         {}
 
-        PropertiesArchive(const Pt::String& name)
-        : _nodeName(name)
+        PropertiesArchive(Archive* parent, const Pt::String& name)
+        : _parentArchive(parent)
+        , _nodeName(name)
         { }
 
     protected:
+        virtual Archive* _parent()
+        {
+            return _parentArchive;
+        }
+
+        virtual const Archive* _parent() const
+        {
+            return _parentArchive;
+        }
+
         virtual const Pt::String& _name() const
         { return _nodeName; }
 
@@ -105,7 +130,7 @@ class PropertiesArchive : public Archive
 
         void _addValue(const Pt::String& name, const Pt::String& value)
         {
-            ArchiveValue* av = new PropertiesArchiveValue(name, value);
+            ArchiveValue* av = new PropertiesArchiveValue(this, name, value);
             _entries.insert( std::make_pair(name, av) );
         }
 
@@ -115,12 +140,13 @@ class PropertiesArchive : public Archive
             if( it != _entries.end() && it->second->toArchive() )
                 return *( it->second->toArchive() );
 
-            PropertiesArchive* arch = new PropertiesArchive(name);
+            PropertiesArchive* arch = new PropertiesArchive(this, name);
             _entries.insert( std::make_pair(name, arch) );
             return *arch;
         }
 
     private:
+        Archive* _parentArchive;
         Pt::String _nodeName;
         Entries _entries;
 };

@@ -46,6 +46,12 @@ class ArchiveNode
         bool operator!= (const ArchiveNode& an) const
         { return this->name() != an.name(); }
 
+        virtual Archive* parent()
+        { return _parent(); }
+
+        virtual const Archive* parent() const
+        { return _parent(); }
+
         Archive* toArchive()
         { return this->_toArchive(); }
 
@@ -61,6 +67,10 @@ class ArchiveNode
     protected:
         ArchiveNode()
         {}
+
+        virtual Archive* _parent() = 0;
+
+        virtual const Archive* _parent() const = 0;
 
         virtual Archive* _toArchive() = 0;
 
