@@ -34,9 +34,6 @@ namespace Pt {
 class PropertiesReader : public ArchiveReader
 {
     public:
-        class ParseContext;
-        typedef void (PropertiesReader::*Parse)(const Pt::Char&, ParseContext&);
-
         Pt::Char eof;
 
         class ParseError : public std::logic_error
@@ -87,8 +84,14 @@ class PropertiesReader : public ArchiveReader
                 Pt::String& value()
                 { return _value; }
 
+                bool isTop() const
+                {
+                    return _archive->parent() == 0;
+                }
+
                 void pushNode()
                 {
+                    //std::cerr << "push node: " << _name.narrow()  << std::endl;
                     _archive = &( _archive->addArchive( _name ) );
                     _name.clear();
                 }
@@ -100,8 +103,7 @@ class PropertiesReader : public ArchiveReader
 
                 void pushValue()
                 {
-                    //std::cerr << "READ: " << "'"<< _name.narrow() << "' = '" << _value.narrow() << "'" << std::endl;
-
+                    //std::cerr << "push value: " << _name.narrow()  << " - " << _value.narrow() << std::endl;
                     size_t pos  = _name.rfind( Pt::Char(L'.') );
 
                     if(pos != Pt::String::npos)
@@ -115,12 +117,12 @@ class PropertiesReader : public ArchiveReader
                     }
 
                     _value.clear();
+                    _name.clear();
                 }
 
             private:
                 Archive* _archive;
                 unsigned _line;
-                Parse _last;
                 Pt::String _name;
                 Pt::String _value;
                 Pt::String _section;
@@ -168,6 +170,8 @@ class PropertiesReader : public ArchiveReader
             }
 
             (this->*_parse)( eof, context );
+
+            assert( context.isTop() );
         }
 
         void parseBeforeName(const Pt::Char& ch, ParseContext& context)
@@ -281,7 +285,7 @@ class PropertiesReader : public ArchiveReader
 
         void parseAfterEqual(const Pt::Char& ch, ParseContext& context)
         {
-            if( ch == eof || ch == Pt::Char(L'=') || ch == Pt::Char(L'[') )
+            if( ch == eof || ch == Pt::Char(L'=') )
                 throw ParseError("Expected token after \'=\'", context.line());
 
             if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
@@ -297,6 +301,13 @@ class PropertiesReader : public ArchiveReader
             {
                 context.pushNode();
                 _parse = &PropertiesReader::parseArray;
+                return;
+            }
+
+            if( ch == Pt::Char('[') )
+            {
+                context.pushNode();
+                _parse = &PropertiesReader::beginComposed;
                 return;
             }
 
@@ -372,7 +383,7 @@ class PropertiesReader : public ArchiveReader
         {
             if( ch == eof )
             {
-                throw ParseError("Incomplete arraya", context.line());
+                throw ParseError("Incomplete array", context.line());
             }
 
             if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
@@ -380,7 +391,7 @@ class PropertiesReader : public ArchiveReader
 
             if( ch == Pt::Char(L',') )
             {
-                throw ParseError("Incomplete arrayb", context.line());
+                throw ParseError("Incomplete array", context.line());
             }
 
             if( ch == Pt::Char(L'"') )
@@ -402,7 +413,7 @@ class PropertiesReader : public ArchiveReader
         void parseArrayValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
-                throw ParseError( "Incomplete array1", context.line() );
+                throw ParseError( "Incomplete array", context.line() );
 
             if( ch == Pt::Char(L',') )
             {
@@ -431,7 +442,7 @@ class PropertiesReader : public ArchiveReader
         void finishArrayValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
-                throw ParseError( "Incomplete array2", context.line() );
+                throw ParseError( "Incomplete array", context.line() );
 
             if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
                 return;
@@ -488,6 +499,156 @@ class PropertiesReader : public ArchiveReader
             throw ParseError( "Unrecognized token in array", context.line() );
         }
 
+        void beginComposed(const Pt::Char& ch, ParseContext& context)
+        { //std::cerr << "parseComposed: " << ch.narrow('_') << std::endl;
+            if( ch == eof )
+            {
+                throw ParseError("Expected token before EOF", context.line());
+            }
+
+            if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
+                return;
+
+            if( ch == Pt::Char(L',') )
+            {
+                throw ParseError("Expected token before \',\'", context.line());
+            }
+
+            context.name() += ch;
+            _parse = &PropertiesReader::parseComposedValueName;
+        }
+
+        void parseComposedValueName(const Pt::Char& ch, ParseContext& context)
+        {//std::cerr << "parseComposedValueName: " << ch.narrow('_') << std::endl;
+            if( ch == eof )
+                throw ParseError("Expected \'=\' token 1", context.line());
+
+            if( ch == Pt::Char(L'=') )
+            {
+                _parse = &PropertiesReader::afterComposedEqual;
+                return;
+            }
+
+            if( Pt::Unicode::isSpace(ch) )
+            {
+                _parse = &PropertiesReader::beforeComposedEqual;
+                return;
+            }
+
+            context.name() += ch;
+        }
+
+        void beforeComposedEqual(const Pt::Char& ch, ParseContext& context)
+        { //std::cerr << "beforeComposedEqual: " << ch.narrow('_') << std::endl;
+            if( ch == eof )
+                throw ParseError("Expected \'=\' token 2", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            if( ch == Pt::Char(L'=') )
+            {
+                _parse = &PropertiesReader::afterComposedEqual;
+                return;
+            }
+
+            throw ParseError("Expected \'=\' token 3", context.line());
+        }
+
+        void afterComposedEqual(const Pt::Char& ch, ParseContext& context)
+        { //std::cerr << "afterComposedEqual: " << ch.narrow('_') << std::endl;
+            if( ch == eof || ch == Pt::Char(L'=') )
+                throw ParseError("Expected token after \'=\' xxx", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            //if( ch == Pt::Char('"') )
+            //{
+            //    _parse = &PropertiesReader::parseQoutedValue;
+            //    return;
+            //}
+
+//             if( ch == Pt::Char('{') )
+//             {
+//                 context.pushNode();
+//                 _parse = &PropertiesReader::parseArray;
+//                 return;
+//             }
+// 
+             if( ch == Pt::Char('[') )
+             {
+                 context.pushNode();
+                 _parse = &PropertiesReader::beginComposed;
+                 return;
+             }
+
+            context.value() += ch;
+            _parse = &PropertiesReader::parseComposedValue;
+        }
+
+        void parseComposedValue(const Pt::Char& ch, ParseContext& context)
+        { //std::cerr << "parseComposedValue: " << ch.narrow('_') << std::endl;
+            if( ch == eof )
+                throw ParseError( "Expected token before EOF", context.line() );
+
+            if( ch == Pt::Char(L',') )
+            {
+                context.pushValue();
+                _parse = &PropertiesReader::beginComposed;
+                return;
+            }
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+            {
+                context.pushValue();
+                _parse = &PropertiesReader::finishComposedValue;
+                return;
+            }
+
+            if( ch == Pt::Char(L']') )
+            {
+                context.pushValue();
+                context.popNode();
+
+                if( context.isTop() )
+                    _parse = &PropertiesReader::parseBeforeName;
+                else
+                    _parse = &PropertiesReader::finishComposedValue;
+
+                return;
+            }
+
+            context.value() += ch;
+        }
+
+        void finishComposedValue(const Pt::Char& ch, ParseContext& context)
+        { //std::cerr << "finishComposedValue: " << ch.narrow('_') << std::endl;
+            if( ch == eof )
+                throw ParseError( "Expected token before EOF", context.line() );
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            if( ch == Pt::Char(L',') )
+            {
+                _parse = &PropertiesReader::parseComposedValueName;
+                return;
+            }
+
+            if( ch == Pt::Char(L']') )
+            {
+                context.popNode();
+
+                if( context.isTop() )
+                    _parse = &PropertiesReader::parseBeforeName;
+                else
+                    _parse = &PropertiesReader::finishComposedValue;
+
+                return;
+            }
+        }
+
         void getEscaped(ParseContext& context)
         {
             Pt::Char ch;
@@ -511,6 +672,7 @@ class PropertiesReader : public ArchiveReader
 
     private:
         std::basic_istream<Pt::Char>* _is;
+        typedef void (PropertiesReader::*Parse)(const Pt::Char&, ParseContext&);
         Parse _parse;
 };
 
