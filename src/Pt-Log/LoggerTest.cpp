@@ -22,6 +22,7 @@
 
 #include "Pt/Log/Logger.h"
 #include "Pt/Log/Target.h"
+#include "Pt/System/IOError.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -123,13 +124,26 @@ class LoggerTest : public Pt::Unit::TestSuite
 
         void SerialChannel()
         {
-            Pt::Log::Logger logger("LoggerTest.SerialChannelTest");
-            Pt::Log::Target::get("LoggerTest.SerialChannelTest").setChannel("comm:///dev/ttyS0");
-            Pt::Log::Target::get("LoggerTest.SerialChannelTest").setLogLevel(Pt::Log::Trace);
-
-            for(int n = 0; n < 10; ++n)
+            std::string url;
+            try
             {
-                logger << Pt::Log::info << "Info Message on serial device" << Pt::Log::endlog;
+                Pt::Log::Logger logger("LoggerTest.SerialChannelTest");
+#ifdef _WIN32
+                url = "comm://COM1:";
+#else
+                url = "comm:///dev/ttyS0";
+#endif
+                Pt::Log::Target::get("LoggerTest.SerialChannelTest").setChannel(url);
+                Pt::Log::Target::get("LoggerTest.SerialChannelTest").setLogLevel(Pt::Log::Trace);
+    
+                for(int n = 0; n < 10; ++n)
+                {
+                    logger << Pt::Log::info << "Info Message on serial device" << Pt::Log::endlog;
+                }
+            }
+            catch( const Pt::System::OpenFailed& e )
+            {
+                message( "No such serial device: " + url ); 
             }
         }
 };
