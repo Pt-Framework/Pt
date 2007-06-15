@@ -85,6 +85,7 @@ class PipeImpl
         IODevice& input();
 
         IODevice& output();
+
     private:
         PipeIODevice        _inputDevice;
         PipeIODevice        _outputDevice;

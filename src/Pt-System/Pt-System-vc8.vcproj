@@ -243,6 +243,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PipeTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Plugin.cpp"
 				>
 			</File>
@@ -814,26 +818,6 @@
 				<File
 					RelativePath=".\wince\FileSystemImpl.h"
 					>
-				</File>
-				<File
-					RelativePath=".\posix\IODeviceImpl.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Pocket PC 2003 (ARMV4)"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Pocket PC 2003 (ARMV4)"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\wince\IODeviceImpl.h"

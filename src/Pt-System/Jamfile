@@ -83,6 +83,10 @@ PtUnitTest_MakeLocate SerialDeviceTest : bin ;
 #Main_LinkSharedLibraries SelectorTest : Pt Pt-System ;
 #PtUnitTest_MakeLocate SelectorTest : bin ;
 
+PtUnitTest PipeTest : PipeTest.cpp ;
+Main_LinkSharedLibraries PipeTest : Pt Pt-System Pt-Unit ;
+PtUnitTest_MakeLocate PipeTest : bin ;
+
 Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : bin ;

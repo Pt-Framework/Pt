@@ -26,11 +26,73 @@
 #include "IODeviceImpl.h"
 #include <windows.h>
 #include <vector>
-#include "..\win32\ReadResult.h"
+#include "..\win32\IOResultImpl.h"
 
 namespace Pt {
 
 namespace System {
+
+
+class ReadResultPipe : public IOResultImpl
+{
+public:
+    ReadResultPipe()    
+    : _bufferSize(0)
+    , _buffer(0)
+    {}
+
+    virtual void onComplete()
+    {
+        this->device()->inputReady();        
+    }
+
+    void attach(char* buffer, size_t size)
+    {
+        _buffer = buffer;
+        _bufferSize = size;
+    }    
+
+    char* buffer() const
+    { return _buffer; }
+
+    DWORD bufferSize() const
+    { return _bufferSize; }    
+
+private:
+    char*   _buffer;
+    DWORD   _bufferSize;   
+};
+
+class WriteResultPipe : public IOResultImpl
+{
+public:
+    WriteResultPipe()    
+    : _bufferSize(0)
+    , _buffer(0)
+    {}
+
+    virtual void onComplete()
+    {
+        this->device()->outputReady();        
+    }
+
+    void attach(const char* buffer, size_t size)
+    {
+        _buffer = buffer;
+        _bufferSize = size;
+    }    
+
+    const char* buffer() const
+    { return _buffer; }
+
+    DWORD bufferSize() const
+    { return _bufferSize; }    
+
+private:
+    const char*   _buffer;
+    DWORD         _bufferSize; 
+};
+
 
 class PipeIODevice : public IODevice, private IODeviceImpl
 {
@@ -41,7 +103,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual ~PipeIODevice();
 
-        virtual void open(HANDLE handle);
+        virtual void open(HANDLE handle, bool isAsync);
 
         virtual HANDLE deviceHandle() const;
         
@@ -62,17 +124,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
         virtual size_t _endRead(IOResult& result, bool& eof);
 
-        IOResult& _beginWrite(const char* buffer, size_t n)
-        {
-            ReadResult result;
-            return result;
-        }
+        IOResult& _beginWrite(const char* buffer, size_t n);        
 
-        size_t _endWrite(IOResult& result)
-        {
-           return 0;
-        }
-
+        size_t _endWrite(IOResult& result);
 
         //! @brief Read bytes from device
         virtual size_t _read(char* buffer, size_t count, bool& eof);
@@ -94,6 +148,9 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         size_t                      _bufferSize;
         std::vector<char>           _buffer;               
         bool                        _isWaitable;
+        ReadResultPipe              _readResult;
+        WriteResultPipe             _writeResult;
+        HANDLE                      _internalBufferWaitHandle;
 };
 
 class PipeImpl

@@ -37,7 +37,8 @@ PipeIODevice::PipeIODevice(Mode mode)
 , _msgSize(0)
 , _isWaitable(true)
 , _bufferSize(0)
-{    
+{  
+    _internalBufferWaitHandle = CreateEvent(NULL, TRUE, TRUE, NULL);
 }
 
 PipeIODevice::~PipeIODevice()
@@ -53,7 +54,7 @@ PipeIODevice::~PipeIODevice()
 
 
 
-void PipeIODevice::open(HANDLE handle)
+void PipeIODevice::open(HANDLE handle, bool isAsync)
 {
     _handle = handle; 
     
@@ -64,17 +65,91 @@ void PipeIODevice::open(HANDLE handle)
         _buffer.resize(_msgSize);        
     }
 
-    setValid(true);
+    this->setValid(true);
+    this->setAsync(isAsync);
 }
 
 IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
-{
-    throw std::runtime_error("endRead not implemented" + PT_SOURCEINFO);
+{    
+    if( Read != _mode ) 
+    {
+        throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
+    }
+
+    if (_bufferSize) 
+    {
+        _readResult.setHandle(_internalBufferWaitHandle);
+    }
+    else
+    {
+        _readResult.setHandle(_handle);
+    }
+
+    _readResult.attach(buffer, n);
+    return _readResult;
+ 
 }
 
 size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
+{    
+    DWORD readBytes = 0;   
+    DWORD flags     = 0;    
+
+    eof = false;
+
+    if (_bufferSize) 
+    {    
+        readBytes = _bufferSize;        
+    }
+    else if ( FALSE == ReadMsgQueue(_handle, &_buffer[0], _msgSize, &readBytes, 0, &flags) ) 
+    {    
+        throw IOError("Could not read from message queue handle", PT_SOURCEINFO);
+    }
+    
+    DWORD bytesToCopy = std::min(_readResult.bufferSize(), readBytes);
+
+    memcpy(_readResult.buffer(), &_buffer[0], bytesToCopy);
+    
+    _bufferSize = 0;
+
+    if (_readResult.bufferSize() >= readBytes)
+        return readBytes;
+
+    // external buffer is too small, copy overlapping bytes to internal buffer
+    // and set the device to non waitable to signal that more data is available
+    std::vector<char>::iterator beginData = (_buffer.begin() + bytesToCopy);
+    std::vector<char>::iterator endData   = (_buffer.begin() + readBytes);
+
+    copy(beginData, endData, _buffer.begin());    
+    
+    _bufferSize = (readBytes - bytesToCopy);
+    
+    return bytesToCopy;
+}
+
+IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
 {
-    throw std::runtime_error("endRead not implemented" + PT_SOURCEINFO);
+    if( Write != _mode ) 
+    {
+        throw IOError("Could not write on a read only pipe", PT_SOURCEINFO);
+    }
+
+    _writeResult.setHandle(_handle);
+    _writeResult.attach(buffer, n);
+
+    return _writeResult;
+}
+
+size_t PipeIODevice::_endWrite(IOResult& result)
+{     
+    DWORD bytesToWrite = std::min(_writeResult.bufferSize(), _msgSize);
+
+    if ( FALSE == WriteMsgQueue(_handle, (LPVOID) _writeResult.buffer(), bytesToWrite, 0, 0)) 
+    {
+        throw IOError("WriteMsgQueue failed", PT_SOURCEINFO);        
+    }
+
+    return bytesToWrite;    
 }
 
 
@@ -82,23 +157,6 @@ HANDLE PipeIODevice::deviceHandle() const
 {
     return _handle;
 }
-
-/*IODeviceImpl::WaitResult PipeIODevice::waitResult( HANDLE handle )
-{
-    if( Read == _mode ) {
-        return IODeviceImpl::ReadyRead;
-    }
-    
-    return IODeviceImpl::ReadyWrite;    
-}
-
-void PipeIODevice::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
-{
-    handles.clear();
-
-    handles.push_back(_handle);    
-}*/
-
 
 void PipeIODevice::_close()
 {
@@ -162,6 +220,8 @@ void PipeIODevice::writeMessage(const char* buffer, size_t count)
     if ( TRUE == WriteMsgQueue(_handle, (LPVOID) buffer, count, 0, 0)) {
         return;
     }
+
+    WaitForSingleObject(_handle, INFINITE);
     
     throw std::logic_error("WriteMsgQueue failed" + PT_SOURCEINFO);
 
@@ -193,7 +253,7 @@ void PipeIODevice::_sync() const
 PipeImpl::PipeImpl(bool isAsync)
 : _inputDevice(PipeIODevice::Read)
 , _outputDevice(PipeIODevice::Write)
-{    
+{
     MSGQUEUEOPTIONS writeOpts, readOpts;
 
     memset(&writeOpts, 0, sizeof(writeOpts));
@@ -218,8 +278,8 @@ PipeImpl::PipeImpl(bool isAsync)
         throw IOError("Could not open message queue handle", PT_SOURCEINFO);
     }
 
-    _inputDevice.open(inputHandle);
-    _outputDevice.open(outputHandle);
+    _inputDevice.open(inputHandle, isAsync);
+    _outputDevice.open(outputHandle, isAsync);
 }
 
 PipeImpl::~PipeImpl()
