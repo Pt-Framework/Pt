@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-void onInput()
+void onInput(Pt::System::IOResult& r)
 {
     std::cerr << "Input: ";
 }

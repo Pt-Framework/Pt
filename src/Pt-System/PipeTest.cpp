@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Bjoern Oliver Streule                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *

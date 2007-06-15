@@ -17,7 +17,7 @@ class WriteResult : public IOResultImpl
 
 		virtual void onComplete()
 		{
-			this->device()->outputReady();
+			this->device()->outputReady(*this);
 		}
 };
 

@@ -43,7 +43,7 @@ public:
 
     virtual void onComplete()
     {
-        this->device()->inputReady();        
+        this->device()->inputReady(*this);        
     }
 
     void attach(char* buffer, size_t size)
@@ -73,7 +73,7 @@ public:
 
     virtual void onComplete()
     {
-        this->device()->outputReady();        
+        this->device()->outputReady(*this);        
     }
 
     void attach(const char* buffer, size_t size)

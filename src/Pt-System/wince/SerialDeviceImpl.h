@@ -79,7 +79,7 @@ class ReadResultSerial : public IOResultSerial
 public:
     virtual void onComplete()
     {
-        this->device()->inputReady();        
+        this->device()->inputReady(*this);        
     }
 };
 
@@ -88,7 +88,7 @@ class WriteResultSerial : public IOResultSerial
 public:
     virtual void onComplete()
     {
-        this->device()->outputReady();        
+        this->device()->outputReady(*this);        
     }
 };
 

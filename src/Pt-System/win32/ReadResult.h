@@ -14,7 +14,7 @@ class ReadResult : public IOResultImpl
 
 		virtual void onComplete()
 		{
-			this->device()->inputReady();
+			this->device()->inputReady(*this);
 		}
 };
 

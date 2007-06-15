@@ -20,6 +20,6 @@ SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-Text Pt-System ;
 SharedLibrary_MakeLocate Pt-Unit : bin ;
 
-Main TextProtocolTest : TextProtocolTest.cpp ;
-Main_LinkSharedLibraries TextProtocolTest : Pt Pt-Unit ;
-Main_MakeLocate TextProtocolTest : bin ;
+#Main TextProtocolTest : TextProtocolTest.cpp ;
+#Main_LinkSharedLibraries TextProtocolTest : Pt Pt-Unit ;
+#Main_MakeLocate TextProtocolTest : bin ;

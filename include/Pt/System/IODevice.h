@@ -261,7 +261,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             This signal is send when the IODevice is monitored
             in a Selector or EventLoop and data becomes available.
         */
-        Signal<> inputReady;
+        Signal<IOResult&> inputReady;
 
         /** @brief Notifies when data can be written
 
@@ -269,7 +269,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             in a Selector or EventLoop and the device is ready
             to write data.
         */
-        Signal<> outputReady;
+        Signal<IOResult&> outputReady;
 
     protected:
         //! @brief Default Constructor
