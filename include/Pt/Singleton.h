@@ -69,9 +69,22 @@ namespace Pt {
             {
                 if(!_instance)
                 {
-                    _instance = _allocator.allocate(1);
-                    new (_instance) T();
-                    std::atexit(&atExit);
+                    try
+                    {
+                        _instance = _allocator.allocate(1);
+					    new (_instance) T();
+					    std::atexit(&atExit);
+                    }
+                    catch( const std::bad_alloc& e )
+                    {
+                        throw e;
+                    }
+                    catch(...)
+                    {
+                        _allocator.deallocate(_instance, 1);
+                        _instance = 0;
+                        throw;
+                    }
                 }
 
                 return *_instance;
