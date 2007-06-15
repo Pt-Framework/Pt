@@ -19,7 +19,9 @@
 
 #include "SerialChannel.h"
 #include <Pt/System/Url.h>
+#include <Pt/System/IOError.h>
 #include <iostream>
+#include <sstream>
 
 
 namespace Pt {
@@ -58,8 +60,26 @@ void SerialChannel::_open(const std::string& urlstr)
 {
     Pt::System::MutexLock lock( _mutex );
 
-    System::Url url(urlstr);
-    _device.open( url.path(), std::ios::out );
+    //TODO Use System::Url for "comm" scheme as soon as protocol handler for "comm" is implemented
+    //System::Url url(urlstr);
+    std::stringstream sStream(urlstr);
+    std::string protocol;
+    std::getline(sStream, protocol, ':');
+    if( protocol != "comm" )
+    {
+        throw Pt::System::OpenFailed( "Unexpected protocol type: " + protocol, PT_SOURCEINFO );
+    }
+    if( sStream.get() != '/' ) 
+    {
+        throw Pt::System::OpenFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
+    }
+    if( sStream.get() != '/' ) 
+    {
+        throw Pt::System::OpenFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
+    }
+    std::string path;
+    std::getline( sStream, path );
+    _device.open( path, std::ios::out );
     _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
 	_device.setCharSize(8);
 	_device.setStopBits(Pt::System::SerialDevice::OneStopBit);
