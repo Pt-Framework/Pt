@@ -143,13 +143,13 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
 
         if( FD_ISSET(fd, &rfds) )
         {
-            result->device()->inputReady();
+            result->device()->inputReady(*result);
             iter = _readers.erase(iter);
             avail = true;
         }
         else if( FD_ISSET(fd, &wfds) )
         {
-            result->device()->outputReady();
+            result->device()->outputReady(*result);
             iter = _readers.erase(iter);
             avail = true;
         }

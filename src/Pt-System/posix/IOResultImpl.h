@@ -58,7 +58,7 @@ namespace System {
             size_t bufferSize() const
             { return _bufferSize; }
 
-            virtual void add(fd_set& readFds, fd_set writeFds) = 0;
+            virtual void add(fd_set& readFds, fd_set& writeFds) = 0;
 
         protected:
             IOResultImpl()

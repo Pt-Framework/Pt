@@ -39,7 +39,7 @@ namespace System {
             ReadResult()
             {}
 
-            virtual void add(fd_set& readFds, fd_set writeFds)
+            virtual void add(fd_set& readFds, fd_set& writeFds)
             {  FD_SET( this->fd(), &readFds ); }
 
         protected:
