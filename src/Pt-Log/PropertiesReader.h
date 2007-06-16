@@ -91,21 +91,21 @@ class PropertiesReader : public ArchiveReader
                     return _depth;
                 }
 
-                void pushNode()
+                void enterNode()
                 {
                     _archive = &( _archive->addArchive( _name ) );
                     _name.clear();
                     ++_depth;
                 }
 
-                void popNode()
+                void leaveNode()
                 {
                     assert(_depth > 0);
                     _archive = _archive->parent();
                     --_depth;
                 }
 
-                void pushValue()
+                void addValue()
                 {
                     size_t pos  = _name.rfind( Pt::Char(L'.') );
 
@@ -263,12 +263,12 @@ class PropertiesReader : public ArchiveReader
                     break;
 
                 case '{':
-                    context.pushNode();
-                    _parse = &PropertiesReader::beginArray;
+                    context.enterNode();
+                    _parse = &PropertiesReader::parseArray;
                     break;
 
                 case '(':
-                    context.pushNode();
+                    context.enterNode();
                     _parse = &PropertiesReader::beginStatement;
                     break;
 
@@ -286,7 +286,7 @@ class PropertiesReader : public ArchiveReader
             if( ch == eof || Pt::Unicode::isSpace(ch) ||
                 ch == Pt::Char(L'\n') )
             {
-                context.pushValue();
+                context.addValue();
                 _parse = &PropertiesReader::finishValue;
                 return;
             }
@@ -294,13 +294,13 @@ class PropertiesReader : public ArchiveReader
             switch( ch.value() )
             {
                 case ',':
-                    context.pushValue();
+                    context.addValue();
                     _parse = &PropertiesReader::beginStatement;
                     break;
 
                 case ')':
-                    context.pushValue();
-                    context.popNode();
+                    context.addValue();
+                    context.leaveNode();
 
                     if( context.depth() == 0 )
                         _parse = &PropertiesReader::beginStatement;
@@ -335,7 +335,7 @@ class PropertiesReader : public ArchiveReader
                     break;
 
                 case ')':
-                    context.popNode();
+                    context.leaveNode();
 
                     if( context.depth() == 0 )
                         _parse = &PropertiesReader::beginStatement;
@@ -371,7 +371,7 @@ class PropertiesReader : public ArchiveReader
                 if(context.depth() > 0)
                     throw ParseError( "Expected token before EOF", context.line() );
 
-                context.pushValue();
+                context.addValue();
                 return;
             }
 
@@ -385,13 +385,13 @@ class PropertiesReader : public ArchiveReader
                     break;
 
                 case ',':
-                    context.pushValue();
+                    context.addValue();
                     _parse = &PropertiesReader::beginStatement;
                     break;
 
                 case ')':
-                    context.pushValue();
-                    context.popNode();
+                    context.addValue();
+                    context.leaveNode();
 
                     if( context.depth() == 0 )
                         _parse = &PropertiesReader::beginStatement;
@@ -403,7 +403,7 @@ class PropertiesReader : public ArchiveReader
             }
         }
 
-        void beginArray(const Pt::Char& ch, ParseContext& context)
+        void parseArray(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
             {
@@ -440,7 +440,6 @@ class PropertiesReader : public ArchiveReader
 
             if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
             {
-                context.pushValue();
                 _parse = &PropertiesReader::finishArrayValue;
                 return;
             }
@@ -448,13 +447,13 @@ class PropertiesReader : public ArchiveReader
             switch( ch.value() )
             {
                 case ',':
-                    context.pushValue();
-                    _parse = &PropertiesReader::beginArray;
+                    context.addValue();
+                    _parse = &PropertiesReader::parseArray;
                     break;
 
                 case '}':
-                    context.pushValue();
-                    context.popNode();
+                    context.addValue();
+                    context.leaveNode();
                     _parse = &PropertiesReader::beginStatement;
                     break;
 
@@ -474,12 +473,13 @@ class PropertiesReader : public ArchiveReader
             switch( ch.value() )
             {
                 case ',':
-                    _parse = &PropertiesReader::beginArray;
+                    context.addValue();
+                    _parse = &PropertiesReader::parseArray;
                     break;
 
                 case '}':
-                    context.pushValue();
-                    context.popNode();
+                    context.addValue();
+                    context.leaveNode();
                     _parse = &PropertiesReader::beginStatement;
                     break;
             }
@@ -521,15 +521,15 @@ class PropertiesReader : public ArchiveReader
 
             if( ch == Pt::Char(L',') )
             {
-                context.pushValue();
-                _parse = &PropertiesReader::beginArray;
+                context.addValue();
+                _parse = &PropertiesReader::parseArray;
                 return;
             }
 
             if( ch == Pt::Char(L'}') )
             {
-                context.pushValue();
-                context.popNode();
+                context.addValue();
+                context.leaveNode();
                 _parse = &PropertiesReader::beginStatement;
                 return;
             }

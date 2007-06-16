@@ -88,7 +88,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
         void PlainArray()
         {
             std::stringstream ss;
-            ss << "a.b.c = { 1, 2, 3 }\n";
+            ss << "a.b.c = { 1,2,3 }\n";
             ss << "d.e.f = {1,2,3}\n";
             ss << "g.h.i = { 1,\"\\n2\", 3 }\n";
 
