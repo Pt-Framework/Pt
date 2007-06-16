@@ -41,16 +41,19 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
         PropertiesArchiveTest()
         : Pt::Unit::TestSuite("PropertiesArchiveTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Parse", *this, &PropertiesArchiveTest::Parse );
-            //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &PropertiesArchiveTest::PlainArray );
-            Pt::Unit::TestSuite::registerMethod( "ComposedType", *this, &PropertiesArchiveTest::ComposedType );
+            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &PropertiesArchiveTest::PlainValue );
+            Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &PropertiesArchiveTest::PlainQoutedValue );
+            Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &PropertiesArchiveTest::PlainArray );
+            Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &PropertiesArchiveTest::PlainQoutedArray );
+            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &PropertiesArchiveTest::ComplexType );
+            Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &PropertiesArchiveTest::QoutedComplexType );
             //Pt::Unit::TestSuite::registerMethod( "Date", *this, &PropertiesArchiveTest::Date );
             //Pt::Unit::TestSuite::registerMethod( "Time", *this, &PropertiesArchiveTest::Time );
             //Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &PropertiesArchiveTest::DateTime );
         }
 
     protected:
-        void Parse()
+        void PlainValue()
         {
             std::stringstream ss;
             ss << "[ a.b.c]\n";
@@ -64,6 +67,22 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             const Pt::String* s = archive.getArchive(L"a.b.c.d")->getValue(L"v");
             PT_UNIT_ASSERT( s)
             PT_UNIT_ASSERT( s->narrow() == "3")
+        }
+
+        void PlainQoutedValue()
+        {
+            std::stringstream ss;
+            ss << "[a.b.c ]\n";
+            ss << "d.v = \"3\" \n \"4\"\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            const Pt::String* s = archive.getArchive(L"a.b.c.d")->getValue(L"v");
+            PT_UNIT_ASSERT( s)
+            PT_UNIT_ASSERT( s->narrow() == "34")
         }
 
         void PlainArray()
@@ -95,7 +114,35 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( concat.narrow() == "1\n23")
         }
 
-        void ComposedType()
+        void PlainQoutedArray()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = { \"1\" , \"2\", \"3\"}\n";
+            ss << "g.h.i = {\"1\", \"2\" \"2\" , \"3\" }\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            Pt::String concat;
+            const Pt::Archive* a = archive.getArchive(L"a.b.c");
+            for( Pt::Archive::ConstIterator it = a->begin(); it != a->end(); ++it)
+            {
+                concat += (*it).toValue()->value();
+            }
+            PT_UNIT_ASSERT( concat.narrow() == "123")
+
+            concat.clear();
+            a = archive.getArchive(L"g.h.i");
+            for( Pt::Archive::ConstIterator it = a->begin(); it != a->end(); ++it)
+            {
+                concat += (*it).toValue()->value();
+            }
+            PT_UNIT_ASSERT( concat.narrow() == "1223")
+        }
+
+        void ComplexType()
         {
             std::stringstream ss;
             ss << "a.b.c = ( d = 1, e =2, f= ( g = 3) )\n";
@@ -107,7 +154,52 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::String concat;
             const Pt::Archive* a = archive.getArchive(L"a.b.c");
+            PT_UNIT_ASSERT( a )
+
+            const Pt::String* value = a->getValue( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( value->narrow() == "1" )
+
+            value = a->getValue( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( value->narrow() == "2" )
+
             a = a->getArchive( L"f" );
+            PT_UNIT_ASSERT( a )
+
+            for( Pt::Archive::ConstIterator it = a->begin(); it != a->end(); ++it)
+            {
+                concat += (*it).toValue()->value();
+            }
+
+            PT_UNIT_ASSERT( concat.narrow() == "3")
+        }
+
+        void QoutedComplexType()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = ( d =\"1\", e = \"2\" \"2\" , f= ( g =\"3\") )\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            Pt::String concat;
+            const Pt::Archive* a = archive.getArchive(L"a.b.c");
+            PT_UNIT_ASSERT( a )
+
+            const Pt::String* value = a->getValue( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( value->narrow() == "1" )
+
+            value = a->getValue( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( value->narrow() == "22" )
+
+            a = a->getArchive( L"f" );
+            PT_UNIT_ASSERT( a )
+
             for( Pt::Archive::ConstIterator it = a->begin(); it != a->end(); ++it)
             {
                 concat += (*it).toValue()->value();
