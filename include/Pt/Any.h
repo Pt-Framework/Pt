@@ -495,7 +495,7 @@ namespace Pt {
                 return a;
             }
 
-            static Any create(const std::string& name, std::istream& is)
+            /*static Any create(const std::string& name, std::istream& is)
             {
                 std::multimap<std::string, AnyIO*>::iterator it;
                 it = AnyFactory::instance().map().find(name);
@@ -522,7 +522,7 @@ namespace Pt {
                 Pt::Any a;
                 it->second->input(is, a);
                 return a;
-            }
+            }*/
 
         protected:
             AnyFactory();

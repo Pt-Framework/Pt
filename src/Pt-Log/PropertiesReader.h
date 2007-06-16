@@ -287,7 +287,10 @@ class PropertiesReader : public ArchiveReader
                 ch == Pt::Char(L'\n') )
             {
                 context.addValue();
-                _parse = &PropertiesReader::finishValue;
+                if(context.depth() == 0)
+                    _parse = &PropertiesReader::beginStatement;
+                else
+                    _parse = &PropertiesReader::finishValue;
                 return;
             }
 
@@ -347,7 +350,7 @@ class PropertiesReader : public ArchiveReader
         void parseQoutedValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof || ch == Pt::Char(L'\n') || ch == Pt::Char(L'\r') )
-                throw ParseError("Expected closing\" token", context.line());
+                throw ParseError("Expected closing \" token", context.line());
 
             switch( ch.value() )
             {
@@ -376,7 +379,9 @@ class PropertiesReader : public ArchiveReader
             }
 
             if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
+            {
                 return;
+            }
 
             switch( ch.value() )
             {
@@ -399,6 +404,14 @@ class PropertiesReader : public ArchiveReader
                     break;
 
                 default:
+                    if( context.depth() == 0 )
+                    {
+                        context.addValue();
+                        context.reset();
+                        context.name() += ch;
+                        _parse = &PropertiesReader::parseName;
+                        return;
+                    }
                     throw ParseError( "Expected closing \')\'", context.line() );
             }
         }

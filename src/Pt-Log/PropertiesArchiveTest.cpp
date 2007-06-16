@@ -58,7 +58,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             std::stringstream ss;
             ss << "[ a.b.c]\n";
             ss << "d.v = 3\n";
-
+            ss << "d.u = 4\n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
             Pt::PropertiesArchive archive;
@@ -67,6 +67,10 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             const Pt::String* s = archive.getArchive(L"a.b.c.d")->getValue(L"v");
             PT_UNIT_ASSERT( s)
             PT_UNIT_ASSERT( s->narrow() == "3")
+
+            s = archive.getArchive(L"a.b.c.d")->getValue(L"u");
+            PT_UNIT_ASSERT( s)
+            PT_UNIT_ASSERT( s->narrow() == "4")
         }
 
         void PlainQoutedValue()
