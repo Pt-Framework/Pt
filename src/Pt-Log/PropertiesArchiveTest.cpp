@@ -42,11 +42,11 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("PropertiesArchiveTest")
         {
             Pt::Unit::TestSuite::registerMethod( "Parse", *this, &PropertiesArchiveTest::Parse );
-            Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &PropertiesArchiveTest::PlainArray );
+            //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &PropertiesArchiveTest::PlainArray );
             Pt::Unit::TestSuite::registerMethod( "ComposedType", *this, &PropertiesArchiveTest::ComposedType );
-            Pt::Unit::TestSuite::registerMethod( "Date", *this, &PropertiesArchiveTest::Date );
-            Pt::Unit::TestSuite::registerMethod( "Time", *this, &PropertiesArchiveTest::Time );
-            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &PropertiesArchiveTest::DateTime );
+            //Pt::Unit::TestSuite::registerMethod( "Date", *this, &PropertiesArchiveTest::Date );
+            //Pt::Unit::TestSuite::registerMethod( "Time", *this, &PropertiesArchiveTest::Time );
+            //Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &PropertiesArchiveTest::DateTime );
         }
 
     protected:
@@ -98,7 +98,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
         void ComposedType()
         {
             std::stringstream ss;
-            ss << "a.b.c = [ d = 1, e =2, f= [ g = 3] ]\n";
+            ss << "a.b.c = ( d = 1, e =2, f= ( g = 3) )\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);

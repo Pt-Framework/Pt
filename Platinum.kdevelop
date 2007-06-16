@@ -24,7 +24,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt/bin/LoggerDemod</mainprogram>
+      <mainprogram>/home/marc/Pt/bin/PropertiesArchiveTestd</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -169,8 +169,8 @@
       <root>/usr/lib/qt3-gcc3.4</root>
       <includestyle>3</includestyle>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake/>
-      <designer/>
+      <qmake></qmake>
+      <designer></designer>
       <designerpluginpaths/>
     </qt>
     <creategettersetter>
