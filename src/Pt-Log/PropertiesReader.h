@@ -259,7 +259,7 @@ class PropertiesReader : public ArchiveReader
                     throw ParseError("Expected token before \'=\'", context.line());
 
                 case '"':
-                    _parse = &PropertiesReader::parseQoutedValue;
+                    _parse = &PropertiesReader::parseQuotedValue;
                     break;
 
                 case '{':
@@ -347,7 +347,7 @@ class PropertiesReader : public ArchiveReader
             }
         }
 
-        void parseQoutedValue(const Pt::Char& ch, ParseContext& context)
+        void parseQuotedValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof || ch == Pt::Char(L'\n') || ch == Pt::Char(L'\r') )
                 throw ParseError("Expected closing \" token", context.line());
@@ -359,7 +359,7 @@ class PropertiesReader : public ArchiveReader
                     break;
 
                 case '"':
-                    _parse = &PropertiesReader::finishQoutedValue;
+                    _parse = &PropertiesReader::finishQuotedValue;
                     break;
 
                 default:
@@ -367,7 +367,7 @@ class PropertiesReader : public ArchiveReader
             }
         }
 
-        void finishQoutedValue(const Pt::Char& ch, ParseContext& context)
+        void finishQuotedValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
             {
@@ -386,7 +386,7 @@ class PropertiesReader : public ArchiveReader
             switch( ch.value() )
             {
                 case '"':
-                    _parse = &PropertiesReader::parseQoutedValue;
+                    _parse = &PropertiesReader::parseQuotedValue;
                     break;
 
                 case ',':
@@ -432,7 +432,7 @@ class PropertiesReader : public ArchiveReader
                     throw ParseError("Incomplete array", context.line());
 
                 case '"':
-                    _parse = &PropertiesReader::parseQoutedArrayValue;
+                    _parse = &PropertiesReader::parseQuotedArrayValue;
                     break;
 
                 case '}':
@@ -498,7 +498,7 @@ class PropertiesReader : public ArchiveReader
             }
         }
 
-        void parseQoutedArrayValue(const Pt::Char& ch, ParseContext& context)
+        void parseQuotedArrayValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
                 throw ParseError( "Reached EOF in array element", context.line() );
@@ -506,7 +506,7 @@ class PropertiesReader : public ArchiveReader
             switch( ch.value() )
             {
                 case '"' :
-                    _parse = &PropertiesReader::finishQoutedArrayValue;
+                    _parse = &PropertiesReader::finishQuotedArrayValue;
                     break;
 
                 case '\\' :
@@ -518,7 +518,7 @@ class PropertiesReader : public ArchiveReader
             }
         }
 
-        void finishQoutedArrayValue(const Pt::Char& ch, ParseContext& context)
+        void finishQuotedArrayValue(const Pt::Char& ch, ParseContext& context)
         {
             if( ch == eof )
                 throw ParseError( "Incomplete array", context.line() );
@@ -528,7 +528,7 @@ class PropertiesReader : public ArchiveReader
 
             if( ch == Pt::Char(L'"') )
             {
-                _parse = &PropertiesReader::parseQoutedArrayValue;
+                _parse = &PropertiesReader::parseQuotedArrayValue;
                 return;
             }
 
