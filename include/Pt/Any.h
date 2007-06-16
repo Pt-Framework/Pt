@@ -361,7 +361,7 @@ namespace Pt {
         throw std::bad_cast();
     }
 
-
+/*
     struct AnyIO
     {
         virtual ~AnyIO()
@@ -406,7 +406,7 @@ namespace Pt {
             AnyTraits<T>::input( is, value->value() );
         }
     };
-
+*/
 
     struct AnyBuilder
     {
@@ -469,10 +469,10 @@ namespace Pt {
 
         public:
             //! @internal
-            std::multimap<std::string, AnyIO*>& map();
+            //std::multimap<std::string, AnyIO*>& map();
 
             //! @internal
-            const std::multimap<std::string, AnyIO*>& map() const;
+            //const std::multimap<std::string, AnyIO*>& map() const;
 
             static Any create(const std::string typeName, const Pt::String& value)
             {
@@ -543,7 +543,7 @@ namespace Pt {
             std::multimap<std::string, AnyBuilder*> _builder;
 
             //! @internal
-            std::multimap<std::string, AnyIO*> _initMap;
+            //std::multimap<std::string, AnyIO*> _initMap;
     };
 
 
@@ -565,18 +565,18 @@ namespace Pt {
 
         /sa Any
     */
-    template <typename T>
-    struct AnyBind
-    {
+    //template <typename T>
+    //struct AnyBind
+    //{
         /** @brief Binds a type to a name
 
             With the use of AnyBind objects you can bind your types
             at static initialisation time. By default the typename
             will be determined by the TypeTraits.
         */
-        AnyBind( const std::string& typeName = TypeTraits<T>::typeName() )
-        { AnyFactory::instance().map().insert( std::make_pair( typeName, new BasicAnyIO<T> ) ); }
-    };
+        //AnyBind( const std::string& typeName = TypeTraits<T>::typeName() )
+        //{ AnyFactory::instance().map().insert( std::make_pair( typeName, new BasicAnyIO<T> ) ); }
+    //};
 
 }
 

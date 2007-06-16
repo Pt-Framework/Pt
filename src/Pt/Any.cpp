@@ -14,12 +14,12 @@ namespace Pt
     }
 
 
-    std::multimap<std::string, AnyIO*>& AnyFactory::map()
-    { return _initMap; }
+    //std::multimap<std::string, AnyIO*>& AnyFactory::map()
+    //{ return _initMap; }
 
 
-    const std::multimap<std::string, AnyIO*>& AnyFactory::map() const
-    { return _initMap; }
+    //const std::multimap<std::string, AnyIO*>& AnyFactory::map() const
+    //{ return _initMap; }
 
 
     Any::Any()
@@ -106,11 +106,11 @@ namespace Pt
     }
 
 
-    static AnyBind<bool> fbind_bool("bool");
-    static AnyBind<char> fbind_char("char");
-    static AnyBind<int> fbind_int("int");
-    static AnyBind<float> fbind_float("float");
-    static AnyBind<double> fbind_double("double");
-    static AnyBind<std::string> fbind_std_string("std::string");
+    //static AnyBind<bool> fbind_bool("bool");
+    //static AnyBind<char> fbind_char("char");
+    //static AnyBind<int> fbind_int("int");
+    //static AnyBind<float> fbind_float("float");
+    //static AnyBind<double> fbind_double("double");
+    //static AnyBind<std::string> fbind_std_string("std::string");
 
 } // namespace Pt
