@@ -180,12 +180,16 @@ class PropertiesReader : public ArchiveReader
 
         void beginStatement(const Pt::Char& ch, ParseContext& context)
         {
-            if( ch == eof || Pt::Unicode::isSpace(ch) )
-                return;
+            //if( ch == eof || Pt::Unicode::isSpace(ch) )
+            //    return;
 
             switch( ch.value() )
             {
                 case '\n':
+                case '\r':
+                case '\t':
+                case ' ':
+                case Pt::uint32_t(-1):
                     break;
 
                 case '[':
