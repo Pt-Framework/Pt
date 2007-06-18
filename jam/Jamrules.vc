@@ -98,7 +98,8 @@ rule SharedLibraryImpl
 
 	PDB on $(_objects) = $(_target:S=.pdb) ;
 	Depends $(_sources) : first ;
-	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+	Depends $(_target) : $(_target:S=$(SUFFLIB)) ;
+
 	LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
 }
 
