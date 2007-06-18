@@ -35,7 +35,6 @@ class AnyTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("AnyTest")
         {
             this->registerMethod( "InitTest", *this, &AnyTest::InitTest );
-            this->registerMethod( "FactoryTest", *this, &AnyTest::FactoryTest );
             this->registerMethod( "BoolTest", *this, &AnyTest::BoolTest );
             this->registerMethod( "CharTest", *this, &AnyTest::CharTest );
             this->registerMethod( "IntTest", *this, &AnyTest::IntTest );
@@ -54,22 +53,11 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( a == b );
         }
 
-        void FactoryTest()
-        {
-            std::stringstream ss("5");
-            Pt::Any a = Pt::AnyFactory::create("int", ss);
-            PT_UNIT_ASSERT( a == 5 );
-        }
-
         void BoolTest()
         {
             Pt::Any a = true;
             bool b = Pt::any_cast<bool>(a);
             PT_UNIT_ASSERT( b == true );
-
-            std::istringstream ss("true");
-            a = Pt::AnyFactory::create("bool", ss);
-            PT_UNIT_ASSERT( a == true );
         }
 
         void CharTest()
@@ -77,10 +65,6 @@ class AnyTest : public Pt::Unit::TestSuite
             Pt::Any a = 'c';
             char c = Pt::any_cast<char>(a);
             PT_UNIT_ASSERT( c == 'c' );
-
-            std::istringstream ss("c");
-            a = Pt::AnyFactory::create("char", ss);
-            PT_UNIT_ASSERT( a == 'c' );
         }
 
         void IntTest()
@@ -88,10 +72,6 @@ class AnyTest : public Pt::Unit::TestSuite
             Pt::Any a = 5;
             int i = Pt::any_cast<int>(a);
             PT_UNIT_ASSERT( i == 5 );
-
-            std::istringstream ss("7");
-            a = Pt::AnyFactory::create("int", ss);
-            PT_UNIT_ASSERT( a == 7 );
         }
 
         void FloatTest()
@@ -99,10 +79,6 @@ class AnyTest : public Pt::Unit::TestSuite
             Pt::Any a = 1.5f;
             float f = Pt::any_cast<float>(a);
             PT_UNIT_ASSERT( f == 1.5 );
-
-            std::istringstream ss("2.5");
-            a = Pt::AnyFactory::create("float", ss);
-            PT_UNIT_ASSERT( a == 2.5f );
         }
 
         void DoubleTest()
@@ -110,10 +86,6 @@ class AnyTest : public Pt::Unit::TestSuite
             Pt::Any a = 1.5;
             double d = Pt::any_cast<double>(a);
             PT_UNIT_ASSERT( d == 1.5 );
-
-            std::istringstream ss("2.5");
-            a = Pt::AnyFactory::create("double", ss);
-            PT_UNIT_ASSERT( a == 2.5 );
         }
 
         void StdStringTest()
@@ -121,10 +93,6 @@ class AnyTest : public Pt::Unit::TestSuite
             Pt::Any a = std::string("hello");
             const std::string& s = Pt::any_cast<const std::string&>(a);
             PT_UNIT_ASSERT( s == "hello" );
-
-            std::istringstream ss("\"world\"");
-            a = Pt::AnyFactory::create("std::string", ss);
-            PT_UNIT_ASSERT( a == std::string("world") );
         }
 };
 
