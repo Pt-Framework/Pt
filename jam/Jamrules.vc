@@ -98,7 +98,13 @@ rule SharedLibraryImpl
 
 	PDB on $(_objects) = $(_target:S=.pdb) ;
 	Depends $(_sources) : first ;
-	Depends $(_target) : $(_target:S=$(SUFFLIB)) ;
+	Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+
+  # The *.lib is created before its *.dll and therefore has an older timestamp.
+  # However, the lib depends on the dll and will be recreated everytime a 
+  # target is called using this dll because it seems to be 'old'.
+  # NOUPDATE will ignore the lib's timestamp once it has been created.
+  NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
 
 	LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
 }
