@@ -102,3 +102,37 @@ PtUnitTest_MakeLocate StringTest : bin ;
 PtUnitTest StringStreamTest : StringStreamTest.cpp ;
 Main_LinkSharedLibraries StringStreamTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate StringStreamTest : bin ;
+
+
+# Define pseudo targets to call from projects
+NOTFILE Pt-all ;
+NOTFILE Pt-test ;
+ 
+DEPENDS Pt-test : 	AtomicTest.unit 
+                 	ByteorderTest.unit
+                 	DateTimeTest.unit
+                 	DateTest.unit
+                 	TimeTest.unit                 	
+                 	ExceptionTest.unit
+                 	TypesTest.unit
+                 	SignalTest.unit
+                 	SmartPtrTest.unit
+                 	StringStreamTest.unit
+                 	VariantTest.unit
+                 	#VersionTest.unit
+                 	;
+                 
+DEPENDS Pt-all : 	Pt
+                 	AtomicTest 
+                 	ByteorderTest 
+                 	DateTimeTest 
+                 	DateTest 
+                 	TimeTest                  	
+                 	ExceptionTest 
+                 	TypesTest 
+                 	SignalTest 
+                 	SmartPtrTest 
+                 	StringStreamTest
+                 	VariantTest
+                 	#VersionTest
+                 	;
