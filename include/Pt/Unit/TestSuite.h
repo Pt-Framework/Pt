@@ -160,6 +160,21 @@ namespace Unit {
             */
             void runTest( const std::string& name, const Args& args = Args() );
 
+            template <typename C, typename A1>
+            void registerTest(const std::string& name, C& parent, void (C::*memFunc)(A1) )
+            {
+                // use Context instead of TestData?
+                // TestData* data = new BasicTestData<A1>();
+                // std::multimap<std::string, TestData*> _data;
+            }
+
+            void runTest( const std::string& name, const Archive& ar )
+            {
+                //TestData& data = this->testArgs(name);
+                //ar >> data;
+                //this->runTest( name, data.args() );
+            }
+
         protected:
             /** @brief The assoziated test protocol
             */

@@ -18,8 +18,8 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TextProtocol.h>
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf8Codec.h"
+//#include "Pt/Text/TextStream.h"
+//#include "Pt/Text/Utf8Codec.h"
 #include "../Pt-Log/PropertiesArchive.h"
 #include "../Pt-Log/PropertiesReader.h"
 
@@ -51,7 +51,7 @@ arg = 20
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
-    std::ifstream file(_path.c_str());
+/*    std::ifstream file(_path.c_str());
 
     if( ! file )
     {
@@ -82,6 +82,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
     {
         
     }
+*/
 }
 
 } // namespace Unit
