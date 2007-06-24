@@ -59,7 +59,7 @@ void TestSuite::run()
 
 void TestSuite::runTest(const std::string& name, const Args& args)
 {
-    ConText ctx(*this, name, args);
+    Context ctx(*this, name, args);
     ctx.run();
 }
 

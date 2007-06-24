@@ -65,6 +65,9 @@ class Args
             //_args.push_back( Any(a) );
         }
 
+        void clear()
+        { _args.clear(); }
+
         const Any& get(size_t n) const
         {
             //TODO: different exception type?

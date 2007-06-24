@@ -19,21 +19,49 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
+#include "Pt/Date.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
+#include "../Pt-Log/PropertiesArchive.h"
+#include "../Pt-Log/PropertiesReader.h"
+#include "Pt/Archive.h"
+#include "Pt/Date.h"
+#include "Pt/Text/TextStream.h"
+#include "Pt/Text/Utf8Codec.h"
+
+class Protocol : public Pt::Unit::TestProtocol
+{
+    public:
+        virtual void run(Pt::Unit::TestSuite& suite)
+        {
+            std::stringstream ss;
+            ss << "myDate = ( julianDays = 400000 )";
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::PropertiesReader reader(ts);
+            Pt::PropertiesArchive archive;
+            reader.read(archive);
+
+            const Pt::Archive* ar = archive.getArchive(L"myDate");
+
+            suite.runTest("test", *ar);
+        }
+} prot;
 
 
 class TextProtocolTest : public Pt::Unit::TestSuite
 {
     public:
         TextProtocolTest()
-        : Pt::Unit::TestSuite("TextProtocolTest")
+        : Pt::Unit::TestSuite("TextProtocolTest", prot)
         {
-            // Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
+            Pt::Unit::TestSuite::registerTest( "test", *this, &TextProtocolTest::test );
         }
 
     protected:
-
+        void test(const Pt::Date& date)
+        {
+            PT_UNIT_ASSERT( date.julian() == 400000 );
+        }
 };
 
 Pt::Unit::RegisterTest<TextProtocolTest> register_TextProtocolTest;

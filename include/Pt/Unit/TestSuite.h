@@ -62,19 +62,19 @@ namespace Unit {
     class PT_UNIT_API TestSuite : public Reflectable, public Test
     {
         public:
-            class ConText : public TestContext
+            class Context : public TestContext
             {
                 public:
-                    ConText(TestSuite& suite, const std::string& name, const Args& args)
+                    Context(TestSuite& suite, const std::string& name, const Args& args)
                     : TestContext(suite)
                     , _suite(suite)
                     , _methodName( name )
-                    , _args(args)
+                    , _args(&args)
                     , _testName( _suite.name() + "::" + name )
                     , _setUp(false)
                     { }
 
-                    virtual ~ConText()
+                    virtual ~Context()
                     {
                         try
                         {
@@ -88,20 +88,51 @@ namespace Unit {
                     const std::string& testName() const
                     { return _testName; }
 
+                    virtual void init(const Archive& ar)
+                    {}
+
                 protected:
                     void _run()
                     {
                         _suite.setUp();
                         _setUp = true;
-                        _suite.call(_methodName, _args);
+                        _suite.call(_methodName, *_args);
+                    }
+
+                    void setArgs(const Args& args)
+                    {
+                        _args = &args;
                     }
 
                 private:
                     TestSuite& _suite;
                     std::string _methodName;
-                    const Args& _args;
+                    const Args* _args;
                     std::string _testName;
                     bool _setUp;
+            };
+
+            template <typename A1>
+            class Context1 : public Context
+            {
+                public:
+                    Context1(TestSuite& suite, const std::string& name)
+                    : Context( suite, name, _args )
+                    {}
+
+                    virtual void init(const Archive& ar)
+                    {
+                        typedef typename Pt::TypeInfo<A1>::Value ValueA1 ;
+                        ValueA1 a1;
+                        ar >> a1;
+                        _args.clear();
+                        _args.push_back(a1);
+
+                        this->setArgs( _args );
+                    }
+
+                private:
+                    Args _args;
             };
 
         public:
@@ -119,6 +150,15 @@ namespace Unit {
             , Test(name)
             , _protocol(&protocol)
             { }
+
+            ~TestSuite()
+            {
+                std::map<std::string, Context*>::iterator it;
+                for(it = _contexts.begin(); it != _contexts.end(); ++it)
+                {
+                    delete it->second;
+                }
+            }
 
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
@@ -163,22 +203,28 @@ namespace Unit {
             template <typename C, typename A1>
             void registerTest(const std::string& name, C& parent, void (C::*memFunc)(A1) )
             {
-                // use Context instead of TestData?
-                // TestData* data = new BasicTestData<A1>();
-                // std::multimap<std::string, TestData*> _data;
+                this->registerMethod(name, parent, memFunc);
+
+                Context1<A1>* ctx = new Context1<A1>(*this, name);
+                _contexts[name] = ctx;
             }
 
-            void runTest( const std::string& name, const Archive& ar )
+            void runTest( const std::string& name, const Archive& archive )
             {
-                //TestData& data = this->testArgs(name);
-                //ar >> data;
-                //this->runTest( name, data.args() );
+                if( _contexts.find(name) != _contexts.end() )
+                {
+                     _contexts[name]->init(archive);
+                     _contexts[name]->run();
+                }
             }
 
         protected:
             /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
+
+        private:
+            std::map<std::string, Context*> _contexts;
 
         public:
             static TestProtocol defaultProtocol;

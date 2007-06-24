@@ -51,7 +51,8 @@ arg = 20
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
-/*    std::ifstream file(_path.c_str());
+/* 
+    std::ifstream file(_path.c_str());
 
     if( ! file )
     {
