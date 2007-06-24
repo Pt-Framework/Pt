@@ -88,7 +88,7 @@ namespace Unit {
                     const std::string& testName() const
                     { return _testName; }
 
-                    virtual void init(const Archive& ar)
+                    virtual void setData(const Archive& ar)
                     {}
 
                 protected:
@@ -120,7 +120,7 @@ namespace Unit {
                     : Context( suite, name, _args )
                     {}
 
-                    virtual void init(const Archive& ar)
+                    virtual void setData(const Archive& ar)
                     {
                         typedef typename Pt::TypeInfo<A1>::Value ValueA1 ;
                         ValueA1 a1;
@@ -213,7 +213,7 @@ namespace Unit {
             {
                 if( _contexts.find(name) != _contexts.end() )
                 {
-                     _contexts[name]->init(archive);
+                     _contexts[name]->setData(archive);
                      _contexts[name]->run();
                 }
             }
