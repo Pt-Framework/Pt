@@ -197,6 +197,7 @@ YACCFILES   ?= ;
 YACCFLAGS   ?= ;
 TEMP_TARGET ?= ;
 OBJECT_TARGET ?= tmp ;
+SPACE = " " ;
 
 
 HDRPATTERN = 
