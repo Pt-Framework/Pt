@@ -19,7 +19,7 @@ RANLIB		?= ranlib ;
 #LINKFLAGS	?= -fvisibility-inlines-hidden -fvisibility=hidden ;
 LINKLIBS	+= -lstdc++ ;
 
-if $(CONFIG) = debug
+if $(CONFIG:L) = debug
 {
 	CCFLAGS += -DDEBUG -g ;
 	OPTIM   ?= -O ;
@@ -105,25 +105,49 @@ rule Resource
 
 rule SharedLibraryImpl
 {
-	# Add library name decorations <lib><name><.so>
-	local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-	LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
 }
 
 
 rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
-    Depends $(_target) : $(PRELIB)$(>)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+    Depends $(_target) : $(_deps) ;
 
     local _l = $(>:S=$(SUFDLL)) ;
     SHLIBS on $(_target) += $(_l) ;
+
+    # Add all shared libraries required by this shared library in a
+    # variable called RPATHLIBS so that their paths can be added as
+    # rpath-link option to the linker command later
+    for local _d in $(_deps)
+    {
+        local _found = false ;
+
+        for _r in $(RPATHLIBS)
+        {
+            if $(_r) = $(_d)
+            {
+                _found = true ;
+            }
+        }
+
+        # only add if not added previously
+        if $(_found) = false
+        {
+            Echo rpath $(_d) ;
+            RPATHLIBS += $(_d)  ;
+        }
+    }
 }
 
 
-actions Link bind NEEDLIBS SHLIBS
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(SHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
+    $(CC) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(SHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
 }
 
