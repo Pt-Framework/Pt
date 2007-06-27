@@ -39,9 +39,21 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
     protected:
         void Integer()
         {
-            Pt::atomic_t v = 0;
+            volatile Pt::atomic_t v = 0;
 
             Pt::atomicIncrement(v);
+            PT_UNIT_ASSERT(v == 1);
+
+            Pt::atomicIncrement(v);
+            PT_UNIT_ASSERT(v == 2);
+
+            Pt::atomicIncrement(v);
+            PT_UNIT_ASSERT(v == 3);
+
+            Pt::atomicDecrement(v);
+            PT_UNIT_ASSERT(v == 2);
+
+            Pt::atomicDecrement(v);
             PT_UNIT_ASSERT(v == 1);
 
             Pt::atomicDecrement(v);
@@ -50,7 +62,13 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::atomicExchange(v, 1);
             PT_UNIT_ASSERT(v == 1);
 
+            Pt::atomicExchange(v, 0);
+            PT_UNIT_ASSERT(v == 0);
+
             Pt::atomicExchangeAdd(v, 3);
+            PT_UNIT_ASSERT(v == 3);
+
+            Pt::atomicExchangeAdd(v, 1);
             PT_UNIT_ASSERT(v == 4);
 
             Pt::atomicCompareExchange(v, 5, 4);
