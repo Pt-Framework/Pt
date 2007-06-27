@@ -55,7 +55,7 @@ void readMousePnp()
     for( size_t i = 0; i < size; i++)
     {
       byte = buffer[i];
-      if(byte == 0x08 || byte == 0x28) 
+      if(byte == 0x08 || byte == 0x28)
       {
         int offset = 0x28 - byte;
         int stop = byte + 1;
@@ -63,7 +63,7 @@ void readMousePnp()
         for( ; i < size; i++ )
         {
            byte = buffer[i];
-          if(byte == stop) 
+          if(byte == stop)
             break;
 
           byte += offset;
@@ -77,19 +77,55 @@ void readMousePnp()
 }
 
 
+class ReaderThread : public Pt::System::Thread
+{
+    public:
+        ReaderThread()
+        : _sdev("COM1:", std::ios_base::in)
+        {
+            _sdev.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
+            _sdev.setCharSize(7);
+            _sdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
+            _sdev.setParity(Pt::System::SerialDevice::ParityNone);
+            _sdev.setFlowControl(Pt::System::SerialDevice::FlowControlHard);
+            _sdev.setTimeout(100);
+        }
+
+    protected:
+        void run()
+        {
+
+
+            char buffer[200];
+            while(true)
+            {
+                size_t readBytes = _sdev.read(buffer, 200);
+                if(readBytes > 0)
+                    std::cerr.write(buffer, readBytes) << std::endl;
+            }
+        }
+
+    private:
+        Pt::System::SerialDevice _sdev;
+};
+
 
 int main( int argc, char* argv[] )
 {
+    //ReaderThread thr;
+    //thr.start();
+    //thr.wait();
+    //return 0;
+
     try
     {
-        const size_t size = 5000 * 1024;
+        const size_t size = 1024;
         char buffer[size];
 
-        memset(buffer, 1, size);
-
         //std::string port = "/dev/ttyS0";
-        std::string port = "COM8:";
+        std::string port = "COM1:";
         std::cerr << "Opening " << port << std::endl;
+
         Pt::System::SerialDevice serialDevice(port, std::ios_base::out, Pt::System::IODevice::Async);
         serialDevice.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
         serialDevice.setCharSize(8);
