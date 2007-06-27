@@ -83,6 +83,84 @@ Logger& Logger::beginLog(const Pt::SourceInfo& si)
 }
 
 
+Logger& Logger::trace(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::trace(*this);
+}
+
+
+Logger& Logger::debug(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::debug(*this);
+}
+
+
+Logger& Logger::info(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::info(*this);
+}
+
+
+Logger& Logger::warn(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::warn(*this);
+}
+
+
+Logger& Logger::error(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::error(*this);
+}
+
+
+Logger& Logger::fatal(const Pt::SourceInfo& si)
+{
+    this->beginLog(si);
+    return Pt::Log::fatal(*this);
+}
+
+
+Logger& Logger::trace()
+{
+    return Pt::Log::trace(*this);
+}
+
+
+Logger& Logger::debug()
+{
+    return Pt::Log::debug(*this);
+}
+
+
+Logger& Logger::info()
+{
+    return Pt::Log::info(*this);
+}
+
+
+Logger& Logger::warn()
+{
+    return Pt::Log::warn(*this);
+}
+
+
+Logger& Logger::error()
+{
+    return Pt::Log::error(*this);
+}
+
+
+Logger& Logger::fatal()
+{
+    return Pt::Log::fatal(*this);
+}
+
+
 void Logger::endlog()
 {
     if( this->enabled() )

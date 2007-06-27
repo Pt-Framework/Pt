@@ -96,7 +96,7 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
 
         /** @brief Returns true if the log messages are propagated
 
-            The logger can be disabled if the lov-level of the target is
+            The logger can be disabled if the log-level of the target is
             higher than the log-level of the logger.
         */
         bool enabled() const;
@@ -117,6 +117,30 @@ class PT_LOG_API Logger : protected Pt::NonCopyable
             comparison.
         */
         Logger& beginLog(const Pt::SourceInfo& si);
+
+        Logger& trace(const Pt::SourceInfo& si);
+
+        Logger& debug(const Pt::SourceInfo& si);
+
+        Logger& info(const Pt::SourceInfo& si);
+
+        Logger& warn(const Pt::SourceInfo& si);
+
+        Logger& error(const Pt::SourceInfo& si);
+
+        Logger& fatal(const Pt::SourceInfo& si);
+
+        Logger& trace();
+
+        Logger& debug();
+
+        Logger& info();
+
+        Logger& warn();
+
+        Logger& error();
+
+        Logger& fatal();
 
         /** @brief Append a type as string to the message
 
