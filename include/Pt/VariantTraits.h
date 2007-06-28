@@ -20,6 +20,7 @@
 #ifndef Pt_VariantTraits_h
 #define Pt_VariantTraits_h
 
+#include <Pt/Api.h>
 #include <string>
 #include <sstream>
 #include <iomanip>
