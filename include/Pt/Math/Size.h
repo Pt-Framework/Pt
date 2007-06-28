@@ -38,6 +38,12 @@ namespace Pt {
                 //! @brief Sets the height
                 inline void setHeight(T h)
                 { _h = h; }
+				//! @brief Sets the widht and height.
+				inline void setWidthHeight(T w, T h)
+				{ 
+                    _w = w;
+                    _h = h; 
+                }
 
                 const BasicSize& addWidth(T w)
                 {
