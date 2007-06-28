@@ -16,7 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <string>
 
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
@@ -31,6 +30,7 @@
 #include "Pt/Unit/TestCase.h"
 #include "Pt/Unit/RegisterTest.h"
 
+#include <string>
 
 //TODO: put condition in TcpSocketTest
 class ServerThread : public Pt::System::Thread
