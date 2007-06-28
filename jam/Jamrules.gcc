@@ -22,7 +22,7 @@ LINKLIBS	+= -lstdc++ ;
 if $(CONFIG:L) = debug
 {
 	CCFLAGS += -DDEBUG -g ;
-	OPTIM   ?= -O ;
+	OPTIM   ?= -O0 ;
 }
 else
 {
