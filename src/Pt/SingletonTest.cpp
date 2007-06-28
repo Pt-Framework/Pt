@@ -19,21 +19,17 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include <iostream>
-using namespace std;
-
 #include "Pt/Singleton.h"
-using namespace Pt;
-
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
+#include <iostream>
 
-class TestSingleton : public Singleton<TestSingleton> 
+class TestSingleton : public Pt::Singleton<TestSingleton> 
 {
-    friend class Singleton<TestSingleton>;
+    friend class Pt::Singleton<TestSingleton>;
 
     public:
         TestSingleton()
