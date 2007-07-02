@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_PropertiesArchive_h
-#define Pt_PropertiesArchive_h
+#ifndef Pt_Settings_h
+#define Pt_Settings_h
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
@@ -27,15 +27,15 @@
 
 namespace Pt {
 
-class PropertiesArchiveValue : public ArchiveValue
+class SettingsValue : public ArchiveValue
 {
     public:
-        PropertiesArchiveValue(Archive* parent, const Pt::String& name)
+        SettingsValue(Archive* parent, const Pt::String& name)
         : _parentArchive(parent)
         , _nodeName(name)
         {}
 
-        PropertiesArchiveValue(Archive* parent, const Pt::String& name, const Pt::String value)
+        SettingsValue(Archive* parent, const Pt::String& name, const Pt::String value)
         : _parentArchive(parent)
         , _nodeName(name)
         , _nodeValue(value)
@@ -65,7 +65,7 @@ class PropertiesArchiveValue : public ArchiveValue
 };
 
 
-class PropertiesArchive : public Archive
+class Settings : public Archive
 {
     public:
         typedef std::multimap<Pt::String, ArchiveNode*> Entries;
@@ -93,11 +93,11 @@ class PropertiesArchive : public Archive
         };
 
     public:
-        PropertiesArchive(Archive* parent = 0)
+        Settings(Archive* parent = 0)
         : _parentArchive(parent)
         {}
 
-        PropertiesArchive(Archive* parent, const Pt::String& name)
+        Settings(Archive* parent, const Pt::String& name)
         : _parentArchive(parent)
         , _nodeName(name)
         { }
@@ -130,7 +130,7 @@ class PropertiesArchive : public Archive
 
         void _addValue(const Pt::String& name, const Pt::String& value)
         {
-            ArchiveValue* av = new PropertiesArchiveValue(this, name, value);
+            ArchiveValue* av = new SettingsValue(this, name, value);
             _entries.insert( std::make_pair(name, av) );
         }
 
@@ -140,7 +140,7 @@ class PropertiesArchive : public Archive
             if( it != _entries.end() && it->second->toArchive() )
                 return *( it->second->toArchive() );
 
-            PropertiesArchive* arch = new PropertiesArchive(this, name);
+            Settings* arch = new Settings(this, name);
             _entries.insert( std::make_pair(name, arch) );
             return *arch;
         }

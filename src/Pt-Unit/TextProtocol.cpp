@@ -18,8 +18,8 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TextProtocol.h>
-//#include "Pt/Text/TextStream.h"
-//#include "Pt/Text/Utf8Codec.h"
+#include "Pt/Text/TextStream.h"
+#include "Pt/Text/Utf8Codec.h"
 #include "../Pt-Log/PropertiesArchive.h"
 #include "../Pt-Log/PropertiesReader.h"
 
@@ -49,8 +49,8 @@ arg = 10
 arg = 20
 */
 
-void TextProtocol::run(Pt::Unit::TestSuite& suite)
-{
+//void TextProtocol::run(Pt::Unit::TestSuite& suite)
+//{
 /* 
     std::ifstream file(_path.c_str());
 
@@ -84,13 +84,13 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         
     }
 */
-}
+//}
 
-} // namespace Unit
+//} // namespace Unit
 
-} // namespace Pt
+//} // namespace Pt
 
-/*
+
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
@@ -106,8 +106,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
     while(getline(iniFile, line))
     {
-        std::cout << "WARNING: method is not fully implemented:\n\tvoid TextProtocol::run(Pt::Unit::TestSuite& suite)" << std::endl;
-
         lineNumber++;
 
         // remove '\r' (Windows files on Linux)
@@ -158,7 +156,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             continue;
         }
 
-
         std::stringstream lineReader(lineBuffer);
         lineBuffer.clear();
         std::string token;
@@ -179,16 +176,17 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             //value.init(suite.property(propertyName).typeName());
             //lineReader >> value;
 
-            std::string typeName = suite.property(propertyName).typeName();
-            value = AnyFactory::create(typeName, lineReader);
+            //std::string typeName = suite.property(propertyName).typeName();
+            //value = AnyFactory::create(typeName, lineReader);
 
-            suite.setProperty(propertyName, value);
+            //suite.setProperty(propertyName, value);
         }
         // method line
         else if(token.compare("method") == 0)
         {
             lineReader >> methodName;
 
+            Settings ar;
             while(getline(lineReader, paramType, ':'))
             {
                 paramType.erase( 0, paramType.find_first_not_of(", \t") );
@@ -199,12 +197,15 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
                 // TODO: use reflection to get paramType instead of writing
                 // the type in the file
-                value = AnyFactory::create(paramType, lineReader);
+                //value = AnyFactory::create(paramType, lineReader);
+                //args.push_back(value);
 
-                args.push_back(value);
+                std::string value;
+                lineReader >> value;
+                ar.addValue( Pt::String(L"arg"), Pt::String::widen(value) );
             }
 
-            suite.runTest(methodName, args);
+            suite.runTest(methodName, ar);
         }
         // unknown command
         else
@@ -215,4 +216,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         }
     }
 }
-*/
+
+}
+
+}

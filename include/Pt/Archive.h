@@ -259,6 +259,240 @@ class Archive : public ArchiveNode
         virtual Archive& _addArchive(const Pt::String& name) = 0;
 };
 
+
+
+
+
+
+
+//////////////
+//////////////
+//////////////
+
+
+class SerializationEntry;
+class SerializationValue;
+
+
+// NOTE: Combine Node, Value, Entry to Serializable
+class SerializationNode
+{
+    public:
+        virtual ~SerializationNode()
+        {}
+
+        const Pt::String& name() const
+        { return this->_name(); }
+
+        bool operator< (const SerializationNode& other) const
+        { return this->name() < other.name(); }
+
+        bool operator!= (const SerializationNode& other) const
+        { return this->name() != other.name(); }
+
+        virtual SerializationEntry* parent()
+        { return _parent(); }
+
+        virtual const SerializationEntry* parent() const
+        { return _parent(); }
+
+        SerializationEntry* toEntry()
+        { return this->_toEntry(); }
+
+        const SerializationEntry* toEntry() const
+        { return this->_toEntry(); }
+
+        SerializationValue* toValue()
+        { return this->_toValue();  }
+
+        const SerializationValue* toValue() const
+        { return this->_toValue(); }
+
+    protected:
+        SerializationNode()
+        {}
+
+        virtual SerializationEntry* _parent() = 0;
+
+        virtual const SerializationEntry* _parent() const = 0;
+
+        virtual SerializationEntry* _toEntry() = 0;
+
+        virtual const SerializationEntry* _toEntry() const = 0;
+
+        virtual SerializationValue* _toValue() = 0;
+
+        virtual const SerializationValue* _toValue() const = 0;
+
+        virtual const Pt::String& _name() const = 0;
+};
+
+
+class SerializationValue : public SerializationNode
+{
+    public:
+        const Pt::String& value() const
+        { return this->_value(); }
+
+    protected:
+        SerializationValue()
+        {}
+
+        virtual SerializationEntry* _toEntry()
+        { return 0; }
+
+        virtual const SerializationEntry* _toEntry() const
+        { return 0; }
+
+        virtual SerializationValue* _toValue()
+        { return this; }
+
+        virtual const SerializationValue* _toValue() const
+        { return this; }
+
+        virtual const Pt::String& _value() const = 0;
+};
+
+
+class SerializationEntry : public SerializationNode
+{
+    public:
+        class IteratorBase : public RefCounted
+        {
+            public:
+                virtual ~IteratorBase()
+                { }
+
+                virtual bool advance() = 0;
+
+                virtual SerializationNode& current() const = 0;
+        };
+
+        class Iterator
+        {
+            public:
+                Iterator(IteratorBase* base = 0)
+                : _base(base)
+                { }
+
+                Iterator& operator++()
+                {
+                    if( ! _base->advance() )
+                        _base = 0;
+
+                    return *this;
+                }
+
+                SerializationNode& operator*()
+                { return _base->current(); }
+
+                bool operator!= (const Iterator& other) const
+                { return _base != other._base; }
+
+            private:
+                SmartPtr<IteratorBase, InternalRefCounted<IteratorBase> > _base;
+        };
+
+        class ConstIterator
+        {
+            public:
+                ConstIterator(IteratorBase* base = 0)
+                : _base(base)
+                { }
+
+                ConstIterator& operator++()
+                {
+                    if( ! _base->advance() )
+                        _base = 0;
+
+                    return *this;
+                }
+
+                const SerializationNode& operator*() const
+                { return _base->current(); }
+
+                bool operator!= (const ConstIterator& other) const
+                { return _base != other._base; }
+
+            private:
+                SmartPtr<IteratorBase, InternalRefCounted<IteratorBase> > _base;
+        };
+
+    public:
+        virtual ~SerializationEntry()
+        {}
+
+        Iterator begin()
+        { return this->_begin(); }
+
+        Iterator end()
+        { return Iterator(); }
+
+        ConstIterator begin() const
+        { return this->_begin(); }
+
+        ConstIterator end() const
+        { return ConstIterator(); }
+
+        const SerializationNode* getNode(const Pt::String& name) const
+        { return this->_getNode(name); }
+
+        const Pt::String* getValue(const Pt::String& name) const
+        {
+            const SerializationNode* node = this->getNode(name);
+
+            if( node && node->toValue() )
+                return &( node->toValue()->value() );
+
+            return 0;
+        }
+
+        void addValue(const Pt::String& name, const Pt::String& value)
+        { this->_addValue(name, value); }
+
+        const SerializationEntry* getEntry(const Pt::String& name) const
+        {
+            const SerializationNode* node = this->getNode(name);
+            if( node && node->toEntry() )
+                return node->toEntry();
+
+            return 0;
+        }
+
+        SerializationEntry& addEntry(const Pt::String& name)
+        { return this->_addEntry(name); }
+
+    protected:
+        SerializationEntry()
+        {}
+
+        virtual SerializationEntry* _toEntry()
+        { return this; }
+
+        virtual const SerializationEntry* _toEntry() const
+        { return this; }
+
+        virtual SerializationValue* _toValue()
+        { return 0; }
+
+        virtual const SerializationValue* _toValue() const
+        { return 0; }
+
+        /** @brief Returns the begin of the SerializationEntry contents
+
+            The deriving class is suposed to return a pointer to its
+            type of iterator created with new. If the archive is empty
+            0 must be returned.
+        */
+        virtual IteratorBase* _begin() const = 0;
+
+        virtual const SerializationNode* _getNode(const Pt::String& name) const = 0;
+
+        virtual void _addValue(const Pt::String& name, const Pt::String& value) = 0;
+
+        virtual SerializationEntry& _addEntry(const Pt::String& name) = 0;
+};
+
 }
 
 #endif

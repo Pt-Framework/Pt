@@ -61,7 +61,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             ss << "d.u = 4\n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             const Pt::String* s = archive.getArchive(L"a.b.c.d")->getValue(L"v");
@@ -82,7 +82,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             const Pt::String* s = archive.getArchive(L"a.b.c.d")->getValue(L"v");
@@ -103,7 +103,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::String concat;
@@ -131,7 +131,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::String concat;
@@ -158,7 +158,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::String concat;
@@ -191,7 +191,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::String concat;
@@ -224,7 +224,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
             ss << "myDate = [ julianDays = 400000 ]";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::Date date;
@@ -243,7 +243,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::Time time;
@@ -263,7 +263,7 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::PropertiesReader reader(ts);
-            Pt::PropertiesArchive archive;
+            Pt::Settings archive;
             reader.read(archive);
 
             Pt::DateTime date;
