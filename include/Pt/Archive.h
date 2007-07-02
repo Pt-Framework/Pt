@@ -284,6 +284,9 @@ class SerializationNode
         const Pt::String& name() const
         { return this->_name(); }
 
+        const Pt::String& value() const
+        { return this->_value(); }
+
         bool operator< (const SerializationNode& other) const
         { return this->name() < other.name(); }
 
@@ -302,12 +305,6 @@ class SerializationNode
         const SerializationEntry* toEntry() const
         { return this->_toEntry(); }
 
-        SerializationValue* toValue()
-        { return this->_toValue();  }
-
-        const SerializationValue* toValue() const
-        { return this->_toValue(); }
-
     protected:
         SerializationNode()
         {}
@@ -320,38 +317,11 @@ class SerializationNode
 
         virtual const SerializationEntry* _toEntry() const = 0;
 
-        virtual SerializationValue* _toValue() = 0;
-
-        virtual const SerializationValue* _toValue() const = 0;
-
         virtual const Pt::String& _name() const = 0;
-};
-
-
-class SerializationValue : public SerializationNode
-{
-    public:
-        const Pt::String& value() const
-        { return this->_value(); }
-
-    protected:
-        SerializationValue()
-        {}
-
-        virtual SerializationEntry* _toEntry()
-        { return 0; }
-
-        virtual const SerializationEntry* _toEntry() const
-        { return 0; }
-
-        virtual SerializationValue* _toValue()
-        { return this; }
-
-        virtual const SerializationValue* _toValue() const
-        { return this; }
 
         virtual const Pt::String& _value() const = 0;
 };
+
 
 
 class SerializationEntry : public SerializationNode
@@ -439,10 +409,10 @@ class SerializationEntry : public SerializationNode
 
         const Pt::String* getValue(const Pt::String& name) const
         {
-            const SerializationNode* node = this->getNode(name);
+            //const SerializationNode* node = this->getNode(name);
 
-            if( node && node->toValue() )
-                return &( node->toValue()->value() );
+            //if( node && node->toValue() )
+            //    return &( node->toValue()->value() );
 
             return 0;
         }
@@ -471,12 +441,6 @@ class SerializationEntry : public SerializationNode
 
         virtual const SerializationEntry* _toEntry() const
         { return this; }
-
-        virtual SerializationValue* _toValue()
-        { return 0; }
-
-        virtual const SerializationValue* _toValue() const
-        { return 0; }
 
         /** @brief Returns the begin of the SerializationEntry contents
 
