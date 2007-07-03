@@ -21,6 +21,7 @@
 #include <Pt/Time.h>
 #include <Pt/Archive.h>
 #include <Pt/Exception.h>
+#include "Pt/SerializationData.h"
 #include <sstream>
 #include <cctype>
 
@@ -230,6 +231,29 @@ Time Time::fromIsoString(const std::string& s)
     return Time(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),
                 getNumber3(d + 9));
 }
+
+
+const SerializationData& operator>>(const SerializationData& data, Time& time)
+{
+    unsigned msec;
+
+    const Pt::Variant* value = data.getEntry(L"totalMSecs");
+    if( value == 0 || value->get<unsigned>(msec) )
+        throw NoSuchEntry("totalMSecs", PT_SOURCEINFO);
+
+    time.setTotalMSecs(msec);
+    return data;
+}
+
+
+SerializationData& operator<<(SerializationData& data, const Time& time)
+{
+    data.addEntry(L"totalMSecs", Variant(time.totalMSecs()) );
+
+    return data;
+}
+
+
 
 } // namespace Pt
 
