@@ -22,6 +22,8 @@
 
 #include "Pt/SerializationData.h"
 #include "Pt/Date.h"
+#include "Pt/Time.h"
+#include "Pt/DateTime.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -37,12 +39,14 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "ObjectData", *this, &SerializationTest::ObjectData );
+            Pt::Unit::TestSuite::registerMethod( "ObjectDataTest", *this, &SerializationTest::ObjectDataTest );
             Pt::Unit::TestSuite::registerMethod( "Date", *this, &SerializationTest::Date );
+            Pt::Unit::TestSuite::registerMethod( "Time", *this, &SerializationTest::Time );
+            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &SerializationTest::DateTime );
         }
 
     protected:
-        void ObjectData()
+        void ObjectDataTest()
         {
             Pt::ObjectData data;
             data.addEntry(L"testEntry", Pt::Variant(1) );
@@ -60,8 +64,39 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Date date2(1,1,1);
             data >> date2;
 
-            //PT_UNIT_ASSERT(date == date2);
+            PT_UNIT_ASSERT(date == date2);
+        }
 
+        void Time()
+        {
+            Pt::Time time(18, 40, 5, 1);
+            Pt::ObjectData data;
+            data << time;
+
+            Pt::Time time2;
+            data >> time2;
+
+            PT_UNIT_ASSERT(time == time2);
+        }
+
+        void DateTime()
+        {
+            Pt::DateTime datetime(2000, 10, 20, 18, 40, 5, 1);
+            Pt::ObjectData data;
+            data << datetime;
+
+            Pt::DateTime datetime2;
+            data >> datetime2;
+
+
+            const Pt::Date date = datetime.date();
+            const Pt::Date date2 = datetime2.date();
+            PT_UNIT_ASSERT(date == date2);
+
+            const Pt::Time time = datetime.time();
+            const Pt::Time time2 = datetime2.time();
+
+            PT_UNIT_ASSERT(time == time2);
         }
 };
 
