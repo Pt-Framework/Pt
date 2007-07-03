@@ -20,6 +20,7 @@ SharedLibrary Pt : Any.cpp
                    TypeInfo.cpp
                    codecvt.cpp
                    ctype.cpp
+                   SerializationData.cpp
                    #num_get.cpp
                    numpunct.cpp
                    Unicode.cpp ;
@@ -112,33 +113,33 @@ PtUnitTest_MakeLocate StringStreamTest : bin ;
 NOTFILE Pt-all ;
 NOTFILE Pt-test ;
  
-DEPENDS Pt-test : 	AtomicTest.unit 
-                 	ByteorderTest.unit
-                 	DateTimeTest.unit
-                 	DateTest.unit
-                 	TimeTest.unit                 	
-                 	ExceptionTest.unit
-                 	TypesTest.unit
-                 	SignalTest.unit
-                 	SmartPtrTest.unit
-                 	StringStreamTest.unit
-                 	VariantTest.unit
-                 	SerializationTest.unit
-                 	#VersionTest.unit
-                 	;
+DEPENDS Pt-test :   AtomicTest.unit 
+                    ByteorderTest.unit
+                    DateTimeTest.unit
+                    DateTest.unit
+                    TimeTest.unit                   
+                    ExceptionTest.unit
+                    TypesTest.unit
+                    SignalTest.unit
+                    SmartPtrTest.unit
+                    StringStreamTest.unit
+                    VariantTest.unit
+                    SerializationTest.unit
+                    #VersionTest.unit
+                    ;
                  
-DEPENDS Pt-all : 	Pt
-                 	AtomicTest 
-                 	ByteorderTest 
-                 	DateTimeTest 
-                 	DateTest 
-                 	TimeTest                  	
-                 	ExceptionTest 
-                 	TypesTest 
-                 	SignalTest 
-                 	SmartPtrTest 
-                 	StringStreamTest
-                 	VariantTest
-                 	SerializationTest
-                 	#VersionTest
-                 	;
+DEPENDS Pt-all :    Pt
+                    AtomicTest 
+                    ByteorderTest 
+                    DateTimeTest 
+                    DateTest 
+                    TimeTest                    
+                    ExceptionTest 
+                    TypesTest 
+                    SignalTest 
+                    SmartPtrTest 
+                    StringStreamTest
+                    VariantTest
+                    SerializationTest
+                    #VersionTest
+                    ;
