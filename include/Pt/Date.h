@@ -28,6 +28,7 @@
 namespace Pt {
 
 class Archive;
+class SerializationData;
 
 
 class InvalidDate : public std::invalid_argument
@@ -246,6 +247,10 @@ class PT_API Date
         //! @internal
         unsigned _julian;
 };
+
+PT_API const SerializationData& operator>>(const SerializationData& data, Date& d);
+
+PT_API SerializationData& operator<<(SerializationData& data, const Date& d);
 
 PT_API const Archive& operator>>(const Archive& ar, Date& d);
 

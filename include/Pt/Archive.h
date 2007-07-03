@@ -268,63 +268,14 @@ class Archive : public ArchiveNode
 //////////////
 //////////////
 //////////////
-
+/*
 
 class SerializationEntry;
 class SerializationValue;
 
 
-// NOTE: Combine Node, Value, Entry to Serializable
-class SerializationNode
-{
-    public:
-        virtual ~SerializationNode()
-        {}
 
-        const Pt::String& name() const
-        { return this->_name(); }
-
-        const Pt::String& value() const
-        { return this->_value(); }
-
-        bool operator< (const SerializationNode& other) const
-        { return this->name() < other.name(); }
-
-        bool operator!= (const SerializationNode& other) const
-        { return this->name() != other.name(); }
-
-        virtual SerializationEntry* parent()
-        { return _parent(); }
-
-        virtual const SerializationEntry* parent() const
-        { return _parent(); }
-
-        SerializationEntry* toEntry()
-        { return this->_toEntry(); }
-
-        const SerializationEntry* toEntry() const
-        { return this->_toEntry(); }
-
-    protected:
-        SerializationNode()
-        {}
-
-        virtual SerializationEntry* _parent() = 0;
-
-        virtual const SerializationEntry* _parent() const = 0;
-
-        virtual SerializationEntry* _toEntry() = 0;
-
-        virtual const SerializationEntry* _toEntry() const = 0;
-
-        virtual const Pt::String& _name() const = 0;
-
-        virtual const Pt::String& _value() const = 0;
-};
-
-
-
-class SerializationEntry : public SerializationNode
+class SerializationData : public SerializationNode
 {
     public:
         class IteratorBase : public RefCounted
@@ -404,59 +355,14 @@ class SerializationEntry : public SerializationNode
         ConstIterator end() const
         { return ConstIterator(); }
 
-        const SerializationNode* getNode(const Pt::String& name) const
-        { return this->_getNode(name); }
-
-        const Pt::String* getValue(const Pt::String& name) const
-        {
-            //const SerializationNode* node = this->getNode(name);
-
-            //if( node && node->toValue() )
-            //    return &( node->toValue()->value() );
-
-            return 0;
-        }
-
-        void addValue(const Pt::String& name, const Pt::String& value)
-        { this->_addValue(name, value); }
-
-        const SerializationEntry* getEntry(const Pt::String& name) const
-        {
-            const SerializationNode* node = this->getNode(name);
-            if( node && node->toEntry() )
-                return node->toEntry();
-
-            return 0;
-        }
-
-        SerializationEntry& addEntry(const Pt::String& name)
-        { return this->_addEntry(name); }
-
     protected:
         SerializationEntry()
         {}
 
-        virtual SerializationEntry* _toEntry()
-        { return this; }
 
-        virtual const SerializationEntry* _toEntry() const
-        { return this; }
-
-        /** @brief Returns the begin of the SerializationEntry contents
-
-            The deriving class is suposed to return a pointer to its
-            type of iterator created with new. If the archive is empty
-            0 must be returned.
-        */
         virtual IteratorBase* _begin() const = 0;
-
-        virtual const SerializationNode* _getNode(const Pt::String& name) const = 0;
-
-        virtual void _addValue(const Pt::String& name, const Pt::String& value) = 0;
-
-        virtual SerializationEntry& _addEntry(const Pt::String& name) = 0;
 };
-
+*/
 }
 
 #endif
