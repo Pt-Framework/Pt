@@ -22,6 +22,7 @@
 #include <Pt/DateTime.h>
 #include <Pt/Archive.h>
 #include "Pt/SourceInfo.h"
+#include "Pt/SerializationData.h"
 
 #include <algorithm>
 #include <sstream>
@@ -87,15 +88,15 @@ DateTime& DateTime::operator=(const DateTime& dateTime)
 {
     _date = dateTime.date();
     _time = dateTime.time();
-	return *this;
+    return *this;
 }
 
 
 DateTime& DateTime::operator=(unsigned julianDay)
 {
-	_time = Time(0, 0, 0, 0);
-	_date.setJulian(julianDay);
-	return *this;
+    _time = Time(0, 0, 0, 0);
+    _date.setJulian(julianDay);
+    return *this;
 }
 
 
@@ -217,5 +218,33 @@ std::string DateTime::toIsoString() const
 
     return std::string(ret, 23);
 }
+
+
+
+const SerializationData& operator>>(const SerializationData& data, DateTime& datetime)
+{
+    Date date(1,1,1);
+    data >> date;
+    const Date d(date);
+    datetime.setDate(d);
+
+    Time time;
+    data >> time;
+    const Time t(time);
+    datetime.setTime(t);
+
+    return data;
+
+}
+
+
+SerializationData& operator<<(SerializationData& data, const DateTime& datetime)
+{
+    data << datetime.date();
+    data << datetime.time();
+
+    return data;
+}
+
 
 }
