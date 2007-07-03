@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Serialization_h
-#define Pt_Serialization_h
+#ifndef Pt_SerializationData_h
+#define Pt_SerializationData_h
 
 #include <Pt/String.h>
 #include <Pt/Variant.h>
@@ -31,19 +31,16 @@ class SerializationEntry;
 class SerializationData;
 
 
-class NoSuchEntry : public std::logic_error
+class PT_API NoSuchEntry : public std::logic_error
 {
     public:
-        NoSuchEntry(const std::string& name, const SourceInfo& si)
-        : std::logic_error("No entry named '" + name + "'" + si)
-        {}
+        NoSuchEntry(const std::string& name, const SourceInfo& si);
 
-        ~NoSuchEntry() throw()
-        {}
+        ~NoSuchEntry() throw();
 };
 
 
-class SerializationNode
+class PT_API SerializationNode
 {
     public:
         virtual ~SerializationNode()
@@ -96,7 +93,7 @@ class SerializationNode
 };
 
 
-class SerializationEntry : public SerializationNode
+class PT_API SerializationEntry : public SerializationNode
 {
     public:
         virtual ~SerializationEntry()
@@ -111,7 +108,7 @@ class SerializationEntry : public SerializationNode
 
         virtual const Pt::Variant& _value() const = 0;
 
-        virtual const SerializationEntry* _toEntry() const 
+        virtual const SerializationEntry* _toEntry() const
         { return this; }
 
         virtual SerializationEntry* _toEntry()
@@ -125,7 +122,7 @@ class SerializationEntry : public SerializationNode
 };
 
 
-class SerializationData : public SerializationNode
+class PT_API SerializationData : public SerializationNode
 {
     public:
         virtual ~SerializationData()
@@ -184,36 +181,21 @@ class SerializationData : public SerializationNode
 
 
 
-class ObjectEntry : public SerializationEntry
+class PT_API ObjectEntry : public SerializationEntry
 {
     public:
-        ObjectEntry(SerializationData& parent, const Pt::String& name)
-        : _parentData(&parent)
-        , _objectName(name)
-        {}
+        ObjectEntry(SerializationData& parent, const Pt::String& name);
 
-        ObjectEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value)
-        : _parentData(&parent)
-        , _objectName(name)
-        , _objectValue(value)
-        {}
+        ObjectEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value);
 
     protected:
-        virtual SerializationData* _parent()
-        {
-            return _parentData;
-        }
+        virtual SerializationData* _parent();
 
-        virtual const SerializationData* _parent() const
-        {
-            return _parentData;
-        }
+        virtual const SerializationData* _parent() const;
 
-        virtual const Pt::String& _name() const
-        { return _objectName; }
+        virtual const Pt::String& _name() const;
 
-        virtual const Pt::Variant& _value() const
-        { return _objectValue; }
+        virtual const Pt::Variant& _value() const;
 
     private:
         SerializationData* _parentData;
@@ -222,65 +204,30 @@ class ObjectEntry : public SerializationEntry
 };
 
 
-class ObjectData : public SerializationData
+class PT_API ObjectData : public SerializationData
 {
     public:
         typedef std::multimap<Pt::String, SerializationNode*> Nodes;
 
     public:
-        ObjectData(SerializationData* parent = 0)
-        : _parentData(parent)
-        {}
+        ObjectData(SerializationData* parent = 0);
 
-        ObjectData(SerializationData* parent, const Pt::String& name)
-        : _parentData(parent)
-        , _objectName(name)
-        { }
+        ObjectData(SerializationData* parent, const Pt::String& name);
 
-        ~ObjectData()
-        {
-            Nodes::const_iterator it;
-            for(it = _nodes.begin(); it != _nodes.end(); ++it)
-            {
-                delete it->second;
-            }
-        }
+        ~ObjectData();
 
     protected:
-        virtual SerializationData* _parent()
-        {
-            return _parentData;
-        }
+        virtual SerializationData* _parent();
 
-        virtual const SerializationData* _parent() const
-        {
-            return _parentData;
-        }
+        virtual const SerializationData* _parent() const;
 
-        virtual const Pt::String& _name() const
-        { return _objectName; }
+        virtual const Pt::String& _name() const;
 
-        const SerializationNode* _getNode(const Pt::String& name) const
-        {
-            Nodes::const_iterator it = _nodes.find(name);
-            if( it == _nodes.end() )
-                return 0;
+        const SerializationNode* _getNode(const Pt::String& name) const;
 
-            return it->second;
-        }
+        void _addEntry(const Pt::String& name, const Pt::Variant& value);
 
-        void _addEntry(const Pt::String& name, const Pt::Variant& value)
-        {
-            ObjectEntry* e = new ObjectEntry(*this, name, value);
-            _nodes.insert( std::make_pair(name, e) );
-        }
-
-        ObjectData& _addData(const Pt::String& name)
-        {
-            ObjectData* data = new ObjectData(this, name);
-            _nodes.insert( std::make_pair(name, data) );
-            return *data;
-        }
+        ObjectData& _addData(const Pt::String& name);
 
     private:
         SerializationData* _parentData;
