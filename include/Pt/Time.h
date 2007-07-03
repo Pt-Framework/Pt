@@ -30,6 +30,7 @@
 namespace Pt {
 
 class Archive;
+class SerializationData;
 
 
 class InvalidTime : public std::invalid_argument
@@ -228,6 +229,11 @@ class PT_API Time
     PT_API const Archive& operator>>(const Archive&, Time& );
 
     PT_API Archive& operator<<(Archive&, const Time& );
+
+    PT_API const SerializationData& operator>>(const SerializationData& data, Time& time);
+
+    PT_API SerializationData& operator<<(SerializationData& data, const Time& time);
+
 }
 
 #endif // PT_TIME_H
