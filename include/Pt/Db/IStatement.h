@@ -22,10 +22,10 @@
 #define PT_DB_ISTATEMENT_H
 
 
-#include <string>
-
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
+#include <Pt/Blob.h>
+#include <string>
 
 
 namespace Pt {
