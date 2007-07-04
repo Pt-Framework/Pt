@@ -95,6 +95,26 @@ class PT_API DateTime
         int year() const
         { return date().year(); }
 
+        /** \brief Returns the hour-part of the Time.
+        */
+        unsigned hour() const
+        { return time().hour(); }
+
+        /** \brief Returns the minute-part of the Time.
+        */
+        unsigned minute() const
+        { return time().minute(); }
+
+        /** \brief Returns the second-part of the Time.
+        */
+        unsigned second() const
+        { return time().second(); }
+
+        /** \brief Returns the millisecond-part of the Time.
+        */
+        unsigned msec() const
+        { return time().msec(); }
+
         static DateTime fromIsoString(const std::string& s);
 
         std::string toIsoString() const;
