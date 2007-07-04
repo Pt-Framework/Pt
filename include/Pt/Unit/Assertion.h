@@ -92,6 +92,18 @@ namespace Unit {
 
     #define PT_UNIT_ASSERT_MSG(cond, what) if( !(cond) ) throw Pt::Unit::Assertion((what), PT_SOURCEINFO);
 
+    #define PT_UNIT_ASSERT_THROW(cond, EX) \
+        try { \
+            cond; \
+            throw std::string("Exception expected."); \
+        } \
+        catch(const std::string & s) \
+        { \
+            throw Pt::Unit::Assertion(s, PT_SOURCEINFO); \
+        } \
+        catch(const EX &) \
+        {} \
+
 } // namespace Unit
 
 } // namespace Pt
