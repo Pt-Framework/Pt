@@ -24,3 +24,7 @@ SharedLibrary_MakeLocate Pt-Xml : bin ;
 Main XmlReaderTest : XmlReaderTest.cpp ;
 Main_LinkSharedLibraries XmlReaderTest : Pt-Xml Pt-Text Pt ;
 Main_MakeLocate XmlReaderTest : bin ;
+
+PtUnitTest XmlTest : XmlTest.cpp ;
+Main_LinkSharedLibraries XmlTest : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
+Main_MakeLocate XmlTest : bin ;

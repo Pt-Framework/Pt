@@ -6,6 +6,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/EndDocument.h>
+#include <Pt/Xml/Resolver.h>
 
 #include <memory>
 #include <queue>
@@ -114,14 +115,17 @@ namespace Xml {
 
             void findOf(const String& str);
 
-            void findNotOf(const String& str);
+            Pt::Char findNotOf(const String& str);
 
             void getUntil(String& buffer, const String& stop);
+
+            void resolveEntities(String& str);
 
         private:
             std::basic_streambuf<Char>* _textBuffer;
             std::basic_streambuf<Char>* _buffer;
             std::queue<Node*> _nodeBuffer;
+            Resolver _resolver;
             Char _token[512];
             const size_t _tokenMax;
     };

@@ -150,7 +150,6 @@ const Node& XmlIStream::next()
 
                 case '?':
                     throw std::logic_error("Processing instruction not yet supported" + PT_SOURCEINFO);
-                    break;
 
                 default:
                     this->onStartElement();
@@ -279,14 +278,14 @@ void XmlIStream::onStartElement()
 {
     std::auto_ptr<Xml::StartElement> elem( new Xml::StartElement() );
     bool isStandalone = this->parseStartElement(*elem);
-    
+
     _nodeBuffer.push( elem.get() );
 
     if (isStandalone)
     {
         _nodeBuffer.push( new Xml::EndElement(elem->name()) );
     }
-    
+
     elem.release();
 }
 
@@ -320,14 +319,17 @@ void XmlIStream::onComment()
 
 bool XmlIStream::parseAttribute(String& name, String& value)
 {
+    typedef std::char_traits<Pt::Char> CharTraits;
+    static const uint32_t eof = CharTraits::eof();
+
     if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
         return false;
     }
 
     static const String attributeNameBegin(L"> /");
-    this->findNotOf(attributeNameBegin);
+    Pt::Char last = this->findNotOf(attributeNameBegin);
 
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
+    if( last == '>' || last == '/') {
         return false;
     }
 
@@ -365,8 +367,8 @@ bool XmlIStream::parseStartElement(StartElement& to)
 
     static const String startElementBegin(L">/ \t");
 
-    this->findNotOf(startElementBegin);
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
+    Pt::Char last = this->findNotOf(startElementBegin);
+    if( last == '>' || last == '/') {
         throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
     }
 
@@ -389,7 +391,7 @@ bool XmlIStream::parseStartElement(StartElement& to)
     }
 
     _textBuffer->snextc();
-    
+
     return isStandalone;
 }
 
@@ -397,9 +399,10 @@ bool XmlIStream::parseStartElement(StartElement& to)
 void XmlIStream::parseEndElement(EndElement& to)
 {
     static const String endElementBegin(L">/ \t");
-    this->findNotOf(endElementBegin);
 
-    if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
+    Pt::Char last = this->findNotOf(endElementBegin);
+
+    if( last == '>' || last == '/') {
         throw std::logic_error("Invalid XML end element: no name" + PT_SOURCEINFO);
     }
 
@@ -414,6 +417,7 @@ void XmlIStream::parseTextElement(Characters& to)
 {
     static const String textElementEnd(L"<");
     this->getUntil(to.content(), textElementEnd);
+    this->resolveEntities(to.content());
 }
 
 
@@ -448,18 +452,22 @@ void XmlIStream::findOf(const String& str)
 }
 
 
-void XmlIStream::findNotOf(const String& str)
+Pt::Char XmlIStream::findNotOf(const String& str)
 {
+    Pt::Char last = _textBuffer->sgetc();
     typedef std::char_traits<Pt::Char> CharTraits;
     const Char eof = CharTraits::to_char_type( CharTraits::eof() );
+
     for( Char ch = _textBuffer->sgetc(); eof != ch; ch = _textBuffer->snextc() )
     {
         if( String::npos == str.find( ch ) )
         {
-            break;
+            return last;
         }
+        last = ch;
     }
 
+    return last;
 }
 
 
@@ -518,6 +526,30 @@ void XmlIStream::getUntil(String& buffer, const String& stop)
 
     buffer.append(_token, n);
 }
+
+
+void XmlIStream::resolveEntities(String& str)
+{
+    size_t entityBegin = 0;
+    size_t entityEnd = 0;
+
+    while( (entityBegin = str.find('&', entityBegin)) != string::npos) {
+        entityEnd = str.find(';', entityBegin);
+        if(entityEnd == string::npos)
+        {
+            throw logic_error( "Invalid XML entitiy reference" + PT_SOURCEINFO );
+        }
+
+        String ref = str.substr(entityBegin+1, entityEnd-entityBegin-1);
+
+        String resolved = _resolver.resolveEntity( str.substr(entityBegin+1, entityEnd-entityBegin-1) );
+
+        str.replace(entityBegin, entityEnd-entityBegin+1, resolved);
+
+        ++entityBegin;
+    }
+}
+
 
 } // namespace Xml
 
