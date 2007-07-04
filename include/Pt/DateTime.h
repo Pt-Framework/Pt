@@ -80,6 +80,21 @@ class PT_API DateTime
         DateTime& setTime(const Time& time)
         { _time = time; return *this; }
 
+        /** @brief Returns the day-part of the date.
+        */
+        unsigned day() const
+        { return date().day(); }
+
+        /** @brief Returns the month-part of the date.
+        */
+        unsigned month() const
+        { return date().month(); }
+
+        /** @brief Returns the year-part of the date.
+        */
+        int year() const
+        { return date().year(); }
+
         static DateTime fromIsoString(const std::string& s);
 
         std::string toIsoString() const;
