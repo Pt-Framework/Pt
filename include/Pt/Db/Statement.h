@@ -37,7 +37,7 @@ namespace Pt {
   //class Date;
   //class Time;
   //class DateTime;
-  
+
 namespace Db {
 
   class Connection;
@@ -46,14 +46,14 @@ namespace Db {
 
     /** /brief This class represents a sql-statement
 
-        A statement can have parameters, which are referenced by name, called 
-        hostvariables. They are prefixed with a colon followed by a name. A 
-        name starts with a letter followed by alphanumeric characters or 
-        underscore. Hostvariables are not searched in strings (between 
-        apostrophes, quotation marks or backticks). The backslash prevents 
+        A statement can have parameters, which are referenced by name, called
+        hostvariables. They are prefixed with a colon followed by a name. A
+        name starts with a letter followed by alphanumeric characters or
+        underscore. Hostvariables are not searched in strings (between
+        apostrophes, quotation marks or backticks). The backslash prevents
         the interpretation of a special meaning of the following character.
     */
-    class Statement
+    class PT_DB_API Statement
     {
         public:
             class ConstIterator;
@@ -67,10 +67,10 @@ namespace Db {
 
         public:
             /** \brief Construct a statement from a specific implementation
-            
-                The Statement class will manage the passed implementation, 
+
+                The Statement class will manage the passed implementation,
                 thus it needs to be created on the heap.
-                
+
                 \param stmt Statement implementation
             */
             Statement(IStatement* stmt = 0)
@@ -78,9 +78,9 @@ namespace Db {
             { }
 
             /** \brief Sets all hostvariables to NULL.
-            
+
                 Sets all hostvariables to NULL.
-            
+
                 \return Self reference
             */
             Statement& clear()
@@ -88,9 +88,9 @@ namespace Db {
 
 
             /** \brief Set a hostvariable to NULL.
-            
+
                 Sets the hostvariable with the given name to NULL.
-                
+
                 \param col Column name
                 \return Self reference
             */
@@ -100,7 +100,7 @@ namespace Db {
             /** Set a host-variable to a boolean value
 
                 Sets the hostvariable with the given name to a boolean value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -109,9 +109,9 @@ namespace Db {
             { _stmt->setBool(col, data); return *this; }
 
             /** Set a host-variable to an integer value
-            
+
                 Sets the hostvariable with the given name to a int value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -120,9 +120,9 @@ namespace Db {
             { _stmt->setInt(col, data); return *this; }
 
             /** Set a host-variable to an unsigned integer value
-            
+
                 Sets the hostvariable with the given name to an unsigned int value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -131,9 +131,9 @@ namespace Db {
             { _stmt->setUnsigned(col, data); return *this; }
 
             /** Set a host-variable to a float value
-            
+
                 Sets the hostvariable with the given name to a float value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -142,9 +142,9 @@ namespace Db {
             { _stmt->setFloat(col, data); return *this; }
 
             /** Set a host-variable to a double value
-            
+
                 Sets the hostvariable with the given name to a double value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -153,9 +153,9 @@ namespace Db {
             { _stmt->setDouble(col, data); return *this; }
 
             /** Set a host-variable to a char
-            
+
                 Sets the hostvariable with the given name to a char.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -164,20 +164,31 @@ namespace Db {
             { _stmt->setChar(col, data); return *this; }
 
             /** Set a host-variable to a string value
-            
+
                 Sets the hostvariable with the given name to a string value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
             */
             Statement& set(const std::string& col, const std::string& data)
             { _stmt->setString(col, data); return *this; }
-            
+
+            /** Set a host-variable to a Blob value
+
+                Sets the hostvariable with the given name to a blob value.
+
+                \param col Column name
+                \param data New variable value
+                \return Self reference
+            */
+            Statement& set(const std::string& col, const Pt::Blob& data)
+            { _stmt->setBlob(col, data); return *this; }
+
             /** Set a host-variable to a string value
-            
+
                 Sets the hostvariable with the given name to a string value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
@@ -187,77 +198,77 @@ namespace Db {
                             : _stmt->setString(col, data); return *this; }
 
             /** Set a host-variable to a date
-            
+
                 Sets the hostvariable with the given name to a date value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
             */
             Statement& set(const std::string& col, const Date& data)
             { _stmt->setDate(col, data); return *this; }
-                                
+
             /** Set a host-variable to a time
-            
+
                 Sets the hostvariable with the given name to a time value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
             */
             Statement& set(const std::string& col, const Time& data)
             { _stmt->setTime(col, data); return *this; }
-                                
+
             /** Set a host-variable to a date-time
-            
+
                 Sets the hostvariable with the given name to a date-time value.
-                
+
                 \param col Column name
                 \param data New variable value
                 \return Self reference
             */
             Statement& set(const std::string& col, const DateTime& data)
             {
-                ///data.isNull() ? _stmt->setNull(col) : _stmt->setDatetime(col, data);
                 _stmt->setDatetime(col, data);
-                return *this; }
+                return *this;
+            }
 
             /** \brief Executes a query with the current parameters
 
-                The query should not return results. This method is normally 
+                The query should not return results. This method is normally
                 used with INSERT-, UPDATE- or DELETE-statements.
-                
-                \return  The number of database rows that were changed 
+
+                \return  The number of database rows that were changed
             */
             size_type execute();
-            
+
             /** \brief Execute a query
                 Executes a query, which returns a resultset, with the current
                 parameters. The query is normally a SELECT-statement.
-                
+
                 \return Result of the query
             */
             Result select();
-            
+
             /** \brief Execute a query
 
                 Executes a query, which returns a row, with the current
                 parameters. If the query returns no rows, a exception of type
                 tntDb::NotFound is thrown. When the query returns more than one row,
                 additional rows are discarded.
-                
+
                 \return Result-row of the query
                 \throw TODO
             */
             Row selectRow();
-            
+
             /** \brief Execute a query
 
                 Executes a query, which returns a single value, with the current
                 parameters. If the query return no rows, a exception of type
                 tntDb::NotFound is thrown. Only the first value of the first row is
                 returned.
-                
+
                 \return Result-value of the query
                 \throw TODO
             */
@@ -266,15 +277,15 @@ namespace Db {
             /** \brief Get Iterator to first row
 
                 This methods creates a cursor and fetches the first row.
-                
+
                 \return Iterator to first row
             */
             ConstIterator begin() const;
-            
+
             /** \brief Get Iterator to end of row
 
                 A empty iterator is returned, which indicates the end of a row.
-            
+
                 \return Iterator to the end of row.
             */
             ConstIterator end() const;
@@ -282,24 +293,24 @@ namespace Db {
             /** \brief Test if bound to a statement
 
                 Returns true, if this class is not bound to an actual statement.
-                
+
                 \return True if unbound
             */
-            bool operator!() const             
+            bool operator!() const
             { return !_stmt; }
 
             //! \brief Returns the actual implementation-class.
-            const IStatement* getImpl() const  
+            const IStatement* getImpl() const
             { return &*_stmt; }
     };
-  
+
     /** \brief Iterator for statements.
 
-        This iterator can be used to iterate over a Statement like over a sequence. 
-        It fullfils    the requirements for a forward iterator. An empty iterator marks
+        This iterator can be used to iterate over a Statement like over a sequence.
+        It fullfils the requirements for a forward iterator. An empty iterator marks
         the end of the sequence.
     */
-    class Statement::ConstIterator : public std::iterator<std::forward_iterator_tag, Row>
+    class PT_DB_API Statement::ConstIterator : public std::iterator<std::forward_iterator_tag, Row>
     {
         private:
             Row _current;
@@ -307,69 +318,69 @@ namespace Db {
 
         public:
             /** \brief Construct an iterator from a specific implementation
-            
-                The iterator will manage the passed implementation, 
+
+                The iterator will manage the passed implementation,
                 thus it needs to be created on the heap.
-                
+
                 \param stmt Iterator implementation
             */
             ConstIterator(ICursor* cursor = 0);
 
             /** \brief Test it two iterators are equal.
-            
+
                 Two iterators are equal if they point to the same iteration.
-            
+
                 \param it Other iterator.
                 \return True if equal.
             */
             bool operator== (const ConstIterator& c) const
             { return _cursor == c._cursor; }
-            
+
             /** \brief Test it two iterators are not equal.
-            
-                Two iterators are not equal if they do not point to the same 
+
+                Two iterators are not equal if they do not point to the same
                 iteration.
-            
+
                 \param it Other iterator.
                 \return True if not equal.
             */
             bool operator!= (const ConstIterator& c) const
             { return _cursor != c._cursor; }
-            
+
             /** \brief Steps forward.
-            
-                Fetches the next row. If no rows are available, the cursor 
+
+                Fetches the next row. If no rows are available, the cursor
                 is closed and removed.
-            
+
                 \return Iterator to next element.
             */
             ConstIterator& operator++();
-            
+
             /** \brief Get current row.
-            
-                Provides read access to the current row in the iterated 
+
+                Provides read access to the current row in the iterated
                 statement.
-            
+
                 \return Const reference to a row.
             */
-            const Row& operator* () const   
+            const Row& operator* () const
             { return _current; }
 
             /** \brief Get pointer to current row.
-            
-                Provides read access to the current row in the iterated 
+
+                Provides read access to the current row in the iterated
                 statement.
-            
+
                 \return Const pointer to a row.
             */
-            const Row* operator-> () const  
+            const Row* operator-> () const
             { return &_current; }
 
             //! \brief Returns the actual implementation-class
-            const ICursor* getImpl() const  
+            const ICursor* getImpl() const
             { return &*_cursor; }
     };
-  
+
 } // namespace Db
 
 } // namespace Pt
