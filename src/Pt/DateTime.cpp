@@ -225,13 +225,11 @@ const SerializationData& operator>>(const SerializationData& data, DateTime& dat
 {
     Date date(1,1,1);
     data >> date;
-    const Date d(date);
-    datetime.setDate(d);
+    datetime.setDate(date);
 
     Time time;
     data >> time;
-    const Time t(time);
-    datetime.setTime(t);
+    datetime.setTime(time);
 
     return data;
 
