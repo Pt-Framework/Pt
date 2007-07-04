@@ -122,6 +122,17 @@ class PT_API DateTime
         static bool isValid(int year, unsigned month, unsigned day,
                             unsigned hour, unsigned minute, unsigned second, unsigned msec);
 
+
+        bool operator==(const DateTime& rhs) const
+        {
+            return !operator!=(rhs);
+        }
+
+        bool operator!=(const DateTime& rhs) const
+        {
+            return _date != rhs._date || _time != rhs._time ;
+        }
+
         /** @brief Assignment by sum operator
         */
         DateTime& operator+=(const Timespan& ts)
