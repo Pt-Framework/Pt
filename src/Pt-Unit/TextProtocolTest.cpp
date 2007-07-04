@@ -44,7 +44,7 @@ class Protocol : public Pt::Unit::TestProtocol
 
             const Pt::Archive* ar = archive.getArchive(L"myDate");
 
-            suite.runTest("test", *ar);
+            //suite.runTest("test", *ar);
         }
 } prot;
 

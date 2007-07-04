@@ -20,7 +20,7 @@
 #define Pt_Any_h
 
 #include <Pt/Api.h>
-#include <Pt/Archive.h>
+#include <Pt/Variant.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/Singleton.h>
@@ -413,32 +413,23 @@ namespace Pt {
         virtual ~AnyBuilder()
         {}
 
-        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
-
-        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+        virtual void build(Pt::Any& a, const Pt::Variant& value) const = 0;
     };
 
 
     template <typename T>
     struct BasicAnyBuilder : public AnyBuilder
     {
-        virtual void build(Pt::Any& a, const Archive& archive) const = 0;
-
-        virtual void build(Pt::Any& a, const Pt::String& value) const = 0;
+        virtual void build(Pt::Any& a, const Pt::Variant& value) const = 0;
     };
 
 
     template <>
     struct BasicAnyBuilder<bool> : public AnyBuilder
     {
-        virtual void build(Pt::Any& a, const Archive& archive) const
+        virtual void build(Pt::Any& a, const Pt::Variant& value) const
         {
-            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
-        }
-
-        virtual void build(Pt::Any& a, const Pt::String& value) const
-        {
-            value == L"true" ? a = true : a = false;
+            value == "true" ? a = true : a = false;
         }
     };
 
@@ -446,14 +437,9 @@ namespace Pt {
     template <>
     struct BasicAnyBuilder<std::string> : public AnyBuilder
     {
-        virtual void build(Pt::Any& a, const Archive& archive) const
+        virtual void build(Pt::Any& a, const Pt::Variant& value) const
         {
-            throw std::logic_error("Type not buildable from archive" + PT_SOURCEINFO);
-        }
-
-        virtual void build(Pt::Any& a, const Pt::String& value) const
-        {
-            std::string s = value.narrow();
+            std::string s = value.str();
             a = s;
         }
     };
@@ -474,7 +460,7 @@ namespace Pt {
             //! @internal
             //const std::multimap<std::string, AnyIO*>& map() const;
 
-            static Any create(const std::string typeName, const Pt::String& value)
+            static Any create(const std::string typeName, const Pt::Variant& value)
             {
                 const AnyBuilder* builder = AnyFactory::findBuilder(typeName);
                 if( builder == 0 )
@@ -484,16 +470,6 @@ namespace Pt {
                 builder->build(a, value);
                 return a;            }
 
-            static Any create(const std::string typeName, const Archive& archive)
-            {
-                const AnyBuilder* builder = AnyFactory::findBuilder(typeName);
-                if( builder == 0 )
-                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
-
-                Pt::Any a;
-                builder->build(a, archive);
-                return a;
-            }
 
             /*static Any create(const std::string& name, std::istream& is)
             {

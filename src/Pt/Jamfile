@@ -36,6 +36,10 @@ PtUnitTest SerializationTest : SerializationTest.cpp ;
 Main_LinkSharedLibraries SerializationTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate SerializationTest : bin ;
 
+PtUnitTest SettingsTest : SettingsTest.cpp ;
+Main_LinkSharedLibraries SettingsTest : Pt Pt-Text Pt-Unit ;
+PtUnitTest_MakeLocate SettingsTest : bin ;
+
 PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate AnyTest : bin ;

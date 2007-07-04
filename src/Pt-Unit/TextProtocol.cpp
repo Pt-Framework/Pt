@@ -20,8 +20,7 @@
 #include <Pt/Unit/TextProtocol.h>
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
-#include "../Pt-Log/PropertiesArchive.h"
-#include "../Pt-Log/PropertiesReader.h"
+#include "Pt/Settings.h"
 
 #include <fstream>
 #include <sstream>
@@ -32,10 +31,10 @@ namespace Pt {
 namespace Unit {
 
 
-const Archive& operator>>(const Archive& ar, TextProtocol& suite)
+/*const Archive& operator>>(const Archive& ar, TextProtocol& suite)
 {
     return ar;
-}
+}*/
 
 /*
 MyTest.property1 = 5
@@ -202,10 +201,10 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
                 std::string value;
                 lineReader >> value;
-                ar.addValue( Pt::String(L"arg"), Pt::String::widen(value) );
+                ar.addEntry( Pt::String(L"arg"), Pt::Variant(value) );
             }
 
-            suite.runTest(methodName, ar);
+            //suite.runTest(methodName, ar);
         }
         // unknown command
         else

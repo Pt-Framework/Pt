@@ -21,6 +21,7 @@
 #define Pt_VariantTraits_h
 
 #include <Pt/Api.h>
+#include <Pt/String.h>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -45,6 +46,7 @@ namespace Pt {
         }
     };
 
+
     template <>
     struct VariantTraits<std::string> {
         static void toData(std::string& data, const std::string& value)
@@ -56,6 +58,23 @@ namespace Pt {
             return true;
         }
     };
+
+
+    template <>
+    struct VariantTraits<Pt::String>
+    {
+        static void toData(std::string& data, const Pt::String& value)
+        {
+            data = value.narrow();
+        }
+
+        static bool fromData(Pt::String& value, const std::string& data)
+        {
+            value = Pt::String::widen(data);
+            return true;
+        }
+    };
+
 
     /** \brief Special trait for double.
 

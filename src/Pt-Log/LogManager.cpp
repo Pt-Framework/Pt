@@ -20,7 +20,6 @@
 #include "Message.h"
 #include "ConsoleChannel.h"
 #include "SerialChannel.h"
-#include "PropertiesReader.h"
 #include "Pt/Exception.h"
 #include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
@@ -29,9 +28,6 @@
 #include <Pt/Text/Utf8Codec.h>
 #include <memory>
 #include <fstream>
-
-#include "Pt/StringStream.h"
-#include "PropertiesWriter.h"
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
@@ -64,14 +60,9 @@ LogManager::LogManager()
     // initialise properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    PropertiesReader reader(ts);
+    SettingsReader reader(ts);
     reader.read(_settings);
     _settings.extract(*this, L"Pt-Log");
-
-    StringStream ss;
-    PropertiesWriter writer(ss);
-    writer.write(_settings);
-    std::cerr << "###\n" << ss.str().narrow() << "###\n" << std::endl;
 
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 

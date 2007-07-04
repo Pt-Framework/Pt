@@ -21,7 +21,7 @@
 #define Pt_Reflectable_h
 
 #include <Pt/Api.h>
-#include <Pt/Archive.h>
+#include <Pt/SerializationData.h>
 #include <Pt/Exception.h>
 #include <Pt/MethodInfo.h>
 #include <Pt/PropertyValue.h>
@@ -201,7 +201,7 @@ class PT_API Reflectable
 };
 
 
-inline const Archive& operator>>(const Archive& archive, Reflectable& r)
+inline const SerializationData& operator>>(const SerializationData& data, Reflectable& r)
 {
     PropertyMap& pmap = r.properties();
     for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
@@ -209,22 +209,22 @@ inline const Archive& operator>>(const Archive& archive, Reflectable& r)
         PropertyInfo& propInfo = *( it->second );
         Pt::String propName = Pt::String::widen( it->first );
 
-        const Pt::String* value = archive.getValue(propName);
+        const Pt::Variant* value = data.getEntry(propName);
         if(value)
         {
             Any a = AnyFactory::create( propInfo.typeName(), *value );
             it->second->setValue(a);
         }
 
-        const Archive* subarchive = archive.getArchive(propName);
-        if(subarchive)
-        {
-            Any a = AnyFactory::create( propInfo.typeName(), *subarchive );
-            it->second->setValue(a);
-        }
+        //const SerializationData* sub = archive.getArchive(propName);
+        //if(sub)
+        //{
+        //    Any a = AnyFactory::create( propInfo.typeName(), *sub );
+        //    it->second->setValue(a);
+        //}
     }
 
-    return archive;
+    return data;
 }
 
 } // namespace Pt

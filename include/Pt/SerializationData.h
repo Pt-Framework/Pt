@@ -22,6 +22,8 @@
 #include <Pt/String.h>
 #include <Pt/Variant.h>
 #include <Pt/Exception.h>
+#include <Pt/RefCounted.h>
+#include <Pt/SmartPtr.h>
 #include <map>
 
 
@@ -125,6 +127,68 @@ class PT_API SerializationEntry : public SerializationNode
 class PT_API SerializationData : public SerializationNode
 {
     public:
+        class IteratorBase : public RefCounted
+        {
+            public:
+                virtual ~IteratorBase()
+                { }
+
+                virtual bool advance() = 0;
+
+                virtual SerializationNode& current() const = 0;
+        };
+
+        class Iterator
+        {
+            public:
+                Iterator(IteratorBase* base = 0)
+                : _base(base)
+                { }
+
+                Iterator& operator++()
+                {
+                    if( ! _base->advance() )
+                        _base = 0;
+
+                    return *this;
+                }
+
+                SerializationNode& operator*()
+                { return _base->current(); }
+
+                bool operator!= (const Iterator& other) const
+                { return _base != other._base; }
+
+            private:
+                SmartPtr<IteratorBase, InternalRefCounted<IteratorBase> > _base;
+        };
+
+        class ConstIterator
+        {
+            public:
+                ConstIterator(IteratorBase* base = 0)
+                : _base(base)
+                { }
+
+                ConstIterator& operator++()
+                {
+                    if( ! _base->advance() )
+                        _base = 0;
+
+                    return *this;
+                }
+
+                const SerializationNode& operator*() const
+                { return _base->current(); }
+
+                bool operator!= (const ConstIterator& other) const
+                { return _base != other._base; }
+
+            private:
+                SmartPtr<IteratorBase, InternalRefCounted<IteratorBase> > _base;
+        };
+
+    public:
         virtual ~SerializationData()
         {}
 
@@ -137,9 +201,21 @@ class PT_API SerializationData : public SerializationNode
         const SerializationNode* getNode(const Pt::String& name) const
         { return this->_getNode(name); }
 
+        SerializationNode* getNode(const Pt::String& name)
+        { return this->_getNode(name); }
+
         const SerializationData* getData(const Pt::String& name) const
         {
             const SerializationNode* node = this->getNode(name);
+            if( node && node->toData() )
+                return node->toData();
+
+            return 0;
+        }
+
+        SerializationData* getData(const Pt::String& name)
+        {
+            SerializationNode* node = this->getNode(name);
             if( node && node->toData() )
                 return node->toData();
 
@@ -156,15 +232,37 @@ class PT_API SerializationData : public SerializationNode
             return 0;
         }
 
+        Iterator begin()
+        { return this->_begin(); }
+
+        Iterator end()
+        { return Iterator(); }
+
+        ConstIterator begin() const
+        { return this->_begin(); }
+
+        ConstIterator end() const
+        { return ConstIterator(); }
+
     protected:
         SerializationData()
         {}
 
         virtual const SerializationNode* _getNode(const Pt::String& name) const = 0;
 
+        virtual SerializationNode* _getNode(const Pt::String& name)= 0;
+
         virtual SerializationData& _addData(const Pt::String& name) = 0;
 
         virtual void _addEntry(const Pt::String& name, const Pt::Variant& value) = 0;
+
+        /** @brief Returns the begin of the Archive contents
+
+            The deriving class is suposed to return a pointer to its
+            type of iterator created with new. If the archive is empty
+            0 must be returned.
+        */
+        virtual IteratorBase* _begin() const = 0;
 
         virtual const SerializationEntry* _toEntry() const
         { return 0; }
@@ -209,6 +307,28 @@ class PT_API ObjectData : public SerializationData
     public:
         typedef std::multimap<Pt::String, SerializationNode*> Nodes;
 
+        class Iterator : public SerializationData::IteratorBase
+        {
+            public:
+                Iterator(const Nodes& entries)
+                : _entries(entries)
+                , _it( entries.begin() )
+                {}
+
+                virtual bool advance()
+                {
+                    ++_it;
+                    return _it != _entries.end();
+                }
+
+                virtual SerializationNode& current() const
+                { return *_it->second; }
+
+            private:
+                const Nodes& _entries;
+                Nodes::const_iterator _it;
+        };
+
     public:
         ObjectData(SerializationData* parent = 0);
 
@@ -225,9 +345,14 @@ class PT_API ObjectData : public SerializationData
 
         const SerializationNode* _getNode(const Pt::String& name) const;
 
+        SerializationNode* _getNode(const Pt::String& name);
+
         void _addEntry(const Pt::String& name, const Pt::Variant& value);
 
         ObjectData& _addData(const Pt::String& name);
+
+        SerializationData::IteratorBase* _begin() const
+        { return _nodes.empty() ? 0 : new Iterator( _nodes ); }
 
     private:
         SerializationData* _parentData;

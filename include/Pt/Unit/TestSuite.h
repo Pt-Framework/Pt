@@ -88,8 +88,8 @@ namespace Unit {
                     const std::string& testName() const
                     { return _testName; }
 
-                    virtual void setData(const Archive& ar)
-                    {}
+                    //virtual void setData(const Archive& ar)
+                    //{}
 
                 protected:
                     void _run()
@@ -120,7 +120,7 @@ namespace Unit {
                     : Context( suite, name, _args )
                     {}
 
-                    virtual void setData(const Archive& ar)
+                    /*virtual void setData(const Archive& ar)
                     {
                         typedef typename Pt::TypeInfo<A1>::Value ValueA1 ;
                         ValueA1 a1;
@@ -129,7 +129,7 @@ namespace Unit {
                         _args.push_back(a1);
 
                         this->setArgs( _args );
-                    }
+                    }*/
 
                 private:
                     Args _args;
@@ -209,14 +209,14 @@ namespace Unit {
                 _contexts[name] = ctx;
             }
 
-            void runTest( const std::string& name, const Archive& archive )
+            /*void runTest( const std::string& name, const Archive& archive )
             {
                 if( _contexts.find(name) != _contexts.end() )
                 {
                      _contexts[name]->setData(archive);
                      _contexts[name]->run();
                 }
-            }
+            }*/
 
         protected:
             /** @brief The assoziated test protocol

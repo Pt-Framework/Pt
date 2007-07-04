@@ -19,7 +19,7 @@
 #ifndef Pt_LogManager_h
 #define Pt_LogManager_h
 
-#include "PropertiesArchive.h"
+#include "Pt/Settings.h"
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Target.h>
 #include <Pt/Singleton.h>
@@ -68,10 +68,10 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 };
 
 
-inline bool operator>>(const Archive& archive, LogManager& manager)
+inline bool operator>>(const SerializationData& data, LogManager& manager)
 {
     Target& ptLog = Target::get("Pt-Log");
-    archive >> ptLog;
+    data >> ptLog;
     return true;
 }
 
