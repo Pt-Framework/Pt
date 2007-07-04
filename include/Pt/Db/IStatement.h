@@ -33,7 +33,7 @@ namespace Pt {
     class Date;
     class Time;
     class DateTime;
-    
+
 namespace Db {
 
     class Result;
@@ -48,7 +48,7 @@ namespace Db {
 
         virtual void clear() = 0;
 
-        
+
         virtual void setNull(const std::string& col) = 0;
         virtual void setBool(const std::string& col, bool data) = 0;
         virtual void setInt(const std::string& col, int data) = 0;
@@ -57,6 +57,7 @@ namespace Db {
         virtual void setDouble(const std::string& col, double data) = 0;
         virtual void setChar(const std::string& col, char data) = 0;
         virtual void setString(const std::string& col, const std::string& data) = 0;
+        virtual void setBlob(const std::string& col, const Pt::Blob& data) = 0;
         virtual void setDate(const std::string& col, const Date& data) = 0;
         virtual void setTime(const std::string& col, const Time& data) = 0;
         virtual void setDatetime(const std::string& col, const DateTime& data) = 0;
