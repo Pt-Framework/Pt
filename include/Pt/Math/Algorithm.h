@@ -16,10 +16,10 @@ namespace {
 */
 enum QuadrantCode
 {
-    Top=0x1,
-    Bottom=0x2,
-    Right=0x4,
-    Left=0x8
+    Top    = 1 << 0, 
+    Bottom = 1 << 1, 
+    Right  = 1 << 2, 
+    Left   = 1 << 3 
 };
 
 /** @brief Determines quadrant code
