@@ -6,14 +6,12 @@
 #define PT_MATH_POINT_H
 
 #include <Pt/Types.h>
-#include <Pt/AnyTraits.h>
-#include <Pt/SourceInfo.h>
-#include <Pt/Char.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
+#include <Pt/Math/MathUtils.h>
 
-#include <iostream>
-#include <stdexcept>
+#include <Pt/AnyTraits.h>
+#include <Pt/SourceInfo.h>
 
 
 namespace Pt {
@@ -82,7 +80,21 @@ namespace Pt {
                 }
 
                 const BasicPoint& move(T dx, T dy)
-                { _x += dy; _y += dy; return *this; }
+                {
+                    _x += dy; _y += dy; return *this;
+                }
+
+
+                double calcDistance(const PointF& otherPoint) const
+                {
+                    if (*this == otherPoint)
+                    {
+                        return 0;
+                    }
+
+                    return hypot(this->x() - otherPoint.x(), this->y() - otherPoint.y());
+                }
+
 
                 const BasicPoint& operator=(const BasicPoint& pt)
                 {
