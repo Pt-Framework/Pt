@@ -60,7 +60,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.deserialize(data);
             
             const Pt::SerializationData* subdata = data.getData(L"date");
+            PT_UNIT_ASSERT(subdata);
+            
             *subdata >> date;
+            PT_UNIT_ASSERT(date == Pt::Date(2007, 7, 5));
         }
 
         void DateTime()
@@ -90,8 +93,10 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             deser.deserialize(data);
             
             const Pt::SerializationData* subdata = data.getData(L"dateTime");
+            PT_UNIT_ASSERT(subdata);
+
             *subdata >> datetime;
-            std::cout<< datetime.toIsoString() <<std::endl;
+            PT_UNIT_ASSERT(datetime == Pt::DateTime(2007, 7, 5, 20, 7, 5, 1));
         }
 };
 

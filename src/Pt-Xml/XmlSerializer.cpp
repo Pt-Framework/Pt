@@ -14,7 +14,22 @@ namespace Xml {
 
 XmlDeserializer::XmlDeserializer(XmlReader& reader)
 : _reader(&reader)
+, _deleteMe(0)
 {
+}
+
+
+XmlDeserializer::XmlDeserializer(std::istream& is)
+: _reader( 0 )
+, _deleteMe(new XmlReader(is))
+{
+    _reader = _deleteMe;
+}
+
+
+XmlDeserializer::~XmlDeserializer()
+{
+    delete _deleteMe;
 }
 
 
@@ -57,16 +72,12 @@ void XmlDeserializer::onStartElement(const Node& node)
             if(Pt::String::npos != chars.content().find_first_not_of(L" \t\n\r") )
             {
                 _current->addEntry( _nodeName, chars.content() );
-                std::cerr << "Value: " << chars.content().narrow() << std::endl;
                 _processNode = &XmlDeserializer::onContent;
             }
             else
             {
                 SerializationData& added = _current->addData( _nodeName );
                 _current = &added;
-
-                std::cerr << "Entering: " << _nodeName.narrow() << " "
-                          << "Parent: " << _current->parent()->name().narrow() << std::endl;
                 _processNode = &XmlDeserializer::onWhitespace;
             }
 
@@ -77,15 +88,13 @@ void XmlDeserializer::onStartElement(const Node& node)
             _nodeName = static_cast<const StartElement&>(node).name();
             SerializationData& added = _current->addData( _nodeName );
             _current = &added;
-            std::cerr << "Entering: " << _nodeName.narrow() << " "
-                      << "Parent: " << _current->parent()->name().narrow() << std::endl;
             break;
         }
         case Node::EndElement:
         {
             _nodeName = static_cast<const EndElement&>(node).name();
             _current = _current->parent();
-            std::cerr << "Leaving: " << _nodeName.narrow() << std::endl;
+            
             if(_current == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
@@ -112,7 +121,7 @@ void XmlDeserializer::onWhitespace(const Node& node)
         {
             _nodeName = static_cast<const EndElement&>(node).name();
             _current = _current->parent();
-            std::cerr << "Leaving: " << _nodeName.narrow() << std::endl;
+
             if(_current == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
             
@@ -159,7 +168,7 @@ void XmlDeserializer::onEndElement(const Node& node)
         {
             _nodeName = static_cast<const EndElement&>(node).name();
             _current = _current->parent();
-            std::cerr << "Leaving: " << _nodeName.narrow() << std::endl;
+
             if(_current == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
@@ -171,7 +180,6 @@ void XmlDeserializer::onEndElement(const Node& node)
         }
         default:
         {
-            std::cerr << node.type() << std::endl;
             throw std::logic_error("Expected start element" + PT_SOURCEINFO);
         }
     };
