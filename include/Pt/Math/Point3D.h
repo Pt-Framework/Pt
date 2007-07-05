@@ -20,7 +20,7 @@ namespace Pt {
         /** \brief BasicPoint3D class
         */
         template<typename T>
-        class BasicPoint3D3D {
+        class BasicPoint3D {
             public:
                 BasicPoint3D()
                 : m_x(0)
@@ -28,7 +28,7 @@ namespace Pt {
                 , m_z(0)
                 {}
 
-                BasicPoint3D(T x, T y)
+                BasicPoint3D(T x, T y, T z)
                 : m_x(x)
                 , m_y(y)
                 , m_z(z)
@@ -77,7 +77,7 @@ namespace Pt {
                     m_z = z;
                 }
 
-                const BasicPoint3D& move(T dx, T dy, Tdz)
+                const BasicPoint3D& move(T dx, T dy, T dz)
                 { 
                     m_x += dy; 
                     m_y += dy; 
@@ -200,7 +200,7 @@ namespace Pt {
             {
                 if( (pt1.x() < pt2.x()) ||
                     ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) ||
-                    ( (pt1.x() == pt2.x()) && (pt1.y() == pt2.y()) && (pt1.z() < pt2.z() ) )
+                    ( (pt1.x() == pt2.x()) && (pt1.y() == pt2.y()) && (pt1.z() < pt2.z()) ) )
                 {
                         return true;
                 }
@@ -211,18 +211,17 @@ namespace Pt {
     } // namespace Math
 
 
-
     template <typename T>
     struct AnyTraits<Math::BasicPoint3D<T> > {
         static void output(std::ostream& os, const Math::BasicPoint3D<T>& value);
         static void input(std::istream& is, Math::BasicPoint3D<T>& value);
-        static void output(std::basicm_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value);
-        static void input(std::basicm_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value);
+        static void output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value);
+        static void input(std::basic_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value);
     };
 
 
     template <typename CharT, typename T>
-    inline void outputGeneric(std::basicm_ostream<CharT>& os, const Math::BasicPoint3D<T>& value)
+    inline void outputGeneric(std::basic_ostream<CharT>& os, const Math::BasicPoint3D<T>& value)
     {
         os << '(' << value.x() << ' ' << value.y() << ' ' << value.z() << ')';
     }
@@ -235,21 +234,21 @@ namespace Pt {
 
 
     template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::output(std::basicm_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value)
+    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value)
     {
         outputGeneric(os, value);
     }
 
 
     template <typename CharT, typename T>
-    inline void inputGeneric(std::basicm_istream<CharT>& is, Math::BasicPoint3D<T>& value)
+    inline void inputGeneric(std::basic_istream<CharT>& is, Math::BasicPoint3D<T>& value)
     {
         CharT ch;
 
         is >> ch;
         if (ch != '(')
         {
-            throw std::runtimem_error("Could not read Point value" + PTm_SOURCEINFO);
+            throw std::runtimem_error("Could not read Point value" + PT_SOURCEINFO);
         }
 
         T x;
@@ -263,7 +262,7 @@ namespace Pt {
         is >> ch;
         if (ch != ')')
         {
-            throw std::runtimem_error("Could not read Point value" + PTm_SOURCEINFO);
+            throw std::runtimem_error("Could not read Point value" + PT_SOURCEINFO);
         }
 
         value.set(x, y);
@@ -278,7 +277,7 @@ namespace Pt {
 
 
     template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::input(std::basicm_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value)
+    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::input(std::basic_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value)
     {
         inputGeneric(is, value);
     }
