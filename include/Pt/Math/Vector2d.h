@@ -8,6 +8,7 @@
 #include <Pt/Types.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
+#include <Pt/Math/MathUtils.h>
 #include <math.h>
 
 
@@ -146,7 +147,7 @@ namespace Math {
                 return this->m_x * vector.m_x + this->m_y * vector.m_y;
             }
 
-            
+
             inline const BasicVector2d<T> operator+=(const BasicPoint<T>& point)
             {
                 m_x += point.x();
@@ -154,7 +155,7 @@ namespace Math {
                 return *this;
             }
 
-            
+
             inline BasicVector2d<T> operator+(const BasicPoint<T>& point) const
             {
                 BasicVector2d<T> newVector( (m_x+point.x()), (m_y+point.y()) );
@@ -169,7 +170,7 @@ namespace Math {
                 return *this;
             }
 
-            
+
             inline BasicVector2d<T> operator-(const BasicPoint<T>& point) const
             {
                 BasicVector2d<T> newVector( (m_x-point.x()), (m_y-point.y()) );
@@ -187,6 +188,18 @@ namespace Math {
             inline double sqrtLength() const
             {
                 return (double)(this->m_x * this->m_x + this->m_y * this->m_y);
+            }
+
+
+            /**
+             * @brief Calculates and returns the angle of this vector towards north.
+             */
+            inline double angleTowardsNorth()
+            {
+                const double angleInDegrees = Pt::Math::radToDeg(atan2((double)m_y, (double)m_x));
+                const double normalizedAngle = 360 + 90 - angleInDegrees;
+
+                return normalizedAngle >= 360 ? normalizedAngle - 360 : normalizedAngle;
             }
 
 
