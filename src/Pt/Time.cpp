@@ -235,20 +235,45 @@ Time Time::fromIsoString(const std::string& s)
 
 const SerializationData& operator>>(const SerializationData& data, Time& time)
 {
-    unsigned msec;
+    unsigned hour;
+    unsigned min;
+    unsigned sec;
+    unsigned mssec;
 
-    const Pt::Variant* value = data.getEntry(L"totalMSecs");
-    if( value == 0 || value->get<unsigned>(msec) )
-        throw NoSuchEntry("totalMSecs", PT_SOURCEINFO);
+    const Pt::Variant* value = data.getEntry(L"hour");
+    if( value == 0 || value->get<unsigned>(hour) )
+        throw NoSuchEntry("hour", PT_SOURCEINFO);
 
-    time.setTotalMSecs(msec);
+    value = data.getEntry(L"minute");
+    if( value == 0 || value->get<unsigned>(min) )
+        throw NoSuchEntry("minute", PT_SOURCEINFO);
+
+    value = data.getEntry(L"second");
+    if( value == 0 || value->get<unsigned>(sec) )
+        throw NoSuchEntry("second", PT_SOURCEINFO);
+
+    value = data.getEntry(L"millisec");
+    if( value == 0 || value->get<unsigned>(mssec) )
+        throw NoSuchEntry("millisec", PT_SOURCEINFO);
+
+    time.set(hour, min, sec, mssec);
     return data;
 }
 
 
 SerializationData& operator<<(SerializationData& data, const Time& time)
 {
-    data.addEntry(L"totalMSecs", Variant(time.totalMSecs()) );
+    unsigned hour;
+    unsigned min;
+    unsigned sec;
+    unsigned msec;
+
+    time.get(hour, min, sec, msec);
+
+    data.addEntry(L"hour", Variant(hour) );
+    data.addEntry(L"minute", Variant(min) );
+    data.addEntry(L"seconds", Variant(sec) );
+    data.addEntry(L"millisec", Variant(msec) );
 
     return data;
 }

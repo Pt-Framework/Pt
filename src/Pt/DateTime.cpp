@@ -223,16 +223,23 @@ std::string DateTime::toIsoString() const
 
 const SerializationData& operator>>(const SerializationData& data, DateTime& datetime)
 {
+    const SerializationData* subData = data.getData(L"date");
+    if(!subData)
+        throw NoSuchEntry("date", PT_SOURCEINFO);
+
     Date date(1,1,1);
-    data >> date;
+    *subData >> date;
     datetime.setDate(date);
 
+    subData = data.getData(L"time");
+    if(!subData)
+        throw NoSuchEntry("time", PT_SOURCEINFO);
+
     Time time;
-    data >> time;
+    *subData >> time;
     datetime.setTime(time);
 
     return data;
-
 }
 
 
