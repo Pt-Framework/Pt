@@ -71,6 +71,11 @@ namespace Pt {
                     _max = max;
                 }
 
+                T size() const
+                {
+                    return _max - _min;
+                }
+
                 const BasicRange& operator=(const BasicRange& range)
                 {
                     _min = range._min;
