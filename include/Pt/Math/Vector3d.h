@@ -215,7 +215,7 @@ namespace Math {
             {
                 this->m_z = z;
             }
-            
+
             void set(const T& x, const T& y, const T& z)
             {
                 this->m_x = x;
