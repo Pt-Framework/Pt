@@ -19,11 +19,20 @@ namespace Pt {
         template <typename T>
         class BasicPoint;
 
-        template <typename PointT, typename SizeT>
-        class BasicRect;
+        template <typename T>
+        class BasicPoint3D;
 
         template <typename T>
         class BasicRange;
+
+        template <typename PointT>
+        class BasicLine;
+
+        template <typename PointT>
+        class BasicLineSegment;
+
+        template <typename PointT>
+        class BasicPolygon;
 
         template <typename T, size_t rowDim, size_t colDim>
         class BasicMatrix;
@@ -40,22 +49,38 @@ namespace Pt {
         typedef BasicPoint<Pt::ssize_t>    Point;
         typedef BasicPoint<double>         PointF;
 
-        typedef BasicRect<Pt::ssize_t, Pt::size_t>  Rect;
-        typedef BasicRect<double, double>           RectF;
+        typedef BasicPoint3D<Pt::ssize_t>    Point3D;
+        typedef BasicPoint3D<double>         Point3DF;
 
-        typedef BasicRange<Pt::ssize_t>     Range;
-        typedef BasicRange<double>          RangeF;
+        typedef BasicRange<Pt::ssize_t>          Range;
+        typedef BasicRange<double>               RangeF;
 
-        typedef BasicVector2d<Pt::ssize_t>  Vector2d;
-        typedef BasicVector2d<double>       Vector2dF;
+        typedef BasicLine<Pt::ssize_t>           Line;
+        typedef BasicLine<double>                LineF;
 
-        typedef BasicVector3d<Pt::ssize_t>  Vector3d;
-        typedef BasicVector3d<double>       Vector3dF;
+        typedef BasicLineSegment<Pt::ssize_t>    LineSegment;
+        typedef BasicLineSegment<double>         LineSegmentF;
+
+        typedef BasicPolygon<Pt::ssize_t>        Polygon;
+        typedef BasicPolygon<double>             PolygonF;
+
+        typedef BasicVector2d<Pt::ssize_t>       Vector2d;
+        typedef BasicVector2d<double>            Vector2dF;
+
+        typedef BasicVector3d<Pt::ssize_t>       Vector3d;
+        typedef BasicVector3d<double>            Vector3dF;
 
         typedef BasicMatrix<Pt::ssize_t, 3, 3>   Matrix3x3;
         typedef BasicMatrix<double, 3, 3>        Matrix3x3F;
         typedef BasicMatrix<Pt::ssize_t, 4, 4>   Matrix4x4;
         typedef BasicMatrix<double, 4, 4>        Matrix4x4F;
+
+
+        template <typename PointT, typename SizeT>
+        class BasicRect;
+
+        typedef BasicRect<Pt::ssize_t, Pt::size_t>  Rect;
+        typedef BasicRect<double, double>           RectF;
 
     } // namespace Math
 
