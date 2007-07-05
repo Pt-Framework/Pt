@@ -272,7 +272,7 @@ SerializationData& operator<<(SerializationData& data, const Time& time)
 
     data.addEntry(L"hour", Variant(hour) );
     data.addEntry(L"minute", Variant(min) );
-    data.addEntry(L"seconds", Variant(sec) );
+    data.addEntry(L"second", Variant(sec) );
     data.addEntry(L"millisec", Variant(msec) );
 
     return data;

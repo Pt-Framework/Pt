@@ -245,8 +245,11 @@ const SerializationData& operator>>(const SerializationData& data, DateTime& dat
 
 SerializationData& operator<<(SerializationData& data, const DateTime& datetime)
 {
-    data << datetime.date();
-    data << datetime.time();
+    SerializationData& dateData = data.addData(L"date");
+    dateData << datetime.date();
+
+    SerializationData& timeData = data.addData(L"time");
+    timeData << datetime.time();
 
     return data;
 }
