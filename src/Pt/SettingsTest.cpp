@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#undef PT_API_LOG_EXPORT
+#undef PT_API_EXPORT
 
 #include "Pt/Settings.h"
 #include "Pt/Text/TextStream.h"
