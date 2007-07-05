@@ -17,8 +17,8 @@
 
 namespace Pt
 {
-    namespace Math
-    {
+  namespace Math
+  {
 
     //--------------------------------------------------------------------------------------------
     // special methods to type-dependent compare matrix elements.
@@ -28,9 +28,8 @@ namespace Pt
     template<typename T>
     bool isEqual(const size_t row, const size_t col, const T* leftData, const T* rightData)
     {
-        return !std::memcmp(leftData, rightData, row * col * sizeof(T));
+      return !std::memcmp(leftData, rightData, row * col * sizeof(T));
     };
-
 
     template<>
     inline bool isEqual<float>(const size_t row, const size_t col, const float* leftData, const float* rightData)
@@ -67,62 +66,61 @@ namespace Pt
     };
 
 
-
-    /** \brief BasicMatrix class
+  /** \brief BasicMatrix class
         Matrix elements are stored in an array. The matrix holds an pointer to this array.
         The data elements in the array are sorted according to row. This means that
         the matrix consist of row vectors.
-    */
-    template <typename T, size_t rowDim, size_t colDim>
-    class BasicMatrix {
+  */
+  template <typename T, size_t rowDim, size_t colDim>
+  class BasicMatrix {
 
         public:
 
-            /** \brief Construct a BasicMatrix.
-                All values of the matrix are set to 0.
-                \param row The No. of rows.
-                \param col The No. of columns.
-            */
-            BasicMatrix()
-            {
-                this->setToNull();
-            }
+      /** \brief Construct a BasicMatrix.
+          All values of the matrix are set to 0.
+        \param row The No. of rows.
+        \param col The No. of columns.
+      */
+      BasicMatrix()
+      {
+        this->setToNull();
+      }
 
-            /** \brief Construct a BasicMatrix with another BasicMatrix.
-                \param matrix Reference to another matrix.
-            */
-              BasicMatrix(const BasicMatrix<T, rowDim, colDim>& matrix)
-            {
-                 memcpy(this->m_matrixData, matrix.m_matrixData, rowDim * colDim * sizeof(T));
-            }
+        /** \brief Construct a BasicMatrix with another BasicMatrix.
+        \param matrix Reference to another matrix.
+      */
+        BasicMatrix(const BasicMatrix<T, rowDim, colDim>& matrix)
+        {
+          std::memcpy(this->m_matrixData, matrix.m_matrixData, rowDim * colDim * sizeof(T));
+        }
 
 
             /** \brief Construct a BasicMatrix with a std::vector.
                 The data vector must have a size of col * row.
-                \param data Reference to a vector with data.
-                \param row The No. of rows.
-                \param col The No. of columns.
-            */
-            BasicMatrix(const std::vector<T>& data)
-            {
-                assert(data.size() == rowDim * colDim  );
+        \param data Reference to a vector with data.
+        \param row The No. of rows.
+      \param col The No. of columns.
+      */
+      BasicMatrix(const std::vector<T>& data)
+      {
+        assert(data.size() == rowDim * colDim  );
 
-                //TODO ggf. durch memcpy ersetzen?
-                for(size_t r = 0; r < rowDim; ++r)
-                {
-                    for(size_t c = 0; c < colDim; ++c)
-                    {
-                        this->m_matrixData[r][c] = data[r * colDim+c];
-                    }
-                }
-            }
+        //TODO ggf. durch memcpy ersetzen?
+        for(size_t r = 0; r < rowDim; ++r)
+        {
+          for(size_t c = 0; c < colDim; ++c)
+          {
+            this->m_matrixData[r][c] = data[r * colDim+c];
+          }
+        }
+      }
 
 
             /** \brief Set all elements of the matrix to 0.
             */
             inline void setToNull()
             {
-                memset(this->m_matrixData, 0, rowDim * colDim * sizeof(T));
+                std::memset(this->m_matrixData, 0, rowDim * colDim * sizeof(T));
             }
 
 
@@ -137,7 +135,7 @@ namespace Pt
                 this->setToNull();
                 for(size_t i = 0; i < colDim; ++i)
                 {
-                    this->m_matrixData[i][i] = (T)(1);
+                  this->m_matrixData[i][i] = (T)(1);
                 }
             }
 
@@ -167,15 +165,15 @@ namespace Pt
             */
             inline size_t colCount() const
             {
-                return colDim;
+              return colDim;
             }
 
-             /** \brief Get the contents of matrix.
+            /** \brief Get the contents of matrix.
                 \return The contents of matrix.
             */
             inline const T* data() const
             {
-                return *this->m_matrixData;
+              return *this->m_matrixData;
             }
 
             /** \brief Get the No. of rows for the matrix.
@@ -183,7 +181,7 @@ namespace Pt
             */
             inline size_t rowCount() const
             {
-                return rowDim;
+              return rowDim;
             }
 
 
@@ -192,9 +190,9 @@ namespace Pt
                 \param row Index of the row.
                 \return The value of a matrix member.
             */
-            inline const T  getValue(const size_t& row, const size_t& col) const
+            inline const T&  getValue(const size_t& row, const size_t& col) const
             {
-                return this->m_matrixData[row][col];
+              return this->m_matrixData[row][col];
             }
 
 
@@ -260,7 +258,7 @@ namespace Pt
             template <typename T1, size_t rowDimIn, size_t colDimIn>
             inline const BasicMatrix<T, rowDim, colDim>& operator=(const BasicMatrix<T1, rowDimIn, colDimIn>& matrix)
             {
-                memcpy(this->m_matrixData, matrix.m_matrixData, this->m_elemCount * sizeof(T));
+                std::memcpy(this->m_matrixData, matrix.m_matrixData, this->m_elemCount * sizeof(T));
                 return *this;
             }
 
@@ -269,7 +267,6 @@ namespace Pt
                 \param matrix BasicMatrix to compare with.
                 \return Whether the matrices are equal.
             */
-
             inline bool operator== (const BasicMatrix<T, rowDim, colDim>& matrix) const
             {
                 // the c-style cast is neccessary here since:
@@ -302,7 +299,7 @@ namespace Pt
                 {
                     for(size_t c = 0; c < colDim; ++c)
                     {
-                        this->m_matrixData[r][c] += matrix.m_matrixData[r][c];
+                      this->m_matrixData[r][c] += matrix.m_matrixData[r][c];
                     }
                 }
                 return *this;
@@ -331,7 +328,7 @@ namespace Pt
                 {
                     for(size_t c = 0; c < colDim; ++c)
                     {
-                        this->m_matrixData[r][c] -= matrix.m_matrixData[r][c];
+                      this->m_matrixData[r][c] -= matrix.m_matrixData[r][c];
                     }
                 }
                 return *this;
@@ -356,7 +353,7 @@ namespace Pt
                 \param matrix BasicMatrix for the Multiplication.
                 \return The resulting BasicMatrix.
             */
-            template <typename T2, size_t rightRowDim, size_t rightColDim>
+      template <typename T2, size_t rightRowDim, size_t rightColDim>
             inline BasicMatrix<T2, rowDim, rightColDim> operator*(const BasicMatrix<T2, rightRowDim, rightColDim>& matrix) const
             {
 
@@ -373,8 +370,8 @@ namespace Pt
                         }
                     }
                 }
-                return resMatrix;
-            }
+        return resMatrix;
+      }
 
 
 
@@ -397,29 +394,28 @@ namespace Pt
                 return resMatrix;
             }
 
-
-
-            /** \brief Prints the matrix content to stdout.
-            */
-            void printSelf()
+      /** \brief Prints the matrix content to stdout.
+      */
+      void printSelf()
+      {
+        std::cout << std::endl;
+        std::cout << std::endl;
+        for(size_t r = 0; r < rowDim; ++r)
+        {
+            for(size_t c = 0; c < colDim; ++c)
             {
-                std::cout << std::endl;
-                std::cout << std::endl;
-                for(size_t r = 0; r < rowDim; ++r)
-                {
-                    for(size_t c = 0; c < colDim; ++c)
-                    {
-                        std::cout << " " << this->m_matrixData[r][c] << "\t\t" ;
-                    }
-                    std::cout << std::endl;
-                }
-                std::cout << std::endl;
+                std::cout << " " << this->m_matrixData[r][c] << "\t\t" ;
             }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+      }
 
         protected:
-            T m_matrixData[rowDim][colDim];
+      T m_matrixData[rowDim][colDim];
 
-    };
+  };
+
 
 } // namespace Math
 
