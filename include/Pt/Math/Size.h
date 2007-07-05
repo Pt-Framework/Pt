@@ -38,11 +38,12 @@ namespace Pt {
                 //! @brief Sets the height
                 inline void setHeight(T h)
                 { _h = h; }
-				//! @brief Sets the widht and height.
-				inline void setWidthHeight(T w, T h)
-				{ 
+
+                //! @brief Sets the widht and height.
+                inline void setWidthHeight(T w, T h)
+                {
                     _w = w;
-                    _h = h; 
+                    _h = h;
                 }
 
                 const BasicSize& addWidth(T w)
@@ -62,14 +63,14 @@ namespace Pt {
                     _h += h;
                     return *this;
                 }
-                
+
 
                 const BasicSize& subHeight(T h)
                 {
                     _h -= h;
                     return *this;
                 }
-                
+
                 const BasicSize& operator=(const BasicSize& other)
                 {
                     _w = other._w; _h = other._h;
