@@ -29,10 +29,10 @@ void perfTest()
     }
 
     cerr << "PrefTest: ";
-    XmlIStream stream( input );
+    XmlReader reader( input );
 
     clock_t begin = clock();
-    for(XmlStreamIterator it = stream.current(); it != stream.end(); ++it)
+    for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
     {}
     cerr << clock() - begin << endl;
 }
@@ -65,13 +65,13 @@ void test()
     input << "</dialog>";
     input << "</ui-description>";
 
-    XmlIStream stream( input );
+    XmlReader reader( input );
 
     try {
-        for(XmlStreamIterator it = stream.current(); it != stream.end(); ++it)
+        for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
         {
             const Xml::Node& n = *it;
-    
+
             if( const Xml::StartElement* e = dynamic_cast<const Xml::StartElement*>(&n) )
             {
                 cerr << "StartElement: '" << e->name().narrow() << "'" << endl;

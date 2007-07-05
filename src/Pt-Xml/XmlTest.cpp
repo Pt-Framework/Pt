@@ -47,9 +47,9 @@ class XmlTest : public Pt::Unit::TestSuite
             this->registerMethod("ElementWithContent" , *this, &XmlTest::ElementWithContent);
             this->registerMethod("DefaultEntities" , *this, &XmlTest::DefaultEntities);
             this->registerMethod("AttributeWithSimpleText" , *this, &XmlTest::AttributeWithSimpleText);
-            this->registerMethod("AttributeWithUTF8" , *this, &XmlTest::AttributeWithUTF8);                  
-            this->registerMethod("MultipleAttributesIteration" , *this, &XmlTest::MultipleAttributesIteration);    
-            //this->registerMethod("CDATA " , *this, &XmlTest::CDATA );           
+            this->registerMethod("AttributeWithUTF8" , *this, &XmlTest::AttributeWithUTF8);
+            this->registerMethod("MultipleAttributesIteration" , *this, &XmlTest::MultipleAttributesIteration);
+            //this->registerMethod("CDATA " , *this, &XmlTest::CDATA );
             //CPPUNIT_TEST( testDoctypeDeclaration );
 
             //CPPUNIT_TEST( testTagMissingCloseTag );
@@ -82,7 +82,7 @@ protected:
     void InvalidTag1();
     void InvalidTag2();
 	void ElementWithContent();
-	
+
 	void testTagMissingCloseTag();
 	void testErrorDoubleCloseCharacter();
 	void testErrorDoubleOpenCharacter1();
@@ -116,7 +116,7 @@ void XmlTest::MissingXmlDeclaration()
 	input << "<a/>";
 
     try {
-        XmlIStream stream(input);
+        XmlReader reader(input);
         PT_UNIT_ASSERT_MSG(false, "Expected exception when xml declaration is missing");
     }
     catch(...)
@@ -130,9 +130,9 @@ void XmlTest::EmptyDocument()
 	stringstream input;
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& n = *it;
 
 	PT_UNIT_ASSERT(n.type() == Node::EndDocument);
@@ -145,9 +145,9 @@ void XmlTest::DoctypeDeclaration()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!DOCTYPE ressourcen SYSTEM \"ressourcen.dtd\">";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& docTypeNode = *it;
 
 	PT_UNIT_ASSERT(docTypeNode.type() == Node::DocType);
@@ -166,9 +166,9 @@ void XmlTest::EmptyElementTag()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement != 0);
@@ -192,10 +192,10 @@ void XmlTest::InvalidTag1()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
 	// Expecting exception because empty tags are not allowed.
-	PT_UNIT_ASSERT_THROW(stream.current(), std::exception);
+	PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
 
@@ -205,10 +205,10 @@ void XmlTest::InvalidTag2()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "</>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
 	// Expecting exception because empty tags are not allowed.
-    PT_UNIT_ASSERT_THROW(stream.current(), std::exception);
+    PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
 }
 
 
@@ -218,9 +218,9 @@ void XmlTest::ElementWithContent()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a>b</a>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	// <a>
@@ -258,9 +258,9 @@ void XmlTest::testTagMissingCloseTag()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a><b></a>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNodeA = *it;
 
 
@@ -299,9 +299,9 @@ void XmlTest::testErrorDoubleCloseCharacter()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a>>b</a>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNodeA = *it;
 
 
@@ -321,7 +321,7 @@ void XmlTest::testErrorDoubleOpenCharacter1()
 	input << "<<a>b</a>";
 
 	// An exception has to happen as "<<a>" is not valid XML.
-	//PT_UNIT_ASSERT_THROW({ XmlIStream stream( input ); XmlStreamIterator it = stream.current(); }, LogicError);
+	//PT_UNIT_ASSERT_THROW({ XmlReader reader( input ); XmlReader::Iterator it = reader.current(); }, LogicError);
 }
 
 
@@ -332,7 +332,7 @@ void XmlTest::testErrorDoubleOpenCharacter2()
 	input << "<ab<cd>>";
 
 	// An exception has to happen as "<ab<cd>>" is not valid XML.
-	//PT_UNIT_ASSERT_THROW({ XmlIStream stream( input ); XmlStreamIterator it = stream.current(); }, LogicError);
+	//PT_UNIT_ASSERT_THROW({ XmlReader reader( input ); XmlReader::Iterator it = reader.current(); }, LogicError);
 }
 
 
@@ -342,9 +342,9 @@ void XmlTest::testErrorMissingAttributeValue1()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a blub/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	//PT_UNIT_ASSERT_THROW(stream.current(), LogicError);
+	//PT_UNIT_ASSERT_THROW(reader.current(), LogicError);
 }
 
 
@@ -354,9 +354,9 @@ void XmlTest::testErrorMissingAttributeValue2()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a blub=/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	//PT_UNIT_ASSERT_THROW(stream.current(), LogicError);
+	//PT_UNIT_ASSERT_THROW(reader.current(), LogicError);
 }
 
 
@@ -366,9 +366,9 @@ void XmlTest::testErrorMissingAttributeValue3()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a blub=\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	//PT_UNIT_ASSERT_THROW(stream.current(), LogicError);
+	//PT_UNIT_ASSERT_THROW(reader.current(), LogicError);
 }
 
 
@@ -378,12 +378,12 @@ void XmlTest::testErrorIncorrectAttribute()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a blub=bla=\"b\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 
 	// TODO Aktuell wird hier fälschlicherweise ein Attribut "blub" mit dem Wert "b" gelesen.
-	//PT_UNIT_ASSERT_THROW(stream.current(), LogicError);
+	//PT_UNIT_ASSERT_THROW(reader.current(), LogicError);
 }
 
 
@@ -393,9 +393,9 @@ void XmlTest::testEmptyAttribute()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a b=\"\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement);
@@ -412,9 +412,9 @@ void XmlTest::AttributeWithSimpleText()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a b=\"abcdefghijklmnopqrstuvwxyz\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement);
@@ -434,9 +434,9 @@ void XmlTest::AttributeWithUTF8()
 	input << "<a b=\"" << (char)0xce << (char)0xba << (char)0xe1 << (char)0xbd << (char)0xb9 << (char)0xcf <<
 	                      (char)0x83 << (char)0xce << (char)0xbc << (char)0xce << (char)0xb5 << "\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement);
@@ -457,9 +457,9 @@ void XmlTest::MultipleAttributesIteration()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a b=\"123\" c=\"456\" d=\"789\"/>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement);
@@ -506,9 +506,9 @@ void XmlTest::testProcessingInstructions()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<?xml-stylesheet type=\"text/css\" href=\"styles.css\"?>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& processingInstructionNode = *it;
 
 	PT_UNIT_ASSERT(processingInstructionNode.type() == Node::ProcessingInstruction);
@@ -524,9 +524,9 @@ void XmlTest::CDATA()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<![CDATA[<Element>dieses Element wird &gt; nur als Zeichenfolge ausgegeben</Element>]]>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& cDataNode = *it;
 
 	PT_UNIT_ASSERT(cDataNode.type() == Node::CData);
@@ -547,9 +547,9 @@ void XmlTest::DefaultEntities()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<a>&lt;&gt;&amp;&quot;&apos;&#1234;</a>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNodeA = *it;
 
 	PT_UNIT_ASSERT(startNodeA.type() == Node::StartElement);
@@ -571,9 +571,9 @@ void XmlTest::testComments1()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!--a-->";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& commentNode = *it;
 
 	const Xml::Comment* comment = dynamic_cast<const Xml::Comment*>(&commentNode);
@@ -592,9 +592,9 @@ void XmlTest::testComments2()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!--a>-->";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& commentNode = *it;
 
 	const Xml::Comment* comment = dynamic_cast<const Xml::Comment*>(&commentNode);
@@ -613,9 +613,9 @@ void XmlTest::testComments3()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!--a > </a> -->";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& commentNode = *it;
 
 	const Xml::Comment* comment = dynamic_cast<const Xml::Comment*>(&commentNode);
@@ -634,9 +634,9 @@ void XmlTest::testComments4()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!---->";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& commentNode = *it;
 
 	const Xml::Comment* comment = dynamic_cast<const Xml::Comment*>(&commentNode);
@@ -655,9 +655,9 @@ void XmlTest::testComments5()
 	input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	input << "<!-- <!-- ab --><a>";
 
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
-	XmlStreamIterator it = stream.current();
+	XmlReader::Iterator it = reader.current();
 	const Xml::Node& commentNode = *it;
 
 	const Xml::Comment* comment = dynamic_cast<const Xml::Comment*>(&commentNode);
@@ -689,14 +689,14 @@ void XmlTest::testPerf()
 	}
 
 	cerr << "PrefTest: ";
-	XmlIStream stream( input );
+	XmlReader reader( input );
 
 	//clock_t begin = clock();
 	Pt::System::Clock c;
 	c.start();
 
 
-	for(XmlStreamIterator it = stream.current(); it != stream.end(); ++it)
+	for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
 	{}
 	Pt::System::TimeValue v = c.stop();
 	cerr << "seconds: " << v.seconds() << "   ms: " << (v.microSeconds() /1000) << endl;

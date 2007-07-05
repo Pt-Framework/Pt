@@ -25,7 +25,7 @@ namespace Pt {
 namespace Xml {
 
 
-XmlIStream::XmlIStream(std::istream& is)
+XmlReader::XmlReader(std::istream& is)
 : _textBuffer(0)
 , _buffer(0)
 , _tokenMax(512)
@@ -37,7 +37,7 @@ XmlIStream::XmlIStream(std::istream& is)
 }
 
 
-XmlIStream::XmlIStream(Text::TextStream& is)
+XmlReader::XmlReader(Text::TextStream& is)
 : _textBuffer(is.rdbuf())
 , _buffer( 0 )
 , _tokenMax(512)
@@ -46,7 +46,7 @@ XmlIStream::XmlIStream(Text::TextStream& is)
 }
 
 
-void XmlIStream::init()
+void XmlReader::init()
 {
     const std::char_traits<Pt::Char>::int_type eof = std::char_traits<Pt::Char>::eof();
 
@@ -77,7 +77,7 @@ void XmlIStream::init()
 }
 
 
-XmlIStream::~XmlIStream()
+XmlReader::~XmlReader()
 {
     while( !_nodeBuffer.empty() )
     {
@@ -89,19 +89,19 @@ XmlIStream::~XmlIStream()
 }
 
 
-XmlStreamIterator XmlIStream::current()
+XmlReader::Iterator XmlReader::current()
 {
-    return XmlStreamIterator(*this);
+    return Iterator(*this);
 }
 
 
-XmlStreamIterator XmlIStream::end() const
+XmlReader::Iterator XmlReader::end() const
 {
-    return XmlStreamIterator();
+    return Iterator();
 }
 
 
-const Node& XmlIStream::get()
+const Node& XmlReader::get()
 {
     if( _nodeBuffer.empty() )
         return this->next();
@@ -110,7 +110,7 @@ const Node& XmlIStream::get()
 }
 
 
-const Node& XmlIStream::next()
+const Node& XmlReader::next()
 {
     if( _nodeBuffer.size() > 0 )
     {
@@ -173,7 +173,7 @@ const Node& XmlIStream::next()
 }
 
 
-XmlIStream& XmlIStream::operator>>(StartElement& to)
+XmlReader& XmlReader::operator>>(StartElement& to)
 {
     // check if there is a node in the buffer
     if( !_nodeBuffer.empty() )
@@ -204,7 +204,7 @@ XmlIStream& XmlIStream::operator>>(StartElement& to)
 }
 
 
-XmlIStream& XmlIStream::operator>>(EndElement& to)
+XmlReader& XmlReader::operator>>(EndElement& to)
 {
     // check if there is a node in the buffer
     if( !_nodeBuffer.empty() )
@@ -232,7 +232,7 @@ XmlIStream& XmlIStream::operator>>(EndElement& to)
 }
 
 
-XmlIStream& XmlIStream::operator>>(Characters& to)
+XmlReader& XmlReader::operator>>(Characters& to)
 {
     // check if there is a node in the buffer
     if( !_nodeBuffer.empty() )
@@ -257,7 +257,7 @@ XmlIStream& XmlIStream::operator>>(Characters& to)
 }
 
 
-void XmlIStream::onDocType()
+void XmlReader::onDocType()
 {
     Char buffer[7];
     _textBuffer->sgetn(buffer, 7);
@@ -274,7 +274,7 @@ void XmlIStream::onDocType()
 }
 
 
-void XmlIStream::onStartElement()
+void XmlReader::onStartElement()
 {
     std::auto_ptr<Xml::StartElement> elem( new Xml::StartElement() );
     bool isStandalone = this->parseStartElement(*elem);
@@ -290,7 +290,7 @@ void XmlIStream::onStartElement()
 }
 
 
-void XmlIStream::onEndElement()
+void XmlReader::onEndElement()
 {
     std::auto_ptr<Xml::EndElement> elem( new Xml::EndElement() );
     this->parseEndElement(*elem);
@@ -298,7 +298,7 @@ void XmlIStream::onEndElement()
 }
 
 
-void XmlIStream::onTextElement()
+void XmlReader::onTextElement()
 {
     std::auto_ptr<Xml::Characters> elem( new Xml::Characters() );
     this->parseTextElement(*elem);
@@ -306,7 +306,7 @@ void XmlIStream::onTextElement()
 }
 
 
-void XmlIStream::onComment()
+void XmlReader::onComment()
 {
     static const String commentEnd(L">");
 
@@ -317,7 +317,7 @@ void XmlIStream::onComment()
 }
 
 
-bool XmlIStream::parseAttribute(String& name, String& value)
+bool XmlReader::parseAttribute(String& name, String& value)
 {
     typedef std::char_traits<Pt::Char> CharTraits;
     static const uint32_t eof = CharTraits::eof();
@@ -361,7 +361,7 @@ bool XmlIStream::parseAttribute(String& name, String& value)
 
 
 
-bool XmlIStream::parseStartElement(StartElement& to)
+bool XmlReader::parseStartElement(StartElement& to)
 {
     bool isStandalone = false;
 
@@ -396,7 +396,7 @@ bool XmlIStream::parseStartElement(StartElement& to)
 }
 
 
-void XmlIStream::parseEndElement(EndElement& to)
+void XmlReader::parseEndElement(EndElement& to)
 {
     static const String endElementBegin(L">/ \t");
 
@@ -413,7 +413,7 @@ void XmlIStream::parseEndElement(EndElement& to)
 }
 
 
-void XmlIStream::parseTextElement(Characters& to)
+void XmlReader::parseTextElement(Characters& to)
 {
     static const String textElementEnd(L"<");
     this->getUntil(to.content(), textElementEnd);
@@ -422,7 +422,7 @@ void XmlIStream::parseTextElement(Characters& to)
 
 
 /*
-const Char* XmlIStream::refill(const Char* current)
+const Char* XmlReader::refill(const Char* current)
 {
     const std::char_traits<Pt::Char>::int_type eof = std::char_traits<Pt::Char>::eof();
 
@@ -440,7 +440,7 @@ const Char* XmlIStream::refill(const Char* current)
 }
 */
 
-void XmlIStream::findOf(const String& str)
+void XmlReader::findOf(const String& str)
 {
     typedef std::char_traits<Pt::Char> CharTraits;
     const Char eof = CharTraits::to_char_type( CharTraits::eof() );
@@ -452,7 +452,7 @@ void XmlIStream::findOf(const String& str)
 }
 
 
-Pt::Char XmlIStream::findNotOf(const String& str)
+Pt::Char XmlReader::findNotOf(const String& str)
 {
     Pt::Char last = _textBuffer->sgetc();
     typedef std::char_traits<Pt::Char> CharTraits;
@@ -471,7 +471,7 @@ Pt::Char XmlIStream::findNotOf(const String& str)
 }
 
 
-void XmlIStream::getUntil(String& buffer, const String& stop)
+void XmlReader::getUntil(String& buffer, const String& stop)
 {
 /*
     const Char* current = _textBuffer->in_begin();
@@ -528,7 +528,7 @@ void XmlIStream::getUntil(String& buffer, const String& stop)
 }
 
 
-void XmlIStream::resolveEntities(String& str)
+void XmlReader::resolveEntities(String& str)
 {
     size_t entityBegin = 0;
     size_t entityEnd = 0;
