@@ -60,7 +60,7 @@ namespace Xml {
      *
      * @see Node
      */
-    class PT_XML_API XmlIStream
+    class PT_XML_API XmlReader
     {
         public:
             static const EndDocument& documentEnd()
@@ -69,16 +69,64 @@ namespace Xml {
                 return _enddoc;
             }
 
+            class Iterator
+            {
+                public:
+                    Iterator()
+                    : _stream(0), _node( &XmlReader::documentEnd() )
+                    { }
+
+                    Iterator(XmlReader& xis)
+                    : _stream(&xis), _node(0)
+                    { _node = &_stream->get(); }
+
+                    Iterator(const Iterator& it)
+                    : _stream(it._stream), _node(it._node)
+                    { }
+
+                    ~Iterator()
+                    { }
+
+                    Iterator& operator=(const Iterator& it)
+                    {
+                        _stream = it._stream;
+                        _node = it._node;
+                        return *this;
+                    }
+
+                    inline const Node& operator*() const
+                    { return *_node; }
+
+                    inline const Node* operator->() const
+                    { return _node; }
+
+                    Iterator& operator++()
+                    {
+                        _node = &_stream->next();
+                        return *this;
+                    }
+
+                    inline bool operator==(const Iterator& it) const
+                    { return _node == it._node; }
+
+                    inline bool operator!=(const Iterator& it) const
+                    { return _node != it._node; }
+
+                private:
+                    XmlReader* _stream;
+                    const Node* _node;
+            };
+
         public:
-            XmlIStream(std::istream& is);
+            XmlReader(std::istream& is);
 
-            XmlIStream(Text::TextStream& is);
+            XmlReader(Text::TextStream& is);
 
-            ~XmlIStream();
+            ~XmlReader();
 
-            XmlStreamIterator current();
+            Iterator current();
 
-            XmlStreamIterator end() const;
+            Iterator end() const;
 
             //! @brief Get current element
             const Node& get();
@@ -86,11 +134,11 @@ namespace Xml {
             //! @brief Get next element from stream
             const Node& next();
 
-            XmlIStream& operator>>(StartElement& se);
+            XmlReader& operator>>(StartElement& se);
 
-            XmlIStream& operator>>(EndElement& e);
+            XmlReader& operator>>(EndElement& e);
 
-            XmlIStream& operator>>(Characters& e);
+            XmlReader& operator>>(Characters& e);
 
         private:
             void init();
@@ -131,50 +179,7 @@ namespace Xml {
     };
 
 
-    class XmlStreamIterator
-    {
-        public:
-            XmlStreamIterator()
-            : _stream(0), _node( &XmlIStream::documentEnd() )
-            { }
 
-            XmlStreamIterator(XmlIStream& xis)
-            : _stream(&xis), _node(0)
-            { _node = &_stream->get(); }
-
-            XmlStreamIterator(const XmlStreamIterator& it)
-            : _stream(it._stream), _node(it._node)
-            { }
-
-            ~XmlStreamIterator()
-            { }
-
-            XmlStreamIterator& operator=(const XmlStreamIterator& it)
-            {
-                _stream = it._stream;
-                _node = it._node;
-                return *this;
-            }
-
-            inline const Node& operator*() const
-            { return *_node; }
-
-            XmlStreamIterator& operator++()
-            {
-                _node = &_stream->next();
-                return *this;
-            }
-
-            inline bool operator==(const XmlStreamIterator& it) const
-            { return _node == it._node; }
-
-            inline bool operator!=(const XmlStreamIterator& it) const
-            { return _node != it._node; }
-
-        private:
-            XmlIStream* _stream;
-            const Node* _node;
-    };
 
 }
 

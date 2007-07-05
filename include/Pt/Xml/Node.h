@@ -30,7 +30,7 @@ namespace Pt {
             public:
                 enum Type {
                     //! Unknown Node type (may not currently be supported)
-                    Unknown,
+                    Unknown = 0,
                     //! Xml declaration (see class XmlDeclaration)
                     XmlDeclaration,
                     //! Doctype (see class DocType)
