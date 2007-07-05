@@ -18,13 +18,13 @@
 namespace Pt {
 
     namespace Math {
-    
+
         //! Natural const
         static const double PI      = 3.14159265358979323846; // pi
         static const double PI_2    = 6.28318530717958647692; // 2*pi
         static const double PI_HALF = 1.57079632679489661923; // pi/2
-        static const double PI_QUAT    = 0.78539816339744830961; // pi/4
-        static const double PI_180    = 0.01745329251994329576; // pi/180
+        static const double PI_QUAT = 0.78539816339744830961; // pi/4
+        static const double PI_180  = 0.01745329251994329576; // pi/180
         static const double PI_SQR  = 9.86960440108935861883449099987615114f; //pi^2
 
 
@@ -33,7 +33,7 @@ namespace Pt {
         {
             return (angle * PI) / 180.0;
         }
-    
+
         //! Converts radiant [0, 2*pi] to degree [0, 360]
         inline double radToDeg(double angle)
         {
@@ -41,10 +41,10 @@ namespace Pt {
         }
 
         // accuracy for equal comparison
-		static const double Eps9	= 10e-9; 
-        static const double Eps6	= 10e-6;
-        static const double Eps3	= 10e-3;
-        static const double Eps1	= 10e-1;
+        static const double Eps9    = 10e-9;
+        static const double Eps6    = 10e-6;
+        static const double Eps3    = 10e-3;
+        static const double Eps1    = 10e-1;
 
         template<typename T>
         inline bool equal(const T& val, const T& val2, const double& eps)
@@ -52,13 +52,13 @@ namespace Pt {
             double diff = fabs(val - val2);
             return diff < eps;
         }
-        
+
         /**
          * @brief Fast sine calculation, not as precise as sin(theta)
          *
          * theta is required in rad [0, 2*PI]
          *
-         * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015 
+         * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
          *
          * In range [0, 2*PI] max. abs error in fast mode is 0.06
          */
@@ -95,13 +95,13 @@ namespace Pt {
          *
          * theta is required in rad [0, 2*PI]
          *
-         * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015 
+         * In range [0, 2*PI] max. abs error in fast accurate mode is 0.0015
          *
          * In range [0, 2*PI] max. abs error in fast mode is 0.06
          */
         template <typename T, bool accurate>
         T fastCos(const T& theta)
-        {   
+        {
             assert(theta <= PI_2);
             assert(theta >= 0);
 
@@ -114,7 +114,7 @@ namespace Pt {
 
             return fastSin<T, accurate>(sinTheta);
         }
-        
+
 
         inline double hypot(double x, double y)
         {
@@ -124,13 +124,16 @@ namespace Pt {
                 return ::hypot(x, y);
             #endif
         }
-        
-        inline int round(double d) 
-        {  return static_cast<int>(d<0?d-.5:d+.5);  }
 
-  inline Point getCenterOfLine( const Point& begin, const Point& end )
+        inline int round(double d)
         {
-            return (begin + (( end - begin ) * 0.5) );
+            return static_cast<int>(d<0 ? d-.5 : d+.5);
+        }
+
+        template <typename T>
+        inline BasicPoint<T> getCenterOfLine( const BasicPoint<T>& begin, const BasicPoint<T>& end )
+        {
+            return (begin + ( (end - begin) * 0.5) );
         }
 
 
