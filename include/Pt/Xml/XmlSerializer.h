@@ -20,7 +20,11 @@ namespace Xml {
     {
         public:
             XmlDeserializer(XmlReader& reader);
-
+            
+            XmlDeserializer(std::istream& is);
+            
+            ~XmlDeserializer();
+                        
             void deserialize(SerializationData& data);
 
         protected:
@@ -32,6 +36,7 @@ namespace Xml {
         
         private:
             XmlReader* _reader;
+            XmlReader* _deleteMe;
             typedef void (XmlDeserializer::*ProcessNode)(const Node&);
             ProcessNode _processNode;
             SerializationData* _current;
