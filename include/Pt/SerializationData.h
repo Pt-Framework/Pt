@@ -53,7 +53,7 @@ class PT_API SerializationNode
 
         void setName(const Pt::String& name)
         { _name = name; }
-        
+
         virtual SerializationData* parent()
         { return _parent; }
 
@@ -87,7 +87,7 @@ class PT_API SerializationNode
         : _parent(parent)
         , _name(name)
         {}
-        
+
         virtual const SerializationEntry* _toEntry() const = 0;
 
         virtual SerializationEntry* _toEntry() = 0;
@@ -95,10 +95,10 @@ class PT_API SerializationNode
         virtual const SerializationData* _toData() const = 0;
 
         virtual SerializationData* _toData() = 0;
-        
+
     private:
-        Pt::String _name;
         SerializationData* _parent;
+        Pt::String _name;
 };
 
 
@@ -108,7 +108,7 @@ class PT_API SerializationEntry : public SerializationNode
         SerializationEntry(SerializationData& parent, const Pt::String& name);
 
         SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value);
-        
+
         virtual ~SerializationEntry()
         {}
 
@@ -127,7 +127,7 @@ class PT_API SerializationEntry : public SerializationNode
 
         virtual SerializationData* _toData()
         { return 0; }
-        
+
     private:
         Pt::Variant _value;
 };
@@ -137,18 +137,18 @@ class PT_API SerializationData : public SerializationNode
 {
     public:
         typedef std::multimap<Pt::String, SerializationNode*> Nodes;
-    
+
     public: 
         class Iterator
         {
             public:
                 Iterator()
                 {}
-                
+
                 Iterator(Nodes::iterator it)
                 : _it( it )
                 {}
-                
+
                 Iterator& operator++()
                 {
                     ++_it;
@@ -173,7 +173,7 @@ class PT_API SerializationData : public SerializationNode
             public:
                 ConstIterator()
                 {}
-                
+
                 ConstIterator(Nodes::const_iterator it)
                 : _it( it )
                 {}
@@ -201,7 +201,7 @@ class PT_API SerializationData : public SerializationNode
         SerializationData(SerializationData* parent = 0);
 
         SerializationData(SerializationData* parent, const Pt::String& name);
-        
+
         virtual ~SerializationData();
 
         SerializationData& addData(const Pt::String& name);
