@@ -168,6 +168,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Char.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CharTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\codecvt.cpp"
 				>
 			</File>
@@ -201,6 +209,10 @@
 			</File>
 			<File
 				RelativePath=".\Delegate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DelegateTest.cpp"
 				>
 			</File>
 			<File
@@ -240,6 +252,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SerializationData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SerializationTest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SettingsTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Signal.cpp"
 				>
 			</File>
@@ -256,6 +280,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\StringStream.cpp"
 				>
 			</File>
@@ -264,7 +292,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StringTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Time.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Timespan.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Timestamp.cpp"
 				>
 			</File>
 			<File
@@ -314,6 +354,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\Archive.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\ArchiveReader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\ArchiveWriter.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Arg.h"
 				>
 			</File>
@@ -359,6 +411,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\Callable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\CallableInfo.h"
 				>
 			</File>
 			<File
@@ -438,7 +494,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\MemberInfo.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\Method.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\MethodInfo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\MethodInfoBase.h"
 				>
 			</File>
 			<File
@@ -454,7 +522,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\Pt\PropertyInfo.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\Pt\PropertyProxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\PropertyValue.h"
 				>
 			</File>
 			<File
@@ -467,6 +543,14 @@
 			</File>
 			<File
 				RelativePath="..\..\include\Pt\Reflectable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\SerializationData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\Pt\Settings.h"
 				>
 			</File>
 			<File

@@ -19,6 +19,7 @@
 #undef PT_XML_API_EXPORT
 
 #include "Pt/Xml/XmlSerializer.h"
+#include "Pt/Xml/XmlDeserializer.h"
 #include "Pt/Xml/XmlReader.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -43,62 +44,33 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
     protected:
         void Date()
         {
-            Pt::Date date(1,1,1);
-            //Pt::Xml::XmlSerializer ser;
+            Pt::Date date1(1889, 4, 20);
+            std::stringstream output;
+            Pt::Xml::XmlSerializer ser(output);
+            ser.serialize(date1, L"date1");
 
-            std::stringstream input;
-            input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-            input << "<date>";
-            input << "    <year>2007</year>";
-            input << "    <month>7</month>";
-            input << "    <day>5</day>";
-            input << "</date>";
+            Pt::Date date2(1, 1, 1);
+            std::stringstream input( output.str() );
+            Pt::Xml::XmlDeserializer deser(input);
+            deser.deserialize(date2);
 
-            Pt::Xml::XmlReader reader(input);
-            Pt::Xml::XmlDeserializer deser(reader);
-            Pt::ObjectData data;
-            deser.deserialize(data);
-            
-            const Pt::SerializationData* subdata = data.getData(L"date");
-            PT_UNIT_ASSERT(subdata);
-            
-            *subdata >> date;
-            PT_UNIT_ASSERT(date == Pt::Date(2007, 7, 5));
+            PT_UNIT_ASSERT( date1 == date2);
         }
 
         void DateTime()
         {
-            Pt::DateTime datetime;
-            //Pt::Xml::XmlSerializer ser;
+            Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
+            std::stringstream output;
+            Pt::Xml::XmlSerializer ser(output);
+            ser.serialize(date1, L"date1");
 
-            std::stringstream input;
-            input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-            input << "<dateTime>";
-            input << "    <date>";
-            input << "        <year>2007</year>";
-            input << "        <month>7</month>";
-            input << "        <day>5</day>";
-            input << "    </date>";           
-            input << "    <time>";
-            input << "        <hour>20</hour>";
-            input << "        <minute>7</minute>";
-            input << "        <second>5</second>";
-            input << "        <millisec>1</millisec>";
-            input << "    </time>"; 
-            input << "</dateTime>";
+            Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
+            std::stringstream input( output.str() );
+            Pt::Xml::XmlDeserializer deser(input);
+            deser.deserialize(date2);
 
-            Pt::Xml::XmlReader reader(input);
-            Pt::Xml::XmlDeserializer deser(reader);
-            Pt::ObjectData data;
-            deser.deserialize(data);
-            
-            const Pt::SerializationData* subdata = data.getData(L"dateTime");
-            PT_UNIT_ASSERT(subdata);
-
-            *subdata >> datetime;
-            PT_UNIT_ASSERT(datetime == Pt::DateTime(2007, 7, 5, 20, 7, 5, 1));
+            PT_UNIT_ASSERT( date1 == date2);
         }
 };
 
 Pt::Unit::RegisterTest<XmlSerializerTest> register_XmlSerializerTest;
-

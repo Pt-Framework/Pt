@@ -16,8 +16,10 @@ SharedLibrary Pt-Xml : CData.cpp
                        Resolver.cpp
                        StartElement.cpp
                        XmlDeclaration.cpp
+                       XmlDeserializer.cpp
                        XmlReader.cpp
                        XmlSerializer.cpp
+                       XmlWriter.cpp
                        ;
 SharedLibrary_LinkSharedLibraries Pt-Xml : Pt-Text Pt ;
 SharedLibrary_MakeLocate Pt-Xml : bin ;
@@ -30,6 +32,13 @@ PtUnitTest XmlTest : XmlTest.cpp ;
 Main_LinkSharedLibraries XmlTest : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
 Main_MakeLocate XmlTest : bin ;
 
+PtUnitTest XmlWriterTest : XmlWriterTest.cpp ;
+Main_LinkSharedLibraries XmlWriterTest : Pt-Xml Pt-Unit Pt-Text Pt ;
+Main_MakeLocate XmlWriterTest : bin ;
+
 PtUnitTest XmlSerializerTest : XmlSerializerTest.cpp ;
 Main_LinkSharedLibraries XmlSerializerTest : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
 Main_MakeLocate XmlSerializerTest : bin ;
+
+NotFile Pt-Xml-test ;
+Depends Pt-Xml-test : XmlSerializerTest ;

@@ -74,6 +74,19 @@ void XmlReader::init()
 
         start.append( 1, ch );
     }
+    
+    const String whitespace(L" \t\n\r");
+        
+    // read whitespace to root element
+    while( true )
+    {
+        Char ch = _textBuffer->sbumpc();
+        if( whitespace.find(ch) == Pt::String::npos )
+        {
+            _textBuffer->sputbackc(ch);
+            break;
+        }
+    }
 }
 
 

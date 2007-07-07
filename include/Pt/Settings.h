@@ -32,15 +32,15 @@
 
 namespace Pt {
 
-class Settings : public ObjectData
+class Settings : public SerializationData
 {
     public:
         Settings(Settings* parent = 0)
-        : ObjectData(parent)
+        : SerializationData(parent)
         {}
 
         Settings(Settings* parent, const Pt::String& name)
-        : ObjectData(parent, name)
+        : SerializationData(parent, name)
         { }
 
         template <typename T>
@@ -55,15 +55,15 @@ class Settings : public ObjectData
 };
 
 
-class SettingsEntry : public ObjectEntry
+class SettingsEntry : public SerializationEntry
 {
     public:
         SettingsEntry(Settings& parent, const Pt::String& name)
-        : ObjectEntry(parent, name)
+        : SerializationEntry(parent, name)
         {}
 
         SettingsEntry(Settings& parent, const Pt::String& name, const Pt::Variant& value)
-        : ObjectEntry(parent, name, value)
+        : SerializationEntry(parent, name, value)
         {}
 };
 

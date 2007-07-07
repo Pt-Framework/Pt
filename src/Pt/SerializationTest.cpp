@@ -48,7 +48,7 @@ class SerializationTest : public Pt::Unit::TestSuite
     protected:
         void ObjectDataTest()
         {
-            Pt::ObjectData data;
+            Pt::SerializationData data;
             data.addEntry(L"testEntry", Pt::Variant(1) );
             const Pt::Variant* entry = data.getEntry(L"testEntry");
 
@@ -58,7 +58,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Date()
         {
             Pt::Date date(2000, 10, 20);
-            Pt::ObjectData data;
+            Pt::SerializationData data;
             data << date;
 
             Pt::Date date2(1,1,1);
@@ -70,7 +70,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Time()
         {
             Pt::Time time(18, 40, 5, 1);
-            Pt::ObjectData data;
+            Pt::SerializationData data;
             data << time;
 
             Pt::Time time2;
@@ -82,7 +82,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void DateTime()
         {
             Pt::DateTime datetime(2000, 10, 20, 18, 40, 5, 1);
-            Pt::ObjectData data;
+            Pt::SerializationData data;
             data << datetime;
 
             Pt::DateTime datetime2;

@@ -3,44 +3,37 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <memory>
 
 namespace Pt {
     class SerializationData;
 
 namespace Xml {
-    class XmlReader;
-    class Node;
-
+    class XmlWriter;
+    
     class PT_XML_API XmlSerializer
     {
-
-    };
-
-    class PT_XML_API XmlDeserializer
-    {
         public:
-            XmlDeserializer(XmlReader& reader);
+            XmlSerializer(std::ostream& os);
             
-            XmlDeserializer(std::istream& is);
+            ~XmlSerializer();
             
-            ~XmlDeserializer();
-                        
-            void deserialize(SerializationData& data);
+            void putData(const SerializationData& data);
+
+            template <typename T>
+            void serialize(const T& t, const Pt::String& name)
+            {
+                SerializationData data(0, name);
+                data << t;
+                this->putData( data );
+            }
 
         protected:
-            void beginDocument(const Node& node);
-            void onStartElement(const Node& node);
-            void onWhitespace(const Node& node);
-            void onContent(const Node& node);
-            void onEndElement(const Node& node);
-        
+            void writeData(const SerializationData& data);
+
         private:
-            XmlReader* _reader;
-            XmlReader* _deleteMe;
-            typedef void (XmlDeserializer::*ProcessNode)(const Node&);
-            ProcessNode _processNode;
-            SerializationData* _current;
-            String _nodeName;
+            XmlWriter* _writer;
+            std::auto_ptr<XmlWriter> _deleter;
     };
 
 } // namespace Xml

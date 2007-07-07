@@ -13,59 +13,30 @@ NoSuchEntry::~NoSuchEntry() throw()
 }
 
 
-ObjectEntry::ObjectEntry(SerializationData& parent, const Pt::String& name)
-: _parentData(&parent)
-, _objectName(name)
+SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name)
+: SerializationNode(&parent, name)
+{}
+
+
+SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value)
+: SerializationNode(&parent, name)
+, _value(value)
+{}
+        
+
+SerializationData::SerializationData(SerializationData* parent)
+: SerializationNode(parent)
 {
 }
 
 
-ObjectEntry::ObjectEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value)
-: _parentData(&parent)
-, _objectName(name)
-, _objectValue(value)
+SerializationData::SerializationData(SerializationData* parent, const Pt::String& name)
+: SerializationNode(parent, name)
 {
 }
 
 
-SerializationData* ObjectEntry::_parent()
-{
-    return _parentData;
-}
-
-
-const SerializationData* ObjectEntry::_parent() const
-{
-    return _parentData;
-}
-
-
-const Pt::String& ObjectEntry::_name() const
-{
-    return _objectName;
-}
-
-
-const Pt::Variant& ObjectEntry::_value() const
-{
-    return _objectValue;
-}
-
-
-ObjectData::ObjectData(SerializationData* parent)
-: _parentData(parent)
-{
-}
-
-
-ObjectData::ObjectData(SerializationData* parent, const Pt::String& name)
-: _parentData(parent)
-, _objectName(name)
-{
-}
-
-
-ObjectData::~ObjectData()
+SerializationData::~SerializationData()
 {
     Nodes::const_iterator it;
     for(it = _nodes.begin(); it != _nodes.end(); ++it)
@@ -75,25 +46,7 @@ ObjectData::~ObjectData()
 }
 
 
-SerializationData* ObjectData::_parent()
-{
-    return _parentData;
-}
-
-
-const SerializationData* ObjectData::_parent() const
-{
-    return _parentData;
-}
-
-
-const Pt::String& ObjectData::_name() const
-{
-    return _objectName;
-}
-
-
-const SerializationNode* ObjectData::_getNode(const Pt::String& name) const
+const SerializationNode* SerializationData::getNode(const Pt::String& name) const
 {
     Nodes::const_iterator it = _nodes.find(name);
     if( it == _nodes.end() )
@@ -103,7 +56,7 @@ const SerializationNode* ObjectData::_getNode(const Pt::String& name) const
 }
 
 
-SerializationNode* ObjectData::_getNode(const Pt::String& name)
+SerializationNode* SerializationData::getNode(const Pt::String& name)
 {
     Nodes::iterator it = _nodes.find(name);
     if( it == _nodes.end() )
@@ -113,20 +66,50 @@ SerializationNode* ObjectData::_getNode(const Pt::String& name)
 }
 
 
-void ObjectData::_addEntry(const Pt::String& name, const Pt::Variant& value)
+void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
 {
-    ObjectEntry* e = new ObjectEntry(*this, name, value);
+    SerializationEntry* e = new SerializationEntry(*this, name, value);
     _nodes.insert( std::make_pair(name, e) );
 }
 
 
-ObjectData& ObjectData::_addData(const Pt::String& name)
+SerializationData& SerializationData::addData(const Pt::String& name)
 {
-    ObjectData* data = new ObjectData(this, name);
+    SerializationData* data = new SerializationData(this, name);
     _nodes.insert( std::make_pair(name, data) );
     return *data;
 }
 
+
+const SerializationData* SerializationData::getData(const Pt::String& name) const
+{
+    const SerializationNode* node = this->getNode(name);
+    if( node && node->toData() )
+        return node->toData();
+
+    return 0;
+}
+
+
+SerializationData* SerializationData::getData(const Pt::String& name)
+{
+    SerializationNode* node = this->getNode(name);
+    if( node && node->toData() )
+        return node->toData();
+
+    return 0;
+}
+
+
+const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
+{
+    const SerializationNode* node = this->getNode(name);
+
+    if( node && node->toEntry() )
+        return &( node->toEntry()->value() );
+
+    return 0;
+}
 
 
 } // namespace Pt
