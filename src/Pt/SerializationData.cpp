@@ -5,12 +5,11 @@ namespace Pt {
 
 NoSuchEntry::NoSuchEntry(const std::string& name, const SourceInfo& si)
 : std::logic_error("No entry named '" + name + "'" + si)
-{
-}
+{}
+
 
 NoSuchEntry::~NoSuchEntry() throw()
-{
-}
+{}
 
 
 SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name)
@@ -22,70 +21,45 @@ SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::Stri
 : SerializationNode(&parent, name)
 , _value(value)
 {}
-        
+
 
 SerializationData::SerializationData(SerializationData* parent)
 : SerializationNode(parent)
-{
-}
+{}
 
 
 SerializationData::SerializationData(SerializationData* parent, const Pt::String& name)
 : SerializationNode(parent, name)
-{
-}
+{}
 
 
 SerializationData::~SerializationData()
-{
-    Nodes::const_iterator it;
-    for(it = _nodes.begin(); it != _nodes.end(); ++it)
-    {
-        delete it->second;
-    }
-}
-
-
-const SerializationNode* SerializationData::getNode(const Pt::String& name) const
-{
-    Nodes::const_iterator it = _nodes.find(name);
-    if( it == _nodes.end() )
-        return 0;
-
-    return it->second;
-}
-
-
-SerializationNode* SerializationData::getNode(const Pt::String& name)
-{
-    Nodes::iterator it = _nodes.find(name);
-    if( it == _nodes.end() )
-        return 0;
-
-    return it->second;
-}
+{}
 
 
 void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
 {
-    SerializationEntry* e = new SerializationEntry(*this, name, value);
-    _nodes.insert( std::make_pair(name, e) );
+    Entries::iterator it = std::upper_bound( _entries.begin(), _entries.end(), SerializationEntry(*this, name, value));
+    _entries.insert( it, SerializationEntry(*this, name, value) );
 }
 
 
 SerializationData& SerializationData::addData(const Pt::String& name)
 {
-    SerializationData* data = new SerializationData(this, name);
-    _nodes.insert( std::make_pair(name, data) );
-    return *data;
+    SerializationData data = SerializationData(this, name);
+    _subdata.push_back(data);
+    return _subdata.back();
 }
 
 
 const SerializationData* SerializationData::getData(const Pt::String& name) const
 {
-    const SerializationNode* node = this->getNode(name);
-    if( node && node->toData() )
-        return node->toData();
+    SubData::const_iterator it = _subdata.begin();
+    for(; it != _subdata.end(); ++it)
+    {
+        if(it->name() == name)
+            return &(*it);
+    }
 
     return 0;
 }
@@ -93,9 +67,12 @@ const SerializationData* SerializationData::getData(const Pt::String& name) cons
 
 SerializationData* SerializationData::getData(const Pt::String& name)
 {
-    SerializationNode* node = this->getNode(name);
-    if( node && node->toData() )
-        return node->toData();
+    SubData::iterator it = _subdata.begin();
+    for(; it != _subdata.end(); ++it)
+    {
+        if(it->name() == name)
+            return &(*it);
+    }
 
     return 0;
 }
@@ -103,12 +80,11 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 
 const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
 {
-    const SerializationNode* node = this->getNode(name);
+    Entries::const_iterator it = std::lower_bound( _entries.begin(), _entries.end(), name);
+    if( it == _entries.end() )
+        return 0;
 
-    if( node && node->toEntry() )
-        return &( node->toEntry()->value() );
-
-    return 0;
+    return &( it->value() );
 }
 
 

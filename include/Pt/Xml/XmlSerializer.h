@@ -10,14 +10,14 @@ namespace Pt {
 
 namespace Xml {
     class XmlWriter;
-    
+
     class PT_XML_API XmlSerializer
     {
         public:
             XmlSerializer(std::ostream& os);
-            
+
             ~XmlSerializer();
-            
+
             void putData(const SerializationData& data);
 
             template <typename T>

@@ -25,6 +25,7 @@
 #include <Pt/RefCounted.h>
 #include <Pt/SmartPtr.h>
 #include <map>
+#include <list>
 
 
 namespace Pt {
@@ -60,26 +61,17 @@ class PT_API SerializationNode
         virtual const SerializationData* parent() const
         { return _parent; }
 
-        const SerializationEntry* toEntry() const
-        { return this->_toEntry(); }
-
-        SerializationEntry* toEntry()
-        { return this->_toEntry(); }
-
-        const SerializationData* toData() const
-        { return this->_toData(); }
-
-        SerializationData* toData()
-        { return this->_toData(); }
-
         bool operator< (const SerializationNode& other) const
         { return this->name() < other.name(); }
+
+        bool operator< (const Pt::String& other) const
+        { return this->name() < other; }
 
         bool operator!= (const SerializationNode& other) const
         { return this->name() != other.name(); }
 
     protected:
-        SerializationNode(SerializationData* parent = 0)
+        explicit SerializationNode(SerializationData* parent = 0)
         : _parent(parent)
         {}
 
@@ -87,14 +79,6 @@ class PT_API SerializationNode
         : _parent(parent)
         , _name(name)
         {}
-
-        virtual const SerializationEntry* _toEntry() const = 0;
-
-        virtual SerializationEntry* _toEntry() = 0;
-
-        virtual const SerializationData* _toData() const = 0;
-
-        virtual SerializationData* _toData() = 0;
 
     private:
         SerializationData* _parent;
@@ -115,19 +99,6 @@ class PT_API SerializationEntry : public SerializationNode
         const Pt::Variant& value() const
         { return _value; }
 
-    protected:
-        virtual const SerializationEntry* _toEntry() const
-        { return this; }
-
-        virtual SerializationEntry* _toEntry()
-        { return this; }
-
-        virtual const SerializationData* _toData() const
-        { return 0; }
-
-        virtual SerializationData* _toData()
-        { return 0; }
-
     private:
         Pt::Variant _value;
 };
@@ -136,69 +107,11 @@ class PT_API SerializationEntry : public SerializationNode
 class PT_API SerializationData : public SerializationNode
 {
     public:
-        typedef std::multimap<Pt::String, SerializationNode*> Nodes;
-
-    public: 
-        class Iterator
-        {
-            public:
-                Iterator()
-                {}
-
-                Iterator(Nodes::iterator it)
-                : _it( it )
-                {}
-
-                Iterator& operator++()
-                {
-                    ++_it;
-                    return *this;
-                }
-
-                SerializationNode& operator*()
-                { return *_it->second; }
-
-                SerializationNode* operator->()
-                { return _it->second; }
-
-                bool operator!= (const Iterator& other) const
-                { return _it != other._it; }
-
-            private:
-                Nodes::iterator _it;
-        };
-
-        class ConstIterator
-        {
-            public:
-                ConstIterator()
-                {}
-
-                ConstIterator(Nodes::const_iterator it)
-                : _it( it )
-                {}
-
-                ConstIterator& operator++()
-                {
-                    ++_it;
-                    return *this;
-                }
-
-                SerializationNode& operator*() const
-                { return *_it->second; }
-
-                SerializationNode* operator->() const
-                { return _it->second; }
-
-                bool operator!= (const ConstIterator& other) const
-                { return _it != other._it; }
-
-            private:
-                Nodes::const_iterator _it;
-        };
+        typedef std::list<SerializationData> SubData;
+        typedef std::list<SerializationEntry> Entries;
 
     public:
-        SerializationData(SerializationData* parent = 0);
+        explicit SerializationData(SerializationData* parent = 0);
 
         SerializationData(SerializationData* parent, const Pt::String& name);
 
@@ -206,45 +119,29 @@ class PT_API SerializationData : public SerializationNode
 
         SerializationData& addData(const Pt::String& name);
 
-        void addEntry(const Pt::String& name, const Pt::Variant& value);
-
-        const SerializationNode* getNode(const Pt::String& name) const;
-
-        SerializationNode* getNode(const Pt::String& name);
-
         const SerializationData* getData(const Pt::String& name) const;
 
         SerializationData* getData(const Pt::String& name);
 
         const Pt::Variant* getEntry(const Pt::String& name) const;
 
-        Iterator begin()
-        { return Iterator( _nodes.begin() ); }
+        void addEntry(const Pt::String& name, const Pt::Variant& value);
 
-        Iterator end()
-        { return Iterator(_nodes.end() ); }
+        const Entries& entries() const
+        { return _entries; }
 
-        ConstIterator begin() const
-        { return ConstIterator( _nodes.begin() ); }
+        Entries& entries()
+        { return _entries; }
 
-        ConstIterator end() const
-        { return ConstIterator( _nodes.end() ); }
+        const SubData& subData() const
+        { return _subdata; }
 
-    protected:
-        virtual const SerializationEntry* _toEntry() const
-        { return 0; }
-
-        virtual SerializationEntry* _toEntry()
-        { return 0; }
-
-        virtual const SerializationData* _toData() const
-        { return this; }
-
-        virtual SerializationData* _toData()
-        { return this; }
+        SubData& subData()
+        { return _subdata; }
 
     private:
-        Nodes _nodes;
+        SubData _subdata;
+        Entries _entries;
 };
 
 } // namespace Pt

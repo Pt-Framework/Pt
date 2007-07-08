@@ -17,13 +17,13 @@ namespace Xml {
     {
         public:
             XmlDeserializer(XmlReader& reader);
-            
+
             XmlDeserializer(std::istream& is);
-            
+
             ~XmlDeserializer();
-                        
+
             void getData(SerializationData& data);
-        
+
             template <typename T>
             void deserialize(T& t)
             {
@@ -31,7 +31,7 @@ namespace Xml {
                 this->getData( data );
                 data >> t;
             }
-        
+
         protected:
             void beginDocument(const Node& node);
             void onRootElement(const Node& node);
@@ -39,7 +39,7 @@ namespace Xml {
             void onWhitespace(const Node& node);
             void onContent(const Node& node);
             void onEndElement(const Node& node);
-        
+
         private:
             XmlReader* _reader;
             std::auto_ptr<XmlReader> _deleter;
