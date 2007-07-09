@@ -36,7 +36,7 @@ namespace Db {
         is hold it the class. The destructor rolls the transaction back, when not explicitely
         commited or rolled back.
     */
-    class Transaction : private NonCopyable
+    class PT_DB_API Transaction : private NonCopyable
     {
         private:
             // \brief Actual connection to a database.
@@ -88,7 +88,7 @@ namespace Db {
             const Connection& getConnection() const  { return _DbConnection; }
 
             /** \brief Begin a transaction.
-            
+
                 Starts a new transaction. If there is an active transaction this
                 will be rolled back at first.
             */
@@ -103,8 +103,8 @@ namespace Db {
             }
 
             /** \brief Commit a transaction
-            
-                Commits the current transaction. If there is no active transaction 
+
+                Commits the current transaction. If there is no active transaction
                 nothing happens. The transaction state is reset.
             */
             void commit()
@@ -118,7 +118,7 @@ namespace Db {
 
             /** \brief Roll back a transaction.
 
-                Rolls back the current transaction. If there is no active 
+                Rolls back the current transaction. If there is no active
                 transaction nothing is done. The transaction state is reset.
             */
             void rollback()

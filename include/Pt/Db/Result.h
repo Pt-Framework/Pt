@@ -39,15 +39,15 @@ namespace Db {
     * Querys might return multiple rows, which are accessable here in arbitary
     * order.
     */
-    class Result
+    class PT_DB_API Result
     {
         public:
             //! \brief Iterator for iterating through the rows of this result.
             class ConstIterator;
-        
+
             //! \brief The size-type used for the Result class.
             typedef size_t size_type;
-            
+
             //! \brief The value-type contained in the result.
             typedef Row value_type;
 
@@ -58,9 +58,9 @@ namespace Db {
         public:
             //! \brief default constructor
             Result()  { }
-            
+
             /** \brief Construct a Result from an implemenataion.
-                
+
                 \param res The implementation of a specific result.
             */
             Result(IResult* res)
@@ -68,7 +68,7 @@ namespace Db {
             { }
 
             /**    \brief Returns a row at a given index.
-                
+
                 Returns a row at a given index, without range checking.
                 \param row_num Index of row.
                 \result Row at index.
@@ -76,7 +76,7 @@ namespace Db {
             Row getRow(size_type row_num) const;
 
             /**    \brief Returns a value at a given result index and row index.
-            
+
                 Returns a value at a given index, without range checking.
                 \param row_num Index of row.
                 \param field_num Index of value.
@@ -87,58 +87,58 @@ namespace Db {
             /** \brief Returns the number of rows of this result.
 
                 Returns the number of rows.
-                        
+
                 \return Number of rows in result.
             */
             size_type size() const           { return _result->size(); }
 
             /** \brief Test if this result-object has no rows.
-            
+
                 Returns true if this result-object has no rows.
-                
+
                 \return True if result is empty.
-            */    
+            */
             bool empty() const               { return size() == 0; }
 
             /**    \brief Return the number of columns in the result
-            
+
                 Returns the number of columns in the result.
-                
+
                 \return Number of columns.
             */
             size_type getFieldCount() const  { return _result->getFieldCount(); }
 
             /** \brief Returns a row at a given index.
-                
+
                 Returns a row at a given index, without range checking.
-                
+
                 \param row_num Specific row index.
                 \return Row at index.
             */
             Row operator[] (size_type row_num) const;
 
             /** \brief Returns an iterator to the first row.
-            
+
                 The returned iterator is a random access iterator, thus i can be used
-                with all algorithms of the stl.                
-                
+                with all algorithms of the stl.
+
                 \return Iterator to begin of result.
             */
             ConstIterator begin() const;
 
             /** \brief Returns an iterator past the last row.
-            
+
                 The returned iterator is a random access iterator, thus i can be used
                 with all algorithms of the stl.
-                
+
                 \return Iterator to end of result.
             */
             ConstIterator end() const;
 
             /** \brief Test if bound to a database-result.
-            
+
                 Returns true if not bound to a database-result.
-                
+
                 \return True if unbound.
             */
             bool operator!() const          { return !_result; }
@@ -146,9 +146,9 @@ namespace Db {
             //! \brief Returns the actual implementation-class.
             const IResult* getImpl() const  { return &*_result; }
     };
-    
+
     /** \brief Iterator to iterate over the rows of a result.
-    
+
         The ConstIterator can perform random access to the rows of a result.
         Offsets can be added and substracted and iterators can be compared
         by using relational operators such as < or >.
@@ -166,9 +166,9 @@ namespace Db {
             size_type _offset;
 
             /** \brief Moves this iterator to the row at a given offset.
-            
+
                 Set iterator to row at a given offset.
-            
+
                 \param off The new offset.
             */
             void setOffset(size_type off)
@@ -183,11 +183,11 @@ namespace Db {
             }
 
         public:
-        
+
             /**    \brief Construct a const iterator pointing to a row in a result.
-            
+
                 Construct a const iterator that points to a row at a given index in result.
-                
+
                 \param row Reference to a result.
                 \param offset Offset of a row.
             */
@@ -200,11 +200,11 @@ namespace Db {
             }
 
             /** \brief Test it two iterators are equal.
-            
+
                 Two iterators are equal if they occupy the same position.
                 The iterators should point to the same resultset. This is
                 not checked. Only the offsets are considered.
-            
+
                 \param it Other iterator.
                 \return True if equal.
             */
@@ -212,11 +212,11 @@ namespace Db {
             { return _offset == it._offset; }
 
             /** \brief Test it two iterators are not equal.
-            
+
                 Two iterators are not equal if they occupy different positions.
                 The iterators should point to the same resultset. This is
                 not checked. Only the offsets are considered.
-            
+
                 \param it Other iterator.
                 \return True if not equal.
             */
@@ -224,18 +224,18 @@ namespace Db {
             { return !operator== (it); }
 
             /** \brief Steps forward.
-            
+
                 Steps forward and returns new position.
-            
+
                 \return Iterator to next element.
             */
             ConstIterator& operator++()
             { setOffset(_offset + 1); return *this; }
 
             /** \brief Steps forward.
-            
+
                 Steps forward and returns old position.
-            
+
                 \return Iterator to old element.
             */
             ConstIterator operator++(int)
@@ -246,18 +246,18 @@ namespace Db {
             }
 
             /** \brief Steps backward.
-            
+
                 Steps backward and returns new position.
-            
+
                 \return Iterator to previous element.
             */
             ConstIterator operator--()
             { setOffset(_offset - 1); return *this; }
 
             /** \brief Steps backward.
-            
+
                 Steps backward and returns old position.
-            
+
                 \return Iterator to old element.
             */
             ConstIterator operator--(int)
@@ -268,27 +268,27 @@ namespace Db {
             }
 
             /** \brief Get current element.
-            
+
                 Provides read access to the current row in the result.
-            
+
                 \return Const reference to a row.
             */
             const_reference operator*() const
             { return _current; }
 
             /** \brief Get pointer to current element.
-            
+
                 Provides read access to the current row in the result.
-            
+
                 \return Const pointer to a row.
             */
             const_pointer operator->() const
             { return &_current; }
 
             /** \brief Steps n elements forward.
-            
+
                 Moves this iterator n elements forward and returns an iterator to new position.
-            
+
                 \param n Positions to move by.
                 \return Const iterator to new position.
             */
@@ -299,10 +299,10 @@ namespace Db {
             }
 
             /** \brief Get an iterator to the nth next row.
-            
+
                 Returns an iterator pointing to the nth row after the row
                 this iterator points to. Leaves this iterator unchanged.
-            
+
                 \param n Positions to move by.
                 \return Const iterator to new position.
             */
@@ -314,10 +314,10 @@ namespace Db {
             }
 
             /** \brief Steps n elements backward.
-            
-                Moves this iterator n elements backward and returns an 
+
+                Moves this iterator n elements backward and returns an
                 iterator to new position.
-            
+
                 \param n Positions to move by.
                 \return Const iterator to new position.
             */
@@ -328,10 +328,10 @@ namespace Db {
             }
 
             /** \brief Get an iterator to the nth previous row.
-            
+
                 Returns an iterator pointing to the nth row before the row
                 this iterator points to. Leaves this iterator unchanged.
-            
+
                 \param n Positions to move by.
                 \return Const iterator to new position.
             */
@@ -343,14 +343,14 @@ namespace Db {
             }
 
             /** Get the distance between two iterators
-            
+
                 Calculate the offset distance between this iterator and
                 a given one. The iterators should point to the same resultset. This is
                 not checked. Only the offsets are used.
-                
+
                 \param it Other iterator.
                 \return Distance.
-            
+
             */
             difference_type operator- (const ConstIterator& it) const
             { return _offset - it._offset; }
