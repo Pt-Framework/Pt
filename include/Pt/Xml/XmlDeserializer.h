@@ -3,6 +3,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <SerializationData.h>
 #include <memory>
 
 

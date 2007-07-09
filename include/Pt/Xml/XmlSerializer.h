@@ -3,10 +3,11 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <SerializationData.h>
 #include <memory>
 
+
 namespace Pt {
-    class SerializationData;
 
 namespace Xml {
     class XmlWriter;
