@@ -31,6 +31,8 @@
 
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <iterator>
 
 
 class SerializationTest : public Pt::Unit::TestSuite

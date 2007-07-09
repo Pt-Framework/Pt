@@ -1,6 +1,39 @@
 #include <Pt/SerializationData.h>
 
 
+namespace {
+
+template<typename ForwardIter, typename T>
+ForwardIter lowerBound(ForwardIter first, ForwardIter last, const T& val)
+{
+    typedef typename std::iterator_traits<ForwardIter>::value_type _ValueType;
+    typedef typename std::iterator_traits<ForwardIter>::difference_type _DistanceType;
+
+    _DistanceType len = distance(first, last);
+    _DistanceType half;
+    ForwardIter middle;
+
+    while(len > 0)
+    {
+        half = len >> 1;
+        middle = first;
+        advance(middle, half);
+        if (*middle < val)
+        {
+            first = middle;
+            ++first;
+            len = len - half - 1;
+        }
+        else
+            len = half;
+    }
+
+    return first;
+}
+
+}
+
+
 namespace Pt {
 
 NoSuchEntry::NoSuchEntry(const std::string& name, const SourceInfo& si)
@@ -77,7 +110,7 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 
 const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
 {
-    Entries::const_iterator it = std::lower_bound( _entries.begin(), _entries.end(), name);
+    Entries::const_iterator it = lowerBound( _entries.begin(), _entries.end(), name);
     if( it == _entries.end() )
         return 0;
 
