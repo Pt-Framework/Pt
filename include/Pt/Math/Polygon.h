@@ -27,6 +27,16 @@ public:
     BasicPolygon()
     {
     }
+
+    typename std::list< BasicPoint<PointT> >::const_iterator begin() const
+    {
+        return _points.begin();
+    }
+    
+    typename std::list< BasicPoint<PointT> >::const_iterator end() const
+    {
+        return _points.end();
+    }
     
     void addPoint(BasicPoint<PointT> point)
     {
@@ -71,6 +81,10 @@ public:
         return _points.size();
     }
     
+    void clear()
+    {
+        _points.clear();
+    }
     
     const std::list< BasicPoint<PointT> >& points() const
     {
