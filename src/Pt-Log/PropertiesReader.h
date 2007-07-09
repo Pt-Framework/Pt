@@ -31,7 +31,7 @@
 
 
 namespace Pt {
-
+/*
 class PropertiesReader : public ArchiveReader
 {
     public:
@@ -631,7 +631,7 @@ class PropertiesReader : public ArchiveReader
         typedef void (PropertiesReader::*Parse)(const Pt::Char&, ParseContext&);
         Parse _parse;
 };
-
+*/
 
 }
 

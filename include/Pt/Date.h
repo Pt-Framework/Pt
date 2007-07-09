@@ -252,9 +252,9 @@ PT_API const SerializationData& operator>>(const SerializationData& data, Date& 
 
 PT_API SerializationData& operator<<(SerializationData& data, const Date& d);
 
-PT_API const Archive& operator>>(const Archive& ar, Date& d);
+//PT_API const Archive& operator>>(const Archive& ar, Date& d);
 
-PT_API Archive& operator<<(Archive& ar, const Date& d);
+//PT_API Archive& operator<<(Archive& ar, const Date& d);
 
 inline Date operator+(const Date& d, int days)
 { return Date(d._julian + days); }

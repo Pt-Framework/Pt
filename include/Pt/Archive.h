@@ -30,7 +30,7 @@ namespace Pt {
 class Archive;
 class ArchiveValue;
 
-
+/*
 class ArchiveNode
 {
     public:
@@ -244,12 +244,12 @@ class Archive : public ArchiveNode
         virtual const ArchiveValue* _toValue() const
         { return 0; }
 
-        /** @brief Returns the begin of the Archive contents
+         @brief Returns the begin of the Archive contents
 
             The deriving class is suposed to return a pointer to its
             type of iterator created with new. If the archive is empty
             0 must be returned.
-        */
+
         virtual IteratorBase* _begin() const = 0;
 
         virtual const ArchiveNode* _getNode(const Pt::String& name) const = 0;
@@ -259,7 +259,7 @@ class Archive : public ArchiveNode
         virtual Archive& _addArchive(const Pt::String& name) = 0;
 };
 
-
+*/
 
 
 

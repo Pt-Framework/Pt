@@ -23,7 +23,7 @@
 
 
 namespace Pt {
-
+/*
     class Archive;
 
     class ArchiveReader
@@ -44,7 +44,7 @@ namespace Pt {
 
             virtual void _read(Archive& archive) = 0;
     };
-
+*/
 }
 
 #endif

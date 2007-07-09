@@ -53,6 +53,7 @@ InvalidTime::~InvalidTime() throw()
 }
 
 
+/*
 const Archive& operator>>(const Archive& ar, Time& time)
 {
     const Pt::String* value = ar.getValue(L"msecs");
@@ -77,7 +78,7 @@ Archive& operator<<(Archive& ar, const Time& time)
     ar.addValue( L"msecs", value );
 
     return ar;
-}
+}*/
 
 
 Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)

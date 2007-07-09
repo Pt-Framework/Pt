@@ -23,7 +23,7 @@
 
 
 namespace Pt {
-
+/*
     class Archive;
 
     class ArchiveWriter
@@ -48,7 +48,7 @@ namespace Pt {
 
             virtual void _commit() = 0;
     };
-
+*/
 }
 
 #endif

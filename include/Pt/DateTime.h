@@ -37,8 +37,8 @@ class SerializationData;
 */
 class PT_API DateTime
 {
-    friend PT_API const Archive& operator>>(const Archive&, DateTime& );
-    friend PT_API Archive& operator<<(Archive&, const DateTime& );
+    //friend PT_API const Archive& operator>>(const Archive&, DateTime& );
+    //friend PT_API Archive& operator<<(Archive&, const DateTime& );
 
     public:
         DateTime();

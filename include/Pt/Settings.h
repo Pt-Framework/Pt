@@ -35,16 +35,33 @@ namespace Pt {
 class Settings : public SerializationData
 {
     public:
-        Settings(Settings* parent = 0)
-        : SerializationData(parent)
+        Settings()
         {}
 
-        Settings(Settings* parent, const Pt::String& name)
-        : SerializationData(parent, name)
-        { }
+        void load(std::basic_istream<Pt::Char>& is)
+        {
+            //SettingsReader reader(is);
+            //reader.read(*this);
+        }
+
+        void load(const std::string& path)
+        {
+            //std::ifstream fs( path.c_str() );
+            //Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
+            //SettingsReader reader(ts);
+            //reader.read(*this);
+        }
+
+        void save(const std::string& path) const
+        {
+            //std::ifstream fs( path.c_str() );
+            //Pt::Text::TextOStream ts(fs, new Pt::Text::Utf8Codec);
+            //SettingsWriter writer(ts);
+            //writer.write(*this);
+        }
 
         template <typename T>
-        const void extract(T& type, const Pt::String& name) const
+        const void init(T& type, const Pt::String& name) const
         {
             const SerializationData* data = this->getData(name);
             if(data == 0)
@@ -52,19 +69,6 @@ class Settings : public SerializationData
 
             *data >> type;
         }
-};
-
-
-class SettingsEntry : public SerializationEntry
-{
-    public:
-        SettingsEntry(Settings& parent, const Pt::String& name)
-        : SerializationEntry(parent, name)
-        {}
-
-        SettingsEntry(Settings& parent, const Pt::String& name, const Pt::Variant& value)
-        : SerializationEntry(parent, name, value)
-        {}
 };
 
 
@@ -196,6 +200,12 @@ class SettingsReader
         void read(SerializationData& data)
         {
             this->_read(data);
+        }
+
+        //! @brief Reads content into an archive
+        void read(Settings& settings)
+        {
+            this->_read( settings );
         }
 
     protected:

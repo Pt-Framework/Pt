@@ -34,7 +34,7 @@
 
 namespace Pt {
 
-
+/*
 const Archive& operator>>(const Archive& ar, DateTime& dt)
 {
     ar >> dt._date;
@@ -50,7 +50,7 @@ Archive& operator<<(Archive& ar, const DateTime& dt)
     ar << dt._time;
 
     return ar;
-}
+}*/
 
 
 DateTime::DateTime()

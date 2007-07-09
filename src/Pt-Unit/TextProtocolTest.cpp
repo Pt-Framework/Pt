@@ -38,11 +38,11 @@ class Protocol : public Pt::Unit::TestProtocol
             std::stringstream ss;
             ss << "myDate = ( julianDays = 400000 )";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-            Pt::PropertiesReader reader(ts);
-            Pt::Settings archive;
-            reader.read(archive);
+            //Pt::PropertiesReader reader(ts);
+            //Pt::Settings archive;
+            //reader.read(archive);
 
-            const Pt::Archive* ar = archive.getArchive(L"myDate");
+            //const Pt::Archive* ar = archive.getArchive(L"myDate");
 
             //suite.runTest("test", *ar);
         }

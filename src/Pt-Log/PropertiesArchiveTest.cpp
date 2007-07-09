@@ -34,7 +34,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
-
+/*
 class PropertiesArchiveTest : public Pt::Unit::TestSuite
 {
     public:
@@ -279,3 +279,4 @@ class PropertiesArchiveTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<PropertiesArchiveTest> register_PropertiesArchiveTest;
+*/

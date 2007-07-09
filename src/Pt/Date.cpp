@@ -242,7 +242,7 @@ Date Date::fromIsoString(const std::string& s)
 }
 
 
-const Archive& operator>>(const Archive& ar, Date& date)
+/*const Archive& operator>>(const Archive& ar, Date& date)
 {
     const Pt::String* value = ar.getValue(L"julianDays");
     if( value )
@@ -266,7 +266,7 @@ Archive& operator<<(Archive& ar, const Date& date)
     ar.addValue( L"julianDays", value );
 
     return ar;
-}
+}*/
 
 
 const SerializationData& operator>>(const SerializationData& data, Date& date)

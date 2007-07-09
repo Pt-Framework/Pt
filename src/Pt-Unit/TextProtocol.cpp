@@ -201,7 +201,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
                 std::string value;
                 lineReader >> value;
-                ar.addEntry( Pt::String(L"arg"), Pt::Variant(value) );
+                //ar.addEntry( Pt::String(L"arg"), Pt::Variant(value) );
             }
 
             //suite.runTest(methodName, ar);

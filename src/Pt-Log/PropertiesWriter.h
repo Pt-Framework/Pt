@@ -27,6 +27,7 @@
 
 namespace Pt {
 
+/*
 class PropertiesWriter : public ArchiveWriter
 {
     public:
@@ -91,7 +92,7 @@ class PropertiesWriter : public ArchiveWriter
     private:
         std::basic_ostream<Pt::Char>& _os;
 };
-
+*/
 }
 
 #endif

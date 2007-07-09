@@ -27,6 +27,7 @@
 
 namespace Pt {
 
+/*
 class SettingsValue : public ArchiveValue
 {
     public:
@@ -150,7 +151,7 @@ class Settings : public Archive
         Pt::String _nodeName;
         Entries _entries;
 };
-
+*/
 }
 
 #endif
