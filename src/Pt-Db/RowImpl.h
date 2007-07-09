@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Db {
 
-    class RowImpl : public IRow
+    class PT_DB_API RowImpl : public IRow
     {
         public:
             typedef std::vector<Value> data_type;
@@ -53,7 +53,7 @@ namespace Db {
             virtual Value getValue(size_type field_num) const;
 
             // specific methods
-            void add(const Value& value)   
+            void add(const Value& value)
             { _data.push_back(value); }
     };
 

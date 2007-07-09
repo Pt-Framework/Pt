@@ -18,7 +18,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
+
 #ifndef PT_DB_RESULTIMPL_H
 #define PT_DB_RESULTIMPL_H
 
@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace Db {
 
-    class ResultImpl : public IResult
+    class PT_DB_API ResultImpl : public IResult
     {
         public:
             typedef std::vector<Row> data_type;
@@ -54,7 +54,7 @@ namespace Db {
             // specific methods
             void add(const Row& row)   { _data.push_back(row); }
   };
-  
+
 } // namespace Db
 
 } // namespace Pt

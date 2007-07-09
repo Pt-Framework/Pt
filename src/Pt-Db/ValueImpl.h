@@ -35,7 +35,7 @@ namespace Pt {
 
 namespace Db {
 
-    class ValueImpl : public IValue
+    class PT_DB_API ValueImpl : public IValue
     {
         private:
             bool _null;
