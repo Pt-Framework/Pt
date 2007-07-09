@@ -275,15 +275,15 @@ const SerializationData& operator>>(const SerializationData& data, Date& date)
     unsigned month, day;
 
     const Pt::Variant* value = data.getEntry(L"year");
-    if( value == 0 || value->get<int>(year) )
+    if( value == 0 || !value->get<int>(year) )
         throw NoSuchEntry("year", PT_SOURCEINFO);
 
     value = data.getEntry(L"month");
-    if( value == 0 || value->get<unsigned>(month) )
+    if( value == 0 || !value->get<unsigned>(month) )
         throw NoSuchEntry("month", PT_SOURCEINFO);
 
     value = data.getEntry(L"day");
-    if( value == 0 || value->get<unsigned>(day) )
+    if( value == 0 || !value->get<unsigned>(day) )
         throw NoSuchEntry("day", PT_SOURCEINFO);
 
     date.set(year, month, day);

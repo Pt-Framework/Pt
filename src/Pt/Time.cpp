@@ -241,19 +241,19 @@ const SerializationData& operator>>(const SerializationData& data, Time& time)
     unsigned mssec;
 
     const Pt::Variant* value = data.getEntry(L"hour");
-    if( value == 0 || value->get<unsigned>(hour) )
+    if( value == 0 || !value->get<unsigned>(hour) )
         throw NoSuchEntry("hour", PT_SOURCEINFO);
 
     value = data.getEntry(L"minute");
-    if( value == 0 || value->get<unsigned>(min) )
+    if( value == 0 || !value->get<unsigned>(min) )
         throw NoSuchEntry("minute", PT_SOURCEINFO);
 
     value = data.getEntry(L"second");
-    if( value == 0 || value->get<unsigned>(sec) )
+    if( value == 0 || !value->get<unsigned>(sec) )
         throw NoSuchEntry("second", PT_SOURCEINFO);
 
     value = data.getEntry(L"millisec");
-    if( value == 0 || value->get<unsigned>(mssec) )
+    if( value == 0 || !value->get<unsigned>(mssec) )
         throw NoSuchEntry("millisec", PT_SOURCEINFO);
 
     time.set(hour, min, sec, mssec);

@@ -42,7 +42,7 @@ namespace Pt {
         {
             std::istringstream is(data);
             is >> value;
-            return is.good();
+            return !is.fail();
         }
     };
 
@@ -93,7 +93,7 @@ namespace Pt {
         {
             std::istringstream is(data);
             is >> std::scientific >> std::setprecision(15) >> value;
-            return is.good();
+            return !is.fail();
         }
     };
 
