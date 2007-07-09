@@ -1,9 +1,11 @@
 /***************************************************************************
  *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
+#undef PT_DB_API_EXPORT
 
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/RegisterTest.h"
 
 #include <string>
 #include <iostream>
@@ -20,14 +22,15 @@ using namespace Pt;
 using namespace Pt::Db;
 
 
-class ResultImplTest : public CPPUNIT_NS::TestFixture
+class ResultImplTest : public Pt::Unit::TestSuite
 {
-    CPPUNIT_TEST_SUITE( ResultImplTest );
-    
-    CPPUNIT_TEST( testSize );
-    CPPUNIT_TEST( testGetRow );
-                
-    CPPUNIT_TEST_SUITE_END();
+public:
+    ResultImplTest()
+    : TestSuite("ResultImplTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("testSize", *this, &ResultImplTest::testSize);
+        Pt::Unit::TestSuite::registerMethod("testGetRow", *this, &ResultImplTest::testGetRow);
+    }
 
 protected:
     void testSize();
@@ -36,13 +39,13 @@ protected:
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION( ResultImplTest );
+Pt::Unit::RegisterTest<ResultImplTest> register_ResultImplTest;
 
 
 void ResultImplTest::testSize()
 {
     ResultImpl resImpl;
-    
+
     for(unsigned int j=0; j<10; j++){
         RowImpl* rowImpl = new RowImpl();
         for(unsigned int i=0; i<25; i++)
@@ -53,16 +56,16 @@ void ResultImplTest::testSize()
         }
         resImpl.add(rowImpl);
     }
-    
-    CPPUNIT_ASSERT( resImpl.size() == 10 );
-    CPPUNIT_ASSERT( resImpl.getFieldCount() == 25 );
+
+    PT_UNIT_ASSERT( resImpl.size() == 10 );
+    PT_UNIT_ASSERT( resImpl.getFieldCount() == 25 );
 }
 
 
 void ResultImplTest::testGetRow()
 {
     ResultImpl resImpl;
-    
+
     for(unsigned int j=0; j<10; j++){
         RowImpl* rowImpl = new RowImpl();
         for(unsigned int i=0; i<25; i++)
@@ -73,10 +76,10 @@ void ResultImplTest::testGetRow()
         }
         resImpl.add(rowImpl);
     }
-    
+
     for(int i=0; i<10; i++)
     {
         Row row = resImpl.getRow(i);
-        CPPUNIT_ASSERT( row.getInt(24) == i * 24 );
+        PT_UNIT_ASSERT( row.getInt(24) == i * 24 );
     }
 }

@@ -1,9 +1,11 @@
 /***************************************************************************
  *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
+#undef PT_DB_API_EXPORT
 
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/RegisterTest.h"
 
 #include <string>
 #include <iostream>
@@ -20,23 +22,24 @@ using namespace Pt;
 using namespace Pt::Db;
 
 
-class ValueImplTest : public CPPUNIT_NS::TestFixture
+class ValueImplTest : public Pt::Unit::TestSuite
 {
-    CPPUNIT_TEST_SUITE( ValueImplTest );
-    
-    CPPUNIT_TEST( testIsNull );
-    CPPUNIT_TEST( testBool );
-    CPPUNIT_TEST( testInt );
-    CPPUNIT_TEST( testUnsigned );
-    CPPUNIT_TEST( testFloat );
-    CPPUNIT_TEST( testDouble );
-    CPPUNIT_TEST( testChar );
-    CPPUNIT_TEST( testString );
-    CPPUNIT_TEST( testDate );
-    CPPUNIT_TEST( testTime );
-    CPPUNIT_TEST( testDateTime );
-                
-    CPPUNIT_TEST_SUITE_END();
+public:
+    ValueImplTest()
+    : TestSuite("ValueImplTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("testIsNull", *this, &ValueImplTest::testIsNull);
+        Pt::Unit::TestSuite::registerMethod("testBool", *this, &ValueImplTest::testBool);
+        Pt::Unit::TestSuite::registerMethod("testInt", *this, &ValueImplTest::testInt);
+        Pt::Unit::TestSuite::registerMethod("testUnsigned", *this, &ValueImplTest::testUnsigned);
+        Pt::Unit::TestSuite::registerMethod("testFloat", *this, &ValueImplTest::testFloat);
+        Pt::Unit::TestSuite::registerMethod("testDouble", *this, &ValueImplTest::testDouble);
+        Pt::Unit::TestSuite::registerMethod("testChar", *this, &ValueImplTest::testChar);
+        Pt::Unit::TestSuite::registerMethod("testString", *this, &ValueImplTest::testString);
+        Pt::Unit::TestSuite::registerMethod("testDate", *this, &ValueImplTest::testDate);
+        Pt::Unit::TestSuite::registerMethod("testTime", *this, &ValueImplTest::testTime);
+        Pt::Unit::TestSuite::registerMethod("testDateTime", *this, &ValueImplTest::testDateTime);
+    }
 
 protected:
     void testIsNull();
@@ -54,91 +57,91 @@ protected:
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION( ValueImplTest );
+Pt::Unit::RegisterTest<ValueImplTest> register_ValueImplTest;
 
 
 void ValueImplTest::testIsNull()
 {
     ValueImpl valImp;
-    CPPUNIT_ASSERT( valImp.isNull() );
+    PT_UNIT_ASSERT( valImp.isNull() );
 }
 
 void ValueImplTest::testBool()
 {
     ValueImpl valImp("true");
-    CPPUNIT_ASSERT( valImp.getBool() == true );
-    
+    PT_UNIT_ASSERT( valImp.getBool() == true );
+
     ValueImpl valImp2("T");
-    CPPUNIT_ASSERT( valImp.getBool() == true );
-    
+    PT_UNIT_ASSERT( valImp.getBool() == true );
+
     ValueImpl valImp3("1");
-    CPPUNIT_ASSERT( valImp.getBool() == true );
-    
+    PT_UNIT_ASSERT( valImp.getBool() == true );
+
     ValueImpl valImp4("Yes");
-    CPPUNIT_ASSERT( valImp.getBool() == true );
-    
+    PT_UNIT_ASSERT( valImp.getBool() == true );
+
     ValueImpl valImp5("y");
-    CPPUNIT_ASSERT( valImp.getBool() == true );
+    PT_UNIT_ASSERT( valImp.getBool() == true );
 }
 
 void ValueImplTest::testInt()
 {
     ValueImpl valImp(22);
-    CPPUNIT_ASSERT( valImp.getInt() == 22 );
-    
+    PT_UNIT_ASSERT( valImp.getInt() == 22 );
+
     ValueImpl valImp2(-42);
-    CPPUNIT_ASSERT( valImp2.getInt() == -42 );
+    PT_UNIT_ASSERT( valImp2.getInt() == -42 );
 }
 
 void ValueImplTest::testUnsigned()
 {
     ValueImpl valImp(478);
-    CPPUNIT_ASSERT( valImp.getInt() == 478 );
+    PT_UNIT_ASSERT( valImp.getInt() == 478 );
 }
 
 void ValueImplTest::testFloat()
 {
-    ValueImpl valImp(321.123f);
-    CPPUNIT_ASSERT( valImp.getFloat() == 321.123f );
+    ValueImpl valImp(321.125f);
+    PT_UNIT_ASSERT( valImp.getFloat() == 321.125f );
 }
 
 void ValueImplTest::testDouble()
 {
-    ValueImpl valImp(321.123456789);
-    CPPUNIT_ASSERT( valImp.getDouble() == 321.123456789 );
+    ValueImpl valImp(321.580078125);
+    PT_UNIT_ASSERT( valImp.getDouble() == 321.580078125 );
 }
 
 void ValueImplTest::testChar()
 {
     ValueImpl valImp('c');
-    CPPUNIT_ASSERT( valImp.getChar() == 'c' );
+    PT_UNIT_ASSERT( valImp.getChar() == 'c' );
 }
 
 void ValueImplTest::testString()
 {
     ValueImpl valImp("Frag den Chemiker");
     std::string str;
-    valImp.getString(str); 
-    CPPUNIT_ASSERT( str == "Frag den Chemiker" );
+    valImp.getString(str);
+    PT_UNIT_ASSERT( str == "Frag den Chemiker" );
 }
 
 void ValueImplTest::testDate()
 {
     Date date(2001, 11, 30);
     ValueImpl valImp(date.toIsoString());
-    CPPUNIT_ASSERT( valImp.getDate() == date );
+    PT_UNIT_ASSERT( valImp.getDate() == date );
 }
 
 void ValueImplTest::testTime()
 {
     Time time(11, 55, 59, 999);
     ValueImpl valImp(time.toIsoString());
-    CPPUNIT_ASSERT( valImp.getTime() == time );
+    PT_UNIT_ASSERT( valImp.getTime() == time );
 }
 
 void ValueImplTest::testDateTime()
 {
     DateTime dateTime(2001, 11, 30, 11, 55, 59, 999);
     ValueImpl valImp(dateTime.toIsoString());
-    CPPUNIT_ASSERT( valImp.getDateTime() == dateTime );
+    PT_UNIT_ASSERT( valImp.getDateTime() == dateTime );
 }

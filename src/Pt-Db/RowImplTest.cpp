@@ -1,9 +1,11 @@
 /***************************************************************************
  *   Copyright (C) 2006 PTV AG                                             *
  ***************************************************************************/
+#undef PT_DB_API_EXPORT
 
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/TestMain.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/RegisterTest.h"
 
 #include <string>
 #include <iostream>
@@ -19,14 +21,15 @@ using namespace Pt;
 using namespace Pt::Db;
 
 
-class RowImplTest : public CPPUNIT_NS::TestFixture
+class RowImplTest : public Pt::Unit::TestSuite
 {
-    CPPUNIT_TEST_SUITE( RowImplTest );
-    
-    CPPUNIT_TEST( testSize );
-    CPPUNIT_TEST( testGetValue );
-                
-    CPPUNIT_TEST_SUITE_END();
+public:
+    RowImplTest()
+    : TestSuite("RowImplTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("testSize", *this, &RowImplTest::testSize);
+        Pt::Unit::TestSuite::registerMethod("testGetValue", *this, &RowImplTest::testGetValue);
+    }
 
 protected:
     void testSize();
@@ -35,37 +38,37 @@ protected:
 };
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION( RowImplTest );
+Pt::Unit::RegisterTest<RowImplTest> register_RowImplTest;
 
 
 void RowImplTest::testSize()
 {
     RowImpl rowImpl;
-    
+
     for(unsigned int i=0; i<25; i++)
     {
         ValueImpl* impl = new ValueImpl(i);
         Value v(impl);
         rowImpl.add( v );
     }
-    
-    CPPUNIT_ASSERT( rowImpl.size() == 25 );
+
+    PT_UNIT_ASSERT( rowImpl.size() == 25 );
 }
 
 
 void RowImplTest::testGetValue()
 {
     RowImpl rowImpl;
-    
+
     for(unsigned int i=0; i<25; i++)
     {
         ValueImpl* impl = new ValueImpl(i);
         Value v(impl);
         rowImpl.add( v );
     }
-    
+
     for(unsigned int i=24; i<=0; i--)
     {
-        CPPUNIT_ASSERT( rowImpl.getValue(i) );
+        PT_UNIT_ASSERT( rowImpl.getValue(i) );
     }
 }
