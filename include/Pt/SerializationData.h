@@ -55,10 +55,10 @@ class PT_API SerializationNode
         void setName(const Pt::String& name)
         { _name = name; }
 
-        virtual SerializationData* parent()
+        SerializationData* parent()
         { return _parent; }
 
-        virtual const SerializationData* parent() const
+        const SerializationData* parent() const
         { return _parent; }
 
         bool operator< (const SerializationNode& other) const
@@ -93,7 +93,7 @@ class PT_API SerializationEntry : public SerializationNode
 
         SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value);
 
-        virtual ~SerializationEntry()
+        ~SerializationEntry()
         {}
 
         const Pt::Variant& value() const
@@ -115,7 +115,8 @@ class PT_API SerializationData : public SerializationNode
 
         SerializationData(SerializationData* parent, const Pt::String& name);
 
-        virtual ~SerializationData();
+        ~SerializationData()
+        {}
 
         SerializationData& addData(const Pt::String& name);
 

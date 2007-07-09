@@ -33,14 +33,11 @@ SerializationData::SerializationData(SerializationData* parent, const Pt::String
 {}
 
 
-SerializationData::~SerializationData()
-{}
-
-
 void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
 {
-    Entries::iterator it = std::upper_bound( _entries.begin(), _entries.end(), SerializationEntry(*this, name, value));
-    _entries.insert( it, SerializationEntry(*this, name, value) );
+    SerializationEntry entry(*this, name, value);
+    Entries::iterator it = std::upper_bound( _entries.begin(), _entries.end(), entry);
+    _entries.insert( it, entry );
 }
 
 
