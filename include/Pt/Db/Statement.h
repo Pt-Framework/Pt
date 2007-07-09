@@ -22,7 +22,6 @@
 #ifndef PT_DB_STATEMENT_H
 #define PT_DB_STATEMENT_H
 
-#include <string>
 #include <Pt/SmartPtr.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
@@ -31,6 +30,7 @@
 #include <Pt/Db/IStatement.h>
 #include <Pt/Db/ICursor.h>
 #include <Pt/Db/Row.h>
+#include <string>
 
 
 namespace Pt {
