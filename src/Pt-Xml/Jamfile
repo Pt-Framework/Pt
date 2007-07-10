@@ -2,43 +2,47 @@ SubDir TOP src Pt-Xml ;
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
 
-SharedLibrary Pt-Xml : CData.cpp
-                       Characters.cpp
-                       Comment.cpp
-                       DocTypeDeclaration.cpp
-                       #EndDocument.cpp
-                       EndElement.cpp
-                       Namespace.cpp
-                       NamespaceContext.cpp
-                       ParseError.cpp
-                       ProcessingInstruction.cpp
-                       QName.cpp
-                       Resolver.cpp
-                       StartElement.cpp
-                       XmlDeclaration.cpp
-                       XmlDeserializer.cpp
-                       XmlReader.cpp
-                       XmlSerializer.cpp
-                       XmlWriter.cpp
-                       ;
+PT_XML_SOURCES = CData.cpp
+                 Characters.cpp
+                 Comment.cpp
+                 DocTypeDeclaration.cpp
+                 #EndDocument.cpp
+                 EndElement.cpp
+                 Namespace.cpp
+                 NamespaceContext.cpp
+                 ParseError.cpp
+                 ProcessingInstruction.cpp
+                 QName.cpp
+                 Resolver.cpp
+                 StartElement.cpp
+                 XmlDeclaration.cpp
+                 XmlDeserializer.cpp
+                 XmlReader.cpp
+                 XmlSerializer.cpp
+                 XmlWriter.cpp
+                 ;
+
+SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ; 
 SharedLibrary_LinkSharedLibraries Pt-Xml : Pt-Text Pt ;
 SharedLibrary_MakeLocate Pt-Xml : bin ;
+
+PT_XML_TESTS = XmlTest.cpp
+               XmlSerializerTest.cpp
+               XmlWriterTest.cpp
+               ;
+
+PtUnitTest Pt-Xml-test : Pt-Xml-test.cpp $(PT_XML_TESTS) ;
+Main_LinkSharedLibraries Pt-Xml-test : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
+PtUnitTest_MakeLocate Pt-Xml-test : bin ;
+
 
 Main XmlReaderTest : XmlReaderTest.cpp ;
 Main_LinkSharedLibraries XmlReaderTest : Pt-Xml Pt-Text Pt ;
 Main_MakeLocate XmlReaderTest : bin ;
 
-PtUnitTest XmlTest : XmlTest.cpp ;
-Main_LinkSharedLibraries XmlTest : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
-Main_MakeLocate XmlTest : bin ;
-
-PtUnitTest XmlWriterTest : XmlWriterTest.cpp ;
-Main_LinkSharedLibraries XmlWriterTest : Pt-Xml Pt-Unit Pt-Text Pt ;
-Main_MakeLocate XmlWriterTest : bin ;
-
-PtUnitTest XmlSerializerTest : XmlSerializerTest.cpp ;
-Main_LinkSharedLibraries XmlSerializerTest : Pt-Xml Pt-System Pt-Unit Pt-Text Pt ;
-Main_MakeLocate XmlSerializerTest : bin ;
-
-NotFile Pt-Xml-test ;
-Depends Pt-Xml-test : XmlSerializerTest ;
+# Define pseudo targets to call from projects
+NOTFILE Pt-Xml-all ;
+DEPENDS Pt-Xml-all : Pt-Xml
+                     Pt-Xml-test
+                     XmlReaderTest
+                     ;
