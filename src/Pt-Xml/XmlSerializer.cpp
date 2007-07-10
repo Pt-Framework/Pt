@@ -22,6 +22,7 @@ XmlSerializer::XmlSerializer(std::ostream& os)
 
 XmlSerializer::~XmlSerializer()
 {
+    _writer->flush();
 }
 
 
@@ -30,7 +31,6 @@ void XmlSerializer::putData(const SerializationData& data)
     _writer->writeStartElement( data.name() );
     this->writeData(data);
     _writer->writeEndElement();
-    _writer->flush();   
 }
 
 
@@ -54,6 +54,13 @@ void XmlSerializer::writeData(const SerializationData& data)
         _writer->writeEndElement();
     }
 }
+
+
+void XmlSerializer::flush()
+{
+    _writer->flush();
+}
+
 
 } // namespace Xml
 

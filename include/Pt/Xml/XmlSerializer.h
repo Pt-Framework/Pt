@@ -29,6 +29,8 @@ namespace Xml {
                 this->putData( data );
             }
 
+            void flush();
+
         protected:
             void writeData(const SerializationData& data);
 
