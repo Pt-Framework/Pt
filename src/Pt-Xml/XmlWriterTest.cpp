@@ -2,7 +2,6 @@
 
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
 #include "Pt/Xml/XmlWriter.h"
@@ -33,12 +32,12 @@ class XmlWriterTest : public Pt::Unit::TestSuite
 	        writer.writeStartElement(L"first");
 	        writer.writeEndElement();
 	        writer.flush();
-	        
+
 	        std::stringstream result;
 	        result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<first>" << std::endl;
             result << "</first>" << std::endl;
-	        
+
 		    PT_UNIT_ASSERT( result.str() == ss.str());
 	    }
 
@@ -48,11 +47,11 @@ class XmlWriterTest : public Pt::Unit::TestSuite
 	        Pt::Xml::XmlWriter writer(ss);
             writer.writeElement(L"fourth", L"Hello world!");
             writer.flush();
-		    
+
 	        std::stringstream result;
 	        result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<fourth>Hello world!</fourth>" << std::endl;
-	        
+
 		    PT_UNIT_ASSERT( result.str() == ss.str());
 	    }
 };

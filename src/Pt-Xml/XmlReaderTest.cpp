@@ -7,6 +7,8 @@
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/EndDocument.h"
 #include "Pt/Text/Utf8Codec.h"
+#include "Pt/Main.h"
+
 
 #include <sstream>
 #include <ctime>
@@ -15,7 +17,7 @@ using namespace Pt;
 using namespace Pt::Xml;
 using namespace std;
 
-
+/*
 void perfTest()
 {
     stringstream input;
@@ -36,7 +38,7 @@ void perfTest()
     {}
     cerr << clock() - begin << endl;
 }
-
+*/
 void test()
 {
     stringstream input;
@@ -94,7 +96,7 @@ void test()
                 cerr << "EndElement: '" << e->name().narrow() << "'" << endl;
             }
             else {
-                cerr << "Unknown Node: " << typeid(n).name()  << endl;
+                cerr << "Unknown Node" << endl;
             }
         }
     }
@@ -108,6 +110,6 @@ void test()
 int main(int argc, char* argv[])
 {
     test();
-    perfTest();
+    //perfTest();
     return 0;
 }
