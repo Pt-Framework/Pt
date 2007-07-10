@@ -103,15 +103,15 @@ class PT_API SerializationEntry : public SerializationNode
         Pt::Variant _value;
 };
 
+
 /** @brief Contains object data
 
     SerializationData objects are the intermediates in the two-step
-    serialization process. To serialize an object it is converted to
-    an SerializationData object, which repreents the object graph. A serializer can convert
-    
-    During deserialization raw data is preprocessedinto SerializationData 
-    objects and then the object to be deserialized is initialized
-    
+    serialization process. To serialize an object, it is decomposed into
+    a SerializationData object, which can be written out by a Serializer.
+
+    During deserialization, raw data is preprocessed into SerializationData
+    objects first and then the object is initialized from it.
 */
 class PT_API SerializationData : public SerializationNode
 {
