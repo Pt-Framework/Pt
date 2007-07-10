@@ -122,12 +122,10 @@ void XmlDeserializer::onStartElement(const Node& node)
         }
         case Node::EndElement:
         {
-            _nodeName = static_cast<const EndElement&>(node).name();
-            _current = _current->parent();
+            if( _nodeName != static_cast<const EndElement&>(node).name() )
+                throw std::logic_error("Invalid element" + PT_SOURCEINFO);
 
-            if(_current == 0)
-                throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
-
+            _current->addEntry( _nodeName, L"" );
             _processNode = &XmlDeserializer::onEndElement;
             break;
         }
@@ -149,7 +147,6 @@ void XmlDeserializer::onWhitespace(const Node& node)
         }
         case Node::EndElement:
         {
-
             if(_current == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
