@@ -340,7 +340,7 @@ class ReadWriteProperty : public PropertyInfo
 
             ValueT value;
             PropertyTraits<ValueT>::set(sd, value);
-            this->set( value );
+            _setter->invoke( value );
         }
 
     private:

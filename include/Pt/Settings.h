@@ -44,20 +44,10 @@ class Settings : public SerializationData
             //reader.read(*this);
         }
 
-        void load(const std::string& path)
+        void save(std::basic_ostream<Pt::Char>& is) const
         {
-            //std::ifstream fs( path.c_str() );
-            //Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-            //SettingsReader reader(ts);
+            //SettingsWriter writer(is);
             //reader.read(*this);
-        }
-
-        void save(const std::string& path) const
-        {
-            //std::ifstream fs( path.c_str() );
-            //Pt::Text::TextOStream ts(fs, new Pt::Text::Utf8Codec);
-            //SettingsWriter writer(ts);
-            //writer.write(*this);
         }
 
         template <typename T>
