@@ -282,7 +282,7 @@ class ReadProperty : public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
-        virtual Pt::Any value()
+        virtual Pt::Any get() const
         { return _value->value(); }
 
     private:
@@ -311,7 +311,7 @@ class ReadWriteProperty : public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
-        virtual Pt::Any value()
+        virtual Pt::Any get() const
         { return _value->value(); }
 
         virtual void set(const Pt::Any& a)
