@@ -62,7 +62,7 @@ LogManager::LogManager()
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
     SettingsReader reader(ts);
     reader.read(_settings);
-    _settings.init(*this, L"Pt-Log");
+    _settings.get(*this, L"Pt-Log");
 
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
@@ -177,7 +177,7 @@ Target& LogManager::target(const std::string& name)
             for(size_t n = 0; n < targetName.size(); ++n)
                 str += Pt::Char( targetName[n] );
 
-            _settings.init(*foundTarget, str);
+            _settings.get(*foundTarget, str);
         }
     }
 

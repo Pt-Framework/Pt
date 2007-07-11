@@ -7,11 +7,11 @@
 namespace Pt
 {
 
-    AnyFactory::AnyFactory()
+/*    AnyFactory::AnyFactory()
     {
         _builder.insert( std::make_pair("bool", new BasicAnyBuilder<bool>) );
         _builder.insert( std::make_pair("std::string", new BasicAnyBuilder<std::string>) );
-    }
+    }*/
 
 
     //std::multimap<std::string, AnyIO*>& AnyFactory::map()

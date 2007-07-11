@@ -134,14 +134,14 @@ class PT_API Reflectable
         template <typename R, typename Parent>
         void registerProperty(const std::string& name, Parent* parent, PropertyValue<R>& value)
         {
-            _properties.insert( std::make_pair(name, new InternalReadPropertyInfo<R>(parent, value)) );
+            _properties.insert( std::make_pair(name, new ReadProperty<R>(parent, value)) );
         }
 
 
         template <typename T, typename R, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, PropertyValue<T>& value, R (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new InternalReadWritePropertyInfo<T, A>(parent, value, setter)) );
+            _properties.insert( std::make_pair(name, new ReadWriteProperty<T, A>(parent, value, setter)) );
         }
 
         template <typename ParentT>
@@ -206,22 +206,16 @@ inline const SerializationData& operator>>(const SerializationData& data, Reflec
     PropertyMap& pmap = r.properties();
     for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
     {
-        PropertyInfo& propInfo = *( it->second );
         Pt::String propName = Pt::String::widen( it->first );
 
-        const Pt::Variant* value = data.getEntry(propName);
-        if(value)
+        if( const Pt::Variant* value = data.getEntry(propName) )
         {
-            Any a = AnyFactory::create( propInfo.typeName(), *value );
-            it->second->setValue(a);
+            it->second->set(*value);
         }
-
-        //const SerializationData* sub = archive.getArchive(propName);
-        //if(sub)
-        //{
-        //    Any a = AnyFactory::create( propInfo.typeName(), *sub );
-        //    it->second->setValue(a);
-        //}
+        else if( const Pt::SerializationData* subdata = data.getData(propName) )
+        {
+            it->second->set(*subdata);
+        }
     }
 
     return data;

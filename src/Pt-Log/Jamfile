@@ -25,7 +25,3 @@ Main_MakeLocate LoggerDemo : bin ;
 Main LoggerTest : LoggerTest.cpp ;
 Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit DllLoggerTest ;
 Main_MakeLocate LoggerTest : bin ;
-
-Main PropertiesArchiveTest : PropertiesArchiveTest.cpp ;
-Main_LinkSharedLibraries PropertiesArchiveTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit ;
-Main_MakeLocate PropertiesArchiveTest : bin ;

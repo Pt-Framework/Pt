@@ -61,7 +61,7 @@ class Settings : public SerializationData
         }
 
         template <typename T>
-        const void init(T& type, const Pt::String& name) const
+        const void get(T& type, const Pt::String& name) const
         {
             const SerializationData* data = this->getData(name);
             if(data == 0)

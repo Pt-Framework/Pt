@@ -76,7 +76,7 @@ Pt::Any Reflectable::property(const std::string& name)
     if(it == _properties.end())
         throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
-    return it->second->value();
+    return it->second->get();
 }
 
 
@@ -89,7 +89,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
         return;
     }
 
-    it->second->setValue(value);
+    it->second->set(value);
 }
 
 

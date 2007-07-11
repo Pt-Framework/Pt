@@ -38,10 +38,17 @@ class PropertyValue
         : _value(value)
         {}
 
-        const T& get()const
+        const T& get() const
         { 
-            const Any::Value* v = _value.value(); 
+            const Any::Value* v = _value.value();
             const Any::BasicValue<T>* b = static_cast< const Any::BasicValue<T>* >(v);
+            return b->value();
+        }
+
+        T& get()
+        {
+            Any::Value* v = _value.value();
+            Any::BasicValue<T>* b = static_cast<Any::BasicValue<T>* >(v);
             return b->value();
         }
 

@@ -408,6 +408,7 @@ namespace Pt {
     };
 */
 
+/*
     struct AnyBuilder
     {
         virtual ~AnyBuilder()
@@ -471,7 +472,7 @@ namespace Pt {
                 return a;            }
 
 
-            /*static Any create(const std::string& name, std::istream& is)
+            *//*static Any create(const std::string& name, std::istream& is)
             {
                 std::multimap<std::string, AnyIO*>::iterator it;
                 it = AnyFactory::instance().map().find(name);
@@ -498,7 +499,7 @@ namespace Pt {
                 Pt::Any a;
                 it->second->input(is, a);
                 return a;
-            }*/
+            }*//*
 
         protected:
             AnyFactory();
@@ -521,8 +522,8 @@ namespace Pt {
             //! @internal
             //std::multimap<std::string, AnyIO*> _initMap;
     };
-
-
+*/
+/*
     template <typename T>
     struct RegisterAnyBuilder
     {
@@ -531,7 +532,7 @@ namespace Pt {
             AnyFactory::instance()._builder.insert( std::make_pair( typeName, new BasicAnyBuilder<T> ) );
         }
     };
-
+*/
 
     /** @brief Type binder for types used in Any
 
