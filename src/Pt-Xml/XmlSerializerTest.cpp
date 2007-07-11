@@ -47,6 +47,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, L"date1");
+            ser.flush();
 
             Pt::Date date2(1, 1, 1);
             std::stringstream input( output.str() );
@@ -62,6 +63,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, L"date1");
+            ser.flush();
 
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);
             std::stringstream input( output.str() );
