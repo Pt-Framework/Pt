@@ -18,11 +18,6 @@
  ***************************************************************************/
 #undef PT_API_LOG_EXPORT
 
-#include "PropertiesArchive.h"
-#include "PropertiesReader.h"
-#include "PropertiesWriter.h"
-
-#include "Pt/Archive.h"
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"

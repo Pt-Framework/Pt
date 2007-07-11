@@ -19,16 +19,13 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
-#include "Pt/Date.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TextProtocol.h"
-#include <string>
-#include "../Pt-Log/PropertiesArchive.h"
-#include "../Pt-Log/PropertiesReader.h"
-#include "Pt/Archive.h"
+
 #include "Pt/Date.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
+#include <string>
 
 class Protocol : public Pt::Unit::TestProtocol
 {

@@ -19,7 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Time.h>
-#include <Pt/Archive.h>
 #include <Pt/Exception.h>
 #include "Pt/SerializationData.h"
 #include <sstream>

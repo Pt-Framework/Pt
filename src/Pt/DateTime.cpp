@@ -20,7 +20,6 @@
  ***************************************************************************/
 
 #include <Pt/DateTime.h>
-#include <Pt/Archive.h>
 #include "Pt/SourceInfo.h"
 #include "Pt/SerializationData.h"
 
