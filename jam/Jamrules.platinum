@@ -35,11 +35,19 @@ if $(SYS:L) = "win32"
 		          $(MINGW)\\lib\\libws2_32.a ;
 	}
 }
+
 if $(TARGET_OS:L) = linux
 {
 	SYSLIBS     = -ldl -lpthread -lrt ;
-  NETLIBS     = -lnsl ;
+    NETLIBS     = -lnsl ;
 }
+
+if $(TARGET_OS:L) = qnxnto
+{
+    SYSLIBS     =  ;
+    NETLIBS     = -lsocket ;
+}
+
 if $(SYS:L) = wince
 {
 	SYSLIBS = mmtimer.lib ;

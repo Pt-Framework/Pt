@@ -9,16 +9,15 @@ C++		= QCC ;
 CC      = qcc ;
 LINK		= $(CC) ;
 CCFLAGS		+= -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC  ;
-BYTEORDER ?= LE ;
-
+BYTEORDER ?= LE ;
+
 PRELIB = lib ;
 
 C++FLAGS    += $(CCFLAGS) -lang-c++ -fexceptions ;
-SYSLIBS = ;
 LINKFLAGS   = -lang-c++  -Wl,-Bsymbolic ;
 
 LINKLIBS    =  -lm  ;
-OPTIM       = -O ;
+
 
 #ARM, PPC and MIPS exist for BE as well as for LE, the compiler wants byteorder to be specified.
 #SH4 and X86 both are little endian CPUs, but only for x86 qcc doesn't want the endianess to be specified
@@ -98,7 +97,8 @@ rule SharedLibraryImpl
 	
 }
 
-rule Library
+
+rule Library
 {
     local _l = $(PRELIB)$(<)$(SUFLIB) ;
     Depends $(<) : $(_l) ;
@@ -118,7 +118,7 @@ rule SharedLibraryImpl
 }
 
 
-actions Link bind NEEDLIBS SHLIBS RPATH_LINKLIBS
+actions Link bind NEEDLIBS SHLIBS RPATH_LINKLIBS
 {
-    $(LINK) -v $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATH_LINKLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(SHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group
+    $(LINK) $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATH_LINKLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group
 }
