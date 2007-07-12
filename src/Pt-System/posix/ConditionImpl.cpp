@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,11 +19,13 @@
  ***************************************************************************/
 #include "ConditionImpl.h"
 #include "MutexImpl.h"
+#include "Pt/SourceInfo.h"
 
 #include <sys/time.h>
 #include <unistd.h>
 #include <errno.h>
 
+#include <stdexcept>
 
 namespace Pt {
 
@@ -31,7 +34,8 @@ namespace System {
 
 ConditionImpl::ConditionImpl()
 {
-    pthread_cond_init( &_cond, NULL );
+    if ( pthread_cond_init( &_cond, NULL ) != 0)
+        throw std::runtime_error("Could not initialize Condition." + PT_SOURCEINFO);
 }
 
 
@@ -43,7 +47,8 @@ ConditionImpl::~ConditionImpl()
 
 void ConditionImpl::wait(Mutex& mtx)
 {
-    pthread_cond_wait(&_cond, mtx.impl()->handle() );
+    if ( pthread_cond_wait(&_cond, mtx.impl()->handle() ) != 0)
+       throw std::runtime_error("Could not wait for Mutex." + PT_SOURCEINFO);
 }
 
 
@@ -70,7 +75,9 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 
 void ConditionImpl::signal()
 {
-    pthread_cond_signal( &_cond );
+
+    if ( pthread_cond_signal( &_cond ) != 0)
+        throw std::runtime_error("Could not signal Condition." + PT_SOURCEINFO);;
 }
 
 

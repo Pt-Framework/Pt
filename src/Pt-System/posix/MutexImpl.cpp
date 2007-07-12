@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
+ *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -32,12 +33,19 @@ namespace Pt {
 namespace System {
 
 
-MutexImpl::MutexImpl(Mutex& mutex)
+MutexImpl::MutexImpl(Mutex& mutex, Mutex::MutexMode mode)
 : _mutex(mutex)
 {
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    if (mode == Mutex::Recursive)
+    {
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE );
+    }
+    else
+    {
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK  );
+    }
     pthread_mutex_init(&_handle, &attr);
 }
 
@@ -50,8 +58,7 @@ MutexImpl::~MutexImpl()
 
 void MutexImpl::lock()
 {
-    int ret = pthread_mutex_lock(&_handle);
-    if(ret != 0)
+   if(pthread_mutex_lock(&_handle) != 0)
         throw SystemError("Could not lock mutex: ", PT_SOURCEINFO);
 }
 
@@ -94,8 +101,7 @@ bool MutexImpl::tryLock(unsigned int msec)
 
 void MutexImpl::unlock()
 {
-    int ret = pthread_mutex_unlock(&_handle);
-    if(ret != 0)
+   if(pthread_mutex_unlock(&_handle) != 0)
         throw SystemError("Could not unlock mutex: ", PT_SOURCEINFO);
 }
 

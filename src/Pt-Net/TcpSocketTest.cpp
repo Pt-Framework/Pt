@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Duerner, Tommi Maekitalo             *
+ *   Copyright (C) 2006 - 2007 by Marc Boris Duerner                       *
+ *   Copyright (C) 2006 - 2007 by Tommi Maekitalo                          *
+ *   Copyright (C) 2006 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -38,6 +40,7 @@ class ServerThread : public Pt::System::Thread
     public:
         ServerThread(const std::string& ipaddr, short port)
         : _server(ipaddr, port)
+        , _mutex(Pt::System::Mutex::NonRecursive)
         { 
             _mutex.lock(); 
         }
@@ -94,14 +97,14 @@ class TcpSocketTest : public Pt::Unit::TestCase
 
         void setUp()
         {
-            _server = new ServerThread("127.0.0.1", 8080);
+            _server = new ServerThread("127.0.0.1", 6789);
             _server->start();
             _server->waitReady();
         }
         
         void test()
         {
-            Pt::Net::TcpSocket socket("127.0.0.1", 8080);
+            Pt::Net::TcpSocket socket("127.0.0.1", 6789);
             socket.write("Hi", 3);
             _server->waitReady();
             PT_UNIT_ASSERT(_server->receivedData() == "Hi");

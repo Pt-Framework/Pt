@@ -211,6 +211,7 @@ void InputHandler::handleJEvents(js_event& events, int bytes)
 
 
 LfbEventLoop::LfbEventLoop()
+: _mutex(Pt::System::Mutex::NonRecursive)
 {
     connect(_input.keyEvent, *this, &LfbEventLoop::handleKeyEvent);
     _input.start();

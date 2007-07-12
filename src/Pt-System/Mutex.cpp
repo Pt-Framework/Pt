@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,9 +28,10 @@ namespace Pt {
 namespace System {
 
 
-Mutex::Mutex()
+Mutex::Mutex(MutexMode mode)
+: _mutexMode(mode)
 {
-    _impl = new MutexImpl(*this);
+	_impl = new MutexImpl(*this, mode);
 }
 
 

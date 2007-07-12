@@ -40,6 +40,7 @@ namespace Log {
 
 LogManager::LogManager()
 : _rootTarget(0)
+, _mutex(Pt::System::Mutex::NonRecursive)
 , _logger(0)
 {
     // builtin plugins

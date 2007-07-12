@@ -73,7 +73,9 @@ void ThreadImpl::setPriority(Priority prio)
 
     sched_param sched;
     int policy = 0;
-    pthread_getschedparam(_id, &policy, &sched);
+
+    if( 0 !=  pthread_getschedparam(_id, &policy, &sched))
+		throw SystemError("Could not get schedul parameter.", PT_SOURCEINFO);
 
     int priomin = sched_get_priority_min(policy);
     int priomax = sched_get_priority_max(policy);

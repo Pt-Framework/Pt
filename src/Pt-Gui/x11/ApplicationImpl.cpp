@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris DÃ¼rner                                  *
- *   Copyright (C) 2006 Aloysius Indrayanto                                *
+ *   Copyright (C) 2006 - 2007 Marc Boris Dürner                           *
+ *   Copyright (C) 2006 - 2007 Aloysius Indrayanto                         *
+ *   Copyright (C) 2006 - 2007 Sebastian Pieck                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,6 +21,10 @@
 
 #include "ApplicationImpl.h"
 
+#ifdef __QNX__
+#include <sys/select.h>
+#include <unistd.h>
+#endif
 #include <X11/Xft/Xft.h>
 
 #include "Pt/Exception.h"
@@ -836,7 +841,9 @@ static const XKeySym2UCS xkeysym2ucs[] = {
 
 
 X11EventLoop::X11EventLoop()
-: _stop(false), _display(0)
+: _stop(false)
+, _display(0)
+, _queueMutex(Pt::System::Mutex::NonRecursive)
 {
     // Open a X11 display connection
     _display = XOpenDisplay(NULL);

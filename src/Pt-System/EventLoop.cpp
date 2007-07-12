@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2007 Marc Boris Duerner                                 *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (C) 2007 Sebastian Pieck                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -27,6 +28,8 @@ namespace System {
 
 EventLoop::EventLoop()
 : _exitLoop(false)
+, _connectionMutex(Pt::System::Mutex::NonRecursive)
+, _mutex(Pt::System::Mutex::NonRecursive)
 , _timeout(Selector::WaitInfinite)
 {
     connect(_selector.timeout, timeout);

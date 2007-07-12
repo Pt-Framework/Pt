@@ -1,6 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris DÃ¼rner                               *
- *   Copyright (C) 2005 by Aloysius Indrayanto                             *
+ *   Copyright (C) 2005 - 2007 by Marc Boris Dürner                        *
+ *   Copyright (C) 2005 - 2007 by Aloysius Indrayanto                      *
+ *   Copyright (C) 2005 - 2007 by Sebastian Pieck                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,16 +20,15 @@
  ***************************************************************************/
 
 #include <pthread.h>
-
+#include "Pt/System/Mutex.h"
 
 namespace Pt {
 
 namespace System {
-    class Mutex;
 
     class MutexImpl {
         public:
-            MutexImpl(Mutex& mutex);
+           MutexImpl(Mutex& mutex, Mutex::MutexMode mode);
 
             ~MutexImpl();
 
