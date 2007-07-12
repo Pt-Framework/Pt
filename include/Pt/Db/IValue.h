@@ -22,10 +22,10 @@
 #ifndef PT_DB_IVALUE_H
 #define PT_DB_IVALUE_H
 
-#include <string>
 #include <Pt/RefCounted.h>
 #include <Pt/Blob.h>
 #include <Pt/Db/Api.h>
+#include <string>
 
 
 namespace Pt {
