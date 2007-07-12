@@ -228,7 +228,7 @@ class WritePropertyInfo : virtual public PropertyInfo
             _setter->invoke(type);
         }
 
-    private:
+    protected:
         Pt::Invokable<T>* _setter;
 };
 
@@ -260,8 +260,37 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
             return any;
         }
 
-        virtual void set(const Pt::Any& any)
-        { WritePropertyInfo<A>::set(any); }
+        virtual void set(const Pt::Any& a)
+        {
+            typedef typename Pt::TypeInfo<A>::ConstReference ConstRefT ;
+
+            try {
+                ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
+                _setter->invoke(val);
+            }
+            catch(const std::bad_cast& e) {
+                std::cerr << e.what() << std::endl;
+                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
+            }
+        }
+
+        virtual void set(const Pt::Variant& variant)
+        {
+            typedef typename Pt::TypeInfo<A>::Value ValueT ;
+
+            ValueT value;
+            PropertyTraits<ValueT>::set(variant, value);
+            _setter->invoke(value);
+        }
+
+        virtual void set(const Pt::SerializationData& sd)
+        {
+            typedef typename Pt::TypeInfo<A>::Value ValueT ;
+
+            ValueT value;
+            PropertyTraits<ValueT>::set(sd, value);
+            _setter->invoke(value);
+        }
 };
 
 
