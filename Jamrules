@@ -6,6 +6,12 @@ JamInclude Jamrules.platinum ;
 #C++FLAGS += [ FDefines "PT_"$(TOOLSET:U) ] ;
 #C++FLAGS += [ FDefines "PT_"$(BYTEORDER:U) ] ;
 
+# set directory to build object files into
+OBJECT_TARGET = tmp ;
+
+# set directory to build library/binary files into
+OUTPUT_TARGET = bin ;
+
 # Print project information
 Echo ;
 Echo "Project                         :" "Platinum C++ Framework" ;

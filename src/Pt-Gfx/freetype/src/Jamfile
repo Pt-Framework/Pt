@@ -43,4 +43,4 @@ Library Pt-Gfx-freetype :
 	[ FDirName winfonts winfnt.c ]
 	;
 
-Library_MakeLocate Pt-Gfx-freetype : bin ;
+Library_MakeLocate Pt-Gfx-freetype : $(OUTPUT_TARGET) ;

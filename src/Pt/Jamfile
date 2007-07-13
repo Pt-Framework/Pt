@@ -25,92 +25,92 @@ SharedLibrary Pt : Any.cpp
                    numpunct.cpp
                    Unicode.cpp ;
 
-SharedLibrary_MakeLocate Pt : bin ;
+SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt ;
 
 PtUnitTest ReflectableTest : ReflectableTest.cpp ;
 Main_LinkSharedLibraries ReflectableTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate ReflectableTest : bin ;
+PtUnitTest_MakeLocate ReflectableTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SerializationTest : SerializationTest.cpp ;
 Main_LinkSharedLibraries SerializationTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate SerializationTest : bin ;
+PtUnitTest_MakeLocate SerializationTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SettingsTest : SettingsTest.cpp ;
 Main_LinkSharedLibraries SettingsTest : Pt Pt-Text Pt-Unit ;
-PtUnitTest_MakeLocate SettingsTest : bin ;
+PtUnitTest_MakeLocate SettingsTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate AnyTest : bin ;
+PtUnitTest_MakeLocate AnyTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest VariantTest : VariantTest.cpp ;
 Main_LinkSharedLibraries VariantTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate VariantTest : bin ;
+PtUnitTest_MakeLocate VariantTest : $(OUTPUT_TARGET) ;
 
 #PtUnitTest PoolTest : PoolTest.cpp ;
 #Main_LinkSharedLibraries PoolTest : Pt ;
-#Main_MakeLocate PoolTest : bin ;
+#Main_MakeLocate PoolTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest DateTest : DateTest.cpp ;
 Main_LinkSharedLibraries DateTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate DateTest : bin ;
+PtUnitTest_MakeLocate DateTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest DateTimeTest : DateTimeTest.cpp ;
 Main_LinkSharedLibraries DateTimeTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate DateTimeTest : bin ;
+PtUnitTest_MakeLocate DateTimeTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest TimeTest : TimeTest.cpp ;
 Main_LinkSharedLibraries TimeTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate TimeTest : bin ;
+PtUnitTest_MakeLocate TimeTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SmartPtrTest : SmartPtrTest.cpp ;
 Main_LinkSharedLibraries SmartPtrTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate SmartPtrTest : bin ;
+PtUnitTest_MakeLocate SmartPtrTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest AtomicTest : AtomicTest.cpp ;
 Main_LinkSharedLibraries AtomicTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate AtomicTest : bin ;
+PtUnitTest_MakeLocate AtomicTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest TypeTraitsTest : TypeTraitsTest.cpp ;
 Main_LinkSharedLibraries TypeTraitsTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate TypeTraitsTest : bin ;
+PtUnitTest_MakeLocate TypeTraitsTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SignalTest : SignalTest.cpp ;
 Main_LinkSharedLibraries SignalTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate SignalTest : bin ;
+PtUnitTest_MakeLocate SignalTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest DelegateTest : DelegateTest.cpp ;
 Main_LinkSharedLibraries DelegateTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate DelegateTest : bin ;
+PtUnitTest_MakeLocate DelegateTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest TypesTest : TypesTest.cpp ;
 Main_LinkSharedLibraries TypesTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate TypesTest : bin ;
+PtUnitTest_MakeLocate TypesTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SingletonTest : SingletonTest.cpp ;
 Main_LinkSharedLibraries SingletonTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate SingletonTest : bin ;
+PtUnitTest_MakeLocate SingletonTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest ByteorderTest : ByteorderTest.cpp ;
 Main_LinkSharedLibraries ByteorderTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate ByteorderTest : bin ;
+PtUnitTest_MakeLocate ByteorderTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest ExceptionTest : ExceptionTest.cpp ;
 Main_LinkSharedLibraries ExceptionTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate ExceptionTest : bin ;
+PtUnitTest_MakeLocate ExceptionTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest CharTest : CharTest.cpp ;
 Main_LinkSharedLibraries CharTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate CharTest : bin ;
+PtUnitTest_MakeLocate CharTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest StringTest : StringTest.cpp ;
 Main_LinkSharedLibraries StringTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate StringTest : bin ;
+PtUnitTest_MakeLocate StringTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest StringStreamTest : StringStreamTest.cpp ;
 Main_LinkSharedLibraries StringStreamTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate StringStreamTest : bin ;
+PtUnitTest_MakeLocate StringStreamTest : $(OUTPUT_TARGET) ;
 
 
 # Define pseudo targets to call from projects

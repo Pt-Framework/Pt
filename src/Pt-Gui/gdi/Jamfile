@@ -10,4 +10,4 @@ Library Pt-Gui-gdi : ApplicationImpl.cpp
                      WidgetPainter.cpp
                      ;
 
-Library_MakeLocate Pt-Gui-gdi : bin ;
+Library_MakeLocate Pt-Gui-gdi : $(OUTPUT_TARGET) ;

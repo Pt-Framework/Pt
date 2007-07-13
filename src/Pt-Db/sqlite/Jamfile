@@ -30,8 +30,8 @@ PT_SQLITE_SOURCES += Connection.cpp
                    ;
 
 Library Pt-Db-sqlite : $(PT_SQLITE_SOURCES) ;
-Library_MakeLocate Pt-Db-sqlite : bin ;
+Library_MakeLocate Pt-Db-sqlite : $(OUTPUT_TARGET) ;
 
 PtUnitTest SqliteTest : SqliteTest.cpp ;
 Main_LinkSharedLibraries SqliteTest : Pt Pt-Db Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate SqliteTest : bin ;
+PtUnitTest_MakeLocate SqliteTest : $(OUTPUT_TARGET) ;

@@ -13,11 +13,11 @@ SharedLibrary Pt-Text : AsciiCodec.cpp
                         Utf32Codec.cpp ;
 
 SharedLibrary_LinkSharedLibraries Pt-Text : Pt ;
-SharedLibrary_MakeLocate Pt-Text : bin ;
+SharedLibrary_MakeLocate Pt-Text : $(OUTPUT_TARGET) ;
 
 PtUnitTest TextStreamTest : TextStreamTest.cpp ;
 Main_LinkSharedLibraries TextStreamTest : Pt-Text Pt Pt-Unit ;
-PtUnitTest_MakeLocate TextStreamTest : bin ;
+PtUnitTest_MakeLocate TextStreamTest : $(OUTPUT_TARGET) ;
 
 
 

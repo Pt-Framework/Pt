@@ -5,6 +5,6 @@ SubDirC++Flags [ FDefines PT_MATH_API_EXPORT ] ;
 
 PtUnitTest AlgorithmTest : AlgorithmTest.cpp ;
 Main_LinkSharedLibraries AlgorithmTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate AlgorithmTest : bin ;
+PtUnitTest_MakeLocate AlgorithmTest : $(OUTPUT_TARGET) ;
 
 

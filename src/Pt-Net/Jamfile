@@ -13,9 +13,9 @@ SharedLibrary Pt-Net : AddrInfo.cpp
 
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
 SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
-SharedLibrary_MakeLocate Pt-Net : bin ;
+SharedLibrary_MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
 
 PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
 Main_LinkSharedLibraries TcpSocketTest : Pt Pt-Net Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate TcpSocketTest : bin ;
+PtUnitTest_MakeLocate TcpSocketTest : $(OUTPUT_TARGET) ;
 

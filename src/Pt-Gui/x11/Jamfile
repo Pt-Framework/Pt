@@ -13,4 +13,4 @@ Library Pt-Gui-x11 : ApplicationImpl.cpp
                      PainterImpl.cpp
                      ;
 
-Library_MakeLocate Pt-Gui-x11 : bin ;
+Library_MakeLocate Pt-Gui-x11 : $(OUTPUT_TARGET) ;
