@@ -110,11 +110,20 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 
 const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
 {
-    Entries::const_iterator it = lowerBound( _entries.begin(), _entries.end(), name);
+/*    Entries::const_iterator it = lowerBound( _entries.begin(), _entries.end(), name);
     if( it == _entries.end() )
         return 0;
 
-    return &( it->value() );
+    return &( it->value() );*/
+
+    Entries::const_iterator it = _entries.begin();
+    for(; it != _entries.end(); ++it)
+    {
+        if(it->name() == name)
+            return &( it->value() );
+    }
+
+    return 0;
 }
 
 
