@@ -8,7 +8,8 @@
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Math.h>
-#include <list>
+
+#include <vector>
 
 namespace Pt {
 namespace Math {
@@ -19,21 +20,27 @@ class BasicPolygon
 {
 public:
     //! A basic class for polygons
-    BasicPolygon(const std::list< BasicPoint<PointT> >& pointList)
+    BasicPolygon(const std::vector< BasicPoint<PointT> >& pointList)
     : _points(pointList)
     {
     }
 
-    BasicPolygon()
+    BasicPolygon(Pt::size_t initialCapacity)
     {
+        _points.reserve(initialCapacity);
     }
 
-    typename std::list< BasicPoint<PointT> >::const_iterator begin() const
+    BasicPolygon()
+    {
+        _points.reserve(2);
+    }
+
+    typename std::vector< BasicPoint<PointT> >::const_iterator begin() const
     {
         return _points.begin();
     }
     
-    typename std::list< BasicPoint<PointT> >::const_iterator end() const
+    typename std::vector< BasicPoint<PointT> >::const_iterator end() const
     {
         return _points.end();
     }
@@ -51,8 +58,8 @@ public:
             return false;
         }
         
-        typename std::list< BasicPoint<T> >::const_iterator      otherIt = other.points().begin();
-        typename std::list< BasicPoint<PointT> >::const_iterator thisIt  = this->_points.begin();
+        typename std::vector< BasicPoint<T> >::const_iterator      otherIt = other.points().begin();
+        typename std::vector< BasicPoint<PointT> >::const_iterator thisIt  = this->_points.begin();
         
         while (thisIt != this->_points.end())
         {
@@ -86,7 +93,7 @@ public:
         _points.clear();
     }
     
-    const std::list< BasicPoint<PointT> >& points() const
+    const std::vector< BasicPoint<PointT> >& points() const
     {
         return _points;
     }
@@ -103,7 +110,7 @@ public:
         bool result = false;
         
         BasicPoint<PointT> last = _points.back();
-        typename std::list< BasicPoint<PointT> >::const_iterator it;
+        typename std::vector< BasicPoint<PointT> >::const_iterator it;
         
         for (it = _points.begin(); it != _points.end(); ++it)
         {
@@ -131,7 +138,7 @@ public:
     }
 
 protected:
-    std::list< BasicPoint<PointT> > _points;
+    std::vector< BasicPoint<PointT> > _points;
 };
 
 } // namespace Math

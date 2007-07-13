@@ -8,6 +8,8 @@
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Math.h>
+#include <Pt/Math/MathUtils.h>
+
 #include <math.h>
 #include <stdexcept>
 #include <algorithm>
@@ -63,8 +65,10 @@ namespace Math {
                     return other.isVertical() && this->isVertical() && other.p1().x() == this->_p1.x();
                 }
             
-                return other.slope()         == this->slope()
-                    && other.axisIntercept() == this->axisIntercept();
+                // Slope and axis intercept have to be (nearly) identical to make
+                // both lines equal.
+                return equal(other.slope(),         this->slope(),         0.00000001)
+                    && equal(other.axisIntercept(), this->axisIntercept(), 0.00000001);
             }
             
             template <typename T>
