@@ -28,8 +28,8 @@ namespace System {
 
 EventLoop::EventLoop()
 : _exitLoop(false)
-, _connectionMutex(Pt::System::Mutex::NonRecursive)
-, _mutex(Pt::System::Mutex::NonRecursive)
+, _connectionMutex(Pt::System::Mutex::Normal)
+, _mutex(Pt::System::Mutex::Normal)
 , _timeout(Selector::WaitInfinite)
 {
     connect(_selector.timeout, timeout);

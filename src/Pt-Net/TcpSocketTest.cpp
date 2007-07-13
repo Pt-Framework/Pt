@@ -40,7 +40,7 @@ class ServerThread : public Pt::System::Thread
     public:
         ServerThread(const std::string& ipaddr, short port)
         : _server(ipaddr, port)
-        , _mutex(Pt::System::Mutex::NonRecursive)
+        , _mutex(Pt::System::Mutex::Normal)
         { 
             _mutex.lock(); 
         }

@@ -69,15 +69,15 @@ namespace System {
             /// Mutex can be created either as recursive or as non-recursive Mutex.
             /// A Mutex to be used in conjunction within the Condition-Class has to be 
             /// non-recursive.
-            enum MutexMode
+            enum Mode
             {
-                Recursive  = 0,
-                NonRecursive  = 1
+                Normal = 0,
+                Recursive  = 1
             };
             //! @brief Default constructor
             ///
             /// Construct the Mutex object.
-            Mutex(MutexMode mode);
+            Mutex(Mode mode);
 
             //! Destructor
             ///
@@ -116,17 +116,15 @@ namespace System {
             void unlock();
 
             //! @brief Returns if Mutex is recursive or non-recursive
-            MutexMode mutexMode()
-            { return _mutexMode;}
-            
+            Mode mode() const
+            { return _mode;}
+
            //! @brief Access to platform specific implementation
             MutexImpl* impl()
             { return _impl; }
 
     private:
-            MutexMode _mutexMode;
-
-
+            Mode _mode;
     };
 
 } // !namespace System

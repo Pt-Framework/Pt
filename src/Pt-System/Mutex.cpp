@@ -28,8 +28,8 @@ namespace Pt {
 namespace System {
 
 
-Mutex::Mutex(MutexMode mode)
-: _mutexMode(mode)
+Mutex::Mutex(Mode mode)
+: _mode(mode)
 {
 	_impl = new MutexImpl(*this, mode);
 }

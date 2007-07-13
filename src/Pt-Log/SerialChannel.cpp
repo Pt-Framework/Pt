@@ -30,7 +30,7 @@ namespace Log {
 
 SerialChannel::SerialChannel()
 : Pt::System::Thread( _threadLoop )
-, _mutex(Pt::System::Mutex::NonRecursive)
+, _mutex(Pt::System::Mutex::Normal)
 , Channel()
 {
     _n = 0;

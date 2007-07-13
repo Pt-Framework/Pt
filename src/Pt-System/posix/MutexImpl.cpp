@@ -33,7 +33,7 @@ namespace Pt {
 namespace System {
 
 
-MutexImpl::MutexImpl(Mutex& mutex, Mutex::MutexMode mode)
+MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
 : _mutex(mutex)
 {
     pthread_mutexattr_t attr;

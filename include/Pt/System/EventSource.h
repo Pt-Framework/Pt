@@ -51,7 +51,7 @@ namespace System {
             /** @brief Constructs a new EventSource
             */
             EventSource()
-            : _mutex(Pt::System::Mutex::NonRecursive)
+            : _mutex(Pt::System::Mutex::Normal)
             { }
 
             /** @brief Destructs the EventSource

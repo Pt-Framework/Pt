@@ -46,7 +46,7 @@ Condition::~Condition()
 
 void Condition::wait(Mutex& mtx)
 {
-   if (mtx.mutexMode() == Mutex::Recursive)
+   if (mtx.mode() == Mutex::Recursive)
         throw SystemError("Condition accepts only non recursive mutexes: ", PT_SOURCEINFO);
    _impl->wait(mtx);
 }
@@ -54,7 +54,7 @@ void Condition::wait(Mutex& mtx)
 
 bool Condition::wait(Mutex& mtx, unsigned int ms)
 {
-     if (mtx.mutexMode() == Mutex::Recursive)
+     if (mtx.mode() == Mutex::Recursive)
         throw SystemError("Condition accepts only non recursive mutexes: ", PT_SOURCEINFO);
     return _impl->wait(mtx, ms);
 }

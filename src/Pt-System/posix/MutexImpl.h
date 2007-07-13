@@ -28,7 +28,7 @@ namespace System {
 
     class MutexImpl {
         public:
-           MutexImpl(Mutex& mutex, Mutex::MutexMode mode);
+           MutexImpl(Mutex& mutex, Mutex::Mode mode);
 
             ~MutexImpl();
 
