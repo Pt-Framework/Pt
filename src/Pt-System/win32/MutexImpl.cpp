@@ -31,7 +31,7 @@ namespace Pt {
 namespace System {
 
 
-MutexImpl::MutexImpl(Mutex& mutex, Mutex::MutexMode mode)
+MutexImpl::MutexImpl(Mutex& mutex, Mutex::Mode mode)
 : _mutex(mutex)
 {
     _handle = CreateMutex(NULL, FALSE, NULL);
@@ -70,7 +70,7 @@ bool MutexImpl::tryLock(unsigned int msec)
     #else
         DWORD ret = WaitForSingleObjectEx(_handle, msec, FALSE);
     #endif
-    
+
     if(ret == WAIT_FAILED) {
         throw SystemError ("Could not wait for mutex: ", PT_SOURCEINFO);
     }

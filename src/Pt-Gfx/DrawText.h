@@ -21,6 +21,8 @@
 #ifndef PT_GFX_DRAWTEXT_H
 #define PT_GFX_DRAWTEXT_H
 
+#include <Pt/Gfx/Api.h>
+
 #include "freetype/include/ft2build.h"
 #include FT_FREETYPE_H
 #include FT_GLYPH_H

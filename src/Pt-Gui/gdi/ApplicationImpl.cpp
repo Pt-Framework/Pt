@@ -154,7 +154,7 @@ void GDIRegistry::unregisterWindowClasses()
 
 GDIEventLoop::GDIEventLoop()
 : _messageLoopThreadId(0)
-, _queueMutex(Pt::System::Mutex::NonRecursive)
+, _queueMutex(Pt::System::Mutex::Normal)
 {
 }
 
@@ -539,7 +539,7 @@ void GDIEventLoop::processMouseWheelMessage(Widget& widget, int wParam, int lPar
     int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
     unsigned int modifiers = createModifiersFromMouseMessage(wParam);
-    
+
     MouseEvent mouseEvent(widget, x, y, (zDelta > 0) ? MouseEvent::WheelUp : MouseEvent::WheelDown, MouseEvent::Press, modifiers);
     eventQueueSignal.send(mouseEvent);
 }

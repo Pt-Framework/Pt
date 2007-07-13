@@ -40,7 +40,7 @@ namespace System {
     class MutexImpl {
         public:
             //! @brief Default Constructor
-            MutexImpl(Mutex& mutex, Mutex::MutexMode mode);
+            MutexImpl(Mutex& mutex, Mutex::Mode mode);
 
             //! @brief Destructor
             ~MutexImpl();
