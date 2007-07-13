@@ -234,19 +234,28 @@ class WritePropertyInfo : virtual public PropertyInfo
 
 
 template <typename R, typename A = R>
-class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyInfo<A> {
+class ReadWritePropertyInfo : public PropertyInfo
+{
     public:
         template <typename R2, typename Object, typename ObjectBase>
         ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
-        : ReadPropertyInfo<R>(parent, getter)
-        , WritePropertyInfo<A>(parent, setter)
-        { }
+        {
+            _getter = new Pt::ConstMethod<R, ObjectBase>( parent, getter );
+            _setter = new Pt::Method<R2, ObjectBase, A>(parent, setter);
+        }
 
         template <typename R2, typename Object, typename ObjectBase>
         ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
-        : ReadPropertyInfo<R>(parent, getter)
-        , WritePropertyInfo<A>(parent, setter)
-        { }
+        {
+            _getter = new Pt::ConstMethod<R, ObjectBase>( parent, getter );
+            _setter = new Pt::Method<R2, ObjectBase, A>(parent, setter);
+        }
+
+        ~ReadWritePropertyInfo()
+        {
+            delete _setter;
+            delete _getter;
+        }
 
         virtual const char* typeName() const
         {
@@ -256,7 +265,7 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
         virtual Pt::Any get() const
         {
             Pt::Any any;
-            any = ReadPropertyInfo<R>::get();
+            any = _getter->operator()();
             return any;
         }
 
@@ -266,9 +275,9 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
 
             try {
                 ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
-                _setter->invoke(val);
+                _setter->invoke( val );
             }
-            catch(const std::bad_cast& e) {
+            catch(const std::exception& e) {
                 std::cerr << e.what() << std::endl;
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
@@ -280,7 +289,7 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
 
             ValueT value;
             PropertyTraits<ValueT>::set(variant, value);
-            _setter->invoke(value);
+            _setter->invoke( value );
         }
 
         virtual void set(const Pt::SerializationData& sd)
@@ -289,8 +298,12 @@ class ReadWritePropertyInfo : public ReadPropertyInfo<R>, public WritePropertyIn
 
             ValueT value;
             PropertyTraits<ValueT>::set(sd, value);
-            _setter->invoke(value);
+            _setter->invoke( value );
         }
+
+    private:
+        Pt::Callable<R>* _getter;
+        Pt::Invokable<A>* _setter;
 };
 
 
