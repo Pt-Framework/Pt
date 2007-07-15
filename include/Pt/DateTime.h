@@ -30,6 +30,7 @@
 
 namespace Pt {
 
+class SerializationNode;
 class SerializationData;
 
 /** @brief Combined %Date and %Time value
@@ -171,7 +172,7 @@ class PT_API DateTime
         Time _time;
 };
 
-PT_API const SerializationData& operator>>(const SerializationData& data, DateTime& time);
+PT_API const SerializationNode& operator>>(const SerializationNode& data, DateTime& time);
 
 PT_API SerializationData& operator<<(SerializationData& data, const DateTime& time);
 

@@ -220,9 +220,13 @@ std::string DateTime::toIsoString() const
 
 
 
-const SerializationData& operator>>(const SerializationData& data, DateTime& datetime)
+const SerializationNode& operator>>(const SerializationNode& node, DateTime& datetime)
 {
-    const SerializationData* subData = data.getData(L"date");
+    const SerializationData* data = node.toData();
+    if(data == 0)
+        throw NoSuchEntry("DateTime", PT_SOURCEINFO);
+
+    const SerializationData* subData = data->getData(L"date");
     if(!subData)
         throw NoSuchEntry("date", PT_SOURCEINFO);
 
@@ -230,7 +234,7 @@ const SerializationData& operator>>(const SerializationData& data, DateTime& dat
     *subData >> date;
     datetime.setDate(date);
 
-    subData = data.getData(L"time");
+    subData = data->getData(L"time");
     if(!subData)
         throw NoSuchEntry("time", PT_SOURCEINFO);
 
@@ -238,7 +242,7 @@ const SerializationData& operator>>(const SerializationData& data, DateTime& dat
     *subData >> time;
     datetime.setTime(time);
 
-    return data;
+    return node;
 }
 
 

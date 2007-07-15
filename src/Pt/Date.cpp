@@ -268,25 +268,29 @@ Archive& operator<<(Archive& ar, const Date& date)
 }*/
 
 
-const SerializationData& operator>>(const SerializationData& data, Date& date)
+const SerializationNode& operator>>(const SerializationNode& node, Date& date)
 {
+    const SerializationData* data = node.toData();
+    if(data == 0)
+        throw NoSuchEntry("date", PT_SOURCEINFO);
+
     int year;
     unsigned month, day;
 
-    const Pt::Variant* value = data.getEntry(L"year");
+    const Pt::Variant* value = data->getEntry(L"year");
     if( value == 0 || !value->get<int>(year) )
         throw NoSuchEntry("year", PT_SOURCEINFO);
 
-    value = data.getEntry(L"month");
+    value = data->getEntry(L"month");
     if( value == 0 || !value->get<unsigned>(month) )
         throw NoSuchEntry("month", PT_SOURCEINFO);
 
-    value = data.getEntry(L"day");
+    value = data->getEntry(L"day");
     if( value == 0 || !value->get<unsigned>(day) )
         throw NoSuchEntry("day", PT_SOURCEINFO);
 
     date.set(year, month, day);
-    return data;
+    return node;
 }
 
 
@@ -298,6 +302,7 @@ SerializationData& operator<<(SerializationData& data, const Date& date)
 
     return data;
 }
+
 
 
 // Return current local date

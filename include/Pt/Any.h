@@ -312,6 +312,10 @@ namespace Pt {
 
             const Any::Value* value() const
             { return _value; }
+
+            Any::Value* value()
+            { return _value; }
+
         private:
             /** @internal */
             Value* _value;

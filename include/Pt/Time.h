@@ -30,6 +30,7 @@
 namespace Pt {
 
 class Archive;
+class SerializationNode;
 class SerializationData;
 
 
@@ -230,7 +231,7 @@ class PT_API Time
 
     //PT_API Archive& operator<<(Archive&, const Time& );
 
-    PT_API const SerializationData& operator>>(const SerializationData& data, Time& time);
+    PT_API const SerializationNode& operator>>(const SerializationNode& data, Time& time);
 
     PT_API SerializationData& operator<<(SerializationData& data, const Time& time);
 

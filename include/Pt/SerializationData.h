@@ -22,8 +22,7 @@
 #include <Pt/String.h>
 #include <Pt/Variant.h>
 #include <Pt/Exception.h>
-#include <map>
-#include <list>
+#include <vector>
 
 
 namespace Pt {
@@ -80,6 +79,18 @@ class PT_API SerializationNode
         bool operator!= (const SerializationNode& other) const
         { return this->name() != other.name(); }
 
+        const SerializationEntry* toEntry() const
+        { return this->_toEntry(); }
+
+        const SerializationData* toData() const
+        { return this->_toData(); }
+
+        SerializationEntry* toEntry()
+        { return this->_toEntry(); }
+
+        SerializationData* toData()
+        { return this->_toData(); }
+
     protected:
         explicit SerializationNode(SerializationData* parent = 0)
         : _parent(parent)
@@ -89,6 +100,14 @@ class PT_API SerializationNode
         : _parent(parent)
         , _name(name)
         {}
+
+        virtual const SerializationEntry* _toEntry() const = 0;
+
+        virtual const SerializationData* _toData() const = 0;
+
+        virtual SerializationEntry* _toEntry() = 0;
+
+        virtual SerializationData* _toData() = 0;
 
     private:
         SerializationData* _parent;
@@ -136,6 +155,19 @@ class PT_API SerializationEntry : public SerializationNode
         void setValue(const Pt::Variant& val)
         { _value = val; }
 
+    protected:
+        const SerializationEntry* _toEntry() const
+        { return this; }
+
+        const SerializationData* _toData() const
+        { return 0; }
+
+        SerializationEntry* _toEntry()
+        { return this; }
+
+        SerializationData* _toData()
+        { return 0; }
+
     private:
         //! @internal
         Pt::Variant _value;
@@ -155,8 +187,36 @@ class PT_API SerializationEntry : public SerializationNode
 class PT_API SerializationData : public SerializationNode
 {
     public:
-        typedef std::list<SerializationData> SubData;
-        typedef std::list<SerializationEntry> Entries;
+        typedef std::vector<SerializationNode*> Nodes;
+
+        class ConstNodeIterator
+        {
+            public:
+                ConstNodeIterator()
+                {}
+
+                ConstNodeIterator(Nodes::const_iterator it)
+                : _it(it)
+                {}
+
+                ConstNodeIterator& operator++()
+                {
+                    ++_it;
+                    return *this;
+                }
+
+                const SerializationNode& operator*() const
+                { return **_it; }
+
+                const SerializationNode* operator->() const
+                { return *_it; }
+
+                bool operator!=(const ConstNodeIterator& other) const
+                { return _it != other._it; }
+
+            private:
+                Nodes::const_iterator _it;
+        };
 
     public:
         /** @brief Construct with parent node
@@ -174,8 +234,13 @@ class PT_API SerializationData : public SerializationNode
         SerializationData(SerializationData* parent, const Pt::String& name);
 
         //! @brief Destructor
-        ~SerializationData()
-        {}
+        ~SerializationData();
+
+        const SerializationNode* getNode(size_t n) const;
+
+        const SerializationNode* getNode(const Pt::String& name) const;
+
+        SerializationNode* getNode(const Pt::String& name);
 
         /** @brief Add subdata as a child
 
@@ -183,6 +248,13 @@ class PT_API SerializationData : public SerializationNode
             node. A reference to the created SerializationData is returned.
         */
         SerializationData& addData(const Pt::String& name);
+
+        /** @brief Add subdata as a child
+
+            A new SerializationData node will be created as a child of this
+            node. A reference to the created SerializationData is returned.
+        */
+        SerializationData& addData();
 
         /** @brief Find object data by name
 
@@ -212,33 +284,137 @@ class PT_API SerializationData : public SerializationNode
         */
         void addEntry(const Pt::String& name, const Pt::Variant& value);
 
-        /** @brief Returns the attributes of this node
-        */
-        const Entries& entries() const
-        { return _entries; }
+        /** @brief Add object attribute
 
-        /** @brief Returns the attributes of this node
+            A new SerializationEntry node will be created and added as a
+            child of this node.
         */
-        Entries& entries()
-        { return _entries; }
+        SerializationEntry& addEntry(const Pt::Variant& value);
 
-        /** @brief Returns the data-node  for a sub-object
-        */
-        const SubData& subData() const
-        { return _subdata; }
+        ConstNodeIterator begin() const
+        { return _nodes.begin(); }
 
-        /** @brief Returns the data-node  for a sub-object
-        */
-        SubData& subData()
-        { return _subdata; }
+        ConstNodeIterator end() const
+        { return _nodes.end(); }
+
+    protected:
+        const SerializationEntry* _toEntry() const
+        { return 0; }
+
+        const SerializationData* _toData() const
+        { return this; }
+
+        SerializationEntry* _toEntry()
+        { return 0; }
+
+        SerializationData* _toData()
+        { return this; }
 
     private:
         //! @internal
-        SubData _subdata;
-
-        //! @internal
-        Entries _entries;
+        Nodes _nodes;
 };
+
+
+//template <typename T>
+//const SerializationNode& operator>>(const SerializationNode& node, T& type);
+
+
+template <typename T>
+inline SerializationNode& insert(SerializationData& data, const T& type)
+{
+    return data.addData() << type;
+}
+
+
+inline const SerializationNode& operator>>(const SerializationNode& node, int& x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<int>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, int x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
+
+inline const SerializationNode& operator>>(const SerializationNode& node, bool x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<bool>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, bool x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
+
+inline const SerializationNode& operator>>(const SerializationNode& node, float x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<float>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, float x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
+
+inline const SerializationNode& operator>>(const SerializationNode& node, double& x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<double>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, double x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
+
+inline const SerializationNode& operator>>(const SerializationNode& node, std::string& x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<std::string>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, const std::string& x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
 
 } // namespace Pt
 

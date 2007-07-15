@@ -36,22 +36,19 @@ void XmlSerializer::putData(const SerializationData& data)
 
 void XmlSerializer::writeData(const SerializationData& data)
 {
-    const SerializationData::Entries& entries = data.entries();
-    SerializationData::Entries::const_iterator it;
-    for(it = entries.begin(); it != entries.end(); ++it)
+    SerializationData::ConstNodeIterator it;
+    for(it = data.begin(); it != data.end(); ++it)
     {
-        const SerializationEntry& entry = *it;
-        _writer->writeElement( entry.name(), Pt::String::widen( entry.value().str() ) );
-    }
-
-    const SerializationData::SubData& sub = data.subData();
-    SerializationData::SubData::const_iterator iter;
-    for(iter = sub.begin(); iter != sub.end(); ++iter)
-    {
-        const SerializationData& subdata = *iter;
-        _writer->writeStartElement( subdata.name() );
-        this->writeData( subdata );
-        _writer->writeEndElement();
+        if(const SerializationEntry* entry = it->toEntry() )
+        {
+            _writer->writeElement( entry->name(), Pt::String::widen( entry->value().str() ) );
+        }
+        else if(const SerializationData* subdata = it->toData() )
+        {
+            _writer->writeStartElement( subdata->name() );
+            this->writeData( *subdata );
+            _writer->writeEndElement();
+        }
     }
 }
 

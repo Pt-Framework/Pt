@@ -233,31 +233,35 @@ Time Time::fromIsoString(const std::string& s)
 }
 
 
-const SerializationData& operator>>(const SerializationData& data, Time& time)
+const SerializationNode& operator>>(const SerializationNode& node, Time& time)
 {
+    const SerializationData* data = node.toData();
+    if(data == 0)
+        throw NoSuchEntry("date", PT_SOURCEINFO);
+
     unsigned hour;
     unsigned min;
     unsigned sec;
     unsigned mssec;
 
-    const Pt::Variant* value = data.getEntry(L"hour");
+    const Pt::Variant* value = data->getEntry(L"hour");
     if( value == 0 || !value->get<unsigned>(hour) )
         throw NoSuchEntry("hour", PT_SOURCEINFO);
 
-    value = data.getEntry(L"minute");
+    value = data->getEntry(L"minute");
     if( value == 0 || !value->get<unsigned>(min) )
         throw NoSuchEntry("minute", PT_SOURCEINFO);
 
-    value = data.getEntry(L"second");
+    value = data->getEntry(L"second");
     if( value == 0 || !value->get<unsigned>(sec) )
         throw NoSuchEntry("second", PT_SOURCEINFO);
 
-    value = data.getEntry(L"millisec");
+    value = data->getEntry(L"millisec");
     if( value == 0 || !value->get<unsigned>(mssec) )
         throw NoSuchEntry("millisec", PT_SOURCEINFO);
 
     time.set(hour, min, sec, mssec);
-    return data;
+    return node;
 }
 
 

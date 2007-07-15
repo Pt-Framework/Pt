@@ -66,30 +66,86 @@ SerializationData::SerializationData(SerializationData* parent, const Pt::String
 {}
 
 
+SerializationData::~SerializationData()
+{
+    Nodes::iterator it;
+    for(it = _nodes.begin(); it != _nodes.end(); ++it)
+    {
+        delete *it;
+    }
+}
+
+
+const SerializationNode* SerializationData::getNode(size_t n) const
+{
+    if( n >= _nodes.size() )
+        return 0;
+
+    return _nodes[n];
+}
+
+
+const SerializationNode* SerializationData::getNode(const Pt::String& name) const
+{
+    Nodes::const_iterator it = _nodes.begin();
+    for(; it != _nodes.end(); ++it)
+    {
+        if( (*it)->name() == name)
+            return (*it);
+    }
+
+    return 0;
+}
+
+
+SerializationNode* SerializationData::getNode(const Pt::String& name)
+{
+    Nodes::iterator it = _nodes.begin();
+    for(; it != _nodes.end(); ++it)
+    {
+        if( (*it)->name() == name)
+            return (*it);
+    }
+
+    return 0;
+}
+
+
 void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
 {
-    SerializationEntry entry(*this, name, value);
-    Entries::iterator it = std::upper_bound( _entries.begin(), _entries.end(), entry);
-    _entries.insert( it, entry );
+    SerializationEntry* entry = new SerializationEntry(*this, name, value);
+    _nodes.push_back(entry);
+}
+
+
+SerializationEntry& SerializationData::addEntry(const Pt::Variant& value)
+{
+    SerializationEntry* entry = new SerializationEntry(*this, Pt::String(), value);
+    _nodes.push_back(entry);
+    return *entry;
 }
 
 
 SerializationData& SerializationData::addData(const Pt::String& name)
 {
-    SerializationData data = SerializationData(this, name);
-    _subdata.push_back(data);
-    return _subdata.back();
+    SerializationData* data = new SerializationData(this, name);
+    _nodes.push_back(data);
+    return *data;
 }
 
 
+SerializationData& SerializationData::addData()
+{
+    SerializationData* data = new SerializationData(this);
+    _nodes.push_back(data);
+    return *data;
+}
+
 const SerializationData* SerializationData::getData(const Pt::String& name) const
 {
-    SubData::const_iterator it = _subdata.begin();
-    for(; it != _subdata.end(); ++it)
-    {
-        if(it->name() == name)
-            return &(*it);
-    }
+    const SerializationNode* node = this->getNode(name);
+    if(node)
+        return node->toData();
 
     return 0;
 }
@@ -97,12 +153,9 @@ const SerializationData* SerializationData::getData(const Pt::String& name) cons
 
 SerializationData* SerializationData::getData(const Pt::String& name)
 {
-    SubData::iterator it = _subdata.begin();
-    for(; it != _subdata.end(); ++it)
-    {
-        if(it->name() == name)
-            return &(*it);
-    }
+    SerializationNode* node = this->getNode(name);
+    if(node)
+        return node->toData();
 
     return 0;
 }
@@ -110,23 +163,12 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 
 const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
 {
-/*    Entries::const_iterator it = lowerBound( _entries.begin(), _entries.end(), name);
-    if( it == _entries.end() )
-        return 0;
-
-    return &( it->value() );*/
-
-    Entries::const_iterator it = _entries.begin();
-    for(; it != _entries.end(); ++it)
-    {
-        if(it->name() == name)
-            return &( it->value() );
-    }
+    const SerializationNode* node = this->getNode(name);
+    if(node)
+        return &(node->toEntry()->value());
 
     return 0;
 }
 
 
 } // namespace Pt
-
-

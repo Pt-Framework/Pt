@@ -28,6 +28,7 @@
 namespace Pt {
 
 class Archive;
+class SerializationNode;
 class SerializationData;
 
 
@@ -248,7 +249,7 @@ class PT_API Date
         unsigned _julian;
 };
 
-PT_API const SerializationData& operator>>(const SerializationData& data, Date& d);
+PT_API const SerializationNode& operator>>(const SerializationNode& data, Date& d);
 
 PT_API SerializationData& operator<<(SerializationData& data, const Date& d);
 
