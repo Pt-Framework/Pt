@@ -43,7 +43,7 @@ namespace Unit {
     class PT_UNIT_API TestSchedule : public TestProtocol
     {
         public:
-            typedef std::multimap<std::string, const Args*> TestMap;
+            //typedef std::multimap<std::string, const Args*> TestMap;
 
         public:
             /** @brief Include a method in the schedule
@@ -54,7 +54,7 @@ namespace Unit {
 
                 @param testName Name of the test to be run.
             */
-            void includeTest(const std::string& testName);
+            //void includeTest(const std::string& testName);
 
             /** @brief Include a method in the schedule
 
@@ -69,7 +69,7 @@ namespace Unit {
                 @param testName Name of the test to be run
                 @param args Arguments to be passed to the test
             */
-            void includeTest(const std::string& testName, const Args& args);
+            //void includeTest(const std::string& testName, const Args& args);
 
             /** @brief Executes the protocol
 
@@ -82,8 +82,8 @@ namespace Unit {
             void run(TestSuite& suite);
 
         private:
-            Args _nullArgs;
-            TestMap _items;
+            //Args _nullArgs;
+            //TestMap _items;
     };
 
 } // namespace Unit

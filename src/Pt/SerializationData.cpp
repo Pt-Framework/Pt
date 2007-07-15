@@ -113,6 +113,7 @@ SerializationNode* SerializationData::getNode(const Pt::String& name)
 
 void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
 {
+    //std::cerr << "entry: " << name.narrow() << std::endl;
     SerializationEntry* entry = new SerializationEntry(*this, name, value);
     _nodes.push_back(entry);
 }
@@ -120,6 +121,7 @@ void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& valu
 
 SerializationEntry& SerializationData::addEntry(const Pt::Variant& value)
 {
+    //std::cerr << "entry: " << std::endl;
     SerializationEntry* entry = new SerializationEntry(*this, Pt::String(), value);
     _nodes.push_back(entry);
     return *entry;
@@ -128,6 +130,7 @@ SerializationEntry& SerializationData::addEntry(const Pt::Variant& value)
 
 SerializationData& SerializationData::addData(const Pt::String& name)
 {
+    //std::cerr << "data: " << name.narrow() << std::endl;
     SerializationData* data = new SerializationData(this, name);
     _nodes.push_back(data);
     return *data;
@@ -136,6 +139,7 @@ SerializationData& SerializationData::addData(const Pt::String& name)
 
 SerializationData& SerializationData::addData()
 {
+    //std::cerr << "data: " << std::endl;
     SerializationData* data = new SerializationData(this);
     _nodes.push_back(data);
     return *data;

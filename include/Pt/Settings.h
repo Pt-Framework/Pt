@@ -32,23 +32,15 @@
 
 namespace Pt {
 
-class Settings : public SerializationData
+class PT_API Settings : public SerializationData
 {
     public:
         Settings()
         {}
 
-        void load(std::basic_istream<Pt::Char>& is)
-        {
-            //SettingsReader reader(is);
-            //reader.read(*this);
-        }
+        void load(std::basic_istream<Pt::Char>& is);
 
-        void save(std::basic_ostream<Pt::Char>& is) const
-        {
-            //SettingsWriter writer(is);
-            //reader.read(*this);
-        }
+        void save(std::basic_ostream<Pt::Char>& is) const;
 
         template <typename T>
         const void get(T& type, const Pt::String& name) const
@@ -62,7 +54,37 @@ class Settings : public SerializationData
 };
 
 
-class SettingsReader
+class PT_API SettingsWriter
+{
+    public:
+        SettingsWriter(std::basic_ostream<Pt::Char>& os)
+        : _os(&os)
+        {   /* _write = &SettingsWriter::writeParent;*/ }
+
+        ~SettingsWriter()
+        {}
+
+        void write(const SerializationData& sd);
+
+    protected:
+        void writeParent(const SerializationData& sd);
+
+        void writeChild(const SerializationNode& node);
+
+        void writeEntry(const Pt::String& name, const Pt::String& value);
+
+        void writeEntry2(const Pt::String& name, const Pt::String& value);
+
+        void writeSection(const Pt::String& prefix);
+
+    private:
+        std::basic_ostream<Pt::Char>* _os;
+        typedef void (SettingsWriter::*Write)(const SerializationNode&);
+        Write _write;
+};
+
+
+class PT_API SettingsReader
 {
     public:
         Pt::Char eof;

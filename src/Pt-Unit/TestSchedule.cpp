@@ -23,7 +23,7 @@
 using namespace Pt;
 using namespace Unit;
 
-
+/*
 void TestSchedule::includeTest(const std::string& testName)
 {
     _items.insert( std::make_pair(testName, &_nullArgs) );
@@ -33,11 +33,11 @@ void TestSchedule::includeTest(const std::string& testName, const Args& args)
 {
     _items.insert( std::make_pair(testName, &args) );
 }
-
+*/
 void TestSchedule::run(TestSuite& suite)
 {
-    for(TestMap::iterator it = _items.begin(); it != _items.end(); ++it)
+    /*for(TestMap::iterator it = _items.begin(); it != _items.end(); ++it)
     {
         suite.runTest(it->first, *it->second);
-    }
+    }*/
 }

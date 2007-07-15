@@ -61,11 +61,10 @@ LogManager::LogManager()
     // initialise properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    SettingsReader reader(ts);
-    reader.read(_settings);
+    _settings.load(ts);
     _settings.get(*this, L"Pt-Log");
 
-    _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
+    _logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
 
     logger.release();
     logTarget.release();

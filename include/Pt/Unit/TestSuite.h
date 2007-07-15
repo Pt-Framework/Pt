@@ -65,11 +65,12 @@ namespace Unit {
             class Context : public TestContext
             {
                 public:
-                    Context(TestSuite& suite, const std::string& name, const Args& args)
+                    Context(TestSuite& suite, const std::string& name, const Any* args, size_t argCount)
                     : TestContext(suite)
                     , _suite(suite)
                     , _methodName( name )
-                    , _args(&args)
+                    , _args(args)
+                    , _argCount(argCount)
                     , _testName( _suite.name() + "::" + name )
                     , _setUp(false)
                     { }
@@ -88,51 +89,30 @@ namespace Unit {
                     const std::string& testName() const
                     { return _testName; }
 
-                    //virtual void setData(const Archive& ar)
-                    //{}
-
                 protected:
                     void _run()
                     {
                         _suite.setUp();
                         _setUp = true;
-                        _suite.call(_methodName, *_args);
+                        if(_argCount == 0)
+                            _suite.call(_methodName, 0, 0);
+                        else
+                            _suite.call(_methodName, _args, _argCount);
                     }
 
-                    void setArgs(const Args& args)
+                    void setArgs(const Any* args, size_t argCount)
                     {
-                        _args = &args;
+                        _args = args;
+                        _argCount = argCount;
                     }
 
                 private:
                     TestSuite& _suite;
                     std::string _methodName;
-                    const Args* _args;
+                    const Any* _args;
+                    size_t _argCount;
                     std::string _testName;
                     bool _setUp;
-            };
-
-            template <typename A1>
-            class Context1 : public Context
-            {
-                public:
-                    Context1(TestSuite& suite, const std::string& name)
-                    : Context( suite, name, _args )
-                    {}
-
-                    /*virtual void setData(const Archive& ar)
-                    {
-                        typedef typename Pt::TypeInfo<A1>::Value ValueA1 ;
-                        ValueA1 a1;
-                        ar >> a1;
-                        _args.clear();
-                        _args.push_back(a1);
-
-                        this->setArgs( _args );
-                    }*/
-
-                private:
-                    Args _args;
             };
 
         public:
@@ -198,25 +178,7 @@ namespace Unit {
                 @param name Name of the method to be run
                 @param args Arguments to invoke the method
             */
-            void runTest( const std::string& name, const Args& args = Args() );
-
-            template <typename C, typename A1>
-            void registerTest(const std::string& name, C& parent, void (C::*memFunc)(A1) )
-            {
-                this->registerMethod(name, parent, memFunc);
-
-                Context1<A1>* ctx = new Context1<A1>(*this, name);
-                _contexts[name] = ctx;
-            }
-
-            /*void runTest( const std::string& name, const Archive& archive )
-            {
-                if( _contexts.find(name) != _contexts.end() )
-                {
-                     _contexts[name]->setData(archive);
-                     _contexts[name]->run();
-                }
-            }*/
+            void runTest( const std::string& name, const Any* args = 0, size_t argCount = 0 );
 
         protected:
             /** @brief The assoziated test protocol

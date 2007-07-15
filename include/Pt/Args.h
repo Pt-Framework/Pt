@@ -19,13 +19,13 @@
 
 #ifndef Pt_Args_h
 #define Pt_Args_h
-
+/*
 #include <Pt/Any.h>
 #include <Pt/SourceInfo.h>
 
 #include <stdexcept>
 #include <vector>
-
+*/
 
 //! \addtogroup Pt
 namespace Pt {
@@ -33,7 +33,7 @@ namespace Pt {
 /** @brief Method invokation arguments
     @ingroup Reflection
 */
-class Args
+/*class Args
 {
     public:
         Args()
@@ -68,6 +68,9 @@ class Args
         void clear()
         { _args.clear(); }
 
+        size_t size() const
+        { return _args.size(); }
+
         const Any& get(size_t n) const
         {
             //TODO: different exception type?
@@ -85,7 +88,7 @@ class Args
 
     private:
         std::vector<Any> _args;
-};
+};*/
 
 
 } // namespace Pt

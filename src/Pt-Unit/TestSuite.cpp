@@ -33,7 +33,7 @@ inline void TestProtocol::run(TestSuite& suite)
     Reflectable::MethodIterator it;
     for(it = suite.methodsBegin(); it != suite.methodsEnd(); ++it)
     {
-        suite.runTest( it->name(), Args() );
+        suite.runTest( it->name(), 0, 0 );
     }
 }
 
@@ -56,9 +56,9 @@ void TestSuite::run()
     _protocol->run(*this);
 }
 
-void TestSuite::runTest(const std::string& name, const Args& args)
+void TestSuite::runTest(const std::string& name, const Any* args, size_t argCount)
 {
-    Context ctx(*this, name, args);
+    Context ctx(*this, name, args, argCount);
     ctx.run();
 }
 

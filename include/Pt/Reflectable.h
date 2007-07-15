@@ -76,7 +76,7 @@ class PT_API Reflectable
 
         void setProperty(const std::string& name, const Pt::Any& value);
 
-        Pt::Any call(const std::string& name, const Args& args);
+        Pt::Any call(const std::string& name, const Any* args, size_t argCount);
 
         void call(const std::string& name, const SerializationData& args);
 

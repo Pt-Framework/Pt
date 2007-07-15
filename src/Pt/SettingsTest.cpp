@@ -19,6 +19,7 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Settings.h"
+#include <Pt/StringStream.h>
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
@@ -60,6 +61,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( s)
             PT_UNIT_ASSERT( *s == "3")
 
+            Pt::StringStream sout;
+            settings.save(sout);
+            std::cerr << sout.str().narrow() << std::endl;
+
             s = settings.getData(L"a.b.c.d")->getEntry(L"u");
             PT_UNIT_ASSERT( s)
             PT_UNIT_ASSERT( *s == "4")
@@ -88,7 +93,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
         void PlainArray()
         {
-            /*std::stringstream ss;
+            std::stringstream ss;
             ss << "a.b.c = { 1,2,3 }\n";
             ss << "d.e.f = {1,2,3}\n";
             ss << "g.h.i = { 1,\"\\n2\", 3 }\n";
@@ -100,19 +105,19 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             std::string concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
-            for( Pt::Settings::Entries::const_iterator it = a->entries().begin(); it != a->entries().end(); ++it)
+            for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += it->value().str();
+                concat += (*it).toEntry()->value().str();
             }
             PT_UNIT_ASSERT( concat == "123")
 
             concat.clear();
             a = settings.getData(L"g.h.i");
-            for(Pt::Settings::Entries::const_iterator it = a->entries().begin(); it != a->entries().end(); ++it)
+            for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += it->value().str();
+                concat += (*it).toEntry()->value().str();
             }
-            PT_UNIT_ASSERT( concat == "1\n23")*/
+            PT_UNIT_ASSERT( concat == "1\n23")
         }
 
         void PlainQoutedArray()
@@ -207,6 +212,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             }
 
             PT_UNIT_ASSERT( concat == "3")
+
+            Pt::StringStream sout;
+            settings.save(sout);
+            std::cerr << sout.str().narrow() << std::endl;
         }
 };
 

@@ -44,7 +44,7 @@ namespace Pt {
 
             virtual const std::type_info& retType() const = 0;
 
-            virtual Pt::Any call(const Args& args) = 0;
+            virtual Pt::Any call(const Any* args, size_t argCount) = 0;
 
             virtual void call(const SerializationData& args) const = 0;
 

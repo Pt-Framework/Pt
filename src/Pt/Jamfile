@@ -12,6 +12,7 @@ SharedLibrary Pt : Any.cpp
                    DateTime.cpp
                    PropertyInfo.cpp
                    Reflectable.cpp
+                   Settings.cpp
                    Signal.cpp
                    StringStream.cpp
                    StringList.cpp

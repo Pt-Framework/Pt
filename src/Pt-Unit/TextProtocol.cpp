@@ -162,7 +162,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         std::string methodName;
         std::string paramType;
         Pt::Any value;
-        Pt::Args args;
+        //Pt::Args args;
 
         lineReader >> token;
 

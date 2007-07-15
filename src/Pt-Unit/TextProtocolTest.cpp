@@ -54,7 +54,7 @@ class TextProtocolTest : public Pt::Unit::TestSuite
         TextProtocolTest()
         : Pt::Unit::TestSuite("TextProtocolTest", tprot)
         {
-            Pt::Unit::TestSuite::registerTest( "test", *this, &TextProtocolTest::test );
+            Pt::Unit::TestSuite::registerMethod( "test", *this, &TextProtocolTest::test );
         }
 
     protected:

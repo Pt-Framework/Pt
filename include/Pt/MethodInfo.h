@@ -49,13 +49,16 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
         : Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            return Method<R, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( a.get(0) ),
-                                                           any_cast<A2>( a.get(1) ),
-                                                           any_cast<A3>( a.get(2) ),
-                                                           any_cast<A4>( a.get(3) ),
-                                                           any_cast<A5>( a.get(4) ));
+            if(argCount < 5)
+                throw std::out_of_range("Not enough arguments");
+
+            return Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( args[0] ),
+                                                              any_cast<A2>( args[1] ),
+                                                              any_cast<A3>( args[2] ),
+                                                              any_cast<A4>( args[3] ),
+                                                              any_cast<A5>( args[4] ) );
         }
 
         virtual void call(const SerializationData& args) const
@@ -83,13 +86,16 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
         : Method<void, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( a.get(0) ),
-                                                       any_cast<A2>( a.get(1) ),
-                                                       any_cast<A3>( a.get(2) ),
-                                                       any_cast<A4>( a.get(3) ),
-                                                       any_cast<A5>( a.get(4) ) );
+            if(argCount < 5)
+                throw std::out_of_range("Not enough arguments");
+
+            Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( args[0] ),
+                                                       any_cast<A2>( args[1] ),
+                                                       any_cast<A3>( args[2] ),
+                                                       any_cast<A4>( args[3] ),
+                                                       any_cast<A5>( args[4] ) );
 
             return Any();
         }
@@ -119,12 +125,15 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
         : Method<R, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            return Method<R, C, A1, A2, A3, A4>::call( any_cast<A1>( a.get(0) ),
-                                                any_cast<A2>( a.get(1) ),
-                                                any_cast<A3>( a.get(2) ),
-                                                any_cast<A4>( a.get(3) ) );
+            if(argCount < 4)
+                throw std::out_of_range("Not enough arguments");
+
+            return Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( args[0] ),
+                                                          any_cast<A2>( args[1] ),
+                                                          any_cast<A3>( args[2] ),
+                                                          any_cast<A4>( args[3] ) );
         }
 
         virtual void call(const SerializationData& args) const
@@ -151,12 +160,15 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         : Method<void, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( a.get(0) ),
-                                                   any_cast<A2>( a.get(1) ),
-                                                   any_cast<A3>( a.get(2) ),
-                                                   any_cast<A4>( a.get(3) ) );
+            if(argCount < 4)
+                throw std::out_of_range("Not enough arguments");
+
+            Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( args[0] ),
+                                                   any_cast<A2>( args[1] ),
+                                                   any_cast<A3>( args[2] ),
+                                                   any_cast<A4>( args[3] ) );
             return Any();
         }
 
@@ -184,11 +196,14 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
         : Method<R, C, A1, A2, A3>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            return Method<R, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
-                                                   any_cast<A2>( a.get(1) ),
-                                                   any_cast<A3>( a.get(2) ));
+            if(argCount < 3)
+                throw std::out_of_range("Not enough arguments");
+
+            return Method<void, C, A1, A2, A3>::call( any_cast<A1>( args[0] ),
+                                                      any_cast<A2>( args[1] ),
+                                                      any_cast<A3>( args[2] ));
         }
 
         virtual void call(const SerializationData& args) const
@@ -215,11 +230,14 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
         , Method<void, C, A1, A2, A3>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            Method<void, C, A1, A2, A3>::call( any_cast<A1>( a.get(0) ),
-                                               any_cast<A2>( a.get(1) ),
-                                               any_cast<A3>( a.get(2) ));
+            if(argCount < 3)
+                throw std::out_of_range("Not enough arguments");
+
+            Method<void, C, A1, A2, A3>::call( any_cast<A1>( args[0] ),
+                                               any_cast<A2>( args[1] ),
+                                               any_cast<A3>( args[2] ));
             return Any();
         }
 
@@ -247,10 +265,13 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
         , Method<R, C, A1, A2>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            return Method<R, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
-                                               any_cast<A2>( a.get(1) ) );
+            if(argCount < 2)
+                throw std::out_of_range("Not enough arguments");
+
+            return Method<R, C, A1, A2>::call( any_cast<A1>( args[0] ),
+                                               any_cast<A2>( args[1] ) );
         }
 
         virtual void call(const SerializationData& args) const
@@ -276,10 +297,13 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
         , Method<void, C, A1, A2>(object, memFunc)
         {}
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            Method<void, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
-                                           any_cast<A2>( a.get(1) ) );
+            if(argCount < 2)
+                throw std::out_of_range("Not enough arguments");
+
+            Method<void, C, A1, A2>::call( any_cast<A1>( args[0] ),
+                                           any_cast<A2>( args[1] ) );
 
             return Any();
         }
@@ -314,9 +338,12 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
         { delete _cb; }
 
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            return _cb->call( any_cast<A1>( a.get(0) ) );
+            if(argCount < 1)
+                throw std::out_of_range("Not enough arguments");
+
+            return _cb->call( any_cast<A1>(*args) );
         }
 
         virtual void call(const SerializationData& args) const
@@ -358,9 +385,12 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         ~MethodInfo()
         { delete _cb; }
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            _cb->call( any_cast<A1>( a.get(0) ) );
+            if(argCount < 1)
+                throw std::out_of_range("Not enough arguments");
+
+            _cb->call( any_cast<A1>(*args) );
             return Any();
         }
 
@@ -401,7 +431,7 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
         ~MethodInfo()
         { delete _cb; }
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
             return _cb->call();
         }
@@ -437,9 +467,9 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pu
         ~MethodInfo()
         { delete _cb; }
 
-        Pt::Any call(const Args& a)
+        Pt::Any call(const Any* args, size_t argCount)
         {
-            _cb->invoke();;
+            _cb->invoke();
             return Any();
         }
 
