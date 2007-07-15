@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
- *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,51 +16,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_PropertyValue_h
-#define Pt_PropertyValue_h
 
-#include <Pt/Api.h>
-#include <Pt/Any.h>
-#include <Pt/Exception.h>
+#include "Pt/Reflectable.h"
 
 
 namespace Pt {
 
-/** @brief Value type registerable as property
-    @ingroup Reflection
-*/
-template <typename T>
-class PropertyValue
+PropertyNotReadable::PropertyNotReadable(const std::string& propertyName, const SourceInfo& si)
+: std::logic_error("Property '" + propertyName + "' is not readable" + si)
 {
-    public:
-        PropertyValue( const T& value = T() )
-        : _value(value)
-        {}
-
-        const T& get() const
-        { 
-            const Any::Value* v = _value.value();
-            const Any::BasicValue<T>* b = static_cast< const Any::BasicValue<T>* >(v);
-            return b->value();
-        }
-
-        T& get()
-        {
-            Any::Value* v = _value.value();
-            Any::BasicValue<T>* b = static_cast<Any::BasicValue<T>* >(v);
-            return b->value();
-        }
-
-        void set( const T& value )
-        { _value = value; }
-
-        const Pt::Any& value() const
-        { return _value; }
-
-    protected:
-        Pt::Any _value;
-};
-
 }
 
-#endif
+PropertyNotReadable::~PropertyNotReadable() throw()
+{
+}
+
+
+PropertyNotWritable::PropertyNotWritable(const std::string& propertyName, const SourceInfo& si)
+: std::logic_error("Property '" + propertyName + "' is not writable" + si)
+{
+}
+
+
+PropertyNotWritable::~PropertyNotWritable() throw()
+{
+}
+
+} // namespace Pt

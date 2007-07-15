@@ -25,6 +25,7 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/MethodInfoBase.h>
+#include <Pt/SerializationData.h>
 
 
 namespace Pt {
@@ -55,6 +56,11 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
                                                            any_cast<A3>( a.get(2) ),
                                                            any_cast<A4>( a.get(3) ),
                                                            any_cast<A5>( a.get(4) ));
+        }
+
+        virtual void call(const SerializationData& args) const
+        {
+
         }
 };
 
@@ -87,6 +93,11 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
 
             return Any();
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+
+        }
 };
 
 
@@ -114,6 +125,11 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
                                                 any_cast<A2>( a.get(1) ),
                                                 any_cast<A3>( a.get(2) ),
                                                 any_cast<A4>( a.get(3) ) );
+        }
+
+        virtual void call(const SerializationData& args) const
+        {
+
         }
 };
 
@@ -143,6 +159,11 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
                                                    any_cast<A4>( a.get(3) ) );
             return Any();
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+
+        }
 };
 
 
@@ -169,6 +190,11 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
                                                    any_cast<A2>( a.get(1) ),
                                                    any_cast<A3>( a.get(2) ));
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+
+        }
 };
 
 
@@ -184,8 +210,9 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
         typedef void (C::*MemFuncT)(A1, A2, A3);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<void, C, A1, A2, A3>(object, memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3>(name)
+        , Method<void, C, A1, A2, A3>(object, memFunc)
         {}
 
         Pt::Any call(const Args& a)
@@ -194,6 +221,11 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
                                                any_cast<A2>( a.get(1) ),
                                                any_cast<A3>( a.get(2) ));
             return Any();
+        }
+
+        virtual void call(const SerializationData& args) const
+        {
+
         }
 };
 
@@ -210,14 +242,20 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
         typedef R (C::*MemFuncT)(A1, A2);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<R, C, A1, A2>(object, memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2>(name)
+        , Method<R, C, A1, A2>(object, memFunc)
         {}
 
         Pt::Any call(const Args& a)
         {
             return Method<R, C, A1, A2>::call( any_cast<A1>( a.get(0) ),
                                                any_cast<A2>( a.get(1) ) );
+        }
+
+        virtual void call(const SerializationData& args) const
+        {
+
         }
 };
 
@@ -233,8 +271,9 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
         typedef void (C::*MemFuncT)(A1, A2);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<void, C, A1, A2>(object, memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2>(name)
+        , Method<void, C, A1, A2>(object, memFunc)
         {}
 
         Pt::Any call(const Args& a)
@@ -244,6 +283,11 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
 
             return Any();
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+
+        }
 };
 
 
@@ -251,21 +295,43 @@ template < typename R,
            class C,
            typename A1>
 class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1>
-                                                                   , private Method<R, C, A1>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1);
+        typedef R (C::*ConstMemFuncT)(A1) const;
 
     public:
         MethodInfo(C* object, MemFuncT memFunc)
-        : Method<R, C, A1>(object, memFunc)
+        : _cb( new Method<R, C, A1>(object, memFunc) )
         {}
+
+        MethodInfo(C* object, ConstMemFuncT memFunc)
+        : _cb( new ConstMethod<R, C, A1>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
+
 
         Pt::Any call(const Args& a)
         {
-            return Method<R, C, A1>::call( any_cast<A1>( a.get(0) ) );
+            return _cb->call( any_cast<A1>( a.get(0) ) );
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if(node)
+            {
+                *node >> a1;
+                _cb->invoke(a1);
+            }
+        }
+
+    private:
+        Callable<void, A1>* _cb;
 };
 
 
@@ -279,12 +345,14 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         typedef void (C::*ConstMemFuncT)(A1) const;
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : _cb( new Method<void, C, A1>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C, A1>(name)
+        , _cb( new Method<void, C, A1>(object, memFunc) )
         {}
 
-        MethodInfo(C* object, ConstMemFuncT memFunc)
-        : _cb( new ConstMethod<void, C, A1>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<void, C, A1>(name)
+        , _cb( new ConstMethod<void, C, A1>(object, memFunc) )
         {}
 
         ~MethodInfo()
@@ -296,6 +364,17 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
             return Any();
         }
 
+        virtual void call(const SerializationData& args) const
+        {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if(node)
+            {
+                *node >> a1;
+                _cb->invoke(a1);
+            }
+        }
+
     private:
         Callable<void, A1>* _cb;
 };
@@ -304,42 +383,73 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
 template < typename R,
            class C >
 class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C>
-                                                                         , private Method<R, C>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)();
+        typedef R (C::*ConstMemFuncT)() const;
 
     public:
         MethodInfo(C* object, MemFuncT memFunc)
-        :  Method<R, C>(object, memFunc)
+        : _cb( new Method<R, C>(object, memFunc) )
         {}
+
+        MethodInfo(C* object, ConstMemFuncT memFunc)
+        : _cb( new ConstMethod<R, C>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Args& a)
         {
-            return Method<R, C>::call();
+            return _cb->call();
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+            _cb->invoke();
+        }
+
+    private:
+        Callable<R>* _cb;
 };
 
 
 template < class C >
 class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C>
-                                                                            , private Method<void, C>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)();
+        typedef void (C::*ConstMemFuncT)() const;
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        :  Method<void, C>(object, memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C>(name)
+        ,_cb( new Method<void, C>(object, memFunc) )
         {}
+
+        MethodInfo(C* object, ConstMemFuncT memFunc)
+        : _cb( new ConstMethod<void, C>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Args& a)
         {
-            Method<void, C>::call();
+            _cb->invoke();;
             return Any();
         }
+
+        virtual void call(const SerializationData& args) const
+        {
+            _cb->invoke();
+        }
+
+    private:
+        Callable<void>* _cb;
 };
 
 } // namespace Pt

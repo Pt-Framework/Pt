@@ -22,10 +22,8 @@
 
 namespace Pt {
 
-
 NoSuchProperty::NoSuchProperty(const std::string& propertyName, const SourceInfo& si)
 : std::logic_error("Property '" + propertyName + "' not found" + si)
-, _propertyName(propertyName)
 {
 }
 
@@ -36,7 +34,6 @@ NoSuchProperty::~NoSuchProperty() throw()
 
 NoSuchMethod::NoSuchMethod(const std::string& methodName, const SourceInfo& si)
 : std::logic_error("Method '" + methodName + "' not found" + si)
-, _methodName(methodName)
 {
 }
 
@@ -45,73 +42,215 @@ NoSuchMethod::~NoSuchMethod() throw()
 }
 
 
+typedef std::vector<PropertyInfo*> Properties;
+typedef std::vector<CallableInfo*> Methods;
+
+
+struct ReflectableData
+{
+    Methods methods;
+    Properties properties;
+    std::string identifierName;
+};
+
 
 Reflectable::Reflectable(const std::string& name)
-: _identiferName(name)
+: _data(0)
 {
+    _data = new ReflectableData();
+    _data->identifierName = name;
+}
+
+
+Reflectable::Reflectable(const Reflectable& other)
+{
+    _data = new ReflectableData();
+    _data->identifierName = other._data->identifierName;
 }
 
 
 Reflectable::~Reflectable()
 {
-    for(PropertyMap::iterator it = _properties.begin(); it != _properties.end(); ++it) {
-        delete it->second;
-    }
-    _properties.clear();
-
-    MethodMap::iterator it;
-    for( it = _methods.begin(); it != _methods.end(); ++it)
+    Properties::iterator iter;
+    for( iter = _data->properties.begin(); iter != _data->properties.end(); ++iter)
     {
-        delete it->second;
+        delete *iter;
     }
 
-    _methods.clear();
+    Methods::iterator it;
+    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+    {
+        delete *it;
+    }
+
+    delete _data;
 }
 
 
-Pt::Any Reflectable::property(const std::string& name)
+const std::string& Reflectable::getIdentifierName() const
 {
-    PropertyMap::iterator it = _properties.find(name);
+    return _data->identifierName;
+}
 
-    if(it == _properties.end())
-        throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 
-    return it->second->get();
+Pt::Any Reflectable::property(const std::string& name) const
+{
+    Properties::const_iterator it;
+    for( it = _data->properties.begin(); it != _data->properties.end(); ++it)
+    {
+        if( (*it)->name() == name)
+            return (*it)->get();
+    }
+
+    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 }
 
 
 void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 {
-    PropertyMap::iterator it = _properties.find(name);
-
-    if( it == _properties.end() ) {
-        throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
-        return;
+    Properties::iterator it;
+    for( it = _data->properties.begin(); it != _data->properties.end(); ++it)
+    {
+        if( (*it)->name() == name)
+            return (*it)->set(value);
     }
 
-    it->second->set(value);
-}
-
-
-const CallableInfo& Reflectable::method(const std::string& name) const
-{
-    MethodMap::const_iterator it = _methods.find(name);
-
-    if( it == _methods.end() )
-        throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
-
-    return *(it->second);
+    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
 }
 
 
 Pt::Any Reflectable::call(const std::string& name, const Args& args)
 {
-    MethodMap::iterator it = _methods.find(name);
-
-    if( it == _methods.end() )
-        throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
-
-    return it->second->call(args);
+    return this->methodInfo(name).call(args);
 }
 
+
+void Reflectable::call(const std::string& name, const SerializationData& sd)
+{
+    return this->methodInfo(name).call(sd);
+}
+
+
+const CallableInfo& Reflectable::methodInfo(const std::string& name) const
+{
+    Methods::const_iterator it;
+    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+    {
+        if( name == (*it)->name() )
+            return **it;
+    }
+
+    throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
+}
+
+
+CallableInfo& Reflectable::methodInfo(const std::string& name)
+{
+    Methods::iterator it;
+    for( it = _data->methods.begin(); it != _data->methods.end(); ++it)
+    {
+        if( name == (*it)->name() )
+            return **it;
+    }
+
+    throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
+}
+
+
+Reflectable::PropertyIterator Reflectable::propertiesBegin()
+{
+    return &( _data->properties[0] );
+}
+
+
+Reflectable::PropertyIterator Reflectable::propertiesEnd()
+{
+    return &( _data->properties[ _data->properties.size() ] );
+}
+
+
+Reflectable::ConstPropertyIterator Reflectable::propertiesBegin() const
+{
+    return &( _data->properties[0] );
+}
+
+
+Reflectable::ConstPropertyIterator Reflectable::propertiesEnd() const
+{
+    return &( _data->properties[ _data->properties.size() ] );
+}
+
+
+Reflectable::MethodIterator Reflectable::methodsBegin()
+{
+    return &(_data->methods[0]);
+}
+
+
+Reflectable::MethodIterator Reflectable::methodsEnd()
+{
+    return &(_data->methods[ _data->methods.size() ]);
+}
+
+
+Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
+{
+    return &(_data->methods[0]);
+}
+
+
+Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
+{
+    return &(_data->methods[ _data->methods.size() ]);
+}
+
+
+void Reflectable::registerCallableInfo(CallableInfo* ci)
+{
+    _data->methods.push_back( ci );
+}
+
+
+void Reflectable::registerPropertyInfo(PropertyInfo* pi)
+{
+    _data->properties.push_back( pi );
+}
+
+
+Reflectable& Reflectable::operator=(const Reflectable& other)
+{
+    _data->identifierName = other.getIdentifierName();
+    return *this;
+}
+
+
+const SerializationData& operator>>(const SerializationData& data, Reflectable& r)
+{
+    Reflectable::PropertyIterator it;
+    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
+    {
+        Pt::String propName = Pt::String::widen( it->name() );
+
+        if( const Pt::SerializationNode* node = data.getNode(propName) )
+        {
+            it->set(*node);
+        }
+    }
+
+    return data;
+}
+
+
+const SerializationData& operator<<(SerializationData& data, const Reflectable& r)
+{
+    Reflectable::ConstPropertyIterator it;
+    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
+    {
+        Pt::String propName = Pt::String::widen( it->name() );
+        SerializationNode& added = it->get(data);
+        added.setName(propName);
+    }
+
+    return data;
+}
 } // namespace Pt

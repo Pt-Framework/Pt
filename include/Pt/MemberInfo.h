@@ -33,6 +33,8 @@ namespace Pt {
             virtual ~MemberInfo()
             {}
 
+            virtual const char* name() const = 0;
+
         protected:
             MemberInfo()
             {}

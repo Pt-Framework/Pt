@@ -30,11 +30,10 @@ TestProtocol TestSuite::defaultProtocol;
 
 inline void TestProtocol::run(TestSuite& suite)
 {
-    const MethodMap& methods = suite.methods();
-
-    for(MethodMap::const_iterator it = methods.begin(); it != methods.end(); ++it)
+    Reflectable::MethodIterator it;
+    for(it = suite.methodsBegin(); it != suite.methodsEnd(); ++it)
     {
-        suite.runTest( it->first, Args() );
+        suite.runTest( it->name(), Args() );
     }
 }
 

@@ -22,21 +22,38 @@
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>
-#include <Pt/Signal.h>
-#include <Pt/Exception.h>
 #include <Pt/Method.h>
 #include <Pt/MemberInfo.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/PropertyValue.h>
 #include <Pt/SerializationData.h>
+#include <memory>
 
 
 namespace Pt {
 
-/** @brief Property interface
+class PT_API PropertyNotReadable : public std::logic_error
+{
+    public:
+        PropertyNotReadable(const std::string& propertyName, const SourceInfo& si);
+
+        ~PropertyNotReadable() throw();
+};
+
+
+class PT_API PropertyNotWritable : public std::logic_error
+{
+    public:
+        PropertyNotWritable(const std::string& propertyName, const SourceInfo& si);
+
+        ~PropertyNotWritable() throw();
+};
+
+
+/** @brief Reflection support for properties
     @ingroup Reflection
 */
-class PT_API PropertyInfo  : public MemberInfo
+class PropertyInfo  : public MemberInfo
 {
     public:
         PropertyInfo()
@@ -47,85 +64,13 @@ class PT_API PropertyInfo  : public MemberInfo
 
         virtual const char* typeName() const = 0;
 
-        virtual Pt::Any get() const
-        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
+        virtual Pt::Any get() const = 0;
 
-        virtual void set(const Pt::Any& value)
-        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+        virtual SerializationNode& get(Pt::SerializationData& sd) const = 0;
 
-        virtual void set(const Pt::Variant& v)
-        {  throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+        virtual void set(const Pt::Any& value) = 0;
 
-        virtual void set(const Pt::SerializationData& sd)
-        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
-
-        Signal<> valueChanged;
-};
-
-
-template <typename T>
-struct PropertyTraits
-{
-    static void set(const Pt::Variant& v, T& t)
-    { throw std::logic_error("Conversion error"); }
-
-    static void set(const Pt::SerializationData& sd, T& t)
-    { sd >> t; }
-};
-
-
-template <>
-struct PropertyTraits<bool>
-{
-    static void set(const Pt::Variant& v, bool& b)
-    { v.get<bool>(b); }
-
-    static void set(const Pt::SerializationData&, bool&)
-    { throw std::logic_error("Serialization error"); }
-};
-
-
-template <>
-struct PropertyTraits<int>
-{
-    static void set(const Pt::Variant& v, int& val)
-    { v.get<int>(val); }
-
-    static void set(const Pt::SerializationData&, int&)
-    { throw std::logic_error("Serialization error"); }
-};
-
-
-template <>
-struct PropertyTraits<float>
-{
-    static void set(const Pt::Variant& v, float& val)
-    { v.get<float>(val); }
-
-    static void set(const Pt::SerializationData&, float&)
-    { throw std::logic_error("Serialization error"); }
-};
-
-
-template <>
-struct PropertyTraits<double>
-{
-    static void set(const Pt::Variant& v, double& val)
-    { v.get<double>(val); }
-
-    static void set(const Pt::SerializationData&, double&)
-    { throw std::logic_error("Serialization error"); }
-};
-
-
-template <>
-struct PropertyTraits<std::string>
-{
-    static void set(const Pt::Variant& v, std::string& s)
-    { v.get<std::string>(s); }
-
-    static void set(const Pt::SerializationData&, std::string&)
-    { throw std::logic_error("Serialization error"); }
+        virtual void set(const Pt::SerializationNode& node) = 0;
 };
 
 
@@ -134,21 +79,24 @@ class ReadPropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename Object, typename ObjectBase>
-        ReadPropertyInfo( Object* parent, T (ObjectBase::*getter)() const )
-        : PropertyInfo()
+        ReadPropertyInfo( const std::string& name, Object* parent, T (ObjectBase::*getter)() const )
+        : _name(name)
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
 
         template <typename Object, typename ObjectBase>
-        ReadPropertyInfo( Object* parent, T (ObjectBase::*getter)() )
-        : PropertyInfo()
+        ReadPropertyInfo( const std::string& name, Object* parent, T (ObjectBase::*getter)() )
+        : _name(name)
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
         }
 
         ~ReadPropertyInfo()
         { delete _getter; }
+
+        const char* name() const
+        { return _name.c_str(); }
 
         virtual const char* typeName() const
         {
@@ -158,11 +106,23 @@ class ReadPropertyInfo : virtual public PropertyInfo
         virtual Pt::Any get() const
         {
             Pt::Any any;
-            any = _getter->operator()();;
+            any = _getter->operator()();
             return any;
         }
 
+        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        {
+            return insert( sd, _getter->call() );
+        }
+
+        virtual void set(const Pt::Any& value)
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
+
+        virtual void set(const Pt::SerializationNode& node)
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
+
     private:
+        std::string _name;
         Pt::Callable<T>* _getter;
 };
 
@@ -172,8 +132,8 @@ class WritePropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
-        WritePropertyInfo(Object* parent, R (ObjectBase::*setter)(T type) )
-        : PropertyInfo()
+        WritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*setter)(T type) )
+        : _name(name)
         {
             _setter = new Pt::Method<R, Object, T>(parent, setter);
         }
@@ -183,10 +143,19 @@ class WritePropertyInfo : virtual public PropertyInfo
             delete _setter;
         }
 
+        const char* name() const
+        { return _name.c_str(); }
+
         virtual const char* typeName() const
         {
             return TypeTraits<T>::typeName();
         }
+
+        virtual Pt::Any get() const
+        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
+
+        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
 
         virtual void set(const Pt::Any& a)
         {
@@ -202,21 +171,12 @@ class WritePropertyInfo : virtual public PropertyInfo
             }
         }
 
-        virtual void set(const Pt::Variant& variant)
+        virtual void set(const Pt::SerializationNode& node)
         {
             typedef typename Pt::TypeInfo<T>::Value ValueT ;
 
             ValueT value;
-            PropertyTraits<ValueT>::set(variant, value);
-            this->set( value );
-        }
-
-        virtual void set(const Pt::SerializationData& sd)
-        {
-            typedef typename Pt::TypeInfo<T>::Value ValueT ;
-
-            ValueT value;
-            PropertyTraits<ValueT>::set(sd, value);
+            node >> value;
             this->set( value );
         }
 
@@ -228,7 +188,8 @@ class WritePropertyInfo : virtual public PropertyInfo
             _setter->invoke(type);
         }
 
-    protected:
+    private:
+        std::string _name;
         Pt::Invokable<T>* _setter;
 };
 
@@ -238,17 +199,21 @@ class ReadWritePropertyInfo : public PropertyInfo
 {
     public:
         template <typename R2, typename Object, typename ObjectBase>
-        ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
+        ReadWritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
+        : _name(name)
         {
-            _getter = new Pt::ConstMethod<R, ObjectBase>( parent, getter );
+            std::auto_ptr< Pt::ConstMethod<R, ObjectBase> > ap( new Pt::ConstMethod<R, ObjectBase>( parent, getter ) );
             _setter = new Pt::Method<R2, ObjectBase, A>(parent, setter);
+            _getter = ap.release();
         }
 
         template <typename R2, typename Object, typename ObjectBase>
-        ReadWritePropertyInfo(Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
+        ReadWritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
+        : _name(name)
         {
-            _getter = new Pt::ConstMethod<R, ObjectBase>( parent, getter );
+            std::auto_ptr< Method<R, ObjectBase> > ap( new Method<R, ObjectBase>( parent, getter ) );
             _setter = new Pt::Method<R2, ObjectBase, A>(parent, setter);
+            _getter = ap.release();
         }
 
         ~ReadWritePropertyInfo()
@@ -256,6 +221,9 @@ class ReadWritePropertyInfo : public PropertyInfo
             delete _setter;
             delete _getter;
         }
+
+        const char* name() const
+        { return _name.c_str(); }
 
         virtual const char* typeName() const
         {
@@ -267,6 +235,11 @@ class ReadWritePropertyInfo : public PropertyInfo
             Pt::Any any;
             any = _getter->operator()();
             return any;
+        }
+
+        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        {
+            return insert( sd, _getter->call() );
         }
 
         virtual void set(const Pt::Any& a)
@@ -283,25 +256,17 @@ class ReadWritePropertyInfo : public PropertyInfo
             }
         }
 
-        virtual void set(const Pt::Variant& variant)
+        virtual void set(const Pt::SerializationNode& node)
         {
             typedef typename Pt::TypeInfo<A>::Value ValueT ;
 
             ValueT value;
-            PropertyTraits<ValueT>::set(variant, value);
-            _setter->invoke( value );
-        }
-
-        virtual void set(const Pt::SerializationData& sd)
-        {
-            typedef typename Pt::TypeInfo<A>::Value ValueT ;
-
-            ValueT value;
-            PropertyTraits<ValueT>::set(sd, value);
+            node >> value;
             _setter->invoke( value );
         }
 
     private:
+        std::string _name;
         Pt::Callable<R>* _getter;
         Pt::Invokable<A>* _setter;
 };
@@ -312,12 +277,16 @@ class ReadProperty : public PropertyInfo
 {
     public:
         template <typename Object>
-        ReadProperty( Object* parent, PropertyValue<T>& value )
-        : _value(&value)
+        ReadProperty( const std::string& name, Object* parent, PropertyValue<T>& value )
+        : _name(name)
+        , _value(&value)
         { }
 
         ~ReadProperty()
         { }
+
+        const char* name() const
+        { return _name.c_str(); }
 
         virtual const char* typeName() const
         {
@@ -327,7 +296,19 @@ class ReadProperty : public PropertyInfo
         virtual Pt::Any get() const
         { return _value->value(); }
 
+        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        {
+            return insert( sd, _value->get() );
+        }
+
+        virtual void set(const Pt::Any& value)
+        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+
+        virtual void set(const Pt::SerializationNode& node)
+        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+
     private:
+        std::string _name;
         PropertyValue<T>* _value;
 };
 
@@ -337,8 +318,9 @@ class ReadWriteProperty : public PropertyInfo
 {
     public:
         template <typename R,typename Class, typename Base>
-        ReadWriteProperty( Class* parent, PropertyValue<T>& value,  R (Base::*setter)(A type) )
-        : _value(&value)
+        ReadWriteProperty( const std::string& name, Class* parent, PropertyValue<T>& value,  R (Base::*setter)(A type) )
+        : _name(name)
+        , _value(&value)
         {
             _setter = new Pt::Method<R, Base, A>(parent, setter);
         }
@@ -348,6 +330,9 @@ class ReadWriteProperty : public PropertyInfo
             delete _setter;
         }
 
+        const char* name() const
+        { return _name.c_str(); }
+
         virtual const char* typeName() const
         {
             return TypeTraits<T>::typeName();
@@ -355,6 +340,11 @@ class ReadWriteProperty : public PropertyInfo
 
         virtual Pt::Any get() const
         { return _value->value(); }
+
+        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        {
+            return insert( sd, _value->get() );
+        }
 
         virtual void set(const Pt::Any& a)
         {
@@ -367,25 +357,17 @@ class ReadWriteProperty : public PropertyInfo
             }
         }
 
-        virtual void set(const Pt::Variant& variant)
+        virtual void set(const Pt::SerializationNode& node)
         {
             typedef typename Pt::TypeInfo<T>::Value ValueT ;
 
             ValueT value;
-            PropertyTraits<ValueT>::set(variant, value);
-            _setter->invoke( value );
-        }
-
-        virtual void set(const Pt::SerializationData& sd)
-        {
-            typedef typename Pt::TypeInfo<T>::Value ValueT ;
-
-            ValueT value;
-            PropertyTraits<ValueT>::set(sd, value);
+            node >> value;
             _setter->invoke( value );
         }
 
     private:
+        std::string _name;
         PropertyValue<T>* _value;
         Pt::Invokable<A>* _setter;
 };

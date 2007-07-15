@@ -17,8 +17,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_ICallable_h
-#define Pt_ICallable_h
+#ifndef Pt_CallableInfo_h
+#define Pt_CallableInfo_h
 
 #include <Pt/MemberInfo.h>
 
@@ -26,6 +26,7 @@
 namespace Pt {
 
     class Args;
+    class SerializationData;
 
     /** @brief Interface for callable entities
         @ingroup Reflection
@@ -33,9 +34,6 @@ namespace Pt {
     class PT_API CallableInfo : public MemberInfo
     {
         public:
-            virtual ~CallableInfo()
-            {}
-
             virtual size_t argSize() const = 0;
 
             virtual const char* argName(size_t index) const = 0;
@@ -47,6 +45,12 @@ namespace Pt {
             virtual const std::type_info& retType() const = 0;
 
             virtual Pt::Any call(const Args& args) = 0;
+
+            virtual void call(const SerializationData& args) const = 0;
+
+        protected:
+            CallableInfo()
+            {}
     };
 
 } // namespace Pt

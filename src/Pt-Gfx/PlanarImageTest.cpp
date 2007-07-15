@@ -50,13 +50,13 @@ class PlanarImageTest : public Pt::Unit::TestSuite
         PlanarImageTest()
         : TestSuite( "PlanarImageTest" )
         {
-            this->registerMethod("PlanarARgbView", *this, &PlanarImageTest::PlanarARgbView);
-            this->registerMethod("ARgbPixelIterator", *this, &PlanarImageTest::ARgbPixelIterator);
             this->registerMethod("ARgbConstPixelIterator", *this, &PlanarImageTest::ARgbConstPixelIterator);
-            this->registerMethod("Yv12View", *this, &PlanarImageTest::Yv12View);
+            this->registerMethod("ARgbPixelIterator", *this, &PlanarImageTest::ARgbPixelIterator);
+            this->registerMethod("PlanarARgbView", *this, &PlanarImageTest::PlanarARgbView);
             this->registerMethod("Yv12BlockScale", *this, &PlanarImageTest::Yv12BlockScale);
-            this->registerMethod("Yv12PixelIterator", *this, &PlanarImageTest::Yv12PixelIterator);
             this->registerMethod("Yv12ConstPixelIterator", *this, &PlanarImageTest::Yv12ConstPixelIterator);
+            this->registerMethod("Yv12PixelIterator", *this, &PlanarImageTest::Yv12PixelIterator);
+            this->registerMethod("Yv12View", *this, &PlanarImageTest::Yv12View);
         }
 
         void PlanarARgbView()

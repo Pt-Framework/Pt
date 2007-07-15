@@ -36,8 +36,12 @@ template < typename R,
 class MethodInfoBase : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 5; }
@@ -75,6 +79,9 @@ class MethodInfoBase : public CallableInfo
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 
@@ -87,8 +94,12 @@ template < typename R,
 class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 4; }
@@ -124,6 +135,9 @@ class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 
@@ -135,8 +149,12 @@ template < typename R,
 class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 3; }
@@ -170,6 +188,9 @@ class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 
@@ -180,8 +201,12 @@ template < typename R,
 class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 2; }
@@ -213,6 +238,9 @@ class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callab
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 
@@ -222,8 +250,12 @@ template < typename R,
 class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 1; }
@@ -253,6 +285,9 @@ class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public 
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 
@@ -261,8 +296,12 @@ template < typename R,
 class MethodInfoBase<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
-        MethodInfoBase()
+        MethodInfoBase(const std::string& name)
+        : _name(name)
         {}
+
+        const char* name() const
+        { return _name.c_str(); }
 
         size_t argSize() const
         { return 0; }
@@ -278,6 +317,9 @@ class MethodInfoBase<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : p
 
         const std::type_info& retType() const
         { return typeid(R); }
+
+    private:
+        std::string _name;
 };
 
 } // namespace Pt

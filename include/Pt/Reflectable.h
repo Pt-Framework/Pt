@@ -21,205 +21,329 @@
 #define Pt_Reflectable_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationData.h>
 #include <Pt/Exception.h>
 #include <Pt/MethodInfo.h>
-#include <Pt/PropertyValue.h>
 #include <Pt/PropertyInfo.h>
-#include <map>
+#include <Pt/SerializationData.h>
 
 
 namespace Pt {
 
-
-class NoSuchProperty : public std::logic_error
+class PT_API NoSuchProperty : public std::logic_error
 {
     public:
         NoSuchProperty(const std::string& propertyName, const SourceInfo& si);
 
         ~NoSuchProperty() throw();
-
-    private:
-        std::string _propertyName;
 };
 
 
-class NoSuchMethod : public std::logic_error
+class PT_API NoSuchMethod : public std::logic_error
 {
     public:
         NoSuchMethod(const std::string& methodName, const SourceInfo& si);
 
         ~NoSuchMethod() throw();
-
-    private:
-        std::string _methodName;
 };
-
-
-typedef std::multimap<std::string, PropertyInfo*> PropertyMap;
-typedef std::multimap<std::string, CallableInfo*> MethodMap;
 
 
 /** @brief Make objects reflectable
     @ingroup Reflection
 
-    TODO: PropertyMap and MethodMap: MemberInfo mapping?
-    TODO: rename CallableInfo to MethodInfo
-    TODO: registerXXX names for Read Write properties
-    TODO: rename method() to methodInfo()
     TODO: remove self()
     TODO: rename getIdentifierName()
 */
 class PT_API Reflectable
 {
     public:
-        Reflectable(const std::string& name);
+        class MethodIterator;
 
+        class ConstMethodIterator;
+
+        class PropertyIterator;
+
+        class ConstPropertyIterator;
+
+    public:
         virtual ~Reflectable();
 
         Reflectable* self()
         { return this; }
 
-        const std::string& getIdentifierName() const
-        { return _identiferName; }
+        const std::string& getIdentifierName() const;
 
-        Pt::Any property(const std::string& name);
+        Pt::Any property(const std::string& name) const;
 
         void setProperty(const std::string& name, const Pt::Any& value);
 
         Pt::Any call(const std::string& name, const Args& args);
 
-        const CallableInfo& method(const std::string& name) const;
+        void call(const std::string& name, const SerializationData& args);
 
-        const PropertyMap& properties() const
-        { return _properties; }
+        CallableInfo& methodInfo(const std::string& name);
 
-        PropertyMap& properties()
-        { return _properties; }
+        const CallableInfo& methodInfo(const std::string& name) const;
 
-        const MethodMap& methods() const
-        { return _methods; }
+        PropertyIterator propertiesBegin();
+
+        PropertyIterator propertiesEnd();
+
+        ConstPropertyIterator propertiesBegin() const;
+
+        ConstPropertyIterator propertiesEnd() const;
+
+        MethodIterator methodsBegin();
+
+        MethodIterator methodsEnd();
+
+        ConstMethodIterator methodsBegin() const;
+
+        ConstMethodIterator methodsEnd() const;
+
+        template <typename R, typename Parent, typename Object>
+        void registerReadProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
+        {
+            this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
+        }
 
         template <typename R, typename Parent, typename Object>
         void registerWriteProperty(const std::string& name, Parent* parent, R (Object::*setter)() )
         {
-            _properties.insert( std::make_pair(name, new WritePropertyInfo<R>(parent, setter)) );
+            this->registerPropertyInfo( new WritePropertyInfo<R>(name, parent, setter) );
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
+        void registerReadProperty(const std::string& name, Parent* parent, R (Object::*getter)())
         {
-            _properties.insert( std::make_pair(name, new ReadPropertyInfo<R>(parent, getter)) );
-        }
-
-        template <typename R, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent* parent, R (Object::*getter)())
-        {
-            _properties.insert( std::make_pair(name, new ReadPropertyInfo<R>(parent, getter)) );
+            this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new ReadWritePropertyInfo<R1, A>(parent, getter, setter)) );
+           this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new ReadWritePropertyInfo<R1, A>(parent, getter, setter)) );
+            this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
-
 
         template <typename R, typename Parent>
-        void registerProperty(const std::string& name, Parent* parent, PropertyValue<R>& value)
+        void registerReadProperty(const std::string& name, Parent* parent, PropertyValue<R>& value)
         {
-            _properties.insert( std::make_pair(name, new ReadProperty<R>(parent, value)) );
+            this->registerPropertyInfo( new ReadProperty<R>(name, parent, value) );
         }
-
 
         template <typename T, typename R, typename A, typename Parent, typename Object>
         void registerProperty(const std::string& name, Parent* parent, PropertyValue<T>& value, R (Object::*setter)(A type))
         {
-            _properties.insert( std::make_pair(name, new ReadWriteProperty<T, A>(parent, value, setter)) );
+            this->registerPropertyInfo( new ReadWriteProperty<T, A>(name, parent, value, setter) );
         }
 
         template <typename ParentT>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
         {
-            CallableInfo* cb = new MethodInfo<void, ParentT>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb = new MethodInfo<void, ParentT>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) const )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(&parent, memFunc);
-            _methods.insert( std::make_pair(name, cb) );
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, &parent, memFunc);
+            this->registerCallableInfo(cb);
         }
 
+    protected:
+        Reflectable(const std::string& name);
+
+        Reflectable(const Reflectable& other);
+
+        Reflectable& operator=(const Reflectable& other);
+
+        void registerPropertyInfo(PropertyInfo* ci);
+
+        void registerCallableInfo(CallableInfo* ci);
+
     private:
-        MethodMap   _methods;
-        PropertyMap _properties;
-        std::string _identiferName;
-        void* _reserved;
+        class ReflectableData* _data;
 };
 
 
-inline const SerializationData& operator>>(const SerializationData& data, Reflectable& r)
+PT_API const SerializationData& operator>>(const SerializationData& data, Reflectable& r);
+
+
+PT_API const SerializationData& operator<<(SerializationData& data, const Reflectable& r);
+
+
+class Reflectable::MethodIterator
 {
-    PropertyMap& pmap = r.properties();
-    for(PropertyMap::iterator it = pmap.begin(); it != pmap.end(); ++it)
-    {
-        Pt::String propName = Pt::String::widen( it->first );
+    public:
+        MethodIterator()
+        : _ci(0)
+        {}
 
-        if( const Pt::Variant* value = data.getEntry(propName) )
-        {
-            it->second->set(*value);
-        }
-        else if( const Pt::SerializationData* subdata = data.getData(propName) )
-        {
-            it->second->set(*subdata);
-        }
-    }
+        MethodIterator(CallableInfo** ci)
+        : _ci(ci)
+        {}
 
-    return data;
-}
+        MethodIterator& operator++()
+        {
+            _ci += 1;
+            return *this;
+        }
+
+        CallableInfo& operator*()
+        { return **_ci; }
+
+        CallableInfo* operator->()
+        { return *_ci; }
+
+        bool operator!=(const MethodIterator& other) const
+        { return _ci != other._ci; }
+
+    private:
+        CallableInfo** _ci;
+};
+
+
+class Reflectable::ConstMethodIterator
+{
+    public:
+        ConstMethodIterator()
+        : _ci(0)
+        {}
+
+        ConstMethodIterator(CallableInfo* const* ci)
+        : _ci(ci)
+        {}
+
+        ConstMethodIterator& operator++()
+        {
+            ++_ci;
+            return *this;
+        }
+
+        const CallableInfo& operator*() const
+        { return **_ci; }
+
+        const CallableInfo* operator->() const
+        { return *_ci; }
+
+        bool operator!=(const ConstMethodIterator& other) const
+        { return _ci != other._ci; }
+
+    private:
+        CallableInfo* const* _ci;
+};
+
+
+class Reflectable::PropertyIterator
+{
+    public:
+        PropertyIterator(PropertyInfo** pi)
+        : _pi(pi)
+        { }
+
+        PropertyIterator()
+        : _pi(0)
+
+        {}
+
+        PropertyIterator& operator++()
+        {
+            ++_pi;
+            return *this;
+        }
+
+        PropertyInfo& operator*()
+        { return **_pi; }
+
+        PropertyInfo* operator->()
+        { return *_pi; }
+
+        bool operator!=(const PropertyIterator& other) const
+        { return _pi != other._pi; }
+
+        bool operator==(const PropertyIterator& other) const
+        { return _pi == other._pi; }
+
+    private:
+        PropertyInfo** _pi;
+};
+
+
+class Reflectable::ConstPropertyIterator
+{
+    public:
+        ConstPropertyIterator(PropertyInfo* const* pi)
+        : _pi(pi)
+        { }
+
+        ConstPropertyIterator()
+        : _pi(0)
+
+        {}
+
+        ConstPropertyIterator& operator++()
+        {
+            ++_pi;
+            return *this;
+        }
+
+        const PropertyInfo& operator*()
+        { return **_pi; }
+
+        const PropertyInfo* operator->()
+        { return *_pi; }
+
+        bool operator!=(const ConstPropertyIterator& other) const
+        { return _pi != other._pi; }
+
+        bool operator==(const ConstPropertyIterator& other) const
+        { return _pi == other._pi; }
+
+    private:
+        PropertyInfo* const* _pi;
+};
+
 
 } // namespace Pt
 

@@ -201,12 +201,14 @@ class ImagePainterTest : public Pt::Unit::TestSuite
         {
             _imagePainter.setBrush( Brush( ARgbColor( 0, 0, 0 ) ) );
 
+            _image.clear();
             _image.resize(  800, 600, _bkColor );
             _imagePainter.fillCircle( Point( 10,10), 100 );
             PT_UNIT_ASSERT( checkImage() );
 
+            _image.clear();
             _image.resize(  800, 600, _bkColor );
-            _imagePainter.drawCircle( Point( -10, 10 ), 100 );
+            _imagePainter.fillCircle( Point( -10, 10 ), 100 );
             PT_UNIT_ASSERT( checkImage() );
         }
 
