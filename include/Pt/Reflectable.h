@@ -50,7 +50,6 @@ class PT_API NoSuchMethod : public std::logic_error
 /** @brief Make objects reflectable
     @ingroup Reflection
 
-    TODO: remove self()
     TODO: rename getIdentifierName()
 */
 class PT_API Reflectable
@@ -66,9 +65,6 @@ class PT_API Reflectable
 
     public:
         virtual ~Reflectable();
-
-        Reflectable* self()
-        { return this; }
 
         const std::string& getIdentifierName() const;
 
