@@ -132,13 +132,7 @@ namespace Unit {
             { }
 
             ~TestSuite()
-            {
-                std::map<std::string, Context*>::iterator it;
-                for(it = _contexts.begin(); it != _contexts.end(); ++it)
-                {
-                    delete it->second;
-                }
-            }
+            {}
 
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
@@ -184,9 +178,6 @@ namespace Unit {
             /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
-
-        private:
-            std::map<std::string, Context*> _contexts;
 
         public:
             static TestProtocol defaultProtocol;

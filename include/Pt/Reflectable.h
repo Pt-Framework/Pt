@@ -76,6 +76,8 @@ class PT_API Reflectable
 
         void call(const std::string& name, const SerializationData& args);
 
+        PropertyInfo& propertyInfo(const std::string& name);
+
         CallableInfo& methodInfo(const std::string& name);
 
         const CallableInfo& methodInfo(const std::string& name) const;

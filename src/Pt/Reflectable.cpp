@@ -131,6 +131,19 @@ void Reflectable::call(const std::string& name, const SerializationData& sd)
 }
 
 
+PropertyInfo& Reflectable::propertyInfo(const std::string& name)
+{
+    Properties::iterator it;
+    for( it = _data->properties.begin(); it != _data->properties.end(); ++it)
+    {
+        if( (*it)->name() == name)
+            return **it;
+    }
+
+    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
+}
+
+
 const CallableInfo& Reflectable::methodInfo(const std::string& name) const
 {
     Methods::const_iterator it;

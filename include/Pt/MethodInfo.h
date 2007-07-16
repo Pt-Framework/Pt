@@ -45,8 +45,9 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
+        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3, A4, A5>(name)
+        , Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
         Pt::Any call(const Any* args, size_t argCount)
@@ -82,8 +83,9 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
         typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<void, C, A1, A2, A3, A4, A5>(object, memFunc)
+        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3, A4, A5>(name)
+        , Method<void, C, A1, A2, A3, A4, A5>(object, memFunc)
         {}
 
         Pt::Any call(const Any* args, size_t argCount)
@@ -121,8 +123,9 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
         typedef R (C::*MemFuncT)(A1, A2, A3, A4);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<R, C, A1, A2, A3, A4>(object, memFunc)
+        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
+        , Method<R, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
         Pt::Any call(const Any* args, size_t argCount)
@@ -156,8 +159,9 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         typedef void (C::*MemFuncT)(A1, A2, A3, A4);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<void, C, A1, A2, A3, A4>(object, memFunc)
+        MethodInfo(const std::string name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3, A4>(name)
+        , Method<void, C, A1, A2, A3, A4>(object, memFunc)
         {}
 
         Pt::Any call(const Any* args, size_t argCount)
@@ -178,6 +182,8 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         }
 };
 
+///////////////
+///////////////
 
 template < typename R,
            class C,
@@ -192,8 +198,9 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
         typedef R (C::*MemFuncT)(A1, A2, A3);
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : Method<R, C, A1, A2, A3>(object, memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3>(name)
+        , Method<R, C, A1, A2, A3>(object, memFunc)
         {}
 
         Pt::Any call(const Any* args, size_t argCount)
