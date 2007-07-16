@@ -345,6 +345,24 @@ inline SerializationNode& insert(SerializationData& data, int x)
 }
 
 
+inline const SerializationNode& operator>>(const SerializationNode& node, unsigned& x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<unsigned>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, unsigned x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
+
 inline const SerializationNode& operator>>(const SerializationNode& node, bool x)
 {
     const SerializationEntry* entry = node.toEntry();
