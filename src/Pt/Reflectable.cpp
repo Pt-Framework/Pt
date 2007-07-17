@@ -172,49 +172,73 @@ CallableInfo& Reflectable::methodInfo(const std::string& name)
 
 Reflectable::PropertyIterator Reflectable::propertiesBegin()
 {
+    if(_data->properties.size() == 0)
+        return 0;
+
     return &( _data->properties[0] );
 }
 
 
 Reflectable::PropertyIterator Reflectable::propertiesEnd()
 {
+    if(_data->properties.size() == 0)
+        return 0;
+
     return &( _data->properties[ _data->properties.size() ] );
 }
 
 
 Reflectable::ConstPropertyIterator Reflectable::propertiesBegin() const
 {
+    if(_data->properties.size() == 0)
+        return 0;
+
     return &( _data->properties[0] );
 }
 
 
 Reflectable::ConstPropertyIterator Reflectable::propertiesEnd() const
 {
-    return &( _data->properties[ _data->properties.size() ] );
+    if(_data->properties.size() == 0)
+        return 0;
+
+    return &( _data->properties[0]) + _data->properties.size();
 }
 
 
 Reflectable::MethodIterator Reflectable::methodsBegin()
 {
+    if(_data->methods.size() == 0)
+        return 0;
+
     return &(_data->methods[0]);
 }
 
 
 Reflectable::MethodIterator Reflectable::methodsEnd()
 {
-    return &(_data->methods[ _data->methods.size() ]);
+    if(_data->methods.size() == 0)
+        return 0;
+
+    return &(_data->methods[0]) + _data->methods.size();
 }
 
 
 Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
 {
+    if(_data->methods.size() == 0)
+        return 0;
+
     return &(_data->methods[0]);
 }
 
 
 Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
 {
-    return &(_data->methods[ _data->methods.size() ]);
+    if(_data->methods.size() == 0)
+        return 0;
+
+    return &(_data->methods[0]) + _data->methods.size();
 }
 
 
