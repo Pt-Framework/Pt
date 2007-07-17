@@ -12,6 +12,12 @@ namespace Pt {
 
 namespace Xml {
 
+XmlSerializer::XmlSerializer()
+: _writer(0)
+, _deleter(0)
+{
+}
+
 XmlSerializer::XmlSerializer(std::ostream& os)
 : _writer( 0 )
 , _deleter( new XmlWriter(os) )
@@ -20,14 +26,54 @@ XmlSerializer::XmlSerializer(std::ostream& os)
 }
 
 
-XmlSerializer::~XmlSerializer()
+XmlSerializer::XmlSerializer(XmlWriter* writer)
+: _writer(writer)
+, _deleter(0)
 {
-    _writer->flush();
 }
 
 
+XmlSerializer::~XmlSerializer()
+{
+    this->detach();
+}
+
+
+void XmlSerializer::attach(std::ostream& os)
+{
+    if (_writer)
+        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
+    
+    _deleter.reset(new XmlWriter(os));
+    _writer = _deleter.get();
+}
+
+
+void XmlSerializer::attach(XmlWriter* writer)
+{
+    if (_writer)
+        throw std::logic_error("XmlSerizalizer is already open." + PT_SOURCEINFO);
+    
+    _deleter.reset(0);
+    _writer = writer;
+}
+
+
+void XmlSerializer::detach()
+{
+    if (!_writer)
+        return;
+
+    this->flush();
+    _deleter.reset(0);
+    _writer = 0;
+}
+
 void XmlSerializer::putData(const SerializationData& data)
 {
+    if (!_writer)
+        throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
+    
     _writer->writeStartElement( data.name() );
     this->writeData(data);
     _writer->writeEndElement();
@@ -36,6 +82,9 @@ void XmlSerializer::putData(const SerializationData& data)
 
 void XmlSerializer::writeData(const SerializationData& data)
 {
+    if (!_writer)
+        throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
+        
     SerializationData::ConstNodeIterator it;
     for(it = data.begin(); it != data.end(); ++it)
     {
@@ -55,7 +104,8 @@ void XmlSerializer::writeData(const SerializationData& data)
 
 void XmlSerializer::flush()
 {
-    _writer->flush();
+    if (_writer)
+        _writer->flush();
 }
 
 
