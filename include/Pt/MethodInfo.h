@@ -26,6 +26,7 @@
 #include <Pt/ConstMethod.h>
 #include <Pt/MethodInfoBase.h>
 #include <Pt/SerializationData.h>
+#include <stdexcept>
 
 
 namespace Pt {
@@ -38,34 +39,80 @@ template < typename R,
            typename A4 = Pt::Void,
            typename A5 = Pt::Void>
 class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
-                 , private Method<R, C, A1, A2, A3, A4, A5>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
 
     public:
-        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4, A5>(name)
-        , Method<R, C, A1, A2, A3, A4, A5>(object, memFunc)
+        , _cb( new Method<R, C, A1, A2, A3, A5>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3, A4, A5>(name)
+        , _cb( new ConstMethod<R, C, A1, A2, A3, A4, A5>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 5)
                 throw std::out_of_range("Not enough arguments");
 
-            return Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( args[0] ),
-                                                              any_cast<A2>( args[1] ),
-                                                              any_cast<A3>( args[2] ),
-                                                              any_cast<A4>( args[3] ),
-                                                              any_cast<A5>( args[4] ) );
+            return _cb->call( any_cast<A1>( args[0] ),
+                              any_cast<A2>( args[1] ),
+                              any_cast<A3>( args[2] ),
+                              any_cast<A4>( args[3] ),
+                              any_cast<A5>( args[4] ) );
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            typename Pt::TypeInfo<A4>::Value a4;
+            node = args.getNode(3);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a4;
+
+            typename Pt::TypeInfo<A5>::Value a5;
+            node = args.getNode(4);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a5;
+
+            _cb->invoke(a1, a2, a3, a4, a5);
         }
+
+    private:
+        Callable<R, A1, A2, A3, A4, A5>* _cb;
 };
 
 
@@ -76,36 +123,82 @@ template < class C,
            typename A4,
            typename A5>
 class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A1, A2, A3, A4, A5>
-                                              , private Method<void, C, A1, A2, A3, A4, A5>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
+        typedef void (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
 
     public:
-        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4, A5>(name)
-        , Method<void, C, A1, A2, A3, A4, A5>(object, memFunc)
+        , _cb( new Method<void, C, A1, A2, A3, A4, A5>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3, A4, A5>(name)
+        , _cb( new ConstMethod<void, C, A1, A2, A3, A4, A5>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 5)
                 throw std::out_of_range("Not enough arguments");
 
-            Method<void, C, A1, A2, A3, A4, A5>::call( any_cast<A1>( args[0] ),
-                                                       any_cast<A2>( args[1] ),
-                                                       any_cast<A3>( args[2] ),
-                                                       any_cast<A4>( args[3] ),
-                                                       any_cast<A5>( args[4] ) );
+            _cb->call( any_cast<A1>( args[0] ),
+                       any_cast<A2>( args[1] ),
+                       any_cast<A3>( args[2] ),
+                       any_cast<A4>( args[3] ),
+                       any_cast<A5>( args[4] ) );
 
             return Any();
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            typename Pt::TypeInfo<A4>::Value a4;
+            node = args.getNode(3);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a4;
+
+            typename Pt::TypeInfo<A5>::Value a5;
+            node = args.getNode(4);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a5;
+
+            _cb->invoke(a1, a2, a3, a4, a5);
         }
+
+    private:
+        Callable<void, A1, A2, A3, A4, A5>* _cb;
 };
 
 
@@ -116,33 +209,72 @@ template < typename R,
            typename A3,
            typename A4>
 class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A1, A2, A3, A4>
-                                                 , private Method<R, C, A1, A2, A3, A4>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4) const;
 
     public:
-        MethodInfo(const std::string name,C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
-        , Method<R, C, A1, A2, A3, A4>(object, memFunc)
+        , _cb( new Method<R, C, A1, A2, A3>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
+        , _cb( new ConstMethod<R, C, A1, A2, A3, A4>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 4)
                 throw std::out_of_range("Not enough arguments");
 
-            return Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( args[0] ),
-                                                          any_cast<A2>( args[1] ),
-                                                          any_cast<A3>( args[2] ),
-                                                          any_cast<A4>( args[3] ) );
+            return _cb->call( any_cast<A1>( args[0] ),
+                              any_cast<A2>( args[1] ),
+                              any_cast<A3>( args[2] ),
+                              any_cast<A4>( args[3] ) );
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            typename Pt::TypeInfo<A4>::Value a4;
+            node = args.getNode(3);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a4;
+
+            _cb->invoke(a1, a2, a3, a4);
         }
+
+    private:
+        Callable<R, A1, A2, A3, A4>* _cb;
 };
 
 
@@ -152,34 +284,74 @@ template < class C,
            typename A3,
            typename A4>
 class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void, C, A1, A2, A3, A4>
-                                                    , private Method<void, C, A1, A2, A3, A4>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)(A1, A2, A3, A4);
+        typedef void (C::*ConstMemFuncT)(A1, A2, A3,A4) const;
 
     public:
-        MethodInfo(const std::string name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4>(name)
-        , Method<void, C, A1, A2, A3, A4>(object, memFunc)
+        , _cb( new Method<void, C, A1, A2, A3, A4>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3, A4>(name)
+        , _cb( new ConstMethod<void, C, A1, A2, A3, A4>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 4)
                 throw std::out_of_range("Not enough arguments");
 
-            Method<void, C, A1, A2, A3, A4>::call( any_cast<A1>( args[0] ),
-                                                   any_cast<A2>( args[1] ),
-                                                   any_cast<A3>( args[2] ),
-                                                   any_cast<A4>( args[3] ) );
+            _cb->call( any_cast<A1>( args[0] ),
+                       any_cast<A2>( args[1] ),
+                       any_cast<A3>( args[2] ),
+                       any_cast<A4>( args[3] ) );
+
             return Any();
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            typename Pt::TypeInfo<A4>::Value a4;
+            node = args.getNode(3);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a4;
+
+            _cb->invoke(a1, a2, a3, a4);
         }
+
+    private:
+        Callable<void, A1, A2, A3, A4>* _cb;
 };
 
 ///////////////
@@ -191,32 +363,64 @@ template < typename R,
            typename A2,
            typename A3>
 class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1, A2, A3>
-                                                       , private Method<R, C, A1, A2, A3>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3) const;
 
     public:
         MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3>(name)
-        , Method<R, C, A1, A2, A3>(object, memFunc)
+        , _cb( new Method<R, C, A1, A2, A3>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2, A3>(name)
+        , _cb( new ConstMethod<R, C, A1, A2, A3>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 3)
                 throw std::out_of_range("Not enough arguments");
 
-            return Method<void, C, A1, A2, A3>::call( any_cast<A1>( args[0] ),
-                                                      any_cast<A2>( args[1] ),
-                                                      any_cast<A3>( args[2] ));
+            return _cb->call( any_cast<A1>( args[0] ),
+                              any_cast<A2>( args[1] ),
+                              any_cast<A3>( args[2] ));
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            _cb->invoke(a1, a2, a3);
         }
+
+    private:
+        Callable<R, A1, A2, A3>* _cb;
 };
 
 
@@ -225,24 +429,32 @@ template < class C,
            typename A2,
            typename A3>
 class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1, A2, A3>
-                                                          , private Method<void, C, A1, A2, A3>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)(A1, A2, A3);
+        typedef void (C::*ConstMemFuncT)(A1, A2, A3) const;
 
     public:
         MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3>(name)
-        , Method<void, C, A1, A2, A3>(object, memFunc)
+        , _cb( new Method<void, C, A1, A2, A3>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2, A3>(name)
+        , _cb( new ConstMethod<void, C, A1, A2, A3>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 3)
                 throw std::out_of_range("Not enough arguments");
 
-            Method<void, C, A1, A2, A3>::call( any_cast<A1>( args[0] ),
+            _cb->call( any_cast<A1>( args[0] ),
                                                any_cast<A2>( args[1] ),
                                                any_cast<A3>( args[2] ));
             return Any();
@@ -250,8 +462,32 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            typename Pt::TypeInfo<A3>::Value a3;
+            node = args.getNode(2);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a3;
+
+            _cb->invoke(a1, a2, a3);
         }
+
+    private:
+        Callable<void, A1, A2, A3>* _cb;
 };
 
 
@@ -260,31 +496,56 @@ template < typename R,
            typename A1,
            typename A2>
 class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C, A1, A2>
-                                                             , private Method<R, C, A1, A2>
 {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2);
+        typedef R (C::*ConstMemFuncT)(A1, A2) const;
 
     public:
         MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2>(name)
-        , Method<R, C, A1, A2>(object, memFunc)
+        , _cb( new Method<R, C, A1, A2>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C, A1, A2>(name)
+        , _cb( new ConstMethod<R, C, A1, A2>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 2)
                 throw std::out_of_range("Not enough arguments");
 
-            return Method<R, C, A1, A2>::call( any_cast<A1>( args[0] ),
-                                               any_cast<A2>( args[1] ) );
+            return _cb->call( any_cast<A1>( args[0] ),
+                              any_cast<A2>( args[1] ) );
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            _cb->invoke(a1, a2);
         }
+
+    private:
+        Callable<void, A1, A2>* _cb;
 };
 
 
@@ -292,33 +553,58 @@ template < class C,
            typename A1,
            typename A2>
 class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C, A1, A2>
-                                                                , private Method<void, C, A1, A2>
 {
     public:
         typedef C ClassT;
         typedef void (C::*MemFuncT)(A1, A2);
+        typedef void (C::*ConstMemFuncT)(A1, A2) const;
 
     public:
         MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2>(name)
-        , Method<void, C, A1, A2>(object, memFunc)
+        , _cb( new Method<void, C, A1, A2>(object, memFunc) )
         {}
+
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<void, C, A1, A2>(name)
+        , _cb( new ConstMethod<void, C, A1, A2>(object, memFunc) )
+        {}
+
+        ~MethodInfo()
+        { delete _cb; }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 2)
                 throw std::out_of_range("Not enough arguments");
 
-            Method<void, C, A1, A2>::call( any_cast<A1>( args[0] ),
-                                           any_cast<A2>( args[1] ) );
+            _cb->call( any_cast<A1>( args[0] ),
+                       any_cast<A2>( args[1] ) );
 
             return Any();
         }
 
         virtual void call(const SerializationData& args) const
         {
+            typename Pt::TypeInfo<A1>::Value a1;
+            const SerializationNode* node = args.getNode(0);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
 
+            *node >> a1;
+
+            typename Pt::TypeInfo<A2>::Value a2;
+            node = args.getNode(1);
+            if( !node)
+                throw std::invalid_argument("Not enough arguments" + PT_SOURCEINFO);
+
+            *node >> a2;
+
+            _cb->invoke(a1, a2);
         }
+
+    private:
+        Callable<void, A1, A2>* _cb;
 };
 
 
@@ -333,12 +619,14 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
         typedef R (C::*ConstMemFuncT)(A1) const;
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : _cb( new Method<R, C, A1>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C, A1>(name)
+        , _cb( new Method<R, C, A1>(object, memFunc) )
         {}
 
-        MethodInfo(C* object, ConstMemFuncT memFunc)
-        : _cb( new ConstMethod<R, C, A1>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C, A1>(name)
+        , _cb( new ConstMethod<R, C, A1>(object, memFunc) )
         {}
 
         ~MethodInfo()
@@ -427,12 +715,14 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
         typedef R (C::*ConstMemFuncT)() const;
 
     public:
-        MethodInfo(C* object, MemFuncT memFunc)
-        : _cb( new Method<R, C>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        : MethodInfoBase<R, C>(name)
+        , _cb( new Method<R, C>(object, memFunc) )
         {}
 
-        MethodInfo(C* object, ConstMemFuncT memFunc)
-        : _cb( new ConstMethod<R, C>(object, memFunc) )
+        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        : MethodInfoBase<R, C>(name)
+        , _cb( new ConstMethod<R, C>(object, memFunc) )
         {}
 
         ~MethodInfo()
