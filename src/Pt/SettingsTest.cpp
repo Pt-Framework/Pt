@@ -35,11 +35,11 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
+            /*Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
             Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
-            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
+            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );*/
             Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
         }
 
@@ -184,7 +184,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void QoutedComplexType()
         {
             std::stringstream ss;
-            ss << "a.b.c = ( d =\"1\", e = \"2\" \"2\" , f= ( g =\"3\") )\n";
+            ss << "a.b.c = ( d =\"1\", x= ( g =9) , e = \"2\" \"2\" , f= ( g =\"3\") )\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);

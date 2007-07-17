@@ -145,6 +145,8 @@ class PT_API SettingsReader
 
                 void enterNode()
                 {
+                    std::cerr << "entered: " << _name.narrow() << std::endl;
+
                     SerializationData* data = _data->getData( _name );
                     if(data == 0)
                         data = &( _data->addData( _name ) );
@@ -157,6 +159,8 @@ class PT_API SettingsReader
 
                 void leaveNode()
                 {
+                    std::cerr << "left: " << _data->name().narrow() << std::endl;
+
                     assert(_depth > 0);
                     _data = _data->parent();
                     --_depth;
@@ -164,6 +168,7 @@ class PT_API SettingsReader
 
                 void addValue()
                 {
+                    std::cerr << "value: " << _name.narrow() << ":" << _value << std::endl;
                     size_t pos  = _name.rfind( Pt::Char(L'.') );
 
                     if(pos != Pt::String::npos)
@@ -417,6 +422,8 @@ class PT_API SettingsReader
 
                     if( context.depth() == 0 )
                         _parse = &SettingsReader::beginStatement;
+                    else
+                        _parse = &SettingsReader::endStatement;
 
                     break;
             }
@@ -475,6 +482,8 @@ class PT_API SettingsReader
 
                     if( context.depth() == 0 )
                         _parse = &SettingsReader::beginStatement;
+                    else
+                        _parse = &SettingsReader::endStatement;
 
                     break;
 
@@ -488,6 +497,40 @@ class PT_API SettingsReader
                         return;
                     }
                     throw ParseError( "Expected closing \')\'", context.line() );
+            }
+        }
+
+        void endStatement(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof )
+            {
+                if(context.depth() > 0)
+                    throw ParseError( "Expected token before EOF", context.line() );
+
+                return;
+            }
+
+            if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
+            {
+                return;
+            }
+
+            switch( ch.value() )
+            {
+                case ',':
+                    _parse = &SettingsReader::beginStatement;
+                    break;
+
+                case ')':
+                    context.leaveNode();
+
+                    if( context.depth() == 0 )
+                        _parse = &SettingsReader::beginStatement;
+
+                    break;
+
+                default:
+                    throw ParseError( "Unexpected token", context.line() );
             }
         }
 
