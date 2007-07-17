@@ -145,7 +145,7 @@ class PT_API SettingsReader
 
                 void enterNode()
                 {
-                    std::cerr << "entered: " << _name.narrow() << std::endl;
+                    //std::cerr << "entered: " << _name.narrow() << std::endl;
 
                     SerializationData* data = _data->getData( _name );
                     if(data == 0)
@@ -159,7 +159,7 @@ class PT_API SettingsReader
 
                 void leaveNode()
                 {
-                    std::cerr << "left: " << _data->name().narrow() << std::endl;
+                    //std::cerr << "left: " << _data->name().narrow() << std::endl;
 
                     assert(_depth > 0);
                     _data = _data->parent();
@@ -168,7 +168,7 @@ class PT_API SettingsReader
 
                 void addValue()
                 {
-                    std::cerr << "value: " << _name.narrow() << ":" << _value << std::endl;
+                    //std::cerr << "value: " << _name.narrow() << ":" << _value << std::endl;
                     size_t pos  = _name.rfind( Pt::Char(L'.') );
 
                     if(pos != Pt::String::npos)
