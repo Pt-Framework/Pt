@@ -174,7 +174,7 @@ Reflectable::PropertyIterator Reflectable::propertiesBegin()
 {
     if(_data->properties.size() == 0)
         return 0;
-    
+
     return &( _data->properties[0] );
 }
 
@@ -183,8 +183,8 @@ Reflectable::PropertyIterator Reflectable::propertiesEnd()
 {
     if(_data->properties.size() == 0)
         return 0;
-    
-    return &( _data->properties[ _data->properties.size() ] );
+
+    return &_data->properties[0] + _data->properties.size();
 }
 
 
@@ -192,7 +192,7 @@ Reflectable::ConstPropertyIterator Reflectable::propertiesBegin() const
 {
     if(_data->properties.size() == 0)
         return 0;
-    
+
     return &( _data->properties[0] );
 }
 
@@ -201,7 +201,7 @@ Reflectable::ConstPropertyIterator Reflectable::propertiesEnd() const
 {
     if(_data->properties.size() == 0)
         return 0;
-    
+
     return &( _data->properties[0]) + _data->properties.size();
 }
 
@@ -219,7 +219,7 @@ Reflectable::MethodIterator Reflectable::methodsEnd()
 {
     if(_data->methods.size() == 0)
         return 0;
-    
+
     return &(_data->methods[0]) + _data->methods.size();
 }
 
@@ -228,7 +228,7 @@ Reflectable::ConstMethodIterator Reflectable::methodsBegin() const
 {
     if(_data->methods.size() == 0)
         return 0;
-    
+
     return &(_data->methods[0]);
 }
 
@@ -237,7 +237,7 @@ Reflectable::ConstMethodIterator Reflectable::methodsEnd() const
 {
     if(_data->methods.size() == 0)
         return 0;
-    
+
     return &(_data->methods[0]) + _data->methods.size();
 }
 
