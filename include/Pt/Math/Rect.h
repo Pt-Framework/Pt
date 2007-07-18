@@ -41,6 +41,11 @@ namespace Pt {
                     _p = p;
                 }
 
+                void setOrigin(PointT x, PointT y)
+                {
+                    _p.set(x, y);
+                }
+
                 BasicRect& setX(PointT x)
                 {
                     _p.setX( x );
@@ -65,6 +70,12 @@ namespace Pt {
                 void setSize(const Pt::Math::BasicSize<SizeT>& s)
                 {
                     _s = s;
+                }
+
+                //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
+                void setSize(SizeT width, SizeT height)
+                {
+                    _s.setWidthHeight(width, height);
                 }
 
                 //! Return the BasicSize<SizeT> as a BasicSize<SizeT>
