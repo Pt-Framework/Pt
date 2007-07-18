@@ -166,22 +166,25 @@ void XmlTest::EmptyElementTag()
 	input << "<a/>";
 
 	XmlReader reader( input );
-
+	PT_UNIT_ASSERT( reader.depth() == 0)
+	
 	XmlReader::Iterator it = reader.current();
 	const Xml::Node& startNode = *it;
 
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement != 0);
 	PT_UNIT_ASSERT(dynamic_cast<const Xml::StartElement*>(&startNode)->name().narrow() == "a");
+	PT_UNIT_ASSERT( reader.depth() == 1)
 
 	++it;
 	const Xml::Node& endNode = *it;
-
 	PT_UNIT_ASSERT(endNode.type() == Node::EndElement);
 	PT_UNIT_ASSERT(dynamic_cast<const Xml::EndElement*>(&endNode)->name().narrow() == "a");
+	PT_UNIT_ASSERT( reader.depth() == 0)
 
 	++it;
 	const Xml::Node& endDocument = *it;
 	PT_UNIT_ASSERT(endDocument.type() == Node::EndDocument);
+	PT_UNIT_ASSERT( reader.depth() == 0)
 }
 
 
@@ -225,7 +228,7 @@ void XmlTest::ElementWithContent()
 	// <a>
 	PT_UNIT_ASSERT(startNode.type() == Node::StartElement);
 	PT_UNIT_ASSERT(dynamic_cast<const Xml::StartElement*>(&startNode)->name().narrow() == "a");
-
+	PT_UNIT_ASSERT( reader.depth() == 1)
 
 	// b
 	++it;
@@ -233,7 +236,7 @@ void XmlTest::ElementWithContent()
 
 	PT_UNIT_ASSERT(charactersNode.type() == Node::Characters);
 	PT_UNIT_ASSERT(dynamic_cast<const Xml::Characters*>(&charactersNode)->content().narrow() == "b");
-
+	PT_UNIT_ASSERT( reader.depth() == 1)
 
 	// </a>
 	++it;
@@ -241,13 +244,13 @@ void XmlTest::ElementWithContent()
 
 	PT_UNIT_ASSERT(endNode.type() == Node::EndElement);
 	PT_UNIT_ASSERT(dynamic_cast<const Xml::EndElement*>(&endNode)->name().narrow() == "a");
-
+	PT_UNIT_ASSERT( reader.depth() == 0)
 
 	// End of document
 	++it;
 	const Xml::Node& endDocument = *it;
-
 	PT_UNIT_ASSERT(endDocument.type() == Node::EndDocument);
+	PT_UNIT_ASSERT( reader.depth() == 0)
 }
 
 

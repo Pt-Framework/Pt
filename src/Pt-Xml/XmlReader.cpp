@@ -28,6 +28,7 @@ namespace Xml {
 XmlReader::XmlReader(std::istream& is)
 : _textBuffer(0)
 , _buffer(0)
+, _depth(0)
 , _tokenMax(512)
 {
     _buffer = new Text::TextBuffer( is.rdbuf(), new Pt::Text::Utf8Codec() );
@@ -40,6 +41,7 @@ XmlReader::XmlReader(std::istream& is)
 XmlReader::XmlReader(Text::TextStream& is)
 : _textBuffer(is.rdbuf())
 , _buffer( 0 )
+, _depth(0)
 , _tokenMax(512)
 {
     this->init();
@@ -74,9 +76,9 @@ void XmlReader::init()
 
         start.append( 1, ch );
     }
-    
+
     const String whitespace(L" \t\n\r");
-        
+
     // read whitespace to root element
     while( true )
     {
@@ -99,6 +101,12 @@ XmlReader::~XmlReader()
     }
 
     delete _buffer;
+}
+
+
+size_t XmlReader::depth() const
+{
+    return _depth;
 }
 
 
@@ -133,7 +141,14 @@ const Node& XmlReader::next()
 
     if( !_nodeBuffer.empty() )
     {
-        return *_nodeBuffer.front();
+        Node* node = _nodeBuffer.front();
+
+        if(node->type() == Node::StartElement)
+            _depth++;
+        else if(node->type() == Node::EndElement)
+            _depth--;
+
+        return *node;
     }
 
     switch( _textBuffer->sgetc() )
@@ -150,6 +165,7 @@ const Node& XmlReader::next()
                 case '/':
                     _textBuffer->snextc();
                     this->onEndElement();
+                    _depth--;
                     break;
 
                 case '!':
@@ -166,6 +182,7 @@ const Node& XmlReader::next()
 
                 default:
                     this->onStartElement();
+                    _depth++;
                     break;
             }
 
@@ -213,6 +230,7 @@ XmlReader& XmlReader::operator>>(StartElement& to)
 
     this->parseStartElement(to);
 
+    ++_depth;
     return *this;
 }
 
@@ -241,6 +259,8 @@ XmlReader& XmlReader::operator>>(EndElement& to)
         throw std::logic_error("Requested XML element is not an end element." + PT_SOURCEINFO);
 
     this->parseEndElement(to);
+
+    --_depth;
     return *this;
 }
 

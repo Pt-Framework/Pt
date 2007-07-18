@@ -124,6 +124,8 @@ namespace Xml {
 
             ~XmlReader();
 
+            size_t depth() const;
+
             Iterator current();
 
             Iterator end() const;
@@ -174,6 +176,7 @@ namespace Xml {
             std::basic_streambuf<Char>* _buffer;
             std::queue<Node*> _nodeBuffer;
             Resolver _resolver;
+            size_t _depth;
             Char _token[512];
             const size_t _tokenMax;
     };
