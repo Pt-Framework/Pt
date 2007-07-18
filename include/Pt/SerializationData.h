@@ -211,11 +211,61 @@ class PT_API SerializationData : public SerializationNode
                 const SerializationNode* operator->() const
                 { return *_it; }
 
+                bool operator==(const ConstNodeIterator& other) const
+                { return _it == other._it; }
+
                 bool operator!=(const ConstNodeIterator& other) const
                 { return _it != other._it; }
 
             private:
                 Nodes::const_iterator _it;
+        };
+
+        class ConstObjectIterator
+        {
+            public:
+                ConstObjectIterator()
+                : _data(0)
+                {}
+
+                ConstObjectIterator(const SerializationData& data)
+                : _data(&data)
+                , _it( data.begin() )
+                {
+                    this->advance();
+                }
+
+                ConstObjectIterator& operator++()
+                {
+                    this->advance();
+                    return *this;
+                }
+
+                const SerializationNode& operator*() const
+                { return *_it; }
+
+                const SerializationNode* operator->() const
+                { return _it.operator->(); }
+
+                bool operator!=(const ConstObjectIterator& other) const
+                { return _it != other._it; }
+
+                bool operator==(const ConstNodeIterator& other) const
+                { return _it == other; }
+
+                bool operator!=(const ConstNodeIterator& other) const
+                { return _it != other; }
+
+            protected:
+                void advance()
+                {
+                    while( ++_it != _data->end() && _it->toData() == 0)
+                    { }
+                }
+
+            private:
+                const SerializationData* _data;
+                ConstNodeIterator _it;
         };
 
     public:

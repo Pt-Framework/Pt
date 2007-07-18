@@ -42,6 +42,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("SerializationTest")
         {
             Pt::Unit::TestSuite::registerMethod( "ObjectDataTest", *this, &SerializationTest::ObjectDataTest );
+            Pt::Unit::TestSuite::registerMethod( "ConstObjectIterator", *this, &SerializationTest::ConstObjectIterator );
             Pt::Unit::TestSuite::registerMethod( "Date", *this, &SerializationTest::Date );
             Pt::Unit::TestSuite::registerMethod( "Time", *this, &SerializationTest::Time );
             Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &SerializationTest::DateTime );
@@ -55,6 +56,19 @@ class SerializationTest : public Pt::Unit::TestSuite
             const Pt::Variant* entry = data.getEntry(L"testEntry");
 
             PT_UNIT_ASSERT( *entry == "1" );
+        }
+
+        void ConstObjectIterator()
+        {
+            Pt::SerializationData data;
+            data.addEntry(L"testEntry1", Pt::Variant(1) );
+            data.addData(L"testData" );
+            data.addEntry(L"testEntry2", Pt::Variant(1) );
+
+            Pt::SerializationData::ConstObjectIterator it(data);
+            PT_UNIT_ASSERT( it->name() == Pt::String(L"testData") );
+
+            PT_UNIT_ASSERT( ++it == data.end() )
         }
 
         void Date()
