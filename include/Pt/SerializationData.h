@@ -232,7 +232,8 @@ class PT_API SerializationData : public SerializationNode
                 : _data(&data)
                 , _it( data.begin() )
                 {
-                    this->advance();
+                    if( _it != data.end() )
+                        this->advance();
                 }
 
                 ConstObjectIterator& operator++()
@@ -241,11 +242,11 @@ class PT_API SerializationData : public SerializationNode
                     return *this;
                 }
 
-                const SerializationNode& operator*() const
-                { return *_it; }
+                const SerializationData& operator*() const
+                { return *( _it->toData() ); }
 
-                const SerializationNode* operator->() const
-                { return _it.operator->(); }
+                const SerializationData* operator->() const
+                { return _it->toData() ; }
 
                 bool operator!=(const ConstObjectIterator& other) const
                 { return _it != other._it; }
@@ -347,6 +348,12 @@ class PT_API SerializationData : public SerializationNode
         ConstNodeIterator end() const
         { return _nodes.end(); }
 
+        ConstObjectIterator objectsBegin() const
+        { return ConstObjectIterator(*this); }
+
+        ConstNodeIterator objectsEnd() const
+        { return this->end(); }
+
     protected:
         const SerializationEntry* _toEntry() const
         { return 0; }
@@ -368,6 +375,13 @@ class PT_API SerializationData : public SerializationNode
 
 //template <typename T>
 //const SerializationNode& operator>>(const SerializationNode& node, T& type);
+
+template <typename T>
+struct Serialization
+{
+    const SerializationNode& get(const SerializationNode& node, T& type)
+    { return node; }
+};
 
 
 template <typename T>
