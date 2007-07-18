@@ -39,12 +39,12 @@ public:
     {
         return _points.begin();
     }
-    
+
     typename std::vector< BasicPoint<PointT> >::const_iterator end() const
     {
         return _points.end();
     }
-    
+
     void addPoint(BasicPoint<PointT> point)
     {
         _points.push_back(point);
@@ -57,21 +57,21 @@ public:
         {
             return false;
         }
-        
+
         typename std::vector< BasicPoint<T> >::const_iterator      otherIt = other.points().begin();
         typename std::vector< BasicPoint<PointT> >::const_iterator thisIt  = this->_points.begin();
-        
+
         while (thisIt != this->_points.end())
         {
             if (otherIt->x() != thisIt->x() || otherIt->y() != thisIt->y())
             {
                 return false;
             }
-            
+
             ++otherIt;
             ++thisIt;
         }
-        
+
         return true;
     }
 
@@ -81,24 +81,24 @@ public:
     {
         return !(*this == other);
     }
-    
-    
+
+
     Pt::size_t size() const
     {
         return _points.size();
     }
-    
+
     void clear()
     {
         _points.clear();
     }
-    
+
     const std::vector< BasicPoint<PointT> >& points() const
     {
         return _points;
     }
-    
-    
+
+
     template <typename T>
     inline bool contains(const BasicPoint<T>& point) const
     {
@@ -106,16 +106,16 @@ public:
         {
             return false;
         }
-    
+
         bool result = false;
-        
+
         BasicPoint<PointT> last = _points.back();
         typename std::vector< BasicPoint<PointT> >::const_iterator it;
-        
+
         for (it = _points.begin(); it != _points.end(); ++it)
         {
             BasicPoint<PointT> current = *it;
-            
+
             if ((current.y() <= point.y() && point.y() < last.y()) ||
                 (last.y()    <= point.y() && point.y() < current.y()))
             {
@@ -124,17 +124,23 @@ public:
                 // and current point). If so, we passed a line and thus have to invert our result.
                 double xPositionOnLine = (last.x() - current.x()) * (point.y() - current.y())
                                        / double(last.y() - current.y()) + current.x();
-                
+
                 if (double(point.x()) <= xPositionOnLine)
                 {
                     result = !result;
                 }
             }
-            
+
             last = current;
         }
-        
+
         return result;
+    }
+
+
+    const BasicPoint<PointT>& operator[](const Pt::size_t index) const
+    {
+        return _points[index];
     }
 
 protected:
