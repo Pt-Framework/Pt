@@ -1,6 +1,6 @@
 SubDir TOP src Pt-Net ;
 SubDirHdrs $(TOP)/include ;
-SubDirHdrs $(TOP)/src/Pt-Net/$(SYS:L) ;
+SubDirHdrs $(TOP)/src/Pt-Net/posix ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 
 SharedLibrary Pt-Net : AddrInfo.cpp
@@ -11,6 +11,8 @@ SharedLibrary Pt-Net : AddrInfo.cpp
                        TcpSocket.cpp
                        TcpServerSocket.cpp
                        ;
+
+Echo ccc $(TOP)/src/Pt-Net/$(SYS:L) ;
 
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
 SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
