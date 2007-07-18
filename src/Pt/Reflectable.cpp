@@ -119,6 +119,13 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
+void Reflectable::call(const std::string& name)
+{
+    CallableInfo& ci = this->methodInfo(name);
+    ci.call(0, 0);
+}
+
+
 Pt::Any Reflectable::call(const std::string& name, const Any* args, size_t argCount)
 {
     return this->methodInfo(name).call(args, argCount);

@@ -502,6 +502,24 @@ inline SerializationNode& insert(SerializationData& data, const std::string& x)
     return data.addEntry( Pt::Variant(x) );
 }
 
+
+inline const SerializationNode& operator>>(const SerializationNode& node, Pt::String& x)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        entry->value().get<Pt::String>(x);
+    }
+
+    return node;
+}
+
+
+inline SerializationNode& insert(SerializationData& data, const Pt::String& x)
+{
+    return data.addEntry( Pt::Variant(x) );
+}
+
 } // namespace Pt
 
 
