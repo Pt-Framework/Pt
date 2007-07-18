@@ -38,19 +38,17 @@ void XmlDeserializer::getData(SerializationData& data)
 
     size_t startDepth = _reader->depth();
 
-    XmlReader::Iterator it = _reader->current();
-    if( it != _reader->end() )
-        (this->*_processNode)(*it);
-
-    ++it;
-
     for(XmlReader::Iterator it = _reader->current(); it != _reader->end(); ++it)
     {
         (this->*_processNode)(*it);
 
-        if(_reader->depth() == startDepth)
+        if((it->type() == Node::EndElement) && (_reader->depth() < startDepth))
             break;
     }
+
+    // currently at closing tag - we have to advance to the next node.
+    _reader->next();
+    
 }
 
 
