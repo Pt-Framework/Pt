@@ -178,5 +178,3 @@ include/Pt/MemberInfo.h
 include/Pt/MethodInfoBase.h
 include/Pt/Unit/TextProtocol.h
 include/Pt/Archive.h
-include/Pt/SerializationData.h
-include/Pt/Settings.h

@@ -1,5 +1,6 @@
 SubDir TOP src Pt-Net ;
 SubDirHdrs $(TOP)/include ;
+SubDirHdrs $(TOP)/src/Pt-Net/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
 
 SharedLibrary Pt-Net : AddrInfo.cpp
