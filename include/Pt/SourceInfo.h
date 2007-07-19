@@ -102,7 +102,11 @@ class SourceInfo {
         */
         inline SourceInfo(const char* file, unsigned int line, const char* func) throw()
         : _file(file), _line(line), _func(func)
-        { }
+        {
+            std::stringstream ss;
+            ss << line;
+            ss >> _lineNo;
+        }
 
         /**  @brief Returns the filename
 
@@ -125,7 +129,7 @@ class SourceInfo {
         { return _line; }
 
         inline std::string str() const
-        { return _file + ": " + _func; }
+        { return _file + ":" + _lineNo + ": " + _func; }
 
         operator std::string() const
         { return this->str(); }
@@ -153,6 +157,7 @@ class SourceInfo {
     private:
         std::string  _file;
         unsigned int _line;
+        std::string _lineNo;
         std::string  _func;
 };
 
