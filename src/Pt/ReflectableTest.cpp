@@ -34,8 +34,8 @@ class TestReflectable : public Pt::Reflectable
         TestReflectable()
         : Pt::Reflectable("TestReflectable")
         {
-            this->registerProperty("number", this, _number, &TestReflectable::setNumber);
-            this->registerReadProperty("count", this, _number );
+            this->registerProperty("number", *this, _number, &TestReflectable::setNumber);
+            this->registerReadProperty("count", *this, _number );
 
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);

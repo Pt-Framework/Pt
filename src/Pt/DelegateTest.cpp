@@ -119,7 +119,7 @@ class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
             connect( d1, slot(d2) );
             PT_UNIT_ASSERT( d1.connectionCount() == 1)
 
-            connect( d2, slot(recv, &Callee::slot0) );
+            connect( d2, slot(*recv, &Callee::slot0) );
             PT_UNIT_ASSERT( d2.connectionCount() == 2)
 
             // Slot must be called via delegate chain

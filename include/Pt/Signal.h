@@ -350,7 +350,7 @@ namespace Pt {
     class SignalSlot : public BasicSlot<void, A1, A2, A3> {
         public:
             SignalSlot(Pt::Signal<A1, A2, A3>& signal)
-            : _method( &signal, &Signal<A1, A2, A3>::send )
+            : _method( signal, &Signal<A1, A2, A3>::send )
             {}
 
             BasicSlot<void, A1, A2, A3>* clone() const
@@ -425,28 +425,28 @@ namespace Pt {
     template <typename R, class BaseT, class ClassT>
     Connection connect(Signal<>& signal, BaseT& object, R(ClassT::*memFunc)())
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
     template <typename R, class BaseT, class ClassT, typename A1>
     Connection connect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1))
     {
-        return signal.connect( slot(&object, memFunc) );
+        return signal.connect( slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2>
     Connection connect(Signal<A1, A2>& signal, ClassT& object, R(ClassT::*memFunc)(A1, A2))
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2, typename A3>
     Connection connect(Signal<A1, A2, A3>& signal, ClassT& object, R(ClassT::*memFunc)(A1, A2, A3))
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
@@ -454,28 +454,28 @@ namespace Pt {
     template <typename R, class ClassT>
     Connection connect(Signal<>& signal, ClassT& object, R(ClassT::*memFunc)() const)
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1>
     Connection connect(Signal<A1>& signal, ClassT& object, R(ClassT::*memFunc)(A1) const)
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2>
     Connection connect(Signal<A1, A2>& signal, ClassT& object, R(ClassT::*memFunc)(A1, A2) const)
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2, typename A3>
     Connection connect(Signal<A1, A2, A3>& signal, ClassT& object, R(ClassT::*memFunc)(A1, A2, A3) const)
     {
-        return connect( signal, slot(&object, memFunc) );
+        return connect( signal, slot(object, memFunc) );
     }
 
 

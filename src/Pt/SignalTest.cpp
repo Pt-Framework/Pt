@@ -90,7 +90,7 @@ class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
         {
             Callee* recv = new Callee;
             Pt::Signal<> signal;
-            connect( signal, slot(recv, &Callee::slot0) );
+            connect( signal, slot(*recv, &Callee::slot0) );
             PT_UNIT_ASSERT(signal.connectionCount() == 1)
 
             // A deleted receiver must remove itself from a signal
@@ -100,7 +100,7 @@ class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
 
             // A signal must call its slot when connected
             recv = new Callee;
-            Pt::Connection connection = connect(signal, slot(recv, &Callee::slot0) );
+            Pt::Connection connection = connect(signal, slot(*recv, &Callee::slot0) );
             signal.send();
             PT_UNIT_ASSERT( recv->count() == 1)
 
@@ -122,7 +122,7 @@ class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
             Pt::Signal<> signal2;
 
             connect( signal1, slot(signal2) );
-            connect( signal2, slot(recv, &Callee::slot0) );
+            connect( signal2, slot(*recv, &Callee::slot0) );
 
             // Slot must be called via signal chain
             signal1.send();

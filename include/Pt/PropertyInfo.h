@@ -79,14 +79,14 @@ class ReadPropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename Object, typename ObjectBase>
-        ReadPropertyInfo( const std::string& name, Object* parent, T (ObjectBase::*getter)() const )
+        ReadPropertyInfo( const std::string& name, Object& parent, T (ObjectBase::*getter)() const )
         : _name(name)
         {
             _getter = new Pt::ConstMethod<T, Object>( parent, getter );
         }
 
         template <typename Object, typename ObjectBase>
-        ReadPropertyInfo( const std::string& name, Object* parent, T (ObjectBase::*getter)() )
+        ReadPropertyInfo( const std::string& name, Object& parent, T (ObjectBase::*getter)() )
         : _name(name)
         {
             _getter = new Pt::Method<T, Object>( parent, getter );
@@ -132,7 +132,7 @@ class WritePropertyInfo : virtual public PropertyInfo
 {
     public:
         template <typename R, typename Object, typename ObjectBase>
-        WritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*setter)(T type) )
+        WritePropertyInfo(const std::string& name, Object& parent, R (ObjectBase::*setter)(T type) )
         : _name(name)
         {
             _setter = new Pt::Method<R, Object, T>(parent, setter);
@@ -199,7 +199,7 @@ class ReadWritePropertyInfo : public PropertyInfo
 {
     public:
         template <typename R2, typename Object, typename ObjectBase>
-        ReadWritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
+        ReadWritePropertyInfo(const std::string& name, Object& parent, R (ObjectBase::*getter)() const, R2 (ObjectBase::*setter)(A type) )
         : _name(name)
         {
             std::auto_ptr< Pt::ConstMethod<R, ObjectBase> > ap( new Pt::ConstMethod<R, ObjectBase>( parent, getter ) );
@@ -208,7 +208,7 @@ class ReadWritePropertyInfo : public PropertyInfo
         }
 
         template <typename R2, typename Object, typename ObjectBase>
-        ReadWritePropertyInfo(const std::string& name, Object* parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
+        ReadWritePropertyInfo(const std::string& name, Object& parent, R (ObjectBase::*getter)(), R2 (ObjectBase::*setter)(A type) )
         : _name(name)
         {
             std::auto_ptr< Method<R, ObjectBase> > ap( new Method<R, ObjectBase>( parent, getter ) );
@@ -277,7 +277,7 @@ class ReadProperty : public PropertyInfo
 {
     public:
         template <typename Object>
-        ReadProperty( const std::string& name, Object* parent, PropertyValue<T>& value )
+        ReadProperty( const std::string& name, Object& parent, PropertyValue<T>& value )
         : _name(name)
         , _value(&value)
         { }
@@ -318,7 +318,7 @@ class ReadWriteProperty : public PropertyInfo
 {
     public:
         template <typename R,typename Class, typename Base>
-        ReadWriteProperty( const std::string& name, Class* parent, PropertyValue<T>& value,  R (Base::*setter)(A type) )
+        ReadWriteProperty( const std::string& name, Class& parent, PropertyValue<T>& value,  R (Base::*setter)(A type) )
         : _name(name)
         , _value(&value)
         {

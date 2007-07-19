@@ -286,7 +286,7 @@ namespace Pt {
     class DelegateSlot : public BasicSlot<R, A1, A2, A3> {
         public:
             DelegateSlot(Delegate<R, A1, A2, A3>& delegate)
-            : _method( &delegate, &Delegate<R, A1, A2, A3>::call )
+            : _method( delegate, &Delegate<R, A1, A2, A3>::call )
             {}
 
             BasicSlot<R, A1, A2, A3>* clone() const
@@ -375,28 +375,28 @@ namespace Pt {
     template <typename R, class BaseT, class ClassT>
     Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)())
     {
-        return connect( delegate, slot(&object, memFunc) );
+        return connect( delegate, slot(object, memFunc) );
     }
 
 
     template <typename R, class BaseT, class ClassT, typename A1>
     Connection connect(Delegate<R, A1>& delegate, BaseT& object, R(ClassT::*memFunc)(A1))
     {
-        return connect( delegate, slot(&object, memFunc) );
+        return connect( delegate, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2>
     Connection connect(Delegate<R, A1, A2>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2))
     {
-        return connect( delegate, slot(&object, memFunc) );
+        return connect( delegate, slot(object, memFunc) );
     }
 
 
     template <typename R, class ClassT, typename A1, typename A2, typename A3>
     Connection connect(Delegate<R, A1, A2, A3>& delegate, ClassT& object, R(ClassT::*memFunc)(A1, A2, A3))
     {
-        return connect( delegate, slot(&object, memFunc) );
+        return connect( delegate, slot(object, memFunc) );
     }
 
     /** @brief Connect a Delegate to a const member function
@@ -404,7 +404,7 @@ namespace Pt {
     template <typename R, class ClassT>
     Connection connect(Delegate<R>& delegate, ClassT& object, R(ClassT::*memFunc)() const)
     {
-        return connect( delegate, slot(&object, memFunc) );
+        return connect( delegate, slot(object, memFunc) );
     }
 
 

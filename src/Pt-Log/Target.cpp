@@ -34,9 +34,9 @@ Target::Target(const std::string& name, Target* parent)
     void (Target::*setter)(const std::string&);
     setter = &Target::setLogLevel;
 
-    this->registerProperty("logLevel", this, &Target::logLevelString, setter);
-    this->registerProperty("channel", this, &Target::channel, &Target::setChannel);
-    this->registerProperty("async", this, &Target::async, &Target::setAsync);
+    this->registerProperty("logLevel", *this, &Target::logLevelString, setter);
+    this->registerProperty("channel", *this, &Target::channel, &Target::setChannel);
+    this->registerProperty("async", *this, &Target::async, &Target::setAsync);
 }
 
 

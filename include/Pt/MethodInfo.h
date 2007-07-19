@@ -46,12 +46,12 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
         typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4, A5>(name)
         , _cb( new Method<R, C, A1, A2, A3, A5>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4, A5>(name)
         , _cb( new ConstMethod<R, C, A1, A2, A3, A4, A5>(object, memFunc) )
         {}
@@ -130,12 +130,12 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
         typedef void (C::*ConstMemFuncT)(A1, A2, A3, A4, A5) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4, A5>(name)
         , _cb( new Method<void, C, A1, A2, A3, A4, A5>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4, A5>(name)
         , _cb( new ConstMethod<void, C, A1, A2, A3, A4, A5>(object, memFunc) )
         {}
@@ -216,12 +216,12 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
         typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
         , _cb( new Method<R, C, A1, A2, A3>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
         , _cb( new ConstMethod<R, C, A1, A2, A3, A4>(object, memFunc) )
         {}
@@ -291,12 +291,12 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         typedef void (C::*ConstMemFuncT)(A1, A2, A3,A4) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4>(name)
         , _cb( new Method<void, C, A1, A2, A3, A4>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3, A4>(name)
         , _cb( new ConstMethod<void, C, A1, A2, A3, A4>(object, memFunc) )
         {}
@@ -370,12 +370,12 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
         typedef R (C::*ConstMemFuncT)(A1, A2, A3) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3>(name)
         , _cb( new Method<R, C, A1, A2, A3>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3>(name)
         , _cb( new ConstMethod<R, C, A1, A2, A3>(object, memFunc) )
         {}
@@ -436,12 +436,12 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
         typedef void (C::*ConstMemFuncT)(A1, A2, A3) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3>(name)
         , _cb( new Method<void, C, A1, A2, A3>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2, A3>(name)
         , _cb( new ConstMethod<void, C, A1, A2, A3>(object, memFunc) )
         {}
@@ -503,12 +503,12 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
         typedef R (C::*ConstMemFuncT)(A1, A2) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2>(name)
         , _cb( new Method<R, C, A1, A2>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2>(name)
         , _cb( new ConstMethod<R, C, A1, A2>(object, memFunc) )
         {}
@@ -560,12 +560,12 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
         typedef void (C::*ConstMemFuncT)(A1, A2) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2>(name)
         , _cb( new Method<void, C, A1, A2>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<void, C, A1, A2>(name)
         , _cb( new ConstMethod<void, C, A1, A2>(object, memFunc) )
         {}
@@ -619,12 +619,12 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
         typedef R (C::*ConstMemFuncT)(A1) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1>(name)
         , _cb( new Method<R, C, A1>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C, A1>(name)
         , _cb( new ConstMethod<R, C, A1>(object, memFunc) )
         {}
@@ -667,12 +667,12 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         typedef void (C::*ConstMemFuncT)(A1) const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C, A1>(name)
         , _cb( new Method<void, C, A1>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<void, C, A1>(name)
         , _cb( new ConstMethod<void, C, A1>(object, memFunc) )
         {}
@@ -715,12 +715,12 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
         typedef R (C::*ConstMemFuncT)() const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C>(name)
         , _cb( new Method<R, C>(object, memFunc) )
         {}
 
-        MethodInfo(const std::string& name, C* object, ConstMemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
         : MethodInfoBase<R, C>(name)
         , _cb( new ConstMethod<R, C>(object, memFunc) )
         {}
@@ -752,12 +752,12 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pu
         typedef void (C::*ConstMemFuncT)() const;
 
     public:
-        MethodInfo(const std::string& name, C* object, MemFuncT memFunc)
+        MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C>(name)
         ,_cb( new Method<void, C>(object, memFunc) )
         {}
 
-        MethodInfo(C* object, ConstMemFuncT memFunc)
+        MethodInfo(C& object, ConstMemFuncT memFunc)
         : _cb( new ConstMethod<void, C>(object, memFunc) )
         {}
 

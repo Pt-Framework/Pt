@@ -101,43 +101,43 @@ class PT_API Reflectable
         ConstMethodIterator methodsEnd() const;
 
         template <typename R, typename Parent, typename Object>
-        void registerReadProperty(const std::string& name, Parent* parent, R (Object::*getter)() const)
+        void registerReadProperty(const std::string& name, Parent& parent, R (Object::*getter)() const)
         {
             this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerWriteProperty(const std::string& name, Parent* parent, R (Object::*setter)() )
+        void registerWriteProperty(const std::string& name, Parent& parent, R (Object::*setter)() )
         {
             this->registerPropertyInfo( new WritePropertyInfo<R>(name, parent, setter) );
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerReadProperty(const std::string& name, Parent* parent, R (Object::*getter)())
+        void registerReadProperty(const std::string& name, Parent& parent, R (Object::*getter)())
         {
             this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
+        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
            this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent* parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
+        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
             this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
 
         template <typename R, typename Parent>
-        void registerReadProperty(const std::string& name, Parent* parent, PropertyValue<R>& value)
+        void registerReadProperty(const std::string& name, Parent& parent, PropertyValue<R>& value)
         {
             this->registerPropertyInfo( new ReadProperty<R>(name, parent, value) );
         }
 
         template <typename T, typename R, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent* parent, PropertyValue<T>& value, R (Object::*setter)(A type))
+        void registerProperty(const std::string& name, Parent& parent, PropertyValue<T>& value, R (Object::*setter)(A type))
         {
             this->registerPropertyInfo( new ReadWriteProperty<T, A>(name, parent, value, setter) );
         }
@@ -145,49 +145,49 @@ class PT_API Reflectable
         template <typename ParentT>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
         {
-            CallableInfo* cb = new MethodInfo<void, ParentT>(name, &parent, memFunc);
+            CallableInfo* cb = new MethodInfo<void, ParentT>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1) const )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
         template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
         void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5) )
         {
-            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, &parent, memFunc);
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 

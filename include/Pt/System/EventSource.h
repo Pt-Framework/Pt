@@ -65,7 +65,7 @@ namespace System {
             {
                 // Do not lock here, the Connection will call
                 // Connectable::opened on this object
-                return Connection( *this, slot(&receiver, &EventLoop::commitEvent).clone() );
+                return Connection( *this, slot(receiver, &EventLoop::commitEvent).clone() );
             }
 
             /** @brief Connects to a slot in another thread
