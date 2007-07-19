@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,77 +20,44 @@
 #include <Pt/Unit/Reporter.h>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
 
+namespace Unit {
 
-void BriefTextReporter::started(const TestContext& test)
+void BriefReporter::started(const TestContext& test)
 {
     *m_out << test.testName() << ": ";
 }
 
-void BriefTextReporter::finished(const TestContext& test)
-{}
-
-void BriefTextReporter::message(const std::string& msg)
-{}
-
-void BriefTextReporter::success(const TestContext& test)
-{
-    *m_out << "OK" << std::endl;
-}
-
-void BriefTextReporter::assertion(const TestContext& test, const Assertion& a)
-{
-    *m_out << "ASSERTION" << std::endl;
-}
-
-void BriefTextReporter::exception(const TestContext& test, const std::exception& ex)
-{
-    *m_out << "EXCEPTION" << std::endl;
-}
-
-void BriefTextReporter::error(const TestContext& test)
-{
-    *m_out << "ERROR" << std::endl;
-}
-
-
-
-void TextReporter::started(const TestContext& test)
-{
-    BriefTextReporter::started(test);
-}
-
-void TextReporter::finished(const TestContext& test)
+void BriefReporter::finished(const TestContext& test)
 {
 }
 
-void TextReporter::message(const std::string& msg)
+void BriefReporter::message(const std::string& msg)
 {
     *m_out << msg << std::endl;
 }
 
-void TextReporter::success(const TestContext& test)
+void BriefReporter::success(const TestContext& test)
 {
-    BriefTextReporter::success(test);
+    *m_out << "OK" << std::endl;
 }
 
-void TextReporter::assertion(const TestContext& test, const Assertion& a)
+void BriefReporter::assertion(const TestContext& test, const Assertion& a)
 {
     *m_out << "ASSERTION at " << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
     *m_out << '\t' << a.what() << std::endl;
 }
 
-void TextReporter::exception(const TestContext& test, const std::exception& ex)
+void BriefReporter::exception(const TestContext& test, const std::exception& ex)
 {
-    BriefTextReporter::exception(test, ex);
+    *m_out << "EXCEPTION" << std::endl;
     *m_out << '\t' << ex.what() << std::endl;
 }
 
-void TextReporter::error(const TestContext& test)
+void BriefReporter::error(const TestContext& test)
 {
-    BriefTextReporter::error(test);
+    *m_out << "ERROR" << std::endl;
 }
 
 
@@ -280,4 +247,8 @@ bool CSVReporter::extractData(std::string key, const std::string& msg, bool isFi
     }
 
     return false;
+}
+
+}
+
 }

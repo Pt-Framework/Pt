@@ -38,24 +38,11 @@ namespace Unit {
         This class is the base class for all reporters for test events. It
         lets the implementor override several virtual methods that are called
         on perticular events during the test. Reporters can be made to print
-        information to the console or write XML logs. The default
-        implementation will report events to a stream in a simple Text format.
+        information to the console or write XML logs.
     */
     class PT_UNIT_API Reporter
     {
         public:
-            /** @brief Constructs a reporter to use an ostream
-
-                This conctructor creates a reporter that uses the passed
-                ostream to print messgages for the events that happen during a
-                test. By default, std::cerr is used to print the messages to.
-
-                @param reporter Reporeter to be used
-            */
-            Reporter(std::ostream* out = &std::cerr)
-            : m_out(out)
-            {}
-
             /** @brief Destructor
             */
             virtual ~Reporter()
@@ -125,20 +112,21 @@ namespace Unit {
             virtual void error(const TestContext& test) = 0;
 
         protected:
-            /** @brief Ostream to print output to
+            /** @brief Constructs a reporter
             */
-            std::ostream* m_out;
+            Reporter()
+            {}
     };
 
 
-    class PT_UNIT_API BriefTextReporter : public Reporter
+    class PT_UNIT_API BriefReporter : public Reporter
     {
         public:
-            BriefTextReporter(std::ostream* out = &std::cerr)
-            : Reporter(out)
+            BriefReporter(std::ostream* out = &std::cerr)
+            : m_out(out)
             {}
 
-            virtual ~BriefTextReporter()
+            virtual ~BriefReporter()
             {}
 
             virtual void started(const TestContext& test);
@@ -154,32 +142,11 @@ namespace Unit {
             virtual void exception(const TestContext& test, const std::exception& ex);
 
             virtual void error(const TestContext& test);
-    };
 
-
-    class PT_UNIT_API TextReporter : public BriefTextReporter
-    {
-    public:
-        TextReporter(std::ostream* out = &std::cerr)
-        : BriefTextReporter(out)
-        {}
-
-        virtual ~TextReporter()
-        {}
-
-        virtual void started(const TestContext& test);
-
-        virtual void finished(const TestContext& test);
-
-        virtual void message(const std::string& msg);
-
-        virtual void success(const TestContext& test);
-
-        virtual void assertion(const TestContext& test, const Assertion& a);
-
-        virtual void exception(const TestContext& test, const std::exception& ex);
-
-        virtual void error(const TestContext& test);
+        private:
+            /** @brief Ostream to print output to
+            */
+            std::ostream* m_out;
     };
 
 
@@ -187,7 +154,7 @@ namespace Unit {
     {
     public:
         XMLReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
-        : Reporter(out)
+        : m_out(out)
         , m_indentWidth(indentWidth)
         , m_indent(0)
         {
@@ -217,15 +184,13 @@ namespace Unit {
 
         virtual void error(const TestContext& test);
 
-    private:
-        int m_indentWidth;
-        int m_indent;
-
-        void beginTag(std::string tag);
-
-        void endTag(std::string tag);
-
-        void writeData(std::string data);
+        private:
+            std::ostream* m_out;
+            int m_indentWidth;
+            int m_indent;
+            void beginTag(std::string tag);
+            void endTag(std::string tag);
+            void writeData(std::string data);
     };
 
 
@@ -233,7 +198,7 @@ namespace Unit {
     {
     public:
         CSVReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
-        : Reporter(out)
+        : m_out(out)
         , m_timestampSaved(false)
         , m_performanceSaved(false)
         {
@@ -262,6 +227,7 @@ namespace Unit {
         virtual void error(const TestContext& test);
 
     private:
+        std::ostream* m_out;
         std::string m_testName;
         std::string m_allMessages;
         bool m_timestampSaved;

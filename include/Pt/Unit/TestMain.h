@@ -46,8 +46,8 @@ int main(int argc, char** argv)
     //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
     //     -f=FILE           save output in file FILE instead of stdout
 
-    Pt::Unit::TextReporter fileReporter;
-    Pt::Unit::TextReporter consoleReporter;    
+    Pt::Unit::BriefReporter fileReporter;
+    Pt::Unit::BriefReporter consoleReporter;
     Pt::Unit::Application app;
     bool fileLoggingEnabled = false;
 
@@ -80,11 +80,11 @@ int main(int argc, char** argv)
           fileLoggingEnabled = true;
         }
     }
-    
+
     std::ofstream logFile(fileName);
     if (fileLoggingEnabled)
     {
-      fileReporter = Pt::Unit::TextReporter(&logFile);
+      fileReporter = Pt::Unit::BriefReporter(&logFile);
       app.addReporter(fileReporter);
     }    
     app.addReporter(consoleReporter);
