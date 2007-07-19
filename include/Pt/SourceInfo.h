@@ -23,6 +23,7 @@
 
 #include <Pt/Api.h>
 #include <string>
+#include <sstream>
 
 
 // GNU C++ compiler
@@ -129,7 +130,7 @@ class SourceInfo {
         { return _line; }
 
         inline std::string str() const
-        { return _file + ":" + _lineNo + ": " + _func; }
+        { return _file + ":" + _lineNo; }
 
         operator std::string() const
         { return this->str(); }
