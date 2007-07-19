@@ -122,8 +122,8 @@ public:
                 // y-value of point lies between y-value of last and y-value of current point.
                 // Now check if the x-value of the point is left of the line (between last point
                 // and current point). If so, we passed a line and thus have to invert our result.
-                double xPositionOnLine = (last.x() - current.x()) * (point.y() - current.y())
-                                       / double(last.y() - current.y()) + current.x();
+                double xPositionOnLine = (double(last.x()) - current.x()) * (point.y() - current.y())
+                                       / (last.y() - current.y()) + current.x();
 
                 if (double(point.x()) <= xPositionOnLine)
                 {
