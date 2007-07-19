@@ -111,9 +111,9 @@ namespace Unit {
                         _suite.setUp();
                         _setUp = true;
 
-                        if(_args)
+                        if(_sdArgs)
                             _suite.call(_methodName, _args, _argCount);
-                        else if(_sdArgs)
+                        else
                             _suite.call(_methodName, _args, _argCount);
                     }
 

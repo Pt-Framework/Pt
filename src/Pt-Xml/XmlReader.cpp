@@ -203,6 +203,57 @@ const Node& XmlReader::next()
 }
 
 
+const StartElement& XmlReader::nextElement()
+{
+    bool found = false;
+    while( !found )
+    {
+        const Node& node = this->next();
+        switch( node.type() )
+        {
+            case Node::EndDocument:
+                throw std::logic_error("End of document" + PT_SOURCEINFO);
+
+            case Node::StartElement:
+                found = true;
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    return static_cast<const StartElement&>( this->get() );
+}
+
+
+const Node& XmlReader::nextTag()
+{
+    bool found = false;
+    while( !found )
+    {
+        const Node& node = this->next();
+        switch( node.type() )
+        {
+            case Node::EndDocument:
+                throw std::logic_error("End of document" + PT_SOURCEINFO);
+
+            case Node::StartElement:
+            case Node::EndElement:
+                found = true;
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    return this->get();
+}
+
+
 XmlReader& XmlReader::operator>>(StartElement& to)
 {
     // check if there is a node in the buffer

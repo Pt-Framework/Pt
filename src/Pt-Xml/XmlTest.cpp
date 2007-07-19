@@ -43,6 +43,8 @@ class XmlTest : public Pt::Unit::TestSuite
             this->registerMethod("EmptyElementTag" , *this, &XmlTest::EmptyElementTag);
             this->registerMethod("InvalidTag1" , *this, &XmlTest::InvalidTag1);
             this->registerMethod("InvalidTag2" , *this, &XmlTest::InvalidTag2);
+            this->registerMethod("NextElement" , *this, &XmlTest::NextElement);
+            this->registerMethod("NextTag" , *this, &XmlTest::NextTag);
             this->registerMethod("ElementWithContent" , *this, &XmlTest::ElementWithContent);
             this->registerMethod("DefaultEntities" , *this, &XmlTest::DefaultEntities);
             this->registerMethod("AttributeWithSimpleText" , *this, &XmlTest::AttributeWithSimpleText);
@@ -80,6 +82,8 @@ protected:
     void EmptyElementTag();
     void InvalidTag1();
     void InvalidTag2();
+    void NextElement();
+    void NextTag();
 	void ElementWithContent();
 
 	void testTagMissingCloseTag();
@@ -211,6 +215,48 @@ void XmlTest::InvalidTag2()
 
 	// Expecting exception because empty tags are not allowed.
     PT_UNIT_ASSERT_THROW(reader.current(), std::exception);
+}
+
+
+void XmlTest::NextElement()
+{
+    stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a><b><c>5</c></b></a>";
+
+    XmlReader reader( input );
+    const Node& node = reader.get();
+    PT_UNIT_ASSERT(node.type() == Node::StartElement);
+
+    reader.nextElement();
+    const StartElement& se = reader.nextElement();
+    PT_UNIT_ASSERT(se.name().narrow() == "c");
+
+    PT_UNIT_ASSERT_THROW(reader.nextElement(), std::exception);
+}
+
+
+void XmlTest::NextTag()
+{
+    stringstream input;
+    input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    input << "<a><b><c>5</c></b></a>";
+
+    XmlReader reader( input );
+    const Node& node = reader.get();
+    PT_UNIT_ASSERT(node.type() == Node::StartElement);
+
+    reader.nextTag();
+    reader.nextTag();
+    reader.nextTag();
+    const Node& node2 = reader.nextTag();
+    PT_UNIT_ASSERT(node2.type() == Node::EndElement);
+
+    const EndElement& ee = static_cast<const EndElement&>(node2);
+    PT_UNIT_ASSERT(ee.name().narrow() == "b");
+
+    reader.nextTag();
+    PT_UNIT_ASSERT_THROW(reader.nextTag(), std::exception);
 }
 
 

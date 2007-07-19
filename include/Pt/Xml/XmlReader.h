@@ -136,6 +136,10 @@ namespace Xml {
             //! @brief Get next element from stream
             const Node& next();
 
+            const StartElement& nextElement();
+
+            const Node& nextTag();
+
             XmlReader& operator>>(StartElement& se);
 
             XmlReader& operator>>(EndElement& e);
