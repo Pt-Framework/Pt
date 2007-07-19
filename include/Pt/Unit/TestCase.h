@@ -88,6 +88,8 @@ namespace Unit {
                         }
                         catch(...)
                         {}
+
+                        _test.finished.send(*this);
                     }
 
                     const std::string& testName() const

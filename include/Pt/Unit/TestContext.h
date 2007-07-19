@@ -33,9 +33,7 @@ namespace Unit {
     {
         public:
             virtual ~TestContext()
-            {
-                _test.finished.send(*this);
-            }
+            {}
 
             virtual const std::string& testName() const;
 
