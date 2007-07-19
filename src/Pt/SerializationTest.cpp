@@ -61,14 +61,25 @@ class SerializationTest : public Pt::Unit::TestSuite
         void ConstObjectIterator()
         {
             Pt::SerializationData data;
-            data.addEntry(L"testEntry1", Pt::Variant(1) );
-            data.addData(L"testData" );
-            data.addEntry(L"testEntry2", Pt::Variant(1) );
+            //data.addEntry(L"testEntry1", Pt::Variant(1) );
+            data.addData(L"testData1" );
+            //data.addEntry(L"testEntry2", Pt::Variant(1) );
+            data.addData(L"testData2" );
+            data.addData(L"testData3" );
 
-            Pt::SerializationData::ConstObjectIterator it(data);
-            PT_UNIT_ASSERT( it->name() == Pt::String(L"testData") );
+            Pt::SerializationData::ConstObjectIterator it;
 
-            PT_UNIT_ASSERT( ++it == data.end() )
+            it = data.objectsBegin();
+            PT_UNIT_ASSERT( it->name() == Pt::String(L"testData1") );
+
+            ++it;
+            PT_UNIT_ASSERT( it->name() == Pt::String(L"testData2") );
+
+            ++it;
+            PT_UNIT_ASSERT( it->name() == Pt::String(L"testData3") );
+
+            ++it;
+            PT_UNIT_ASSERT( it == data.objectsEnd() )
         }
 
         void Date()

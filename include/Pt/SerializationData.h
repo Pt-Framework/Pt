@@ -232,7 +232,7 @@ class PT_API SerializationData : public SerializationNode
                 : _data(&data)
                 , _it( data.begin() )
                 {
-                    if( _it != data.end() )
+                    if( _it != data.end() && _it->toData() == 0 )
                         this->advance();
                 }
 
@@ -260,7 +260,7 @@ class PT_API SerializationData : public SerializationNode
             protected:
                 void advance()
                 {
-                    while( ++_it != _data->end() && _it->toData() == 0)
+                    while( ++_it != _data->end() && _it->toData() == 0 )
                     { }
                 }
 
