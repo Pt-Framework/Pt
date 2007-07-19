@@ -11,15 +11,19 @@ PT_UNIT_SOURCES = Application.cpp
                   TestCase.cpp
                   TestContext.cpp
                   TestProtocol.cpp
-                  TestSchedule.cpp
                   TestSuite.cpp
                   TextProtocol.cpp
                  ;
 
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-Text Pt-System ;
+SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
 
-Main TextProtocolTest : TextProtocolTest.cpp ;
-Main_LinkSharedLibraries TextProtocolTest : Pt Pt-Text Pt-Unit ;
-Main_MakeLocate TextProtocolTest : $(OUTPUT_TARGET) ;
+
+DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt-Unit ;
+
+
+# Define a pseudo target to call from projects
+NOTFILE Pt-Unit-all ;
+DEPENDS Pt-Unit-all : Pt-Unit
+                      ;

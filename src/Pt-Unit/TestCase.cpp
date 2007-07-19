@@ -26,7 +26,7 @@ using namespace Unit;
 
 void TestCase::run()
 {
-    ConText ctx(*this);
+    Context ctx(*this);
     ctx.run();
 }
 

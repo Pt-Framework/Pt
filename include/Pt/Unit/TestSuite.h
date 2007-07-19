@@ -65,12 +65,26 @@ namespace Unit {
             class Context : public TestContext
             {
                 public:
-                    Context(TestSuite& suite, const std::string& name, const Any* args, size_t argCount)
+                    Context(TestSuite& suite, const std::string& name,
+                            const Any* args = 0, size_t argCount = 0)
                     : TestContext(suite)
                     , _suite(suite)
                     , _methodName( name )
                     , _args(args)
                     , _argCount(argCount)
+                    , _sdArgs(0)
+                    , _testName( _suite.name() + "::" + name )
+                    , _setUp(false)
+                    { }
+
+                    Context(TestSuite& suite, const std::string& name,
+                            const SerializationData& args)
+                    : TestContext(suite)
+                    , _suite(suite)
+                    , _methodName( name )
+                    , _args(0)
+                    , _argCount(0)
+                    , _sdArgs(&args)
                     , _testName( _suite.name() + "::" + name )
                     , _setUp(false)
                     { }
@@ -85,7 +99,7 @@ namespace Unit {
                         catch(...)
                         {}
 
-                        _test.finished.send(*this);
+                        _suite.finished.send(*this);
                     }
 
                     const std::string& testName() const
@@ -96,23 +110,19 @@ namespace Unit {
                     {
                         _suite.setUp();
                         _setUp = true;
-                        if(_argCount == 0)
-                            _suite.call(_methodName, 0, 0);
-                        else
-                            _suite.call(_methodName, _args, _argCount);
-                    }
 
-                    void setArgs(const Any* args, size_t argCount)
-                    {
-                        _args = args;
-                        _argCount = argCount;
+                        if(_args)
+                            _suite.call(_methodName, _args, _argCount);
+                        else if(_sdArgs)
+                            _suite.call(_methodName, _args, _argCount);
                     }
 
                 private:
                     TestSuite& _suite;
                     std::string _methodName;
-                    const Any* _args;
+                    const Any* _args ;
                     size_t _argCount;
+                    const SerializationData* _sdArgs;
                     std::string _testName;
                     bool _setUp;
             };
@@ -132,9 +142,6 @@ namespace Unit {
             , Test(name)
             , _protocol(&protocol)
             { }
-
-            ~TestSuite()
-            {}
 
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
@@ -175,6 +182,8 @@ namespace Unit {
                 @param args Arguments to invoke the method
             */
             void runTest( const std::string& name, const Any* args = 0, size_t argCount = 0 );
+
+            void runTest( const std::string& name, const SerializationData& args );
 
         protected:
             /** @brief The assoziated test protocol

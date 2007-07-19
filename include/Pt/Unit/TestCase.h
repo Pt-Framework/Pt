@@ -70,16 +70,16 @@ namespace Unit {
     class PT_UNIT_API TestCase : public Test
     {
         public:
-            class ConText : public TestContext
+            class Context : public TestContext
             {
                 public:
-                    ConText(TestCase& test)
+                    Context(TestCase& test)
                     : TestContext(test)
                     , _test(test)
                     , _setUp(false)
                     { }
 
-                    ~ConText()
+                    ~Context()
                     {
                         try
                         {

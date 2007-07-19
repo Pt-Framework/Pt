@@ -33,7 +33,7 @@ namespace Unit {
     {
         public:
             virtual ~TestContext()
-            {}
+            { }
 
             virtual const std::string& testName() const;
 

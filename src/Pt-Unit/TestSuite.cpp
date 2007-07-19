@@ -20,9 +20,8 @@
 #include <Pt/Unit/TestSuite.h>
 
 
-namespace Pt {
-
-namespace Unit {
+using namespace Pt;
+using namespace Unit;
 
 
 TestProtocol TestSuite::defaultProtocol;
@@ -56,12 +55,15 @@ void TestSuite::run()
     _protocol->run(*this);
 }
 
-void TestSuite::runTest(const std::string& name, const Any* args, size_t argCount)
+void TestSuite::runTest(const std::string& name, const Any* args, size_t argCount )
 {
     Context ctx(*this, name, args, argCount);
     ctx.run();
 }
 
-}
 
+void TestSuite::runTest(const std::string& name, const SerializationData& args)
+{
+    Context ctx(*this, name, args);
+    ctx.run();
 }
