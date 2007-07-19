@@ -12,8 +12,6 @@ SharedLibrary Pt-Net : AddrInfo.cpp
                        TcpServerSocket.cpp
                        ;
 
-Echo ccc $(TOP)/src/Pt-Net/$(SYS:L) ;
-
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
 SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
 SharedLibrary_MakeLocate Pt-Net : $(OUTPUT_TARGET) ;

@@ -75,7 +75,7 @@ static int  is_win95_defined = 0;
 static int  is_winnt = 0;
 static int  is_win2000  = 0;
 static int  is_winxp  = 0;
-
+static int  is_winvista  = 0;
 
 static struct
 {
@@ -117,7 +117,9 @@ set_is_win95( void )
                       && (os_info.dwMajorVersion == 5)
                       && (os_info.dwMinorVersion == 1) ;
 
-
+  is_winvista = (os_info.dwPlatformId == VER_PLATFORM_WIN32_NT)
+                      && (os_info.dwMajorVersion == 6)
+                      && (os_info.dwMinorVersion == 0) ;
 }
 
 int maxline()
@@ -133,6 +135,8 @@ int maxline()
     else if ((is_win2000) || (is_winnt))
         retVal = 2047;
     else if (is_winxp)
+        retVal = 8192;
+    else if (is_winvista)
         retVal = 8192;
 
     return retVal;
