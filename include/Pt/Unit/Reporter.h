@@ -43,117 +43,117 @@ namespace Unit {
     */
     class PT_UNIT_API Reporter
     {
-    public:
-        /** @brief Constructs a reporter to use an ostream
+        public:
+            /** @brief Constructs a reporter to use an ostream
 
-            This conctructor creates a reporter that uses the passed
-            ostream to print messgages for the events that happen during a
-            test. By default, std::cerr is used to print the messages to.
+                This conctructor creates a reporter that uses the passed
+                ostream to print messgages for the events that happen during a
+                test. By default, std::cerr is used to print the messages to.
 
-            @param reporter Reporeter to be used
-        */
-        Reporter(std::ostream* out = &std::cerr)
-        : m_out(out)
-        {}
+                @param reporter Reporeter to be used
+            */
+            Reporter(std::ostream* out = &std::cerr)
+            : m_out(out)
+            {}
 
-        /** @brief Destructor
-        */
-        virtual ~Reporter()
-        {}
+            /** @brief Destructor
+            */
+            virtual ~Reporter()
+            {}
 
-        /** @brief Start notification
+            /** @brief Start notification
 
-            This method is called when a test has started. Every test sends
-            this signal at startup.
+                This method is called when a test has started. Every test sends
+                this signal at startup.
 
-            @param test The started test
-        */
-        virtual void started(const TestContext& test) = 0;
+                @param test The started test
+            */
+            virtual void started(const TestContext& test) = 0;
 
-        /** @brief Finished notification
+            /** @brief Finished notification
 
-            This method is called when a test has finished. Every test sends
-            this signal at its end no matter if it failed or succeeded.
+                This method is called when a test has finished. Every test sends
+                this signal at its end no matter if it failed or succeeded.
 
-            @param test The finished test
-        */
-        virtual void finished(const TestContext& test) = 0;
+                @param test The finished test
+            */
+            virtual void finished(const TestContext& test) = 0;
 
-        /** @brief Message notification
+            /** @brief Message notification
 
-            This method is called when a test has produced an informational
-            message.
+                This method is called when a test has produced an informational
+                message.
 
-            @param msg The message
-        */
-        virtual void message(const std::string& msg) = 0;
+                @param msg The message
+            */
+            virtual void message(const std::string& msg) = 0;
 
-        /** @brief Success notification
+            /** @brief Success notification
 
-            This method is called when a test was successful.
+                This method is called when a test was successful.
 
-            @param test The succeeded test
-        */
-        virtual void success(const TestContext& test) = 0;
+                @param test The succeeded test
+            */
+            virtual void success(const TestContext& test) = 0;
 
-        /** @brief Assertion notification
+            /** @brief Assertion notification
 
-            This method is called when a an assertion failed during a test. an
-            assertion fails when a user defined condition is not met.
+                This method is called when a an assertion failed during a test. an
+                assertion fails when a user defined condition is not met.
 
-            @param test The failed test
-        */
-        virtual void assertion(const TestContext& test, const Assertion& a) = 0;
+                @param test The failed test
+            */
+            virtual void assertion(const TestContext& test, const Assertion& a) = 0;
 
-        /** @brief Exception notification
+            /** @brief Exception notification
 
-            This method is called when a an exception failed during a test. An
-            exception usually means that an error occured that was even u
-            nexpected in a test scenario
+                This method is called when a an exception failed during a test. An
+                exception usually means that an error occured that was even u
+                nexpected in a test scenario
 
-            @param test The failed test
-        */
-        virtual void exception(const TestContext& test, const std::exception& ex) = 0;
+                @param test The failed test
+            */
+            virtual void exception(const TestContext& test, const std::exception& ex) = 0;
 
-        /** @brief Error notification
+            /** @brief Error notification
 
-            This method is called when a an unknown error occurs during a
-            test.
+                This method is called when a an unknown error occurs during a
+                test.
 
-            @param test The failed test
-        */
-        virtual void error(const TestContext& test) = 0;
+                @param test The failed test
+            */
+            virtual void error(const TestContext& test) = 0;
 
-    protected:
-        /** @brief Ostream to print output to
-        */
-        std::ostream* m_out;
+        protected:
+            /** @brief Ostream to print output to
+            */
+            std::ostream* m_out;
     };
 
 
     class PT_UNIT_API BriefTextReporter : public Reporter
     {
-    public:
-        BriefTextReporter(std::ostream* out = &std::cerr)
-        : Reporter(out)
-        {}
+        public:
+            BriefTextReporter(std::ostream* out = &std::cerr)
+            : Reporter(out)
+            {}
 
-        virtual ~BriefTextReporter()
-        {}
+            virtual ~BriefTextReporter()
+            {}
 
-        virtual void started(const TestContext& test);
+            virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test);
+            virtual void finished(const TestContext& test);
 
-        virtual void message(const std::string& msg);
+            virtual void message(const std::string& msg);
 
-        virtual void success(const TestContext& test);
+            virtual void success(const TestContext& test);
 
-        virtual void assertion(const TestContext& test, const Assertion& a);
+            virtual void assertion(const TestContext& test, const Assertion& a);
 
-        virtual void exception(const TestContext& test, const std::exception& ex);
+            virtual void exception(const TestContext& test, const std::exception& ex);
 
-        virtual void error(const TestContext& test);
+            virtual void error(const TestContext& test);
     };
 
 

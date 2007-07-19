@@ -60,12 +60,10 @@ void BriefTextReporter::error(const TestContext& test)
 void TextReporter::started(const TestContext& test)
 {
     BriefTextReporter::started(test);
-    *m_out << std::endl;
 }
 
 void TextReporter::finished(const TestContext& test)
 {
-    *m_out << std::endl;
 }
 
 void TextReporter::message(const std::string& msg)
@@ -80,9 +78,8 @@ void TextReporter::success(const TestContext& test)
 
 void TextReporter::assertion(const TestContext& test, const Assertion& a)
 {
-    BriefTextReporter::assertion(test, a);
-    *m_out << '\t' << "Condition: " << a.what() << std::endl;
-    *m_out << '\t' << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
+    *m_out << "ASSERTION at " << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
+    *m_out << '\t' << a.what() << std::endl;
 }
 
 void TextReporter::exception(const TestContext& test, const std::exception& ex)
@@ -95,7 +92,6 @@ void TextReporter::error(const TestContext& test)
 {
     BriefTextReporter::error(test);
 }
-
 
 
 void XMLReporter::started(const TestContext& test)
