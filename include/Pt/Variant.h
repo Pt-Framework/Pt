@@ -85,7 +85,8 @@ namespace Pt {
 	    /**
 	       Constructs an empty object.
 	    */
-            Variant() throw()
+            Variant()
+            : _isUnicode(0)
             {}
 
             ~Variant() throw()
@@ -95,25 +96,28 @@ namespace Pt {
 	       Lexically casts value to a string.
 	    */
             template <typename T>
-            Variant(const T& value) throw()
+            Variant(const T& value)
+            : _isUnicode(0)
             { this->set(value); }
 
 	    /**
 	       Deeply copies rhs.
 	    */
-            Variant(const Variant & rhs) throw()
+            Variant(const Variant & rhs)
             : _data(rhs._data)
+            , _isUnicode(0)
             { }
 
 	    /**
 
 	    */
-            Variant(const char* blob, int byteCount) throw()
+            Variant(const char* blob, int byteCount)
+            : _isUnicode(0)
             {
                 _data.assign(blob, byteCount);
             }
 
-            void assign(const char * blob, int byteCount) throw()
+            void assign(const char * blob, int byteCount)
             {
                 _data.assign(blob, byteCount);
             }
@@ -125,7 +129,12 @@ namespace Pt {
 	    */
             template <typename T>
             bool get(T& tgt) const throw()
-            { return VariantTraits<T>::fromData(tgt , _data); }
+            {
+                if(_isUnicode)
+                    return VariantTraits<T>::fromData(tgt , _udata);
+
+                return VariantTraits<T>::fromData(tgt , _data);
+            }
 
 	    /**
 	       Lexically casts value to a string
@@ -239,6 +248,8 @@ namespace Pt {
 
         private:
             std::string _data;
+            Pt::String _udata;
+            int _isUnicode;
     };
 
 

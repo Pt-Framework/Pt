@@ -22,6 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
+#include <Pt/StringStream.h>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -30,7 +31,10 @@
 namespace Pt {
 
     template <typename T>
-    struct VariantTraits {
+    struct VariantTraits
+    {
+        static const int isUnicode = 0;
+
         static void toData(std::string& data, const T& value)
         {
             std::ostringstream os;
@@ -44,11 +48,49 @@ namespace Pt {
             is >> value;
             return !is.fail();
         }
+
+        static bool fromData(T& value, const Pt::String& data)
+        {
+            Pt::StringStream is(data);
+            is >> value;
+            return !is.fail();
+        }
     };
 
+    template <>
+    struct VariantTraits<char>
+    {
+        static const int isUnicode = 0;
+
+        static void toData(std::string& data, char value)
+        {
+            std::ostringstream os;
+            os << value;
+            data = os.str();
+        }
+
+        static bool fromData(char& value, const std::string& data)
+        {
+            std::istringstream is(data);
+            is >> value;
+            return !is.fail();
+        }
+
+        static bool fromData(char& value, const Pt::String& data)
+        {
+            if( data.empty() )
+                return false;
+
+            value = data[0].narrow('*');
+            return true;
+        }
+    };
 
     template <>
-    struct VariantTraits<std::string> {
+    struct VariantTraits<std::string>
+    {
+        static const int isUnicode = 0;
+
         static void toData(std::string& data, const std::string& value)
         { data = value; }
 
@@ -57,12 +99,20 @@ namespace Pt {
             value = data;
             return true;
         }
+
+        static bool fromData(std::string& value, const Pt::String& data)
+        {
+            value = data.narrow();
+            return true;
+        }
     };
 
 
     template <>
     struct VariantTraits<Pt::String>
     {
+        static const int isUnicode = 1;
+
         static void toData(std::string& data, const Pt::String& value)
         {
             data = value.narrow();
@@ -73,6 +123,12 @@ namespace Pt {
             value = Pt::String::widen(data);
             return true;
         }
+
+        static bool fromData(Pt::String& value, const Pt::String& data)
+        {
+            value = data;
+            return true;
+        }
     };
 
 
@@ -81,7 +137,10 @@ namespace Pt {
         VariantTraits for double.
     */
     template <>
-    struct VariantTraits<double> {
+    struct VariantTraits<double>
+    {
+        static const int isUnicode = 0;
+
         static void toData(std::string& data, const double& value)
         {
             std::ostringstream os;
@@ -92,6 +151,13 @@ namespace Pt {
         static bool fromData(double& value, const std::string& data)
         {
             std::istringstream is(data);
+            is >> std::scientific >> std::setprecision(15) >> value;
+            return !is.fail();
+        }
+
+        static bool fromData(double& value, const Pt::String& data)
+        {
+            Pt::StringStream is(data);
             is >> std::scientific >> std::setprecision(15) >> value;
             return !is.fail();
         }
