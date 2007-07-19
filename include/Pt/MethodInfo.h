@@ -62,7 +62,7 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 5)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ),
@@ -146,7 +146,7 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 5)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             _cb->call( any_cast<A1>( args[0] ),
                        any_cast<A2>( args[1] ),
@@ -232,7 +232,7 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 4)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ),
@@ -307,7 +307,7 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 4)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             _cb->call( any_cast<A1>( args[0] ),
                        any_cast<A2>( args[1] ),
@@ -354,8 +354,6 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         Callable<void, A1, A2, A3, A4>* _cb;
 };
 
-///////////////
-///////////////
 
 template < typename R,
            class C,
@@ -386,7 +384,7 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 3)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ),
@@ -452,7 +450,7 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 3)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             _cb->call( any_cast<A1>( args[0] ),
                                                any_cast<A2>( args[1] ),
@@ -519,7 +517,7 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 2)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ) );
@@ -576,7 +574,7 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 2)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             _cb->call( any_cast<A1>( args[0] ),
                        any_cast<A2>( args[1] ) );
@@ -636,7 +634,7 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 1)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             return _cb->call( any_cast<A1>(*args) );
         }
@@ -683,7 +681,7 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 1)
-                throw std::out_of_range("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments");
 
             _cb->call( any_cast<A1>(*args) );
             return Any();

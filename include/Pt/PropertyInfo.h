@@ -152,10 +152,10 @@ class WritePropertyInfo : virtual public PropertyInfo
         }
 
         virtual Pt::Any get() const
-        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
+        { throw PropertyNotReadable(this->name(), PT_SOURCEINFO); }
 
         virtual SerializationNode& get(Pt::SerializationData& sd) const
-        { throw std::logic_error("Property is not readable" + PT_SOURCEINFO); }
+        { throw PropertyNotReadable(this->name(), PT_SOURCEINFO); }
 
         virtual void set(const Pt::Any& a)
         {
@@ -165,8 +165,7 @@ class WritePropertyInfo : virtual public PropertyInfo
                 ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
                 this->set( val );
             }
-            catch(const std::exception& e) {
-                std::cerr << e.what() << std::endl;
+            catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }
@@ -250,8 +249,7 @@ class ReadWritePropertyInfo : public PropertyInfo
                 ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
                 _setter->invoke( val );
             }
-            catch(const std::exception& e) {
-                std::cerr << e.what() << std::endl;
+            catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }
@@ -302,10 +300,10 @@ class ReadProperty : public PropertyInfo
         }
 
         virtual void set(const Pt::Any& value)
-        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
         virtual void set(const Pt::SerializationNode& node)
-        { throw std::logic_error("Property is not writable" + PT_SOURCEINFO); }
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
     private:
         std::string _name;
@@ -352,7 +350,7 @@ class ReadWriteProperty : public PropertyInfo
                 const T& value = Pt::any_cast<const T&>(a) ;
                 _setter->invoke( value );
             }
-            catch(...) {
+            catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
         }
