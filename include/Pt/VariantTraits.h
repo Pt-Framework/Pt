@@ -126,7 +126,7 @@ namespace Pt {
 
         static void toData(Pt::String& data, signed char value)
         {
-            data = Pt::Char(value);
+            data = Pt::Char( int(value) );
         }
 
         static bool fromData(signed char& value, const std::string& data)
