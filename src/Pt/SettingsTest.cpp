@@ -35,12 +35,14 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            /*Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
+            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
             Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
-            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );*/
+            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
             Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
+
+            Pt::Unit::TestSuite::registerMethod( "ComplexTypeWithTypename", *this, &SettingsTest::ComplexTypeWithTypename );
         }
 
     protected:
@@ -152,6 +154,39 @@ class SettingsTest : public Pt::Unit::TestSuite
         {
             std::stringstream ss;
             ss << "a.b.c = ( d = 1, e =2, f= ( g = 3) )\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::SettingsReader reader(ts);
+            Pt::Settings settings;
+            reader.read(settings);
+
+            Pt::String concat;
+            const Pt::SerializationData* a = settings.getData(L"a.b.c");
+            PT_UNIT_ASSERT( a )
+
+            const Pt::Variant* value = a->getEntry( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"1" )
+
+            value = a->getEntry( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"2" )
+
+            a = a->getData( L"f" );
+            PT_UNIT_ASSERT( a )
+
+            for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
+            {
+                concat += (*it).toEntry()->value().str();
+            }
+
+            PT_UNIT_ASSERT( concat == L"3")
+        }
+
+        void ComplexTypeWithTypename()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = Color ( int d = 1, e =2, f= ( g = 3) )\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);

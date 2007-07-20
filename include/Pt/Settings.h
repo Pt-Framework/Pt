@@ -138,6 +138,9 @@ class PT_API SettingsReader
                 Pt::String& value()
                 { return _value; }
 
+                Pt::String& type()
+                { return _type; }
+
                 unsigned depth() const
                 {
                     return _depth;
@@ -145,7 +148,7 @@ class PT_API SettingsReader
 
                 void enterNode()
                 {
-                    //std::cerr << "entered: " << _name.narrow() << std::endl;
+                    //std::cerr << "entered: " << "(" << _type.narrow() << ")" << _name.narrow() << std::endl;
 
                     SerializationData* data = _data->getData( _name );
                     if(data == 0)
@@ -153,6 +156,7 @@ class PT_API SettingsReader
 
                     _data = data;
 
+                    _type.clear();
                     _name.clear();
                     ++_depth;
                 }
@@ -168,7 +172,7 @@ class PT_API SettingsReader
 
                 void addValue()
                 {
-                    //std::cerr << "value: " << _name.narrow() << ":" << _value << std::endl;
+                    //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
                     size_t pos  = _name.rfind( Pt::Char(L'.') );
 
                     if(pos != Pt::String::npos)
@@ -184,6 +188,7 @@ class PT_API SettingsReader
                         _data->addEntry(_name, _value);
                     }
 
+                    _type.clear();
                     _value.clear();
                     _name.clear();
                 }
@@ -193,6 +198,7 @@ class PT_API SettingsReader
                 unsigned _line;
                 unsigned _depth;
                 Pt::String _name;
+                Pt::String _type;
                 Pt::String _value;
                 Pt::String _section;
         };
@@ -321,7 +327,35 @@ class PT_API SettingsReader
                     break;
 
                 default:
-                    throw ParseError("Expected \'=\' token", context.line());
+                    if(context.depth() == 0)
+                        throw ParseError("Expected \'=\' token", context.line());
+
+                    context.type() = context.name();
+                    context.name().clear();
+                    context.name() += ch;
+                    _parse = &SettingsReader::parseTypedName;
+            }
+        }
+
+        void parseTypedName(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof )
+                throw ParseError("Expected \'=\' token", context.line());
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+            {
+                _parse = &SettingsReader::beginEqual;
+                return;
+            }
+
+            switch( ch.value() )
+            {
+                case '=':
+                    _parse = &SettingsReader::finishEqual;
+                    break;
+
+                default:
+                    context.name() += ch;
             }
         }
 
@@ -363,14 +397,19 @@ class PT_API SettingsReader
             if( ch == Pt::Char(L'=') )
                 throw ParseError("Invalid token after \'=\'", context.line());
 
-            if( ch == eof || Pt::Unicode::isSpace(ch) ||
-                ch == Pt::Char(L'\n') )
+            if( ch == eof  )
             {
                 context.addValue();
                 if(context.depth() == 0)
                     _parse = &SettingsReader::beginStatement;
                 else
                     _parse = &SettingsReader::finishValue;
+                return;
+            }
+////////////
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+            {
+                _parse = &SettingsReader::parseTypedValue;
                 return;
             }
 
@@ -394,6 +433,45 @@ class PT_API SettingsReader
 
                 default:
                     context.value() += ch;
+            }
+        }
+
+        void parseTypedValue(const Pt::Char& ch, ParseContext& context)
+        {
+            if( ch == eof  )
+            {
+                context.addValue();
+                if(context.depth() == 0)
+                    _parse = &SettingsReader::beginStatement;
+                else
+                    _parse = &SettingsReader::finishValue;
+                return;
+            }
+
+            if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+                return;
+
+            switch( ch.value() )
+            {
+                case '(':
+                    context.type() = context.value();
+                    context.enterNode();
+                    _parse = &SettingsReader::beginStatement;
+                    break;
+
+                default:
+                    if(context.depth() == 0)
+                    {
+                        context.addValue();
+                        context.reset();
+                        context.name() += ch;
+                        _parse = &SettingsReader::parseName;
+                        return;
+                    }
+
+                    context.type() = context.value();
+                    context.value() += ch;
+                    _parse = &SettingsReader::parseValue;
             }
         }
 
