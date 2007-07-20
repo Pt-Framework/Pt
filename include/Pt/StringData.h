@@ -35,8 +35,8 @@ namespace Pt {
 */
 class StringData {
     public:
-		typedef unsigned int atomic_type;
-		
+        typedef unsigned int atomic_type;
+
         typedef size_t size_type;
         typedef Pt::Char value_type;
         typedef std::char_traits<Pt::Char> traits_type;
@@ -65,23 +65,23 @@ class StringData {
         void setInitial()
         { _n = atomic_type(1); }
 
-		/** @brief Check if in busy state
-		    
-		    Busy mode means that a modifying action that reuires more than one 
-		    calls by the caller was started. This is the case if a non-const 
-		    iterator was aquired or the index operator is used. Busy mode will 
-		    be ended if the client calls a modifying action which would also 
-		    invalidate an iterator even if the class was not shared.
-		*/
+        /** @brief Check if in busy state
+
+            Busy mode means that a modifying action that reuires more than one
+            calls by the caller was started. This is the case if a non-const
+            iterator was aquired or the index operator is used. Busy mode will
+            be ended if the client calls a modifying action which would also
+            invalidate an iterator even if the class was not shared.
+        */
         bool busy() const
         { return _n == atomic_type(-1); }
 
-		/** @brief Enter busy state
-	
-			For example a mutating iterator is aquired, so we can not allow any
-			data sharing until the caller calls a modifying method that would 
-			normally invalidate any iterator as well.
-		*/
+        /** @brief Enter busy state
+
+            For example a mutating iterator is aquired, so we can not allow any
+            data sharing until the caller calls a modifying method that would
+            normally invalidate any iterator as well.
+        */
         void setBusy()
         { _n = atomic_type(-1); }
 
@@ -134,6 +134,8 @@ class StringData {
         wchar_t _wStr[_wstrSize];
 #endif
 };
+
+static StringData EmptyStringData;
 
 } // namespace Pt
 

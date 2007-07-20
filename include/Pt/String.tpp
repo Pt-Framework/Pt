@@ -20,6 +20,13 @@
 
 namespace std {
 
+inline basic_string<Pt::Char>::basic_string()
+: _data( &Pt::EmptyStringData )
+{
+    _data->ref();
+}
+
+
 inline basic_string<Pt::Char>::basic_string(const allocator_type& a)
 : _data( new Pt::StringData(a) )
 {

@@ -57,7 +57,9 @@ class basic_string< Pt::Char > {
         static const size_type npos = static_cast<size_type>(-1);
 
     public:
-        explicit basic_string( const allocator_type& a = allocator_type() );
+        basic_string();
+
+        explicit basic_string( const allocator_type& a );
 
         basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
 
@@ -346,6 +348,8 @@ class basic_string< Pt::Char > {
     private:
         Pt::StringData* _data;
     };
+
+    static const basic_string< Pt::Char > Pt_String_null(L"");
 
     inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
