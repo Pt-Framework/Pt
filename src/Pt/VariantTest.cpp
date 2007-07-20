@@ -44,6 +44,7 @@ class VariantTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void Blob();
         void AssignInt();
         void GetInt();
         void CompareInt();
@@ -57,10 +58,10 @@ Pt::Unit::RegisterTest<VariantTest> register_VariantTest;
 void VariantTest::AssignInt()
 {
     Pt::Variant v(5);
-    PT_UNIT_ASSERT( v.str() == "5" );
+    PT_UNIT_ASSERT( v.str() == Pt::String(L"5") );
 
     v = 10;
-    PT_UNIT_ASSERT( v.str() == "10" );
+    PT_UNIT_ASSERT( v.str() == Pt::String(L"10") );
 }
 
 
@@ -87,11 +88,11 @@ void VariantTest::AssignVariant()
 {
     Pt::Variant v(5);
     Pt::Variant v2( v );
-    PT_UNIT_ASSERT( v2.str() == "5" );
+    PT_UNIT_ASSERT( v2.str() == Pt::String(L"5") );
 
     Pt::Variant v3;
     v3 = v;
-    PT_UNIT_ASSERT( v.str() == "5" );
+    PT_UNIT_ASSERT( v.str() == Pt::String(L"5") );
 }
 
 

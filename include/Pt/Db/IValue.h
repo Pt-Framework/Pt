@@ -58,7 +58,7 @@ namespace Db {
             //TODO: extra blob function needed??? ->    alternative: read all text values with blob sql function
             //virtual void getBlob(std::string& blobdata) const = 0;
             virtual void getBlob(Pt::Blob& blobdata) const = 0;
-            virtual void getData(Pt::Variant& data) const = 0;
+            //virtual void getData(Pt::Variant& data) const = 0;
     };
 
 } // namespace Db

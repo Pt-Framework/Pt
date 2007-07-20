@@ -41,7 +41,7 @@ void SettingsWriter::write(const SerializationData& sd)
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
-        if(const SerializationEntry* entry = it->toEntry() )
+        if( it->toEntry() )
         {
             (this->*_write)(*it);
         }
@@ -61,7 +61,7 @@ void SettingsWriter::writeParent(const SerializationData& sd)
     {
         if(const SerializationEntry* entry = it->toEntry() )
         {
-            this->writeEntry( entry->name(), Pt::String::widen( entry->value().str() ) );
+            this->writeEntry( entry->name(), entry->value().str() );
         }
         else if(const SerializationData* subdata = it->toData() )
         {
@@ -81,7 +81,7 @@ void SettingsWriter::writeChild(const SerializationNode& node)
 {
     if(const SerializationEntry* entry = node.toEntry() )
     {
-        this->writeEntry2( entry->name(), Pt::String::widen( entry->value().str() ) );
+        this->writeEntry2( entry->name(), entry->value().str() );
     }
     else if(const SerializationData* subdata = node.toData() )
     {

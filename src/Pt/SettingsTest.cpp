@@ -59,7 +59,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( settings.getData(L"a.b.c.d")->getEntry(L"v") )
             const Pt::Variant* s = settings.getData(L"a.b.c.d")->getEntry(L"v");
             PT_UNIT_ASSERT( s)
-            PT_UNIT_ASSERT( *s == "3")
+            PT_UNIT_ASSERT( *s == L"3")
 
             Pt::StringStream sout;
             settings.save(sout);
@@ -67,7 +67,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             s = settings.getData(L"a.b.c.d")->getEntry(L"u");
             PT_UNIT_ASSERT( s)
-            PT_UNIT_ASSERT( *s == "4")
+            PT_UNIT_ASSERT( *s == L"4")
         }
 
         void PlainQoutedValue()
@@ -84,11 +84,11 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             const Pt::Variant* s = settings.getData(L"a.b.c.d")->getEntry(L"v");
             PT_UNIT_ASSERT( s)
-            PT_UNIT_ASSERT( *s == "34")
+            PT_UNIT_ASSERT( *s == L"34")
 
             s = settings.getData(L"a.b.c.d")->getEntry(L"u");
             PT_UNIT_ASSERT( s)
-            PT_UNIT_ASSERT( *s == "34")
+            PT_UNIT_ASSERT( *s == L"34")
         }
 
         void PlainArray()
@@ -103,13 +103,13 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            std::string concat;
+            Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 concat += (*it).toEntry()->value().str();
             }
-            PT_UNIT_ASSERT( concat == "123")
+            PT_UNIT_ASSERT( concat == L"123")
 
             concat.clear();
             a = settings.getData(L"g.h.i");
@@ -117,7 +117,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             {
                 concat += (*it).toEntry()->value().str();
             }
-            PT_UNIT_ASSERT( concat == "1\n23")
+            PT_UNIT_ASSERT( concat == L"1\n23")
         }
 
         void PlainQoutedArray()
@@ -131,13 +131,13 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            std::string concat;
+            Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 concat += (*it).toEntry()->value().str();
             }
-            PT_UNIT_ASSERT( concat == "123")
+            PT_UNIT_ASSERT( concat == L"123")
 
             concat.clear();
             a = settings.getData(L"g.h.i");
@@ -145,7 +145,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             {
                 concat += (*it).toEntry()->value().str();
             }
-            PT_UNIT_ASSERT( concat == "1223")
+            PT_UNIT_ASSERT( concat == L"1223")
         }
 
         void ComplexType()
@@ -158,17 +158,17 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            std::string concat;
+            Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
             PT_UNIT_ASSERT( a )
 
             const Pt::Variant* value = a->getEntry( L"d" );
             PT_UNIT_ASSERT( value )
-            PT_UNIT_ASSERT( *value == "1" )
+            PT_UNIT_ASSERT( *value == L"1" )
 
             value = a->getEntry( L"e" );
             PT_UNIT_ASSERT( value )
-            PT_UNIT_ASSERT( *value == "2" )
+            PT_UNIT_ASSERT( *value == L"2" )
 
             a = a->getData( L"f" );
             PT_UNIT_ASSERT( a )
@@ -178,7 +178,7 @@ class SettingsTest : public Pt::Unit::TestSuite
                 concat += (*it).toEntry()->value().str();
             }
 
-            PT_UNIT_ASSERT( concat == "3")
+            PT_UNIT_ASSERT( concat == L"3")
         }
 
         void QoutedComplexType()
@@ -191,17 +191,17 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            std::string concat;
+            Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
             PT_UNIT_ASSERT( a )
 
             const Pt::Variant* value = a->getEntry( L"d" );
             PT_UNIT_ASSERT( value )
-            PT_UNIT_ASSERT( *value == "1" )
+            PT_UNIT_ASSERT( *value == L"1" )
 
             value = a->getEntry( L"e" );
             PT_UNIT_ASSERT( value )
-            PT_UNIT_ASSERT( *value == "22" )
+            PT_UNIT_ASSERT( *value == L"22" )
 
             a = a->getData( L"f" );
             PT_UNIT_ASSERT( a )
@@ -211,7 +211,7 @@ class SettingsTest : public Pt::Unit::TestSuite
                 concat += (*it).toEntry()->value().str();
             }
 
-            PT_UNIT_ASSERT( concat == "3")
+            PT_UNIT_ASSERT( concat == L"3")
 
             Pt::StringStream sout;
             settings.save(sout);

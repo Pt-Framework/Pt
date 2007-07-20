@@ -39,21 +39,16 @@ namespace Db {
     {
         private:
             bool _null;
-            Variant _data;
+            std::string _data;
 
         public:
             ValueImpl()
             : _null(true)
             { }
 
-/*          ValueImpl(const std::string& d)
+          ValueImpl(const std::string& d)
             : _null(false)
             , _data(d)
-            { }
-*/
-            ValueImpl(const Variant& var)
-            : _null(false)
-            , _data(var)
             { }
 
             ValueImpl(const void* blob, int byteCount)
@@ -78,7 +73,7 @@ namespace Db {
 
             virtual char getChar() const;
 
-            virtual void getString(std::string& stringdata) const;
+            virtual void getString(std::string& s) const;
 
             virtual Date getDate() const;
 
@@ -86,14 +81,7 @@ namespace Db {
 
             virtual DateTime getDateTime() const;
 
-            static bool isTrue(char ch)
-            {
-                return ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y' || ch == '1';
-            }
-
-            //DoTo: extra blob function needed??? ->    alternative: read all text values with blob sql function
-            //virtual void getBlob(std::string& blobdata) const;
-            virtual void getBlob(Pt::Blob& blobdata) const;
+            virtual void getBlob(Pt::Blob& blob) const;
     };
 
 } // namespace Db

@@ -104,20 +104,19 @@ namespace sqlite {
         return DateTime::fromIsoString(str);
     }
 
-    void StmtValue::getData(Pt::Variant& data) const
+    /*void StmtValue::getData(Pt::Variant& data) const
     {
         int bytes = ::sqlite3_column_bytes( getStmt(), _iCol );
         const void* ret = ::sqlite3_column_blob( getStmt(), _iCol );
-        data.assign( (const char*)ret, bytes);
-    }
+        data.assign( (const char*)ret, bytes );
+    }*/
 
-        //DoTo: extra blob function needed??? ->    alternative: read all text values with blob sql function
-    void StmtValue::getBlob(Pt::Blob& blobdata) const
+    void StmtValue::getBlob(Pt::Blob& blob) const
     {
         int bytes = ::sqlite3_column_bytes(getStmt(), _iCol);
         const void* ret = ::sqlite3_column_blob(getStmt(), _iCol);
 
-        blobdata.assign((const char *)ret, bytes);
+        blob.assign((const char *)ret, bytes);
     }
 
 } // namespace sqlite

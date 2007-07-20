@@ -27,8 +27,8 @@
 
 namespace Pt {
 
-	/**
-           variant provides a really convenient way to lexically cast
+    /**
+           Variant provides a really convenient way to lexically cast
            strings and other streamable types to/from each other.
 
            All parameterized types used by this type must be:
@@ -57,7 +57,7 @@ namespace Pt {
            it is also extremely easy to use, as shown here:
 
 
-<pre>
+    <pre>
         Variant lex = 17;
         int bogo = lex;
         ulong bogol = bogo * static_cast<long>(lex);
@@ -65,7 +65,7 @@ namespace Pt {
 
         typedef std::map<Variant,Variant> LMap;
         LMap map;
-        
+
         map[4] = "one";
         map["one"] = 4;
         map[123] = "eat this";
@@ -75,96 +75,82 @@ namespace Pt {
         map["123"] = "this was re-set";
         int myint = map["one"];
 
-</pre>
+    </pre>
 
         Finally, Perl-ish type flexibility in C++. :)
 
-	*/
+    */
     class Variant {
         public:
-	    /**
-	       Constructs an empty object.
-	    */
+            /**
+                Constructs an empty object.
+            */
             Variant()
-            : _isUnicode(0)
             {}
 
             ~Variant() throw()
             {}
 
-	    /**
-	       Lexically casts value to a string.
-	    */
+            /**
+                Lexically casts value to a string.
+            */
             template <typename T>
             Variant(const T& value)
-            : _isUnicode(0)
-            { this->set(value); }
+            {
+                this->set(value);
+            }
 
-	    /**
-	       Deeply copies rhs.
-	    */
+            /**
+            Deeply copies rhs.
+            */
             Variant(const Variant & rhs)
             : _data(rhs._data)
-            , _isUnicode(0)
             { }
 
-	    /**
-
-	    */
-            Variant(const char* blob, int byteCount)
-            : _isUnicode(0)
-            {
-                _data.assign(blob, byteCount);
-            }
-
-            void assign(const char * blob, int byteCount)
-            {
-                _data.assign(blob, byteCount);
-            }
-
-	    /**
-	       Lexically casts this->str() to a T
-	       and assigns that to tgt. Returns true
-	       on success, false on error.
-	    */
+            /**
+                Lexically casts this->str() to a T
+                and assigns that to tgt. Returns true
+                on success, false on error.
+            */
             template <typename T>
             bool get(T& tgt) const throw()
             {
-                if(_isUnicode)
-                    return VariantTraits<T>::fromData(tgt , _udata);
-
                 return VariantTraits<T>::fromData(tgt , _data);
             }
 
-	    /**
-	       Lexically casts value to a string
-	       and sets this->str().
-	    */
+            /**
+                Lexically casts value to a string
+                and sets this->str().
+            */
             template <typename T>
             void set(const T& value) throw()
-            { VariantTraits<T>::toData(_data, value); }
+            {
+                VariantTraits<T>::toData(_data, value);
+            }
 
-	    /**
-	       Clears all data in this object.
-	    */
+            /**
+                Clears all data in this object.
+            */
             void clear()
-            { this->_data.clear(); }
+            {
+                this->_data.clear();
+            }
 
-	    /**
-	       Returns true if this object has no content (e.g., was
-	       default constructed, clear() was called, or it contains
-	       an empty string value). Note that there is no way to
-	       differentiate between a "null" value and an empty value
-	       (e.g., by calling str("") or operator=("")).
-	    */
+            /**
+                Returns true if this object has no content (e.g., was
+                default constructed, clear() was called, or it contains
+                an empty string value). Note that there is no way to
+                differentiate between a "null" value and an empty value
+                (e.g., by calling str("") or operator=("")).
+            */
             inline bool empty() const
             { return this->_data.empty(); }
 
-	    /**
-	       lexically casts val to a string and returns
-	       this object. this->str() holds the lexically-cast
-	       value of val.
-	    */
+            /**
+                lexically casts val to a string and returns
+                this object. this->str() holds the lexically-cast
+                value of val.
+            */
             template <typename T>
             inline Variant& operator=(const T& val) throw()
             {
@@ -172,9 +158,9 @@ namespace Pt {
                 return *this;
             }
 
-	    /**
-	       Deeply copies rhs.
-	    */
+            /**
+                Deeply copies rhs.
+            */
             inline Variant& operator=(const Variant & rhs) throw()
             {
                 if(&rhs != this)
@@ -183,34 +169,34 @@ namespace Pt {
                 return *this;
             }
 
-	    /**
-	       Returns this object's MUTABLE string data.
-	    */
-            inline std::string& str() throw()
+            /**
+                Returns this object's MUTABLE string data.
+            */
+            Pt::String& str()
             { return this->_data; }
 
-	    /**
-	       Returns this object's IMMUTABLE string data.
-	    */
-            inline const std::string& str() const throw()
+            /**
+                Returns this object's IMMUTABLE string data.
+            */
+            const Pt::String& str() const
             { return  this->_data; }
 
-	    /**
-	       Returns (this->str() < rhs.str()).
-	    */
+            /**
+                Returns (this->str() < rhs.str()).
+            */
             inline bool operator<(const Variant& rhs) const
             { return this->str() < rhs.str(); }
 
-	    /**
-	       Returns (this->str() > rhs.str()).
-	    */
+            /**
+                Returns (this->str() > rhs.str()).
+            */
             inline bool operator>(const Variant& rhs) const
             { return this->str() > rhs.str(); }
 
-	    /**
-	       Lexically casts this->str() to
-	       a T object and returns operator==(thatT,rhs).
-	    */
+            /**
+                Lexically casts this->str() to
+                a T object and returns operator==(thatT,rhs).
+            */
             template <typename T>
             inline bool operator==(const T & rhs) const
             {
@@ -219,37 +205,35 @@ namespace Pt {
                 return type == rhs;
             }
 
-	    /**
-	       returns this->str() == rhs.str()
-	    */
+            /**
+                returns this->str() == rhs.str()
+            */
             inline bool operator==(const Variant & rhs) const
             {
                 return this->str() == rhs.str();
             }
 
-	    /**
-	       returns this->str() == rhs
+            /**
+                returns this->str() == rhs
 
-	       If (!rhs) then this function returns (this->empty()).
-	    */
-            inline bool operator==(const char * rhs) const
+                If (!rhs) then this function returns (this->empty()).
+            */
+            inline bool operator==(const wchar_t* rhs) const
             {
                 if( !rhs ) return this->empty();
-                return this->str() == std::string(rhs);
+                return this->str() == rhs;
             }
 
-	    /**
-	       returns this->str() == rhs
-	    */
-            inline bool operator==(const std::string & rhs) const
+            /**
+                returns this->str() == rhs
+            */
+            inline bool operator==(const Pt::String& rhs) const
             {
                 return this->str() == rhs;
             }
 
         private:
-            std::string _data;
-            Pt::String _udata;
-            int _isUnicode;
+            Pt::String _data;
     };
 
 
@@ -258,7 +242,7 @@ namespace Pt {
     */
     inline std::ostream& operator<<(std::ostream & os, const Variant& var)
     {
-        os << var.str();
+        os << var.str().narrow();
         return os;
     }
 
@@ -269,7 +253,9 @@ namespace Pt {
     */
     inline std::istream& operator>>(std::istream & is, Variant& var)
     {
-        std::getline( is, var.str(), static_cast<std::istream::char_type>(std::istream::traits_type::eof()) );
+        std::string s;
+        std::getline( is, s, static_cast<std::istream::char_type>(std::istream::traits_type::eof()) );
+        var.set(s);
         return is;
     }
 

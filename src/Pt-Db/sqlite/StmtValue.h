@@ -62,8 +62,6 @@ namespace sqlite {
             //virtual void getBlob(std::string& blobdata) const;
             virtual void getBlob(Pt::Blob& blobdata) const;
 
-            void getData(Variant& v) const;
-
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const   { return _stmt; }
     };

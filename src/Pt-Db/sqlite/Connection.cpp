@@ -34,7 +34,7 @@
 
 
 namespace {
-  
+
     int select_callback(void *pArg, int argc, char ** argv, char **columnNames)
     {
         Pt::Db::ResultImpl* res = static_cast<Pt::Db::ResultImpl*>(pArg);
@@ -46,7 +46,7 @@ namespace {
             Pt::Db::Value v;
             if (argv[i])
             {
-                v = Pt::Db::Value(new Pt::Db::ValueImpl(argv[i]));
+                v = Pt::Db::Value( new Pt::Db::ValueImpl(argv[i]) );
             }
             data.push_back(v);
         }

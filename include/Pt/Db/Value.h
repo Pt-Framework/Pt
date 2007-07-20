@@ -191,8 +191,8 @@ namespace Db {
             void getBlob(Pt::Blob& blobdata) const
             { return _value->getBlob(blobdata); }
 
-            void getData(Variant& v) const 
-            { return _value->getData(v); }
+            //void getData(Variant& v) const 
+            //{ return _value->getData(v); }
     };
 
 } // namespace Db

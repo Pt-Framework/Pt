@@ -55,7 +55,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             data.addEntry(L"testEntry", Pt::Variant(1) );
             const Pt::Variant* entry = data.getEntry(L"testEntry");
 
-            PT_UNIT_ASSERT( *entry == "1" );
+            PT_UNIT_ASSERT( *entry == L"1" );
         }
 
         void ConstObjectIterator()
