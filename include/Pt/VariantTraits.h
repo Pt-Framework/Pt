@@ -80,6 +80,40 @@ namespace Pt {
         }
     };
 
+
+    template <>
+    struct VariantTraits<Pt::uint8_t>
+    {
+        static void toData(std::string& data, Pt::uint8_t value)
+        {
+            std::ostringstream os;
+            os << value;
+            data = os.str();
+        }
+
+        static void toData(Pt::String& data, Pt::uint8_t value)
+        {
+            data = Pt::Char(value);
+        }
+
+        static bool fromData(Pt::uint8_t& value, const std::string& data)
+        {
+            std::istringstream is(data);
+            is >> value;
+            return !is.fail();
+        }
+
+        static bool fromData(Pt::uint8_t& value, const Pt::String& data)
+        {
+            if( data.empty() )
+                return false;
+
+            value = data[0];
+            return true;
+        }
+    };
+
+
     template <>
     struct VariantTraits<std::string>
     {
