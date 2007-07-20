@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Drner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
  *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,5 +25,18 @@
 #include <Pt/SourceInfo.h>
 #include <exception>
 #include <stdexcept>
+
+
+namespace Pt {
+
+class PT_API ConversionError : public std::runtime_error
+{
+    public:
+        ConversionError(const std::string& msg, const SourceInfo& si);
+
+        ~ConversionError() throw();
+};
+
+}
 
 #endif

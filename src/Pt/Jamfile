@@ -10,6 +10,7 @@ SharedLibrary Pt : Any.cpp
                    Connectable.cpp
                    Date.cpp
                    DateTime.cpp
+                   Exception.cpp
                    PropertyInfo.cpp
                    Reflectable.cpp
                    Settings.cpp
