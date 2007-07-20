@@ -86,34 +86,34 @@ void ValueImplTest::testBool()
 
 void ValueImplTest::testInt()
 {
-    ValueImpl valImp(22);
+    ValueImpl valImp("22");
     PT_UNIT_ASSERT( valImp.getInt() == 22 );
 
-    ValueImpl valImp2(-42);
+    ValueImpl valImp2("-42");
     PT_UNIT_ASSERT( valImp2.getInt() == -42 );
 }
 
 void ValueImplTest::testUnsigned()
 {
-    ValueImpl valImp(478);
+    ValueImpl valImp("478");
     PT_UNIT_ASSERT( valImp.getInt() == 478 );
 }
 
 void ValueImplTest::testFloat()
 {
-    ValueImpl valImp(321.125f);
+    ValueImpl valImp("321.125");
     PT_UNIT_ASSERT( valImp.getFloat() == 321.125f );
 }
 
 void ValueImplTest::testDouble()
 {
-    ValueImpl valImp(321.580078125);
+    ValueImpl valImp("321.580078125");
     PT_UNIT_ASSERT( valImp.getDouble() == 321.580078125 );
 }
 
 void ValueImplTest::testChar()
 {
-    ValueImpl valImp('c');
+    ValueImpl valImp("c");
     PT_UNIT_ASSERT( valImp.getChar() == 'c' );
 }
 

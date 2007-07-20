@@ -15,13 +15,18 @@ SharedLibrary_LinkSharedLibraries Pt-Db : Pt-System Pt ;
 SharedLibrary_LinkLibraries Pt-Db : Pt-Db-sqlite ;
 SharedLibrary_MakeLocate Pt-Db : $(OUTPUT_TARGET) ;
 
-#PtUnitTest ResultImplTest : ResultImplTest.cpp : $(OUTPUT_TARGET) ;
-#Main_LinkSharedLibraries ResultImplTest : Pt-Db Pt ;
+PT_DB_TESTS = ResultImplTest.cpp
+              RowImplTest.cpp
+              ValueImplTest.cpp
+              ;
 
-#PtUnitTest RowImplTest : RowImplTest.cpp : $(OUTPUT_TARGET) ;
-#Main_LinkSharedLibraries RowImplTest : Pt-Db Pt ;
+PtUnitTest Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
+Main_LinkSharedLibraries Pt-Db-test : Pt Pt-System Pt-Db Pt-Unit ;
+PtUnitTest_MakeLocate Pt-Db-test : $(OUTPUT_TARGET) ;
 
-#PtUnitTest ValueImplTest : ValueImplTest.cpp : $(OUTPUT_TARGET) ;
-#Main_LinkSharedLibraries ValueImplTest : Pt-Db Pt ;
+
+# Define pseudo targets to call from projects
+NOTFILE Pt-Db-all ;
+DEPENDS Pt-Db-all : Pt Pt-Db-test ;
 
 SubInclude TOP src Pt-Db sqlite ;

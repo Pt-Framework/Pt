@@ -9,6 +9,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <limits>
 
 #include "ResultImpl.h"
@@ -50,7 +51,10 @@ void ResultImplTest::testSize()
         RowImpl* rowImpl = new RowImpl();
         for(unsigned int i=0; i<25; i++)
         {
-            ValueImpl* impl = new ValueImpl(j*i);
+            std::stringstream ss;
+            ss << j*i;
+
+            ValueImpl* impl = new ValueImpl( ss.str() );
             Value v(impl);
             rowImpl->add( v );
         }
@@ -70,7 +74,10 @@ void ResultImplTest::testGetRow()
         RowImpl* rowImpl = new RowImpl();
         for(unsigned int i=0; i<25; i++)
         {
-            ValueImpl* impl = new ValueImpl(j*i);
+            std::stringstream ss;
+            ss << j*i;
+
+            ValueImpl* impl = new ValueImpl( ss.str() );
             Value v(impl);
             rowImpl->add( v );
         }
