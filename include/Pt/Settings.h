@@ -143,10 +143,6 @@ class PT_API SettingsReader
 
         void beginEqual(const Pt::Char& ch, ParseContext& context);
 
-        void parseTypedName(const Pt::Char& ch, ParseContext& context);
-
-        void finishTypedName(const Pt::Char& ch, ParseContext& context);
-
         void finishEqual(const Pt::Char& ch, ParseContext& context);
 
         void parseValue(const Pt::Char& ch, ParseContext& context);

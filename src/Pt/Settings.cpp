@@ -124,6 +124,7 @@ class SettingsReader::ParseContext
         : _data( &data )
         , _line(1)
         , _depth(0)
+        , _hasName(false)
         {}
 
         void reset()
@@ -174,9 +175,39 @@ class SettingsReader::ParseContext
             ++_depth;
         }
 
-        void enterNode2()
+        void enter()
         {
-        
+            if( _nodeName.empty() == false)
+                this->pushNode();
+
+            _nodeName = _name;
+            _nodeValue = _value;
+            _hasName = true;
+
+            _name.clear();
+            _value.clear();
+        }
+
+        void pushNode()
+        {
+            //std::cerr << "pushed: " << _nodeName.narrow() << std::endl;
+            Pt::SerializationData* data = _data->getData( _nodeName );
+            if(data == 0)
+                data = &( _data->addData( _nodeName ) );
+
+            _data = data;
+
+            ++_depth;
+        }
+
+        void pushValue()
+        {
+            _value = _name;
+            _name = _nodeName;
+            _type = _nodeValue;
+            _nodeName.clear();
+            _hasName = false;
+            _nodeValue.clear();
         }
 
         void leaveNode()
@@ -190,6 +221,12 @@ class SettingsReader::ParseContext
 
         void addValue()
         {
+            if( _hasName)
+                this->pushNode();
+
+            _nodeName.clear();
+            _hasName = false;
+
             //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
             size_t pos  = _name.rfind( Pt::Char(L'.') );
 
@@ -219,6 +256,9 @@ class SettingsReader::ParseContext
         Pt::String _type;
         Pt::String _value;
         Pt::String _section;
+        Pt::String _nodeName;
+        bool _hasName;
+        Pt::String _nodeValue;
 };
 
 
@@ -231,7 +271,7 @@ void SettingsReader::_read(SerializationData& data)
     Pt::Char ch;
     while( _is->get(ch) )
     {
-        //char xx = ch.narrow('*');
+        char xx = ch.narrow('*');
         if( ch == Pt::Char(L'#') )
         {
             getline( *_is, comment, Pt::Char(L'\n') );
@@ -271,12 +311,20 @@ void SettingsReader::beginStatement(const Pt::Char& ch, ParseContext& context)
             break;
 
         case ')':
+            context.leaveNode();
+
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+
         case '(':
         case '=':
             throw ParseError( "Unexpected token " + ch.narrow(' '), context.line() );
 
         default:
-            context.reset();
             context.name() += ch;
             _parse = &SettingsReader::parseName;
     }
@@ -300,6 +348,12 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
             _parse = &SettingsReader::finishEqual;
             break;
 
+        case ')':
+            context.pushValue();
+            context.addValue();
+            _parse = &SettingsReader::afterValue;
+            break;
+
         default:
             context.name() += ch;
     }
@@ -321,57 +375,10 @@ void SettingsReader::beginEqual(const Pt::Char& ch, ParseContext& context)
             break;
 
         default:
-            if(context.depth() == 0)
-                throw ParseError("Expected \'=\' token", context.line());
-
-            context.type() = context.name();
-            context.name().clear();
-            context.name() += ch;
-            _parse = &SettingsReader::parseTypedName;
-    }
-}
-
-
-void SettingsReader::parseTypedName(const Pt::Char& ch, ParseContext& context)
-{
-    if( ch == eof )
-        throw ParseError("Expected \'=\' token", context.line());
-
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
-    {
-        _parse = &SettingsReader::finishTypedName;
-        return;
-    }
-
-    switch( ch.value() )
-    {
-        case '=':
-            _parse = &SettingsReader::finishEqual;
-            break;
-
-        default:
-            context.name() += ch;
-    }
-}
-
-void SettingsReader::finishTypedName(const Pt::Char& ch, ParseContext& context)
-{
-    if( ch == eof )
-        throw ParseError("Expected \'=\' token", context.line());
-
-    if( Pt::Unicode::isSpace(ch) )
-        return;
-
-    switch( ch.value() )
-    {
-        case '=':
-            _parse = &SettingsReader::finishEqual;
-            break;
-
-        default:
             throw ParseError("Expected \'=\' token", context.line());
     }
 }
+
 
 void SettingsReader::finishEqual(const Pt::Char& ch, ParseContext& context)
 {
@@ -396,7 +403,7 @@ void SettingsReader::finishEqual(const Pt::Char& ch, ParseContext& context)
             break;
 
         case '(':
-            context.enterNode();
+            context.enter();
             _parse = &SettingsReader::beginStatement;
             break;
 
@@ -424,7 +431,7 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
 
     if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
     {
-        _parse = &SettingsReader::finishValue;
+        _parse = &SettingsReader::finishValue;///
         return;
     }
 
@@ -447,8 +454,7 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
             break;
 
         case '(':
-            context.type() = context.value();
-            context.enterNode();
+            context.enter();
             _parse = &SettingsReader::beginStatement;
             break;
 
@@ -476,8 +482,7 @@ void SettingsReader::finishValue(const Pt::Char& ch, ParseContext& context)
     switch( ch.value() )
     {
         case '(':
-            context.type() = context.value();
-            context.enterNode();
+            context.enter();
             _parse = &SettingsReader::beginStatement;
             break;
 

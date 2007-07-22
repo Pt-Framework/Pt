@@ -35,12 +35,12 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
-            //Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
-            //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
-            //Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
-            //Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
-            //Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
+            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
+            Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
+            Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
+            Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
+            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
+            Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
 
             Pt::Unit::TestSuite::registerMethod( "ComplexTypeWithTypename", *this, &SettingsTest::ComplexTypeWithTypename );
         }
@@ -65,7 +65,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             Pt::StringStream sout;
             settings.save(sout);
-            std::cerr << sout.str().narrow() << std::endl;
+            std::cerr << "\n" << sout.str().narrow() << std::endl;
 
             s = settings.getData(L"a.b.c.d")->getEntry(L"u");
             PT_UNIT_ASSERT( s)
@@ -189,17 +189,20 @@ class SettingsTest : public Pt::Unit::TestSuite
             //ss << "a.b.c = Color ( int d = 1 , e =2, f= test( g = 3) ) \n";
             //ss << "a.b.d = Color ( int d= 1, e =2, f= test( g = 3) )\n";
             //ss << "a.b.e = Color ( int d= 1 ,e=2, f= test( g = 3 ) )\n";
+            //ss << "a = s(x=c(5))\n";
 
-            ss << "myPen = Pen( color = Color( red = 255,    \n";
-            ss << "                            green = 0,    \n";
-            ss << "                            blue = 0  ),  \n";
-            ss << "             size = 1 )                   \n";
-            ss << "myValue = 1                               \n";
+            ss << "a.b=1\n";
+            ss << "p = P ( c = C ( red = char(255),\n"; // BUG: space after 255
+            ss <<                 "green= char (0),\n";
+            ss <<                 "blue =char( 0) ),\n";
+            ss <<      "size = 1 )\n";
+
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
             Pt::Settings settings;
             reader.read(settings);
+
             /*
             Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
@@ -259,7 +262,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             Pt::StringStream sout;
             settings.save(sout);
-            std::cerr << sout.str().narrow() << std::endl;
+            std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 };
 
