@@ -35,12 +35,12 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
-            Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
-            Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
-            Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
-            Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
-            Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
+            //Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
+            //Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
+            //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
+            //Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
+            //Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
+            //Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
 
             Pt::Unit::TestSuite::registerMethod( "ComplexTypeWithTypename", *this, &SettingsTest::ComplexTypeWithTypename );
         }
@@ -186,13 +186,21 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeWithTypename()
         {
             std::stringstream ss;
-            ss << "a.b.c = Color ( int d = 1, e =2, f= ( g = 3) )\n";
+            //ss << "a.b.c = Color ( int d = 1 , e =2, f= test( g = 3) ) \n";
+            //ss << "a.b.d = Color ( int d= 1, e =2, f= test( g = 3) )\n";
+            //ss << "a.b.e = Color ( int d= 1 ,e=2, f= test( g = 3 ) )\n";
+
+            ss << "myPen = Pen( color = Color( red = 255,    \n";
+            ss << "                            green = 0,    \n";
+            ss << "                            blue = 0  ),  \n";
+            ss << "             size = 1 )                   \n";
+            ss << "myValue = 1                               \n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
             Pt::Settings settings;
             reader.read(settings);
-
+            /*
             Pt::String concat;
             const Pt::SerializationData* a = settings.getData(L"a.b.c");
             PT_UNIT_ASSERT( a )
@@ -214,6 +222,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             }
 
             PT_UNIT_ASSERT( concat == L"3")
+            */
         }
 
         void QoutedComplexType()
