@@ -59,6 +59,7 @@ class PT_API SettingsWriter
     public:
         SettingsWriter(std::basic_ostream<Pt::Char>& os)
         : _os(&os)
+        , _indent(0)
         { }
 
         ~SettingsWriter()
@@ -69,18 +70,15 @@ class PT_API SettingsWriter
     protected:
         void writeParent(const SerializationData& sd);
 
-        void writeChild(const SerializationNode& node);
+        void writeChild(const SerializationData& node);
 
         void writeEntry(const Pt::String& name, const Pt::String& value);
-
-        void writeEntry2(const Pt::String& name, const Pt::String& value);
 
         void writeSection(const Pt::String& prefix);
 
     private:
         std::basic_ostream<Pt::Char>* _os;
-        typedef void (SettingsWriter::*Write)(const SerializationNode&);
-        Write _write;
+        size_t _indent;
 };
 
 

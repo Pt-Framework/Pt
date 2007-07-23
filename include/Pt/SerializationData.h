@@ -294,6 +294,9 @@ class PT_API SerializationData : public SerializationNode
         //! @brief Destructor
         ~SerializationData();
 
+        size_t size() const
+        { return _nodes.size(); }
+
         const SerializationNode* getNode(size_t n) const;
 
         const SerializationNode* getNode(const Pt::String& name) const;

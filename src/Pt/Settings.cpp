@@ -45,11 +45,12 @@ void SettingsWriter::write(const SerializationData& sd)
         if( const SerializationEntry* entry = it->toEntry() )
         {
             this->writeEntry( entry->name(), entry->value().str() );
+            *_os << std::endl;
         }
         else if(const SerializationData* subdata = it->toData() )
         {
             this->writeSection( subdata->name() );
-            this->writeParent(*subdata);
+            this->writeParent( *subdata );
         }
     }
 }
@@ -63,49 +64,47 @@ void SettingsWriter::writeParent(const SerializationData& sd)
         if(const SerializationEntry* entry = it->toEntry() )
         {
             this->writeEntry( entry->name(), entry->value().str() );
+            *_os << std::endl;
         }
         else if(const SerializationData* subdata = it->toData() )
         {
-            SerializationData::ConstNodeIterator it;
-            for(it = subdata->begin(); it != subdata->end(); ++it)
-            {
-                *_os << subdata->name() << Pt::String(L" = ( ");
-                this->writeChild(*it);
-                *_os << Pt::String(L" ) ") << std::endl;
-            }
+            *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"( ");
+            this->writeChild(*subdata);     
+            *_os << Pt::String(L" )") << std::endl;
         }
     }
 }
 
 
-void SettingsWriter::writeChild(const SerializationNode& node)
+void SettingsWriter::writeChild(const SerializationData& sd)
 {
-    if(const SerializationEntry* entry = node.toEntry() )
+    bool separate = false;
+    SerializationData::ConstNodeIterator it;
+    for(it = sd.begin(); it != sd.end(); ++it)
     {
-        this->writeEntry2( entry->name(), entry->value().str() );
-    }
-    else if(const SerializationData* subdata = node.toData() )
-    {
-        SerializationData::ConstNodeIterator it;
-        for(it = subdata->begin(); it != subdata->end(); ++it)
+        if(separate)
+            *_os << Pt::String(L", ");
+        
+        if(const SerializationEntry* entry = it->toEntry() )
         {
-            *_os << subdata->name() << Pt::String(L" = ( ");
-            this->writeChild(*it);
-            *_os << Pt::String(L" ) ") << std::endl;
+            this->writeEntry( entry->name(), entry->value().str() );
         }
+        else if(const SerializationData* subdata = it->toData() )
+        {
+           
+            *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"( ");
+            this->writeChild(*subdata);     
+            *_os << Pt::String(L" )");
+        }
+        
+        separate = true;
     }
 }
 
 
 void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value)
 {
-    *_os << name << Pt::String(L" = \"") << value << Pt::String(L"\"") << std::endl;
-}
-
-
-void SettingsWriter::writeEntry2(const Pt::String& name, const Pt::String& value)
-{
-    *_os << name << Pt::String(L" = \"") << value << Pt::String(L"\"");
+    *_os << name << Pt::String(L"=\"") << value << Pt::String(L"\"");
 }
 
 
@@ -125,6 +124,7 @@ class SettingsReader::ParseContext
         , _line(1)
         , _depth(0)
         , _hasPrev(false)
+        , _isDotted(false)
         {}
 
         void reset()
@@ -192,8 +192,16 @@ class SettingsReader::ParseContext
             //std::cerr << "left: " << _data->name().narrow() << std::endl;
 
             assert(_depth > 0);
+
             _data = _data->parent();
             --_depth;
+            
+            if(_depth == 1 && _isDotted)
+            {
+                _data = _data->parent();
+                _isDotted = false;
+                --_depth;
+            }
         }
 
         void addValue()
@@ -236,12 +244,27 @@ class SettingsReader::ParseContext
         void pushNode()
         {
             //std::cerr << "pushed: " << "(" << _prevType.narrow() << ") " << _prevName.narrow() << std::endl;
+            
+            size_t pos  = _prevName.rfind( Pt::Char(L'.') );
+            
+            if(pos != Pt::String::npos)
+            { 
+                Pt::SerializationData* data = _data->getData( _prevName.substr( 0, pos ) );
+                if(data == 0)
+                    data = &( _data->addData( _prevName.substr( 0, pos ) ) );
+                    
+                _data = data;
+                ++_depth;
+                _isDotted = true;
+                _prevName = _prevName.substr( ++pos );
+            }
+
             Pt::SerializationData* data = _data->getData( _prevName );
             if(data == 0)
                 data = &( _data->addData( _prevName ) );
 
             _data = data;
-
+            _data->setTypeName(_prevType);
             ++_depth;
         }
 
@@ -257,6 +280,7 @@ class SettingsReader::ParseContext
         Pt::String _prevValue;
         Pt::String _prevType;
         bool _hasPrev;
+        bool _isDotted;
 };
 
 
@@ -523,7 +547,9 @@ void SettingsReader::finishValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::parseName;
                 return;
             }
-
+            
+            std::cerr << "_depth = " << context.depth() << std::endl;
+////////////////////////////////////////////
             throw ParseError( "Invalid token", context.line() );
     }
 }
@@ -566,7 +592,9 @@ void SettingsReader::afterValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::parseName;
                 return;
             }
-
+            
+            std::cerr << "_depth = " << context.depth() << std::endl;
+////////////////////////////////////////////
             throw ParseError( "Invalid token", context.line() );
     }
 }
