@@ -64,6 +64,12 @@ class PT_API SerializationNode
         void setName(const Pt::String& name)
         { _name = name; }
 
+        const Pt::String& typeName() const
+        { return _type; }
+
+        void setTypeName(const Pt::String& type)
+        { _type = type; }
+
         SerializationData* parent()
         { return _parent; }
 
@@ -112,6 +118,7 @@ class PT_API SerializationNode
     private:
         SerializationData* _parent;
         Pt::String _name;
+        Pt::String _type;
 };
 
 
