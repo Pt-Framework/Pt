@@ -50,7 +50,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         {
             std::stringstream ss;
             ss << "[ a.b.c]\n";
-            ss << "d.v = 3\n";
+            ss << "d.v = g(3)\n";
             ss << "d.u = 4\n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
@@ -186,22 +186,19 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeWithTypename()
         {
             std::stringstream ss;
-            //ss << "a.b.c = Color ( int d = 1 , e =2, f= test( g = 3) ) \n";
-            //ss << "a.b.d = Color ( int d= 1, e =2, f= test( g = 3) )\n";
-            //ss << "a.b.e = Color ( int d= 1 ,e=2, f= test( g = 3 ) )\n";
-            //ss << "a = s(x=c(5))\n";
-
-            ss << "a.b=1\n";
-            ss << "p = P ( c = C ( red = char(255),\n"; // BUG: space after 255
-            ss <<                 "green= char (0),\n";
-            ss <<                 "blue =char( 0) ),\n";
-            ss <<      "size = 1 )\n";
-
+            ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
+            ss << "                                 green= char (0),   \n";
+            ss << "                                 blue =char( 0) ),  \n";
+            ss << "                  size=1 )                          \n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
             Pt::Settings settings;
             reader.read(settings);
+
+            Pt::StringStream sout;
+            settings.save(sout);
+            std::cerr << "\n" << sout.str().narrow() << std::endl;
 
             /*
             Pt::String concat;
