@@ -21,57 +21,69 @@
 #include <Pt/Gfx/ARgbImage.h>
 
 namespace Pt {
+
 namespace Gfx {
 
 Pen::Pen()
 : _penData( new PenData( 1, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
 { }                
 
+
 Pen::Pen( size_t size )
 : _penData( new PenData( size, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
 { }   
+
 
 Pen::Pen( PenStyle style )
 : _penData( new PenData( 1, ARgbColor(0,0,0) ,style, RoundCap, RoundJoin  ) )
 { }
 
+
 Pen::Pen( const ARgbColor& color )
 : _penData( new PenData( 1, color ,SolidStyle, RoundCap, RoundJoin  ) )
 { }
 
+
 Pen::Pen( size_t size, const ARgbColor& color, PenStyle style, CapStyle cap,  JoinStyle join )
 : _penData( new PenData( size, color ,style, cap,  join ) )
 { }
+
 
 size_t Pen::size() const
 {
     return _penData->size();
 }
 
+
 const ARgbColor& Pen::color() const
 {
     return _penData->color();
 }
+
 
 Pen::PenStyle Pen::style() const
 {
     return _penData->style();
 }
 
+
 Pen::CapStyle Pen::capStyle() const
 {
     return _penData->capStyle();
 }
+
 
 Pen::JoinStyle Pen::joinStyle() const
 {
     return _penData->joinStyle();
 }
 
+
 const ARgbImage& Pen::buffer() const
 { 
     return _penData->buffer(); 
 }
+
 
 bool operator==(const Pen& a, const Pen& b)
 {
@@ -80,10 +92,53 @@ bool operator==(const Pen& a, const Pen& b)
 	       a._penData->style() == b._penData->style();
 }
 
+
 bool operator<(const Pen& a, const Pen& b)
 {
 	return a._penData->size() < b._penData->size();
 }
 
+
+SerializationNode& insert(SerializationData& data, const Pen& pen)
+{
+    Pt::StringStream ss;
+    ss << pen.size() << Pt::Char('-') 
+       << pen.color().toHtml() << Pt::Char('-')
+       << pen.style();
+    
+    SerializationNode& ret = data.addEntry( ss.str() );
+    ret.setTypeName(L"Pen");
+    return ret;
+}
+
+
+const SerializationNode& operator>>(const SerializationNode& node, Pen& pen)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        size_t              penSize;
+        Gfx::ARgbColor      penColor;
+        Pt::ssize_t         penStyle;
+        Pt::String html;
+        
+        Pt::StringStream ss( entry->value().str() );
+        ss >> penSize;
+        ss.get();
+
+        getline( ss, html, Pt::Char('-') );
+       
+        ss >> penStyle;
+       
+        if( ss.fail() )
+            throw ConversionError("ARgbColor", PT_SOURCEINFO);
+       
+        pen = Gfx::Pen(penSize, ARgbColor::fromHtml(html), (Gfx::Pen::PenStyle)penStyle);
+    }
+
+    return node;
+}
+    
 } // namespace Gfx
+
 } // namespace Pt

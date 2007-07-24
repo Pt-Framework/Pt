@@ -44,7 +44,7 @@ void SettingsWriter::write(const SerializationData& sd)
     {
         if( const SerializationEntry* entry = it->toEntry() )
         {
-            this->writeEntry( entry->name(), entry->value().str() );
+            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
         else if(const SerializationData* subdata = it->toData() )
@@ -63,7 +63,7 @@ void SettingsWriter::writeParent(const SerializationData& sd)
     {
         if(const SerializationEntry* entry = it->toEntry() )
         {
-            this->writeEntry( entry->name(), entry->value().str() );
+            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
         else if(const SerializationData* subdata = it->toData() )
@@ -87,7 +87,7 @@ void SettingsWriter::writeChild(const SerializationData& sd)
         
         if(const SerializationEntry* entry = it->toEntry() )
         {
-            this->writeEntry( entry->name(), entry->value().str() );
+            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
         }
         else if(const SerializationData* subdata = it->toData() )
         {
@@ -102,9 +102,15 @@ void SettingsWriter::writeChild(const SerializationData& sd)
 }
 
 
-void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value)
+void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value, const Pt::String& type)
 {
-    *_os << name << Pt::String(L"=\"") << value << Pt::String(L"\"");
+    if( type.empty() )
+    {
+        *_os << name << Pt::String(L"=\"") << value << Pt::String(L"\"");
+        return;
+    }
+    
+    *_os << name << Pt::String(L" = ") << type<< Pt::String(L"(\"") << value << Pt::String(L"\")");
 }
 
 
@@ -346,6 +352,10 @@ void SettingsReader::beginStatement(const Pt::Char& ch, ParseContext& context)
         case '=':
             throw ParseError( "Unexpected token " + ch.narrow(' '), context.line() );
 
+        case '"':
+            _parse = &SettingsReader::parseQoutedName;
+            break;
+
         default:
             context.name() += ch;
             _parse = &SettingsReader::parseName;
@@ -374,6 +384,23 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
         case ')':
             context.popValue();
             _parse = &SettingsReader::afterValue;
+            break;
+
+        default:
+            context.name() += ch;
+    }
+}
+
+
+void SettingsReader::parseQoutedName(const Pt::Char& ch, ParseContext& context)
+{
+    switch( ch.value() )
+    {
+        case Pt::uint32_t(-1):
+            throw ParseError("Expected \')\' token", context.line());
+
+        case '"':
+            _parse = &SettingsReader::afterName;
             break;
 
         default:
@@ -412,14 +439,17 @@ void SettingsReader::afterName(const Pt::Char& ch, ParseContext& context)
 
 void SettingsReader::onEqual(const Pt::Char& ch, ParseContext& context)
 {
-    if( ch == eof )
-        throw ParseError("Expected token after \'=\'", context.line());
-
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
-        return;
-
     switch( ch.value() )
     {
+        case Pt::uint32_t(-1):
+            throw ParseError("Expected \'=\' token", context.line());
+
+        case '\n':
+        case '\r':
+        case '\t':
+        case ' ':
+            break;
+    
         case '=':
             throw ParseError("Expected token before \'=\'", context.line());
 
@@ -429,7 +459,7 @@ void SettingsReader::onEqual(const Pt::Char& ch, ParseContext& context)
 
         case '{':
             context.popNode();
-            context.enter();                                                 /////////////////////
+            context.enter();
             _parse = &SettingsReader::parseArray;
             break;
 
@@ -444,6 +474,7 @@ void SettingsReader::onEqual(const Pt::Char& ch, ParseContext& context)
             _parse = &SettingsReader::parseValue;
     }
 }
+
 
 void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
 {
@@ -547,9 +578,7 @@ void SettingsReader::finishValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::parseName;
                 return;
             }
-            
-            std::cerr << "_depth = " << context.depth() << std::endl;
-////////////////////////////////////////////
+
             throw ParseError( "Invalid token", context.line() );
     }
 }
@@ -592,9 +621,7 @@ void SettingsReader::afterValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::parseName;
                 return;
             }
-            
-            std::cerr << "_depth = " << context.depth() << std::endl;
-////////////////////////////////////////////
+
             throw ParseError( "Invalid token", context.line() );
     }
 }
@@ -607,9 +634,12 @@ void SettingsReader::parseQuotedValue(const Pt::Char& ch, ParseContext& context)
     switch( ch.value() )
     {
         case '\\':
-            this->getEscaped(context);
+        {
+            bool success = this->getEscaped( context.value() );
+            if(!success)
+                throw ParseError("Invalid escaped character", context.line() );
             break;
-
+        }
         case '"':
             _parse = &SettingsReader::finishQuotedValue;
             break;
@@ -798,8 +828,13 @@ void SettingsReader::parseQuotedArrayValue(const Pt::Char& ch, ParseContext& con
             break;
 
         case '\\' :
-            this->getEscaped(context);
+        {
+            bool success = this->getEscaped( context.value() );
+            if(!success)
+                throw ParseError("Invalid escaped character", context.line() );
+                
             break;
+        }
 
         default:
             context.value() += ch;
@@ -889,25 +924,27 @@ void SettingsReader::finishSection(const Pt::Char& ch, ParseContext& context)
     throw ParseError("Invalid section name", context.line());
 }
 
-void SettingsReader::getEscaped(ParseContext& context)
+bool SettingsReader::getEscaped(Pt::String& s)
 {
     Pt::Char ch;
     if( ! _is->get(ch) )
-        throw ParseError("Reached EOF within qoute", context.line() );
+        return false;
 
     switch( ch.value() )
     {
         case 'n':
-            context.value() += Pt::Char(L'\n');
+            s += Pt::Char(L'\n');
             break;
 
         case 'r':
-            context.value() += Pt::Char(L'\r');
+            s += Pt::Char(L'\r');
             break;
 
         default:
-            throw ParseError("Unknown escaped character", context.line() );
+            return false;
     }
+    
+    return true;
 }
 
 }

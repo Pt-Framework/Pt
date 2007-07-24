@@ -26,6 +26,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
+#include "Pt/Gfx/Pen.h"
 #include <string>
 
 
@@ -49,22 +50,22 @@ class SettingsTest : public Pt::Unit::TestSuite
         {
             std::stringstream ss;
             ss << "[ a.b.c]\n";
-            ss << "d.v = g(3)\n";
+            ss << "d.v = g(\"3\")\n";
             ss << "d.u = 4\n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
             Pt::Settings settings;
             reader.read(settings);
 
+            //Pt::StringStream sout;
+            //settings.save(sout);
+            //std::cerr << "\n" << sout.str().narrow() << std::endl;
+
             PT_UNIT_ASSERT( settings.getData(L"a.b.c.d") )
             PT_UNIT_ASSERT( settings.getData(L"a.b.c.d")->getEntry(L"v") )
             const Pt::Variant* s = settings.getData(L"a.b.c.d")->getEntry(L"v");
             PT_UNIT_ASSERT( s)
             PT_UNIT_ASSERT( *s == L"3")
-
-            Pt::StringStream sout;
-            settings.save(sout);
-            std::cerr << "\n" << sout.str().narrow() << std::endl;
 
             s = settings.getData(L"a.b.c.d")->getEntry(L"u");
             PT_UNIT_ASSERT( s)
@@ -216,10 +217,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             ss << "                  size=1 )                          \n";
             ss << "Painter.alpha = 50                                  \n";
             ss << "Painter.beta = 50                                   \n";
-            ss << "Painter.gamma = 50                                  \n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
             Pt::Settings settings;
             settings.load(ts);
+            
+            Pt::Gfx::Pen a;
+            settings.set(a, L"myPen");
+            
+            Pt::Gfx::Pen b;
+            settings.get(b, L"myPen");
 
             Pt::StringStream sout;
             settings.save(sout);
@@ -261,9 +268,9 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT( concat == L"3")
 
-            Pt::StringStream sout;
-            settings.save(sout);
-            std::cerr << "\n" << sout.str().narrow() << std::endl;
+            //Pt::StringStream sout;
+            //settings.save(sout);
+            //std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 };
 

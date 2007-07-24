@@ -25,7 +25,7 @@
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/SmartPtr.h>
-
+#include <Pt/SerializationData.h>
 
 namespace Pt {
   namespace Gfx {
@@ -160,47 +160,52 @@ namespace Pt {
           SmartPtr<PenData> _penData;
     };
 
-      class PT_GFX_API PenData
+    class PT_GFX_API PenData
     {
-      public:
-        PenData( size_t size, const ARgbColor& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
-        : _size( size )
-        , _style( style )
-        , _buffer( 64, 1, color )
-        , _capStyle( cap )
-        , _joinStyle( join )
-        { }
+        public:
+            PenData( size_t size, const ARgbColor& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
+            : _size( size )
+            , _style( style )
+            , _buffer( 64, 1, color )
+            , _capStyle( cap )
+            , _joinStyle( join )
+            { }
 
-        ~PenData()
-        { }
+            ~PenData()
+            { }
 
-        const ARgbColor& color() const
-        { return _buffer.pixel( 0, 0); }
+            const ARgbColor& color() const
+            { return _buffer.pixel( 0, 0); }
 
-        const ARgbImage& buffer() const
-        { return _buffer; }
+            const ARgbImage& buffer() const
+            { return _buffer; }
 
-        size_t size() const
-        { return _size; }
+            size_t size() const
+            { return _size; }
 
-        Pen::PenStyle style() const
-        { return _style; }
+            Pen::PenStyle style() const
+            { return _style; }
 
-              Pen::CapStyle capStyle() const
-              { return _capStyle;}
+            Pen::CapStyle capStyle() const
+            { return _capStyle;}
 
-              Pen::JoinStyle joinStyle() const
-              { return _joinStyle; }
+            Pen::JoinStyle joinStyle() const
+            { return _joinStyle; }
 
-      private:
+        private:
             size_t          _size;
-        Pen::PenStyle   _style;
-        ARgbImage       _buffer;
-        Pen::CapStyle   _capStyle;
-        Pen::JoinStyle  _joinStyle;
-      };
+            Pen::PenStyle   _style;
+            ARgbImage       _buffer;
+            Pen::CapStyle   _capStyle;
+            Pen::JoinStyle  _joinStyle;
+    };
 
-  } // namespace Gfx
+    PT_GFX_API SerializationNode& insert(SerializationData& data, const Pen& pen);
+
+    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Pen& x);
+
+
+} // namespace Gfx
 
 template <>
 struct AnyTraits<Gfx::Pen> {

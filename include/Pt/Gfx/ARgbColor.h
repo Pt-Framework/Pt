@@ -21,7 +21,9 @@
 #define Pt_Gfx_ARgbColor_h
 
 #include <Pt/String.h>
+#include <Pt/StringStream.h>
 #include <Pt/Unicode.h>
+#include <Pt/SerializationData.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/Gfx/Color.h>
@@ -152,6 +154,10 @@ namespace Pt {
                 inline void setBlue(uint16_t b)
                 { _b = b; }
 
+                Pt::String toHtml() const;
+
+                static Color fromHtml(const Pt::String& s);
+
             protected:
                 uint16_t _a, _r, _g, _b;
         };
@@ -247,7 +253,12 @@ namespace Pt {
                           [rB, gB, bB] * aB*(1-aA)/aD
         */
 
-    } // namespace Gfx
+
+    PT_GFX_API SerializationNode& insert(SerializationData& data, const Gfx::Color<Gfx::ARgb>& pen);
+
+    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Gfx::Color<Gfx::ARgb>& x);
+
+} // namespace Gfx
 
 
 

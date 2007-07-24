@@ -45,11 +45,17 @@ class PT_API Settings : public SerializationData
         template <typename T>
         const void get(T& type, const Pt::String& name) const
         {
-            const SerializationData* data = this->getData(name);
-            if(data == 0)
+            const SerializationNode* node = this->getNode(name);
+            if(node == 0)
                 return;
 
-            *data >> type;
+            *node >> type;
+        }
+        
+        template <typename T>
+        const void set(const T& type, const Pt::String& name)
+        {
+            insert( *this, type ).setName(name);
         }
 };
 
@@ -72,7 +78,7 @@ class PT_API SettingsWriter
 
         void writeChild(const SerializationData& node);
 
-        void writeEntry(const Pt::String& name, const Pt::String& value);
+        void writeEntry(const Pt::String& name, const Pt::String& value, const Pt::String& type);
 
         void writeSection(const Pt::String& prefix);
 
@@ -139,6 +145,8 @@ class PT_API SettingsReader
 
         void parseName(const Pt::Char& ch, ParseContext& context);
 
+        void parseQoutedName(const Pt::Char& ch, ParseContext& context);
+
         void afterName(const Pt::Char& ch, ParseContext& context);
 
         void onEqual(const Pt::Char& ch, ParseContext& context);
@@ -171,7 +179,7 @@ class PT_API SettingsReader
 
         void finishSection(const Pt::Char& ch, ParseContext& context);
 
-        void getEscaped(ParseContext& context);
+        bool getEscaped(Pt::String& s);
 
     private:
         std::basic_istream<Pt::Char>* _is;
