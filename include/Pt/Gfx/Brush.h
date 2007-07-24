@@ -57,6 +57,12 @@ namespace Gfx {
     };
 
 
+    PT_GFX_API SerializationNode& insert(SerializationData& data, const Brush& pen);
+
+
+    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Brush& x);
+
+
     class PT_GFX_API BrushData
     {
         public:

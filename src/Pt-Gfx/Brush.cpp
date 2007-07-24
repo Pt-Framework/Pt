@@ -40,6 +40,26 @@ const ARgbImage& Brush::texture() const
 }
 
 
+SerializationNode& insert(SerializationData& data, const Brush& brush)
+{
+    SerializationNode& ret = data.addEntry( brush.color().toHtml() );
+    ret.setTypeName(L"Brush");
+    return ret;
+}
+
+
+const SerializationNode& operator>>(const SerializationNode& node, Brush& brush)
+{
+    const SerializationEntry* entry = node.toEntry();
+    if(entry)
+    {
+        brush = Brush( ARgbColor::fromHtml( entry->value().str() ) );
+    }
+
+    return node;
+}
+
+
 BrushData::BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture)
 : _fillStyle(fillStyle)
 , _color(color)
