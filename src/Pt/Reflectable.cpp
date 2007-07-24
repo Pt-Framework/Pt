@@ -268,20 +268,24 @@ Reflectable& Reflectable::operator=(const Reflectable& other)
 }
 
 
-const SerializationData& operator>>(const SerializationData& data, Reflectable& r)
+const SerializationNode& operator>>(const SerializationNode& node, Reflectable& r)
 {
+    const SerializationData* data = node.toData();
+    if(!data)
+        throw NoSuchEntry("Reflectable", PT_SOURCEINFO);
+
     Reflectable::PropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
     {
         Pt::String propName = Pt::String::widen( it->name() );
 
-        if( const Pt::SerializationNode* node = data.getNode(propName) )
+        if( const Pt::SerializationNode* node = data->getNode(propName) )
         {
             it->set(*node);
         }
     }
 
-    return data;
+    return node;
 }
 
 

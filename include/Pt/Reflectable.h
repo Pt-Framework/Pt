@@ -207,7 +207,7 @@ class PT_API Reflectable
 };
 
 
-PT_API const SerializationData& operator>>(const SerializationData& data, Reflectable& r);
+PT_API const SerializationNode& operator>>(const SerializationNode& data, Reflectable& r);
 
 
 PT_API const SerializationData& operator<<(SerializationData& data, const Reflectable& r);
