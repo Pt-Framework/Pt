@@ -25,7 +25,7 @@
 #include <Pt/Types.h>
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
-
+#include <Pt/SerializationData.h>
 #include <Pt/String.h>
 
 
@@ -91,6 +91,12 @@ namespace Gfx {
     {
         return a._size < b._size;
     }
+
+
+    PT_GFX_API SerializationNode& insert(SerializationData& data, const Font& f);
+
+
+    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Font& f);
 
 } // namespace Gfx
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Marc Boris Drner                          *
  *   Copyright (C) 2006-2007 by Laurentiu-Gheorghe Crisan                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -105,7 +105,7 @@ SerializationNode& insert(SerializationData& data, const Pen& pen)
     ss << pen.size() << Pt::Char('-') 
        << pen.color().toHtml() << Pt::Char('-')
        << pen.style();
-    
+
     SerializationNode& ret = data.addEntry( ss.str() );
     ret.setTypeName(L"Pen");
     return ret;
@@ -121,18 +121,18 @@ const SerializationNode& operator>>(const SerializationNode& node, Pen& pen)
         Gfx::ARgbColor      penColor;
         Pt::ssize_t         penStyle;
         Pt::String html;
-        
+
         Pt::StringStream ss( entry->value().str() );
         ss >> penSize;
         ss.get();
 
         getline( ss, html, Pt::Char('-') );
-       
+
         ss >> penStyle;
-       
+
         if( ss.fail() )
-            throw ConversionError("ARgbColor", PT_SOURCEINFO);
-       
+            throw ConversionError("Pen", PT_SOURCEINFO);
+
         pen = Gfx::Pen(penSize, ARgbColor::fromHtml(html), (Gfx::Pen::PenStyle)penStyle);
     }
 

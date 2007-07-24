@@ -27,6 +27,8 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Gfx/Pen.h"
+#include "Pt/Gfx/Brush.h"
+#include "Pt/Gfx/Font.h"
 #include <string>
 
 
@@ -221,12 +223,18 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             Pt::Settings settings;
             settings.load(ts);
-            
+
             Pt::Gfx::Pen a;
             settings.set(a, L"myPen");
-            
-            Pt::Gfx::Pen b;
-            settings.get(b, L"myPen");
+
+            Pt::Gfx::Pen p;
+            settings.get(p, L"myPen");
+
+            Pt::Gfx::Font f("Arial");
+            settings.set(f, L"myFont");
+
+            Pt::Gfx::Brush b;
+            settings.set(b, L"myBrush");
 
             Pt::StringStream sout;
             settings.save(sout);
