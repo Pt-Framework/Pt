@@ -48,6 +48,23 @@ namespace Pt {
         }
     };
 
+
+    template <>
+    struct VariantTraits<bool>
+    {
+        static void toData(Pt::String& data, bool value)
+        {
+            data = L"true";
+        }
+
+        static bool fromData(bool& value, const Pt::String& data)
+        {
+            value = data == L"true";
+            return true;
+        }
+    };
+
+
     template <>
     struct VariantTraits<char>
     {
