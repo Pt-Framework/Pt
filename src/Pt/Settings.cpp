@@ -179,6 +179,17 @@ class SettingsReader::ParseContext
             _type.clear();
         }
 
+        void enter2()
+        {
+            _prevValue = _name;
+            //_prevType = _value;
+            _hasPrev = true;
+
+            _name.clear();
+            _value.clear();
+            _type.clear();
+        }
+
         void popValue()
         {
             _value = _name;
@@ -214,7 +225,7 @@ class SettingsReader::ParseContext
         {
             this->popNode();
 
-            //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
+            std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
             size_t pos  = _name.rfind( Pt::Char(L'.') );
 
             if(pos != Pt::String::npos)
@@ -381,6 +392,12 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
             _parse = &SettingsReader::onEqual;
             break;
 
+        case '(':
+            context.popNode();
+            context.enter2();                                                 //////////////////////////////
+            _parse = &SettingsReader::beginStatement;
+            break;
+
         case ')':
             context.popValue();
             _parse = &SettingsReader::afterValue;
@@ -424,6 +441,12 @@ void SettingsReader::afterName(const Pt::Char& ch, ParseContext& context)
 
         case '=':
             _parse = &SettingsReader::onEqual;
+            break;
+
+        case '(':
+            context.popNode();
+            context.enter2();                                                 //////////////////////////////
+            _parse = &SettingsReader::beginStatement;
             break;
 
         case ')':
