@@ -44,7 +44,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
             Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
             Pt::Unit::TestSuite::registerMethod( "SimpleList", *this, &SettingsTest::SimpleList );
+            Pt::Unit::TestSuite::registerMethod( "SimpleQoutedList", *this, &SettingsTest::SimpleQoutedList );
             Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
+            Pt::Unit::TestSuite::registerMethod( "SimpleTypedList", *this, &SettingsTest::SimpleTypedList );
+            Pt::Unit::TestSuite::registerMethod( "SimpleTypedQuotedList", *this, &SettingsTest::SimpleTypedQuotedList );
             Pt::Unit::TestSuite::registerMethod( "ComplexTypeWithTypename", *this, &SettingsTest::ComplexTypeWithTypename );
         }
 
@@ -214,11 +217,11 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeWithTypename()
         {
             std::stringstream ss;
-            ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
+            /*ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
             ss << "                                 green= char (0),   \n";
             ss << "                                 blue =char( 0) ),  \n";
             ss << "                  size=1 )                          \n";
-            ss << "Painter.alpha = 50                                  \n";
+            ss << "Painter.alpha = 50                                  \n";*/
             ss << "b.x = B( char( 30), char(40 ) ,char (50) , char(60) ) \n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
@@ -242,10 +245,100 @@ class SettingsTest : public Pt::Unit::TestSuite
             std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 
+        void SimpleTypedList()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = List( d =char( 1), e = char (2), f= char(3 ) )\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::Settings settings;
+            settings.load(ts);
+
+            Pt::String concat;
+            const Pt::SerializationData* data = settings.getData(L"a.b");
+            PT_UNIT_ASSERT( data )
+            
+            data = data->getData(L"c");
+            PT_UNIT_ASSERT( data )
+            PT_UNIT_ASSERT( data->typeName() == L"List" )
+
+            const Pt::Variant* value = data->getEntry( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"1" )
+
+            value = data->getEntry( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"2" )
+
+            value = data->getEntry( L"f" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"3" )
+        }
+
+        void SimpleTypedQuotedList()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = List( d =char( \"1\"), e = char (\"2\"), f= char(\"3\" ) )\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::Settings settings;
+            settings.load(ts);
+
+            Pt::String concat;
+            const Pt::SerializationData* data = settings.getData(L"a.b");
+            PT_UNIT_ASSERT( data )
+            
+            data = data->getData(L"c");
+            PT_UNIT_ASSERT( data )
+            PT_UNIT_ASSERT( data->typeName() == L"List" )
+
+            const Pt::Variant* value = data->getEntry( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"1" )
+
+            value = data->getEntry( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"2" )
+
+            value = data->getEntry( L"f" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"3" )
+        }
+
         void SimpleList()
         {
             std::stringstream ss;
             ss << "a.b.c = List( d = 1, e =2, f= 3 )\n";
+
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::Settings settings;
+            settings.load(ts);
+
+            Pt::String concat;
+            const Pt::SerializationData* data = settings.getData(L"a.b");
+            PT_UNIT_ASSERT( data )
+            
+            data = data->getData(L"c");
+            PT_UNIT_ASSERT( data )
+            PT_UNIT_ASSERT( data->typeName() == L"List" )
+
+            const Pt::Variant* value = data->getEntry( L"d" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"1" )
+
+            value = data->getEntry( L"e" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"2" )
+
+            value = data->getEntry( L"f" );
+            PT_UNIT_ASSERT( value )
+            PT_UNIT_ASSERT( *value == L"3" )
+        }
+
+        void SimpleQoutedList()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = List( d = \"1\", e =\"2\", f= \"3\" )\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::Settings settings;
