@@ -40,7 +40,7 @@ Main_LinkSharedLibraries SerializationTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate SerializationTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SettingsTest : SettingsTest.cpp ;
-Main_LinkSharedLibraries SettingsTest : Pt Pt-Text Pt-Gfx Pt-Unit ;
+Main_LinkSharedLibraries SettingsTest : Pt Pt-Text Pt-Unit ;
 PtUnitTest_MakeLocate SettingsTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest AnyTest : AnyTest.cpp ;

@@ -26,9 +26,6 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Gfx/Pen.h"
-#include "Pt/Gfx/Brush.h"
-#include "Pt/Gfx/Font.h"
 #include <string>
 
 
@@ -217,32 +214,20 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeWithTypename()
         {
             std::stringstream ss;
-            /*ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
+            ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
             ss << "                                 green= char (0),   \n";
             ss << "                                 blue =char( 0) ),  \n";
             ss << "                  size=1 )                          \n";
-            ss << "Painter.alpha = 50                                  \n";*/
+            ss << "Painter.alpha = 50                                  \n";
             ss << "b.x = B( char( 30), char(40 ) ,char (50) , char(60) ) \n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
             Pt::Settings settings;
             settings.load(ts);
 
-            Pt::Gfx::Pen a;
-            settings.set(a, L"myPen");
-
-            Pt::Gfx::Pen p;
-            settings.get(p, L"myPen");
-
-            Pt::Gfx::Font f("Arial");
-            settings.set(f, L"myFont");
-
-            Pt::Gfx::Brush b;
-            settings.set(b, L"myBrush");
-
-            Pt::StringStream sout;
-            settings.save(sout);
-            std::cerr << "\n" << sout.str().narrow() << std::endl;
+            //Pt::StringStream sout;
+            //settings.save(sout);
+            //std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 
         void SimpleTypedList()

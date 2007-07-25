@@ -225,7 +225,7 @@ class SettingsReader::ParseContext
         {
             this->popNode();
 
-            std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
+            //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
             size_t pos  = _name.rfind( Pt::Char(L'.') );
 
             if(pos != Pt::String::npos)
