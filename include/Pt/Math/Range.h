@@ -106,6 +106,40 @@ namespace Pt {
                 T _max;
         };
 
+        template <typename T>
+        inline const Pt::SerializationNode& operator>>(const Pt::SerializationNode& node, BasicRange<T>& r)
+        {
+            const Pt::SerializationData* data = node.toData();
+            if(!data)
+                throw NoSuchEntry("Range", PT_SOURCEINFO);
+
+            T min;
+            T max;
+
+            const Pt::Variant* value = data->getEntry(L"min");
+            if( value == 0 || !value->get(min) )
+                throw Pt::NoSuchEntry("min", PT_SOURCEINFO);
+
+            value = data->getEntry(L"max");
+            if( value == 0 || !value->get(max) )
+                throw Pt::NoSuchEntry("max", PT_SOURCEINFO);
+
+            r.setMin(min);
+            r.setMax(max);
+
+            return node;
+        }
+
+
+        template <typename T>
+        inline Pt::SerializationNode& insert(Pt::SerializationData& parent, const BasicRange<T>& r)
+        {
+            SerializationData& data = parent.addData();
+            data.addEntry(L"min", Pt::Variant(r.min()));
+            data.addEntry(L"max", Pt::Variant(r.max()));
+            return data;
+        }
+
     } // namespace Math
 
 
