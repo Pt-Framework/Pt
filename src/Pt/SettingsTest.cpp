@@ -245,7 +245,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void SimpleList()
         {
             std::stringstream ss;
-            ss << "a.b.c = ( d = 1, e =2, f= 3 )\n";
+            ss << "a.b.c = List( d = 1, e =2, f= 3 )\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::Settings settings;
@@ -257,6 +257,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             
             data = data->getData(L"c");
             PT_UNIT_ASSERT( data )
+            PT_UNIT_ASSERT( data->typeName() == L"List" )
 
             const Pt::Variant* value = data->getEntry( L"d" );
             PT_UNIT_ASSERT( value )
