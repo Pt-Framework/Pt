@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 
 class TypesTest : public Pt::Unit::TestCase
@@ -51,6 +52,12 @@ class TypesTest : public Pt::Unit::TestCase
             PT_UNIT_ASSERT( sizeof(float) == 4 );
             PT_UNIT_ASSERT( sizeof(double) == 8 );
 
+			PT_UNIT_ASSERT( std::numeric_limits<float>::has_infinity );
+			PT_UNIT_ASSERT( std::numeric_limits<double>::has_infinity );
+
+			PT_UNIT_ASSERT( std::numeric_limits<float>::has_quiet_NaN );
+			PT_UNIT_ASSERT( std::numeric_limits<double>::has_quiet_NaN );
+			
             //stringstream ss;
             //ss << "sizeof(Pt::uchar   ) = " << sizeof(Pt::uchar   ) << endl;
             //ss << "sizeof(Pt::ushort  ) = " << sizeof(Pt::ushort  ) << endl;
