@@ -68,10 +68,14 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 };
 
 
-inline bool operator>>(const SerializationData& data, LogManager& manager)
+inline bool operator>>(const SerializationNode& node, LogManager& manager)
 {
+    const SerializationData* data = node.toData();
+    if(!data)
+        return false;
+
     Target& ptLog = Target::get("Pt-Log");
-    data >> ptLog;
+    *data >> ptLog;
     return true;
 }
 

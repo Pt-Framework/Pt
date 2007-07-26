@@ -224,7 +224,7 @@ namespace Pt {
             typedef uint32_t ValueT;
 
             const ValueT oF = factor;
-            const ValueT rF = std::numeric_limits<uint16_t>::max() - factor;
+            const ValueT rF = (std::numeric_limits<uint16_t>::max)() - factor;
 
             const ValueT dA = ValueT( dst.alpha() ) * rF;
             const ValueT dR = ValueT( dst.red()   ) * rF;
