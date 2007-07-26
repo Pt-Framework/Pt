@@ -5,6 +5,7 @@
 #ifndef PT_MATH_POINT_H
 #define PT_MATH_POINT_H
 
+#include <Pt/Math/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
@@ -12,7 +13,9 @@
 
 #include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/SerializationData.h>
 
+#include <vector>
 
 namespace Pt {
 
@@ -85,14 +88,15 @@ namespace Pt {
                 }
 
 
-                double calcDistance(const PointF& otherPoint) const
+                template<typename T2>
+                T calcDistance(const BasicPoint<T2>& otherPoint) const
                 {
                     if (*this == otherPoint)
                     {
                         return 0;
                     }
 
-                    return hypot(this->x() - otherPoint.x(), this->y() - otherPoint.y());
+                    return (T)(hypot(this->x() - otherPoint.x(), this->y() - otherPoint.y()));
                 }
 
 
@@ -202,6 +206,124 @@ namespace Pt {
                 return false;
             }
         };
+
+        /**
+         * @brief serialization of a BasicPoint<Pt::uint8_t>
+         * The type Pt::uint8_t is defined to unsinged char. To make sure the
+         * numbers are not interpreted as unsigned char, a cast to Pt::uint16_t
+         * is done.                            
+         */
+        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
+                                                 const Pt::Math::BasicPoint<Pt::uint8_t>& point)
+        {
+            data.addEntry(L"x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
+            data.addEntry(L"y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
+            return data;
+        }
+
+        /**
+         * @brief serialization of a BasicPoint<T>
+         */
+        template <typename T>
+        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
+                                                 const Pt::Math::BasicPoint<T>& point)
+        {
+            data.addEntry(L"x", Pt::Variant(point.x()));
+            data.addEntry(L"y", Pt::Variant(point.y()));
+            return data;
+        }
+
+        /**
+         * @brief deserialization of a BasicPoint<Pt::uint8_t>
+         */
+        inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
+                                                        Pt::Math::BasicPoint<Pt::uint8_t>& point)
+        {
+            const Pt::SerializationData* data = node.toData();
+            if(!data)
+                throw NoSuchEntry("point", PT_SOURCEINFO);
+
+            Pt::uint16_t x;
+            Pt::uint16_t y;
+
+            const Pt::Variant* value = data->getEntry(L"x");
+            if( value == 0 || !value->get<Pt::uint16_t>(x) )
+                throw Pt::NoSuchEntry("x", PT_SOURCEINFO);
+
+            value = data->getEntry(L"y");
+            if( value == 0 || !value->get<Pt::uint16_t>(y) )
+                throw Pt::NoSuchEntry("y", PT_SOURCEINFO);
+
+            point.setX(static_cast<Pt::uint8_t>(x));
+            point.setY(static_cast<Pt::uint8_t>(y));
+
+            return node;
+        }
+
+        /**
+         * @brief deserialization of a BasicPoint<T>
+         */
+        template <typename T>
+        inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
+                                                        Pt::Math::BasicPoint<T>& point)
+        {
+            const Pt::SerializationData* data = node.toData();
+            if(!data)
+                throw NoSuchEntry("point", PT_SOURCEINFO);
+
+            T x;
+            T y;
+
+            const Pt::Variant* value = data->getEntry(L"x");
+            if( value == 0 || !value->get(x) )
+                throw Pt::NoSuchEntry("x", PT_SOURCEINFO);
+
+            value = data->getEntry(L"y");
+            if( value == 0 || !value->get(y) )
+                throw Pt::NoSuchEntry("y", PT_SOURCEINFO);
+
+            point.setX(x);
+            point.setY(y);
+
+            return node;
+        }
+
+        /**
+         * @brief Serialization of a vector of BasicPoint<T> objects.
+         *
+         */
+        template <typename T>
+        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
+                                                 const std::vector< Pt::Math::BasicPoint<T> >& points)
+        {
+            typename std::vector< Pt::Math::BasicPoint<T> >::const_iterator it;
+            for(it = points.begin(); it != points.end(); ++it)
+            {
+                data.addData(L"Point") << *it;
+            }
+        
+            return data;
+        }
+        
+        /**
+         * @brief Deserialization of a vector of BasicPoint<T> objects.
+         *
+         */
+        template <typename T>
+        inline const Pt::SerializationData& operator>>(const Pt::SerializationData& data,
+                                                       std::vector< Pt::Math::BasicPoint<T> >& points)
+        {
+            Pt::SerializationData::ConstObjectIterator it;
+            for(it = data.objectsBegin(); it != data.objectsEnd(); ++it)
+            {
+                Pt::Math::BasicPoint<T> bp;
+                *it >> bp;
+                points.push_back(bp);
+            }
+        
+            return data;
+        }
+
 
     } // namespace Math
 
