@@ -243,7 +243,7 @@ namespace Pt {
         {
             const Pt::SerializationData* data = node.toData();
             if(!data)
-                throw NoSuchEntry("point", PT_SOURCEINFO);
+                throw NoSuchEntry("Point", PT_SOURCEINFO);
 
             Pt::uint16_t x;
             Pt::uint16_t y;
@@ -271,7 +271,7 @@ namespace Pt {
         {
             const Pt::SerializationData* data = node.toData();
             if(!data)
-                throw NoSuchEntry("point", PT_SOURCEINFO);
+                throw NoSuchEntry("Point", PT_SOURCEINFO);
 
             T x;
             T y;
