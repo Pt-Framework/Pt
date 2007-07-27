@@ -289,7 +289,7 @@ const SerializationNode& operator>>(const SerializationNode& node, Reflectable& 
 }
 
 
-const SerializationData& operator<<(SerializationData& data, const Reflectable& r)
+SerializationData& operator<<(SerializationData& data, const Reflectable& r)
 {
     Reflectable::ConstPropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)

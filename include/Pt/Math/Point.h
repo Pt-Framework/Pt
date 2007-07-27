@@ -218,6 +218,7 @@ namespace Pt {
         {
             data.addEntry(L"x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
             data.addEntry(L"y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
+            data.setTypeName(L"Point");
             return data;
         }
 
@@ -230,6 +231,7 @@ namespace Pt {
         {
             data.addEntry(L"x", Pt::Variant(point.x()));
             data.addEntry(L"y", Pt::Variant(point.y()));
+            data.setTypeName(L"Point");
             return data;
         }
 
