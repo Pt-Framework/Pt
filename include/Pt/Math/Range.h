@@ -135,6 +135,7 @@ namespace Pt {
         inline Pt::SerializationNode& insert(Pt::SerializationData& parent, const BasicRange<T>& r)
         {
             SerializationData& data = parent.addData();
+            data.setTypeName(L"Range");
             data.addEntry(L"min", Pt::Variant(r.min()));
             data.addEntry(L"max", Pt::Variant(r.max()));
             return data;

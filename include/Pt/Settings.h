@@ -51,7 +51,7 @@ class PT_API Settings : public SerializationData
 
             *node >> type;
         }
-        
+
         template <typename T>
         const void set(const T& type, const Pt::String& name)
         {
@@ -74,7 +74,7 @@ class PT_API SettingsWriter
         void write(const SerializationData& sd);
 
     protected:
-        void writeParent(const SerializationData& sd);
+        void writeParent(const SerializationData& sd, const Pt::String& prefix);
 
         void writeChild(const SerializationData& node);
 

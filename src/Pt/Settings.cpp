@@ -49,28 +49,39 @@ void SettingsWriter::write(const SerializationData& sd)
         }
         else if(const SerializationData* subdata = it->toData() )
         {
-            this->writeSection( subdata->name() );
-            this->writeParent( *subdata );
+            // Array types may have no instance-names
+            if( subdata->getNode(L"") )
+            {
+                *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"{ ");
+                this->writeParent( *subdata, L"");
+                *_os << Pt::String(L" }") << std::endl;
+                continue;
+            }
+
+            //this->writeSection( subdata->name() );
+            this->writeParent( *subdata, subdata->name() );
         }
     }
 }
 
 
-void SettingsWriter::writeParent(const SerializationData& sd)
+void SettingsWriter::writeParent(const SerializationData& sd, const Pt::String& prefix)
 {
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if(const SerializationEntry* entry = it->toEntry() )
         {
+            *_os << prefix << '.';
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
         else if(const SerializationData* subdata = it->toData() )
         {
-            *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"( ");
-            this->writeChild(*subdata);     
-            *_os << Pt::String(L" )") << std::endl;
+            *_os << prefix << '.' << subdata->name() << Pt::String(L" = ");
+            *_os<< subdata->typeName() << Pt::String(L"{ ");
+            this->writeChild(*subdata);
+            *_os << Pt::String(L" }") << std::endl;
         }
     }
 }
@@ -79,24 +90,27 @@ void SettingsWriter::writeParent(const SerializationData& sd)
 void SettingsWriter::writeChild(const SerializationData& sd)
 {
     bool separate = false;
+
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if(separate)
             *_os << Pt::String(L", ");
-        
+
         if(const SerializationEntry* entry = it->toEntry() )
         {
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
         }
         else if(const SerializationData* subdata = it->toData() )
         {
-           
-            *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"( ");
-            this->writeChild(*subdata);     
-            *_os << Pt::String(L" )");
+            if(subdata->name().empty() == false)
+                *_os << subdata->name() << Pt::String(L" = ");
+
+            *_os << subdata->typeName() << Pt::String(L"{ ");
+            this->writeChild(*subdata);
+            *_os << Pt::String(L" }");
         }
-        
+
         separate = true;
     }
 }
@@ -106,11 +120,17 @@ void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value,
 {
     if( type.empty() )
     {
-        *_os << name << Pt::String(L"=\"") << value << Pt::String(L"\"");
+        if( name.empty() == false)
+            *_os << name << Pt::String(L"=");
+
+        *_os  << Pt::String(L"\"") << value << Pt::String(L"\"");
         return;
     }
-    
-    *_os << name << Pt::String(L" = ") << type<< Pt::String(L"(\"") << value << Pt::String(L"\")");
+
+    if( name.empty() == false)
+        *_os << name << Pt::String(L" = ");
+
+    *_os << type << Pt::String(L"(\"") << value << Pt::String(L"\")");
 }
 
 
@@ -182,7 +202,7 @@ class SettingsReader::ParseContext
         void enter2()
         {
             _prevValue = _name;
-            //_prevType = _value;
+            _prevType = _name;
             _hasPrev = true;
 
             _name.clear();
@@ -195,12 +215,12 @@ class SettingsReader::ParseContext
             _value = _name;
             _name = _prevName;
             _type = _prevValue;
-            
+
             _prevName.clear();
             _prevValue.clear();
             _prevType.clear();
             _hasPrev = false;
-            
+
             this->addValue();
         }
 
@@ -212,7 +232,7 @@ class SettingsReader::ParseContext
 
             _data = _data->parent();
             --_depth;
-            
+
             if(_depth == 1 && _isDotted)
             {
                 _data = _data->parent();
@@ -234,11 +254,15 @@ class SettingsReader::ParseContext
                 if(data == 0)
                     data = &( _data->addData( _name.substr( 0, pos ) ) );
 
-                data->addEntry( _name.substr( ++pos ), _value );
+                SerializationEntry& entry = data->addEntry(_value);
+                entry.setName(_name.substr( ++pos ) );
+                entry.setTypeName(_type);
             }
             else
             {
-                _data->addEntry(_name, _value);
+                SerializationEntry& entry = _data->addEntry(_value);
+                entry.setName(_name);
+                entry.setTypeName(_type);
             }
 
             _type.clear();
@@ -261,15 +285,15 @@ class SettingsReader::ParseContext
         void pushNode()
         {
             //std::cerr << "pushed: " << "(" << _prevType.narrow() << ") " << _prevName.narrow() << std::endl;
-            
+
             size_t pos  = _prevName.rfind( Pt::Char(L'.') );
-            
+
             if(pos != Pt::String::npos)
-            { 
+            {
                 Pt::SerializationData* data = _data->getData( _prevName.substr( 0, pos ) );
                 if(data == 0)
                     data = &( _data->addData( _prevName.substr( 0, pos ) ) );
-                    
+
                 _data = data;
                 ++_depth;
                 _isDotted = true;
@@ -277,7 +301,7 @@ class SettingsReader::ParseContext
             }
 
             Pt::SerializationData* data = _data->getData( _prevName );
-            if(data == 0)
+            if(data == 0 || _depth != 0)
                 data = &( _data->addData( _prevName ) );
 
             _data = data;
@@ -311,7 +335,7 @@ void SettingsReader::_read(SerializationData& data)
     while( _is->get(ch) )
     {
         char xx = ch.narrow('*');
-        if( ch == Pt::Char(L'#') )
+        if( ch == Pt::Char(L';') )
         {
             getline( *_is, comment, Pt::Char(L'\n') );
             ch = Pt::Char(L'\n');
@@ -349,7 +373,7 @@ void SettingsReader::beginStatement(const Pt::Char& ch, ParseContext& context)
         case ')':
             if(context.depth() == 0)
                 throw ParseError( "Invalid closing ')'", context.line() );
-            
+
             context.leave();
 
             if( context.depth() == 0 )
@@ -357,6 +381,13 @@ void SettingsReader::beginStatement(const Pt::Char& ch, ParseContext& context)
             else
                 _parse = &SettingsReader::afterValue;
 
+            break;
+
+        case '{':
+            context.popNode();
+            context.enter();
+            _parse = &SettingsReader::beginStatement;
+            //_parse = &SettingsReader::parseArray;                                  // CHANGED
             break;
 
         case '(':
@@ -380,7 +411,7 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
     {
         case Pt::uint32_t(-1):
             throw ParseError("Expected \'=\' token", context.line());
-        
+
         case '\n':
         case '\r':
         case '\t':
@@ -394,13 +425,37 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
 
         case '(':
             context.popNode();
-            context.enter2();                                                 //////////////////////////////
+            context.enter2();                                                 
             _parse = &SettingsReader::beginStatement;
             break;
 
         case ')':
             context.popValue();
             _parse = &SettingsReader::afterValue;
+            break;
+
+        case '{':
+            context.popNode();
+            context.enter2();
+            _parse = &SettingsReader::beginStatement;
+            break;
+
+        case '}':
+            context.popNode();
+            context.popValue();
+            context.leave();
+
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+
+        case ',':
+            context.popNode();
+            context.popValue();
+            _parse = &SettingsReader::beginStatement;
             break;
 
         default:
@@ -442,16 +497,40 @@ void SettingsReader::afterName(const Pt::Char& ch, ParseContext& context)
         case '=':
             _parse = &SettingsReader::onEqual;
             break;
-
+        
+        case ',':
+            context.popNode();
+            context.popValue();
+            _parse = &SettingsReader::beginStatement;
+            break;
+        
         case '(':
             context.popNode();
-            context.enter2();                                                 //////////////////////////////
+            context.enter2();
             _parse = &SettingsReader::beginStatement;
             break;
 
         case ')':
             context.popValue();
             _parse = &SettingsReader::afterValue;
+            break;
+
+        case '{':
+            context.popNode();
+            context.enter2();
+            _parse = &SettingsReader::beginStatement;
+            break;
+
+        case '}':
+            context.popNode();
+            context.popValue();
+            context.leave();
+
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
             break;
 
         default:
@@ -472,7 +551,7 @@ void SettingsReader::onEqual(const Pt::Char& ch, ParseContext& context)
         case '\t':
         case ' ':
             break;
-    
+
         case '=':
             throw ParseError("Expected token before \'=\'", context.line());
 
@@ -483,7 +562,8 @@ void SettingsReader::onEqual(const Pt::Char& ch, ParseContext& context)
         case '{':
             context.popNode();
             context.enter();
-            _parse = &SettingsReader::parseArray;
+            _parse = &SettingsReader::beginStatement;
+            //_parse = &SettingsReader::parseArray;                                  // CHANGED
             break;
 
         case '(':
@@ -546,6 +626,12 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
             _parse = &SettingsReader::beginStatement;
             break;
 
+        case '{':
+            context.popNode();
+            context.enter();
+            _parse = &SettingsReader::beginStatement;
+            break;
+
         default:
             context.value() += ch;
     }
@@ -570,6 +656,12 @@ void SettingsReader::finishValue(const Pt::Char& ch, ParseContext& context)
     switch( ch.value() )
     {
         case '(':
+            context.popNode();
+            context.enter();
+            _parse = &SettingsReader::beginStatement;
+            break;
+
+        case '{':
             context.popNode();
             context.enter();
             _parse = &SettingsReader::beginStatement;
@@ -635,7 +727,17 @@ void SettingsReader::afterValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::endStatement;
 
             break;
-            
+
+        case '}':
+            context.leave();
+
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+
         default:
             if(context.depth() == 0)
             {
@@ -698,7 +800,18 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
             context.addValue();
             _parse = &SettingsReader::beginStatement;
             break;
+        
+        case '}':
+            context.addValue();
+            context.leave();
 
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+        
         case ')':
             context.addValue();
             context.leave();
@@ -855,7 +968,7 @@ void SettingsReader::parseQuotedArrayValue(const Pt::Char& ch, ParseContext& con
             bool success = this->getEscaped( context.value() );
             if(!success)
                 throw ParseError("Invalid escaped character", context.line() );
-                
+
             break;
         }
 
@@ -966,7 +1079,7 @@ bool SettingsReader::getEscaped(Pt::String& s)
         default:
             return false;
     }
-    
+
     return true;
 }
 
