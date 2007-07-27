@@ -116,7 +116,6 @@ const SerializationNode& operator>>(const SerializationNode& node, Font& f)
         ss.get();
 
         ss >> fontDirection;
-        ss.get();
 
         if( ss.fail() )
             throw ConversionError("Font", PT_SOURCEINFO);
