@@ -263,18 +263,20 @@ class PT_API SerializationData : public SerializationNode
         template <typename T>
         T getValue(const Pt::String& name) const
         {
-            T ret;
-            bool success = this->getEntry(name).get<T>(ret);
+            T value;
+            const Variant& v = this->getEntry(name);
+            bool success = v.get(value);
             if(!success)
                 throw ConversionError("Conversion error", PT_SOURCEINFO);
 
-            return ret;
+            return value;
         }
 
         template <typename T>
         void getValue(const Pt::String& name, T& type) const
         {
-            bool success = this->getEntry(name).get<T>(type);
+            const Variant& v = this->getEntry(name);
+            bool success = v.get(type);
             if(!success)
                 throw ConversionError("Conversion error", PT_SOURCEINFO);
         }
