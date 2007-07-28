@@ -239,54 +239,6 @@ class PT_API SerializationData : public SerializationNode
                 Nodes::const_iterator _it;
         };
 
-        class ConstObjectIterator
-        {
-            public:
-                ConstObjectIterator()
-                : _data(0)
-                {}
-
-                ConstObjectIterator(const SerializationData& data)
-                : _data(&data)
-                , _it( data.begin() )
-                {
-                    if( _it != data.end() && node_cast<const SerializationData*>(&*_it) == 0 )
-                        this->advance();
-                }
-
-                ConstObjectIterator& operator++()
-                {
-                    this->advance();
-                    return *this;
-                }
-
-                const SerializationData& operator*() const
-                { return static_cast<const SerializationData&>(*_it); }
-
-                const SerializationData* operator->() const
-                { return static_cast<const SerializationData*>(&*_it); }
-
-                bool operator!=(const ConstObjectIterator& other) const
-                { return _it != other._it; }
-
-                bool operator==(const ConstNodeIterator& other) const
-                { return _it == other; }
-
-                bool operator!=(const ConstNodeIterator& other) const
-                { return _it != other; }
-
-            protected:
-                void advance()
-                {
-                    while( ++_it != _data->end() && node_cast<const SerializationData*>(&*_it) == 0 )
-                    { }
-                }
-
-            private:
-                const SerializationData* _data;
-                ConstNodeIterator _it;
-        };
-
     public:
         /** @brief Construct with parent node
 
@@ -368,12 +320,6 @@ class PT_API SerializationData : public SerializationNode
 
         ConstNodeIterator end() const
         { return _nodes.end(); }
-
-        ConstObjectIterator objectsBegin() const
-        { return ConstObjectIterator(*this); }
-
-        ConstNodeIterator objectsEnd() const
-        { return this->end(); }
 
     private:
         //! @internal
