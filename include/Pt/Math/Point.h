@@ -236,7 +236,7 @@ namespace Pt {
         inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
                                                         Pt::Math::BasicPoint<Pt::uint8_t>& point)
         {
-            const Pt::SerializationData* data = node.toData();
+            const Pt::SerializationData* data = node_cast<const SerializationData*>(&node);
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
@@ -264,7 +264,7 @@ namespace Pt {
         inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
                                                         Pt::Math::BasicPoint<T>& point)
         {
-            const Pt::SerializationData* data = node.toData();
+            const Pt::SerializationData* data = node_cast<const SerializationData*>(&node);
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 

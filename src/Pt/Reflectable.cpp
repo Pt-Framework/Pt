@@ -270,7 +270,7 @@ Reflectable& Reflectable::operator=(const Reflectable& other)
 
 const SerializationNode& operator>>(const SerializationNode& node, Reflectable& r)
 {
-    const SerializationData* data = node.toData();
+    const Pt::SerializationData* data = Pt::node_cast<const Pt::SerializationData*>(&node);
     if(!data)
         throw NoSuchEntry("Reflectable", PT_SOURCEINFO);
 

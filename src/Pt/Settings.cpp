@@ -42,12 +42,12 @@ void SettingsWriter::write(const SerializationData& sd)
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
-        if( const SerializationEntry* entry = it->toEntry() )
+        if( const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
-        else if(const SerializationData* subdata = it->toData() )
+        else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             // Array types may have no instance-names
             if( subdata->getNode(L"") )
@@ -70,13 +70,13 @@ void SettingsWriter::writeParent(const SerializationData& sd, const Pt::String& 
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
-        if(const SerializationEntry* entry = it->toEntry() )
+        if( const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
             *_os << prefix << '.';
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
-        else if(const SerializationData* subdata = it->toData() )
+        else if( const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             *_os << prefix << '.' << subdata->name() << Pt::String(L" = ");
             *_os<< subdata->typeName() << Pt::String(L"{ ");
@@ -97,11 +97,11 @@ void SettingsWriter::writeChild(const SerializationData& sd)
         if(separate)
             *_os << Pt::String(L", ");
 
-        if(const SerializationEntry* entry = it->toEntry() )
+        if(const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
         }
-        else if(const SerializationData* subdata = it->toData() )
+        else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             if(subdata->name().empty() == false)
                 *_os << subdata->name() << Pt::String(L" = ");
@@ -425,7 +425,7 @@ void SettingsReader::parseName(const Pt::Char& ch, ParseContext& context)
 
         case '(':
             context.popNode();
-            context.enter2();                                                 
+            context.enter2();
             _parse = &SettingsReader::beginStatement;
             break;
 
@@ -497,13 +497,13 @@ void SettingsReader::afterName(const Pt::Char& ch, ParseContext& context)
         case '=':
             _parse = &SettingsReader::onEqual;
             break;
-        
+
         case ',':
             context.popNode();
             context.popValue();
             _parse = &SettingsReader::beginStatement;
             break;
-        
+
         case '(':
             context.popNode();
             context.enter2();
@@ -800,7 +800,7 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
             context.addValue();
             _parse = &SettingsReader::beginStatement;
             break;
-        
+
         case '}':
             context.addValue();
             context.leave();
@@ -811,7 +811,7 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
                 _parse = &SettingsReader::afterValue;
 
             break;
-        
+
         case ')':
             context.addValue();
             context.leave();

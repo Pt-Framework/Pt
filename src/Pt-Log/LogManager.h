@@ -70,7 +70,7 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 
 inline bool operator>>(const SerializationNode& node, LogManager& manager)
 {
-    const SerializationData* data = node.toData();
+    const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(!data)
         return false;
 

@@ -22,6 +22,7 @@
 #include <Pt/String.h>
 #include <Pt/Variant.h>
 #include <Pt/Exception.h>
+#include <Pt/TypeInfo.h>
 #include <vector>
 
 
@@ -55,8 +56,18 @@ class PT_API NoSuchEntry : public std::logic_error
 class PT_API SerializationNode
 {
     public:
+        enum Category
+        {
+            Value = 0,
+            Object = 1,
+        };
+
+    public:
         virtual ~SerializationNode()
         {}
+
+        Category category() const
+        { return _category; }
 
         const Pt::String& name() const
         { return _name; }
@@ -85,41 +96,48 @@ class PT_API SerializationNode
         bool operator!= (const SerializationNode& other) const
         { return this->name() != other.name(); }
 
-        const SerializationEntry* toEntry() const
-        { return this->_toEntry(); }
-
-        const SerializationData* toData() const
-        { return this->_toData(); }
-
-        SerializationEntry* toEntry()
-        { return this->_toEntry(); }
-
-        SerializationData* toData()
-        { return this->_toData(); }
-
     protected:
-        explicit SerializationNode(SerializationData* parent = 0)
+        explicit SerializationNode(Category cat, SerializationData* parent = 0)
         : _parent(parent)
+        , _category(cat)
         {}
 
-        SerializationNode(SerializationData* parent, const Pt::String& name)
+        SerializationNode(Category cat, SerializationData* parent, const Pt::String& name)
         : _parent(parent)
+        , _category(cat)
         , _name(name)
         {}
 
-        virtual const SerializationEntry* _toEntry() const = 0;
-
-        virtual const SerializationData* _toData() const = 0;
-
-        virtual SerializationEntry* _toEntry() = 0;
-
-        virtual SerializationData* _toData() = 0;
-
     private:
         SerializationData* _parent;
+        Category _category;
         Pt::String _name;
         Pt::String _type;
 };
+
+
+template <typename T>
+inline T node_cast(const SerializationNode* node)
+{
+    typedef typename Pt::TypeInfo<T>::Value NodeT;
+
+    if(node && node->category() == NodeT::Id)
+        return static_cast<T>(node);
+
+    return 0;
+}
+
+
+template <typename T>
+inline T node_cast(SerializationNode* node)
+{
+    typedef typename Pt::TypeInfo<T>::Value NodeT;
+
+    if(node && node->category() == NodeT::Id)
+        return static_cast<T>(node);
+
+    return 0;
+}
 
 
 /** @brief Object attributes for serialization
@@ -132,6 +150,9 @@ class PT_API SerializationNode
 */
 class PT_API SerializationEntry : public SerializationNode
 {
+    public:
+        static const int Id = SerializationNode::Value;
+
     public:
         /** @brief Construct with parent node and name
 
@@ -162,19 +183,6 @@ class PT_API SerializationEntry : public SerializationNode
         void setValue(const Pt::Variant& val)
         { _value = val; }
 
-    protected:
-        const SerializationEntry* _toEntry() const
-        { return this; }
-
-        const SerializationData* _toData() const
-        { return 0; }
-
-        SerializationEntry* _toEntry()
-        { return this; }
-
-        SerializationData* _toData()
-        { return 0; }
-
     private:
         //! @internal
         Pt::Variant _value;
@@ -193,6 +201,9 @@ class PT_API SerializationEntry : public SerializationNode
 */
 class PT_API SerializationData : public SerializationNode
 {
+    public:
+        static const int Id = SerializationNode::Object;
+
     public:
         typedef std::vector<SerializationNode*> Nodes;
 
@@ -239,7 +250,7 @@ class PT_API SerializationData : public SerializationNode
                 : _data(&data)
                 , _it( data.begin() )
                 {
-                    if( _it != data.end() && _it->toData() == 0 )
+                    if( _it != data.end() && node_cast<const SerializationData*>(&*_it) == 0 )
                         this->advance();
                 }
 
@@ -250,10 +261,10 @@ class PT_API SerializationData : public SerializationNode
                 }
 
                 const SerializationData& operator*() const
-                { return *( _it->toData() ); }
+                { return static_cast<const SerializationData&>(*_it); }
 
                 const SerializationData* operator->() const
-                { return _it->toData() ; }
+                { return static_cast<const SerializationData*>(&*_it); }
 
                 bool operator!=(const ConstObjectIterator& other) const
                 { return _it != other._it; }
@@ -267,7 +278,7 @@ class PT_API SerializationData : public SerializationNode
             protected:
                 void advance()
                 {
-                    while( ++_it != _data->end() && _it->toData() == 0 )
+                    while( ++_it != _data->end() && node_cast<const SerializationData*>(&*_it) == 0 )
                     { }
                 }
 
@@ -364,19 +375,6 @@ class PT_API SerializationData : public SerializationNode
         ConstNodeIterator objectsEnd() const
         { return this->end(); }
 
-    protected:
-        const SerializationEntry* _toEntry() const
-        { return 0; }
-
-        const SerializationData* _toData() const
-        { return this; }
-
-        SerializationEntry* _toEntry()
-        { return 0; }
-
-        SerializationData* _toData()
-        { return this; }
-
     private:
         //! @internal
         Nodes _nodes;
@@ -403,7 +401,7 @@ inline SerializationNode& insert(SerializationData& data, const T& type)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, int& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<int>(x);
@@ -419,9 +417,9 @@ inline SerializationNode& insert(SerializationData& data, int x)
 }
 
 
-inline const SerializationNode& operator>>(const SerializationNode& node, char x)
+inline const SerializationNode& operator>>(const SerializationNode& node, char& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<char>(x);
@@ -439,7 +437,7 @@ inline SerializationNode& insert(SerializationData& data, char x)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, unsigned& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<unsigned>(x);
@@ -455,9 +453,9 @@ inline SerializationNode& insert(SerializationData& data, unsigned x)
 }
 
 
-inline const SerializationNode& operator>>(const SerializationNode& node, bool x)
+inline const SerializationNode& operator>>(const SerializationNode& node, bool& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<bool>(x);
@@ -473,9 +471,9 @@ inline SerializationNode& insert(SerializationData& data, bool x)
 }
 
 
-inline const SerializationNode& operator>>(const SerializationNode& node, float x)
+inline const SerializationNode& operator>>(const SerializationNode& node, float& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<float>(x);
@@ -493,7 +491,7 @@ inline SerializationNode& insert(SerializationData& data, float x)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, double& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<double>(x);
@@ -511,7 +509,7 @@ inline SerializationNode& insert(SerializationData& data, double x)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, std::string& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<std::string>(x);
@@ -529,7 +527,7 @@ inline SerializationNode& insert(SerializationData& data, const std::string& x)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, Pt::String& x)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         entry->value().get<Pt::String>(x);

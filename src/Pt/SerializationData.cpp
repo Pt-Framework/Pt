@@ -45,24 +45,28 @@ NoSuchEntry::~NoSuchEntry() throw()
 {}
 
 
+
+
 SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name)
-: SerializationNode(&parent, name)
+: SerializationNode(SerializationNode::Value, &parent, name)
 {}
 
 
 SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value)
-: SerializationNode(&parent, name)
+: SerializationNode(SerializationNode::Value, &parent, name)
 , _value(value)
 {}
 
 
+
+
 SerializationData::SerializationData(SerializationData* parent)
-: SerializationNode(parent)
+: SerializationNode(SerializationNode::Object, parent)
 {}
 
 
 SerializationData::SerializationData(SerializationData* parent, const Pt::String& name)
-: SerializationNode(parent, name)
+: SerializationNode(SerializationNode::Object, parent, name)
 {}
 
 
@@ -149,7 +153,7 @@ const SerializationData* SerializationData::getData(const Pt::String& name) cons
 {
     const SerializationNode* node = this->getNode(name);
     if(node)
-        return node->toData();
+        return node_cast<const SerializationData*>(node);
 
     return 0;
 }
@@ -159,7 +163,7 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 {
     SerializationNode* node = this->getNode(name);
     if(node)
-        return node->toData();
+        return node_cast<SerializationData*>(node);
 
     return 0;
 }
@@ -168,8 +172,8 @@ SerializationData* SerializationData::getData(const Pt::String& name)
 const Pt::Variant* SerializationData::getEntry(const Pt::String& name) const
 {
     const SerializationNode* node = this->getNode(name);
-    if(node)
-        return &(node->toEntry()->value());
+    if( node && node_cast<const SerializationEntry*>(node) )
+        return &( node_cast<const SerializationEntry*>(node)->value() );
 
     return 0;
 }

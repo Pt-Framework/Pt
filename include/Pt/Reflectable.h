@@ -203,7 +203,7 @@ class PT_API Reflectable
         void registerCallableInfo(CallableInfo* ci);
 
     private:
-        class ReflectableData* _data;
+        struct ReflectableData* _data;
 };
 
 

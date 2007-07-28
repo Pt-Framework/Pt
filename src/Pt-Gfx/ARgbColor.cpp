@@ -31,13 +31,13 @@ Pt::String Color<ARgb>::toHtml() const
 {
     ARgb8888Color rgb8;
     assign(rgb8, *this);
-    
+
     Pt::StringStream ss;
-    ss << std::hex << Pt::Char('#') 
+    ss << std::hex << Pt::Char('#')
        << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)rgb8.red()
        << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)rgb8.green()
        << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)rgb8.blue();
-    
+
     return ss.str();
 }
 
@@ -58,29 +58,29 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
     ss2 >> std::hex >> r;
     ss2.clear();
     ss2.str( L"" );
-    
+
     ss.get(token, 3);
     ss2 << token;
     ss2 >> std::hex >> g;
     ss2.clear();
-    ss2.str( L"" );        
-    
+    ss2.str( L"" );
+
     ss.get(token, 3);
     ss2 << token;
     ss2 >> std::hex >> b;
     ss2.clear();
-    ss2.str( L"" );        
-    
+    ss2.str( L"" );
+
     if( ss.fail() )
         throw ConversionError("ARgbColor", PT_SOURCEINFO);
 
     ARgb8888Color rgb8( (uint8_t)r, (uint8_t)g, (uint8_t)b);
     Color<Gfx::ARgb> color;
     assign(color, rgb8);
-    
+
     return color;
 }
-                
+
 
 SerializationNode& insert(SerializationData& data, const Color<ARgb>& color)
 {
@@ -92,17 +92,17 @@ SerializationNode& insert(SerializationData& data, const Color<ARgb>& color)
 
 const SerializationNode& operator>>(const SerializationNode& node, Gfx::Color<Gfx::ARgb>& color)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         Pt::String s;
-        entry->value().get<Pt::String>(s);      
+        entry->value().get<Pt::String>(s);
         color = ARgbColor::fromHtml(s);
     }
 
     return node;
 }
-    
+
 }
 
 }

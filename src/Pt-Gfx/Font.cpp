@@ -94,7 +94,7 @@ SerializationNode& insert(SerializationData& data, const Font& f)
 
 const SerializationNode& operator>>(const SerializationNode& node, Font& f)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         Pt::String fontName;

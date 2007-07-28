@@ -50,7 +50,7 @@ SerializationNode& insert(SerializationData& data, const Brush& brush)
 
 const SerializationNode& operator>>(const SerializationNode& node, Brush& brush)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         brush = Brush( ARgbColor::fromHtml( entry->value().str() ) );
@@ -100,7 +100,7 @@ const ARgbImage& BrushData::texture() const
 
 bool operator==(const Brush& a, const Brush& b)
 {
-	return a._brushData->fillStyle() == b._brushData->fillStyle() && 
+	return a._brushData->fillStyle() == b._brushData->fillStyle() &&
 	       a._brushData->color() == b._brushData->color();
 //           && a._brushData->texture() == b._brushData->texture();    //real image comparison needed ???
 }

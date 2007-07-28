@@ -26,12 +26,12 @@ namespace Gfx {
 
 Pen::Pen()
 : _penData( new PenData( 1, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
-{ }                
+{ }
 
 
 Pen::Pen( size_t size )
 : _penData( new PenData( size, ARgbColor(0,0,0) ,SolidStyle, RoundCap, RoundJoin  ) )
-{ }   
+{ }
 
 
 Pen::Pen( PenStyle style )
@@ -80,15 +80,15 @@ Pen::JoinStyle Pen::joinStyle() const
 
 
 const ARgbImage& Pen::buffer() const
-{ 
-    return _penData->buffer(); 
+{
+    return _penData->buffer();
 }
 
 
 bool operator==(const Pen& a, const Pen& b)
 {
-	return a._penData->size() == b._penData->size() && 
-	       a._penData->color() == b._penData->color() && 
+	return a._penData->size() == b._penData->size() &&
+	       a._penData->color() == b._penData->color() &&
 	       a._penData->style() == b._penData->style();
 }
 
@@ -102,7 +102,7 @@ bool operator<(const Pen& a, const Pen& b)
 SerializationNode& insert(SerializationData& data, const Pen& pen)
 {
     Pt::StringStream ss;
-    ss << pen.size() << Pt::Char('-') 
+    ss << pen.size() << Pt::Char('-')
        << pen.color().toHtml() << Pt::Char('-')
        << pen.style();
 
@@ -114,7 +114,7 @@ SerializationNode& insert(SerializationData& data, const Pen& pen)
 
 const SerializationNode& operator>>(const SerializationNode& node, Pen& pen)
 {
-    const SerializationEntry* entry = node.toEntry();
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
         size_t              penSize;
@@ -138,7 +138,7 @@ const SerializationNode& operator>>(const SerializationNode& node, Pen& pen)
 
     return node;
 }
-    
+
 } // namespace Gfx
 
 } // namespace Pt

@@ -108,7 +108,7 @@ namespace Pt {
         template <typename T>
         inline const Pt::SerializationNode& operator>>(const Pt::SerializationNode& node, BasicRange<T>& r)
         {
-            const Pt::SerializationData* data = node.toData();
+            const Pt::SerializationData* data = node_cast<const SerializationData*>(&node);
             if(!data)
                 throw NoSuchEntry("Range", PT_SOURCEINFO);
 

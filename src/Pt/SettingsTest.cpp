@@ -119,7 +119,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
             PT_UNIT_ASSERT( concat == L"123")
 
@@ -133,7 +134,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
 
             PT_UNIT_ASSERT( concat == L"123")
@@ -159,7 +161,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
             PT_UNIT_ASSERT( concat == L"123")
 
@@ -173,7 +176,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
             PT_UNIT_ASSERT( concat == L"1223")
         }
@@ -208,7 +212,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::SerializationData::ConstNodeIterator it = data->begin(); it != data->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
 
             PT_UNIT_ASSERT( concat == L"3")
@@ -405,7 +410,8 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             for( Pt::Settings::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
-                concat += (*it).toEntry()->value().str();
+                const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
+                concat += entry->value().str();
             }
 
             PT_UNIT_ASSERT( concat == L"3")
