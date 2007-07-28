@@ -112,8 +112,9 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Range", PT_SOURCEINFO);
 
-            T min = data->getValue<T>(L"min");
-            T max = data->getValue<T>(L"max");
+            T min =0, max = 0;
+            data->getValue<T>(L"min", min);
+            data->getValue<T>(L"max", max);
 
             r.setMin(min);
             r.setMax(max);
