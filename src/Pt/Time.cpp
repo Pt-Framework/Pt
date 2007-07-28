@@ -235,7 +235,7 @@ Time Time::fromIsoString(const std::string& s)
 
 const SerializationNode& operator>>(const SerializationNode& node, Time& time)
 {
-    const SerializationData* data = node.toData();
+    const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(data == 0)
         throw NoSuchEntry("date", PT_SOURCEINFO);
 

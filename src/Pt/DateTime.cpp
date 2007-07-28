@@ -222,7 +222,7 @@ std::string DateTime::toIsoString() const
 
 const SerializationNode& operator>>(const SerializationNode& node, DateTime& datetime)
 {
-    const SerializationData* data = node.toData();
+    const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(data == 0)
         throw NoSuchEntry("DateTime", PT_SOURCEINFO);
 

@@ -270,7 +270,7 @@ Archive& operator<<(Archive& ar, const Date& date)
 
 const SerializationNode& operator>>(const SerializationNode& node, Date& date)
 {
-    const SerializationData* data = node.toData();
+    const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(data == 0)
         throw NoSuchEntry("date", PT_SOURCEINFO);
 
