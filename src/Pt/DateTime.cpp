@@ -219,27 +219,18 @@ std::string DateTime::toIsoString() const
 }
 
 
-
 const SerializationNode& operator>>(const SerializationNode& node, DateTime& datetime)
 {
     const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(data == 0)
         throw NoSuchEntry("DateTime", PT_SOURCEINFO);
 
-    const SerializationData* subData = data->getData(L"date");
-    if(!subData)
-        throw NoSuchEntry("date", PT_SOURCEINFO);
-
     Date date(1,1,1);
-    *subData >> date;
+    data->getNode(L"date") >> date;
     datetime.setDate(date);
 
-    subData = data->getData(L"time");
-    if(!subData)
-        throw NoSuchEntry("time", PT_SOURCEINFO);
-
     Time time;
-    *subData >> time;
+    data->getNode(L"time") >> time;
     datetime.setTime(time);
 
     return node;

@@ -112,16 +112,8 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Range", PT_SOURCEINFO);
 
-            T min;
-            T max;
-
-            const Pt::Variant* value = data->getEntry(L"min");
-            if( value == 0 || !value->get(min) )
-                throw Pt::NoSuchEntry("min", PT_SOURCEINFO);
-
-            value = data->getEntry(L"max");
-            if( value == 0 || !value->get(max) )
-                throw Pt::NoSuchEntry("max", PT_SOURCEINFO);
+            T min = data->getValue<T>(L"min");
+            T max = data->getValue<T>(L"max");
 
             r.setMin(min);
             r.setMax(max);

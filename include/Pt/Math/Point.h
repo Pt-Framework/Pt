@@ -240,16 +240,8 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
-            Pt::uint16_t x;
-            Pt::uint16_t y;
-
-            const Pt::Variant* value = data->getEntry(L"x");
-            if( value == 0 || !value->get<Pt::uint16_t>(x) )
-                throw Pt::NoSuchEntry("x", PT_SOURCEINFO);
-
-            value = data->getEntry(L"y");
-            if( value == 0 || !value->get<Pt::uint16_t>(y) )
-                throw Pt::NoSuchEntry("y", PT_SOURCEINFO);
+            Pt::uint16_t x = data->getValue<Pt::uint16_t>(L"x");
+            Pt::uint16_t y = data->getValue<Pt::uint16_t>(L"y");
 
             point.setX(static_cast<Pt::uint8_t>(x));
             point.setY(static_cast<Pt::uint8_t>(y));
@@ -268,16 +260,8 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
-            T x;
-            T y;
-
-            const Pt::Variant* value = data->getEntry(L"x");
-            if( value == 0 || !value->get(x) )
-                throw Pt::NoSuchEntry("x", PT_SOURCEINFO);
-
-            value = data->getEntry(L"y");
-            if( value == 0 || !value->get(y) )
-                throw Pt::NoSuchEntry("y", PT_SOURCEINFO);
+            T x = data->getValue<T>(L"x");
+            T y = data->getValue<T>(L"y");
 
             point.setX(x);
             point.setY(y);

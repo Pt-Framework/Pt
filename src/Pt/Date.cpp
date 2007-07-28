@@ -274,20 +274,9 @@ const SerializationNode& operator>>(const SerializationNode& node, Date& date)
     if(data == 0)
         throw NoSuchEntry("date", PT_SOURCEINFO);
 
-    int year;
-    unsigned month, day;
-
-    const Pt::Variant* value = data->getEntry(L"year");
-    if( value == 0 || !value->get<int>(year) )
-        throw NoSuchEntry("year", PT_SOURCEINFO);
-
-    value = data->getEntry(L"month");
-    if( value == 0 || !value->get<unsigned>(month) )
-        throw NoSuchEntry("month", PT_SOURCEINFO);
-
-    value = data->getEntry(L"day");
-    if( value == 0 || !value->get<unsigned>(day) )
-        throw NoSuchEntry("day", PT_SOURCEINFO);
+    int year = data->getValue<int>(L"year");
+    unsigned month = data->getValue<unsigned>(L"month");
+    unsigned day = data->getValue<unsigned>(L"day");
 
     date.set(year, month, day);
     return node;

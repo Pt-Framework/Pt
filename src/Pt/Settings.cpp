@@ -50,7 +50,7 @@ void SettingsWriter::write(const SerializationData& sd)
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             // Array types may have no instance-names
-            if( subdata->getNode(L"") )
+            if( subdata->findNode(L"") )
             {
                 *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"{ ");
                 this->writeParent( *subdata, L"");
@@ -250,7 +250,7 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationData* data = _data->getData( _name.substr( 0, pos ) );
+                Pt::SerializationData* data = _data->findData( _name.substr( 0, pos ) );
                 if(data == 0)
                     data = &( _data->addData( _name.substr( 0, pos ) ) );
 
@@ -290,7 +290,7 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationData* data = _data->getData( _prevName.substr( 0, pos ) );
+                Pt::SerializationData* data = _data->findData( _prevName.substr( 0, pos ) );
                 if(data == 0)
                     data = &( _data->addData( _prevName.substr( 0, pos ) ) );
 
@@ -300,7 +300,7 @@ class SettingsReader::ParseContext
                 _prevName = _prevName.substr( ++pos );
             }
 
-            Pt::SerializationData* data = _data->getData( _prevName );
+            Pt::SerializationData* data = _data->findData( _prevName );
             if(data == 0 || _depth != 0)
                 data = &( _data->addData( _prevName ) );
 

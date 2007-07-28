@@ -260,11 +260,34 @@ class PT_API SerializationData : public SerializationNode
         size_t size() const
         { return _nodes.size(); }
 
-        const SerializationNode* getNode(size_t n) const;
+        template <typename T>
+        T getValue(const Pt::String& name) const
+        {
+            T ret;
+            bool success = this->getEntry(name).get<T>(ret);
+            if(!success)
+                throw ConversionError("Conversion error", PT_SOURCEINFO);
 
-        const SerializationNode* getNode(const Pt::String& name) const;
+            return ret;
+        }
 
-        SerializationNode* getNode(const Pt::String& name);
+        template <typename T>
+        void getValue(const Pt::String& name, T& type) const
+        {
+            bool success = this->getEntry(name).get<T>(type);
+            if(!success)
+                throw ConversionError("Conversion error", PT_SOURCEINFO);
+        }
+
+        const SerializationNode& getNode(size_t n) const;
+
+        const SerializationNode& getNode(const Pt::String& name) const;
+
+        const SerializationNode* findNode(const Pt::String& name) const;
+
+        SerializationNode* findNode(const Pt::String& name);
+
+        SerializationNode& getNode(const Pt::String& name);
 
         /** @brief Add subdata as a child
 
@@ -283,23 +306,38 @@ class PT_API SerializationData : public SerializationNode
         /** @brief Find object data by name
 
             This method returns the object data, if this node has a
-            SerializationData child node with the name \a name
+            SerializationData child node with the name \a name. Otherwise
+            an exception is thrown.
         */
-        const SerializationData* getData(const Pt::String& name) const;
+        const SerializationData& getData(const Pt::String& name) const;
 
         /** @brief Find object data by name
 
             This method returns the object data, if this node has a
             SerializationData child node with the name \a name
         */
-        SerializationData* getData(const Pt::String& name);
+        const SerializationData* findData(const Pt::String& name) const;
+
+        /** @brief Find object data by name
+
+            This method returns the object data, if this node has a
+            SerializationData child node with the name \a name
+        */
+        SerializationData* findData(const Pt::String& name);
+
+        /** @brief Find object data by name
+
+            This method returns the object data, if this node has a
+            SerializationData child node with the name \a name
+        */
+        SerializationData& getData(const Pt::String& name);
 
         /** @brief Find object attribute by name
 
             This method returns the object attribute, if this node has a
             SerializationEntry child node with the name \a name
         */
-        const Pt::Variant* getEntry(const Pt::String& name) const;
+        const Pt::Variant& getEntry(const Pt::String& name) const;
 
         /** @brief Add object attribute
 
@@ -324,17 +362,6 @@ class PT_API SerializationData : public SerializationNode
     private:
         //! @internal
         Nodes _nodes;
-};
-
-
-//template <typename T>
-//const SerializationNode& operator>>(const SerializationNode& node, T& type);
-
-template <typename T>
-struct Serialization
-{
-    const SerializationNode& get(const SerializationNode& node, T& type)
-    { return node; }
 };
 
 

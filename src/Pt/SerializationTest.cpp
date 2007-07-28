@@ -52,9 +52,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::SerializationData data;
             data.addEntry(L"testEntry", Pt::Variant(1) );
-            const Pt::Variant* entry = data.getEntry(L"testEntry");
-            PT_UNIT_ASSERT( entry );
-            PT_UNIT_ASSERT( *entry == L"1" );
+            PT_UNIT_ASSERT( 1 == data.getValue<int>(L"testEntry") );
         }
 
         void Date()

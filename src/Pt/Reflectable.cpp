@@ -278,11 +278,11 @@ const SerializationNode& operator>>(const SerializationNode& node, Reflectable& 
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
     {
         Pt::String propName = Pt::String::widen( it->name() );
-
-        if( const Pt::SerializationNode* node = data->getNode(propName) )
-        {
-            it->set(*node);
+        try {
+            it->set( data->getNode(propName) );
         }
+        catch(...)
+        { }
     }
 
     return node;
