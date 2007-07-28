@@ -310,8 +310,8 @@ namespace Pt {
         inline const Pt::SerializationData& operator>>(const Pt::SerializationData& data,
                                                        std::vector< Pt::Math::BasicPoint<T> >& points)
         {
-            Pt::SerializationData::ConstObjectIterator it;
-            for(it = data.objectsBegin(); it != data.objectsEnd(); ++it)
+            Pt::SerializationData::ConstNodeIterator it;
+            for(it = data.begin(); it != data.end(); ++it)
             {
                 Pt::Math::BasicPoint<T> bp;
                 *it >> bp;
