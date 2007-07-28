@@ -1,21 +1,16 @@
-/***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
- ***************************************************************************/
-
 #ifndef PT_MATH_POINT_H
 #define PT_MATH_POINT_H
 
 #include <Pt/Math/Api.h>
-#include <Pt/Types.h>
-#include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 #include <Pt/Math/MathUtils.h>
 
-#include <Pt/AnyTraits.h>
+#include <Pt/Types.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/SerializationData.h>
 
 #include <vector>
+
 
 namespace Pt {
 
@@ -208,10 +203,10 @@ namespace Pt {
         };
 
         /**
-         * @brief serialization of a BasicPoint<Pt::uint8_t>
+         * @brief serialization BasicPoint<Pt::uint8_t>
          * The type Pt::uint8_t is defined to unsinged char. To make sure the
          * numbers are not interpreted as unsigned char, a cast to Pt::uint16_t
-         * is done.                            
+         * is done.
          */
         inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
                                                  const Pt::Math::BasicPoint<Pt::uint8_t>& point)
@@ -223,7 +218,7 @@ namespace Pt {
         }
 
         /**
-         * @brief serialization of a BasicPoint<T>
+         * @brief serialization BasicPoint
          */
         template <typename T>
         inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
@@ -236,7 +231,7 @@ namespace Pt {
         }
 
         /**
-         * @brief deserialization of a BasicPoint<Pt::uint8_t>
+         * @brief deserialization BasicPoint<Pt::uint8_t>
          */
         inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
                                                         Pt::Math::BasicPoint<Pt::uint8_t>& point)
@@ -263,7 +258,7 @@ namespace Pt {
         }
 
         /**
-         * @brief deserialization of a BasicPoint<T>
+         * @brief deserialization BasicPoint
          */
         template <typename T>
         inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
@@ -291,7 +286,7 @@ namespace Pt {
         }
 
         /**
-         * @brief Serialization of a vector of BasicPoint<T> objects.
+         * @brief Serialization of a vector of BasicPoint objects.
          *
          */
         template <typename T>
@@ -303,12 +298,12 @@ namespace Pt {
             {
                 data.addData(L"Point") << *it;
             }
-        
+
             return data;
         }
-        
+
         /**
-         * @brief Deserialization of a vector of BasicPoint<T> objects.
+         * @brief Deserialization of a vector of BasicPoint objects.
          *
          */
         template <typename T>
@@ -322,84 +317,12 @@ namespace Pt {
                 *it >> bp;
                 points.push_back(bp);
             }
-        
+
             return data;
         }
 
 
     } // namespace Math
-
-
-
-    template <typename T>
-    struct AnyTraits<Math::BasicPoint<T> > {
-        static void output(std::ostream& os, const Math::BasicPoint<T>& value);
-        static void input(std::istream& is, Math::BasicPoint<T>& value);
-        static void output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint<T>& value);
-        static void input(std::basic_istream<Pt::Char>& is, Math::BasicPoint<T>& value);
-    };
-
-
-    template <typename CharT, typename T>
-    inline void outputGeneric(std::basic_ostream<CharT>& os, const Math::BasicPoint<T>& value)
-    {
-        os << '(' << value.x() << ' ' << value.y() << ')';
-    }
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint<T> >::output(std::ostream& os, const Math::BasicPoint<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint<T> >::output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename CharT, typename T>
-    inline void inputGeneric(std::basic_istream<CharT>& is, Math::BasicPoint<T>& value)
-    {
-        CharT ch;
-
-        is >> ch;
-        if (ch != '(')
-        {
-            throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
-        }
-
-        T x;
-        T y;
-
-        is >> x;
-        is >> y;
-
-        is >> ch;
-        if (ch != ')')
-        {
-            throw std::runtime_error("Could not read Point value" + PT_SOURCEINFO);
-        }
-
-        value.set(x, y);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint<T> >::input(std::istream& is, Math::BasicPoint<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint<T> >::input(std::basic_istream<Pt::Char>& is, Math::BasicPoint<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
 
 } // namespace Pt
 

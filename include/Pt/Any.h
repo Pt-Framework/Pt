@@ -21,7 +21,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Variant.h>
-#include <Pt/AnyTraits.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/Singleton.h>
 #include <Pt/SourceInfo.h>

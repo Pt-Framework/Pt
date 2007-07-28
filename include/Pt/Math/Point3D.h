@@ -8,10 +8,7 @@
 #include <Pt/Types.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
-
-#include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
-
 
 namespace Pt {
 
@@ -41,18 +38,18 @@ namespace Pt {
                 { }
 
                 T x() const
-                { 
-                    return m_x; 
+                {
+                    return m_x;
                 }
 
                 T y() const
-                { 
-                    return m_y; 
+                {
+                    return m_y;
                 }
 
                 T z() const
-                { 
-                    return m_z; 
+                {
+                    return m_z;
                 }
 
                 void setX(T x)
@@ -78,29 +75,29 @@ namespace Pt {
                 }
 
                 const BasicPoint3D& move(T dx, T dy, T dz)
-                { 
-                    m_x += dy; 
-                    m_y += dy; 
-                    m_z += dz; 
-                    return *this; 
+                {
+                    m_x += dy;
+                    m_y += dy;
+                    m_z += dz;
+                    return *this;
                 }
 
                 const BasicPoint3D& operator=(const BasicPoint3D& pt)
                 {
-                    m_x = pt.m_x; 
+                    m_x = pt.m_x;
                     m_y = pt.m_y;
                     m_z = pt.m_z;
                     return *this;
                 }
 
                 bool operator==(const BasicPoint3D& pt) const
-                { 
-                    return (m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z); 
+                {
+                    return (m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z);
                 }
 
                 bool operator!=(const BasicPoint3D& pt) const
-                { 
-                    return (m_x != pt.m_x || m_y != pt.m_y || m_z != pt.m_z); 
+                {
+                    return (m_x != pt.m_x || m_y != pt.m_y || m_z != pt.m_z);
                 }
 
                 bool operator>(const BasicPoint3D& pt) const
@@ -209,79 +206,6 @@ namespace Pt {
         };
 
     } // namespace Math
-
-
-    template <typename T>
-    struct AnyTraits<Math::BasicPoint3D<T> > {
-        static void output(std::ostream& os, const Math::BasicPoint3D<T>& value);
-        static void input(std::istream& is, Math::BasicPoint3D<T>& value);
-        static void output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value);
-        static void input(std::basic_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value);
-    };
-
-
-    template <typename CharT, typename T>
-    inline void outputGeneric(std::basic_ostream<CharT>& os, const Math::BasicPoint3D<T>& value)
-    {
-        os << '(' << value.x() << ' ' << value.y() << ' ' << value.z() << ')';
-    }
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::output(std::ostream& os, const Math::BasicPoint3D<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::output(std::basic_ostream<Pt::Char>& os, const Math::BasicPoint3D<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename CharT, typename T>
-    inline void inputGeneric(std::basic_istream<CharT>& is, Math::BasicPoint3D<T>& value)
-    {
-        CharT ch;
-
-        is >> ch;
-        if (ch != '(')
-        {
-            throw std::runtimem_error("Could not read Point value" + PT_SOURCEINFO);
-        }
-
-        T x;
-        T y;
-        T z;
-
-        is >> x;
-        is >> y;
-        is >> z;
-
-        is >> ch;
-        if (ch != ')')
-        {
-            throw std::runtimem_error("Could not read Point value" + PT_SOURCEINFO);
-        }
-
-        value.set(x, y);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::input(std::istream& is, Math::BasicPoint3D<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicPoint3D<T> >::input(std::basic_istream<Pt::Char>& is, Math::BasicPoint3D<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
 
 } // namespace Pt
 

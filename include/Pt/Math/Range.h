@@ -24,12 +24,11 @@
 #include <Pt/Types.h>
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
-
-#include <Pt/AnyTraits.h>
 #include <Pt/SourceInfo.h>
 
 
 namespace Pt {
+
     namespace Math {
 
         /**
@@ -142,78 +141,6 @@ namespace Pt {
         }
 
     } // namespace Math
-
-
-
-    template <typename T>
-    struct AnyTraits<Math::BasicRange<T> > {
-        static void output(std::ostream& os, const Math::BasicRange<T>& value);
-        static void input (std::istream& is, Math::BasicRange<T>& value);
-        static void output(std::basic_ostream<Pt::Char>& os, const Math::BasicRange<T>& value);
-        static void input (std::basic_istream<Pt::Char>& is, Math::BasicRange<T>& value);
-    };
-
-
-    template <typename CharT, typename T>
-    inline void outputGeneric(std::basic_ostream<CharT>& os, const Math::BasicRange<T>& value)
-    {
-        os << '[' << value.min() << ' ' << value.max() << ']';
-    }
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicRange<T> >::output(std::ostream& os, const Math::BasicRange<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicRange<T> >::output(std::basic_ostream<Pt::Char>& os, const Math::BasicRange<T>& value)
-    {
-        outputGeneric(os, value);
-    }
-
-
-    template <typename CharT, typename T>
-    inline void inputGeneric(std::basic_istream<CharT>& is, Math::BasicRange<T>& value)
-    {
-        CharT ch;
-
-        is >> ch;
-        if (ch != '[')
-        {
-            throw std::runtime_error("Could not read Range value" + PT_SOURCEINFO);
-        }
-
-        T min;
-        T max;
-
-        is >> min;
-        is >> max;
-
-        is >> ch;
-        if (ch != ']')
-        {
-            throw std::runtime_error("Could not read Range value" + PT_SOURCEINFO);
-        }
-
-        value.set(min, max);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicRange<T> >::input(std::istream& is, Math::BasicRange<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
-
-    template <typename T>
-    inline void Pt::AnyTraits<Math::BasicRange<T> >::input(std::basic_istream<Pt::Char>& is, Math::BasicRange<T>& value)
-    {
-        inputGeneric(is, value);
-    }
-
 
 } // namespace Pt
 
