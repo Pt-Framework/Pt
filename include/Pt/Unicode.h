@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 Tobias Müller                                 *
+ *   Copyright (C) 2006-2007 Tobias Mller                                 *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -284,7 +284,7 @@ inline int isPunctuation(const Pt::Char& ch)
 }
 
 
-inline int isAlnum(const Pt::Char& ch)
+inline int isalnum(const Pt::Char& ch)
 {
     int ret = 0;
 

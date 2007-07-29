@@ -41,6 +41,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "Integer", *this, &SerializationTest::Integer );
             Pt::Unit::TestSuite::registerMethod( "ObjectDataTest", *this, &SerializationTest::ObjectDataTest );
             Pt::Unit::TestSuite::registerMethod( "Date", *this, &SerializationTest::Date );
             Pt::Unit::TestSuite::registerMethod( "Time", *this, &SerializationTest::Time );
@@ -53,6 +54,18 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::SerializationData data;
             data.addEntry(L"testEntry", Pt::Variant(1) );
             PT_UNIT_ASSERT( 1 == data.getValue<int>(L"testEntry") );
+        }
+
+        void Integer()
+        {
+            int i = 5;
+            Pt::SerializationData data;
+            decompose(i, data).setName(L"myInt");
+
+            int i2 = 0;
+            compose( i2, data.getNode(L"myInt") );
+            std::cerr << "i2: "<< i2 << std::endl;
+            PT_UNIT_ASSERT(i2 == 5);
         }
 
         void Date()

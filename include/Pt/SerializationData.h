@@ -367,6 +367,97 @@ class PT_API SerializationData : public SerializationNode
 };
 
 
+
+struct PlainSerializable
+{};
+
+
+struct ComplexSerializable
+{};
+
+
+template <typename T>
+struct Serialization
+{
+    typedef PlainSerializable Category;
+
+    static void compose(T& x, const SerializationEntry& entry)
+    {
+        entry.value().get(x);
+    }
+
+    static void decompose(const T& x, SerializationEntry& entry)
+    {
+        entry.setValue( Pt::Variant(x) );
+    }
+};
+
+
+template <typename T>
+void compose(T& x, const SerializationNode& node, PlainSerializable)
+{
+    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
+    if(entry)
+    {
+        Serialization<T>::compose(x, *entry);
+    }
+}
+
+
+template <typename T>
+void compose(T& x, const SerializationNode& node, ComplexSerializable)
+{
+    const SerializationData* data = node_cast<const SerializationData*>(&node);
+    if(data)
+    {
+        Serialization<T>::compose(x, *data);
+    }
+}
+
+
+template <typename T>
+void compose(T& x, const SerializationNode& node)
+{
+    typedef typename Serialization<T>::Category Cat;
+    compose(x, node, Cat());
+}
+
+
+
+
+template <typename T>
+SerializationNode& decompose(const T& x, SerializationData& parent, PlainSerializable)
+{
+    SerializationEntry& entry = parent.addEntry( Pt::String() );
+    Serialization<T>::decompose(x, entry);
+    return entry;
+}
+
+
+template <typename T>
+SerializationNode& decompose(const T& x, SerializationData& parent, ComplexSerializable)
+{
+    SerializationData& data = parent.addData();
+    Serialization<T>::decompose(x, data);
+    return data;
+}
+
+
+template <typename T>
+SerializationNode& decompose(const T& x, SerializationData& parent)
+{
+    typedef typename Serialization<T>::Category Cat;
+    return decompose(x, parent, Cat());
+}
+
+
+
+
+
+
+
+
+
 template <typename T>
 inline SerializationNode& insert(SerializationData& data, const T& type)
 {
@@ -376,12 +467,7 @@ inline SerializationNode& insert(SerializationData& data, const T& type)
 
 inline const SerializationNode& operator>>(const SerializationNode& node, int& x)
 {
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<int>(x);
-    }
-
+    compose(x, node);
     return node;
 }
 
