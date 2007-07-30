@@ -284,7 +284,7 @@ inline int isPunctuation(const Pt::Char& ch)
 }
 
 
-inline int isalnum(const Pt::Char& ch)
+inline int isAlnum(const Pt::Char& ch)
 {
     int ret = 0;
 

@@ -260,8 +260,9 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
-            T x = data->getValue<T>(L"x");
-            T y = data->getValue<T>(L"y");
+            T x = 0, y = 0;
+            data->getValue(L"x", x);
+            data->getValue(L"y", x);
 
             point.setX(x);
             point.setY(y);
