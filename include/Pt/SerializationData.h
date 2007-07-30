@@ -37,18 +37,15 @@ class SerializationData;
     This Exception indicates a error during serialization caused by
     missing attributes or object data.
 */
-class PT_API NoSuchEntry : public std::logic_error
+class PT_API SerializationError : public std::logic_error
 {
     public:
-        /** @brief Construct with attribute name and source-info
-
-            The string \a name is the name of the missing or invalid attribute
-            and will be inserted into the error message text of the exception.
+        /** @brief Construct with message and source-info
         */
-        NoSuchEntry(const std::string& name, const SourceInfo& si);
+        SerializationError(const std::string& msg, const SourceInfo& si);
 
         //! @brief Destructor
-        ~NoSuchEntry() throw();
+        ~SerializationError() throw();
 };
 
 
@@ -365,6 +362,7 @@ class PT_API SerializationData : public SerializationNode
 
 
 
+
 struct PlainSerializable
 {};
 
@@ -376,75 +374,234 @@ struct ComplexSerializable
 template <typename T>
 struct Serialization
 {
-    typedef PlainSerializable Category;
-
-    static void compose(T& x, const SerializationEntry& entry)
-    {
-        entry.value().get(x);
-    }
-
-    static void decompose(const T& x, SerializationEntry& entry)
-    {
-        entry.setValue( Pt::Variant(x) );
-    }
+    typedef ComplexSerializable Category;
 };
 
 
+
 template <typename T>
-void compose(T& x, const SerializationNode& node, PlainSerializable)
+void get(const SerializationNode& node, T& x, PlainSerializable)
 {
     const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if(entry)
     {
-        Serialization<T>::compose(x, *entry);
+        get(*entry, x);
     }
 }
 
 
 template <typename T>
-void compose(T& x, const SerializationNode& node, ComplexSerializable)
+void get(const SerializationNode& node, T& x, ComplexSerializable)
 {
     const SerializationData* data = node_cast<const SerializationData*>(&node);
     if(data)
     {
-        Serialization<T>::compose(x, *data);
+        get(*data, x);
     }
 }
 
 
 template <typename T>
-void compose(T& x, const SerializationNode& node)
+const SerializationNode& getType(const SerializationNode& node, T& x)
 {
     typedef typename Serialization<T>::Category Cat;
-    compose(x, node, Cat());
+    get( node, x, Cat() );
+    return node;
 }
 
 
 
 
 template <typename T>
-SerializationNode& decompose(const T& x, SerializationData& parent, PlainSerializable)
+SerializationNode& insert(SerializationData& parent, const T& x, PlainSerializable)
 {
     SerializationEntry& entry = parent.addEntry( Pt::String() );
-    Serialization<T>::decompose(x, entry);
+    set(entry, x);
     return entry;
 }
 
 
 template <typename T>
-SerializationNode& decompose(const T& x, SerializationData& parent, ComplexSerializable)
+SerializationNode& insert(SerializationData& parent, const T& x, ComplexSerializable)
 {
     SerializationData& data = parent.addData();
-    Serialization<T>::decompose(x, data);
+    set(data, x);
     return data;
 }
 
 
 template <typename T>
-SerializationNode& decompose(const T& x, SerializationData& parent)
+SerializationNode& insert(SerializationData& parent, const T& x )
 {
     typedef typename Serialization<T>::Category Cat;
-    return decompose(x, parent, Cat());
+    return insert( parent, x, Cat() );
+}
+
+
+template <>
+struct Serialization<int>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, int& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, int x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<unsigned>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, unsigned& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, unsigned x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<char>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, char& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, char x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<bool>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, bool& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, bool x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<float>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, float& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, float x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<double>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, double& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, double x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+
+template <>
+struct Serialization<std::string>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, std::string& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, const std::string& x)
+{
+    entry.setValue( Pt::Variant(x) );
+}
+
+
+
+
+template <>
+struct Serialization<Pt::String>
+{
+    typedef PlainSerializable Category;
+};
+
+
+inline void get(const SerializationEntry& entry, Pt::String& x)
+{
+    entry.value().get(x);
+}
+
+
+inline void set(SerializationEntry& entry, const Pt::String& x)
+{
+    entry.setValue( Pt::Variant(x) );
 }
 
 
@@ -452,21 +609,21 @@ SerializationNode& decompose(const T& x, SerializationData& parent)
 
 
 
-
-
-
+/*
 template <typename T>
 inline SerializationNode& insert(SerializationData& data, const T& type)
 {
     return data.addData() << type;
 }
+*/
 
-
+/*
 inline const SerializationNode& operator>>(const SerializationNode& node, int& x)
 {
     compose(x, node);
     return node;
 }
+
 
 
 inline SerializationNode& insert(SerializationData& data, int x)
@@ -599,6 +756,8 @@ inline SerializationNode& insert(SerializationData& data, const Pt::String& x)
 {
     return data.addEntry( Pt::Variant(x) );
 }
+
+*/
 
 } // namespace Pt
 

@@ -43,20 +43,22 @@ class PT_API Settings : public SerializationData
         void save(std::basic_ostream<Pt::Char>& is) const;
 
         template <typename T>
-        const bool get(T& type, const std::string& name) const
+        const bool getObject(T& type, const std::string& name) const
         {
-            const SerializationNode* node = this->findNode(name);
-            if(node == 0)
+            const SerializationData* data = this->findData(name);
+            if(data == 0)
                 return false;
 
-            *node >> type;
+            get(*data, type);
             return true;
         }
 
         template <typename T>
-        const void set(const T& type, const std::string& name)
+        const void setObject(const T& type, const std::string& name)
         {
-            insert( *this, type ).setName(name);
+            SerializationData& data = this->addData();
+            set(data, type);
+            data.setName(name);
         }
 };
 

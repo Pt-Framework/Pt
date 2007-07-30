@@ -92,11 +92,17 @@ namespace Gfx {
     }
 
 
-    PT_GFX_API SerializationNode& insert(SerializationData& data, const Font& f);
+    PT_GFX_API void get( const SerializationEntry& e, Gfx::Font& x );
 
-    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Font& f);
+    PT_GFX_API void set( SerializationEntry& e, const Gfx::Font& x );
 
 } // namespace Gfx
+
+template <>
+struct Serialization< Gfx::Font >
+{
+    typedef PlainSerializable Category;
+};
 
 } // namespace Pt
 

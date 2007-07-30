@@ -57,11 +57,6 @@ namespace Gfx {
     };
 
 
-    PT_GFX_API SerializationNode& insert(SerializationData& data, const Brush& b);
-
-    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Brush& b);
-
-
     class PT_GFX_API BrushData
     {
         public:
@@ -81,7 +76,18 @@ namespace Gfx {
             ARgbImage*       _texture;
     };
 
+    PT_GFX_API void get( const SerializationEntry& e, Gfx::Brush& x );
+
+    PT_GFX_API void set( SerializationEntry& e, const Gfx::Brush& x );
+
 } // namespace Gfx
+
+template <>
+struct Serialization< Gfx::Brush >
+{
+    typedef PlainSerializable Category;
+};
+
 
 } // namespace Pt
 

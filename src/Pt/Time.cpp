@@ -52,34 +52,6 @@ InvalidTime::~InvalidTime() throw()
 }
 
 
-/*
-const Archive& operator>>(const Archive& ar, Time& time)
-{
-    const Pt::String* value = ar.getValue(L"msecs");
-    if( value )
-    {
-        std::stringstream ss( value->narrow() );
-        unsigned msecs = 0;
-        ss >> msecs;
-        time.setTotalMSecs(msecs);
-    }
-
-    return ar;
-}
-
-
-Archive& operator<<(Archive& ar, const Time& time)
-{
-    std::stringstream ss;
-    ss << time.totalMSecs();
-    Pt::String value = Pt::String::widen( ss.str() );
-
-    ar.addValue( L"msecs", value );
-
-    return ar;
-}*/
-
-
 Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)
 {
     set(h, m, s, ms);
@@ -233,40 +205,30 @@ Time Time::fromIsoString(const std::string& s)
 }
 
 
-const SerializationNode& operator>>(const SerializationNode& node, Time& time)
+void get(const SerializationData& data, Time& time)
 {
-    const SerializationData* data = node_cast<const SerializationData*>(&node);
-    if(data == 0)
-        throw NoSuchEntry("date", PT_SOURCEINFO);
-
-    unsigned hour = data->getValue<unsigned>("hour");
-    unsigned min = data->getValue<unsigned>("minute");
-    unsigned sec = data->getValue<unsigned>("second");
-    unsigned msec = data->getValue<unsigned>("millisec");
-
+    unsigned hour = data.getValue<unsigned>("hour");
+    unsigned min = data.getValue<unsigned>("minute");
+    unsigned sec = data.getValue<unsigned>("second");
+    unsigned msec = data.getValue<unsigned>("millisec");
     time.set(hour, min, sec, msec);
-    return node;
 }
 
 
-SerializationData& operator<<(SerializationData& data, const Time& time)
+void set(SerializationData& data, const Time& time)
 {
     unsigned hour;
     unsigned min;
     unsigned sec;
     unsigned msec;
-
     time.get(hour, min, sec, msec);
 
+    data.setTypeName("Time");
     data.addEntry("hour", Variant(hour) );
     data.addEntry("minute", Variant(min) );
     data.addEntry("second", Variant(sec) );
     data.addEntry("millisec", Variant(msec) );
-
-    return data;
 }
-
-
 
 } // namespace Pt
 

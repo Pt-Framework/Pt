@@ -252,11 +252,18 @@ namespace Pt {
                           [rB, gB, bB] * aB*(1-aA)/aD
         */
 
-    PT_GFX_API SerializationNode& insert(SerializationData& data, const Gfx::Color<Gfx::ARgb>& pen);
 
-    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Gfx::Color<Gfx::ARgb>& x);
+    PT_GFX_API void get( const SerializationEntry& e, Gfx::Color<Pt::Gfx::ARgb>& x );
+
+    PT_GFX_API void set( SerializationEntry& e, const Gfx::Color<Pt::Gfx::ARgb>& x );
 
 } // namespace Gfx
+
+template <>
+struct Serialization< Gfx::Color<Pt::Gfx::ARgb> >
+{
+    typedef PlainSerializable Category;
+};
 
 } // namespace Pt
 

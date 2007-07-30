@@ -268,6 +268,7 @@ Reflectable& Reflectable::operator=(const Reflectable& other)
 }
 
 
+/*
 const SerializationNode& operator>>(const SerializationNode& node, Reflectable& r)
 {
     const Pt::SerializationData* data = Pt::node_cast<const Pt::SerializationData*>(&node);
@@ -301,4 +302,32 @@ SerializationData& operator<<(SerializationData& data, const Reflectable& r)
 
     return data;
 }
+*/
+
+
+void get(const SerializationData& data, Reflectable& r)
+{
+    Reflectable::PropertyIterator it;
+    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
+    {
+        Pt::String propName = Pt::String::widen( it->name() );
+        try {
+            it->set( data.getNode( it->name() ) );
+        }
+        catch(...)
+        { }
+    }
+}
+
+
+void set(SerializationData& data, const Reflectable& r)
+{
+    Reflectable::ConstPropertyIterator it;
+    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
+    {
+        SerializationNode& added = it->get(data);
+        added.setName( it->name() );
+    }
+}
+
 } // namespace Pt

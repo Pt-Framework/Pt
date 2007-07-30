@@ -175,7 +175,7 @@ class WritePropertyInfo : virtual public PropertyInfo
             typedef typename Pt::TypeInfo<T>::Value ValueT ;
 
             ValueT value;
-            node >> value;
+            getType(node, value);
             this->set( value );
         }
 
@@ -259,7 +259,7 @@ class ReadWritePropertyInfo : public PropertyInfo
             typedef typename Pt::TypeInfo<A>::Value ValueT ;
 
             ValueT value;
-            node >> value;
+            getType(node, value);
             _setter->invoke( value );
         }
 
@@ -359,8 +359,8 @@ class ReadWriteProperty : public PropertyInfo
         {
             typedef typename Pt::TypeInfo<T>::Value ValueT ;
 
-            ValueT value;
-            node >> value;
+            ValueT value = ValueT();
+            getType(node, value);
             _setter->invoke( value );
         }
 

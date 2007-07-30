@@ -98,7 +98,7 @@ namespace Xml {
             void serialize(const T& type, const std::string& name)
             {
                 SerializationData data(0, name);
-                data << type;
+                set(data, type);
                 this->putData( data );
             }
 

@@ -99,44 +99,37 @@ bool operator<(const Pen& a, const Pen& b)
 }
 
 
-SerializationNode& insert(SerializationData& data, const Pen& pen)
+void get(const SerializationEntry& e, Gfx::Pen& pen)
+{
+    size_t              penSize;
+    Gfx::ARgbColor      penColor;
+    Pt::ssize_t         penStyle;
+    Pt::String html;
+
+    Pt::StringStream ss( e.value().str() );
+    ss >> penSize;
+    ss.get();
+
+    getline( ss, html, Pt::Char('-') );
+
+    ss >> penStyle;
+
+    if( ss.fail() )
+        throw ConversionError("Pen", PT_SOURCEINFO);
+
+    pen = Gfx::Pen(penSize, Gfx::ARgbColor::fromHtml(html), (Gfx::Pen::PenStyle)penStyle);
+}
+
+
+void set(SerializationEntry& e, const Gfx::Pen& pen)
 {
     Pt::StringStream ss;
     ss << pen.size() << Pt::Char('-')
        << pen.color().toHtml() << Pt::Char('-')
        << pen.style();
 
-    SerializationNode& ret = data.addEntry( ss.str() );
-    ret.setTypeName("Pen");
-    return ret;
-}
-
-
-const SerializationNode& operator>>(const SerializationNode& node, Pen& pen)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        size_t              penSize;
-        Gfx::ARgbColor      penColor;
-        Pt::ssize_t         penStyle;
-        Pt::String html;
-
-        Pt::StringStream ss( entry->value().str() );
-        ss >> penSize;
-        ss.get();
-
-        getline( ss, html, Pt::Char('-') );
-
-        ss >> penStyle;
-
-        if( ss.fail() )
-            throw ConversionError("Pen", PT_SOURCEINFO);
-
-        pen = Gfx::Pen(penSize, ARgbColor::fromHtml(html), (Gfx::Pen::PenStyle)penStyle);
-    }
-
-    return node;
+    e.setValue( ss.str() );
+    e.setTypeName("Pen");
 }
 
 } // namespace Gfx

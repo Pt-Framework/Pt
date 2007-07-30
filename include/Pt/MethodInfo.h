@@ -74,19 +74,19 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             typename Pt::TypeInfo<A4>::Value a4;
-            args.getNode(3) >> a4;
+            getType( args.getNode(3), a4 );
 
             typename Pt::TypeInfo<A5>::Value a5;
-            args.getNode(4) >> a5;
+            getType( args.getNode(4), a5 );
 
             _cb->invoke(a1, a2, a3, a4, a5);
         }
@@ -140,19 +140,19 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             typename Pt::TypeInfo<A4>::Value a4;
-            args.getNode(3) >> a4;
+            getType( args.getNode(3), a4 );
 
             typename Pt::TypeInfo<A5>::Value a5;
-            args.getNode(4) >> a5;
+            getType( args.getNode(4), a5 );
 
             _cb->invoke(a1, a2, a3, a4, a5);
         }
@@ -203,16 +203,16 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             typename Pt::TypeInfo<A4>::Value a4;
-            args.getNode(3) >> a4;
+            getType( args.getNode(3), a4 );
 
             _cb->invoke(a1, a2, a3, a4);
         }
@@ -264,16 +264,16 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             typename Pt::TypeInfo<A4>::Value a4;
-            args.getNode(3) >> a4;
+            getType( args.getNode(3), a4 );
 
             _cb->invoke(a1, a2, a3, a4);
         }
@@ -322,13 +322,13 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             _cb->invoke(a1, a2, a3);
         }
@@ -377,13 +377,13 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             typename Pt::TypeInfo<A3>::Value a3;
-            args.getNode(2) >> a3;
+            getType( args.getNode(2), a3 );
 
             _cb->invoke(a1, a2, a3);
         }
@@ -430,10 +430,10 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             _cb->invoke(a1, a2);
         }
@@ -481,10 +481,10 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
 
             typename Pt::TypeInfo<A2>::Value a2;
-            args.getNode(1) >> a2;
+            getType( args.getNode(1), a2 );
 
             _cb->invoke(a1, a2);
         }
@@ -530,7 +530,7 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
             _cb->invoke(a1);
         }
 
@@ -574,7 +574,7 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         virtual void call(const SerializationData& args) const
         {
             typename Pt::TypeInfo<A1>::Value a1;
-            args.getNode(0) >> a1;
+            getType( args.getNode(0), a1 );
             _cb->invoke(a1);
         }
 

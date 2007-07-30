@@ -24,6 +24,7 @@
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Timespan.h>
+#include <Pt/SerializationData.h>
 #include <string>
 
 
@@ -227,13 +228,17 @@ class PT_API Time
         unsigned _msecs;
     };
 
-    //PT_API const Archive& operator>>(const Archive&, Time& );
 
-    //PT_API Archive& operator<<(Archive&, const Time& );
+    PT_API void get(const SerializationData& data, Time& x);
 
-    PT_API const SerializationNode& operator>>(const SerializationNode& data, Time& time);
+    PT_API void set(SerializationData& data, const Time& x);
 
-    PT_API SerializationData& operator<<(SerializationData& data, const Time& time);
+
+    template <>
+    struct Serialization< Pt::Time >
+    {
+        typedef ComplexSerializable Category;
+    };
 
 }
 

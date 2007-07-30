@@ -22,15 +22,11 @@
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
+#include <Pt/SerializationData.h>
 #include <string>
 
 
 namespace Pt {
-
-class Archive;
-class SerializationNode;
-class SerializationData;
-
 
 class InvalidDate : public std::invalid_argument
 {
@@ -249,13 +245,18 @@ class PT_API Date
         unsigned _julian;
 };
 
-PT_API const SerializationNode& operator>>(const SerializationNode& data, Date& d);
 
-PT_API SerializationData& operator<<(SerializationData& data, const Date& d);
+PT_API void get(const SerializationData& data, Date& x);
 
-//PT_API const Archive& operator>>(const Archive& ar, Date& d);
+PT_API void set(SerializationData& data, const Date& x);
 
-//PT_API Archive& operator<<(Archive& ar, const Date& d);
+
+template <>
+struct Serialization< Pt::Date >
+{
+    typedef ComplexSerializable Category;
+};
+
 
 inline Date operator+(const Date& d, int days)
 { return Date(d._julian + days); }

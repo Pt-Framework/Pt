@@ -200,12 +200,24 @@ namespace Pt {
             Pen::JoinStyle  _joinStyle;
     };
 
-    PT_GFX_API SerializationNode& insert(SerializationData& data, const Pen& pen);
 
-    PT_GFX_API const SerializationNode& operator>>(const SerializationNode& node, Pen& x);
+    PT_GFX_API void get(const SerializationEntry& e, Gfx::Pen& p);
+
+    PT_GFX_API void set(SerializationEntry& e, const Gfx::Pen& p);
 
 } // namespace Gfx
 
 } // namespace Pt
+
+
+namespace Pt {
+
+    template <>
+    struct  Serialization< Gfx::Pen >
+    {
+        typedef PlainSerializable Category;
+    };
+
+}
 
 #endif

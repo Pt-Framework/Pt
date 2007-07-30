@@ -40,26 +40,6 @@ const ARgbImage& Brush::texture() const
 }
 
 
-SerializationNode& insert(SerializationData& data, const Brush& brush)
-{
-    SerializationNode& ret = data.addEntry( brush.color().toHtml() );
-    ret.setTypeName("Brush");
-    return ret;
-}
-
-
-const SerializationNode& operator>>(const SerializationNode& node, Brush& brush)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        brush = Brush( ARgbColor::fromHtml( entry->value().str() ) );
-    }
-
-    return node;
-}
-
-
 BrushData::BrushData(Brush::FillStyle fillStyle, const ARgbColor& color, const ARgbImage* texture)
 : _fillStyle(fillStyle)
 , _color(color)
@@ -108,6 +88,19 @@ bool operator==(const Brush& a, const Brush& b)
 bool operator<(const Brush& a, const Brush& b)
 {
 	return a._brushData->fillStyle() < b._brushData->fillStyle();
+}
+
+
+void get( const SerializationEntry& e, Gfx::Brush& brush )
+{
+    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( e.value().str() ) );
+}
+
+
+void set( SerializationEntry& e, const Gfx::Brush& brush )
+{
+    e.setValue( brush.color().toHtml() );
+    e.setTypeName("Brush");
 }
 
 } // namespace Gfx

@@ -48,7 +48,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
     Pt::StringStream ss2;
 
     if( ss.get() != '#' )
-        throw NoSuchEntry("ARgbColor", PT_SOURCEINFO);
+        throw SerializationError("Invalid color value", PT_SOURCEINFO);
 
     int r,g,b;
 
@@ -82,25 +82,18 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 }
 
 
-SerializationNode& insert(SerializationData& data, const Color<ARgb>& color)
+void get(const SerializationEntry& entry, Gfx::Color<Pt::Gfx::ARgb>& color)
 {
-    SerializationNode& ret = data.addEntry( color.toHtml() );
-    ret.setTypeName("ARgbColor");
-    return ret;
+    Pt::String s;
+    entry.value().get<Pt::String>(s);
+    color = Gfx::ARgbColor::fromHtml(s);
 }
 
 
-const SerializationNode& operator>>(const SerializationNode& node, Gfx::Color<Gfx::ARgb>& color)
+void set(SerializationEntry& entry, const Gfx::Color<Pt::Gfx::ARgb>& color)
 {
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        Pt::String s;
-        entry->value().get<Pt::String>(s);
-        color = ARgbColor::fromHtml(s);
-    }
-
-    return node;
+    entry.setTypeName("ARgbColor");
+    entry.setValue( color.toHtml() );
 }
 
 }

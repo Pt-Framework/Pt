@@ -172,9 +172,17 @@ class PT_API DateTime
         Time _time;
 };
 
-PT_API const SerializationNode& operator>>(const SerializationNode& data, DateTime& time);
 
-PT_API SerializationData& operator<<(SerializationData& data, const DateTime& time);
+PT_API void get(const SerializationData& data, DateTime& x);
+
+PT_API void set(SerializationData& data, const DateTime& x);
+
+
+template <>
+struct PT_API Serialization< Pt::DateTime >
+{
+    typedef ComplexSerializable Category;
+};
 
 }
 

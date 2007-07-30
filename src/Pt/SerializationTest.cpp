@@ -59,10 +59,11 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::Date date(2000, 10, 20);
             Pt::SerializationData data;
-            data << date;
+            set(data, date);
+            data.setName("myDate");
 
             Pt::Date date2(1,1,1);
-            data >> date2;
+            get(data, date2);
 
             PT_UNIT_ASSERT(date == date2);
         }
@@ -71,10 +72,11 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::Time time(18, 40, 5, 1);
             Pt::SerializationData data;
-            data << time;
+            set(data,  time);
+            data.setName("myTime" );
 
             Pt::Time time2;
-            data >> time2;
+            get( data, time2 );
 
             PT_UNIT_ASSERT(time == time2);
         }
@@ -83,11 +85,11 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::DateTime datetime(2000, 10, 20, 18, 40, 5, 1);
             Pt::SerializationData data;
-            data << datetime;
+            set(data, datetime);
+            data.setName("myDateTime" );
 
             Pt::DateTime datetime2;
-            data >> datetime2;
-
+            get( data, datetime2 );
 
             const Pt::Date date = datetime.date();
             const Pt::Date date2 = datetime2.date();

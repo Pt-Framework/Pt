@@ -77,19 +77,7 @@ Font::Direction Font::direction() const
 }
 
 
-SerializationNode& insert(SerializationData& data, const Font& f)
-{
-    Pt::StringStream ss;
-    ss << Pt::String::widen( f.name() ) << Pt::Char('-')
-       << f.size() << Pt::Char('-')
-       << f.fontStyle() << Pt::Char('-')
-       << f.angle() << Pt::Char('-')
-       << f.direction();
 
-    SerializationNode& ret = data.addEntry( ss.str() );
-    ret.setTypeName("Font");
-    return ret;
-}
 
 
 const SerializationNode& operator>>(const SerializationNode& node, Font& f)
@@ -124,6 +112,50 @@ const SerializationNode& operator>>(const SerializationNode& node, Font& f)
     }
 
     return node;
+}
+
+
+void get(const SerializationEntry& e, Gfx::Font& f)
+{
+    Pt::String fontName;
+    size_t      fontSize;
+    ssize_t     fontStyle;
+    ssize_t     fontAngle;
+    ssize_t     fontDirection;
+
+    Pt::StringStream ss( e.value().str() );
+    getline( ss, fontName, Pt::Char('-') );
+
+    ss >> fontSize;
+    ss.get();
+
+    ss >> fontStyle;
+    ss.get();
+
+    ss >> fontAngle;
+    ss.get();
+
+    ss >> fontDirection;
+
+    if( ss.fail() )
+        throw ConversionError("Font", PT_SOURCEINFO);
+
+    f = Gfx::Font( fontName.narrow(), fontSize, (Gfx::Font::FontStyle)fontStyle,
+                   fontAngle, (Gfx::Font::Direction)fontDirection );
+}
+
+
+void set(SerializationEntry& e, const Gfx::Font& f)
+{
+    Pt::StringStream ss;
+    ss << Pt::String::widen( f.name() ) << Pt::Char('-')
+       << f.size() << Pt::Char('-')
+       << f.fontStyle() << Pt::Char('-')
+       << f.angle() << Pt::Char('-')
+       << f.direction();
+
+    e.setValue( ss.str() );
+    e.setTypeName("Brush");
 }
 
 } // namespace Gfx

@@ -79,7 +79,7 @@ bool ValueImpl::getBool() const
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
-    return !_data.empty() && isTrue(_data.at(0));
+    return !_data.empty() && ::isTrue(_data.at(0));
 }
 
 

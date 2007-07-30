@@ -241,55 +241,21 @@ Date Date::fromIsoString(const std::string& s)
 }
 
 
-/*const Archive& operator>>(const Archive& ar, Date& date)
+void get(const SerializationData& data, Date& date)
 {
-    const Pt::String* value = ar.getValue(L"julianDays");
-    if( value )
-    {
-        std::stringstream ss( value->narrow() );
-        unsigned julian = 0;
-        ss >> julian;
-        date.setJulian(julian);
-    }
-
-    return ar;
-}
-
-
-Archive& operator<<(Archive& ar, const Date& date)
-{
-    std::stringstream ss;
-    ss << date.julian();
-    Pt::String value = Pt::String::widen( ss.str() );
-
-    ar.addValue( L"julianDays", value );
-
-    return ar;
-}*/
-
-
-const SerializationNode& operator>>(const SerializationNode& node, Date& date)
-{
-    const SerializationData* data = node_cast<const SerializationData*>(&node);
-    if(data == 0)
-        throw NoSuchEntry("date", PT_SOURCEINFO);
-
-    int year = data->getValue<int>("year");
-    unsigned month = data->getValue<unsigned>("month");
-    unsigned day = data->getValue<unsigned>("day");
-
+    int year = data.getValue<int>("year");
+    unsigned month = data.getValue<unsigned>("month");
+    unsigned day = data.getValue<unsigned>("day");
     date.set(year, month, day);
-    return node;
 }
 
 
-SerializationData& operator<<(SerializationData& data, const Date& date)
+void set(SerializationData& data, const Date& date)
 {
+    data.setTypeName("Date");
     data.addEntry("year", Variant(date.year()) );
     data.addEntry("month", Variant(date.month()) );
     data.addEntry("day", Variant(date.day()) );
-
-    return data;
 }
 
 

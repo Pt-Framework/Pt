@@ -47,7 +47,7 @@ namespace Xml {
             {
                 SerializationData data;
                 this->getData( data );
-                data >> type;
+                get(data, type);
             }
 
         protected:

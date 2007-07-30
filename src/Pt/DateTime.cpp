@@ -33,25 +33,6 @@
 
 namespace Pt {
 
-/*
-const Archive& operator>>(const Archive& ar, DateTime& dt)
-{
-    ar >> dt._date;
-    ar >> dt._time;
-
-    return ar;
-}
-
-
-Archive& operator<<(Archive& ar, const DateTime& dt)
-{
-    ar << dt._date;
-    ar << dt._time;
-
-    return ar;
-}*/
-
-
 DateTime::DateTime()
 {
 }
@@ -219,34 +200,29 @@ std::string DateTime::toIsoString() const
 }
 
 
-const SerializationNode& operator>>(const SerializationNode& node, DateTime& datetime)
+void get(const SerializationData& data, DateTime& datetime)
 {
-    const SerializationData* data = node_cast<const SerializationData*>(&node);
-    if(data == 0)
-        throw NoSuchEntry("DateTime", PT_SOURCEINFO);
-
     Date date(1,1,1);
-    data->getNode("date") >> date;
+    get( data.getData("date"), date );
     datetime.setDate(date);
 
     Time time;
-    data->getNode("time") >> time;
+    get( data.getData("time"), time );
     datetime.setTime(time);
-
-    return node;
 }
 
 
-SerializationData& operator<<(SerializationData& data, const DateTime& datetime)
+void set(SerializationData& data, const DateTime& datetime)
 {
-    SerializationData& dateData = data.addData("date");
-    dateData << datetime.date();
+    data.setTypeName("DateTime");
 
-    SerializationData& timeData = data.addData("time");
-    timeData << datetime.time();
+    SerializationData& date = data.addData();
+    date.setName("date");
+    set( date, datetime.date() );
 
-    return data;
+    SerializationData& time = data.addData();
+    time.setName("time");
+    set( time, datetime.time() );
 }
-
 
 }

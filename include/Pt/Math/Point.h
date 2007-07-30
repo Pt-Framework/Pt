@@ -208,66 +208,52 @@ namespace Pt {
          * numbers are not interpreted as unsigned char, a cast to Pt::uint16_t
          * is done.
          */
-        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
-                                                 const Pt::Math::BasicPoint<Pt::uint8_t>& point)
+        inline void set(Pt::SerializationData& data,
+                        const Pt::Math::BasicPoint<Pt::uint8_t>& point)
         {
             data.addEntry("x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
             data.addEntry("y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
             data.setTypeName("Point");
-            return data;
         }
 
         /**
          * @brief serialization BasicPoint
          */
         template <typename T>
-        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
-                                                 const Pt::Math::BasicPoint<T>& point)
+        inline void set(Pt::SerializationData& data,
+                        const Pt::Math::BasicPoint<T>& point)
         {
             data.addEntry("x", Pt::Variant(point.x()));
             data.addEntry("y", Pt::Variant(point.y()));
             data.setTypeName("Point");
-            return data;
         }
 
         /**
          * @brief deserialization BasicPoint<Pt::uint8_t>
          */
-        inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
-                                                        Pt::Math::BasicPoint<Pt::uint8_t>& point)
+        inline void get(const Pt::SerializationData& data,
+                        Pt::Math::BasicPoint<Pt::uint8_t>& point)
         {
-            const Pt::SerializationData* data = node_cast<const SerializationData*>(&node);
-            if(!data)
-                throw NoSuchEntry("Point", PT_SOURCEINFO);
-
-            Pt::uint16_t x = data->getValue<Pt::uint16_t>("x");
-            Pt::uint16_t y = data->getValue<Pt::uint16_t>("y");
+            Pt::uint16_t x = data.getValue<Pt::uint16_t>("x");
+            Pt::uint16_t y = data.getValue<Pt::uint16_t>("y");
 
             point.setX(static_cast<Pt::uint8_t>(x));
             point.setY(static_cast<Pt::uint8_t>(y));
-
-            return node;
         }
 
         /**
          * @brief deserialization BasicPoint
          */
         template <typename T>
-        inline const Pt::SerializationNode& operator>> (const Pt::SerializationNode& node,
-                                                        Pt::Math::BasicPoint<T>& point)
+        inline void get(const Pt::SerializationData& data,
+                        Pt::Math::BasicPoint<T>& point)
         {
-            const Pt::SerializationData* data = node_cast<const SerializationData*>(&node);
-            if(!data)
-                throw NoSuchEntry("Point", PT_SOURCEINFO);
-
             T x = 0, y = 0;
-            data->getValue("x", x);
-            data->getValue("y", y);
+            data.getValue("x", x);
+            data.getValue("y", y);
 
             point.setX(x);
             point.setY(y);
-
-            return node;
         }
 
         /**
@@ -275,16 +261,14 @@ namespace Pt {
          *
          */
         template <typename T>
-        inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
-                                                 const std::vector< Pt::Math::BasicPoint<T> >& points)
+        inline void set(Pt::SerializationData& data,
+                        const std::vector< Pt::Math::BasicPoint<T> >& points)
         {
             typename std::vector< Pt::Math::BasicPoint<T> >::const_iterator it;
             for(it = points.begin(); it != points.end(); ++it)
             {
-                data.addData("Point") << *it;
+                set( data.addData("Point"), *it );
             }
-
-            return data;
         }
 
         /**
@@ -292,18 +276,16 @@ namespace Pt {
          *
          */
         template <typename T>
-        inline const Pt::SerializationData& operator>>(const Pt::SerializationData& data,
-                                                       std::vector< Pt::Math::BasicPoint<T> >& points)
+        inline void get(const Pt::SerializationData& data,
+                        std::vector< Pt::Math::BasicPoint<T> >& points)
         {
             Pt::SerializationData::ConstNodeIterator it;
             for(it = data.begin(); it != data.end(); ++it)
             {
                 Pt::Math::BasicPoint<T> bp;
-                *it >> bp;
+                getType(*it, bp);
                 points.push_back(bp);
             }
-
-            return data;
         }
 
 

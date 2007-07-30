@@ -66,7 +66,7 @@ LogManager::LogManager()
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
     SettingsReader reader(ts);
     reader.read(_settings);
-    _settings.get(*this, "Pt-Log");
+    _settings.getObject( *logTarget, "Pt-Log" );
 
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
@@ -176,7 +176,8 @@ Target& LogManager::target(const std::string& name)
             _logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName << ", parent: " << foundTarget->name() << endlog;
             foundTarget = new Target(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
-            _settings.get(*foundTarget, targetName);
+
+            _settings.getObject(*foundTarget, targetName);
         }
     }
 

@@ -3,12 +3,12 @@
 
 namespace Pt {
 
-NoSuchEntry::NoSuchEntry(const std::string& name, const SourceInfo& si)
-: std::logic_error("No entry named '" + name + "'" + si)
+SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
+: std::logic_error(msg + "'" + si)
 {}
 
 
-NoSuchEntry::~NoSuchEntry() throw()
+SerializationError::~SerializationError() throw()
 {}
 
 
@@ -50,7 +50,7 @@ SerializationData::~SerializationData()
 const SerializationNode& SerializationData::getNode(size_t n) const
 {
     if( n >= _nodes.size() )
-        throw NoSuchEntry("index out of range", PT_SOURCEINFO);
+        throw SerializationError("Out of range", PT_SOURCEINFO);
 
     return *_nodes[n];
 }
@@ -65,7 +65,7 @@ const SerializationNode& SerializationData::getNode(const std::string& name) con
             return **it;
     }
 
-    throw NoSuchEntry(name, PT_SOURCEINFO);
+    throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 }
 
 
@@ -78,7 +78,7 @@ SerializationNode& SerializationData::getNode(const std::string& name)
             return **it;
     }
 
-    throw NoSuchEntry(name, PT_SOURCEINFO);
+    throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 }
 
 
@@ -147,7 +147,7 @@ const SerializationData& SerializationData::getData(const std::string& name) con
     const SerializationNode& node = this->getNode(name);
     const SerializationData* data = node_cast<const SerializationData*>(&node);
     if( !data )
-        throw NoSuchEntry(name, PT_SOURCEINFO);
+        throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 
     return *data;
 }
@@ -172,7 +172,7 @@ SerializationData& SerializationData::getData(const std::string& name)
     SerializationNode& node = this->getNode(name);
     SerializationData* data = node_cast<SerializationData*>(&node);
     if( !data )
-        throw NoSuchEntry(name, PT_SOURCEINFO);
+        throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 
     return *data;
 }
@@ -183,7 +183,7 @@ const Pt::Variant& SerializationData::getEntry(const std::string& name) const
     const SerializationNode& node = this->getNode(name);
     const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if( !entry )
-        throw NoSuchEntry(name, PT_SOURCEINFO);
+        throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 
     return entry->value();
 }
