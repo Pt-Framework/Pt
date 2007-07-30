@@ -50,7 +50,7 @@ struct ReflectableData
 {
     Methods methods;
     Properties properties;
-    std::string identifierName;
+    std::string objectName;
 };
 
 
@@ -58,14 +58,14 @@ Reflectable::Reflectable(const std::string& name)
 : _data(0)
 {
     _data = new ReflectableData();
-    _data->identifierName = name;
+    _data->objectName = name;
 }
 
 
 Reflectable::Reflectable(const Reflectable& other)
 {
     _data = new ReflectableData();
-    _data->identifierName = other._data->identifierName;
+    _data->objectName = other._data->objectName;
 }
 
 
@@ -87,9 +87,9 @@ Reflectable::~Reflectable()
 }
 
 
-const std::string& Reflectable::getIdentifierName() const
+const std::string& Reflectable::objectName() const
 {
-    return _data->identifierName;
+    return _data->objectName;
 }
 
 
@@ -102,7 +102,7 @@ Pt::Any Reflectable::property(const std::string& name) const
             return (*it)->get();
     }
 
-    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
+    throw NoSuchProperty(objectName() + "." + name, PT_SOURCEINFO);
 }
 
 
@@ -115,7 +115,7 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
             return (*it)->set(value);
     }
 
-    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
+    throw NoSuchProperty(objectName() + "." + name, PT_SOURCEINFO);
 }
 
 
@@ -147,7 +147,7 @@ PropertyInfo& Reflectable::propertyInfo(const std::string& name)
             return **it;
     }
 
-    throw NoSuchProperty(getIdentifierName() + "." + name, PT_SOURCEINFO);
+    throw NoSuchProperty(objectName() + "." + name, PT_SOURCEINFO);
 }
 
 
@@ -160,7 +160,7 @@ const CallableInfo& Reflectable::methodInfo(const std::string& name) const
             return **it;
     }
 
-    throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
+    throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
 }
 
 
@@ -173,7 +173,7 @@ CallableInfo& Reflectable::methodInfo(const std::string& name)
             return **it;
     }
 
-    throw NoSuchMethod(getIdentifierName() + "." + name, PT_SOURCEINFO);
+    throw NoSuchMethod(objectName() + "." + name, PT_SOURCEINFO);
 }
 
 
@@ -263,7 +263,7 @@ void Reflectable::registerPropertyInfo(PropertyInfo* pi)
 
 Reflectable& Reflectable::operator=(const Reflectable& other)
 {
-    _data->identifierName = other.getIdentifierName();
+    _data->objectName = other.objectName();
     return *this;
 }
 

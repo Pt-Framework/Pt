@@ -66,7 +66,7 @@ class PT_API Reflectable
     public:
         virtual ~Reflectable();
 
-        const std::string& getIdentifierName() const;
+        const std::string& objectName() const;
 
         Pt::Any property(const std::string& name) const;
 
