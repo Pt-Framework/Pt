@@ -27,14 +27,9 @@ Main LoggerTest : LoggerTest.cpp ;
 Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit DllLoggerTest ;
 Main_MakeLocate LoggerTest : $(OUTPUT_TARGET) ;
 
-
-DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt-Log ;
-
-
 # Define pseudo targets to call from projects
 NOTFILE Pt-Log-all ;
 DEPENDS Pt-Log-all : Pt-Log
                      LoggerDemo
                      LoggerTest
-#                    PropertiesArchiveTest
                      ;
