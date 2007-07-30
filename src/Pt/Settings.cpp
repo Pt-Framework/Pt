@@ -116,6 +116,22 @@ void SettingsWriter::writeChild(const SerializationData& sd)
 }
 
 
+void writeEscapedValue(std::basic_ostream<Pt::Char>& os, const Pt::String& value)
+{
+    for(size_t n = 0; n < value.size(); ++n)
+    {
+        switch( value[n].value() )
+        {
+            case '\\':
+                os << Pt::Char('\\');
+
+            default:
+                os << value[n];
+        }
+    }
+}
+
+
 void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value, const Pt::String& type)
 {
     if( type.empty() )
@@ -123,14 +139,19 @@ void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value,
         if( name.empty() == false)
             *_os << name << Pt::String(L"=");
 
-        *_os  << Pt::String(L"\"") << value << Pt::String(L"\"");
+        *_os  << Pt::String(L"\"");
+        writeEscapedValue(*_os, value);
+        *_os << Pt::String(L"\"");
+
         return;
     }
 
     if( name.empty() == false)
         *_os << name << Pt::String(L" = ");
 
-    *_os << type << Pt::String(L"(\"") << value << Pt::String(L"\")");
+    *_os << type << Pt::String(L"(\"");
+    writeEscapedValue(*_os, value);
+    *_os << Pt::String(L"\")");
 }
 
 
@@ -1077,7 +1098,7 @@ bool SettingsReader::getEscaped(Pt::String& s)
             break;
 
         default:
-            return false;
+            s += ch;
     }
 
     return true;
