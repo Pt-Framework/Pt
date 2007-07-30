@@ -85,7 +85,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 SerializationNode& insert(SerializationData& data, const Color<ARgb>& color)
 {
     SerializationNode& ret = data.addEntry( color.toHtml() );
-    ret.setTypeName(L"ARgbColor");
+    ret.setTypeName("ARgbColor");
     return ret;
 }
 

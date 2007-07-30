@@ -87,7 +87,7 @@ SerializationNode& insert(SerializationData& data, const Font& f)
        << f.direction();
 
     SerializationNode& ret = data.addEntry( ss.str() );
-    ret.setTypeName(L"Font");
+    ret.setTypeName("Font");
     return ret;
 }
 

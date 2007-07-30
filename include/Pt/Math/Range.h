@@ -113,8 +113,8 @@ namespace Pt {
                 throw NoSuchEntry("Range", PT_SOURCEINFO);
 
             T min =0, max = 0;
-            data->getValue<T>(L"min", min);
-            data->getValue<T>(L"max", max);
+            data->getValue("min", min);
+            data->getValue("max", max);
 
             r.setMin(min);
             r.setMax(max);
@@ -127,9 +127,9 @@ namespace Pt {
         inline Pt::SerializationNode& insert(Pt::SerializationData& parent, const BasicRange<T>& r)
         {
             SerializationData& data = parent.addData();
-            data.setTypeName(L"Range");
-            data.addEntry(L"min", Pt::Variant(r.min()));
-            data.addEntry(L"max", Pt::Variant(r.max()));
+            data.setTypeName("Range");
+            data.addEntry("min", Pt::Variant(r.min()));
+            data.addEntry("max", Pt::Variant(r.max()));
             return data;
         }
 

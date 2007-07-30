@@ -43,7 +43,7 @@ class PT_API Settings : public SerializationData
         void save(std::basic_ostream<Pt::Char>& is) const;
 
         template <typename T>
-        const bool get(T& type, const Pt::String& name) const
+        const bool get(T& type, const std::string& name) const
         {
             const SerializationNode* node = this->findNode(name);
             if(node == 0)
@@ -54,7 +54,7 @@ class PT_API Settings : public SerializationData
         }
 
         template <typename T>
-        const void set(const T& type, const Pt::String& name)
+        const void set(const T& type, const std::string& name)
         {
             insert( *this, type ).setName(name);
         }
@@ -75,11 +75,11 @@ class PT_API SettingsWriter
         void write(const SerializationData& sd);
 
     protected:
-        void writeParent(const SerializationData& sd, const Pt::String& prefix);
+        void writeParent(const SerializationData& sd, const std::string& prefix);
 
         void writeChild(const SerializationData& node);
 
-        void writeEntry(const Pt::String& name, const Pt::String& value, const Pt::String& type);
+        void writeEntry(const std::string& name, const Pt::String& value, const std::string& type);
 
         void writeSection(const Pt::String& prefix);
 

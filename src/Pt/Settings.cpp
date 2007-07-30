@@ -50,10 +50,11 @@ void SettingsWriter::write(const SerializationData& sd)
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             // Array types may have no instance-names
-            if( subdata->findNode(L"") )
+            if( subdata->findNode("") )
             {
-                *_os << subdata->name() << Pt::String(L" = ") << subdata->typeName() << Pt::String(L"{ ");
-                this->writeParent( *subdata, L"");
+                *_os << Pt::String::widen( subdata->name() ) << Pt::String(L" = ");
+                *_os << Pt::String::widen( subdata->typeName() ) << Pt::String(L"{ ");
+                this->writeParent( *subdata, "");
                 *_os << Pt::String(L" }") << std::endl;
                 continue;
             }
@@ -65,21 +66,21 @@ void SettingsWriter::write(const SerializationData& sd)
 }
 
 
-void SettingsWriter::writeParent(const SerializationData& sd, const Pt::String& prefix)
+void SettingsWriter::writeParent(const SerializationData& sd, const std::string& prefix)
 {
     SerializationData::ConstNodeIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if( const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
-            *_os << prefix << '.';
+            *_os << Pt::String::widen( prefix ) << '.';
             this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
             *_os << std::endl;
         }
         else if( const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
-            *_os << prefix << '.' << subdata->name() << Pt::String(L" = ");
-            *_os<< subdata->typeName() << Pt::String(L"{ ");
+            *_os << Pt::String::widen( prefix ) << '.' << Pt::String::widen( subdata->name() ) << Pt::String(L" = ");
+            *_os<< Pt::String::widen( subdata->typeName() ) << Pt::String(L"{ ");
             this->writeChild(*subdata);
             *_os << Pt::String(L" }") << std::endl;
         }
@@ -104,9 +105,9 @@ void SettingsWriter::writeChild(const SerializationData& sd)
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
             if(subdata->name().empty() == false)
-                *_os << subdata->name() << Pt::String(L" = ");
+                *_os << Pt::String::widen( subdata->name() ) << Pt::String(L" = ");
 
-            *_os << subdata->typeName() << Pt::String(L"{ ");
+            *_os << Pt::String::widen( subdata->typeName() ) << Pt::String(L"{ ");
             this->writeChild(*subdata);
             *_os << Pt::String(L" }");
         }
@@ -132,12 +133,12 @@ void writeEscapedValue(std::basic_ostream<Pt::Char>& os, const Pt::String& value
 }
 
 
-void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value, const Pt::String& type)
+void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value, const std::string& type)
 {
     if( type.empty() )
     {
         if( name.empty() == false)
-            *_os << name << Pt::String(L"=");
+            *_os << Pt::String::widen(name) << Pt::String(L"=");
 
         *_os  << Pt::String(L"\"");
         writeEscapedValue(*_os, value);
@@ -147,9 +148,9 @@ void SettingsWriter::writeEntry(const Pt::String& name, const Pt::String& value,
     }
 
     if( name.empty() == false)
-        *_os << name << Pt::String(L" = ");
+        *_os << Pt::String::widen(name) << Pt::String(L" = ");
 
-    *_os << type << Pt::String(L"(\"");
+    *_os << Pt::String::widen(type) << Pt::String(L"(\"");
     writeEscapedValue(*_os, value);
     *_os << Pt::String(L"\")");
 }
@@ -271,19 +272,19 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationData* data = _data->findData( _name.substr( 0, pos ) );
+                Pt::SerializationData* data = _data->findData( _name.substr( 0, pos ).narrow() );
                 if(data == 0)
-                    data = &( _data->addData( _name.substr( 0, pos ) ) );
+                    data = &( _data->addData( _name.substr( 0, pos ).narrow() ) );
 
                 SerializationEntry& entry = data->addEntry(_value);
-                entry.setName(_name.substr( ++pos ) );
-                entry.setTypeName(_type);
+                entry.setName(_name.substr( ++pos ).narrow() );
+                entry.setTypeName( _type.narrow() );
             }
             else
             {
                 SerializationEntry& entry = _data->addEntry(_value);
-                entry.setName(_name);
-                entry.setTypeName(_type);
+                entry.setName( _name.narrow() );
+                entry.setTypeName( _type.narrow() );
             }
 
             _type.clear();
@@ -311,9 +312,9 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationData* data = _data->findData( _prevName.substr( 0, pos ) );
+                Pt::SerializationData* data = _data->findData( _prevName.substr( 0, pos ).narrow() );
                 if(data == 0)
-                    data = &( _data->addData( _prevName.substr( 0, pos ) ) );
+                    data = &( _data->addData( _prevName.substr( 0, pos ).narrow() ) );
 
                 _data = data;
                 ++_depth;
@@ -321,12 +322,12 @@ class SettingsReader::ParseContext
                 _prevName = _prevName.substr( ++pos );
             }
 
-            Pt::SerializationData* data = _data->findData( _prevName );
+            Pt::SerializationData* data = _data->findData( _prevName.narrow() );
             if(data == 0 || _depth != 0)
-                data = &( _data->addData( _prevName ) );
+                data = &( _data->addData( _prevName.narrow() ) );
 
             _data = data;
-            _data->setTypeName(_prevType);
+            _data->setTypeName(_prevType.narrow());
             ++_depth;
         }
 
@@ -808,13 +809,14 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
         return;
     }
 
-    if(Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n')  )
-    {
-        return;
-    }
-
     switch( ch.value() )
     {
+        case '\n':
+        case '\r':
+        case '\t':
+        case ' ':
+            break;    
+            
         case '"':
             _parse = &SettingsReader::parseQuotedValue;
             break;

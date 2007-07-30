@@ -69,16 +69,16 @@ class PT_API SerializationNode
         Category category() const
         { return _category; }
 
-        const Pt::String& name() const
+        const std::string& name() const
         { return _name; }
 
-        void setName(const Pt::String& name)
+        void setName(const std::string& name)
         { _name = name; }
 
-        const Pt::String& typeName() const
+        const std::string& typeName() const
         { return _type; }
 
-        void setTypeName(const Pt::String& type)
+        void setTypeName(const std::string& type)
         { _type = type; }
 
         SerializationData* parent()
@@ -90,9 +90,6 @@ class PT_API SerializationNode
         bool operator< (const SerializationNode& other) const
         { return this->name() < other.name(); }
 
-        bool operator< (const Pt::String& other) const
-        { return this->name() < other; }
-
         bool operator!= (const SerializationNode& other) const
         { return this->name() != other.name(); }
 
@@ -102,7 +99,7 @@ class PT_API SerializationNode
         , _category(cat)
         {}
 
-        SerializationNode(Category cat, SerializationData* parent, const Pt::String& name)
+        SerializationNode(Category cat, SerializationData* parent, const std::string& name)
         : _parent(parent)
         , _category(cat)
         , _name(name)
@@ -111,8 +108,8 @@ class PT_API SerializationNode
     private:
         SerializationData* _parent;
         Category _category;
-        Pt::String _name;
-        Pt::String _type;
+        std::string _name;
+        std::string _type;
 };
 
 
@@ -160,7 +157,7 @@ class PT_API SerializationEntry : public SerializationNode
             and the name \a name. Client code does not need to create entries,
             but call SerializationData::addEntry to add attributes to object data.
         */
-        SerializationEntry(SerializationData& parent, const Pt::String& name);
+        SerializationEntry(SerializationData& parent, const std::string& name);
 
         /** @brief Construct with parent node, name and value
 
@@ -169,7 +166,7 @@ class PT_API SerializationEntry : public SerializationNode
             to create entries, but call SerializationData::addEntry to add
             attributes to object data.
         */
-        SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value);
+        SerializationEntry(SerializationData& parent, const std::string& name, const Pt::Variant& value);
 
         //! @brief Destructor
         ~SerializationEntry()
@@ -252,7 +249,7 @@ class PT_API SerializationData : public SerializationNode
             Constructs a SerializationData which is the child of \a parent.
             If \a parent is null, this will be a root node.
         */
-        SerializationData(SerializationData* parent, const Pt::String& name);
+        SerializationData(SerializationData* parent, const std::string& name);
 
         //! @brief Destructor
         ~SerializationData();
@@ -261,7 +258,7 @@ class PT_API SerializationData : public SerializationNode
         { return _nodes.size(); }
 
         template <typename T>
-        T getValue(const Pt::String& name) const
+        T getValue(const std::string& name) const
         {
             T value;
             const Variant& v = this->getEntry(name);
@@ -273,7 +270,7 @@ class PT_API SerializationData : public SerializationNode
         }
 
         template <typename T>
-        void getValue(const Pt::String& name, T& type) const
+        void getValue(const std::string& name, T& type) const
         {
             const Variant& v = this->getEntry(name);
             bool success = v.get(type);
@@ -283,20 +280,20 @@ class PT_API SerializationData : public SerializationNode
 
         const SerializationNode& getNode(size_t n) const;
 
-        const SerializationNode& getNode(const Pt::String& name) const;
+        const SerializationNode& getNode(const std::string& name) const;
 
-        const SerializationNode* findNode(const Pt::String& name) const;
+        const SerializationNode* findNode(const std::string& name) const;
 
-        SerializationNode* findNode(const Pt::String& name);
+        SerializationNode* findNode(const std::string& name);
 
-        SerializationNode& getNode(const Pt::String& name);
+        SerializationNode& getNode(const std::string& name);
 
         /** @brief Add subdata as a child
 
             A new SerializationData node will be created as a child of this
             node. A reference to the created SerializationData is returned.
         */
-        SerializationData& addData(const Pt::String& name);
+        SerializationData& addData(const std::string& name);
 
         /** @brief Add subdata as a child
 
@@ -311,42 +308,42 @@ class PT_API SerializationData : public SerializationNode
             SerializationData child node with the name \a name. Otherwise
             an exception is thrown.
         */
-        const SerializationData& getData(const Pt::String& name) const;
+        const SerializationData& getData(const std::string& name) const;
 
         /** @brief Find object data by name
 
             This method returns the object data, if this node has a
             SerializationData child node with the name \a name
         */
-        const SerializationData* findData(const Pt::String& name) const;
+        const SerializationData* findData(const std::string& name) const;
 
         /** @brief Find object data by name
 
             This method returns the object data, if this node has a
             SerializationData child node with the name \a name
         */
-        SerializationData* findData(const Pt::String& name);
+        SerializationData* findData(const std::string& name);
 
         /** @brief Find object data by name
 
             This method returns the object data, if this node has a
             SerializationData child node with the name \a name
         */
-        SerializationData& getData(const Pt::String& name);
+        SerializationData& getData(const std::string& name);
 
         /** @brief Find object attribute by name
 
             This method returns the object attribute, if this node has a
             SerializationEntry child node with the name \a name
         */
-        const Pt::Variant& getEntry(const Pt::String& name) const;
+        const Pt::Variant& getEntry(const std::string& name) const;
 
         /** @brief Add object attribute
 
             A new SerializationEntry node will be created and added as a
             child of this node.
         */
-        void addEntry(const Pt::String& name, const Pt::Variant& value);
+        void addEntry(const std::string& name, const Pt::Variant& value);
 
         /** @brief Add object attribute
 

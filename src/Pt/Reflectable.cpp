@@ -279,7 +279,7 @@ const SerializationNode& operator>>(const SerializationNode& node, Reflectable& 
     {
         Pt::String propName = Pt::String::widen( it->name() );
         try {
-            it->set( data->getNode(propName) );
+            it->set( data->getNode( it->name() ) );
         }
         catch(...)
         { }
@@ -296,7 +296,7 @@ SerializationData& operator<<(SerializationData& data, const Reflectable& r)
     {
         Pt::String propName = Pt::String::widen( it->name() );
         SerializationNode& added = it->get(data);
-        added.setName(propName);
+        added.setName( it->name() );
     }
 
     return data;

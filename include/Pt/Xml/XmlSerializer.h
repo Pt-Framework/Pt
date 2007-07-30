@@ -27,15 +27,15 @@ namespace Xml {
                 method attach().
             */
             XmlSerializer();
-            
+
             /** @brief Construct a serializer writing to a byte stream
 
                 The serializer will write the objects as XML with
                 UTF-8 encoding to the output stream.
             */
             XmlSerializer(std::ostream& os);
-            
-            
+
+
             /** @brief Construct a serializer writing to the given XmlWriter object
 
                 The serializer will write the objects to the given XmlWriter object.
@@ -43,15 +43,15 @@ namespace Xml {
                 responsible to free it if needed.
             */
             XmlSerializer(XmlWriter* writer);
-            
+
             //! @brief Destructor
             ~XmlSerializer();
 
             /** @brief Opens this serializer for writing into the given stream.
-            
+
                 The serializer will write the objects as XML with
                 UTF-8 encoding to the output stream.
-                
+
                 This method does not have to be called if this XmlSerializer object
                 was constructed using the constructor that takes an ostream or
                 XmlWriter object. If this method is called anyway or called twice an
@@ -60,9 +60,9 @@ namespace Xml {
             void attach(std::ostream& os);
 
             /** @brief Opens this serializer for writing into the given XmlWriter object.
-            
+
                 The serializer will write the objects to the given XmlWriter object.
-                
+
                 This method does not have to be called if this XmlSerializer object
                 was constructed using the constructor that takes an ostream or
                 XmlWriter object. If this method is called anyway or called twice an
@@ -74,7 +74,7 @@ namespace Xml {
             void attach(XmlWriter* writer);
 
             /** @brief Detaches the currently set writer from this object.
-            
+
                 Before detaching the writer, the underlaying stream is flushed.
                 If there is no currently set writer, nothing happens.
             */
@@ -95,7 +95,7 @@ namespace Xml {
                 root element. The type must be serializable.
             */
             template <typename T>
-            void serialize(const T& type, const Pt::String& name)
+            void serialize(const T& type, const std::string& name)
             {
                 SerializationData data(0, name);
                 data << type;

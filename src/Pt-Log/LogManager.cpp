@@ -19,6 +19,7 @@
 #include "LogManager.h"
 #include "Message.h"
 #include "ConsoleChannel.h"
+#include "FileChannel.h"
 #include "SerialChannel.h"
 #include "Pt/Exception.h"
 #include "Pt/System/MutexLock.h"
@@ -31,6 +32,7 @@
 
 
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
+static Pt::System::BasicPlugin<Pt::Log::FileChannel, Pt::Log::Channel> filePlugin("file", "0.0.1");
 static Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> serialPlugin("comm", "0.0.1");
 
 
@@ -45,6 +47,7 @@ LogManager::LogManager()
 {
     // builtin plugins
     _pluginManager.registerPlugin( consolePlugin );
+    _pluginManager.registerPlugin( filePlugin );
     _pluginManager.registerPlugin( serialPlugin );
 
     // root of the target hierachy
@@ -61,10 +64,11 @@ LogManager::LogManager()
     // initialise properties
     std::ifstream fs("Pt-Log.properties");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    _settings.load(ts);
-    _settings.get(*this, L"Pt-Log");
+    SettingsReader reader(ts);
+    reader.read(_settings);
+    _settings.get(*this, "Pt-Log");
 
-    _logger->info(PT_SOURCEINFO) << "Logging system initialized" << endlog;
+    _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
     logger.release();
     logTarget.release();
@@ -172,12 +176,7 @@ Target& LogManager::target(const std::string& name)
             _logger->beginLog(PT_SOURCEINFO) << info << "New target: " << targetName << ", parent: " << foundTarget->name() << endlog;
             foundTarget = new Target(targetName, foundTarget);
             _targetMap[targetName] = foundTarget;
-
-            Pt::String str;
-            for(size_t n = 0; n < targetName.size(); ++n)
-                str += Pt::Char( targetName[n] );
-
-            _settings.get(*foundTarget, str);
+            _settings.get(*foundTarget, targetName);
         }
     }
 

@@ -107,7 +107,7 @@ SerializationNode& insert(SerializationData& data, const Pen& pen)
        << pen.style();
 
     SerializationNode& ret = data.addEntry( ss.str() );
-    ret.setTypeName(L"Pen");
+    ret.setTypeName("Pen");
     return ret;
 }
 

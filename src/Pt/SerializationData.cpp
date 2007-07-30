@@ -1,39 +1,6 @@
 #include <Pt/SerializationData.h>
 
 
-namespace {
-
-template<typename ForwardIter, typename T>
-ForwardIter lowerBound(ForwardIter first, ForwardIter last, const T& val)
-{
-    typedef typename std::iterator_traits<ForwardIter>::value_type _ValueType;
-    typedef typename std::iterator_traits<ForwardIter>::difference_type _DistanceType;
-
-    _DistanceType len = distance(first, last);
-    _DistanceType half;
-    ForwardIter middle;
-
-    while(len > 0)
-    {
-        half = len >> 1;
-        middle = first;
-        advance(middle, half);
-        if (*middle < val)
-        {
-            first = middle;
-            ++first;
-            len = len - half - 1;
-        }
-        else
-            len = half;
-    }
-
-    return first;
-}
-
-}
-
-
 namespace Pt {
 
 NoSuchEntry::NoSuchEntry(const std::string& name, const SourceInfo& si)
@@ -47,12 +14,12 @@ NoSuchEntry::~NoSuchEntry() throw()
 
 
 
-SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name)
+SerializationEntry::SerializationEntry(SerializationData& parent, const std::string& name)
 : SerializationNode(SerializationNode::Value, &parent, name)
 {}
 
 
-SerializationEntry::SerializationEntry(SerializationData& parent, const Pt::String& name, const Pt::Variant& value)
+SerializationEntry::SerializationEntry(SerializationData& parent, const std::string& name, const Pt::Variant& value)
 : SerializationNode(SerializationNode::Value, &parent, name)
 , _value(value)
 {}
@@ -65,7 +32,7 @@ SerializationData::SerializationData(SerializationData* parent)
 {}
 
 
-SerializationData::SerializationData(SerializationData* parent, const Pt::String& name)
+SerializationData::SerializationData(SerializationData* parent, const std::string& name)
 : SerializationNode(SerializationNode::Object, parent, name)
 {}
 
@@ -89,38 +56,38 @@ const SerializationNode& SerializationData::getNode(size_t n) const
 }
 
 
-const SerializationNode& SerializationData::getNode(const Pt::String& name) const
+const SerializationNode& SerializationData::getNode(const std::string& name) const
 {
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name)
+        if( (*it)->name() == name )
             return **it;
     }
 
-    throw NoSuchEntry(name.narrow(), PT_SOURCEINFO);
+    throw NoSuchEntry(name, PT_SOURCEINFO);
 }
 
 
-SerializationNode& SerializationData::getNode(const Pt::String& name)
+SerializationNode& SerializationData::getNode(const std::string& name)
 {
     Nodes::iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name)
+        if( (*it)->name() == name )
             return **it;
     }
 
-    throw NoSuchEntry(name.narrow(), PT_SOURCEINFO);
+    throw NoSuchEntry(name, PT_SOURCEINFO);
 }
 
 
-const SerializationNode* SerializationData::findNode(const Pt::String& name) const
+const SerializationNode* SerializationData::findNode(const std::string& name) const
 {
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name)
+        if( (*it)->name() == name )
             return *it;
     }
 
@@ -128,12 +95,12 @@ const SerializationNode* SerializationData::findNode(const Pt::String& name) con
 }
 
 
-SerializationNode* SerializationData::findNode(const Pt::String& name)
+SerializationNode* SerializationData::findNode(const std::string& name)
 {
     Nodes::iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name)
+        if( (*it)->name() == name )
             return *it;
     }
 
@@ -141,7 +108,7 @@ SerializationNode* SerializationData::findNode(const Pt::String& name)
 }
 
 
-void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& value)
+void SerializationData::addEntry(const std::string& name, const Pt::Variant& value)
 {
     //std::cerr << "entry: " << name.narrow() << std::endl;
     SerializationEntry* entry = new SerializationEntry(*this, name, value);
@@ -152,13 +119,13 @@ void SerializationData::addEntry(const Pt::String& name, const Pt::Variant& valu
 SerializationEntry& SerializationData::addEntry(const Pt::Variant& value)
 {
     //std::cerr << "entry: " << std::endl;
-    SerializationEntry* entry = new SerializationEntry(*this, Pt::String(), value);
+    SerializationEntry* entry = new SerializationEntry(*this, "", value);
     _nodes.push_back(entry);
     return *entry;
 }
 
 
-SerializationData& SerializationData::addData(const Pt::String& name)
+SerializationData& SerializationData::addData(const std::string& name)
 {
     //std::cerr << "data: " << name.narrow() << std::endl;
     SerializationData* data = new SerializationData(this, name);
@@ -175,48 +142,48 @@ SerializationData& SerializationData::addData()
     return *data;
 }
 
-const SerializationData& SerializationData::getData(const Pt::String& name) const
+const SerializationData& SerializationData::getData(const std::string& name) const
 {
     const SerializationNode& node = this->getNode(name);
     const SerializationData* data = node_cast<const SerializationData*>(&node);
     if( !data )
-        throw NoSuchEntry(name.narrow(), PT_SOURCEINFO);
+        throw NoSuchEntry(name, PT_SOURCEINFO);
 
     return *data;
 }
 
 
-const SerializationData* SerializationData::findData(const Pt::String& name) const
+const SerializationData* SerializationData::findData(const std::string& name) const
 {
     const SerializationNode* node = this->findNode(name);
     return node_cast<const SerializationData*>(node);
 }
 
 
-SerializationData* SerializationData::findData(const Pt::String& name)
+SerializationData* SerializationData::findData(const std::string& name)
 {
     SerializationNode* node = this->findNode(name);
     return node_cast<SerializationData*>(node);
 }
 
 
-SerializationData& SerializationData::getData(const Pt::String& name)
+SerializationData& SerializationData::getData(const std::string& name)
 {
     SerializationNode& node = this->getNode(name);
     SerializationData* data = node_cast<SerializationData*>(&node);
     if( !data )
-        throw NoSuchEntry(name.narrow(), PT_SOURCEINFO);
+        throw NoSuchEntry(name, PT_SOURCEINFO);
 
     return *data;
 }
 
 
-const Pt::Variant& SerializationData::getEntry(const Pt::String& name) const
+const Pt::Variant& SerializationData::getEntry(const std::string& name) const
 {
     const SerializationNode& node = this->getNode(name);
     const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if( !entry )
-        throw NoSuchEntry(name.narrow(), PT_SOURCEINFO);
+        throw NoSuchEntry(name, PT_SOURCEINFO);
 
     return entry->value();
 }

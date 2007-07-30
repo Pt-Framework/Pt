@@ -74,7 +74,7 @@ void XmlSerializer::putData(const SerializationData& data)
     if (!_writer)
         throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
 
-    _writer->writeStartElement( data.name() );
+    _writer->writeStartElement( Pt::String::widen( data.name() ) );
     this->writeData(data);
     _writer->writeEndElement();
 }
@@ -90,11 +90,11 @@ void XmlSerializer::writeData(const SerializationData& data)
     {
         if(const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
-            _writer->writeElement( entry->name(), entry->value().str() );
+            _writer->writeElement( Pt::String::widen( entry->name() ), entry->value().str() );
         }
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
-            _writer->writeStartElement( subdata->name() );
+            _writer->writeStartElement( Pt::String::widen( subdata->name() ) );
             this->writeData( *subdata );
             _writer->writeEndElement();
         }

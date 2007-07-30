@@ -226,11 +226,11 @@ const SerializationNode& operator>>(const SerializationNode& node, DateTime& dat
         throw NoSuchEntry("DateTime", PT_SOURCEINFO);
 
     Date date(1,1,1);
-    data->getNode(L"date") >> date;
+    data->getNode("date") >> date;
     datetime.setDate(date);
 
     Time time;
-    data->getNode(L"time") >> time;
+    data->getNode("time") >> time;
     datetime.setTime(time);
 
     return node;
@@ -239,10 +239,10 @@ const SerializationNode& operator>>(const SerializationNode& node, DateTime& dat
 
 SerializationData& operator<<(SerializationData& data, const DateTime& datetime)
 {
-    SerializationData& dateData = data.addData(L"date");
+    SerializationData& dateData = data.addData("date");
     dateData << datetime.date();
 
-    SerializationData& timeData = data.addData(L"time");
+    SerializationData& timeData = data.addData("time");
     timeData << datetime.time();
 
     return data;

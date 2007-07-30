@@ -43,7 +43,7 @@ const ARgbImage& Brush::texture() const
 SerializationNode& insert(SerializationData& data, const Brush& brush)
 {
     SerializationNode& ret = data.addEntry( brush.color().toHtml() );
-    ret.setTypeName(L"Brush");
+    ret.setTypeName("Brush");
     return ret;
 }
 

@@ -211,9 +211,9 @@ namespace Pt {
         inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
                                                  const Pt::Math::BasicPoint<Pt::uint8_t>& point)
         {
-            data.addEntry(L"x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
-            data.addEntry(L"y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
-            data.setTypeName(L"Point");
+            data.addEntry("x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
+            data.addEntry("y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
+            data.setTypeName("Point");
             return data;
         }
 
@@ -224,9 +224,9 @@ namespace Pt {
         inline Pt::SerializationData& operator<<(Pt::SerializationData& data,
                                                  const Pt::Math::BasicPoint<T>& point)
         {
-            data.addEntry(L"x", Pt::Variant(point.x()));
-            data.addEntry(L"y", Pt::Variant(point.y()));
-            data.setTypeName(L"Point");
+            data.addEntry("x", Pt::Variant(point.x()));
+            data.addEntry("y", Pt::Variant(point.y()));
+            data.setTypeName("Point");
             return data;
         }
 
@@ -240,8 +240,8 @@ namespace Pt {
             if(!data)
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
-            Pt::uint16_t x = data->getValue<Pt::uint16_t>(L"x");
-            Pt::uint16_t y = data->getValue<Pt::uint16_t>(L"y");
+            Pt::uint16_t x = data->getValue<Pt::uint16_t>("x");
+            Pt::uint16_t y = data->getValue<Pt::uint16_t>("y");
 
             point.setX(static_cast<Pt::uint8_t>(x));
             point.setY(static_cast<Pt::uint8_t>(y));
@@ -261,8 +261,8 @@ namespace Pt {
                 throw NoSuchEntry("Point", PT_SOURCEINFO);
 
             T x = 0, y = 0;
-            data->getValue(L"x", x);
-            data->getValue(L"y", x);
+            data->getValue("x", x);
+            data->getValue("y", y);
 
             point.setX(x);
             point.setY(y);
@@ -281,7 +281,7 @@ namespace Pt {
             typename std::vector< Pt::Math::BasicPoint<T> >::const_iterator it;
             for(it = points.begin(); it != points.end(); ++it)
             {
-                data.addData(L"Point") << *it;
+                data.addData("Point") << *it;
             }
 
             return data;

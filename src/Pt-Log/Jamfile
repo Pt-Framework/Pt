@@ -1,16 +1,17 @@
 SubDir TOP src Pt-Log ;
-
 SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_LOG_API_EXPORT ] ;
 
-SharedLibrary Pt-Log : ConsoleChannel.cpp
-                       Logger.cpp
-                       LogManager.cpp
-                       Message.cpp
-                       SerialChannel.cpp
-                       Target.cpp
-                       ;
+PT_LOG_SOURCES = ConsoleChannel.cpp
+                 FileChannel.cpp
+                 Logger.cpp
+                 LogManager.cpp
+                 Message.cpp
+                 SerialChannel.cpp
+                 Target.cpp
+                 ;
 
+SharedLibrary Pt-Log : $(PT_LOG_SOURCES) ; 
 SharedLibrary_LinkSharedLibraries Pt-Log : Pt Pt-Text Pt-System ;
 SharedLibrary_MakeLocate Pt-Log : $(OUTPUT_TARGET) ;
 
@@ -19,9 +20,21 @@ SharedLibrary_LinkSharedLibraries DllLoggerTest : Pt Pt-Text Pt-Log ;
 SharedLibrary_MakeLocate DllLoggerTest : $(OUTPUT_TARGET) ;
 
 Main LoggerDemo : LoggerDemo.cpp ;
-Main_LinkSharedLibraries LoggerDemo : Pt Pt-Log Pt-Text Pt-System ;
+Main_LinkSharedLibraries LoggerDemo : Pt Pt-Text Pt-System Pt-Log ;
 Main_MakeLocate LoggerDemo : $(OUTPUT_TARGET) ;
 
 Main LoggerTest : LoggerTest.cpp ;
 Main_LinkSharedLibraries LoggerTest : Pt Pt-Log Pt-Text Pt-System Pt-Unit DllLoggerTest ;
 Main_MakeLocate LoggerTest : $(OUTPUT_TARGET) ;
+
+
+DeploySharedLibrary $(DEPLOY_LIBDIR) : Pt-Log ;
+
+
+# Define pseudo targets to call from projects
+NOTFILE Pt-Log-all ;
+DEPENDS Pt-Log-all : Pt-Log
+                     LoggerDemo
+                     LoggerTest
+#                    PropertiesArchiveTest
+                     ;

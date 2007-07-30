@@ -65,11 +65,11 @@ class SettingsTest : public Pt::Unit::TestSuite
             //settings.save(sout);
             //std::cerr << "\n" << sout.str().narrow() << std::endl;
 
-            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d") )
-            const Pt::Variant& s = settings.findData(L"a.b.c.d")->getEntry(L"v");
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d") )
+            const Pt::Variant& s = settings.findData("a.b.c.d")->getEntry("v");
             PT_UNIT_ASSERT( s == L"3")
 
-            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"u") == L"4")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u") == L"4")
         }
 
         void PlainQoutedValue()
@@ -84,8 +84,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"v") == L";34")
-            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"u") == L"34")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("v") == L";34")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u") == L"34")
         }
 
         void PlainArray()
@@ -101,10 +101,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             Pt::String concat;
-            const Pt::SerializationData* a = settings.findData(L"a.b");
+            const Pt::SerializationData* a = settings.findData("a.b");
             PT_UNIT_ASSERT(a)
 
-            a = a->findData(L"c");
+            a = a->findData("c");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
@@ -116,10 +116,10 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             concat.clear();
 
-            a = settings.findData(L"g.h");
+            a = settings.findData("g.h");
             PT_UNIT_ASSERT(a)
 
-            a = a->findData(L"i");
+            a = a->findData("i");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
@@ -143,10 +143,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             Pt::String concat;
-            const Pt::SerializationData* a = settings.findData(L"a.b");
+            const Pt::SerializationData* a = settings.findData("a.b");
             PT_UNIT_ASSERT(a)
 
-            a = a->findData(L"c");
+            a = a->findData("c");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
@@ -158,10 +158,10 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             concat.clear();
 
-            a = settings.findData(L"g.h");
+            a = settings.findData("g.h");
             PT_UNIT_ASSERT(a)
 
-            a = a->findData(L"i");
+            a = a->findData("i");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
@@ -183,16 +183,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             Pt::String concat;
-            const Pt::SerializationData* data = settings.findData(L"a.b");
+            const Pt::SerializationData* data = settings.findData("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findData(L"c");
+            data = data->findData("c");
             PT_UNIT_ASSERT( data )
 
-            PT_UNIT_ASSERT( data->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( L"e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
 
-            data = data->findData( L"f" );
+            data = data->findData( "f" );
             PT_UNIT_ASSERT( data )
 
             for( Pt::SerializationData::ConstNodeIterator it = data->begin(); it != data->end(); ++it)
@@ -255,16 +255,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationData* data = settings.findData(L"a.b");
+            const Pt::SerializationData* data = settings.findData("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findData(L"c");
+            data = data->findData("c");
             PT_UNIT_ASSERT( data )
-            PT_UNIT_ASSERT( data->typeName() == L"List" )
+            PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( L"e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( L"f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
         }
 
         void SimpleTypedQuotedList()
@@ -277,16 +277,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationData* data = settings.findData(L"a.b");
+            const Pt::SerializationData* data = settings.findData("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findData(L"c");
+            data = data->findData("c");
             PT_UNIT_ASSERT( data )
-            PT_UNIT_ASSERT( data->typeName() == L"List" )
+            PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( L"e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( L"f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
         }
 
         void SimpleList()
@@ -299,15 +299,15 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationData* data = settings.findData(L"a.b");
+            const Pt::SerializationData* data = settings.findData("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findData(L"c");
+            data = data->findData("c");
             PT_UNIT_ASSERT( data )
-            PT_UNIT_ASSERT( data->typeName() == L"List" )
-            PT_UNIT_ASSERT( data->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( L"e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( L"f" ) == L"3" )
+            PT_UNIT_ASSERT( data->typeName() == "List" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
         }
 
         void SimpleQoutedList()
@@ -320,16 +320,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationData* data = settings.findData(L"a.b");
+            const Pt::SerializationData* data = settings.findData("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findData(L"c");
+            data = data->findData("c");
             PT_UNIT_ASSERT( data )
-            PT_UNIT_ASSERT( data->typeName() == L"List" )
+            PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( L"e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( L"f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
         }
 
         void QoutedComplexType()
@@ -343,16 +343,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             Pt::String concat;
-            const Pt::SerializationData* a = settings.findData(L"a.b");
+            const Pt::SerializationData* a = settings.findData("a.b");
             PT_UNIT_ASSERT( a )
 
-            a = a->findData(L"c");
+            a = a->findData("c");
             PT_UNIT_ASSERT( a )
 
-            PT_UNIT_ASSERT( a->getEntry( L"d" ) == L"1" )
-            PT_UNIT_ASSERT( a->getEntry( L"e" ) == L"22" )
+            PT_UNIT_ASSERT( a->getEntry( "d" ) == L"1" )
+            PT_UNIT_ASSERT( a->getEntry( "e" ) == L"22" )
 
-            a = a->findData( L"f" );
+            a = a->findData( "f" );
             PT_UNIT_ASSERT( a )
 
             for( Pt::Settings::ConstNodeIterator it = a->begin(); it != a->end(); ++it)

@@ -239,10 +239,10 @@ const SerializationNode& operator>>(const SerializationNode& node, Time& time)
     if(data == 0)
         throw NoSuchEntry("date", PT_SOURCEINFO);
 
-    unsigned hour = data->getValue<unsigned>(L"hour");
-    unsigned min = data->getValue<unsigned>(L"minute");
-    unsigned sec = data->getValue<unsigned>(L"second");
-    unsigned msec = data->getValue<unsigned>(L"millisec");
+    unsigned hour = data->getValue<unsigned>("hour");
+    unsigned min = data->getValue<unsigned>("minute");
+    unsigned sec = data->getValue<unsigned>("second");
+    unsigned msec = data->getValue<unsigned>("millisec");
 
     time.set(hour, min, sec, msec);
     return node;
@@ -258,10 +258,10 @@ SerializationData& operator<<(SerializationData& data, const Time& time)
 
     time.get(hour, min, sec, msec);
 
-    data.addEntry(L"hour", Variant(hour) );
-    data.addEntry(L"minute", Variant(min) );
-    data.addEntry(L"second", Variant(sec) );
-    data.addEntry(L"millisec", Variant(msec) );
+    data.addEntry("hour", Variant(hour) );
+    data.addEntry("minute", Variant(min) );
+    data.addEntry("second", Variant(sec) );
+    data.addEntry("millisec", Variant(msec) );
 
     return data;
 }
