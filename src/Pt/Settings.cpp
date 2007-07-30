@@ -774,11 +774,13 @@ void SettingsReader::afterValue(const Pt::Char& ch, ParseContext& context)
 
 void SettingsReader::parseQuotedValue(const Pt::Char& ch, ParseContext& context)
 {
-    if( ch == eof || ch == Pt::Char(L'\n') || ch == Pt::Char(L'\r') )
-        throw ParseError("Expected closing \" token", context.line());
-
     switch( ch.value() )
     {
+        case Pt::uint32_t(-1):
+        case '\n':
+        case '\r':
+            throw ParseError("Expected closing \" token", context.line());
+        
         case '\\':
         {
             bool success = this->getEscaped( context.value() );
