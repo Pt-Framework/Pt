@@ -18,89 +18,25 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TextProtocol.h>
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf8Codec.h"
-#include "Pt/Settings.h"
-
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 
-namespace Pt {
-
-namespace Unit {
-
-
-/*const Archive& operator>>(const Archive& ar, TextProtocol& suite)
-{
-    return ar;
-}*/
-
-/*
-MyTest.property1 = 5
-MyTest.property2 = Hello
-
-[ MyTest.protocol.tests.testMethod1 ]
-arg = 10
-
-# Should this create a new testMethod1 Archive?
-[ MyTest.protocol.tests.testMethod1 ]
-arg = 20
-*/
-
-//void TextProtocol::run(Pt::Unit::TestSuite& suite)
-//{
-/* 
-    std::ifstream file(_path.c_str());
-
-    if( ! file )
-    {
-        throw std::logic_error(_path + " not found" + PT_SOURCEINFO);
-    }
-
-    Text::TextIStream ts(file, new Pt::Text::Utf8Codec);
-    PropertiesReader reader(ts);
-
-    PropertiesArchive archive;
-    reader.read(archive);
-
-    // extract the suite itself
-    Pt::String suiteName = Pt::String::widen( suite.name() );
-    archive.extract( suite, suiteName );
-
-    // extract this protocol as element of the test
-    const Archive* protocol = archive.getArchive(suiteName);
-    if( ! protocol )
-        return;
-
-    protocol = archive.getArchive(L"protocol");
-    if( ! protocol )
-        return;
-
-    Archive::ConstIterator it = protocol->begin();
-    for( ; it != protocol->end(); ++it )
-    {
-        
-    }
-*/
-//}
-
-//} // namespace Unit
-
-//} // namespace Pt
-
+using namespace Pt;
+using namespace Unit;
 
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
-    std::ifstream iniFile(_path.c_str());
+    std::ifstream iniFile(m_iniFileName.c_str());
     std::string line;
     std::string lineBuffer;
     int lineNumber = 0;
 
     if(!iniFile)
     {
-        throw std::logic_error("Test protocol "  + _path + " not found" + PT_SOURCEINFO);
+        throw std::logic_error("Test protocol "  + m_iniFileName + " not found" + PT_SOURCEINFO);
     }
 
     while(getline(iniFile, line))
@@ -155,14 +91,13 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             continue;
         }
 
+
         std::stringstream lineReader(lineBuffer);
         lineBuffer.clear();
         std::string token;
         std::string propertyName;
         std::string methodName;
         std::string paramType;
-        Pt::Any value;
-        //Pt::Args args;
 
         lineReader >> token;
 
@@ -171,51 +106,78 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         {
             lineReader >> propertyName;
 
-            // old code
             //value.init(suite.property(propertyName).typeName());
             //lineReader >> value;
-
-            //std::string typeName = suite.property(propertyName).typeName();
-            //value = AnyFactory::create(typeName, lineReader);
-
             //suite.setProperty(propertyName, value);
+
+            char ch;
+            lineReader >> ch;
+            if(ch == '"')
+            {
+                std::getline(lineReader, token, '"');
+            }
+            else
+            {
+                token.clear();
+                lineReader >> token;
+                token = ch + token;
+            }
+
+            //std::cerr << "Property:" << propertyName << " : " << token << std::endl;
+            Pt::PropertyInfo& pi = suite.propertyInfo(propertyName);
+
+            Pt::SerializationData sd;
+            SerializationEntry& entry = sd.addEntry( Pt::Variant(token) );
+            pi.set(entry);
         }
         // method line
         else if(token.compare("method") == 0)
         {
             lineReader >> methodName;
 
-            Settings ar;
+            SerializationData sd;
             while(getline(lineReader, paramType, ':'))
             {
-                paramType.erase( 0, paramType.find_first_not_of(", \t") );
+                ///paramType.erase(0, paramType.find_first_not_of(", \t"));
+                ///value.init(paramType);
+                ///lineReader >> value;
+                ///args.push_back(value);
 
-                // old code
-                //value.init(paramType);
-                //lineReader >> value;
+                char ch;
+                lineReader >> ch;
+                if(ch == '"')
+                {
+                    std::getline(lineReader, token, '"');
+                }
+                else
+                {
+                    token.clear();
+                    char next = lineReader.peek();
+                    if( std::isspace(next) )
+                    {
+                        token += ch;
 
-                // TODO: use reflection to get paramType instead of writing
-                // the type in the file
-                //value = AnyFactory::create(paramType, lineReader);
-                //args.push_back(value);
+                    }
+                    else
+                    {
+                        lineReader >> token;
+                        token = ch + token;
+                    }
+                }
 
-                std::string value;
-                lineReader >> value;
-                //ar.addEntry( Pt::String(L"arg"), Pt::Variant(value) );
+                //std::cerr << "arg:" << token << std::endl;
+                sd.addEntry( "arg", Pt::Variant(token) );
             }
 
-            //suite.runTest(methodName, ar);
+            ///suite.runTest(methodName, args);
+            suite.runTest(methodName, sd);
         }
         // unknown command
         else
         {
             std::stringstream msg;
-            msg << "Invalid protocol format in " << _path << ", line " << lineNumber << ": " << token;
+            msg << "Invalid protocol format in " << m_iniFileName << ", line " << lineNumber << ": " << token;
             throw std::logic_error(msg.str() + PT_SOURCEINFO);
         }
     }
-}
-
-}
-
 }

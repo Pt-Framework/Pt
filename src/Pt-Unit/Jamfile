@@ -12,7 +12,6 @@ PT_UNIT_SOURCES = Application.cpp
                   TestContext.cpp
                   TestProtocol.cpp
                   TestSuite.cpp
-                  TextProtocol.cpp
                  ;
 
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
