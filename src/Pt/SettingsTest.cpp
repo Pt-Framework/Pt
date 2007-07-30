@@ -24,7 +24,6 @@
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
@@ -35,9 +34,9 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            /*Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
+            //Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
-            */
+
             //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
             /*Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
             Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
@@ -77,7 +76,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         {
             std::stringstream ss;
             ss << "[a.b.c ]\n";
-            ss << "d.v = \"3\" \n \"4\"\n";
+            ss << "d.v = \";3\" \n \"4\"\n";
             ss << "d.u = \"3\" \n \"4\"\n";
 
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
@@ -85,7 +84,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"v") == L"34")
+            PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"v") == L";34")
             PT_UNIT_ASSERT( settings.findData(L"a.b.c.d")->getEntry(L"u") == L"34")
         }
 

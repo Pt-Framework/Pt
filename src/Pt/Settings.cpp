@@ -356,7 +356,7 @@ void SettingsReader::_read(SerializationData& data)
     while( _is->get(ch) )
     {
         char xx = ch.narrow('*');
-        if( ch == Pt::Char(L';') )
+        if( ch == Pt::Char(L';') && _parse != &SettingsReader::parseQuotedValue)
         {
             getline( *_is, comment, Pt::Char(L'\n') );
             ch = Pt::Char(L'\n');
@@ -780,7 +780,7 @@ void SettingsReader::parseQuotedValue(const Pt::Char& ch, ParseContext& context)
         case '\n':
         case '\r':
             throw ParseError("Expected closing \" token", context.line());
-        
+
         case '\\':
         {
             bool success = this->getEscaped( context.value() );
