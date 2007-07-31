@@ -90,7 +90,7 @@ void XmlSerializer::writeData(const SerializationData& data)
     {
         if(const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
-            _writer->writeElement( Pt::String::widen( entry->name() ), entry->value().str() );
+            _writer->writeElement( Pt::String::widen( entry->name() ), entry->str() );
         }
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {

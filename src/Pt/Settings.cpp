@@ -44,7 +44,7 @@ void SettingsWriter::write(const SerializationData& sd)
     {
         if( const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
-            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
+            this->writeEntry( entry->name(), entry->str(), entry->typeName() );
             *_os << std::endl;
         }
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
@@ -74,7 +74,7 @@ void SettingsWriter::writeParent(const SerializationData& sd, const std::string&
         if( const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
             *_os << Pt::String::widen( prefix ) << '.';
-            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
+            this->writeEntry( entry->name(), entry->str(), entry->typeName() );
             *_os << std::endl;
         }
         else if( const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
@@ -100,7 +100,7 @@ void SettingsWriter::writeChild(const SerializationData& sd)
 
         if(const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
         {
-            this->writeEntry( entry->name(), entry->value().str(), entry->typeName() );
+            this->writeEntry( entry->name(), entry->str(), entry->typeName() );
         }
         else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
         {
@@ -641,7 +641,7 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::afterValue;
 
             break;
-        
+
         case '}':                                        //////////////yyyyyyyyyyyyyyyyy
             context.addValue();
             context.leave();
@@ -652,7 +652,7 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::afterValue;
 
             break;
-        
+
         case '(':
             context.popNode();
             context.enter();

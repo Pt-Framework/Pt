@@ -93,7 +93,7 @@ bool operator<(const Brush& a, const Brush& b)
 
 void get( const SerializationEntry& e, Gfx::Brush& brush )
 {
-    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( e.value().str() ) );
+    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( e.str() ) );
 }
 
 

@@ -85,7 +85,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 void get(const SerializationEntry& entry, Gfx::Color<Pt::Gfx::ARgb>& color)
 {
     Pt::String s;
-    entry.value().get<Pt::String>(s);
+    entry.getValue(s);
     color = Gfx::ARgbColor::fromHtml(s);
 }
 

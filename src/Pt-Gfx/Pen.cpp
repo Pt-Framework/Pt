@@ -106,7 +106,7 @@ void get(const SerializationEntry& e, Gfx::Pen& pen)
     Pt::ssize_t         penStyle;
     Pt::String html;
 
-    Pt::StringStream ss( e.value().str() );
+    Pt::StringStream ss( e.str() );
     ss >> penSize;
     ss.get();
 

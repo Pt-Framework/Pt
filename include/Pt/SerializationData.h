@@ -169,13 +169,27 @@ class PT_API SerializationEntry : public SerializationNode
         ~SerializationEntry()
         {}
 
-        //! @brief Returns the value of the entry
-        const Pt::Variant& value() const
-        { return _value; }
+        /** @brief Gets the value of the entry
+            The requested type must be storable in a Pt::Variant.
+        */
+        template <typename T>
+        void getValue(T& type) const
+        {
+            if(_value.get(type) == false)
+                throw SerializationError("Invalid value for " + this->name() , PT_SOURCEINFO);
+        }
 
-        //! @brief Sets the value of the entry
-        void setValue(const Pt::Variant& val)
+        /** @brief Sets the value of the entry
+            The value must be storable in a Pt::Variant.
+        */
+        template <typename T>
+        void setValue(const T& val)
         { _value = val; }
+
+        /** Returns the value as string.
+        */
+        const Pt::String& str() const
+        { return _value.str(); }
 
     private:
         //! @internal
@@ -258,21 +272,14 @@ class PT_API SerializationData : public SerializationNode
         T getValue(const std::string& name) const
         {
             T value;
-            const Variant& v = this->getEntry(name);
-            bool success = v.get(value);
-            if(!success)
-                throw ConversionError("Conversion error", PT_SOURCEINFO);
-
+            this->getEntry(name).getValue(value);
             return value;
         }
 
         template <typename T>
         void getValue(const std::string& name, T& type) const
         {
-            const Variant& v = this->getEntry(name);
-            bool success = v.get(type);
-            if(!success)
-                throw ConversionError("Conversion error", PT_SOURCEINFO);
+            this->getEntry(name).getValue(type);
         }
 
         const SerializationNode& getNode(size_t n) const;
@@ -333,7 +340,7 @@ class PT_API SerializationData : public SerializationNode
             This method returns the object attribute, if this node has a
             SerializationEntry child node with the name \a name
         */
-        const Pt::Variant& getEntry(const std::string& name) const;
+        const SerializationEntry& getEntry(const std::string& name) const;
 
         /** @brief Add object attribute
 
@@ -375,6 +382,9 @@ template <typename T>
 struct Serialization
 {
     typedef ComplexSerializable Category;
+
+    //static const char* typeName()
+    //{ return TypeInfo<T>::typeName(); }
 };
 
 
@@ -442,18 +452,21 @@ template <>
 struct Serialization<int>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "int"; }
 };
 
 
 inline void get(const SerializationEntry& entry, int& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, int x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -463,18 +476,21 @@ template <>
 struct Serialization<unsigned>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "unsigned"; }
 };
 
 
 inline void get(const SerializationEntry& entry, unsigned& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, unsigned x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -484,18 +500,21 @@ template <>
 struct Serialization<char>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "char"; }
 };
 
 
 inline void get(const SerializationEntry& entry, char& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, char x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -505,18 +524,21 @@ template <>
 struct Serialization<bool>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "bool"; }
 };
 
 
 inline void get(const SerializationEntry& entry, bool& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, bool x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -526,18 +548,21 @@ template <>
 struct Serialization<float>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "float"; }
 };
 
 
 inline void get(const SerializationEntry& entry, float& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, float x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -547,18 +572,21 @@ template <>
 struct Serialization<double>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "double"; }
 };
 
 
 inline void get(const SerializationEntry& entry, double& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, double x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -569,18 +597,21 @@ template <>
 struct Serialization<std::string>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "std:.string"; }
 };
 
 
 inline void get(const SerializationEntry& entry, std::string& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, const std::string& x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
 
 
@@ -590,174 +621,22 @@ template <>
 struct Serialization<Pt::String>
 {
     typedef PlainSerializable Category;
+
+    static const char* typeName()
+    { return "Pt::String"; }
 };
 
 
 inline void get(const SerializationEntry& entry, Pt::String& x)
 {
-    entry.value().get(x);
+    entry.getValue(x);
 }
 
 
 inline void set(SerializationEntry& entry, const Pt::String& x)
 {
-    entry.setValue( Pt::Variant(x) );
+    entry.setValue(x);
 }
-
-
-
-
-
-
-/*
-template <typename T>
-inline SerializationNode& insert(SerializationData& data, const T& type)
-{
-    return data.addData() << type;
-}
-*/
-
-/*
-inline const SerializationNode& operator>>(const SerializationNode& node, int& x)
-{
-    compose(x, node);
-    return node;
-}
-
-
-
-inline SerializationNode& insert(SerializationData& data, int x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, char& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<char>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, char x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, unsigned& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<unsigned>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, unsigned x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, bool& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<bool>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, bool x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, float& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<float>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, float x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, double& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<double>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, double x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, std::string& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<std::string>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, const std::string& x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-
-inline const SerializationNode& operator>>(const SerializationNode& node, Pt::String& x)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        entry->value().get<Pt::String>(x);
-    }
-
-    return node;
-}
-
-
-inline SerializationNode& insert(SerializationData& data, const Pt::String& x)
-{
-    return data.addEntry( Pt::Variant(x) );
-}
-
-*/
 
 } // namespace Pt
 

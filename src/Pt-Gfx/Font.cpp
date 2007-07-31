@@ -91,7 +91,7 @@ const SerializationNode& operator>>(const SerializationNode& node, Font& f)
         ssize_t     fontAngle;
         ssize_t     fontDirection;
 
-        Pt::StringStream ss( entry->value().str() );
+        Pt::StringStream ss( entry->str() );
         getline( ss, fontName, Pt::Char('-') );
 
         ss >> fontSize;
@@ -123,7 +123,7 @@ void get(const SerializationEntry& e, Gfx::Font& f)
     ssize_t     fontAngle;
     ssize_t     fontDirection;
 
-    Pt::StringStream ss( e.value().str() );
+    Pt::StringStream ss( e.str() );
     getline( ss, fontName, Pt::Char('-') );
 
     ss >> fontSize;

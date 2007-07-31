@@ -24,7 +24,6 @@
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
@@ -68,10 +67,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             //std::cerr << "\n" << sout.str().narrow() << std::endl;
 
             PT_UNIT_ASSERT( settings.findData("a.b.c.d") )
-            const Pt::Variant& s = settings.findData("a.b.c.d")->getEntry("v");
-            PT_UNIT_ASSERT( s == L"3")
-
-            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u") == L"4")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("v").str() == L"3")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u").str() == L"4")
         }
 
         void PlainQoutedValue()
@@ -86,8 +83,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("v") == L";34")
-            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u") == L"34")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("v").str() == L";34")
+            PT_UNIT_ASSERT( settings.findData("a.b.c.d")->getEntry("u").str() == L"34")
         }
 
         void PlainArray()
@@ -112,7 +109,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
             PT_UNIT_ASSERT( concat == L"123")
 
@@ -127,7 +124,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
 
             PT_UNIT_ASSERT( concat == L"123")
@@ -154,7 +151,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
             PT_UNIT_ASSERT( concat == L"123")
 
@@ -169,7 +166,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::SerializationData::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
             PT_UNIT_ASSERT( concat == L"1223")
         }
@@ -177,7 +174,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexArray()
         {
             std::stringstream ss;
-            ss << "a.b.c = { Point{ x=10.0, y= 20 }, Point{ x=\"10\", y = \"20\" } }\n";
+            ss << "a.b.c = { Point{x=\"0.0\", y=\"0.0\"}, Point{x=\"75.0\", y=\"0.75\"} }\n";
             Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
             Pt::SettingsReader reader(ts);
             Pt::Settings settings;
@@ -205,8 +202,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             data = data->findData("c");
             PT_UNIT_ASSERT( data )
 
-            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ).str() == L"2" )
 
             data = data->findData( "f" );
             PT_UNIT_ASSERT( data )
@@ -214,7 +211,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::SerializationData::ConstNodeIterator it = data->begin(); it != data->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
 
             PT_UNIT_ASSERT( concat == L"3")
@@ -278,9 +275,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ).str() == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ).str() == L"3" )
         }
 
         void SimpleTypedQuotedList()
@@ -300,9 +297,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ).str() == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ).str() == L"3" )
         }
 
         void SimpleList()
@@ -321,9 +318,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             data = data->findData("c");
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
-            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ).str() == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ).str() == L"3" )
         }
 
         void SimpleQoutedList()
@@ -343,9 +340,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
-            PT_UNIT_ASSERT( data->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( data->getEntry( "e" ) == L"2" )
-            PT_UNIT_ASSERT( data->getEntry( "f" ) == L"3" )
+            PT_UNIT_ASSERT( data->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( data->getEntry( "e" ).str() == L"2" )
+            PT_UNIT_ASSERT( data->getEntry( "f" ).str() == L"3" )
         }
 
         void QoutedComplexType()
@@ -365,8 +362,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             a = a->findData("c");
             PT_UNIT_ASSERT( a )
 
-            PT_UNIT_ASSERT( a->getEntry( "d" ) == L"1" )
-            PT_UNIT_ASSERT( a->getEntry( "e" ) == L"22" )
+            PT_UNIT_ASSERT( a->getEntry( "d" ).str() == L"1" )
+            PT_UNIT_ASSERT( a->getEntry( "e" ).str() == L"22" )
 
             a = a->findData( "f" );
             PT_UNIT_ASSERT( a )
@@ -374,7 +371,7 @@ class SettingsTest : public Pt::Unit::TestSuite
             for( Pt::Settings::ConstNodeIterator it = a->begin(); it != a->end(); ++it)
             {
                 const Pt::SerializationEntry* entry = Pt::node_cast<const Pt::SerializationEntry*>(&*it);
-                concat += entry->value().str();
+                concat += entry->str();
             }
 
             PT_UNIT_ASSERT( concat == L"3")

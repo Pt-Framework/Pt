@@ -178,14 +178,14 @@ SerializationData& SerializationData::getData(const std::string& name)
 }
 
 
-const Pt::Variant& SerializationData::getEntry(const std::string& name) const
+const SerializationEntry& SerializationData::getEntry(const std::string& name) const
 {
     const SerializationNode& node = this->getNode(name);
     const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
     if( !entry )
         throw SerializationError("Missing data for '" + name + "'", PT_SOURCEINFO);
 
-    return entry->value();
+    return *entry;
 }
 
 
