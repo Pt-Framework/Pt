@@ -219,31 +219,69 @@ namespace Pt {
         VariantTraits for double.
     */
     template <>
-    struct VariantTraits<double>
+    struct VariantTraits<float>
     {
-        static void toData(std::string& data, const double& value)
+        static void toData(Pt::String& data, float value)
         {
-            std::ostringstream os;
-            os << std::scientific << std::setprecision(15) << value;
+            // not a number
+            if(value != value)
+            {
+                data = L"NAN";
+                return;
+            }
+
+            Pt::StringStream os;
+            os << value;
             data = os.str();
         }
 
-        static void toData(Pt::String& data, const double& value)
+        static bool fromData(float& value, const Pt::String& data)
         {
+            // not a number
+            if(data == L"NAN")
+            {
+                value = std::numeric_limits<float>::quiet_NaN();
+                return true;
+            }
+
+            Pt::StringStream is(data);
+            is >> value;
+
+            return !is.fail();
+        }
+    };
+
+
+    /** \brief Special trait for double.
+
+        VariantTraits for double.
+    */
+    template <>
+    struct VariantTraits<double>
+    {
+        static void toData(Pt::String& data, double value)
+        {
+            // not a number
+            if(value != value)
+            {
+                data = L"NAN";
+                return;
+            }
+
             Pt::StringStream os;
             os << std::scientific << std::setprecision(15) << value;
             data = os.str();
         }
 
-        static bool fromData(double& value, const std::string& data)
-        {
-            std::istringstream is(data);
-            is >> std::scientific >> std::setprecision(15) >> value;
-            return !is.fail();
-        }
-
         static bool fromData(double& value, const Pt::String& data)
         {
+            // not a number
+            if(data == L"NAN")
+            {
+                value = std::numeric_limits<float>::quiet_NaN();
+                return true;
+            }
+
             Pt::StringStream is(data);
             is >> std::scientific >> std::setprecision(15) >> value;
             return !is.fail();

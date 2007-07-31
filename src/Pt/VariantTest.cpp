@@ -38,14 +38,15 @@ class VariantTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "AssignInt", *this, &VariantTest::AssignInt );
             Pt::Unit::TestSuite::registerMethod( "GetInt", *this, &VariantTest::GetInt );
+            Pt::Unit::TestSuite::registerMethod( "Float", *this, &VariantTest::Float );
             Pt::Unit::TestSuite::registerMethod( "CompareInt", *this, &VariantTest::CompareInt );
             Pt::Unit::TestSuite::registerMethod( "AssignVariant", *this, &VariantTest::AssignVariant );
             Pt::Unit::TestSuite::registerMethod( "CompareVariant", *this, &VariantTest::CompareVariant );
         }
 
     protected:
-        void Blob();
         void AssignInt();
+        void Float();
         void GetInt();
         void CompareInt();
         void AssignVariant();
@@ -62,6 +63,16 @@ void VariantTest::AssignInt()
 
     v = 10;
     PT_UNIT_ASSERT( v.str() == Pt::String(L"10") );
+}
+
+
+void VariantTest::Float()
+{
+    Pt::Variant v( std::numeric_limits<float>::quiet_NaN() );
+
+    float f = 1.0f;
+    v.get(f);
+    std::cerr << "##### " << f << " need: "<< std::setprecision(7)<< std::scientific << std::numeric_limits<float>::quiet_NaN() << std::endl;
 }
 
 
