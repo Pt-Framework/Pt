@@ -69,10 +69,7 @@ void VariantTest::AssignInt()
 void VariantTest::Float()
 {
     Pt::Variant v( std::numeric_limits<float>::quiet_NaN() );
-
-    float f = 1.0f;
-    v.get(f);
-    std::cerr << "##### " << f << " need: "<< std::setprecision(7)<< std::scientific << std::numeric_limits<float>::quiet_NaN() << std::endl;
+    PT_UNIT_ASSERT( v.str() == L"NAN" )
 }
 
 
