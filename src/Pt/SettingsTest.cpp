@@ -35,6 +35,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "ComplexArray", *this, &SettingsTest::ComplexArray );
             //Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
             Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
 
@@ -173,6 +174,20 @@ class SettingsTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( concat == L"1223")
         }
 
+        void ComplexArray()
+        {
+            std::stringstream ss;
+            ss << "a.b.c = { Point{ x=10.0, y= 20 }, Point{ x=\"10\", y = \"20\" } }\n";
+            Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+            Pt::SettingsReader reader(ts);
+            Pt::Settings settings;
+            reader.read(settings);
+
+            Pt::StringStream sout;
+            settings.save(sout);
+            std::cerr << "################\n" << sout.str().narrow() << std::endl;
+        }
+
         void ComplexType()
         {
             std::stringstream ss;
@@ -219,9 +234,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             settings.load(ts);
 
-            Pt::StringStream sout;
-            settings.save(sout);
-            std::cerr << "\n" << sout.str().narrow() << std::endl;
+            //Pt::StringStream sout;
+            //settings.save(sout);
+            //std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 
         void ComplexType3()
@@ -241,9 +256,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             settings.load(ts);
 
-            Pt::StringStream sout;
-            settings.save(sout);
-            std::cerr << "\n" << sout.str().narrow() << std::endl;
+            //Pt::StringStream sout;
+            //settings.save(sout);
+            //std::cerr << "\n" << sout.str().narrow() << std::endl;
         }
 
         void SimpleTypedList()

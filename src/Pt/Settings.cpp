@@ -641,7 +641,18 @@ void SettingsReader::parseValue(const Pt::Char& ch, ParseContext& context)
                 _parse = &SettingsReader::afterValue;
 
             break;
+        
+        case '}':                                        //////////////yyyyyyyyyyyyyyyyy
+            context.addValue();
+            context.leave();
 
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+        
         case '(':
             context.popNode();
             context.enter();
@@ -706,6 +717,17 @@ void SettingsReader::finishValue(const Pt::Char& ch, ParseContext& context)
 
             break;
 
+        case '}':                                        //////////////yyyyyyyyyyyyyyyyy
+            context.addValue();
+            context.leave();
+
+            if( context.depth() == 0 )
+                _parse = &SettingsReader::beginStatement;
+            else
+                _parse = &SettingsReader::afterValue;
+
+            break;
+
         default:
             if(context.depth() == 0)
             {
@@ -731,11 +753,14 @@ void SettingsReader::afterValue(const Pt::Char& ch, ParseContext& context)
         return;
     }
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
-        return;
-
     switch( ch.value() )
     {
+        case '\n':
+        case '\r':
+        case '\t':
+        case ' ':
+            break;
+
         case ',':
             _parse = &SettingsReader::beginStatement;
             break;
@@ -815,8 +840,8 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
         case '\r':
         case '\t':
         case ' ':
-            break;    
-            
+            break;
+
         case '"':
             _parse = &SettingsReader::parseQuotedValue;
             break;
@@ -844,7 +869,7 @@ void SettingsReader::finishQuotedValue(const Pt::Char& ch, ParseContext& context
             if( context.depth() == 0 )
                 _parse = &SettingsReader::beginStatement;
             else
-                _parse = &SettingsReader::endStatement;
+                _parse = &SettingsReader::afterValue;  ////////xxxxxxxxxx
 
             break;
 
@@ -891,7 +916,7 @@ void SettingsReader::endStatement(const Pt::Char& ch, ParseContext& context)
             break;
 
         default:
-            throw ParseError( "Unexpected token", context.line() );
+            throw ParseError( "Unexpected token at statemant end", context.line() );
     }
 }
 
