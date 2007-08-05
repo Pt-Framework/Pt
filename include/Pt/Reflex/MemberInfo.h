@@ -28,7 +28,7 @@ namespace Reflex {
     /** @brief Reflectable member of a %Reflectable
         @ingroup Reflection
     */
-    class PT_API MemberInfo
+    class MemberInfo
     {
         public:
             virtual ~MemberInfo()

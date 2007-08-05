@@ -33,7 +33,7 @@ namespace Reflex {
     /** @brief Reflection support for callable entities
         @ingroup Reflection
     */
-    class PT_API CallableInfo : public MemberInfo
+    class CallableInfo : public MemberInfo
     {
         public:
             virtual size_t argSize() const = 0;
