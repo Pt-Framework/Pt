@@ -19,6 +19,9 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Any.h"
+#include "Pt/AnyFactory.h"
+#include "Pt/SerializationInfo.h"
+
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -34,13 +37,15 @@ class AnyTest : public Pt::Unit::TestSuite
         AnyTest()
         : Pt::Unit::TestSuite("AnyTest")
         {
-            this->registerMethod( "InitTest", *this, &AnyTest::InitTest );
-            this->registerMethod( "BoolTest", *this, &AnyTest::BoolTest );
-            this->registerMethod( "CharTest", *this, &AnyTest::CharTest );
-            this->registerMethod( "IntTest", *this, &AnyTest::IntTest );
-            this->registerMethod( "FloatTest", *this, &AnyTest::FloatTest );
-            this->registerMethod( "DoubleTest", *this, &AnyTest::DoubleTest );
-            this->registerMethod( "StdStringTest", *this, &AnyTest::StdStringTest );
+            this->registerMethod( "Init", *this, &AnyTest::InitTest );
+            this->registerMethod( "Bool", *this, &AnyTest::BoolTest );
+            this->registerMethod( "Char", *this, &AnyTest::CharTest );
+            this->registerMethod( "Int", *this, &AnyTest::IntTest );
+            this->registerMethod( "SerilializeInt", *this, &AnyTest::SerilializeInt );
+            this->registerMethod( "Float", *this, &AnyTest::FloatTest );
+            this->registerMethod( "SerilializeFloat", *this, &AnyTest::SerilializeFloat );
+            this->registerMethod( "Double", *this, &AnyTest::DoubleTest );
+            this->registerMethod( "StdString", *this, &AnyTest::StdStringTest );
         }
 
     protected:
@@ -74,11 +79,35 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( i == 5 );
         }
 
+        void SerilializeInt()
+        {
+            Pt::Any a = 5;
+            Pt::SerializationInfo si;
+            Pt::TypeFactory::instance().serialize(si, a);
+
+            Pt::Any a2;
+            a2 = Pt::TypeFactory::instance().create(si);
+
+            PT_UNIT_ASSERT(a2 == 5)
+        }
+
         void FloatTest()
         {
             Pt::Any a = 1.5f;
             float f = Pt::any_cast<float>(a);
             PT_UNIT_ASSERT( f == 1.5 );
+        }
+
+        void SerilializeFloat()
+        {
+            Pt::Any a = 5.0f;
+            Pt::SerializationInfo si;
+            Pt::TypeFactory::instance().serialize(si, a);
+
+            Pt::Any a2;
+            a2 = Pt::TypeFactory::instance().create(si);
+
+            PT_UNIT_ASSERT(a2 == 5.0f)
         }
 
         void DoubleTest()

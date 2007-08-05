@@ -21,11 +21,159 @@
 
 #include "Pt/Pt.h"
 #include "Pt/Reflectable.h"
-
+#include "Pt/SerializationInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
+
+
+class ClassDef;
+
+
+template <typename T>
+class ClassTraits
+{
+    public:
+        static void construct(Pt::Reflectable&, T& instance )
+        { }
+};
+
+
+class ClassDef
+{
+    typedef Pt::Reflectable* (*Create)(ClassDef const *);
+
+    public:
+        ClassDef(ClassDef const* base, Create c)
+        : _base(base)
+        , _create(c)
+        { }
+
+        Pt::Reflectable* create() const
+        {
+            return _create(this);
+        }
+
+        ClassDef const* base() const
+        { return _base; }
+
+    private:
+        ClassDef const * const _base;
+        Create _create;
+};
+
+
+template <typename C>
+class StaticObject : public Pt::Reflectable
+{
+    public:
+        StaticObject()
+        : Pt::Reflectable("")
+        {
+            _object = new C;
+            ClassTraits<C>::construct(*this, *_object);
+        }
+
+    private:
+        C* _object;
+};
+
+
+class DynamicObject : public Pt::Reflectable
+{
+    public:
+        DynamicObject(ClassDef const* def)
+        : Pt::Reflectable("")
+        {
+            if( def->base() )
+            {
+                _base = def->base()->create();
+                this->include(*_base);
+            }
+        }
+
+    private:
+        Pt::Reflectable* _base;
+};
+
+
+/** Static classes
+*/
+template <class T>
+Pt::Reflectable* createStaticObject(ClassDef const* def)
+{
+    return new StaticObject<T>();
+}
+
+
+template <typename T>
+ClassDef staticClass()
+{
+    return ClassDef(0, &createStaticObject<T>);
+}
+
+
+/** Meta classes
+*/
+template <class T>
+static Pt::Reflectable* createMetaObject(ClassDef const* cdef)
+{
+    return new T;
+}
+
+
+template <typename T>
+ClassDef metaClass()
+{
+    return ClassDef( 0, &createMetaObject<T> );
+}
+
+
+/** Dynamic classes
+*/
+Pt::Reflectable* createDynamicObject(ClassDef const* def)
+{
+    return new DynamicObject(def);
+}
+
+
+ClassDef dynamicClass(ClassDef const* base)
+{
+    return ClassDef(base, &createDynamicObject);
+}
+
+
+class MyClass
+{
+    public:
+        MyClass()
+        : _number(3)
+        {}
+
+        int number() const
+        { return _number; }
+
+        void setNumber(int n)
+        {
+            std::cerr << "Setting number: " << n << std::endl;
+            _number = n;
+        }
+
+    private:
+        int _number;
+};
+
+
+template <>
+class ClassTraits<MyClass>
+{
+    public:
+        static void construct(Pt::Reflectable& refl, MyClass& mc)
+        {
+            refl.registerProperty("number", mc, &MyClass::number, &MyClass::setNumber);
+        }
+};
 
 
 class TestReflectable : public Pt::Reflectable
@@ -59,9 +207,6 @@ class TestReflectable : public Pt::Reflectable
 
     private:
         Pt::PropertyValue<int> _number;
-
-        TestReflectable* self()
-        { return this; }
 };
 
 
@@ -70,14 +215,14 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
     public:
         ReflectableTest()
         : Pt::Unit::TestSuite( "ReflectableTest" )
-        , _onValueChanged(false)
         {
             Pt::Unit::TestSuite::registerMethod( "Property", *this, &ReflectableTest::Property );
+            /*Pt::Unit::TestSuite::registerMethod( "SerializeProperty", *this, &ReflectableTest::SerializeProperty );
             Pt::Unit::TestSuite::registerMethod( "PropertyIterator", *this, &ReflectableTest::PropertyIterator );
             Pt::Unit::TestSuite::registerMethod( "ConstPropertyIterator", *this, &ReflectableTest::ConstPropertyIterator );
             Pt::Unit::TestSuite::registerMethod( "Method1", *this, &ReflectableTest::Method1 );
             Pt::Unit::TestSuite::registerMethod( "Method2", *this, &ReflectableTest::Method2 );
-            Pt::Unit::TestSuite::registerMethod( "Method3", *this, &ReflectableTest::Method3 );
+            Pt::Unit::TestSuite::registerMethod( "Method3", *this, &ReflectableTest::Method3 );*/
         }
 
     protected:
@@ -85,9 +230,45 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
         {
             TestReflectable reflectable;
 
+            std::cerr << "\n######################"<< std::endl;
+            /*MyClass mc;
+            ClassInfo ci(mc);
+            ci.setProperty("number", 5);
+
+            ClassInfo ci2(reflectable);*/
+
+            ClassDef meta = metaClass<TestReflectable>();
+            ClassDef stat = staticClass<MyClass>();
+            ClassDef dyna = dynamicClass(&stat);
+
+            Reflectable* rd = dyna.create();
+            Pt::Any number = rd->property("number");
+            std::cerr << "Number is: " <<  Pt::any_cast<int>(number) << std::endl;
+            std::cerr << "\n######################"<< std::endl;
+
+            /*
+            TestReflectable reflectable;
+
             reflectable.setProperty("number", Pt::Any( int(5) ) );
-            Pt::Any number = reflectable.property("number");
+            Pt::Any number = reflectable.property("count");
             PT_UNIT_ASSERT( number == 5 )
+            */
+        }
+
+        void SerializeProperty()
+        {
+            TestReflectable reflectable;
+
+            reflectable.setProperty("number", Pt::Any( int(5) ) );
+
+            Pt::SerializationInfo si;
+            put( si, static_cast<Pt::Reflectable&>(reflectable) );
+
+            TestReflectable reflectable2;
+            get(si, static_cast<Pt::Reflectable&>(reflectable2) );
+
+            PT_UNIT_ASSERT( reflectable2.property("count") == 5 )
+            PT_UNIT_ASSERT( reflectable2.property("number") == 5 )
         }
 
         void PropertyIterator()
@@ -142,12 +323,6 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             PT_UNIT_ASSERT( refl.methodInfo("method3").argName(1) == std::string("bool") );
             PT_UNIT_ASSERT( refl.methodInfo("method3").argName(2) == std::string("char") );
         }
-
-    private:
-        void onValueChanged()
-        { _onValueChanged = true; }
-
-        bool _onValueChanged;
 };
 
 

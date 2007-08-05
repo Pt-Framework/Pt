@@ -3,12 +3,11 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <Pt/SerializationData.h>
+#include <Pt/SerializationInfo.h>
 #include <memory>
 
 
 namespace Pt {
-    class SerializationData;
 
 namespace Xml {
     class XmlReader;
@@ -35,7 +34,7 @@ namespace Xml {
                 This method will append the object data generated
                 from an XML format to \a data.
             */
-            void getData(SerializationData& data);
+            void getData(SerializationInfo& si);
 
             /** @brief Deserialize an object to XML
 
@@ -45,9 +44,9 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                SerializationData data;
-                this->getData( data );
-                get(data, type);
+                SerializationInfo si;
+                this->getData( si );
+                get(si, type);
             }
 
         protected:
@@ -83,7 +82,7 @@ namespace Xml {
             ProcessNode _processNode;
 
             //! @internal
-            SerializationData* _current;
+            SerializationInfo* _current;
 
             //! @internal
             String _nodeName;

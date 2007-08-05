@@ -20,9 +20,9 @@
  ***************************************************************************/
 
 #include "Pt/Gfx/Font.h"
+#include "Pt/StringStream.h"
+#include "Pt/SerializationInfo.h"
 
-
-using namespace std;
 
 namespace Pt {
 
@@ -77,45 +77,7 @@ Font::Direction Font::direction() const
 }
 
 
-
-
-
-const SerializationNode& operator>>(const SerializationNode& node, Font& f)
-{
-    const SerializationEntry* entry = node_cast<const SerializationEntry*>(&node);
-    if(entry)
-    {
-        Pt::String fontName;
-        size_t      fontSize;
-        ssize_t     fontStyle;
-        ssize_t     fontAngle;
-        ssize_t     fontDirection;
-
-        Pt::StringStream ss( entry->str() );
-        getline( ss, fontName, Pt::Char('-') );
-
-        ss >> fontSize;
-        ss.get();
-
-        ss >> fontStyle;
-        ss.get();
-
-        ss >> fontAngle;
-        ss.get();
-
-        ss >> fontDirection;
-
-        if( ss.fail() )
-            throw ConversionError("Font", PT_SOURCEINFO);
-
-        f = Gfx::Font(fontName.narrow(), fontSize, (Gfx::Font::FontStyle)fontStyle, fontAngle, (Gfx::Font::Direction)fontDirection);
-    }
-
-    return node;
-}
-
-
-void get(const SerializationEntry& e, Gfx::Font& f)
+void get(const SerializationInfo& si, Gfx::Font& f)
 {
     Pt::String fontName;
     size_t      fontSize;
@@ -123,7 +85,7 @@ void get(const SerializationEntry& e, Gfx::Font& f)
     ssize_t     fontAngle;
     ssize_t     fontDirection;
 
-    Pt::StringStream ss( e.str() );
+    Pt::StringStream ss( si.toString() );
     getline( ss, fontName, Pt::Char('-') );
 
     ss >> fontSize;
@@ -145,7 +107,7 @@ void get(const SerializationEntry& e, Gfx::Font& f)
 }
 
 
-void set(SerializationEntry& e, const Gfx::Font& f)
+void put(SerializationInfo& si, const Gfx::Font& f)
 {
     Pt::StringStream ss;
     ss << Pt::String::widen( f.name() ) << Pt::Char('-')
@@ -154,8 +116,8 @@ void set(SerializationEntry& e, const Gfx::Font& f)
        << f.angle() << Pt::Char('-')
        << f.direction();
 
-    e.setValue( ss.str() );
-    e.setTypeName("Brush");
+    si.setValue( ss.str() );
+    si.setTypeName("Brush");
 }
 
 } // namespace Gfx

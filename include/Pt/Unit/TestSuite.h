@@ -19,6 +19,8 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
+#include <Pt/Singleton.h>
+#include <Pt/AnyFactory.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
@@ -72,19 +74,6 @@ namespace Unit {
                     , _methodName( name )
                     , _args(args)
                     , _argCount(argCount)
-                    , _sdArgs(0)
-                    , _testName( _suite.name() + "::" + name )
-                    , _setUp(false)
-                    { }
-
-                    Context(TestSuite& suite, const std::string& name,
-                            const SerializationData& args)
-                    : TestContext(suite)
-                    , _suite(suite)
-                    , _methodName( name )
-                    , _args(0)
-                    , _argCount(0)
-                    , _sdArgs(&args)
                     , _testName( _suite.name() + "::" + name )
                     , _setUp(false)
                     { }
@@ -110,11 +99,7 @@ namespace Unit {
                     {
                         _suite.setUp();
                         _setUp = true;
-
-                        if(_sdArgs)
-                            _suite.call(_methodName, _args, _argCount);
-                        else
-                            _suite.call(_methodName, _args, _argCount);
+                        _suite.call(_methodName, _args, _argCount);
                     }
 
                 private:
@@ -122,7 +107,6 @@ namespace Unit {
                     std::string _methodName;
                     const Any* _args ;
                     size_t _argCount;
-                    const SerializationData* _sdArgs;
                     std::string _testName;
                     bool _setUp;
             };
@@ -183,12 +167,18 @@ namespace Unit {
             */
             void runTest( const std::string& name, const Any* args = 0, size_t argCount = 0 );
 
-            void runTest( const std::string& name, const SerializationData& args );
-
         protected:
             /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
+
+            template <class ParentT, typename A1>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
+            {
+                AssertType<A1>();
+
+                this->registerMethod(name, parent, method);
+            }
 
         public:
             static TestProtocol defaultProtocol;

@@ -22,7 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
-#include <Pt/SerializationData.h>
+#include <Pt/SerializationInfo.h>
 #include <string>
 
 
@@ -246,16 +246,22 @@ class PT_API Date
 };
 
 
-PT_API void get(const SerializationData& data, Date& x);
-
-PT_API void set(SerializationData& data, const Date& x);
-
-
-template <>
-struct Serialization< Pt::Date >
+inline void get(const SerializationInfo& si, Date& date)
 {
-    typedef ComplexSerializable Category;
-};
+    int year = si.getValue<int>("year");
+    unsigned month = si.getValue<unsigned>("month");
+    unsigned day = si.getValue<unsigned>("day");
+    date.set(year, month, day);
+}
+
+
+inline void put(SerializationInfo& si, const Date& date)
+{
+    si.addValue("year",  date.year() );
+    si.addValue("month", date.month() );
+    si.addValue("day",   date.day() );
+    si.setTypeName( "Date");
+}
 
 
 inline Date operator+(const Date& d, int days)

@@ -25,9 +25,9 @@
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/SmartPtr.h>
-#include <Pt/SerializationData.h>
 
 namespace Pt {
+
   namespace Gfx {
 
       class PenData;
@@ -49,8 +49,7 @@ namespace Pt {
       */
       class PT_GFX_API Pen
       {
-          public:
-
+         public:
               enum PenStyle{ SolidStyle = 0, DashStyle =1, DoubleDash = 2};
               enum CapStyle{ FlatCap = 0, RoundCap = 1, TriangularCap = 2, ProjectingCap = 3, ButtCap = 4 };
               enum JoinStyle{ RoundJoin = 0, BevelJoin = 1 };
@@ -98,48 +97,47 @@ namespace Pt {
               */
               Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
 
-
-        /**
-        * @brief Returns the size of the pen as specified when created.
-        *
-        * @return The size of the pen.
-        */
+              /**
+              * @brief Returns the size of the pen as specified when created.
+              *
+              * @return The size of the pen.
+              */
               size_t size() const;
 
-        /**
-        * @brief Returns a reference to the color of the pen as specified when created.
-        *
-        * @return The color of the pen.
-        */
-        const ARgbColor& color() const;
-
-        /**
-        * @brief Returns the pen style.
-        *
-        * @return The pen style.
-        */
-        PenStyle style() const;
+              /**
+              * @brief Returns a reference to the color of the pen as specified when created.
+              *
+              * @return The color of the pen.
+              */
+              const ARgbColor& color() const;
 
               /**
-        * @brief Returns the cap style
-        *
-        * @return The cap style.
-        */
-        CapStyle capStyle() const;
+              * @brief Returns the pen style.
+              *
+              * @return The pen style.
+              */
+              PenStyle style() const;
 
               /**
-        * @brief Returns the join style
-        *
-        * @return The join style.
-        */
-        JoinStyle joinStyle() const;
+              * @brief Returns the cap style
+              *
+              * @return The cap style.
+              */
+              CapStyle capStyle() const;
 
-        /**
-        * @brief Returns a reference to the pen color buffer
-        *
-        * @return The color buffer of the pen.
-        */
-        const ARgbImage& buffer() const;
+              /**
+              * @brief Returns the join style
+              *
+              * @return The join style.
+              */
+              JoinStyle joinStyle() const;
+
+              /**
+              * @brief Returns a reference to the pen color buffer
+              *
+              * @return The color buffer of the pen.
+              */
+              const ARgbImage& buffer() const;
 
               /**
               * @brief Equality-operator (==) which compares the given Pen's by comparing their
@@ -156,9 +154,14 @@ namespace Pt {
 
               friend PT_GFX_API bool operator<(const Pen& a, const Pen& b);
 
-      private:
-          SmartPtr<PenData> _penData;
+        private:
+            SmartPtr<PenData> _penData;
     };
+
+    PT_GFX_API void get(const SerializationInfo& si, Gfx::Pen& p);
+
+    PT_GFX_API void put(SerializationInfo& si, const Gfx::Pen& p);
+
 
     class PT_GFX_API PenData
     {
@@ -200,24 +203,8 @@ namespace Pt {
             Pen::JoinStyle  _joinStyle;
     };
 
-
-    PT_GFX_API void get(const SerializationEntry& e, Gfx::Pen& p);
-
-    PT_GFX_API void set(SerializationEntry& e, const Gfx::Pen& p);
-
 } // namespace Gfx
 
 } // namespace Pt
-
-
-namespace Pt {
-
-    template <>
-    struct  Serialization< Gfx::Pen >
-    {
-        typedef PlainSerializable Category;
-    };
-
-}
 
 #endif

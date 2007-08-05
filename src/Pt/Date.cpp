@@ -17,7 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Date.h"
-#include "Pt/SerializationData.h"
 #include <sstream>
 #include <cctype>
 
@@ -239,26 +238,6 @@ Date Date::fromIsoString(const std::string& s)
     const char* d = s.data();
     return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
 }
-
-
-void get(const SerializationData& data, Date& date)
-{
-    int year = data.getValue<int>("year");
-    unsigned month = data.getValue<unsigned>("month");
-    unsigned day = data.getValue<unsigned>("day");
-    date.set(year, month, day);
-}
-
-
-void set(SerializationData& data, const Date& date)
-{
-    data.setTypeName("Date");
-    data.addEntry("year", Variant(date.year()) );
-    data.addEntry("month", Variant(date.month()) );
-    data.addEntry("day", Variant(date.day()) );
-}
-
-
 
 // Return current local date
 /*

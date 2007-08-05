@@ -25,6 +25,7 @@
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/SerializationInfo.h>
 
 
 namespace Pt {
@@ -105,12 +106,12 @@ namespace Pt {
                 T _max;
         };
 
+
         template <typename T>
-        inline void get(const Pt::SerializationData& data, BasicRange<T>& r)
+        inline void get(const Pt::SerializationInfo& si, BasicRange<T>& r)
         {
-            T min =0, max = 0;
-            data.getValue("min", min);
-            data.getValue("max", max);
+            T min = data.getValue<T>("min");
+            T max = data.getValue<T>("max");
 
             r.setMin(min);
             r.setMax(max);
@@ -118,11 +119,11 @@ namespace Pt {
 
 
         template <typename T>
-        inline void set(Pt::SerializationData& data, const BasicRange<T>& r)
+        inline void put(Pt::SerializationInfo& si, const BasicRange<T>& r)
         {
-            data.setTypeName("Range");
-            data.addEntry("min", Pt::Variant(r.min()));
-            data.addEntry("max", Pt::Variant(r.max()));
+            si.setTypeName("Range");
+            si.addValue( "min", r.min() );
+            si.addValue( "max", r.max() );
         }
 
     } // namespace Math

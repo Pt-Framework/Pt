@@ -20,7 +20,6 @@
  ***************************************************************************/
 #include <Pt/Time.h>
 #include <Pt/Exception.h>
-#include "Pt/SerializationData.h"
 #include <sstream>
 #include <cctype>
 
@@ -202,32 +201,6 @@ Time Time::fromIsoString(const std::string& s)
     const char* d = s.data();
     return Time(getNumber2(d), getNumber2(d + 3), getNumber2(d + 6),
                 getNumber3(d + 9));
-}
-
-
-void get(const SerializationData& data, Time& time)
-{
-    unsigned hour = data.getValue<unsigned>("hour");
-    unsigned min = data.getValue<unsigned>("minute");
-    unsigned sec = data.getValue<unsigned>("second");
-    unsigned msec = data.getValue<unsigned>("millisec");
-    time.set(hour, min, sec, msec);
-}
-
-
-void set(SerializationData& data, const Time& time)
-{
-    unsigned hour;
-    unsigned min;
-    unsigned sec;
-    unsigned msec;
-    time.get(hour, min, sec, msec);
-
-    data.setTypeName("Time");
-    data.addEntry("hour", Variant(hour) );
-    data.addEntry("minute", Variant(min) );
-    data.addEntry("second", Variant(sec) );
-    data.addEntry("millisec", Variant(msec) );
 }
 
 } // namespace Pt

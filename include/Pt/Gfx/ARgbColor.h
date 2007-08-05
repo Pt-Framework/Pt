@@ -24,7 +24,7 @@
 #include <Pt/Gfx/Color.h>
 #include <Pt/String.h>
 #include <Pt/SourceInfo.h>
-#include <Pt/SerializationData.h>
+#include <Pt/SerializationInfo.h>
 #include <limits>
 #include <vector>
 #include <string.h>
@@ -253,17 +253,11 @@ namespace Pt {
         */
 
 
-    PT_GFX_API void get( const SerializationEntry& e, Gfx::Color<Pt::Gfx::ARgb>& x );
+    PT_GFX_API void get( const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& x );
 
-    PT_GFX_API void set( SerializationEntry& e, const Gfx::Color<Pt::Gfx::ARgb>& x );
+    PT_GFX_API void put( SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& x );
 
 } // namespace Gfx
-
-template <>
-struct Serialization< Gfx::Color<Pt::Gfx::ARgb> >
-{
-    typedef PlainSerializable Category;
-};
 
 } // namespace Pt
 

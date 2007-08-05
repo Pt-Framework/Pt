@@ -28,7 +28,7 @@ namespace Pt {
     class Args;
     class SerializationData;
 
-    /** @brief Interface for callable entities
+    /** @brief Reflection support for callable entities
         @ingroup Reflection
     */
     class PT_API CallableInfo : public MemberInfo
@@ -45,8 +45,6 @@ namespace Pt {
             virtual const std::type_info& retType() const = 0;
 
             virtual Pt::Any call(const Any* args, size_t argCount) = 0;
-
-            virtual void call(const SerializationData& args) const = 0;
 
         protected:
             CallableInfo()

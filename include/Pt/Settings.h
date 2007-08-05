@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Dr. Marc Boris Drner                       *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duener                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,11 +20,10 @@
 #define Pt_Settings_h
 
 #include <Pt/Api.h>
-#include <Pt/SerializationData.h>
 #include <Pt/String.h>
 #include <Pt/Exception.h>
 #include <Pt/Unicode.h>
-
+#include <Pt/SerializationInfo.h>
 #include <iostream>
 #include <sstream>
 #include <cassert>
@@ -32,7 +31,7 @@
 
 namespace Pt {
 
-class PT_API Settings : public SerializationData
+class PT_API Settings : public SerializationInfo
 {
     public:
         Settings()
@@ -45,20 +44,19 @@ class PT_API Settings : public SerializationData
         template <typename T>
         const bool getObject(T& type, const std::string& name) const
         {
-            const SerializationData* data = this->findData(name);
-            if(data == 0)
+            const SerializationInfo* si = this->findObjectData(name);
+            if(si == 0)
                 return false;
 
-            get(*data, type);
+            get(*si, type);
             return true;
         }
 
         template <typename T>
         const void setObject(const T& type, const std::string& name)
         {
-            SerializationData& data = this->addData();
-            set(data, type);
-            data.setName(name);
+            SerializationInfo& si = this->addValue(name);
+            put(si, type);
         }
 };
 
@@ -74,12 +72,14 @@ class PT_API SettingsWriter
         ~SettingsWriter()
         {}
 
-        void write(const SerializationData& sd);
+        void write(const SerializationInfo& si);
+
+        void write(const Settings& s);
 
     protected:
-        void writeParent(const SerializationData& sd, const std::string& prefix);
+        void writeParent(const SerializationInfo& sd, const std::string& prefix);
 
-        void writeChild(const SerializationData& node);
+        void writeChild(const SerializationInfo& node);
 
         void writeEntry(const std::string& name, const Pt::String& value, const std::string& type);
 
@@ -130,9 +130,9 @@ class PT_API SettingsReader
         }
 
         //! @brief Reads content into an archive
-        void read(SerializationData& data)
+        void read(SerializationInfo& si)
         {
-            this->_read(data);
+            this->_read(si);
         }
 
         //! @brief Reads content into an archive
@@ -142,7 +142,7 @@ class PT_API SettingsReader
         }
 
     protected:
-        void _read(SerializationData& data);
+        void _read(SerializationInfo& si);
 
         void beginStatement(const Pt::Char& ch, ParseContext& context);
 

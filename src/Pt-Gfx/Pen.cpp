@@ -99,14 +99,14 @@ bool operator<(const Pen& a, const Pen& b)
 }
 
 
-void get(const SerializationEntry& e, Gfx::Pen& pen)
+void get(const SerializationInfo& si, Gfx::Pen& pen)
 {
     size_t              penSize;
     Gfx::ARgbColor      penColor;
     Pt::ssize_t         penStyle;
     Pt::String html;
 
-    Pt::StringStream ss( e.str() );
+    Pt::StringStream ss( si.toString() );
     ss >> penSize;
     ss.get();
 
@@ -121,15 +121,15 @@ void get(const SerializationEntry& e, Gfx::Pen& pen)
 }
 
 
-void set(SerializationEntry& e, const Gfx::Pen& pen)
+void put(SerializationInfo& si, const Gfx::Pen& pen)
 {
     Pt::StringStream ss;
     ss << pen.size() << Pt::Char('-')
        << pen.color().toHtml() << Pt::Char('-')
        << pen.style();
 
-    e.setValue( ss.str() );
-    e.setTypeName("Pen");
+    si.setValue( ss.str() );
+    si.setTypeName("Pen");
 }
 
 } // namespace Gfx

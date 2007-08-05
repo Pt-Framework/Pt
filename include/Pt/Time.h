@@ -24,7 +24,7 @@
 #include <Pt/Api.h>
 #include <Pt/Exception.h>
 #include <Pt/Timespan.h>
-#include <Pt/SerializationData.h>
+#include <Pt/SerializationInfo.h>
 #include <string>
 
 
@@ -229,16 +229,30 @@ class PT_API Time
     };
 
 
-    PT_API void get(const SerializationData& data, Time& x);
-
-    PT_API void set(SerializationData& data, const Time& x);
-
-
-    template <>
-    struct Serialization< Pt::Time >
+    inline void get(const SerializationInfo& si, Time& time)
     {
-        typedef ComplexSerializable Category;
-    };
+        unsigned hour = si.getValue<unsigned>("hour");
+        unsigned min = si.getValue<unsigned>("minute");
+        unsigned sec = si.getValue<unsigned>("second");
+        unsigned msec = si.getValue<unsigned>("millisec");
+        time.set(hour, min, sec, msec);
+    }
+
+
+    inline void put(SerializationInfo& si, const Time& time)
+    {
+        unsigned hour = 0;
+        unsigned min = 0;
+        unsigned sec = 0;
+        unsigned msec = 0;
+        time.get(hour, min, sec, msec);
+
+        si.addValue("hour", Variant(hour) );
+        si.addValue("minute", Variant(min) );
+        si.addValue("second", Variant(sec) );
+        si.addValue("millisec", Variant(msec) );
+        si.setTypeName("Time");
+    }
 
 }
 

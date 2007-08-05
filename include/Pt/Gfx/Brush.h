@@ -76,18 +76,11 @@ namespace Gfx {
             ARgbImage*       _texture;
     };
 
-    PT_GFX_API void get( const SerializationEntry& e, Gfx::Brush& x );
+    PT_GFX_API void get( const SerializationInfo& si, Gfx::Brush& x );
 
-    PT_GFX_API void set( SerializationEntry& e, const Gfx::Brush& x );
+    PT_GFX_API void put( SerializationInfo& si, const Gfx::Brush& x );
 
 } // namespace Gfx
-
-template <>
-struct Serialization< Gfx::Brush >
-{
-    typedef PlainSerializable Category;
-};
-
 
 } // namespace Pt
 

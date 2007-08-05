@@ -17,6 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "Pt/SerializationInfo.h"
 #include <Pt/Unit/TextProtocol.h>
 #include <fstream>
 #include <sstream>
@@ -29,6 +30,8 @@ using namespace Unit;
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
+    std::string m_iniFileName = "TextprotocolLine32";
+
     std::ifstream iniFile(m_iniFileName.c_str());
     std::string line;
     std::string lineBuffer;
@@ -91,7 +94,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             continue;
         }
 
-
         std::stringstream lineReader(lineBuffer);
         lineBuffer.clear();
         std::string token;
@@ -105,10 +107,6 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         if(token.compare("property") == 0)
         {
             lineReader >> propertyName;
-
-            //value.init(suite.property(propertyName).typeName());
-            //lineReader >> value;
-            //suite.setProperty(propertyName, value);
 
             char ch;
             lineReader >> ch;
@@ -124,24 +122,25 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             }
 
             //std::cerr << "Property:" << propertyName << " : " << token << std::endl;
-            Pt::PropertyInfo& pi = suite.propertyInfo(propertyName);
+            Pt::SerializationInfo si;
+            si.setName(propertyName);
+            si.setValue(token);
 
-            Pt::SerializationData sd;
-            SerializationEntry& entry = sd.addEntry( Pt::Variant(token) );
-            pi.set(entry);
+            Pt::PropertyInfo& pi = suite.propertyInfo(propertyName);
+            get(si, pi);
         }
         // method line
         else if(token.compare("method") == 0)
         {
             lineReader >> methodName;
 
-            SerializationData sd;
-            while(getline(lineReader, paramType, ':'))
+            size_t argIndex = 0;
+            std::vector<Pt::Any> args;
+            Pt::CallableInfo& cb = suite.methodInfo(methodName);
+
+            while( getline(lineReader, paramType, ':') )
             {
-                ///paramType.erase(0, paramType.find_first_not_of(", \t"));
-                ///value.init(paramType);
-                ///lineReader >> value;
-                ///args.push_back(value);
+                //paramType.erase(0, paramType.find_first_not_of(", \t"));
 
                 char ch;
                 lineReader >> ch;
@@ -166,11 +165,17 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
                 }
 
                 //std::cerr << "arg:" << token << std::endl;
-                sd.addEntry( "arg", Pt::Variant(token) );
+                SerializationInfo si;
+                si.setValue(token);
+
+                const char* argName = cb.argName(argIndex);
+                Any a = Pt::TypeFactory::instance().create(si, argName);
+
+                args.push_back(a);
+                argIndex++;
             }
 
-            ///suite.runTest(methodName, args);
-            suite.runTest(methodName, sd);
+            suite.runTest(methodName, &args[0], args.size() );
         }
         // unknown command
         else

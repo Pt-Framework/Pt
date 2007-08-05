@@ -20,10 +20,11 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include "Pt/SerializationData.h"
+#include "Pt/SerializationInfo.h"
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
+#include "Pt/System/Clock.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -41,29 +42,118 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "ObjectDataTest", *this, &SerializationTest::ObjectDataTest );
+            Pt::Unit::TestSuite::registerMethod( "perf", *this, &SerializationTest::perf );
+            Pt::Unit::TestSuite::registerMethod( "StdVector", *this, &SerializationTest::StdVector );
             Pt::Unit::TestSuite::registerMethod( "Date", *this, &SerializationTest::Date );
             Pt::Unit::TestSuite::registerMethod( "Time", *this, &SerializationTest::Time );
             Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &SerializationTest::DateTime );
         }
 
     protected:
-        void ObjectDataTest()
+
+        void perf()
         {
-            Pt::SerializationData data;
-            data.addEntry( Pt::Variant(1) ).setName("testEntry");
-            PT_UNIT_ASSERT( 1 == data.getValue<int>("testEntry") );
+
+
+            Pt::System::Clock c;
+            c.start();
+
+                std::stringstream ss("         hallo         1234567890         ");
+                std::string token;
+
+                Pt::SerializationInfo si1;
+                Pt::SerializationInfo si2;
+                ss >> token;
+                si1.setValue(token);
+
+                ss >> token;
+                si2.setValue(token);
+                Pt::Any a1 = std::string("hallo");
+                Pt::Any a2 = 5;
+            for(int n = 0; n < 100000; ++n)
+            {
+
+
+                //std::string s = si1.toValue<std::string>();
+                //int n = si2.toValue<int>();
+
+
+                //const std::string& sx = Pt::any_cast<std::string>(aa2);
+                //int nx = Pt::any_cast<int>(aa1);
+                //int mx = Pt::any_cast<int>(aa1);
+                //Pt::TypeFactory::instance().assertBuilder<std::string>();
+                //Pt::TypeFactory::instance().assertBuilder<int>();
+
+                a1 = Pt::TypeFactory::instance().create(si1, "std::string");
+                a2 = Pt::TypeFactory::instance().create(si2, "int");
+                const std::string& s = Pt::any_cast<const std::string&>(a1);
+                int n = Pt::any_cast<int>(a2);
+            }
+
+            Pt::System::TimeValue tv = c.stop();
+            std::cerr << "Duration: " << tv.seconds() << ":" << tv.microSeconds()/1000 << std::endl;
+        }
+        
+        void StdVector()
+        {
+            std::vector<int> iv, iv2;
+            iv.push_back(1);
+            iv.push_back(2);
+            iv.push_back(3);
+
+            Pt::SerializationInfo si;
+            put(si, iv);
+
+            /*for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+            {
+                std::cerr << "elem: " << it->getValue<std::string>() << std::endl;
+            }*/
+            get(si, iv2);
+/*
+            Pt::ObjectManager manager;
+
+            Pt::SerializationInfo info;
+            Pt::SerializationInfo& object = info.addValue("object", 5);
+            info.addValue("pointerToObject", "object");
+
+            // read from source and fill object map
+            manager._objects["object"] =  &object;
+
+            int n = info.getValue<int>("object");
+            manager._objects["object"] =  &n;
+
+            std::string id = info.getValue<std::string>("pointerToObject");
+            int* px = 0;
+            manager._pointers[(void**)&px] = id;
+
+            // read done, now fixup
+            std::map<void**, std::string>::iterator it;
+            for(it = manager._pointers.begin(); it != manager._pointers.end(); ++it)
+            {
+                std::cerr << "\nfixing up to " << it->second << std::endl;
+                void* object = manager._objects[ it->second ];
+                void** p = it->first;
+                int** i = (int**)p;
+                std::cerr << "NEW VALUE: " << *( (int*)(object) ) << std::endl;
+                *i = &(*( (int*)(object) ));
+            }
+
+            std::cerr << "FIXED: " << px << " " << *px << std::endl;*/
         }
 
         void Date()
         {
             Pt::Date date(2000, 10, 20);
-            Pt::SerializationData data;
-            set(data, date);
-            data.setName("myDate");
+            Pt::SerializationInfo si;
+            put(si, date);
+
+            /*for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+            {
+                std::cerr << "iter: " << it->name() <<  " " << it->getValue<std::string>() << std::endl;
+            }*/
 
             Pt::Date date2(1,1,1);
-            get(data, date2);
+            get(si, date2);
 
             PT_UNIT_ASSERT(date == date2);
         }
@@ -71,12 +161,11 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Time()
         {
             Pt::Time time(18, 40, 5, 1);
-            Pt::SerializationData data;
-            set(data,  time);
-            data.setName("myTime" );
+            Pt::SerializationInfo si;
+            put(si, time);
 
             Pt::Time time2;
-            get( data, time2 );
+            get( si, time2 );
 
             PT_UNIT_ASSERT(time == time2);
         }
@@ -84,12 +173,11 @@ class SerializationTest : public Pt::Unit::TestSuite
         void DateTime()
         {
             Pt::DateTime datetime(2000, 10, 20, 18, 40, 5, 1);
-            Pt::SerializationData data;
-            set(data, datetime);
-            data.setName("myDateTime" );
+            Pt::SerializationInfo si;
+            put(si, datetime);
 
             Pt::DateTime datetime2;
-            get( data, datetime2 );
+            get( si, datetime2 );
 
             const Pt::Date date = datetime.date();
             const Pt::Date date2 = datetime2.date();

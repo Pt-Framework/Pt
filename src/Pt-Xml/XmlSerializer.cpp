@@ -3,7 +3,6 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
-#include "Pt/SerializationData.h"
 #include "Pt/Exception.h"
 #include "Pt/String.h"
 
@@ -69,33 +68,34 @@ void XmlSerializer::detach()
     _writer = 0;
 }
 
-void XmlSerializer::putData(const SerializationData& data)
+
+void XmlSerializer::putData(const SerializationInfo& si)
 {
     if (!_writer)
         throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
 
-    _writer->writeStartElement( Pt::String::widen( data.name() ) );
-    this->writeData(data);
+    _writer->writeStartElement( Pt::String::widen( si.name() ) );
+    this->writeData(si);
     _writer->writeEndElement();
 }
 
 
-void XmlSerializer::writeData(const SerializationData& data)
+void XmlSerializer::writeData(const SerializationInfo& si)
 {
     if (!_writer)
         throw std::logic_error("XmlSerizalizer was not yet opened." + PT_SOURCEINFO);
 
-    SerializationData::ConstNodeIterator it;
-    for(it = data.begin(); it != data.end(); ++it)
+    SerializationInfo::ConstIterator it;
+    for(it = si.begin(); it != si.end(); ++it)
     {
-        if(const SerializationEntry* entry = node_cast<const SerializationEntry*>(&*it) )
+        if( it->category() == SerializationInfo::Value )
         {
-            _writer->writeElement( Pt::String::widen( entry->name() ), entry->str() );
+            _writer->writeElement( Pt::String::widen( it->name() ), it->toString() );
         }
-        else if(const SerializationData* subdata = node_cast<const SerializationData*>(&*it) )
+        else if( it->category() == SerializationInfo::Object )
         {
-            _writer->writeStartElement( Pt::String::widen( subdata->name() ) );
-            this->writeData( *subdata );
+            _writer->writeStartElement( Pt::String::widen( it->name() ) );
+            this->writeData( *it );
             _writer->writeEndElement();
         }
     }

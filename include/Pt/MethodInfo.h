@@ -25,7 +25,6 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/MethodInfoBase.h>
-#include <Pt/SerializationData.h>
 #include <stdexcept>
 
 
@@ -69,26 +68,6 @@ class MethodInfo : public MethodInfoBase<R, C, A1, A2, A3, A4, A5>
                               any_cast<A3>( args[2] ),
                               any_cast<A4>( args[3] ),
                               any_cast<A5>( args[4] ) );
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            typename Pt::TypeInfo<A4>::Value a4;
-            getType( args.getNode(3), a4 );
-
-            typename Pt::TypeInfo<A5>::Value a5;
-            getType( args.getNode(4), a5 );
-
-            _cb->invoke(a1, a2, a3, a4, a5);
         }
 
     private:
@@ -137,26 +116,6 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5> : public MethodInfoBase<void, C, A
             return Any();
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            typename Pt::TypeInfo<A4>::Value a4;
-            getType( args.getNode(3), a4 );
-
-            typename Pt::TypeInfo<A5>::Value a5;
-            getType( args.getNode(4), a5 );
-
-            _cb->invoke(a1, a2, a3, a4, a5);
-        }
-
     private:
         Callable<void, A1, A2, A3, A4, A5>* _cb;
 };
@@ -198,23 +157,6 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
                               any_cast<A2>( args[1] ),
                               any_cast<A3>( args[2] ),
                               any_cast<A4>( args[3] ) );
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            typename Pt::TypeInfo<A4>::Value a4;
-            getType( args.getNode(3), a4 );
-
-            _cb->invoke(a1, a2, a3, a4);
         }
 
     private:
@@ -261,23 +203,6 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<void
             return Any();
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            typename Pt::TypeInfo<A4>::Value a4;
-            getType( args.getNode(3), a4 );
-
-            _cb->invoke(a1, a2, a3, a4);
-        }
-
     private:
         Callable<void, A1, A2, A3, A4>* _cb;
 };
@@ -317,20 +242,6 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBase<R
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ),
                               any_cast<A3>( args[2] ));
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            _cb->invoke(a1, a2, a3);
         }
 
     private:
@@ -374,20 +285,6 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void> : public MethodInfoBas
             return Any();
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            typename Pt::TypeInfo<A3>::Value a3;
-            getType( args.getNode(2), a3 );
-
-            _cb->invoke(a1, a2, a3);
-        }
-
     private:
         Callable<void, A1, A2, A3>* _cb;
 };
@@ -425,17 +322,6 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodInfo
 
             return _cb->call( any_cast<A1>( args[0] ),
                               any_cast<A2>( args[1] ) );
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            _cb->invoke(a1, a2);
         }
 
     private:
@@ -478,17 +364,6 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public MethodI
             return Any();
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-
-            typename Pt::TypeInfo<A2>::Value a2;
-            getType( args.getNode(1), a2 );
-
-            _cb->invoke(a1, a2);
-        }
-
     private:
         Callable<void, A1, A2>* _cb;
 };
@@ -527,13 +402,6 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Meth
             return _cb->call( any_cast<A1>(*args) );
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-            _cb->invoke(a1);
-        }
-
     private:
         Callable<void, A1>* _cb;
 };
@@ -565,17 +433,10 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
         Pt::Any call(const Any* args, size_t argCount)
         {
             if(argCount < 1)
-                throw std::invalid_argument("Not enough arguments");
+                throw std::invalid_argument("Not enough arguments YYY");
 
             _cb->call( any_cast<A1>(*args) );
             return Any();
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            typename Pt::TypeInfo<A1>::Value a1;
-            getType( args.getNode(0), a1 );
-            _cb->invoke(a1);
         }
 
     private:
@@ -611,11 +472,6 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
             return _cb->call();
         }
 
-        virtual void call(const SerializationData& args) const
-        {
-            _cb->invoke();
-        }
-
     private:
         Callable<R>* _cb;
 };
@@ -646,11 +502,6 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pu
         {
             _cb->invoke();
             return Any();
-        }
-
-        virtual void call(const SerializationData& args) const
-        {
-            _cb->invoke();
         }
 
     private:

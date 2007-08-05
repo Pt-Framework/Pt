@@ -91,16 +91,16 @@ bool operator<(const Brush& a, const Brush& b)
 }
 
 
-void get( const SerializationEntry& e, Gfx::Brush& brush )
+void get( const SerializationInfo& si, Gfx::Brush& brush )
 {
-    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( e.str() ) );
+    brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( si.toString() ) );
 }
 
 
-void set( SerializationEntry& e, const Gfx::Brush& brush )
+void put( SerializationInfo& si, const Gfx::Brush& brush )
 {
-    e.setValue( brush.color().toHtml() );
-    e.setTypeName("Brush");
+    si.setValue( brush.color().toHtml() );
+    si.setTypeName("Brush");
 }
 
 } // namespace Gfx

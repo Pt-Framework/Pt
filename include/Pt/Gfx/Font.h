@@ -25,10 +25,11 @@
 #include <Pt/Types.h>
 #include <Pt/String.h>
 #include <Pt/SourceInfo.h>
-#include <Pt/SerializationData.h>
 
 
 namespace Pt {
+
+class SerializationInfo;
 
 namespace Gfx {
 
@@ -92,17 +93,11 @@ namespace Gfx {
     }
 
 
-    PT_GFX_API void get( const SerializationEntry& e, Gfx::Font& x );
+    PT_GFX_API void get( const SerializationInfo& si, Gfx::Font& x );
 
-    PT_GFX_API void set( SerializationEntry& e, const Gfx::Font& x );
+    PT_GFX_API void put( SerializationInfo& si, const Gfx::Font& x );
 
 } // namespace Gfx
-
-template <>
-struct Serialization< Gfx::Font >
-{
-    typedef PlainSerializable Category;
-};
 
 } // namespace Pt
 

@@ -21,7 +21,6 @@
 
 #include <Pt/DateTime.h>
 #include "Pt/SourceInfo.h"
-#include "Pt/SerializationData.h"
 
 #include <algorithm>
 #include <sstream>
@@ -197,32 +196,6 @@ std::string DateTime::toIsoString() const
     ret[20] = '0' + n % 10;
 
     return std::string(ret, 23);
-}
-
-
-void get(const SerializationData& data, DateTime& datetime)
-{
-    Date date(1,1,1);
-    get( data.getData("date"), date );
-    datetime.setDate(date);
-
-    Time time;
-    get( data.getData("time"), time );
-    datetime.setTime(time);
-}
-
-
-void set(SerializationData& data, const DateTime& datetime)
-{
-    data.setTypeName("DateTime");
-
-    SerializationData& date = data.addData();
-    date.setName("date");
-    set( date, datetime.date() );
-
-    SerializationData& time = data.addData();
-    time.setName("time");
-    set( time, datetime.time() );
 }
 
 }

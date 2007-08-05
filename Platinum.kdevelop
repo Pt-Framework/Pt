@@ -24,7 +24,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt/bin/AtomicTestd</mainprogram>
+      <mainprogram>/home/marc/Pt/bin/ReflectableTestd</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q SerializationTest.unit</makeoptions>
+      <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

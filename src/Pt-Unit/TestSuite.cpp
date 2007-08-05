@@ -62,8 +62,3 @@ void TestSuite::runTest(const std::string& name, const Any* args, size_t argCoun
 }
 
 
-void TestSuite::runTest(const std::string& name, const SerializationData& args)
-{
-    Context ctx(*this, name, args);
-    ctx.run();
-}

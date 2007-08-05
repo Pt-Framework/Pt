@@ -3,6 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : Any.cpp
+                   AnyFactory.cpp
                    Callable.cpp
                    Char.cpp
                    Connection.cpp
@@ -12,6 +13,7 @@ SharedLibrary Pt : Any.cpp
                    Exception.cpp
                    PropertyInfo.cpp
                    Reflectable.cpp
+                   SerializationInfo.cpp
                    Settings.cpp
                    Signal.cpp
                    StringStream.cpp
@@ -22,7 +24,6 @@ SharedLibrary Pt : Any.cpp
                    TypeInfo.cpp
                    codecvt.cpp
                    ctype.cpp
-                   SerializationData.cpp
                    #num_get.cpp
                    numpunct.cpp
                    Unicode.cpp ;

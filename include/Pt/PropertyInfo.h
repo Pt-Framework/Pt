@@ -26,7 +26,6 @@
 #include <Pt/MemberInfo.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/PropertyValue.h>
-#include <Pt/SerializationData.h>
 #include <memory>
 
 
@@ -64,13 +63,11 @@ class PropertyInfo  : public MemberInfo
 
         virtual const char* typeName() const = 0;
 
+        virtual bool isWritable() const = 0;
+
         virtual Pt::Any get() const = 0;
 
-        virtual SerializationNode& get(Pt::SerializationData& sd) const = 0;
-
         virtual void set(const Pt::Any& value) = 0;
-
-        virtual void set(const Pt::SerializationNode& node) = 0;
 };
 
 
@@ -103,6 +100,9 @@ class ReadPropertyInfo : virtual public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
+        virtual bool isWritable() const
+        { return false; }
+
         virtual Pt::Any get() const
         {
             Pt::Any any;
@@ -110,15 +110,7 @@ class ReadPropertyInfo : virtual public PropertyInfo
             return any;
         }
 
-        virtual SerializationNode& get(Pt::SerializationData& sd) const
-        {
-            return insert( sd, _getter->call() );
-        }
-
         virtual void set(const Pt::Any& value)
-        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
-
-        virtual void set(const Pt::SerializationNode& node)
         { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
     private:
@@ -151,10 +143,10 @@ class WritePropertyInfo : virtual public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
-        virtual Pt::Any get() const
-        { throw PropertyNotReadable(this->name(), PT_SOURCEINFO); }
+        virtual bool isWritable() const
+        { return true; }
 
-        virtual SerializationNode& get(Pt::SerializationData& sd) const
+        virtual Pt::Any get() const
         { throw PropertyNotReadable(this->name(), PT_SOURCEINFO); }
 
         virtual void set(const Pt::Any& a)
@@ -168,15 +160,6 @@ class WritePropertyInfo : virtual public PropertyInfo
             catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
-        }
-
-        virtual void set(const Pt::SerializationNode& node)
-        {
-            typedef typename Pt::TypeInfo<T>::Value ValueT ;
-
-            ValueT value;
-            getType(node, value);
-            this->set( value );
         }
 
         void operator=(T type)
@@ -229,16 +212,14 @@ class ReadWritePropertyInfo : public PropertyInfo
             return TypeTraits<R>::typeName();
         }
 
+        virtual bool isWritable() const
+        { return true; }
+
         virtual Pt::Any get() const
         {
             Pt::Any any;
             any = _getter->operator()();
             return any;
-        }
-
-        virtual SerializationNode& get(Pt::SerializationData& sd) const
-        {
-            return insert( sd, _getter->call() );
         }
 
         virtual void set(const Pt::Any& a)
@@ -252,15 +233,6 @@ class ReadWritePropertyInfo : public PropertyInfo
             catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
-        }
-
-        virtual void set(const Pt::SerializationNode& node)
-        {
-            typedef typename Pt::TypeInfo<A>::Value ValueT ;
-
-            ValueT value;
-            getType(node, value);
-            _setter->invoke( value );
         }
 
     private:
@@ -291,18 +263,13 @@ class ReadProperty : public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
+        virtual bool isWritable() const
+        { return false; }
+
         virtual Pt::Any get() const
         { return _value->value(); }
 
-        virtual SerializationNode& get(Pt::SerializationData& sd) const
-        {
-            return insert( sd, _value->get() );
-        }
-
         virtual void set(const Pt::Any& value)
-        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
-
-        virtual void set(const Pt::SerializationNode& node)
         { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
     private:
@@ -336,13 +303,11 @@ class ReadWriteProperty : public PropertyInfo
             return TypeTraits<T>::typeName();
         }
 
+        virtual bool isWritable() const
+        { return true; }
+
         virtual Pt::Any get() const
         { return _value->value(); }
-
-        virtual SerializationNode& get(Pt::SerializationData& sd) const
-        {
-            return insert( sd, _value->get() );
-        }
 
         virtual void set(const Pt::Any& a)
         {
@@ -353,15 +318,6 @@ class ReadWriteProperty : public PropertyInfo
             catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
-        }
-
-        virtual void set(const Pt::SerializationNode& node)
-        {
-            typedef typename Pt::TypeInfo<T>::Value ValueT ;
-
-            ValueT value = ValueT();
-            getType(node, value);
-            _setter->invoke( value );
         }
 
     private:

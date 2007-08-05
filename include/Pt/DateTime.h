@@ -172,17 +172,33 @@ class PT_API DateTime
         Time _time;
 };
 
-
 PT_API void get(const SerializationData& data, DateTime& x);
 
 PT_API void set(SerializationData& data, const DateTime& x);
 
 
-template <>
-struct PT_API Serialization< Pt::DateTime >
+inline void get(const SerializationInfo& si, DateTime& datetime)
 {
-    typedef ComplexSerializable Category;
-};
+    Date date(1,1,1);
+    get( si.getObjectData("date"), date );
+    datetime.setDate(date);
+
+    Time time;
+    get( si.getObjectData("time"), time );
+    datetime.setTime(time);
+}
+
+
+inline void put(SerializationInfo& si, const DateTime& datetime)
+{
+    si.setTypeName("DateTime");
+
+    SerializationInfo& date = si.addValue("date");
+    put( date, datetime.date() );
+
+    SerializationInfo& time  = si.addValue("time");
+    put( time, datetime.time() );
+}
 
 }
 

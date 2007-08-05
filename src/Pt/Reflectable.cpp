@@ -18,6 +18,9 @@
  ***************************************************************************/
 
 #include "Pt/Reflectable.h"
+#include "Pt/SerializationInfo.h"
+#include "Pt/AnyFactory.h"
+#include <algorithm>
 
 
 namespace Pt {
@@ -119,22 +122,16 @@ void Reflectable::setProperty(const std::string& name, const Pt::Any& value)
 }
 
 
-void Reflectable::call(const std::string& name)
+void Reflectable::invoke(const std::string& name, const Any* args, size_t argCount)
 {
     CallableInfo& ci = this->methodInfo(name);
-    ci.call(0, 0);
+    ci.call(args, argCount);
 }
 
 
 Pt::Any Reflectable::call(const std::string& name, const Any* args, size_t argCount)
 {
     return this->methodInfo(name).call(args, argCount);
-}
-
-
-void Reflectable::call(const std::string& name, const SerializationData& sd)
-{
-    return this->methodInfo(name).call(sd);
 }
 
 
@@ -268,66 +265,77 @@ Reflectable& Reflectable::operator=(const Reflectable& other)
 }
 
 
-/*
-const SerializationNode& operator>>(const SerializationNode& node, Reflectable& r)
+void Reflectable::include(Reflectable& child)
 {
-    const Pt::SerializationData* data = Pt::node_cast<const Pt::SerializationData*>(&node);
-    if(!data)
-        throw NoSuchEntry("Reflectable", PT_SOURCEINFO);
+    std::copy( child._data->properties.begin(),
+               child._data->properties.end(),
+               std::back_inserter<Properties>(_data->properties) );
 
-    Reflectable::PropertyIterator it;
-    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
-    {
-        Pt::String propName = Pt::String::widen( it->name() );
-        try {
-            it->set( data->getNode( it->name() ) );
-        }
-        catch(...)
-        { }
-    }
-
-    return node;
+    child._data->properties.clear();
 }
 
 
-SerializationData& operator<<(SerializationData& data, const Reflectable& r)
+void Reflectable::deserialize(const SerializationInfo& si)
+{
+    get(si, *this);
+}
+
+
+void Reflectable::serialize(SerializationInfo& si)
+{
+    put(si, *this);
+}
+
+
+void get(const SerializationInfo& si, PropertyInfo& property)
+{
+    std::string pname = property.name();
+    std::string ptype = property.typeName();
+
+    Any a = TypeFactory::instance().create(si, ptype);
+    property.set(a);
+}
+
+
+void put(SerializationInfo& si, const PropertyInfo& property)
+{
+    std::string pname = property.name();
+    std::string ptype = property.typeName();
+
+    TypeFactory::instance().serialize( si, property.get() );
+}
+
+
+void get(const SerializationInfo& si, Reflectable& r)
+{
+    Reflectable::PropertyIterator it;
+    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
+    {
+        if(it->isWritable() == false)
+            continue;
+
+        const SerializationInfo* pinfo = si.findObjectData( it->name() );
+        if(pinfo == 0)
+            continue;
+
+        get(*pinfo, *it);
+    }
+}
+
+
+void put(SerializationInfo& si, const Reflectable& r)
 {
     Reflectable::ConstPropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
     {
-        Pt::String propName = Pt::String::widen( it->name() );
-        SerializationNode& added = it->get(data);
-        added.setName( it->name() );
+        if(it->isWritable() == false)
+            continue;
+
+        SerializationInfo& pinfo = si.addValue( it->name() );
+        put(pinfo, *it);
     }
 
-    return data;
-}
-*/
-
-
-void get(const SerializationData& data, Reflectable& r)
-{
-    Reflectable::PropertyIterator it;
-    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
-    {
-        Pt::String propName = Pt::String::widen( it->name() );
-        try {
-            it->set( data.getNode( it->name() ) );
-        }
-        catch(...)
-        { }
-    }
-}
-
-
-void set(SerializationData& data, const Reflectable& r)
-{
-    Reflectable::ConstPropertyIterator it;
-    for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
-    {
-        SerializationNode& added = it->get(data);
-        added.setName( it->name() );
-    }
+    si.setTypeName( r.objectName() );
 }
 
 } // namespace Pt

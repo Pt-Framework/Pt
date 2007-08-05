@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,10 +24,13 @@
 #include <Pt/Exception.h>
 #include <Pt/MethodInfo.h>
 #include <Pt/PropertyInfo.h>
-#include <Pt/SerializationData.h>
+#include <Pt/AnyFactory.h>
 
 
 namespace Pt {
+
+class SerializationInfo;
+
 
 class PT_API NoSuchProperty : public std::logic_error
 {
@@ -49,8 +52,6 @@ class PT_API NoSuchMethod : public std::logic_error
 
 /** @brief Make objects reflectable
     @ingroup Reflection
-
-    TODO: rename getIdentifierName()
 */
 class PT_API Reflectable
 {
@@ -64,19 +65,19 @@ class PT_API Reflectable
         class ConstPropertyIterator;
 
     public:
+        Reflectable(const std::string& name);
+
         virtual ~Reflectable();
 
         const std::string& objectName() const;
 
-        Pt::Any property(const std::string& name) const;
+        virtual Pt::Any property(const std::string& name) const;
 
-        void setProperty(const std::string& name, const Pt::Any& value);
+        virtual void setProperty(const std::string& name, const Pt::Any& value);
 
-        void call(const std::string& name);
+        void invoke(const std::string& name, const Any* args, size_t argCount);
 
         Pt::Any call(const std::string& name, const Any* args, size_t argCount);
-
-        void call(const std::string& name, const SerializationData& args);
 
         PropertyInfo& propertyInfo(const std::string& name);
 
@@ -191,9 +192,11 @@ class PT_API Reflectable
             this->registerCallableInfo(cb);
         }
 
-    protected:
-        Reflectable(const std::string& name);
+        void deserialize(const SerializationInfo& si);
 
+        void serialize(SerializationInfo& si);
+
+    protected:
         Reflectable(const Reflectable& other);
 
         Reflectable& operator=(const Reflectable& other);
@@ -202,21 +205,19 @@ class PT_API Reflectable
 
         void registerCallableInfo(CallableInfo* ci);
 
+        void include(Reflectable& r);
+
     private:
         struct ReflectableData* _data;
 };
 
+PT_API void get(const SerializationInfo& si, PropertyInfo& p);
 
-PT_API void get(const SerializationData& data, Reflectable& r);
+PT_API void put(SerializationInfo& si, const PropertyInfo& p);
 
-PT_API void set(SerializationData& data, const Reflectable& r);
+PT_API void get(const SerializationInfo& si, Reflectable& r);
 
-
-template <>
-struct Serialization< Reflectable >
-{
-    typedef ComplexSerializable Category;
-};
+PT_API void put(SerializationInfo& si, const Reflectable& r);
 
 
 class Reflectable::MethodIterator
@@ -349,7 +350,6 @@ class Reflectable::ConstPropertyIterator
     private:
         PropertyInfo* const* _pi;
 };
-
 
 } // namespace Pt
 

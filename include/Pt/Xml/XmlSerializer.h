@@ -3,7 +3,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
-#include <Pt/SerializationData.h>
+#include <Pt/SerializationInfo.h>
 #include <memory>
 
 
@@ -85,7 +85,7 @@ namespace Xml {
                 The serializer will serialize the object data \a data
                 as a complete XML document to the stream.
             */
-            void putData(const SerializationData& data);
+            void putData(const SerializationInfo& si);
 
             /** @brief Serialize an object to XML
 
@@ -97,9 +97,10 @@ namespace Xml {
             template <typename T>
             void serialize(const T& type, const std::string& name)
             {
-                SerializationData data(0, name);
-                set(data, type);
-                this->putData( data );
+                SerializationInfo si;
+                si.setName(name);
+                put(si, type);
+                this->putData( si );
             }
 
             /** @brief Serialize object to XML
@@ -110,7 +111,7 @@ namespace Xml {
 
         protected:
             //! @internal
-            void writeData(const SerializationData& data);
+            void writeData(const SerializationInfo& si);
 
         private:
             //! @internal
