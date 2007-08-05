@@ -30,11 +30,6 @@
 
 namespace Pt {
 
-class Archive;
-class SerializationNode;
-class SerializationData;
-
-
 class InvalidTime : public std::invalid_argument
 {
     public:

@@ -30,9 +30,6 @@
 
 namespace Pt {
 
-class SerializationNode;
-class SerializationData;
-
 /** @brief Combined %Date and %Time value
     @ingroup DateTime
 */
@@ -171,10 +168,6 @@ class PT_API DateTime
         Date _date;
         Time _time;
 };
-
-PT_API void get(const SerializationData& data, DateTime& x);
-
-PT_API void set(SerializationData& data, const DateTime& x);
 
 
 inline void get(const SerializationInfo& si, DateTime& datetime)
