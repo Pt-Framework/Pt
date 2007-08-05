@@ -17,15 +17,18 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_PropertyValue_h
-#define Pt_PropertyValue_h
+#ifndef Pt_Reflex_PropertyValue_h
+#define Pt_Reflex_PropertyValue_h
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>
 #include <Pt/Exception.h>
+#include <Pt/Reflex/Api.h>
 
 
 namespace Pt {
+
+namespace Reflex {
 
 /** @brief Value type registerable as property
     @ingroup Reflection
@@ -62,6 +65,8 @@ class PropertyValue
         Pt::Any _value;
 };
 
-}
+} // namespace Reflex
+
+} // namespace Reflex
 
 #endif

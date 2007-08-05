@@ -17,18 +17,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_MethodInfo_h
-#define Pt_MethodInfo_h
+#ifndef Pt_Reflex_MethodInfo_h
+#define Pt_Reflex_MethodInfo_h
 
-#include <Pt/Args.h>
+#include <Pt/Reflex/Api.h>
+#include <Pt/Reflex/MethodInfoBase.h>
 #include <Pt/Exception.h>
-#include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
-#include <Pt/MethodInfoBase.h>
+#include <Pt/Method.h>
 #include <stdexcept>
 
 
 namespace Pt {
+
+namespace Reflex {
 
 template < typename R,
            class C,
@@ -507,6 +509,8 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pu
     private:
         Callable<void>* _cb;
 };
+
+} // namespace Reflex
 
 } // namespace Pt
 

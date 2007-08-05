@@ -17,10 +17,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Reflectable.h"
+#include "Pt/Reflex/Reflectable.h"
 
 
 namespace Pt {
+
+namespace Reflex {
 
 PropertyNotReadable::PropertyNotReadable(const std::string& propertyName, const SourceInfo& si)
 : std::logic_error("Property '" + propertyName + "' is not readable" + si)
@@ -41,5 +43,7 @@ PropertyNotWritable::PropertyNotWritable(const std::string& propertyName, const 
 PropertyNotWritable::~PropertyNotWritable() throw()
 {
 }
+
+} // namespace Reflex
 
 } // namespace Pt

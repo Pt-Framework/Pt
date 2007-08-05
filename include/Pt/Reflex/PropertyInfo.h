@@ -17,21 +17,23 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_PropertyInfo_h
-#define Pt_PropertyInfo_h
+#ifndef Pt_Reflex_PropertyInfo_h
+#define Pt_Reflex_PropertyInfo_h
 
-#include <Pt/Api.h>
 #include <Pt/Any.h>
 #include <Pt/Method.h>
-#include <Pt/MemberInfo.h>
 #include <Pt/ConstMethod.h>
-#include <Pt/PropertyValue.h>
+#include <Pt/Reflex/Api.h>
+#include <Pt/Reflex/MemberInfo.h>
+#include <Pt/Reflex/PropertyValue.h>
 #include <memory>
 
 
 namespace Pt {
 
-class PT_API PropertyNotReadable : public std::logic_error
+namespace Reflex {
+
+class PT_REFLEX_API PropertyNotReadable : public std::logic_error
 {
     public:
         PropertyNotReadable(const std::string& propertyName, const SourceInfo& si);
@@ -40,7 +42,7 @@ class PT_API PropertyNotReadable : public std::logic_error
 };
 
 
-class PT_API PropertyNotWritable : public std::logic_error
+class PT_REFLEX_API PropertyNotWritable : public std::logic_error
 {
     public:
         PropertyNotWritable(const std::string& propertyName, const SourceInfo& si);
@@ -325,6 +327,8 @@ class ReadWriteProperty : public PropertyInfo
         PropertyValue<T>* _value;
         Pt::Invokable<A>* _setter;
 };
+
+} // namespace Reflex
 
 } // namespace Pt
 

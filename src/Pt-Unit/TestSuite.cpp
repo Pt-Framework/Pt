@@ -29,7 +29,7 @@ TestProtocol TestSuite::defaultProtocol;
 
 inline void TestProtocol::run(TestSuite& suite)
 {
-    Reflectable::MethodIterator it;
+    Reflex::Reflectable::MethodIterator it;
     for(it = suite.methodsBegin(); it != suite.methodsEnd(); ++it)
     {
         suite.runTest( it->name(), 0, 0 );

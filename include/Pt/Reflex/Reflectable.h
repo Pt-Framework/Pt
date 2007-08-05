@@ -17,13 +17,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_Reflectable_h
-#define Pt_Reflectable_h
+#ifndef Pt_Reflex_Reflectable_h
+#define Pt_Reflex_Reflectable_h
 
-#include <Pt/Api.h>
+#include <Pt/Reflex/Api.h>
+#include <Pt/Reflex/MethodInfo.h>
+#include <Pt/Reflex/PropertyInfo.h>
 #include <Pt/Exception.h>
-#include <Pt/MethodInfo.h>
-#include <Pt/PropertyInfo.h>
 #include <Pt/AnyFactory.h>
 
 
@@ -31,8 +31,9 @@ namespace Pt {
 
 class SerializationInfo;
 
+namespace Reflex {
 
-class PT_API NoSuchProperty : public std::logic_error
+class PT_REFLEX_API NoSuchProperty : public std::logic_error
 {
     public:
         NoSuchProperty(const std::string& propertyName, const SourceInfo& si);
@@ -41,7 +42,7 @@ class PT_API NoSuchProperty : public std::logic_error
 };
 
 
-class PT_API NoSuchMethod : public std::logic_error
+class PT_REFLEX_API NoSuchMethod : public std::logic_error
 {
     public:
         NoSuchMethod(const std::string& methodName, const SourceInfo& si);
@@ -53,7 +54,7 @@ class PT_API NoSuchMethod : public std::logic_error
 /** @brief Make objects reflectable
     @ingroup Reflection
 */
-class PT_API Reflectable
+class PT_REFLEX_API Reflectable
 {
     public:
         class MethodIterator;
@@ -350,6 +351,8 @@ class Reflectable::ConstPropertyIterator
     private:
         PropertyInfo* const* _pi;
 };
+
+} // Reflex
 
 } // namespace Pt
 

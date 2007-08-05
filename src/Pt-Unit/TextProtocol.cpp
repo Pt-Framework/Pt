@@ -126,7 +126,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             si.setName(propertyName);
             si.setValue(token);
 
-            Pt::PropertyInfo& pi = suite.propertyInfo(propertyName);
+            Pt::Reflex::PropertyInfo& pi = suite.propertyInfo(propertyName);
             get(si, pi);
         }
         // method line
@@ -136,7 +136,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
             size_t argIndex = 0;
             std::vector<Pt::Any> args;
-            Pt::CallableInfo& cb = suite.methodInfo(methodName);
+            Pt::Reflex::CallableInfo& cb = suite.methodInfo(methodName);
 
             while( getline(lineReader, paramType, ':') )
             {

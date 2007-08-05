@@ -61,7 +61,7 @@ namespace Unit {
         one and reflection can be used to call any method multiple times with
         the required data.
     */
-    class PT_UNIT_API TestSuite : public Reflectable, public Test
+    class PT_UNIT_API TestSuite : public Reflex::Reflectable, public Test
     {
         public:
             class Context : public TestContext

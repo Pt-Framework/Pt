@@ -17,16 +17,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_CallableInfo_h
-#define Pt_CallableInfo_h
+#ifndef Pt_Reflex_CallableInfo_h
+#define Pt_Reflex_CallableInfo_h
 
-#include <Pt/MemberInfo.h>
+#include <Pt/Reflex/Api.h>
+#include <Pt/Reflex/MemberInfo.h>
+#include <Pt/Types.h>
+#include <Pt/Any.h>
 
-//! \addtogroup Pt
+
 namespace Pt {
 
-    class Args;
-    class SerializationData;
+namespace Reflex {
 
     /** @brief Reflection support for callable entities
         @ingroup Reflection
@@ -50,6 +52,8 @@ namespace Pt {
             CallableInfo()
             {}
     };
+
+} // namespace Reflex
 
 } // namespace Pt
 

@@ -11,8 +11,6 @@ SharedLibrary Pt : Any.cpp
                    Date.cpp
                    DateTime.cpp
                    Exception.cpp
-                   PropertyInfo.cpp
-                   Reflectable.cpp
                    SerializationInfo.cpp
                    Settings.cpp
                    Signal.cpp
@@ -30,10 +28,6 @@ SharedLibrary Pt : Any.cpp
 
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt ;
-
-PtUnitTest ReflectableTest : ReflectableTest.cpp ;
-Main_LinkSharedLibraries ReflectableTest : Pt Pt-Unit ;
-PtUnitTest_MakeLocate ReflectableTest : $(OUTPUT_TARGET) ;
 
 PtUnitTest SerializationTest : SerializationTest.cpp ;
 Main_LinkSharedLibraries SerializationTest : Pt Pt-Unit ;

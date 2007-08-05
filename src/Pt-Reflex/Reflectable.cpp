@@ -17,13 +17,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/Reflectable.h"
+#include "Pt/Reflex/Reflectable.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/AnyFactory.h"
 #include <algorithm>
 
 
 namespace Pt {
+
+namespace Reflex {
 
 NoSuchProperty::NoSuchProperty(const std::string& propertyName, const SourceInfo& si)
 : std::logic_error("Property '" + propertyName + "' not found" + si)
@@ -337,5 +339,7 @@ void put(SerializationInfo& si, const Reflectable& r)
 
     si.setTypeName( r.objectName() );
 }
+
+} // namespace Reflex
 
 } // namespace Pt

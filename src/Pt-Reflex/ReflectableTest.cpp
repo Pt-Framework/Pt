@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Marc Boris Drner                               *
+ *   Copyright (C) 2007 by Marc Boris Drner                                *
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,16 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#undef PT_API_EXPORT
+#undef PT_REFLEX_API_EXPORT
 
-#include "Pt/Pt.h"
-#include "Pt/Reflectable.h"
+#include "Pt/Reflex/Reflectable.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
+using namespace Pt::Reflex;
 
 class ClassDef;
 
@@ -35,14 +35,14 @@ template <typename T>
 class ClassTraits
 {
     public:
-        static void construct(Pt::Reflectable&, T& instance )
+        static void construct(Reflectable&, T& instance )
         { }
 };
 
 
 class ClassDef
 {
-    typedef Pt::Reflectable* (*Create)(ClassDef const *);
+    typedef Reflectable* (*Create)(ClassDef const *);
 
     public:
         ClassDef(ClassDef const* base, Create c)
@@ -50,7 +50,7 @@ class ClassDef
         , _create(c)
         { }
 
-        Pt::Reflectable* create() const
+        Reflectable* create() const
         {
             return _create(this);
         }
@@ -65,11 +65,11 @@ class ClassDef
 
 
 template <typename C>
-class StaticObject : public Pt::Reflectable
+class StaticObject : public Reflectable
 {
     public:
         StaticObject()
-        : Pt::Reflectable("")
+        : Reflectable("")
         {
             _object = new C;
             ClassTraits<C>::construct(*this, *_object);
@@ -80,11 +80,11 @@ class StaticObject : public Pt::Reflectable
 };
 
 
-class DynamicObject : public Pt::Reflectable
+class DynamicObject : public Reflectable
 {
     public:
         DynamicObject(ClassDef const* def)
-        : Pt::Reflectable("")
+        : Reflectable("")
         {
             if( def->base() )
             {
@@ -94,14 +94,14 @@ class DynamicObject : public Pt::Reflectable
         }
 
     private:
-        Pt::Reflectable* _base;
+        Reflectable* _base;
 };
 
 
 /** Static classes
 */
 template <class T>
-Pt::Reflectable* createStaticObject(ClassDef const* def)
+Reflectable* createStaticObject(ClassDef const* def)
 {
     return new StaticObject<T>();
 }
@@ -117,7 +117,7 @@ ClassDef staticClass()
 /** Meta classes
 */
 template <class T>
-static Pt::Reflectable* createMetaObject(ClassDef const* cdef)
+static Reflectable* createMetaObject(ClassDef const* cdef)
 {
     return new T;
 }
@@ -132,7 +132,7 @@ ClassDef metaClass()
 
 /** Dynamic classes
 */
-Pt::Reflectable* createDynamicObject(ClassDef const* def)
+Reflectable* createDynamicObject(ClassDef const* def)
 {
     return new DynamicObject(def);
 }
@@ -169,18 +169,18 @@ template <>
 class ClassTraits<MyClass>
 {
     public:
-        static void construct(Pt::Reflectable& refl, MyClass& mc)
+        static void construct(Pt::Reflex::Reflectable& refl, MyClass& mc)
         {
             refl.registerProperty("number", mc, &MyClass::number, &MyClass::setNumber);
         }
 };
 
 
-class TestReflectable : public Pt::Reflectable
+class TestReflectable : public Pt::Reflex::Reflectable
 {
     public:
         TestReflectable()
-        : Pt::Reflectable("TestReflectable")
+        : Pt::Reflex::Reflectable("TestReflectable")
         {
             this->registerProperty("number", *this, _number, &TestReflectable::setNumber);
             this->registerReadProperty("count", *this, _number );
@@ -206,7 +206,7 @@ class TestReflectable : public Pt::Reflectable
         { return _number.get(); }
 
     private:
-        Pt::PropertyValue<int> _number;
+        Pt::Reflex::PropertyValue<int> _number;
 };
 
 
@@ -262,10 +262,10 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             reflectable.setProperty("number", Pt::Any( int(5) ) );
 
             Pt::SerializationInfo si;
-            put( si, static_cast<Pt::Reflectable&>(reflectable) );
+            put( si, static_cast<Pt::Reflex::Reflectable&>(reflectable) );
 
             TestReflectable reflectable2;
-            get(si, static_cast<Pt::Reflectable&>(reflectable2) );
+            get(si, static_cast<Pt::Reflex::Reflectable&>(reflectable2) );
 
             PT_UNIT_ASSERT( reflectable2.property("count") == 5 )
             PT_UNIT_ASSERT( reflectable2.property("number") == 5 )

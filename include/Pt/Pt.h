@@ -28,12 +28,6 @@
     including other dates, times and timespans.
 */
 
-/** @defgroup Reflection
-    @brief Object reflection system
-
-    The Pt Reflection API offers support for properties and method invokation.
-*/
-
 /** @defgroup CTTI
     @brief Compile time type information
 

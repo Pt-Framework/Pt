@@ -17,12 +17,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Pt_MemberInfo_h
-#define Pt_MemberInfo_h
+#ifndef Pt_Reflex_MemberInfo_h
+#define Pt_Reflex_MemberInfo_h
 
 
-//! \addtogroup Pt
 namespace Pt {
+
+namespace Reflex {
 
     /** @brief Reflectable member of a %Reflectable
         @ingroup Reflection
@@ -39,6 +40,8 @@ namespace Pt {
             MemberInfo()
             {}
     };
+
+} // namespace Reflex
 
 } // namespace Pt
 
