@@ -181,3 +181,13 @@ include/Pt/Archive.h
 include/Pt/SerializationData.h
 include/Pt/Settings.h
 include/Pt/SerializationInfo.h
+include/Pt/Reflex/CallableInfo.h
+include/Pt/Reflex/MemberInfo.h
+include/Pt/Reflex/MethodInfoBase.h
+include/Pt/Reflex/MethodInfo.h
+include/Pt/Reflex/PropertyInfo.h
+include/Pt/Reflex/PropertyValue.h
+include/Pt/Reflex/Reflectable.h
+src/Pt-Reflex/PropertyInfo.cpp
+src/Pt-Reflex/Reflectable.cpp
+src/Pt-Reflex/ReflectableTest.cpp

@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q test</makeoptions>
+      <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

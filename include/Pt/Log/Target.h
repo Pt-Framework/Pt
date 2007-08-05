@@ -21,7 +21,7 @@
 
 #include <Pt/Log/Api.h>
 #include <Pt/Log/Logger.h>
-#include <Pt/Reflectable.h>
+#include <Pt/Reflex/Reflectable.h>
 #include <string>
 
 
@@ -61,7 +61,7 @@ namespace Log {
         target ping writes messages with a log-level of Error of higher
         asnychronously to the serial port.
     */
-    class PT_LOG_API Target : public Reflectable, protected Pt::NonCopyable
+    class PT_LOG_API Target : public Reflex::Reflectable, protected Pt::NonCopyable
     {
         friend class LogManager;
         friend class Logger;
