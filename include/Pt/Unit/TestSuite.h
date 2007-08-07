@@ -20,7 +20,6 @@
 #define PT_UNIT_TESTSUITE_H
 
 #include <Pt/Singleton.h>
-#include <Pt/AnyFactory.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>

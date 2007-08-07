@@ -19,7 +19,6 @@
 
 #include "Pt/Reflex/Reflectable.h"
 #include "Pt/SerializationInfo.h"
-#include "Pt/AnyFactory.h"
 #include <algorithm>
 
 

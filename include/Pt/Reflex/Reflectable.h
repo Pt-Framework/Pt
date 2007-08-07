@@ -24,7 +24,6 @@
 #include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/PropertyInfo.h>
 #include <Pt/Exception.h>
-#include <Pt/AnyFactory.h>
 
 
 namespace Pt {

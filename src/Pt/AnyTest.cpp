@@ -19,7 +19,6 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Any.h"
-#include "Pt/AnyFactory.h"
 #include "Pt/SerializationInfo.h"
 
 #include "Pt/Unit/Assertion.h"

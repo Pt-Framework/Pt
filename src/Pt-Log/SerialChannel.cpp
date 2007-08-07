@@ -30,8 +30,8 @@ namespace Log {
 
 SerialChannel::SerialChannel()
 : Pt::System::Thread( _threadLoop )
-, _mutex(Pt::System::Mutex::Normal)
 , Channel()
+, _mutex(Pt::System::Mutex::Normal)
 {
     _n = 0;
     Pt::connect( _threadLoop.event, *this, &SerialChannel::processEvent);
