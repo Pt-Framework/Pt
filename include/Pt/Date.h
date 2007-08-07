@@ -246,7 +246,7 @@ class PT_API Date
 };
 
 
-inline void get(const SerializationInfo& si, Date& date)
+inline void operator >>=(const SerializationInfo& si, Date& date)
 {
     int year = si.getValue<int>("year");
     unsigned month = si.getValue<unsigned>("month");
@@ -255,7 +255,7 @@ inline void get(const SerializationInfo& si, Date& date)
 }
 
 
-inline void put(SerializationInfo& si, const Date& date)
+inline void operator <<=(SerializationInfo& si, const Date& date)
 {
     si.addValue("year",  date.year() );
     si.addValue("month", date.month() );

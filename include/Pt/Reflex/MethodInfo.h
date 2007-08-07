@@ -449,6 +449,7 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public M
 template < typename R,
            class C >
 class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<R, C>
+                                                                         , public Connectable
 {
     public:
         typedef C ClassT;
@@ -474,6 +475,14 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
             return _cb->call();
         }
 
+        virtual Slot* createSlot()
+        {
+            return Pt::slot( *this, &MethodInfo::do_call ).clone();
+        }
+
+        void do_call()
+        { _cb->invoke(); }
+
     private:
         Callable<R>* _cb;
 };
@@ -481,6 +490,7 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : publi
 
 template < class C >
 class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public MethodInfoBase<void, C>
+                                                                            , public Connectable
 {
     public:
         typedef C ClassT;
@@ -491,20 +501,30 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : pu
         MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<void, C>(name)
         ,_cb( new Method<void, C>(object, memFunc) )
-        {}
+        { }
 
         MethodInfo(C& object, ConstMemFuncT memFunc)
         : _cb( new ConstMethod<void, C>(object, memFunc) )
-        {}
+        { }
 
         ~MethodInfo()
-        { delete _cb; }
+        {
+            delete _cb;
+        }
 
         Pt::Any call(const Any* args, size_t argCount)
         {
             _cb->invoke();
             return Any();
         }
+
+        virtual Slot* createSlot()
+        {
+            return Pt::slot( *this, &MethodInfo::do_call ).clone();
+        }
+
+        void do_call()
+        { _cb->invoke(); }
 
     private:
         Callable<void>* _cb;

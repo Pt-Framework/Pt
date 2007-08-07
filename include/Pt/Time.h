@@ -224,7 +224,7 @@ class PT_API Time
     };
 
 
-    inline void get(const SerializationInfo& si, Time& time)
+    inline void operator >>=(const SerializationInfo& si, Time& time)
     {
         unsigned hour = si.getValue<unsigned>("hour");
         unsigned min = si.getValue<unsigned>("minute");
@@ -234,7 +234,7 @@ class PT_API Time
     }
 
 
-    inline void put(SerializationInfo& si, const Time& time)
+    inline void operator <<=(SerializationInfo& si, const Time& time)
     {
         unsigned hour = 0;
         unsigned min = 0;

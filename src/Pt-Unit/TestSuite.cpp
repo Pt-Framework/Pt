@@ -32,7 +32,8 @@ inline void TestProtocol::run(TestSuite& suite)
     Reflex::Reflectable::MethodIterator it;
     for(it = suite.methodsBegin(); it != suite.methodsEnd(); ++it)
     {
-        suite.runTest( it->name(), 0, 0 );
+        const Any* a = 0;
+        suite.runTest( it->name(), a, 0 );
     }
 }
 
@@ -62,3 +63,28 @@ void TestSuite::runTest(const std::string& name, const Any* args, size_t argCoun
 }
 
 
+void TestSuite::runTest( const std::string& name, const SerializationInfo* si, size_t argCount )
+{
+    Pt::Reflex::CallableInfo& cb = this->methodInfo( name );
+
+    if(argCount == 0)
+    {
+        this->runTest(name);
+    }
+
+    std::vector<Pt::Any> args(argCount);
+    for(size_t n = 0; n < argCount; ++n)
+    {
+        const char* argName = cb.argName(n);
+
+        std::map<std::string, Deserialize>::const_iterator it = _deserializers.find(argName);
+        if( it == _deserializers.end() )
+            throw SerializationError("Could not deserialize type " + std::string(argName) , PT_SOURCEINFO);
+
+        Any a;
+        it->second(si[n], args[n]);
+        args.push_back(a);
+    }
+
+    this->runTest(name, &args[0], argCount);
+}

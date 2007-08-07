@@ -91,13 +91,13 @@ bool operator<(const Brush& a, const Brush& b)
 }
 
 
-void get( const SerializationInfo& si, Gfx::Brush& brush )
+void operator >>=( const SerializationInfo& si, Gfx::Brush& brush )
 {
     brush = Gfx::Brush( Gfx::ARgbColor::fromHtml( si.toString() ) );
 }
 
 
-void put( SerializationInfo& si, const Gfx::Brush& brush )
+void operator <<=( SerializationInfo& si, const Gfx::Brush& brush )
 {
     si.setValue( brush.color().toHtml() );
     si.setTypeName("Brush");

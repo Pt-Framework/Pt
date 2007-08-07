@@ -24,7 +24,7 @@
 
 
 namespace Pt {
-
+/*
 TypeFactory::TypeFactory()
 { }
 
@@ -72,5 +72,5 @@ void TypeFactory::serialize(Pt::SerializationInfo& si, const Pt::Any& a)
     it->second(si, a);
 }
 
-
+*/
 } // namespace Pt

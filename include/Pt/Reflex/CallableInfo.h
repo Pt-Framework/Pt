@@ -28,6 +28,8 @@
 
 namespace Pt {
 
+class Slot;
+
 namespace Reflex {
 
     /** @brief Reflection support for callable entities
@@ -47,6 +49,9 @@ namespace Reflex {
             virtual const std::type_info& retType() const = 0;
 
             virtual Pt::Any call(const Any* args, size_t argCount) = 0;
+
+            virtual Slot* createSlot()
+            { return 0; }
 
         protected:
             CallableInfo()

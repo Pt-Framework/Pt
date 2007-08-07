@@ -99,7 +99,7 @@ namespace Xml {
             {
                 SerializationInfo si;
                 si.setName(name);
-                put(si, type);
+                si <<= type;
                 this->putData( si );
             }
 

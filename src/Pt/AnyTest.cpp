@@ -41,9 +41,7 @@ class AnyTest : public Pt::Unit::TestSuite
             this->registerMethod( "Bool", *this, &AnyTest::BoolTest );
             this->registerMethod( "Char", *this, &AnyTest::CharTest );
             this->registerMethod( "Int", *this, &AnyTest::IntTest );
-            this->registerMethod( "SerilializeInt", *this, &AnyTest::SerilializeInt );
             this->registerMethod( "Float", *this, &AnyTest::FloatTest );
-            this->registerMethod( "SerilializeFloat", *this, &AnyTest::SerilializeFloat );
             this->registerMethod( "Double", *this, &AnyTest::DoubleTest );
             this->registerMethod( "StdString", *this, &AnyTest::StdStringTest );
         }
@@ -79,35 +77,11 @@ class AnyTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( i == 5 );
         }
 
-        void SerilializeInt()
-        {
-            Pt::Any a = 5;
-            Pt::SerializationInfo si;
-            Pt::TypeFactory::instance().serialize(si, a);
-
-            Pt::Any a2;
-            a2 = Pt::TypeFactory::instance().create(si);
-
-            PT_UNIT_ASSERT(a2 == 5)
-        }
-
         void FloatTest()
         {
             Pt::Any a = 1.5f;
             float f = Pt::any_cast<float>(a);
             PT_UNIT_ASSERT( f == 1.5 );
-        }
-
-        void SerilializeFloat()
-        {
-            Pt::Any a = 5.0f;
-            Pt::SerializationInfo si;
-            Pt::TypeFactory::instance().serialize(si, a);
-
-            Pt::Any a2;
-            a2 = Pt::TypeFactory::instance().create(si);
-
-            PT_UNIT_ASSERT(a2 == 5.0f)
         }
 
         void DoubleTest()

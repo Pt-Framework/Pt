@@ -127,17 +127,16 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             si.setValue(token);
 
             Pt::Reflex::PropertyInfo& pi = suite.propertyInfo(propertyName);
-            get(si, pi);
+            si >>= pi;
         }
         // method line
         else if(token.compare("method") == 0)
         {
             lineReader >> methodName;
 
-            size_t argIndex = 0;
-            std::vector<Pt::Any> args;
-            Pt::Reflex::CallableInfo& cb = suite.methodInfo(methodName);
-
+            // SerializationInfo is not copy-constructible
+            SerializationInfo siArgs[10];
+            size_t n = 0;
             while( getline(lineReader, paramType, ':') )
             {
                 //paramType.erase(0, paramType.find_first_not_of(", \t"));
@@ -165,17 +164,12 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
                 }
 
                 //std::cerr << "arg:" << token << std::endl;
-                SerializationInfo si;
-                si.setValue(token);
-
-                const char* argName = cb.argName(argIndex);
-                Any a = Pt::TypeFactory::instance().create(si, argName);
-
-                args.push_back(a);
-                argIndex++;
+                siArgs[n].setValue(token);
+                if(++n > 9)
+                    throw std::out_of_range("Too many method arguments");
             }
 
-            suite.runTest(methodName, &args[0], args.size() );
+            suite.runTest(methodName, siArgs, n );
         }
         // unknown command
         else

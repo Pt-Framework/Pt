@@ -208,7 +208,7 @@ namespace Pt {
          * numbers are not interpreted as unsigned char, a cast to Pt::uint16_t
          * is done.
          */
-        inline void put(Pt::SerializationInfo& si, const BasicPoint<Pt::uint8_t>& point)
+        inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<Pt::uint8_t>& point)
         {
             si.addValue("x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
             si.addValue("y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
@@ -218,7 +218,7 @@ namespace Pt {
         /** @brief serialization BasicPoint
          */
         template <typename T>
-        inline void put(Pt::SerializationInfo& si, const BasicPoint<T>& point)
+        inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<T>& point)
         {
             si.addValue("x", Pt::Variant(point.x()));
             si.addValue("y", Pt::Variant(point.y()));
@@ -227,7 +227,7 @@ namespace Pt {
 
         /** @brief deserialization BasicPoint<Pt::uint8_t>
          */
-        inline void get(const Pt::SerializationInfo& si, BasicPoint<Pt::uint8_t>& point)
+        inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<Pt::uint8_t>& point)
         {
             Pt::uint16_t x = si.getValue<Pt::uint16_t>("x");
             Pt::uint16_t y = si.getValue<Pt::uint16_t>("y");
@@ -239,7 +239,7 @@ namespace Pt {
         /** @brief deserialization BasicPoint
          */
         template <typename T>
-        inline void get(const Pt::SerializationInfo& si, BasicPoint<T>& point)
+        inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<T>& point)
         {
             T x = si.toValue<T>("x");
             T y = si.toValue<T>("y");

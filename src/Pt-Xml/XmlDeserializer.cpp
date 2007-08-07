@@ -116,7 +116,7 @@ void XmlDeserializer::onStartElement(const Node& node)
                 if(_current == 0)
                     throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
-                SerializationInfo& added = _current->addValue( _nodeName.narrow() );
+                SerializationInfo& added = _current->addMember( _nodeName.narrow() );
                 _current = &added;
                 _processNode = &XmlDeserializer::onWhitespace;
             }
@@ -128,7 +128,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             if(_current == 0)
                 throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
 
-             SerializationInfo& added = _current->addValue( _nodeName.narrow() );
+             SerializationInfo& added = _current->addMember( _nodeName.narrow() );
             _current = &added;
 
             _nodeName = static_cast<const StartElement&>(node).name();

@@ -19,12 +19,6 @@ SerializationInfo::SerializationInfo()
 }
 
 
-SerializationInfo::SerializationInfo(SerializationInfo& parent)
-: _parent(&parent)
-, _category(Value)
-{ }
-
-
 SerializationInfo::~SerializationInfo()
 {
     Nodes::iterator it;
@@ -84,7 +78,13 @@ void SerializationInfo::setValue(const Pt::Variant& value)
 }
 
 
-SerializationInfo& SerializationInfo::addValue(const std::string& name)
+const Pt::String& SerializationInfo::toString() const
+{
+    return _value.str();
+}
+
+
+SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
     SerializationInfo* info = new SerializationInfo(*this);
     info->setName(name);
@@ -113,7 +113,7 @@ SerializationInfo::ConstIterator SerializationInfo::end() const
 }
 
 
-const SerializationInfo& SerializationInfo::getObjectData(const std::string& name) const
+const SerializationInfo& SerializationInfo::getMember(const std::string& name) const
 {
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
@@ -126,7 +126,7 @@ const SerializationInfo& SerializationInfo::getObjectData(const std::string& nam
 }
 
 
-const SerializationInfo* SerializationInfo::findObjectData(const std::string& name) const
+const SerializationInfo* SerializationInfo::findMember(const std::string& name) const
 {
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
@@ -139,7 +139,7 @@ const SerializationInfo* SerializationInfo::findObjectData(const std::string& na
 }
 
 
-SerializationInfo* SerializationInfo::findObjectData(const std::string& name)
+SerializationInfo* SerializationInfo::findMember(const std::string& name)
 {
     Nodes::iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)

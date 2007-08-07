@@ -50,50 +50,15 @@ class SerializationTest : public Pt::Unit::TestSuite
         }
 
     protected:
-
         void perf()
         {
-
-
             Pt::System::Clock c;
             c.start();
-
-                std::stringstream ss("         hallo         1234567890         ");
-                std::string token;
-
-                Pt::SerializationInfo si1;
-                Pt::SerializationInfo si2;
-                ss >> token;
-                si1.setValue(token);
-
-                ss >> token;
-                si2.setValue(token);
-                Pt::Any a1 = std::string("hallo");
-                Pt::Any a2 = 5;
-            for(int n = 0; n < 100000; ++n)
-            {
-
-
-                //std::string s = si1.toValue<std::string>();
-                //int n = si2.toValue<int>();
-
-
-                //const std::string& sx = Pt::any_cast<std::string>(aa2);
-                //int nx = Pt::any_cast<int>(aa1);
-                //int mx = Pt::any_cast<int>(aa1);
-                //Pt::TypeFactory::instance().assertBuilder<std::string>();
-                //Pt::TypeFactory::instance().assertBuilder<int>();
-
-                a1 = Pt::TypeFactory::instance().create(si1, "std::string");
-                a2 = Pt::TypeFactory::instance().create(si2, "int");
-                const std::string& s = Pt::any_cast<const std::string&>(a1);
-                int n = Pt::any_cast<int>(a2);
-            }
 
             Pt::System::TimeValue tv = c.stop();
             std::cerr << "Duration: " << tv.seconds() << ":" << tv.microSeconds()/1000 << std::endl;
         }
-        
+
         void StdVector()
         {
             std::vector<int> iv, iv2;
@@ -102,13 +67,13 @@ class SerializationTest : public Pt::Unit::TestSuite
             iv.push_back(3);
 
             Pt::SerializationInfo si;
-            put(si, iv);
+            si <<= iv;
 
             /*for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
             {
                 std::cerr << "elem: " << it->getValue<std::string>() << std::endl;
             }*/
-            get(si, iv2);
+            si >>= iv2;
 /*
             Pt::ObjectManager manager;
 
@@ -145,7 +110,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::Date date(2000, 10, 20);
             Pt::SerializationInfo si;
-            put(si, date);
+            si <<=  date;
 
             /*for(Pt::SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
             {
@@ -153,7 +118,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             }*/
 
             Pt::Date date2(1,1,1);
-            get(si, date2);
+            si >>= date2;
 
             PT_UNIT_ASSERT(date == date2);
         }
@@ -162,10 +127,10 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::Time time(18, 40, 5, 1);
             Pt::SerializationInfo si;
-            put(si, time);
+            si <<= time;
 
             Pt::Time time2;
-            get( si, time2 );
+            si >>= time2;
 
             PT_UNIT_ASSERT(time == time2);
         }
@@ -174,10 +139,10 @@ class SerializationTest : public Pt::Unit::TestSuite
         {
             Pt::DateTime datetime(2000, 10, 20, 18, 40, 5, 1);
             Pt::SerializationInfo si;
-            put(si, datetime);
+            si <<= datetime;
 
             Pt::DateTime datetime2;
-            get( si, datetime2 );
+            si >>= datetime2;
 
             const Pt::Date date = datetime.date();
             const Pt::Date date2 = datetime2.date();

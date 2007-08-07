@@ -170,27 +170,27 @@ class PT_API DateTime
 };
 
 
-inline void get(const SerializationInfo& si, DateTime& datetime)
+inline void operator >>=(const SerializationInfo& si, DateTime& datetime)
 {
     Date date(1,1,1);
-    get( si.getObjectData("date"), date );
+    si.getMember("date") >>= date;
     datetime.setDate(date);
 
     Time time;
-    get( si.getObjectData("time"), time );
+    si.getMember("time") >>= time;
     datetime.setTime(time);
 }
 
 
-inline void put(SerializationInfo& si, const DateTime& datetime)
+inline void operator <<=(SerializationInfo& si, const DateTime& datetime)
 {
     si.setTypeName("DateTime");
 
-    SerializationInfo& date = si.addValue("date");
-    put( date, datetime.date() );
+    SerializationInfo& date = si.addMember("date");
+    date <<= datetime.date();
 
-    SerializationInfo& time  = si.addValue("time");
-    put( time, datetime.time() );
+    SerializationInfo& time  = si.addMember("time");
+    time <<= datetime.time();
 }
 
 }

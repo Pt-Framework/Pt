@@ -176,6 +176,34 @@ class ClassTraits<MyClass>
 };
 
 
+class SignalInfo
+{
+    public:
+        SignalInfo(Pt::Signal<>& signal)
+        : _signal(&signal)
+        {}
+
+        void send(const Pt::Any* args, size_t argCount)
+        {
+            _signal->send();
+        }
+
+        Pt::Connection connect(CallableInfo& ci)
+        {
+            if(ci.argSize() != 0)
+            {
+                throw std::invalid_argument("Incompatible slot" + PT_SOURCEINFO);
+            }
+
+            Pt::Slot* slot = ci.createSlot();
+            return Pt::Connection(*_signal, slot);
+        }
+
+    private:
+        Pt::Signal<>* _signal;
+};
+
+
 class TestReflectable : public Pt::Reflex::Reflectable
 {
     public:
@@ -185,9 +213,15 @@ class TestReflectable : public Pt::Reflex::Reflectable
             this->registerProperty("number", *this, _number, &TestReflectable::setNumber);
             this->registerReadProperty("count", *this, _number );
 
+            this->registerMethod("method0", *this, &TestReflectable::method0);
             this->registerMethod("method1", *this, &TestReflectable::method1);
             this->registerMethod("method2", *this, &TestReflectable::method2);
             this->registerMethod("method3", *this, &TestReflectable::method3);
+        }
+
+        int method0()
+        { std::cerr << "XXX method 0 called." << std::endl;
+            return 0;
         }
 
         void method1(int) const
@@ -244,6 +278,15 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             Reflectable* rd = dyna.create();
             Pt::Any number = rd->property("number");
             std::cerr << "Number is: " <<  Pt::any_cast<int>(number) << std::endl;
+
+            Pt::Signal<> sig;
+            SignalInfo si(sig);
+
+            Pt::Reflex::Reflectable* rm = meta.create();
+            CallableInfo& ci = rm->methodInfo("method0");
+            si.connect(ci);
+
+            si.send(0,0);
             std::cerr << "\n######################"<< std::endl;
 
             /*
@@ -262,13 +305,14 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             reflectable.setProperty("number", Pt::Any( int(5) ) );
 
             Pt::SerializationInfo si;
-            put( si, static_cast<Pt::Reflex::Reflectable&>(reflectable) );
+            si <<= static_cast<Pt::Reflex::Reflectable&>(reflectable);
 
             TestReflectable reflectable2;
-            get(si, static_cast<Pt::Reflex::Reflectable&>(reflectable2) );
 
-            PT_UNIT_ASSERT( reflectable2.property("count") == 5 )
-            PT_UNIT_ASSERT( reflectable2.property("number") == 5 )
+            si >>= static_cast<Pt::Reflex::Reflectable&>(reflectable2);
+
+            PT_UNIT_ASSERT( reflectable2.property("count") == 5 );
+            PT_UNIT_ASSERT( reflectable2.property("number") == 5 );
         }
 
         void PropertyIterator()
@@ -284,7 +328,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             PT_UNIT_ASSERT( it->name() == std::string("count") )
 
             ++it;
-            PT_UNIT_ASSERT( it == reflectable.propertiesEnd() )
+            PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );
         }
 
         void ConstPropertyIterator()
@@ -300,7 +344,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             PT_UNIT_ASSERT( it->name() == std::string("count") )
 
             ++it;
-            PT_UNIT_ASSERT( it == reflectable.propertiesEnd() )
+            PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );
         }
 
         void Method1()

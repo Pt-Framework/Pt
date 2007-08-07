@@ -23,14 +23,11 @@
 #include <Pt/SerializationInfo.h>
 
 namespace Pt {
-
+/*
 
 template <typename T>
-struct SerializeAny
+struct SerializationTraits
 {
-    static const char* typeName()
-    { return TypeTraits<T>::typeName(); }
-
     static void serialize(Pt::SerializationInfo& si, const Pt::Any& a)
     {
         T t = any_cast<T>(a);
@@ -50,15 +47,16 @@ class TypeFactory : public Singleton<TypeFactory>
 {
     friend class Singleton<TypeFactory>;
 
+    typedef void (*Serialize)(SerializationInfo&, const Any&);
+    typedef void (*Deserialize)(const SerializationInfo&, Any&);
+
     public:
         ~TypeFactory();
 
-        template <typename T>
-        void assertType()
+        void registerType(const char* type, Serialize s, Deserialize d)
         {
-            const char* type = SerializeAny<T>::typeName();
-            _serializer[type] = &SerializeAny<T>::serialize;
-            _deserializer[type] = &SerializeAny<T>::deserialize;
+            _serializer[type] = s;
+            _deserializer[type] = d;
         }
 
         Any create(const Pt::SerializationInfo& si);
@@ -70,35 +68,43 @@ class TypeFactory : public Singleton<TypeFactory>
     protected:
         TypeFactory();
 
-        bool hasBuilder(const std::string& type) const;
-
     private:
-        typedef void (*Serialize)(SerializationInfo&, const Any&);
         std::map<std::string, Serialize> _serializer;
-
-        typedef void (*Deserialize)(const SerializationInfo&, Any&);
         std::map<std::string, Deserialize> _deserializer;
-
         void* _reserved;
 };
 
 
+// RegisterSerializable
 template <typename T>
-class AssertType
+class RegisterType
 {
+    static bool registered;
+
     public:
-        AssertType()
-        { TypeFactory::instance().assertType<T>(); }
+        RegisterType()
+        {
+            if( !registered )
+            {
+                TypeFactory::instance().registerType( TypeTraits<T>::typeName(),
+                                                      &SerializationTraits<T>::serialize,
+                                                      &SerializationTraits<T>::deserialize );
+                registered = true;
+            }
+        }
 };
 
 
-static AssertType<bool> assertBool;
-static AssertType<int> assertInt;
-static AssertType<float> assertFloat;
-static AssertType<double> assertDouble;
-static AssertType<std::string> assertStdString;
-static AssertType<Pt::String> assertPtString;
+template <typename T>
+bool RegisterType<T>::registered = false;
 
+static RegisterType<bool> assertBool;
+static RegisterType<int> assertInt;
+static RegisterType<float> assertFloat;
+static RegisterType<double> assertDouble;
+static RegisterType<std::string> assertStdString;
+static RegisterType<Pt::String> assertPtString;
+*/
 } // namespace Pt
 
 #endif

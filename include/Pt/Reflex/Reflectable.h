@@ -103,19 +103,13 @@ class PT_REFLEX_API Reflectable
         ConstMethodIterator methodsEnd() const;
 
         template <typename R, typename Parent, typename Object>
-        void registerReadProperty(const std::string& name, Parent& parent, R (Object::*getter)() const)
+        void registerProperty(const std::string& name, Parent& parent, R (Object::*getter)() const)
         {
             this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
         }
 
         template <typename R, typename Parent, typename Object>
-        void registerWriteProperty(const std::string& name, Parent& parent, R (Object::*setter)() )
-        {
-            this->registerPropertyInfo( new WritePropertyInfo<R>(name, parent, setter) );
-        }
-
-        template <typename R, typename Parent, typename Object>
-        void registerReadProperty(const std::string& name, Parent& parent, R (Object::*getter)())
+        void registerProperty(const std::string& name, Parent& parent, R (Object::*getter)())
         {
             this->registerPropertyInfo( new ReadPropertyInfo<R>(name, parent, getter) );
         }
@@ -144,10 +138,10 @@ class PT_REFLEX_API Reflectable
             this->registerPropertyInfo( new ReadWriteProperty<T, A>(name, parent, value, setter) );
         }
 
-        template <typename ParentT>
-        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)() )
+        template <typename R, typename ParentT>
+        void registerMethod(const std::string& name, ParentT& parent, R (ParentT::*memFunc)() )
         {
-            CallableInfo* cb = new MethodInfo<void, ParentT>(name, parent, memFunc);
+            CallableInfo* cb = new MethodInfo<R, ParentT>(name, parent, memFunc);
             this->registerCallableInfo(cb);
         }
 
@@ -212,13 +206,9 @@ class PT_REFLEX_API Reflectable
         struct ReflectableData* _data;
 };
 
-PT_API void get(const SerializationInfo& si, PropertyInfo& p);
+PT_API void operator >>= (const SerializationInfo& si, Reflectable& r);
 
-PT_API void put(SerializationInfo& si, const PropertyInfo& p);
-
-PT_API void get(const SerializationInfo& si, Reflectable& r);
-
-PT_API void put(SerializationInfo& si, const Reflectable& r);
+PT_API void operator <<= (SerializationInfo& si, const Reflectable& r);
 
 
 class Reflectable::MethodIterator

@@ -46,7 +46,7 @@ namespace Xml {
             {
                 SerializationInfo si;
                 this->getData( si );
-                get(si, type);
+                si >>= type;
             }
 
         protected:

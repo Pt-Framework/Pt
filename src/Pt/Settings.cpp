@@ -57,7 +57,7 @@ void SettingsWriter::write(const SerializationInfo& si)
         else if( it->category() == SerializationInfo::Object)
         {
             // Array types may have no instance-names
-            if( it->findObjectData("") )
+            if( it->findMember("") )
             {
                 *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");
                 *_os << Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");
@@ -279,17 +279,17 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationInfo* obj = _data->findObjectData( _name.substr( 0, pos ).narrow() );
+                Pt::SerializationInfo* obj = _data->findMember( _name.substr( 0, pos ).narrow() );
                 if(obj == 0)
-                    obj = &( _data->addValue( _name.substr( 0, pos ).narrow() ) );
+                    obj = &( _data->addMember( _name.substr( 0, pos ).narrow() ) );
 
-                SerializationInfo& value = obj->addValue( _name.substr( ++pos ).narrow() );
+                SerializationInfo& value = obj->addMember( _name.substr( ++pos ).narrow() );
                 value.setValue(_value);
                 value.setTypeName( _type.narrow() );
             }
             else
             {
-                SerializationInfo& value = _data->addValue(_name.narrow());
+                SerializationInfo& value = _data->addMember(_name.narrow());
                 value.setValue( _value );
                 value.setTypeName( _type.narrow() );
             }
@@ -319,9 +319,9 @@ class SettingsReader::ParseContext
 
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationInfo* data = _data->findObjectData( _prevName.substr( 0, pos ).narrow() );
+                Pt::SerializationInfo* data = _data->findMember( _prevName.substr( 0, pos ).narrow() );
                 if(data == 0)
-                    data = &( _data->addValue( _prevName.substr( 0, pos ).narrow() ) );
+                    data = &( _data->addMember( _prevName.substr( 0, pos ).narrow() ) );
 
                 _data = data;
                 ++_depth;
@@ -329,9 +329,9 @@ class SettingsReader::ParseContext
                 _prevName = _prevName.substr( ++pos );
             }
 
-            Pt::SerializationInfo* data = _data->findObjectData( _prevName.narrow() );
+            Pt::SerializationInfo* data = _data->findMember( _prevName.narrow() );
             if(data == 0 || _depth != 0)
-                data = &( _data->addValue( _prevName.narrow() ) );
+                data = &( _data->addMember( _prevName.narrow() ) );
 
             _data = data;
             _data->setTypeName(_prevType.narrow());

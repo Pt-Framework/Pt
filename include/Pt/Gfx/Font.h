@@ -93,9 +93,9 @@ namespace Gfx {
     }
 
 
-    PT_GFX_API void get( const SerializationInfo& si, Gfx::Font& x );
+    PT_GFX_API void operator >>=( const SerializationInfo& si, Gfx::Font& x );
 
-    PT_GFX_API void put( SerializationInfo& si, const Gfx::Font& x );
+    PT_GFX_API void operator <<=( SerializationInfo& si, const Gfx::Font& x );
 
 } // namespace Gfx
 

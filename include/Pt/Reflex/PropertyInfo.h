@@ -23,6 +23,7 @@
 #include <Pt/Any.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
+#include <Pt/SerializationInfo.h>
 #include <Pt/Reflex/Api.h>
 #include <Pt/Reflex/MemberInfo.h>
 #include <Pt/Reflex/PropertyValue.h>
@@ -70,6 +71,10 @@ class PropertyInfo  : public MemberInfo
         virtual Pt::Any get() const = 0;
 
         virtual void set(const Pt::Any& value) = 0;
+
+        virtual void serialize(Pt::SerializationInfo& si) const = 0;
+
+        virtual void deserialize(const Pt::SerializationInfo& si) = 0;
 };
 
 
@@ -115,66 +120,17 @@ class ReadPropertyInfo : virtual public PropertyInfo
         virtual void set(const Pt::Any& value)
         { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
+        void serialize(Pt::SerializationInfo& si) const
+        {
+            si <<= _getter->operator()();
+        }
+
+        void deserialize(const Pt::SerializationInfo& si)
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
+
     private:
         std::string _name;
         Pt::Callable<T>* _getter;
-};
-
-
-template <typename T>
-class WritePropertyInfo : virtual public PropertyInfo
-{
-    public:
-        template <typename R, typename Object, typename ObjectBase>
-        WritePropertyInfo(const std::string& name, Object& parent, R (ObjectBase::*setter)(T type) )
-        : _name(name)
-        {
-            _setter = new Pt::Method<R, Object, T>(parent, setter);
-        }
-
-        ~WritePropertyInfo()
-        {
-            delete _setter;
-        }
-
-        const char* name() const
-        { return _name.c_str(); }
-
-        virtual const char* typeName() const
-        {
-            return TypeTraits<T>::typeName();
-        }
-
-        virtual bool isWritable() const
-        { return true; }
-
-        virtual Pt::Any get() const
-        { throw PropertyNotReadable(this->name(), PT_SOURCEINFO); }
-
-        virtual void set(const Pt::Any& a)
-        {
-            typedef typename Pt::TypeInfo<T>::ConstReference ConstRefT ;
-
-            try {
-                ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
-                this->set( val );
-            }
-            catch(const std::bad_cast&) {
-                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
-            }
-        }
-
-        void operator=(T type)
-        { this->set(type); }
-
-        void set(T type)
-        {
-            _setter->invoke(type);
-        }
-
-    private:
-        std::string _name;
-        Pt::Invokable<T>* _setter;
 };
 
 
@@ -237,6 +193,19 @@ class ReadWritePropertyInfo : public PropertyInfo
             }
         }
 
+        void serialize(Pt::SerializationInfo& si) const
+        {
+            si <<= _getter->operator()();
+        }
+
+        void deserialize(const Pt::SerializationInfo& si)
+        {
+            typedef typename Pt::TypeInfo<A>::Value ValueT;
+            ValueT value;
+            si >>= value;
+            _setter->invoke(value);
+        }
+
     private:
         std::string _name;
         Pt::Callable<R>* _getter;
@@ -272,6 +241,14 @@ class ReadProperty : public PropertyInfo
         { return _value->value(); }
 
         virtual void set(const Pt::Any& value)
+        { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
+
+        void serialize(Pt::SerializationInfo& si) const
+        {
+            si <<=  _value->get();
+        }
+
+        void deserialize(const Pt::SerializationInfo& si)
         { throw PropertyNotWritable(this->name(), PT_SOURCEINFO); }
 
     private:
@@ -320,6 +297,18 @@ class ReadWriteProperty : public PropertyInfo
             catch(const std::bad_cast&) {
                 std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
             }
+        }
+
+        void serialize(Pt::SerializationInfo& si) const
+        {
+            si <<= _value->get();
+        }
+
+        void deserialize(const Pt::SerializationInfo& si)
+        {
+            T value = T();
+            si >>= value;
+            _setter->invoke( value );
         }
 
     private:

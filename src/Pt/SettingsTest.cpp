@@ -67,9 +67,9 @@ class SettingsTest : public Pt::Unit::TestSuite
             //settings.save(sout);
             //std::cerr << "\n" << sout.str().narrow() << std::endl;
 
-            PT_UNIT_ASSERT( settings.findObjectData("a.b.c.d") )
-            PT_UNIT_ASSERT( settings.findObjectData("a.b.c.d")->getValue<std::string>("v") == "3")
-            PT_UNIT_ASSERT( settings.findObjectData("a.b.c.d")->getValue<std::string>("u") == "4")
+            PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
+            PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "3")
+            PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "4")
         }
 
         void PlainQoutedValue()
@@ -84,8 +84,8 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Settings settings;
             reader.read(settings);
 
-            PT_UNIT_ASSERT( settings.findObjectData("a.b.c.d")->getValue<std::string>("v") == ";34")
-            PT_UNIT_ASSERT( settings.findObjectData("a.b.c.d")->getValue<std::string>("u") == "34")
+            PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == ";34")
+            PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "34")
         }
 
         void PlainArray()
@@ -101,10 +101,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             std::string concat;
-            const Pt::SerializationInfo* a = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* a = settings.findMember("a.b");
             PT_UNIT_ASSERT(a)
 
-            a = a->findObjectData("c");
+            a = a->findMember("c");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
@@ -115,10 +115,10 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             concat.clear();
 
-            a = settings.findObjectData("g.h");
+            a = settings.findMember("g.h");
             PT_UNIT_ASSERT(a)
 
-            a = a->findObjectData("i");
+            a = a->findMember("i");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
@@ -141,10 +141,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             std::string concat;
-            const Pt::SerializationInfo* a = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* a = settings.findMember("a.b");
             PT_UNIT_ASSERT(a)
 
-            a = a->findObjectData("c");
+            a = a->findMember("c");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
@@ -155,10 +155,10 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             concat.clear();
 
-            a = settings.findObjectData("g.h");
+            a = settings.findMember("g.h");
             PT_UNIT_ASSERT(a)
 
-            a = a->findObjectData("i");
+            a = a->findMember("i");
             PT_UNIT_ASSERT(a)
 
             for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
@@ -193,16 +193,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             std::string concat;
-            const Pt::SerializationInfo* data = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* data = settings.findMember("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findObjectData("c");
+            data = data->findMember("c");
             PT_UNIT_ASSERT( data )
 
             PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
             PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
 
-            data = data->findObjectData( "f" );
+            data = data->findMember( "f" );
             PT_UNIT_ASSERT( data )
 
             for( Pt::SerializationInfo::ConstIterator it = data->begin(); it != data->end(); ++it)
@@ -264,10 +264,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationInfo* data = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* data = settings.findMember("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findObjectData("c");
+            data = data->findMember("c");
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
@@ -286,10 +286,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationInfo* data = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* data = settings.findMember("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findObjectData("c");
+            data = data->findMember("c");
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
@@ -308,10 +308,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationInfo* data = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* data = settings.findMember("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findObjectData("c");
+            data = data->findMember("c");
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
             PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
@@ -329,10 +329,10 @@ class SettingsTest : public Pt::Unit::TestSuite
             settings.load(ts);
 
             Pt::String concat;
-            const Pt::SerializationInfo* data = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* data = settings.findMember("a.b");
             PT_UNIT_ASSERT( data )
 
-            data = data->findObjectData("c");
+            data = data->findMember("c");
             PT_UNIT_ASSERT( data )
             PT_UNIT_ASSERT( data->typeName() == "List" )
 
@@ -352,16 +352,16 @@ class SettingsTest : public Pt::Unit::TestSuite
             reader.read(settings);
 
             std::string concat;
-            const Pt::SerializationInfo* a = settings.findObjectData("a.b");
+            const Pt::SerializationInfo* a = settings.findMember("a.b");
             PT_UNIT_ASSERT( a )
 
-            a = a->findObjectData("c");
+            a = a->findMember("c");
             PT_UNIT_ASSERT( a )
 
             PT_UNIT_ASSERT( a->getValue<std::string>( "d" ) == "1" )
             PT_UNIT_ASSERT( a->getValue<std::string>( "e" ) == "22" )
 
-            a = a->findObjectData( "f" );
+            a = a->findMember( "f" );
             PT_UNIT_ASSERT( a )
 
             for( Pt::Settings::ConstIterator it = a->begin(); it != a->end(); ++it)

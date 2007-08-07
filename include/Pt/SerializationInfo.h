@@ -58,8 +58,6 @@ class SerializationInfo
     public:
         SerializationInfo();
 
-        explicit SerializationInfo(SerializationInfo& parent);
-
         ~SerializationInfo();
 
         Category category() const;
@@ -92,32 +90,25 @@ class SerializationInfo
             _value.get(value);
         }
 
-        const Pt::String& toString() const
-        {
-            return _value.str();
-        }
+        const Pt::String& toString() const;
 
         template <typename T>
         SerializationInfo& addValue(const std::string& name, const T& value)
         {
-            SerializationInfo& info = this->addValue(name);
+            SerializationInfo& info = this->addMember(name);
             info.setValue(value);
             return info;
         }
 
-        SerializationInfo& addValue(const std::string& name);
+        SerializationInfo& addMember(const std::string& name);
 
-        ConstIterator begin() const;
-
-        ConstIterator end() const;
-
-        const SerializationInfo& getObjectData(const std::string& name) const;
+        const SerializationInfo& getMember(const std::string& name) const;
 
         template <typename T>
         T getValue(const std::string& name) const
         {
             T value;
-            const SerializationInfo& info = this->getObjectData(name);
+            const SerializationInfo& info = this->getMember(name);
             info.toValue(value);
             return value;
         }
@@ -125,7 +116,7 @@ class SerializationInfo
         template <typename T>
         void getValue(const std::string& name, T& value) const
         {
-            const SerializationInfo& info = this->getObjectData(name);
+            const SerializationInfo& info = this->getMember(name);
             return info.toValue(value);
         }
 
@@ -134,16 +125,20 @@ class SerializationInfo
             This method returns the data for an object with the name \a name.
             or null if it is not present.
         */
-        const SerializationInfo* findObjectData(const std::string& name) const;
+        const SerializationInfo* findMember(const std::string& name) const;
 
         /** @brief Find object data by name
 
             This method returns the data for an object with the name \a name.
             or null if it is not present.
         */
-        SerializationInfo* findObjectData(const std::string& name);
+        SerializationInfo* findMember(const std::string& name);
 
         size_t memberCount() const;
+
+        ConstIterator begin() const;
+
+        ConstIterator end() const;
 
     private:
         SerializationInfo* _parent;
@@ -180,91 +175,91 @@ class SerializationInfo::ConstIterator
 
 
 template <typename T>
-inline void get(const Pt::SerializationInfo& si, T& x)
+void operator >>=(const Pt::SerializationInfo& si, T& x)
 {
     x.deserialize(si);
 }
 
 
 template <typename T>
-inline void put(Pt::SerializationInfo& si, const T& x)
+void operator <<=(Pt::SerializationInfo& si, const T& x)
 {
     x.serialize(si);
 }
 
 
-inline void get(const SerializationInfo& si, bool& n)
+inline void operator >>=(const SerializationInfo& si, bool& n)
 {
     si.toValue(n);
 }
 
 
-inline void put(SerializationInfo& si, bool n)
+inline void operator <<=(SerializationInfo& si, bool n)
 {
     si.setValue(n);
     si.setTypeName("bool");
 }
 
 
-inline void get(const SerializationInfo& si, int& n)
+inline void operator >>=(const SerializationInfo& si, int& n)
 {
     si.toValue(n);
 }
 
 
-inline void put(SerializationInfo& si, int n)
+inline void operator <<=(SerializationInfo& si, int n)
 {
     si.setValue(n);
     si.setTypeName("int");
 }
 
 
-inline void get(const SerializationInfo& si, float& n)
+inline void operator >>=(const SerializationInfo& si, float& n)
 {
     si.toValue<float>(n);
 }
 
 
-inline void put(SerializationInfo& si, float n)
+inline void operator <<=(SerializationInfo& si, float n)
 {
     si.setValue(n);
     si.setTypeName("float");
 }
 
 
-inline void get(const SerializationInfo& si, double& n)
+inline void operator >>=(const SerializationInfo& si, double& n)
 {
     si.toValue<double>(n);
 }
 
 
-inline void put(SerializationInfo& si, double n)
+inline void operator <<=(SerializationInfo& si, double n)
 {
     si.setValue(n);
     si.setTypeName("double");
 }
 
 
-inline void get(const SerializationInfo& si, std::string& n)
+inline void operator >>=(const SerializationInfo& si, std::string& n)
 {
     si.toValue<std::string>(n);
 }
 
 
-inline void put(SerializationInfo& si, const std::string& n)
+inline void operator <<=(SerializationInfo& si, const std::string& n)
 {
     si.setValue(n);
     si.setTypeName("string");
 }
 
 
-inline void get(const SerializationInfo& si, Pt::String& n)
+inline void operator >>=(const SerializationInfo& si, Pt::String& n)
 {
     si.toValue<Pt::String>(n);
 }
 
 
-inline void put(SerializationInfo& si, const Pt::String& n)
+inline void operator <<=(SerializationInfo& si, const Pt::String& n)
 {
     si.setValue(n);
     si.setTypeName("string");
@@ -272,24 +267,24 @@ inline void put(SerializationInfo& si, const Pt::String& n)
 
 
 template <typename T>
-inline void get(const SerializationInfo& si, std::vector<T>& vec)
+inline void operator >>=(const SerializationInfo& si, std::vector<T>& vec)
 {
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         vec.resize( vec.size() + 1 );
-        get( *it, vec.back() );
+        *it >>=  vec.back();
     }
 }
 
 
 template <typename T>
-inline void put(SerializationInfo& si, const std::vector<T>& vec)
+inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 {
     typename std::vector<T>::const_iterator it;
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        SerializationInfo& elem = si.addValue("");
-        put(elem, *it);
+        SerializationInfo& elem = si.addMember("");
+        elem <<= *it;
     }
 }
 

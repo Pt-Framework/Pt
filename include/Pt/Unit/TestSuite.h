@@ -165,18 +165,37 @@ namespace Unit {
                 @param name Name of the method to be run
                 @param args Arguments to invoke the method
             */
-            void runTest( const std::string& name, const Any* args = 0, size_t argCount = 0 );
+            void runTest( const std::string& name, const Any* args, size_t argCount );
+
+            void runTest( const std::string& name, const SerializationInfo* args, size_t argCount);
+
+            void runTest( const std::string& name)
+            {
+                const Any* a = 0;
+                this->runTest(name, a, 0);
+            }
 
         protected:
             /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
 
+            typedef void (*Deserialize)(const SerializationInfo&, Any&);
+
+            std::map<std::string, Deserialize> _deserializers;
+
+            template <typename T>
+            void deserialize(const Pt::SerializationInfo& si, Any& any)
+            {
+                T value = T();
+                si >>= value;
+                any = value;
+            }
+
             template <class ParentT, typename A1>
             void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
             {
-                AssertType<A1>();
-
+                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
                 this->registerMethod(name, parent, method);
             }
 

@@ -82,14 +82,14 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
 }
 
 
-void get(const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& color)
+void operator >>=(const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& color)
 {
     Pt::String s = si.toValue<Pt::String>();
     color = Gfx::ARgbColor::fromHtml(s);
 }
 
 
-void set(SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& color)
+void operator <<=(SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& color)
 {
     si.setTypeName("ARgbColor");
     si.setValue( color.toHtml() );

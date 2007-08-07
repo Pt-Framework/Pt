@@ -99,7 +99,7 @@ bool operator<(const Pen& a, const Pen& b)
 }
 
 
-void get(const SerializationInfo& si, Gfx::Pen& pen)
+void operator >>=(const SerializationInfo& si, Gfx::Pen& pen)
 {
     size_t              penSize;
     Gfx::ARgbColor      penColor;
@@ -121,7 +121,7 @@ void get(const SerializationInfo& si, Gfx::Pen& pen)
 }
 
 
-void put(SerializationInfo& si, const Gfx::Pen& pen)
+void operator <<=(SerializationInfo& si, const Gfx::Pen& pen)
 {
     Pt::StringStream ss;
     ss << pen.size() << Pt::Char('-')

@@ -76,9 +76,9 @@ namespace Gfx {
             ARgbImage*       _texture;
     };
 
-    PT_GFX_API void get( const SerializationInfo& si, Gfx::Brush& x );
+    PT_GFX_API void operator >>=( const SerializationInfo& si, Gfx::Brush& x );
 
-    PT_GFX_API void put( SerializationInfo& si, const Gfx::Brush& x );
+    PT_GFX_API void operator <<=( SerializationInfo& si, const Gfx::Brush& x );
 
 } // namespace Gfx
 

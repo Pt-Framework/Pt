@@ -253,9 +253,9 @@ namespace Pt {
         */
 
 
-    PT_GFX_API void get( const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& x );
+    PT_GFX_API void operator >>=( const SerializationInfo& si, Gfx::Color<Pt::Gfx::ARgb>& x );
 
-    PT_GFX_API void put( SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& x );
+    PT_GFX_API void operator <<=( SerializationInfo& si, const Gfx::Color<Pt::Gfx::ARgb>& x );
 
 } // namespace Gfx
 

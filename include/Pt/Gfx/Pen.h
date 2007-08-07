@@ -158,9 +158,9 @@ namespace Pt {
             SmartPtr<PenData> _penData;
     };
 
-    PT_GFX_API void get(const SerializationInfo& si, Gfx::Pen& p);
+    PT_GFX_API void operator >>=(const SerializationInfo& si, Gfx::Pen& p);
 
-    PT_GFX_API void put(SerializationInfo& si, const Gfx::Pen& p);
+    PT_GFX_API void operator <<=(SerializationInfo& si, const Gfx::Pen& p);
 
 
     class PT_GFX_API PenData

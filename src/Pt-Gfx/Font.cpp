@@ -77,7 +77,7 @@ Font::Direction Font::direction() const
 }
 
 
-void get(const SerializationInfo& si, Gfx::Font& f)
+void operator >>=(const SerializationInfo& si, Gfx::Font& f)
 {
     Pt::String fontName;
     size_t      fontSize;
@@ -107,7 +107,7 @@ void get(const SerializationInfo& si, Gfx::Font& f)
 }
 
 
-void put(SerializationInfo& si, const Gfx::Font& f)
+void operator >>=(SerializationInfo& si, const Gfx::Font& f)
 {
     Pt::StringStream ss;
     ss << Pt::String::widen( f.name() ) << Pt::Char('-')

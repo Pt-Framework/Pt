@@ -279,36 +279,17 @@ void Reflectable::include(Reflectable& child)
 
 void Reflectable::deserialize(const SerializationInfo& si)
 {
-    get(si, *this);
+    si >>= *this;
 }
 
 
 void Reflectable::serialize(SerializationInfo& si)
 {
-    put(si, *this);
+    si <<= *this;
 }
 
 
-void get(const SerializationInfo& si, PropertyInfo& property)
-{
-    std::string pname = property.name();
-    std::string ptype = property.typeName();
-
-    Any a = TypeFactory::instance().create(si, ptype);
-    property.set(a);
-}
-
-
-void put(SerializationInfo& si, const PropertyInfo& property)
-{
-    std::string pname = property.name();
-    std::string ptype = property.typeName();
-
-    TypeFactory::instance().serialize( si, property.get() );
-}
-
-
-void get(const SerializationInfo& si, Reflectable& r)
+void operator >>= (const SerializationInfo& si, Reflectable& r)
 {
     Reflectable::PropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
@@ -316,16 +297,16 @@ void get(const SerializationInfo& si, Reflectable& r)
         if(it->isWritable() == false)
             continue;
 
-        const SerializationInfo* pinfo = si.findObjectData( it->name() );
+        const SerializationInfo* pinfo = si.findMember( it->name() );
         if(pinfo == 0)
             continue;
 
-        get(*pinfo, *it);
+        *pinfo >>= *it;
     }
 }
 
 
-void put(SerializationInfo& si, const Reflectable& r)
+void operator <<= (SerializationInfo& si, const Reflectable& r)
 {
     Reflectable::ConstPropertyIterator it;
     for( it = r.propertiesBegin(); it != r.propertiesEnd(); ++it)
@@ -333,8 +314,8 @@ void put(SerializationInfo& si, const Reflectable& r)
         if(it->isWritable() == false)
             continue;
 
-        SerializationInfo& pinfo = si.addValue( it->name() );
-        put(pinfo, *it);
+        SerializationInfo& pinfo = si.addMember( it->name() );
+        pinfo <<= *it;
     }
 
     si.setTypeName( r.objectName() );
