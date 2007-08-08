@@ -21,19 +21,19 @@
         <br>
         <h2>Subversion</h2>
         <p>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk">
                 Trunk
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/tags">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/tags">
                 Tags
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/branches">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/branches">
                 Branches
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/tools">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/tools">
                 Precompiled Development Tools
             </a>
         </p>

@@ -8,7 +8,7 @@
 
 <b>Marc Duerner</b>
 <p>
-Marc earned a PhD in Chemistry in 2004 and has been working as a professional C++ programmer since then. He started as a programming to solve his scientific computational problems and quickly developed an interest for object-oriented design, generic programming and the combination of the two paradigms. Marc has written much code for the System, IO, Net, Text, XML, Gui and the core module of %Pt. Marc is currently employed by PTV AG in Karlsruhe, Germany, who support him in the development of the Platinum framework.
+Marc is a software engineer at Eckhardt+Partner GmBH and has written the initial code base of Pt. His interests include object-oriented and generic program design and multi-platform development. Marc earned a PhD in Chemistry from Sheffield Hallam University in 2004.
 </p>
 
 <b>Tommi Maekitalo</b>
@@ -34,6 +34,14 @@ Laurentiu has many years of experience in object-oriented software architecture 
 <b>Bjoern Streule</b>
 <p>
 Bjoern has finished his degree in 2002 (Dipl. Ing. (FH) Nachrichten- und Kommunikationstechnik) and has been developing object-oriented software for desktop systems and embedded devices since then. He is currently employed by PTV AG in Karlsruhe and is involved in the development of %Pt as part of his daily work and in his free time.
+</p>
+
+<b>Roman Schnider</b>
+<p>
+Roman finished his studies in Information Technology in late 2002. Since
+then, he has been developing multi-platform software for a number of
+different operating systems. He is employed by PTV AG in Karlsruhe where
+Platinum serves as portable runtime in his current project.
 </p>
 
 </div>
