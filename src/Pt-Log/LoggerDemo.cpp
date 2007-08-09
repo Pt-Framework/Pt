@@ -41,8 +41,9 @@ class LogThread : public Pt::System::Thread
             {
                 try
                 {
-                    Pt::Log::Logger logger(_loggerName, Pt::Log::Trace);
-                    logger << Pt::Log::info << _message << Pt::Log::endlog;
+                    Pt::Log::Logger logger(_loggerName);
+                    logger.beginLog(PT_SOURCEINFO) << _message << Pt::Log::endlog;
+                    logger.info(PT_SOURCEINFO) << _message << Pt::Log::endlog;
 
                     Pt::System::Thread::sleep(1000);
                     this->yield();
