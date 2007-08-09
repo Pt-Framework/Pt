@@ -61,8 +61,8 @@ LogManager::LogManager()
     std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
     _logger = logger.get();
 
-    // initialise properties
-    std::ifstream fs("Pt-Log.properties");
+    // initialise settings
+    std::ifstream fs("Pt-Log.settings");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
     SettingsReader reader(ts);
     reader.read(_settings);
