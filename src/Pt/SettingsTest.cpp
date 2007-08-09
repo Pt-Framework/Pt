@@ -35,15 +35,15 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "ComplexArray", *this, &SettingsTest::ComplexArray );
+            Pt::Unit::TestSuite::registerMethod( "ComplexArray", *this, &SettingsTest::ComplexArray );
             //Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
             //Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
 
             //Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
             /*Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
             Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
-            Pt::Unit::TestSuite::registerMethod( "ComplexType3", *this, &SettingsTest::ComplexType3 );
-            Pt::Unit::TestSuite::registerMethod( "SimpleList", *this, &SettingsTest::SimpleList );
+            */Pt::Unit::TestSuite::registerMethod( "ComplexType3", *this, &SettingsTest::ComplexType3 );
+            /*Pt::Unit::TestSuite::registerMethod( "SimpleList", *this, &SettingsTest::SimpleList );
             Pt::Unit::TestSuite::registerMethod( "SimpleQoutedList", *this, &SettingsTest::SimpleQoutedList );
             Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
             Pt::Unit::TestSuite::registerMethod( "SimpleTypedList", *this, &SettingsTest::SimpleTypedList );

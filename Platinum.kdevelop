@@ -24,10 +24,10 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt/bin/SerializationTestd</mainprogram>
+      <mainprogram>/home/marc/Pt/bin/SettingsTestd</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs></programargs>
+      <programargs>-fbin/SettingsTestd.unit</programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars>

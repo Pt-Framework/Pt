@@ -167,8 +167,11 @@ class SerializationInfo : protected Pt::NonCopyable
 
         ConstIterator end() const;
 
+    protected:
+        void setParent(SerializationInfo& si)
+        { _parent = &si; }
+
     private:
-        SerializationInfo(const SerializationInfo&) {}
         SerializationInfo* _parent;
         Category _category;
         std::string _name;

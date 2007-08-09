@@ -92,7 +92,8 @@ const Pt::String& SerializationInfo::toString() const
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    SerializationInfo* info = new SerializationInfo(*this);
+    SerializationInfo* info = new SerializationInfo();
+    info->setParent(*this);
     info->setName(name);
     _nodes.push_back( info );
 
