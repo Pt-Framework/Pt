@@ -35,6 +35,12 @@ SerializationInfo::Category SerializationInfo::category() const
 }
 
 
+void SerializationInfo::setCategory(Category cat)
+{
+    _category = cat;
+}
+
+
 SerializationInfo* SerializationInfo::parent()
 {
     return _parent;

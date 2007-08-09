@@ -22,6 +22,7 @@
 #include <Pt/String.h>
 #include <Pt/Variant.h>
 #include <Pt/Exception.h>
+#include <Pt/NonCopyable.h>
 #include <vector>
 
 
@@ -44,13 +45,13 @@ class PT_API SerializationError : public std::logic_error
 };
 
 
-class SerializationInfo
+class SerializationInfo : protected Pt::NonCopyable
 {
     typedef std::vector<SerializationInfo*> Nodes;
 
     public:
         enum Category {
-            Void = 0, Value = 1, Object = 2, Array = 3, Reference = 4
+            Void = 0, Value = 1, Object = 2, Array = 4, Reference = 8
         };
 
         class ConstIterator;
@@ -61,6 +62,8 @@ class SerializationInfo
         ~SerializationInfo();
 
         Category category() const;
+
+        void setCategory(Category cat);
 
         SerializationInfo* parent();
 
@@ -75,6 +78,30 @@ class SerializationInfo
         void setName(const std::string& name);
 
         void setValue(const Pt::Variant& value);
+
+        void setId(const std::string& id)
+        {
+            _id = id;
+        }
+
+        const std::string& id() const
+        {
+            return _id;
+        }
+
+        void setReference(void* ref)
+        {
+            _value = ref;
+            _category = Reference;
+        }
+
+
+        template <typename T>
+        void resolve(T*& type) const
+        {
+            _value = (void**)&type;
+            type = 0;
+        }
 
         template <typename T>
         T toValue() const
@@ -141,11 +168,13 @@ class SerializationInfo
         ConstIterator end() const;
 
     private:
+        SerializationInfo(const SerializationInfo&) {}
         SerializationInfo* _parent;
         Category _category;
         std::string _name;
+        std::string _id;
         std::string _type;
-        Pt::Variant _value;
+        mutable Pt::Variant _value;
         Nodes _nodes;
 };
 

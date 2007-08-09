@@ -20,6 +20,7 @@
 #undef PT_REFLEX_API_EXPORT
 
 #include "Pt/Reflex/Reflectable.h"
+#include "Pt/Reflex/SignalInfo.h"
 #include "Pt/SerializationInfo.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -176,33 +177,6 @@ class ClassTraits<MyClass>
 };
 
 
-class SignalInfo
-{
-    public:
-        SignalInfo(Pt::Signal<>& signal)
-        : _signal(&signal)
-        {}
-
-        void send(const Pt::Any* args, size_t argCount)
-        {
-            _signal->send();
-        }
-
-        Pt::Connection connect(CallableInfo& ci)
-        {
-            if(ci.argSize() != 0)
-            {
-                throw std::invalid_argument("Incompatible slot" + PT_SOURCEINFO);
-            }
-
-            Pt::Slot* slot = ci.createSlot();
-            return Pt::Connection(*_signal, slot);
-        }
-
-    private:
-        Pt::Signal<>* _signal;
-};
-
 
 class TestReflectable : public Pt::Reflex::Reflectable
 {
@@ -280,7 +254,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             std::cerr << "Number is: " <<  Pt::any_cast<int>(number) << std::endl;
 
             Pt::Signal<> sig;
-            SignalInfo si(sig);
+            Pt::Reflex::SignalInfo si(sig);
 
             Pt::Reflex::Reflectable* rm = meta.create();
             CallableInfo& ci = rm->methodInfo("method0");

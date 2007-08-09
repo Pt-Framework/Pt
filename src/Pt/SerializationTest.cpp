@@ -36,6 +36,129 @@
 #include <iterator>
 
 
+class Serializer
+{
+    public:
+        Serializer()
+        {}
+
+        template <typename T>
+        void serialize(const T& type, const std::string& name)
+        {
+            Pt::SerializationInfo& si = _root.addMember(name);
+            si <<= type;
+            this->addObject(&type, si);
+        }
+
+        void addObject(const void* ref, Pt::SerializationInfo& si)
+        {
+            _ids[ref] = &si;
+        }
+
+        void fixup(const Pt::SerializationInfo& si)
+        {
+            Pt::SerializationInfo::ConstIterator it;
+            for(it = si.begin(); it != si.end(); ++it)
+            {
+                if(it->category() == Pt::SerializationInfo::Reference)
+                {
+                    void* p = it->toValue<void*>();
+                    Pt::SerializationInfo* pointee = _ids[p];
+
+                    std::stringstream id;
+                    id << pointee;
+                    pointee->setId( id.str() );
+                }
+
+                if(it->category() == Pt::SerializationInfo::Object)
+                {
+                    this->fixup(*it);
+                }
+            }
+        }
+
+        void fixup()
+        {
+            this->fixup(_root);
+        }
+
+    private:
+        Pt::SerializationInfo _root;
+        std::map<const void*, Pt::SerializationInfo*> _ids;
+};
+
+
+class Deserializer
+{
+    public:
+        Deserializer()
+        {}
+
+        template <typename T>
+        void deserialize(const Pt::SerializationInfo& si, T& type)
+        {
+            si >>= type;
+            _types[ si.id() ] = &type;
+            _fixups[ si.id() ] = &Deserializer::do_fixup<T>;
+        }
+
+        void fixup(const Pt::SerializationInfo& si)
+        {
+            Pt::SerializationInfo::ConstIterator it;
+            for(it = si.begin(); it != si.end(); ++it)
+            {
+                if(it->category() == Pt::SerializationInfo::Reference)
+                {
+                    void* target = _types[ it->id() ];
+
+                    void* d = it->toValue<void*>();
+                    void** destination = (void**)d;
+                    _fixups[ it->id() ]( destination, target);
+                }
+
+                if(it->category() == Pt::SerializationInfo::Object)
+                {
+                    this->fixup(*it);
+                }
+            }
+        }
+
+        template <typename T>
+        static void do_fixup(void** ref , void* val)
+        {
+            *( (T**)(ref) ) = (T*)(val);
+        }
+
+    private:
+        std::map<std::string, void*> _types;
+
+        typedef void (*Fixup)(void**, void*);
+        std::map<std::string, Fixup> _fixups;
+};
+
+
+struct DateRef
+{
+    Pt::Date* date;
+};
+
+
+
+void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
+{
+    const Pt::SerializationInfo& dptr = si.getMember("date");
+    dptr.resolve( dr.date );
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
+{
+    Pt::SerializationInfo& d = si.addMember("date");
+    d.setReference(dr.date);
+}
+
+
+
 class SerializationTest : public Pt::Unit::TestSuite
 {
     public:
@@ -52,11 +175,46 @@ class SerializationTest : public Pt::Unit::TestSuite
     protected:
         void perf()
         {
+            std::cerr << std::endl;
+            Pt::Date date;
+            std::cerr << "Address of date: " << &date << std::endl;
+
+            DateRef dref;
+            dref.date = &date;
+
+            Serializer ser;
+            ser.serialize(date, "myDate");
+            ser.serialize(dref, "MyDateRef");
+            ser.fixup();
+
+            sleep(1);
+
+            Pt::SerializationInfo si1;
+            si1.setName("myDate");
+            si1 <<= date;
+            si1.setId("11223344");
+
+            Pt::Date* pdate = &date;
+            Pt::SerializationInfo si2;
+            si2.setName("myDateRef");
+
+            Pt::SerializationInfo& pd = si2.addMember("date");
+            pd.setCategory( Pt::SerializationInfo::Reference );
+            pd.setId("11223344");
+
+            Deserializer dser;
+            dser.deserialize(si1, date);
+            dser.deserialize(si2, dref);
+            dser.fixup(si2);
+
+            std::cerr << "dref.date is: " << dref.date << std::endl;
+            /*
             Pt::System::Clock c;
             c.start();
 
             Pt::System::TimeValue tv = c.stop();
             std::cerr << "Duration: " << tv.seconds() << ":" << tv.microSeconds()/1000 << std::endl;
+            */
         }
 
         void StdVector()
