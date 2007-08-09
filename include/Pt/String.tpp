@@ -629,7 +629,7 @@ inline int basic_string<Pt::Char>::compare(const basic_string& str) const
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
@@ -646,7 +646,7 @@ inline int basic_string<Pt::Char>::compare(const Pt::Char* str) const
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
@@ -663,7 +663,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
@@ -682,7 +682,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
@@ -701,7 +701,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt:
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
@@ -720,7 +720,7 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt:
 
     // unlike real life, size only matters when the quality is equal
     if (result == 0) {
-        return size - osize;
+        return (int)(size - osize);
     }
 
     return result;
