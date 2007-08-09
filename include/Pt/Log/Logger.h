@@ -44,16 +44,16 @@ class Message;
     by the logging framework. A logger is created by passing a string that
     identifies the target uniquely to the constructor. If the target does not
     exist yet, it will be created. If several loggers are created with the
-    same target string tey will indeed use the same target. A logger should
+    same target string they will indeed use the same target. A logger should
     be kept within a single thread, but different loggers can log to the
     same target from  different threads. The creation of a logger requires
     a lookup in the logging manager, so it is beneficial to keep created logger
-    at the class level for as-long as the are needed.
+    at the class level for as-long as they are needed.
     Logging is most convenient using the stream API. The complete IOStreams
     API is supported, but a few manipulators should be avoided that would
     conflict with the typical format of a log-message. Some extra manipulators
     exist to set the state of the logger, most notably endlog or the manipulators
-    to set the log-level. This is a typeical example how a logger is used to
+    to set the log-level. This is a typical example how a logger is used to
     produce a log-message:
 
     @code
@@ -63,7 +63,7 @@ class Message;
                                   << Pt::Log::endlog;
     @endcode
 
-    If the logger is disabled, meaning its log-level is lower that the log-level
+    If the logger is disabled, meaning its log-level is lower than the log-level
     of its target, each call to the logger will only cost an integer comparison.
 */
 class PT_LOG_API Logger : protected Pt::NonCopyable
