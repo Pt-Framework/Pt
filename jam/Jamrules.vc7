@@ -45,7 +45,7 @@ if $(CONFIG:L) = debug
 }
 else
 {
-	CCFLAGS += /MD ;
+	CCFLAGS += /MD /D "NDEBUG" ;
 	OPTIM   ?= /O1 /Oy ;
 }
 
