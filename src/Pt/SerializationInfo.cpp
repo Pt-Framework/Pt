@@ -19,6 +19,33 @@ SerializationInfo::SerializationInfo()
 }
 
 
+SerializationInfo::SerializationInfo(const SerializationInfo& si)
+: _parent(0)
+, _category(si._category)
+, _name(si._name)
+, _id(si._id)
+, _type(si._type)
+, _value(si._value)
+, _nodes(si._nodes)
+{
+}
+
+
+SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
+{
+    // don't assign parent on purpose !!!
+    _category = si._category;
+    _name = si._name;
+    _id = si._id;
+    _type = si._type;
+    _value = si._value;
+    _nodes = si._nodes;
+
+    return *this;
+}
+
+
+
 SerializationInfo::~SerializationInfo()
 {
     Nodes::iterator it;
@@ -84,6 +111,32 @@ void SerializationInfo::setValue(const Pt::Variant& value)
 }
 
 
+void SerializationInfo::setId(const std::string& id)
+{
+    _id = id;
+}
+
+
+const std::string& SerializationInfo::id() const
+{
+    return _id;
+}
+
+
+void SerializationInfo::fixdown(void* ref)
+{
+    _value = ref;
+    _category = Reference;
+}
+
+
+void SerializationInfo::fixup(void*& type) const
+{
+    _value = &type;
+    type = 0;
+}
+
+
 const Pt::String& SerializationInfo::toString() const
 {
     return _value.str();
@@ -99,6 +152,24 @@ SerializationInfo& SerializationInfo::addMember(const std::string& name)
 
     _category = Object;
     return *info;
+}
+
+
+SerializationInfo::Iterator SerializationInfo::begin()
+{
+    if(_nodes.size() == 0)
+        return 0;
+
+    return &( _nodes[0] );
+}
+
+
+SerializationInfo::Iterator SerializationInfo::end()
+{
+    if(_nodes.size() == 0)
+        return 0;
+
+    return &_nodes[0] + _nodes.size();
 }
 
 
@@ -162,6 +233,53 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
 size_t SerializationInfo::memberCount() const
 {
     return _nodes.size();
+}
+
+
+SerializationInfo::Iterator::Iterator()
+: _info(0)
+{}
+
+
+SerializationInfo::Iterator::Iterator(const Iterator& other)
+: _info(other._info)
+{}
+
+
+SerializationInfo::Iterator::Iterator(SerializationInfo** info)
+: _info(info)
+{}
+
+
+SerializationInfo::Iterator::Iterator& SerializationInfo::Iterator::operator=(const Iterator& other)
+{
+    _info = other._info;
+    return *this;
+}
+
+
+SerializationInfo::Iterator::Iterator& SerializationInfo::Iterator::operator++()
+{
+    ++_info;
+    return *this;
+}
+
+
+SerializationInfo& SerializationInfo::Iterator::operator*()
+{
+    return **_info;
+}
+
+
+SerializationInfo* SerializationInfo::Iterator::operator->()
+{
+    return *_info;
+}
+
+
+bool SerializationInfo::Iterator::operator!=(const Iterator& other) const
+{
+    return _info != other._info;
 }
 
 

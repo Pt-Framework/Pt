@@ -191,10 +191,54 @@ namespace Unit {
                 any = value;
             }
 
+            template <class ParentT>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)() )
+            {
+                this->registerMethod(name, parent, method);
+            }
+
             template <class ParentT, typename A1>
             void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
+                this->registerMethod(name, parent, method);
+            }
+
+            template <class ParentT, typename A1, typename A2>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2) )
+            {
+                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
+                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
+                this->registerMethod(name, parent, method);
+            }
+
+            template <class ParentT, typename A1, typename A2, typename A3>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3) )
+            {
+                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
+                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
+                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
+                this->registerMethod(name, parent, method);
+            }
+
+            template <class ParentT, typename A1, typename A2, typename A3, typename A4>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4) )
+            {
+                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
+                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
+                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
+                _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
+                this->registerMethod(name, parent, method);
+            }
+
+            template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
+            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4, A5) )
+            {
+                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
+                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
+                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
+                _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
+                _deserializers[ TypeTraits<A5>::typeName() ] =  &deserialize<A5>;
                 this->registerMethod(name, parent, method);
             }
 

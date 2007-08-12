@@ -191,3 +191,4 @@ include/Pt/Reflex/Reflectable.h
 src/Pt-Reflex/PropertyInfo.cpp
 src/Pt-Reflex/Reflectable.cpp
 src/Pt-Reflex/ReflectableTest.cpp
+include/Pt/Reflex/SignalInfo.h

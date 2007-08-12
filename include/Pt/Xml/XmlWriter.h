@@ -10,6 +10,8 @@ namespace Pt {
 
 namespace Xml {
 
+    class Attribute;
+
     class PT_XML_API XmlWriter
     {
         public:
@@ -20,11 +22,15 @@ namespace Xml {
             void writeStartElement(const Pt::String& prefix, const Pt::String& localName, const Pt::String& ns);
 
             void writeStartElement(const Pt::String& localName);
-          
+
+            void writeStartElement(const Pt::String& localName, const Attribute* attr, size_t attrCount);
+
             void writeEndElement();
-    
+
             void writeElement(const Pt::String& localName, const Pt::String& content);
-        
+
+            void writeElement(const Pt::String& localName, const Attribute* attr, size_t attrCount, const Pt::String& content);
+
             void writeCharacters(const Pt::String& text);
 
             void flush();

@@ -45,7 +45,7 @@ class PT_API SerializationError : public std::logic_error
 };
 
 
-class SerializationInfo : protected Pt::NonCopyable
+class SerializationInfo
 {
     typedef std::vector<SerializationInfo*> Nodes;
 
@@ -54,10 +54,13 @@ class SerializationInfo : protected Pt::NonCopyable
             Void = 0, Value = 1, Object = 2, Array = 4, Reference = 8
         };
 
+        class Iterator;
         class ConstIterator;
 
     public:
         SerializationInfo();
+
+        SerializationInfo(const SerializationInfo& si);
 
         ~SerializationInfo();
 
@@ -79,29 +82,19 @@ class SerializationInfo : protected Pt::NonCopyable
 
         void setValue(const Pt::Variant& value);
 
-        void setId(const std::string& id)
-        {
-            _id = id;
-        }
+        void setId(const std::string& id);
 
-        const std::string& id() const
-        {
-            return _id;
-        }
+        const std::string& id() const;
 
-        void setReference(void* ref)
-        {
-            _value = ref;
-            _category = Reference;
-        }
-
+        void fixdown(void* ref);
 
         template <typename T>
-        void resolve(T*& type) const
+        void fixup(T*& type) const
         {
-            _value = (void**)&type;
-            type = 0;
+            this->fixup( reinterpret_cast<void*&>(type) );
         }
+
+        void fixup(void*& type) const;
 
         template <typename T>
         T toValue() const
@@ -163,9 +156,15 @@ class SerializationInfo : protected Pt::NonCopyable
 
         size_t memberCount() const;
 
+        Iterator begin();
+
+        Iterator end();
+
         ConstIterator begin() const;
 
         ConstIterator end() const;
+
+        SerializationInfo& operator =(const SerializationInfo& si);
 
     protected:
         void setParent(SerializationInfo& si)
@@ -179,6 +178,30 @@ class SerializationInfo : protected Pt::NonCopyable
         std::string _type;
         mutable Pt::Variant _value;
         Nodes _nodes;
+};
+
+
+class SerializationInfo::Iterator
+{
+    public:
+        Iterator();
+
+        Iterator(const Iterator& other);
+
+        Iterator(SerializationInfo** info);
+
+        Iterator& operator=(const Iterator& other);
+
+        Iterator& operator++();
+
+        SerializationInfo& operator*();
+
+        SerializationInfo* operator->();
+
+        bool operator!=(const Iterator& other) const;
+
+    private:
+        SerializationInfo** _info;
 };
 
 

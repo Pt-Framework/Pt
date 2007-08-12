@@ -30,14 +30,33 @@
 #include <sstream>
 
 
+struct DateRef
+{
+    Pt::Date* date;
+};
+
+
+void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
+{
+    si.getMember("date").fixup( dr.date );
+}
+
+
+void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
+{
+    si.setTypeName("DateRef");
+    si.addMember("date").fixdown(dr.date);
+}
+
+
 class XmlSerializerTest: public Pt::Unit::TestSuite
 {
     public:
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Date", *this, &XmlSerializerTest::Date );
-            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &XmlSerializerTest::DateTime );
+            Pt::Unit::TestSuite::registerTest( "Date", *this, &XmlSerializerTest::Date );
+            Pt::Unit::TestSuite::registerTest( "DateTime", *this, &XmlSerializerTest::DateTime );
         }
 
     protected:
@@ -47,7 +66,15 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
+
+            //DateRef dr;
+            //dr.date = &date1;
+            //ser.serialize(dr, "dref");
             ser.flush();
+
+            //std::cerr << "\n##########\n" << std::endl;
+            //std::cerr << output.str() << std::endl;
+            //std::cerr << "##########" << std::endl;
 
             Pt::Date date2(1, 1, 1);
             std::stringstream input( output.str() );

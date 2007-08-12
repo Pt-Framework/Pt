@@ -5,6 +5,7 @@
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
+#include <map>
 
 
 namespace Pt {
@@ -29,13 +30,6 @@ namespace Xml {
             //! @brief Destructor
             ~XmlDeserializer();
 
-            /** @brief Deserialize object data from XML
-
-                This method will append the object data generated
-                from an XML format to \a data.
-            */
-            void getData(SerializationInfo& si);
-
             /** @brief Deserialize an object to XML
 
                 This method will deserialize the object \a type from an
@@ -47,9 +41,25 @@ namespace Xml {
                 SerializationInfo si;
                 this->getData( si );
                 si >>= type;
+
+                if( ! si.id().empty() )
+                {
+                    _objects[ si.id() ] = &type;
+                    _fixups[ si.id() ] = &XmlDeserializer::do_fixup<T>;
+                }
             }
 
+            void fixup()
+            {}
+
         protected:
+            /** @brief Deserialize object data from XML
+
+                This method will append the object data generated
+                from an XML format to \a data.
+            */
+            void getData(SerializationInfo& si);
+
             //! @internal
             void beginDocument(const Node& node);
 
@@ -86,6 +96,40 @@ namespace Xml {
 
             //! @internal
             String _nodeName;
+
+            void fixup(const Pt::SerializationInfo& si)
+            {
+                // TODO: we only need to store all references during parsing
+                // and fixup pointer addresses later when Deserializer::fixup is called
+                Pt::SerializationInfo::ConstIterator it;
+                for(it = si.begin(); it != si.end(); ++it)
+                {
+                    if(it->category() == Pt::SerializationInfo::Reference)
+                    {
+                        void* target = _objects[ it->id() ];
+
+                        void* d = it->toValue<void*>();
+                        void** destination = (void**)d;
+                        _fixups[ it->id() ]( destination, target);
+                    }
+
+                    if(it->category() == Pt::SerializationInfo::Object)
+                    {
+                        this->fixup(*it);
+                    }
+                }
+            }
+
+            std::map<std::string, void*> _objects;
+
+            typedef void (*Fixup)(void**, void*);
+            std::map<std::string, Fixup> _fixups;
+
+            template <typename T>
+            static void do_fixup(void** ref , void* val)
+            {
+                *( (T**)(ref) ) = (T*)(val);
+            }
     };
 
 } // namespace Xml

@@ -5,6 +5,8 @@
 #include <Pt/String.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
+#include <map>
+#include <vector>
 
 
 namespace Pt {
@@ -71,7 +73,7 @@ namespace Xml {
                 This class will not free the given XmlWriter object. The caller is
                 responsible to free it if needed.
             */
-            void attach(XmlWriter* writer);
+            void attach(XmlWriter& writer);
 
             /** @brief Detaches the currently set writer from this object.
 
@@ -80,27 +82,23 @@ namespace Xml {
             */
             void detach();
 
-            /** @brief Serialize object data to XML
-
-                The serializer will serialize the object data \a data
-                as a complete XML document to the stream.
-            */
-            void putData(const SerializationInfo& si);
-
             /** @brief Serialize an object to XML
 
-                The serializer will serialize the object \a type as a complete
-                XML document to the stream. The string \a name will be used
+                The serializer will serialize the object \a type as
+                XML to the assigned stream. The string \a name will be used
                 as the instance name of \a type and appear as the name of the
-                root element. The type must be serializable.
+                XML element. The type must be serializable.
             */
             template <typename T>
             void serialize(const T& type, const std::string& name)
             {
-                SerializationInfo si;
-                si.setName(name);
-                si <<= type;
-                this->putData( si );
+                SerializationInfo* si = new SerializationInfo();
+                _stack.push_back(si);
+
+                _objects[&type] = si;
+
+                si->setName(name);
+                *si <<= type;
             }
 
             /** @brief Serialize object to XML
@@ -111,7 +109,13 @@ namespace Xml {
 
         protected:
             //! @internal
-            void writeData(const SerializationInfo& si);
+            void write(const SerializationInfo& si);
+
+            //! @internal
+            void fixdown(Pt::SerializationInfo& si);
+
+            //! @internal
+            void clear();
 
         private:
             //! @internal
@@ -119,6 +123,12 @@ namespace Xml {
 
             //! @internal
             std::auto_ptr<XmlWriter> _deleter;
+
+            //! @internal
+            std::vector<Pt::SerializationInfo*> _stack;
+
+            //! @internal
+            std::map<const void*, Pt::SerializationInfo*> _objects;
     };
 
 } // namespace Xml
