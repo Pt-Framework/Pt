@@ -179,7 +179,7 @@ inline void StringData::insert(size_type pos, const Pt::Char* str, size_type n)
 
     traits_type::move(_str + pos + n,
                       _str + pos,
-                      (std::char_traits<Pt::Char>::int_type)_length - pos);
+                      static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos));
 
     traits_type::copy(_str + pos, str, n);
 
@@ -195,7 +195,7 @@ inline void StringData::insert(size_type pos, size_type n, Pt::Char ch)
 
     traits_type::move(_str + pos + n,
                       _str + pos,
-                      (std::char_traits<Pt::Char>::int_type)_length - pos);
+                      static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos));
 
     traits_type::assign(_str + pos, n, ch);
 
@@ -212,7 +212,7 @@ inline StringData::value_type* StringData::erase(value_type* pos, size_type n)
 
     traits_type::move(pos,
                       pos + n,
-                      (std::char_traits<Pt::Char>::int_type)_length - n - rpos);
+                      static_cast<std::char_traits<Pt::Char>::int_type>(_length - n - rpos));
 
     _length -= n;
     _str[_length] = Pt::Char::null();
@@ -229,13 +229,13 @@ inline void StringData::replace(size_type pos, size_type n, const Pt::Char* str,
     if( n2 > n ) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          (std::char_traits<Pt::Char>::int_type)_length - pos - n);
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n));
         //cerr << "moved a: " << (_length - pos - n) << endl;
     }
     else if(n2 < n) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          (std::char_traits<Pt::Char>::int_type)_length - pos - n2);
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n2));
         //cerr << "moved b: " << (_length - pos - n2) << endl;
     }
 
@@ -254,13 +254,13 @@ inline void StringData::replace(size_type pos, size_type n, size_type n2, Pt::Ch
     if( n2 > n ) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          (std::char_traits<Pt::Char>::int_type)_length - pos - n);
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n));
         //cerr << "moved a: " << (_length - pos - n) << endl;
     }
     else if(n2 < n) {
         traits_type::move(_str + pos + n2,
                           _str + pos + n,
-                          (std::char_traits<Pt::Char>::int_type)_length - pos - n2);
+                          static_cast<std::char_traits<Pt::Char>::int_type>(_length - pos - n2));
         //cerr << "moved b: " << (_length - pos - n2) << endl;
     }
 
