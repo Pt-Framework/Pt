@@ -251,14 +251,14 @@ SerializationInfo::Iterator::Iterator(SerializationInfo** info)
 {}
 
 
-SerializationInfo::Iterator::Iterator& SerializationInfo::Iterator::operator=(const Iterator& other)
+SerializationInfo::Iterator& SerializationInfo::Iterator::operator=(const Iterator& other)
 {
     _info = other._info;
     return *this;
 }
 
 
-SerializationInfo::Iterator::Iterator& SerializationInfo::Iterator::operator++()
+SerializationInfo::Iterator& SerializationInfo::Iterator::operator++()
 {
     ++_info;
     return *this;
@@ -298,14 +298,14 @@ SerializationInfo::ConstIterator::ConstIterator(SerializationInfo* const* info)
 {}
 
 
-SerializationInfo::ConstIterator::ConstIterator& SerializationInfo::ConstIterator::operator=(const ConstIterator& other)
+SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator=(const ConstIterator& other)
 {
     _info = other._info;
     return *this;
 }
 
 
-SerializationInfo::ConstIterator::ConstIterator& SerializationInfo::ConstIterator::operator++()
+SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator++()
 {
     ++_info;
     return *this;

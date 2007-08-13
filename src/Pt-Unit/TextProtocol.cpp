@@ -125,9 +125,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             Pt::SerializationInfo si;
             si.setName(propertyName);
             si.setValue(token);
-
-            Pt::Reflex::PropertyInfo& pi = suite.propertyInfo(propertyName);
-            si >>= pi;
+            suite.setProperty(propertyName, si);
         }
         // method line
         else if(token.compare("method") == 0)

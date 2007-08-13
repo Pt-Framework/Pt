@@ -25,8 +25,16 @@
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestProtocol.h>
 #include <Pt/Unit/TestContext.h>
+#include <Pt/Reflex/MethodInfo.h>
 
 namespace Pt {
+
+  class SerializationInfo;
+
+namespace Reflex {
+    class CallableInfo;
+    class Reflectable;
+}
 
 namespace Unit {
 
@@ -60,8 +68,12 @@ namespace Unit {
         one and reflection can be used to call any method multiple times with
         the required data.
     */
-    class PT_UNIT_API TestSuite : public Reflex::Reflectable, public Test
+    class PT_UNIT_API TestSuite : public Test
     {
+    
+        private:
+            Pt::Reflex::Reflectable* m_reflectable;
+            
         public:
             class Context : public TestContext
             {
@@ -120,12 +132,17 @@ namespace Unit {
                 @param name Name of the test
                 @param protocol Protocol for the test.
             */
-            TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol)
-            : Reflectable("Pt.Unit.TestSuite")
-            , Test(name)
-            , _protocol(&protocol)
-            { }
-
+            TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol);
+            
+            ~TestSuite();
+              
+            void setProperty(const std::string& name, const Pt::SerializationInfo& value);
+         
+            Pt::Reflex::Reflectable* reflectable()
+            {
+                return m_reflectable;
+            }
+            
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
             */
@@ -174,6 +191,8 @@ namespace Unit {
                 this->runTest(name, a, 0);
             }
 
+            void call( const std::string& name, const Any* args, size_t argCount );
+            
         protected:
             /** @brief The assoziated test protocol
             */
@@ -192,55 +211,65 @@ namespace Unit {
             }
 
             template <class ParentT>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)() )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)() )
             {
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT>(name, parent, method);
+                this->registerCallable(cb);
             }
 
             template <class ParentT, typename A1>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1>(name, parent, method);
+                this->registerCallable(cb);
+
             }
 
             template <class ParentT, typename A1, typename A2>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2) )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
                 _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2>(name, parent, method);
+                this->registerCallable(cb);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3) )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
                 _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
                 _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3>(name, parent, method);
+                this->registerCallable(cb);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4) )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
                 _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
                 _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
                 _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3, A4>(name, parent, method);
+                this->registerCallable(cb);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
-            void registerTest(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4, A5) )
+            void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4, A5) )
             {
                 _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
                 _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
                 _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
                 _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
                 _deserializers[ TypeTraits<A5>::typeName() ] =  &deserialize<A5>;
-                this->registerMethod(name, parent, method);
+                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, parent, method);
+                this->registerCallable(cb);
             }
+            
+        protected:
+            void registerCallable(Pt::Reflex::CallableInfo* ci);           
 
         public:
             static TestProtocol defaultProtocol;

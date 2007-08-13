@@ -55,8 +55,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            Pt::Unit::TestSuite::registerTest( "Date", *this, &XmlSerializerTest::Date );
-            Pt::Unit::TestSuite::registerTest( "DateTime", *this, &XmlSerializerTest::DateTime );
+            Pt::Unit::TestSuite::registerMethod( "Date", *this, &XmlSerializerTest::Date );
+            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &XmlSerializerTest::DateTime );
         }
 
     protected:

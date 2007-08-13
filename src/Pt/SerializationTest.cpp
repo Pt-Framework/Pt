@@ -187,8 +187,6 @@ class SerializationTest : public Pt::Unit::TestSuite
             ser.serialize(dref, "MyDateRef");
             ser.fixup();
 
-            sleep(1);
-
             Pt::SerializationInfo si1;
             si1.setName("myDate");
             si1 <<= date;

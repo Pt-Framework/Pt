@@ -45,7 +45,7 @@ class PT_API SerializationError : public std::logic_error
 };
 
 
-class SerializationInfo
+class PT_API SerializationInfo
 {
     typedef std::vector<SerializationInfo*> Nodes;
 
@@ -181,7 +181,7 @@ class SerializationInfo
 };
 
 
-class SerializationInfo::Iterator
+class PT_API SerializationInfo::Iterator
 {
     public:
         Iterator();
@@ -205,7 +205,7 @@ class SerializationInfo::Iterator
 };
 
 
-class SerializationInfo::ConstIterator
+class PT_API SerializationInfo::ConstIterator
 {
     public:
         ConstIterator();

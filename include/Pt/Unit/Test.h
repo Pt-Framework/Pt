@@ -21,7 +21,6 @@
 
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/Reflex/Reflectable.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Assertion.h>
 

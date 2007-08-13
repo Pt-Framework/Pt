@@ -186,6 +186,8 @@ class PT_REFLEX_API Reflectable
             this->registerCallableInfo(cb);
         }
 
+        void registerCallableInfo(CallableInfo* ci);
+
         void deserialize(const SerializationInfo& si);
 
         void serialize(SerializationInfo& si);
@@ -197,17 +199,15 @@ class PT_REFLEX_API Reflectable
 
         void registerPropertyInfo(PropertyInfo* ci);
 
-        void registerCallableInfo(CallableInfo* ci);
-
         void include(Reflectable& r);
 
     private:
         struct ReflectableData* _data;
 };
 
-PT_API void operator >>= (const SerializationInfo& si, Reflectable& r);
+PT_REFLEX_API void operator >>= (const SerializationInfo& si, Reflectable& r);
 
-PT_API void operator <<= (SerializationInfo& si, const Reflectable& r);
+PT_REFLEX_API void operator <<= (SerializationInfo& si, const Reflectable& r);
 
 
 class Reflectable::MethodIterator

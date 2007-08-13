@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TestSuite.h>
+#include <Pt/Reflex/Reflectable.h>
 
 
 using namespace Pt;
@@ -30,7 +31,7 @@ TestProtocol TestSuite::defaultProtocol;
 inline void TestProtocol::run(TestSuite& suite)
 {
     Reflex::Reflectable::MethodIterator it;
-    for(it = suite.methodsBegin(); it != suite.methodsEnd(); ++it)
+    for(it = suite.reflectable()->methodsBegin(); it != suite.reflectable()->methodsEnd(); ++it)
     {
         const Any* a = 0;
         suite.runTest( it->name(), a, 0 );
@@ -38,6 +39,26 @@ inline void TestProtocol::run(TestSuite& suite)
 }
 
 
+TestSuite::TestSuite(const std::string& name, TestProtocol& protocol)
+: Test(name)
+, _protocol(&protocol)
+{
+    m_reflectable = new Pt::Reflex::Reflectable("Pt.Unit.TestSuite");
+}
+
+TestSuite::~TestSuite()
+{
+    delete m_reflectable;
+}
+
+
+void TestSuite::setProperty(const std::string& name, const Pt::SerializationInfo& si)
+{
+    Pt::Reflex::PropertyInfo& pi = m_reflectable->propertyInfo(name);
+    si >>= pi;
+}
+            
+            
 void TestSuite::setProtocol(TestProtocol* protocol)
 {
     _protocol = protocol;
@@ -65,7 +86,7 @@ void TestSuite::runTest(const std::string& name, const Any* args, size_t argCoun
 
 void TestSuite::runTest( const std::string& name, const SerializationInfo* si, size_t argCount )
 {
-    Pt::Reflex::CallableInfo& cb = this->methodInfo( name );
+    Pt::Reflex::CallableInfo& cb = m_reflectable->methodInfo( name );
 
     if(argCount == 0)
     {
@@ -88,3 +109,14 @@ void TestSuite::runTest( const std::string& name, const SerializationInfo* si, s
 
     this->runTest(name, &args[0], argCount);
 }
+
+void TestSuite::call( const std::string& name, const Any* args, size_t argCount )
+{
+    m_reflectable->call(name, args, argCount);
+}
+
+void TestSuite::registerCallable(Pt::Reflex::CallableInfo* ci)
+{
+    m_reflectable->registerCallableInfo(ci);
+}
+
