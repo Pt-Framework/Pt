@@ -210,8 +210,8 @@ namespace Pt {
          */
         inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<Pt::uint8_t>& point)
         {
-            si.addValue("x", Pt::Variant(static_cast<Pt::uint16_t>(point.x())));
-            si.addValue("y", Pt::Variant(static_cast<Pt::uint16_t>(point.y())));
+            si.addValue("x", static_cast<Pt::uint16_t>(point.x()));
+            si.addValue("y", static_cast<Pt::uint16_t>(point.y()));
             si.setTypeName("Point");
         }
 
@@ -220,8 +220,8 @@ namespace Pt {
         template <typename T>
         inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<T>& point)
         {
-            si.addValue("x", Pt::Variant(point.x()));
-            si.addValue("y", Pt::Variant(point.y()));
+            si.addValue("x", point.x());
+            si.addValue("y", point.y());
             si.setTypeName("Point");
         }
 
@@ -241,8 +241,10 @@ namespace Pt {
         template <typename T>
         inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<T>& point)
         {
-            T x = si.toValue<T>("x");
-            T y = si.toValue<T>("y");
+            T x;
+            T y; 
+            si.getValue("x", x);
+            si.getValue("y", y);
 
             point.setX(x);
             point.setY(y);
