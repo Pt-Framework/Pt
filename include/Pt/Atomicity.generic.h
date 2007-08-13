@@ -22,6 +22,7 @@
 
 #warning "Using fallback implementation of AtomicInt (using pthread) !!!"
 
+#include <signal.h>
 
 namespace Pt {
 
@@ -70,7 +71,7 @@ inline atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
 
 
 template <typename T>
-T* atomicExchange(volatile T*& dest, T* exch)
+volatile T* atomicExchange(volatile T*& dest, T* exch)
 {
     volatile T* tmp = dest;
     dest = exch;
