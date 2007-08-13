@@ -203,7 +203,7 @@ namespace Unit {
             std::map<std::string, Deserialize> _deserializers;
 
             template <typename T>
-            void deserialize(const Pt::SerializationInfo& si, Any& any)
+            static void deserialize(const Pt::SerializationInfo& si, Any& any)
             {
                 T value = T();
                 si >>= value;
