@@ -139,7 +139,7 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void> : public MethodInfoBase<R, C, A
     public:
         MethodInfo(const std::string& name, C& object, MemFuncT memFunc)
         : MethodInfoBase<R, C, A1, A2, A3, A4>(name)
-        , _cb( new Method<R, C, A1, A2, A3>(object, memFunc) )
+        , _cb( new Method<R, C, A1, A2, A3, A4>(object, memFunc) )
         {}
 
         MethodInfo(const std::string& name, C& object, ConstMemFuncT memFunc)
