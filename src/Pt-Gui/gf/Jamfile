@@ -1,0 +1,18 @@
+SubDir TOP src Pt-Gui gf ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+
+
+Library Pt-Gui-gf : ApplicationImpl.cpp
+                     PainterImpl.cpp
+                     PixmapImpl.cpp
+                     WidgetImpl.cpp
+                     ;
+
+Library_MakeLocate Pt-Gui-gf : $(OUTPUT_TARGET) ;
+
+
+Main GfTest : GfTest.cpp  ;
+              
+Main_LinkSharedLibraries GfTest : Pt-System Pt Pt-Gfx Pt-Text Pt-Gui ;
+Main_MakeLocate GfTest : bin ;
