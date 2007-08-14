@@ -34,11 +34,12 @@
 #else
     #include <sys/types.h>
     #include <sys/socket.h>
-    #include <sys/poll.h>
     #include <cerrno>
     #ifdef __QNX__
         #include <unistd.h>
         #include <sys/select.h>
+    #else
+        #include <sys/poll.h>
     #endif
     typedef int SOCKET;
     #define PT_INVALID_SOCKET -1
