@@ -110,8 +110,8 @@ namespace Pt {
         template <typename T>
         inline void operator >>=(const Pt::SerializationInfo& si, BasicRange<T>& r)
         {
-            T min = data.getValue<T>("min");
-            T max = data.getValue<T>("max");
+            T min = si.getValue<T>("min");
+            T max = si.getValue<T>("max");
 
             r.setMin(min);
             r.setMax(max);
