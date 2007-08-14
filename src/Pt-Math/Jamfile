@@ -7,4 +7,7 @@ PtUnitTest AlgorithmTest : AlgorithmTest.cpp ;
 Main_LinkSharedLibraries AlgorithmTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate AlgorithmTest : $(OUTPUT_TARGET) ;
 
+PtUnitTest BasicPointTest : BasicPointTest.cpp ;
+Main_LinkSharedLibraries BasicPointTest : Pt Pt-Unit ;
+PtUnitTest_MakeLocate BasicPointTest : $(OUTPUT_TARGET) ;
 
