@@ -4,7 +4,7 @@
 #include <Pt/System/Thread.h>
 #include <iostream>
 #include <sstream>
-
+#include <stdio.h>
 using namespace Pt;
 using namespace Pt::System;
 
