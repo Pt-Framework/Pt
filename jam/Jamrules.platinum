@@ -160,7 +160,7 @@ if $(GUI:L) = "x11"
     }
 	if  $(_xftIncludes) = ""
 	{
-		Exit "Checking for Xft includes... FAILED" ;
+        Echo "Checking for Xft includes... FAILED" ;
 	}
 	else
 	{
@@ -181,7 +181,7 @@ if $(GUI:L) = "x11"
     }
 	if  $(_libXmu) = ""
 	{
-		Exit "Checking for Xmu library... FAILED" ;
+        Echo "Checking for Xmu library... FAILED" ;
 	}
 	else
 	{
@@ -192,7 +192,14 @@ if $(GUI:L) = "x11"
 }
 if $(GUI:L) = "gf"
 {
-	GUI ?= gf ;
-	GUILIBS = ;
+    if $(CONFIG:L) = "release"
+    {
+	    GUILIBS = -L/usr/lib -lgfS ;
+    }
+    else
+    {
+        GUILIBS = -L/usr/lib -lgfS_g ;
+    }
+        
 }
 
