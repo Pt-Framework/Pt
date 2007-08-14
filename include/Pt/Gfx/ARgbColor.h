@@ -160,7 +160,7 @@ namespace Pt {
                 uint16_t _a, _r, _g, _b;
         } PT_PACKED ;
 
-#include <Pt/Packpop.h>
+#include <Pt/PackPop.h>
 
 
         /** @brief Convenience access to the 64-Bit ARGB color model.

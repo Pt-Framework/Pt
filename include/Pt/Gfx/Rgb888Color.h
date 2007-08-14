@@ -172,7 +172,7 @@ namespace Pt {
                 uint32_t _val;
         } PT_PACKED ;
 
-#include <Pt/Packpop.h>
+#include <Pt/PackPop.h>
 
         /** @brief Convenience access to the 32-Bit ARGB color model.
          *  @ingroup Gfx
