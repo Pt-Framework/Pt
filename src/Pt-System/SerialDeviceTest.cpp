@@ -68,7 +68,7 @@ void SerialDeviceTest::ReadPnp()
 
         char buffer[201];
         char byte;
-        memset( buffer, 0, 201);
+        std::memset( buffer, 0, 201);
 
         size_t size = serdev.read( buffer, 1);
 
