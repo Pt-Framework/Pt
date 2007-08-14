@@ -13,7 +13,7 @@ SubInclude TOP src Pt-Text ;
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Math ;
 
-if $(TARGET_OS:L) != wince
+if $(TARGET_OS:L) != wince && $(TARGET_OS:L) != qnxnto
 {
     SubInclude TOP src Pt-Xml ;
 }
