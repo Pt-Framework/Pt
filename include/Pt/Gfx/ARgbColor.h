@@ -38,8 +38,7 @@ namespace Pt {
          */
         struct ARgb {};
 
-
-#pragma pack(push, 1)
+#include <Pt/Pack1.h>
         /** @brief 64-Bit ARGB color class.
          *
          *  This is the master color model for Pt::Gfx, since it is used by
@@ -159,8 +158,9 @@ namespace Pt {
 
             protected:
                 uint16_t _a, _r, _g, _b;
-        };
-#pragma pack(pop)
+        } PT_PACKED ;
+
+#include <Pt/Packpop.h>
 
 
         /** @brief Convenience access to the 64-Bit ARGB color model.

@@ -31,8 +31,7 @@ namespace Pt {
          */
         struct Rgb565 {};
 
-
-#pragma pack(push, 1)
+#include <Pt/Pack1.h>
         /** @brief Packed 16-bit RGB color class.
          *  @ingroup Gfx
          *
@@ -178,9 +177,9 @@ namespace Pt {
 
             protected:
                 uint16_t _val;
-        };
-#pragma pack(pop)
+        } PT_PACKED ;
 
+#include <Pt/Packpop.h>
 
         /** @brief Convenience access to the 32-Bit ARGB color model.
          *  @ingroup Gfx

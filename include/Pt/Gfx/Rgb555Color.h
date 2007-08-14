@@ -31,8 +31,7 @@ namespace Pt {
          */
         struct Rgb555 {};
 
-
-#pragma pack(push, 1)
+#include <Pt/Pack1.h>
         /** @brief Packed 15-bit RGB color class.
          *  @ingroup Gfx
          *
@@ -176,9 +175,9 @@ namespace Pt {
 
             protected:
                 uint16_t _val;
-        };
-#pragma pack(pop)
+        } PT_PACKED ;
 
+#include <Pt/Packpop.h>
 
         /** @brief Convenience access to the 32-Bit ARGB color model.
          *  @ingroup Gfx
@@ -209,7 +208,7 @@ namespace Pt {
             // 7654321076543210
             // 0RRRRRGGGGGBBBBB
             // CCCCCCCCCCCCCCCC
-            const uint32_t val = ( uint32_t(from.red  () & 0xF800) >>  1 ) |
+            const uint32_t val = ( uint32_t(from.red  () & 0xF800) /*>>  1*/ ) |
                                  ( uint32_t(from.green() & 0xF800) >>  6 ) |
                                  ( uint32_t(from.blue ()         ) >> 11 );
             to.setValue(val);

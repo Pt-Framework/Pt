@@ -32,7 +32,7 @@ namespace Pt {
         struct ARgbF {};
 
 
-#pragma pack(push, 1)
+#include <Pt/Pack1.h>
         /** @brief Floated ARGB color class.
          *  @ingroup Gfx
          *
@@ -149,8 +149,9 @@ namespace Pt {
 
             protected:
                 float _a, _r, _g, _b;
-        };
-#pragma pack(pop)
+        } PT_PACKED ;
+
+#include <Pt/PackPop.h>
 
 
         /** @brief Convenience access to the Floated ARGB color model.
