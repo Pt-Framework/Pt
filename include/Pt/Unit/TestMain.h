@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         {
             testName = argv[i] + 2;
         }
-        else if( !strncmp(argv[i], "-f", 2) )
+        else if( !std::strncmp(argv[i], "-f", 2) )
         {
           fileName = argv[i] + 2;
           fileLoggingEnabled = true;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     {
       fileReporter = Pt::Unit::BriefReporter(&logFile);
       app.addReporter(fileReporter);
-    }    
+    }
     app.addReporter(consoleReporter);
 
     try {
