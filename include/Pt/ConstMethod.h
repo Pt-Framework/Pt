@@ -86,7 +86,7 @@ class ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, 
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1, A2, A3>()
+        : Callable<R, A1, A2, A3, A4>()
         { this->operator=(method); }
 
         Object& object()
