@@ -53,7 +53,7 @@ class ConstMethod : public Callable<R, A1, A2, A3, A4, A5> {
         const Object& object() const
         { return *_object;}
 
-        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A4 a5) const
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
         { return (_object->*_method)(a1, a2, a3, a4, a5); }
 
         ConstMethod<R, Object, A1, A2, A3, A4, A5>* clone() const
