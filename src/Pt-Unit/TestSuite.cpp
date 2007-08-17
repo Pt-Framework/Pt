@@ -92,22 +92,25 @@ void TestSuite::runTest( const std::string& name, const SerializationInfo* si, s
     {
         this->runTest(name);
     }
-
-    std::vector<Pt::Any> args(argCount);
-    for(size_t n = 0; n < argCount; ++n)
+    else
     {
-        const char* argName = cb.argName(n);
+        std::vector<Pt::Any> args(argCount);
+        for(size_t n = 0; n < argCount; ++n)
+        {
+            const char* argName = cb.argName(n);
 
-        std::map<std::string, Deserialize>::const_iterator it = _deserializers.find(argName);
-        if( it == _deserializers.end() )
-            throw SerializationError("Could not deserialize type " + std::string(argName) , PT_SOURCEINFO);
+            std::map<std::string, Deserialize>::const_iterator it = _deserializers.find(argName);
+            if( it == _deserializers.end() )
+                throw SerializationError("Could not deserialize type " + std::string(argName) , PT_SOURCEINFO);
 
-        Any a;
-        it->second(si[n], args[n]);
-        args.push_back(a);
+            Any a;
+            it->second(si[n], args[n]);
+            args.push_back(a);
+        }
+
+        this->runTest(name, &args[0], argCount);
     }
 
-    this->runTest(name, &args[0], argCount);
 }
 
 void TestSuite::call( const std::string& name, const Any* args, size_t argCount )
