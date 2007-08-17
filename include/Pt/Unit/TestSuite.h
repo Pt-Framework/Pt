@@ -19,12 +19,12 @@
 #ifndef PT_UNIT_TESTSUITE_H
 #define PT_UNIT_TESTSUITE_H
 
-#include <Pt/Singleton.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestProtocol.h>
 #include <Pt/Unit/TestContext.h>
+#include <Pt/Singleton.h>
 #include <Pt/Reflex/MethodInfo.h>
 
 namespace Pt {
