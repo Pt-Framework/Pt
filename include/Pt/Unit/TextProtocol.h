@@ -24,7 +24,7 @@ class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
         /**
          * Constructor.
          *
-         * @param iniFileName initializes the component test protocol file name
+         * @param path initializes the component test protocol file name
          */
         TextProtocol(const std::string& path)
         : _path(path)
