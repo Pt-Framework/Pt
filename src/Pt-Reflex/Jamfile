@@ -15,9 +15,6 @@ PtUnitTest_MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
 NOTFILE Pt-Reflex-all ;
-DEPENDS Pt-Reflex-test : Pt-Reflex-test.unit ;
-
-NOTFILE Pt-Reflex-test ;
 DEPENDS Pt-Reflex-all : Pt-Reflex
                         Pt-Reflex-test
                         ;
