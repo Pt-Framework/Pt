@@ -190,7 +190,7 @@ class PT_REFLEX_API Reflectable
 
         void deserialize(const SerializationInfo& si);
 
-        void serialize(SerializationInfo& si);
+        void serialize(SerializationInfo& si) const;
 
     protected:
         Reflectable(const Reflectable& other);
