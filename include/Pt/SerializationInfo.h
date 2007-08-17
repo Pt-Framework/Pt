@@ -123,7 +123,14 @@ class PT_API SerializationInfo
         SerializationInfo& addMember(const std::string& name);
 
         const SerializationInfo& getMember(const std::string& name) const;
+        
+        
+        // This is needed for some compilers (GCC 3.x) to allow access to
+        // method 'T getValue(const std::string& name) const' below.
+        template <typename T>
+        friend T getValue(const std::string& name, SerializationInfo* si);
 
+        
         template <typename T>
         T getValue(const std::string& name) const
         {
