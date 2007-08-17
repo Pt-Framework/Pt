@@ -88,7 +88,7 @@ int ValueImpl::getInt() const
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
-    return getValue<int>(_data);
+    return ::getValue<int>(_data);
 }
 
 
@@ -97,7 +97,7 @@ unsigned ValueImpl::getUnsigned() const
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
-    return getValue<unsigned>(_data);
+    return ::getValue<unsigned>(_data);
 }
 
 
@@ -106,7 +106,7 @@ float ValueImpl::getFloat() const
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
-    return getValue<float>(_data);
+    return ::getValue<float>(_data);
 }
 
 
@@ -115,7 +115,7 @@ double ValueImpl::getDouble() const
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);
 
-    return getValue<double>(_data);
+    return ::getValue<double>(_data);
 }
 
 
