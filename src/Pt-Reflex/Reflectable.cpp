@@ -282,7 +282,7 @@ void Reflectable::deserialize(const SerializationInfo& si)
 }
 
 
-void Reflectable::serialize(SerializationInfo& si)
+void Reflectable::serialize(SerializationInfo& si) const
 {
     si <<= *this;
 }
