@@ -7,7 +7,7 @@ SharedLibrary Pt-Reflex : PropertyInfo.cpp
                           ;
 SharedLibrary_LinkSharedLibraries Pt-Reflex : Pt ;
 SharedLibrary_MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
-SharedLibrary_Install Pt ;
+SharedLibrary_Install Pt-Reflex ;
 
 PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
 Main_LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
