@@ -97,11 +97,11 @@ namespace Pt {
 
 			virtual void operator()(A1, A2, A3, A4, A5, A6, A7, A8) const = 0;
 
-			void call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6, A7, A8) const
-			{ return this->operator()(a1, a2, a3, a4, a5, A6, A7, A8); }
+			void call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+			{ return this->operator()(a1, a2, a3, a4, a5, a6, a7, a8); }
 
-			void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6, A7, A8) const
-			{ this->operator()(a1, a2, a3, a4, a5, A6, A7, A8); }
+			void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+			{ this->operator()(a1, a2, a3, a4, a5, a6, a7, a8); }
 	};
 	
 	
