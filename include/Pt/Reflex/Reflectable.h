@@ -186,6 +186,14 @@ class PT_REFLEX_API Reflectable
             this->registerCallableInfo(cb);
         }
 
+        template <class ParentT, typename A1, typename A2, typename A3, typename A4, 
+                                 typename A5, typename A6, typename A7, typename A8>
+        void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*memFunc)(A1, A2, A3, A4, A5, A6, A7, A8) )
+        {
+            CallableInfo* cb =  new MethodInfo<void, ParentT, A1, A2, A3, A4, A5, A6, A7, A8>(name, parent, memFunc);
+            this->registerCallableInfo(cb);
+        }
+
         void registerCallableInfo(CallableInfo* ci);
 
         void deserialize(const SerializationInfo& si);

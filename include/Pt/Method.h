@@ -34,8 +34,58 @@ template < typename R,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
-           typename A5 = Pt::Void>
-class Method : public Callable<R, A1, A2, A3, A4, A5> {
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void>
+class Method : public Callable<R, A1, A2, A3, A4, A5, A6, A7, A8> {
+    public:
+        typedef C ClassT;
+        typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
+        typedef R (C::*ConstMemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8) const;
+
+        explicit Method(C& object, MemFuncT ptr) throw()
+        : _object(&object), _memFunc(ptr)
+        { }
+
+        Method(const Method& method) throw()
+        :  Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>()
+        { this->operator=(method); }
+
+        C& object()
+        { return *_object;}
+
+        const C& object() const
+        { return *_object;}
+
+        const MemFuncT& method() const
+        { return _memFunc;}
+
+        inline R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+        { return (_object->*_memFunc)(a1, a2, a3, a4, a5, a6, a7, a8); }
+
+        Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>* clone() const
+        { return new Method(*this); }
+
+    private:
+        C* _object;
+        MemFuncT _memFunc;
+};
+
+
+template <typename R, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+Method<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8> callable( ClassT& obj, R (ClassT::*ptr)(A1, A2, A3, A4, A5, A6, A7, A8) ) throw()
+{ return Method<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8>(obj, ptr); }
+
+
+template < typename R,
+           class C,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4,
+           typename A5 >
+class Method<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3, A4, A5> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
@@ -46,7 +96,7 @@ class Method : public Callable<R, A1, A2, A3, A4, A5> {
         { }
 
         Method(const Method& method) throw()
-        :  Callable<R, A1, A2, A3, A4, A5>()
+        : Callable<R, A1, A2, A3, A4, A5>()
         { this->operator=(method); }
 
         C& object()
@@ -126,7 +176,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class Method<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
+class Method<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3);
@@ -189,7 +239,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2 >
-class Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
+class Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2);
@@ -249,7 +299,7 @@ Method<R, ClassT, A1, A2> callable( ClassT& obj, R (ClassT::*ptr)(A1, A2) ) thro
 template < typename R,
            class C,
            typename A1 >
-class Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
+class Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1);
@@ -311,7 +361,7 @@ Method<R,ClassT, A1> callable( ClassT& obj, R (BaseT::*ptr)(A1) ) throw()
 
 template < typename R,
            class C >
-class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
+class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)();
@@ -370,16 +420,19 @@ Method<R,ClassT> callable( ClassT& obj, R (BaseT::*ptr)() ) throw()
 
 
 template < typename R,
-            class C,
-            typename A1 = Pt::Void,
-            typename A2 = Pt::Void,
-            typename A3 = Pt::Void,
-            typename A4 = Pt::Void,
-            typename A5 = Pt::Void
-          >
-class MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
+           class C,
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void,
+           typename A3 = Pt::Void,
+           typename A4 = Pt::Void,
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void
+         >
+class MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5, A6, A7, A8> {
     public:
-        MethodSlot(const Method<R, C, A1, A2, A3, A4, A5>& method)
+        MethodSlot(const Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8>& method)
         : _method(method)
         {}
 
@@ -404,7 +457,7 @@ class MethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
         }
 
     private:
-        Method<R, C, A1, A2, A3, A4, A5> _method;
+        Method<R, C, A1, A2, A3, A4, A5, A6, A7, A8> _method;
 };
 
 
@@ -436,6 +489,10 @@ MethodSlot<R, ClassT, A1, A2, A3, A4> slot( ClassT& obj, R (BaseT::*method)(A1, 
 template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5>
 MethodSlot<R, ClassT, A1, A2, A3, A4, A5> slot( ClassT& obj, R (BaseT::*method)(A1, A2, A3, A4, A5) ) throw()
 { return MethodSlot<R, ClassT, A1, A2, A3, A4, A5>( callable(obj, method) ); }
+
+template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+MethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8> slot( ClassT& obj, R (BaseT::*method)(A1, A2, A3, A4, A5, A6, A7, A8) ) throw()
+{ return MethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8>( callable(obj, method) ); }
 
 } // !namespace Pt
 

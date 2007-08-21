@@ -33,8 +33,54 @@ template < typename R,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
-           typename A5 = Pt::Void >
-class ConstMethod : public Callable<R, A1, A2, A3, A4, A5> {
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void >
+class ConstMethod : public Callable<R, A1, A2, A3, A4, A5, A6, A7, A8> {
+    public:
+        typedef Object ObjectT;
+        typedef R (Object::*MethodT)(A1, A2, A3, A4, A5, A6, A7, A8) const;
+
+        ConstMethod(Object& object, MethodT ptr) throw()
+        : _object(&object), _method(ptr)
+        { }
+
+        ConstMethod(const ConstMethod& method) throw()
+        : Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>()
+        { this->operator=(method); }
+
+        Object& object()
+        { return *_object;}
+
+        const Object& object() const
+        { return *_object;}
+
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+        { return (_object->*_method)(a1, a2, a3, a4, a5, a6, a7, a8); }
+
+        ConstMethod<R, Object, A1, A2, A3, A4, A5, A6, A7, A8>* clone() const
+        { return new ConstMethod(*this); }
+
+    private:
+        Object* _object;
+        MethodT _method;
+};
+
+
+template <typename R, class Object, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+ConstMethod<R, Object, A1, A2, A3, A4, A5, A6, A7, A8> callable( Object& obj, R (Object::*ptr)(A1, A2, A3, A4, A5, A6, A7, A8) const ) throw()
+{ return ConstMethod<R, Object, A1, A2, A3, A4, A5, A6, A7, A8>(obj, ptr); }
+
+
+template < typename R,
+           class Object,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4,
+           typename A5 >
+class ConstMethod<R, Object, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void > : public Callable<R, A1, A2, A3, A4, A5> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3, A4, A5) const;
@@ -76,7 +122,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4 >
-class ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
+class ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3, A4) const;
@@ -86,7 +132,7 @@ class ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, 
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1, A2, A3, A4>()
+        : Callable<R, A1, A2, A3>()
         { this->operator=(method); }
 
         Object& object()
@@ -117,7 +163,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3 >
-class ConstMethod<R, Object, A1, A2, A3, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
+class ConstMethod<R, Object, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3) const;
@@ -157,7 +203,7 @@ template < typename R,
            class Object,
            typename A1,
            typename A2 >
-class ConstMethod<R, Object, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
+class ConstMethod<R, Object, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2) const;
@@ -196,7 +242,7 @@ ConstMethod<R, Object, A1, A2> callable( Object& obj, R (Object::*ptr)(A1, A2) c
 template < typename R,
            class Object,
            typename A1 >
-class ConstMethod<R, Object, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
+class ConstMethod<R, Object, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1) const;
@@ -234,7 +280,7 @@ ConstMethod<R,Object, A1> callable( Object& obj, R (Object::*ptr)(A1) const ) th
 
 template < typename R,
            class C >
-class ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
+class ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)() const;
@@ -284,11 +330,14 @@ template < typename R,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
-           typename A5 = Pt::Void
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void
          >
-class ConstMethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
+class ConstMethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5, A6, A7, A8> {
     public:
-        ConstMethodSlot(const ConstMethod<R, C, A1, A2, A3, A4, A5>& method)
+        ConstMethodSlot(const ConstMethod<R, C, A1, A2, A3, A4, A5, A6, A7, A8>& method)
         : _method( method )
         {}
 
@@ -311,7 +360,7 @@ class ConstMethodSlot : public BasicSlot<R, A1, A2, A3, A4, A5> {
         }
 
     private:
-        ConstMethod<R, C, A1, A2, A3, A4, A5> _method;
+        ConstMethod<R, C, A1, A2, A3, A4, A5, A6, A7, A8> _method;
 };
 
 
@@ -343,6 +392,10 @@ ConstMethodSlot<R, ClassT, A1, A2, A3, A4> slot( ClassT& obj, R (BaseT::*method)
 template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5>
 ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5> slot( ClassT& obj, R (BaseT::*method)(A1, A2, A3, A4, A5) const ) throw()
 { return ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5>( callable(obj, method) ); }
+
+template <typename R, class BaseT, class ClassT, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
+ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8> slot( ClassT& obj, R (BaseT::*method)(A1, A2, A3, A4, A5, A6, A7, A8) const ) throw()
+{ return ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8>( callable(obj, method) ); }
 
 } // !namespace Pt
 

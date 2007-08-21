@@ -36,8 +36,76 @@ template < typename R,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void,
            typename A4 = Pt::Void,
-           typename A5 = Pt::Void>
+           typename A5 = Pt::Void,
+           typename A6 = Pt::Void,
+           typename A7 = Pt::Void,
+           typename A8 = Pt::Void>
 class MethodInfoBase : public CallableInfo
+{
+    public:
+        MethodInfoBase(const std::string& name)
+        : _name(name)
+        {}
+
+        const char* name() const
+        { return _name.c_str(); }
+
+        size_t argSize() const
+        { return 8; }
+
+        const char* argName(size_t index) const
+        {
+            switch(index)
+            {
+                case 0: return TypeTraits<A1>::typeName();
+                case 1: return TypeTraits<A2>::typeName();
+                case 2: return TypeTraits<A3>::typeName();
+                case 3: return TypeTraits<A4>::typeName();
+                case 4: return TypeTraits<A5>::typeName();
+                case 5: return TypeTraits<A6>::typeName();
+                case 6: return TypeTraits<A7>::typeName();
+                case 7: return TypeTraits<A8>::typeName();
+            }
+
+            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+        }
+
+        const std::type_info& argType(size_t index) const
+        {
+            switch(index)
+            {
+                case 0: return typeid(A1);
+                case 1: return typeid(A2);
+                case 2: return typeid(A3);
+                case 3: return typeid(A4);
+                case 4: return typeid(A5);
+                case 5: return typeid(A6);
+                case 6: return typeid(A7);
+                case 7: return typeid(A8);
+            }
+
+            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
+        }
+
+        const char* retName() const
+        { return TypeTraits<R>::typeName(); }
+
+        const std::type_info& retType() const
+        { return typeid(R); }
+
+    private:
+        std::string _name;
+};
+
+
+template < typename R,
+           class C,
+           typename A1,
+           typename A2,
+           typename A3,
+           typename A4,
+           typename A5>
+class MethodInfoBase<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
@@ -95,7 +163,7 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4>
-class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void> : public CallableInfo
+class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
@@ -150,7 +218,7 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
@@ -202,7 +270,7 @@ template < typename R,
            class C,
            typename A1,
            typename A2>
-class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
@@ -251,7 +319,7 @@ class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void> : public Callab
 template < typename R,
            class C,
            typename A1>
-class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
@@ -297,7 +365,7 @@ class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public 
 
 template < typename R,
            class C >
-class MethodInfoBase<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
+class MethodInfoBase<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public CallableInfo
 {
     public:
         MethodInfoBase(const std::string& name)
