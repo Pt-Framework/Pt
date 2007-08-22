@@ -276,6 +276,19 @@ inline void operator <<=(SerializationInfo& si, int n)
 }
 
 
+inline void operator >>=(const SerializationInfo& si, unsigned int& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, unsigned int n)
+{
+    si.setValue(n);
+    si.setTypeName("unsigned");
+}
+
+
 inline void operator >>=(const SerializationInfo& si, float& n)
 {
     si.toValue<float>(n);
