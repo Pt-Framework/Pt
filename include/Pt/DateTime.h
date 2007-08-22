@@ -163,6 +163,16 @@ class PT_API DateTime
             _time -= Timespan( overrun );
             return *this;
         }
+        
+        friend Timespan operator-(const DateTime& first, const DateTime& second)
+        {
+            Pt::int64_t dayDiff      = Pt::int64_t(first.date().julian())     - Pt::int64_t(second.date().julian());
+            Pt::int64_t milliSecDiff = Pt::int64_t(first.time().totalMSecs()) - Pt::int64_t(second.time().totalMSecs());
+            
+            Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
+            
+            return Timespan(result < 0 ? -result : result);
+        }
 
     private:
         Date _date;
