@@ -55,7 +55,7 @@ namespace Pt {
     {
         static void toData(Pt::String& data, bool value)
         {
-            data = L"true";
+            data = value ? L"true" : L"false";
         }
 
         static bool fromData(bool& value, const Pt::String& data)
@@ -270,7 +270,7 @@ namespace Pt {
             }
 
             Pt::StringStream os;
-            os << std::scientific << std::setprecision(15) << value;
+            os << std::fixed << std::setprecision(15) << value;
             data = os.str();
         }
 
@@ -284,7 +284,7 @@ namespace Pt {
             }
 
             Pt::StringStream is(data);
-            is >> std::scientific >> std::setprecision(15) >> value;
+            is >> std::fixed >> std::setprecision(15) >> value;
             return !is.fail();
         }
     };
