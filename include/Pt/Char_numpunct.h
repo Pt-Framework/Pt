@@ -29,9 +29,6 @@
 
 namespace std {
 
-    /** @brief Numpunct localization facet
-        @ingroup Unicode
-    */
     template <>
     class PT_API numpunct<Pt::Char> : public locale::facet {
         public:
