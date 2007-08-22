@@ -45,9 +45,10 @@ namespace Pt {
             //! Clone method.
             virtual Event* clone() const = 0;
 
-            /** @brief Returns the type info for this class of events.
-             
-                 @return The type info for this class of events.
+           /**
+            * @brief Returns the type info for this class of events.
+            * 
+            * @return The type info for this class of events.
             */
             virtual const std::type_info& typeInfo() const = 0;
     };
