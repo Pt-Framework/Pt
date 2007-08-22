@@ -32,13 +32,13 @@ public:
         the referenced data. As a consequence, the caller must not destroy
         the referenced data - the Blob is now responsible for that.
         @param data The pointer to the data from which to create the Blob.
-        @param lenght The length of the data.
+        @param len The length of the data.
     */
     Blob(const char* data, size_t len) : m_data(data), m_length(len), m_size(len), m_refcnt(new int(1))
     { }
 
-    /*! This is the copy-constructor which creates a deep-copy of a Blob.
-        There is no data copied, only the reference counter gets incremented.
+    /*! Creates of copy of an existing Blob.
+        Note that no data is copied as the implementation is reference counted.
     */
     Blob(const Blob& aBlob) : m_data(aBlob.m_data), m_length(aBlob.m_length), m_size(aBlob.m_size),
                   m_refcnt(aBlob.m_refcnt)
@@ -57,6 +57,7 @@ public:
 
     /*! Assignment-operator which just increments the refcounter of the Blob,
         so, no copying of data is performed.
+        @param b A reference to the blob whose data should be shared by this blob.
     */
     Blob& operator=(const Blob& b) {
         // self assignement is handled implicit by first incrementing the ref counter!
@@ -71,7 +72,14 @@ public:
         return *this;
     }
 
-    void assign(const char* data, size_t len) {        
+    /* Assign raw data to a blob.
+       Note that this function takes ownership of the given data by making a copy
+       of it if this blob was unused before.
+       If the blob already contains data the old data is deleted and the new data
+       is copied into this blob.
+       @param data A pointer to the data of which this blob should create a copy.
+       @param len The length of the data of which this data should create a copy. */
+    void assign(const char* data, size_t len) {
         if (*m_refcnt == 1 && len <= m_size) {
             m_length = len;
             memcpy((void*) m_data, data, len);
@@ -89,7 +97,7 @@ public:
         same data (pointer comparison). Note that the assignment operator and the copy-
         constructor make a deep-copy of the data. As a result this comparison operator
         doesn't regard blobs created this way as being equal.
-        @param Blob The Blob to which to compare the current Blob.
+        @param b The Blob to which to compare the current Blob.
         @return true, if the Blobs point to the same data (pointer comparison)
     */
     bool operator==(const Blob& b) const {
@@ -115,6 +123,12 @@ public:
        The reference counter for the Blob.
     */
     int *m_refcnt;
+
+
+    const char* data() const
+    {
+        return m_data;
+    }
 
 private:
     /*! Deletion of the Blob.
