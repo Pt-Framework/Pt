@@ -160,7 +160,7 @@ namespace Pt
                 return false;
 
               for (int i = 1; i < argc - 1; ++i)
-                if (strcmp(argv[i], str) == 0)
+                if (std::strcmp(argv[i], str) == 0)
                 {
                   if (VariantTraits<T>::fromData(m_value, argv[i + 1]))
                   {
@@ -176,7 +176,7 @@ namespace Pt
               return false;
             }
 
-            /** @brief Reads next parameter and removes it. 
+            /** @brief Reads next parameter and removes it.
             */
             bool set(int& argc, char* argv[])
             {
@@ -203,7 +203,7 @@ namespace Pt
                 return m_isset;
             }
 
-            /** @brief returns the value. 
+            /** @brief returns the value.
             */
             const T& getValue() const   { return m_value; }
 
@@ -227,7 +227,7 @@ namespace Pt
             */
             operator T() const   { return m_value; }
 
-            /** @brief returns true, if the option was found and the default was not used. 
+            /** @brief returns true, if the option was found and the default was not used.
             */
             bool isSet() const   { return m_isset; }
 
@@ -405,7 +405,7 @@ namespace Pt
             return false;
 
           for (int i = 1; i < argc; ++i)
-            if (strcmp(argv[i], str) == 0)
+            if (std::strcmp(argv[i], str) == 0)
             {
               m_value = true;
               m_isset = true;
@@ -419,19 +419,19 @@ namespace Pt
           return false;
         }
 
-        /** @brief returns true, if options is set. 
+        /** @brief returns true, if options is set.
         */
         bool isTrue() const   { return m_value; }
 
-        /** @brief returns true, if options is not set. 
+        /** @brief returns true, if options is not set.
         */
         bool isFalse() const  { return !m_value; }
 
-        /** @brief convertible to bool. 
+        /** @brief convertible to bool.
         */
         operator bool() const  { return m_value; }
 
-        /** @brief returns true, if option is explicitly set 
+        /** @brief returns true, if option is explicitly set
         */
         bool isSet() const             { return m_isset; }
 
@@ -472,7 +472,7 @@ namespace Pt
         Arg(int& argc, char* argv[])
           : m_value(0),
             m_isset(false)
-        { 
+        {
           m_isset = set(argc, argv);
         }
 
@@ -499,7 +499,7 @@ namespace Pt
           return false;
         }
 
-        /** @brief setter for the long form. 
+        /** @brief setter for the long form.
         */
         bool set(int& argc, char* argv[], const char* str, const char* def = 0)
         {
@@ -508,7 +508,7 @@ namespace Pt
             return false;
 
           for (int i = 1; i < argc - 1; ++i)
-            if (strcmp(argv[i], str) == 0)
+            if (std::strcmp(argv[i], str) == 0)
             {
               m_value = argv[i + 1];
               m_isset = true;
@@ -522,7 +522,7 @@ namespace Pt
           return false;
         }
 
-        /** @brief extracts the next parameter. 
+        /** @brief extracts the next parameter.
         */
         bool set(int& argc, char* argv[])
         {
@@ -544,15 +544,15 @@ namespace Pt
             return false;
         }
 
-        /** @brief returns the extracted value. 
+        /** @brief returns the extracted value.
         */
         const char* getValue() const   { return m_value; }
 
-        /** @brief argument is convertible to "const char*" 
+        /** @brief argument is convertible to "const char*"
         */
         operator const char*() const   { return m_value; }
 
-        /** @brief returns true, when the option is not set and the default is used. 
+        /** @brief returns true, when the option is not set and the default is used.
         */
         bool isSet() const             { return m_isset; }
 
@@ -576,7 +576,7 @@ namespace Pt
             m_isset(false)
         { }
 
-        /** @brief Constructor for the short form. 
+        /** @brief Constructor for the short form.
         */
         Arg(int& argc, char* argv[], char ch, const std::string& def = std::string())
           : m_value(def),
@@ -585,7 +585,7 @@ namespace Pt
           m_isset = set(argc, argv, ch);
         }
 
-        /** @brief Constructor for the long form. 
+        /** @brief Constructor for the long form.
         */
         Arg(int& argc, char* argv[], const char* str, const std::string& def = std::string())
           : m_value(def),
@@ -594,7 +594,7 @@ namespace Pt
           m_isset = set(argc, argv, str);
         }
 
-        /** @brief Extracts the next parameter. 
+        /** @brief Extracts the next parameter.
         */
         Arg(int& argc, char* argv[])
           : m_value(std::string()),
@@ -603,7 +603,7 @@ namespace Pt
           m_isset = set(argc, argv);
         }
 
-        /** @brief setter for the short form. 
+        /** @brief setter for the short form.
         */
         bool set(int& argc, char* argv[], char ch)
         {
@@ -626,7 +626,7 @@ namespace Pt
           return false;
         }
 
-        /** @brief setter for the long form. 
+        /** @brief setter for the long form.
         */
         bool set(int& argc, char* argv[], const char* str)
         {
@@ -635,7 +635,7 @@ namespace Pt
             return false;
 
           for (int i = 1; i < argc - 1; ++i)
-            if (strcmp(argv[i], str) == 0)
+            if (std::strcmp(argv[i], str) == 0)
             {
               m_value = argv[i + 1];
               m_isset = true;
@@ -649,7 +649,7 @@ namespace Pt
           return false;
         }
 
-        /** @brief Extracts the next parameter. 
+        /** @brief Extracts the next parameter.
         */
         bool set(int& argc, char* argv[])
         {
@@ -671,7 +671,7 @@ namespace Pt
             return false;
         }
 
-        /** @brief Extracts the next non-option-parameter. 
+        /** @brief Extracts the next non-option-parameter.
         */
         bool setNoOpt(int& argc, char* argv[])
         {
@@ -698,11 +698,11 @@ namespace Pt
         */
         const std::string& getValue() const   { return m_value; }
 
-        /** @brief argument is convertible to "const std::string&" 
+        /** @brief argument is convertible to "const std::string&"
         */
         operator const std::string&() const   { return m_value; }
 
-        /** @brief returns true, when the option is not set and the default is used. 
+        /** @brief returns true, when the option is not set and the default is used.
         */
         bool isSet() const             { return m_isset; }
 
@@ -713,5 +713,5 @@ namespace Pt
 
 } // namespace Pt
 
-#endif 
+#endif
 
