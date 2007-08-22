@@ -42,16 +42,11 @@ namespace std {
     struct PT_API ctype_base;
 #endif
 
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
     template <>
     class PT_API ctype< Pt::Char > : public ctype_base {
 
 #else
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
+
     template <>
     class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
 
