@@ -23,14 +23,14 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <iostream>
-#include <string>
 
+#include <string>
+#include <iostream>
 
 namespace Pt {
 
-    /** @brief Unicode capable character type
-     *  @ingroup Unicode
+    /**
+     * @brief A lightweight Character class (32 bits).
      *
      * Unicode characters are 32-bit entities. This class represents such an entity. It is lightweight, so it
      * can be used everywhere. Most compilers treat it like an unsigned int of 32 bits.
@@ -62,19 +62,24 @@ namespace Pt {
             : _value(0)
             {}
 
-            //! Constructs a character using the given 8-bit char as base for the character value.
+            //! Constructs a character using the given char as base for the character value.
             Char(char ch)
             : _value( (uint32_t)((unsigned char)ch) )
             {}
 
-            //! Constructs a character using the given wide-char as base for the character value.
-            Char(wchar_t ch)
-            : _value(ch)
+            //! Constructs a character using the given 8-bit char as base for the character value.
+            Char(signed char ch)
+            : _value( (uint32_t)((unsigned char)ch) )
             {}
 
             //! Constructs a character using the given char as base for the character value.
             Char(unsigned char ch)
             : _value( (uint32_t)(ch) )
+            {}
+
+            //! Constructs a character using the given wide-char as base for the character value.
+            Char(wchar_t ch)
+            : _value(ch)
             {}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
@@ -115,7 +120,7 @@ namespace Pt {
              *
              * If this character is equal or lower than 255 the character is cast to char.
              *
-             * @param The default character which is returned if this character can not be narrowed
+             * @param def The default character which is returned if this character can not be narrowed
              * @return An 8-bit char which is a narrowed representation of this character object or
              * the default character if this character object's value is out of range (>255).
              */
@@ -130,7 +135,7 @@ namespace Pt {
 
             /**
              * @brief Assigns the given uint32_t as new value for this character.
-             * @param ch The new 32-bit value for this character.
+             * @param value The new 32-bit value for this character.
              * @return A reference to this object to allow concatination of operations.
              */
             Char& operator=(uint32_t value)
@@ -306,7 +311,7 @@ namespace std {
         typedef Pt::uint32_t int_type;
         typedef streamoff off_type;
         typedef streampos pos_type;
-        typedef mbstate_t state_type;
+        typedef std::mbstate_t state_type;
 
         inline static void assign(char_type& c1, const char_type& c2);
 
@@ -478,7 +483,7 @@ namespace Pt {
     };
 
 
-    //! @internal instantiate streambuf class in Pt and clients import symbols 
+    //! @internal instantiate streambuf class in Pt and clients import symbols
     class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
     {
         public:
@@ -486,7 +491,6 @@ namespace Pt {
     };
 
 } // namespace Pt
-
 
 #include <Pt/Char_ctype.h>
 #include <Pt/Char_numpunct.h>
