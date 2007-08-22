@@ -18,40 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #ifndef PT_ATOMICITY_H
-#define PT_ATOMICITY_H
 
 
 #ifdef _MSC_VER
 
-    #include "Atomicity.windows.h"
+    #define PT_ATOMICITY_H "Atomicity.windows.h"
 
 #elif __GNUC__
 
     #if defined( _i386_     ) || defined( __i386__ ) || \
         defined( __x86_64__ ) || defined( _M_IX86  )
 
-        #include "Atomicity.gcc.x86.h"
+        #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
 
     #elif defined( __arm__ )
 
-        #include "Atomicity.gcc.arm.h"
+        #define PT_ATOMICITY_H "Atomicity.gcc.arm.h"
 
     #elif defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
           defined( __ppc__ )
 
-        #include "Atomicity.gcc.ppc.h"
+        #define PT_ATOMICITY_H "Atomicity.gcc.ppc.h"
 
     #elif defined( __mips__ )
 
-        #include "Atomicity.gcc.mips.h"
+        #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
 
     #else
 
-       #include "Atomicity.generic.h"
+        #define PT_ATOMICITY_H "Atomicity.generic.h"
 
     #endif
 
 #endif
+
+#include PT_ATOMICITY_H
 
 #endif
