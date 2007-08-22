@@ -64,7 +64,7 @@ namespace Pt {
                 }
             }
 
-            //! \brief lLnk a smart pointer to a managed object
+            //! \brief Link a smart pointer to a managed object
             void link(const RefLinked& ptr, T* object)
             {
                 prev = &ptr;
@@ -209,8 +209,6 @@ namespace Pt {
                 The behaviour depends on the Model. When the default model is
                 used the managed raw pointer will be deleted when the last
                 SmartPtr goes out of scope.
-
-                \param ptr The other SmartPtr
             */
             ~SmartPtr()
             { this->unlink(object); }
@@ -229,6 +227,7 @@ namespace Pt {
                 if(this == &ptr) {
                     return *this;
                 }
+
                 this->unlink(object);
                 object = ptr.object;
                 this->link(ptr, object);
