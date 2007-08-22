@@ -153,7 +153,7 @@ namespace Pt {
                 construction, the Any will be empty and the exception is
                 porpagated.
 
-                @param val Value to assign
+                @param type Value to assign
             */
             template <typename T>
             Any(const T& type)
@@ -243,7 +243,7 @@ namespace Pt {
                 If an exception is thrown during construction, the Any will remain
                 unaltered and the exception is porpagated.
 
-                @param val Value to assign
+                @param rhs Value to assign
             */
             template <typename T>
             Any& operator=(const T& rhs)
@@ -261,7 +261,7 @@ namespace Pt {
                 is thrown during assignment, the Any will remain unchanged and
                 the exception is porpagated.
 
-                @param val Any to assign
+                @param rhs Any to assign
             */
             Any& operator=(const Any& rhs);
 
@@ -328,8 +328,7 @@ namespace Pt {
         an int, but the typeid's must match. It is, however, possible to
         get a const reference ton the contained type.
 
-        @param any
-        @param val Any to read to
+        @param any Any to read to
         @return contained value
         @throw std::bad_cast on type mismatch
     */
