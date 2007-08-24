@@ -125,7 +125,7 @@ void File::remove()
 }
 
 /*
-void File::copy(const char* to) const
+void File::copy(const std::string& to) const
 {
     return _impl->copy(to);
 }

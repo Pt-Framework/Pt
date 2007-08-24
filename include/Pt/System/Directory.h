@@ -143,7 +143,12 @@ while (it != d.end())
              * @return The directory name of this Directory object.
              */
             virtual std::string name() const;
-        
+
+            virtual FileSystemNodeType type() const
+            {
+                return DIRECTORY;
+            }
+
         private:
             std::string _path;
     };

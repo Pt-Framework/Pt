@@ -33,6 +33,13 @@ namespace System {
 class PT_SYSTEM_API FileSystemNode 
 {
     public:
+
+        enum FileSystemNodeType
+        {
+            FILE = 0,
+            DIRECTORY
+        };
+
         FileSystemNode()
         {}
 
@@ -55,6 +62,8 @@ class PT_SYSTEM_API FileSystemNode
 
         // virtual void rename(const std::string& newname);
         virtual void move(const std::string& newname) = 0;
+
+        virtual FileSystemNodeType type() const = 0;
 };
 
 } // namespace System

@@ -34,7 +34,8 @@ namespace Pt {
 
 namespace System {
 
-/** Provides common operations on files.
+/**
+ * @brief Provides common operations on files.
  */
 class PT_SYSTEM_API File : public FileSystemNode {
 
@@ -51,9 +52,9 @@ class PT_SYSTEM_API File : public FileSystemNode {
         File(const File& file);
 
         ~File();
-        
+
         File& operator=(const File& file);
-        
+
         /**
          * @brief Creates a file in the file system which is described by this
          * File object's abstract path name.
@@ -73,15 +74,20 @@ class PT_SYSTEM_API File : public FileSystemNode {
         virtual std::size_t size() const;
 
         void resize(std::size_t newSize);
-        
+
         bool exists() const;
+
+        virtual FileSystemNodeType type() const
+        {
+            return FILE;
+        }
 
         virtual void remove();
 
-        //void copy(const char* to) const;
+        //void copy(const std::string& to) const;
 
         virtual void move(const std::string& newPath);
-        
+
         /**
          * @brief Returns the directory in which this file resides.
          *
@@ -96,7 +102,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
          * @return The directory in which this file resides.
          */
         virtual std::string parentPath() const;
-        
+
         /**
          * @brief Returns the file name of the file this object points to.
          *
@@ -107,7 +113,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
          * @return The file name of this File object.
          */
         virtual std::string name() const;
-        
+
         /**
          * @brief Returns the base file name (without its file name extension) of the file
          * this object points to.
@@ -119,7 +125,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
          * @return The file name excluding the file name extension) of this File object.
          */
         std::string baseName() const;
-        
+
         /**
          * @brief Returns the file name extensions of the file this object points to.
          *
