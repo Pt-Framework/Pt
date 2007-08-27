@@ -23,13 +23,8 @@ namespace Math {
         public:
             //! Construct a BasicLineSegment specified by two points of type BasicPoint<PointT>.
             BasicLineSegment(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
-            : _p1(p1)
-            , _p2(p2)
             {
-                if (p1 == p2)
-                {
-                    throw std::invalid_argument("The points to construct a line from must not be identical.");
-                }
+                setPoints(p1, p2);
             }
 
             // No default constructor available as it would most likely set the points
@@ -45,18 +40,30 @@ namespace Math {
                 return _p1;
             }
 
-            void setP1(const BasicPoint<PointT>& p1)
-            {
-                _p1 = p1;
-            }
-            
             const BasicPoint<PointT>& p2() const
             {
                 return _p2;
             }
 
-            void setP2(const BasicPoint<PointT>& p2)
+            /**
+             * @brief Sets both points of this line segments.
+             *
+             * The points provided must not be identical as this is invalid for
+             * a line segments which must have a length greater than 0. If both
+             * points are identical an std::invalid_argument exception is thrown.
+             *
+             * @param p1 The point to which the first point of this line segment is set.
+             * @param p1 The point to which the second point of this line segment is set.
+             * @throws std::invalid_argument if both points are identical.
+             */
+            void setPoints(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
             {
+                if (p1 == p2)
+                {
+                    throw std::invalid_argument("The points to construct a line from must not be identical." + PT_SOURCEINFO);
+                }
+                
+                _p1 = p1;
                 _p2 = p2;
             }
             
