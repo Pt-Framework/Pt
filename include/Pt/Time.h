@@ -161,7 +161,7 @@ class PT_API Time
         Time& operator+=(const Timespan& ts)
         {
             Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
-            msecs = static_cast<unsigned>(msecs);
+            _msecs = static_cast<unsigned>(msecs);
             return *this;
         }
 
