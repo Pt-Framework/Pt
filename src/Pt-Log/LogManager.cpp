@@ -61,11 +61,18 @@ LogManager::LogManager()
     std::auto_ptr<Logger> logger( new Logger( *logTarget ) );
     _logger = logger.get();
 
-    // initialise settings
+    // Set root logger default values to logLevel 'Error' and output channel to 'console://'
+    _rootTarget->setLogLevel(Pt::Log::Error);
+    _rootTarget->setChannel("console://");
+    logTarget->setLogLevel(Pt::Log::Error);
+    logTarget->setChannel("console://");
+
+    // initialise settings if .settings exist
     std::ifstream fs("Pt-Log.settings");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
     SettingsReader reader(ts);
     reader.read(_settings);
+    _settings.getObject( *_rootTarget, "" );
     _settings.getObject( *logTarget, "Pt-Log" );
 
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
@@ -120,6 +127,7 @@ Target& LogManager::target(const std::string& name)
 
     // logger needs to be created as a child of an existing logger
     Target* foundTarget = _rootTarget;
+    LogLevel lastExplicitelySetLogLevel = _rootTarget->_logLevel;
 
     // parse the target name dot syntax
     // ad-hoc parsing code. We might want to replace this with a real
@@ -170,6 +178,10 @@ Target& LogManager::target(const std::string& name)
         {
             _logger->beginLog(PT_SOURCEINFO) << debug << "Found target: " << targetName << endlog;
             foundTarget = it->second;
+            if (foundTarget->logLevelExplicitelySet())
+            {
+                lastExplicitelySetLogLevel = foundTarget->logLevel();
+            }
         }
         else
         {
@@ -178,10 +190,56 @@ Target& LogManager::target(const std::string& name)
             _targetMap[targetName] = foundTarget;
 
             _settings.getObject(*foundTarget, targetName);
+
+            if (!foundTarget->logLevelExplicitelySet())
+            {
+                // get LogLevel from parent
+                foundTarget->setLogLevelImplicitely(lastExplicitelySetLogLevel);
+            }
+            else
+            {
+                lastExplicitelySetLogLevel = foundTarget->logLevel();
+            }
         }
     }
 
     return *foundTarget;
+}
+
+
+void LogManager::updateChildLogLevels(Target &target)
+{
+    Pt::Log::LoggedScope(*_logger, Pt::Log::Trace, PT_SOURCEINFO);
+    Pt::System::MutexLock lock( _mutex );
+
+    // Find the direct children of this target and set their LogLevels,
+    // if their LogLevels haven't been set explicitely
+    const std::string targetName = target.name() + ".";
+
+    std::string::size_type startPos;
+    std::string::size_type endPos;
+    
+    std::map<std::string, Target*>::iterator it;
+    for (it = _targetMap.upper_bound(targetName); it != _targetMap.end(); ++it)
+    {
+        Target* foundTarget = it->second;
+        
+        const std::string& childTargetName = foundTarget->name();
+        startPos = childTargetName.find(targetName);
+        
+        if (startPos != 0)
+        {
+            break;  // It's not a child. Leave this loop/method.
+        }
+        
+        // Is it a direct child? Update the target's log level and descent recursivly.
+        endPos = childTargetName.find(".", targetName.size());
+        if (endPos == std::string::npos && !foundTarget->logLevelExplicitelySet())
+        {            
+            foundTarget->setLogLevelImplicitely(target.logLevel());
+            LogManager::instance().updateChildLogLevels(*foundTarget);            
+        }
+    }
 }
 
 

@@ -70,11 +70,11 @@ void SerialChannel::_open(const std::string& urlstr)
     {
         throw Pt::System::OpenFailed( "Unexpected protocol type: " + protocol, PT_SOURCEINFO );
     }
-    if( sStream.get() != '/' ) 
+    if( sStream.get() != '/' )
     {
         throw Pt::System::OpenFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
     }
-    if( sStream.get() != '/' ) 
+    if( sStream.get() != '/' )
     {
         throw Pt::System::OpenFailed( "Malformed URL! Expected '/' after protocol part.", PT_SOURCEINFO );
     }
@@ -82,9 +82,9 @@ void SerialChannel::_open(const std::string& urlstr)
     std::getline( sStream, path );
     _device.open( path, std::ios::out );
     _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-	_device.setCharSize(8);
-	_device.setStopBits(Pt::System::SerialDevice::OneStopBit);
-	_device.setParity(Pt::System::SerialDevice::ParityNone);
+    _device.setCharSize(8);
+    _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
+    _device.setParity(Pt::System::SerialDevice::ParityNone);
 }
 
 

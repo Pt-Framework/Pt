@@ -99,10 +99,11 @@ namespace Log {
             */
             LogLevel logLevel() const;
 
-            /** @brief Sets the log-level of the target
+            /** @brief Sets the log-level of the target explicitely
 
                 This method is thread-safe. The log-level can also be set
-                in the properties file of the logging-manager.
+                in the properties file of the logging-manager. All children of this
+                target inherit the given LogLevel.
             */
             void setLogLevel(LogLevel level);
 
@@ -131,6 +132,12 @@ namespace Log {
             */
             static Target& get(const std::string& name);
 
+            /** @brief Returns, if a log level was explicitely set via .settings file or setLogLevel()
+             *
+             *  @return True, if LogLevel was explicitely set, otherwise false
+            */
+            bool logLevelExplicitelySet();
+
         protected:
             //! @internal Used by Logger
             void log(const Message& msg);
@@ -141,8 +148,16 @@ namespace Log {
             //! @internal Property callback
             void setLogLevel(const std::string&);
 
+            /** @brief Sets the log-level of the target implicitely
+
+                This method is thread-safe. The children of this
+                target don't inherit the given LogLevel.
+            */
+            void setLogLevelImplicitely(LogLevel level);
+
             //! @internal Only used on LogManager initialisation
             void assignChannel(Channel& ch);
+
 
         private:
             //! @internal
@@ -161,6 +176,9 @@ namespace Log {
 
             //! @internal
             void* _reserved;
+
+            //! @internal
+            bool _logLevelExplicitelySet;
     };
 
 } // namespace Log

@@ -54,6 +54,8 @@ class PT_LOG_API LogManager : public Pt::Singleton<LogManager>
 
         void log(Target& target, const Message& message, bool isAsync = false);
 
+        void updateChildLogLevels(Target &target);
+
     protected:
         Channel& channel(const std::string& url);
 

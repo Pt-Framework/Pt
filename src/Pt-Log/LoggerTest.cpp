@@ -37,6 +37,7 @@ class LoggerTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("LoggerTest")
         {
             Pt::Unit::TestSuite::registerMethod( "CreateLogger", *this, &LoggerTest::CreateLogger );
+            Pt::Unit::TestSuite::registerMethod( "TestInheritance", *this, &LoggerTest::TestInheritance );
             Pt::Unit::TestSuite::registerMethod( "LogFatal", *this, &LoggerTest::LogFatal );
             Pt::Unit::TestSuite::registerMethod( "LogError", *this, &LoggerTest::LogError );
             Pt::Unit::TestSuite::registerMethod( "LogWarn", *this, &LoggerTest::LogWarn );
@@ -79,6 +80,83 @@ class LoggerTest : public Pt::Unit::TestSuite
             }
             catch(const std::invalid_argument&)
             {  }
+        }
+
+        void TestInheritance()
+        { 
+            Pt::Log::Logger logger_m("m");
+            Pt::Log::Logger logger_m_a("m.a");
+            Pt::Log::Logger logger_m_a_a("m.a.a");
+            Pt::Log::Logger logger_m_aa_aa("m.aa.aa");
+            Pt::Log::Logger logger_m_a_A("m.a.A");
+            Pt::Log::Logger logger_m_A_a("m.A.a");
+            Pt::Log::Logger logger_m_a_a_a("m.a.a.a");
+            Pt::Log::Logger logger_m_a_a_b("m.a.a.b");
+            Pt::Log::Logger logger_m_a_b("m.a.b");
+            Pt::Log::Logger logger_m_a_b_a("m.a.b.a");
+            Pt::Log::Logger logger_m_a_b_b("m.a.b.b");
+            Pt::Log::Logger logger_m_b("m.b");
+            Pt::Log::Logger logger_m_b_a("m.b.a");
+            
+            logger_m.target().setLogLevel(Pt::Log::Trace);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::Log::Trace );
+            
+            logger_m_a_b.target().setLogLevel(Pt::Log::Error);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::Log::Trace );
+
+            logger_m_a.target().setLogLevel(Pt::Log::Info);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::Log::Trace );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::Log::Trace );
+
+            logger_m.target().setLogLevel(Pt::Log::Fatal);
+            PT_UNIT_ASSERT( logger_m.target().logLevel()        == Pt::Log::Fatal );
+            PT_UNIT_ASSERT( logger_m_a.target().logLevel()      == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_a.target().logLevel()    == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_aa_aa.target().logLevel()  == Pt::Log::Fatal );
+            PT_UNIT_ASSERT( logger_m_a_A.target().logLevel()    == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_A_a.target().logLevel()    == Pt::Log::Fatal );
+            PT_UNIT_ASSERT( logger_m_a_a_a.target().logLevel()  == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_a_b.target().logLevel()  == Pt::Log::Info );
+            PT_UNIT_ASSERT( logger_m_a_b.target().logLevel()    == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_a.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_a_b_b.target().logLevel()  == Pt::Log::Error );
+            PT_UNIT_ASSERT( logger_m_b.target().logLevel()      == Pt::Log::Fatal );
+            PT_UNIT_ASSERT( logger_m_b_a.target().logLevel()    == Pt::Log::Fatal );
         }
 
         void LogFatal()

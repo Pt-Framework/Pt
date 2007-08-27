@@ -30,6 +30,7 @@ Target::Target(const std::string& name, Target* parent)
 , _logLevel(Fatal)
 , _parent(parent)
 , _channel(0)
+, _logLevelExplicitelySet(false)
 {
     void (Target::*setter)(const std::string&);
     setter = &Target::setLogLevel;
@@ -72,6 +73,10 @@ LogLevel Target::logLevel() const
 void Target::setLogLevel(LogLevel level)
 {
     _logLevel = level;
+    _logLevelExplicitelySet = true;
+
+    // Iterate through childs and set new LogLevels
+    LogManager::instance().updateChildLogLevels(*this);
 }
 
 
@@ -101,6 +106,10 @@ Target& Target::get(const std::string& name)
     return LogManager::instance().target(name);
 }
 
+bool Target::logLevelExplicitelySet()
+{
+    return _logLevelExplicitelySet;
+}
 
 std::string Target::logLevelString() const
 {
@@ -110,32 +119,40 @@ std::string Target::logLevelString() const
 
 void Target::setLogLevel(const std::string& level)
 {
+    if(level == "None")
+    {
+        this->setLogLevel(None);
+    }
     if(level == "Fatal")
     {
-        _logLevel = Fatal;
+        this->setLogLevel(Fatal);
     }
     else if(level == "Error")
     {
-        _logLevel = Error;
+        this->setLogLevel(Error);
     }
     else if(level == "Warn")
     {
-        _logLevel = Warn;
+        this->setLogLevel(Warn);
     }
     else if(level == "Info")
     {
-        _logLevel = Info;
+        this->setLogLevel(Info);
     }
     else if( level == "Debug")
     {
-        _logLevel = Debug;
+        this->setLogLevel(Debug);
     }
     else if(level == "Trace")
     {
-        _logLevel = Trace;
+        this->setLogLevel(Trace);
     }
 }
 
+void Target::setLogLevelImplicitely(LogLevel level)
+{
+    _logLevel = level;
+}
 
 void Target::assignChannel(Channel& ch)
 {

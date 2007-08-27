@@ -21,7 +21,7 @@
 
 #include <Pt/Log/Api.h>
 #include <string>
-
+#include <stdexcept>
 
 namespace Pt {
 
@@ -32,12 +32,13 @@ namespace Log {
     @ingroup Logging
 */
 enum LogLevel {
-    Fatal = 0,
-    Error = 100,
-    Warn  = 200,
-    Info  = 300,
-    Debug = 400,
-    Trace = 500
+    None  = 0,
+    Fatal = 100,
+    Error = 200,
+    Warn  = 300,
+    Info  = 400,
+    Debug = 500,
+    Trace = 600
 };
 
 
@@ -46,34 +47,17 @@ enum LogLevel {
 */
 inline std::string toString(LogLevel level)
 {
-    std::string s;
-
-    switch( level )
+    switch (level)
     {
-        case Fatal:
-            s = "FATAL";
-            break;
-
-        case Error:
-            s = "ERROR";
-            break;
-
-        case Warn:
-            s = "WARN";
-            break;
-
-        case Info:
-            s = "INFO";
-            break;
-
-        case Debug:
-            s = "DEBUG";
-            break;
-
-        default: s = "TRACE";
+        case None:  return "NONE";
+        case Fatal: return "FATAL";
+        case Error: return "ERROR";
+        case Warn:  return "WARN";
+        case Info:  return "INFO";
+        case Debug: return "DEBUG";
+        case Trace: return "TRACE";
+        default:    throw std::logic_error("Unknown log level in LogLevel::toString() method.");
     };
-
-    return s;
 }
 
 
