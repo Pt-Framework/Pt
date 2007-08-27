@@ -113,33 +113,28 @@ PtUnitTest_MakeLocate StringStreamTest : $(OUTPUT_TARGET) ;
 NOTFILE Pt-all ;
 NOTFILE Pt-test ;
  
-DEPENDS Pt-test :   AtomicTest.unit 
+DEPENDS Pt-test :   AnyTest.unit
+                    AtomicTest.unit
                     ByteorderTest.unit
-                    DateTimeTest.unit
+                    CharTest.unit
                     DateTest.unit
-                    TimeTest.unit                   
+                    DateTimeTest.unit
+                    DelegateTest.unit
                     ExceptionTest.unit
-                    TypesTest.unit
+                    SerializationTest.unit
+                    SettingsTest.unit
                     SignalTest.unit
+                    SingletonTest.unit
                     SmartPtrTest.unit
                     StringStreamTest.unit
+                    StringTest.unit
+                    TimeTest.unit
+                    TypesTest.unit
+                    TypeTraitsTest.unit
                     VariantTest.unit
-                    SerializationTest.unit
-                    #VersionTest.unit
                     ;
+                    
                  
 DEPENDS Pt-all :    Pt
-                    AtomicTest 
-                    ByteorderTest 
-                    DateTimeTest 
-                    DateTest 
-                    TimeTest                    
-                    ExceptionTest 
-                    TypesTest 
-                    SignalTest 
-                    SmartPtrTest 
-                    StringStreamTest
-                    VariantTest
-                    SerializationTest
-                    #VersionTest
+                    Pt-test
                     ;
