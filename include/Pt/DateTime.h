@@ -144,7 +144,7 @@ class PT_API DateTime
 
             _date += static_cast<int>(days);
 
-            _time += Timespan(overrun);
+            _time += Timespan(overrun * 1000);
             return *this;
         }
 
