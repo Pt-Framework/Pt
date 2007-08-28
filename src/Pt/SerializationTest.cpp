@@ -20,15 +20,16 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include <Pt/SerializationInfo.h>
-#include <Pt/Date.h>
-#include <Pt/Time.h>
-#include <Pt/DateTime.h>
-#include <Pt/System/Clock.h>
-#include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestSuite.h>
-#include <Pt/Unit/RegisterTest.h>
-#include <Pt/Math/MathUtils.h>
+#include "Pt/SerializationInfo.h"
+#include "Pt/Date.h"
+#include "Pt/Time.h"
+#include "Pt/DateTime.h"
+#include "Pt/System/Clock.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestMain.h"
+#include "Pt/Unit/RegisterTest.h"
+#include "Pt/Math/MathUtils.h"
 
 #include <string>
 #include <iostream>
@@ -363,17 +364,17 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
 
 
-    double doubleVal1 = 198.819649;
+    double doubleVal1 = 198.8196;
     double doubleVal2;
     si <<= doubleVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
     PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(doubleVal2);
-    PT_UNIT_ASSERT( Pt::Math::equal(doubleVal2, 198.819649, Pt::Math::Eps6) );
+    PT_UNIT_ASSERT( Pt::Math::equal(doubleVal2, 198.8196, Pt::Math::Eps6) );
     Pt::String asString = si.toString();
-    PT_UNIT_ASSERT( asString.find(L"198.819649") != Pt::String::npos );
+    PT_UNIT_ASSERT( asString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
-    PT_UNIT_ASSERT(doubleVal2 == 198.819649);
+    PT_UNIT_ASSERT(doubleVal2 == 198.8196);
 
 }
 
