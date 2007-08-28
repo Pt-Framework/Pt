@@ -23,6 +23,8 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/StringStream.h>
+#include <Pt/Text/TextStream.h>
+#include <Pt/Text/Utf8Codec.h>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -104,29 +106,43 @@ namespace Pt {
     {
         static void toData(std::string& data, unsigned char value)
         {
+            // output as numeric value
             std::ostringstream os;
-            os << value;
+            os << (static_cast<unsigned int>(value));
             data = os.str();
         }
 
         static void toData(Pt::String& data, unsigned char value)
         {
-            data = Pt::Char(value);
+            // output as numeric value
+            Pt::StringStream sStream;
+            unsigned int uintValue = static_cast<unsigned int>(value);
+            sStream << uintValue;
+            data = sStream.str();
         }
 
         static bool fromData(unsigned char& value, const std::string& data)
         {
+            // interpret as numeric value
             std::istringstream is(data);
-            is >> value;
+            unsigned int uintValue;
+            is >> uintValue;
+            value = static_cast<unsigned char>(uintValue);
             return !is.fail();
         }
 
         static bool fromData(unsigned char& value, const Pt::String& data)
         {
             if( data.empty() )
+            {
                 return false;
+            }
 
-            value = data[0];
+            // interpret as numeric value
+            Pt::StringStream sStream(data);
+            unsigned int uintValue;
+            sStream >> uintValue;
+            value = static_cast<unsigned char>(uintValue);
             return true;
         }
     };
@@ -137,29 +153,43 @@ namespace Pt {
     {
         static void toData(std::string& data, signed char value)
         {
+            // output as numeric value
             std::ostringstream os;
-            os << value;
+            os << (static_cast<signed char>(value));
             data = os.str();
         }
 
         static void toData(Pt::String& data, signed char value)
         {
-            data = Pt::Char( int(value) );
+            // output as numeric value
+            Pt::StringStream sStream;
+            int intValue = static_cast<int>(value);
+            sStream << intValue;
+            data = sStream.str();
         }
 
         static bool fromData(signed char& value, const std::string& data)
         {
+            // interpret as numeric value
             std::istringstream is(data);
-            is >> value;
-            return !is.fail();
+            int intValue;
+            is >> intValue;
+            value = static_cast<signed char>(intValue);
+            return !is.fail();;
         }
 
         static bool fromData(signed char& value, const Pt::String& data)
         {
             if( data.empty() )
+            {
                 return false;
+            }
 
-            value = data[0];
+            // interpret as numeric value
+            Pt::StringStream sStream(data);
+            int intValue;
+            sStream >> intValue;
+            value = static_cast<int>(intValue);
             return true;
         }
     };
