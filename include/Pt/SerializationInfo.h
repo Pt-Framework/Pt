@@ -123,14 +123,14 @@ class PT_API SerializationInfo
         SerializationInfo& addMember(const std::string& name);
 
         const SerializationInfo& getMember(const std::string& name) const;
-        
-        
+
+
         // This is needed for some compilers (GCC 3.x) to allow access to
         // method 'T getValue(const std::string& name) const' below.
         template <typename T>
         friend T getValue(const std::string& name, SerializationInfo* si);
 
-        
+
         template <typename T>
         T getValue(const std::string& name) const
         {
@@ -263,6 +263,71 @@ inline void operator <<=(SerializationInfo& si, bool n)
 }
 
 
+inline void operator >>=(const SerializationInfo& si, signed char& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, signed char n)
+{
+    si.setValue(n);
+    si.setTypeName("signed char");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, unsigned char& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, unsigned char n)
+{
+    si.setValue(n);
+    si.setTypeName("unsigned char");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, char& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, char n)
+{
+    si.setValue(n);
+    si.setTypeName("char");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, short& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, short n)
+{
+    si.setValue(n);
+    si.setTypeName("short");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, unsigned short& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, unsigned short n)
+{
+    si.setValue(n);
+    si.setTypeName("unsigned short");
+}
+
+
 inline void operator >>=(const SerializationInfo& si, int& n)
 {
     si.toValue(n);
@@ -285,7 +350,33 @@ inline void operator >>=(const SerializationInfo& si, unsigned int& n)
 inline void operator <<=(SerializationInfo& si, unsigned int n)
 {
     si.setValue(n);
-    si.setTypeName("unsigned");
+    si.setTypeName("unsigned int");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, long& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, long n)
+{
+    si.setValue(n);
+    si.setTypeName("long");
+}
+
+
+inline void operator >>=(const SerializationInfo& si, unsigned long& n)
+{
+    si.toValue(n);
+}
+
+
+inline void operator <<=(SerializationInfo& si, unsigned long n)
+{
+    si.setValue(n);
+    si.setTypeName("unsigned long");
 }
 
 
