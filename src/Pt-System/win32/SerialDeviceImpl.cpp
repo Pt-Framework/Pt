@@ -63,7 +63,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
 
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
-        throw OpenFailed("Could not open port" , PT_SOURCEINFO);
+        throw OpenFailed("Could not open port " + port , PT_SOURCEINFO);
 
     try
     {
