@@ -138,9 +138,9 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_ovRead, &readBytes, FALSE) == FALSE )
     {
-		DWORD err=GetLastError();
+        DWORD err=GetLastError();
         if( ERROR_HANDLE_EOF == GetLastError() ) {
-			eof = true;
+            eof = true;
         }
         else{
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
