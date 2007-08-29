@@ -43,7 +43,14 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
 {
-    IODeviceImpl::open(path, mode, isAsync);
+    try
+    {
+        IODeviceImpl::open(path, mode, isAsync);
+    }
+    catch (const OpenFailed& e)
+    {
+        throw OpenFailed("Could not open port " + path, PT_SOURCEINFO);
+    }
 
     struct termios ios;
     if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
