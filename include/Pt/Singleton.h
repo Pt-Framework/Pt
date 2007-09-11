@@ -72,8 +72,8 @@ namespace Pt {
                     try
                     {
                         _instance = _allocator.allocate(1);
-					    new (_instance) T();
-					    std::atexit(&atExit);
+                        new (_instance) T();
+                        std::atexit(&atExit);
                     }
                     catch( const std::bad_alloc& e )
                     {
