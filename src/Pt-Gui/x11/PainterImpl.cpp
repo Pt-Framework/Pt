@@ -135,7 +135,9 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
             case Pen::DashStyle:
                 lineStyle = LineOnOffDash;
                 break;
-	  default: break;
+
+            case Pen::DoubleDash:
+                break;
         }
 
         int joinStyle = JoinBevel;
@@ -161,10 +163,14 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
                 capStyle = CapRound;
                 break;
 
-	  case Pen::TriangularCap:
-	  case Pen::ProjectingCap:
-	  case Pen::ButtCap:
-	  default: break;
+            case Pen::TriangularCap:
+                break;
+
+            case Pen::ProjectingCap:
+                break;
+
+            case Pen::ButtCap:
+                break;
         }
 
         Display* display = X11EventLoop::instance().display();
@@ -516,21 +522,21 @@ long PainterImpl::toXColor(const Gfx::ARgbColor& color)
         {
             Gfx::Rgb888Color rgb888;
             assign(rgb888, color);
-            return reinterpret_cast<long&>(rgb888);
+            return rgb888.value();
         }
 
         case 16:
         {
             Gfx::Rgb565Color rgb565;
             assign(rgb565, color);
-            return reinterpret_cast<long&>(rgb565);
+            return rgb565.value();
         }
 
         case 15:
         {
             Gfx::Rgb555Color rgb555;
             assign(rgb555, color);
-            return reinterpret_cast<long&>(rgb555);
+            return rgb555.value();
         }
 
         default:
