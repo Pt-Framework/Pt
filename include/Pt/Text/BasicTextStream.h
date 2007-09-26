@@ -82,15 +82,14 @@ namespace Text {
             ~BasicTextIStream()
             { delete _buffer; }
 
-        protected:
-            BasicTextIStream(std::basic_streambuf<InternT>* buffer)
-            : std::basic_istream<InternT>( buffer ),
-              _buffer(0)
-            { }
+			void attach(std::basic_iostream<ExternT>& ios)
+			{
+				_buffer->attach( ios.rdbuf() );
+				this->clear();
+			}
 
         private:
-            //! @brief Internal buffer using the internal data type (InternT)
-            std::basic_streambuf<InternT>* _buffer;
+            BasicTextBuffer<InternT, ExternT>* _buffer;
     };
 
 
@@ -145,15 +144,14 @@ namespace Text {
             ~BasicTextOStream()
             { delete _buffer; }
 
-        protected:
-            BasicTextOStream(std::basic_streambuf<InternT>* buffer)
-            : std::basic_ostream<InternT>( buffer ),
-              _buffer(0)
-            { }
+			void attach(std::basic_iostream<ExternT>& ios)
+			{
+				_buffer->attach( ios.rdbuf() );
+				this->clear();
+			}
 
         private:
-            //! @brief Internal buffer using the internal data type (InternT)
-            std::basic_streambuf<InternT>* _buffer;
+            BasicTextBuffer<InternT, ExternT>* _buffer;
     };
 
 
@@ -199,23 +197,23 @@ namespace Text {
              * @param is The I/O-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data from or to the external device.
              */
-            BasicTextStream(std::basic_iostream<ExternT>& is, CodecT* codec)
-            : std::basic_iostream<InternT>( _buffer = new BasicTextBuffer<InternT, ExternT>( is.rdbuf() , codec) )
-            { }
+            BasicTextStream(std::basic_iostream<ExternT>& os, CodecT* codec)
+            : std::basic_iostream<InternT>( _buffer = new BasicTextBuffer<InternT, ExternT>( os.rdbuf() , codec) )
+            { 
+			}
 
             //! @brief Destructs this object freeing the internal buffer.
             ~BasicTextStream()
             { delete _buffer; }
 
-        protected:
-            BasicTextStream(std::basic_streambuf<InternT>* buffer)
-            : std::basic_iostream<InternT>( buffer ),
-              _buffer(0)
-            { }
+			void attach(std::basic_iostream<ExternT>& ios)
+			{
+				_buffer->attach( ios.rdbuf() );
+				this->clear();
+			}
 
         private:
-            //! @brief Internal buffer using the internal data type (InternT)
-            std::basic_streambuf<InternT>* _buffer;
+            BasicTextBuffer<InternT, ExternT>* _buffer;
     };
 
 } // namespace Text

@@ -61,6 +61,8 @@ class TextStreamTest : public Pt::Unit::TestSuite
         TextStreamTest()
         : Pt::Unit::TestSuite("TextStreamTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "InvalidUTF8String",
+                                                 *this, &TextStreamTest::InvalidUTF8String );
             Pt::Unit::TestSuite::registerMethod( "testTextStreamDirectFromUTF8ToUnicode",
                                                  *this, &TextStreamTest::testTextStreamDirectFromUTF8ToUnicode );
             Pt::Unit::TestSuite::registerMethod( "testTextStreamGetLineFromUTF8ToUnicode",
@@ -75,6 +77,7 @@ class TextStreamTest : public Pt::Unit::TestSuite
                                                  *this, &TextStreamTest::testNumpunct );
         }
 
+		void InvalidUTF8String();
         void testTextStreamDirectFromUTF8ToUnicode();
         void testTextStreamGetLineFromUTF8ToUnicode();
         void testTextBufferFromUnicodeToUTF8();
@@ -98,6 +101,30 @@ char TextStreamTest::_TextUTF8[]    = { (char)0xce, (char)0xba, (char)0xe1, (cha
                                         (char)0xce, (char)0xbc, (char)0xce, (char)0xb5, (char)0x0 };
 
 Pt::Char TextStreamTest::_TextUnicode[] = { 954, 8057, 963, 956, 949, 0 };
+
+
+void TextStreamTest::InvalidUTF8String()
+{
+    std::stringstream ss;
+    Pt::Text::TextStream ts( ss, new Pt::Text::Utf8Codec() );
+ 
+	std::string invalid = "Xevil";
+	invalid[0] = std::char_traits<char>::to_char_type(159); //"Ÿevil"
+    ss.str(invalid);
+    PT_UNIT_ASSERT( !ss.fail() );
+    
+    Pt::String str;
+    std::getline(ts, str);
+    PT_UNIT_ASSERT( ts.fail() );
+    
+	// attaching the TextStream also clears state
+	std::stringstream ss2( _TextUTF8 );
+	ts.attach(ss2);
+    PT_UNIT_ASSERT( !ts.fail() );
+	
+	std::getline(ts, str);
+    PT_UNIT_ASSERT( !ts.fail() );
+}
 
 
 void TextStreamTest::testTextStreamDirectFromUTF8ToUnicode()

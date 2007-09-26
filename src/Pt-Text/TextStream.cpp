@@ -61,56 +61,39 @@ TextBuffer::TextBuffer(std::streambuf* buffer, CodecT* codec)
 
 
 TextIStream::TextIStream(std::istream& is, CodecT* codec)
-: BasicTextIStream<Char, char>( new TextBuffer(is.rdbuf(), codec) )
-, _buffer(0)
+: BasicTextIStream<Char, char>( is, codec )
 {
-    _buffer = (TextBuffer*)( this->rdbuf() );
 }
 
 
 TextIStream::~TextIStream()
 {
-    delete _buffer;
-}
 
-
-TextIStream::TextIStream(TextBuffer* buffer)
-: BasicTextIStream<Pt::Char, char>( buffer )
-, _buffer(0)
-{
-    /*#ifndef PTV_WITHOUT_STD_LOCALE
-        if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) ) {
-            std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
-            std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-        }
-    #endif*/
 }
 
 
 
 
 TextOStream::TextOStream(std::ostream& os, CodecT* codec)
-: BasicTextOStream<Char, char>( new TextBuffer(os.rdbuf(), codec) )
+: BasicTextOStream<Char, char>( os, codec )
 { }
 
 
 TextOStream::~TextOStream()
 {
-    delete this->rdbuf();
 }
 
 
+
+
 TextStream::TextStream(std::iostream& ios, CodecT* codec)
-: BasicTextStream<Char, char>( new TextBuffer(ios.rdbuf(), codec) )
+: BasicTextStream<Char, char>( ios, codec )
 {
 }
 
 
 TextStream::~TextStream()
 {
-    delete this->rdbuf();
 }
 
 

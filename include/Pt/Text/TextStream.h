@@ -83,12 +83,6 @@ namespace Text {
 
             //! @brief Destructs this object freeing the internal buffer.
             ~TextIStream();
-
-        protected:
-            TextIStream(TextBuffer* buffer);
-
-        private:
-            TextBuffer* _buffer;
     };
 
 

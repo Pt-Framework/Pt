@@ -80,7 +80,13 @@ namespace Text {
                 this->btinit();
             }
 
-            ~BasicTextBuffer() throw()
+			void attach(std::basic_streambuf<ExternT>* buffer)
+			{ 			
+				_streambuf = buffer;
+				this->btinit();
+			}
+
+			~BasicTextBuffer() throw()
             { delete _codec; }
 
             InternT* begin()
@@ -142,8 +148,8 @@ namespace Text {
     {
         _bufferSize = 1024;
         _putbackMax = 4;
-
         _readBuffer.reserve(_bufferSize);
+		_readBuffer.resize(0);
 
         // TODO: use size factor from TextCodec to determine
         // optimum buffer size ratios
@@ -154,7 +160,7 @@ namespace Text {
 
         _outBuffer.resize(_bufferSize);
         _writeBuffer.resize(_bufferSize * 4);
-        this->setp(&_outBuffer[0], &_outBuffer[0] + _outBuffer.size());
+        this->setp(&_outBuffer[0], &_outBuffer[0] + _outBuffer.size());			
     }
 
 
