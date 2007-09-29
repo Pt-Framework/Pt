@@ -363,7 +363,6 @@ void SettingsReader::_read(SerializationInfo& data)
     Pt::Char ch;
     while( _is->get(ch) )
     {
-        char xx = ch.narrow('*');
         if( ch == Pt::Char(L';') && _parse != &SettingsReader::parseQuotedValue)
         {
             getline( *_is, comment, Pt::Char(L'\n') );
