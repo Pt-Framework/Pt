@@ -34,7 +34,7 @@ class VariantTest : public Pt::Unit::TestSuite
 {
     public:
         VariantTest()
-        : Pt::Unit::TestSuite("TimeTest")
+        : Pt::Unit::TestSuite("VariantTest")
         {
             Pt::Unit::TestSuite::registerMethod( "AssignInt", *this, &VariantTest::AssignInt );
             Pt::Unit::TestSuite::registerMethod( "GetInt", *this, &VariantTest::GetInt );
