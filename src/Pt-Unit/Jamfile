@@ -10,7 +10,7 @@ PT_UNIT_SOURCES = Application.cpp
                   Test.cpp
                   TestCase.cpp
                   TestContext.cpp
-                  TestProtocol.cpp
+                  # TestProtocol.cpp
                   TextProtocol.cpp
                   TestSuite.cpp
                  ;

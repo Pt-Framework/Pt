@@ -29,7 +29,7 @@ namespace std {
 std::locale::id ctype<Pt::Char>::id;
 
 
-#if (defined _MSC_VER || defined __QNX__)
+#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
 
 ctype<Pt::Char>::ctype(size_t refs)
 : ctype_base(refs)

@@ -46,10 +46,14 @@
         #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
 
     #else
-
+        #error gggggggggggggggggggggg
         #define PT_ATOMICITY_H "Atomicity.generic.h"
 
     #endif
+
+#else
+
+    #include "Atomicity.generic.h"
 
 #endif
 

@@ -87,7 +87,7 @@ namespace System {
             { return _count != 0; }
 
     private:
-        atomic_t _count;
+        Pt::atomic_t _count;
     };
 
 } // !namespace System

@@ -27,6 +27,18 @@
 #include <cerrno>
 #include <iostream>
 
+/*
+ * #if defined(__QNX__)
+#define CRTSCTS (IHFLOW | OHFLOW)
+#endif
+*/
+
+#if defined(_THR_UNIXWARE) || defined(__hpux) || defined(_AIX)
+#include <sys/termiox.h>
+#define CRTSCTS (CTSXON | RTSXOFF)
+#endif
+
+
 namespace Pt {
 
 namespace System {
@@ -108,11 +120,16 @@ void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
         case SerialDevice::BaudRate9600: rate = B9600; break;
         case SerialDevice::BaudRate19200: rate = B19200; break;
         case SerialDevice::BaudRate38400: rate = B38400; break;
-        case SerialDevice::BaudRate57600: rate = B57600; break;
-        case SerialDevice::BaudRate115200: rate = B115200; break;
+        #ifdef B57600
+            case SerialDevice::BaudRate57600: rate = B57600; break;
+        #endif
+        #ifdef B115200
+            case SerialDevice::BaudRate115200: rate = B115200; break;
+        #endif
         #ifdef B230400
             case SerialDevice::BaudRate230400: rate = B230400; break;
         #endif
+        throw IOError("Baud rate not available", PT_SOURCEINFO);
     }
 
     ::cfsetispeed( &ios, rate );
@@ -152,8 +169,15 @@ SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
         case B9600:   return SerialDevice::BaudRate9600;
         case B19200:  return SerialDevice::BaudRate19200;
         case B38400:  return SerialDevice::BaudRate38400;
-        case B57600:  return SerialDevice::BaudRate57600;
-        case B115200: return SerialDevice::BaudRate115200;
+        
+        #ifdef B57600
+            case B57600:  return SerialDevice::BaudRate57600;
+        #endif
+
+        #ifdef B115200
+            case B115200: return SerialDevice::BaudRate115200;
+        #endif
+        
         #ifdef B230400
             case B230400: return SerialDevice::BaudRate230400;
         #endif
@@ -320,7 +344,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set flow control", PT_SOURCEINFO);
 
-    #ifdef linux
+    #if defined(linux) || defined(_AIX)
         ios.c_cflag &= ~CRTSCTS;
     #else
         ios.c_cflag &= ~IHFLOW; // INPUT hardware control
@@ -339,7 +363,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         case SerialDevice::FlowControlBoth:
             ios.c_iflag |= (IXON | IXANY | IXOFF);
         case SerialDevice::FlowControlHard:
-            #ifdef linux
+            #if defined(linux) || defined(_AIX)
                ios.c_cflag |= CRTSCTS;
             #else
                ios.c_cflag |= IHFLOW; // INPUT hardware control

@@ -26,7 +26,6 @@ rule JamInclude
 #
 TARGET_OS ?= $(OS:L) ;
 
-
 # Set target platform to host platform if unset
 #
 TARGET_OSPLAT ?= $(OSPLAT:L) ;

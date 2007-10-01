@@ -361,7 +361,9 @@ Method<R,ClassT, A1> callable( ClassT& obj, R (BaseT::*ptr)(A1) ) throw()
 
 template < typename R,
            class C >
+
 class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
+
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)();
@@ -372,7 +374,7 @@ class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, P
         { }
 
         Method(const Method& method) throw()
-        : Callable<R, Pt::Void, Pt::Void, Pt::Void>()
+        : Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>()
         { this->operator=(method); }
 
         ClassT& object()

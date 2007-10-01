@@ -25,6 +25,9 @@ SharedLibrary Pt : Any.cpp
                    numpunct.cpp
                    Unicode.cpp ;
 
+#TntnetLibrary tnttest : tnt.ecpp ;
+#SharedLibrary_MakeLocate tnttest : $(OUTPUT_TARGET) ;
+
 SharedLibrary_MakeLocate Pt : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt ;
 

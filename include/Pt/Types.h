@@ -86,13 +86,13 @@ namespace Pt {
     typedef unsigned long uint32_t;
 #endif
 
-#if UINT_MAX == 18446744073709551615UL
+#if UINT_MAX == 18446744073709551615ULL
     #define PT_64BIT 1
     /// \exclude
     typedef int int64_t;
     /// \exclude
     typedef unsigned int uint64_t;
-#elif ULONG_MAX == 18446744073709551615UL
+#elif ULONG_MAX == 18446744073709551615ULL
     #define PT_64BIT 1
     /// \exclude
     typedef long int64_t;

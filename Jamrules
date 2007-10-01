@@ -21,7 +21,6 @@ Echo "Host Operating System (OS)      :" $(OS:L) ;
 Echo "Host Platform (OSPLAT)          :" $(OSPLAT:L) ;
 Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
 Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
-Echo "Byte Order (BYTEORDER)          :" $(BYTEORDER:L) ;
 Echo "Graphic User Interface (GUI)    :" $(GUI) ;
 Echo "System Interface (SYS)          :" $(SYS) ;
 Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
@@ -31,3 +30,36 @@ Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
 Echo "Warnings (WARN)                 :" $(WARN) ;
 Echo ;
 
+
+if $(SYS) = "posix"
+{
+  TNTNETLIBS = -ltntnet ;
+}
+else
+{
+  Exit "*** TNT-net requires a posix compliant operating system" ;
+}
+
+
+rule TntnetLibrary
+{
+  local _source = $(<:S=.cpp) ;
+  local _sourceGristed = [ FGristFiles $(_source) ] ;
+
+  MakeLocate $(_source) : $(LOCATE_TARGET) ;
+  SEARCH on $(>) = $(SEARCH_SOURCE) ;
+  Clean clean : $(_source) ;
+
+  Depends $(_sourceGristed) : $(>) ;
+  Depends $(_source) : $(>) ;
+
+  SharedLibrary $(<) : $(_source) ;
+  LINKFLAGS on $(PRELIB)$(<:S=$(SUFDLL)) += $(TNTNETLIBS) ;
+
+  Ecppc $(_source) : $(>) ;
+}
+
+actions Ecppc
+{
+    ecppc -o $(<) -n $(<:B) $(>)
+}

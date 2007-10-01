@@ -229,7 +229,7 @@ namespace Pt {
 
             inline void send(A1 a1, A2 a2) const
             {
-                Sentry sentry(this);
+                SignalBase::Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
                 for(; it != _connections.end(); ++it)
@@ -275,7 +275,7 @@ namespace Pt {
 
             inline void send(A1 a1) const
             {
-                Sentry sentry(this);
+                SignalBase::Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
                 for(; it != _connections.end(); ++it)

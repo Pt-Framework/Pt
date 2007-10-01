@@ -20,9 +20,9 @@
 #ifndef PT_ATOMICINT_GENERIC_H
 #define PT_ATOMICINT_GENERIC_H
 
-#warning "Using fallback implementation of AtomicInt (using pthread) !!!"
+// #warning "Using fallback implementation of AtomicInt (using pthread) !!!"
 
-#include <signal.h>
+#include <csignal>
 
 namespace Pt {
 

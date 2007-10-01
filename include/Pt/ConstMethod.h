@@ -290,7 +290,7 @@ class ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Vo
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, Pt::Void, Pt::Void, Pt::Void>()
+        : Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>()
         { this->operator=(method); }
 
         ClassT& object()

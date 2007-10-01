@@ -141,7 +141,7 @@ namespace Pt {
     /** @brief CTTI for for array types
         @ingroup CTTI
     */
-    template <typename T>
+    /*template <typename T>
     struct TypeInfo<T[]> : public TypeInfoBase<T> {
         static const char* typeName()
         { return _typeName.c_str(); }
@@ -150,7 +150,7 @@ namespace Pt {
     };
 
     template <typename T>
-    const std::string TypeInfo<T[]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[]";
+    const std::string TypeInfo<T[]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[]";*/
 
 
     /** @brief CTTI for for member function types
@@ -234,9 +234,9 @@ namespace Pt {
     };
 
 
-    template <typename T>
-    struct isArray<T[]> : public isTrue {
-    };
+    //template <typename T>
+    //struct isArray<T[]> : public isTrue {
+    //};
 
 
     template <typename T>
@@ -271,9 +271,9 @@ namespace Pt {
     };
 
 
-    template <typename T>
-    struct isPointer<T[]> : public isTrue {
-    };
+    //template <typename T>
+    //struct isPointer<T[]> : public isTrue {
+    //};
 
 
     //! CTTI predicate for const types

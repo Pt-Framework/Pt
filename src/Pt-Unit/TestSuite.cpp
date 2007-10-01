@@ -21,14 +21,19 @@
 #include <Pt/Reflex/Reflectable.h>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
 
+namespace Unit {
 
 TestProtocol TestSuite::defaultProtocol;
 
 
-inline void TestProtocol::run(TestSuite& suite)
+TestProtocol::~TestProtocol()
+{
+}
+
+
+void TestProtocol::run(TestSuite& suite)
 {
     Reflex::Reflectable::MethodIterator it;
     for(it = suite.reflectable()->methodsBegin(); it != suite.reflectable()->methodsEnd(); ++it)
@@ -121,5 +126,9 @@ void TestSuite::call( const std::string& name, const Any* args, size_t argCount 
 void TestSuite::registerCallable(Pt::Reflex::CallableInfo* ci)
 {
     m_reflectable->registerCallableInfo(ci);
+}
+
+}
+
 }
 

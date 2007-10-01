@@ -631,7 +631,7 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::
         { _cb->invoke(); }
 
     private:
-        Callable<void>* _cb;
+        Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 } // namespace Reflex

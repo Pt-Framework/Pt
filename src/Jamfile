@@ -3,17 +3,17 @@ SubDir TOP src ;
 SubInclude TOP src Pt ;
 SubInclude TOP src Pt-Reflex ;
 SubInclude TOP src Pt-System ;
-SubInclude TOP src Pt-Cma ;
+#SubInclude TOP src Pt-Cma ;
 SubInclude TOP src Pt-Log ;
-SubInclude TOP src Pt-Net ;
-SubInclude TOP src Pt-Db ;
-SubInclude TOP src Pt-Gfx ;
-SubInclude TOP src Pt-Gui ;
+#SubInclude TOP src Pt-Net ;
+#SubInclude TOP src Pt-Db ;
+#SubInclude TOP src Pt-Gfx ;
+#SubInclude TOP src Pt-Gui ;
 SubInclude TOP src Pt-Text ;
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Math ;
 
-if $(TARGET_OS:L) != wince && $(TARGET_OS:L) != qnxnto
-{
-    SubInclude TOP src Pt-Xml ;
-}
+#if $(TARGET_OS:L) != wince && $(TARGET_OS:L) != qnxnto
+#{
+#    SubInclude TOP src Pt-Xml ;
+#}

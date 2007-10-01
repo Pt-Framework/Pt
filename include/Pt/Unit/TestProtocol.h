@@ -42,8 +42,7 @@ namespace Unit {
         public:
             /** @brief Destructor
             */
-            virtual ~TestProtocol()
-            {}
+            virtual ~TestProtocol();
 
             /** @brief Executes the protocol
 

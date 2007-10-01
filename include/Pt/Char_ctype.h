@@ -33,7 +33,7 @@ namespace std {
 
     class ios_base;
 
-#if (defined _MSC_VER || defined __QNX__)
+#if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
 
 // According to the VC compiler warning, ctype_base is declared as class on WinCE
 #ifdef _WIN32_WCE
