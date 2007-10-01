@@ -31,14 +31,14 @@ Echo "Warnings (WARN)                 :" $(WARN) ;
 Echo ;
 
 
-if $(SYS) = "posix"
-{
+#if $(SYS) = "posix"
+#{
   TNTNETLIBS = -ltntnet ;
-}
-else
-{
-  Exit "*** TNT-net requires a posix compliant operating system" ;
-}
+#}
+#else
+#{
+#  Echo "*** TNT-net requires a posix compliant operating system" ;
+#}
 
 
 rule TntnetLibrary
