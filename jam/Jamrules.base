@@ -141,7 +141,6 @@
 #   all - default if none given on command line
 #
 
-
 # Initialize variables
 #
 AR          ?= ar ru ;

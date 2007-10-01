@@ -9,6 +9,11 @@ if $(TARGET_OS:L) = linux
 	GUI     ?= x11 ;
 
 }
+if $(TARGET_OS) = aix
+{
+        SYS     ?= posix ;
+        GUI     ?= x11 ;
+}
 if $(TARGET_OS:L) = qnxnto
 {
 	SYS ?= posix ;
@@ -40,6 +45,13 @@ if $(TARGET_OS:L) = linux
 {
 	SYSLIBS     = -ldl -lpthread -lrt ;
     NETLIBS     = -lnsl ;
+}
+
+if $(TARGET_OS) = aix
+{
+    SYSLIBS = -bdynamic -ldl -lpthread -lrt ;
+    LINKLIBS += $(SYSLIBS) ;
+    # NETLIBS = 
 }
 
 if $(TARGET_OS:L) = qnxnto
