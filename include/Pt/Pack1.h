@@ -34,7 +34,15 @@
             #pragma warning(disable:4103)
     #endif
 #elif defined(__INTEL_COMPILER)
- #pragma pack(1)
+    #pragma pack(1)
+    #ifndef PT_PACKED
+        #define PT_PACKED
+    #endif
+#elif defined(__xlC__)
+    #pragma pack(1)
+    #ifndef PT_PACKED
+        #define PT_PACKED
+    #endif
 #else
     #error MACRO FOR PACKING HAS NOT BEEN DEFINED!!
 #endif

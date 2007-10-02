@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -67,8 +67,8 @@
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
     #define PT_EXPORT __declspec(dllexport)
     #define PT_IMPORT __declspec(dllimport)
-    #define PT_PACKED
-    #define PT_ALIGN(value) __declspec( align( value ) )
+    //#define PT_PACKED
+    //#define PT_ALIGN(value) __declspec( align( value ) )
 
     // suppress min/max macros from win32 headers
     #ifndef NOMINMAX
@@ -92,13 +92,13 @@
 #elif __GNUC__ >= 4
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
-    #define PT_PACKED __attribute__ ((packed))
-    #define PT_ALIGN(value) __attribute__ ((aligned ( value )))
+    //#define PT_PACKED __attribute__ ((packed))
+    //#define PT_ALIGN(value) __attribute__ ((aligned ( value )))
 #elif __GNUC__
     #define PT_EXPORT
     #define PT_IMPORT
-    #define PT_PACKED __attribute__ ((packed))
-    #define PT_ALIGN(value) __attribute__ ((aligned ( value )))
+    //#define PT_PACKED __attribute__ ((packed))
+    //#define PT_ALIGN(value) __attribute__ ((aligned ( value )))
 #elif __xlC__
     #define PT_EXPORT
     #define PT_IMPORT

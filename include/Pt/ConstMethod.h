@@ -80,7 +80,23 @@ template < typename R,
            typename A3,
            typename A4,
            typename A5 >
-class ConstMethod<R, Object, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void > : public Callable<R, A1, A2, A3, A4, A5> {
+class ConstMethod<R, Object,
+                  A1,
+                  A2,
+                  A3,
+                  A4,
+                  A5,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              A1,
+                                              A2,
+                                              A3,
+                                              A4,
+                                              A5,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3, A4, A5) const;
@@ -122,7 +138,23 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4 >
-class ConstMethod<R, Object, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
+class ConstMethod<R, Object,
+                  A1,
+                  A2,
+                  A3,
+                  A4,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              A1,
+                                              A2,
+                                              A3,
+                                              A4,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3, A4) const;
@@ -163,7 +195,23 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3 >
-class ConstMethod<R, Object, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
+class ConstMethod<R, Object,
+                  A1,
+                  A2,
+                  A3,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              A1,
+                                              A2,
+                                              A3,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2, A3) const;
@@ -203,7 +251,23 @@ template < typename R,
            class Object,
            typename A1,
            typename A2 >
-class ConstMethod<R, Object, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
+class ConstMethod<R, Object,
+                  A1,
+                  A2,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              A1,
+                                              A2,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1, A2) const;
@@ -242,7 +306,23 @@ ConstMethod<R, Object, A1, A2> callable( Object& obj, R (Object::*ptr)(A1, A2) c
 template < typename R,
            class Object,
            typename A1 >
-class ConstMethod<R, Object, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
+class ConstMethod<R, Object,
+                  A1,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              A1,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef Object ObjectT;
         typedef R (Object::*MethodT)(A1) const;
@@ -280,7 +360,23 @@ ConstMethod<R,Object, A1> callable( Object& obj, R (Object::*ptr)(A1) const ) th
 
 template < typename R,
            class C >
-class ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
+class ConstMethod<R, C,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Callable<R,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void,
+                                              Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)() const;
@@ -290,7 +386,6 @@ class ConstMethod<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Vo
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>()
         { this->operator=(method); }
 
         ClassT& object()

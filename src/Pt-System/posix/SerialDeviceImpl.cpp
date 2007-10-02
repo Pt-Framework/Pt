@@ -22,7 +22,6 @@
 #include <fcntl.h>
 
 #include "SerialDeviceImpl.h"
-#include "Pt/System/Thread.h"
 
 #include <cerrno>
 #include <iostream>

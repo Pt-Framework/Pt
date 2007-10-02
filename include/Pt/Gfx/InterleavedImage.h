@@ -91,12 +91,12 @@ namespace Pt {
 
                 /** @brief Return the width of the image.
                  */
-                inline uint width() const
+                inline size_t width() const
                 { return _width; }
 
                 /** @brief Return the height of the image.
                  */
-                inline uint height() const
+                inline size_t height() const
                 { return _height; }
 
 

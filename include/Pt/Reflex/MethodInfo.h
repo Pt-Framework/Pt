@@ -177,7 +177,7 @@ class MethodInfo<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : publi
         }
 
     private:
-        Callable<R, A1, A2, A3, A4, A5>* _cb;
+        Callable<R, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -223,7 +223,7 @@ class MethodInfo<void, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : pu
         }
 
     private:
-        Callable<void, A1, A2, A3, A4, A5>* _cb;
+        Callable<void, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -266,7 +266,7 @@ class MethodInfo<R, C, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void> :
         }
 
     private:
-        Callable<R, A1, A2, A3, A4>* _cb;
+        Callable<R, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -310,7 +310,7 @@ class MethodInfo<void, C, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void
         }
 
     private:
-        Callable<void, A1, A2, A3, A4>* _cb;
+        Callable<void, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -351,7 +351,7 @@ class MethodInfo<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::V
         }
 
     private:
-        Callable<R, A1, A2, A3>* _cb;
+        Callable<R, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -392,7 +392,7 @@ class MethodInfo<void, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt
         }
 
     private:
-        Callable<void, A1, A2, A3>* _cb;
+        Callable<void, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -431,7 +431,7 @@ class MethodInfo<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void,
         }
 
     private:
-        Callable<void, A1, A2>* _cb;
+        Callable<void, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -471,7 +471,7 @@ class MethodInfo<void, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Vo
         }
 
     private:
-        Callable<void, A1, A2>* _cb;
+        Callable<void, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -509,7 +509,7 @@ class MethodInfo<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt:
         }
 
     private:
-        Callable<void, A1>* _cb;
+        Callable<void, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -546,7 +546,7 @@ class MethodInfo<void, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, 
         }
 
     private:
-        Callable<void, A1>* _cb;
+        Callable<void, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -588,7 +588,7 @@ class MethodInfo<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Voi
         { _cb->invoke(); }
 
     private:
-        Callable<R>* _cb;
+        Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 
@@ -631,7 +631,7 @@ class MethodInfo<void, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::
         { _cb->invoke(); }
 
     private:
-        Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
+        Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>* _cb;
 };
 
 } // namespace Reflex

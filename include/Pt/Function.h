@@ -32,7 +32,14 @@ template < typename R,
            typename A1 = Pt::Void,
            typename A2 = Pt::Void,
            typename A3 = Pt::Void >
-class Function : public Callable<R, A1, A2, A3> {
+class Function : public Callable<R, A1,
+                                  A2,
+                                  A3,
+                                  Pt::Void,
+                                  Pt::Void,
+                                  Pt::Void,
+                                  Pt::Void,
+                                  Pt::Void> {
     public:
         typedef R (*FuncT)(A1, A2, A3);
 
@@ -79,7 +86,14 @@ Function<R, A1, A2, A3> callable(R (*func)(A1, A2, A3)) throw()
 template < typename R,
            typename A1,
            typename A2>
-class Function<R, A1, A2, Pt::Void> : public Callable<R, A1, A2, Pt::Void> {
+class Function<R, A1, A2, Pt::Void> : public Callable<R, A1,
+                                                            A2,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void> {
     public:
         typedef R (*FuncT)( A1, A2);
 
@@ -126,7 +140,14 @@ Function<R, A1, A2> callable(R (*func)(A1, A2)) throw()
 
 template < typename R,
            typename A1 >
-class Function<R, A1, Pt::Void, Pt::Void> : public Callable<R, A1, Pt::Void, Pt::Void> {
+class Function<R, A1, Pt::Void, Pt::Void> : public Callable<R, A1,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void,
+                                                            Pt::Void> {
     public:
         typedef R (*FuncT)(A1);
 
@@ -171,7 +192,15 @@ Function<R, A1> callable(R (*func)(A1)) throw()
 
 
 template < typename R >
-class Function<R, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, Pt::Void, Pt::Void, Pt::Void> {
+class Function<R, Pt::Void, Pt::Void, Pt::Void> : public Callable<R,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void,
+                                                                  Pt::Void> {
     public:
         typedef R (*FuncT)();
 

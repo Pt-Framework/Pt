@@ -337,7 +337,15 @@ namespace Pt {
 
 	template < typename R,
 	           typename A1 >
-	class Callable<R, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<A1> {
+	class Callable<R,
+                 A1,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void> : public Invokable<A1> {
 		public:
 			typedef R ReturnT;
 			typedef A1 Arg1T;
@@ -362,7 +370,15 @@ namespace Pt {
 
 
 	template <typename A1>
-	class Callable<void, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<A1> {
+	class Callable<void,
+                  A1,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void,
+                  Pt::Void> : public Invokable<A1> {
 		public:
 			typedef void ReturnT;
 			typedef A1 Arg1T;
@@ -387,7 +403,15 @@ namespace Pt {
 
 
 	template <typename R>
-	class Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<> {
+	class Callable<R,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void,
+                 Pt::Void> : public Invokable<> {
 		public:
 			typedef R ReturnT;
 			typedef Pt::Void Arg1T;
@@ -412,7 +436,15 @@ namespace Pt {
 
 
 	template <>
-	class PT_API Callable<void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Invokable<> {
+	class PT_API Callable<void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void,
+                        Pt::Void> : public Invokable<> {
 		public:
 			typedef void ReturnT;
 			typedef Pt::Void Arg1T;

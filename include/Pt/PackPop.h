@@ -27,6 +27,8 @@
     #pragma pack(pop)
 #elif defined(__INTEL_COMPILER)
     #pragma pack()
+#elif defined(__xlC__)
+    #pragma pack(pop)
 #else
     #error MACRO FOR PACKING HAS NOT BEEN DEFINED!!
 #endif

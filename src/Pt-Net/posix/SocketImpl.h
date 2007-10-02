@@ -34,9 +34,9 @@
 #else
     #include <sys/types.h>
     #include <sys/socket.h>
+    #include <unistd.h>
     #include <cerrno>
     #ifdef __QNX__
-        #include <unistd.h>
         #include <sys/select.h>
     #else
         #include <sys/poll.h>

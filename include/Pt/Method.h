@@ -85,7 +85,23 @@ template < typename R,
            typename A3,
            typename A4,
            typename A5 >
-class Method<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3, A4, A5> {
+class Method<R, C,
+             A1,
+             A2,
+             A3,
+             A4,
+             A5,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         A1,
+                                         A2,
+                                         A3,
+                                         A4,
+                                         A5,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4, A5);
@@ -131,7 +147,23 @@ template < typename R,
            typename A2,
            typename A3,
            typename A4 >
-class Method<R, C, A1, A2, A3, A4, Pt::Void> : public Callable<R, A1, A2, A3, A4> {
+class Method<R, C,
+             A1,
+             A2,
+             A3,
+             A4,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         A1,
+                                         A2,
+                                         A3,
+                                         A4,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3, A4);
@@ -176,7 +208,23 @@ template < typename R,
            typename A1,
            typename A2,
            typename A3>
-class Method<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2, A3> {
+class Method<R, C,
+             A1,
+             A2,
+             A3,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         A1,
+                                         A2,
+                                         A3,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2, A3);
@@ -239,7 +287,23 @@ template < typename R,
            class C,
            typename A1,
            typename A2 >
-class Method<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1, A2> {
+class Method<R, C,
+             A1,
+             A2,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         A1,
+                                         A2,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1, A2);
@@ -299,7 +363,23 @@ Method<R, ClassT, A1, A2> callable( ClassT& obj, R (ClassT::*ptr)(A1, A2) ) thro
 template < typename R,
            class C,
            typename A1 >
-class Method<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R, A1> {
+class Method<R, C,
+             A1,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         A1,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void> {
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)(A1);
@@ -361,9 +441,24 @@ Method<R,ClassT, A1> callable( ClassT& obj, R (BaseT::*ptr)(A1) ) throw()
 
 template < typename R,
            class C >
-
-class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void> : public Callable<R> {
-
+class Method<R, C,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void,
+             Pt::Void> : public Callable<R,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void,
+                                         Pt::Void>
+{
     public:
         typedef C ClassT;
         typedef R (C::*MemFuncT)();
@@ -374,7 +469,6 @@ class Method<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, P
         { }
 
         Method(const Method& method) throw()
-        : Callable<R, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void>()
         { this->operator=(method); }
 
         ClassT& object()

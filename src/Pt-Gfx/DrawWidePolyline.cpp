@@ -238,14 +238,14 @@ void DrawWidePolyline::fillRect(ARgbImage& image,const Pen& pen, int x, int y, u
     Pt::ssize_t xend = 0;
 
     if( (x + (int)w)  >= 0 )
-        xend = std::min( image.width(), x + w ) ;
+        xend = std::min<int>( image.width(), x + w ) ;
 
     Pt::ssize_t ypos = std::max( 0, y );
 
     Pt::ssize_t yend = 0;
 
     if( (y + (int) h) > 0 )
-        yend = std::min( image.height(), y + h ) ;
+        yend = std::min<int>( image.height(), y + h ) ;
 
     for( ; ypos < yend; ypos++ )
         for( ssize_t xpos = xbegin; xpos < xend; xpos++ )
@@ -475,7 +475,7 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
 int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Math::Point>& points, std::vector<size_t>& widths)
 {
     Pt::Math::Point *tpts, *bpts;
-    unsigned int *twids, *bwids;
+    size_t* twids, *bwids;
     int x, y, e, ex;
     int slw;
 
