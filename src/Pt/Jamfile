@@ -43,6 +43,10 @@ PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate AnyTest : $(OUTPUT_TARGET) ;
 
+PtUnitTest InfixTest : InfixTest.cpp ;
+Main_LinkSharedLibraries InfixTest : Pt Pt-Unit ;
+PtUnitTest_MakeLocate InfixTest : $(OUTPUT_TARGET) ;
+
 PtUnitTest VariantTest : VariantTest.cpp ;
 Main_LinkSharedLibraries VariantTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate VariantTest : $(OUTPUT_TARGET) ;
