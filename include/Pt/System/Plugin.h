@@ -110,7 +110,7 @@ namespace System {
 
 
     template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
-    class PluginManager : PluginManagerBase {
+    class PluginManager : private PluginManagerBase {
         public:
             typedef typename std::map< std::string, PluginT* > PluginMap;
             typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;

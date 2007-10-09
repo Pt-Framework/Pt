@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 - 2007 Marc Boris Dürner                           *
+ *   Copyright (C) 2006 - 2007 Marc Boris Dï¿½rner                           *
  *   Copyright (C) 2006 - 2007 Aloysius Indrayanto                         *
  *   Copyright (C) 2006 - 2007 Sebastian Pieck                             *
  *                                                                         *
@@ -21,11 +21,9 @@
 
 #include "ApplicationImpl.h"
 
-#ifdef __QNX__
-#include <sys/select.h>
-#include <unistd.h>
-#endif
+#ifndef _AIX
 #include <X11/Xft/Xft.h>
+#endif
 
 #include "Pt/Exception.h"
 #include "Pt/Gui/Application.h"
@@ -41,8 +39,9 @@
 
 #include <iostream>
 #include <vector>
-using namespace std;
 
+#include <sys/select.h>
+#include <unistd.h>
 
 namespace Pt {
 

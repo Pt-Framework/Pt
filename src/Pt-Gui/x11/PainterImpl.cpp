@@ -17,7 +17,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef _AIX
 #include <X11/Xft/Xft.h>
+#endif
 
 #include "PainterImpl.h"
 #include "ApplicationImpl.h"
@@ -66,10 +68,12 @@ PainterImpl::PainterImpl(Gui::Drawable& drawable)
                          0,
                          NULL);
 
+#ifndef _AIX
     _xftDraw = XftDrawCreate( display,
                               _drawable->x11Drawable(),
                               visual,
                               DefaultColormap(display, screen) );
+#endif
 
     this->setFont(_font);
 
@@ -87,13 +91,16 @@ PainterImpl::~PainterImpl()
     XFreeGC(display, _brushGc);
     _brushGc = 0;
 
+#ifndef _AIX
     if(_xftFont) {
         XftFontClose(display, _xftFont);
         _xftFont = 0;
     }
 
+
     XftDrawDestroy(_xftDraw);
     _xftDraw = 0;
+#endif
 }
 
 
@@ -224,7 +231,7 @@ void PainterImpl::setFont(const Gfx::Font& font)
 {
     Display* display = X11EventLoop::instance().display();
     unsigned int screen = DefaultScreen(display);
-
+#ifndef _AIX
     if(_xftFont) {
         XftFontClose(display, _xftFont);
         _xftFont = 0;
@@ -280,20 +287,26 @@ void PainterImpl::setFont(const Gfx::Font& font)
                            NULL);
 
     _font = font;
+#endif
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
+#ifndef _AIX
     if(!_xftFont)
         return Gfx::FontMetrics(0, 0, 0, 0);
 
     return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, 0, _xftFont->height);
+#else
+    return Gfx::FontMetrics(0, 0, 0, 0);
+#endif
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
+#ifndef _AIX
     if(!_xftFont)
         return Gfx::FontMetrics(0, 0, 0, 0);
 
@@ -315,11 +328,15 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
         XftTextExtents16(display, _xftFont, (XftChar16*)utf16Text.c_str(), utf16Length, &info);
 
     return Gfx::FontMetrics(_xftFont->ascent, _xftFont->descent, info.width, _xftFont->height);
+#else
+    return Gfx::FontMetrics(0, 0, 0, 0);
+#endif
 }
 
 
 const std::list<std::string>& PainterImpl::fontFamilyNames()
 {
+#ifndef _AIX
     if( _fontList.empty() )
     {
         Display* display = X11EventLoop::instance().display();
@@ -333,6 +350,7 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
         }
         XftFontSetDestroy(fonts);
     }
+#endif
 
     return _fontList;
 }
@@ -371,6 +389,7 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 
 void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 {
+#ifndef _AIX
     XftColor xftColor;
     xftColor.pixel = 0; // this would be input for XftColorAllocValue
     xftColor.color.red   = _pen.color().red();
@@ -391,6 +410,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     size_t utf16Length = utf16Text.length() / 2;
 
     XftDrawString16(_xftDraw, &xftColor, _xftFont, to.x(), to.y(), (XftChar16*)utf16Text.c_str(), utf16Length);
+#endif
 }
 
 

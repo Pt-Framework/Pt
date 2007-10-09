@@ -10,17 +10,18 @@ RANLIB  ?= ranlib ;
 #
 if $(CONFIG:L) = debug
 {
-	CCFLAGS += -DDEBUG -g ;
-	OPTIM   ?= -O0 ;
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM   ?= -O0 ;
 }
 else
 {
-	CCFLAGS += -DNDEBUG ;
-	OPTIM	  ?= -O2 ;
+    CCFLAGS += -DNDEBUG ;
+    OPTIM	  ?= -O2 ;
 }
 
-C++FLAGS += $(CCFLAGS) -qrtti -qeh ;
-WARN     ?= -qinfo=lan ;
+LINKFLAGS += -bh:5 ;
+C++FLAGS  += $(CCFLAGS) -qrtti -qeh -qstaticinline ;
+WARN      ?= -qinfo=lan ;
 
 #
 # Implementation of platform specific rules and actions
