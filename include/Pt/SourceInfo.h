@@ -51,6 +51,9 @@
 */
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__,__LINE__,PT_PRETTY_FUNCTION)
 
+#define PT_STRINGIFY(x) #x
+#define PT_TOSTRING(x) PT_STRINGIFY(x)
+#define PT_SOURCEINFO_STR(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
 
 namespace Pt {
 
