@@ -37,7 +37,7 @@ class IOResultSerial : public IOResultImpl
 {
 protected:
     IOResultSerial()
-    : _writtenBytes(0)
+    : _processedBytes(0)
     , _bufferSize(0)
     , _buffer(0)
     {}
@@ -47,31 +47,36 @@ public:
 
     void attach(char* buffer, size_t size)
     {
-        _writtenBytes = 0;
+        _processedBytes = 0;
         _buffer = buffer;
         _bufferSize = size;
     }
 
-    void setWrittenBytes(size_t bytes)
+    void setProcessedBytes(size_t bytes)
     {
-        _writtenBytes = bytes;
+        _processedBytes = bytes;
     }
 
-    size_t writtenBytes() const
+    size_t processedBytes() const
     {
-        return _writtenBytes;
+        return _processedBytes;
     }
 
     char* buffer() const
     { return _buffer; }
 
     size_t bufferSize() const
-    { return _bufferSize; }    
+    { return _bufferSize; } 
+    
+    bool attached() const
+    {
+        return _buffer != 0;
+    }   
 
 private:
     char*   _buffer;
     size_t  _bufferSize;
-    size_t  _writtenBytes;
+    size_t  _processedBytes;
 };
 
 class ReadResultSerial : public IOResultSerial

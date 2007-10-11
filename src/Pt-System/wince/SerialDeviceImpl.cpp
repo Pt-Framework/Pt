@@ -66,17 +66,10 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
 
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-        comTimeOut.ReadTotalTimeoutConstant     = 0;
+        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutConstant     = MAXDWORD;
         comTimeOut.WriteTotalTimeoutMultiplier  = 0;
-        if ( isAsync )
-        {            
-            comTimeOut.WriteTotalTimeoutConstant    = 1;               
-        }
-        else
-        {   
-            comTimeOut.WriteTotalTimeoutConstant    = 0;
-        }
+        comTimeOut.WriteTotalTimeoutConstant    = 1;
         
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw OpenFailed("Set port time outs failed" , PT_SOURCEINFO);        
@@ -153,16 +146,22 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t count, bool& eof)
 
 size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
 {
-    DWORD   length;    
+    // If data was available immediately the result already contains the available data.
+    // Thus we can simply return the number of processed bytes as data length.
+    DWORD   length = _readResult.processedBytes();    
 
     ResetEvent(_comEvent); 
+
+    if( length > 0 )
+        return length;
 
     if( !ReadFile( _handle, _readResult.buffer(), _readResult.bufferSize(), &length, 0 ) )
         throw IOError("Read port failed" , PT_SOURCEINFO);
 
     if( length == 0 )     
        eof = true;
-
+    //deattach from IOResult
+    _readResult.attach( 0, 0 );
     return length;
 }
 
@@ -176,7 +175,7 @@ IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 
     size_t bytes = this->write(buffer, n); 
 
-    _writeResult.setWrittenBytes(bytes);
+    _writeResult.setProcessedBytes(bytes);
 
     if (bytes == 0)
     {
@@ -199,12 +198,16 @@ size_t SerialDeviceImpl::endWrite(IOResult& result)
     ResetEvent(_comEvent); 
 
     size_t bytes = 0;
-    if ( _writeResult.writtenBytes() == 0 )
+    if ( _writeResult.processedBytes() == 0 )
     {
         bytes = this->write(_writeResult.buffer(), _writeResult.bufferSize());
     }   
-	
-	return _writeResult.writtenBytes() + bytes;
+    
+    bytes += _writeResult.processedBytes();
+    
+	//deattach from IOResult
+    _writeResult.attach( 0, 0 );
+	return bytes;
 }	
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
@@ -441,6 +444,28 @@ void SerialDeviceImpl::run()
 
         if (_terminateThread)
             return;
+
+        // When reading and the kernel buffer is already full, WaitForCommEvent 
+        // might block forever because the event type is EV_RXCHAR .
+        // Therefore we check for data first before waiting for comm events
+        if( _readResult.attached() )
+        {
+            DWORD length = 0;
+            if( !ReadFile( _handle, _readResult.buffer(), _readResult.bufferSize(), &length, 0 ) )
+            {
+                if( !_terminateThread )
+                {
+                    //ToDo: Handle com errors
+                    std::cerr<<"ReadFile failed!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                }
+            }
+            if(length)
+            {
+                _readResult.setProcessedBytes(length);
+                SetEvent( _comEvent );
+                continue;
+            }
+        }
 
         bool retVal = ( WaitCommEvent( _handle, &eventMask, NULL )  == TRUE ); 
 

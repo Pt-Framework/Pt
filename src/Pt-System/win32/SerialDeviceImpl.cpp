@@ -29,7 +29,7 @@ namespace System{
 
 SerialDeviceImpl::SerialDeviceImpl()
 : _terminateEv( 0 )
-{        
+{
     memset( &_ovRead, 0, sizeof( _ovRead ) );
     memset( &_ovWrite, 0, sizeof( _ovWrite ) );
     memset( &_ovStatus, 0, sizeof( _ovStatus ) );
@@ -41,7 +41,7 @@ SerialDeviceImpl::SerialDeviceImpl()
 }
 
 SerialDeviceImpl::~SerialDeviceImpl()
-{ 
+{
     CloseHandle( _ovWrite.hEvent );
     CloseHandle( _ovRead.hEvent );
     CloseHandle( _ovStatus.hEvent );
@@ -60,22 +60,31 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     if( mode & std::ios_base::in )
         openFlags |= GENERIC_READ;
 
-    _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+    if(isAsync)
+    {
+        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+    }
+    else
+    {
+        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, NULL, NULL);
+    }
+
 
     if( _handle == 0  || _handle == INVALID_HANDLE_VALUE )
-        throw OpenFailed("Could not open port " + port , PT_SOURCEINFO);
+        throw OpenFailed("Could not open port" , PT_SOURCEINFO);
 
     try
     {
         if( !GetCommState( _handle, &_orgCommState ) )
             throw OpenFailed("Get port state failed" , PT_SOURCEINFO);
-                   
+
+		// Do not use timeouts, return read data immediately.
         COMMTIMEOUTS comTimeOut;
         comTimeOut.ReadIntervalTimeout          = MAXDWORD;
-        comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-        comTimeOut.ReadTotalTimeoutConstant     = 0;
-        comTimeOut.WriteTotalTimeoutMultiplier  = 10;
-        comTimeOut.WriteTotalTimeoutConstant    = 100;
+        comTimeOut.ReadTotalTimeoutMultiplier   = MAXDWORD;
+        comTimeOut.ReadTotalTimeoutConstant     = MAXDWORD-1; // MAXDWORD does not apply for all drivers
+        comTimeOut.WriteTotalTimeoutMultiplier  = 0;
+        comTimeOut.WriteTotalTimeoutConstant    = 1;
 
         if( !SetCommTimeouts( _handle, &comTimeOut ) )
             throw IOError("Set port time outs failed" , PT_SOURCEINFO);
@@ -105,13 +114,13 @@ void SerialDeviceImpl::close()
     SetCommState( _handle, &_orgCommState );
 
     //Close the port handle.
-    CloseHandle( _handle );    
+    CloseHandle( _handle );
 
     _handle = 0;
 }
 
 IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
-{ 
+{
     DWORD length;
 
     if( ReadFile( _handle, buffer, n, &length, &_ovRead ) == FALSE )
@@ -120,16 +129,16 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
         DWORD error = GetLastError();
         if (ERROR_HANDLE_EOF == error)
         {
-            eof = true;        
+            eof = true;
         }
         else if (ERROR_IO_PENDING != error)
-        {        
+        {
             throw IOError("Read port failed" , PT_SOURCEINFO);
-        }        
-    }   
+        }
+    }
 
     _result.setHandle(_ovRead.hEvent);
-    
+
     return _result;
 }
 
@@ -138,16 +147,16 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_ovRead, &readBytes, FALSE) == FALSE )
     {
-        DWORD err=GetLastError();
+		DWORD err=GetLastError();
         if( ERROR_HANDLE_EOF == GetLastError() ) {
-            eof = true;
+			eof = true;
         }
         else{
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
         }
     }
 
-    _ovRead.Offset += readBytes;    
+    _ovRead.Offset += readBytes;
 
     return readBytes;
 }
@@ -173,14 +182,14 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     {
         throw IOError("Read port failed" , PT_SOURCEINFO);
     }
-    
+
     return length;
 }
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
     DWORD length = 0;
-    
+
     if( WriteFile(  _handle,  buffer,  count, &length, &_ovWrite ) )
         return length;
 
@@ -407,7 +416,7 @@ size_t SerialDeviceImpl::timeout() const
 {
     COMMTIMEOUTS comTimeOut;
     GetCommTimeouts( _handle, &comTimeOut );
-    return  comTimeOut.ReadTotalTimeoutConstant;    
+    return  comTimeOut.ReadTotalTimeoutConstant;
 }
 
 void SerialDeviceImpl::flush()
@@ -416,10 +425,10 @@ void SerialDeviceImpl::flush()
 }
 
 void SerialDeviceImpl::resetEvent( HANDLE handle )
-{     
+{
     if( handle != _ovStatus.hEvent )
         throw std::logic_error("Unknown event handle ");
-        
+
     if( WaitCommEvent( _handle, &_eventMask, &_ovStatus ) == FALSE )
     {
         if( GetLastError () != ERROR_IO_PENDING )
@@ -430,36 +439,36 @@ void SerialDeviceImpl::resetEvent( HANDLE handle )
 /*void SerialDeviceImpl::eventHandles( std::vector<HANDLE>& handles, size_t waitMode )
 {
     handles.clear();
-    
+
     DWORD waitMask = 0;
-    
+
     if(waitMode & Selector::WaitInput)
         waitMask |= EV_RXCHAR;
-        
+
     if(waitMode & Selector::WaitOutput)
         waitMask |= EV_TXEMPTY;
 
     SetCommMask( _handle, waitMask );
-    
-    handles.push_back( _ovStatus.hEvent );    
 
-    resetEvent( _ovStatus.hEvent );            
+    handles.push_back( _ovStatus.hEvent );
+
+    resetEvent( _ovStatus.hEvent );
 }
-        
+
 IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
-{           
+{
    if( handle != _ovStatus.hEvent )
         throw std::logic_error("Unknown event handle ");
-        
+
     if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
-        return ReadyWrite;    
+        return ReadyWrite;
 
 /*    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
         return _readEvent;       *//*
 
     if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
         return ReadyRead;
-    
+
     throw IOError("Unknow event", PT_SOURCEINFO);
     return ReadyRead;
 }*/
