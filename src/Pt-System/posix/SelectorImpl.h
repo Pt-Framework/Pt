@@ -23,7 +23,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include <map>
+#include <vector>
 #include <sys/select.h>
 #include <sys/time.h>
 

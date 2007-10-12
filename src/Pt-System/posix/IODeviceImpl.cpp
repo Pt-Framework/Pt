@@ -22,6 +22,7 @@
 
 #include <Pt/System/IOError.h>
 #include <cerrno>
+#include <cassert>
 #include <unistd.h>
 #include <fcntl.h>
 
