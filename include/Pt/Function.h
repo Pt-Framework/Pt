@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Drner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Duerner                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,14 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Function_h
 #define Pt_Function_h
 
 #include <Pt/Callable.h>
 #include <Pt/Connectable.h>
 #include <Pt/Slot.h>
-
 
 namespace Pt {
 
@@ -61,16 +59,6 @@ class Function : public Callable<R, A1,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& s) const
-        {
-            try {
-                const Function& function = dynamic_cast<const Function&>(s);
-                return _funcPtr == function._funcPtr;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         FuncT _funcPtr;
 };
@@ -79,8 +67,6 @@ class Function : public Callable<R, A1,
 template <typename R, typename A1, typename A2, typename A3>
 Function<R, A1, A2, A3> callable(R (*func)(A1, A2, A3)) throw()
 { return Function<R, A1, A2, A3>(func); }
-
-
 
 
 template < typename R,
@@ -115,16 +101,6 @@ class Function<R, A1, A2, Pt::Void> : public Callable<R, A1,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Function& function = dynamic_cast<const Function&>(cb);
-                return _funcPtr == function._funcPtr;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         FuncT _funcPtr;
 };
@@ -133,9 +109,6 @@ class Function<R, A1, A2, Pt::Void> : public Callable<R, A1,
 template <typename R, typename A1, typename A2>
 Function<R, A1, A2> callable(R (*func)(A1, A2)) throw()
 { return Function<R, A1, A2>(func); }
-
-
-
 
 
 template < typename R,
@@ -169,16 +142,6 @@ class Function<R, A1, Pt::Void, Pt::Void> : public Callable<R, A1,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Function& function = dynamic_cast<const Function&>(cb);
-                return _funcPtr == function._funcPtr;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         FuncT _funcPtr;
 };
@@ -187,8 +150,6 @@ class Function<R, A1, Pt::Void, Pt::Void> : public Callable<R, A1,
 template <typename R, typename A1>
 Function<R, A1> callable(R (*func)(A1)) throw()
 { return Function<R, A1>(func); }
-
-
 
 
 template < typename R >
@@ -225,16 +186,6 @@ class Function<R, Pt::Void, Pt::Void, Pt::Void> : public Callable<R,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Function& function = dynamic_cast<const Function&>(cb);
-                return _funcPtr == function._funcPtr;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         FuncT _funcPtr;
 };
@@ -248,10 +199,9 @@ Function<R> callable(R (*func)()) throw()
 
 
 template < typename R,
-            typename A1 = Pt::Void,
-            typename A2 = Pt::Void,
-            typename A3 = Pt::Void
-          >
+           typename A1 = Pt::Void,
+           typename A2 = Pt::Void,
+           typename A3 = Pt::Void >
 class FunctionSlot : public BasicSlot<R, A1, A2, A3> {
     public:
         FunctionSlot(const Function<R, A1, A2, A3>& func)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,14 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_ConstMethod_h
 #define Pt_ConstMethod_h
 
 #include <Pt/Callable.h>
 #include <Pt/Connectable.h>
 #include <Pt/Slot.h>
-
 
 namespace Pt {
 
@@ -413,10 +411,8 @@ class ConstMethod<R, C,
 
 
 template <typename R, class Object>
-ConstMethod<R,Object> callable( Object* obj, R (Object::*ptr)() const ) throw()
+ConstMethod<R,Object> callable( Object& obj, R (Object::*ptr)() const ) throw()
 { return ConstMethod<R, Object>(obj, ptr); }
-
-
 
 
 template < typename R,
@@ -493,6 +489,5 @@ ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8> slot( ClassT& obj, R 
 { return ConstMethodSlot<R, ClassT, A1, A2, A3, A4, A5, A6, A7, A8>( callable(obj, method) ); }
 
 } // !namespace Pt
-
 
 #endif

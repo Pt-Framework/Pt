@@ -113,7 +113,7 @@ class PT_API Invokable<Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Voi
         virtual void invoke() const = 0;
 };
 
-} // !namespace Pt
+} // namespace Pt
 
 
 #endif

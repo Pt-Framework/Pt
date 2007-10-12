@@ -20,6 +20,7 @@
 #include <Pt/Main.h>
 #include <Pt/System/Timer.h>
 #include <Pt/System/Selector.h>
+#include <iostream>
 
 void onTimer0()
 {

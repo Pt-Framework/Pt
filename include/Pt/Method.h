@@ -24,8 +24,6 @@
 #include <Pt/Connectable.h>
 #include <Pt/Slot.h>
 
-#include <iostream>
-
 namespace Pt {
 
 template < typename R,
@@ -260,16 +258,6 @@ class Method<R, C,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Method& method = dynamic_cast<const Method&>(cb);
-                return _object == method._object && _memFunc == method._memFunc;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         C* _object;
         MemFuncT _memFunc;
@@ -339,16 +327,6 @@ class Method<R, C,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Method& method = dynamic_cast<const Method&>(cb);
-                return _object == method._object && _memFunc == method._memFunc;
-            } catch(...) {}
-
-            return false;
-        }
-
     private:
         ClassT* _object;
         MemFuncT _memFunc;
@@ -415,19 +393,6 @@ class Method<R, C,
             return (*this);
         }
 
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Method& method = dynamic_cast<const Method&>(cb);
-                return _object == method._object && _memFunc == method._memFunc;
-            } catch(...) {}
-
-            return false;
-        }
-
-        //virtual void closed(const Connection& c)
-        //{ _object->closed(c); }
-
     private:
         ClassT* _object;
         MemFuncT _memFunc;
@@ -491,16 +456,6 @@ class Method<R, C,
             _object = method._object;
             _memFunc = method._memFunc;
             return (*this);
-        }
-
-        virtual bool operator==(const Slot& cb) const
-        {
-            try {
-                const Method& method = dynamic_cast<const Method&>(cb);
-                return _object == method._object && _memFunc == method._memFunc;
-            } catch(...) {}
-
-            return false;
         }
 
     private:
