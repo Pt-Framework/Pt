@@ -52,32 +52,32 @@ void PipeTest::testAsyncWriteRead()
     const int size = 8;
     char buffer[size];
 
-    Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+    Pt::System::Pipe pipe( Pt::System::IODevice::Async );
     Pt::System::Selector selector;
     
-
     size_t writtenBytes = 0;
     while( writtenBytes < out.size() )
     {
-        Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, out.size() - writtenBytes );
+        Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, 
+                                                                   out.size() - writtenBytes );
         selector.complete(writeRes);
-
-        PT_UNIT_ASSERT_MSG(selector.wait(500), "Wait output failed");
+        bool activity = selector.wait(500);
+        PT_UNIT_ASSERT_MSG(activity, "Wait output failed");
 
         writtenBytes += pipe.output().endWrite(writeRes);
     }
 
-    size_t totalReadBytes = 0;
-    while(totalReadBytes < out.size())
+    size_t readBytes = 0;
+    while( readBytes < out.size() )
     {       
         Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
         selector.complete(res);
+        bool activity = selector.wait(500);
+        PT_UNIT_ASSERT_MSG(activity, "Wait input failed");
 
-        PT_UNIT_ASSERT_MSG(selector.wait(500), "Wait input failed");
-
-        const size_t readBytes = pipe.input().endRead(res);
-        totalReadBytes +=  readBytes;
-        in.append(buffer, readBytes);
+        const size_t n = pipe.input().endRead(res);
+        readBytes +=  n;
+        in.append(buffer, n);
     }
 
     PT_UNIT_ASSERT_MSG( in == out, "Input does not match output");    
