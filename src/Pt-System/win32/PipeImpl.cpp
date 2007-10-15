@@ -128,7 +128,7 @@ size_t PipeIODevice::_endWrite(IOResult& result)
 {
 	return IODeviceImpl::endWrite(result);
 }
-      
+
 
 void PipeIODevice::_close()
 {
@@ -153,7 +153,7 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
     eof = false;
     DWORD readBytes = 0;
 
-    if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, NULL) )
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
@@ -180,7 +180,7 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
 {
     DWORD writtenBytes = 0;
 
-    if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, &_writeOv) )
+    if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, NULL) )
     {
         if( ERROR_IO_PENDING != GetLastError() )
         {
@@ -213,25 +213,30 @@ PipeImpl::PipeImpl(bool isAsync)
     std::stringstream ss;
     ss<<"\\\\.\\pipe\\ptpipe"<<_nameId;
 
-    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
-                                     PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-                                     PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-                                     1,
-                                     256,
-                                     256,
-                                     1000,
-                                     NULL );
-
-    if (inputHandle == INVALID_HANDLE_VALUE)
-        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);
-
+    DWORD pflags = PIPE_ACCESS_DUPLEX;
     DWORD access = GENERIC_WRITE;
     DWORD share  = 0;
     DWORD create = OPEN_EXISTING;
-    DWORD flags  = FILE_FLAG_OVERLAPPED;
+    DWORD flags  = 0;
+    
+    if(isAsync)
+    {
+        flags  = FILE_FLAG_OVERLAPPED;
+        pflags |= FILE_FLAG_OVERLAPPED;
+    }
+
+    HANDLE inputHandle = ::CreateNamedPipe(ss.str().c_str(),
+                                           pflags,
+                                           PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
+                                           1,
+                                           256,
+                                           256,
+                                           1000,
+                                           NULL );
+    if (inputHandle == INVALID_HANDLE_VALUE)
+        throw OpenFailed("Could not create named pipe", PT_SOURCEINFO);
 
     HANDLE outputHandle = ::CreateFile(ss.str().c_str(), access, share, NULL, create, flags, NULL);
-
     if(outputHandle == INVALID_HANDLE_VALUE)
         throw OpenFailed("Could not open file handle", PT_SOURCEINFO);
 

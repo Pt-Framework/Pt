@@ -57,9 +57,9 @@ void PipeTest::testAsyncWriteRead()
     
 
     size_t writtenBytes = 0;
-    while(writtenBytes < out.size())
+    while( writtenBytes < out.size() )
     {
-        Pt::System::IOResult& writeRes = pipe.output().beginWrite( (out.c_str() + writtenBytes), (out.size() - writtenBytes) );
+        Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, out.size() - writtenBytes );
         selector.complete(writeRes);
 
         PT_UNIT_ASSERT_MSG(selector.wait(500), "Wait output failed");
