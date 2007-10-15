@@ -21,6 +21,7 @@
 #include "win32.h"
 #include "Pt/System/Selector.h"
 #include "FileDeviceImpl.h"
+#include <cassert>
 
 namespace Pt {
 namespace System {

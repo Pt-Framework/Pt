@@ -23,7 +23,7 @@
 #include "Pt/System/Selector.h"
 #include <windows.h>
 #include <sstream>
-
+#include <cassert>
 
 namespace Pt {
 
