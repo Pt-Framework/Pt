@@ -14,14 +14,13 @@
 #include <Pt/Gui/Label.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
-
+#include <Pt/Delegate.h>
 #include <string>
 #include <iostream>
 
 using namespace Pt;
 using namespace Pt::Gfx;
 using namespace Pt::Gui;
-
 
 class ScribbleWidget : public Pt::Gui::Widget
 {
@@ -61,6 +60,9 @@ class ScribbleWidget : public Pt::Gui::Widget
 
             connect(_clearButton->clicked, *this, &ScribbleWidget::onClearButton);
         }
+
+        Button& getRedButton()
+        { return *_redButton; }
 
         void onRedButton()
         {
@@ -187,6 +189,12 @@ class ScribbleWidget : public Pt::Gui::Widget
 };
 
 
+void function()
+{
+    std::cerr << "function clicked..."  << std::endl;
+}
+
+
 int main(int argc, char* argv[])
 {
     try
@@ -196,8 +204,14 @@ int main(int argc, char* argv[])
         ScribbleWidget widget;
         connect(widget.closed, app, &Gui::Application::exit);
 
-        widget.show();
+        Signal<> signal;
+        Connection c = connect(signal, function);
+        signal.send();
 
+        c.close();
+        signal.send();
+
+        widget.show();
         return app.run();
     }
     catch(const std::exception& e)

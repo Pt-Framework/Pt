@@ -136,7 +136,7 @@ int main( int argc, char* argv[] )
         producer2.start();
 
         //Changing the producer consumer relation
-        for( int i = 0; i < 10000; i++)
+        for( int i = 0; i < 100; i++)
         {
             if( i % 2 == 0)
             {
