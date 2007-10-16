@@ -74,25 +74,7 @@ namespace Pt {
             */
             virtual void closed(const Connection& c);
 
-            /** @brief Prevents the object from accepting connections.
-
-                A %Connectable can be shut down to initiate the destruction
-                phase. This function can be called from a derived classes
-                destructor to ensure that no more connections are accepted
-                during the object destruction phase. This is neccessary to
-                implement thread-safe singal types.
-            */
-            virtual void shutDown();
-
-            /** @brief Checks if a connectable is shut down.
-
-                @sa Connectable::shutDown();
-
-               @return True if shut down.
-            */
-            bool isDown() const;
-
-            //! @internal
+            //! @internal @brief For unit tests only.
             size_t connectionCount() const
             { return _connections.size(); }
 
@@ -114,10 +96,6 @@ namespace Pt {
             */
             Connectable& operator=(const Connectable& rhs);
 
-            /** @brief Close all connections
-            */
-            void clear();
-
             /** @brief Returns a list of all current connections
             */
             const std::list<Connection>& connections() const
@@ -135,7 +113,7 @@ namespace Pt {
 
         private:
             //! @internal
-            bool _shutDown;
+            void clear();
     };
 
 } // namespace Pt

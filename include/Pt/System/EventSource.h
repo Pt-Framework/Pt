@@ -57,7 +57,23 @@ namespace System {
             /** @brief Destructs the EventSource
             */
             ~EventSource()
-            { this->shutDown(); }
+            {
+                Connection connection;
+                while( true )
+                {
+                    {
+                        MutexLock lock( _mutex );
+
+                         if( _connections.empty() )
+                            break;
+
+                         connection = _connections.front();
+                         _connections.remove( connection );
+                    }
+
+                    connection.close();
+                }
+            }
 
             /** @brief Connects to a EventLoop in another thread
             */
@@ -106,29 +122,6 @@ namespace System {
 
                     const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
                     invokable->invoke(ev);
-                }
-            }
-
-            //! @internal
-            void shutDown()
-            {
-                Connectable::shutDown();
-
-                Connection connection;
-
-                while( true )
-                {
-                    {
-                        MutexLock lock( _mutex );
-
-                         if( _connections.empty() )
-                            break;
-
-                         connection = _connections.front();
-                        _connections.remove( connection );
-                    }
-
-                    connection.close();
                 }
             }
 

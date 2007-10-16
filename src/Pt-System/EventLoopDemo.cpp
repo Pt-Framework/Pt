@@ -53,9 +53,6 @@ class ConsumerThread : public Thread, public Connectable
             connect( _eventLoop.event , *this, &ConsumerThread::handleEvent );
         }
 
-        ~ConsumerThread()
-        {}
-
         EventLoop& eventLoop()
         { return _eventLoop; }
 
@@ -68,7 +65,7 @@ class ConsumerThread : public Thread, public Connectable
         void handleEvent( const Pt::Event& event )
         {
             TestEvent* testEvent  = (TestEvent*) &event;
-            printf(testEvent->text().c_str() );
+            printf( testEvent->text().c_str() );
             printf("-");
         }
 
@@ -91,11 +88,6 @@ class ProducerThread : public Thread
         , _text( text )
         , _stop( false)
         { }
-
-        ~ProducerThread()
-        {
-            //eventDispatcher.shutDown();
-        }
 
         void stop()
         {
@@ -144,24 +136,23 @@ int main( int argc, char* argv[] )
         producer2.start();
 
         //Changing the producer consumer relation
-        for( int i = 0; i < 1000; i++)
+        for( int i = 0; i < 10000; i++)
         {
-            if( i % 10 == 0)
+            if( i % 2 == 0)
             {
                 //Remove the consumer
                 consumer->stop();
                 delete consumer;
-                printf("B");
 
                 //Add a new consumer
+                printf("C-");
                 consumer = new ConsumerThread();
                 producer2.eventSource.connect( consumer->eventLoop() );
                 producer1->eventSource.connect( consumer->eventLoop() );
 
                 consumer->start();
             }
-
-            if( i % 9 == 0)
+            else
             {
                 //Remove a producer
                 producer1->stop();
@@ -169,7 +160,7 @@ int main( int argc, char* argv[] )
                 delete producer1;
 
                 //Add a new producer
-                printf("A");
+                printf("P-");
                 producer1 = new ProducerThread("p1");
                 producer1->eventSource.connect( consumer->eventLoop() );
                 producer1->start();

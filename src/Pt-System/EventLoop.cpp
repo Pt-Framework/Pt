@@ -36,22 +36,22 @@ EventLoop::EventLoop()
 }
 
 EventLoop::~EventLoop()
-{
-    _connectionMutex.lock();
-
-     Connectable::shutDown();
-
-    while( !_connections.empty() )
+{   
+    Connection connection;
+    while( true )
     {
-        Connection connection = _connections.front();
-        _connectionMutex.unlock();
+        {
+            MutexLock lock( _connectionMutex );
+
+             if( _connections.empty() )
+                break;
+
+             connection = _connections.front();
+             _connections.remove( connection );
+        }
 
         connection.close();
-        _connectionMutex.lock();
-        _connections.remove( connection );
     }
-
-    _connectionMutex.unlock();
 }
 
 
@@ -106,7 +106,7 @@ void EventLoop::processEvents()
 
 void EventLoop::wake()
 {
-    MutexLock threadSave( _mutex );
+    MutexLock lock( _mutex );
     _selector.wake();
 }
 
