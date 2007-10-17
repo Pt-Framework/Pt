@@ -25,7 +25,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 #include <cctype>
-#include <locale>
+//#include <locale>
 
 
 class AtomicTestSuite : public Pt::Unit::TestSuite

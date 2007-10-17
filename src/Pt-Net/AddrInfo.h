@@ -29,7 +29,7 @@
     #include <winsock2.h>
     #include <ws2tcpip.h>
 	#ifndef __GNUC__
-		#include <wspiapi.h>
+//		#include <wspiapi.h>
 	#endif
 #else
     #include <sys/types.h>

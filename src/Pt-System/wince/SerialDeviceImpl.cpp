@@ -193,8 +193,6 @@ IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 
 size_t SerialDeviceImpl::endWrite(IOResult& result)
 {
-	assert(&result == &_writeResult);
-
     ResetEvent(_comEvent); 
 
     size_t bytes = 0;
