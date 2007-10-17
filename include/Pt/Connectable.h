@@ -32,10 +32,7 @@ namespace Pt {
         objects. It makes sure that all connections where this object
         is involved are closed on destruction. Deriving classes can
         overload Connectable::opened and Connectable::closed to tune
-        connection managenment. If a %Connectable is shut down it will
-        refuse to accept any further connections. This can be used
-        to implement signal types that can be destructed in a
-        thread-safe way.
+        connection managenment.
     */
     class PT_API Connectable
     {
