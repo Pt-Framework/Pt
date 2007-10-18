@@ -131,17 +131,18 @@ class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
         void Copy()
         {
             Callee callee;
-            Pt::Delegate<int> d1;
+            Pt::Delegate<int>* d1 = new Pt::Delegate<int>;
             Pt::Delegate<int> d2;
 
-            Pt::Connection connection1 = connect(d1, callee, &Callee::slot0);
-            PT_UNIT_ASSERT( d1.connectionCount() == 1)
+            Pt::Connection connection1 = connect(*d1, callee, &Callee::slot0);
+            PT_UNIT_ASSERT( d1->connectionCount() == 1)
 
-            d2 = d1;
+            d2 = *d1;
             PT_UNIT_ASSERT( d2.connectionCount() == 1)
 
             connection1.close();
-            PT_UNIT_ASSERT( d1.connectionCount() == 0)
+            PT_UNIT_ASSERT( d1->connectionCount() == 0)
+            delete d1;
 
             d2.call();
             PT_UNIT_ASSERT( callee.count() == 1 )

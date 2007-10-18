@@ -133,13 +133,13 @@ class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
         void CopySignal()
         {
             Callee callee;
-            Pt::Signal<> signal1;
+            Pt::Signal<>* signal1 = new Pt::Signal<>;
             Pt::Signal<> signal2;
 
-            Pt::Connection connection1 = connect(signal1, callee, &Callee::slot0);
-            signal2 = signal1;
+            Pt::Connection connection1 = connect(*signal1, callee, &Callee::slot0);
+            signal2 = *signal1;
 
-            connection1.close();
+            delete signal1;
 
             signal2.send();
             PT_UNIT_ASSERT( callee.count() == 1 )

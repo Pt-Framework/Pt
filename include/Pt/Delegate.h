@@ -45,8 +45,6 @@ namespace Pt {
 
             DelegateBase& operator=(const DelegateBase& other)
             {
-                Connectable::operator=(other);
-
                 _target.close();
 
                 if( !other._target )
