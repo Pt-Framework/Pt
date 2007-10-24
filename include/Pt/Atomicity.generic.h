@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,8 +19,6 @@
  ***************************************************************************/
 #ifndef PT_ATOMICINT_GENERIC_H
 #define PT_ATOMICINT_GENERIC_H
-
-// #warning "Using fallback implementation of AtomicInt (using pthread) !!!"
 
 #include <csignal>
 
@@ -85,7 +83,6 @@ inline atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
     dest += add;
     return tmp;
 }
-
 
 } // namespace Pt
 

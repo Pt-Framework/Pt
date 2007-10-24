@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Marc Boris Dürner                          *
+ *   Copyright (C) 2006-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 by Aloysius Indrayanto                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,12 +19,13 @@
  ***************************************************************************/
 #ifndef PT_ATOMICITY_H
 
-
-#ifdef _MSC_VER
+// use Win32 Interlocked-functions
+#if defined(_MSC_VER)
 
     #define PT_ATOMICITY_H "Atomicity.windows.h"
 
-#elif __GNUC__
+// use AT&T-style inline asm
+#elif defined(__GNUC__) || defined(__xlC__)
 
     #if defined( _i386_     ) || defined( __i386__ ) || \
         defined( __x86_64__ ) || defined( _M_IX86  )
@@ -46,10 +47,12 @@
         #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
 
     #else
+
         #define PT_ATOMICITY_H "Atomicity.generic.h"
 
     #endif
 
+// fallback to normal integer operations
 #else
 
     #define PT_ATOMICITY_H "Atomicity.generic.h"
@@ -57,5 +60,53 @@
 #endif
 
 #include PT_ATOMICITY_H
+
+namespace Pt {
+
+/** @brief Increases a value by one as an atomic operation
+
+    Returns the resulting incremented value.
+*/
+atomic_t atomicIncrement(volatile atomic_t& val);
+
+/** @brief Decreases a value by one as an atomic operation
+
+    Returns the resulting decremented value.
+*/
+atomic_t atomicDecrement(volatile atomic_t& val);
+
+/** @brief Performs atomic addition of two values
+
+    Returns the initial value of the addend.
+*/
+atomic_t atomicExchangeAdd(volatile atomic_t& val, atomic_t add);
+
+/** @brief Performs an atomic compare-and-exchange operation
+
+    If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
+    value of of \a val is returned.
+*/
+atomic_t atomicCompareExchange(volatile atomic_t& val, atomic_t exch, atomic_t comp);
+
+/** @brief Performs an atomic compare-and-exchange operation
+
+    If \a ptr is equal to \a comp, \a ptr is replaced by \a exch. The initial
+    value of \a ptr is returned.
+*/
+void* atomicCompareExchange(volatile void*& ptr, void* exch, void* comp);
+
+/** @brief Performs an atomic exchange operation
+
+    Sets \a val to \a exch and returns the initial value of \a val.
+*/
+atomic_t atomicExchange(volatile atomic_t& val, atomic_t exch);
+
+/** @brief Performs an atomic exchange operation
+
+    Sets \a dest to \a exch and returns the initial value of \a dest.
+*/
+void* atomicExchange(volatile void*& dest, void* exch);
+
+}
 
 #endif

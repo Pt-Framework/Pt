@@ -16,17 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include <Pt/Unit/Application.h>
 
+namespace Pt {
 
-using namespace Pt;
-using namespace Unit;
-
+namespace Unit {
 
 size_t Application::_errors = 0;
-
-std::list<Test*> Application::_allTests;
 
 Reporter* Application::_reporter = 0;
 
@@ -38,10 +34,12 @@ void Application::setReporter(Reporter& reporter)
     Application::_reporter = &reporter;
 }
 
+
 void Application::addReporter(Reporter& reporter)
 {
     Application::_reporterList.push_back(&reporter);
 }
+
 
 void Application::registerTest(Test& test)
 {
@@ -52,15 +50,16 @@ void Application::registerTest(Test& test)
     connect(test.exception, &Application::exception);
     connect(test.error, &Application::error);
     connect(test.message, &Application::message);
-    _allTests.push_back(&test);
+    Application::tests().push_back(&test);
 }
+
 
 int Application::run()
 {
     _errors = 0;
 
     std::list<Test*>::iterator it;
-    for(it = _allTests.begin(); it != _allTests.end(); ++it)
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
     {
             (*it)->run();
     }
@@ -68,12 +67,13 @@ int Application::run()
     return _errors;
 }
 
+
 int Application::run(const std::string& testName)
 {
     _errors = 0;
 
     std::list<Test*>::iterator it;
-    for(it = _allTests.begin(); it != _allTests.end(); ++it)
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
     {
         if(testName == "" || (*it)->name() == testName)
             (*it)->run();
@@ -82,10 +82,13 @@ int Application::run(const std::string& testName)
     return _errors;
 }
 
-const std::list<Test*>& Application::tests() const
+
+std::list<Test*>& Application::tests()
 {
+    static std::list<Test*> _allTests;
     return _allTests;
 }
+
 
 void Application::started(const TestContext& test)
 {
@@ -102,6 +105,7 @@ void Application::started(const TestContext& test)
     }
 }
 
+
 void Application::finished(const TestContext& test)
 {
     if(_reporter)
@@ -117,6 +121,7 @@ void Application::finished(const TestContext& test)
     }
 }
 
+
 void Application::success(const TestContext& test)
 {
     if(_reporter)
@@ -131,6 +136,7 @@ void Application::success(const TestContext& test)
         (*it)->success(test);
     }
 }
+
 
 void Application::assertion(const TestContext& test, const Assertion& a)
 {
@@ -149,6 +155,7 @@ void Application::assertion(const TestContext& test, const Assertion& a)
     }
 }
 
+
 void Application::exception(const TestContext& test, const std::exception& ex)
 {
     ++_errors;
@@ -165,6 +172,7 @@ void Application::exception(const TestContext& test, const std::exception& ex)
         (*it)->exception(test, ex);
     }
 }
+
 
 void Application::error(const TestContext& test)
 {
@@ -198,3 +206,7 @@ void Application::message(const std::string& msg)
         (*it)->message(msg);
     }
 }
+
+} //namespace Unit
+
+} // namespace Pt

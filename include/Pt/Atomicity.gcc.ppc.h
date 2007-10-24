@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
  *   Copyright (C) 2006 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,7 +21,6 @@
 #define PT_ATOMICINT_GCC_PPC_H
 
 #include <csignal>
-
 
 namespace Pt {
 
@@ -181,7 +180,6 @@ inline void* atomicExchange(volatile void*& dest, void* exch)
 
     return ret;
 }
-
 
 } // namespace Pt
 

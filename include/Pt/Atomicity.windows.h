@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 by PTV AG                                          *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
  *   Copyright (C) 2006 by Aloysius Indrayanto                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,52 +18,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_MSC_H
-#define PT_ATOMICINT_MSC_H
+#ifndef PT_ATOMICITY_WINDOWS_H
+#define PT_ATOMICITY_WINDOWS_H
 
 #include <windows.h>
 
-
 namespace Pt {
 
-    typedef long atomic_t;
-
-    class AtomicInt
-    {
-        public:
-            inline AtomicInt(atomic_t value = 0)
-            : _value(value)
-            {}
-
-            inline atomic_t value() const
-            { return _value; }
-
-            inline void operator+=(atomic_t n)
-            { ::InterlockedExchangeAdd(const_cast<long*>(&_value), n); }
-
-            inline void operator-=(atomic_t n)
-            { ::InterlockedExchangeAdd(const_cast<long*>(&_value), -n); }
-
-            inline void operator=(atomic_t n)
-            { ::InterlockedExchange(const_cast<long*>(&_value), n); }
-
-            inline bool compareExchange(atomic_t cmp, atomic_t ex)
-            { return (::InterlockedCompareExchange(const_cast<long*>(&_value), ex, cmp) == cmp); }
-
-        private:
-            volatile atomic_t _value;
-    };
+typedef long atomic_t;
 
 
 inline atomic_t atomicIncrement(volatile atomic_t& value)
 {
-    return InterlockedIncrement( const_cast<long*>(&value) );
+    return ::InterlockedIncrement( const_cast<long*>(&value) );
 }
 
 
 inline atomic_t atomicDecrement(volatile atomic_t& value)
 {
-    return InterlockedDecrement( const_cast<long*>(&value) );
+    return ::InterlockedDecrement( const_cast<long*>(&value) );
 }
 
 
@@ -81,21 +54,20 @@ inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t new_val)
 
 inline void* atomicExchange(volatile void*& ptr, void* new_val)
 {
-    return InterlockedExchangePointer(&ptr, new_val);
+    return ::InterlockedExchangePointer(&ptr, new_val);
 }
 
 
 inline atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t cmp)
 {
-    return InterlockedCompareExchange(const_cast<long*>(&value), ex, cmp);
+    return ::InterlockedCompareExchange(const_cast<long*>(&value), ex, cmp);
 }
 
 
 inline void* atomicCompareExchange(volatile void*& ptr, void* ex, void* cmp)
 {
-    return InterlockedCompareExchangePointer((volatile PVOID *)&ptr, ex, cmp);
+    return ::InterlockedCompareExchangePointer((volatile PVOID *)&ptr, ex, cmp);
 }
-
 
 } // namespace Pt
 

@@ -121,7 +121,7 @@ namespace Unit {
 
                 @return Reference to the registered tests.
             */
-            const std::list<Test*>& tests() const;
+            static std::list<Test*>& tests();
 
             /** @brief Process started event
             */
@@ -156,10 +156,6 @@ namespace Unit {
             /** @brief Number of errors that occured during a run
             */
             static size_t _errors;
-
-            /** @brief List of all registered tests
-            */
-            static std::list<Test*> _allTests;
 
             /** @brief Currently used reporter
             */
