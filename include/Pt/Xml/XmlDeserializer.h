@@ -6,6 +6,7 @@
 #include <Pt/SerializationInfo.h>
 #include <memory>
 #include <map>
+#include <list>
 
 
 namespace Pt {
@@ -38,7 +39,9 @@ namespace Xml {
             template <typename T>
             void deserialize(T& type)
             {
-                SerializationInfo si;
+                _stack.push_back( SerializationInfo() );
+                SerializationInfo& si = _stack.back();
+
                 this->getData( si );
                 si >>= type;
 
@@ -50,7 +53,18 @@ namespace Xml {
             }
 
             void fixup()
-            {}
+            {
+                std::list<Pt::SerializationInfo>::iterator it;
+                for(it = _stack.begin(); it != _stack.end(); ++it)
+                {
+                    this->fixup(*it);
+                }
+
+                _stack.clear();
+            }
+
+            XmlReader& reader()
+            { return *_reader; }
 
         protected:
             /** @brief Deserialize object data from XML
@@ -97,6 +111,8 @@ namespace Xml {
             //! @internal
             String _nodeName;
 
+            String _nodeId;
+
             void fixup(const Pt::SerializationInfo& si)
             {
                 // TODO: we only need to store all references during parsing
@@ -119,6 +135,8 @@ namespace Xml {
                     }
                 }
             }
+
+            std::list<Pt::SerializationInfo> _stack;
 
             std::map<std::string, void*> _objects;
 

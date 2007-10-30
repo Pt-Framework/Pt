@@ -17,4 +17,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Pt/Unit/TestProtocol.h>
+#include "Pt/Unit/TestProtocol.h"
+#include "Pt/Unit/TestSuite.h"
+
+
+namespace Pt {
+
+namespace Unit {
+
+void TestProtocol::run(TestSuite& suite)
+{
+    suite.runAll();
+}
+
+} // namespace Unit
+
+} // namespace Pt

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,9 +21,6 @@
 
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
-#include <Pt/Unit/Assertion.h>
-#include <Pt/Unit/TestContext.h>
-
 #include <string>
 
 
@@ -68,46 +65,8 @@ namespace Unit {
         using the RegisterTest class template.
     */
     class PT_UNIT_API TestCase : public Test
+                               , public TestFixture
     {
-        public:
-            class Context : public TestContext
-            {
-                public:
-                    Context(TestCase& test)
-                    : TestContext(test)
-                    , _test(test)
-                    , _setUp(false)
-                    { }
-
-                    ~Context()
-                    {
-                        try
-                        {
-                            if( _setUp )
-                                _test.tearDown();
-                        }
-                        catch(...)
-                        {}
-
-                        _test.finished.send(*this);
-                    }
-
-                    const std::string& testName() const
-                    { return _test.name(); }
-
-                protected:
-                    void _run()
-                    {
-                        _test.setUp();
-                        _setUp = true;
-                        _test.test();
-                    }
-
-                private:
-                    TestCase& _test;
-                    bool _setUp;
-            };
-
         public:
             /** @brief Construct by name
 
@@ -124,7 +83,7 @@ namespace Unit {
                 'test' and finally 'tearDown'. Signals inherited from
                 Unit::Test are sent appropriatly.
             */
-            virtual void run();
+            virtual void run(const SerializationInfo* si, size_t argCount);
 
             /** \brief Set up conText before running a test.
 
@@ -140,15 +99,6 @@ namespace Unit {
                 initialized in TestCase::setUp.
             */
             virtual void tearDown();
-
-        protected:
-            /** @brief Performs the actual test
-
-                The implementor is supposed to override this method, which
-                is called between 'setUp' and 'tearDown'. Assertions may be
-                thrown to indicate failed test assertions.
-            */
-            virtual void test();
     };
 
 } // namespace Unit

@@ -21,22 +21,317 @@
 
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
-#include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestProtocol.h>
 #include <Pt/Unit/TestContext.h>
-#include <Pt/Singleton.h>
-#include <Pt/Reflex/MethodInfo.h>
+#include <Pt/SerializationInfo.h>
+#include <map>
+
 
 namespace Pt {
 
-  class SerializationInfo;
-
-namespace Reflex {
-    class CallableInfo;
-    class Reflectable;
-}
-
 namespace Unit {
+
+    template < class C,
+               typename A1 = Pt::Void,
+               typename A2 = Pt::Void,
+               typename A3 = Pt::Void,
+               typename A4 = Pt::Void,
+               typename A5 = Pt::Void,
+               typename A6 = Pt::Void,
+               typename A7 = Pt::Void,
+               typename A8 = Pt::Void >
+    class TestMethod : public Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>
+                     , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 8)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+
+                A2 a2 = A2();
+                args[1] >>= a2;
+
+                A3 a3 = A3();
+                args[2] >>= a3;
+
+                A4 a4 = A4();
+                args[3] >>= a4;
+
+                A5 a5 = A5();
+                args[4] >>= a5;
+
+                A6 a6 = A6();
+                args[5] >>= a6;
+
+                A7 a7 = A7();
+                args[6] >>= a7;
+
+                A8 a8 = A8();
+                args[7] >>= a8;
+
+                Pt::Method<void, C>::call(a1, a2, a3, a4, a5, a6, a7, a8);
+            }
+    };
+
+
+    template < class C,
+               typename A1,
+               typename A2,
+               typename A3,
+               typename A4,
+               typename A5>
+    class TestMethod<C,
+                     A1,
+                     A2,
+                     A3,
+                     A4,
+                     A5,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4, A5>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1, A2, A3, A4, A5>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 5)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+
+                A2 a2 = A2();
+                args[1] >>= a2;
+
+                A3 a3 = A3();
+                args[2] >>= a3;
+
+                A4 a4 = A4();
+                args[3] >>= a4;
+
+                A5 a5 = A5();
+                args[4] >>= a5;
+
+                Pt::Method<void, C, A1, A2, A3, A4, A5>::call(a1, a2, a3, a4, a5);
+            }
+    };
+
+
+    template < class C,
+               typename A1,
+               typename A2,
+               typename A3,
+               typename A4>
+    class TestMethod<C,
+                     A1,
+                     A2,
+                     A3,
+                     A4,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1, A2, A3, A4);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1, A2, A3, A4>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 4)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+
+                A2 a2 = A2();
+                args[1] >>= a2;
+
+                A3 a3 = A3();
+                args[2] >>= a3;
+
+                A4 a4 = A4();
+                args[3] >>= a4;
+
+                Pt::Method<void, C, A1, A2, A3, A4>::call(a1, a2, a3, a4);
+            }
+    };
+
+
+    template < class C,
+               typename A1,
+               typename A2,
+               typename A3>
+    class TestMethod<C,
+                     A1,
+                     A2,
+                     A3,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1, A2, A3);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1, A2, A3>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 3)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+
+                A2 a2 = A2();
+                args[1] >>= a2;
+
+                A3 a3 = A3();
+                args[2] >>= a3;
+
+                Pt::Method<void, C, A1, A2, A3>::call(a1, a2, a3);
+            }
+    };
+
+
+    template < class C,
+               typename A1,
+               typename A2>
+    class TestMethod<C,
+                     A1,
+                     A2,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C, A1, A2>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1, A2);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1, A2>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 2)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+
+                A2 a2 = A2();
+                args[1] >>= a2;
+
+                Pt::Method<void, C, A1, A2>::call(a1, a2);
+            }
+    };
+
+
+    template < class C,
+               typename A1>
+    class TestMethod<C,
+                     A1,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C, A1>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)(A1);
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C, A1>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* args, size_t argCount)
+            {
+                if(argCount != 1)
+                    throw std::invalid_argument("invalid number of arguments");
+
+                A1 a1 = A1();
+                args[0] >>= a1;
+                Pt::Method<void, C, A1>::call(a1);
+            }
+    };
+
+    template < class C >
+    class TestMethod<C,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void,
+                     Pt::Void> : public Pt::Method<void, C>
+                               , public Pt::Unit::Test
+    {
+        public:
+            typedef C ClassT;
+            typedef void (C::*MemFuncT)();
+
+        public:
+            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            : Pt::Method<void, C>(object, ptr)
+            , Pt::Unit::Test(name)
+            {}
+
+            void run(const SerializationInfo* si, size_t argCount)
+            {
+                Pt::Method<void, C>::call();
+            }
+    };
 
     /** @brief Protocol and data driven testing
 
@@ -69,59 +364,8 @@ namespace Unit {
         the required data.
     */
     class PT_UNIT_API TestSuite : public Test
+                                , public TestFixture
     {
-    
-        private:
-            Pt::Reflex::Reflectable* m_reflectable;
-            
-        public:
-            class Context : public TestContext
-            {
-                public:
-                    Context(TestSuite& suite, const std::string& name,
-                            const Any* args = 0, size_t argCount = 0)
-                    : TestContext(suite)
-                    , _suite(suite)
-                    , _methodName( name )
-                    , _args(args)
-                    , _argCount(argCount)
-                    , _testName( _suite.name() + "::" + name )
-                    , _setUp(false)
-                    { }
-
-                    virtual ~Context()
-                    {
-                        try
-                        {
-                            if( _setUp )
-                                _suite.tearDown();
-                        }
-                        catch(...)
-                        {}
-
-                        _suite.finished.send(*this);
-                    }
-
-                    const std::string& testName() const
-                    { return _testName; }
-
-                protected:
-                    void _run()
-                    {
-                        _suite.setUp();
-                        _setUp = true;
-                        _suite.call(_methodName, _args, _argCount);
-                    }
-
-                private:
-                    TestSuite& _suite;
-                    std::string _methodName;
-                    const Any* _args ;
-                    size_t _argCount;
-                    std::string _testName;
-                    bool _setUp;
-            };
-
         public:
             /** @brief Construct by name and protocol
 
@@ -133,16 +377,13 @@ namespace Unit {
                 @param protocol Protocol for the test.
             */
             TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol);
-            
+
             ~TestSuite();
-              
+
             void setProperty(const std::string& name, const Pt::SerializationInfo& value);
-         
-            Pt::Reflex::Reflectable* reflectable()
-            {
-                return m_reflectable;
-            }
-            
+
+            const Pt::SerializationInfo& property(const std::string& name) const;
+
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
             */
@@ -168,7 +409,7 @@ namespace Unit {
                 The TestProtocol assosiated with the test will be executed.
                 The default protocol will simply call all registered tests.
             */
-            virtual void run();
+            virtual void run(const SerializationInfo* si, size_t argCount);
 
             /** @brief Runs a registered test
 
@@ -181,95 +422,65 @@ namespace Unit {
                 @param name Name of the method to be run
                 @param args Arguments to invoke the method
             */
-            void runTest( const std::string& name, const Any* args, size_t argCount );
+            void runTest( const std::string& name, const SerializationInfo* args = 0, size_t argCount = 0);
 
-            void runTest( const std::string& name, const SerializationInfo* args, size_t argCount);
+            void runAll();
 
-            void runTest( const std::string& name)
-            {
-                const Any* a = 0;
-                this->runTest(name, a, 0);
-            }
-
-            void call( const std::string& name, const Any* args, size_t argCount );
-            
         protected:
-            /** @brief The assoziated test protocol
-            */
-            TestProtocol* _protocol;
-
-            typedef void (*Deserialize)(const SerializationInfo&, Any&);
-
-            std::map<std::string, Deserialize> _deserializers;
-
-            template <typename T>
-            static void deserialize(const Pt::SerializationInfo& si, Any& any)
-            {
-                T value = T();
-                si >>= value;
-                any = value;
-            }
+            Test* findTest(const std::string& name);
 
             template <class ParentT>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)() )
             {
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT>(name, parent, method);
-                this->registerCallable(cb);
+                Pt::Unit::Test* test = new TestMethod<ParentT>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
 
             template <class ParentT, typename A1>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
             {
-                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1>(name, parent, method);
-                this->registerCallable(cb);
-
+                Pt::Unit::Test* test = new TestMethod<ParentT, A1>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2) )
             {
-                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2>(name, parent, method);
-                this->registerCallable(cb);
+                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3) )
             {
-                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
-                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3>(name, parent, method);
-                this->registerCallable(cb);
+                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4) )
             {
-                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
-                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
-                _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3, A4>(name, parent, method);
-                this->registerCallable(cb);
+                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3, A4>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4, A5) )
             {
-                _deserializers[ TypeTraits<A1>::typeName() ] =  &deserialize<A1>;
-                _deserializers[ TypeTraits<A2>::typeName() ] =  &deserialize<A2>;
-                _deserializers[ TypeTraits<A3>::typeName() ] =  &deserialize<A3>;
-                _deserializers[ TypeTraits<A4>::typeName() ] =  &deserialize<A4>;
-                _deserializers[ TypeTraits<A5>::typeName() ] =  &deserialize<A5>;
-                Pt::Reflex::CallableInfo* cb =  new Pt::Reflex::MethodInfo<void, ParentT, A1, A2, A3, A4, A5>(name, parent, method);
-                this->registerCallable(cb);
+                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3, A4, A5>(this->name() + "::" + name, parent, method);
+                this->registerTest(test);
             }
-            
-        protected:
-            void registerCallable(Pt::Reflex::CallableInfo* ci);           
+
+            void registerTest(Test* test);
+
+        private:
+            /** @brief The assoziated test protocol
+            */
+            TestProtocol* _protocol;
+
+            std::multimap<std::string, Test*> _tests;
+
+            std::map<std::string, Pt::SerializationInfo> _properties;
 
         public:
             static TestProtocol defaultProtocol;

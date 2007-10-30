@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Dürner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,24 +20,28 @@
 #include <Pt/Unit/TestCase.h>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
 
+namespace Unit {
 
-void TestCase::run()
+void TestCase::run(const SerializationInfo* si, size_t argCount)
 {
-    Context ctx(*this);
-    ctx.run();
+    // TODO: use a TestMethod here and register a protected function
+
+    //TestContext ctx(*this, *this, si, argCount);
+    //ctx.run();
 }
+
 
 void TestCase::setUp()
 {
 }
 
+
 void TestCase::tearDown()
 {
 }
 
-void TestCase::test()
-{
+}
+
 }

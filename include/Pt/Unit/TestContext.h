@@ -27,27 +27,28 @@
 
 namespace Pt {
 
+    class SerializationInfo;
+
 namespace Unit {
 
     class PT_UNIT_API TestContext
     {
         public:
-            virtual ~TestContext()
-            { }
+            TestContext(TestFixture& fixture, Test& test,
+                        const SerializationInfo* args = 0, size_t argCount = 0);
 
-            virtual const std::string& testName() const;
+            virtual ~TestContext();
+
+            virtual std::string testName() const;
 
             void run();
 
-        protected:
-            virtual void _run();
-
-            TestContext(Test& test)
-            : _test(test)
-            {}
-
         private:
+            TestFixture& _fixture;
             Test& _test;
+            const SerializationInfo* _args;
+            size_t _argCount;
+            bool _setUp;
     };
 
 } // namespace Unit

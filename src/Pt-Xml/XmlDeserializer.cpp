@@ -46,6 +46,7 @@ void XmlDeserializer::getData(SerializationInfo& si)
     }
 
     // currently at closing tag - we have to advance to the next node.
+    // TODO: should be nextTag() ???
     _reader->next();
 
 }
@@ -59,6 +60,12 @@ void XmlDeserializer::beginDocument(const Node& node)
         {
             _nodeName = static_cast<const StartElement&>(node).name();
             _current->setName( _nodeName.narrow() );
+
+            _nodeId = static_cast<const StartElement&>(node).attribute(L"id");
+            if( ! _nodeId.empty() )
+            {
+                _current->setId( _nodeId.narrow() );
+            }
             _processNode = &XmlDeserializer::onRootElement;
             break;
         }
@@ -114,7 +121,7 @@ void XmlDeserializer::onStartElement(const Node& node)
             else
             {
                 if(_current == 0)
-                    throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
+                    throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
                 SerializationInfo& added = _current->addMember( _nodeName.narrow() );
                 _current = &added;
@@ -126,7 +133,7 @@ void XmlDeserializer::onStartElement(const Node& node)
         case Node::StartElement:
         {
             if(_current == 0)
-                throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
+                throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
              SerializationInfo& added = _current->addMember( _nodeName.narrow() );
             _current = &added;
@@ -156,13 +163,23 @@ void XmlDeserializer::onWhitespace(const Node& node)
         case Node::StartElement:
         {
             _nodeName = static_cast<const StartElement&>(node).name();
+
+            String refId = static_cast<const StartElement&>(node).attribute(L"ref");
+            if( ! refId.empty() )
+            {
+                SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
+                ref.setCategory(SerializationInfo::Reference);
+                ref.setId( refId.narrow() );
+                _processNode = &XmlDeserializer::onContent;
+            }
+
             _processNode = &XmlDeserializer::onStartElement;
             break;
         }
         case Node::EndElement:
         {
             if(_current == 0)
-                throw std::logic_error("Invalid parent" + PT_SOURCEINFO);
+                throw std::logic_error("Element outside document tree" + PT_SOURCEINFO);
 
             _nodeName = static_cast<const EndElement&>(node).name();
             _current = _current->parent();

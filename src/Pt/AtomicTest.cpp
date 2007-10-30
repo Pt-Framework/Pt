@@ -28,6 +28,36 @@
 //#include <locale>
 
 
+class PtUnitTestSuite : public Pt::Unit::TestSuite
+{
+    public:
+        PtUnitTestSuite()
+        : Pt::Unit::TestSuite("PtUnitTestSuite")
+        {
+            Pt::Unit::TestSuite::registerMethod( "Arg1", *this, &PtUnitTestSuite::arg1 );
+            Pt::Unit::TestSuite::registerMethod( "Arg2", *this, &PtUnitTestSuite::arg2 );
+            Pt::Unit::TestSuite::registerMethod( "Arg3", *this, &PtUnitTestSuite::arg3 );
+            Pt::Unit::TestSuite::registerMethod( "Arg4", *this, &PtUnitTestSuite::arg4 );
+            Pt::Unit::TestSuite::registerMethod( "Arg5", *this, &PtUnitTestSuite::arg5 );
+        }
+
+        void arg1(int a)
+        {}
+
+        void arg2(int a, int b)
+        {}
+
+        void arg3(int a, int b, int c)
+        {}
+
+        void arg4(int a, int b, int c, int d)
+        {}
+
+        void arg5(int a, int b, int c, int d, int e)
+        {}
+};
+
+
 class AtomicTestSuite : public Pt::Unit::TestSuite
 {
     public:

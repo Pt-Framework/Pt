@@ -67,19 +67,32 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
 
-            //DateRef dr;
-            //dr.date = &date1;
-            //ser.serialize(dr, "dref");
+            DateRef dr;
+            dr.date = &date1;
+            std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date1 << std::endl;
+
+            ser.serialize(dr, "dref");
             ser.flush();
 
-            //std::cerr << "\n##########\n" << std::endl;
-            //std::cerr << output.str() << std::endl;
-            //std::cerr << "##########" << std::endl;
+            std::cerr << "\n##########\n" << std::endl;
+            std::cerr << output.str() << std::endl;
+            std::cerr << "##########" << std::endl;
 
             Pt::Date date2(1, 1, 1);
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
+
+            Pt::Xml::XmlReader& reader = deser.reader();
+
+            reader.nextElement();
             deser.deserialize(date2);
+
+            dr.date = 0;
+            reader.nextElement();
+            deser.deserialize(dr);
+
+            deser.fixup();
+            std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date2 << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
         }

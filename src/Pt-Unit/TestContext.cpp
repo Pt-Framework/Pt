@@ -20,21 +20,47 @@
 #include <Pt/Unit/TestContext.h>
 
 
-using namespace Pt;
-using namespace Unit;
+namespace Pt {
+
+namespace Unit {
+
+TestContext::TestContext(TestFixture& fixture, Test& test, const SerializationInfo* args, size_t argCount )
+: _fixture(fixture)
+, _test(test)
+, _args(args)
+, _argCount(argCount)
+, _setUp(false)
+{ }
 
 
-const std::string& TestContext::testName() const
+TestContext::~TestContext()
+{
+    try
+    {
+        if( _setUp )
+            _fixture.tearDown();
+    }
+    catch(...)
+    {}
+
+    _test.finished.send(*this);
+}
+
+
+std::string TestContext::testName() const
 {
     return _test.name();
 }
+
 
 void TestContext::run()
 {
     try
     {
         _test.started.send(*this);
-        this->_run();
+        _fixture.setUp();
+        _setUp = true;
+        _test.run(_args, _argCount);
         _test.success.send(*this);
     }
     catch(const Assertion& assertion)
@@ -63,6 +89,6 @@ void TestContext::run()
     }
 }
 
-void TestContext::_run()
-{
+}
+
 }

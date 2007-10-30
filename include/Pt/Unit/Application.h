@@ -147,7 +147,6 @@ namespace Unit {
             */
             static void error(const TestContext& test);
 
-
             /** @brief Process informational messages
             */
             static void message(const std::string& msg);

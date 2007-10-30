@@ -29,9 +29,36 @@
 
 namespace Pt {
 
+    class SerializationInfo;
+
 namespace Unit {
 
     class TestContext;
+
+
+    class PT_UNIT_API TestFixture
+    {
+        public:
+            virtual ~TestFixture()
+            {}
+
+            /** \brief Set up conText before running a test.
+
+                This function is called before each registered tester function
+                is invoked. It is meant to initialize any required resources.
+            */
+            virtual void setUp()
+            {}
+
+            /** \brief Clean up after the test run.
+
+                This function is called after each registered tester function
+                is invoked. It is meant to remove any resources previously
+                initialized in TestCase::setUp.
+            */
+            virtual void tearDown()
+            {}
+    };
 
     /** @brief Test base class
 
@@ -61,7 +88,13 @@ namespace Unit {
                 the signal 'error' indicates an unknown exception or error.
                 This method should not propagate any exceptions
             */
-            virtual void run() = 0;
+            virtual void run(const SerializationInfo* si, size_t argCount) = 0;
+
+            void run()
+            {
+                const SerializationInfo* si = 0;
+                this->run(si, 0);
+            }
 
             const std::string& name() const;
 
@@ -111,11 +144,6 @@ namespace Unit {
 
         protected:
             /** @brief Construct a test by name
-
-                This ctor is almost never called by the user directly, but
-                rather from derived classes' initialization lists, which
-                pass the name of the test.
-
                 @param name Name of the test
             */
             Test(const std::string& name)

@@ -10,13 +10,13 @@ PT_UNIT_SOURCES = Application.cpp
                   Test.cpp
                   TestCase.cpp
                   TestContext.cpp
-                  # TestProtocol.cpp
+                  TestProtocol.cpp
                   TextProtocol.cpp
                   TestSuite.cpp
                  ;
 
 SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
-SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-Reflex Pt-System ;
+SharedLibrary_LinkSharedLibraries Pt-Unit : Pt Pt-System ;
 SharedLibrary_MakeLocate Pt-Unit : $(OUTPUT_TARGET) ;
 
 # Define a pseudo target to call from projects

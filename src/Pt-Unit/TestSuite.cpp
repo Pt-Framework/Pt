@@ -18,117 +18,121 @@
  ***************************************************************************/
 
 #include <Pt/Unit/TestSuite.h>
-#include <Pt/Reflex/Reflectable.h>
+#include <Pt/SerializationInfo.h>
 
 
 namespace Pt {
 
 namespace Unit {
 
+
 TestProtocol TestSuite::defaultProtocol;
-
-
-TestProtocol::~TestProtocol()
-{
-}
-
-
-void TestProtocol::run(TestSuite& suite)
-{
-    Reflex::Reflectable::MethodIterator it;
-    for(it = suite.reflectable()->methodsBegin(); it != suite.reflectable()->methodsEnd(); ++it)
-    {
-        const Any* a = 0;
-        suite.runTest( it->name(), a, 0 );
-    }
-}
 
 
 TestSuite::TestSuite(const std::string& name, TestProtocol& protocol)
 : Test(name)
 , _protocol(&protocol)
 {
-    m_reflectable = new Pt::Reflex::Reflectable("Pt.Unit.TestSuite");
 }
+
 
 TestSuite::~TestSuite()
 {
-    delete m_reflectable;
+    std::map<std::string, Test*>::iterator it;
+    for(it = _tests.begin(); it != _tests.end(); ++it)
+    {
+        delete it->second;
+    }
 }
 
 
 void TestSuite::setProperty(const std::string& name, const Pt::SerializationInfo& si)
 {
-    Pt::Reflex::PropertyInfo& pi = m_reflectable->propertyInfo(name);
-    si >>= pi;
+    _properties[name] = si;
 }
-            
-            
+
+
+const Pt::SerializationInfo& TestSuite::property(const std::string& name) const
+{
+    std::map<std::string, Pt::SerializationInfo>::const_iterator it;
+    it = _properties.find(name);
+
+    if( it == _properties.end() )
+        throw std::invalid_argument("No such property");
+
+    return it->second;
+}
+
+
 void TestSuite::setProtocol(TestProtocol* protocol)
 {
     _protocol = protocol;
 }
 
+
 void TestSuite::setUp()
 {
 }
+
 
 void TestSuite::tearDown()
 {
 }
 
-void TestSuite::run()
+
+void TestSuite::run(const SerializationInfo* si, size_t argCount)
 {
     _protocol->run(*this);
-}
-
-void TestSuite::runTest(const std::string& name, const Any* args, size_t argCount )
-{
-    Context ctx(*this, name, args, argCount);
-    ctx.run();
 }
 
 
 void TestSuite::runTest( const std::string& name, const SerializationInfo* si, size_t argCount )
 {
-    Pt::Reflex::CallableInfo& cb = m_reflectable->methodInfo( name );
+    Test* test = this->findTest(name);
+    if(!test)
+        throw std::runtime_error("No such test");
 
-    if(argCount == 0)
-    {
-        this->runTest(name);
-    }
-    else
-    {
-        std::vector<Pt::Any> args(argCount);
-        for(size_t n = 0; n < argCount; ++n)
-        {
-            const char* argName = cb.argName(n);
-
-            std::map<std::string, Deserialize>::const_iterator it = _deserializers.find(argName);
-            if( it == _deserializers.end() )
-                throw SerializationError("Could not deserialize type " + std::string(argName) , PT_SOURCEINFO);
-
-            Any a;
-            it->second(si[n], args[n]);
-            args.push_back(a);
-        }
-
-        this->runTest(name, &args[0], argCount);
-    }
-
+    TestContext ctx(*this, *test, si, argCount);
+    ctx.run();
 }
 
-void TestSuite::call( const std::string& name, const Any* args, size_t argCount )
+
+void TestSuite::runAll()
 {
-    m_reflectable->call(name, args, argCount);
+    std::map<std::string, Test*>::iterator it;
+    for(it = _tests.begin(); it != _tests.end(); ++it)
+    {
+        Test* test = it->second;
+        TestContext ctx(*this, *test);
+        ctx.run();
+    }
 }
 
-void TestSuite::registerCallable(Pt::Reflex::CallableInfo* ci)
+
+Test* TestSuite::findTest(const std::string& name)
 {
-    m_reflectable->registerCallableInfo(ci);
+    std::map<std::string, Test*>::iterator it = _tests.find(name);
+    if( it== _tests.end() )
+        return 0;
+
+    return it->second;
 }
 
+
+void TestSuite::registerTest(Test* test)
+{
+    connect(test->started,   this->started);
+    connect(test->finished,  this->finished);
+    connect(test->success,   this->success);
+    connect(test->assertion, this->assertion);
+    connect(test->exception, this->exception);
+    connect(test->error,     this->error);
+    connect(test->message,   this->message);
+
+    _tests.insert( std::make_pair(test->name(), test) );
 }
 
-}
 
+} // namespace Unit
+
+} // namespace Pt
