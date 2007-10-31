@@ -46,13 +46,14 @@ namespace Pt {
 
         protected:
             //! \brief Unlink a smart pointer from a managed object
-            void unlink(T* object)
+            bool unlink(T* object)
             {
+                bool ret = false;
                 if (object)
                 {
                     if (next == this)
                     {
-                        delete object;
+                        ret = true;
                         object = 0;
                     }
                     else
@@ -62,6 +63,7 @@ namespace Pt {
                     }
                     next = prev = this;
                 }
+                return ret;
             }
 
             //! \brief Link a smart pointer to a managed object
@@ -90,10 +92,11 @@ namespace Pt {
     {
         protected:
             //! \brief unlink a smart pointer from a managed object
-            void unlink(T* object)
+            bool unlink(T* object)
             {
                 if (object)
                     object->release();
+                return false;
             }
 
             //! \brief link a smart pointer to a managed object
@@ -128,13 +131,15 @@ namespace Pt {
             { }
 
             //! \brief unlink a smart pointer from a managed object
-            void unlink(T* object)
+            bool unlink(T* object)
             {
                 if ( _count && !--*_count)
                 {
                     delete _count;
-                    delete object;
+                    return true;
                 }
+                else
+                    return false;
             }
 
             //! \brief link a smart pointer to a managed object
@@ -155,19 +160,44 @@ namespace Pt {
     };
 
 
+    /**
+        \param T The managed object type
+    */
+    template <typename T>
+    /** \brief deleter policy for smart pointer
+
+        The DeletePolicy implements the method, which instructs the SmartPtr to free the
+        object which it helds by deleting it.
+    */
+    class DeletePolicy
+    {
+        protected:
+            void destroy(T* ptr)
+            { delete ptr; }
+    };
+
+
     /** \param T Contained type
         \param Model Model for linking/unlinking
+        \param DestroyPolicy policy, to destroy the object
     */
     template <typename T,
-              typename Model = ExternalRefCounted<T> >
+              typename Model = ExternalRefCounted<T>
+              typename Destroy = DeletePolicy<T> >
     /** \brief Policy based smart pointer.
         The SmartPtr implements a model that determines how the contained
         raw pointer is managed. The default model is RefCounted, which uses a
         non-intrusive reference counting mechanism.
-        A policy needs to implement two functions called link() and unlink() to
+        A model-policy needs to implement two functions called link() and unlink() to
         manage a raw pointer.
+        The DestroyPolicy implements the method for destroying the object once
+        the smart pointer detects, that the object needs to be freed. By default
+        the object is destroyed by deleting it, but this can be overridden by
+        implementing a different DestroyPolicy. The DestroyPolicy needs to
+        implement a method destroy(T*), which releases the underlying pointer.
     */
-    class SmartPtr : public Model
+    class SmartPtr : public Model,
+                     public DestroyPolicy
     {
         private:
             //! \brief The raw pointer
@@ -211,7 +241,8 @@ namespace Pt {
                 SmartPtr goes out of scope.
             */
             ~SmartPtr()
-            { this->unlink(object); }
+            { if (this->unlink(object))
+                  this->destroy(object); }
 
             /** \brief Assign from another SmartPtr.
 
@@ -224,13 +255,17 @@ namespace Pt {
             */
             SmartPtr& operator=(const SmartPtr& ptr)
             {
-                if(this == &ptr) {
+                if(object == ptr.object) {
                     return *this;
                 }
 
-                this->unlink(object);
+                if (this->unlink(object))
+                    this->destroy(object);
+
                 object = ptr.object;
+
                 this->link(ptr, object);
+
                 return *this;
             }
 
