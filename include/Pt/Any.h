@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 by Marc Boris Drner                          *
+ *   Copyright (C) 2004-2007 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,14 +20,8 @@
 #define Pt_Any_h
 
 #include <Pt/Api.h>
-#include <Pt/Variant.h>
 #include <Pt/TypeInfo.h>
-#include <Pt/Singleton.h>
 #include <Pt/SourceInfo.h>
-
-#include <iostream>
-#include <map>
-
 
 namespace Pt {
 
@@ -35,12 +29,10 @@ namespace Pt {
         @ingroup Reflection
 
         Any can contain any other type that is default- and copy constructible
-        and less-than and equality comparable. The behaviour of types used in
-        Anys can be refined by specialising AnyTraits for the type. When a
-        value is assigne to an Any a copy is made, just like when a type is
-        inserted in a standard C++ container. The contained type can be
-        accessed via Pt::any_cast<>. It is only possible to get the contained
-        value if the type matches
+        and less-than and equality comparable. When a value is assigned to an
+        Any a copy is made, just like when a type is inserted in a standard
+        C++ container. The contained type can be accessed via Pt::any_cast<>.
+        It is only possible to get the contained value if the type matches
 
         @code
             Any a = 5;
@@ -326,7 +318,7 @@ namespace Pt {
         This function is used to get the contained value from an Any. It is
         not possible to get a float out of an Any if the contained value is
         an int, but the typeid's must match. It is, however, possible to
-        get a const reference ton the contained type.
+        get a const reference to the contained type.
 
         @param any Any to read to
         @return contained value
@@ -336,7 +328,6 @@ namespace Pt {
     inline T any_cast(const Any& any)
     {
         // NOTE:
-        // This implementation is just a workaround:
         // - the first if(...) may not work properly on Linux when loading libs,
         //   so there is also a comparison of string names (second if(...))
         // - but: the name() method necessary for string comparison does not
@@ -363,200 +354,6 @@ namespace Pt {
         throw std::bad_cast();
     }
 
-/*
-    struct AnyIO
-    {
-        virtual ~AnyIO()
-        {}
-
-        virtual void output(std::ostream& os, const Pt::Any& a) const = 0;
-
-        virtual void input(std::istream& is, Pt::Any& a) = 0;
-
-        virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const = 0;
-
-        virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a) = 0;
-    };
-
-
-    template <typename T>
-    struct BasicAnyIO : public AnyIO
-    {
-        virtual void output(std::ostream& os, const Pt::Any& a) const
-        {
-            const T& type = any_cast<const T&>(a);
-            AnyTraits<T>::output(os, type);
-        }
-
-        virtual void output(std::basic_ostream<Pt::Char>& os, const Pt::Any& a) const
-        {
-            const T& type = any_cast<const T&>(a);
-            AnyTraits<T>::output(os, type);
-        }
-
-        virtual void input(std::istream& is, Pt::Any& a)
-        {
-            Pt::Any::BasicValue<T>* value = new Any::BasicValue<T>;
-            a.assign(value);
-            AnyTraits<T>::input( is, value->value() );
-        }
-
-        virtual void input(std::basic_istream<Pt::Char>& is, Pt::Any& a)
-        {
-            Pt::Any::BasicValue<T>* value = new Any::BasicValue<T>;
-            a.assign(value);
-            AnyTraits<T>::input( is, value->value() );
-        }
-    };
-*/
-
-/*
-    struct AnyBuilder
-    {
-        virtual ~AnyBuilder()
-        {}
-
-        virtual void build(Pt::Any& a, const Pt::Variant& value) const = 0;
-    };
-
-
-    template <typename T>
-    struct BasicAnyBuilder : public AnyBuilder
-    {
-        virtual void build(Pt::Any& a, const Pt::Variant& value) const = 0;
-    };
-
-
-    template <>
-    struct BasicAnyBuilder<bool> : public AnyBuilder
-    {
-        virtual void build(Pt::Any& a, const Pt::Variant& value) const
-        {
-            value == "true" ? a = true : a = false;
-        }
-    };
-
-
-    template <>
-    struct BasicAnyBuilder<std::string> : public AnyBuilder
-    {
-        virtual void build(Pt::Any& a, const Pt::Variant& value) const
-        {
-            std::string s = value.str();
-            a = s;
-        }
-    };
-
-
-    //! @internal
-    class PT_API AnyFactory : public Singleton<AnyFactory>
-    {
-        friend class Singleton<AnyFactory>;
-
-        template <typename T>
-        friend struct BasicAnyBuilder;
-
-        public:
-            //! @internal
-            //std::multimap<std::string, AnyIO*>& map();
-
-            //! @internal
-            //const std::multimap<std::string, AnyIO*>& map() const;
-
-            static Any create(const std::string typeName, const Pt::Variant& value)
-            {
-                const AnyBuilder* builder = AnyFactory::findBuilder(typeName);
-                if( builder == 0 )
-                    throw std::invalid_argument("No such builder (" + typeName + ")" + PT_SOURCEINFO);
-
-                Pt::Any a;
-                builder->build(a, value);
-                return a;            }
-
-
-            *//*static Any create(const std::string& name, std::istream& is)
-            {
-                std::multimap<std::string, AnyIO*>::iterator it;
-                it = AnyFactory::instance().map().find(name);
-
-                if( it == AnyFactory::instance().map().end() ) {
-                    return Any();
-                }
-
-                Pt::Any a;
-                it->second->input(is, a);
-                return a;
-            }
-
-
-            static Any create(const std::string& name, std::basic_istream<Pt::Char>& is)
-            {
-                std::multimap<std::string, AnyIO*>::iterator it;
-                it = AnyFactory::instance().map().find(name);
-
-                if( it == AnyFactory::instance().map().end() ) {
-                    return Any();
-                }
-
-                Pt::Any a;
-                it->second->input(is, a);
-                return a;
-            }*//*
-
-        protected:
-            AnyFactory();
-
-            static const AnyBuilder* findBuilder(const std::string typeName)
-            {
-                std::multimap<std::string, AnyBuilder*>::iterator it;
-                it = AnyFactory::instance()._builder.find(typeName);
-
-                if( it != AnyFactory::instance()._builder.end() )
-                    return it->second;
-
-                return 0;
-            }
-
-        private:
-            //! @internal
-            std::multimap<std::string, AnyBuilder*> _builder;
-
-            //! @internal
-            //std::multimap<std::string, AnyIO*> _initMap;
-    };
-*/
-/*
-    template <typename T>
-    struct RegisterAnyBuilder
-    {
-        RegisterAnyBuilder( const std::string& typeName = TypeTraits<T>::typeName() )
-        {
-            AnyFactory::instance()._builder.insert( std::make_pair( typeName, new BasicAnyBuilder<T> ) );
-        }
-    };
-*/
-
-    /** @brief Type binder for types used in Any
-
-        With the use of AnyBind objects you can bind your types
-        at static initialisation time. By default the typename
-        will be determined by the TypeTraits.
-
-        /sa Any
-    */
-    //template <typename T>
-    //struct AnyBind
-    //{
-        /** @brief Binds a type to a name
-
-            With the use of AnyBind objects you can bind your types
-            at static initialisation time. By default the typename
-            will be determined by the TypeTraits.
-        */
-        //AnyBind( const std::string& typeName = TypeTraits<T>::typeName() )
-        //{ AnyFactory::instance().map().insert( std::make_pair( typeName, new BasicAnyIO<T> ) ); }
-    //};
-
-}
+} // namespace Pt
 
 #endif

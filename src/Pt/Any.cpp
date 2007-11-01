@@ -1,116 +1,106 @@
+/***************************************************************************
+ *   Copyright (C) 2004-2007 by Marc Boris Duerner                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 #include "Pt/Any.h"
-#include "Pt/String.h"
-#include <string>
-#include <iostream>
+
+namespace Pt {
+
+Any::Any()
+: _value(0)
+{ }
 
 
-namespace Pt
+Any& Any::assign(Value* value)
 {
+    if(_value)
+        delete _value;
 
-/*    AnyFactory::AnyFactory()
+    _value = value;
+    return *this;
+}
+
+
+Any::Any(const Any& val)
+: _value(0)
+{
+    _value = val._value ? val._value->clone() : 0;
+}
+
+
+Any::~Any()
+{
+    if(_value)
+        delete _value;
+}
+
+
+void Any::clear()
+{
+    if(_value) {
+        delete _value;
+        _value = 0;
+    }
+}
+
+
+Any& Any::swap(Any& rhs)
+{
+    std::swap(_value, rhs._value);
+    return *this;
+}
+
+
+Any& Any::operator=(const Any& rhs)
+{
+    Any(rhs).swap(*this);
+    return *this;
+}
+
+
+bool Any::operator==(const Any& a) const
+{
+    if(_value && a._value)
     {
-        _builder.insert( std::make_pair("bool", new BasicAnyBuilder<bool>) );
-        _builder.insert( std::make_pair("std::string", new BasicAnyBuilder<std::string>) );
-    }*/
-
-
-    //std::multimap<std::string, AnyIO*>& AnyFactory::map()
-    //{ return _initMap; }
-
-
-    //const std::multimap<std::string, AnyIO*>& AnyFactory::map() const
-    //{ return _initMap; }
-
-
-    Any::Any()
-    : _value(0)
-    { }
-
-
-    Any& Any::assign(Value* value)
-    {
-        if(_value)
-            delete _value;
-
-        _value = value;
-        return *this;
+        return _value->equal( *(a._value) );
     }
 
+    // if one or both of the Anys is not initialised
+    // they are considered equal if both have NULL values.
+    return _value == a._value;
+}
 
-    Any::Any(const Any& val)
-    : _value(0)
+
+bool Any::operator!=(const Any& a) const
+{
+    return !( this->operator==(a) );
+}
+
+
+bool Any::operator<(const Any& a) const
+{
+    if(_value && a._value)
     {
-        _value = val._value ? val._value->clone() : 0;
+        return _value->lt( *(a._value) );
     }
 
-
-    Any::~Any()
-    {
-	    if(_value)
-		    delete _value;
-    }
-
-
-    void Any::clear()
-    {
-	    if(_value) {
-		    delete _value;
-		    _value = 0;
-	    }
-    }
-
-
-    Any& Any::swap(Any& rhs)
-    {
-	    std::swap(_value, rhs._value);
-	    return *this;
-    }
-
-
-    Any& Any::operator=(const Any& rhs)
-    {
-	    Any(rhs).swap(*this);
-	    return *this;
-    }
-
-
-    bool Any::operator==(const Any& a) const
-    {
-        if(_value && a._value)
-        {
-           return _value->equal( *(a._value) );
-        }
-
-        // if one or both of the Anys is not initialised
-        // they are considered equal if both have NULL values.
-        return _value == a._value;
-    }
-
-
-    bool Any::operator!=(const Any& a) const
-    {
-	    return !( this->operator==(a) );
-    }
-
-
-    bool Any::operator<(const Any& a) const
-    {
-	    if(_value && a._value)
-        {
-           return _value->lt( *(a._value) );
-        }
-
-        // if one of the Anys is not initialised the
-        //one having a NULL valueis considered less.
-        return _value < a._value;
-    }
-
-
-    //static AnyBind<bool> fbind_bool("bool");
-    //static AnyBind<char> fbind_char("char");
-    //static AnyBind<int> fbind_int("int");
-    //static AnyBind<float> fbind_float("float");
-    //static AnyBind<double> fbind_double("double");
-    //static AnyBind<std::string> fbind_std_string("std::string");
+    // if one of the Anys is not initialised the
+    //one having a NULL valueis considered less.
+    return _value < a._value;
+}
 
 } // namespace Pt
