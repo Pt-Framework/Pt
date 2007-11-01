@@ -38,7 +38,7 @@ TestSuite::TestSuite(const std::string& name, TestProtocol& protocol)
 
 TestSuite::~TestSuite()
 {
-    std::map<std::string, Test*>::iterator it;
+    std::multimap<std::string, Test*>::iterator it;
     for(it = _tests.begin(); it != _tests.end(); ++it)
     {
         delete it->second;
