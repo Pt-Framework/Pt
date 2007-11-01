@@ -138,21 +138,6 @@ namespace Pt {
     const std::string TypeInfo<T[N]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[N]";
 
 
-    /** @brief CTTI for for array types
-        @ingroup CTTI
-    */
-    /*template <typename T>
-    struct TypeInfo<T[]> : public TypeInfoBase<T> {
-        static const char* typeName()
-        { return _typeName.c_str(); }
-
-        static const std::string _typeName;
-    };
-
-    template <typename T>
-    const std::string TypeInfo<T[]>::_typeName = std::string( TypeTraits<T>::typeName() ) + "[]";*/
-
-
     /** @brief CTTI for for member function types
         @ingroup CTTI
     */
@@ -234,11 +219,6 @@ namespace Pt {
     };
 
 
-    //template <typename T>
-    //struct isArray<T[]> : public isTrue {
-    //};
-
-
     template <typename T>
     struct isArray<T**> : public isTrue {
     };
@@ -269,11 +249,6 @@ namespace Pt {
     template <typename T, std::size_t N>
     struct isPointer<T[N]> : public isTrue {
     };
-
-
-    //template <typename T>
-    //struct isPointer<T[]> : public isTrue {
-    //};
 
 
     //! CTTI predicate for const types
@@ -309,7 +284,6 @@ namespace Pt {
         { return long(); }
     };
 
- #if __GNUC__ > 3
     //! CTTI predicate for class/struct types
     template <typename T,
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) != 1, isTrue, isFalse>::ResultT >
@@ -322,7 +296,7 @@ namespace Pt {
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) == 1, isTrue, isFalse>::ResultT >
     struct isValue : public Base {
     };
-#endif
+
 } // !namespace Pt
 
 

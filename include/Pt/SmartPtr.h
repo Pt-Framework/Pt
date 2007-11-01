@@ -182,7 +182,7 @@ namespace Pt {
         \param DestroyPolicy policy, to destroy the object
     */
     template <typename T,
-              typename Model = ExternalRefCounted<T>
+              typename Model = ExternalRefCounted<T>,
               typename Destroy = DeletePolicy<T> >
     /** \brief Policy based smart pointer.
         The SmartPtr implements a model that determines how the contained
@@ -197,7 +197,7 @@ namespace Pt {
         implement a method destroy(T*), which releases the underlying pointer.
     */
     class SmartPtr : public Model,
-                     public DestroyPolicy
+                     public Destroy
     {
         private:
             //! \brief The raw pointer
