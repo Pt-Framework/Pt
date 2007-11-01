@@ -99,7 +99,7 @@ void TestSuite::runTest( const std::string& name, const SerializationInfo* si, s
 
 void TestSuite::runAll()
 {
-    std::map<std::string, Test*>::iterator it;
+    std::multimap<std::string, Test*>::iterator it;
     for(it = _tests.begin(); it != _tests.end(); ++it)
     {
         Test* test = it->second;
@@ -111,7 +111,7 @@ void TestSuite::runAll()
 
 Test* TestSuite::findTest(const std::string& name)
 {
-    std::map<std::string, Test*>::iterator it = _tests.find(name);
+    std::multimap<std::string, Test*>::iterator it = _tests.find(name);
     if( it== _tests.end() )
         return 0;
 
