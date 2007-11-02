@@ -25,22 +25,18 @@
 #include <Pt/Types.h>
 #include <cassert>
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    #define PT_LE
+
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    #define PT_BE
+
+#elif defined(_WIN32) || defined(WIN32)
+    #define PT_LE
+#endif
+
 #if !defined(PT_LE) && !defined(PT_BE)
-
-    #if __BYTE_ORDER == __LITTLE_ENDIAN
-        #define PT_LE
-
-    #elif __BYTE_ORDER == __BIG_ENDIAN
-        #define PT_BE
-
-    #elif defined(_MSC_VER)
-        #define PT_LE
-
-    #else
-        #error "PT_LE or PT_BE needs to be defined."
-
-    #endif
-
+    #error "PT_LE or PT_BE needs to be defined."
 #endif
 
 // For experiment
