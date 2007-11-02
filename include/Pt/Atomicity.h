@@ -20,7 +20,7 @@
 #ifndef PT_ATOMICITY_H
 
 // use Win32 Interlocked-functions
-#if defined(_MSC_VER)
+#if defined(_WIN32) || defined(WIN32)
 
     #define PT_ATOMICITY_H "Atomicity.windows.h"
 
