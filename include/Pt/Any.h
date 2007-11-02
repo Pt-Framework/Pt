@@ -22,6 +22,7 @@
 #include <Pt/Api.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/SourceInfo.h>
+#include <cstring>
 
 namespace Pt {
 
@@ -343,7 +344,7 @@ namespace Pt {
         }
 
 #ifndef _WIN32_WCE
-        else if( std::string(any.type().name()) == std::string(typeid(ValueT).name()) )
+        else if( 0 == strcmp(any.type().name(), typeid(ValueT).name() ) )
         {
             const Any::BasicValue<ValueT>* value;
             value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
