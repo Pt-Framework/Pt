@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2004 Marc Boris Duerner                                 *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,11 +25,6 @@
 #include <climits>
 #include <cstddef>
 #include <stddef.h>
-
-#ifdef __GNUC__
-    #include <stdint.h>
-#endif
-
 
 namespace Pt {
 

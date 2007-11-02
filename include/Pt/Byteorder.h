@@ -21,9 +21,9 @@
 #ifndef Pt_Byteorder_h
 #define Pt_Byteorder_h
 
-#include <cassert>
 #include <Pt/Api.h>
 #include <Pt/Types.h>
+#include <cassert>
 
 #if !defined(PT_LE) && !defined(PT_BE)
 

@@ -28,6 +28,15 @@
 # Aloysius
 #
 
+ITEM P10 S5 "The AtomicInt class implements atomic operations"
+    TASK "Write test case (using multi-threading)"
+    TASK "Write docs"
+
+ITEM P10 S5 "DateTime classes are improved"
+    TASK "Write Timespan class"
+    TASK "Write Timestamp class"
+    TASK "Improve DateTime class"
+
 ITEM P10 S13 "Timers using an IOMonitor are implemented"
     TASK "Implement Timer class"
     TASK "Implement Timer scheduling"

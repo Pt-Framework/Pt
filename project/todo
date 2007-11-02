@@ -22,6 +22,3 @@
 #
 
 
-ITEM P10 S8 "Delegates are implemented"
-    TASK "Write Documentation"
-    TASK "Write test case"
