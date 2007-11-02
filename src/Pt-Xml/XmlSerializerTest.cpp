@@ -21,6 +21,7 @@
 #include "Pt/Xml/XmlSerializer.h"
 #include "Pt/Xml/XmlDeserializer.h"
 #include "Pt/Xml/XmlReader.h"
+#include "Pt/Xml/StartElement.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
