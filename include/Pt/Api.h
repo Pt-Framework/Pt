@@ -64,10 +64,7 @@
     #define PT_WITHOUT_STD_LOCALE
 #endif
 
-#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
-    #define PT_EXPORT __declspec(dllexport)
-    #define PT_IMPORT __declspec(dllimport)
-
+#if defined(WIN32) || defined(_WIN32)
     // suppress min/max macros from win32 headers
     #ifndef NOMINMAX
     #define NOMINMAX
@@ -85,6 +82,11 @@
     #ifndef _WIN32_WINDOWS
     #define _WIN32_WINDOWS 0x0410
     #endif
+#endif
+
+#if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
+    #define PT_EXPORT __declspec(dllexport)
+    #define PT_IMPORT __declspec(dllimport)    
 #elif __GNUC__ >= 4
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
