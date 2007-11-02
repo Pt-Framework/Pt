@@ -22,7 +22,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
 #include <Pt/System/StreamBuffer.h>
-
+#include <algorithm>
 
 namespace Pt {
 
