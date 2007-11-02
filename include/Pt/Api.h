@@ -70,10 +70,10 @@
 
     // suppress min/max macros from win32 headers
     #ifndef NOMINMAX
-    	#define NOMINMAX
+    #define NOMINMAX
     #endif
 
-    // Use of features specific Windows versiond.
+    // Use of features specific Windows versions
     #ifndef WINVER
     #define WINVER 0x0501
     #endif
