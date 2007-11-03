@@ -19,20 +19,26 @@
  ***************************************************************************/
 #ifndef PT_ATOMICITY_H
 
-// use Win32 Interlocked-functions
+// build systems can specify asm-style by defining PT_ASM_ATT or PT_ASM_INTEL.
+// If these are not defined it is still possible to detect the asm-style
+// correctly for many common compilers.
+
+// always use Interlocked-functions when compiling for win32
 #if defined(_WIN32) || defined(WIN32)
 
     #define PT_ATOMICITY_H "Atomicity.windows.h"
 
 // use AT&T-style inline asm
-#elif defined(__GNUC__) || defined(__xlC__)
+#elif defined(PT_ASM_ATT) || \
+      defined(__GNUC__) || defined(__xlC__) || \
+      defined(__SUNPRO_CC) || defined(__SUNPRO_C)
 
-    #if defined( _i386_     ) || defined( __i386__ ) || \
-        defined( __x86_64__ ) || defined( _M_IX86  )
+    #if defined (i386) || defined(__i386) || defined (__i386__) || \
+        defined(_X86_) || defined(sun386) || defined (_M_IX86)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
 
-    #elif defined( __arm__ )
+    #elif defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.arm.h"
 
@@ -42,9 +48,14 @@
 
         #define PT_ATOMICITY_H "Atomicity.gcc.ppc.h"
 
-    #elif defined( __mips__ )
+    #elif defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
+          defined(MIPSEL) || defined(_MIPSEL)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
+
+    #elif defined(__sparc__) || defined(sparc) || defined(__sparc) ||
+
+        #define PT_ATOMICITY_H "Atomicity.gcc.sparc.h"
 
     #else
 

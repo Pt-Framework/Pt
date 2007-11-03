@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
  *   Copyright (C)      2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Byteorder_h
 #define Pt_Byteorder_h
 
@@ -25,21 +24,52 @@
 #include <Pt/Types.h>
 #include <cassert>
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    #define PT_LE
+// build systems can specify byte-order by defining PT_LE or PT_BE.
+// If these are not defined it is still possible to detect the
+// endianess correctly on many common targets.
+#if defined (_BYTE_ORDER)
+#   if (_BYTE_ORDER == _LITTLE_ENDIAN)
+#       define PT_LE
+#   elif (_BYTE_ORDER == _BIG_ENDIAN)
+#       define PT_BE
+#   else
+#       error: unknown _BYTE_ORDER!
+#   endif
+#elif defined (__BYTE_ORDER)
+#    if (__BYTE_ORDER == __LITTLE_ENDIAN)
+#        define PT_LE
+#    elif (__BYTE_ORDER == __BIG_ENDIAN)
+#        define PT_BE
+#    else
+#        error: unknown __BYTE_ORDER!
+#    endif
+#else
+#    if defined (PT_LE) || defined (__LITTLE_ENDIAN__) || \
+        defined (i386) || defined(__i386) || defined (__i386__) || \
+        defined(_X86_) || defined(sun386) || defined (_M_IX86) ||  \
+        defined (_M_IA64) || defined (__ia64__) || \
+        defined(__IA64__) || defined(_IA64) || \
+        defined (_M_AMD64) || defined (__amd64) || \
+        defined(MIPSEL) || defined(_MIPSEL) || \
+        defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT) || \
+        defined (vax) || defined (__alpha) || defined(__THW_INTEL)
+#        define PT_LE
+#    elif defined (PT_BE) || defined(__BIG_ENDIAN__) || \
+          defined(__hppa__) || defined(__hppa) || defined(__hp9000) || \
+          defined(__hp9000s300) || defined(hp9000s300) || \
+          defined(__hp9000s700) || defined(hp9000s700) || \
+          defined(__hp9000s800) || defined(hp9000s800) || defined(hp9000s820) || \
+          defined(__sparc__) || defined(sparc) || defined(__sparc) || \
+          defined(ibm032) || defined(ibm370) || defined(_IBMR2) || \
+          defined(MIPSEB) || defined(_MIPSEB) || \
+          defined(mc68000) || defined(is68k) || defined(macII) || defined(m68k) || \
+          defined(apollo) || defined(__convex__) || defined(_CRAY) || defined(sel)
+#        define PT_BE
+#    else
+#        error: PT_LE or PT_BE needs to be defined.
+#    endif
+# endif
 
-#elif __BYTE_ORDER == __BIG_ENDIAN
-    #define PT_BE
-
-#elif defined(_WIN32) || defined(WIN32)
-    #define PT_LE
-#endif
-
-#if !defined(PT_LE) && !defined(PT_BE)
-    #error "PT_LE or PT_BE needs to be defined."
-#endif
-
-// For experiment
 #define USE_BYTE_MOVE
 
 namespace Pt
@@ -74,16 +104,20 @@ namespace Pt
     inline T swab32(T value)
     {
 #ifdef USE_BYTE_MOVE
-        uint8_t *w = reinterpret_cast<uint8_t*>(&value);
-        const uint8_t w0 = w[0];
-        const uint8_t w1 = w[1];
-        const uint8_t w2 = w[2];
-        const uint8_t w3 = w[3];
-        w[0] = w3;
-        w[1] = w2;
-        w[2] = w1;
-        w[3] = w0;
-        return(value);
+        union {
+            uint32_t v;
+            uint8_t  b[4];
+        } u;
+        u.v = value;
+        const uint8_t b0 = u.b[0];
+        const uint8_t b1 = u.b[1];
+        const uint8_t b2 = u.b[2];
+        const uint8_t b3 = u.b[3];
+        u.b[0] = b3;
+        u.b[1] = b2;
+        u.b[2] = b1;
+        u.b[3] = b0;
+        return(u.v);
 #else
         return ( (value & 0x000000FF) << 24 ) |
                      ( (value & 0x0000FF00) <<  8 ) |
@@ -92,7 +126,7 @@ namespace Pt
 #endif
     }
 
-#ifdef PT_64BIT
+#ifdef PT_WITH_INT64
     /** @brief Swaps the byteorder of the given 64-bit value.
      *  @internal
      */
@@ -191,7 +225,7 @@ namespace Pt
     { return swab32(value); }
 
 
-#ifdef PT_64BIT
+#ifdef PT_WITH_INT64
     /** @brief Swaps the byteorder of an int64_t.
      *
      *  @param value The value to be byte-swapped
