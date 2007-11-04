@@ -19,9 +19,10 @@
  ***************************************************************************/
 #ifndef PT_ATOMICITY_H
 
-// build systems can specify asm-style by defining PT_ASM_ATT or PT_ASM_INTEL.
+// build systems can specify asm-style by defining PT_ASM_ATT or PT_ASM_INTEL
+// as well as the CPU type by defining PT_X86, PT_ARM, PT_PPC etc...
 // If these are not defined it is still possible to detect the asm-style
-// correctly for many common compilers.
+// and CPU correctly for many common cases.
 
 // always use Interlocked-functions when compiling for win32
 #if defined(_WIN32) || defined(WIN32)
@@ -33,27 +34,32 @@
       defined(__GNUC__) || defined(__xlC__) || \
       defined(__SUNPRO_CC) || defined(__SUNPRO_C)
 
-    #if defined (i386) || defined(__i386) || defined (__i386__) || \
+    #if defined(PT_X86) || \
+        defined (i386) || defined(__i386) || defined (__i386__) || \
         defined(_X86_) || defined(sun386) || defined (_M_IX86)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
 
-    #elif defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
+    #elif defined(PT_ARM) || \
+          defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.arm.h"
 
-    #elif defined( _M_PPC  ) || defined( PPC         ) || \
+    #elif defined(PT_PPC) || \
+          defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
           defined( __ppc__ )
 
         #define PT_ATOMICITY_H "Atomicity.gcc.ppc.h"
 
-    #elif defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
+    #elif defined(PT_MIPS) || \
+          defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
           defined(MIPSEL) || defined(_MIPSEL)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
 
-    #elif defined(__sparc__) || defined(sparc) || defined(__sparc) ||
+    #elif defined(PT_SPARC) || \
+          defined(__sparc__) || defined(sparc) || defined(__sparc) ||
 
         #define PT_ATOMICITY_H "Atomicity.gcc.sparc.h"
 

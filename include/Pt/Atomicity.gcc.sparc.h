@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_GCC_PPC_H
-#define PT_ATOMICINT_GCC_PPC_H
+#ifndef PT_ATOMICINT_GCC_SPARC_H
+#define PT_ATOMICINT_GCC_SPARC_H
 
 #include <csignal>
 
