@@ -380,9 +380,8 @@ namespace Unit {
 
             ~TestSuite();
 
-            void setProperty(const std::string& name, const Pt::SerializationInfo& value);
-
-            const Pt::SerializationInfo& property(const std::string& name) const;
+            //! @brief Deprecated
+            virtual void setProperty(const std::string& name, const Pt::SerializationInfo& value);
 
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test
@@ -479,8 +478,6 @@ namespace Unit {
             TestProtocol* _protocol;
 
             std::multimap<std::string, Test*> _tests;
-
-            std::map<std::string, Pt::SerializationInfo> _properties;
 
         public:
             static TestProtocol defaultProtocol;

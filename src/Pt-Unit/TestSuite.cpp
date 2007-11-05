@@ -48,19 +48,6 @@ TestSuite::~TestSuite()
 
 void TestSuite::setProperty(const std::string& name, const Pt::SerializationInfo& si)
 {
-    _properties[name] = si;
-}
-
-
-const Pt::SerializationInfo& TestSuite::property(const std::string& name) const
-{
-    std::map<std::string, Pt::SerializationInfo>::const_iterator it;
-    it = _properties.find(name);
-
-    if( it == _properties.end() )
-        throw std::invalid_argument("No such property");
-
-    return it->second;
 }
 
 
