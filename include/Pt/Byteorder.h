@@ -27,8 +27,9 @@
 // build systems can specify byte-order by defining PT_LE or PT_BE.
 // If these are not defined it is still possible to detect the
 // endianess correctly on many common targets.
-
-#if defined (_BYTE_ORDER)
+#if defined(PT_LE) || defined(PT_BE)
+    // user defined endianess
+#elif defined (_BYTE_ORDER)
 #   if (_BYTE_ORDER == _LITTLE_ENDIAN)
 #       define PT_LE
 #   elif (_BYTE_ORDER == _BIG_ENDIAN)
@@ -65,7 +66,7 @@
       defined(mc68000) || defined(is68k) || defined(macII) || defined(m68k) || \
       defined(apollo) || defined(__convex__) || defined(_CRAY) || defined(sel)
     #define PT_BE
-#elif !defined(PT_LE) && !defined(PT_BE)
+#else
     #error: PT_LE or PT_BE needs to be defined (Pt/Byteorder.h)
 #endif
 
