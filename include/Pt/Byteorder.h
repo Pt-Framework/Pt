@@ -44,34 +44,30 @@
 #    else
 #        error: unknown __BYTE_ORDER
 #    endif
-#else
-#    if defined (__LITTLE_ENDIAN__) || \
-        defined (i386) || defined(__i386) || defined (__i386__) || \
-        defined(_X86_) || defined(sun386) || defined (_M_IX86) ||  \
-        defined (_M_IA64) || defined (__ia64__) || \
-        defined(__IA64__) || defined(_IA64) || \
-        defined (_M_AMD64) || defined (__amd64) || \
-        defined(MIPSEL) || defined(_MIPSEL) || \
-        defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT) || \
-        defined (vax) || defined (__alpha) || defined(__THW_INTEL)
-#        define PT_LE
-#    elif defined(__BIG_ENDIAN__) || \
-          defined(__hppa__) || defined(__hppa) || defined(__hp9000) || \
-          defined(__hp9000s300) || defined(hp9000s300) || \
-          defined(__hp9000s700) || defined(hp9000s700) || \
-          defined(__hp9000s800) || defined(hp9000s800) || defined(hp9000s820) || \
-          defined(__sparc__) || defined(sparc) || defined(__sparc) || \
-          defined(ibm032) || defined(ibm370) || defined(_IBMR2) || \
-          defined(MIPSEB) || defined(_MIPSEB) || \
-          defined(mc68000) || defined(is68k) || defined(macII) || defined(m68k) || \
-          defined(apollo) || defined(__convex__) || defined(_CRAY) || defined(sel)
-#        define PT_BE
-#    endif
-# endif
-
-#if !defined(PT_LE) && !defined(PT_BE)
-#        error: PT_LE or PT_BE needs to be defined (Pt/Byteorder.h)
-#    endif
+#elif defined (__LITTLE_ENDIAN__) || \
+      defined (i386) || defined(__i386) || defined (__i386__) || \
+      defined(_X86_) || defined(sun386) || defined (_M_IX86) ||  \
+      defined (_M_IA64) || defined (__ia64__) || \
+      defined(__IA64__) || defined(_IA64) || \
+      defined (_M_AMD64) || defined (__amd64) || \
+      defined(MIPSEL) || defined(_MIPSEL) || \
+      defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT) || \
+      defined (vax) || defined (__alpha) || defined(__THW_INTEL)
+    #define PT_LE
+#elif defined(__BIG_ENDIAN__) || \
+      defined(__hppa__) || defined(__hppa) || defined(__hp9000) || \
+      defined(__hp9000s300) || defined(hp9000s300) || \
+      defined(__hp9000s700) || defined(hp9000s700) || \
+      defined(__hp9000s800) || defined(hp9000s800) || defined(hp9000s820) || \
+      defined(__sparc__) || defined(sparc) || defined(__sparc) || \
+      defined(ibm032) || defined(ibm370) || defined(_IBMR2) || \
+      defined(MIPSEB) || defined(_MIPSEB) || \
+      defined(mc68000) || defined(is68k) || defined(macII) || defined(m68k) || \
+      defined(apollo) || defined(__convex__) || defined(_CRAY) || defined(sel)
+    #define PT_BE
+#elif !defined(PT_LE) && !defined(PT_BE)
+    #error: PT_LE or PT_BE needs to be defined (Pt/Byteorder.h)
+#endif
 
 namespace Pt
 {
