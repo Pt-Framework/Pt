@@ -70,7 +70,7 @@ namespace sqlite {
 				throw std::logic_error("Too much data for one row" + srcInfo);
 
 			case SQLITE_CONSTRAINT :
-				throw std::runtime_error("Abort due to contraint violation" + srcInfo);
+				throw std::runtime_error("Abort due to constraint violation" + srcInfo);
 
 			case SQLITE_MISMATCH :
 				throw std::logic_error("Data type mismatch" + srcInfo);
