@@ -32,7 +32,7 @@ namespace Pt {
 namespace Gui {
     class PainterImpl;
 
-    class PT_GUI_API Painter : public IPainter
+    class PT_GUI_API Painter : public Gfx::Painter
     {
         public:
             /**

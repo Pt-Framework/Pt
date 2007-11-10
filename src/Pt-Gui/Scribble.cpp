@@ -61,9 +61,6 @@ class ScribbleWidget : public Pt::Gui::Widget
             connect(_clearButton->clicked, *this, &ScribbleWidget::onClearButton);
         }
 
-        Button& getRedButton()
-        { return *_redButton; }
-
         void onRedButton()
         {
             this->setPenColor( ARgbColor(65535, 0, 0) );
@@ -189,12 +186,6 @@ class ScribbleWidget : public Pt::Gui::Widget
 };
 
 
-void function()
-{
-    std::cerr << "function clicked..."  << std::endl;
-}
-
-
 int main(int argc, char* argv[])
 {
     try
@@ -203,13 +194,6 @@ int main(int argc, char* argv[])
 
         ScribbleWidget widget;
         connect(widget.closed, app, &Gui::Application::exit);
-
-        Signal<> signal;
-        Connection c = connect(signal, function);
-        signal.send();
-
-        c.close();
-        signal.send();
 
         widget.show();
         return app.run();
