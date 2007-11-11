@@ -1,5 +1,101 @@
-template < typename R,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void>
-class Function : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8>
+template < typename R,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
+class Function : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
+{
+    public:
+        typedef R (*FuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
+
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
+
+        Function(const Function& f) throw()
+        { this->operator=(f); }
+
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+        { return (*_funcPtr)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); }
+
+        Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
+        { return new Function(*this); }
+
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
+
+    private:
+        FuncT _funcPtr;
+};
+template < typename R,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
+class FunctionSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
+{
+    public:
+        FunctionSlot(const Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& func)
+        : _func( func )
+        {}
+
+        virtual const void* callable() const
+        { return &_func; }
+
+        Slot* clone() const
+        { return new FunctionSlot(*this); }
+
+        virtual bool opened(const Connection& c)
+        { return true; }
+
+        virtual void closed(const Connection& c)
+        { }
+
+    private:
+        Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> _func;
+}; // FunctionSlot
+
+
+template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> callable(R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)) throw()
+{ return Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>(func); }
+
+template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) ) throw()
+{ return FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>( callable(func) ); }
+
+template < typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>
+{
+    public:
+        typedef R (*FuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
+
+        Function(FuncT func) throw()
+        : _funcPtr(func) { }
+
+        Function(const Function& f) throw()
+        { this->operator=(f); }
+
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+        { return (*_funcPtr)(a1,a2,a3,a4,a5,a6,a7,a8,a9); }
+
+        Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>* clone() const
+        { return new Function(*this); }
+
+        Function& operator=(const Function& function)
+        {
+            _funcPtr = function._funcPtr;
+            return (*this);
+        }
+
+    private:
+        FuncT _funcPtr;
+};
+
+template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9> callable(R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)) throw()
+{ return Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>(func); }
+
+template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) ) throw()
+{ return FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>( callable(func) ); }
+
+template < typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class Function<R,A1,A2,A3,A4,A5,A6,A7,A8> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3,A4,A5,A6,A7,A8);
@@ -25,30 +121,6 @@ class Function : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8>
     private:
         FuncT _funcPtr;
 };
-template < typename R,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void>
-class FunctionSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8>
-{
-    public:
-        FunctionSlot(const Function<R,A1,A2,A3,A4,A5,A6,A7,A8>& func)
-        : _func( func )
-        {}
-
-        virtual const void* callable() const
-        { return &_func; }
-
-        Slot* clone() const
-        { return new FunctionSlot(*this); }
-
-        virtual bool opened(const Connection& c)
-        { return true; }
-
-        virtual void closed(const Connection& c)
-        { }
-
-    private:
-        Function<R,A1,A2,A3,A4,A5,A6,A7,A8> _func;
-}; // FunctionSlot
-
 
 template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
 Function<R,A1,A2,A3,A4,A5,A6,A7,A8> callable(R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)) throw()
@@ -59,7 +131,7 @@ FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 
 { return FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7,A8>( callable(func) ); }
 
 template < typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-class Function<R,A1,A2,A3,A4,A5,A6,A7> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,Void>
+class Function<R,A1,A2,A3,A4,A5,A6,A7> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3,A4,A5,A6,A7);
@@ -95,7 +167,7 @@ FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4,
 { return FunctionSlot<R,A1,A2,A3,A4,A5,A6,A7>( callable(func) ); }
 
 template < typename R,class A1, class A2, class A3, class A4, class A5, class A6>
-class Function<R,A1,A2,A3,A4,A5,A6> : public Callable<R, A1,A2,A3,A4,A5,A6,Void,Void>
+class Function<R,A1,A2,A3,A4,A5,A6> : public Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3,A4,A5,A6);
@@ -131,7 +203,7 @@ FunctionSlot<R,A1,A2,A3,A4,A5,A6> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5
 { return FunctionSlot<R,A1,A2,A3,A4,A5,A6>( callable(func) ); }
 
 template < typename R,class A1, class A2, class A3, class A4, class A5>
-class Function<R,A1,A2,A3,A4,A5> : public Callable<R, A1,A2,A3,A4,A5,Void,Void,Void>
+class Function<R,A1,A2,A3,A4,A5> : public Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3,A4,A5);
@@ -167,7 +239,7 @@ FunctionSlot<R,A1,A2,A3,A4,A5> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5
 { return FunctionSlot<R,A1,A2,A3,A4,A5>( callable(func) ); }
 
 template < typename R,class A1, class A2, class A3, class A4>
-class Function<R,A1,A2,A3,A4> : public Callable<R, A1,A2,A3,A4,Void,Void,Void,Void>
+class Function<R,A1,A2,A3,A4> : public Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3,A4);
@@ -203,7 +275,7 @@ FunctionSlot<R,A1,A2,A3,A4> slot( R (*func)(A1 a1, A2 a2, A3 a3, A4 a4) ) throw(
 { return FunctionSlot<R,A1,A2,A3,A4>( callable(func) ); }
 
 template < typename R,class A1, class A2, class A3>
-class Function<R,A1,A2,A3> : public Callable<R, A1,A2,A3,Void,Void,Void,Void,Void>
+class Function<R,A1,A2,A3> : public Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2,A3);
@@ -239,7 +311,7 @@ FunctionSlot<R,A1,A2,A3> slot( R (*func)(A1 a1, A2 a2, A3 a3) ) throw()
 { return FunctionSlot<R,A1,A2,A3>( callable(func) ); }
 
 template < typename R,class A1, class A2>
-class Function<R,A1,A2> : public Callable<R, A1,A2,Void,Void,Void,Void,Void,Void>
+class Function<R,A1,A2> : public Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1,A2);
@@ -275,7 +347,7 @@ FunctionSlot<R,A1,A2> slot( R (*func)(A1 a1, A2 a2) ) throw()
 { return FunctionSlot<R,A1,A2>( callable(func) ); }
 
 template < typename R,class A1>
-class Function<R,A1> : public Callable<R, A1,Void,Void,Void,Void,Void,Void,Void>
+class Function<R,A1> : public Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)(A1);
@@ -311,7 +383,7 @@ FunctionSlot<R,A1> slot( R (*func)(A1 a1) ) throw()
 { return FunctionSlot<R,A1>( callable(func) ); }
 
 template < typename R>
-class Function<R> : public Callable<R, Void,Void,Void,Void,Void,Void,Void,Void>
+class Function<R> : public Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef R (*FuncT)();

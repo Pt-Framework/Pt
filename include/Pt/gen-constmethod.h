@@ -1,6 +1,120 @@
 // Main instantiation
-template < typename R,typename ClassT,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void>
-class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8>
+template < typename R,typename ClassT,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
+class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
+{
+    public:
+        typedef ClassT InterfaceType;
+        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const;
+
+        ConstMethod(ClassT& object, MethodT ptr) throw()
+        : _object(&object), _method(ptr)
+        { }
+
+        ConstMethod(const ConstMethod& method) throw()
+        : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>()
+        { this->operator=(method); }
+
+        ClassT& object()
+        { return *_object;}
+
+        const ClassT& object() const
+        { return *_object;}
+
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+        { return (_object->*_method)(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); }
+
+        ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
+        { return new ConstMethod(*this); }
+
+    private:
+        ClassT* _object;
+        MethodT _method;
+};
+
+template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const ) throw()
+{ return ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>(obj,ptr); }
+
+// Main instantiation
+template < typename R, typename ClassT,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
+class ConstMethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
+{
+    public:
+        ConstMethodSlot(const ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& method)
+        : _method( method )
+        {}
+
+        Slot* clone() const
+        { return new ConstMethodSlot(*this); }
+
+        virtual const void* callable() const
+        { return &_method; }
+
+        virtual bool opened(const Connection& c)
+        {
+            Connectable& connectable = _method.object();
+            return connectable.opened(c);
+        }
+
+        virtual void closed(const Connection& c) 
+        {
+            Connectable& connectable = _method.object();
+            connectable.closed(c);
+        }
+
+    private:
+        ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> _method;
+};
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const ) throw()
+{
+    return ConstMethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>( callable( obj, memFunc ) );
+}
+// Specialization
+template < typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>
+{
+    public:
+        typedef ClassT InterfaceType;
+        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const;
+
+        ConstMethod(ClassT& object, MethodT ptr) throw()
+        : _object(&object), _method(ptr)
+        { }
+
+        ConstMethod(const ConstMethod& method) throw()
+        : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>()
+        { this->operator=(method); }
+
+        ClassT& object()
+        { return *_object;}
+
+        const ClassT& object() const
+        { return *_object;}
+
+        R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+        { return (_object->*_method)(a1,a2,a3,a4,a5,a6,a7,a8,a9); }
+
+        ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>* clone() const
+        { return new ConstMethod(*this); }
+
+    private:
+        ClassT* _object;
+        MethodT _method;
+};
+
+template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const ) throw()
+{ return ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>(obj,ptr); }
+
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8,A9> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const ) throw()
+{
+    return ConstMethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>( callable( obj, memFunc ) );
+}
+// Specialization
+template < typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -11,7 +125,7 @@ class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8>
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8>()
+        : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -35,36 +149,6 @@ template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5
 ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const ) throw()
 { return ConstMethod<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8>(obj,ptr); }
 
-// Main instantiation
-template < typename R, typename ClassT,class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void>
-class ConstMethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8>
-{
-    public:
-        ConstMethodSlot(const ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8>& method)
-        : _method( method )
-        {}
-
-        Slot* clone() const
-        { return new ConstMethodSlot(*this); }
-
-        virtual const void* callable() const
-        { return &_method; }
-
-        virtual bool opened(const Connection& c)
-        {
-            Connectable& connectable = _method.object();
-            return connectable.opened(c);
-        }
-
-        virtual void closed(const Connection& c) 
-        {
-            Connectable& connectable = _method.object();
-            connectable.closed(c);
-        }
-
-    private:
-        ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8> _method;
-};
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
 ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const ) throw()
 {
@@ -72,7 +156,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8> slot( ClassT & obj, R (BaseT::*
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,Void>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -83,7 +167,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void> : public Callable<R, A1,A
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,A4,A5,A6,A7,Void>()
+        : Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -114,7 +198,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7> slot( ClassT & obj, R (BaseT::*mem
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,Void,Void>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -125,7 +209,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void> : public Callable<R, A1
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,A4,A5,A6,Void,Void>()
+        : Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -156,7 +240,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6> slot( ClassT & obj, R (BaseT::*memFun
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2, class A3, class A4, class A5>
-class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,Void,Void,Void>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -167,7 +251,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void> : public Callable<R, 
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,A4,A5,Void,Void,Void>()
+        : Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -198,7 +282,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3,A4,A5> slot( ClassT & obj, R (BaseT::*memFunc)(
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2, class A3, class A4>
-class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,Void,Void,Void,Void>
+class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -209,7 +293,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void> : public Callable<R
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,A4,Void,Void,Void,Void>()
+        : Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -240,7 +324,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3,A4> slot( ClassT & obj, R (BaseT::*memFunc)(A1,
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2, class A3>
-class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,Void,Void,Void,Void,Void>
+class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -251,7 +335,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void> : public Callable
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,A3,Void,Void,Void,Void,Void>()
+        : Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -282,7 +366,7 @@ ConstMethodSlot<R,BaseT,A1,A2,A3> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,
 }
 // Specialization
 template < typename R, typename ClassT,class A1, class A2>
-class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,Void,Void,Void,Void,Void,Void>
+class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -293,7 +377,7 @@ class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void> : public Callab
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,A2,Void,Void,Void,Void,Void,Void>()
+        : Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -324,7 +408,7 @@ ConstMethodSlot<R,BaseT,A1,A2> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2) co
 }
 // Specialization
 template < typename R, typename ClassT,class A1>
-class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,Void,Void,Void,Void,Void,Void,Void>
+class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -335,7 +419,7 @@ class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void> : public Call
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, A1,Void,Void,Void,Void,Void,Void,Void>()
+        : Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
@@ -366,7 +450,7 @@ ConstMethodSlot<R,BaseT,A1> slot( ClassT & obj, R (BaseT::*memFunc)(A1) const ) 
 }
 // Specialization
 template < typename R, typename ClassT>
-class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, Void,Void,Void,Void,Void,Void,Void,Void>
+class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
         typedef ClassT InterfaceType;
@@ -377,7 +461,7 @@ class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void> : public Ca
         { }
 
         ConstMethod(const ConstMethod& method) throw()
-        : Callable<R, Void,Void,Void,Void,Void,Void,Void,Void>()
+        : Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(method); }
 
         ClassT& object()
