@@ -51,8 +51,8 @@ int main(int argc, char** argv)
     Pt::Unit::Application app;
     bool fileLoggingEnabled = false;
 
-    char* fileName = "";
-    char* testName = "";
+    const char* fileName = "";
+    const char* testName = "";
 
     for(int i = 1; i < argc; ++i)
     {
