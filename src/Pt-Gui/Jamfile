@@ -32,6 +32,9 @@ SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
 SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
 
+Main WidgetDemo : WidgetDemo.cpp ;
+Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
+Main_MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
 
 Main Scribble : Scribble.cpp ;
 Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;

@@ -19,7 +19,7 @@ if $(TARGET_OS) = aix
 if $(TARGET_OS:L) = qnxnto
 {
     SYS ?= posix ;
-    GUI ?= gf ;
+    GUI ?= photon ;
 }
 if $(TARGET_OS:L) = wince
 {
@@ -156,12 +156,18 @@ if $(GUI:L) = "gf"
 {
     if $(CONFIG:L) = "release"
     {
-    GUILIBS = -L/usr/lib -lgfS ;
+        GUILIBS = -L/usr/lib -lgfS ;
     }
     else
     {
         GUILIBS = -L/usr/lib -lgfS_g ;
     }
+}
+
+
+if $(GUI:L) = "photon"
+{
+    GUILIBS = -lph ;
 }
 
 

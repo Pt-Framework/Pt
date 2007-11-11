@@ -1,0 +1,17 @@
+SubDir TOP src Pt-Gui photon ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+
+Library Pt-Gui-photon : ApplicationImpl.cpp
+                                    PainterImpl.cpp
+                                    PixmapImpl.cpp
+                                    WidgetImpl.cpp
+                                    ;
+
+Library_MakeLocate Pt-Gui-photon : $(OUTPUT_TARGET) ;
+
+#Main phtest : phtest.cpp  ;
+#LINKLIBS  += $(GUILIBS) ;
+#Main_LinkLibraries phtest : Pt-Gui-photon ;
+#Main_LinkSharedLibraries phtest : Pt-System Pt-Text Pt-Gfx ;
+#Main_MakeLocate phtest : bin ;
