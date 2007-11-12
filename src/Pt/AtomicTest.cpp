@@ -79,7 +79,7 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
         void Pointer()
         {
             int a = 0, b = 1;
-            volatile void* p = 0;
+            void* volatile p = 0;
 
             Pt::atomicExchange( p, (void*)&a );
             PT_UNIT_ASSERT(p == (void*)&a);
