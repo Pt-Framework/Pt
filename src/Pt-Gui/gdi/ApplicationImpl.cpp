@@ -222,6 +222,8 @@ int GDIEventLoop::run()
     // Save current thread-id to later post messages to this thread's message queue.
     _messageLoopThreadId = GetCurrentThreadId();
 
+    // Process the events which were added to the queue before entring the run method.
+    processEvents();
     while (GetMessage(&msg, NULL, 0, 0)) {
         // Deliver our events first.
         processEvents();
@@ -384,7 +386,7 @@ void GDIEventLoop::processVirtualKeyMessage(Widget& widget, int wParam, int lPar
 
     KeyEvent::KeyCode code = KeyEvent::Void;
 
-    // TODO How to distinGuish between left and right shift?
+    // TODO How to distinguish between left and right shift?
     switch (wParam)
     {
         case VK_CONTROL: code = isExtendedKey ? KeyEvent::CtrlR : KeyEvent::CtrlL; break;
@@ -557,7 +559,6 @@ void GDIEventLoop::processMouseLeaveMessage(Widget& widget)
 void GDIEventLoop::processPaintMessage(HWND hwnd, Widget& widget)
 {
     //std::cout << __FUNCTION__ << widget.impl().hwnd() <<std::endl;
-
 
     RECT gdiRectangle;
 

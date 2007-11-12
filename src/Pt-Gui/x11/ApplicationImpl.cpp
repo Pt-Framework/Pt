@@ -905,6 +905,8 @@ int X11EventLoop::run()
     std::vector<char> msgbuf(100);
     int xfd = XConnectionNumber(_display);
 
+   // Process the events which were added to the queue before entring the run method.
+    this->processEvents();
     while(!_stop) {
         fd_set readfds;
         FD_ZERO( &readfds );
