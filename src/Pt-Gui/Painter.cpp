@@ -16,17 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "PainterImpl.h"
-
+#include "PainterImpl.h"
+#include "Pt/Gui/Painter.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
-
-using namespace Pt::Gfx;
-
-
+
 namespace Pt {
 
 namespace Gui {
@@ -40,31 +36,31 @@ Painter::Painter(PainterImpl* painterImpl)
 
 Painter::~Painter()
 {
-    if (!_active) {
+    if (_active) {
         _painterImpl->end();
     }
 }
 
 
-void Painter::setPen(const Pen& pen)
+void Painter::setPen(const Gfx::Pen& pen)
 {
     _painterImpl->setPen(pen);
 }
 
 
-const Pen& Painter::pen() const
+const Gfx::Pen& Painter::pen() const
 {
     return _painterImpl->pen();
 }
 
 
-void Painter::setBrush(const Brush& brush)
+void Painter::setBrush(const Gfx::Brush& brush)
 {
     _painterImpl->setBrush(brush);
 }
 
 
-const Brush& Painter::brush() const
+const Gfx::Brush& Painter::brush() const
 {
     return _painterImpl->brush();
 }
@@ -82,14 +78,14 @@ const Gfx::Font& Painter::font() const
 }
 
 
-FontMetrics Painter::fontMetrics() const
+Gfx::FontMetrics Painter::fontMetrics() const
 {
     this->begin();
     return _painterImpl->fontMetrics();
 }
 
 
-FontMetrics Painter::fontMetrics(Pt::String text) const
+Gfx::FontMetrics Painter::fontMetrics(Pt::String text) const
 {
     this->begin();
     return _painterImpl->fontMetrics(text);
@@ -116,7 +112,7 @@ void Painter::drawLine(const Math::Point& from, const Math::Point& to)
     _painterImpl->drawLine(from, to);
 }
 
-void Painter::drawText( const Math::Point& to, const Pt::String& text, const Pt::Gfx::ARgbColor* outline )
+void Painter::drawText( const Math::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
     this->begin();
     _painterImpl->drawText(to, text);
@@ -165,7 +161,7 @@ void Painter::fillPolygon(const Math::Point* points, const size_t pointCount)
 }
 
 
-void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
+void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.
@@ -176,7 +172,7 @@ void Painter::drawImage(const Math::Point& to, const ARgbImage& image)
 }
 
 
-void Painter::drawImage(const Math::Point& to, const ARgbImage& image, const Gfx::Region& imageRect)
+void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.

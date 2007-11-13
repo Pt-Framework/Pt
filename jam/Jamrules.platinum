@@ -167,7 +167,7 @@ if $(GUI:L) = "gf"
 
 if $(GUI:L) = "photon"
 {
-    GUILIBS = -lph ;
+    GUILIBS = -lphrender -lph ;
 }
 
 

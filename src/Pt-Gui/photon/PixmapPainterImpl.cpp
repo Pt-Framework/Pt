@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                  *
+ *   Copyright (C) 2005-2007 by Aloysius Indrayanto                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,49 +17,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_PixmapImpl_h
-#define Pt_PixmapImpl_h
-
-#include "Pt/Api.h"
-#include "Pt/Math/Size.h"
-#include "Pt/Gui/Painter.h"
-#include <photon/PhRender.h>
-#include <Pt.h>
-
 #include "PixmapPainterImpl.h"
+#include "PixmapImpl.h"
 
 namespace Pt {
 
 namespace Gui {
 
-    class PixmapImpl {
-        public:
-            PixmapImpl(size_t width, size_t height);
+PixmapPainterImpl::PixmapPainterImpl( )
+{
+}
 
-            PixmapImpl(const PixmapImpl& pimpl);
 
-            virtual ~PixmapImpl();
+PixmapPainterImpl::~PixmapPainterImpl()
+{
+}
 
-            const Math::Size& size() const
-            { return _size; }
 
-            Painter painter();
+void PixmapPainterImpl::set(PixmapImpl& pixmap)
+{
+	_pixmap = &pixmap;
+}
 
-			PmMemoryContext_t* mc()
-			{ return _mc; }
 
-			PhImage_t* image()
-			{ return &_image; }
+void PixmapPainterImpl::begin()
+{
+	PmMemStart( _pixmap->mc() );
+}
 
-        private:
-            Math::Size _size;
-            PixmapPainterImpl _painter;
-            PmMemoryContext_t* _mc;
-            PhImage_t _image;
-    };
+
+void PixmapPainterImpl::end()
+{
+	PmMemFlush( _pixmap->mc(), _pixmap->image() );
+	PmMemStop( _pixmap->mc() );
+}
 
 } // namespace Gui
 
 } // namespace Pt
 
-#endif

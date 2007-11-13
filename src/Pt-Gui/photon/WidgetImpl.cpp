@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2006 Aloysius Indrayanto                                *
- *   Copyright (C) 2007 Sebastian Pieck                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,15 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ApplicationImpl.h"
 #include "WidgetImpl.h"
-
-//#include <Pt/Gui/Application.h>
 #include <Pt/Gui/Widget.h>
-//#include <Pt/Gui/ResizeEvent.h>
-//#include <Pt/Gui/PaintEvent.h>
-
-
 
 namespace Pt {
 
@@ -37,7 +29,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 , _ptwidget(0)
 , _isShown(false)
 {
-    if(true)
+    if(parent)
         _ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 0, NULL);
     else
         _ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 0, NULL);
@@ -46,14 +38,11 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
     this->resize(size.width(), size.height());
 
     _painter.setRid( PtWidgetRid(_ptwidget ) );
-    
-    //GfEventLoop::instance().registerWidget(_apiWidget);
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-   //GfEventLoop::instance().unregisterWidget(_apiWidget);
 }
 
 
@@ -65,7 +54,6 @@ void WidgetImpl::setTitle(const Pt::String& text)
 
 Painter WidgetImpl::painter()
 {
-    _painter.setRid( PtWidgetRid(_ptwidget) );
     return Painter(&_painter);
 }
 
@@ -76,6 +64,8 @@ void WidgetImpl::show()
         return;
 
     PtRealizeWidget(_ptwidget);
+
+    _painter.setRid( PtWidgetRid(_ptwidget) );
     _isShown = true;
 }
 
@@ -116,17 +106,17 @@ void WidgetImpl::resize(size_t width, size_t height)
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:2019:monospace9:-3:-3:0
-#2019:2084:monospace9:0:-1:0
-#2084:2191:monospace9:-3:-3:0
-#2191:2215:monospace9:0:-1:0
-#2215:2486:monospace9:-3:-3:0
-#2486:2508:monospace9:0:-1:0
-#2508:2690:monospace9:-3:-3:0
-#2690:2780:monospace9:0:-1:0
-#2780:2967:monospace9:-3:-3:0
-#2967:2987:monospace9:0:-1:0
-#2987:3046:monospace9:-3:-3:0
-#3046:3127:monospace9:0:-1:0
-#3127:3170:monospace9:-3:-3:0
+#0:1811:monospace9:-3:-3:0
+#1811:1876:monospace9:0:-1:0
+#1876:1983:monospace9:-3:-3:0
+#1983:2007:monospace9:0:-1:0
+#2007:2267:monospace9:-3:-3:0
+#2267:2309:monospace9:0:-1:0
+#2309:2361:monospace9:-3:-3:0
+#2361:2451:monospace9:0:-1:0
+#2451:2638:monospace9:-3:-3:0
+#2638:2658:monospace9:0:-1:0
+#2658:2717:monospace9:-3:-3:0
+#2717:2798:monospace9:0:-1:0
+#2798:2841:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000470)**/

@@ -28,11 +28,22 @@ int main(int argc, char* argv[])
         connect(widget.closed, app, &Pt::Gui::Application::exit);
 
         widget.show();
+   
+        Pt::Gui::Pixmap pm(100, 100);
+        {	
+        	Pt::Gui::Painter painter = pm.painter();
+        	painter.setBrush(Pt::Gfx::Brush( Pt::Gfx::ARgbColor(0xffff, 0, 0) ) );
+        	painter.fillRect( Pt::Gfx::Rect( Pt::Math::Point(20, 20), Pt::Math::Size(100,100) ) );
+        	painter.drawLine( Pt::Math::Point(10,20), Pt::Math::Point(100,120) );
+         }
         
         {
         	Pt::Gui::Painter painter = widget.painter();
-        	painter.drawLine( Pt::Math::Point(10,10), Pt::Math::Point(100,100) );
+        	painter.drawPixmap( Pt::Math::Point(10, 10), pm );
+        	painter.drawLine( Pt::Math::Point(10,10), Pt::Math::Point(200,100) );
         }
+
+
         return app.run();
     }
     catch(const std::exception& e)

@@ -5,6 +5,8 @@ SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 Library Pt-Gui-photon : ApplicationImpl.cpp
                                     PainterImpl.cpp
                                     PixmapImpl.cpp
+                                    PixmapPainterImpl.cpp
+                                    WidgetPainterImpl.cpp
                                     WidgetImpl.cpp
                                     ;
 

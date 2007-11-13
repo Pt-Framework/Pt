@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2005-2007 by Aloysius Indrayanto                        *
- *   Copyright (C) 2005-2007 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,10 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_linux_fb_PainterImpl_h
-#define Pt_linux_fb_PainterImpl_h
-
-#include "ApplicationImpl.h"
+#ifndef Pt_Gui_photon_PainterImpl_h
+#define Pt_Gui_photon_PainterImpl_h
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Gfx/Pen.h>
@@ -32,17 +29,15 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
-#include <Pt/Gui/Painter.h>
 #include <Pt/String.h>
-
+#include <list>
 #include <Pt.h>
-
-#include <stdio.h>
 
 namespace Pt {
 
 namespace Gui {
 
+	class Pixmap;
 
     class PainterImpl {
         public:
@@ -50,12 +45,9 @@ namespace Gui {
 
             virtual ~PainterImpl();
 
-            void begin();
+            virtual void begin() = 0;
 
-            void end();
-
-            void setRid(PhRid_t rid)
-            { _rid = rid; }
+            virtual void end() = 0;
 
             void setPen(const Gfx::Pen& pen);
 
@@ -100,28 +92,13 @@ namespace Gui {
             void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
             void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
-                           const Gfx::Region& imageRegion);
+                                       const Gfx::Region& imageRegion);
 
         protected:
             template <typename Iterator>
             void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
             {
-                /*Screen& screen = Screen::instance();
-                const char* imageData = 0;
 
-                switch( screen.depth() )
-                {
-                    case 16:
-                    {
-                        Gfx::Rgb555Image rgbImage( width, height );
-                        assign( begin, end, rgbImage.begin() );
-                        imageData = (char*)( rgbImage.data() );
-                        this->copyImageData( toX, toY, imageData, rgbImage.width(), rgbImage.height() );
-                        break;
-                    }
-                    default:
-                        imageData = 0;
-                }*/
             }
 
             void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
@@ -130,11 +107,11 @@ namespace Gui {
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-            PhRid_t _rid;
     };
 
 } // namespace Gui
 
 } // namespace Pt
+
 
 #endif

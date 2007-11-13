@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                  *
  *   Copyright (C) 2005-2007 by Aloysius Indrayanto                        *
- *   Copyright (C) 2005-2007 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,24 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ApplicationImpl.h"
 #include "PainterImpl.h"
-
-//#include "Pt/Gui/Pixmap.h"
-#include "Pt/Math/Rect.h"
+#include "PixmapImpl.h"
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Text/TextStream.h"
-#include "Pt/Text/Utf16Codec.h"
-
-#include <iostream>
-#include <sstream>
-#include <cmath>
-
 
 namespace Pt {
 
 namespace Gui {
-
 
 PainterImpl::PainterImpl( )
 //: _font("sans-serif")
@@ -45,18 +35,6 @@ PainterImpl::PainterImpl( )
 
 PainterImpl::~PainterImpl()
 {
-}
-
-
-void PainterImpl::begin()
-{
-    PgSetRegion( _rid );
-}
-
-
-void PainterImpl::end()
-{
-    PtFlush();
 }
 
 
@@ -118,6 +96,10 @@ const Gfx::Pen& PainterImpl::pen() const
 
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
+    Gfx::Rgb888Color rgb888;
+    assign( rgb888, brush.color() );
+	PgSetFillColor( rgb888.value() );
+
     _brush = brush;
 }
 
@@ -167,7 +149,7 @@ void PainterImpl::drawPixel(const Math::Point& to)
 
 void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
-    PgDrawILine( from.x(), from.y(),to.x(),to.y() );
+    PgDrawILine( from.x(), from.y(), to.x(),to.y() );
 }
 
 
@@ -179,7 +161,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 
 void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
-
+	PgDrawIRect( rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_STROKE);
 }
 
 
@@ -197,7 +179,7 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 
 void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
-
+	PgDrawIRect(rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
 }
 
 
@@ -215,14 +197,18 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
-
+	PhPoint_t _to = { to.x(), to.y() };
+	PgDrawPhImage(&_to, pm.impl().image(), 0 );
 }
 
 
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm,
-                             const Gfx::Region& pmRegion)
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
 {
-
+	PhPoint_t _to = { to.x(), to.y() };
+	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
+	
+	PgDrawPhImageRectv(&_to, pm.impl().image(), &rect, NULL );
+	PgFlush(); // TODO: is this necessary ???
 }
 
 
@@ -241,32 +227,11 @@ void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
 
 void PainterImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
-/*    size_t pixelSize = Screen::instance().depth() / 8;
 
-
-    if ( gf_draw_begin( *Screen::instance().drawContext() ) == GF_ERR_OK )
-    {
-
-        if (gf_surface_attach(Screen::instance().offscreenSurface(), *Screen::instance().devContext(),
-                  fromWidth, fromHeight, fromWidth * pixelSize, GF_FORMAT_PKLE_ARGB1555, NULL,  (uint8_t*)data, 0) != GF_ERR_OK)
-                  { throw std::logic_error("Cannot create Offscreen-Surface" + PT_SOURCEINFO);  }
-
-        if ( gf_draw_blit2(*Screen::instance().drawContext(), *Screen::instance().offscreenSurface(),
-                NULL, 0, 0, fromWidth-1, fromHeight-1, 0, 0) != GF_ERR_OK )
-                { throw std::logic_error("Cannot blit bitmap!" + PT_SOURCEINFO); }
-
-        if (gf_draw_flush( *Screen::instance().drawContext() ) != GF_ERR_OK )
-           { throw std::logic_error("Cannot flush context!"+ PT_SOURCEINFO);  }
-
-        gf_draw_end( *Screen::instance().drawContext() );
-    }
-    else
-    {
-        throw std::logic_error("Cannot begin draw!"+ PT_SOURCEINFO);
-    }*/
 }
 
 } // namespace Gui
 
 } // namespace Pt
+
 

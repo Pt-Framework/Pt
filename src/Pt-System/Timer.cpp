@@ -1,11 +1,11 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
-#include <limits>
+#include <climits>
 
 
 namespace {
 
-size_t getCurrentMSecs()
+Pt::size_t getCurrentMSecs()
 {    
     return  Pt::System::Clock::getTime();
 }

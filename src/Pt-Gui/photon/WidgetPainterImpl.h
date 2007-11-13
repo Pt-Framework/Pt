@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2007 Sebastian Pieck                                    *
+ *   Copyright (C) 2005-2007 by Aloysius Indrayanto                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,55 +17,32 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_WidgetImpl_h
-#define Pt_Gui_WidgetImpl_h
+#ifndef Pt_WidgetPainterImpl_h
+#define Pt_WidgetPainterImpl_h
 
-#include "WidgetPainterImpl.h"
-
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Widget.h>
-#include <Pt/Gui/Painter.h>
-#include <Pt/String.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include "PainterImpl.h"
+#include <Pt.h>
 
 namespace Pt {
 
 namespace Gui {
-;
-    class Widget;
-    class ResizeEvent;
 
-    class WidgetImpl
+    class WidgetPainterImpl : public PainterImpl
     {
         public:
-            WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at = Math::Point(0, 0),
-                                                          const Math::Size& size = Math::Size(400, 300));
+            WidgetPainterImpl();
 
-            virtual ~WidgetImpl();
+            virtual ~WidgetPainterImpl();
 
-            void setTitle(const Pt::String& text);
+            virtual void begin();
 
-            Pt::String title() const
-            { return L""; }
+            virtual void end();
 
-            Painter painter();
+            void setRid(PhRid_t rid)
+            { _rid = rid; }
 
-            void setParent(Widget* parent);
-
-            void move(size_t x, size_t y);
-
-            void resize(size_t width, size_t height);
-
-            void show();
-
-            void hide();
-        
         private:
-            Widget& _apiWidget;
-            PtWidget_t* _ptwidget;
-            WidgetPainterImpl _painter;
-            bool _isShown;
+            PhRid_t _rid;
     };
 
 } // namespace Gui
@@ -73,12 +50,3 @@ namespace Gui {
 } // namespace Pt
 
 #endif
-
-#/** PhEDIT attribute block
-#-11:16777215
-#0:1521:monospace9:-3:-3:0
-#1521:1551:monospace9:0:-1:0
-#1551:1577:monospace9:-3:-3:0
-#1577:1603:monospace9:0:-1:0
-#1603:2631:monospace9:-3:-3:0
-#**  PhEDIT attribute block ends (-0000234)**/

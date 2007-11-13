@@ -24,7 +24,7 @@
 
 #include <climits>
 #include <cstddef>
-#include <stddef.h>
+//#include <stddef.h>
 
 namespace Pt {
 
@@ -38,7 +38,7 @@ namespace Pt {
     typedef unsigned long  ulong;
 
     /// \exclude
-    using ::size_t;
+    using std::size_t;
     /// \exclude
     typedef std::ptrdiff_t ssize_t;
 
