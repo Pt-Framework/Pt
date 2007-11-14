@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "WidgetImpl.h"
+#include "ApplicationImpl.h"
 #include <Pt/Gui/Widget.h>
 
 namespace Pt {
@@ -38,6 +39,10 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
     this->resize(size.width(), size.height());
 
     _painter.setRid( PtWidgetRid(_ptwidget ) );
+
+		PtAddEventHandler(_ptwidget, 
+		                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION, 
+		                  &EventLoopImpl::photonEvent,&_apiWidget );
 }
 
 
@@ -106,17 +111,17 @@ void WidgetImpl::resize(size_t width, size_t height)
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:1811:monospace9:-3:-3:0
-#1811:1876:monospace9:0:-1:0
-#1876:1983:monospace9:-3:-3:0
-#1983:2007:monospace9:0:-1:0
-#2007:2267:monospace9:-3:-3:0
-#2267:2309:monospace9:0:-1:0
-#2309:2361:monospace9:-3:-3:0
-#2361:2451:monospace9:0:-1:0
-#2451:2638:monospace9:-3:-3:0
-#2638:2658:monospace9:0:-1:0
-#2658:2717:monospace9:-3:-3:0
-#2717:2798:monospace9:0:-1:0
-#2798:2841:monospace9:-3:-3:0
+#0:1840:monospace9:-3:-3:0
+#1840:1905:monospace9:0:-1:0
+#1905:2012:monospace9:-3:-3:0
+#2012:2036:monospace9:0:-1:0
+#2036:2467:monospace9:-3:-3:0
+#2467:2509:monospace9:0:-1:0
+#2509:2561:monospace9:-3:-3:0
+#2561:2651:monospace9:0:-1:0
+#2651:2838:monospace9:-3:-3:0
+#2838:2858:monospace9:0:-1:0
+#2858:2917:monospace9:-3:-3:0
+#2917:2998:monospace9:0:-1:0
+#2998:3041:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000470)**/

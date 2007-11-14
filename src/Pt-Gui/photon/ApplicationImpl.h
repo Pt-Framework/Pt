@@ -17,30 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Gui_photon_ApplicationImpl_h
 #define Pt_Gui_photon_ApplicationImpl_h
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Application.h>
+#include <Pt/Singleton.h>
 #include <Pt/Signal.h>
+#include <Pt.h>
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 namespace Pt {
 
 namespace Gui {
 
+	class PT_GUI_API EventLoopImpl : public Singleton<EventLoopImpl>
+	{
+		friend class Singleton<EventLoopImpl>;
+		
+		public:
+			void setApp(Application& app);
+			
+			int run();
+			
+			void exit();
+			
+			static int photonEvent(PtWidget_t* widget, void* data, PtCallbackInfo_t* info);
+		
+		protected:
+			EventLoopImpl();
+					
+		private:
+			Application* _app;
+	};
+
     class PT_GUI_API ApplicationImpl
     {
         public:
-        	ApplicationImpl();
-
             ApplicationImpl(Application& app);
 
             ~ApplicationImpl();

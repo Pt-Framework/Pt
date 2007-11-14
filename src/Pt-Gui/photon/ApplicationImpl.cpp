@@ -18,9 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "ApplicationImpl.h"
-
+#include "Pt/Gui/Widget.h"
+#include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
 #include <iostream>
 #include <cerrno>
 #include <stdexcept>
@@ -28,30 +29,72 @@
 #include <cerrno>
 #include <sys/neutrino.h>
 #include <sys/select.h>
-#include <Pt.h>
 
 namespace Pt {
 
 namespace Gui {
 
-int eventCallback(PtWidget_t* widget, void* data, PtCallbackInfo_t* info)
+EventLoopImpl::EventLoopImpl()
+: _app(0)
 {
-	reinterpret_cast<ApplicationImpl*>(data)->wake();
+	if( PtInit(NULL) == -1 )
+		PtExit(EXIT_FAILURE);
+}
+
+void EventLoopImpl::setApp(Application& app)
+{
+	_app = &app;
+}
+			
+int EventLoopImpl::run()
+{
+	PhEventArm();
+	PtMainLoop();
+	return 0;
+}
+			
+
+void EventLoopImpl::exit()
+{
+	PtExit(EXIT_SUCCESS);
+}			
+
+
+int EventLoopImpl::photonEvent(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
+{
+	Widget* widget = reinterpret_cast<Widget*>(data);
+std::cerr << widget << std::endl;
+	switch(info->event->type)
+	{
+		case Ph_EV_PTR_MOTION_BUTTON:
+		case Ph_EV_PTR_MOTION_NOBUTTON:
+		{
+			PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(info->event);
+			Pt::Gui::MouseMoveEvent ev(*widget, pev->pos.x, pev->pos.y, Pt::Gui::MouseMoveEvent::Moved, 0);
+			EventLoopImpl::instance()._app->event(ev);
+			printf("move\n");
+			break;
+		}
+		case Ph_EV_BUT_PRESS:
+		{
+			printf("press\n");
+			break;
+		}
+		case Ph_EV_BUT_RELEASE:
+		{
+			printf("release\n");
+			break;
+		}
+	}
+	
+	//EventLoopImpl::instance()._app->event;
 	return 0;
 }
 
 
 ApplicationImpl::ApplicationImpl(Application& app)
 {
-	if( PtInit(NULL) == -1 )
-		PtExit(EXIT_FAILURE);
-}
-
-
-ApplicationImpl::ApplicationImpl()
-{
-	if( PtInit(NULL) == -1 )
-		PtExit(EXIT_FAILURE);
+	EventLoopImpl::instance().setApp(app);
 }
 
 
@@ -81,16 +124,7 @@ void ApplicationImpl::processEvents()
 
 int ApplicationImpl::run()
 {  
-	PhEventArm();
-
-    //connect(GfEventLoop::instance().event, app.event);
-
-	//mainWidget = PtCreateWidget(PtWindow, Pt_NO_PARENT, 0, NULL);
-	//PtAddEventHandler(mainWidget, Ph_EV_BUT_PRESS | Ph_EV_PTR_MOTION, eventCallback, this);
-	//PtRealizeWidget(mainWidget);
-	
-	PtMainLoop();
-	return true;
+	return EventLoopImpl::instance().run();
 }
 
 
@@ -102,7 +136,7 @@ void ApplicationImpl::wake()
 
 void ApplicationImpl::exit()
 {
-	PtExit(EXIT_SUCCESS);
+	EventLoopImpl::instance().exit();
 }
 
 } // namespace Gui
