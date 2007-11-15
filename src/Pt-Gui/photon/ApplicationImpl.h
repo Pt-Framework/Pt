@@ -21,15 +21,18 @@
 #define Pt_Gui_photon_ApplicationImpl_h
 
 #include <Pt/Gui/Api.h>
-#include <Pt/Gui/Application.h>
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
+#include <Pt/Event.h>
 #include <Pt.h>
 
 
 namespace Pt {
 
 namespace Gui {
+
+	class Application;
+	class Widget;
 
 	class PT_GUI_API EventLoopImpl : public Singleton<EventLoopImpl>
 	{
@@ -46,7 +49,16 @@ namespace Gui {
 		
 		protected:
 			EventLoopImpl();
-					
+			
+			void pointerMotion(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
+
+			void buttonPress(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
+			
+			void buttonRelease(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
+		
+			void exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev);
+
+			void windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev);
 		private:
 			Application* _app;
 	};

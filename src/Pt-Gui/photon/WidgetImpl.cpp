@@ -41,7 +41,9 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
     _painter.setRid( PtWidgetRid(_ptwidget ) );
 
 		PtAddEventHandler(_ptwidget, 
-		                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION, 
+		                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION |
+		                  Ph_EV_EXPOSE|Ph_EV_KEY|Ph_EV_BOUNDARY|Ph_EV_DRAG|
+		                  Ph_EV_WM, 
 		                  &EventLoopImpl::photonEvent,&_apiWidget );
 }
 
@@ -115,13 +117,13 @@ void WidgetImpl::resize(size_t width, size_t height)
 #1840:1905:monospace9:0:-1:0
 #1905:2012:monospace9:-3:-3:0
 #2012:2036:monospace9:0:-1:0
-#2036:2467:monospace9:-3:-3:0
-#2467:2509:monospace9:0:-1:0
-#2509:2561:monospace9:-3:-3:0
-#2561:2651:monospace9:0:-1:0
-#2651:2838:monospace9:-3:-3:0
-#2838:2858:monospace9:0:-1:0
-#2858:2917:monospace9:-3:-3:0
-#2917:2998:monospace9:0:-1:0
-#2998:3041:monospace9:-3:-3:0
+#2036:2568:monospace9:-3:-3:0
+#2568:2610:monospace9:0:-1:0
+#2610:2662:monospace9:-3:-3:0
+#2662:2752:monospace9:0:-1:0
+#2752:2939:monospace9:-3:-3:0
+#2939:2959:monospace9:0:-1:0
+#2959:3018:monospace9:-3:-3:0
+#3018:3099:monospace9:0:-1:0
+#3099:3142:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000470)**/
