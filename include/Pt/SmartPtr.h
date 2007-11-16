@@ -123,7 +123,7 @@ namespace Pt {
     {
         public:
             size_t refs() const
-            { return *_count; }
+            { return _count ? *_count : 0; }
 
         protected:
             ExternalRefCounted()
@@ -136,6 +136,8 @@ namespace Pt {
                 if ( _count && !--*_count)
                 {
                     delete _count;
+                    // no need to set _count to 0 since the pointer is either
+                    // destroyed or another object is linked in
                     return true;
                 }
                 else
@@ -145,14 +147,19 @@ namespace Pt {
             //! \brief link a smart pointer to a managed object
             void link(const ExternalRefCounted& ptr, T* object)
             {
-                if(ptr._count == 0) {
-                    _count = new size_t(1);
+                if(object)
+                {
+                    if(ptr._count == 0) {
+                        _count = new size_t(1);
+                    }
+                    else
+                    {
+                        _count = ptr._count;
+                        ++*_count;
+                    }
                 }
                 else
-                {
-                    _count = ptr._count;
-                    ++*_count;
-                }
+                    _count = 0;
             }
 
         private:
