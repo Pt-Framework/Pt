@@ -22,24 +22,31 @@
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
+#include <iostream>
 
 namespace Pt {
 
 namespace Gui {
 
 PainterImpl::PainterImpl( )
-//: _font("sans-serif")
+: _dc(0)
+, _font("sans-serif")
 {
+	_gc = PgCreateGC(0);
 }
 
 
 PainterImpl::~PainterImpl()
 {
+	PgDestroyGC( _gc );
 }
 
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
     _pen = pen;
     
     Gfx::Rgb888Color rgb888;
@@ -96,6 +103,9 @@ const Gfx::Pen& PainterImpl::pen() const
 
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
     Gfx::Rgb888Color rgb888;
     assign( rgb888, brush.color() );
 	PgSetFillColor( rgb888.value() );
@@ -149,6 +159,9 @@ void PainterImpl::drawPixel(const Math::Point& to)
 
 void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
     PgDrawILine( from.x(), from.y(), to.x(),to.y() );
 }
 
@@ -161,6 +174,9 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 
 void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
 	PgDrawIRect( rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_STROKE);
 }
 
@@ -179,6 +195,9 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 
 void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
 	PgDrawIRect(rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
 }
 
@@ -197,6 +216,9 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
 	PhPoint_t _to = { to.x(), to.y() };
 	PgDrawPhImage(&_to, pm.impl().image(), 0 );
 }
@@ -204,6 +226,9 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
 {
+	PgSetGC(_gc);
+	PhDCSetCurrent(_dc);
+
 	PhPoint_t _to = { to.x(), to.y() };
 	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
 	

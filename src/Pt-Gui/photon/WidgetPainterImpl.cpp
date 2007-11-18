@@ -26,6 +26,9 @@ namespace Gui {
 
 WidgetPainterImpl::WidgetPainterImpl( )
 {
+	PhDrawContext_t* old = PhDCSetCurrent(0);
+	PhDrawContext_t* dc = PhDCSetCurrent(old);
+	this->setDC(dc);
 }
 
 
@@ -36,7 +39,7 @@ WidgetPainterImpl::~WidgetPainterImpl()
 
 void WidgetPainterImpl::begin()
 {
-    PgSetRegion( _rid );
+    //PgSetRegion( _rid );
 }
 
 

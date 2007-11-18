@@ -37,17 +37,19 @@ PixmapPainterImpl::~PixmapPainterImpl()
 void PixmapPainterImpl::set(PixmapImpl& pixmap)
 {
 	_pixmap = &pixmap;
+	this->setDC( _pixmap->mc() );
 }
 
 
 void PixmapPainterImpl::begin()
 {
-	PmMemStart( _pixmap->mc() );
+	// PmMemStart( _pixmap->mc() );
 }
 
 
 void PixmapPainterImpl::end()
 {
+	//PmMemStart( _pixmap->mc() );
 	PmMemFlush( _pixmap->mc(), _pixmap->image() );
 	PmMemStop( _pixmap->mc() );
 }

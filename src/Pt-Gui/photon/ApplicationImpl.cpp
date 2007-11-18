@@ -64,69 +64,91 @@ void EventLoopImpl::exit()
 }			
 
 
-void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhPointerEvent_t& pev)
+void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
+	PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(&ev);
+
 	MouseMoveEvent::Modifier mod = MouseMoveEvent::NoButton;
-	
-	if(pev.button_state & Ph_BUTTON_SELECT)
+	if(pev->button_state & Ph_BUTTON_SELECT)
 		mod = MouseMoveEvent::LeftButtonDown;
-	else if(pev.button_state & Ph_BUTTON_MENU)
+	else if(pev->button_state & Ph_BUTTON_MENU)
 		mod = MouseMoveEvent::RightButtonDown;
-	else if(pev.button_state & Ph_BUTTON_ADJUST)
+	else if(pev->button_state & Ph_BUTTON_ADJUST)
 		mod = MouseMoveEvent::MiddleButtonDown;
 
-	MouseMoveEvent ev(widget, 
-	                                  pev.pos.x, 
-	                                  pev.pos.y, 
-	                                  MouseMoveEvent::Moved, 
-	                                  mod);
+	MouseMoveEvent::Action action = MouseMoveEvent::Moved;
+	if(ev.type == Ph_EV_BOUNDARY)
+	{
+		if(ev.subtype == Ph_EV_PTR_ENTER_FROM_PARENT ||
+		   ev.subtype == Ph_EV_PTR_ENTER_FROM_CHILD)
+		{
+			action = MouseMoveEvent::Entered;
+		}
+		else if(ev.subtype == Ph_EV_PTR_LEAVE_TO_PARENT ||
+		           ev.subtype == Ph_EV_PTR_LEAVE_TO_CHILD)
+		{
+			action = MouseMoveEvent::Exited;
+		}
+	}
+
+	MouseMoveEvent mev(widget, 
+	                                    pev->pos.x + ev.translation.x, 
+	                                    pev->pos.y + ev.translation.y, 
+	                                    action, 
+	                                    mod);
 	                                  
-	//std::cerr << pev.pos.x << " " << pev.pos.y << std::endl;
-	_app->event(ev);
+	// std::cerr << mev.x() << " " << mev.y() << std::endl;
+	_app->event(mev);
 }
 
 
-void EventLoopImpl::buttonPress(Pt::Gui::Widget& widget, PhPointerEvent_t& pev)
+void EventLoopImpl::buttonPress(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
-	MouseEvent::Button button = MouseEvent::LeftButton;
+	PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(&ev);
 	
-	if(pev.buttons & Ph_BUTTON_SELECT)
+	MouseEvent::Button button = MouseEvent::LeftButton;
+	if(pev->buttons & Ph_BUTTON_SELECT)
 		button = MouseEvent::LeftButton;
-	else if(pev.buttons & Ph_BUTTON_MENU)
+	else if(pev->buttons & Ph_BUTTON_MENU)
 		button = MouseEvent::RightButton;
-	else if(pev.buttons & Ph_BUTTON_ADJUST)
+	else if(pev->buttons & Ph_BUTTON_ADJUST)
 		button = MouseEvent::MiddleButton;
 
-	Pt::Gui::MouseEvent ev(widget, 
-	                                     pev.pos.x, 
-	                                     pev.pos.y,
-	                                     button,
-	                                     MouseEvent::Press,
-	                                     0);
+	MouseEvent::Action action = MouseEvent::Press;
+	if(pev->click_count >= 2)
+		action = MouseEvent::DoubleClick;
+
+	Pt::Gui::MouseEvent mev(widget, 
+	                                       pev->pos.x + ev.translation.x, 
+	                                       pev->pos.y + ev.translation.y,
+	                                       button,
+	                                       action,
+	                                       0);
 	                                     
-	 //std::cerr << pev.pos.x << " " << pev.pos.y << std::endl;
-	_app->event(ev);
+	 // std::cerr << pev.pos.x << " " << pev.pos.y << std::endl;
+	_app->event(mev);
 }
 
 
-void EventLoopImpl::buttonRelease(Pt::Gui::Widget& widget, PhPointerEvent_t& pev)
+void EventLoopImpl::buttonRelease(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
+	PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(&ev);
+
 	MouseEvent::Button button = MouseEvent::LeftButton;
-	
-	if(pev.buttons & Ph_BUTTON_SELECT)
+	if(pev->buttons & Ph_BUTTON_SELECT)
 		button = MouseEvent::LeftButton;
-	else if(pev.buttons & Ph_BUTTON_MENU)
+	else if(pev->buttons & Ph_BUTTON_MENU)
 		button = MouseEvent::RightButton;
-	else if(pev.buttons & Ph_BUTTON_ADJUST)
+	else if(pev->buttons & Ph_BUTTON_ADJUST)
 		button = MouseEvent::MiddleButton;
 
-	Pt::Gui::MouseEvent ev(widget, 
-	                                     pev.pos.x, 
-	                                     pev.pos.y,
-	                                     button,
-	                                     MouseEvent::Release,
-	                                     0);
-	_app->event(ev);
+	Pt::Gui::MouseEvent mev(widget, 
+	                                       pev->pos.x + ev.translation.x, 
+	                                       pev->pos.y + ev.translation.y,
+	                                       button,
+	                                       MouseEvent::Release,
+	                                       0);
+	_app->event(mev);
 }
 
 
@@ -141,7 +163,7 @@ void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 		                         Math::Size( rect->lr.x - rect->ul.x + 1, rect->lr.y - rect->ul.y + 1) );
 
 
-		std::cerr << rect->ul.x << " " << rect->ul.y << " " << (rect->lr.x - rect->ul.x + 1) << " " <<(rect->lr.y - rect->ul.y + 1) << std::endl;
+		// std::cerr << rect->ul.x << " " << rect->ul.y << " " << (rect->lr.x - rect->ul.x + 1) << " " <<(rect->lr.y - rect->ul.y + 1) << std::endl;
 		_app->event(pev);
 	}
 }
@@ -149,32 +171,69 @@ void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 
 void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 {
+	// TODO: Minimized.
+
+	switch(ev.event_f)
+	{
+		case Ph_WM_MAX:
+		{
+			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Maximized);
+			_app->event(rev);
+			break;
+		}
+		case Ph_WM_RESTORE:
+		{
+			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Restored);
+			_app->event(rev);
+			break;
+		}
+		case Ph_WM_RESIZE:
+		{
+			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
+			_app->event(rev);
+			// std::cerr << "Resize:" << ev.size.w << " " << ev.size.h << std::endl;
+			break;
+		}
+		case Ph_WM_MOVE:
+		{
+			MoveEvent mev(widget, ev.pos.x, ev.pos.y);
+			_app->event(mev);
+			// std::cerr << "Move:" << ev.pos.x << " " << ev.pos.y << std::endl;
+			break;
+		}
+		default: 
+			// std::cerr << "WM: " << ev.event_f << std::endl;
+			break;
+	}
 }
 
 
 int EventLoopImpl::photonEvent(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 {
 	Widget* widget = reinterpret_cast<Widget*>(data);
+	PhEvent_t* ev = (PhEvent_t*)(info->event);
 
 	switch(info->event->type)
 	{
 		case Ph_EV_PTR_MOTION_BUTTON:
 		case Ph_EV_PTR_MOTION_NOBUTTON:
 		{
-			PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(info->event);
-			EventLoopImpl::instance().pointerMotion(*widget, *pev);
+			EventLoopImpl::instance().pointerMotion( *widget, *ev );
 			break;
 		}
 		case Ph_EV_BUT_PRESS:
 		{
-			PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(info->event);
-			EventLoopImpl::instance().buttonPress(*widget, *pev);
+			EventLoopImpl::instance().buttonPress(*widget, *ev);
 			break;
 		}
 		case Ph_EV_BUT_RELEASE:
 		{
-			PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(info->event);
-			EventLoopImpl::instance().buttonRelease(*widget, *pev);
+			EventLoopImpl::instance().buttonRelease(*widget, *ev);
+			break;
+		}
+		case Ph_EV_BOUNDARY:
+		{
+			EventLoopImpl::instance().pointerMotion(*widget, *ev);
 			break;
 		}
 		case Ph_EV_EXPOSE:
@@ -191,8 +250,7 @@ int EventLoopImpl::photonEvent(PtWidget_t* pw, void* data, PtCallbackInfo_t* inf
 		//default:
 		//	std::cerr << "Unknown event" << std::endl;
 	}
-	
-	//EventLoopImpl::instance()._app->event;
+
 	return 0;
 }
 

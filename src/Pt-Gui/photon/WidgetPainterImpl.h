@@ -27,6 +27,8 @@ namespace Pt {
 
 namespace Gui {
 
+	class Widget;
+
     class WidgetPainterImpl : public PainterImpl
     {
         public:

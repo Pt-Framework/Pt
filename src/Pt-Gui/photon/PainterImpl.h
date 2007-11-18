@@ -103,7 +103,14 @@ namespace Gui {
 
             void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
 
+			void setDC( void* dc)
+			{
+				_dc = dc;
+			}
+
         private:
+        	PhGC_t* _gc;
+        	void* _dc;
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;

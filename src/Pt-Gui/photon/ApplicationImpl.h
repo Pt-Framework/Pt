@@ -50,12 +50,12 @@ namespace Gui {
 		protected:
 			EventLoopImpl();
 			
-			void pointerMotion(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
+			void pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& pev);
 
-			void buttonPress(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
+			void buttonPress(Pt::Gui::Widget& widget, PhEvent_t& pev);
 			
-			void buttonRelease(Pt::Gui::Widget& widget, PhPointerEvent_t& pev);
-		
+			void buttonRelease(Pt::Gui::Widget& widget, PhEvent_t& pev);
+
 			void exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev);
 
 			void windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev);
