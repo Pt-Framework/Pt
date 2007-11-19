@@ -25,19 +25,7 @@ namespace Pt {
     };
 
 
-    template < typename R,
-               typename A1 = Pt::Void,
-               typename A2 = Pt::Void,
-               typename A3 = Pt::Void,
-               typename A4 = Pt::Void,
-               typename A5 = Pt::Void,
-               typename A6 = Pt::Void,
-               typename A7 = Pt::Void,
-               typename A8 = Pt::Void >
-    class BasicSlot : public Slot {
-        public:
-            virtual Slot* clone() const = 0;
-    };
+#include <Pt/gen-slot.h>
 
 }
 
