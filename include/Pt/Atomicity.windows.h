@@ -54,7 +54,7 @@ inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t new_val)
 
 inline void* atomicExchange(void* volatile& ptr, void* new_val)
 {
-    return InterlockedExchangePointer(&ptr, new_val);
+    return InterlockedExchangePointer( (void**)&ptr, new_val );
 }
 
 
