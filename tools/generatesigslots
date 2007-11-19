@@ -353,7 +353,7 @@ print << "EOF"
                 // in the connection list to keep the iterator valid, but mark
                 // the Signal dirty. If the Signal is dirty, all invalid
                 // connections will be removed by the Sentry when it destructs..
-                Sentry sentry(this);
+                SignalBase::Sentry sentry(this);
 
                 std::list<Connection>::const_iterator it = Connectable::connections().begin();
                 std::list<Connection>::const_iterator end = Connectable::connections().end();
@@ -510,7 +510,7 @@ EOF
 } else {
 print << "EOF"
 template < typename R${comma_arg_tmpl_decl}>
-class Function<R${comma_arg_tmpl_types}> : public Callable<R${comma_arg_tmpl_types_all}>
+class Function<R${comma_arg_tmpl_types_all}> : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
 ;
 }
