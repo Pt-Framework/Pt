@@ -37,7 +37,7 @@ int main( int argc, char* argv[] )
            break;*/
 
         Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
-        selector.complete(res);
+        selector.add(res);
 
         bool avail = selector.wait(500);
         if(avail == false)

@@ -142,7 +142,7 @@ int main( int argc, char* argv[] )
         while(true)
         {
             Pt::System::IOResult& res = serialDevice.beginWrite(buffer, size);
-            selector.complete(res);
+            selector.add(res);
             bool available = selector.wait();
             if(available)
             {

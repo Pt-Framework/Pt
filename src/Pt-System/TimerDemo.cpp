@@ -51,8 +51,8 @@ int main( int argc, char* argv[] )
         timer1.start(1000);
 
         Pt::System::Selector selector;
-        selector.addTimer(timer0);
-        selector.addTimer(timer1);
+        selector.add(timer0);
+        selector.add(timer1);
         connect(selector.timeout, onTimeout);
 
         for(int n = 0; n < 9; ++n)

@@ -160,19 +160,19 @@ namespace System {
 
             /** @copydoc Selector::addDevice
             */
-             void complete( IOResult& result );
+             void add( IOResult& result );
 
             /** @copydoc Selector::removeDevice
             */
-            void cancel( IOResult& result );
+            void remove( IOResult& result );
 
             /** @copydoc Selector::addTimer
             */
-            void addTimer( Timer& timer );
+            void add( Timer& timer );
 
             /** @copydoc Selector::removeTimer
             */
-            void removeTimer( Timer& timer );
+            void remove( Timer& timer );
 
             /** @brief Sets the idle timeout
                 It the set idle timeout expires without any acitvity on

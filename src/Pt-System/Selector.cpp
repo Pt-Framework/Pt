@@ -26,27 +26,33 @@ Selector::~Selector()
 }
 
 
-void Selector::complete( IOResult& result )
+void Selector::add( IOResult& result )
 {
-	_impl->complete(result);
-     connect(result.canceled, *this, &Selector::cancel);
+    void (Selector::*removeResult)(IOResult&);
+    removeResult = &Selector::remove;
+
+    _impl->complete(result);
+     connect(result.canceled, *this, removeResult);
 }
 
 
-void Selector::cancel( IOResult& result )
+void Selector::remove( IOResult& result )
 {
     _impl->cancel(result);
 }
 
 
-void Selector::addTimer(Timer& timer)
+void Selector::add(Timer& timer)
 {
+    void (Selector::*removeTimer)(Timer&);
+    removeTimer = &Selector::remove;
+
     _timers.push_back(&timer);
-    connect(timer.destroyed, *this, &Selector::removeTimer);
+    connect(timer.destroyed, *this, removeTimer);
 }
 
 
-void Selector::removeTimer( Timer& timer )
+void Selector::remove( Timer& timer )
 {
     _timers.remove( &timer );
 }
@@ -75,7 +81,7 @@ bool Selector::updateTimer(size_t& timeout)
 }
 
 bool Selector::wait(unsigned int msecs)
-{    
+{
     size_t timerTimeout = Selector::WaitInfinite;
 
     if ( updateTimer(timerTimeout) )
@@ -87,8 +93,8 @@ bool Selector::wait(unsigned int msecs)
     {
         if (_impl->wait(timerTimeout))
             return true;
-        
-        return updateTimer(timerTimeout);        
+
+        return updateTimer(timerTimeout);
     }
 
     // This handles the case when no timer will become

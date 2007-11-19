@@ -79,7 +79,7 @@ namespace System {
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
     {
         public:
-            static const unsigned int WaitInfinite = static_cast<size_t>(-1);         
+            static const unsigned int WaitInfinite = static_cast<size_t>(-1);
 
             //! @brief Default constructor
             Selector();
@@ -90,13 +90,13 @@ namespace System {
             /** @brief Adds an IOResult
 
                 Adds an IOResult to the selector. IOResult are removed
-                automatically when they get destroyed.                
+                automatically when they get destroyed.
             */
-            void complete( IOResult& result );            
+            void add( IOResult& result );
 
             /** @brief Cancel an IOResult.
             */
-            void cancel( IOResult& result );
+            void remove( IOResult& result );
 
             /** @brief Adds a Timer
 
@@ -105,13 +105,13 @@ namespace System {
 
                 @param timer The device to add
             */
-            void addTimer(Timer& timer);
+            void add(Timer& timer);
 
             /** @brief Removes a Timer
 
                 @param timer The timer to remove
             */
-            void removeTimer( Timer& timer );
+            void remove( Timer& timer );
 
             /** @brief Wait for activity
 

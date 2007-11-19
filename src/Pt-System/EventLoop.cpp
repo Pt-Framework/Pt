@@ -125,30 +125,30 @@ void EventLoop::queueEvent(const Pt::Event& event)
 }
 
 
-void EventLoop::complete( IOResult& result )
+void EventLoop::add( IOResult& result )
 {
     MutexLock lock( _mutex );
-    return _selector.complete( result );
+    return _selector.add( result );
 }
 
 
-void EventLoop::cancel( IOResult& result )
+void EventLoop::remove( IOResult& result )
 {
     MutexLock lock( _mutex );
-    _selector.cancel( result );
+    _selector.remove( result );
 }
 
 
-void EventLoop::addTimer( Timer& timer )
+void EventLoop::add( Timer& timer )
 {
     MutexLock lock( _mutex );
-    return _selector.addTimer( timer );
+    return _selector.add( timer );
 }
 
-void EventLoop::removeTimer( Timer& timer)
+void EventLoop::remove( Timer& timer)
 {
     MutexLock lock( _mutex );
-    _selector.removeTimer( timer );
+    _selector.remove( timer );
 }
 
 

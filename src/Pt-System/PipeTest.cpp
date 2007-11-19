@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Laurentiu-Gheorghe Crisan                       *
- *   Copyright (C) 2007 by Marc Boris Dürner                               *
+ *   Copyright (C) 2007 by Marc Boris Dï¿½rner                               *
  *   Copyright (C) 2007 by Bjoern Oliver Streule                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -60,7 +60,7 @@ void PipeTest::testAsyncWriteRead()
     {
         Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, 
                                                                    out.size() - writtenBytes );
-        selector.complete(writeRes);
+        selector.add(writeRes);
         bool activity = selector.wait(500);
         PT_UNIT_ASSERT_MSG(activity, "Wait output failed");
 
@@ -71,7 +71,7 @@ void PipeTest::testAsyncWriteRead()
     while( readBytes < out.size() )
     {       
         Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
-        selector.complete(res);
+        selector.add(res);
         bool activity = selector.wait(500);
         PT_UNIT_ASSERT_MSG(activity, "Wait input failed");
 

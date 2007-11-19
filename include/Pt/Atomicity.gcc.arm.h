@@ -88,7 +88,7 @@ inline atomic_t atomicCompareExchange(volatile atomic_t& dest, atomic_t exch, at
 }
 
 
-inline volatile void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
+inline void* atomicCompareExchange(void* volatile& dest, void* exch, void* comp)
 {
     volatile void* a;
     volatile void* b;
