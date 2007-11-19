@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Duernr                             *
+ *   Copyright (C) 2004-2007 Marc Boris Duerner                            *
  *   Copyright (C)      2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,14 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_SourceInfo_h
 #define Pt_SourceInfo_h
 
 #include <Pt/Api.h>
 #include <string>
-#include <sstream>
-
 
 // GNU C++ compiler
 #ifdef __GNUC__
@@ -45,43 +42,38 @@
     #define PT_PRETTY_FUNCTION __FUNCTION__
 #endif
 
+#define PT_STRINGIFY(x) #x
+#define PT_TOSTRING(x) PT_STRINGIFY(x)
+#define PT_SOURCEINFO_STR(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
 
 /** @brief super macro to construct a Pt::SourceInfo object
     @ingroup Pt
 */
-#define PT_SOURCEINFO Pt::SourceInfo(__FILE__,__LINE__,PT_PRETTY_FUNCTION)
-
-#define PT_STRINGIFY(x) #x
-#define PT_TOSTRING(x) PT_STRINGIFY(x)
-#define PT_SOURCEINFO_STR(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
+#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, \
+                                     __FILE__ ":" PT_TOSTRING(__LINE__) ": " PT_PRETTY_FUNCTION)
 
 namespace Pt {
 
 /** @brief Source code info class
     @ingroup Pt
 
-    This class is used by exception classes for storing information
-    about the location in the source code where the error occured.
-    The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
-    object conveniently.\n
-    \n
-    Example:
+    This class is used to store information about a location in the source 
+    code. The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
+    object conveniently.
+
     @code
     int main()
     {
-        try
-        {
-            const Pt::SourceInfo& si = PT_SOURCEINFO;
-            throw Pt::Exception("Some error occured", si);
+        const Pt::SourceInfo& si = PT_SOURCEINFO;
 
-        }
-        catch(const Pt::Exception& e) {
-            cerr << "Error    : " << e.what() << endl;
-            cerr << "File     : " << e.sourceInfo().file() << endl;
-            cerr << "Line     : " << e.sourceInfo().line() << endl;
-            cerr << "Function : " << e.sourceInfo().func() << endl;
-            return 1;
-        }
+        // print file, line and function
+        std::cout << si.file() << std::endl;
+        std::cout << si.line() << std::endl;
+        std::cout << si.func() << std::endl;
+
+        // print combined string
+        std::cout << si.str() << std::endl;
+
         return 0;
     }
     @endcode
@@ -91,62 +83,36 @@ class SourceInfo {
         /** @brief Copy constructor
         */
         inline SourceInfo(const SourceInfo& si) throw()
-        : _file(si._file), _line(si._line), _func(si._func)
+        : _file(si._file), _line(si._line), _func(si._func), _msg(si._msg)
         { }
 
         /** @brief Constructor
 
-                Do not use the constructor directly, but the PT_SOURCEINFO
-                macro to take advantage of compiler specific macros to
-                indicate the source file name, position and function name.
-
-                @param file filename of the source
-                @param line line number of the source
-                @param func function name of the source
+            Do not use the constructor directly, but the PT_SOURCEINFO
+            macro to take advantage of compiler specific macros to
+            indicate the source file name, position and function name.
         */
-        inline SourceInfo(const char* file, unsigned int line, const char* func) throw()
-        : _file(file), _line(line), _func(func)
-        {
-            std::stringstream ss;
-            ss << line;
-            ss >> _lineNo;
-        }
+        inline SourceInfo(const char* file, unsigned int line, const char* func, const char* msg) throw()
+        : _file(file), _line(line), _func(func), _msg(msg)
+        { }
 
         /**  @brief Returns the filename
-
-                Returns the name of the file where the exception has
-                been thrown.
-
-                @return name of the file where the exception was thrown
         */
         inline const char* file() const throw()
-        { return _file.c_str(); }
+        { return _file; }
 
         /** @brief Returns the line number
-
-                Returns the line number of the file where the exception
-                has been thrown.
-
-                @return line number where the exception was thrown
         */
         inline unsigned int line() const throw()
         { return _line; }
 
-        inline std::string str() const
-        { return _file + ":" + _lineNo; }
-
-        operator std::string() const
-        { return this->str(); }
+        inline const char* str() const
+        { return _msg; }
 
         /** @brief Returns the function signature
-
-                Returns the signature of the function where the exception
-                has been thrown.
-
-                @return the function signature
         */
         inline const char* func() const throw()
-        { return _func.c_str(); }
+        { return _func; }
 
         /** @brief Assignment operator
         */
@@ -155,20 +121,21 @@ class SourceInfo {
             _file = si._file;
             _line = si._line;
             _func = si._func;
+            _msg = si._msg;
             return *this;
         }
 
     private:
-        std::string  _file;
+        const char*  _file;
         unsigned int _line;
-        std::string _lineNo;
-        std::string  _func;
+        const char*  _func;
+        const char* _msg;
 };
 
 
 inline std::string operator+(const std::string& what, const SourceInfo& info)
 {
-    return info.str() + ": " + what;
+    return std::string( info.str() ) + ": " + what;
 }
 
 } // namespace Pt
