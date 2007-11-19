@@ -200,6 +200,20 @@ namespace Pt
     { return swab64(value); }
 #endif
 
+    //! @brief Returns true, if the cpu is big-endian (high-byte first).
+    inline bool isBigEndian()
+    {
+        const int i = 1;
+        return *reinterpret_cast<const int8_t*>(&i) == 0;
+    }
+
+    //! @brief Returns true, if the cpu is little-endian (low-byte first).
+    inline bool isLittleEndian()
+    {
+        const int i = 1;
+        return *reinterpret_cast<const int8_t*>(&i) == 1;
+    }
+
     /** @brief Changes the byteorder of a given value from host-byteorder to little-endian.
      *
      *  @param value The value in host-byteorder
