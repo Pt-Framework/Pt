@@ -49,7 +49,7 @@ namespace Log {
             const std::string& text() const
             { return _text; }
 
-            void setLogLevel(LogLevel level)
+            void setLogLevel(const LogLevel level)
             { _level = level; }
 
             LogLevel logLevel() const
@@ -70,13 +70,13 @@ namespace Log {
             long threadId() const
             { return _threadId; }
 
-            void setThreadId(long id)
+            void setThreadId(const long id)
             { _threadId = id; }
 
             long processId() const
             { return _procId; }
 
-            void setProcessId(long id)
+            void setProcessId(const long id)
             { _procId = id; }
 
         private:

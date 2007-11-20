@@ -22,13 +22,18 @@
 
 
 namespace Pt {
-
 namespace Log {
 
-Message::Message(const std::string& target, LogLevel level)
+
+Message::Message(const std::string& target, const LogLevel level)
 : _target(target)
+, _text()
 , _level(level)
 , _source(PT_SOURCEINFO)
+, _dateTime()
+, _threadId(-1)
+, _procId(-1)
+, _reserved(0)
 {
 }
 
@@ -38,5 +43,4 @@ Message::~Message()
 }
 
 } // namespace Log
-
 } // namespace Pt
