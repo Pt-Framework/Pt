@@ -27,6 +27,7 @@ namespace Log {
 Target::Target(const std::string& name, Target* parent)
 : Reflectable(name)
 , _name(name)
+, _async(false)
 , _logLevel(Fatal)
 , _parent(parent)
 , _channel(0)
