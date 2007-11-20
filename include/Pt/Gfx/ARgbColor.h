@@ -162,7 +162,6 @@ namespace Pt {
 
 #include <Pt/PackPop.h>
 
-
         /** @brief Convenience access to the 64-Bit ARGB color model.
          *  @ingroup Gfx
          */
@@ -221,23 +220,45 @@ namespace Pt {
         {
             typedef uint32_t ValueT;
 
+            // A factor of 0 means that the src color is not used at all. Thus the
+            // dst color keeps the same; just return.
+            if (factor == 0)
+            {
+                return;
+            }
+
+            // The maximum factor means that only the src color is used. The dst color
+            // is completely covered by the src color. Just copy the src color to the
+            // dst color and return.
+            if (factor == (std::numeric_limits<Pt::uint16_t>::max)())
+            {
+                dst.setAlpha(src.alpha());
+                dst.setRed  (src.red());
+                dst.setGreen(src.green());
+                dst.setBlue (src.blue());
+                return;
+            }
+
+
             const ValueT oF = factor;
-            const ValueT rF = (std::numeric_limits<Pt::uint16_t>::max)() - factor;
 
-            const ValueT dA = ValueT( dst.alpha() ) * rF;
-            const ValueT dR = ValueT( dst.red()   ) * rF;
-            const ValueT dG = ValueT( dst.green() ) * rF;
-            const ValueT dB = ValueT( dst.blue()  ) * rF;
+            const ValueT srcAlpha = ValueT(src.alpha());
+            const ValueT dstAlpha = ValueT(dst.alpha());
+            const ValueT srcRed   = ValueT(src.red());
+            const ValueT dstRed   = ValueT(dst.red());
+            const ValueT srcGreen = ValueT(src.green());
+            const ValueT dstGreen = ValueT(dst.green());
+            const ValueT srcBlue  = ValueT(src.blue());
+            const ValueT dstBlue  = ValueT(dst.blue());
 
-            const ValueT sA = ValueT( src.alpha() ) * oF;
-            const ValueT sR = ValueT( src.red()   ) * oF;
-            const ValueT sG = ValueT( src.green() ) * oF;
-            const ValueT sB = ValueT( src.blue()  ) * oF;
+            const int shiftWidth = 8 * sizeof(factor);
 
-            dst.setAlpha( (dA + sA) >> (8*sizeof(factor)) );
-            dst.setRed  ( (dR + sR) >> (8*sizeof(factor)) );
-            dst.setGreen( (dG + sG) >> (8*sizeof(factor)) );
-            dst.setBlue ( (dB + sB) >> (8*sizeof(factor)) );
+            // The lines are basically the same as dst.X = factor * src.X + (1 - factor) * dst
+            // where factor is of type float with a value between 0 and 1.
+            dst.setAlpha((((srcAlpha - dstAlpha) * oF) >> shiftWidth) + dstAlpha);
+            dst.setRed  ((((srcRed   - dstRed)   * oF) >> shiftWidth) + dstRed);
+            dst.setGreen((((srcGreen - dstGreen) * oF) >> shiftWidth) + dstGreen);
+            dst.setBlue ((((srcBlue  - dstBlue)  * oF) >> shiftWidth) + dstBlue);
         }
 
         /*
