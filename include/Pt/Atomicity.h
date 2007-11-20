@@ -69,10 +69,9 @@
 
     #endif
 
-// fallback to normal integer operations
 #else
-
-    #define PT_ATOMICITY_H "Atomicity.generic.h"
+    #define PT_ATOMICITY_WITH_PTHREAD
+    #define PT_ATOMICITY_H "Atomicity.pthread.h"
 
 #endif
 

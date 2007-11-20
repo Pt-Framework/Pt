@@ -3,6 +3,7 @@ SubDirHdrs $(TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
 
 SharedLibrary Pt : Any.cpp
+                   Atomicity.cpp
                    Callable.cpp
                    Char.cpp
                    Connection.cpp
