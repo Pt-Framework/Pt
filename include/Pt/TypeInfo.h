@@ -284,6 +284,7 @@ namespace Pt {
         { return long(); }
     };
 
+/* Does not compile under XLC
     //! CTTI predicate for class/struct types
     template <typename T,
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) != 1, isTrue, isFalse>::ResultT >
@@ -296,7 +297,7 @@ namespace Pt {
               class Base = typename IfElse<sizeof( isClassImpl::test<T>(0) ) == 1, isTrue, isFalse>::ResultT >
     struct isValue : public Base {
     };
-
+*/
 } // !namespace Pt
 
 
