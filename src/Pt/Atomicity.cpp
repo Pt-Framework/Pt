@@ -17,10 +17,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Atomicity.h"
-#include <cassert>
-#include <pthread.h>
 
 #if defined (PT_ATOMICITY_WITH_PTHREAD)
+
+#include <cassert>
+#include <pthread.h>
 
 namespace Pt {
 
