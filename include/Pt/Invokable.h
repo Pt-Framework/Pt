@@ -27,7 +27,7 @@
 //! \addtogroup Pt
 namespace Pt {
 
-#include <Pt/gen-invokable.h>
+#include <Pt/Invokable.tpp>
 
 } // namespace Pt
 

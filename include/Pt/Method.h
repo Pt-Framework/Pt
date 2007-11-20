@@ -26,7 +26,7 @@
 
 namespace Pt {
 
-#include <Pt/gen-method.h>
+#include <Pt/Method.tpp>
 
 } // !namespace Pt
 

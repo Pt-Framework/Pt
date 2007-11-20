@@ -145,7 +145,7 @@ namespace Pt {
     };
 
 
-#include <Pt/gen-signals.h>
+#include <Pt/Signal.tpp>
 
 } // !namespace Pt
 

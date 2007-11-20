@@ -25,7 +25,7 @@ namespace Pt {
     };
 
 
-#include <Pt/gen-slot.h>
+#include <Pt/Slot.tpp>
 
 }
 

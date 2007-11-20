@@ -85,7 +85,7 @@ namespace Pt {
     };
 
 
-#include <Pt/gen-delegate.h>
+#include <Pt/Delegate.tpp>
 
 } // !namespace Pt
 

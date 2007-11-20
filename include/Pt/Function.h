@@ -25,7 +25,7 @@
 
 namespace Pt {
 
-#include <Pt/gen-function.h>
+#include <Pt/Function.tpp>
 
 } // !namespace Pt
 

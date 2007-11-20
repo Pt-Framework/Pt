@@ -25,7 +25,7 @@
 
 namespace Pt {
 
-#include <Pt/gen-constmethod.h>
+#include <Pt/ConstMethod.tpp>
 
 } // !namespace Pt
 

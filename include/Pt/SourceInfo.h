@@ -49,8 +49,7 @@
 /** @brief super macro to construct a Pt::SourceInfo object
     @ingroup Pt
 */
-#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, \
-                                     __FILE__ ":" PT_TOSTRING(__LINE__) ": " PT_PRETTY_FUNCTION)
+#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, __FILE__ ":" PT_TOSTRING(__LINE__) )
 
 namespace Pt {
 
@@ -106,7 +105,7 @@ class SourceInfo {
         inline unsigned int line() const throw()
         { return _line; }
 
-        inline const char* str() const
+        inline const char* where() const
         { return _msg; }
 
         /** @brief Returns the function signature
@@ -135,7 +134,7 @@ class SourceInfo {
 
 inline std::string operator+(const std::string& what, const SourceInfo& info)
 {
-    return std::string( info.str() ) + ": " + what;
+    return std::string( info.where() ) + ": " + what;
 }
 
 } // namespace Pt
