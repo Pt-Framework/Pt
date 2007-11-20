@@ -15,16 +15,17 @@
 #include <math.h>
 #endif
 
+
 namespace Pt {
 
     namespace Math {
 
         //! Natural const
-        static const double PI      = 3.14159265358979323846; // pi
-        static const double PI_2    = 6.28318530717958647692; // 2*pi
-        static const double PI_HALF = 1.57079632679489661923; // pi/2
-        static const double PI_QUAT = 0.78539816339744830961; // pi/4
-        static const double PI_180  = 0.01745329251994329576; // pi/180
+        static const double PI      = 3.14159265358979323846;  // pi
+        static const double PI_2    = 6.28318530717958647692;  // 2*pi
+        static const double PI_HALF = 1.57079632679489661923;  // pi/2
+        static const double PI_QUAT = 0.78539816339744830961;  // pi/4
+        static const double PI_180  = 0.01745329251994329576;  // pi/180
         static const double PI_SQR  = 9.86960440108935861883449099987615114f; //pi^2
 
 
@@ -38,6 +39,18 @@ namespace Pt {
         inline double radToDeg(double angle)
         {
             return (angle * 180.0) / PI;
+        }
+
+        //! Converts angle from degree [0, 360] to radiant [0, 2*pi]
+        inline float degToRad(float angle)
+        {
+            return angle * float(PI) / 180.0f;
+        }
+
+        //! Converts radiant [0, 2*pi] to degree [0, 360]
+        inline float radToDeg(float angle)
+        {
+            return (angle * 180.0f) / float(PI);
         }
 
         // accuracy for equal comparison
