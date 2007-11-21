@@ -18,6 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "WidgetPainterImpl.h"
+#include "PixmapImpl.h"
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
 #include <iostream>
 
 namespace Pt {
@@ -25,10 +28,10 @@ namespace Pt {
 namespace Gui {
 
 WidgetPainterImpl::WidgetPainterImpl( )
+: _dc(0)
 {
 	PhDrawContext_t* old = PhDCSetCurrent(0);
-	PhDrawContext_t* dc = PhDCSetCurrent(old);
-	this->setDC(dc);
+	_dc = PhDCSetCurrent(old);
 }
 
 
@@ -39,13 +42,78 @@ WidgetPainterImpl::~WidgetPainterImpl()
 
 void WidgetPainterImpl::begin()
 {
-    //PgSetRegion( _rid );
 }
 
 
 void WidgetPainterImpl::end()
 {
-	PtFlush();
+}
+
+
+void WidgetPainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+{
+	PgSetRegionCx( _dc, _rid );
+	PhGC_t* old = PgSetGCCx(_dc, _gc);
+
+    PgDrawILineCx( _dc, from.x(), from.y(), to.x(),to.y() );
+	PgFlush();
+
+	PgSetGCCx(_dc, old);
+}
+
+
+void WidgetPainterImpl::drawRect(const Gfx::Rect& rect)
+{
+	PgSetRegionCx( _dc, _rid );
+	PhGC_t* old = PgSetGCCx(_dc, _gc);
+
+	PgDrawIRectCx( _dc, rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_STROKE);
+	PgFlush();
+
+	PgSetGCCx(_dc, old);
+}
+
+
+void WidgetPainterImpl::fillRect(const Gfx::Rect& rect)
+{
+	std::cerr << "WP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
+
+	PgSetRegionCx( _dc, _rid );
+	PhGC_t* old = PgSetGCCx(_dc, _gc);
+
+	PgDrawIRectCx(_dc, rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
+	PgFlush();
+
+	PgSetGCCx(_dc, old);
+}
+
+
+void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+{
+	PgSetRegionCx( _dc, _rid );
+	PhGC_t* old = PgSetGCCx(_dc, _gc);
+
+	PhPoint_t _to = { to.x(), to.y() };
+	PgDrawPhImageCx(_dc, &_to, pm.impl().image(), 0 );
+	PgFlush();
+
+	PgSetGCCx(_dc, old);
+}
+
+
+void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
+{
+	PgSetRegionCx( _dc, _rid );
+	PhGC_t* old = PgSetGCCx(_dc, _gc);
+	std::cerr << "drawPixmap: To: " << to.x() << ", " << to.y()  << "   From: " << region.x() << ", " << region.y() << ", " <<  region.width() << ", " << region.height()<< std::endl;
+	PhPoint_t _to = { to.x(), to.y() };
+	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
+	//PhDim_t dim = {region.width(), region.height() };
+
+	PgDrawPhImageRectCxv(_dc, &_to, pm.impl().image(), &rect, NULL );
+	PgFlush();
+
+	PgSetGCCx(_dc, old);
 }
 
 } // namespace Gui

@@ -176,13 +176,13 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 	switch(ev.event_f)
 	{
 		case Ph_WM_MAX:
-		{
+		{ //std::cerr << "WM: " << "Ph_WM_MAX" << std::endl;
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Maximized);
 			_app->event(rev);
 			break;
 		}
 		case Ph_WM_RESTORE:
-		{
+		{//std::cerr << "WM: " << "Ph_WM_RESTORE" << std::endl;
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Restored);
 			_app->event(rev);
 			break;
@@ -191,18 +191,83 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 		{
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
 			_app->event(rev);
-			// std::cerr << "Resize:" << ev.size.w << " " << ev.size.h << std::endl;
+			//std::cerr << "Resize:" << ev.size.w << " " << ev.size.h << std::endl;
 			break;
 		}
 		case Ph_WM_MOVE:
 		{
 			MoveEvent mev(widget, ev.pos.x, ev.pos.y);
 			_app->event(mev);
-			// std::cerr << "Move:" << ev.pos.x << " " << ev.pos.y << std::endl;
+			//std::cerr << "Move:" << ev.pos.x << " " << ev.pos.y << std::endl;
+			break;
+		}
+		case Ph_WM_TOFRONT:
+		{
+			//std::cerr << "WM: " << "Ph_WM_TOFRONT" << std::endl;
+			break;
+		}
+		case Ph_WM_FFRONT:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_FFRONT" << std::endl;
+			break;
+		}
+		case Ph_WM_FOCUS:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_FOCUS" << std::endl;
+			break;
+		}
+		case Ph_WM_CLOSE:
+		{
+			//std::cerr << "WM: " << "Ph_WM_CLOSE" << std::endl;
+			break;
+		}
+		case Ph_WM_MENU:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_MENU" << std::endl;
+			break;
+		}
+		case Ph_WM_TOBACK:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_TOBACK" << std::endl;
+			break;
+		}
+		case Ph_WM_CONSWITCH:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_CONSWITCH" << std::endl;
+			break;
+		}
+		case Ph_WM_HIDE:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_HIDE" << std::endl;
+			break;
+		}
+		case Ph_WM_BACKDROP:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_BACKDROP" << std::endl;
+			break;
+		}
+		case Ph_WM_HELP:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_HELP" << std::endl;
+			break;
+		}
+		case Ph_WM_COLLAPSE:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_COLLAPSE" << std::endl;
+			break;
+		}
+		case Ph_WM_TASKBAR:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_TASKBAR" << std::endl;
+			break;
+		}
+		case Ph_WM_NO_FOCUS_LIST:
+		{
+			//std::cerr << "WM: " <<" Ph_WM_NO_FOCUS_LIST" << std::endl;
 			break;
 		}
 		default: 
-			// std::cerr << "WM: " << ev.event_f << std::endl;
+			std::cerr << "WM unknown: " << (unsigned long) ev.event_f<< " - " << ev.size.w << " " <<  ev.size.h << std::endl;
 			break;
 	}
 }
@@ -217,38 +282,64 @@ int EventLoopImpl::photonEvent(PtWidget_t* pw, void* data, PtCallbackInfo_t* inf
 	{
 		case Ph_EV_PTR_MOTION_BUTTON:
 		case Ph_EV_PTR_MOTION_NOBUTTON:
-		{
+		{ //std::cerr << "Ph_EV_PTR_MOTION_NOBUTTON"  << std::endl;
 			EventLoopImpl::instance().pointerMotion( *widget, *ev );
 			break;
 		}
 		case Ph_EV_BUT_PRESS:
-		{
+		{ //std::cerr << "Ph_EV_BUT_PRESS"  << std::endl;
 			EventLoopImpl::instance().buttonPress(*widget, *ev);
 			break;
 		}
 		case Ph_EV_BUT_RELEASE:
-		{
+		{ //std::cerr << "Ph_EV_BUT_RELEASE"  << std::endl;
 			EventLoopImpl::instance().buttonRelease(*widget, *ev);
 			break;
 		}
 		case Ph_EV_BOUNDARY:
-		{
+		{ //std::cerr << "Ph_EV_BOUNDARY"  << std::endl;
 			EventLoopImpl::instance().pointerMotion(*widget, *ev);
 			break;
 		}
 		case Ph_EV_EXPOSE:
-		{
+		{ //std::cerr << "Ph_EV_EXPOSE"  << std::endl;
 			EventLoopImpl::instance().exposeEvent(*widget, *(info->event));
 			break;
 		}
 		case Ph_EV_WM:
 		{
+		    //std::cerr << "Ph_EV_WM"  << std::endl;
 			PhWindowEvent_t* wev = (PhWindowEvent_t*) PhGetData(info->event);
 			EventLoopImpl::instance().windowEvent(*widget, *wev);
 			break;
 		}
-		//default:
-		//	std::cerr << "Unknown event" << std::endl;
+		case Ph_EV_INFO:
+		{
+			//std::cerr << "Ph_EV_INFO"  << std::endl;
+			break;
+		}
+		case Ph_EV_KEY:
+		{
+			//std::cerr << "Ph_EV_KEY"  << std::endl;
+			break;
+		}
+		case Ph_EV_RAW:
+				{
+			//std::cerr << "Ph_EV_RAW"  << std::endl;
+			break;
+		}
+		case Ph_EV_SERVICE:
+		{
+			//std::cerr << "Ph_EV_SERVICE"  << std::endl;
+			break;
+		}
+		case Ph_EV_SYSTEM:
+		{
+			//std::cerr << "Ph_EV_SYSTEM"  << std::endl;
+			break;
+		}
+		default:
+			std::cerr << "Unknown event:" << info->event->type  << std::endl;
 	}
 
 	return 0;
@@ -306,3 +397,10 @@ void ApplicationImpl::exit()
 
 } // namespace Pt
 
+
+#/** PhEDIT attribute block
+#-11:16777215
+#0:9262:default:-3:-3:0
+#9262:9677:monospace9:0:-1:0
+#9677:10311:default:-3:-3:0
+#**  PhEDIT attribute block ends (-0000170)**/

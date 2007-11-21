@@ -45,11 +45,6 @@ namespace Gui {
 			
 			void exit();
 			
-			static int photonEvent(PtWidget_t* widget, void* data, PtCallbackInfo_t* info);
-		
-		protected:
-			EventLoopImpl();
-			
 			void pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& pev);
 
 			void buttonPress(Pt::Gui::Widget& widget, PhEvent_t& pev);
@@ -59,6 +54,12 @@ namespace Gui {
 			void exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev);
 
 			void windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev);
+
+			static int photonEvent(PtWidget_t* widget, void* data, PtCallbackInfo_t* info);
+
+		protected:		
+			EventLoopImpl();
+
 		private:
 			Application* _app;
 	};

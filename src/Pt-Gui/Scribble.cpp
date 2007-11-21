@@ -34,22 +34,24 @@ class ScribbleWidget : public Pt::Gui::Widget
         {
             Widget::setTitle(L"Scribble");
 
-            _redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
-            _greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
-            _blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
-            _clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
+            //_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
+            //_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
+            //_blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
+            //_clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
+            
             _pixmap.reset( new Pixmap( 0, 0 ) );
 
             updatePen();
 
-            Gui::Painter widgetPainter = painter();
+            //Gui::Painter widgetPainter = painter();
             Gui::Painter pixmapPainter = _pixmap->painter();
 
             // Clear the backbuffer (pixmap) with white color.
-            pixmapPainter.setBrush(Brush(ARgbColor(65535, 65535, 65535)));
+            pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
             pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
 
-            _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
+           /* 
+           _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
             connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
 
             _greenButton->setBackgroundColor( ARgbColor(0, 65535, 0) );
@@ -59,6 +61,7 @@ class ScribbleWidget : public Pt::Gui::Widget
             connect(_blueButton->clicked, *this, &ScribbleWidget::onBlueButton);
 
             connect(_clearButton->clicked, *this, &ScribbleWidget::onClearButton);
+            */
         }
 
         void onRedButton()
@@ -174,10 +177,10 @@ class ScribbleWidget : public Pt::Gui::Widget
         }
 
     private:
-        std::auto_ptr<Button> _redButton;
-        std::auto_ptr<Button> _greenButton;
-        std::auto_ptr<Button> _blueButton;
-        std::auto_ptr<Button> _clearButton;
+        //std::auto_ptr<Button> _redButton;
+        //std::auto_ptr<Button> _greenButton;
+        //std::auto_ptr<Button> _blueButton;
+        //std::auto_ptr<Button> _clearButton;
         std::auto_ptr<Pixmap> _pixmap;
         size_t _lastX;
         size_t _lastY;

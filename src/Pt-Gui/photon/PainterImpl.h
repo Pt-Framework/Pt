@@ -67,31 +67,31 @@ namespace Gui {
 
             const std::list<std::string>& fontFamilyNames();
 
-            void drawPixel(const Math::Point& to);
+            virtual void drawPixel(const Math::Point& to);
 
-            void drawLine(const Math::Point& from, const Math::Point& to);
+            virtual void drawLine(const Math::Point& from, const Math::Point& to) = 0;
 
-            void drawText(const Math::Point& to, const Pt::String& text);
+            virtual void drawText(const Math::Point& to, const Pt::String& text);
 
-            void drawRect(const Gfx::Rect& rect);
+            virtual void drawRect(const Gfx::Rect& rect) = 0;
 
-            void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-            void drawPolyline(const Math::Point* points, const size_t pointCount);
+            virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
 
-            void fillRect(const Gfx::Rect& rect);
+            virtual void fillRect(const Gfx::Rect& rect) = 0;
 
-            void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
+            virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
-            void fillPolygon(const Math::Point* points, const size_t pointCount);
+            virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm);
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm) = 0;
 
-            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) = 0;
 
-            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
-            void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
+            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
                                        const Gfx::Region& imageRegion);
 
         protected:
@@ -103,14 +103,8 @@ namespace Gui {
 
             void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
 
-			void setDC( void* dc)
-			{
-				_dc = dc;
-			}
-
-        private:
-        	PhGC_t* _gc;
-        	void* _dc;
+		protected:
+		    PhGC_t* _gc;
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;

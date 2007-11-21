@@ -34,7 +34,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
         _ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 0, NULL);
     else
         _ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 0, NULL);
-    
+       
     this->move(at.x(), at.y());
     this->resize(size.width(), size.height());
 
@@ -42,8 +42,8 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 
 		PtAddEventHandler(_ptwidget, 
 		                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION |
-		                  Ph_EV_EXPOSE|Ph_EV_KEY|Ph_EV_BOUNDARY|Ph_EV_DRAG|
-		                  Ph_EV_WM, 
+		                  Ph_EV_EXPOSE|Ph_EV_KEY|Ph_EV_BOUNDARY |Ph_EV_DRAG |
+		                  Ph_EV_WM | Ph_EV_KEY | Ph_EV_RAW,
 		                  &EventLoopImpl::photonEvent,&_apiWidget );
 }
 
@@ -103,7 +103,12 @@ void WidgetImpl::move(size_t x, size_t y)
 void WidgetImpl::resize(size_t width, size_t height)
 {
 	PhDim_t dim = { width, height };
-	PtSetResource(_ptwidget,	Pt_ARG_DIM,&dim,0);;
+	PtSetResource(_ptwidget,	Pt_ARG_DIM,&dim,0);
+
+	PhWindowEvent_t wev;
+	wev.event_f = Ph_WM_RESIZE;
+	wev.size = dim;
+	EventLoopImpl::instance().windowEvent(_apiWidget, wev);
 }
 
 
@@ -115,15 +120,15 @@ void WidgetImpl::resize(size_t width, size_t height)
 #-11:16777215
 #0:1840:monospace9:-3:-3:0
 #1840:1905:monospace9:0:-1:0
-#1905:2012:monospace9:-3:-3:0
-#2012:2036:monospace9:0:-1:0
-#2036:2568:monospace9:-3:-3:0
-#2568:2610:monospace9:0:-1:0
-#2610:2662:monospace9:-3:-3:0
-#2662:2752:monospace9:0:-1:0
-#2752:2939:monospace9:-3:-3:0
-#2939:2959:monospace9:0:-1:0
-#2959:3018:monospace9:-3:-3:0
-#3018:3099:monospace9:0:-1:0
-#3099:3142:monospace9:-3:-3:0
+#1905:2015:monospace9:-3:-3:0
+#2015:2039:monospace9:0:-1:0
+#2039:2596:monospace9:-3:-3:0
+#2596:2638:monospace9:0:-1:0
+#2638:2690:monospace9:-3:-3:0
+#2690:2780:monospace9:0:-1:0
+#2780:2967:monospace9:-3:-3:0
+#2967:2987:monospace9:0:-1:0
+#2987:3046:monospace9:-3:-3:0
+#3046:3253:monospace9:0:-1:0
+#3253:3295:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000470)**/

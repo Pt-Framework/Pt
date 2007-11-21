@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "PixmapPainterImpl.h"
 #include "PixmapImpl.h"
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
 
 namespace Pt {
 
@@ -37,19 +39,91 @@ PixmapPainterImpl::~PixmapPainterImpl()
 void PixmapPainterImpl::set(PixmapImpl& pixmap)
 {
 	_pixmap = &pixmap;
-	this->setDC( _pixmap->mc() );
 }
 
 
 void PixmapPainterImpl::begin()
 {
-	// PmMemStart( _pixmap->mc() );
 }
 
 
 void PixmapPainterImpl::end()
 {
-	//PmMemStart( _pixmap->mc() );
+}
+
+
+void PixmapPainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+{
+	PmMemStart( _pixmap->mc() );
+	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );
+
+    PgDrawILineCx( _pixmap->mc(), from.x(), from.y(), to.x(),to.y() );
+	PgFlush();
+	PgSetGCCx( _pixmap->mc(), old);
+	PmMemFlush( _pixmap->mc(), _pixmap->image() );
+	PmMemStop( _pixmap->mc() );
+}
+
+
+void PixmapPainterImpl::drawRect(const Gfx::Rect& rect)
+{
+	PmMemStart( _pixmap->mc() );
+	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );
+	PgDrawIRectCx( _pixmap->mc(), rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_STROKE);
+	
+	PgFlush();
+	PgSetGCCx( _pixmap->mc(), old);
+	
+	PmMemFlush( _pixmap->mc(), _pixmap->image() );
+	PmMemStop( _pixmap->mc() );
+}
+
+
+void PixmapPainterImpl::fillRect(const Gfx::Rect& rect)
+{
+	std::cerr << "PP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
+
+	PmMemStart( _pixmap->mc() );
+	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );
+	PgDrawIRectCx(_pixmap->mc(), rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
+	
+	PgFlush();
+	PgSetGCCx( _pixmap->mc(), old);
+	
+	PmMemFlush( _pixmap->mc(), _pixmap->image() );
+	PmMemStop( _pixmap->mc() );
+}
+
+
+void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+{
+	PmMemStart( _pixmap->mc() );
+	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );
+	
+	PhPoint_t _to = { to.x(), to.y() };
+	PgDrawPhImageCx(_pixmap->mc(), &_to, pm.impl().image(), 0 );
+	
+	PgFlush();
+	PgSetGCCx( _pixmap->mc(), old);
+	
+	PmMemFlush( _pixmap->mc(), _pixmap->image() );
+	PmMemStop( _pixmap->mc() );
+}
+
+
+void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
+{
+	PmMemStart( _pixmap->mc() );
+	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );
+
+	PhPoint_t _to = { to.x(), to.y() };
+	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
+	//PhDim_t dim = {region.width(), region.height() };
+
+	PgDrawPhImageRectCxv(_pixmap->mc(), &_to, pm.impl().image(), &rect, NULL );
+	PgFlush();
+	PgSetGCCx( _pixmap->mc(), old);
+	
 	PmMemFlush( _pixmap->mc(), _pixmap->image() );
 	PmMemStop( _pixmap->mc() );
 }

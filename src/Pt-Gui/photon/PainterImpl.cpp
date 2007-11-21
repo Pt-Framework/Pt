@@ -29,8 +29,7 @@ namespace Pt {
 namespace Gui {
 
 PainterImpl::PainterImpl( )
-: _dc(0)
-, _font("sans-serif")
+: _font("sans-serif")
 {
 	_gc = PgCreateGC(0);
 }
@@ -44,52 +43,48 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
     _pen = pen;
     
     Gfx::Rgb888Color rgb888;
     assign( rgb888, pen.color() );
-	PgSetStrokeColor( rgb888.value() );
+	PgSetStrokeColorCx( _gc, rgb888.value() );
 	
-	PgSetStrokeWidth( pen.size() );
+	PgSetStrokeWidthCx( _gc, pen.size() );
 
 	switch( pen.joinStyle() )
 	{
 		case Pt::Gfx::Pen::RoundJoin:
-			PgSetStrokeJoin( Pg_ROUND_JOIN);
+			PgSetStrokeJoinCx( _gc, Pg_ROUND_JOIN);
 			break;
 		
 		case Pt::Gfx::Pen::BevelJoin:
-			PgSetStrokeJoin( Pg_BEVEL_JOIN);
+			PgSetStrokeJoinCx( _gc, Pg_BEVEL_JOIN);
 			break;
 			
 		default:
-			PgSetStrokeJoin( Pg_MITER_JOIN);
-			PgSetStrokeJoin( Pg_BUTT_JOIN);
+			PgSetStrokeJoinCx( _gc, Pg_MITER_JOIN);
 	}
 	
 	switch( pen.capStyle() )
 	{
 		case Pt::Gfx::Pen::FlatCap:
-			PgSetStrokeCap(Pg_BUTT_CAP);
+			PgSetStrokeCapCx( _gc, Pg_BUTT_CAP);
 			break;
 		
 		case Pt::Gfx::Pen::RoundCap:
-			PgSetStrokeCap(Pg_ROUND_CAP);
+			PgSetStrokeCapCx( _gc, Pg_ROUND_CAP);
 			break;
 		
 		case Pt::Gfx::Pen::TriangularCap:
-			PgSetStrokeCap(Pg_POINT_CAP);
+			PgSetStrokeCapCx( _gc, Pg_POINT_CAP);
 			break;
 		
 		case Pt::Gfx::Pen::ProjectingCap:
-			PgSetStrokeCap(Pg_SQUARE_CAP);
+			PgSetStrokeCapCx( _gc, Pg_SQUARE_CAP);
 			break;
 		
 		case Pt::Gfx::Pen::ButtCap:
-			PgSetStrokeCap(Pg_BUTT_CAP);
+			PgSetStrokeCapCx( _gc, Pg_BUTT_CAP);
 			break;
 	}
 }
@@ -103,12 +98,9 @@ const Gfx::Pen& PainterImpl::pen() const
 
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
     Gfx::Rgb888Color rgb888;
     assign( rgb888, brush.color() );
-	PgSetFillColor( rgb888.value() );
+	PgSetFillColorCx( _gc, rgb888.value() );
 
     _brush = brush;
 }
@@ -157,27 +149,9 @@ void PainterImpl::drawPixel(const Math::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
-{
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
-    PgDrawILine( from.x(), from.y(), to.x(),to.y() );
-}
-
-
 void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 {
 
-}
-
-
-void PainterImpl::drawRect(const Gfx::Rect& rect)
-{
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
-	PgDrawIRect( rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_STROKE);
 }
 
 
@@ -193,15 +167,6 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
-void PainterImpl::fillRect(const Gfx::Rect& rect)
-{
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
-	PgDrawIRect(rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
-}
-
-
 void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 
@@ -211,29 +176,6 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
 void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
 
-}
-
-
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
-{
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
-	PhPoint_t _to = { to.x(), to.y() };
-	PgDrawPhImage(&_to, pm.impl().image(), 0 );
-}
-
-
-void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
-{
-	PgSetGC(_gc);
-	PhDCSetCurrent(_dc);
-
-	PhPoint_t _to = { to.x(), to.y() };
-	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
-	
-	PgDrawPhImageRectv(&_to, pm.impl().image(), &rect, NULL );
-	PgFlush(); // TODO: is this necessary ???
 }
 
 
