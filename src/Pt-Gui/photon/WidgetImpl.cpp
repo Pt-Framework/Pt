@@ -40,9 +40,12 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 	PtSetArg(&args[1],Pt_ARG_POS,&pos, 0);
 
   if(parent)
-		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 1, args);
+  {
+		_ptwidget =  PtCreateWidget(PtRaw, parent->impl().photonWidget(), 2, args);
+		PtReparentWidget(_ptwidget, parent->impl().photonWidget() );
+	}
   else
-		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 1, args);
+		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 2, args);
 
   _painter.setRid( PtWidgetRid(_ptwidget ) );
 
@@ -186,23 +189,23 @@ PhEmit(&ev, &rect, &wev);
 #1544:1575:monospace9:0:-1:0
 #1575:1773:monospace9:-3:-3:0
 #1773:1959:monospace9:0:-1:0
-#1959:2044:monospace9:-3:-3:0
-#2044:2107:monospace9:0:-1:0
-#2107:2128:monospace9:-3:-3:0
-#2128:2152:monospace9:0:-1:0
-#2152:2729:monospace9:-3:-3:0
-#2729:2775:monospace9:0:-1:0
-#2775:2790:monospace9:-3:-3:0
-#2790:2848:monospace9:0:-1:0
-#2848:2853:monospace9:-3:-3:0
-#2853:2873:monospace9:0:-1:0
-#2873:2874:monospace9:-3:-3:0
-#2874:2953:monospace9:0:-1:0
-#2953:3064:monospace9:-3:-3:0
-#3064:3154:monospace9:0:-1:0
-#3154:3341:monospace9:-3:-3:0
-#3341:3392:monospace9:0:-1:0
-#3392:3451:monospace9:-3:-3:0
-#3451:4502:monospace9:0:-1:0
-#4502:4544:monospace9:-3:-3:0
+#1959:2128:monospace9:-3:-3:0
+#2128:2191:monospace9:0:-1:0
+#2191:2212:monospace9:-3:-3:0
+#2212:2236:monospace9:0:-1:0
+#2236:2813:monospace9:-3:-3:0
+#2813:2859:monospace9:0:-1:0
+#2859:2874:monospace9:-3:-3:0
+#2874:2932:monospace9:0:-1:0
+#2932:2937:monospace9:-3:-3:0
+#2937:2957:monospace9:0:-1:0
+#2957:2958:monospace9:-3:-3:0
+#2958:3037:monospace9:0:-1:0
+#3037:3148:monospace9:-3:-3:0
+#3148:3238:monospace9:0:-1:0
+#3238:3425:monospace9:-3:-3:0
+#3425:3476:monospace9:0:-1:0
+#3476:3535:monospace9:-3:-3:0
+#3535:4586:monospace9:0:-1:0
+#4586:4628:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000765)**/

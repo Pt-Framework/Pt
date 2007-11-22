@@ -198,6 +198,7 @@ Math::Size Button::preferredSize()
 
 void Button::_resizeEvent(const ResizeEvent& event)
 {
+//std::cerr << "Button::resize" << std::endl;
     _backbuffer.reset( new Pixmap( event.width(), event.height() ) );
 
     Painter backbufferPainter = _backbuffer->painter();
@@ -207,6 +208,7 @@ void Button::_resizeEvent(const ResizeEvent& event)
 
 void Button::_paintEvent(const PaintEvent& event)
 {
+//std::cerr << "Button::paint" << std::endl;
     painter().drawPixmap( event.origin(), *_backbuffer, event.region() );
 }
 

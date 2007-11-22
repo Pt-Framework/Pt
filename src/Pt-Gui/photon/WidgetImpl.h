@@ -61,6 +61,9 @@ namespace Gui {
 
             void hide();
         
+        			PtWidget_t* photonWidget()
+        			{ return _ptwidget; }
+
         private:
             Widget& _apiWidget;
             PtWidget_t* _ptwidget;
@@ -80,5 +83,5 @@ namespace Gui {
 #1521:1551:monospace9:0:-1:0
 #1551:1577:monospace9:-3:-3:0
 #1577:1603:monospace9:0:-1:0
-#1603:2631:monospace9:-3:-3:0
+#1603:2703:monospace9:-3:-3:0
 #**  PhEDIT attribute block ends (-0000234)**/

@@ -34,7 +34,8 @@ class ScribbleWidget : public Pt::Gui::Widget
         {
             Widget::setTitle(L"Scribble");
 
-            //_redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
+            _redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
+            _redButton->show();
             //_greenButton.reset( new Button( *this, Math::Point(10, 45),  Math::Size(70, 30), L"GREEN")  );
             //_blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
             //_clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
@@ -50,10 +51,11 @@ class ScribbleWidget : public Pt::Gui::Widget
             pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
             pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
 
-           /* 
+
            _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
             connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
 
+           /* 
             _greenButton->setBackgroundColor( ARgbColor(0, 65535, 0) );
             connect(_greenButton->clicked, *this, &ScribbleWidget::onGreenButton);
 
@@ -141,7 +143,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _resizeEvent(const ResizeEvent& event)
         {
-        	std::cerr << "Scribble:Resize:" << event.width() << ":" << event.height()  << std::endl;
+        	//std::cerr << "Scribble:Resize:" << event.width() << ":" << event.height()  << std::endl;
             if (event.resizeType() == ResizeEvent::Minimized) {
                 return;
             }
@@ -160,7 +162,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _paintEvent(const PaintEvent& event)
         {
-        	std::cerr << "Scribble Paint:" << event.region().width() << ":" << event.region().height()  << std::endl;
+        	//std::cerr << "Scribble Paint:" << event.region().width() << ":" << event.region().height()  << std::endl;
             Gui::Painter widgetPainter = painter();
             widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
         }
@@ -179,7 +181,7 @@ class ScribbleWidget : public Pt::Gui::Widget
         }
 
     private:
-        //std::auto_ptr<Button> _redButton;
+        std::auto_ptr<Button> _redButton;
         //std::auto_ptr<Button> _greenButton;
         //std::auto_ptr<Button> _blueButton;
         //std::auto_ptr<Button> _clearButton;
