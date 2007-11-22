@@ -45,6 +45,8 @@ namespace Gui {
 			
 			void exit();
 			
+			void commitEvent(const Pt::Event& event);
+
 			void pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& pev);
 
 			void buttonPress(Pt::Gui::Widget& widget, PhEvent_t& pev);

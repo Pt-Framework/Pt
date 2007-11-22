@@ -64,6 +64,12 @@ void EventLoopImpl::exit()
 }			
 
 
+void EventLoopImpl::commitEvent(const Pt::Event& event)
+{
+	_app->event(event);
+}
+
+
 void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& ev)
 {
 	PhPointerEvent_t* pev = (PhPointerEvent_t*) PhGetData(&ev);
@@ -163,7 +169,7 @@ void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 		                         Math::Size( rect->lr.x - rect->ul.x + 1, rect->lr.y - rect->ul.y + 1) );
 
 
-		// std::cerr << rect->ul.x << " " << rect->ul.y << " " << (rect->lr.x - rect->ul.x + 1) << " " <<(rect->lr.y - rect->ul.y + 1) << std::endl;
+		std::cerr << rect->ul.x << " " << rect->ul.y << " " << (rect->lr.x - rect->ul.x + 1) << " " <<(rect->lr.y - rect->ul.y + 1) << std::endl;
 		_app->event(pev);
 	}
 }
@@ -176,22 +182,28 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 	switch(ev.event_f)
 	{
 		case Ph_WM_MAX:
-		{ //std::cerr << "WM: " << "Ph_WM_MAX" << std::endl;
+		{ std::cerr << "WM: " << "Ph_WM_MAX" << std::endl;
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Maximized);
 			_app->event(rev);
 			break;
 		}
 		case Ph_WM_RESTORE:
-		{//std::cerr << "WM: " << "Ph_WM_RESTORE" << std::endl;
+		{std::cerr << "WM: " << "Ph_WM_RESTORE" << std::endl;
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Restored);
 			_app->event(rev);
 			break;
 		}
 		case Ph_WM_RESIZE:
 		{
+			//std::cerr << "#Resize:" << ev.size.w << " " << ev.size.h << std::endl;
+			//std::cerr << "-Resize:" << widget.size().width() << " " << widget.size().height() << std::endl;
+			
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
 			_app->event(rev);
-			//std::cerr << "Resize:" << ev.size.w << " " << ev.size.h << std::endl;
+			
+			PaintEvent pev (widget,  Math::Point( 0, 0 ), Math::Size( ev.size.w, ev.size.h) );
+			_app->event(pev);
+
 			break;
 		}
 		case Ph_WM_MOVE:
@@ -267,7 +279,7 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 			break;
 		}
 		default: 
-			std::cerr << "WM unknown: " << (unsigned long) ev.event_f<< " - " << ev.size.w << " " <<  ev.size.h << std::endl;
+			//std::cerr << "WM unknown: " << (unsigned long) ev.event_f<< " - " << ev.size.w << " " <<  ev.size.h << std::endl;
 			break;
 	}
 }
@@ -400,7 +412,7 @@ void ApplicationImpl::exit()
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:9262:default:-3:-3:0
-#9262:9677:monospace9:0:-1:0
-#9677:10311:default:-3:-3:0
+#0:9558:default:-3:-3:0
+#9558:9973:monospace9:0:-1:0
+#9973:10607:default:-3:-3:0
 #**  PhEDIT attribute block ends (-0000170)**/

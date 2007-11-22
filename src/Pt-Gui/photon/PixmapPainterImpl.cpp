@@ -81,7 +81,7 @@ void PixmapPainterImpl::drawRect(const Gfx::Rect& rect)
 
 void PixmapPainterImpl::fillRect(const Gfx::Rect& rect)
 {
-	std::cerr << "PP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
+	//std::cerr << "PP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
 
 	PmMemStart( _pixmap->mc() );
 	PhGC_t* old = PgSetGCCx( _pixmap->mc(), _gc );

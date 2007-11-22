@@ -141,6 +141,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _resizeEvent(const ResizeEvent& event)
         {
+        	std::cerr << "Scribble:Resize:" << event.width() << ":" << event.height()  << std::endl;
             if (event.resizeType() == ResizeEvent::Minimized) {
                 return;
             }
@@ -159,6 +160,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _paintEvent(const PaintEvent& event)
         {
+        	std::cerr << "Scribble Paint:" << event.region().width() << ":" << event.region().height()  << std::endl;
             Gui::Painter widgetPainter = painter();
             widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
         }

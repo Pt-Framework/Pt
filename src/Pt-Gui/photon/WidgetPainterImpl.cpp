@@ -76,7 +76,7 @@ void WidgetPainterImpl::drawRect(const Gfx::Rect& rect)
 
 void WidgetPainterImpl::fillRect(const Gfx::Rect& rect)
 {
-	std::cerr << "WP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
+	//std::cerr << "WP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
 
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
@@ -105,7 +105,7 @@ void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx:
 {
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
-	std::cerr << "drawPixmap: To: " << to.x() << ", " << to.y()  << "   From: " << region.x() << ", " << region.y() << ", " <<  region.width() << ", " << region.height()<< std::endl;
+	//std::cerr << "drawPixmap: To: " << to.x() << ", " << to.y()  << "   From: " << region.x() << ", " << region.y() << ", " <<  region.width() << ", " << region.height()<< std::endl;
 	PhPoint_t _to = { to.x(), to.y() };
 	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
 	//PhDim_t dim = {region.width(), region.height() };
