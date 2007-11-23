@@ -344,7 +344,7 @@ namespace Pt {
         }
 
 #ifndef _WIN32_WCE
-        else if( 0 == strcmp(any.type().name(), typeid(ValueT).name() ) )
+        else if( 0 == std::strcmp(any.type().name(), typeid(ValueT).name() ) )
         {
             const Any::BasicValue<ValueT>* value;
             value = static_cast< const Any::BasicValue<ValueT>* >(any._value);
