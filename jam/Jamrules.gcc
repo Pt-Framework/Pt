@@ -41,26 +41,6 @@ if $(TARGET_OSPLAT:U) != X86
 C++FLAGS	+= $(CCFLAGS) ;
 
 
-# MinGW support for gcc under NT
-#
-if $(TARGET_OS:L) = "nt"
-{
-	if $(MINGW)
-	{
-		MINGW   = $(MINGW:J=" ") ;
-		AR      = "$(MINGW)\\bin\\ar ru" ;
-		CC      = $(MINGW)\\bin\\gcc ;
-		C++     = $(MINGW)\\bin\\g++ ;
-		RANLIB  = $(MINGW)\\bin\\ranlib ;
-		LINKFLAGS += -Wl,--enable-runtime-pseudo-reloc ;
-	}
-	else
-	{
-		Exit "Please specify path to the MinGW installation with -sMINGW" ;
-	}
-}
-
-
 rule FDefines
 { return -D$(<) ; }
 
