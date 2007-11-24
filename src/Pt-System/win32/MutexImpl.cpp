@@ -21,7 +21,7 @@
 
 #include "MutexImpl.h"
 
-#include "Pt/Sourceinfo.h"
+#include "Pt/SourceInfo.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/Mutex.h"
 

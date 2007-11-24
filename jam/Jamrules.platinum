@@ -37,11 +37,11 @@ if $(SYS:L) = "win32"
 
     if $(MINGW)
     {
-        SYSLIBS = $(MINGW)\\lib\\libversion.a
-                $(MINGW)\\lib\\libwinmm.a
-                $(MINGW)\\lib\\libpsapi.a ;
-        NETLIBS = $(MINGW)\\lib\\libwsock32.a
-                $(MINGW)\\lib\\libws2_32.a ;
+        SYSLIBS = $(MINGW)$(SLASH)lib$(SLASH)libversion.a
+                $(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
+                $(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
+        NETLIBS = $(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
+                $(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
     }
 }
 
@@ -81,8 +81,8 @@ if $(GUI:L) = "gdi"
     }
     if $(MINGW)
     {
-        GUILIBS = $(MINGW)\\lib\\libgdi32.a
-                $(MINGW)\\lib\\libuser32.a  ;
+        GUILIBS = $(MINGW)$(SLASH)lib$(SLASH)libgdi32.a
+                $(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
     }
 }
 

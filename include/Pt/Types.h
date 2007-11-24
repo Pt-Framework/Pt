@@ -21,10 +21,8 @@
 #define Pt_Types_h
 
 #include <Pt/Api.h>
-
 #include <climits>
 #include <cstddef>
-//#include <stddef.h>
 
 namespace Pt {
 
@@ -93,7 +91,7 @@ namespace Pt {
     typedef long int64_t;
     /// \exclude
     typedef unsigned long uint64_t;
-#elif ULLONG_MAX == 18446744073709551615ULL
+#elif ULLONG_MAX >= 18446744073709551615ULL
     #define PT_WITH_INT64 1
     /// \exclude
     typedef long long int64_t;
@@ -102,9 +100,9 @@ namespace Pt {
 #elif defined(__GNUC__)
     #define PT_WITH_INT64 1
     /// \exclude
-    typedef ::int64_t int64_t;
+    typedef long long int64_t;
     /// \exclude
-    typedef ::uint64_t uint64_t;
+    typedef unsigned long long uint64_t;
 #endif
 
 } // namespace Pt

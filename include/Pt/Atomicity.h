@@ -25,7 +25,7 @@
 // and CPU correctly for many common cases.
 
 // always use Interlocked-functions when compiling for win32
-#if defined(_WIN32) || defined(WIN32)
+#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
 
     #define PT_ATOMICITY_H "Atomicity.windows.h"
 

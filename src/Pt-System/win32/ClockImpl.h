@@ -1,7 +1,7 @@
 #if !defined(PT_ClockImpl_H)
 #define PT_ClockImpl_H
 
-#include <Windows.h>
+#include <windows.h>
 #include "Pt/DateTime.h"
 #include "Pt/System/TimeValue.h"
 

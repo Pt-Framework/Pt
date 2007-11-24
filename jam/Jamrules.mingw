@@ -1,0 +1,142 @@
+##############################################################################
+# Default values and settings
+##############################################################################
+if $(MINGW)
+{
+    MINGW = $(MINGW:J=" ") ;
+}
+else
+{
+    Exit "Please specify path to the MinGW installation with -sMINGW" ;
+}
+
+##############################################################################
+# Tools and utilities
+##############################################################################
+CC      = $(MINGW)$(SLASH)bin$(SLASH)gcc ;
+C++     = $(MINGW)$(SLASH)bin$(SLASH)g++ ;
+RANLIB  = $(MINGW)$(SLASH)bin$(SLASH)ranlib ;
+AR      = $(MINGW)$(SLASH)bin$(SLASH)ar ru ;
+LINK    = $(C++) ;
+LINKFLAGS += -Wl,--enable-runtime-pseudo-reloc ;
+
+##############################################################################
+# Compiler and linker flags
+##############################################################################
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM ?= -O0 ;
+}
+else
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM ?= -O2 ;
+}
+
+# only use -fPIC for non-X86 CPUs
+if $(TARGET_OSPLAT:U) != X86
+{
+    CCFLAGS += -fPIC ;
+}
+
+C++FLAGS += $(CCFLAGS) ;
+WARN ?= -Wall ;
+
+##############################################################################
+# Rules
+##############################################################################
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    # linker flag -E: export global symbols from the executable
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    SHLIBS on $(_target) += $(_libs) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+}
+
+
+# Adds a resource to be linked with a binary.
+# Not implemented for GCC - on Windows, it can be 
+# used to add an icon to the binary
+#
+# param 1 executable
+# param 2 resource file
+# param 3 output directory of compiled resource file
+#
+# Resource prog : resources.rc : output_directory ;
+rule Resource
+{
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+    Depends $(_target) : $(_deps) ;
+
+    local _l = $(>:S=$(SUFDLL)) ;
+    SHLIBS on $(_target) += $(_l) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+
+    # Add all shared libraries required by this shared library in a
+    # variable called RPATHLIBS so that their paths can be added as
+    # rpath-link option to the linker command later
+    for local _d in $(_deps)
+    {
+        local _found = false ;
+
+        for _r in $(RPATHLIBS)
+        {
+            if $(_r) = $(_d)
+            {
+                _found = true ;
+            }
+        }
+
+        # only add if not added previously
+        if $(_found) = false
+        {
+            RPATHLIBS += $(_d)  ;
+        }
+    }
+}
+
+##############################################################################
+# Actions
+##############################################################################
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+{
+    $(LINK) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
+}
+

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,7 +23,7 @@
 #include "PainterImpl.h"
 
 #include <Pt/Api.h>
-#include <Pt/gfx/gfx.h>
+#include <Pt/Gfx/Gfx.h>
 
 
 namespace Pt {

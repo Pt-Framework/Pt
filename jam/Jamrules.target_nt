@@ -1,5 +1,25 @@
 JAVA_SYSTEM_INCLUDE = win32 ;
 
+##############################################################################
+# Default values and settings
+##############################################################################
+if $(MSVCDir)
+{
+    TOOLSET ?= vc7 ;
+}
+else if $(VSINSTALLDIR)
+{
+    TOOLSET ?= vc8 ;
+}
+else if $(MINGW)
+{
+    TOOLSET ?= mingw ;
+}
+else
+{
+    TOOLSET ?= vc7 ;
+}
+
 SUFOBJ	= .obj ;
 PRELIB	= "" ;
 
@@ -18,18 +38,5 @@ else
 	SUFDBG  = "" ;
 }
 
-# Deduce TOOLSET from envars usually set by build console
-#
-if $(MSVCDir)
-{
-	TOOLSET ?= vc7 ;
-}
-else if $(VSINSTALLDIR) 
-{
-	TOOLSET ?= vc8 ;
-}
-else
-{
-	TOOLSET ?= vc7 ;
-}
+
 

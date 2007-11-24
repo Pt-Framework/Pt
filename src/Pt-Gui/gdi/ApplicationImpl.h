@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -28,7 +28,7 @@
 #include <Pt/Signal.h>
 
 #include <Pt/Event.h>
-#include <Pt/system/Mutex.h>
+#include <Pt/System/Mutex.h>
 
 #include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/KeyEvent.h>

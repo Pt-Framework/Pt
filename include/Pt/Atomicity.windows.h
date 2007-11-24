@@ -30,37 +30,37 @@ typedef LONG atomic_t;
 
 inline atomic_t atomicIncrement(volatile atomic_t& value)
 {
-    return InterlockedIncrement( &value );
+    return InterlockedIncrement( const_cast<atomic_t*>(&value) );
 }
 
 
 inline atomic_t atomicDecrement(volatile atomic_t& value)
 {
-    return InterlockedDecrement( &value );
+    return InterlockedDecrement( const_cast<atomic_t*>(&value) );
 }
 
 
 inline atomic_t atomicExchangeAdd(volatile atomic_t& value, atomic_t n)
 {
-    return InterlockedExchangeAdd(&value, n);
+    return InterlockedExchangeAdd(const_cast<atomic_t*>(&value), n);
 }
 
 
-inline atomic_t atomicExchange(volatile atomic_t& val, atomic_t new_val)
+inline atomic_t atomicExchange(volatile atomic_t& value, atomic_t new_val)
 {
-    return InterlockedExchange(&val, new_val);
+    return InterlockedExchange(const_cast<atomic_t*>(&value), new_val);
 }
 
 
 inline void* atomicExchange(void* volatile& ptr, void* new_val)
 {
-    return InterlockedExchangePointer( (void**)&ptr, new_val );
+    return InterlockedExchangePointer( const_cast<void**>(&ptr), new_val );
 }
 
 
 inline atomic_t atomicCompareExchange(volatile atomic_t& value, atomic_t ex, atomic_t cmp)
 {
-    return InterlockedCompareExchange(&value, ex, cmp);
+    return InterlockedCompareExchange(const_cast<atomic_t*>(&value), ex, cmp);
 }
 
 
