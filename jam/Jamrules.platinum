@@ -128,28 +128,6 @@ if $(GUI:L) = "x11"
         Echo "Checking for Xft includes... $(_xftIncludes)" ;
         GUILIBS += -lXft -lXrender ;
     }
-
-    #
-    # Check if Xmu library is installed
-    #
-    #local _libXmu = [ GLOB  /usr/lib : *Xmu.so ] ;
-    #if  $(_libXmu) = ""
-    #{
-    #    _libXmu = [ GLOB  /usr/X11R6/lib : *Xmu.so ] ;
-    #}
-    #if  $(_libXmu) = ""
-    #{
-    #    _libXmu = [ GLOB  /opt/X11R6/lib : *Xmu.so ] ;
-    #}
-    #if  $(_libXmu) = ""
-    #{
-    #        Echo "Checking for Xmu library... FAILED" ;
-    #}
-    #else
-    #{
-    #    Echo "Checking for Xmu library... " $(_libXmu) ;
-    #    GUILIBS += -lXmu ;
-    #}
 }
 
 if $(GUI:L) = "gf"
