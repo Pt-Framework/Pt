@@ -15,7 +15,7 @@ int main( int argc, char* argv[] )
     std::string out("Hello World, where do you want to GOTO day!");
     const int size = 8;
     char buffer[size];
-    size_t sz;
+    std::size_t sz;
 
   /*  Pt::System::FileDevice file("test.txt", std::ios::in | std::ios::out);
     file.write(out.c_str(), out.size());
@@ -55,7 +55,7 @@ int main( int argc, char* argv[] )
     Pt::System::Pipe pipe2(Pt::System::IODevice::Async);
     pipe2.output().write(out.c_str(), out.size());
 
-    size_t readBytes = pipe2.input().read(buffer, size);
+    std::size_t readBytes = pipe2.input().read(buffer, size);
     std::cerr.write(buffer, readBytes);
 
     std::cerr << std::endl;

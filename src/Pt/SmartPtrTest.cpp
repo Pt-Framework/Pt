@@ -37,10 +37,10 @@ class Object : public Pt::RefCounted
         ~Object()
         { --objectRefs; }
 
-        static size_t objectRefs;
+        static std::size_t objectRefs;
 };
 
-size_t Object::objectRefs = 0;
+std::size_t Object::objectRefs = 0;
 
 
 class Base

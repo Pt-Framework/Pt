@@ -70,7 +70,7 @@ void SerialDeviceTest::ReadPnp()
         char byte;
         std::memset( buffer, 0, 201);
 
-        size_t size = serdev.read( buffer, 1);
+        std::size_t size = serdev.read( buffer, 1);
 
         if( (int)buffer[0] == 0 )
             return;
@@ -78,7 +78,7 @@ void SerialDeviceTest::ReadPnp()
         size = serdev.read( buffer, 200);
 
         std::string pnpString;
-        for( size_t i = 0; i < size; i++)
+        for( std::size_t i = 0; i < size; i++)
         {
             byte = buffer[i];
             if(byte == 0x08 || byte == 0x28)

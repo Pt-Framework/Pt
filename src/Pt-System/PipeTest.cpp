@@ -55,7 +55,7 @@ void PipeTest::testAsyncWriteRead()
     Pt::System::Pipe pipe( Pt::System::IODevice::Async );
     Pt::System::Selector selector;
     
-    size_t writtenBytes = 0;
+    std::size_t writtenBytes = 0;
     while( writtenBytes < out.size() )
     {
         Pt::System::IOResult& writeRes = pipe.output().beginWrite( out.c_str() + writtenBytes, 
@@ -67,7 +67,7 @@ void PipeTest::testAsyncWriteRead()
         writtenBytes += pipe.output().endWrite(writeRes);
     }
 
-    size_t readBytes = 0;
+    std::size_t readBytes = 0;
     while( readBytes < out.size() )
     {       
         Pt::System::IOResult& res = pipe.input().beginRead(buffer, size);
@@ -75,7 +75,7 @@ void PipeTest::testAsyncWriteRead()
         bool activity = selector.wait(500);
         PT_UNIT_ASSERT_MSG(activity, "Wait input failed");
 
-        const size_t n = pipe.input().endRead(res);
+        const std::size_t n = pipe.input().endRead(res);
         readBytes +=  n;
         in.append(buffer, n);
     }
@@ -92,16 +92,16 @@ void PipeTest::testSyncWriteRead()
 
     Pt::System::Pipe pipe(Pt::System::IODevice::Sync);
 
-    size_t writtenBytes = 0;
+    std::size_t writtenBytes = 0;
     while(writtenBytes < out.size())
     {
         writtenBytes += pipe.output().write( out.c_str(), out.size() );
     }
 
-    size_t totalReadBytes = 0;
+    std::size_t totalReadBytes = 0;
     while(totalReadBytes < out.size())
     {
-        const size_t readBytes = pipe.input().read(buffer, size);
+        const std::size_t readBytes = pipe.input().read(buffer, size);
         totalReadBytes +=  readBytes;
         in.append(buffer, readBytes);
     }
