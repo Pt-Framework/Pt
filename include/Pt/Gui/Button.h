@@ -35,13 +35,13 @@ namespace Gui {
      * text in its center. This text can be set using the constructor of this class or by calling
      * setTex().
      *
-     * A button usually has two visual states: pressed and not pressed.
+     * A button usually has three visual states: pressed, not pressed and disabled.
      *
      * A foreground and a background color can be set for a button. The foreground color is
      * used as color for the label's text. The background color is used for the button's interior
      * except for the border drawing. The default background color is a gray shade.
      *
-     * \image Button-default_cancel_button.png A default cancel button
+     * \image html Button-default_cancel_button.png "A default cancel button"
      */
     class PT_GUI_API Button : public Widget
     {
@@ -62,9 +62,12 @@ namespace Gui {
              * @param text The (optional) text of this button.
              * @see setText(const std::string)
              */
-            Button(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text = Pt::String());
+            Button(Widget& parent,
+                   const Math::Point& at = Math::Point(0, 0),
+                   const Math::Size& size = Math::Size(0, 0),
+                   const Pt::String& text = Pt::String());
 
-            //! @brief Emptry destructor for the button widget.
+            //! @brief Empty destructor for the button widget.
             ~Button();
 
             /**
@@ -91,10 +94,10 @@ namespace Gui {
              */
             virtual void update();
 
-            // Inherit doc
+            // Automatically inherits the documentation of its base class.
             virtual Math::Size minimumSize();
 
-            // Inherit doc
+            // Automatically inherits the documentation of its base class.
             virtual Math::Size preferredSize();
 
         public:
@@ -112,7 +115,7 @@ namespace Gui {
 
             //! Internal repaint event handle method.
             virtual void _paintEvent(const PaintEvent& event);
-            
+
             //! Internal move event handle method.
             virtual void _mouseMoveEvent(const MouseMoveEvent& event);
 
@@ -129,6 +132,8 @@ namespace Gui {
              * @brief Draws the button in pressed state using the given painter.
              */
             void drawNormal(Painter& painter, bool focused);
+
+            void drawText(Painter& painter, const Pt::ssize_t offset) const;
 
         private:
             std::auto_ptr<Pixmap> _backbuffer;
