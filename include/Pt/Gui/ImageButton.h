@@ -21,7 +21,6 @@
 
 
 namespace Pt {
-
 namespace Gui {
 
     class Pixmap;
@@ -39,16 +38,14 @@ namespace Gui {
      * to this Signal and will be executed whenever the button was clicked.
      *
      * A typical button's presentation is a rectangle, wider than it is tall, with a descriptive
-     * Text in its center. This Text can be set using the constructor of this class or by calling
-     * setTex().
+     * Text in its center. As this button is an ImageButton, which uses 3 images to represent
+     * its state, the text usually is incorporated in the image; or there is no text at all.
      *
-     * A button usually has two visual states: pressed and not pressed.
+     * A button usually has three visual states: pressed, not pressed and deactivated. For each
+     * of these states an image can be set using the constructor. The image is then shown for
+     * the appropriate state.
      *
-     * A foreground and a background color can be set for a button. The foreground color is
-     * used as color for the label's Text. The background color is used for the button's interior
-     * except for the border drawing. The default background color is a gray shade.
-     *
-     * \image Button-default_cancel_button.png A default cancel button
+     * @see Button
      */
     class PT_GUI_API ImageButton : public Widget
     {
@@ -58,23 +55,33 @@ namespace Gui {
              *
              * A button widget is created. The given parent is set as parent of this button and
              * the button is added to the parent's children list. The button is positioned at the
-             * given location using the given size. An optional Text can be passed as an argument.
-             * This Text will be shown as button Text. If no Text is given, no Text is shown.
+             * given location using the given size. At least one image has to be given; this image
+             * will be shown for the normal state (and for all other states if there is no explicit
+             * image set for the other states).
+             *
+             * Beside the image for the normal state, there are images for the pressed state and
+             * the disabled state. If no image for the pressed state is given, the normal state's
+             * image is shown, but drawn with an offset of some pixels so it appears as if the button
+             * is actually pressed. If no image for the disabled state is given, the normal state's
+             * image is also shown.
              *
              * @param parent The parent widget for this button. The button will become the child of
              * this parent and be shown inside of it. To create a top-level widget 0 can be passed
              * as an argument.
              * @param at The position of this button inside its parent relative to the parent's top-left corner.
              * @param size The size of this button. The size must be >0 for width and height.
-             * @param Text The (optional) Text of this button.
-             * @see setText(const std::string)
+             * @param normalState The image for the normal state of this button.
+             * @param pressedState The image for the pressed state of this button. (Optional)
+             * @param disabledState The image for the disabled state of this button. (Optional)
              */
             ImageButton(Widget& parent,
-                   const Pt::Math::Point& at,
-                   const Pt::Math::Size& size,
-                   const Pt::Gfx::ARgbImage& image);
+                        const Pt::Math::Point& at,
+                        const Pt::Math::Size& size,
+                        const Pt::Gfx::ARgbImage* normalState,
+                        const Pt::Gfx::ARgbImage* pressedState = 0,
+                        const Pt::Gfx::ARgbImage* disabledState = 0);
 
-            //! @brief Emptry destructor for the button widget.
+            //! @brief Empty destructor for the button widget.
             ~ImageButton();
 
             /**
@@ -84,11 +91,11 @@ namespace Gui {
              */
             virtual void update();
 
-            // Inherit doc
-            virtual  Pt::Math::Size minimumSize();
+            // Automatically inherits the documentation of its base class.
+            virtual Pt::Math::Size minimumSize();
 
-            // Inherit doc
-            virtual  Pt::Math::Size preferredSize();
+            // Automatically inherits the documentation of its base class.
+            virtual Pt::Math::Size preferredSize();
 
         public:
             /**
@@ -113,23 +120,31 @@ namespace Gui {
             bool _pressed;
 
         private:
-            /**
-             * @brief Draws the button in pressed state using the given painter.
-             */
-            void drawPressed(Painter& painter);
 
             /**
-             * @brief Draws the button in pressed state using the given painter.
+             * @brief Draws the buttons background, given by the parameter 'image' to the given
+             * painter object.
+             *
+             * The given image is drawn to the painter at a centered position. If an offset is
+             * specified, the image is positioned using this offset in x and y direction.
+             *
+             * @param painter The given image is drawn to this painter.
+             * @param image This image is drawn to the painter. The pointer has to be valid and
+             * not 0!
+             * @param offset If this optional parameter is given, the image is painted with an
+             * offset of this amount in x and y direction.
              */
-            void drawNormal(Painter& painter, bool focused);
+            void drawBackground(Painter& painter, const Pt::Gfx::ARgbImage* image, const Pt::ssize_t offset = 0);
 
         private:
             std::auto_ptr<Pixmap> _backbuffer;
-            Pt::Gfx::ARgbImage   _image;
+            const Pt::Gfx::ARgbImage* _normalStateImage;
+            const Pt::Gfx::ARgbImage* _pressedStateImage;
+            const Pt::Gfx::ARgbImage* _disabledStateImage;
+            
     };
 
 } // namespace Gui
-
 } // namespace Pt
 
 #endif

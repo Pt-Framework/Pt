@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Tobias Mueller                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,7 +19,6 @@
 
 #include "Pt/Math/Point.h"
 #include "Pt/Math/Size.h"
-#include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/ImageButton.h"
 #include <Pt/Gui/Painter.h>
 #include "Pt/Gui/CloseEvent.h"
@@ -37,25 +36,32 @@
 #include "Pt/Gfx/FontMetrics.h"
 
 #include <iostream>
+#include <algorithm>
 
-using namespace Pt::Gfx;
-using namespace Pt::Math;
 using namespace std;
 
 
 namespace Pt {
-
 namespace Gui {
 
 
-ImageButton::ImageButton(Widget& parent, const  Pt::Math::Point& at, const  Pt::Math::Size& size, const Pt::Gfx::ARgbImage& image)
+ImageButton::ImageButton(Widget& parent, const  Pt::Math::Point& at, const  Pt::Math::Size& size,
+                         const Pt::Gfx::ARgbImage* normalState, const Pt::Gfx::ARgbImage* pressedState,
+                         const Pt::Gfx::ARgbImage* disabledState)
 : Widget(parent, at, size)
 , _pressed(false)
 , _backbuffer(new Pixmap(size.width(), size.height()))
-, _image(image)
+, _normalStateImage(normalState)
+, _pressedStateImage(pressedState)
+, _disabledStateImage(disabledState)
 {
-    setForegroundColor(ARgbColor(0, 0, 0));
-    setBackgroundColor(ARgbColor(0xffff, 0xffff, 0xffff));
+    if (_normalStateImage == 0)
+    {
+        // TODO Throw exception.
+    }
+    
+    setForegroundColor(Gfx::ARgbColor(0, 0, 0));
+    setBackgroundColor(Gfx::ARgbColor(0xffff, 0xffff, 0xffff));
 }
 
 
@@ -65,52 +71,56 @@ ImageButton::~ImageButton()
 
 void ImageButton::update()
 {
-    Painter widgetPainter = painter();
+    Painter widgetPainter     = painter();
     Painter backbufferPainter = _backbuffer->painter();
 
-    if (_pressed) {
-        drawPressed(widgetPainter);
-        drawPressed(backbufferPainter);
-    } else {
-        drawNormal(widgetPainter, false);
-        drawNormal(backbufferPainter, false);
+    Pt::ssize_t offset = 0;
+    const Pt::Gfx::ARgbImage* imageToDraw = _normalStateImage;
+
+    if (!isEnabled() && _disabledStateImage != 0)
+    {
+        imageToDraw = _disabledStateImage;
     }
+    else if (_pressed)
+    {
+        if (_pressedStateImage != 0)
+        {
+            imageToDraw = _pressedStateImage;
+        }
+        else
+        {
+            offset = 1;
+        }
+    }
+    
+    drawBackground(widgetPainter,     imageToDraw, offset);
+    drawBackground(backbufferPainter, imageToDraw, offset);
 }
 
 
-void ImageButton::drawPressed(Painter& painter)
+void ImageButton::drawBackground(Painter& painter, const Pt::Gfx::ARgbImage* image, const Pt::ssize_t offset)
 {
-    painter.setBrush(Brush(backgroundColor()));
-    painter.fillRect(Gfx::Rect(Point(0, 0), this->size()));
+    painter.setBrush(Gfx::Brush(backgroundColor()));
+    painter.fillRect(Gfx::Rect(Math::Point(0, 0), this->size()));
 
-    ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
-    ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
-    painter.drawImage(Point(x + 1, y + 1), _image);
-}
-
-
-void ImageButton::drawNormal(Painter& painter, bool focused)
-{
-    painter.setBrush(Brush(backgroundColor()));
-    painter.fillRect(Gfx::Rect(Point(0, 0), this->size()));
-
-    ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)_image.width())  / 2;
-    ssize_t y = ((ssize_t)this->size().height() - (ssize_t)_image.height()) / 2;
-    painter.drawImage(Point(x, y), _image);
+    ssize_t x = ((ssize_t)this->size().width()  - (ssize_t)image->width())  / 2;
+    ssize_t y = ((ssize_t)this->size().height() - (ssize_t)image->height()) / 2;
+    painter.drawImage(Math::Point(x + offset, y + offset), *image);
 }
 
 
 
-Pt::Math::Size ImageButton::minimumSize()
+Math::Size ImageButton::minimumSize()
 {
-    return Size(_image.width(), _image.height());
+    return Math::Size(_normalStateImage->width() + insets().left() + insets().right(),
+                      _normalStateImage->height() + insets().top() + insets().bottom());
 }
 
 
-Pt::Math::Size ImageButton::preferredSize()
+Math::Size ImageButton::preferredSize()
 {
-    return Pt::Math::Size(_image.width() + insets().left() + insets().right(),
-                           _image.height() + insets().top()  + insets().bottom());
+    return Math::Size(_normalStateImage->width() + insets().left() + insets().right(),
+                      _normalStateImage->height() + insets().top() + insets().bottom());
 }
 
 
