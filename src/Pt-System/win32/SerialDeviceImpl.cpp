@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Dürner                                  *
+ *   Copyright (C) 2007 Marc Boris Dï¿½rner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -66,7 +66,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios_base::openmode m
     }
     else
     {
-        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, NULL, NULL);
+        _handle = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
 
 
@@ -147,7 +147,7 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_ovRead, &readBytes, FALSE) == FALSE )
     {
-		DWORD err=GetLastError();
+		//DWORD err=GetLastError();
         if( ERROR_HANDLE_EOF == GetLastError() ) {
 			eof = true;
         }
@@ -463,8 +463,8 @@ IODeviceImpl::WaitResult SerialDeviceImpl::waitResult( HANDLE handle )
     if( (_eventMask & EV_TXEMPTY) == EV_TXEMPTY )
         return ReadyWrite;
 
-/*    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
-        return _readEvent;       *//*
+//    if( (_eventMask & EV_RXFLAG) == EV_RXFLAG)
+//        return _readEvent;
 
     if( (_eventMask & EV_RXCHAR) == EV_RXCHAR)
         return ReadyRead;

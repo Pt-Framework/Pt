@@ -73,7 +73,7 @@ class FileDeviceImpl  : public IODeviceImpl
         { return _handle; }        
 
     private:
-        enum { Reading, Writing, Idle } _state;
+        //enum { Reading, Writing, Idle } _state;
 
         HANDLE     _handle;
         OVERLAPPED _readOv;

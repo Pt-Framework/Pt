@@ -28,7 +28,7 @@ namespace System {
 
 FileDeviceImpl::FileDeviceImpl()
 : _handle(INVALID_HANDLE_VALUE)
-, _state( Idle )
+//, _state( Idle )
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -140,7 +140,7 @@ size_t FileDeviceImpl::endRead(IOResult& result, bool& eof)
 #ifndef _WIN32_WCE
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
-		DWORD err=GetLastError();
+		//DWORD err=GetLastError();
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
 			eof = true;
@@ -175,6 +175,10 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 
         case std::ios::end:
             whence = FILE_END;
+            break;
+
+        default:
+            throw std::invalid_argument("Unknown seekdir");
             break;
     }
 
@@ -227,7 +231,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
     eof = false;
     DWORD readBytes = 0;
-    _state = Reading;
+    //_state = Reading;
 
     if( FALSE == ReadFile(_handle, (void*)buffer, count, &readBytes, &_readOv) )
     {
@@ -257,7 +261,7 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 
 size_t FileDeviceImpl::write(const char* buffer, size_t count)
 {
-    _state = Writing;
+    //_state = Writing;
     DWORD writtenBytes = 0;
 
     if( FALSE == WriteFile(_handle, (void*)buffer, count, &writtenBytes, &_writeOv) )
