@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -49,14 +49,15 @@ namespace Pt {
 namespace Gui {
 
 
-Widget::Widget(Widget& parent, const Math::Point& at, const Math::Size& size)
-: _parent(&parent)
+Widget::Widget(Widget& newParent, const Math::Point& at, const Math::Size& size)
+: _parent(&newParent)
 , _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
+, _enabled(true)
 {
-    parent.addChild(*this);
-    _impl = new WidgetImpl( *this, &parent, at, size );
+    newParent.addChild(*this);
+    _impl = new WidgetImpl( *this, &newParent, at, size );
     _layout.reset(NullLayout::createFor(*this));
 }
 
@@ -66,20 +67,22 @@ Widget::Widget(const Math::Point& at, const Math::Size& size)
 , _region(at, size)
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
+, _enabled(true)
 {
     _impl = new WidgetImpl( *this, 0, at, size );
     _layout.reset(NullLayout::createFor(*this));
 }
 
 
-Widget::Widget(Widget& parent)
-: _parent(&parent)
+Widget::Widget(Widget& newParent)
+: _parent(&newParent)
 , _region(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
+, _enabled(true)
 {
-    parent.addChild(*this);
-    _impl = new WidgetImpl(*this, &parent);
+    newParent.addChild(*this);
+    _impl = new WidgetImpl(*this, &newParent);
     _layout.reset(NullLayout::createFor(*this));
 }
 
@@ -89,6 +92,7 @@ Widget::Widget()
 , _region(Math::Point(0, 0), Math::Size(0, 0))
 , _foregroundColor( ARgbColor(0, 0, 0) )
 , _backgroundColor( ARgbColor(65535, 65535, 65535) )
+, _enabled(true)
 {
     _impl = new WidgetImpl(*this, 0);
     _layout.reset(NullLayout::createFor(*this));
@@ -189,6 +193,30 @@ void Widget::move(ssize_t x, ssize_t y)
 }
 
 
+ssize_t Widget::x() const
+{
+    return _region.x();
+}
+
+
+ssize_t Widget::y() const
+{
+    return _region.y();
+}
+
+
+size_t Widget::width() const
+{
+    return _region.width();
+}
+
+
+size_t Widget::height() const
+{
+    return _region.height();
+}
+
+
 void Widget::resize(size_t width, size_t height)
 {
     if (width == _region.width() && height == _region.height()) {
@@ -201,6 +229,12 @@ void Widget::resize(size_t width, size_t height)
     _region.setHeight(height);
 
     this->updateLayout();
+}
+
+
+void Widget::resize(const Math::Size& newSize)
+{
+    this->resize(newSize.width(), newSize.height());
 }
 
 
@@ -229,7 +263,7 @@ Math::Size Widget::preferredSize()
     // Non-top-level widgets and top-level widgets use the preferred size of their layout manager if they have one.
     // If they don't have a layout manager they return the current size.
     // TODO We can currently not check if the widget has no layout manager. Every widget has a layout manager, namely
-    // NullLayout. So I currently check the returnd preferred size to match (0, 0). If it does, I suspect that there is
+    // NullLayout. So I currently check the returned preferred size to match (0, 0). If it does, I suspect that there is
     // no layout manager set. Is this good?
 
     Math::Size preferredSize = layout().preferredSize();
@@ -317,6 +351,35 @@ Widget* Widget::parent() const
     return _parent;
 }
 
+
+void Widget::enable()
+{
+    this->setEnabled(true);
+}
+
+
+void Widget::disable()
+{
+    this->setEnabled(false);
+}
+
+
+void Widget::setEnabled(bool newEnabledState)
+{
+    if (newEnabledState != _enabled)
+    {
+        _enabled = newEnabledState;
+        this->update();
+    }
+}
+
+
+bool Widget::isEnabled() const
+{
+    return _enabled;
+}
+
+
 Painter Widget::painter()
 {
     return _impl->painter();
@@ -391,31 +454,31 @@ void Widget::_event(const Event& e)
 {
     const type_info& typeInfo = e.typeInfo();
 
-    if( typeInfo == CloseEvent::TYPE_INFO ) {
+    if (typeInfo == CloseEvent::TYPE_INFO) {
         const CloseEvent& ev = (const CloseEvent&)(e);
         this->closeEvent(ev);
     }
-    else if( typeInfo == MouseEvent::TYPE_INFO ) {
+    else if (typeInfo == MouseEvent::TYPE_INFO && _enabled) {
         const MouseEvent& ev = (const MouseEvent&)(e);
         this->mouseEvent(ev);
     }
-    else if( typeInfo == KeyEvent::TYPE_INFO ) {
+    else if (typeInfo == KeyEvent::TYPE_INFO && _enabled) {
         const KeyEvent& ev = (const KeyEvent&)(e);
         this->keyEvent(ev);
     }
-    else if( typeInfo == MoveEvent::TYPE_INFO ) {
+    else if (typeInfo == MoveEvent::TYPE_INFO) {
         const MoveEvent& ev = (const MoveEvent&)(e);
         this->moveEvent(ev);
     }
-    else if( typeInfo == MouseMoveEvent::TYPE_INFO ) {
+    else if (typeInfo == MouseMoveEvent::TYPE_INFO && _enabled) {
         const MouseMoveEvent& ev = (const MouseMoveEvent&)(e);
         this->mouseMoveEvent(ev);
     }
-    else if( typeInfo == ResizeEvent::TYPE_INFO ) {
+    else if (typeInfo == ResizeEvent::TYPE_INFO) {
         const ResizeEvent& ev = (const ResizeEvent&)(e);
         this->resizeEvent(ev);
     }
-    else if( typeInfo == PaintEvent::TYPE_INFO ) {
+    else if (typeInfo == PaintEvent::TYPE_INFO) {
         const PaintEvent& ev = (const PaintEvent&)(e);
         this->paintEvent(ev);
     }

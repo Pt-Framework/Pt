@@ -9,7 +9,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Region.h>
 #include <Pt/String.h>
 #include <Pt/Gfx/ARgbColor.h>
@@ -70,7 +70,7 @@ namespace Gui {
      * Use show() and hide() to show or hide a widget.
      *
      * !Parent - child relationship
-     * In principell any widget can act as a container which can contain child widgets. This widget base
+     * In principle any widget can act as a container which can contain child widgets. This widget base
      * class provides operations for this matter. To add a widget to a parent widget, the parent widget
      * can be passed as first argument to the widget class' constructor. This will add the widget to the
      * child list of the parent and set the parent of the newly created widget to the given widget.
@@ -287,7 +287,7 @@ namespace Gui {
              * spacing between the button's text and its painted border, for a checkbox this may
              * be the distance between the marker-box and its text.
              *
-             * When a widget contains other widgets (parent-child-relationsip) the insets are the
+             * When a widget contains other widgets (parent-child-relationship) the insets are the
              * spacing between the child widgets and the border of the parent widget.
              *
              * @param insets The new insets for this widget.
@@ -344,9 +344,35 @@ namespace Gui {
             virtual void move(ssize_t x, ssize_t y);
 
             /**
-             * @brief Resizes this widget to the given width and height.
+             * @brief Returns the x-position of this widget relative to its parent widget.
              *
-             * The widget is resized to the given width and height.
+             * @return The x-position of this widget relative to its parent widget.
+             */
+            ssize_t x() const;
+
+            /**
+             * @brief Returns the y-position of this widget relative to its parent widget.
+             *
+             * @return The y-position of this widget relative to its parent widget.
+             */
+            ssize_t y() const;
+            
+            /**
+             * @brief Returns the width of this widget.
+             *
+             * @return The width of this widget.
+             */
+            size_t width() const;
+
+            /**
+             * @brief Returns the height of this widget.
+             *
+             * @return The height of this widget.
+             */
+            size_t height() const;
+            
+            /**
+             * @brief Resizes this widget to the given width and height.
              *
              * Resizing a widget will result in a ResizeEvent.
              *
@@ -354,14 +380,27 @@ namespace Gui {
              * @param height The new height for this widget.
              * @see move()
              * @see size()
+             * @see resize(Math::Size&)
              */
             virtual void resize(size_t width, size_t height);
+
+            /**
+            * @brief Resizes this widget to the given size.
+            *
+            * Resizing a widget will result in a ResizeEvent.
+            *
+            * @param size The new size for this widget.
+            * @see move()
+            * @see size()
+            * @see resize(size_t, size_t)
+            */
+            virtual void resize(const Math::Size& newSize);
 
             /**
              * @brief Makes this widget visible.
              *
              * The widget will be shown after calling this method. If the widget was invisible
-             * before calling this method a PaintEvent is triggeed. If the widget already was
+             * before calling this method a PaintEvent is triggered. If the widget already was
              * visible, nothing happens.
              *
              * @see hide()
@@ -380,13 +419,13 @@ namespace Gui {
              * @see show()
              */
             virtual void hide();
-
+            
             /**
              * @brief Calculates and returns the minimum size of this widget.
              *
              * When resizing a widget the new size should not be smaller than the minimum size
              * returned by this method. The minimum size specifies the size at which the widget can
-             * still be shown normally without major graphical clitches.
+             * still be shown normally without major graphical glitches.
              *
              * A call to resize() does no check against the minimum size. The widget can be
              * resized to a smaller size than is returned by minimumSize().
@@ -427,7 +466,7 @@ namespace Gui {
              * @brief Resizes this top-level widget to its preferred size and layouts its child
              * widgets accordingly.
              *
-             * The widget will calculate the preferred size by considerung the preferred sizes of
+             * The widget will calculate the preferred size by considering the preferred sizes of
              * all child widgets (and their child widgets) and then resize this widget so all
              * child widgets can be layouted using their preferred sizes.
              *
@@ -452,7 +491,7 @@ namespace Gui {
              * @brief Returns the LayoutManager which is set for this widget.
              *
              * To set the LayoutManager for a widget use the Factory-method of the specific
-             * LayoutManager which should be set. The the docmentation of the LayoutManager
+             * LayoutManager which should be set. The the documentation of the LayoutManager
              * for further details.
              *
              * The LayoutManager object returned by this method is of the generic base class for
@@ -519,11 +558,52 @@ namespace Gui {
             /**
              * @brief Returns a pointer to the parent widget of this widget.
              *
-             * If there is no parent set for this widgt, 0 is returned.
+             * If there is no parent set for this widget, 0 is returned.
              *
              * @return A pointer to the parent widget.
              */
             Widget* parent() const;
+
+            /**
+            * @brief Enables this widget. This is the same as calling \c setEnabled(true);
+            * @see setEnabled(bool)
+            */
+            void enable();
+
+            /**
+             * @brief Disabled this widget. This is the same as calling \c setEnabled(false);
+             * @see setEnabled(bool)
+             */
+            void disable();
+
+            /**
+             * @brief Enables or disables this widget.
+             *
+             * A disabled widget does not receive input events like mouse events or key events.
+             * It is usually also displayed as being disabled, for example by showing the text
+             * or background in a specific color.
+             *
+             * Widgets are enabled by default.
+             *
+             * Currently the disable state is not propagated to the child widgets. If all children
+             * of a widget also need to be disabled, this has currently to be done manually by
+             * disabling/enabling all child widgets.
+             *
+             * @brief newEnabledState New enabled state: \c true for enabled and \c false for disabled.
+             */
+            void setEnabled(bool newEnabledState);
+
+            /**
+             * @brief Returns the current enabled/disabled state of this widget.
+             *
+             * If the widget is currently enabled \c true is returned. If the widget is disabled
+             * \c false is returned.
+             *
+             * See setEnabled(bool) for more details about the enabled/disabled state of a widget.
+             *
+             * @return \c true if this widget is enabled; \c false if it is disabled.
+             */
+            bool isEnabled() const;
 
             /**
              * @brief Does a complete repaint of this widget's presentation.
@@ -543,7 +623,7 @@ namespace Gui {
              *
              * The Painter which is returned by this widget can be used to draw on this widget
              * at every time. Note that the paint operations only affect the widget's surface but
-             * not its backbuffer. The backbuffer has to be drawn seperately by getting a Painter
+             * not its backbuffer. The backbuffer has to be drawn separately by getting a Painter
              * object for the backbuffer.
              *
              * The returned Painter can be copied as often as necessary without much overhead.
@@ -653,13 +733,13 @@ namespace Gui {
              * @see _keyEvent()
              */
             void keyEvent(const KeyEvent& event);
-
+            
         public:
             //! @brief Signal which is sent when the widget is closed by the underlying platform.
             //! To get informed about signals use one of the connect()-methods.
             Signal<> closed;
 
-            //! @brief Signal which is sent when the widget object is destroyed (-> desctuctor).
+            //! @brief Signal which is sent when the widget object is destroyed (-> destructor).
             //! To get informed about signals use one of the connect()-methods.
             Signal<Widget&> destroyed;
 
@@ -735,7 +815,7 @@ namespace Gui {
             /**
              * @brief Receives and processes a PaintEvent by doing a repaint of the widget.
              *
-             * A PaintEvent is usually generated when parts of or all of the widget is diclosed or
+             * A PaintEvent is usually generated when parts of or all of the widget is disclosed or
              * when the widget becomes visible for other reasons.
              *
              * Override this method to paint the widget whenever it is necessary.
@@ -838,6 +918,7 @@ namespace Gui {
             std::list<Widget*> _childWidgets;
             Insets _insets;
             std::auto_ptr<Layout> _layout;
+            bool _enabled;
     };
 
 } // namespace Gui
