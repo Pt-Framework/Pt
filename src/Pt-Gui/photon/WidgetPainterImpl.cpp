@@ -81,7 +81,7 @@ void WidgetPainterImpl::fillRect(const Gfx::Rect& rect)
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
 
-	PgDrawIRectCx(_dc, rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
+	PgDrawIRect(rect.x(), rect.y(), rect.x()+rect.width(), rect.y()+rect.height(), Pg_DRAW_FILL);
 	PgFlush();
 
 	PgSetGCCx(_dc, old);
