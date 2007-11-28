@@ -23,6 +23,7 @@ SharedLibrary Pt-Gui :  Application.cpp
                         Panel.cpp
                         ProgressBar.cpp
                         ResizeEvent.cpp
+                        BorderLayout.cpp
                         SimpleGridLayout.cpp
                         VerticalLayout.cpp
                        ;
