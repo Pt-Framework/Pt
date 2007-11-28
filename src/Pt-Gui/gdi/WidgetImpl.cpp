@@ -1,5 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006 Tobias Mueller                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,8 +26,10 @@
 #include <Pt/Gui/Application.h>
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/Painter.h>
+#include <Pt/Gui/PaintEvent.h>
 #include <Pt/Text/TextStream.h>
 #include <Pt/Text/Utf16Codec.h>
+#include <Pt/Text/Utf8Codec.h>
 
 #include <iostream>
 #include <sstream>
@@ -94,6 +97,10 @@ void WidgetImpl::init(Widget& widget, Widget* parent, const Math::Point& at, con
 
     GDIRegistry::instance().registerWidget(_hwnd, widget);
 
+    // Bring (child) widget to front, as windows seems to add child widgets behind all
+    // existing widgets. We want new widgets to be on top of all existing widgets.
+    BringWindowToTop(_hwnd);
+
     // Hide top-level windows from start.
     if (!parent) {
         ShowWindow(_hwnd, SW_HIDE);
@@ -131,14 +138,16 @@ void WidgetImpl::setTitle(const Pt::String& text)
 
 Pt::String WidgetImpl::title()
 {
-    std::vector<wchar_t> buffer(255);
-    GetWindowTextW(_hwnd, &buffer[0], buffer.size());
+    int length = GetWindowTextLengthW(_hwnd);
+    
+    std::vector<wchar_t> buffer(length + 1);
+    GetWindowTextW(_hwnd, &buffer[0], length);
 
-    std::stringstream ss((char*)&buffer[0]);
-    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf16Codec());
+    std::stringstream ss(Pt::win32::toUTF8(&buffer[0]));
+    Pt::Text::TextStream textStream(ss, new Pt::Text::Utf8Codec());
     Pt::String result;
     getline(textStream, result);
-
+    
     return result;
 }
 

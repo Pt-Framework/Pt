@@ -22,7 +22,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
 #include <Pt/Gui/Painter.h>
 #include "WidgetPainter.h"
 #include "Drawable.h"
@@ -39,7 +38,6 @@ namespace Pt {
 namespace Gui {
 
     class Widget;
-    class ResizeEvent;
     class GDIPainter;
 
     class WidgetImpl : public Drawable

@@ -43,6 +43,18 @@ namespace win32 {
     }
 
 
+    inline std::string toUTF8(const wchar_t* from)
+    {
+        size_t length = WideCharToMultiByte(CP_UTF8, 0, from, -1, NULL, 0, NULL, NULL);
+
+        std::vector<char> str(length + 1);
+        WideCharToMultiByte(CP_UTF8, 0, from, -1, &str[0], length, NULL, NULL);
+
+        std::string ret(&str[0], length);
+        return ret;
+    }
+
+
     inline std::string toMultiByte(const char* from)
     {
         return std::string(from);
