@@ -24,6 +24,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/ARgbColor.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
@@ -58,28 +59,28 @@ namespace Pt {
               * @brief Creates a new Pen object.
               *
               * The default pen size is 1. The default pen color is black, the default style is solid
-              * and the defauld cap und join style are round.
+              * and the default cap and join style are round.
               */
               Pen();
 
               /**
               * @brief Creates a new Pen object with the specified size
               *
-              * The default pen color is black. The default style is solid. The defauld cap und join style are round.
+              * The default pen color is black. The default style is solid. The default cap and join style are round.
               */
               Pen( size_t size );
 
               /**
               * @brief Creates a new Pen object with the specified style
               *
-              * The default pen size is 1. The default pen color is black. The defauld cap und join style are round.
+              * The default pen size is 1. The default pen color is black. The default cap and join style are round.
               */
               Pen( PenStyle style );
 
               /**
               * @brief Creates a new Pen object with the specified color
               *
-              * The default pen size is 1. The default style is solid. The defauld cap und join style are round.
+              * The default pen size is 1. The default style is solid. The default cap and join style are round.
               */
               Pen( const ARgbColor& color );
 
@@ -89,11 +90,11 @@ namespace Pt {
               * The pen size, color and style are optional. The default pen size is 1. The
               * default pen color is black and the default style is solid.
               *
-              * @param size The size of the pen. This parameter is optional. The default is 1.
+              * @param width The width of the pen. This parameter is optional. The default is 1.
               * @param color The color of the pen. This parameter is optional. The default is black.
-              * @param penStyle The style of the pen. This parameter is optional. The default is SolidStyle.
-              * @param capStyle The cap style. This parameter is optional. The default is flat style.
-              * @param joinStyle The join style. This parameter is optional. The default is round style.
+              * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
+              * @param cap The cap style. This parameter is optional. The default is flat style.
+              * @param join The join style. This parameter is optional. The default is round style.
               */
               Pen( size_t width, const ARgbColor& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
 
