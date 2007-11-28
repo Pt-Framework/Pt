@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006 Tobias Mueller                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,7 +17,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "Pt/Api.h"
+
 #include "Pt/Gfx/Brush.h"
+#include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Math/Point.h"
@@ -82,8 +85,13 @@ void Label::update()
 
     if( !_text.empty() ) {
         Pen pen(1, foregroundColor());
+        Font font("Tahoma");     // TODO Font name
+
         widgetPainter.setPen(pen);
         backbufferPainter.setPen(pen);
+
+        widgetPainter.setFont(font);
+        backbufferPainter.setFont(font);
 
         widgetPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );
         backbufferPainter.drawText( Math::Point(0, widgetPainter.fontMetrics().ascent()), _text.c_str() );

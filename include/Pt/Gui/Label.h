@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris D�rner                                  *
+ *   Copyright (C) 2006 Tobias Mueller                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -61,7 +61,10 @@ namespace Gui {
              * @param text The (optional) text of this label.
              * @see setText(const Pt::String)
              */
-            Label(Widget& parent, const Math::Point& at, const Math::Size& size, const Pt::String& text = Pt::String());
+            Label(Widget& parent,
+                  const Math::Point& at = Math::Point(0, 0),
+                  const Math::Size& size = Math::Size(0, 0),
+                  const Pt::String& text = Pt::String());
 
             //! Empty destructor for the label widget.
             ~Label();
@@ -90,10 +93,10 @@ namespace Gui {
              */
             virtual void update();
 
-            // inherit doc
+            // Automatically inherits the documentation of its base class.
             virtual Math::Size minimumSize();
 
-            // inherit doc
+            // Automatically inherits the documentation of its base class.
             virtual Math::Size preferredSize();
 
         public:
