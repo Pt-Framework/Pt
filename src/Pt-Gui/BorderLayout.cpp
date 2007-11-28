@@ -87,7 +87,7 @@ void BorderLayout::remove(Widget& widget)
 
 void BorderLayout::update()
 {
-    const std::list<Widget*>& children = this->widget().childWidgets();
+    // const std::list<Widget*>& children = this->widget().childWidgets();
 
     ssize_t top    = this->widget().insets().top();
     ssize_t left   = this->widget().insets().left();
@@ -150,7 +150,7 @@ Math::Size BorderLayout::minimumSize()
 
     if (_east != 0) {
         middleMaxWidth += _east->minimumSize().width() + _spacing;
-        middleMaxHeight = size_t(std::max(0, ssize_t(_east->minimumSize().height())));
+        middleMaxHeight = size_t(std::max(ssize_t(0), ssize_t(_east->minimumSize().height())));
     }
 
     if (_center != 0) {
