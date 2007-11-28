@@ -102,26 +102,26 @@ void BorderLayout::update()
 
     if (_south != 0) {
         _south->move(left, bottom - _south->preferredSize().height());
-        _south->resize(size_t(std::max(0l, right - left)), _south->preferredSize().height());
+        _south->resize(size_t(std::max(ssize_t(0), right - left)), _south->preferredSize().height());
         bottom -= _south->size().height() + _spacing;
     }
 
     if (_east != 0) {
         const Pt::Math::Size& preferredSize = _east->preferredSize();
         _east->move(right -preferredSize .width(), top);
-        _east->resize(preferredSize.width(), size_t(std::max(0l, bottom - top)));
+        _east->resize(preferredSize.width(), size_t(std::max(ssize_t(0), bottom - top)));
         right -= _east->size().width() + _spacing;
     }
 
     if (_west != 0) {
         _west->move(left, top);
-        _west->resize(_west->preferredSize().width(), size_t(std::max(0l, bottom - top)));
+        _west->resize(_west->preferredSize().width(), size_t(std::max(ssize_t(0), bottom - top)));
         left += _west->size().width() + _spacing;
     }
 
     if (_center != 0) {
         _center->move(left, top);
-        _center->resize(size_t(std::max(0l, right - left)), size_t(std::max(0l, bottom - top)));
+        _center->resize(size_t(std::max(ssize_t(0), right - left)), size_t(std::max(ssize_t(0), bottom - top)));
     }
 }
 
@@ -150,12 +150,12 @@ Math::Size BorderLayout::minimumSize()
 
     if (_east != 0) {
         middleMaxWidth += _east->minimumSize().width() + _spacing;
-        middleMaxHeight = size_t(std::max(0l, ssize_t(_east->minimumSize().height())));
+        middleMaxHeight = size_t(std::max(0, ssize_t(_east->minimumSize().height())));
     }
 
     if (_center != 0) {
         middleMaxWidth += _center->minimumSize().width();
-        middleMaxHeight = size_t(std::max(0l, ssize_t(_center->minimumSize().height())));
+        middleMaxHeight = size_t(std::max(ssize_t(0), ssize_t(_center->minimumSize().height())));
     }
 
     maxWidth   = std::max(maxWidth, middleMaxWidth);
