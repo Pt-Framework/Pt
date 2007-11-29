@@ -87,8 +87,6 @@ void BorderLayout::remove(Widget& widget)
 
 void BorderLayout::update()
 {
-    // const std::list<Widget*>& children = this->widget().childWidgets();
-
     ssize_t top    = this->widget().insets().top();
     ssize_t left   = this->widget().insets().left();
     ssize_t bottom = this->widget().size().height() - this->widget().insets().bottom();
