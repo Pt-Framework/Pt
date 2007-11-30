@@ -23,19 +23,19 @@
 
 namespace Pt {
 
-void Settings::load(std::basic_istream<Pt::Char>& is)
+
+void Settings::load(std::basic_istream<Pt::Char>* is)
 {
-    SettingsReader reader(is);
+    SettingsReader reader(*is);
     reader.read(*this);
 }
 
 
-void Settings::save(std::basic_ostream<Pt::Char>& is) const
+void Settings::save(std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is ) const
 {
-    SettingsWriter writer(is);
+    SettingsWriter writer(os,is);
     writer.write(*this);
 }
-
 
 void SettingsWriter::write(const Settings& s)
 {
@@ -78,6 +78,14 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
     SerializationInfo::ConstIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
+        if( _is != 0 )
+        {
+            Pt::String line;
+            
+            while( getline(*_is,line) && line[0] == ';')    
+                *_os <<line<<std::endl;
+        }
+        
         if( it->category() == SerializationInfo::Value )
         {
             *_os << Pt::String::widen( prefix ) << '.';
@@ -185,12 +193,12 @@ class SettingsReader::ParseContext
         void reset()
         {
             if( _section.empty() )
-                _name.clear();
+                _name = L"";
             else
                 _name = _section + Pt::Char(L'.');
 
-            _value.clear();
-            _type.clear();
+            _value = L"";
+            _type = L"";
         }
 
         unsigned line() const
@@ -223,9 +231,9 @@ class SettingsReader::ParseContext
             _prevType = _value;
             _hasPrev = true;
 
-            _name.clear();
-            _value.clear();
-            _type.clear();
+            _name  = L"";
+            _value = L"";
+            _type  = L"";
         }
 
         void enter2()
@@ -234,21 +242,21 @@ class SettingsReader::ParseContext
             _prevType = _name;
             _hasPrev = true;
 
-            _name.clear();
-            _value.clear();
-            _type.clear();
+            _name  = L"";
+            _value = L"";
+            _type  = L"";
         }
 
         void popValue()
         {
             _value = _name;
-            _name = _prevName;
-            _type = _prevValue;
+            _name  = _prevName;
+            _type  = _prevValue;
 
-            _prevName.clear();
-            _prevValue.clear();
-            _prevType.clear();
-            _hasPrev = false;
+            _prevName  = L"";
+            _prevValue = L"";
+            _prevType  = L"";
+            _hasPrev   = false;
 
             this->addValue();
         }
@@ -272,31 +280,33 @@ class SettingsReader::ParseContext
 
         void addValue()
         {
-            this->popNode();
+           this->popNode();
 
             //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
-            size_t pos  = _name.rfind( Pt::Char(L'.') );
-
+            std::string name = _name.narrow();
+            
+            size_t pos  = name.rfind('.');
+                         
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationInfo* obj = _data->findMember( _name.substr( 0, pos ).narrow() );
+                Pt::SerializationInfo* obj = _data->findMember( name.substr( 0, pos ) );
                 if(obj == 0)
-                    obj = &( _data->addMember( _name.substr( 0, pos ).narrow() ) );
+                    obj = &( _data->addMember( name.substr( 0, pos ) ) );
 
-                SerializationInfo& value = obj->addMember( _name.substr( ++pos ).narrow() );
+                SerializationInfo& value = obj->addMember( name.substr( ++pos ) );
                 value.setValue(_value);
                 value.setTypeName( _type.narrow() );
             }
             else
             {
-                SerializationInfo& value = _data->addMember(_name.narrow());
+                SerializationInfo& value = _data->addMember( name );
                 value.setValue( _value );
                 value.setTypeName( _type.narrow() );
             }
 
-            _type.clear();
-            _value.clear();
-            _name.clear();
+            _type  = L"";
+            _value = L"";
+            _name  = L"";
         }
 
         void popNode()
@@ -304,9 +314,9 @@ class SettingsReader::ParseContext
             if(_hasPrev)
                 this->pushNode();
 
-            _prevName.clear();
-            _prevValue.clear();
-            _prevType.clear();
+            _prevName  = L"";
+            _prevValue = L"";
+            _prevType  = L"";
             _hasPrev = false;
         }
 
@@ -314,27 +324,29 @@ class SettingsReader::ParseContext
         void pushNode()
         {
             //std::cerr << "pushed: " << "(" << _prevType.narrow() << ") " << _prevName.narrow() << std::endl;
-
-            size_t pos  = _prevName.rfind( Pt::Char(L'.') );
+            std::string prevName =  _prevName.narrow();
+            
+            size_t pos  = prevName.rfind( '.' );
 
             if(pos != Pt::String::npos)
-            {
-                Pt::SerializationInfo* data = _data->findMember( _prevName.substr( 0, pos ).narrow() );
+            {               
+                Pt::SerializationInfo* data = _data->findMember( prevName.substr( 0, pos ) );
                 if(data == 0)
-                    data = &( _data->addMember( _prevName.substr( 0, pos ).narrow() ) );
+                    data = &( _data->addMember( prevName.substr( 0, pos ) ));
 
                 _data = data;
                 ++_depth;
                 _isDotted = true;
                 _prevName = _prevName.substr( ++pos );
-            }
-
-            Pt::SerializationInfo* data = _data->findMember( _prevName.narrow() );
+                 prevName = _prevName.narrow();
+            }                        
+            
+            Pt::SerializationInfo* data = _data->findMember( prevName );
             if(data == 0 || _depth != 0)
-                data = &( _data->addMember( _prevName.narrow() ) );
+                data = &( _data->addMember( prevName ) );
 
             _data = data;
-            _data->setTypeName(_prevType.narrow());
+            _data->setTypeName( prevName );
             ++_depth;
         }
 

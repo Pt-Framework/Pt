@@ -29,6 +29,7 @@
 #include <cassert>
 
 
+
 namespace Pt {
 
 class PT_API Settings : public SerializationInfo
@@ -36,10 +37,9 @@ class PT_API Settings : public SerializationInfo
     public:
         Settings()
         {}
-
-        void load(std::basic_istream<Pt::Char>& is);
-
-        void save(std::basic_ostream<Pt::Char>& is) const;
+        
+        void load( std::basic_istream<Pt::Char>* is );
+        void save( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is = 0 ) const;
 
         // TODO getSerializable
         template <typename T>
@@ -65,8 +65,9 @@ class PT_API Settings : public SerializationInfo
 class PT_API SettingsWriter
 {
     public:
-        SettingsWriter(std::basic_ostream<Pt::Char>& os)
-        : _os(&os)
+        SettingsWriter( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is)
+        : _os(os)
+        , _is(is)
         , _indent(0)
         { }
 
@@ -88,6 +89,7 @@ class PT_API SettingsWriter
 
     private:
         std::basic_ostream<Pt::Char>* _os;
+        std::basic_istream<Pt::Char>* _is;
         size_t _indent;
 };
 

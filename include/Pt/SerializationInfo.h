@@ -447,10 +447,28 @@ template <typename T>
 inline void operator <<=(SerializationInfo& si, const std::vector<T>& vec)
 {
     typename std::vector<T>::const_iterator it;
+
+    for(it = vec.begin(); it != vec.end(); ++it)
+        si <<= *it;
+}
+
+inline void operator >>=(const SerializationInfo& si, std::vector<int>& vec)
+{
+    for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
+    {
+        vec.resize( vec.size() + 1 );
+        *it >>=  vec.back();
+    }
+}
+
+inline void operator <<=(SerializationInfo& si, const std::vector<int>& vec)
+{
+    std::vector<int>::const_iterator it;
+
     for(it = vec.begin(); it != vec.end(); ++it)
     {
-        SerializationInfo& elem = si.addMember("");
-        elem <<= *it;
+        SerializationInfo& newSi = si.addMember("int");
+        newSi <<= *it;
     }
 }
 

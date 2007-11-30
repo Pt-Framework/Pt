@@ -3,10 +3,10 @@
 
 namespace Pt {
 
+
 SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
 : std::logic_error(msg + "'" + si)
-{}
-
+{ }
 
 SerializationError::~SerializationError() throw()
 {}
@@ -16,8 +16,8 @@ SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)
 {
+    _nodes.reserve(150);
 }
-
 
 SerializationInfo::SerializationInfo(const SerializationInfo& si)
 : _parent(0)
@@ -29,7 +29,6 @@ SerializationInfo::SerializationInfo(const SerializationInfo& si)
 , _nodes(si._nodes)
 {
 }
-
 
 SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
 {
