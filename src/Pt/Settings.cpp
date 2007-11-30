@@ -81,11 +81,11 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
         if( _is != 0 )
         {
             Pt::String line;
-            
-            while( getline(*_is,line) && line[0] == ';')    
+
+            while( getline(*_is,line) && line[0] == ';')
                 *_os <<line<<std::endl;
         }
-        
+
         if( it->category() == SerializationInfo::Value )
         {
             *_os << Pt::String::widen( prefix ) << '.';
@@ -198,7 +198,7 @@ class SettingsReader::ParseContext
                 _name = _section + Pt::Char(L'.');
 
             _value = L"";
-            _type = L"";
+            _type  = L"";
         }
 
         unsigned line() const
@@ -231,9 +231,9 @@ class SettingsReader::ParseContext
             _prevType = _value;
             _hasPrev = true;
 
-            _name  = L"";
+            _name = L"";
             _value = L"";
-            _type  = L"";
+            _type = L"";
         }
 
         void enter2()
@@ -242,9 +242,9 @@ class SettingsReader::ParseContext
             _prevType = _name;
             _hasPrev = true;
 
-            _name  = L"";
+            _name = L"";
             _value = L"";
-            _type  = L"";
+            _type = L"";
         }
 
         void popValue()
@@ -253,9 +253,9 @@ class SettingsReader::ParseContext
             _name  = _prevName;
             _type  = _prevValue;
 
-            _prevName  = L"";
+            _prevName = L"";
             _prevValue = L"";
-            _prevType  = L"";
+            _prevType = L"";
             _hasPrev   = false;
 
             this->addValue();
@@ -280,16 +280,16 @@ class SettingsReader::ParseContext
 
         void addValue()
         {
-           this->popNode();
+            this->popNode();
 
             //std::cerr << "value: " << "(" << _type.narrow() << ")" << _name.narrow() << ":" << _value << std::endl;
             std::string name = _name.narrow();
-            
             size_t pos  = name.rfind('.');
-                         
+
+
             if(pos != Pt::String::npos)
             {
-                Pt::SerializationInfo* obj = _data->findMember( name.substr( 0, pos ) );
+                Pt::SerializationInfo* obj = _data->findMember( name.substr( 0, pos ));
                 if(obj == 0)
                     obj = &( _data->addMember( name.substr( 0, pos ) ) );
 
@@ -299,14 +299,14 @@ class SettingsReader::ParseContext
             }
             else
             {
-                SerializationInfo& value = _data->addMember( name );
+                SerializationInfo& value = _data->addMember( name);
                 value.setValue( _value );
                 value.setTypeName( _type.narrow() );
             }
 
-            _type  = L"";
+            _type = L"";
             _value = L"";
-            _name  = L"";
+            _name = L"";
         }
 
         void popNode()
@@ -314,9 +314,9 @@ class SettingsReader::ParseContext
             if(_hasPrev)
                 this->pushNode();
 
-            _prevName  = L"";
+            _prevName = L"";
             _prevValue = L"";
-            _prevType  = L"";
+            _prevType = L"";
             _hasPrev = false;
         }
 
@@ -324,29 +324,29 @@ class SettingsReader::ParseContext
         void pushNode()
         {
             //std::cerr << "pushed: " << "(" << _prevType.narrow() << ") " << _prevName.narrow() << std::endl;
-            std::string prevName =  _prevName.narrow();
-            
-            size_t pos  = prevName.rfind( '.' );
+            std::string prevName = _prevName.narrow();
+            size_t pos  = prevName.rfind('.');
 
             if(pos != Pt::String::npos)
-            {               
+            {
                 Pt::SerializationInfo* data = _data->findMember( prevName.substr( 0, pos ) );
                 if(data == 0)
-                    data = &( _data->addMember( prevName.substr( 0, pos ) ));
+                    data = &( _data->addMember( prevName.substr( 0, pos ) ) );
 
                 _data = data;
                 ++_depth;
                 _isDotted = true;
                 _prevName = _prevName.substr( ++pos );
                  prevName = _prevName.narrow();
-            }                        
-            
-            Pt::SerializationInfo* data = _data->findMember( prevName );
+            }
+
+            Pt::SerializationInfo* data = _data->findMember( prevName  );
+
             if(data == 0 || _depth != 0)
                 data = &( _data->addMember( prevName ) );
 
             _data = data;
-            _data->setTypeName( prevName );
+            _data->setTypeName( _prevType.narrow() );
             ++_depth;
         }
 
