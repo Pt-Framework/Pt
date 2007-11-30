@@ -197,12 +197,23 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 		{
 			//std::cerr << "#Resize:" << ev.size.w << " " << ev.size.h << std::endl;
 			//std::cerr << "-Resize:" << widget.size().width() << " " << widget.size().height() << std::endl;
+			size_t oldHeight = widget.size().height();
+			size_t oldWidth = widget.size().width();
 			
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
 			_app->event(rev);
-			
-			//PaintEvent pev (widget,  Math::Point( 0, 0 ), Math::Size( ev.size.w, ev.size.h) );
-			//_app->event(pev);
+
+			if( ev.size.h > oldHeight )
+			{
+				PaintEvent pev (widget,  Math::Point( 0, oldHeight ), Math::Size( ev.size.w, ev.size.h - oldHeight) );
+				_app->event(pev);
+			}
+
+			if( ev.size.w > oldWidth )
+			{
+				PaintEvent pev (widget,  Math::Point( oldWidth, 0 ), Math::Size( ev.size.w-oldWidth, oldHeight) );
+				_app->event(pev);
+			}
 
 			break;
 		}
@@ -412,7 +423,7 @@ void ApplicationImpl::exit()
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:9564:default:-3:-3:0
-#9564:9979:monospace9:0:-1:0
-#9979:10613:default:-3:-3:0
-#**  PhEDIT attribute block ends (-0000170)**/
+#0:9876:default:-3:-3:0
+#9876:10291:monospace9:0:-1:0
+#10291:10925:default:-3:-3:0
+#**  PhEDIT attribute block ends (-0000172)**/

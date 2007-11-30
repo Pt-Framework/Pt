@@ -32,7 +32,7 @@ void onWidgetDraw(PtWidget_t* pw, PhTile_t* damage)
 	PtWidgetDim(pw, &dim);
 	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)w;
 
-	//std::cerr << "draw:: " << w << " " << dim.w << ":" << dim.h << std::endl;
+	std::cerr << "draw:: " << w << " " << dim.w << ":" << dim.h << std::endl;
 	//std::cerr << "draw:: " << PtWidgetRid(pw ) << std::endl;
 
 	Pt::Gui::PaintEvent pev(*widget, 
@@ -44,8 +44,6 @@ void onWidgetDraw(PtWidget_t* pw, PhTile_t* damage)
 
 int onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 {
-	printf("REALIZE\n");
-	
 	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)data;
 
 	PhDim_t dim = { 0, 0 };
@@ -66,6 +64,24 @@ int onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 }
 
 
+int onResize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
+{
+	printf("RESIZE%d\n", data);
+	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)data;
+
+	PhDim_t dim = { 0,	 0 };
+	PtWidgetDim(pw, &dim);
+ 
+  PhWindowEvent_t wev;
+  memset(&wev, 0, sizeof(wev));
+	wev.event_f = Ph_WM_RESIZE;
+	wev.size = dim;
+	Pt::Gui::EventLoopImpl::instance().windowEvent(*widget, wev);
+
+	return Pt_CONTINUE;
+}
+
+
 namespace Pt {
 
 namespace Gui {
@@ -75,7 +91,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 , _ptwidget(0)
 , _isShown(false)
 {
-	PtArg_t args[5];
+	PtArg_t args[7];
 	
 	PhDim_t dim = { size.width(), size.height() };
 	PtSetArg(&args[0],Pt_ARG_DIM,&dim, 0);
@@ -92,25 +108,28 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 	realizeCallback.data = &_apiWidget;
   PtSetArg(&args[4], Pt_CB_REALIZED, &realizeCallback, 0);
   
+  	PtCallback_t resizeCallback;
+	resizeCallback.event_f = &onResize;
+	resizeCallback.data = &_apiWidget;
+  PtSetArg(&args[5], Pt_CB_REALIZED, &resizeCallback, 0);
+  
+  PtSetArg(&args[6], Pt_ARG_FILL_COLOR, Pg_TRANSPARENT, 0);
+  
   if(parent)
   {
-		_ptwidget =  PtCreateWidget(PtRaw, parent->impl().photonWidget(), 5, args);
-		//std::cerr << "child: " << &_apiWidget << std::endl;
+		_ptwidget =  PtCreateWidget(PtRaw, parent->impl().photonWidget(), 7, args);
+		std::cerr << "child: " << &_apiWidget << std::endl;
 		PtRealizeWidget(_ptwidget);
 		_isShown = true;
     _painter.setRid( PtWidgetRid(_ptwidget) );
 	}
   else
   {
-		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 5, args);
-		//std::cerr << "top-level: " << &_apiWidget << std::endl;
+		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 7, args);
+		std::cerr << "top-level: " << &_apiWidget << std::endl;
 	}
 
   _painter.setRid( PtWidgetRid(_ptwidget ) );
-
-
-
-	
 
 	PtAddEventHandler(_ptwidget, 
 	                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION |
@@ -180,12 +199,13 @@ void WidgetImpl::resize(size_t width, size_t height)
 	PhDim_t dim = { width, height };
 	PtSetResource(_ptwidget,	Pt_ARG_DIM,&dim,0);
 
+/*
   PhWindowEvent_t wev;
   memset(&wev, 0, sizeof(wev));
 	wev.event_f = Ph_WM_RESIZE;
 	wev.size = dim;
 	EventLoopImpl::instance().windowEvent(_apiWidget, wev);
-
+*/
 	/*PaintEvent pev(_apiWidget, 
 	               Math::Point( 0, 0), 
 	               Math::Size( dim.w, dim.h ) );
@@ -238,26 +258,28 @@ PhEmit(&ev, &rect, &wev);
 #/** PhEDIT attribute block
 #-11:16777215
 #0:1544:monospace9:-3:-3:0
-#1544:2690:monospace9:0:-1:0
-#2690:2888:monospace9:-3:-3:0
-#2888:3294:monospace9:0:-1:0
-#3294:3509:monospace9:-3:-3:0
-#3509:3602:monospace9:0:-1:0
-#3602:3617:monospace9:-3:-3:0
-#3617:3743:monospace9:0:-1:0
-#3743:3764:monospace9:-3:-3:0
-#3764:3788:monospace9:0:-1:0
-#3788:3793:monospace9:-3:-3:0
-#3793:3795:monospace9:0:-1:0
-#3795:4242:monospace9:-3:-3:0
-#4242:4286:monospace9:0:-1:0
-#4286:4411:monospace9:-3:-3:0
-#4411:4457:monospace9:0:-1:0
-#4457:4509:monospace9:-3:-3:0
-#4509:4599:monospace9:0:-1:0
-#4599:4786:monospace9:-3:-3:0
-#4786:4837:monospace9:0:-1:0
-#4837:4896:monospace9:-3:-3:0
-#4896:5951:monospace9:0:-1:0
-#5951:5993:monospace9:-3:-3:0
-#**  PhEDIT attribute block ends (-0000765)**/
+#1544:3054:monospace9:0:-1:0
+#3054:3252:monospace9:-3:-3:0
+#3252:3658:monospace9:0:-1:0
+#3658:3722:monospace9:-3:-3:0
+#3722:3882:monospace9:0:-1:0
+#3882:3897:monospace9:-3:-3:0
+#3897:3907:monospace9:0:-1:0
+#3907:4100:monospace9:-3:-3:0
+#4100:4193:monospace9:0:-1:0
+#4193:4208:monospace9:-3:-3:0
+#4208:4332:monospace9:0:-1:0
+#4332:4353:monospace9:-3:-3:0
+#4353:4377:monospace9:0:-1:0
+#4377:4826:monospace9:-3:-3:0
+#4826:4870:monospace9:0:-1:0
+#4870:4995:monospace9:-3:-3:0
+#4995:5041:monospace9:0:-1:0
+#5041:5093:monospace9:-3:-3:0
+#5093:5183:monospace9:0:-1:0
+#5183:5370:monospace9:-3:-3:0
+#5370:5421:monospace9:0:-1:0
+#5421:5480:monospace9:-3:-3:0
+#5480:6540:monospace9:0:-1:0
+#6540:6582:monospace9:-3:-3:0
+#**  PhEDIT attribute block ends (-0000824)**/
