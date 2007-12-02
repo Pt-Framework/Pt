@@ -43,6 +43,8 @@ namespace Gui {
             void setRid(PhRid_t rid)
             { _rid = rid; }
 
+			void setClipping(PhTile_t* tiles);
+
             void drawLine(const Math::Point& from, const Math::Point& to);
 
             void drawRect(const Gfx::Rect& rect);

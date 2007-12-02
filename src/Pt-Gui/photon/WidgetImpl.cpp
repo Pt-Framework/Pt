@@ -22,18 +22,18 @@
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/PaintEvent.h>
 
+namespace Pt {
 
-void onWidgetDraw(PtWidget_t* pw, PhTile_t* damage)
+namespace Gui {
+
+void WidgetImpl::onDraw(PtWidget_t* pw, PhTile_t* damage)
 {
 	void* w = 0;
 	PtGetResource(pw, Pt_ARG_POINTER, &w, 0);
-
+	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)w;
+	
 	PhDim_t dim = { 0, 0 };
 	PtWidgetDim(pw, &dim);
-	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)w;
-
-	std::cerr << "draw:: " << w << " " << dim.w << ":" << dim.h << std::endl;
-	//std::cerr << "draw:: " << PtWidgetRid(pw ) << std::endl;
 
 	Pt::Gui::PaintEvent pev(*widget, 
 	                        Pt::Math::Point( 0, 0), 
@@ -42,49 +42,35 @@ void onWidgetDraw(PtWidget_t* pw, PhTile_t* damage)
 }
 
 
-int onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
+int WidgetImpl::onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 {
 	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)data;
-
-	PhDim_t dim = { 0, 0 };
-	PtWidgetDim(pw, &dim);
-
-	PhWindowEvent_t wev;
-	memset(&wev, 0, sizeof(wev));
-	wev.event_f = Ph_WM_RESIZE;
-	wev.size = dim;
-	Pt::Gui::EventLoopImpl::instance().windowEvent(*widget, wev);
-
-	Pt::Gui::PaintEvent pev(*widget, 
-	               Pt::Math::Point( 0, 0), 
-	               Pt::Math::Size( dim.w, dim.h ) );
-	Pt::Gui::EventLoopImpl::instance().commitEvent(pev);
+	widget->impl()._painter.setRid( PtWidgetRid(pw) );
 	
 	return Pt_CONTINUE;
 }
 
 
-int onResize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
+int WidgetImpl::onResize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 {
-	printf("RESIZE%d\n", data);
 	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)data;
 
 	PhDim_t dim = { 0,	 0 };
 	PtWidgetDim(pw, &dim);
  
-  PhWindowEvent_t wev;
-  memset(&wev, 0, sizeof(wev));
+ 	PhWindowEvent_t wev;
+ 	memset(&wev, 0, sizeof(wev));
 	wev.event_f = Ph_WM_RESIZE;
 	wev.size = dim;
 	Pt::Gui::EventLoopImpl::instance().windowEvent(*widget, wev);
+
+	widget->impl().setClipping();
 
 	return Pt_CONTINUE;
 }
 
 
-namespace Pt {
 
-namespace Gui {
 
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _apiWidget(apiWidget)
@@ -98,38 +84,29 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 
 	PhPoint_t pos = { at.x(), at.y() };
 	PtSetArg(&args[1],Pt_ARG_POS,&pos, 0);
-
 	PtSetArg(&args[2], Pt_ARG_POINTER, &apiWidget, 0);
-
-	PtSetArg(&args[3], Pt_ARG_RAW_DRAW_F, &onWidgetDraw, 1);
+	PtSetArg(&args[3], Pt_ARG_RAW_DRAW_F, &WidgetImpl::onDraw, 1);
 
 	PtCallback_t realizeCallback;
-	realizeCallback.event_f = &onRealize;
+	realizeCallback.event_f = &WidgetImpl::onRealize;
 	realizeCallback.data = &_apiWidget;
-  PtSetArg(&args[4], Pt_CB_REALIZED, &realizeCallback, 0);
+	PtSetArg(&args[4], Pt_CB_REALIZED, &realizeCallback, 0);
   
   	PtCallback_t resizeCallback;
-	resizeCallback.event_f = &onResize;
+	resizeCallback.event_f = &WidgetImpl::onResize;
 	resizeCallback.data = &_apiWidget;
-  PtSetArg(&args[5], Pt_CB_REALIZED, &resizeCallback, 0);
+	PtSetArg(&args[5], Pt_CB_REALIZED, &resizeCallback, 0);
   
   PtSetArg(&args[6], Pt_ARG_FILL_COLOR, Pg_TRANSPARENT, 0);
   
   if(parent)
   {
 		_ptwidget =  PtCreateWidget(PtRaw, parent->impl().photonWidget(), 7, args);
-		std::cerr << "child: " << &_apiWidget << std::endl;
-		PtRealizeWidget(_ptwidget);
-		_isShown = true;
-    _painter.setRid( PtWidgetRid(_ptwidget) );
 	}
   else
   {
 		_ptwidget =  PtCreateWidget(PtWindow, Pt_NO_PARENT, 7, args);
-		std::cerr << "top-level: " << &_apiWidget << std::endl;
 	}
-
-  _painter.setRid( PtWidgetRid(_ptwidget ) );
 
 	PtAddEventHandler(_ptwidget, 
 	                  Ph_EV_BUT_PRESS |Ph_EV_BUT_RELEASE |Ph_EV_PTR_MOTION |
@@ -153,7 +130,6 @@ void WidgetImpl::setTitle(const Pt::String& text)
 
 Painter WidgetImpl::painter()
 {
-	_painter.setRid( PtWidgetRid(_ptwidget ) );
 	return Painter(&_painter);
 }
 
@@ -164,7 +140,6 @@ void WidgetImpl::show()
         return;
 
     PtRealizeWidget(_ptwidget);
-    _painter.setRid( PtWidgetRid(_ptwidget) );
     _isShown = true;
 }
 
@@ -189,8 +164,6 @@ void WidgetImpl::move(size_t x, size_t y)
 {
 	PhPoint_t pos = { x, y };
 	PtSetResource(_ptwidget,Pt_ARG_POS,&pos, 0);
-	
-	//TODO: synthetic MoveEvent
 }
 
 
@@ -198,88 +171,55 @@ void WidgetImpl::resize(size_t width, size_t height)
 {
 	PhDim_t dim = { width, height };
 	PtSetResource(_ptwidget,	Pt_ARG_DIM,&dim,0);
-
-/*
-  PhWindowEvent_t wev;
-  memset(&wev, 0, sizeof(wev));
-	wev.event_f = Ph_WM_RESIZE;
-	wev.size = dim;
-	EventLoopImpl::instance().windowEvent(_apiWidget, wev);
-*/
-	/*PaintEvent pev(_apiWidget, 
-	               Math::Point( 0, 0), 
-	               Math::Size( dim.w, dim.h ) );
-	EventLoopImpl::instance().commitEvent(pev);*/
-
-/*
-	PhRegion_t region;
-	region.rid = PtWidgetRid(_ptwidget);
-	
-	
-	PhRegionChange(Ph_REGION_RECT,
-	Ph_EXPOSE_REGION,
-	&region,
-	NULL,
-	NULL );
-*/
-	
-	//PtMoveResizeWidget(_ptwidget, Pt_BLIT);
-
-/*
-PhWindowEvent_t wev;
-memset(&wev, 0, sizeof(wev));
-wev.event_f = Ph_WM_RESIZE;
-wev.size = dim;
-
-PhEvent_t ev;
-memset(&ev, 0, sizeof(ev));
-ev.type = Ph_EV_WM;
-ev.subtype = 0;
-ev.processing_flags = Ph_FAKE_EVENT;
-ev.flags = Ph_EVENT_DIRECT;
-ev.num_rects = 1;
-ev.data_len = sizeof(wev);
-ev.emitter.rid = Ph_DEV_RID;
-ev.collector.rid = PtWidgetRid(_ptwidget);
-
-PhRect_t rect;
-rect.ul.x = rect.ul.y = 0;
-rect.lr.x = rect.lr.y = 200;
-
-PhEmit(&ev, &rect, &wev);
-*/
 }
 
+
+void WidgetImpl::setClipping()
+{
+	PhDim_t dim = { 0, 0 };
+	PtWidgetDim(_ptwidget, &dim);
+	
+	PhTile_t* backTile = PhGetTile();
+	backTile->rect.ul.x = 0;
+	backTile->rect.ul.y = 0; 
+	backTile->rect.lr.x = dim.w;
+	backTile->rect.lr.y = dim.h; 
+	backTile->next = NULL;
+	
+	PhTile_t* tile = NULL;
+	PhTile_t* tiles = NULL;
+	PtWidget_t* child = 0;
+	for(child = PtWidgetChildBack( _ptwidget ); child ; child = PtWidgetBrotherInFront(child))
+	{
+		if( !tiles )
+		{
+  			tile = PhGetTile();
+  			tiles = tile;
+		}
+		else
+		{
+			tile->next = PhGetTile();
+			tile = tile->next;
+		}
+
+		PhArea_t area;
+		PtWidgetArea( child, &area );
+
+		tile->rect.ul.x = area.pos.x;
+		tile->rect.ul.y = area.pos.y; 
+		tile->rect.lr.x = area.pos.x + area.size.w - 1;
+		tile->rect.lr.y = area.pos.y + area.size.h - 1; 
+		tile->next = NULL;
+	}
+	
+	if(tiles)
+	{
+		PhTile_t* clipped = PhClipTilings(backTile, tiles, NULL);	
+		_painter.setClipping(clipped);
+		PhFreeTiles(tiles);
+	}
+}
 
 } // namespace Gui
 
 } // namespace Pt
-
-#/** PhEDIT attribute block
-#-11:16777215
-#0:1544:monospace9:-3:-3:0
-#1544:3054:monospace9:0:-1:0
-#3054:3252:monospace9:-3:-3:0
-#3252:3658:monospace9:0:-1:0
-#3658:3722:monospace9:-3:-3:0
-#3722:3882:monospace9:0:-1:0
-#3882:3897:monospace9:-3:-3:0
-#3897:3907:monospace9:0:-1:0
-#3907:4100:monospace9:-3:-3:0
-#4100:4193:monospace9:0:-1:0
-#4193:4208:monospace9:-3:-3:0
-#4208:4332:monospace9:0:-1:0
-#4332:4353:monospace9:-3:-3:0
-#4353:4377:monospace9:0:-1:0
-#4377:4826:monospace9:-3:-3:0
-#4826:4870:monospace9:0:-1:0
-#4870:4995:monospace9:-3:-3:0
-#4995:5041:monospace9:0:-1:0
-#5041:5093:monospace9:-3:-3:0
-#5093:5183:monospace9:0:-1:0
-#5183:5370:monospace9:-3:-3:0
-#5370:5421:monospace9:0:-1:0
-#5421:5480:monospace9:-3:-3:0
-#5480:6540:monospace9:0:-1:0
-#6540:6582:monospace9:-3:-3:0
-#**  PhEDIT attribute block ends (-0000824)**/

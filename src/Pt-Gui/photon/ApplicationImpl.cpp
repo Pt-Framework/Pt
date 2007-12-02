@@ -19,6 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ApplicationImpl.h"
+#include "WidgetImpl.h"
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/Widget.h"
 #include "Pt/Gui/MouseEvent.h"
@@ -102,8 +103,7 @@ void EventLoopImpl::pointerMotion(Pt::Gui::Widget& widget, PhEvent_t& ev)
 	                                    pev->pos.y + ev.translation.y, 
 	                                    action, 
 	                                    mod);
-	                                  
-	// std::cerr << mev.x() << " " << mev.y() << std::endl;
+
 	_app->event(mev);
 }
 
@@ -130,8 +130,7 @@ void EventLoopImpl::buttonPress(Pt::Gui::Widget& widget, PhEvent_t& ev)
 	                                       button,
 	                                       action,
 	                                       0);
-	                                     
-	 // std::cerr << pev.pos.x << " " << pev.pos.y << std::endl;
+
 	_app->event(mev);
 }
 
@@ -167,9 +166,7 @@ void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 		PaintEvent pev(widget, 
 		                         Math::Point( rect->ul.x, rect->ul.y), 
 		                         Math::Size( rect->lr.x - rect->ul.x + 1, rect->lr.y - rect->ul.y + 1) );
-
-
-		//std::cerr << rect->ul.x << " " << rect->ul.y << " " << (rect->lr.x - rect->ul.x + 1) << " " <<(rect->lr.y - rect->ul.y + 1) << std::endl;
+		
 		_app->event(pev);
 	}
 }
@@ -177,29 +174,29 @@ void EventLoopImpl::exposeEvent(Pt::Gui::Widget& widget, PhEvent_t& ev)
 
 void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 {
-	// TODO: Minimized.
+	// TODO: Minimized. Could be Ph_WM_HIDE
 
 	switch(ev.event_f)
 	{
 		case Ph_WM_MAX:
-		{ std::cerr << "WM: " << "Ph_WM_MAX" << std::endl;
+		{
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Maximized);
 			_app->event(rev);
 			break;
 		}
 		case Ph_WM_RESTORE:
-		{std::cerr << "WM: " << "Ph_WM_RESTORE" << std::endl;
+		{
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Restored);
 			_app->event(rev);
 			break;
 		}
 		case Ph_WM_RESIZE:
 		{
-			//std::cerr << "#Resize:" << ev.size.w << " " << ev.size.h << std::endl;
-			//std::cerr << "-Resize:" << widget.size().width() << " " << widget.size().height() << std::endl;
 			size_t oldHeight = widget.size().height();
 			size_t oldWidth = widget.size().width();
 			
+			widget.impl().setClipping();
+
 			ResizeEvent rev(widget,  ev.size.w,  ev.size.h , ResizeEvent::Resize);
 			_app->event(rev);
 
@@ -221,76 +218,25 @@ void EventLoopImpl::windowEvent(Pt::Gui::Widget& widget, PhWindowEvent_t& ev)
 		{
 			MoveEvent mev(widget, ev.pos.x, ev.pos.y);
 			_app->event(mev);
-			//std::cerr << "Move:" << ev.pos.x << " " << ev.pos.y << std::endl;
 			break;
 		}
+		
 		case Ph_WM_TOFRONT:
-		{
-			//std::cerr << "WM: " << "Ph_WM_TOFRONT" << std::endl;
-			break;
-		}
 		case Ph_WM_FFRONT:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_FFRONT" << std::endl;
-			break;
-		}
 		case Ph_WM_FOCUS:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_FOCUS" << std::endl;
-			break;
-		}
 		case Ph_WM_CLOSE:
-		{
-			//std::cerr << "WM: " << "Ph_WM_CLOSE" << std::endl;
-			break;
-		}
 		case Ph_WM_MENU:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_MENU" << std::endl;
-			break;
-		}
 		case Ph_WM_TOBACK:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_TOBACK" << std::endl;
-			break;
-		}
 		case Ph_WM_CONSWITCH:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_CONSWITCH" << std::endl;
-			break;
-		}
 		case Ph_WM_HIDE:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_HIDE" << std::endl;
-			break;
-		}
 		case Ph_WM_BACKDROP:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_BACKDROP" << std::endl;
-			break;
-		}
 		case Ph_WM_HELP:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_HELP" << std::endl;
-			break;
-		}
 		case Ph_WM_COLLAPSE:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_COLLAPSE" << std::endl;
-			break;
-		}
 		case Ph_WM_TASKBAR:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_TASKBAR" << std::endl;
-			break;
-		}
 		case Ph_WM_NO_FOCUS_LIST:
-		{
-			//std::cerr << "WM: " <<" Ph_WM_NO_FOCUS_LIST" << std::endl;
 			break;
-		}
+
 		default: 
-			//std::cerr << "WM unknown: " << (unsigned long) ev.event_f<< " - " << ev.size.w << " " <<  ev.size.h << std::endl;
 			break;
 	}
 }
@@ -305,64 +251,45 @@ int EventLoopImpl::photonEvent(PtWidget_t* pw, void* data, PtCallbackInfo_t* inf
 	{
 		case Ph_EV_PTR_MOTION_BUTTON:
 		case Ph_EV_PTR_MOTION_NOBUTTON:
-		{ //std::cerr << "Ph_EV_PTR_MOTION_NOBUTTON"  << std::endl;
+		{
 			EventLoopImpl::instance().pointerMotion( *widget, *ev );
 			break;
 		}
 		case Ph_EV_BUT_PRESS:
-		{ //std::cerr << "Ph_EV_BUT_PRESS"  << std::endl;
+		{
 			EventLoopImpl::instance().buttonPress(*widget, *ev);
 			break;
 		}
 		case Ph_EV_BUT_RELEASE:
-		{ //std::cerr << "Ph_EV_BUT_RELEASE"  << std::endl;
+		{
 			EventLoopImpl::instance().buttonRelease(*widget, *ev);
 			break;
 		}
 		case Ph_EV_BOUNDARY:
-		{ //std::cerr << "Ph_EV_BOUNDARY"  << std::endl;
+		{
 			EventLoopImpl::instance().pointerMotion(*widget, *ev);
 			break;
 		}
 		case Ph_EV_EXPOSE:
-		{ //std::cerr << "Ph_EV_EXPOSE"  << std::endl;
+		{
 			EventLoopImpl::instance().exposeEvent(*widget, *(info->event));
 			break;
 		}
 		case Ph_EV_WM:
 		{
-		    //std::cerr << "Ph_EV_WM"  << std::endl;
 			PhWindowEvent_t* wev = (PhWindowEvent_t*) PhGetData(info->event);
 			EventLoopImpl::instance().windowEvent(*widget, *wev);
 			break;
 		}
 		case Ph_EV_INFO:
-		{
-			//std::cerr << "Ph_EV_INFO"  << std::endl;
-			break;
-		}
 		case Ph_EV_KEY:
-		{
-			//std::cerr << "Ph_EV_KEY"  << std::endl;
-			break;
-		}
 		case Ph_EV_RAW:
-				{
-			//std::cerr << "Ph_EV_RAW"  << std::endl;
-			break;
-		}
 		case Ph_EV_SERVICE:
-		{
-			//std::cerr << "Ph_EV_SERVICE"  << std::endl;
-			break;
-		}
 		case Ph_EV_SYSTEM:
-		{
-			//std::cerr << "Ph_EV_SYSTEM"  << std::endl;
 			break;
-		}
+
 		default:
-			std::cerr << "Unknown event:" << info->event->type  << std::endl;
+			std::cerr << "Unknown event: " << info->event->type  << std::endl;
 	}
 
 	return 0;
@@ -423,7 +350,7 @@ void ApplicationImpl::exit()
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:9876:default:-3:-3:0
-#9876:10291:monospace9:0:-1:0
-#10291:10925:default:-3:-3:0
-#**  PhEDIT attribute block ends (-0000172)**/
+#0:7888:default:-3:-3:0
+#7888:7988:monospace9:0:-1:0
+#7988:8624:default:-3:-3:0
+#**  PhEDIT attribute block ends (-0000169)**/

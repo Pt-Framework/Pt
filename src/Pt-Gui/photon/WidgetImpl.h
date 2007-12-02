@@ -1,6 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
- *   Copyright (C) 2007 Sebastian Pieck                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -64,6 +63,14 @@ namespace Gui {
         			PtWidget_t* photonWidget()
         			{ return _ptwidget; }
 
+						void setClipping();
+
+						static void onDraw(PtWidget_t* pw, PhTile_t* damage);
+
+						static int onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info);
+
+						static int onResize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info);
+
         private:
             Widget& _apiWidget;
             PtWidget_t* _ptwidget;
@@ -79,9 +86,13 @@ namespace Gui {
 
 #/** PhEDIT attribute block
 #-11:16777215
-#0:1521:monospace9:-3:-3:0
-#1521:1551:monospace9:0:-1:0
-#1551:1577:monospace9:-3:-3:0
-#1577:1603:monospace9:0:-1:0
-#1603:2703:monospace9:-3:-3:0
-#**  PhEDIT attribute block ends (-0000234)**/
+#0:1444:monospace9:-3:-3:0
+#1444:1474:monospace9:0:-1:0
+#1474:1500:monospace9:-3:-3:0
+#1500:1526:monospace9:0:-1:0
+#1526:2448:monospace9:-3:-3:0
+#2448:2507:monospace09:0:-1:0
+#2507:2508:monospace9:-3:-3:0
+#2508:2669:monospace09:0:-1:0
+#2669:2875:monospace9:-3:-3:0
+#**  PhEDIT attribute block ends (-0000354)**/

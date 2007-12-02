@@ -28,7 +28,8 @@ namespace Pt {
 namespace Gui {
 
 WidgetPainterImpl::WidgetPainterImpl( )
-: _dc(0)
+: _rid(0),
+  _dc(0)
 {
 	PhDrawContext_t* old = PhDCSetCurrent(0);
 	_dc = PhDCSetCurrent(old);
@@ -47,6 +48,24 @@ void WidgetPainterImpl::begin()
 
 void WidgetPainterImpl::end()
 {
+}
+
+
+void WidgetPainterImpl::setClipping(PhTile_t* tiles)
+{
+	std::vector<PhRect_t> rects;
+	
+	for(PhTile_t* tile = tiles; tile != 0; tile = tile->next)
+	{
+		PhRect_t rect;
+		memcpy( &rect, &tile->rect, sizeof(PhRect_t) );
+		rects.push_back(rect);
+	}
+	
+	if( rects.size() )
+		PgSetMultiClipCx(_gc,rects.size(), &rects[0] );
+  	else
+		PgSetMultiClipCx(_gc, 0, NULL );
 }
 
 
@@ -76,8 +95,6 @@ void WidgetPainterImpl::drawRect(const Gfx::Rect& rect)
 
 void WidgetPainterImpl::fillRect(const Gfx::Rect& rect)
 {
-	//std::cerr << "WP :: fillRect: " << rect.x() << " " << rect.y() << " " << rect.width() << " " << rect.height() << std::endl;
-
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
 
@@ -105,10 +122,9 @@ void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx:
 {
 	PgSetRegionCx( _dc, _rid );
 	PhGC_t* old = PgSetGCCx(_dc, _gc);
-	//std::cerr << "drawPixmap: To: " << to.x() << ", " << to.y()  << "   From: " << region.x() << ", " << region.y() << ", " <<  region.width() << ", " << region.height()<< std::endl;
+	
 	PhPoint_t _to = { to.x(), to.y() };
 	PhRect_t rect = { region.x(), region.y(), region.x() + region.width(), region.y() + region.height() };
-	//PhDim_t dim = {region.width(), region.height() };
 
 	PgDrawPhImageRectCxv(_dc, &_to, pm.impl().image(), &rect, NULL );
 	PgFlush();
@@ -120,3 +136,12 @@ void WidgetPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx:
 
 } // namespace Pt
 
+
+#/** PhEDIT attribute block
+#-11:16777215
+#0:2149:default:-3:-3:0
+#2149:2241:monospace9:0:-1:0
+#2241:2394:default:-3:-3:0
+#2394:2395:monospace9:0:-1:0
+#2395:3739:default:-3:-3:0
+#**  PhEDIT attribute block ends (-0000225)**/
