@@ -35,10 +35,16 @@ void WidgetImpl::onDraw(PtWidget_t* pw, PhTile_t* damage)
 	PhDim_t dim = { 0, 0 };
 	PtWidgetDim(pw, &dim);
 
-	Pt::Gui::PaintEvent pev(*widget, 
-	                        Pt::Math::Point( 0, 0), 
-	                        Pt::Math::Size( dim.w, dim.h ) );
-	Pt::Gui::EventLoopImpl::instance().commitEvent(pev);
+	PhTile_t* tile = 0;
+	for(tile = damage; tile; tile = tile->next)
+	{
+		size_t x = tile->rect.ul.x;
+		size_t y = tile->rect.ul.y;
+		size_t width = tile->rect.lr.x - tile->rect.ul.x;
+		size_t height = tile->rect.lr.y - tile->rect.ul.y;
+		PaintEvent pev(*widget, Math::Point( x, y), Math::Size( width, height ) );
+		EventLoopImpl::instance().commitEvent(pev);
+	}
 }
 
 
@@ -46,7 +52,15 @@ int WidgetImpl::onRealize(PtWidget_t* pw, void* data, PtCallbackInfo_t* info)
 {
 	Pt::Gui::Widget* widget = (Pt::Gui::Widget*)data;
 	widget->impl()._painter.setRid( PtWidgetRid(pw) );
-	
+
+	if( PtWidgetParent(pw) == NULL )
+	{
+		PhDim_t dim = { 0, 0 };
+		PtWidgetDim(pw, &dim);
+		PaintEvent pev(*widget, Math::Point( 0, 0), Math::Size( dim.w, dim.h ) );
+		EventLoopImpl::instance().commitEvent(pev);
+	}
+
 	return Pt_CONTINUE;
 }
 
@@ -95,7 +109,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
   	PtCallback_t resizeCallback;
 	resizeCallback.event_f = &WidgetImpl::onResize;
 	resizeCallback.data = &_apiWidget;
-	PtSetArg(&args[5], Pt_CB_REALIZED, &resizeCallback, 0);
+	PtSetArg(&args[5], Pt_CB_RESIZE, &resizeCallback, 0);
   
   PtSetArg(&args[6], Pt_ARG_FILL_COLOR, Pg_TRANSPARENT, 0);
   
