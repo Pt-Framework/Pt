@@ -10,7 +10,7 @@ SUFLIB	= .lib ;
 SUFEXE	= .exe ;
 SUFDLL	= .dll ;
 
-if $(CONFIG) = debug 
+if $(CONFIG:L) = debug 
 {
 	SUFLIB	= d.lib ;
 	SUFEXE	= d.exe ;

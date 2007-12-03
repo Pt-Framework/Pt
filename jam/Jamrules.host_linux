@@ -8,4 +8,3 @@ YACC        = yacc ;
 YACCFILES   = y.tab ;
 YACCFLAGS   = -d ;
 YACCGEN     = .c ;
-

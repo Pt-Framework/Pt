@@ -5,16 +5,18 @@ JamInclude Jamrules.gcc ;
 # Compiler flags and tools
 #
 GCCVERSION ?= 3.3.5 ;
-C++		= QCC ;
+C++     = QCC ;
 CC      = qcc ;
-LINK		= $(CC) ;
-CCFLAGS		+= -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC  ;
+LINK        = $(C++) ;
+CCFLAGS     += -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC  ;
+
 BYTEORDER ?= LE ;
+
 
 PRELIB = lib ;
 
 C++FLAGS    += $(CCFLAGS) -lang-c++ -fexceptions ;
-LINKFLAGS   = -lang-c++  -Wl,-Bsymbolic ;
+LINKFLAGS   = -lang-c++ ;
 
 LINKLIBS    =  -lm  ;
 
@@ -28,7 +30,7 @@ if $(TARGET_OSPLAT:L) = x86
         CCFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
         C++FLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
         LINKFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
-	}
+    }
     else
     {
         CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
@@ -47,23 +49,23 @@ else
     }
     else
     {
-    	CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+        CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
         C++FLAGS  += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
         LINKFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
     }
-}	
+}   
 
 
 #Redefine toolset for cross compilation
 if $(OS:L) = nt 
 {
-	AR = nto$(TARGET_OSPLAT)-ar.exe ru ;
-	RANLIB = nto$(TARGET_OSPLAT)-ranlib.exe ;
-	
-	actions Chmod1
-	{
-	 REM is not necessary within cross development environment
-	}
+    AR = nto$(TARGET_OSPLAT)-ar.exe ru ;
+    RANLIB = nto$(TARGET_OSPLAT)-ranlib.exe ;
+    
+    actions Chmod1
+    {
+     REM is not necessary within cross development environment
+    }
 }
 
 rule SharedLibraryImpl
@@ -79,22 +81,7 @@ rule SharedLibraryImpl
     CCFLAGS on $(_objects) =  $(CCFLAGS) -shared ;
     
     LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
-    
-  	local _found = false ;
-	local  _rPathBuffer = [ FGristFiles $(<:S=$(SUFDLL)) ] ; 
-	
-    for $(_n) in $(RPATH_LINKLIBS)
-    {
-      	 if $(_n) = $(_rPathBuffer)
-      	 {
-      			_found = true ;
-      	 }
-    }
-    if $(_found) = false
-    {
-	     RPATH_LINKLIBS += $(_rPathBuffer)  ; 	
-	}
-	
+
 }
 
 
@@ -103,7 +90,7 @@ rule Library
     local _l = $(PRELIB)$(<)$(SUFLIB) ;
     Depends $(<) : $(_l) ;
 
-	 # Add grist to file names
+     # Add grist to file names
     local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
     
     
@@ -118,7 +105,8 @@ rule Library
 }
 
 
-actions Link bind NEEDLIBS SHLIBS RPATH_LINKLIBS
+
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(LINK) $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATH_LINKLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group
+    $(LINK) $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group
 }

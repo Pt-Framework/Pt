@@ -141,6 +141,7 @@
 #   all - default if none given on command line
 #
 
+
 # Initialize variables
 #
 AR          ?= ar ru ;
@@ -209,7 +210,7 @@ OSFULL = $(OS)$(OSVER)$(OSPLAT) $(OS)$(OSPLAT) $(OS)$(OSVER) $(OS) ;
 #
 DEPENDS all : shell files lib exe obj ;
 DEPENDS all shell files lib exe obj : first ;
-NOTFILE all first shell files lib exe obj dirs clean uninstall ;
+NOTFILE all first shell files lib exe obj dirs clean install uninstall ;
 ALWAYS clean uninstall ;
 
 #
@@ -305,6 +306,108 @@ rule C++
 rule Chmod
 {
     if $(CHMOD) { Chmod1 $(<) ; }
+}
+
+
+rule DeployComponent
+{
+  local _sources = $(PRELIB)$(>:S=$(SUFDLL)) ;
+  DeployFile $(<) : $(_sources) ;
+}
+
+
+rule DeployInternalFile
+{
+    if $(DEPLOY:L) = internal
+    {
+        DeployFile $(<) : $(>) ;
+    }
+}
+
+
+rule DeployFile
+{
+    # DeployFile dir : sources ;
+
+    local i t ;
+
+    t = $(>:G=deployment) ;
+
+    Depends deploy : $(t) ;
+    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    MakeLocate $(t) : $(<) ;
+
+    for i in $(>)
+    {
+        local tt = $(i:G=deployment) ;
+      
+        Depends $(tt) : $(i) ;
+        Deploy  $(tt) : $(i) ;
+    }
+}
+
+
+# Deploys all header files from a directory to another directory
+#
+# $(<) destination directory of the headers
+# $(>) directory to search for headers
+# $(3) [optional] list of header files to deploy (no search is done)
+#
+# Example
+#   DeployHeaders [ FDirName $(DEPLOY_INCLUDEDIR) Pt Log ] : TOP include Pt Log ;
+#
+# to install all headers from TOP/include/Pt/Log to the subdirectory
+# Pt/Lob in DEPLOY_INCLUDEDIR.
+#
+rule DeployHeaders
+{
+	if ! $($(>[1]))
+	{
+			EXIT Top level of source tree has not been set with $(>[1]) ;
+	}
+	
+	local _s = [ FDirName $(>[2-]) ] ;
+	local _targetdir = $(_s:R=$($(>[1]))) ;
+
+	local _headers ;
+	if $(3) 
+  {
+      _headers = $(3:BS) ;
+	} 
+	else
+	{
+    	for local h in [ GLOB  $(_targetdir) : *.h ]
+    	{
+    	   _headers += $(h:BS) ;
+    	}
+	}
+
+	# we do not use the DeployFile rule here because headers of the same 
+	# name exist in different modules (e.g. Api.h). Grist the files uniquely and
+	# set the dependecy on the header file, including its path.
+  #DeployFile $(<) : $(_headers) ;
+	
+  local _target = [ FGristFiles $(_headers) ] ;
+
+  Depends deploy : $(_target) ;
+  MakeLocate $(_target) : $(<) ;
+
+  for local i in $(_headers)
+  {
+      local tt = [ FGristFiles $(i) ] ;
+
+      Depends $(tt) : [ FDirName $(_targetdir) $(i) ] ;
+      Deploy  $(tt) : [ FDirName $(_targetdir) $(i) ] ;
+  }
+	
+}
+
+
+rule DeploySharedLibrary
+{
+  local _sources = $(PRELIB)$(>:S=$(SUFDLL)) ;
+  
+  DeployFile $(<) : $(_sources) ;
 }
 
 
@@ -918,6 +1021,26 @@ rule Objects
     }
 }
 
+# @brief Copies resources (images, settings files) of an executable to the 
+# output directory if missing or old.
+#
+# @param < the target this resource depends on
+# @param > the destination directory
+# @param 3 a list of resource files
+rule Resources
+{
+    Depends $(3) : $(>) ;
+
+    local i ;
+    for i in $(3)
+    {
+      Depends $(<) : [ FDirName $(>) $(i) ] ;
+      Clean clean  : [ FDirName $(>) $(i) ] ;
+    }
+    
+    Bulk $(>) : $(3) ;
+}
+
 
 rule RmTemps
 {
@@ -1506,6 +1629,11 @@ actions Chown
 actions piecemeal together existing Clean
 {
     $(RM) $(>)
+}
+
+actions Deploy
+{
+    $(CP) $(>) $(<) 
 }
 
 actions File

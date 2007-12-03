@@ -5,6 +5,7 @@ JAMRULES_PTUNIT = true ;
 # Special targets
 #
 NOTFILE test ;
+DEPENDS test : files ;
 DEPENDS all-test : all test ;
 NOTFILE all-test ;
 
@@ -16,54 +17,92 @@ NOTFILE all-test ;
 #
 rule PtUnitTest
 {
-	local _target = $(1:S=$(SUFEXE)) ;
-	local _output = $(1:S=.unit) ;
-	
-	Main $(<) : $(>) ;
+  local _target = $(<:S=$(SUFEXE)) ;
+  local _output = $(<:S=.unit) ;
+  
+  Main $(<) : $(>) ;
 
-	DEPENDS $(_output) : $(_target) ;
-	DEPENDS test : $(_output) ;
+  Depends $(_output) : $(_target) ;
+  Depends test : $(_output) ;
 
-	Clean clean : $(_output) ;
-	MakeLocate $(_output) : $(LOCATE_TARGET) ;
+  Clean clean : $(_output) ;
+  MakeLocate $(_output) : $(LOCATE_TARGET) ;
 
-	PtUnitTestAction $(_output) : $(_target) ;
+  PtUnitTestAction $(_output) : $(_target) ;
 }
 
 rule PtUnitTest_MakeLocate
 {
-	local _output = $(1:S=.unit) ;
+  local _output = $(<:S=.unit) ;
 
   Main_MakeLocate $(<) : $(>) ;
   MakeLocate $(_output) : $(>) ;
 }
+
 
 # Actions
 #
 if $(UNIX)
 {
 
-	actions PtUnitTestAction bind testExe
-	{
-		sh -c "export LD_LIBRARY_PATH=`pwd`/$(>:P) && $(>) -f$(>:S=.unit)"
-	}
+  # $(<) : <path_to_test>/test.unit
+  # $(>) : <path_to_test>/testd.exe
+  actions PtUnitTestAction
+  {
+    cd $(>:D)
+    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. ./$(>:BS) -f$(<:BS)"
+  }
 
 }
 else if $(TARGET_OS:L) = "wince"
 {
-	#TODO: run device emulator
-	actions PtUnitTestAction
-	{
-		echo ### WARNING: Can not run WinCE unit test.
-	}
+
+  actions PtUnitTestAction
+  {
+      ce del \$(<:BS).failed > nul
+      ce copy $(>) \$(>:BS)
+
+      rem start will return after process has started
+      ce start "\$(>:BS)" -f\$(<:BS)
+
+      :Loop
+        ping 127.0.0.1 -n 5 -w 1000 > nul
+        ce tlist | findstr "$(>:BS)" > nul
+        IF %ERRORLEVEL% EQU 0 GOTO Loop
+              
+      ce get \$(<:BS).failed $(<).failed > nul
+  
+      SET TEST_FAILED=0
+      IF EXIST $(<).failed (
+        SET TEST_FAILED=1
+        ce get \$(<:BS) $(<).failed
+        ce del \$(<:BS).failed
+      ) ELSE (
+        ce get \$(<:BS) $(<)
+        IF EXIST $(<) (
+          SET TEST_FAILED=0
+        ) ELSE (
+          SET TEST_FAILED=1
+        )
+      )
+      ce del \$(<:BS)
+      ce del \$(>:BS)
+      
+      rem taskkill /F /IM DeviceEmulator.exe
+      rem IF EXIST $(<).failed $(RM) $(<).failed
+
+      EXIT %TEST_FAILED%
+  }
+
 }
 else
 {
 
-	actions PtUnitTestAction
-	{
-		$(>) -f$(>:S=.unit)
-	}
+  actions PtUnitTestAction
+  {
+    cd $(>:D)
+    $(>:BS) -f$(<:BS)
+  }
 
 }
 

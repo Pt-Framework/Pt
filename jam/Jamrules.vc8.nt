@@ -2,7 +2,7 @@
 #
 if $(TARGET_OSPLAT:L) != x86
 {
-	Exit "This target-platform is not supported on this toolset" ;
+    Exit "This target-platform is not supported on this toolset" ;
 }
 
 LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
@@ -11,14 +11,20 @@ CCFLAGS += /DWIN32 ;
 
 if $(CONFIG:L) = debug 
 {
-	CCFLAGS   += /MDd /Zi /RTC1 ;
-	OPTIM     ?= /Od ;
-	LINKFLAGS += /DEBUG ;
+    CCFLAGS   += /MDd /Zi /RTC1 ;
+    OPTIM     ?= /Od ;
+    LINKFLAGS += /DEBUG ;
 }
-else
+else if $(CONFIG:L) = release 
 {
-	CCFLAGS += /MD /D "NDEBUG" ;
-	OPTIM   ?= /Ox /Ot /Oy ;
+    CCFLAGS += /MD /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
+}
+else if $(CONFIG:L) = aqtime
+{
+    CCFLAGS += /MD /Zi /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
+    LINKFLAGS += /DEBUG ;
 }
 
 WARN     ?= /W3 ;

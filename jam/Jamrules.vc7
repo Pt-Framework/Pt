@@ -6,7 +6,7 @@ JamInclude Jamrules.vc ;
 # if it was not passed to jam using -sVISUALC=<path> 
 if $(VISUALC) 
 {
-	VISUALC = $(VISUALC:J=" ") ;
+  VISUALC = $(VISUALC:J=" ") ;
 } 
 else
 {
@@ -20,12 +20,12 @@ Use either -sVISUALC=<path_to_VS> or set the environment variable VSINSTALLDIR" 
 
 if $(TARGET_OS:L) != nt 
 {
-	exit "This target-os is not supported on this toolset" ;
+  exit "This target-os is not supported on this toolset" ;
 }
 
 if $(TARGET_OSPLAT:L) != x86
 {
-	exit "This target-platform is not supported on this toolset" ;
+  exit "This target-platform is not supported on this toolset" ;
 }
 
 
@@ -39,28 +39,40 @@ PLATFORMSDK ?= $(VISUALC)\\vc7\\PlatformSDK ;
 
 if $(CONFIG:L) = debug 
 {
-	LINKFLAGS += /DEBUG ;
-	CCFLAGS   += /MDd /Zi ;
-  OPTIM     ?= /Od ;
+    LINKFLAGS += /DEBUG ;
+    CCFLAGS   += /MDd /Zi ;
+    OPTIM     ?= /Od ;
 }
-else
+else if $(CONFIG:L) = release 
 {
-	CCFLAGS += /MD /D "NDEBUG" ;
-	OPTIM   ?= /O1 /Oy ;
+    CCFLAGS += /MD /D "NDEBUG" ;
+    OPTIM   ?= /O1 /Oy ;
+}
+else if $(CONFIG:L) = aqtime
+{
+    CCFLAGS += /MD /Zi /D "NDEBUG" ;
+    OPTIM   ?= /O1 /Oy ;
+    LINKFLAGS += /DEBUG ;
 }
 
-AR		= $(VISUALC)\\vc7\\bin\\lib ;
-AS		= masm386 ;
-CC		= $(VISUALC)\\vc7\\bin\\cl /nologo ;
-C++		= $(CC) ;
-LINK		   = $(VISUALC)\\vc7\\bin\\link /nologo ;
+
+AR    = $(VISUALC)\\vc7\\bin\\lib ;
+AS    = masm386 ;
+CC    = $(VISUALC)\\vc7\\bin\\cl /nologo ;
+C++   = $(CC) ;
+LINK  = $(VISUALC)\\vc7\\bin\\link /nologo ;
 RC    = $(VISUALC)\\vc7\\bin\\rc ;
 
-C++FLAGS	+= $(CCFLAGS) /EHsc /GR /DWIN32 /Zc:wchar_t ;
+C++FLAGS  += $(CCFLAGS) /EHsc /GR /DWIN32 /Zc:wchar_t ;
 LINKFLAGS += "/INCREMENTAL:NO" ;
 LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
 STDHDRS    = \"$(VISUALC)\\vc7\\include\" 
-	           \"$(PLATFORMSDK)\\include\" ;
-UNDEFFLAG	 = "/u _" ;
+             \"$(PLATFORMSDK)\\include\" ;
+UNDEFFLAG  = "/u _" ;
 WARN      ?= /W3 ;
 
+
+rule EmbedManifest
+{
+# no manifest files on VC7
+}

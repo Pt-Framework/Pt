@@ -18,7 +18,7 @@ Exit evc4 stuff in Jamrules.evc4 is still undefined
 #
 #LINKLIBS = coredll.lib corelibc.lib ole32.lib oleaut32.lib uuid.lib commctrl.lib ccrtrtti.lib ;
 #
-#if $(CONFIG) = debug 
+#if $(CONFIG:L) = debug 
 #{
 #	C++FLAGS += /Zi /D "DEBUG" /D "_DEBUG" /MDd ;
 #	LINKFLAGS += /DEBUG ;

@@ -4,7 +4,7 @@ SUFDLL    = .so ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
 
-if $(CONFIG) = debug 
+if $(CONFIG:L) = debug 
 {
 	SUFLIB  = d.a ;
 	SUFDLL  = d.so ;
