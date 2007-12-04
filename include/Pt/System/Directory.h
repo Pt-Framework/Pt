@@ -135,7 +135,7 @@ while (it != d.end())
              * @return The directory in which this directory resides.
              */
             virtual std::string parentPath() const;
-            
+
             /**
              * @brief Returns the name of thi directory, excluding the complete path
              * except the last element -- the directory name.
@@ -144,9 +144,9 @@ while (it != d.end())
              */
             virtual std::string name() const;
 
-            virtual FileSystemNodeType type() const
+            virtual Type type() const
             {
-                return DIRECTORY;
+                return FileSystemNode::Directory;
             }
 
         private:

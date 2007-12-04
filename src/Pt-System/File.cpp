@@ -36,7 +36,7 @@ File::File(const std::string& path)
     _impl = new FileImpl(path);
 }
 
-File::File(const Directory& baseDir, const std::string& fileName)
+File::File(const System::Directory& baseDir, const std::string& fileName)
 {
     const std::string& baseDirPath = baseDir.path();
     

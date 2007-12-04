@@ -47,7 +47,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
     public:
         File(const std::string& path = "");
 
-        File(const Directory& baseDir, const std::string& fileName);
+        File(const System::Directory& baseDir, const std::string& fileName);
 
         File(const File& file);
 
@@ -77,9 +77,9 @@ class PT_SYSTEM_API File : public FileSystemNode {
 
         bool exists() const;
 
-        virtual FileSystemNodeType type() const
+        virtual Type type() const
         {
-            return FILE;
+            return FileSystemNode::File;
         }
 
         virtual void remove();

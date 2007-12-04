@@ -22,26 +22,22 @@
 #ifndef Pt_System_FileSystemNode_h
 #define Pt_System_FileSystemNode_h
 
-#include <string>
 #include <Pt/Types.h>
 #include <Pt/System/Api.h>
+#include <string>
 
 namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API FileSystemNode 
+class PT_SYSTEM_API FileSystemNode
 {
     public:
-
-        enum FileSystemNodeType
+        enum Type
         {
-            FILE = 0,
-            DIRECTORY
+            File = 0,
+            Directory
         };
-
-        FileSystemNode()
-        {}
 
         virtual ~FileSystemNode()
         {}
@@ -60,10 +56,9 @@ class PT_SYSTEM_API FileSystemNode
 
         virtual bool exists() const = 0;
 
-        // virtual void rename(const std::string& newname);
         virtual void move(const std::string& newname) = 0;
 
-        virtual FileSystemNodeType type() const = 0;
+        virtual Type type() const = 0;
 };
 
 } // namespace System
