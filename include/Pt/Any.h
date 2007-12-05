@@ -79,7 +79,6 @@ namespace Pt {
                 public:
                     virtual ~Value() {}
                     virtual Value* clone() const = 0;
-                    virtual const char* typeName() const = 0;
                     virtual const std::type_info& type() const = 0;
                     virtual bool equal(const Value& value) const = 0;
                     virtual bool lt(const Value& value) const = 0;
@@ -100,9 +99,6 @@ namespace Pt {
 
                     T& value()
                     { return _value;}
-
-                    virtual const char* typeName() const
-                    { return TypeTraits<T>::typeName(); }
 
                     virtual const std::type_info& type() const
                     { return typeid(T); }
@@ -208,16 +204,6 @@ namespace Pt {
                 @return self reference
             */
             Any& swap(Any& other);
-
-            /** @brief Check typename of assigned type
-
-                Returns the typename of the currently assigned type. If the
-                Any is empty "void" is returned.
-
-                @return Typename
-            */
-            const char* typeName() const
-            { return _value ? _value->typeName() : "void"; }
 
             /** @brief Returns type info of assigned type
 

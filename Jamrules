@@ -30,7 +30,6 @@ Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
 Echo "Warnings (WARN)                 :" $(WARN) ;
 Echo ;
 
-
 #if $(SYS) = "posix"
 #{
   TNTNETLIBS = -ltntnet ;

@@ -189,7 +189,7 @@ class ReadWritePropertyInfo : public PropertyInfo
                 _setter->invoke( val );
             }
             catch(const std::bad_cast&) {
-                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
+                std::cerr << "WritePropertyInfo: Type mismatch: " << _name << std::endl;
             }
         }
 
@@ -295,7 +295,7 @@ class ReadWriteProperty : public PropertyInfo
                 _setter->invoke( value );
             }
             catch(const std::bad_cast&) {
-                std::cerr << "WritePropertyInfo: Type mismatch: " << a.typeName() << std::endl;
+                std::cerr << "WritePropertyInfo: Type mismatch: " << _name << std::endl;
             }
         }
 
