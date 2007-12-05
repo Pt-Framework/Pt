@@ -65,9 +65,11 @@ namespace System {
 
             DirectoryIterator& operator=(const DirectoryIterator& it);
 
-            bool operator==(const DirectoryIterator& it) const;
+            bool operator==(const DirectoryIterator& it) const
+            { return _impl == it._impl; }
 
-            bool operator!=(const DirectoryIterator& it) const;
+            bool operator!=(const DirectoryIterator& it) const
+            { return _impl != it._impl; }
 
             FileSystemNode& operator*() const;
 
