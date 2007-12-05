@@ -2,6 +2,7 @@
 #include <Pt/System/Pipe.h>
 #include <Pt/System/Selector.h>
 #include <Pt/System/FileDevice.h>
+#include <Pt/System/Directory.h>
 #include <iostream>
 #include <fstream>
 
@@ -12,6 +13,16 @@ void onInput(Pt::System::IOResult& r)
 
 int main( int argc, char* argv[] )
 {
+/*
+    Pt::System::Directory dir("/home/marc");
+    Pt::System::Directory::Iterator it;
+    for(it = dir.begin(); it != dir.end(); ++it)
+    {
+        std::cerr << (*it).name() << std::endl;
+    }
+
+    return 0;
+*/
     std::string out("Hello World, where do you want to GOTO day!");
     const int size = 8;
     char buffer[size];

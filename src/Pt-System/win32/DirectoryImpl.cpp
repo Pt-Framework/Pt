@@ -21,10 +21,7 @@
 #include "DirectoryImpl.h"
 #include "win32.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/FileSystem.h"
-
 #include <vector>
-
 #include <windows.h>
 
 
@@ -86,7 +83,7 @@ void DirectoryIteratorImpl::advance()
 {
     // cannot advance an unintialised iterator
     if(_findHandle == INVALID_HANDLE_VALUE) {
-        return;
+        return false;
     }
 
     // the current node becomes invalid now
@@ -99,6 +96,8 @@ void DirectoryIteratorImpl::advance()
         ::FindClose(_findHandle);
         _findHandle = INVALID_HANDLE_VALUE;
     }
+
+    return _findHandle != INVALID_HANDLE_VALUE;
 }
 
 
@@ -115,7 +114,7 @@ FileSystemNode& DirectoryIteratorImpl::node()
     path += this->name();
 
     // create file system node by full path
-    _node = FileSystem::instance().create( path.c_str() );
+    _node = FileSystemNode::instance().create( path.c_str() );
     if(!_node)
         throw SystemError("Unknown file system node", PT_SOURCEINFO);
 
@@ -129,11 +128,6 @@ std::string DirectoryIteratorImpl::name() const
         return win32::toMultiByte( _current.cFileName );
 
     return "";
-}
-
-bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
-{
-    return _findHandle == impl._findHandle;
 }
 
 

@@ -19,10 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "DirectoryImpl.h"
-
 #include "Pt/System/SystemError.h"
-#include "Pt/System/FileSystem.h"
-
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -53,7 +50,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _current(0)
 {
     _handle = ::opendir( path );
-    
+
     if( !_handle )
     {
         throw SystemError("Could not open directory", PT_SOURCEINFO);
@@ -85,20 +82,14 @@ int DirectoryIteratorImpl::deref()
 }
 
 
-void DirectoryIteratorImpl::advance()
+bool DirectoryIteratorImpl::advance()
 {
-    // cannot advance a unintialised iterator
-    if(_handle == 0) {
-        _current = 0;
-        return;
-    }
-
-    // the current node becomes invalid now
     delete _node;
     _node = 0;
 
     // _current == 0 means end
     _current = ::readdir( _handle );
+    return _current != 0;
 }
 
 
@@ -115,7 +106,7 @@ FileSystemNode& DirectoryIteratorImpl::node()
     path += this->name();
 
     // create file system node by full path
-    _node = FileSystem::instance().create( path.c_str() );
+    _node = FileSystemNode::create( path.c_str() );
     if(!_node)
         throw SystemError("Unknown file system node", PT_SOURCEINFO);
 
@@ -132,10 +123,6 @@ std::string DirectoryIteratorImpl::name() const
 }
 
 
-bool DirectoryIteratorImpl::operator==(const DirectoryIteratorImpl& impl) const
-{
-    return _current == impl._current;
-}
 
 
 void DirectoryImpl::create(const std::string& path)

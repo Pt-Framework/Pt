@@ -15,7 +15,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) EnvironmentImpl.cpp ]
                           [ FDirName $(SYS:L) FileImpl.cpp ]
                           [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
-                          [ FDirName $(SYS:L) FileSystemImpl.cpp ]
                           [ FDirName $(SYS:L) MutexImpl.cpp ]
                           [ FDirName $(SYS:L) SemaphoreImpl.cpp ]
                           [ FDirName $(SYS:L) ThreadImpl.cpp  ]
@@ -35,7 +34,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           File.cpp
                           FileDevice.cpp
                           FileStream.cpp
-                          FileSystem.cpp
+                          FileSystemNode.cpp
                           FileErrors.cpp
                           IOError.cpp
                           IOManager.cpp

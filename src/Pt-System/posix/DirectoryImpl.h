@@ -46,7 +46,7 @@ namespace System {
 
             int deref();
 
-            void advance();
+            bool advance();
 
             const char* path() const
             { return _path.c_str(); }
@@ -54,8 +54,6 @@ namespace System {
             FileSystemNode& node();
 
             std::string name() const;
-
-            bool operator==(const DirectoryIteratorImpl& impl) const;
 
         private:
             unsigned int _refs;

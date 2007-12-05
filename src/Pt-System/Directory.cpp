@@ -29,12 +29,6 @@ namespace Pt {
 
 namespace System {
 
-DirectoryIterator::DirectoryIterator()
-{
-    _impl = new DirectoryIteratorImpl();
-}
-
-
 DirectoryIterator::DirectoryIterator(const char* path)
 {
     _impl = new DirectoryIteratorImpl(path);
@@ -42,15 +36,18 @@ DirectoryIterator::DirectoryIterator(const char* path)
 
 
 DirectoryIterator::DirectoryIterator(const DirectoryIterator& it)
+: _impl(0)
 {
     _impl = it._impl;
-    _impl->ref();
+
+    if(_impl)
+        _impl->ref();
 }
 
 
 DirectoryIterator::~DirectoryIterator()
 {
-    if( 0 == _impl->deref() ) {
+    if( _impl && 0 == _impl->deref() ) {
         delete _impl;
     }
 }
@@ -58,7 +55,18 @@ DirectoryIterator::~DirectoryIterator()
 
 DirectoryIterator& DirectoryIterator::operator++()
 {
-    _impl->advance();
+    if( _impl && _impl->advance() )
+    {
+        return *this;
+    }
+
+    if( _impl && 0 == _impl->deref() )
+    {
+        delete _impl;
+        _impl = 0;
+    }
+
+
     return *this;
 }
 
@@ -68,33 +76,42 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
     if (*this == it )
         return *this;
 
-    if( 0 == _impl->deref() )
+    if( _impl && 0 == _impl->deref() )
     {
         delete _impl;
     }
 
     _impl = it._impl;
-    _impl->ref();
+
+    if(_impl)
+        _impl->ref();
 
     return *this;
 }
 
+
 bool DirectoryIterator::operator==(const DirectoryIterator& it) const
 {
-    return *_impl == *(it._impl);
+    return _impl == it._impl;
 }
 
 
 bool DirectoryIterator::operator!=(const DirectoryIterator& it) const
 {
-    return !( *_impl == *(it._impl) );
+    return _impl != it._impl;
 }
 
 
 FileSystemNode& DirectoryIterator::operator*() const
 {
+    if(_impl == 0)
+        throw std::out_of_range("directory iterator out of range");
+
     return _impl->node();
 }
+
+
+
 
 Directory::Directory(const std::string& path)
 : _path(path)

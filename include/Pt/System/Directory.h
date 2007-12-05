@@ -51,7 +51,9 @@ namespace System {
     */
     class PT_SYSTEM_API DirectoryIterator {
         public:
-            DirectoryIterator();
+            DirectoryIterator()
+            : _impl(0)
+            { }
 
             DirectoryIterator(const char* path);
 
@@ -113,8 +115,7 @@ while (it != d.end())
             //! Returns an iterator to the end of the directory.
             DirectoryIterator end() const
             {
-                static DirectoryIterator _end;
-                return _end;
+                return DirectoryIterator();
             }
 
             virtual void remove();

@@ -59,6 +59,8 @@ class PT_SYSTEM_API FileSystemNode
         virtual void move(const std::string& newname) = 0;
 
         virtual Type type() const = 0;
+
+        static FileSystemNode* create(const char* path);
 };
 
 } // namespace System

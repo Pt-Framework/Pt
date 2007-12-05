@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Dï¿½rner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,42 +17,36 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "win32.h"
-
-#include "Pt/Api.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
-
 #include <windows.h>
-
 
 namespace Pt {
 
 namespace System {
 
-    class FileSystemImpl {
-        public:
-            FileSystemImpl()
-            {}
+class FileSystemNodeImpl
+{
+    public:
+        static FileSystemNode* create(const char* path)
+        {
+            std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+            DWORD attr = GetFileAttributes( tpath.c_str() );
 
-            static FileSystemNode* create(const char* path)
-            {
-                std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
-                DWORD attr = GetFileAttributes( tpath.c_str() );
-
-                if(attr == 0xffffffff)
-                    throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
+            if(attr == 0xffffffff)
+                throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
 
 
-                if(attr & FILE_ATTRIBUTE_DIRECTORY) {
-                    return new Directory(path);
-                }
-                else {
-                    return new File(path);
-                }
-
-                return 0;
+            if(attr & FILE_ATTRIBUTE_DIRECTORY) {
+                return new Directory(path);
             }
-    };
+            else {
+                return new File(path);
+            }
+
+            return 0;
+        }
+};
 
 } // namespace System
 

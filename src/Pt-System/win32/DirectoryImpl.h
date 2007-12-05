@@ -46,8 +46,6 @@ class DirectoryIteratorImpl {
 
         std::string name() const;
 
-        bool operator==(const DirectoryIteratorImpl& impl) const;
-
     private:
         unsigned int    _refs;
         std::string     _path;

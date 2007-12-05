@@ -16,28 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/System/File.h"
-#include "Pt/System/Directory.h"
-#include "Pt/System/FileSystem.h"
-
-#include "FileSystemImpl.h"
-
+#include "FileSystemNodeImpl.h"
 
 namespace Pt {
 
 namespace System {
 
-
-/*FileSystemNode* FileSystem::create(const char* path) const
-{
-    return FileSystemImpl::create(path);
-}*/
-
-
 FileSystemNode* FileSystemNode::create(const char* path)
 {
-    return FileSystemImpl::create(path);
+    return FileSystemNodeImpl::create(path);
 }
 
 } // namespace System

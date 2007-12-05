@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Dï¿½rner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,34 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Api.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-
 
 namespace Pt {
 
 namespace System {
 
-    class PT_API FileSystemImpl {
+    class PT_API FileSystemNodeImpl
+    {
         public:
-            FileSystemImpl()
-            {}
-
             static FileSystemNode* create(const char* path)
             {
                 struct stat st;
                 if( 0 != ::stat(path, &st) )
                     throw SystemError("Could not stat file", PT_SOURCEINFO);
-            
+
                 if( S_ISREG(st.st_mode) )
                 {
                     return new File(path);
@@ -71,7 +66,7 @@ namespace System {
                     type = File::Link;
                 #endif
                 */
-            
+
                 return 0;
             }
     };
@@ -79,5 +74,4 @@ namespace System {
 } // namespace System
 
 } // namespace Pt
-
 
