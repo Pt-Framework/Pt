@@ -79,7 +79,7 @@ int DirectoryIteratorImpl::deref()
 }
 
 
-void DirectoryIteratorImpl::advance()
+bool DirectoryIteratorImpl::advance()
 {
     // cannot advance an unintialised iterator
     if(_findHandle == INVALID_HANDLE_VALUE) {
@@ -114,7 +114,7 @@ FileSystemNode& DirectoryIteratorImpl::node()
     path += this->name();
 
     // create file system node by full path
-    _node = FileSystemNode::instance().create( path.c_str() );
+    _node = FileSystemNode::create( path.c_str() );
     if(!_node)
         throw SystemError("Unknown file system node", PT_SOURCEINFO);
 

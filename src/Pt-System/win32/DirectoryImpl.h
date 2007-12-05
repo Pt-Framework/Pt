@@ -40,7 +40,7 @@ class DirectoryIteratorImpl {
 
         int deref();
 
-        void advance();
+        bool advance();
 
         FileSystemNode& node();
 
