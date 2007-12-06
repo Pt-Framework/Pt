@@ -53,7 +53,7 @@ namespace Pt {
     template <typename T>
     struct TypeTraits<const T> : public TypeTraitsBase<T>
     {
-        static const unsigned int isConst = 0;
+        static const unsigned int isConst = 1;
         static const unsigned int isPointer = 0;
         static const unsigned int isReference = 0;
     };
