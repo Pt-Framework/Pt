@@ -19,6 +19,7 @@
 #include "win32.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
+#include <cstring>
 #include <windows.h>
 
 namespace Pt {
@@ -34,8 +35,12 @@ class FileSystemNodeImpl
             DWORD attr = GetFileAttributes( tpath.c_str() );
 
             if(attr == 0xffffffff)
-                throw SystemError("Could not get file attributes.", PT_SOURCEINFO);
+            {
+                if( 0 != strstr(path, ".sys") )
+                    return new File(path);
 
+                throw SystemError( std::string("Could not get file attributes: ") + path, PT_SOURCEINFO);
+            }
 
             if(attr & FILE_ATTRIBUTE_DIRECTORY) {
                 return new Directory(path);
