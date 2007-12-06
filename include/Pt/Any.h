@@ -20,8 +20,9 @@
 #define Pt_Any_h
 
 #include <Pt/Api.h>
-#include <Pt/TypeInfo.h>
+#include <Pt/TypeTraits.h>
 #include <Pt/SourceInfo.h>
+#include <typeinfo>
 #include <cstring>
 
 namespace Pt {
@@ -320,7 +321,7 @@ namespace Pt {
         // - but: the name() method necessary for string comparison does not
         //   exist on WinCE, so the second if(...) is not compiled for WinCE
 
-        typedef typename Pt::TypeInfo<T>::Value ValueT;
+        typedef typename Pt::TypeTraits<T>::Value ValueT;
 
         if( any.type() == typeid(ValueT) )
         {

@@ -64,8 +64,6 @@ class PropertyInfo  : public MemberInfo
         virtual ~PropertyInfo()
         {}
 
-        virtual const char* typeName() const = 0;
-
         virtual bool isWritable() const = 0;
 
         virtual Pt::Any get() const = 0;
@@ -101,11 +99,6 @@ class ReadPropertyInfo : virtual public PropertyInfo
 
         const char* name() const
         { return _name.c_str(); }
-
-        virtual const char* typeName() const
-        {
-            return TypeTraits<T>::typeName();
-        }
 
         virtual bool isWritable() const
         { return false; }
@@ -165,11 +158,6 @@ class ReadWritePropertyInfo : public PropertyInfo
         const char* name() const
         { return _name.c_str(); }
 
-        virtual const char* typeName() const
-        {
-            return TypeTraits<R>::typeName();
-        }
-
         virtual bool isWritable() const
         { return true; }
 
@@ -182,7 +170,7 @@ class ReadWritePropertyInfo : public PropertyInfo
 
         virtual void set(const Pt::Any& a)
         {
-            typedef typename Pt::TypeInfo<A>::ConstReference ConstRefT ;
+            typedef typename Pt::TypeTraits<A>::ConstReference ConstRefT ;
 
             try {
                 ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
@@ -200,7 +188,7 @@ class ReadWritePropertyInfo : public PropertyInfo
 
         void deserialize(const Pt::SerializationInfo& si)
         {
-            typedef typename Pt::TypeInfo<A>::Value ValueT;
+            typedef typename Pt::TypeTraits<A>::Value ValueT;
             ValueT value;
             si >>= value;
             _setter->invoke(value);
@@ -228,11 +216,6 @@ class ReadProperty : public PropertyInfo
 
         const char* name() const
         { return _name.c_str(); }
-
-        virtual const char* typeName() const
-        {
-            return TypeTraits<T>::typeName();
-        }
 
         virtual bool isWritable() const
         { return false; }
@@ -276,11 +259,6 @@ class ReadWriteProperty : public PropertyInfo
 
         const char* name() const
         { return _name.c_str(); }
-
-        virtual const char* typeName() const
-        {
-            return TypeTraits<T>::typeName();
-        }
 
         virtual bool isWritable() const
         { return true; }

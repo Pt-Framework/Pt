@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 Marc Boris Duerner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,218 +20,109 @@
 #define Pt_TypeTraits_h
 
 #include <Pt/Api.h>
-#include <string>
-#include <typeinfo>
-
+#include <cstddef>
 
 namespace Pt {
 
-    /** @brief Traits struct for types used in the CTTI system
-        @ingroup Pt
-
-        Compile time type information (CTTI) is implemented in Pt by the two
-        classes TypeTraits and TypeInfo. A number of specialisations allows
-        compile type branching in gerneric code depending on the type.
-        TypeTraits can be used on its own or as part of TypeInfo, which can
-        give more detailed information about a type. All types to be used
-        in the CTTI system can be added non-intrusively, by specialising the
-        TypeTraits.
-    */
     template <typename T>
-    struct TypeTraits
-    {
-        /** @brief Indicate that TypeTraits  exist
-
-            This function returns false in the generic version of TypeTraits
-            meaning that no specialisation for a type exists. All specialised
-            TypeTraits shall return true.
-        */
-        static bool isSpecialized()
-        { return false; }
-
-        /** @brief Get type name as string
-
-            The generic version, which is used if no specialisation exists returns
-            the string "unknown". All specialised TypeTraits shall return a fully
-            qualified typename.
-        */
-        static const char* typeName()
-        { return "unknown"; }
+    struct TypeTraitsBase {
+        typedef T Value;
+        typedef const T ConstValue;
+        typedef T& Reference;
+        typedef const T& ConstReference;
+        typedef T* Pointer;
+        typedef const T* ConstPointer;
     };
 
+    /** @brief Type-traits for for non-const value types
 
-    /** @brief Type traits for void
-        @ingroup Pt
+        Compile time type information (CTTI) is implemented in Pt by the
+        means of TypeTraits. A number of specialisations allows
+        compile type branching in gerneric code depending on the type.
+    */
+    template <typename T>
+    struct TypeTraits : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 0;
+        static const unsigned int isReference = 0;
+    };
 
-        This is the type information for void used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
+    /** @brief Type-traits for for const value types
+    */
+    template <typename T>
+    struct TypeTraits<const T> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 0;
+        static const unsigned int isReference = 0;
+    };
+
+    /** @brief Type-traits for for non-const reference types
+    */
+    template <typename T>
+    struct TypeTraits<T&> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 0;
+        static const unsigned int isReference = 1;
+    };
+
+    /** @brief Type-traits for for const reference types
+    */
+    template <typename T>
+    struct TypeTraits<const T&> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 1;
+        static const unsigned int isPointer = 0;
+        static const unsigned int isReference = 1;
+    };
+
+    /** @brief Type-traits for for non-const pointer types
+    */
+    template <typename T>
+    struct TypeTraits<T*> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 1;
+        static const unsigned int isReference = 0;
+    };
+
+    /** @brief Type-traits for for const pointer types
+    */
+    template <typename T>
+    struct TypeTraits<const T*> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 1;
+        static const unsigned int isPointer = 1;
+        static const unsigned int isReference = 0;
+    };
+
+    /** @brief Type-traits for for fixed-size array types
+    */
+    template <typename T, std::size_t N>
+    struct TypeTraits<T[N]> : public TypeTraitsBase<T>
+    {
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 1;
+        static const unsigned int isReference = 0;
+    };
+
+    /** @brief Type-traits for for void
     */
     template <>
     struct PT_API TypeTraits<void>
     {
-         /** @brief Indicate that TypeTraits exist
+        typedef void Value;
+        typedef void ConstType;
+        typedef void Reference;
+        typedef void ConstReference;
+        typedef void* Pointer;
+        typedef void* ConstPointer;
 
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "void"; }
-    };
-
-
-    /** @brief Type traits for bool
-        @ingroup Pt
-
-        This is the type information for bool used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<bool>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "bool"; }
-    };
-
-
-    /** @brief Type traits for char
-        @ingroup Pt
-
-        This is the type information for char used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<char>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "char"; }
-    };
-
-
-    /** @brief Type traits for int
-        @ingroup Pt
-
-        This is the type information for int used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<int>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "int"; }
-    };
-
-
-    /** @brief Type traits for float
-        @ingroup Pt
-
-        This is the type information for float used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<float>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "float"; }
-    };
-
-
-    /** @brief Type traits for double
-        @ingroup Pt
-
-        This is the type information for double used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<double>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "double"; }
-    };
-
-
-    /** @brief Type traits for void
-        @ingroup Pt
-
-        This is the type information for std::string used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct PT_API TypeTraits<std::string>
-    {
-        /** @brief Indicate that TypeTraits exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "std::string"; }
+        static const unsigned int isConst = 0;
+        static const unsigned int isPointer = 0;
+        static const unsigned int isReference = 0;
     };
 
 } // !namespace Pt

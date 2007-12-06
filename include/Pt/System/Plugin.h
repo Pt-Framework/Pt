@@ -2,11 +2,10 @@
 #define Pt_Plugin_h
 
 #include <Pt/System/Api.h>
-#include <Pt/TypeInfo.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/Directory.h>
 #include <Pt/System/SharedLib.h>
-
+#include <typeinfo>
 #include <list>
 #include <map>
 #include <string>
@@ -18,7 +17,7 @@ namespace System {
 
     class PluginId {
         public:
-            PluginId(const std::string& iface, const std::string& feature, const std::string& info = "")
+            PluginId(const std::type_info& iface, const std::string& feature, const std::string& info = "")
             : _iface(iface),
               _feature(feature),
               _info(info)
@@ -27,7 +26,7 @@ namespace System {
             virtual ~PluginId()
             { }
 
-            const std::string& iface() const
+            const std::type_info& iface() const
             { return _iface; }
 
             const std::string& feature() const
@@ -37,7 +36,7 @@ namespace System {
             { return _info; }
 
         private:
-            std::string _iface;
+            const std::type_info& _iface;
             std::string _feature;
             std::string _info;
     };
@@ -46,7 +45,7 @@ namespace System {
     template <typename Iface>
     class Plugin : public PluginId {
         public:
-            Plugin(const std::string& iface, const std::string& feature, const std::string& info)
+            Plugin(const std::type_info& iface, const std::string& feature, const std::string& info)
             : PluginId( iface, feature, info)
             { }
 
@@ -74,11 +73,7 @@ namespace System {
     class BasicPlugin : public Plugin<Iface> {
         public:
             BasicPlugin(const std::string& feature, const std::string& info = "")
-            : Plugin<Iface>( TypeInfo<Iface>::typeName(), feature, info)
-            { }
-
-            BasicPlugin(const std::string& iface, const std::string& feature, const std::string& info)
-            : Plugin<Iface>( iface, feature, info)
+            : Plugin<Iface>( typeid(Iface), feature, info)
             { }
 
             Iface* create()
@@ -116,8 +111,8 @@ namespace System {
             typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;
 
         public:
-            PluginManager( const std::string& iface = TypeInfo<IfaceT>::typeName() )
-            : _iface(iface)
+            PluginManager()
+            : _iface( typeid(IfaceT) )
             { }
 
             ~PluginManager();
@@ -143,7 +138,7 @@ namespace System {
 
         private:
             /// A string representation of the interface id
-            std::string _iface;
+            const std::type_info& _iface;
 
             /// A map of a feature string and the Plugin* which handles it.
             PluginMap _plugins;

@@ -18,13 +18,13 @@
     </ignoreparts>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description></description>
     <projectname>Platinum</projectname>
-    <defaultencoding/>
+    <defaultencoding></defaultencoding>
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt/bin/Pt-Xml-testd</mainprogram>
+      <mainprogram>/home/marc/Pt</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs>-fbin/SettingsTestd.unit</programargs>
@@ -33,7 +33,7 @@
       <envvars>
         <envvar value="/home/marc/Pt/bin" name="LD_LIBRARY_PATH" />
       </envvars>
-      <globaldebugarguments/>
+      <globaldebugarguments></globaldebugarguments>
       <globalcwd>/home/marc/Pt</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <autoinstall>false</autoinstall>
@@ -41,7 +41,7 @@
     </run>
     <build>
       <buildtool>make</buildtool>
-      <builddir/>
+      <builddir></builddir>
     </build>
     <make>
       <abortonerror>true</abortonerror>
@@ -49,8 +49,8 @@
       <prio>0</prio>
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
-      <defaulttarget/>
-      <makeoptions>-s TOOLSET=gcc -sGUI=x11 -q AtomicTest.unit</makeoptions>
+      <defaulttarget></defaulttarget>
+      <makeoptions></makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>
@@ -78,15 +78,25 @@
       <filetype>CMakeLists.txt</filetype>
     </filetypes>
     <blacklist/>
+    <other>
+      <prio>0</prio>
+      <otherbin></otherbin>
+      <defaulttarget></defaulttarget>
+      <otheroptions></otheroptions>
+      <selectedenvironment>Debug</selectedenvironment>
+      <environments>
+        <Debug/>
+      </environments>
+    </other>
   </kdevcustomproject>
   <kdevdebugger>
     <general>
-      <dbgshell/>
+      <dbgshell></dbgshell>
       <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -193,7 +203,7 @@
       <designerpluginpaths/>
     </qt>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>

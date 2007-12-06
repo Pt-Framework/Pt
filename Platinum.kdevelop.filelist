@@ -16,7 +16,6 @@ include/Pt/Signal.h
 include/Pt/Singleton.h
 include/Pt/Slot.h
 include/Pt/SourceInfo.h
-include/Pt/TypeInfo.h
 include/Pt/Types.h
 include/Pt/TypeTraits.h
 include/Pt/Variant.h
