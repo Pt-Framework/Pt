@@ -14,13 +14,17 @@ void onInput(Pt::System::IOResult& r)
 int main( int argc, char* argv[] )
 {
 /*
-    Pt::System::Directory dir("/home/marc");
+try {
+    Pt::System::Directory dir("c:\\");
     Pt::System::Directory::Iterator it;
     for(it = dir.begin(); it != dir.end(); ++it)
     {
-        std::cerr << (*it).name() << std::endl;
+        std::cerr << it.name() << std::endl;
     }
-
+}catch(const std::exception& e)
+{
+    std::cerr << e.what() << std::endl;
+}
     return 0;
 */
     std::string out("Hello World, where do you want to GOTO day!");

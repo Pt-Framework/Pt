@@ -90,6 +90,13 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 }
 
 
+std::string DirectoryIterator::name() const
+{
+    if(_impl)
+        return _impl->name();
+
+    return "";
+}
 
 
 FileSystemNode& DirectoryIterator::operator*() const

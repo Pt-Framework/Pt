@@ -71,6 +71,8 @@ namespace System {
             bool operator!=(const DirectoryIterator& it) const
             { return _impl != it._impl; }
 
+            std::string name() const;
+            
             FileSystemNode& operator*() const;
 
         private:
