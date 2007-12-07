@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Dï¿½rner                                  *
  *                                                                         *
  ***************************************************************************/
 
@@ -7,6 +7,7 @@
 #define PT_EVENT_H
 
 #include <Pt/Api.h>
+#include <Pt/Types.h>
 #include <typeinfo>
 
 
@@ -44,6 +45,10 @@ namespace Pt {
 
             //! Clone method.
             virtual Event* clone() const = 0;
+
+            //! Clone method.
+            virtual size_t clone(void* to, size_t available)
+            { return 0; }
 
            /**
             * @brief Returns the type info for this class of events.
