@@ -21,8 +21,8 @@
 #define PTV_STRINGLIST_h
 
 #include <Pt/Api.h>
-#include <Pt/TypeInfo.h>
 #include <Pt/String.h>
+#include <Pt/TypeTraits.h>
 #include <list>
 
 

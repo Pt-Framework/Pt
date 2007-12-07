@@ -19,7 +19,6 @@ SharedLibrary Pt : Any.cpp
                    Time.cpp
                    Timespan.cpp
                    Timestamp.cpp
-                   TypeInfo.cpp
                    codecvt.cpp
                    ctype.cpp
                    #num_get.cpp
