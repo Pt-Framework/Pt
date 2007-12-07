@@ -21,21 +21,12 @@
 #define Pt_Gfx_GenericAlgo_h
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/IfElse.h>
 #include <Pt/Types.h>
 
 
 namespace Pt {
 
     namespace Gfx {
-
-        //! \internal
-        template <typename A, typename B>
-        struct LargestSizeOf {
-            typedef typename IfElse< (sizeof(A) >= sizeof(B)), A, B >::ResultT Result;
-        };
-
-
 
         // TODO For all recursive template -> make both the classes and the helper
         //      functions use the same convention -> using Min/Max instead of N
