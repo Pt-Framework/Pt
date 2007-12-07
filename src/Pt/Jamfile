@@ -18,7 +18,7 @@ SharedLibrary Pt : Any.cpp
                    StringList.cpp
                    Time.cpp
                    Timespan.cpp
-                   Timestamp.cpp
+                   #Timestamp.cpp
                    codecvt.cpp
                    ctype.cpp
                    #num_get.cpp

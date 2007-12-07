@@ -26,8 +26,9 @@
 #ifndef Pt_Timespan_h
 #define Pt_Timespan_h
 
-#include "Pt/Api.h"
-#include "Pt/Timestamp.h"
+#include <Pt/Api.h>
+#include <Pt/Types.h>
+//#include "Pt/Timestamp.h"
 
 
 namespace Pt {

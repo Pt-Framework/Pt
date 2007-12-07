@@ -20,7 +20,6 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Types.h"
-#include "Pt/Timestamp.h"
 #include "Pt/DateTime.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestCase.h"
