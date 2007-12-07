@@ -42,14 +42,19 @@
     #define PT_PRETTY_FUNCTION __FUNCTION__
 #endif
 
-#define PT_STRINGIFY(x) #x
-#define PT_TOSTRING(x) PT_STRINGIFY(x)
-#define PT_SOURCEINFO_STR(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
+#define PT_SOURCEINFO_STRINGIFY(x) #x
+#define PT_SOURCEINFO_TOSTRING(x) PT_SOURCEINFO_STRINGIFY(x)
 
-/** @brief super macro to construct a Pt::SourceInfo object
+/** @brief Builds a message including source information
     @ingroup Pt
 */
-#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, __FILE__ ":" PT_TOSTRING(__LINE__) )
+#define PT_SOURCEINFO_MSG(msg) __FILE__ ":" PT_SOURCEINFO_TOSTRING(__LINE__) ": " #msg
+
+/** @brief Construct a Pt::SourceInfo object
+    @ingroup Pt
+*/
+#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, \
+                                     __FILE__ ":" PT_SOURCEINFO_TOSTRING(__LINE__) )
 
 namespace Pt {
 
@@ -61,9 +66,7 @@ namespace Pt {
     object conveniently.
 
     @code
-    int main()
-    {
-        const Pt::SourceInfo& si = PT_SOURCEINFO;
+        Pt::SourceInfo si(PT_SOURCEINFO);
 
         // print file, line and function
         std::cout << si.file() << std::endl;
@@ -71,10 +74,7 @@ namespace Pt {
         std::cout << si.func() << std::endl;
 
         // print combined string
-        std::cout << si.str() << std::endl;
-
-        return 0;
-    }
+        std::cout << si.where() << std::endl;
     @endcode
 */
 class SourceInfo {
@@ -105,6 +105,8 @@ class SourceInfo {
         inline unsigned int line() const throw()
         { return _line; }
 
+        /** @brief Returns a string describing the location
+        */
         inline const char* where() const
         { return _msg; }
 
