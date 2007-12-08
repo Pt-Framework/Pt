@@ -73,8 +73,7 @@ namespace Pt {
         friend T any_cast(const Any&);
 
         public:
-            /** @internal
-            */
+            /** @internal */
             class PT_API Value
             {
                 public:
@@ -85,8 +84,7 @@ namespace Pt {
                     virtual bool lt(const Value& value) const = 0;
             };
 
-            /** @internal
-            */
+            /** @internal */
             template <typename T>
             class BasicValue : public Value
             {
