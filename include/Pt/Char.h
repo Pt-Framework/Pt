@@ -22,7 +22,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <string>
 #include <iostream>
 
 namespace Pt {
