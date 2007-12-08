@@ -16,9 +16,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Locale.h>
-#include <Pt/String.h>
-#include <Pt/Unicode.h>
+#include "Pt/Locale.h"
+#include "Pt/String.h"
+#include "Pt/Unicode.h"
 
 namespace std {
 

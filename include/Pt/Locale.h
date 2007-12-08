@@ -104,14 +104,6 @@ namespace std {
             { }
     };
 
-    
-    template <typename T>
-    class numpunct
-    {
-        public:
-            numpunct()
-            { }
-    };
 
     class PT_API codecvt_base
     {
