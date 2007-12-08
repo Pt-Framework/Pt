@@ -26,8 +26,7 @@ namespace Pt {
     CharDummyStream::CharDummyStream()
     : std::basic_iostream<Pt::Char>(0)
     {}
-    
-    
+
     CharDummyStreamBuf::CharDummyStreamBuf()
     : std::basic_streambuf<Pt::Char>()
     {}

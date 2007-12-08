@@ -16,14 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_Text_TextCodec_h
 #define PT_Text_TextCodec_h
 
 #include <Pt/Text/Api.h>
 #include <Pt/Exception.h>
-#include <Pt/Char_codecvt.h>
-
+#include <Pt/Locale.h>
 
 namespace Pt {
 

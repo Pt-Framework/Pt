@@ -16,20 +16,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_STRINGSTREAM_H
 #define PT_STRINGSTREAM_H
 
 #include <Pt/Api.h>
-#include <Pt/Char_ctype.h>
-#include <Pt/Char_numpunct.h>
 #include <Pt/Char.h>
+#include <Pt/Locale.h>
 #include <Pt/String.h>
 #include <sstream>
 
-
 namespace Pt {
-
 
 class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
 {
@@ -37,7 +33,6 @@ class PT_API BasicStringStreamBuffer : public std::basic_stringbuf<Pt::Char>
         explicit BasicStringStreamBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
         explicit BasicStringStreamBuffer(const Pt::String& str, std::ios::openmode mode = std::ios::in | std::ios::out);
 };
-
 
 } // namespace Pt
 
@@ -48,25 +43,25 @@ template<>
 class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 {
     public:
-	    typedef Pt::Char char_type;
-	    typedef std::char_traits<Pt::Char> traits_type;
-	    typedef std::allocator<Pt::Char> allocator_type;
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
 
-	    typedef traits_type::int_type int_type;
-	    typedef traits_type::pos_type pos_type;
-	    typedef traits_type::off_type off_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
 
-	    explicit basic_stringstream(ios_base::openmode mode = ios_base::in | ios_base::out);
+        explicit basic_stringstream(ios_base::openmode mode = ios_base::in | ios_base::out);
 
-	    explicit basic_stringstream(const Pt::String& str, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
+        explicit basic_stringstream(const Pt::String& str, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
 
-	    virtual ~basic_stringstream();
+        virtual ~basic_stringstream();
 
-	    basic_stringbuf<Pt::Char>* rdbuf() const;
+        basic_stringbuf<Pt::Char>* rdbuf() const;
 
-	    Pt::String str() const;
+        Pt::String str() const;
 
-	    void str(const Pt::String& newStr);
+        void str(const Pt::String& newStr);
 
     private:
         Pt::BasicStringStreamBuffer* _buffer;

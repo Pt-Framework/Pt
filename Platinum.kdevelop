@@ -45,12 +45,12 @@
     </build>
     <make>
       <abortonerror>true</abortonerror>
-      <numberofjobs>1</numberofjobs>
+      <numberofjobs>0</numberofjobs>
       <prio>0</prio>
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions></makeoptions>
+      <makeoptions> -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>
@@ -77,7 +77,99 @@
       <filetype>Makefile</filetype>
       <filetype>CMakeLists.txt</filetype>
     </filetypes>
-    <blacklist/>
+    <blacklist>
+      <path>jam</path>
+      <path>jam/src</path>
+      <path>jam/src/builtins.c</path>
+      <path>jam/src/builtins.h</path>
+      <path>jam/src/class.c</path>
+      <path>jam/src/class.h</path>
+      <path>jam/src/command.c</path>
+      <path>jam/src/command.h</path>
+      <path>jam/src/compile.c</path>
+      <path>jam/src/compile.h</path>
+      <path>jam/src/debug.c</path>
+      <path>jam/src/debug.h</path>
+      <path>jam/src/execcmd.h</path>
+      <path>jam/src/execmac.c</path>
+      <path>jam/src/execnt.c</path>
+      <path>jam/src/execunix.c</path>
+      <path>jam/src/execvms.c</path>
+      <path>jam/src/expand.c</path>
+      <path>jam/src/expand.h</path>
+      <path>jam/src/filemac.c</path>
+      <path>jam/src/filent.c</path>
+      <path>jam/src/fileos2.c</path>
+      <path>jam/src/filesys.c</path>
+      <path>jam/src/filesys.h</path>
+      <path>jam/src/fileunix.c</path>
+      <path>jam/src/filevms.c</path>
+      <path>jam/src/frames.c</path>
+      <path>jam/src/frames.h</path>
+      <path>jam/src/glob.c</path>
+      <path>jam/src/hash.c</path>
+      <path>jam/src/hash.h</path>
+      <path>jam/src/hcache.c</path>
+      <path>jam/src/hcache.h</path>
+      <path>jam/src/hdrmacro.c</path>
+      <path>jam/src/hdrmacro.h</path>
+      <path>jam/src/headers.c</path>
+      <path>jam/src/headers.h</path>
+      <path>jam/src/jambase.c</path>
+      <path>jam/src/jambase.h</path>
+      <path>jam/src/jam.c</path>
+      <path>jam/src/jamgram.c</path>
+      <path>jam/src/jamgram.h</path>
+      <path>jam/src/jamgramtab.h</path>
+      <path>jam/src/jam.h</path>
+      <path>jam/src/lists.c</path>
+      <path>jam/src/lists.h</path>
+      <path>jam/src/make1.c</path>
+      <path>jam/src/make.c</path>
+      <path>jam/src/make.h</path>
+      <path>jam/src/mkjambase.c</path>
+      <path>jam/src/modules</path>
+      <path>jam/src/modules/order.c</path>
+      <path>jam/src/modules/path.c</path>
+      <path>jam/src/modules/property-set.c</path>
+      <path>jam/src/modules/regex.c</path>
+      <path>jam/src/modules/sequence.c</path>
+      <path>jam/src/modules/set.c</path>
+      <path>jam/src/modules.c</path>
+      <path>jam/src/modules.h</path>
+      <path>jam/src/native.c</path>
+      <path>jam/src/native.h</path>
+      <path>jam/src/newstr.c</path>
+      <path>jam/src/newstr.h</path>
+      <path>jam/src/option.c</path>
+      <path>jam/src/option.h</path>
+      <path>jam/src/parse.c</path>
+      <path>jam/src/parse.h</path>
+      <path>jam/src/patchlevel.h</path>
+      <path>jam/src/pathmac.c</path>
+      <path>jam/src/pathsys.h</path>
+      <path>jam/src/pathunix.c</path>
+      <path>jam/src/pathvms.c</path>
+      <path>jam/src/pwd.c</path>
+      <path>jam/src/pwd.h</path>
+      <path>jam/src/regexp.c</path>
+      <path>jam/src/regexp.h</path>
+      <path>jam/src/rules.c</path>
+      <path>jam/src/rules.h</path>
+      <path>jam/src/scan.c</path>
+      <path>jam/src/scan.h</path>
+      <path>jam/src/search.c</path>
+      <path>jam/src/search.h</path>
+      <path>jam/src/strings.c</path>
+      <path>jam/src/strings.h</path>
+      <path>jam/src/subst.c</path>
+      <path>jam/src/timestamp.c</path>
+      <path>jam/src/timestamp.h</path>
+      <path>jam/src/variable.c</path>
+      <path>jam/src/variable.h</path>
+      <path>jam/src/w32_getreg.c</path>
+      <path>jam/src/yyacc.c</path>
+    </blacklist>
     <other>
       <prio>0</prio>
       <otherbin></otherbin>

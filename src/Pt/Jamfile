@@ -11,6 +11,7 @@ SharedLibrary Pt : Any.cpp
                    Date.cpp
                    DateTime.cpp
                    Exception.cpp
+                   Locale.cpp
                    SerializationInfo.cpp
                    Settings.cpp
                    Signal.cpp
@@ -18,11 +19,6 @@ SharedLibrary Pt : Any.cpp
                    StringList.cpp
                    Time.cpp
                    Timespan.cpp
-                   #Timestamp.cpp
-                   codecvt.cpp
-                   ctype.cpp
-                   #num_get.cpp
-                   numpunct.cpp
                    Unicode.cpp ;
 
 #TntnetLibrary tnttest : tnt.ecpp ;

@@ -17,13 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_CHAR_H
 #define PT_CHAR_H
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-
 #include <string>
 #include <iostream>
 
@@ -492,7 +490,6 @@ namespace Pt {
 
 } // namespace Pt
 
-#include <Pt/Char_ctype.h>
-#include <Pt/Char_numpunct.h>
+#include <Pt/Locale.h>
 
 #endif
