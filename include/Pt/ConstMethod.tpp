@@ -4,10 +4,9 @@ template < typename R,typename ClassT,class A1 = Void, class A2 = Void, class A3
 class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -29,7 +28,7 @@ class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
@@ -78,10 +77,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4, c
 class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -103,7 +101,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
@@ -122,10 +120,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4, c
 class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7,A8) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -147,7 +144,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
@@ -166,10 +163,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4, c
 class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6,A7) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -191,7 +187,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callab
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
@@ -210,10 +206,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4, c
 class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5,A6) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -235,7 +230,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Call
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
@@ -254,10 +249,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4, c
 class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4,A5) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -279,7 +273,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Ca
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5>
@@ -298,10 +292,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3, class A4>
 class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3,A4) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -323,7 +316,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public 
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3, class A4>
@@ -342,10 +335,9 @@ template < typename R, typename ClassT,class A1, class A2, class A3>
 class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2,A3) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2,A3) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -367,7 +359,7 @@ class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : publi
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2, class A3>
@@ -386,10 +378,9 @@ template < typename R, typename ClassT,class A1, class A2>
 class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1,A2) const;
+        typedef R (ClassT::*MemFuncT)(A1,A2) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -411,7 +402,7 @@ class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : pub
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1, class A2>
@@ -430,10 +421,9 @@ template < typename R, typename ClassT,class A1>
 class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(A1) const;
+        typedef R (ClassT::*MemFuncT)(A1) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -455,7 +445,7 @@ class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : p
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT,class A1>
@@ -474,10 +464,9 @@ template < typename R, typename ClassT>
 class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)() const;
+        typedef R (ClassT::*MemFuncT)() const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -499,7 +488,7 @@ class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> :
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT>

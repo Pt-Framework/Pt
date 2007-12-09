@@ -3,16 +3,6 @@
     template <typename R, class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
     class Callable : public Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef A6 Arg6T;
-		typedef A7 Arg7T;
-		typedef A8 Arg8T;
-		typedef A9 Arg9T;
-		typedef A10 Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 10 };
 
@@ -34,16 +24,6 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     class Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef A6 Arg6T;
-		typedef A7 Arg7T;
-		typedef A8 Arg8T;
-		typedef A9 Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 9 };
 
@@ -65,16 +45,6 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     class Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Invokable<A1,A2,A3,A4,A5,A6,A7,A8> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef A6 Arg6T;
-		typedef A7 Arg7T;
-		typedef A8 Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 8 };
 
@@ -96,16 +66,6 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     class Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Invokable<A1,A2,A3,A4,A5,A6,A7> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef A6 Arg6T;
-		typedef A7 Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 7 };
 
@@ -127,16 +87,6 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6>
     class Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Invokable<A1,A2,A3,A4,A5,A6> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef A6 Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 6 };
 
@@ -158,16 +108,6 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5>
     class Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Invokable<A1,A2,A3,A4,A5> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef A5 Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 5 };
 
@@ -189,16 +129,6 @@
     template <typename R,class A1, class A2, class A3, class A4>
     class Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Invokable<A1,A2,A3,A4> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef A4 Arg4T;
-		typedef Void Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 4 };
 
@@ -220,16 +150,6 @@
     template <typename R,class A1, class A2, class A3>
     class Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Invokable<A1,A2,A3> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef A3 Arg3T;
-		typedef Void Arg4T;
-		typedef Void Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 3 };
 
@@ -251,16 +171,6 @@
     template <typename R,class A1, class A2>
     class Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Invokable<A1,A2> {
 		public:
-		typedef A1 Arg1T;
-		typedef A2 Arg2T;
-		typedef Void Arg3T;
-		typedef Void Arg4T;
-		typedef Void Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 2 };
 
@@ -282,16 +192,6 @@
     template <typename R,class A1>
     class Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Invokable<A1> {
 		public:
-		typedef A1 Arg1T;
-		typedef Void Arg2T;
-		typedef Void Arg3T;
-		typedef Void Arg4T;
-		typedef Void Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 1 };
 
@@ -313,16 +213,6 @@
     template <typename R>
     class Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Invokable<> {
 		public:
-		typedef Void Arg1T;
-		typedef Void Arg2T;
-		typedef Void Arg3T;
-		typedef Void Arg4T;
-		typedef Void Arg5T;
-		typedef Void Arg6T;
-		typedef Void Arg7T;
-		typedef Void Arg8T;
-		typedef Void Arg9T;
-		typedef Void Arg10T;
             typedef R ReturnT;
             enum { NumArgs = 0 };
 
