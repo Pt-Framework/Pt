@@ -50,11 +50,6 @@ void XmlDeserializer::read(SerializationInfo& si)
             break;
         }
     }
-
-    // currently at closing tag - we have to advance to the next node.
-    // TODO: should be nextTag() ???
-    // _reader->next();
-
 }
 
 
