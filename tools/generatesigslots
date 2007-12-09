@@ -276,11 +276,11 @@ EOF
 }
 
 print "\t\tpublic:\n";
-$i = 0;
-foreach $t (@typelist) {
-	++$i;
-	print "\t\ttypedef ".$t." Arg".$i."T;\n";
-}
+#$i = 0;
+#foreach $t (@typelist) {
+#	++$i;
+#	print "\t\ttypedef ".$t." Arg".$i."T;\n";
+#}
 print << "EOF"
             typedef R ReturnT;
             enum { NumArgs = ${argc} };
@@ -612,10 +612,9 @@ EOF
 print << "EOF"
 {
     public:
-        typedef ClassT InterfaceType;
-        typedef R (ClassT::*MethodT)(${arg_tmpl_types}) const;
+        typedef R (ClassT::*MemFuncT)(${arg_tmpl_types}) const;
 
-        ConstMethod(ClassT& object, MethodT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
@@ -637,7 +636,7 @@ print << "EOF"
 
     private:
         ClassT* _object;
-        MethodT _method;
+        MemFuncT _method;
 };
 
 template <class R, class ClassT${comma_arg_tmpl_decl}>
@@ -715,10 +714,7 @@ EOF
 print << "EOF"
 {
     public:
-        typedef ClassT InterfaceType;
         typedef R (ClassT::*MemFuncT)(${arg_tmpl_types});
-        typedef R (ClassT::*ConstMemFuncT)(${arg_tmpl_types}) const;
-
 
         explicit Method(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _memFunc(ptr)
