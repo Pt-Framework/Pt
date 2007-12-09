@@ -1,6 +1,7 @@
 #include "ClockImpl.h"
-#include "Pt/Exception.h"
-#include "time.h"
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
+#include <time.h>
 #include <mmsystem.h>
 
 

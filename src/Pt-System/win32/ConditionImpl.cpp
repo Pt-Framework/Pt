@@ -2,7 +2,8 @@
  *   Copyright (C) 2006                                                    *
  ***************************************************************************/
 #include "ConditionImpl.h"
-#include "Pt/Exception.h"
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 namespace Pt {
 
