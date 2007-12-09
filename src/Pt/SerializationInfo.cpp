@@ -16,7 +16,7 @@ SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)
 {
-    _nodes.reserve(150);
+    _nodes.reserve(10);
 }
 
 SerializationInfo::SerializationInfo(const SerializationInfo& si)
@@ -103,13 +103,6 @@ void SerializationInfo::setName(const std::string& name)
 }
 
 
-void SerializationInfo::setValue(const Pt::Variant& value)
-{
-    _value = value;
-    _category = Value;
-}
-
-
 void SerializationInfo::setId(const std::string& id)
 {
     _id = id;
@@ -122,23 +115,31 @@ const std::string& SerializationInfo::id() const
 }
 
 
-void SerializationInfo::fixdown(void* ref)
+void SerializationInfo::setReference(void* ref)
 {
-    _value = ref;
+    _value = convert<Pt::String>(ref);
     _category = Reference;
 }
 
 
-void SerializationInfo::fixup(void*& type) const
+SerializationInfo& SerializationInfo::addReference(const std::string& name, void* ref)
 {
-    _value = &type;
+    SerializationInfo& info = this->addMember(name);
+    info.setReference(ref);
+    return info;
+}
+
+
+void SerializationInfo::getReference(void*& type) const
+{
+    _id = convert<Pt::String>(&type).narrow();
     type = 0;
 }
 
 
 const Pt::String& SerializationInfo::toString() const
 {
-    return _value.str();
+    return _value;
 }
 
 

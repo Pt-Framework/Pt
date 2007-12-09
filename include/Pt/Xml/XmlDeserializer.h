@@ -115,18 +115,17 @@ namespace Xml {
 
             void fixup(const Pt::SerializationInfo& si)
             {
-                // TODO: we only need to store all references during parsing
-                // and fixup pointer addresses later when Deserializer::fixup is called
                 Pt::SerializationInfo::ConstIterator it;
                 for(it = si.begin(); it != si.end(); ++it)
                 {
                     if(it->category() == Pt::SerializationInfo::Reference)
                     {
-                        void* target = _objects[ it->id() ];
+                        void* target = _objects[ it->toValue<std::string>() ];
 
-                        void* d = it->toValue<void*>();
+                        void* d = convert<void*>( Pt::String::widen( it->id()) );
                         void** destination = (void**)d;
-                        _fixups[ it->id() ]( destination, target);
+
+                        _fixups[ it->toValue<std::string>() ]( destination, target);
                     }
 
                     if(it->category() == Pt::SerializationInfo::Object)

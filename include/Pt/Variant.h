@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Marc Boris Drner                          *
+ *   Copyright (C) 2004-2006 by Marc Boris Duerner                         *
  *   Copyright (C) 2004-2006 by Stepan Beal                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +20,8 @@
 #ifndef Pt_Variant_h
 #define Pt_Variant_h
 
-#include <Pt/VariantTraits.h>
-
+#include <Pt/Convert.h>
 #include <string>
-
 
 namespace Pt {
 
@@ -109,13 +107,12 @@ namespace Pt {
 
             /**
                 Lexically casts this->str() to a T
-                and assigns that to tgt. Returns true
-                on success, false on error.
+                and assigns that to tgt.
             */
             template <typename T>
-            bool get(T& tgt) const throw()
+            void get(T& tgt) const throw()
             {
-                return VariantTraits<T>::fromData(tgt , _data);
+                return convert(tgt , _data);
             }
 
             /**
@@ -125,7 +122,7 @@ namespace Pt {
             template <typename T>
             void set(const T& value) throw()
             {
-                VariantTraits<T>::toData(_data, value);
+                convert(_data, value);
             }
 
             /**
@@ -259,9 +256,6 @@ namespace Pt {
         return is;
     }
 
-
 } // namespace Pt
 
-
-#endif 
-
+#endif

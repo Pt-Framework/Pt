@@ -242,10 +242,10 @@ class PT_API Time
         unsigned msec = 0;
         time.get(hour, min, sec, msec);
 
-        si.addValue("hour", Variant(hour) );
-        si.addValue("minute", Variant(min) );
-        si.addValue("second", Variant(sec) );
-        si.addValue("millisec", Variant(msec) );
+        si.addValue("hour", hour );
+        si.addValue("minute", min );
+        si.addValue("second", sec );
+        si.addValue("millisec", msec );
         si.setTypeName("Time");
     }
 

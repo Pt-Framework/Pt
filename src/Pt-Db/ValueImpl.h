@@ -24,7 +24,7 @@
 
 #include <Pt/Blob.h>
 #include <Pt/Db/IValue.h>
-#include <Pt/Variant.h>
+//#include <Pt/Variant.h>
 
 
 namespace Pt {
@@ -58,8 +58,8 @@ namespace Db {
 
             virtual bool isNull() const;
 
-            virtual void getData(Variant& v) const
-            { v = _data; }
+            //virtual void getData(Variant& v) const
+            //{ v = _data; }
 
             virtual bool getBool() const;
 

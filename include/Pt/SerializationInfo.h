@@ -20,11 +20,10 @@
 #define Pt_SerializationInfo_h
 
 #include <Pt/String.h>
-#include <Pt/Variant.h>
+#include <Pt/Convert.h>
 #include <Pt/Exception.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
-
 
 namespace Pt {
 
@@ -80,34 +79,43 @@ class PT_API SerializationInfo
 
         void setName(const std::string& name);
 
-        void setValue(const Pt::Variant& value);
-
         void setId(const std::string& id);
 
         const std::string& id() const;
 
-        void fixdown(void* ref);
+        void setReference(void* ref);
+
+        SerializationInfo& addReference(const std::string& name, void* ref);
 
         template <typename T>
-        void fixup(T*& type) const
+        void toReference(T*& type) const
         {
-            this->fixup( reinterpret_cast<void*&>(type) );
+            this->getReference( reinterpret_cast<void*&>(type) );
         }
 
-        void fixup(void*& type) const;
+        template <typename T>
+        void getReference(const std::string& name, T*& type) const
+        {
+            this->getMember(name).getReference( reinterpret_cast<void*&>(type) );
+        }
+
+        template <typename T>
+        void setValue(const T& value)
+        {
+            convert(_value, value);
+            _category = Value;
+        }
 
         template <typename T>
         T toValue() const
         {
-            T value;
-            _value.get(value);
-            return value;
+            return convert<T>(_value);
         }
 
         template <typename T>
         void toValue(T& value) const
         {
-            _value.get(value);
+            convert(value, _value);
         }
 
         const Pt::String& toString() const;
@@ -124,12 +132,10 @@ class PT_API SerializationInfo
 
         const SerializationInfo& getMember(const std::string& name) const;
 
-
         // This is needed for some compilers (GCC 3.x) to allow access to
         // method 'T getValue(const std::string& name) const' below.
         template <typename T>
         friend T getValue(const std::string& name, SerializationInfo* si);
-
 
         template <typename T>
         T getValue(const std::string& name) const
@@ -174,6 +180,8 @@ class PT_API SerializationInfo
         SerializationInfo& operator =(const SerializationInfo& si);
 
     protected:
+        void getReference(void*& type) const;
+
         void setParent(SerializationInfo& si)
         { _parent = &si; }
 
@@ -181,9 +189,9 @@ class PT_API SerializationInfo
         SerializationInfo* _parent;
         Category _category;
         std::string _name;
-        std::string _id;
+        mutable std::string _id;
         std::string _type;
-        mutable Pt::Variant _value;
+        Pt::String _value;
         Nodes _nodes;
 };
 

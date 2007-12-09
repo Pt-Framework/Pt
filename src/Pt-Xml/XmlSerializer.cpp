@@ -99,7 +99,7 @@ void XmlSerializer::write(const SerializationInfo& si)
     }
     else if( si.category() == SerializationInfo::Reference )
     {
-        Attribute attr( Pt::String(L"ref"), Pt::String::widen( si.id() ) );
+        Attribute attr( Pt::String(L"ref"), si.toString() );
         _writer->writeElement( Pt::String::widen( si.name() ), &attr, 1, Pt::String() );
     }
 }
@@ -135,7 +135,7 @@ void XmlSerializer::fixdown(Pt::SerializationInfo& si)
         std::stringstream id;
         id << pointee;
         pointee->setId( id.str() );
-        si.setId( id.str() );
+        si.setReference( pointee );
     }
     else if(si.category() == Pt::SerializationInfo::Object)
     {

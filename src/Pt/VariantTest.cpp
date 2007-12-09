@@ -69,7 +69,7 @@ void VariantTest::AssignInt()
 void VariantTest::Float()
 {
     Pt::Variant v( std::numeric_limits<float>::quiet_NaN() );
-    PT_UNIT_ASSERT( v.str() == L"NAN" )
+    PT_UNIT_ASSERT( v.str() == L"NAN" );
 }
 
 

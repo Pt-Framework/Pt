@@ -12,7 +12,7 @@
 #include <limits>
 
 #include "ValueImpl.h"
-#include "Pt/Variant.h"
+//#include "Pt/Variant.h"
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"

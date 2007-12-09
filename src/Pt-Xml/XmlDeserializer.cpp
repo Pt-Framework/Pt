@@ -169,7 +169,8 @@ void XmlDeserializer::onWhitespace(const Node& node)
             {
                 SerializationInfo& ref = _current->addValue( _nodeName.narrow(), refId );
                 ref.setCategory(SerializationInfo::Reference);
-                ref.setId( refId.narrow() );
+                //ref.setId( refId.narrow() );
+
                 _processNode = &XmlDeserializer::onContent;
             }
 

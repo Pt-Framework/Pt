@@ -45,12 +45,12 @@
     </build>
     <make>
       <abortonerror>true</abortonerror>
-      <numberofjobs>0</numberofjobs>
+      <numberofjobs>1</numberofjobs>
       <prio>0</prio>
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q</makeoptions>
+      <makeoptions> -q Pt-Xml-test</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

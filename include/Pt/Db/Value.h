@@ -24,7 +24,6 @@
 
 #include <Pt/Db/Api.h>
 #include <Pt/Db/IValue.h>
-#include <Pt/Variant.h>
 #include <Pt/Blob.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
@@ -190,9 +189,6 @@ namespace Db {
 
             void getBlob(Pt::Blob& blobdata) const
             { return _value->getBlob(blobdata); }
-
-            //void getData(Variant& v) const 
-            //{ return _value->getData(v); }
     };
 
 } // namespace Db

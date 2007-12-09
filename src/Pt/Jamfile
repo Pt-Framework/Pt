@@ -39,13 +39,13 @@ PtUnitTest AnyTest : AnyTest.cpp ;
 Main_LinkSharedLibraries AnyTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate AnyTest : $(OUTPUT_TARGET) ;
 
-#PtUnitTest InfixTest : InfixTest.cpp ;
-#Main_LinkSharedLibraries InfixTest : Pt Pt-Unit ;
-#PtUnitTest_MakeLocate InfixTest : $(OUTPUT_TARGET) ;
-
 PtUnitTest VariantTest : VariantTest.cpp ;
 Main_LinkSharedLibraries VariantTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate VariantTest : $(OUTPUT_TARGET) ;
+
+PtUnitTest ConversionTest : ConversionTest.cpp ;
+Main_LinkSharedLibraries ConversionTest : Pt Pt-Unit ;
+PtUnitTest_MakeLocate ConversionTest : $(OUTPUT_TARGET) ;
 
 #PtUnitTest PoolTest : PoolTest.cpp ;
 #Main_LinkSharedLibraries PoolTest : Pt ;
@@ -120,6 +120,7 @@ DEPENDS Pt-test :   AnyTest.unit
                     AtomicTest.unit
                     ByteorderTest.unit
                     CharTest.unit
+                    ConversionTest.unit
                     DateTest.unit
                     DateTimeTest.unit
                     DelegateTest.unit

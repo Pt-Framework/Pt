@@ -17,9 +17,7 @@ include/Pt/Slot.h
 include/Pt/SourceInfo.h
 include/Pt/Types.h
 include/Pt/TypeTraits.h
-include/Pt/Variant.h
 include/Pt/Void.h
-include/Pt/VariantTraits.h
 include/Pt/Pt.h
 include/Pt/Api.h
 include/Pt/Application.h
@@ -1007,3 +1005,5 @@ src/Pt-Xml/XmlWriter.cpp
 src/Pt-Xml/XmlWriterTest.cpp
 include/Pt/Locale.h
 src/Pt/Locale.cpp
+src/Pt/ConversionTest.cpp
+include/Pt/Convert.h
