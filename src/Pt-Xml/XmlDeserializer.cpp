@@ -39,8 +39,6 @@ void XmlDeserializer::read(SerializationInfo& si)
     _processNode = &XmlDeserializer::beginDocument;
 
     size_t startDepth = _reader->depth();
-
-    bool end = false;
     for(XmlReader::Iterator it = _reader->current(); it != _reader->end(); ++it)
     {
         (this->*_processNode)(*it);
