@@ -147,8 +147,7 @@ struct DateRef
 
 void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
 {
-    const Pt::SerializationInfo& dptr = si.getMember("date");
-    dptr.fixupReference( dr.date );
+    si.getReference("date", dr.date );
 }
 
 
