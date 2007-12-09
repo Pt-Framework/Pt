@@ -21,7 +21,8 @@
 #include "Pt/Net/TcpServerSocket.h"
 #include "TcpSocketImpl.h"
 #include "TcpServerSocketImpl.h"
-#include "Pt/Exception.h"
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 
 namespace Pt {

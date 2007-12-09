@@ -16,7 +16,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Net_AddrInfo_H
 #define Pt_Net_AddrInfo_H
 
@@ -37,7 +36,6 @@
     #include <netdb.h>
 #endif
 
-#include <Pt/Exception.h>
 #include <iterator>
 #include <string>
 #include <sstream>

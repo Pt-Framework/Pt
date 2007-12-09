@@ -72,7 +72,7 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
     ss2.str( L"" );
 
     if( ss.fail() )
-        throw ConversionError("ARgbColor", PT_SOURCEINFO);
+        throw Pt::ConversionError( PT_CONVERSIONERROR(Pt::Gfx::ARgbColor, Pt::String) );
 
     ARgb8888Color rgb8( (uint8_t)r, (uint8_t)g, (uint8_t)b);
     Color<Gfx::ARgb> color;

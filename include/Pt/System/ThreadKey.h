@@ -22,7 +22,6 @@
 #define Pt_ThreadKey_h
 
 #include <Pt/System/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/NonCopyable.h>
 
 

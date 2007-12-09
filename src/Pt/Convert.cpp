@@ -16,18 +16,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Exception.h"
+#include "Pt/Convert.h"
 
 namespace Pt {
 
-ConversionError::ConversionError(const std::string& msg, const SourceInfo& si)
-: std::runtime_error(msg + si)
+ConversionError::ConversionError(const char* msg, const SourceInfo& si)
+: std::runtime_error(msg)
+, _si(si)
 {
 }
 
+
 ConversionError::~ConversionError() throw()
 {
+}
+
+
+const Pt::SourceInfo& ConversionError::where() const
+{
+    return _si;
 }
 
 }

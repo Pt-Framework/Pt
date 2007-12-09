@@ -22,7 +22,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/Any.h>
-#include <Pt/Exception.h>
 #include <Pt/Reflex/Api.h>
 
 

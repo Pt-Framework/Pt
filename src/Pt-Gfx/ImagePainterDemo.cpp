@@ -19,8 +19,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Main.h>
-
-#include <Pt/Exception.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
@@ -29,7 +27,6 @@
 #include <Pt/Gui/Widget.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
-
 #include <Pt/Math/Point.h>
 #include <Pt/System/Clock.h>
 #include <iostream>

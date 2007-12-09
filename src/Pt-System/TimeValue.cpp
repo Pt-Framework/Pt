@@ -1,5 +1,6 @@
 #include "Pt/System/TimeValue.h"
-#include "Pt/Exception.h"
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 
 namespace Pt {

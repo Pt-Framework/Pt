@@ -1,9 +1,9 @@
 #ifndef PTV_Xml_ParseError_h
 #define PTV_Xml_ParseError_h
 
-#include <Pt/Exception.h>
 #include <Pt/Xml/Api.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 namespace Pt {
 

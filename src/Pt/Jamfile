@@ -8,9 +8,9 @@ SharedLibrary Pt : Any.cpp
                    Char.cpp
                    Connection.cpp
                    Connectable.cpp
+                   Convert.cpp
                    Date.cpp
                    DateTime.cpp
-                   Exception.cpp
                    Locale.cpp
                    SerializationInfo.cpp
                    Settings.cpp

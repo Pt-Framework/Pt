@@ -57,14 +57,11 @@
     Oct 2004: updated to use UNI_MAX_LEGAL_UTF32 in UTF-32 conversions.
 
  **************************************************************************/
-
 #ifndef Ptv_IO_Utf16Codec_h
 #define Ptv_IO_Utf16Codec_h
 
-#include <Pt/Exception.h>
 #include <Pt/Text/Api.h>
 #include <Pt/Text/TextCodec.h>
-
 
 namespace Pt {
 

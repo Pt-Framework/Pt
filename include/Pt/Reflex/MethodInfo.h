@@ -22,7 +22,7 @@
 
 #include <Pt/Reflex/Api.h>
 #include <Pt/Reflex/MethodInfoBase.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Method.h>
 #include <stdexcept>

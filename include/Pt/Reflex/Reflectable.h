@@ -23,8 +23,8 @@
 #include <Pt/Reflex/Api.h>
 #include <Pt/Reflex/MethodInfo.h>
 #include <Pt/Reflex/PropertyInfo.h>
-#include <Pt/Exception.h>
-
+#include <Pt/SourceInfo.h>
+#include <stdexcept>
 
 namespace Pt {
 

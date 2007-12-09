@@ -21,7 +21,6 @@
 #define PT_DATE_H
 
 #include <Pt/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/SerializationInfo.h>
 #include <string>
 

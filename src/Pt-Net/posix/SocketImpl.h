@@ -48,9 +48,9 @@
     #define PT_EAGAIN EAGAIN
 #endif
 
-#include <Pt/Exception.h>
 #include <Pt/Net/Socket.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 namespace Pt {
 

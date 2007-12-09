@@ -16,15 +16,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Reflex_MethodInfoBase_h
 #define Pt_Reflex_MethodInfoBase_h
 
 #include <Pt/Reflex/Api.h>
 #include <Pt/Reflex/CallableInfo.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/Void.h>
-
+#include <stdexcept>
 
 namespace Pt {
 

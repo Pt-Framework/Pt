@@ -20,8 +20,8 @@
 #define PT_UNIT_ASSERTION_H
 
 #include <Pt/Unit/Api.h>
-#include <Pt/Exception.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <iostream>
 
 

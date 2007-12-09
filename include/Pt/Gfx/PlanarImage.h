@@ -20,9 +20,10 @@
 #ifndef Pt_Gfx_PlanarImage_h
 #define Pt_Gfx_PlanarImage_h
 
-#include <Pt/Exception.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/PlanarImageView.h>
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <vector>
 
 

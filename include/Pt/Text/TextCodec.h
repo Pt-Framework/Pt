@@ -20,7 +20,6 @@
 #define PT_Text_TextCodec_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/Locale.h>
 
 namespace Pt {

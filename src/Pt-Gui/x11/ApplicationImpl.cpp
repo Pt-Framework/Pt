@@ -25,7 +25,6 @@
 #include <X11/Xft/Xft.h>
 #endif
 
-#include "Pt/Exception.h"
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/Widget.h"
 #include <Pt/Gui/PaintEvent.h>
@@ -36,7 +35,8 @@
 #include <Pt/Gui/MoveEvent.h>
 #include <Pt/Gui/KeyEvent.h>
 #include <Pt/Gui/Widget.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <iostream>
 #include <vector>
 

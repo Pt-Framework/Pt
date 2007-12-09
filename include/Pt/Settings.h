@@ -21,7 +21,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/Exception.h>
 #include <Pt/Unicode.h>
 #include <Pt/SerializationInfo.h>
 #include <iostream>

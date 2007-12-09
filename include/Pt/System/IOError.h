@@ -22,8 +22,9 @@
 #define PT_SYSTEM_IOERROR_H
 
 #include <Pt/System/Api.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <ios>
+#include <stdexcept>
 
 namespace Pt {
 

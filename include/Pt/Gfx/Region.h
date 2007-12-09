@@ -20,7 +20,6 @@
 #ifndef PT_GFX_REGION_H
 #define PT_GFX_REGION_H
 
-#include <Pt/Exception.h>
 #include <Pt/Math/Math.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Size.h>

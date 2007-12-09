@@ -1,14 +1,11 @@
 #ifndef PT_CMA_COMPONENT_H
 #define PT_CMA_COMPONENT_H
 
-#include <map>
-
 #include <Pt/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/Cma/TypeId.h>
 #include <Pt/Cma/IUnknown.h>
 #include <Pt/Cma/IComponentBuilder.h>
-
+#include <map>
 
 namespace Pt {
 

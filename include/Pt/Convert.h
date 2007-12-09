@@ -22,216 +22,254 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/StringStream.h>
+#include <sstream>
 #include <string>
 #include <stdexcept>
 #include <iomanip>
 #include <limits>
 
+#define PT_CONVERSIONERROR(to, from) \
+    "conversion to " #to " from " #from " failed", PT_SOURCEINFO
+
 namespace Pt {
 
-    template <typename T>
-    inline void convert(Pt::String& s, const T& value)
+class PT_API ConversionError : public std::runtime_error
+{
+    public:
+        ConversionError(const char* msg, const SourceInfo& si);
+
+        virtual ~ConversionError() throw();
+
+        const Pt::SourceInfo& where() const;
+
+    private:
+        Pt::SourceInfo _si;
+};
+
+
+template <typename T>
+inline void convert(Pt::String& s, const T& value)
+{
+    Pt::StringStream os;
+    os << value;
+    s = os.str();
+}
+
+
+template <typename T>
+inline void convert(T& t, const Pt::String& str)
+{
+    Pt::StringStream is(str);
+    is >> t;
+}
+
+
+template <typename T>
+inline void convert(std::string& s, const T& value)
+{
+    std::ostringstream os;
+    os << value;
+    s = os.str();
+}
+
+
+template <typename T>
+inline void convert(T& t, const std::string& str)
+{
+    std::istringstream is(str);
+    is >> t;
+}
+
+
+inline void convert(Pt::String& s, const Pt::String& str)
+{
+    s = str;
+}
+
+
+inline void convert(Pt::String& s, bool value)
+{
+    s = value ?
+        Pt::String::widen("true") :
+        Pt::String::widen("false");
+}
+
+
+inline void convert(bool& n, const Pt::String& str)
+{
+    n = ( str.size() == 4 ) &&
+        ( str[0] == Pt::Char('t') ) &&
+        ( str[1] == Pt::Char('r') ) &&
+        ( str[2] == Pt::Char('u') ) &&
+        ( str[3] == Pt::Char('e') );
+}
+
+
+inline void convert(Pt::String& s, char value)
+{
+    s = Pt::String( 1, Pt::Char(value) );
+}
+
+
+inline void convert(char& n, const Pt::String& str)
+{
+    if( str.empty() )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(char, Pt::String) );
+
+    n = str[0].narrow('*');
+}
+
+
+inline void convert(Pt::String& s, unsigned char value)
+{
+    Pt::StringStream ss;
+    unsigned int i = static_cast<unsigned int>(value);
+    ss << i;
+    s = ss.str();
+}
+
+
+inline void convert(unsigned char& n, const Pt::String& str)
+{
+    if( str.empty() )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(unsigned char, Pt::String) );
+
+    // interpret as numeric value
+    Pt::StringStream ss(str);
+    unsigned int i = 0;
+    ss >> i;
+    n = static_cast<unsigned char>(i);
+}
+
+
+inline void convert(Pt::String& s, signed char value)
+{
+    Pt::StringStream ss;
+    signed int i = static_cast<signed int>(value);
+    ss << i;
+    s = ss.str();
+}
+
+
+inline void convert(signed char& n, const Pt::String& str)
+{
+    if( str.empty() )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(signed char, Pt::String) );
+
+    // interpret as numeric value
+    Pt::StringStream ss(str);
+    signed int i = 0;
+    ss >> i;
+    n = static_cast<signed char>(i);
+}
+
+
+inline void convert(Pt::String& s, const std::string& value)
+{
+    s = Pt::String::widen(value);
+}
+
+
+inline void convert(std::string& s,const Pt::String& str)
+{
+    s = str.narrow();
+}
+
+
+inline void convert(Pt::String& s, float value)
+{
+    // not a number
+    if(value != value)
     {
-        Pt::StringStream os;
-        os << value;
-        s = os.str();
+        s = L"NAN";
+        return;
     }
 
+    Pt::StringStream os;
+    os << value;
+    s = os.str();
+}
 
-    template <typename T>
-    inline void convert(T& t, const Pt::String& str)
+
+inline void convert(float& n, const Pt::String& str)
+{
+    // not a number
+    if(str == L"NAN")
     {
-        Pt::StringStream is(str);
-        is >> t;
+        n = std::numeric_limits<float>::quiet_NaN();
+        return;
     }
 
+    Pt::StringStream is(str);
+    is >> n;
 
-    inline void convert(Pt::String& s, const Pt::String& str)
+    if( is.fail() )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(float, Pt::String) );
+}
+
+
+inline void convert(Pt::String& s, double value)
+{
+    // not a number
+    if(value != value)
     {
-        s = str;
+        s = L"NAN";
+        return;
     }
 
+    Pt::StringStream os;
+    os << std::fixed << std::setprecision(15) << value;
+    s = os.str();
+}
 
-    inline void convert(Pt::String& s, bool value)
+
+inline void convert(double& n, const Pt::String& str)
+{
+    // not a number
+    if(str == L"NAN")
     {
-        static const Pt::String istrue(L"true");
-        static const Pt::String isfalse(L"false");
-        s = value ? istrue : isfalse;
+        n = std::numeric_limits<float>::quiet_NaN();
+        return;
     }
 
+    Pt::StringStream is(str);
+    is >> std::fixed >> std::setprecision(15) >> n;
 
-    inline void convert(bool& n, const Pt::String& str)
-    {
-        static const Pt::String istrue(L"true");
-        n = (str == istrue);
-    }
-
-
-    inline void convert(Pt::String& s, char value)
-    {
-        s = Pt::String( 1, Pt::Char(value) );
-    }
+    if( is.fail() )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(double, Pt::String) );
+}
 
 
-    inline void convert(char& n, const Pt::String& str)
-    {
-        if( str.empty() )
-            throw ConversionError("char", PT_SOURCEINFO);
-
-        n = str[0].narrow('*');
-    }
-
-
-    inline void convert(Pt::String& s, unsigned char value)
-    {
-        Pt::StringStream ss;
-        unsigned int i = static_cast<unsigned int>(value);
-        ss << i;
-        s = ss.str();
-    }
+template<typename T, typename S>
+void convert(T& to, const S& from)
+{
+    Pt::StringStream ss;
+    if( !(ss << from && ss >> to) )
+        throw Pt::ConversionError( PT_CONVERSIONERROR(streamable, streamable) );
+}
 
 
-    inline void convert(unsigned char& n, const Pt::String& str)
-    {
-        if( str.empty() )
-            throw ConversionError("unsigned char", PT_SOURCEINFO);
-
-        // interpret as numeric value
-        Pt::StringStream ss(str);
-        unsigned int i = 0;
-        ss >> i;
-        n = static_cast<unsigned char>(i);
-    }
-
-
-    inline void convert(Pt::String& s, signed char value)
-    {
-        Pt::StringStream ss;
-        signed int i = static_cast<signed int>(value);
-        ss << i;
-        s = ss.str();
-    }
-
-
-    inline void convert(signed char& n, const Pt::String& str)
-    {
-        if( str.empty() )
-            throw ConversionError("signed char", PT_SOURCEINFO);
-
-        // interpret as numeric value
-        Pt::StringStream ss(str);
-        signed int i = 0;
-        ss >> i;
-        n = static_cast<signed char>(i);
-    }
-
-
-    inline void convert(Pt::String& s, const std::string& value)
-    {
-        s = Pt::String::widen(value);
-    }
-
-
-    inline void convert(std::string& s,const Pt::String& str)
-    {
-        s = str.narrow();
-    }
-
-
-    inline void convert(Pt::String& s, float value)
-    {
-        // not a number
-        if(value != value)
-        {
-            s = L"NAN";
-            return;
-        }
-
-        Pt::StringStream os;
-        os << value;
-        s = os.str();
-    }
-
-
-    inline void convert(float& n, const Pt::String& str)
-    {
-        // not a number
-        if(str == L"NAN")
-        {
-            n = std::numeric_limits<float>::quiet_NaN();
-            return;
-        }
-
-        Pt::StringStream is(str);
-        is >> n;
-
-        if( is.fail() )
-            throw ConversionError("float", PT_SOURCEINFO);
-    }
-
-
-    inline void convert(Pt::String& s, double value)
-    {
-        // not a number
-        if(value != value)
-        {
-            s = L"NAN";
-            return;
-        }
-
-        Pt::StringStream os;
-        os << std::fixed << std::setprecision(15) << value;
-        s = os.str();
-    }
-
-
-    inline void convert(double& n, const Pt::String& str)
-    {
-        // not a number
-        if(str == L"NAN")
-        {
-            n = std::numeric_limits<float>::quiet_NaN();
-            return;
-        }
-
-        Pt::StringStream is(str);
-        is >> std::fixed >> std::setprecision(15) >> n;
-
-        if( is.fail() )
-            throw ConversionError("float", PT_SOURCEINFO);
-    }
-
-
-    template<typename T, typename S>
-    void convert(T& to, const S& from)
-    {
-        Pt::StringStream ss;
-        if( !(ss << from && ss >> to) )
-            throw std::bad_cast("bad lexical cast");
-    }
-
-
-    template<typename T, typename S>
-    struct Convert
-    {
-        T operator()(const S& from) const
-        {
-            T value = T();
-            convert(value, from);
-            return value;
-        }
-    };
-
-
-    template<typename T, typename S>
-    T convert(const S& from)
+template<typename T, typename S>
+struct Convert
+{
+    T operator()(const S& from) const
     {
         T value = T();
         convert(value, from);
         return value;
     }
+};
+
+
+template<typename T, typename S>
+T convert(const S& from)
+{
+    T value = T();
+    convert(value, from);
+    return value;
+}
 
 } // namespace Pt
 

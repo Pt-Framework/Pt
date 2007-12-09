@@ -16,12 +16,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Ptv_Utf32Codec_h
 #define Ptv_Utf32Codec_h
 
 #include <Pt/Text/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/Char.h>
 #include <Pt/Text/TextCodec.h>
 

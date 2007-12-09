@@ -9,11 +9,11 @@
 #include "Pt/Xml/ProcessingInstruction.h"
 #include "Pt/Xml/Comment.h"
 #include "Pt/Xml/EndDocument.h"
-
 #include "Pt/String.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <sstream>
 #include <iostream>
 

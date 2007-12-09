@@ -3,9 +3,9 @@
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/Xml/Characters.h"
-#include "Pt/Exception.h"
 #include "Pt/String.h"
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 
 namespace Pt {
 

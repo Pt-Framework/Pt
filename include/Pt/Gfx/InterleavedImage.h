@@ -20,10 +20,10 @@
 #ifndef Pt_Gfx_InterleavedImage_h
 #define Pt_Gfx_InterleavedImage_h
 
-#include <Pt/Exception.h>
 #include <Pt/Gfx/ARgbFColor.h>
 #include <Pt/Math/Rect.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <vector>
 
 

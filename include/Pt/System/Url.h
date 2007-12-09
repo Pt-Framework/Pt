@@ -22,8 +22,9 @@
 #define Pt_System_Url_h
 
 #include <Pt/System/Api.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <iostream>
+#include <stdexcept>
 #include <map>
 #include <string>
 

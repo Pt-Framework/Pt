@@ -22,7 +22,6 @@
 #define PT_TIME_H
 
 #include <Pt/Api.h>
-#include <Pt/Exception.h>
 #include <Pt/Timespan.h>
 #include <Pt/SerializationInfo.h>
 #include <string>

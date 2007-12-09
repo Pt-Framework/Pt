@@ -21,7 +21,6 @@
 
 #include <Pt/String.h>
 #include <Pt/Convert.h>
-#include <Pt/Exception.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 

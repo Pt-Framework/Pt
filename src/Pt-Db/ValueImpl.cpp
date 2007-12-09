@@ -25,8 +25,8 @@
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>
-#include <Pt/Exception.h>
-
+#include "Pt/SourceInfo.h"
+#include <stdexcept>
 #include <sstream>
 #include <iostream>
 

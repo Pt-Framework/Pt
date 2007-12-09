@@ -21,13 +21,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_System_SystemError_h
 #define Pt_System_SystemError_h
 
 #include <Pt/System/Api.h>
-#include <Pt/Exception.h>
-
+#include <Pt/SourceInfo.h>
+#include <stdexcept>
 
 namespace Pt {
 

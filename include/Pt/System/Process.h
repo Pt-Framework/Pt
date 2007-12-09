@@ -7,10 +7,10 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/Types.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/System/SystemError.h>
 #include <string>
-
+#include <stdexcept>
 
 namespace Pt {
 

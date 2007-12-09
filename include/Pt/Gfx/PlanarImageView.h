@@ -20,10 +20,8 @@
 #ifndef Pt_Gfx_PlanarImageModel_h
 #define Pt_Gfx_PlanarImageModel_h
 
-#include <Pt/Exception.h>
 #include <Pt/Math/Size.h>
 #include <Pt/Gfx/GenericAlgo.h>
-
 
 namespace Pt {
 

@@ -22,8 +22,9 @@
 #define PT_SYSTEM_FILEERRORS_H
 
 #include <Pt/System/Api.h>
-#include <Pt/Exception.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/System/File.h>
+#include <stdexcept>
 
 namespace Pt {
 

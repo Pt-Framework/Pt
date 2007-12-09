@@ -6,7 +6,6 @@ include/Pt/Connectable.h
 include/Pt/Connection.h
 include/Pt/ConstMethod.h
 include/Pt/Delegate.h
-include/Pt/Exception.h
 include/Pt/Function.h
 include/Pt/Invokable.h
 include/Pt/Method.h
@@ -125,7 +124,6 @@ src/Pt/DateTime.cpp
 src/Pt/DateTimeTest.cpp
 src/Pt/Delegate.cpp
 src/Pt/DelegateTest.cpp
-src/Pt/Exception.cpp
 src/Pt/ExceptionTest.cpp
 src/Pt/Pt-test.cpp
 src/Pt/SerializationInfo.cpp

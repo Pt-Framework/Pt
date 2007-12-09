@@ -21,7 +21,6 @@
 #include "ConsoleChannel.h"
 #include "FileChannel.h"
 #include "SerialChannel.h"
-#include "Pt/Exception.h"
 #include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
 #include <Pt/Log/Logger.h>
@@ -30,11 +29,9 @@
 #include <memory>
 #include <fstream>
 
-
 static Pt::System::BasicPlugin<Pt::Log::ConsoleChannel, Pt::Log::Channel> consolePlugin("console", "0.0.1");
 static Pt::System::BasicPlugin<Pt::Log::FileChannel, Pt::Log::Channel> filePlugin("file", "0.0.1");
 static Pt::System::BasicPlugin<Pt::Log::SerialChannel, Pt::Log::Channel> serialPlugin("comm", "0.0.1");
-
 
 namespace Pt {
 
