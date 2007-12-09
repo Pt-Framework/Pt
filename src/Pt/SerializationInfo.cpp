@@ -132,8 +132,9 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 
 void SerializationInfo::getReference(void*& type) const
 {
-    _id = convert<std::string>(&type);
-    type = 0;
+    _fixupAddr = &type;
+    //_id = convert<std::string>(&type);
+    //type = 0;
 }
 
 

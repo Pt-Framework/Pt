@@ -11,8 +11,10 @@ SharedLibrary Pt : Any.cpp
                    Convert.cpp
                    Date.cpp
                    DateTime.cpp
+                   Deserializer.cpp
                    Locale.cpp
                    SerializationInfo.cpp
+                   Serializer.cpp
                    Settings.cpp
                    Signal.cpp
                    StringStream.cpp

@@ -3,15 +3,14 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <Pt/Serializer.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
-#include <map>
-#include <vector>
-
 
 namespace Pt {
 
 namespace Xml {
+
     class XmlWriter;
 
     /** @brief Serialize objects or object data to XML
@@ -19,7 +18,7 @@ namespace Xml {
         Thic class performs XML serialization of a single object or
         object data.
     */
-    class PT_XML_API XmlSerializer
+    class PT_XML_API XmlSerializer : public Serializer
     {
         public:
             /** @brief Construct a serializer without initializing the
@@ -82,40 +81,12 @@ namespace Xml {
             */
             void detach();
 
-            /** @brief Serialize an object to XML
-
-                The serializer will serialize the object \a type as
-                XML to the assigned stream. The string \a name will be used
-                as the instance name of \a type and appear as the name of the
-                XML element. The type must be serializable.
-            */
-            template <typename T>
-            void serialize(const T& type, const std::string& name)
-            {
-                SerializationInfo* si = new SerializationInfo();
-                _stack.push_back(si);
-
-                _objects[&type] = si;
-
-                si->setName(name);
-                *si <<= type;
-            }
-
-            /** @brief Serialize object to XML
-
-                Writes all pending data to the used stream.
-            */
+            //! @internal
             void flush();
 
         protected:
             //! @internal
-            void write(const SerializationInfo& si);
-
-            //! @internal
-            void fixdown(Pt::SerializationInfo& si);
-
-            //! @internal
-            void clear();
+            virtual void write(const SerializationInfo& si);
 
         private:
             //! @internal
@@ -123,12 +94,6 @@ namespace Xml {
 
             //! @internal
             std::auto_ptr<XmlWriter> _deleter;
-
-            //! @internal
-            std::vector<Pt::SerializationInfo*> _stack;
-
-            //! @internal
-            std::map<const void*, Pt::SerializationInfo*> _objects;
     };
 
 } // namespace Xml

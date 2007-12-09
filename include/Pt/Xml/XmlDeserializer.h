@@ -3,11 +3,9 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
+#include <Pt/Deserializer.h>
 #include <Pt/SerializationInfo.h>
 #include <memory>
-#include <map>
-#include <list>
-
 
 namespace Pt {
 
@@ -15,13 +13,12 @@ namespace Xml {
     class XmlReader;
     class Node;
 
-
     /** @brief Deserialize objects or object data to XML
 
         Thic class performs XML deserialization of a single object or
         object data.
     */
-    class PT_XML_API XmlDeserializer
+    class PT_XML_API XmlDeserializer : public Pt::Deserializer
     {
         public:
             XmlDeserializer(XmlReader& reader);
@@ -30,38 +27,6 @@ namespace Xml {
 
             //! @brief Destructor
             ~XmlDeserializer();
-
-            /** @brief Deserialize an object to XML
-
-                This method will deserialize the object \a type from an
-                XML format. The type \a type must be serializable.
-            */
-            template <typename T>
-            void deserialize(T& type)
-            {
-                _stack.push_back( SerializationInfo() );
-                SerializationInfo& si = _stack.back();
-
-                this->getData( si );
-                si >>= type;
-
-                if( ! si.id().empty() )
-                {
-                    _objects[ si.id() ] = &type;
-                    _fixups[ si.id() ] = &XmlDeserializer::do_fixup<T>;
-                }
-            }
-
-            void fixup()
-            {
-                std::list<Pt::SerializationInfo>::iterator it;
-                for(it = _stack.begin(); it != _stack.end(); ++it)
-                {
-                    this->fixup(*it);
-                }
-
-                _stack.clear();
-            }
 
             XmlReader& reader()
             { return *_reader; }
@@ -72,7 +37,7 @@ namespace Xml {
                 This method will append the object data generated
                 from an XML format to \a data.
             */
-            void getData(SerializationInfo& si);
+            void read(SerializationInfo& si);
 
             //! @internal
             void beginDocument(const Node& node);
@@ -112,41 +77,6 @@ namespace Xml {
             String _nodeName;
 
             String _nodeId;
-
-            void fixup(const Pt::SerializationInfo& si)
-            {
-                Pt::SerializationInfo::ConstIterator it;
-                for(it = si.begin(); it != si.end(); ++it)
-                {
-                    if(it->category() == Pt::SerializationInfo::Reference)
-                    {
-                        void* target = _objects[ it->toValue<std::string>() ];
-
-                        void* d = convert<void*>( Pt::String::widen( it->id()) );
-                        void** destination = (void**)d;
-
-                        _fixups[ it->toValue<std::string>() ]( destination, target);
-                    }
-
-                    if(it->category() == Pt::SerializationInfo::Object)
-                    {
-                        this->fixup(*it);
-                    }
-                }
-            }
-
-            std::list<Pt::SerializationInfo> _stack;
-
-            std::map<std::string, void*> _objects;
-
-            typedef void (*Fixup)(void**, void*);
-            std::map<std::string, Fixup> _fixups;
-
-            template <typename T>
-            static void do_fixup(void** ref , void* val)
-            {
-                *( (T**)(ref) ) = (T*)(val);
-            }
     };
 
 } // namespace Xml

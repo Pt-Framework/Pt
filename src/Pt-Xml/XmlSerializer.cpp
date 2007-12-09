@@ -35,7 +35,6 @@ XmlSerializer::XmlSerializer(XmlWriter* writer)
 XmlSerializer::~XmlSerializer()
 {
     this->detach();
-    this->clear();
 }
 
 
@@ -107,57 +106,8 @@ void XmlSerializer::write(const SerializationInfo& si)
 
 void XmlSerializer::flush()
 {
-    std::vector<Pt::SerializationInfo*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->fixdown(**it);
-    }
-
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        this->write( **it );
-    }
-
-    this->clear();
-
     if (_writer)
         _writer->flush();
-}
-
-
-void XmlSerializer::fixdown(Pt::SerializationInfo& si)
-{
-    if(si.category() == Pt::SerializationInfo::Reference)
-    {
-        const void* p = si.toValue<void*>();
-        Pt::SerializationInfo* pointee = _objects[p];
-
-        std::stringstream id;
-        id << pointee;
-        pointee->setId( id.str() );
-        si.setReference( pointee );
-    }
-    else if(si.category() == Pt::SerializationInfo::Object)
-    {
-        Pt::SerializationInfo::Iterator it;
-        for(it = si.begin(); it != si.end(); ++it)
-        {
-            this->fixdown(*it);
-        }
-    }
-}
-
-
-void XmlSerializer::clear()
-{
-    std::vector<Pt::SerializationInfo*>::iterator it;
-    for(it = _stack.begin(); it != _stack.end(); ++it)
-    {
-        delete *it;
-    }
-
-    _objects.clear();
-    _stack.clear();
 }
 
 } // namespace Xml

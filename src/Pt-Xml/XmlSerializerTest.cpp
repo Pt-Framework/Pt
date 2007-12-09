@@ -56,54 +56,51 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         XmlSerializerTest()
         : Pt::Unit::TestSuite("XmlSerializerTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Date", *this, &XmlSerializerTest::Date );
-            Pt::Unit::TestSuite::registerMethod( "DateTime", *this, &XmlSerializerTest::DateTime );
+            Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
+            Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
         }
 
     protected:
-        void Date()
+        void Reference()
         {
             Pt::Date date1(1889, 4, 20);
-            std::stringstream output;
-            Pt::Xml::XmlSerializer ser(output);
-            ser.serialize(date1, "date1");
 
             DateRef dr;
             dr.date = &date1;
-            std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date1 << std::endl;
+            //std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date1 << std::endl;
 
+            std::stringstream output;
+            Pt::Xml::XmlSerializer ser(output);
+            ser.serialize(date1, "date1");
             ser.serialize(dr, "dref");
+
+            ser.fixdown();
             ser.flush();
 
-            std::cerr << "\n##########\n" << std::endl;
-            std::cerr << output.str() << std::endl;
-            std::cerr << "##########" << std::endl;
+            //std::cerr << "\n##########\n" << std::endl;
+            //std::cerr << output.str() << std::endl;
+            //std::cerr << "##########" << std::endl;
 
             Pt::Date date2(1, 1, 1);
+            dr.date = 0;
+
             std::stringstream input( output.str() );
             Pt::Xml::XmlDeserializer deser(input);
-
-            Pt::Xml::XmlReader& reader = deser.reader();
-
-            reader.nextElement();
             deser.deserialize(date2);
-
-            dr.date = 0;
-            reader.nextElement();
             deser.deserialize(dr);
-
             deser.fixup();
-            std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date2 << std::endl;
+            //std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date2 << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
         }
 
-        void DateTime()
+        void Object()
         {
             Pt::DateTime date1(1889, 4, 20, 1, 2, 3, 4);
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
+            ser.fixdown();
             ser.flush();
 
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);

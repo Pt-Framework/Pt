@@ -178,6 +178,9 @@ class PT_API SerializationInfo
 
         SerializationInfo& operator =(const SerializationInfo& si);
 
+        void* fixupAddr() const
+        { return _fixupAddr; }
+
     protected:
         void getReference(void*& type) const;
 
@@ -188,7 +191,8 @@ class PT_API SerializationInfo
         SerializationInfo* _parent;
         Category _category;
         std::string _name;
-        mutable std::string _id;
+        std::string _id;
+        mutable void* _fixupAddr;
         std::string _type;
         Pt::String _value;
         Nodes _nodes;

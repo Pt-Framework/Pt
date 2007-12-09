@@ -30,24 +30,30 @@ XmlDeserializer::~XmlDeserializer()
 }
 
 
-void XmlDeserializer::getData(SerializationInfo& si)
+void XmlDeserializer::read(SerializationInfo& si)
 {
+    if(_reader->get().type() != Node::StartElement)
+        _reader->nextElement();
+
     _current = &si;
     _processNode = &XmlDeserializer::beginDocument;
 
     size_t startDepth = _reader->depth();
 
+    bool end = false;
     for(XmlReader::Iterator it = _reader->current(); it != _reader->end(); ++it)
     {
         (this->*_processNode)(*it);
 
         if((it->type() == Node::EndElement) && (_reader->depth() < startDepth))
+        {
             break;
+        }
     }
 
     // currently at closing tag - we have to advance to the next node.
     // TODO: should be nextTag() ???
-    _reader->next();
+    // _reader->next();
 
 }
 
@@ -70,6 +76,7 @@ void XmlDeserializer::beginDocument(const Node& node)
             break;
         }
         default:
+            std::cerr << "NODE: " << node.type() << std::endl;
             throw std::logic_error("Expected start element" + PT_SOURCEINFO);
     };
 }
@@ -244,7 +251,6 @@ void XmlDeserializer::onEndElement(const Node& node)
         }
     };
 }
-
 
 } // namespace Xml
 
