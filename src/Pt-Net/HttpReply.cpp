@@ -361,12 +361,12 @@ void HttpReply::receive()
 
         // copy the single input buffers into one total buffer.
         Pt::Blob totalBuffer(new char[totalBufferSize], totalBufferSize);
-        const char* currentBuffer = totalBuffer.m_data;
+        const char* currentBuffer = totalBuffer.data();
         std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
         while (singleBuffer != singleBuffers.end())
         {
-            memcpy((void*) currentBuffer, (*singleBuffer).m_data, (*singleBuffer).m_length);
-            currentBuffer += (*singleBuffer).m_length;
+            memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
+            currentBuffer += (*singleBuffer).size();
             singleBuffer++;
         }
         singleBuffers.clear();
@@ -398,15 +398,15 @@ void HttpReply::send()
         }
     }
 
-    if (0 < _body.m_length)
+    if (0 < _body.size())
     {
-        httpHeader << STR_CONTENT_LENGTH << _body.m_length << STR_END_OF_LINE;
+        httpHeader << STR_CONTENT_LENGTH << _body.size() << STR_END_OF_LINE;
     }
 
     httpHeader << STR_END_OF_LINE << std::flush;
 
     // allocate buffer.
-    const size_t bufferSize = httpHeader.str().length() + _body.m_length;
+    const size_t bufferSize = httpHeader.str().length() + _body.size();
     char* buffer = new char[bufferSize];
 
     // copy the HTTP header.
@@ -415,7 +415,7 @@ void HttpReply::send()
 
     // copy the body data.
     char* bodyData = headerData + httpHeader.str().length();
-    memcpy(bodyData, _body.m_data, _body.m_length);
+    memcpy(bodyData, _body.data(), _body.size());
 
     // send the HTTP reply.
     _connection.write(buffer, bufferSize);

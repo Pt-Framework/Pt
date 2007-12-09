@@ -318,7 +318,7 @@ namespace Net {
          */
         void setBody(const Pt::Blob body)
         {
-            _body.assign(body.m_data, body.m_length);
+            _body = body;
         }
 
         /**

@@ -312,7 +312,7 @@ namespace sqlite {
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
             
-            int ret = ::sqlite3_bind_blob(stmt, idx, data.m_data, data.m_length, SQLITE_TRANSIENT);
+            int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
             {

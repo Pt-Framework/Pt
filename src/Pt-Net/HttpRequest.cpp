@@ -340,12 +340,12 @@ void HttpRequest::receive(Pt::Net::TcpSocket& connection)
 
         // copy the single input buffers into one total buffer.
         Pt::Blob totalBuffer(new char[totalBufferSize], totalBufferSize);
-        const char* currentBuffer = totalBuffer.m_data;
+        const char* currentBuffer = totalBuffer.data();
         std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
         while (singleBuffer != singleBuffers.end())
         {
-            memcpy((void*) currentBuffer, (*singleBuffer).m_data, (*singleBuffer).m_length);
-            currentBuffer += (*singleBuffer).m_length;
+            memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
+            currentBuffer += (*singleBuffer).size();
             singleBuffer++;
         }
         singleBuffers.clear();
@@ -393,11 +393,11 @@ void HttpRequest::sendPostMethod(Pt::Net::TcpSocket& connection)
     httpHeader << _url;
     httpHeader << STR_HTTP_VERSION << STR_END_OF_LINE;
     httpHeader << STR_HOST << _host << STR_END_OF_LINE;
-    httpHeader << STR_CONTENT_LENGTH << _body.m_length << STR_END_OF_LINE;
+    httpHeader << STR_CONTENT_LENGTH << _body.size() << STR_END_OF_LINE;
     httpHeader << STR_END_OF_LINE << std::flush;
 
     // allocate buffer.
-    const size_t bufferSize = httpHeader.str().length() + _body.m_length;
+    const size_t bufferSize = httpHeader.str().length() + _body.size();
     char* buffer = new char[bufferSize];
 
     // copy the HTTP header.
@@ -406,7 +406,7 @@ void HttpRequest::sendPostMethod(Pt::Net::TcpSocket& connection)
 
     // copy the body data.
     char* body = header + httpHeader.str().length();
-    memcpy(body, _body.m_data, _body.m_length);
+    memcpy(body, _body.data(), _body.size());
 
     // send the HTTP request.
     connection.write(buffer, bufferSize);

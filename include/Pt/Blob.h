@@ -1,11 +1,28 @@
+/***************************************************************************
+ *   Copyright (C) 2007 by Tommi Mäkitalo                                  *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 #ifndef PT_BLOB_H
 #define PT_BLOB_H
 
-#include <stddef.h>
-#include <memory.h>
+#include <string>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
-
 
 /*! A class to hold binary data.
     The data is represented by a plain pointer to the data
@@ -19,89 +36,41 @@ namespace Pt {
 */
 class Blob
 {
+    SmartPtr<std::string, ExternalRefCounted<std::string> > m_dataptr;
 
 public:
     /*!
         Default constructor which creates an empty blob object.
     */
-    Blob() : m_data(0), m_length(0), m_size(0), m_refcnt(new int(1))
+    Blob()
     { }
 
-    /*! This is a constructor with ownership-transfer semantics.
-        This means that the caller of this constructer gives up ownership of
-        the referenced data. As a consequence, the caller must not destroy
-        the referenced data - the Blob is now responsible for that.
+    /*! 
         @param data The pointer to the data from which to create the Blob.
         @param len The length of the data.
     */
-    Blob(const char* data, size_t len) : m_data(data), m_length(len), m_size(len), m_refcnt(new int(1))
+    Blob(const char* data, unsigned len)
+        : m_dataptr(new std::string(data, len))
     { }
 
-    /*! Creates of copy of an existing Blob.
-        Note that no data is copied as the implementation is reference counted.
-    */
-    Blob(const Blob& aBlob) : m_data(aBlob.m_data), m_length(aBlob.m_length), m_size(aBlob.m_size),
-                  m_refcnt(aBlob.m_refcnt)
-    {
-        (*m_refcnt)++;
-    }
-
-    /*! Destroys this Blob.
-        As the Blob is defined to be the owner of the
-        referenced data, it is responsible for destroying it.
-        The data is only destroyed, if the reference counter drop to 0.
-    */
-    virtual ~Blob() {
-        dispose();
-    };
-
-    /*! Assignment-operator which just increments the refcounter of the Blob,
-        so, no copying of data is performed.
-        @param b A reference to the blob whose data should be shared by this blob.
-    */
-    Blob& operator=(const Blob& b) {
-        // self assignement is handled implicit by first incrementing the ref counter!
-        // (in 99.9% you don't do self assignement so a explicit
-        // check would be a waste of time )
-        (*b.m_refcnt)++;
-        dispose();
-        m_data = b.m_data;
-        m_length = b.m_length;
-        m_size = b.m_size;
-        m_refcnt = b.m_refcnt;
-        return *this;
-    }
-
     /* Assign raw data to a blob.
-       Note that this function takes ownership of the given data by making a copy
-       of it if this blob was unused before.
-       If the blob already contains data the old data is deleted and the new data
-       is copied into this blob.
        @param data A pointer to the data of which this blob should create a copy.
        @param len The length of the data of which this data should create a copy. */
     void assign(const char* data, size_t len) {
-        if (*m_refcnt == 1 && len <= m_size) {
-            m_length = len;
-            memcpy((void*) m_data, data, len);
-            return;
-        }
-        dispose();
-        m_data = new char[len];
-        m_length = len;
-        m_size = len;
-        memcpy((void*) m_data, data, len);
-        m_refcnt = new int(1);
+        if (!m_dataptr || m_dataptr.refs() > 1)
+            m_dataptr = new std::string(data, len);
+        else
+            m_dataptr->assign(data, len);
     }
     /*! Comparison-operator.
-        The Blobs are assumed to be equal, if they point to the
-        same data (pointer comparison). Note that the assignment operator and the copy-
-        constructor make a deep-copy of the data. As a result this comparison operator
-        doesn't regard blobs created this way as being equal.
         @param b The Blob to which to compare the current Blob.
         @return true, if the Blobs point to the same data (pointer comparison)
     */
     bool operator==(const Blob& b) const {
-        return b.m_data == this->m_data && b.m_length == this->m_length;
+        return m_dataptr.getPointer() == b.m_dataptr.getPointer()
+            || m_dataptr.getPointer()
+             && m_dataptr.getPointer()
+             && *m_dataptr == *m_dataptr;
     }
 
     bool operator!=(const Blob& b) const {
@@ -109,45 +78,24 @@ public:
     }
 
     /*!
-        The pointer to the content of this Blob.
-    */
-    const char* m_data;
-
-    /*!
-        The length of the content of this Blob.
-    */
-    size_t m_length;
-    size_t m_size;
-
-    /*!
-       The reference counter for the Blob.
-    */
-    int *m_refcnt;
-
-
+        Returns a pointer to the data or 0 if no data is set.
+     */
     const char* data() const
     {
-        return m_data;
+      return m_dataptr.getPointer() ? m_dataptr->data() : 0;
     }
 
-private:
-    /*! Deletion of the Blob.
-        The reference counter gets decremented, if it drops to 0 then the data of the Blob
-        is destroyed otherwise nothing more happens
-    */
-    void dispose()
+    /*!
+        Returns the size of the data
+     */
+    unsigned size() const
     {
-        --(*m_refcnt);
-        if (*m_refcnt == 0)
-        {
-            delete[] m_data;
-            delete m_refcnt;
-        }
+      return m_dataptr.getPointer() ? m_dataptr->size() : 0;
     }
 
 };
 
 } // namespace Pt
 
-#endif //PTV_BLOB_H
+#endif //PT_BLOB_H
 
