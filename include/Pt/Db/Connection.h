@@ -22,11 +22,11 @@
 #ifndef PT_DB_Connection_H
 #define PT_DB_Connection_H
 
-#include <string>
 #include <Pt/Db/Api.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IConnection.h>
 #include <Pt/Db/Statement.h>
+#include <string>
 
 namespace Pt {
 
