@@ -38,7 +38,7 @@ namespace System {
     class IOResult : protected NonCopyable
     {
         public:
-            static const unsigned int WaitInfinite = static_cast<size_t>(-1);
+            static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
             IOResult()
             : _device(0)

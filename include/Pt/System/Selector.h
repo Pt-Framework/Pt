@@ -79,7 +79,7 @@ namespace System {
     class PT_SYSTEM_API Selector : public Connectable, public NonCopyable
     {
         public:
-            static const unsigned int WaitInfinite = static_cast<size_t>(-1);
+            static const unsigned int WaitInfinite = static_cast<const unsigned int>(-1);
 
             //! @brief Default constructor
             Selector();
