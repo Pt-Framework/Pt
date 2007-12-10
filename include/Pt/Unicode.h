@@ -24,7 +24,7 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <Pt/Char.h>
-#include <Pt/Locale.h>
+#include <Pt/Facets.h>
 
 namespace Pt {
 

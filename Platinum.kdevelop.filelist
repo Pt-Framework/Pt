@@ -1001,7 +1001,5 @@ src/Pt-Xml/XmlStream.cpp
 src/Pt-Xml/XmlTest.cpp
 src/Pt-Xml/XmlWriter.cpp
 src/Pt-Xml/XmlWriterTest.cpp
-include/Pt/Locale.h
-src/Pt/Locale.cpp
 src/Pt/ConversionTest.cpp
 include/Pt/Convert.h

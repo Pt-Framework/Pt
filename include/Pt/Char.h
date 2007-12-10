@@ -489,6 +489,6 @@ namespace Pt {
 
 } // namespace Pt
 
-#include <Pt/Locale.h>
+#include <Pt/Facets.h>
 
 #endif

@@ -12,7 +12,7 @@ SharedLibrary Pt : Any.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
-                   Locale.cpp
+                   Facets.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
                    Settings.cpp

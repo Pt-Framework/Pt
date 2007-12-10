@@ -21,7 +21,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Char.h>
-#include <Pt/Locale.h>
+#include <Pt/Facets.h>
 #include <Pt/String.h>
 #include <sstream>
 
