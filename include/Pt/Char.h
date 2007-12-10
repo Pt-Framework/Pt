@@ -458,6 +458,80 @@ namespace std {
 
 namespace Pt {
 
+    PT_API std::ctype_base::mask ctypeMask(const Char& ch);
+
+
+    inline int isalpha(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::alpha;
+    }
+
+
+    inline int isalnum(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::alnum;
+    }
+
+
+    inline int ispunct(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::punct;
+    }
+
+
+    inline int iscntrl(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::cntrl;
+    }
+
+
+    inline int isdigit(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::digit;
+    }
+
+
+    inline int isxdigit(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::xdigit;
+    }
+
+    inline int isgraph(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::graph;
+    }
+
+
+    inline int islower(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::lower;
+    }
+
+
+    inline int isupper(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::upper;
+    }
+
+
+    inline int isprint(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::print;
+    }
+
+
+    inline int isspace(const Pt::Char& ch)
+    {
+        return ctypeMask(ch) & std::ctype_base::space;
+    }
+
+
+    PT_API Pt::Char tolower(const Pt::Char& ch);
+
+
+    PT_API Pt::Char toupper(const Pt::Char& ch);
+
+
     inline char Char::narrow(char def) const
     {
         if( _value == std::char_traits<Char>::eof() ) {

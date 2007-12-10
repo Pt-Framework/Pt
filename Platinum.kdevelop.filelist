@@ -81,7 +81,6 @@ include/Pt/Main.h
 include/Pt/StringStream.h
 include/Pt/StringList.h
 include/Pt/Timespan.h
-include/Pt/Unicode.h
 include/Pt/Atomicity.h
 include/Pt/Atomicity.gcc.arm.h
 include/Pt/Atomicity.gcc.mips.h

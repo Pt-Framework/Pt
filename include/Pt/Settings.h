@@ -21,13 +21,10 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/Unicode.h>
 #include <Pt/SerializationInfo.h>
 #include <iostream>
 #include <sstream>
 #include <cassert>
-
-
 
 namespace Pt {
 

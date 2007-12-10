@@ -22,25 +22,6 @@
 #include <Pt/Api.h>
 #include <Pt/Char.h>
 
-/**
- * This header files provides some basic dummy implementations for locale, locale::facet, ctype_base,
- * ctype, codecvt_base and codecvt for platforms which do not support the locale-classes of the STL.
- * The define PTV_WITHOUT_STD_LOCALE is set for those classes which do not support locale etc.
- * For all other platform's the <locale>-header of the STL is includes in this header as usual.
- *
- * For platform-independent usage only this header-file (locale.h) should be used. Do not include
- * <locale>!
- *
- * Don't use this:
- * \code
- * #include <locale>
- * \endcode
- * But use this:
- * \code
- * #include "Pt/Locale.h"
- * \endcode
- */
-
 #ifndef PT_WITHOUT_STD_LOCALE
 
     #include <locale>

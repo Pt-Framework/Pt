@@ -18,7 +18,6 @@
  ***************************************************************************/
 #include "Pt/Facets.h"
 #include "Pt/String.h"
-#include "Pt/Unicode.h"
 
 namespace std {
 

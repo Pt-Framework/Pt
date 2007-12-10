@@ -24,7 +24,6 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Char.h"
-#include "Pt/Unicode.h"
 
 #include <string>
 #include <sstream>
