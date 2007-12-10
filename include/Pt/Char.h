@@ -534,11 +534,13 @@ namespace Pt {
 
     inline char Char::narrow(char def) const
     {
-        if( _value == std::char_traits<Char>::eof() ) {
+        if( _value == std::char_traits<Char>::eof() )
+        {
             return std::char_traits<char>::eof();
         }
 
-        if( _value <= 0xff ) {
+        if( _value <= 0xff )
+        {
             return (char)_value;
         }
 
@@ -546,7 +548,7 @@ namespace Pt {
     }
 
 
-    //! @internal instantiate stream class in Pt and clients import symbols
+    //! @internal Import symbols from this library
     class PT_API CharDummyStream : public std::basic_iostream<Pt::Char>
     {
         public:
@@ -554,7 +556,7 @@ namespace Pt {
     };
 
 
-    //! @internal instantiate streambuf class in Pt and clients import symbols
+    //! @internal Import symbols from this library
     class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
     {
         public:
