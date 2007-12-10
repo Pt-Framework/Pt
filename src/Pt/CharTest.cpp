@@ -125,123 +125,122 @@ void CharTest::testCategory()
     Pt::Char p;
 
     p = 'a';
-    PT_UNIT_ASSERT( Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT( isalpha(p));
+    PT_UNIT_ASSERT( isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT( islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
-    p = Pt::Unicode::toUpper(p);  // A
-    PT_UNIT_ASSERT( Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    p = toupper(p);  // A
+    PT_UNIT_ASSERT( isalpha(p));
+    PT_UNIT_ASSERT( isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT( isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
     p = wchar_t(248);
-    PT_UNIT_ASSERT( Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT( isalpha(p));
+    PT_UNIT_ASSERT( isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT( islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
-
-    p = Pt::Unicode::toUpper(p);  // �
-    PT_UNIT_ASSERT( Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    p = toupper(p);
+    PT_UNIT_ASSERT( isalpha(p));
+    PT_UNIT_ASSERT( isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT( isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
     p = '1';
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT(!isalpha(p));
+    PT_UNIT_ASSERT( isalnum(p));
+    PT_UNIT_ASSERT( isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
-    PT_UNIT_ASSERT(Pt::Unicode::toUpper(p) == p);
+    PT_UNIT_ASSERT(toupper(p) == p);
 
     p = '\t';
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT(!isalpha(p));
+    PT_UNIT_ASSERT(!isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT( iscntrl(p));
+    PT_UNIT_ASSERT(!isgraph(p));
+    PT_UNIT_ASSERT(!isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT( isspace(p));
 
-    PT_UNIT_ASSERT(Pt::Unicode::toUpper(p) == p);
+    PT_UNIT_ASSERT(toupper(p) == p);
 
     p = ' ';
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT(!isalpha(p));
+    PT_UNIT_ASSERT(!isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT(!isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT(!ispunct(p));
+    PT_UNIT_ASSERT( isspace(p));
 
-    PT_UNIT_ASSERT(Pt::Unicode::toUpper(p) == p);
+    PT_UNIT_ASSERT(toupper(p) == p);
 
     p = ':';
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT(!isalpha(p));
+    PT_UNIT_ASSERT(!isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT( ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
-    PT_UNIT_ASSERT(Pt::Unicode::toUpper(p) == p);
+    PT_UNIT_ASSERT(toupper(p) == p);
 
     p = '+';
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlpha(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isAlnum(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isDigit(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isLower(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isUpper(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isControl(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isGraph(p));
-    PT_UNIT_ASSERT( Pt::Unicode::isPrint(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isPunctuation(p));
-    PT_UNIT_ASSERT(!Pt::Unicode::isSpace(p));
+    PT_UNIT_ASSERT(!isalpha(p));
+    PT_UNIT_ASSERT(!isalnum(p));
+    PT_UNIT_ASSERT(!isdigit(p));
+    PT_UNIT_ASSERT(!islower(p));
+    PT_UNIT_ASSERT(!isupper(p));
+    PT_UNIT_ASSERT(!iscntrl(p));
+    PT_UNIT_ASSERT( isgraph(p));
+    PT_UNIT_ASSERT( isprint(p));
+    PT_UNIT_ASSERT( ispunct(p));
+    PT_UNIT_ASSERT(!isspace(p));
 
-    PT_UNIT_ASSERT(Pt::Unicode::toUpper(p) == p);
+    PT_UNIT_ASSERT(toupper(p) == p);
 }
 
 void CharTest::testCompare()

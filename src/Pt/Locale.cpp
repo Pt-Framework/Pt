@@ -47,179 +47,18 @@ ctype<Pt::Char>::~ctype()
 }
 
 
-ctype<Pt::Char>::mask ctype<Pt::Char>::lookup(Pt::Char ch) const
-{
-    ctype_base::mask m = 0;
-
-    switch (Pt::Unicode::category(ch)) {
-        case Pt::Unicode::MarkNonSpacing:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::MarkSpacingCombining:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::MarkEnclosing:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::NumberDecimal:
-            m |= ctype_base::print;
-            m |= ctype_base::digit;
-            m |= ctype_base::alnum;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::NumberLetter:
-            m |= ctype_base::print;
-            //m |= ctype_base::alpha;
-            //m |= ctype_base::alnum;
-            //m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::NumberOther:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::SeparatorSpace:
-            m |= ctype_base::space;
-            break;
-
-        case Pt::Unicode::SeparatorLine:
-            m |= ctype_base::space;
-            break;
-
-        case Pt::Unicode::SeparatorParagraph:
-            m |= ctype_base::space;
-            break;
-
-        case Pt::Unicode::OtherControl:
-            m |= ctype_base::cntrl;
-            break;
-
-        case Pt::Unicode::OtherFormat:
-            m |= ctype_base::cntrl;
-            break;
-
-        case Pt::Unicode::OtherSurrogate:
-            m |= ctype_base::cntrl;
-            break;
-
-        case Pt::Unicode::OtherPrivate:
-            m |= ctype_base::cntrl;
-            break;
-
-        case Pt::Unicode::OtherNotAssigned:
-            m |= ctype_base::cntrl;
-            break;
-
-        case Pt::Unicode::LetterUpper:
-            m |= ctype_base::print;
-            m |= ctype_base::upper;
-            m |= ctype_base::alpha;
-            m |= ctype_base::alnum;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::LetterLower:
-            m |= ctype_base::print;
-            m |= ctype_base::lower;
-            m |= ctype_base::alpha;
-            m |= ctype_base::alnum;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::LetterTitle:
-            m |= ctype_base::print;
-            //m |= ctype_base::upper;
-            m |= ctype_base::alpha;
-            m |= ctype_base::alnum;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::LetterModifier:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::LetterOther:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::PunctConnector:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctDash:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctOpen:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctClose:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctInitial:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctFinal:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::PunctOther:
-            m |= ctype_base::print;
-            m |= ctype_base::punct;
-            m |= ctype_base::graph;
-            break;
-
-        case Pt::Unicode::SymbolMath:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::SymbolCurrency:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::SymbolModifier:
-            m |= ctype_base::print;
-            break;
-
-        case Pt::Unicode::SymbolOther:
-            m |= ctype_base::print;
-            break;
-    }
-
-    return m;
-}
-
-
 bool ctype<Pt::Char>::do_is(mask m, Pt::Char c) const
 {
-    return m == this->lookup(c);
+    return m & ctypeMask(c);
 }
 
 
 const Pt::Char*
 ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) const
 {
-    for( ; begin < end; ++begin) {
-        *vec = this->lookup(*begin);
+    for( ; begin < end; ++begin)
+    {
+        *vec = ctypeMask(*begin);
         ++vec;
     }
 
@@ -228,8 +67,10 @@ ctype<Pt::Char>::do_is(const Pt::Char* begin, const Pt::Char* end, mask* vec) co
 
 
 const Pt::Char*
-ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const {
-    while( begin != end && !is(m,*begin)) {
+ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) const
+{
+    while( begin != end && !is(m,*begin))
+    {
         ++begin;
     }
 
@@ -238,8 +79,10 @@ ctype<Pt::Char>::do_scan_is(mask m, const Pt::Char* begin, const Pt::Char* end) 
 
 
 const Pt::Char*
-ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const {
-    while( begin != end && is(m,*begin)) {
+ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end) const
+{
+    while( begin != end && is(m,*begin))
+    {
         ++begin;
     }
 
@@ -248,14 +91,17 @@ ctype<Pt::Char>::do_scan_not(mask m, const Pt::Char* begin, const Pt::Char* end)
 
 
 Pt::Char
-ctype<Pt::Char>::do_toupper(Pt::Char ch) const {
-    return Pt::Unicode::toUpper(ch);
+ctype<Pt::Char>::do_toupper(Pt::Char ch) const
+{
+    return toupper(ch);
 }
 
 
 const Pt::Char*
-ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const {
-    for(; begin < end; ++begin) {
+ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const
+{
+    for(; begin < end; ++begin)
+    {
         *begin = do_toupper(*begin);
     }
 
@@ -264,13 +110,15 @@ ctype<Pt::Char>::do_toupper(Pt::Char* begin, const Pt::Char* end) const {
 
 
 Pt::Char
-ctype<Pt::Char>::do_tolower(Pt::Char ch) const {
-    return Pt::Unicode::toLower(ch);
+ctype<Pt::Char>::do_tolower(Pt::Char ch) const
+{
+    return tolower(ch);
 }
 
 
 const Pt::Char*
-ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const {
+ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const
+{
     for(; begin < end; ++begin) {
         *begin = do_tolower(*begin);
     }
@@ -279,12 +127,14 @@ ctype<Pt::Char>::do_tolower(Pt::Char* begin, const Pt::Char* end) const {
 }
 
 
-Pt::Char ctype<Pt::Char>::do_widen(char ch) const {
+Pt::Char ctype<Pt::Char>::do_widen(char ch) const
+{
     return Pt::Char(ch);
 }
 
 
-const char* ctype<Pt::Char>::do_widen(const char* begin, const char* end, Pt::Char* dest) const {
+const char* ctype<Pt::Char>::do_widen(const char* begin, const char* end, Pt::Char* dest) const
+{
     for(const char* cur = begin; cur < end; ++cur) {
         *dest = do_widen(*cur);
         ++dest;
@@ -294,13 +144,15 @@ const char* ctype<Pt::Char>::do_widen(const char* begin, const char* end, Pt::Ch
 }
 
 
-char ctype<Pt::Char>::do_narrow(Pt::Char ch, char dfault) const {
+char ctype<Pt::Char>::do_narrow(Pt::Char ch, char dfault) const
+{
     return ch.narrow(dfault);
 }
 
 
 const Pt::Char*
-ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const {
+ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfault, char* dest) const
+{
     for(const Pt::Char* cur = begin; cur < end; ++cur) {
         *dest = do_narrow(*cur, dfault);
         ++dest;

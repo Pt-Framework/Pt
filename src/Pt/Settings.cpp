@@ -981,7 +981,7 @@ void SettingsReader::parseArrayValue(const Pt::Char& ch, ParseContext& context)
         throw ParseError( "Incomplete array", context.line() );
 
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
     {
         _parse = &SettingsReader::finishArrayValue;
         return;
@@ -1010,7 +1010,7 @@ void SettingsReader::finishArrayValue(const Pt::Char& ch, ParseContext& context)
     if( ch == eof )
         throw ParseError( "Incomplete array", context.line() );
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
         return;
 
     switch( ch.value() )
@@ -1058,7 +1058,7 @@ void SettingsReader::finishQuotedArrayValue(const Pt::Char& ch, ParseContext& co
     if( ch == eof )
         throw ParseError( "Incomplete array", context.line() );
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
         return;
 
     if( ch == Pt::Char(L'"') )
@@ -1090,7 +1090,7 @@ void SettingsReader::beginSection(const Pt::Char& ch, ParseContext& context)
     if( ch == eof )
         throw ParseError("Section not closed", context.line());
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
         return;
 
     context.section() += ch;
@@ -1102,7 +1102,7 @@ void SettingsReader::parseSection(const Pt::Char& ch, ParseContext& context)
     if( ch == eof )
         throw ParseError("Section not closed", context.line());
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
     {
         _parse = &SettingsReader::finishSection;
         return;
@@ -1123,7 +1123,7 @@ void SettingsReader::finishSection(const Pt::Char& ch, ParseContext& context)
     if( ch == eof )
         throw ParseError("Section not closed", context.line());
 
-    if( Pt::Unicode::isSpace(ch) || ch == Pt::Char(L'\n') )
+    if( isspace(ch) || ch == Pt::Char(L'\n') )
         return;
 
     if( ch == Pt::Char(L']') )

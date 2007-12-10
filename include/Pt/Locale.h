@@ -89,7 +89,7 @@ namespace std {
                 graph  = alnum | punct
             };
 
-            typedef short mask;
+            typedef unsigned short mask;
 
             ctype_base(size_t _refs = 0)
             { }
@@ -307,8 +307,6 @@ namespace std {
             { return this->do_narrow(lo, hi, dfault, to); }
 
         protected:
-            ctype_base::mask lookup(Pt::Char c) const;
-
             virtual bool do_is(mask m, Pt::Char c) const;
 
             virtual const Pt::Char* do_is(const Pt::Char* lo, const Pt::Char* hi,
