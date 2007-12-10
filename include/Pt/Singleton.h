@@ -104,7 +104,7 @@ namespace Pt {
         private:
             /** @brief Exit handler
 
-                This function is set as the progra exit handler and will destroy
+                This function is set as the program exit handler and will destroy
                 the singleton instance at the end of the program using the
                 specified allocator.
              */
