@@ -23,6 +23,7 @@
 #include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <iostream>
+#include <string>
 
 namespace Pt {
 
@@ -456,6 +457,30 @@ namespace std {
 } // namespace std
 
 
+#include "Pt/String.h"
+
+namespace Pt {
+
+    //! @internal Import symbols from this library
+    class PT_API CharDummyStream : public std::basic_iostream<Pt::Char>
+    {
+        public:
+          CharDummyStream();
+    };
+
+
+    //! @internal Import symbols from this library
+    class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
+    {
+        public:
+          CharDummyStreamBuf();
+    };
+    
+} // namespace Pt
+
+
+#include <Pt/Facets.h>
+
 namespace Pt {
 
     PT_API std::ctype_base::mask ctypeMask(const Char& ch);
@@ -547,24 +572,6 @@ namespace Pt {
         return def;
     }
 
-
-    //! @internal Import symbols from this library
-    class PT_API CharDummyStream : public std::basic_iostream<Pt::Char>
-    {
-        public:
-          CharDummyStream();
-    };
-
-
-    //! @internal Import symbols from this library
-    class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
-    {
-        public:
-          CharDummyStreamBuf();
-    };
-
 } // namespace Pt
-
-#include <Pt/Facets.h>
 
 #endif
