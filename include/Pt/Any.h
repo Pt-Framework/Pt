@@ -21,7 +21,6 @@
 
 #include <Pt/Api.h>
 #include <Pt/TypeTraits.h>
-#include <Pt/SourceInfo.h>
 #include <typeinfo>
 #include <cstring>
 
