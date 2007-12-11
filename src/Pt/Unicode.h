@@ -20,11 +20,11 @@ const std::ctype_base::mask ctype_data[13936]=
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
-    (cntrl|space),
-    (cntrl|space),
-    (cntrl|space),
-    (cntrl|space),
-    (cntrl|space),
+    (cntrl|space) & ~(print), /// print
+    (cntrl|space) & ~(print), ///
+    (cntrl|space) & ~(print), ///
+    (cntrl|space) & ~(print), ///
+    (cntrl|space) & ~(print), ///
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
     (cntrl) & ~(xdigit|digit|upper|lower|punct|alpha|space),
@@ -59,16 +59,16 @@ const std::ctype_base::mask ctype_data[13936]=
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
-    (print|digit|xdigit) & ~(upper|lower|alpha|space),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct), /// punct
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct),
+    (print|digit|xdigit) & ~(upper|lower|alpha|space|punct), /// punct
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
@@ -76,12 +76,12 @@ const std::ctype_base::mask ctype_data[13936]=
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
-    (print|alpha|upper|xdigit) & ~(xdigit|digit|lower|punct|space),
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),/// xdigit
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),///
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),///
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),///
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),///
+    (print|alpha|upper|xdigit) & ~(digit|lower|punct|space),///
     (print|alpha|upper) & ~(xdigit|digit|lower|punct|space),
     (print|alpha|upper) & ~(xdigit|digit|lower|punct|space),
     (print|alpha|upper) & ~(xdigit|digit|lower|punct|space),
@@ -108,17 +108,17 @@ const std::ctype_base::mask ctype_data[13936]=
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
     (print|punct) & ~(xdigit|digit|upper|lower|alpha|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
-    (print|alpha|lower|xdigit) & ~(xdigit|digit|upper|punct|space),
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),/// xdigit
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),///
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),///
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),///
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),///
+    (print|alpha|lower|xdigit) & ~(digit|upper|punct|space),///
+    (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),///
+    (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
+    (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
+    (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
+    (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
     (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
     (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),
     (print|alpha|lower) & ~(xdigit|digit|upper|punct|space),

@@ -35,7 +35,7 @@ class CharTest : public Pt::Unit::TestSuite
         CharTest()
         : Pt::Unit::TestSuite("CharTest")
         {
-            /*std::cerr << "upper  " << std::ctype_base::upper << std::endl;
+           std::cerr << "upper  " << std::ctype_base::upper << std::endl;
             std::cerr << "lower  " << std::ctype_base::lower << std::endl;
             std::cerr << "alpha  " << std::ctype_base::alpha << std::endl;
             std::cerr << "digit  " << std::ctype_base::digit << std::endl;
@@ -45,7 +45,7 @@ class CharTest : public Pt::Unit::TestSuite
             std::cerr << "punct  " << std::ctype_base::punct << std::endl;
             std::cerr << "space  " << std::ctype_base::space << std::endl;
             std::cerr << "print  " << std::ctype_base::print << std::endl;
-            std::cerr << "cntrl  " << std::ctype_base::cntrl << std::endl;*/
+            std::cerr << "cntrl  " << std::ctype_base::cntrl << std::endl;
 
             Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &CharTest::testConstructor  );
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
@@ -136,6 +136,7 @@ void CharTest::testCategory()
     Pt::Char p;
 
     p = 'a';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT( isalpha(p));
     PT_UNIT_ASSERT( isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -148,6 +149,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(!isspace(p));
 
     p = toupper(p);  // A
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT( isalpha(p));
     PT_UNIT_ASSERT( isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -160,6 +162,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(!isspace(p));
 
     p = wchar_t(248);
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT( isalpha(p));
     PT_UNIT_ASSERT( isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -172,6 +175,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(!isspace(p));
 
     p = toupper(p);
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT( isalpha(p));
     PT_UNIT_ASSERT( isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -184,6 +188,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(!isspace(p));
 
     p = '1';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT(!isalpha(p));
     PT_UNIT_ASSERT( isalnum(p));
     PT_UNIT_ASSERT( isdigit(p));
@@ -198,6 +203,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(toupper(p) == p);
 
     p = '\t';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT(!isalpha(p));
     PT_UNIT_ASSERT(!isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -212,6 +218,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(toupper(p) == p);
 
     p = ' ';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT(!isalpha(p));
     PT_UNIT_ASSERT(!isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -226,6 +233,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(toupper(p) == p);
 
     p = ':';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT(!isalpha(p));
     PT_UNIT_ASSERT(!isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));
@@ -240,6 +248,7 @@ void CharTest::testCategory()
     PT_UNIT_ASSERT(toupper(p) == p);
 
     p = '+';
+    std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
     PT_UNIT_ASSERT(!isalpha(p));
     PT_UNIT_ASSERT(!isalnum(p));
     PT_UNIT_ASSERT(!isdigit(p));

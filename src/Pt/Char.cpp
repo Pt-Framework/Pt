@@ -21,7 +21,7 @@
 #include "Pt/String.h"
 
 namespace Pt {
-
+/*
     CharDummyStream::CharDummyStream()
     : std::basic_iostream<Pt::Char>(0)
     {}
@@ -29,5 +29,5 @@ namespace Pt {
     CharDummyStreamBuf::CharDummyStreamBuf()
     : std::basic_streambuf<Pt::Char>()
     {}
-
+*/
 }

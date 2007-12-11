@@ -147,7 +147,7 @@ inline void convert(unsigned char& n, const Pt::String& str)
 inline void convert(Pt::String& s, signed char value)
 {
     Pt::StringStream ss;
-    signed int i = static_cast<signed int>(value);
+    int i = static_cast<signed int>(value);
     ss << i;
     s = ss.str();
 }
@@ -157,10 +157,10 @@ inline void convert(signed char& n, const Pt::String& str)
 {
     if( str.empty() )
         throw Pt::ConversionError( PT_CONVERSIONERROR(signed char, Pt::String) );
-
+        
     // interpret as numeric value
     Pt::StringStream ss(str);
-    signed int i = 0;
+    int i = 0;
     ss >> i;
     n = static_cast<signed char>(i);
 }

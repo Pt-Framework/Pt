@@ -30,7 +30,7 @@
 #include <Pt/Gui/MouseMoveEvent.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/PaintEvent.h>
-
+#include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <string>

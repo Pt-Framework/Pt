@@ -22,7 +22,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <iostream>
+//#include <iostream>
 #include <string>
 
 namespace Pt {
@@ -456,7 +456,7 @@ namespace std {
 
 } // namespace std
 
-
+/*
 #include "Pt/String.h"
 
 namespace Pt {
@@ -477,7 +477,7 @@ namespace Pt {
     };
     
 } // namespace Pt
-
+*/
 
 #include <Pt/Facets.h>
 
