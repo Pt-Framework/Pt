@@ -30,6 +30,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Math/MathUtils.h"
+#include "Pt/Convert.h"
 
 #include <string>
 #include <iostream>
@@ -56,31 +57,29 @@ class Serializer
             _ids[ref] = &si;
         }
 
-        void fixup(const Pt::SerializationInfo& si)
+        void fixdown(Pt::SerializationInfo& si)
         {
-            Pt::SerializationInfo::ConstIterator it;
-            for(it = si.begin(); it != si.end(); ++it)
+            if(si.category() == Pt::SerializationInfo::Reference)
             {
-                if(it->category() == Pt::SerializationInfo::Reference)
+                const void* p = si.toValue<void*>();
+                Pt::SerializationInfo* pointee = _ids[p];
+                pointee->setId( Pt::convert<std::string>(pointee) );
+                si.setReference( pointee );
+            }
+            else if(si.category() == Pt::SerializationInfo::Object)
+            {
+                Pt::SerializationInfo::Iterator it;
+                for(it = si.begin(); it != si.end(); ++it)
                 {
-                    void* p = it->toValue<void*>();
-                    Pt::SerializationInfo* pointee = _ids[p];
-
-                    std::stringstream id;
-                    id << pointee;
-                    pointee->setId( id.str() );
-                }
-
-                if(it->category() == Pt::SerializationInfo::Object)
-                {
-                    this->fixup(*it);
+                    this->fixdown(*it);
                 }
             }
+
         }
 
-        void fixup()
+        void fixdown()
         {
-            this->fixup(_root);
+            this->fixdown(_root);
         }
 
     private:
@@ -110,13 +109,14 @@ class Deserializer
             {
                 if(it->category() == Pt::SerializationInfo::Reference)
                 {
-                    void* target = _types[ it->id() ];
-
-                    void* d = it->toValue<void*>();
+                    void* target = _types[ it->toValue<std::string>() ];
+        
+                    void* d = it->fixupAddr();
                     void** destination = (void**)d;
-                    _fixups[ it->id() ]( destination, target);
+        
+                    _fixups[ it->toValue<std::string>() ]( destination, target);
                 }
-
+        
                 if(it->category() == Pt::SerializationInfo::Object)
                 {
                     this->fixup(*it);
@@ -199,7 +199,7 @@ void SerializationTest::SerializeDeserializeTest()
     Serializer ser;
     ser.serialize(date, "myDate");
     ser.serialize(dref, "MyDateRef");
-    ser.fixup();
+    ser.fixdown();
 
     Pt::SerializationInfo si1;
     si1.setName("myDate");
