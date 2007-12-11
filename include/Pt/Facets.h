@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_LOCALE_H
-#define PT_LOCALE_H
+#ifndef PT_FACETS_H
+#define PT_FACETS_H
 
 #include <Pt/Api.h>
 #include <Pt/Char.h>
