@@ -22,7 +22,6 @@
 #include <Pt/Text/Api.h>
 #include <Pt/Text/BasicTextStream.h>
 #include <Pt/Char.h>
-#include <Pt/Facets.h>
 
 namespace Pt {
 
