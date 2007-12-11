@@ -35,6 +35,18 @@ class CharTest : public Pt::Unit::TestSuite
         CharTest()
         : Pt::Unit::TestSuite("CharTest")
         {
+            /*std::cerr << "upper  " << std::ctype_base::upper << std::endl;
+            std::cerr << "lower  " << std::ctype_base::lower << std::endl;
+            std::cerr << "alpha  " << std::ctype_base::alpha << std::endl;
+            std::cerr << "digit  " << std::ctype_base::digit << std::endl;
+            std::cerr << "alnum  " << std::ctype_base::alnum << std::endl;
+            std::cerr << "xdigit " << std::ctype_base::xdigit << std::endl;
+            std::cerr << "graph  " << std::ctype_base::graph << std::endl;
+            std::cerr << "punct  " << std::ctype_base::punct << std::endl;
+            std::cerr << "space  " << std::ctype_base::space << std::endl;
+            std::cerr << "print  " << std::ctype_base::print << std::endl;
+            std::cerr << "cntrl  " << std::ctype_base::cntrl << std::endl;*/
+
             Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &CharTest::testConstructor  );
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
             Pt::Unit::TestSuite::registerMethod( "testCategory", *this, &CharTest::testCategory  );

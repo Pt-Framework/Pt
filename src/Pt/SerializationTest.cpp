@@ -171,7 +171,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
             Pt::Unit::TestSuite::registerMethod( "DateTimeTest", *this, &SerializationTest::DateTimeTest );
-            Pt::Unit::TestSuite::registerMethod( "SerializeDeserializeTest", *this, &SerializationTest::SerializeDeserializeTest );
+            //Pt::Unit::TestSuite::registerMethod( "SerializeDeserializeTest", *this, &SerializationTest::SerializeDeserializeTest );
         }
 
     protected:
