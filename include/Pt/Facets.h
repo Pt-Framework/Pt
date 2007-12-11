@@ -20,7 +20,7 @@
 #define PT_FACETS_H
 
 #include <Pt/Api.h>
-#include <Pt/Char.h>
+//#include <Pt/Char.h>
 
 #ifndef PT_WITHOUT_STD_LOCALE
 

@@ -28,7 +28,7 @@
 #include <Pt/Reflex/MemberInfo.h>
 #include <Pt/Reflex/PropertyValue.h>
 #include <memory>
-
+#include <iostream>
 
 namespace Pt {
 

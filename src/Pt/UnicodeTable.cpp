@@ -953,92 +953,175 @@ SymbolOther          = 29  punct|print
 
 int main(int argc, char* argv[])
 {
-    std::ofstream f("Unicode.cxx");
-    f << "\ntypedef std::ctype_base CTYPE;\n\n";
-    f << "const CTYPE::mask MaskValues[" << sizeof(category_data)+1 << "]= \n{\n";
+    std::ofstream f("Unicode.h");
+    f << "\n";
+    f << "const std::ctype_base::mask digit = std::ctype_base::digit;\n";
+    f << "const std::ctype_base::mask xdigit = std::ctype_base::xdigit;\n";
+    f << "const std::ctype_base::mask cntrl = std::ctype_base::cntrl;\n";
+    f << "const std::ctype_base::mask space = std::ctype_base::space;\n";
+    f << "const std::ctype_base::mask upper = std::ctype_base::upper;\n";
+    f << "const std::ctype_base::mask lower = std::ctype_base::lower;\n";
+    f << "const std::ctype_base::mask alpha = std::ctype_base::alpha;\n";
+    f << "const std::ctype_base::mask punct = std::ctype_base::punct;\n";
+    f << "const std::ctype_base::mask print = std::ctype_base::print;\n";
+    f << "\n";
+    f << "const std::ctype_base::mask ctype_data[" << sizeof(category_data)+1 << "]= \n{\n";
 
     for(unsigned n = 0; n < sizeof(category_data); ++n)
     {
         unsigned char cat = category_data[n];
+
+        f << "    (";
+
         switch( int(cat) )
         {
-            case 0: f << "0";
+            case 0: f << "cntrl";
                 break;
-            case 1: f << "CTYPE::cntrl";
+            case 1: f << "cntrl";
                 break;
-            case 2: f << "CTYPE::cntrl";
+            case 2: f << "cntrl";
                 break;
-            case 3: f << "CTYPE::cntrl";
+            case 3: f << "cntrl";
                 break;
-            case 4: f << "CTYPE::cntrl";
+            case 4: f << "cntrl";
                 break;
-            case 5: f << "CTYPE::cntrl|CTYPE::print|CTYPE::space";
+            case 5: f << "cntrl|print|space";
                 break;
-            case 6: f << "CTYPE::cntrl|CTYPE::print|CTYPE::space";
+            case 6: f << "cntrl|print|space";
                 break;
-            case 7: f << "CTYPE::cntrl|CTYPE::print|CTYPE::space";
+            case 7: f << "cntrl|print|space";
                 break;
-            case 8: f << "CTYPE::print|CTYPE::space";
+            case 8: f << "print|space";
                 break;
-            case 9: f << "CTYPE::print|CTYPE::space";
+            case 9: f << "print|space";
                 break;
-            case 10: f << "CTYPE::print|CTYPE::space";
+            case 10: f << "print|space";
                 break;
-            case 11: f << "CTYPE::print|CTYPE::alpha|CTYPE::upper";
+            case 11: f << "print|alpha|upper";
                 break;
-            case 12: f << "CTYPE::print|CTYPE::alpha|CTYPE::lower";
+            case 12: f << "print|alpha|lower";
                 break;
-            case 13: f << "CTYPE::print|CTYPE::alpha";
+            case 13: f << "print|alpha";
                 break;
-            case 14: f << "CTYPE::print|CTYPE::alpha";
+            case 14: f << "print|alpha";
                 break;
-            case 15: f << "CTYPE::print|CTYPE::alpha";
+            case 15: f << "print|alpha";
                 break;
-            case 16: f << "CTYPE::print";
+            case 16: f << "print|punct";
                 break;
-            case 17: f << "CTYPE::print|CTYPE::digit|CTYPE::xdigit";
+            case 17: f << "print|digit|xdigit";
                 break;
-            case 18: f << "CTYPE::print";
+            case 18: f << "print|punct";
                 break;
-            case 19: f << "CTYPE::print|CTYPE::punct";
+            case 19: f << "print|punct";
                 break;
-            case 20: f << "CTYPE::print|CTYPE::punct";
+            case 20: f << "print|punct";
                 break;
-            case 21: f << "CTYPE::print|CTYPE::punct";
+            case 21: f << "print|punct";
                 break;
-            case 22: f << "CTYPE::print|CTYPE::punct";
+            case 22: f << "print|punct";
                 break;
-            case 23: f << "CTYPE::print|CTYPE::punct";
+            case 23: f << "print|punct";
                 break;
-            case 24: f << "CTYPE::print|CTYPE::punct";
+            case 24: f << "print|punct";
                 break;
-            case 25: f << "CTYPE::print|CTYPE::punct";
+            case 25: f << "print|punct";
                 break;
-            case 26: f << "CTYPE::print|CTYPE::punct";
+            case 26: f << "print|punct";
                 break;
-            case 27: f << "CTYPE::print|CTYPE::punct";
+            case 27: f << "print|punct";
                 break;
-            case 28: f << "CTYPE::print|CTYPE::punct";
+            case 28: f << "print|punct";
                 break;
-            case 29: f << "CTYPE::print|CTYPE::punct";
+            case 29: f << "print|punct";
                 break;
         }
 
         if(n >=9 && n <= 13)
-            f << "|CTYPE::space";
+        {
+            f << "|space) & ~(print),\n";
+            continue;
+        }
 
         if(n >=65 && n <= 70)
-            f << "|CTYPE::xdigit";
+        {
+            f << "|xdigit) & ~(digit|lower|punct|space),\n";
+            continue;
+        }
 
         if(n >=97 && n <= 107)
-            f << "|CTYPE::xdigit";
+        {
+            f << "|xdigit) & ~(digit|upper|punct|space),\n";
+            continue;
+        }
 
-        f << ",";
+        f << ") & ~(";
 
-        if( (n % 4) == 0 && n != 0)
-            f << '\n';
-        else
-            f << "    ";
+        switch( int(cat) )
+        {
+            case 0: f << "xdigit|digit|upper|lower|punct|alpha|space";
+                break;
+            case 1: f << "xdigit|digit|upper|lower|punct|alpha|space";
+                break;
+            case 2: f << "xdigit|digit|upper|lower|punct|alpha|space";
+                break;
+            case 3: f << "xdigit|digit|upper|lower|punct|alpha|space";
+                break;
+            case 4: f << "xdigit|digit|upper|lower|punct|alpha|space";
+                break;
+            case 5: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 6: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 7: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 8: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 9: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 10: f << "xdigit|digit|upper|lower|punct|alpha";
+                break;
+            case 11: f << "xdigit|digit|lower|punct|space";
+                break;
+            case 12: f << "xdigit|digit|upper|punct|space";
+                break;
+            case 13: f << "xdigit|digit|upper|lower|punct|space";
+                break;
+            case 14: f << "xdigit|digit|upper|lower|punct|space";
+                break;
+            case 15: f << "xdigit|digit|upper|lower|punct|space";
+                break;
+            case 16: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 17: f << "upper|lower|alpha|space|punct";
+                break;
+            case 18: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 19: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 20: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 21: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 22: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 23: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 24: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 25: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 26: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 27: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 28: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+            case 29: f << "xdigit|digit|upper|lower|alpha|space";
+                break;
+        }
+
+        f << "),\n";
     }
 
      f << " 0 };\n";
