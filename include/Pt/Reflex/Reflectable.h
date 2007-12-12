@@ -114,13 +114,13 @@ class PT_REFLEX_API Reflectable
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)() const, R2 (Object::*setter)( const A type))
+        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)() const, R2 (Object::*setter)(A type))
         {
            this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
 
         template <typename R1, typename R2, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)(), R2 (Object::*setter)( const A type))
+        void registerProperty(const std::string& name, Parent& parent, R1 (Object::*getter)(), R2 (Object::*setter)(A type))
         {
             this->registerPropertyInfo( new ReadWritePropertyInfo<R1, A>(name, parent, getter, setter) );
         }
@@ -132,7 +132,7 @@ class PT_REFLEX_API Reflectable
         }
 
         template <typename T, typename R, typename A, typename Parent, typename Object>
-        void registerProperty(const std::string& name, Parent& parent, PropertyValue<T>& value, R (Object::*setter)( const A type))
+        void registerProperty(const std::string& name, Parent& parent, PropertyValue<T>& value, R (Object::*setter)(A type))
         {
             this->registerPropertyInfo( new ReadWriteProperty<T, A>(name, parent, value, setter) );
         }
