@@ -486,11 +486,6 @@ namespace Pt {
     PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
 
-    inline int isAlpha(const Pt::Char& ch)
-    {
-        return ctypeMask(ch) & std::ctype_base::alpha;
-    }
-
     inline int isalpha(const Pt::Char& ch)
     {
         return ctypeMask(ch) & std::ctype_base::alpha;
