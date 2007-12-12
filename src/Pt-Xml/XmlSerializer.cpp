@@ -34,6 +34,7 @@ XmlSerializer::XmlSerializer(XmlWriter* writer)
 
 XmlSerializer::~XmlSerializer()
 {
+    this->fixdown();
     this->detach();
 }
 

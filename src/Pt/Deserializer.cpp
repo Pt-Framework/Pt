@@ -26,9 +26,7 @@ Deserializer::Deserializer()
 
 
 Deserializer::~Deserializer()
-{
-    this->fixup();
-}
+{ }
 
 
 SerializationInfo& Deserializer::peek()

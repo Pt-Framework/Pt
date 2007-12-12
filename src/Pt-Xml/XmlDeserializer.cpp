@@ -27,6 +27,7 @@ XmlDeserializer::XmlDeserializer(std::istream& is)
 
 XmlDeserializer::~XmlDeserializer()
 {
+    this->fixup();
 }
 
 

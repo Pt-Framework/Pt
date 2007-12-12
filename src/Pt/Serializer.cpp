@@ -25,9 +25,7 @@ Serializer::Serializer()
 
 
 Serializer::~Serializer()
-{
-    this->fixdown();
-}
+{ }
 
 
 SerializationInfo& Serializer::append(const void* obj)
