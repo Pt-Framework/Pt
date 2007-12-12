@@ -18,7 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/Char.h"
-#include "Pt/String.h"
+
+//#include "Pt/String.h" // for CharDummyStream
 
 namespace Pt {
 /*
