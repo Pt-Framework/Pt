@@ -21,6 +21,8 @@
 
 #include <Pt/Api.h>
 //#include <Pt/Char.h>
+#include <cctype>
+
 
 #ifndef PT_WITHOUT_STD_LOCALE
 
