@@ -30,11 +30,6 @@ namespace Pt {
 class BlobData : public RefCounted
 {
     public:
-        BlobData()
-        :_data(0)
-        , _size(0)
-        { this->addRef(); }
-
         BlobData(const char* data, size_t len)
         :_data(0)
         , _size(0)
@@ -76,6 +71,12 @@ class BlobData : public RefCounted
             static BlobData empty;
             return &empty;
         }
+
+    protected:
+        BlobData()
+        :_data(0)
+        , _size(0)
+        { this->addRef(); }
 
     private:
         char* _data;
