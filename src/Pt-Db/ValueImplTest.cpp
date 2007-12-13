@@ -66,6 +66,11 @@ void ValueImplTest::Blob()
     Pt::Blob blob("Hello", 5);
     PT_UNIT_ASSERT(blob.size() == 5);
     PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello", 5) == 0);
+
+    ValueImpl impl("Hello world!", 12);
+    impl.getBlob(blob);
+    PT_UNIT_ASSERT(blob.size() == 12);
+    PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello world!", 12) == 0);
 }
 
 void ValueImplTest::testIsNull()
