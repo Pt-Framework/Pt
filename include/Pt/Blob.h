@@ -64,7 +64,7 @@ class BlobData : public RefCounted
         const char* data() const
         { return _data; }
 
-        bool operator==(const BlobData& other)
+        bool operator==(const BlobData& other) const
         {
             return _size == other._size &&
                    ( std::strncmp(_data, other._data, _size) == 0 );
