@@ -28,6 +28,7 @@ public:
     ValueImplTest()
     : TestSuite("ValueImplTest")
     {
+        Pt::Unit::TestSuite::registerMethod("Blob", *this, &ValueImplTest::Blob);
         Pt::Unit::TestSuite::registerMethod("testIsNull", *this, &ValueImplTest::testIsNull);
         Pt::Unit::TestSuite::registerMethod("testBool", *this, &ValueImplTest::testBool);
         Pt::Unit::TestSuite::registerMethod("testInt", *this, &ValueImplTest::testInt);
@@ -42,6 +43,7 @@ public:
     }
 
 protected:
+    void Blob();
     void testIsNull();
     void testBool();
     void testInt();
@@ -59,6 +61,12 @@ protected:
 
 Pt::Unit::RegisterTest<ValueImplTest> register_ValueImplTest;
 
+void ValueImplTest::Blob()
+{
+    Pt::Blob blob("Hello", 5);
+    PT_UNIT_ASSERT(blob.size() == 5);
+    PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello", 5) == 0);
+}
 
 void ValueImplTest::testIsNull()
 {

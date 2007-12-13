@@ -19,78 +19,140 @@
 #ifndef PT_BLOB_H
 #define PT_BLOB_H
 
-#include <string>
 #include <Pt/SmartPtr.h>
+#include <Pt/RefCounted.h>
+#include <cstring>
+#include <cstdlib>
 
 namespace Pt {
 
-/*! A class to hold binary data.
-    The data is represented by a plain pointer to the data
-    plus the length of the data. The class can be used for holding information about
-    tiles coming from a database or any other tile-source. A blob is the owner of the data
-    which is referenced by itself. Therefore the blob is responsible for destroying the referenced
-    data once it is destroyed itself.
-    The Blob contains a reference counter, which is incremented by the copy constructor and
-    the assignement operator and decremented on destruction. This avoid copying of the data
-    the Blob holds and makes assignement a cheap operation.
+class BlobData : public RefCounted
+{
+    public:
+        BlobData()
+        :_data(0)
+        , _size(0)
+        { this->addRef(); }
+
+        BlobData(const char* data, size_t len)
+        :_data(0)
+        , _size(0)
+        {
+            _data = (char*)malloc(len);
+            std::memcpy(_data, data, len);
+            _size = len;
+        }
+
+        void assign(const char* data, size_t len)
+        {
+            if( len > this->size() )
+            {
+                std::free(_data);
+                _data = (char*)malloc(len);
+            }
+
+            std::memcpy(_data, data, len);
+            _size = len;
+        }
+
+        size_t size() const
+        { return _size; }
+
+        char* data()
+        { return _data; }
+
+        const char* data() const
+        { return _data; }
+
+        bool operator==(const BlobData& other)
+        {
+            return _size == other._size &&
+                   ( std::strncmp(_data, other._data, _size) == 0 );
+        }
+
+        static BlobData* emptyInstance()
+        {
+            static BlobData empty;
+            return &empty;
+        }
+
+    private:
+        char* _data;
+        size_t _size;
+};
+
+
+/** @internal Initialize statics in BlobData.
+
+    Thread-safety.
+*/
+static struct InitBlobData
+{
+    InitBlobData()
+    { BlobData::emptyInstance(); }
+} init;
+
+
+/** @brief A class to hold binary data.
+
+    The data is represented by a plain pointer to the data plus the length of
+    the data. The class can be used for holding information about tiles coming
+    from a database or any other tile-source. A blob is the owner of the data
+    which is referenced by itself. Therefore the blob is responsible for
+    destroying the referenced data once it is destroyed itself. The Blob
+    contains a reference counter, which is incremented by the copy constructor
+    and the assignement operator and decremented on destruction. This avoid
+    copying of the data the Blob holds and makes assignement a cheap operation.
 */
 class Blob
 {
-    SmartPtr<std::string, ExternalRefCounted<std::string> > m_dataptr;
+    SmartPtr< BlobData, InternalRefCounted<BlobData> > m_data;
 
 public:
-    /*!
-        Default constructor which creates an empty blob object.
-    */
     Blob()
-    { }
+    {
+        m_data = BlobData::emptyInstance();
+    }
 
-    /*! 
-        @param data The pointer to the data from which to create the Blob.
-        @param len The length of the data.
-    */
-    Blob(const char* data, unsigned len)
-        : m_dataptr(new std::string(data, len))
-    { }
+    Blob(const char* data, size_t len)
+    {
+        m_data = new BlobData(data, len);
+    }
 
-    /* Assign raw data to a blob.
-       @param data A pointer to the data of which this blob should create a copy.
-       @param len The length of the data of which this data should create a copy. */
-    void assign(const char* data, size_t len) {
-        if (!m_dataptr || m_dataptr.refs() > 1)
-            m_dataptr = new std::string(data, len);
+    void assign(const char* data, size_t len)
+    {
+        if ( m_data->refs() > 1 )
+        {
+            m_data = new BlobData(data, len);
+        }
         else
-            m_dataptr->assign(data, len);
-    }
-    /*! Comparison-operator.
-        @param b The Blob to which to compare the current Blob.
-        @return true, if the Blobs point to the same data (pointer comparison)
-    */
-    bool operator==(const Blob& b) const {
-        return m_dataptr.getPointer() == b.m_dataptr.getPointer()
-            || m_dataptr.getPointer()
-             && m_dataptr.getPointer()
-             && *m_dataptr == *m_dataptr;
+        {
+            m_data->assign(data, len);
+        }
     }
 
-    bool operator!=(const Blob& b) const {
+    bool operator==(const Blob& b) const
+    {
+        return *m_data == *m_data;
+    }
+
+    bool operator!=(const Blob& b) const
+    {
         return !operator==(b);
     }
 
-    /*!
-        Returns a pointer to the data or 0 if no data is set.
+    /** Returns a pointer to the data or 0 if no data is set.
      */
     const char* data() const
     {
-      return m_dataptr.getPointer() ? m_dataptr->data() : 0;
+      return  m_data->data();
     }
 
-    /*!
-        Returns the size of the data
+    /** Returns the size of the data
      */
-    unsigned size() const
+    size_t size() const
     {
-      return m_dataptr.getPointer() ? m_dataptr->size() : 0;
+      return m_data->size();
     }
 
 };

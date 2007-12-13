@@ -183,6 +183,13 @@ namespace Pt {
             { delete ptr; }
     };
 
+    template <typename T>
+    class Free
+    {
+        protected:
+            void destroy(T* ptr)
+            { free(ptr); }
+    };
 
     /** \param T Contained type
         \param Model Model for linking/unlinking

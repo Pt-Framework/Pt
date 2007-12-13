@@ -76,7 +76,6 @@ include/Pt/StringData.tpp
 include/Pt/String.h
 include/Pt/String.tpp
 include/Pt/Char.h
-include/Pt/Blob.h
 include/Pt/Main.h
 include/Pt/StringStream.h
 include/Pt/StringList.h
