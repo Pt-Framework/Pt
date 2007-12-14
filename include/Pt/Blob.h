@@ -30,20 +30,18 @@ namespace Pt {
 class BlobData : public RefCounted
 {
     public:
-        BlobData(const char* data, size_t len)
+        BlobData()
         :_data(0)
         , _size(0)
-        {
-            _data = (char*)malloc(len);
-            std::memcpy(_data, data, len);
-            _size = len;
-        }
+        { }
 
         void assign(const char* data, size_t len)
         {
             if( len > this->size() )
             {
-                std::free(_data);
+                if(_data)
+                    std::free(_data);
+
                 _data = (char*)malloc(len);
             }
 
@@ -68,12 +66,12 @@ class BlobData : public RefCounted
 
         static BlobData* emptyInstance()
         {
-            static BlobData empty;
+            static BlobData empty(1);
             return &empty;
         }
 
     protected:
-        BlobData()
+        BlobData(size_t refs)
         :_data(0)
         , _size(0)
         { this->addRef(); }
@@ -118,19 +116,18 @@ public:
 
     Blob(const char* data, size_t len)
     {
-        m_data = new BlobData(data, len);
+        m_data = new BlobData();
+        m_data->assign(data, len);
     }
 
     void assign(const char* data, size_t len)
     {
         if ( m_data->refs() > 1 )
         {
-            m_data = new BlobData(data, len);
+            m_data = new BlobData();
         }
-        else
-        {
-            m_data->assign(data, len);
-        }
+
+        m_data->assign(data, len);
     }
 
     bool operator==(const Blob& b) const
