@@ -59,7 +59,7 @@ namespace Db {
 
             /** \brief Construct a Row from an implemenataion.
 
-                \param row The implementation of a specific row.
+                \param row_ The implementation of a specific row.
             */
             Row(IRow* row_)
                 : row(row_)
