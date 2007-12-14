@@ -322,7 +322,7 @@ namespace Db {
                 The iterator will manage the passed implementation,
                 thus it needs to be created on the heap.
 
-                \param stmt Iterator implementation
+                \param cursor Iterator implementation
             */
             ConstIterator(ICursor* cursor = 0);
 
@@ -330,7 +330,7 @@ namespace Db {
 
                 Two iterators are equal if they point to the same iteration.
 
-                \param it Other iterator.
+                \param c Other iterator.
                 \return True if equal.
             */
             bool operator== (const ConstIterator& c) const
@@ -341,7 +341,7 @@ namespace Db {
                 Two iterators are not equal if they do not point to the same
                 iteration.
 
-                \param it Other iterator.
+                \param c Other iterator.
                 \return True if not equal.
             */
             bool operator!= (const ConstIterator& c) const
