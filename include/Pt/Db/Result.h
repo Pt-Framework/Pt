@@ -57,14 +57,14 @@ namespace Db {
 
         public:
             //! \brief default constructor
-            Result()  { }
+            Result() { }
 
             /** \brief Construct a Result from an implemenataion.
 
                 \param res The implementation of a specific result.
             */
             Result(IResult* res)
-                : _result(res)
+            : _result(res)
             { }
 
             /**    \brief Returns a row at a given index.
@@ -192,8 +192,8 @@ namespace Db {
                 \param off Offset of a row.
             */
             ConstIterator(const Result& r, size_type off)
-                : _result(r)
-                , _offset(off)
+            : _result(r)
+            , _offset(off)
             {
                 if (_offset < r.size())
                     _current = r.getRow(_offset);
@@ -361,4 +361,3 @@ namespace Db {
 } // namespace Pt
 
 #endif // PTV_DB_RESULT_H
-

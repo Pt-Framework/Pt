@@ -62,8 +62,9 @@ namespace Db {
                 \param row_ The implementation of a specific row.
             */
             Row(IRow* row_)
-                : row(row_)
-            { }
+            : row(row_)
+            {
+            }
 
             /** \brief Returns the number of columns of this row.
 
@@ -274,8 +275,8 @@ namespace Db {
                 \param offset Offset of a value.
             */
             ConstIterator(const Row& row, size_type offset)
-                : _row(row)
-                , _offset(offset)
+            : _row(row)
+            , _offset(offset)
             {
                 // is range checking needed here ???
                 if (_offset < row.size())
@@ -444,4 +445,3 @@ namespace Db {
 } // namespace Pt
 
 #endif // PTV_DB_ROW_H
-
