@@ -20,3 +20,8 @@ PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
 Main_LinkSharedLibraries TcpSocketTest : Pt Pt-Net Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate TcpSocketTest : $(OUTPUT_TARGET) ;
 
+# Define pseudo targets to call from projects
+NOTFILE Pt-Net-all ;
+DEPENDS Pt-Net-all :  Pt-Net
+                      TcpSocketTest
+                      ;
