@@ -188,8 +188,8 @@ namespace Db {
 
                 Construct a const iterator that points to a row at a given index in result.
 
-                \param row Reference to a result.
-                \param offset Offset of a row.
+                \param r Reference to a result.
+                \param off Offset of a row.
             */
             ConstIterator(const Result& r, size_type off)
                 : _result(r)
