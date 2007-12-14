@@ -18,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
 #include "Pt/System/MutexLock.h"
@@ -34,6 +33,7 @@
 
 #include <string>
 
+
 //TODO: put condition in TcpSocketTest
 class ServerThread : public Pt::System::Thread
 {
@@ -41,15 +41,15 @@ class ServerThread : public Pt::System::Thread
         ServerThread(const std::string& ipaddr, short port)
         : _server(ipaddr, port)
         , _mutex(Pt::System::Mutex::Normal)
-        { 
-            _mutex.lock(); 
+        {
+            _mutex.lock();
         }
 
         ~ServerThread()
-        { 
-            _mutex.unlock(); 
+        {
+            _mutex.unlock();
         }
-            
+
         const std::string& receivedData() const
         { return _receivedData; }
 
@@ -62,7 +62,7 @@ class ServerThread : public Pt::System::Thread
         void run()
         {
             this->signalReady();
-            
+
             Pt::Net::TcpSocket socket(_server);
             char buffer[80];
             socket.read(buffer, 80);
@@ -75,10 +75,10 @@ class ServerThread : public Pt::System::Thread
     protected:
         void signalReady()
         {
-            Pt::System::MutexLock lock(_mutex);                    
+            Pt::System::MutexLock lock(_mutex);
             _ready.signal();
         }
-            
+
     private:
         Pt::Net::TcpServerSocket _server;
         Pt::System::Condition _ready;
@@ -101,7 +101,7 @@ class TcpSocketTest : public Pt::Unit::TestCase
             _server->start();
             _server->waitReady();
         }
-        
+
         void test()
         {
             Pt::Net::TcpSocket socket("127.0.0.1", 6789);
@@ -113,13 +113,13 @@ class TcpSocketTest : public Pt::Unit::TestCase
             //socket.read(buffer, 80);
             //PT_UNIT_ASSERT( std::string(buffer, 3) == "Bye" );
         }
-        
+
         void tearDown()
         {
             delete _server;
             _server = 0;
         }
-        
+
     private:
         ServerThread* _server;
 };
