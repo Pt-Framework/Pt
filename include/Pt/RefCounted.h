@@ -20,6 +20,7 @@
 #ifndef PT_REFCOUNTED_H
 #define PT_REFCOUNTED_H
 
+#include <Pt/Api.h>
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
 
