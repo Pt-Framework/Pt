@@ -34,9 +34,6 @@
 
 
 namespace Pt {
-  //class Date;
-  //class Time;
-  //class DateTime;
 
 namespace Db {
 
@@ -386,4 +383,3 @@ namespace Db {
 } // namespace Pt
 
 #endif // PT_DB_STATEMENT_H
-
