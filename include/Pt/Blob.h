@@ -27,15 +27,43 @@
 
 namespace Pt {
 
-class BlobData : public RefCounted
+class IBlob : public RefCounted
 {
     public:
-        BlobData()
+        virtual ~IBlob() {}
+
+        virtual void assign(const char* data, size_t len) = 0;
+
+        size_t size() const
+        { return _size; }
+
+        const char* data() const
+        { return _data; }
+
+        bool operator==(const IBlob& other) const
+        {
+            return _size == other._size &&
+                   ( std::strncmp(_data, other._data, _size) == 0 );
+        }
+
+    protected:
+        IBlob()
         :_data(0)
         , _size(0)
         { }
 
-        void assign(const char* data, size_t len)
+        char* _data;
+        size_t _size;
+};
+
+
+class BlobData : public IBlob
+{
+    public:
+        BlobData()
+        { }
+
+        virtual void assign(const char* data, size_t len)
         {
             if( len > this->size() )
             {
@@ -49,21 +77,6 @@ class BlobData : public RefCounted
             _size = len;
         }
 
-        size_t size() const
-        { return _size; }
-
-        char* data()
-        { return _data; }
-
-        const char* data() const
-        { return _data; }
-
-        bool operator==(const BlobData& other) const
-        {
-            return _size == other._size &&
-                   ( std::strncmp(_data, other._data, _size) == 0 );
-        }
-
         static BlobData* emptyInstance()
         {
             static BlobData empty(1);
@@ -72,13 +85,7 @@ class BlobData : public RefCounted
 
     protected:
         BlobData(size_t refs)
-        :_data(0)
-        , _size(0)
         { this->addRef(); }
-
-    private:
-        char* _data;
-        size_t _size;
 };
 
 
@@ -106,7 +113,7 @@ static struct InitBlobData
 */
 class Blob
 {
-    SmartPtr< BlobData, InternalRefCounted<BlobData> > m_data;
+    SmartPtr< IBlob, InternalRefCounted<IBlob> > m_data;
 
 public:
     Blob()
@@ -118,6 +125,11 @@ public:
     {
         m_data = new BlobData();
         m_data->assign(data, len);
+    }
+
+    Blob(IBlob* b)
+    {
+        m_data = b;
     }
 
     void assign(const char* data, size_t len)
