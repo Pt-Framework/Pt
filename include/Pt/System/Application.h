@@ -1,14 +1,29 @@
 /***************************************************************************
- *   Copyright (C) 2006 PTV AG                                             *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PT_SYSTEM_APPLICATION_H
+#define PT_SYSTEM_APPLICATION_H
 
-#ifndef PTV_SYSTEM_APPLICATION_H
-#define PTV_SYSTEM_APPLICATION_H
-
-#include <Pt/Connectable.h>
-#include <Pt/Application.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/Connectable.h>
+#include <Pt/Event.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
@@ -41,7 +56,8 @@ namespace System {
      * to EventLoop::processEvents() without making it necessary to first obtain the
      * event loop manually.
      */
-    class PT_SYSTEM_API Application : public Pt::Application {
+    class PT_SYSTEM_API Application : public Pt::Connectable
+    {
         public:
             Application();
 
@@ -101,6 +117,12 @@ namespace System {
              * retrieve it. See commitEvent(), queueEvent(), processEvents().
              */
             EventLoop& eventLoop();
+
+            /**
+             * \brief The signal to which slots can register themselves to listen for
+             * any event that is committed to this application's event loop.
+             */
+            Signal<const Pt::Event&> event;
 
         private:
             //! The EventLoop of this application.

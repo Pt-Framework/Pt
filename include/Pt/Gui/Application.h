@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,17 +19,36 @@
 #ifndef Pt_Gui_Application_h
 #define Pt_Gui_Application_h
 
-#include <Pt/Application.h>
 #include <Pt/Gui/Api.h>
-
-#include <typeinfo>
-
+#include <Pt/Connectable.h>
+#include <Pt/Event.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
 namespace Gui {
 
-    class PT_GUI_API Application : public Pt::Application
+    /**
+     * \brief An interface that can be implemented by application classes that want to 
+     * provide an event loop for applications with or without a GUI.
+     * 
+     * This interface provides methods for running and stopping the application, for
+     * adding and processing of events and a signal (event) to which slots can be connected to
+     * listen for events that are sent to the event queue.
+     *
+     * A class that implements this interface may contain a main event loop, where event
+     * sources can be registered and events from those sources are dispatched to listeners,
+     * that were registered to the event loop. Events may for example be operating system
+     * events (timer, file system changes) or gui-specific events (like repaint, mouse events).
+     *
+     * The application and therefore the event loop is started with a call to run() and
+     * can be exited with a call to exit(). After calling exit() the application should
+     * terminate.
+     *
+     * Events can be committed by calling commitEvent(). Long running operations
+     * can call processEvents() to keep the application responsive.
+     */
+    class PT_GUI_API Application : public Pt::Connectable
     {
         private:
             //! Pointer to the implementation of Application.
@@ -64,6 +83,12 @@ namespace Gui {
 
             // inheritdoc
             void exit();
+
+            /**
+             * \brief The signal to which slots can register themselves to listen for
+             * any event that is committed to this application's event loop.
+             */
+            Signal<const Pt::Event&> event;
 
             /**
              * @brief Receives GUI events for widgets and delivers them to the widget.

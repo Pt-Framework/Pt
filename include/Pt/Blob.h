@@ -216,7 +216,7 @@ public:
 
     bool operator==(const Blob& b) const
     {
-        return *m_data == *m_data;
+        return *m_data == *b.m_data;
     }
 
     bool operator!=(const Blob& b) const
