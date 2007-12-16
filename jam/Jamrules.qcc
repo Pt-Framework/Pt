@@ -8,12 +8,16 @@ GCCVERSION ?= 3.3.5 ;
 C++     = QCC ;
 CC      = qcc ;
 LINK        = $(C++) ;
-CCFLAGS     += -D_FILE_OFFSET_BITS=64 -D__QNX__ -fPIC  ;
+CCFLAGS     += -D_FILE_OFFSET_BITS=64 -D__QNX__  ;
+
+if $(GCCVERSION) = 3.3.5
+{
+	CCFLAGS     += -fPIC  ;
+}
+
 
 BYTEORDER ?= LE ;
-
-
-PRELIB = lib ;
+PRELIB = lib ;
 
 C++FLAGS    += $(CCFLAGS) -lang-c++ -fexceptions ;
 LINKFLAGS   = -lang-c++ ;
