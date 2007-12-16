@@ -67,6 +67,20 @@ void ValueImplTest::Blob()
     PT_UNIT_ASSERT(blob.size() == 5);
     PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello", 5) == 0);
 
+    Pt::Blob blob2;
+    PT_UNIT_ASSERT(blob2.size() == 0);
+    PT_UNIT_ASSERT(blob2.data() == 0);	
+
+	blob2 = blob;
+    PT_UNIT_ASSERT(blob2.size() == 5);
+    PT_UNIT_ASSERT( std::strncmp(blob2.data(), "Hello", 5) == 0);
+
+	blob.assign("World!", 6);
+    PT_UNIT_ASSERT(blob2.size() == 5);
+    PT_UNIT_ASSERT( std::strncmp(blob2.data(), "Hello", 5) == 0);
+    PT_UNIT_ASSERT(blob.size() == 6);
+    PT_UNIT_ASSERT( std::strncmp(blob.data(), "World!", 6) == 0);
+
     ValueImpl impl("Hello world!", 12);
     impl.getBlob(blob);
     PT_UNIT_ASSERT(blob.size() == 12);

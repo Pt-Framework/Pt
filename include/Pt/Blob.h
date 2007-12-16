@@ -27,19 +27,58 @@
 
 namespace Pt {
 
+/** @brief Implementation base of Blob values
+
+	This class serves as the base for the shared implementation classes used
+	in Blob objects. The non-virtual interface consists of a pointer to the
+	blob-data and its size. The implementor has to override three virtual methods,
+	IBlob::assign, IBlob::create and IBlob::destroy. The main purpose of these 
+	methods is to customize memory allocation of blob-data, aswell as the shared 
+	implementation class derived from IBlob. A default implementation, called 
+	BlobData, is provided, that uses malloc()/free() to aquire space for the 
+	blob-data and new/delete for the implementation class.
+*/
 class IBlob : public RefCounted
 {
     public:
+		/** @brief Destructor
+		*/
         virtual ~IBlob() {}
 
+		/** @brief Assign data of a given length
+		
+			The \a len bytes of the data pointed to by \a data are copied
+			to this blob. 
+ 		*/
         virtual void assign(const char* data, size_t len) = 0;
 
+		/** @brief Create a value implementation
+			
+			Returns a pointer to a implementation class derived from IBlob. 
+			IBlob::destroy must be implemented accordingly to destroy this
+			instance.
+ 		*/
+        virtual IBlob* create() const = 0;
+
+        
+ 		/** @brief Destroy a value implementation
+			
+			Destroys an instance previously created by the IBlob::create.
+ 		*/       
+        virtual void destroy() = 0; 
+
+		/** @brief Returns the size of the blob-data.
+		*/
         size_t size() const
         { return _size; }
 
+		/** @brief Returns a pointer to the blob-data or 0 if the blob is empty
+		*/
         const char* data() const
         { return _data; }
 
+		/** qbrief Returns true if the two instances contain the same data
+		*/
         bool operator==(const IBlob& other) const
         {
             return _size == other._size &&
@@ -48,7 +87,13 @@ class IBlob : public RefCounted
 
     protected:
         IBlob()
-        :_data(0)
+        : _data(0)
+        , _size(0)
+        { }
+
+        IBlob(size_t refs)
+        : RefCounted(refs)
+        , _data(0)
         , _size(0)
         { }
 
@@ -56,13 +101,24 @@ class IBlob : public RefCounted
         size_t _size;
 };
 
+/** @brief Default Blob value implementation
 
+	This implementation uses new/delete to create and destroy 
+	the shared objects and malloc/free to allocate memory for
+	the blob-data.
+*/
 class BlobData : public IBlob
 {
     public:
         BlobData()
         { }
 
+        ~BlobData()
+        { 
+            if(_data)
+                std::free(_data); 
+        }
+        
         virtual void assign(const char* data, size_t len)
         {
             if( len > this->size() )
@@ -77,6 +133,12 @@ class BlobData : public IBlob
             _size = len;
         }
 
+        virtual IBlob* create() const
+        { return new BlobData(); }
+
+        virtual void destroy()
+        { delete this; }
+        
         static BlobData* emptyInstance()
         {
             static BlobData empty(1);
@@ -85,58 +147,68 @@ class BlobData : public IBlob
 
     protected:
         BlobData(size_t refs)
-        { this->addRef(); }
+        : IBlob(refs)
+        {}
 };
 
 
-/** @internal Initialize statics in BlobData.
+/** @internal Initialize statics in BlobData during static initialization
 
     Thread-safety.
 */
-static struct InitBlobData
+static struct BlobDataInitializer
 {
-    InitBlobData()
-    { BlobData::emptyInstance(); }
-} init;
+    BlobDataInitializer()
+    { 
+        BlobData::emptyInstance(); 
+    }
+} pt_blobdata_initializer;
 
 
-/** @brief A class to hold binary data.
-
-    The data is represented by a plain pointer to the data plus the length of
-    the data. The class can be used for holding information about tiles coming
-    from a database or any other tile-source. A blob is the owner of the data
-    which is referenced by itself. Therefore the blob is responsible for
-    destroying the referenced data once it is destroyed itself. The Blob
-    contains a reference counter, which is incremented by the copy constructor
-    and the assignement operator and decremented on destruction. This avoid
-    copying of the data the Blob holds and makes assignement a cheap operation.
+/** @brief Binary large objects
 */
 class Blob
 {
-    SmartPtr< IBlob, InternalRefCounted<IBlob> > m_data;
+	//! @brief Release policy for SmartPtr
+    struct Release
+    {
+        void destroy(IBlob* blob)
+        { blob->destroy(); }
+    };
+
+	//! @brief Pointer to shared data
+    SmartPtr< IBlob, InternalRefCounted<IBlob>, Release > m_data;
 
 public:
     Blob()
-    {
-        m_data = BlobData::emptyInstance();
-    }
+    : m_data( BlobData::emptyInstance() )
+    { }
 
+	/** Construct a Blob with data of a given length
+		
+		Constructs a Blob using a default implementation using malloc/free
+		to manage the blob-data and new/delete to manage the shared data
+		object. The first \a len bytes of the data pointed to by \a data are
+		copied to this Blob.
+	*/
     Blob(const char* data, size_t len)
+    : m_data( new BlobData() )
     {
-        m_data = new BlobData();
         m_data->assign(data, len);
     }
 
+	/** Construct a Blob to use a customized implementation
+	*/
     Blob(IBlob* b)
-    {
-        m_data = b;
-    }
+    : m_data(b)
+    { }
 
     void assign(const char* data, size_t len)
     {
+        // copy-on-write
         if ( m_data->refs() > 1 )
         {
-            m_data = new BlobData();
+            m_data = m_data->create();
         }
 
         m_data->assign(data, len);

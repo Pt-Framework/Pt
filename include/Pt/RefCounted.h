@@ -34,6 +34,10 @@ namespace Pt
             : _refs(0)
             { }
 
+            RefCounted(size_t refs)
+            : _refs(refs)
+            { }
+            
             virtual ~RefCounted()
             { }
 
