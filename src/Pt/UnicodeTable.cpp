@@ -964,6 +964,7 @@ int main(int argc, char* argv[])
     f << "const std::ctype_base::mask alpha = std::ctype_base::alpha;\n";
     f << "const std::ctype_base::mask punct = std::ctype_base::punct;\n";
     f << "const std::ctype_base::mask print = std::ctype_base::print;\n";
+    f << "const std::ctype_base::mask alnum = std::ctype_base::alnum;\n";
     f << "\n";
     f << "const std::ctype_base::mask ctype_data[" << sizeof(category_data)+1 << "]= \n{\n";
 
@@ -997,19 +998,19 @@ int main(int argc, char* argv[])
                 break;
             case 10: f << "print|space";
                 break;
-            case 11: f << "print|alpha|upper";
+            case 11: f << "alnum|print|alpha|upper";
                 break;
-            case 12: f << "print|alpha|lower";
+            case 12: f << "alnum|print|alpha|lower";
                 break;
-            case 13: f << "print|alpha";
+            case 13: f << "alnum|print|alpha";
                 break;
-            case 14: f << "print|alpha";
+            case 14: f << "alnum|print|alpha";
                 break;
-            case 15: f << "print|alpha";
+            case 15: f << "alnum|print|alpha";
                 break;
-            case 16: f << "print|punct";
+            case 16: f << "alnum|print|punct";
                 break;
-            case 17: f << "print|digit|xdigit";
+            case 17: f << "alnum|print|digit|xdigit";
                 break;
             case 18: f << "print|punct";
                 break;
