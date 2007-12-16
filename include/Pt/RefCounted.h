@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
+ *   Copyright (C) 2006 by Marc Boris Dï¿½rner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,10 +34,10 @@ namespace Pt
             : _refs(0)
             { }
 
-            RefCounted(size_t refs)
+            explicit RefCounted(size_t refs)
             : _refs(refs)
             { }
-            
+
             virtual ~RefCounted()
             { }
 
