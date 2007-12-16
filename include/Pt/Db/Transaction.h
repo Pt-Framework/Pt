@@ -36,7 +36,7 @@ namespace Db {
         is hold it the class. The destructor rolls the transaction back, when not explicitely
         commited or rolled back.
     */
-    class PT_DB_API Transaction : private NonCopyable
+    class Transaction : private NonCopyable
     {
         private:
             // \brief Actual connection to a database.
