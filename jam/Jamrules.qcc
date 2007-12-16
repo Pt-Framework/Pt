@@ -20,7 +20,7 @@ BYTEORDER ?= LE ;
 PRELIB = lib ;
 
 C++FLAGS    += $(CCFLAGS) -lang-c++ -fexceptions ;
-LINKFLAGS   = -lang-c++ ;
+LINKFLAGS   = -lang-c++ -Wl,-Bsymbolic ;
 
 LINKLIBS    =  -lm  ;
 
