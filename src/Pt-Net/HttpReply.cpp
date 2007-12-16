@@ -365,7 +365,7 @@ void HttpReply::receive()
         std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
         while (singleBuffer != singleBuffers.end())
         {
-            memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
+            std::memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
             currentBuffer += (*singleBuffer).size();
             singleBuffer++;
         }
@@ -411,11 +411,11 @@ void HttpReply::send()
 
     // copy the HTTP header.
     char* headerData = buffer;
-    memcpy(headerData, httpHeader.str().data(), httpHeader.str().length());
+    std::memcpy(headerData, httpHeader.str().data(), httpHeader.str().length());
 
     // copy the body data.
     char* bodyData = headerData + httpHeader.str().length();
-    memcpy(bodyData, _body.data(), _body.size());
+    std::memcpy(bodyData, _body.data(), _body.size());
 
     // send the HTTP reply.
     _connection.write(buffer, bufferSize);

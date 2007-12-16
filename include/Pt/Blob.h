@@ -126,7 +126,7 @@ class BlobData : public IBlob
                 if(_data)
                     std::free(_data);
 
-                _data = (char*)malloc(len);
+                _data = (char*)std::malloc(len);
             }
 
             std::memcpy(_data, data, len);

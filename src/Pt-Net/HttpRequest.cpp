@@ -344,7 +344,7 @@ void HttpRequest::receive(Pt::Net::TcpSocket& connection)
         std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
         while (singleBuffer != singleBuffers.end())
         {
-            memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
+            std::memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
             currentBuffer += (*singleBuffer).size();
             singleBuffer++;
         }
@@ -402,11 +402,11 @@ void HttpRequest::sendPostMethod(Pt::Net::TcpSocket& connection)
 
     // copy the HTTP header.
     char* header = buffer;
-    memcpy(header, httpHeader.str().data(), httpHeader.str().length());
+    std::memcpy(header, httpHeader.str().data(), httpHeader.str().length());
 
     // copy the body data.
     char* body = header + httpHeader.str().length();
-    memcpy(body, _body.data(), _body.size());
+    std::memcpy(body, _body.data(), _body.size());
 
     // send the HTTP request.
     connection.write(buffer, bufferSize);
