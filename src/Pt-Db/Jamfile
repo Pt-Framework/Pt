@@ -17,6 +17,7 @@ SharedLibrary_MakeLocate Pt-Db : $(OUTPUT_TARGET) ;
 
 PT_DB_TESTS = ResultImplTest.cpp
               RowImplTest.cpp
+              SqliteTest.cpp
               ValueImplTest.cpp
               ;
 
