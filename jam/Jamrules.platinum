@@ -11,6 +11,11 @@ if $(TARGET_OS:L) = linux
     SYS ?= posix ;
     GUI ?= x11 ;
 }
+if $(TARGET_OS:L) = macosx
+{
+    SYS ?= posix ;
+    GUI ?= none ;
+}
 if $(TARGET_OS) = aix
 {
     SYS ?= posix ;
@@ -46,6 +51,12 @@ if $(SYS:L) = "win32"
 }
 
 if $(TARGET_OS:L) = linux
+{
+    SYSLIBS = -ldl -lpthread -lrt ;
+    NETLIBS = -lnsl ;
+}
+
+if $(TARGET_OS:L) = macosx
 {
     SYSLIBS = -ldl -lpthread -lrt ;
     NETLIBS = -lnsl ;

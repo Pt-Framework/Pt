@@ -1,0 +1,113 @@
+
+# Initialize variables
+#
+CC        = gcc ;
+C++       = g++ ;
+if $(CXX)
+{
+	C++ = $(CXX) ;
+}
+RANLIB		?= ranlib ;
+
+
+# Flags and options
+#
+# TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
+#       options below can be enabled ???
+#
+#CCFLAGS 	+= -fvisibility-inlines-hidden -fvisibility=hidden ;
+#LINKFLAGS	?= -fvisibility-inlines-hidden -fvisibility=hidden ;
+LINKLIBS	+= -lstdc++ ;
+
+if $(CONFIG:L) = debug
+{
+	CCFLAGS += -DDEBUG -g ;
+	OPTIM   ?= -O0 ;
+}
+else
+{
+	CCFLAGS += -DNDEBUG ;
+	OPTIM	  ?= -O1 ;
+}
+
+WARN ?= -Wall ;
+
+# only use -fPIC for non-X86 CPUs
+if $(TARGET_OSPLAT:U) != X86
+{
+	CCFLAGS += -fPIC ;
+}
+
+C++FLAGS	+= $(CCFLAGS) ;
+
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    # linker flag -E: export global symbols from the executable
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    SHLIBS on $(_target) += $(_libs) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+}
+
+
+# Adds a resource to be linked with a binary.
+# Not implemented for GCC - on Windows, it can be 
+# used to add an icon to the binary
+#
+# param 1 executable
+# param 2 resource file
+# param 3 output directory of compiled resource file
+#
+# Resource prog : resources.rc : output_directory ;
+rule Resource
+{
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+    Depends $(_target) : $(_deps) ;
+
+    local _l = $(>:S=$(SUFDLL)) ;
+    SHLIBS on $(_target) += $(_l) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+}
+
+
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+}
+

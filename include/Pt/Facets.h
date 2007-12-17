@@ -181,6 +181,10 @@ namespace std {
             typedef Pt::Char char_type;
             typedef std::basic_string<Pt::Char> string_type;
 
+
+			#if __GLIBCXX__ == 20050421
+			typedef __numpunct_cache<Pt::Char>  __cache_type;
+			#endif
             // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
             #if __GNUC__ == 3 && __GNUC_MINOR__ == 4
             typedef __numpunct_cache<Pt::Char>  __cache_type;
