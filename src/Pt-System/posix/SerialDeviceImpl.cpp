@@ -343,7 +343,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set flow control", PT_SOURCEINFO);
 
-    #if defined(linux) || defined(_AIX)
+    #if defined(linux) || defined(_AIX) || defined(__APPLE__)
         ios.c_cflag &= ~CRTSCTS;
     #else
         ios.c_cflag &= ~IHFLOW; // INPUT hardware control
@@ -362,7 +362,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         case SerialDevice::FlowControlBoth:
             ios.c_iflag |= (IXON | IXANY | IXOFF);
         case SerialDevice::FlowControlHard:
-            #if defined(linux) || defined(_AIX)
+            #if defined(linux) || defined(_AIX) || defined(__APPLE__)
                ios.c_cflag |= CRTSCTS;
             #else
                ios.c_cflag |= IHFLOW; // INPUT hardware control

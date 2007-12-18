@@ -58,7 +58,7 @@ if $(TARGET_OS:L) = linux
 
 if $(TARGET_OS:L) = macosx
 {
-    SYSLIBS = -ldl -lpthread -lrt ;
+    SYSLIBS = -ldl -lpthread ;
     NETLIBS = -lnsl ;
 }
 
