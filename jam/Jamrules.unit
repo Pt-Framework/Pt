@@ -50,7 +50,7 @@ if $(UNIX)
   actions PtUnitTestAction
   {
     cd $(>:D)
-    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. ./$(>:BS) -f$(<:BS)"
+    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:. ./$(>:BS) -f$(<:BS)"
   }
 
 }
