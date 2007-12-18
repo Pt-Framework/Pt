@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q Pt-Db-test.unit</makeoptions>
+      <makeoptions> -q SettingsTest</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

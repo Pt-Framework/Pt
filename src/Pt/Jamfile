@@ -16,6 +16,7 @@ SharedLibrary Pt : Any.cpp
                    SerializationInfo.cpp
                    Serializer.cpp
                    Settings.cpp
+                   SettingsParser.cpp
                    Signal.cpp
                    StringStream.cpp
                    StringList.cpp
