@@ -8,12 +8,13 @@ SubInclude TOP src Pt-Log ;
 SubInclude TOP src Pt-Net ;
 SubInclude TOP src Pt-Db ;
 SubInclude TOP src Pt-Gfx ;
-SubInclude TOP src Pt-Gui ;
+
+if $(GUI) != none
+{
+    SubInclude TOP src Pt-Gui ;
+}
+
 SubInclude TOP src Pt-Text ;
 SubInclude TOP src Pt-Unit ;
 SubInclude TOP src Pt-Math ;
-
-#if $(TARGET_OS:L) != wince && $(TARGET_OS:L) != qnxnto
-#{
-    SubInclude TOP src Pt-Xml ;
-#}
+SubInclude TOP src Pt-Xml ;

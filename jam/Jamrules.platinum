@@ -59,7 +59,7 @@ if $(TARGET_OS:L) = linux
 if $(TARGET_OS:L) = macosx
 {
     SYSLIBS = -ldl -lpthread ;
-    NETLIBS = -lnsl ;
+    #NETLIBS = -lsocket ;
 }
 
 if $(TARGET_OS) = aix

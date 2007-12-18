@@ -45,6 +45,8 @@ Main BlockscaleTest : BlockscaleTest.cpp ;
 Main_LinkSharedLibraries BlockscaleTest : Pt Pt-System Pt-Text Pt-Gfx ;
 Main_MakeLocate BlockscaleTest : $(OUTPUT_TARGET) ;
 
+if $(GUI) != none
+{
 Main ImagePainterDemo : ImagePainterDemo.cpp ;
 Main_LinkSharedLibraries ImagePainterDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate ImagePainterDemo : $(OUTPUT_TARGET) ;
@@ -73,6 +75,12 @@ Main DrawTextDemo : DrawTextDemo.cpp ;
 Main_LinkSharedLibraries DrawTextDemo : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate DrawTextDemo : $(OUTPUT_TARGET) ;
 
+Main GfxPerf : GfxPerf.cpp ;
+Main_LinkSharedLibraries GfxPerf : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
+Main_MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
+
+}
+
 PtUnitTest ImagePainterTest : ImagePainterTest.cpp ;
 Main_LinkSharedLibraries ImagePainterTest : Pt Pt-System Pt-Text Pt-Gfx Pt-Unit ;
 PtUnitTest_MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
@@ -80,10 +88,6 @@ PtUnitTest_MakeLocate ImagePainterTest : $(OUTPUT_TARGET) ;
 PtUnitTest PlanarImageTest : PlanarImageTest.cpp ;
 Main_LinkSharedLibraries PlanarImageTest : Pt Pt-Gfx Pt-Text Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate PlanarImageTest : $(OUTPUT_TARGET) ;
-
-Main GfxPerf : GfxPerf.cpp ;
-Main_LinkSharedLibraries GfxPerf : Pt Pt-System Pt-Text Pt-Gfx Pt-Gui ;
-Main_MakeLocate GfxPerf : $(OUTPUT_TARGET) ;
 
 Main MakeFontHeader : MakeFontHeader.cpp ;
 Main_MakeLocate MakeFontHeader : $(OUTPUT_TARGET) ;
