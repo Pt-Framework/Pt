@@ -20,19 +20,30 @@
 
 namespace Pt {
 
+SettingsParser::BeginStatement SettingsParser::beginStatement;
+SettingsParser::OnComment SettingsParser::onComment;
+SettingsParser::OnSection SettingsParser::onSection;
+
+
 SettingsParser::SettingsParser(std::basic_istream<Pt::Char>& is)
 : state(0)
 , _is(&is)
+, _line(0)
 { }
+
 
 void SettingsParser::parse(SerializationInfo& si)
 {
-    //state = &Parser::beforeExpression;
+    state = &beginStatement;
+    _line  = 0;
+    Pt::Char ch = 0;
 
-    Pt::Char ch;
     while ( _is->get(ch) )
     {
         state = state->onChar(ch, *this);
+
+        if(ch == '\n')
+            ++_line;
     }
 
     // if exceptions are deactivated caller must check

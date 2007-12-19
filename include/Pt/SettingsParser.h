@@ -44,14 +44,11 @@ class SettingsParser
 
                     switch( c.value() )
                     {
+                            case '\n':
                             case ' ':
                             case '\t':
-                            case '\n':
                             case '\r':
                                 return this->onSpace(c, parser);
-
-                            case '.':
-                                return this->onDot(c, parser);
 
                             case '"':
                                 return this->onQoute(c, parser);
@@ -92,8 +89,6 @@ class SettingsParser
             protected:
                 virtual State* onSpace(Pt::Char c, SettingsParser&) = 0;
 
-                virtual State* onDot(Pt::Char c, SettingsParser&) = 0;
-
                 virtual State* onQoute(Pt::Char c, SettingsParser&) = 0;
 
                 virtual State* onComma(Pt::Char c, SettingsParser&) = 0;
@@ -115,16 +110,187 @@ class SettingsParser
                 virtual State* onEof(Pt::Char c, SettingsParser&) = 0;
         };
 
+        static class BeginStatement : public State
+        {
+            protected:
+                virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+                { return this; }
+
+                virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onComma(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onEqual(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    return &onSection;
+                }
+
+                virtual State* onCloseBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onHash(Pt::Char c, SettingsParser& parser)
+                {
+                    return &onComment;
+                }
+
+
+                virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+                {
+                    parser.buildName(c);
+                    //return &onName;
+                    return this;
+                }
+
+                virtual State* onEof(Pt::Char c, SettingsParser& parser)
+                {
+                    return this;
+                }
+        } beginStatement;
+
+        static class OnComment : public State
+        {
+            public:
+                virtual State* onChar(Pt::Char c, SettingsParser& parser)
+                {
+                    if(c == '\n')
+                    {
+                        return &beginStatement;
+                    }
+
+                    return this;
+                }
+
+            protected:
+                virtual State* onSpace(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onQoute(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onComma(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onEqual(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onCloseBrace(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onHash(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onAlpha(Pt::Char c, SettingsParser& parser) { return this; }
+                virtual State* onEof(Pt::Char c, SettingsParser& parser) { return this; }
+        } onComment;
+
+        static class OnSection : public State
+        {
+            protected:
+                virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+                { return this; }
+
+                virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onComma(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onEqual(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onCloseBrace(Pt::Char c, SettingsParser& parser)
+                {
+                    return &beginStatement;
+                }
+
+                virtual State* onHash(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+
+                virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+                {
+                    parser.buildSection(c);
+                    return this;
+                }
+
+                virtual State* onEof(Pt::Char c, SettingsParser& parser)
+                {
+                    throw std::runtime_error("parse error");
+                    return this;
+                }
+        } onSection;
+
     public:
         SettingsParser(std::basic_istream<Pt::Char>& is);
 
         void parse(SerializationInfo& si);
+
+        void buildName(Pt::Char c)
+        { _name += c; }
+
+        void buildSection(Pt::Char c)
+        { _section += c; }
 
     private:
         //! State of the parser.
         State* state;
 
         std::basic_istream<Pt::Char>* _is;
+
+        size_t _line;
+
+        Pt::String _name;
+
+        Pt::String _section;
 };
 
 } // namespace Pt
