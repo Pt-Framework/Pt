@@ -23,7 +23,8 @@ namespace Pt {
 SettingsParser::BeginStatement SettingsParser::beginStatement;
 SettingsParser::OnComment SettingsParser::onComment;
 SettingsParser::OnSection SettingsParser::onSection;
-
+SettingsParser::OnName SettingsParser::onName;
+SettingsParser::AfterName SettingsParser::afterName;
 
 SettingsParser::SettingsParser(std::basic_istream<Pt::Char>& is)
 : state(0)
