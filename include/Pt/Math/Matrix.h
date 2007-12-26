@@ -9,10 +9,8 @@
 #include <Pt/Math/Api.h>
 #include <Pt/Math/Math.h>
 #include <Pt/Math/MathUtils.h>
-#include <vector>
 #include <assert.h>
 #include <iostream>
-#include <fstream>
 
 
 namespace Pt
@@ -68,6 +66,7 @@ namespace Pt
 
         /**
          * @brief BasicMatrix class
+         *
          * Matrix elements are stored in an array. The matrix holds an pointer to this array.
          * The data elements in the array are sorted according to row. This means that
          * the matrix consist of row vectors.
@@ -310,10 +309,9 @@ namespace Pt
              * @param matrix BasicMatrix to assign.
              * @return A Reference to this matrix.
              */
-            template <typename T1, size_t rowDimIn, size_t colDimIn>
-            inline const BasicMatrix<T, rowDim, colDim>& operator=(const BasicMatrix<T1, rowDimIn, colDimIn>& matrix)
+            inline const BasicMatrix<T, rowDim, colDim>& operator=(const BasicMatrix<T, rowDim, colDim>& matrix)
             {
-                std::memcpy(this->m_matrixData, matrix.m_matrixData, this->m_elemCount * sizeof(T));
+                std::memcpy(this->m_matrixData, matrix.m_matrixData, rowDim * colDim * sizeof(T));
                 return *this;
             }
 
@@ -423,8 +421,8 @@ namespace Pt
              * @param matrix BasicMatrix for the Multiplication.
              * @return The resulting BasicMatrix.
              */
-            template <typename T2, size_t rightRowDim, size_t rightColDim>
-            inline BasicMatrix<T2, rowDim, rightColDim> operator*(const BasicMatrix<T2, rightRowDim, rightColDim>& matrix) const
+            template <typename T2, size_t rightColDim>
+            inline BasicMatrix<T2, rowDim, rightColDim> operator*(const BasicMatrix<T2, colDim, rightColDim>& matrix) const
             {
 
                 BasicMatrix<T2, rowDim, rightColDim> resMatrix;
