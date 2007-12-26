@@ -24,10 +24,10 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt</mainprogram>
+      <mainprogram>/home/marc/Pt/bin/SettingsParserTestd</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
-      <programargs>-fbin/SettingsTestd.unit</programargs>
+      <programargs></programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars>
@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q SettingsTest</makeoptions>
+      <makeoptions> -q SettingsParserTest.unit</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

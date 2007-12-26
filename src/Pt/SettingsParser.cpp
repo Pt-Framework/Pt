@@ -21,20 +21,34 @@
 namespace Pt {
 
 SettingsParser::BeginStatement SettingsParser::beginStatement;
-SettingsParser::OnComment SettingsParser::onComment;
 SettingsParser::OnSection SettingsParser::onSection;
-SettingsParser::OnName SettingsParser::onName;
+SettingsParser::BeginType SettingsParser::beginType;
 SettingsParser::AfterName SettingsParser::afterName;
+SettingsParser::OnEqual SettingsParser::onEqual;
+SettingsParser::OnCurly SettingsParser::onCurly;
+SettingsParser::OnCloseCurly SettingsParser::onCloseCurly;
+SettingsParser::OnQoutedValue SettingsParser::onQoutedValue;
+SettingsParser::AfterQoutedValue SettingsParser::afterQoutedValue;
+SettingsParser::OnRValue SettingsParser::onRValue;
+SettingsParser::AfterRValue SettingsParser::afterRValue;
+SettingsParser::BeginTypedValue SettingsParser::beginTypedValue;
+SettingsParser::OnTypedValue SettingsParser::onTypedValue;
+SettingsParser::OnQoutedTypedValue SettingsParser::onQoutedTypedValue;
+SettingsParser::EndTypedValue SettingsParser::endTypedValue;
+SettingsParser::AfterValue SettingsParser::afterValue;
 
 SettingsParser::SettingsParser(std::basic_istream<Pt::Char>& is)
 : state(0)
+, _current(0)
 , _is(&is)
 , _line(0)
+, _depth(0)
 { }
 
 
 void SettingsParser::parse(SerializationInfo& si)
 {
+    _current = &si;
     state = &beginStatement;
     _line  = 0;
     Pt::Char ch = 0;

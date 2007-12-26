@@ -34,6 +34,10 @@ PtUnitTest SerializationTest : SerializationTest.cpp ;
 Main_LinkSharedLibraries SerializationTest : Pt Pt-Unit ;
 PtUnitTest_MakeLocate SerializationTest : $(OUTPUT_TARGET) ;
 
+PtUnitTest SettingsParserTest : SettingsParserTest.cpp ;
+Main_LinkSharedLibraries SettingsParserTest : Pt Pt-Text Pt-Unit ;
+PtUnitTest_MakeLocate SettingsParserTest : $(OUTPUT_TARGET) ;
+
 PtUnitTest SettingsTest : SettingsTest.cpp ;
 Main_LinkSharedLibraries SettingsTest : Pt Pt-Text Pt-Unit ;
 PtUnitTest_MakeLocate SettingsTest : $(OUTPUT_TARGET) ;
