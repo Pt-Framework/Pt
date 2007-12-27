@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                       *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,8 +18,8 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
+#include "SettingsParser.h"
 #include "Pt/Settings.h"
-#include <Pt/StringStream.h>
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
@@ -28,372 +28,257 @@
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
 
-
 class SettingsTest : public Pt::Unit::TestSuite
 {
     public:
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "PlainValue", *this, &SettingsTest::PlainValue );
-            Pt::Unit::TestSuite::registerMethod( "ComplexArray", *this, &SettingsTest::ComplexArray );
-            Pt::Unit::TestSuite::registerMethod( "PlainQoutedValue", *this, &SettingsTest::PlainQoutedValue );
-            Pt::Unit::TestSuite::registerMethod( "PlainArray", *this, &SettingsTest::PlainArray );
-            Pt::Unit::TestSuite::registerMethod( "PlainQoutedArray", *this, &SettingsTest::PlainQoutedArray );
+            Pt::Unit::TestSuite::registerMethod( "Comment", *this, &SettingsTest::Comment );
+
+            Pt::Unit::TestSuite::registerMethod( "SimpleValue", *this, &SettingsTest::SimpleValue );
+            Pt::Unit::TestSuite::registerMethod( "SimpleTypedValue", *this, &SettingsTest::SimpleTypedValue );
+            Pt::Unit::TestSuite::registerMethod( "SimpleQoutedValue", *this, &SettingsTest::SimpleQoutedValue );
+
+            Pt::Unit::TestSuite::registerMethod( "SimpleArray", *this, &SettingsTest::SimpleArray );
+            Pt::Unit::TestSuite::registerMethod( "SimpleNamedArray", *this, &SettingsTest::SimpleNamedArray );
+            Pt::Unit::TestSuite::registerMethod( "SimpleQoutedArray", *this, &SettingsTest::SimpleQoutedArray );
+            Pt::Unit::TestSuite::registerMethod( "SimpleTypedArray", *this, &SettingsTest::SimpleTypedArray );
+            Pt::Unit::TestSuite::registerMethod( "SimpleArrayQoutedTypedValues", *this, &SettingsTest::SimpleArrayQoutedTypedValues );
+
             Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsTest::ComplexType );
-            Pt::Unit::TestSuite::registerMethod( "ComplexType3", *this, &SettingsTest::ComplexType3 );
-            Pt::Unit::TestSuite::registerMethod( "SimpleList", *this, &SettingsTest::SimpleList );
-            Pt::Unit::TestSuite::registerMethod( "SimpleQoutedList", *this, &SettingsTest::SimpleQoutedList );
-            Pt::Unit::TestSuite::registerMethod( "QoutedComplexType", *this, &SettingsTest::QoutedComplexType );
-            Pt::Unit::TestSuite::registerMethod( "SimpleTypedList", *this, &SettingsTest::SimpleTypedList );
-            Pt::Unit::TestSuite::registerMethod( "SimpleTypedQuotedList", *this, &SettingsTest::SimpleTypedQuotedList );
-            Pt::Unit::TestSuite::registerMethod( "ComplexTypeWithTypename", *this, &SettingsTest::ComplexTypeWithTypename );
+            Pt::Unit::TestSuite::registerMethod( "ComplexTypeNamedQoutedValues", *this, &SettingsTest::ComplexTypeNamedQoutedValues );
+            Pt::Unit::TestSuite::registerMethod( "ComplexNamedType", *this, &SettingsTest::ComplexNamedType );
+
+            Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsTest::Section );
+            Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsTest::ArrayOfArrays );
         }
 
     protected:
-
-        void PlainValue();
-        void ComplexArray();
-        void PlainQoutedValue();
-        void PlainArray();
-        void PlainQoutedArray();
+        void Comment();
+        void SimpleValue();
+        void SimpleTypedValue();
+        void SimpleQoutedValue();
+        void SimpleArray();
+        void SimpleNamedArray();
+        void SimpleQoutedArray();
+        void SimpleTypedArray();
+        void SimpleArrayQoutedTypedValues();
+        void ComplexNamedType();
         void ComplexType();
-        void ComplexType3();
-        void SimpleList();
-        void SimpleQoutedList();
-        void QoutedComplexType();
-        void SimpleTypedList();
-        void SimpleTypedQuotedList();
-        void ComplexTypeWithTypename();
-
-
-
-
+        void ComplexTypeNamedQoutedValues();
+        void Section();
+        void ArrayOfArrays();
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
+/*
+std::ifstream in("/home/marc/Desktop/maprenderer.settings");
+PT_UNIT_ASSERT(in)
 
-void SettingsTest::PlainValue()
+Pt::Text::TextIStream ts(in, new Pt::Text::Utf8Codec);
+
+Pt::SerializationInfo si;
+Pt::SettingsParser parser(ts);
+parser.parse(si);
+*/
+
+void SettingsTest::Comment()
 {
     std::stringstream ss;
-    ss << "[ a.b.c]\n";
-    ss << "d.v = g(\"3\")\n";
-    ss << "d.u = 4\n";
+    ss << ";first comment\n";
+    ss << "a = \"1#;2\"\n";
+    ss << "#second comment\n";
+    ss << "b = 2\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
+
     Pt::Settings settings;
-    reader.read(settings);
+    settings.load(&ts);
 
-    //Pt::StringStream sout;
-    //settings.save(sout);
-    //std::cerr << "\n" << sout.str().narrow() << std::endl;
-
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "3")
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "4")
+    PT_UNIT_ASSERT("1#;2" == settings.getValue<std::string>("a") );
+    PT_UNIT_ASSERT(2 == settings.getValue<int>("b") );
 }
 
-void SettingsTest::PlainQoutedValue()
+void SettingsTest::ArrayOfArrays()
 {
     std::stringstream ss;
-    ss << "[a.b.c ]\n";
-    ss << "d.v = \";3\" \n \"4\"\n";
-    ss << "d.u = \"3\" \n \"4\"\n";
-
+    ss << "a={array{1,2,3},array{4,5,6}}\n";
+    ss << "b = { { 1 , 2 , 3 } , { 4 , 5 , 6 } }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
 
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == ";34")
-    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "34")
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+
+    PT_UNIT_ASSERT(2 == si.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(2 == si.getMember("b").memberCount() );
 }
 
-void SettingsTest::PlainArray()
+
+void SettingsTest::SimpleValue()
 {
     std::stringstream ss;
-    ss << "a.b.c = { 1,2,3 }\n";
-    ss << "d.e.f = {1,2,3}\n";
-    ss << "g.h.i = { 1,\"2\", 3 }\n";
-
+    ss << "a = 5\n";
+    ss << "b=6\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
 
-    std::string concat;
-    const Pt::SerializationInfo* a = settings.findMember("a.b");
-    PT_UNIT_ASSERT(a)
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    a = a->findMember("c");
-    PT_UNIT_ASSERT(a)
-
-    for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-    PT_UNIT_ASSERT( concat == "123")
-
-    concat.clear();
-
-    a = settings.findMember("g.h");
-    PT_UNIT_ASSERT(a)
-
-    a = a->findMember("i");
-    PT_UNIT_ASSERT(a)
-
-    for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-
-    PT_UNIT_ASSERT( concat == "123")
+    PT_UNIT_ASSERT(5 == si.getValue<int>("a") );
+    PT_UNIT_ASSERT(6 == si.getValue<int>("b") );
 }
 
-void SettingsTest::PlainQoutedArray()
+void SettingsTest::SimpleTypedValue()
 {
     std::stringstream ss;
-    ss << "a.b.c = {\"1\", \"2\", \"3\"}\n";
-    ss << "g.h.i = {\"1\", \"2\", \"2\" , \"3\" }\n";
-
+    ss << "a = int ( 5 )\n";
+    ss << "b = int(6)\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
 
-    std::string concat;
-    const Pt::SerializationInfo* a = settings.findMember("a.b");
-    PT_UNIT_ASSERT(a)
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    a = a->findMember("c");
-    PT_UNIT_ASSERT(a)
-
-    for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-    PT_UNIT_ASSERT( concat == "123")
-
-    concat.clear();
-
-    a = settings.findMember("g.h");
-    PT_UNIT_ASSERT(a)
-
-    a = a->findMember("i");
-    PT_UNIT_ASSERT(a)
-
-    for( Pt::SerializationInfo::ConstIterator it = a->begin(); it != a->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-    PT_UNIT_ASSERT( concat == "1223")
+    PT_UNIT_ASSERT(5 == si.getValue<int>("a") );
+    PT_UNIT_ASSERT(6 == si.getValue<int>("b") );
 }
 
-void SettingsTest::ComplexArray()
+void SettingsTest::SimpleQoutedValue()
 {
     std::stringstream ss;
-    ss << "a.b.c = { Point{x=\"0.0\", y=\"0.0\"}, Point{x=\"75.0\", y=\"0.75\"} }\n";
+    ss << "a=\"a b c\"\n";
+    ss << "b = \"a b c\"\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
 
-    Pt::StringStream sout;
-    settings.save(&sout);
-//    std::cerr << "################\n" << sout.str().narrow() << std::endl;
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+
+    PT_UNIT_ASSERT("a b c" == si.getValue<std::string>("a") );
+    PT_UNIT_ASSERT("a b c" == si.getValue<std::string>("b") );
+}
+
+void SettingsTest::SimpleArray()
+{
+    std::stringstream ss;
+    ss << "a={1,2,3}\n";
+    ss << "b = { 4 , 5 , 6 } \n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+}
+
+void SettingsTest::SimpleNamedArray()
+{
+    std::stringstream ss;
+    ss << "a=array{1,2,3}\n";
+    ss << "b = array { 4 , 5 , 6 } \n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+}
+
+void SettingsTest::SimpleQoutedArray()
+{
+    std::stringstream ss;
+    ss << "a={\"1\",\"2\",\"3\"}\n";
+    ss << "b = { \"4\" , \"5\" , \"6\" } \n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+}
+
+void SettingsTest::SimpleTypedArray()
+{
+    std::stringstream ss;
+    ss << "a={int(1),int(2),int(3)}\n";
+    ss << "b = { int( 4 ) , int( 5 ) , int( 6 ) }\n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+}
+
+void SettingsTest::SimpleArrayQoutedTypedValues()
+{
+    std::stringstream ss;
+    ss << "a={int(\"1\"),int(\"2\"),int(\"3\")}\n";
+    ss << "b = { int( \"4\" ) , int( \"5\" ) , int( \"6\" ) }\n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 }
 
 void SettingsTest::ComplexType()
 {
     std::stringstream ss;
-    ss << "a.b.c = ( d = 1, e =2, f= ( g = 3) )\n";
-
+    ss << "a={red=1,green=2,blue=3}\n";
+    ss << "b = { red = 4 , green = 5 , blue = 6 }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
 
-    std::string concat;
-    const Pt::SerializationInfo* data = settings.findMember("a.b");
-    PT_UNIT_ASSERT( data )
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    data = data->findMember("c");
-    PT_UNIT_ASSERT( data )
-
-    PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
-
-    data = data->findMember( "f" );
-    PT_UNIT_ASSERT( data )
-
-    for( Pt::SerializationInfo::ConstIterator it = data->begin(); it != data->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-
-    PT_UNIT_ASSERT( concat == "3")
+    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
+    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
 }
 
-void SettingsTest::ComplexTypeWithTypename()
+void SettingsTest::ComplexTypeNamedQoutedValues()
 {
     std::stringstream ss;
-    ss << "Painter.pen =Pen( color= Color ( red = char(255 ),  \n";
-    ss << "                                 green= char (0),   \n";
-    ss << "                                 blue =char( 0) ),  \n";
-    ss << "                  size=1 )                          \n";
-    ss << "Painter.alpha = 50                                  \n";
-    ss << "b.x = B( char( 30), char(40 ) ,char (50) , char(60) ) \n";
+    ss << "a={red=\"1\",green=\"2\",blue=\"3\"}\n";
+    ss << "b = { red = \"4\" , green = \"5\" , blue = \"6\" }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::Settings settings;
-    settings.load(&ts);
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    //Pt::StringStream sout;
-    //settings.save(sout);
-    //std::cerr << "\n" << sout.str().narrow() << std::endl;
+    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
+    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
 }
 
-void SettingsTest::ComplexType3()
+void SettingsTest::ComplexNamedType()
 {
     std::stringstream ss;
-    ss << "a.b.n = { { Pen(\"1\"), Pen(\"#112233\") } }   \n";
-    ss << "a.b.n = v1{ v2{ Pen(\"1\"), Pen(\"#112233\") } }   \n";
-    ss << "a.b.colors = array{ Color{ red = char(255 ),      \n";
-    ss << "                           green= char (0),       \n";
-    ss << "                           blue =char( 0) },      \n";
-    ss << "                    Color { red = char(255 ),     \n";
-    ss << "                            green= char (0),      \n";
-    ss << "                            blue =char( 0) } }    \n";
-    ss << "b = char(5) \n";
+    ss << "a=Color{red=int(1),green=int(2),blue=int(3)}\n";
+    ss << "b = Color { red = int ( 4 ) , green = int ( 5 ) , blue = int ( 6 ) }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::Settings settings;
-    settings.load(&ts);
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    //Pt::StringStream sout;
-    //settings.save(sout);
-    //std::cerr << "\n" << sout.str().narrow() << std::endl;
+    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
+    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
 }
 
-void SettingsTest::SimpleTypedList()
+void SettingsTest::Section()
 {
     std::stringstream ss;
-    ss << "a.b.c = List( d =char( 1), e = char (2), f= char(3 ) )\n";
-
+    ss << "[a.b.c]\n";
+    ss << "d.v = 1\n";
+    ss << "d.u = 2\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::Settings settings;
-    settings.load(&ts);
 
-    Pt::String concat;
-    const Pt::SerializationInfo* data = settings.findMember("a.b");
-    PT_UNIT_ASSERT( data )
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
 
-    data = data->findMember("c");
-    PT_UNIT_ASSERT( data )
-    PT_UNIT_ASSERT( data->typeName() == "List" )
-
-    PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "f" ) == "3" )
-}
-
-void SettingsTest::SimpleTypedQuotedList()
-{
-    std::stringstream ss;
-    ss << "a.b.c = List( d =char( \"1\"), e = char (\"2\"), f= char(\"3\" ) )\n";
-
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::Settings settings;
-    settings.load(&ts);
-
-    Pt::String concat;
-    const Pt::SerializationInfo* data = settings.findMember("a.b");
-    PT_UNIT_ASSERT( data )
-
-    data = data->findMember("c");
-    PT_UNIT_ASSERT( data )
-    PT_UNIT_ASSERT( data->typeName() == "List" )
-
-    PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "f" ) == "3" )
-}
-
-void SettingsTest::SimpleList()
-{
-    std::stringstream ss;
-    ss << "a.b.c = List( d = 1, e =2, f= 3 )\n";
-
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::Settings settings;
-    settings.load(&ts);
-
-    Pt::String concat;
-    const Pt::SerializationInfo* data = settings.findMember("a.b");
-    PT_UNIT_ASSERT( data )
-
-    data = data->findMember("c");
-    PT_UNIT_ASSERT( data )
-    PT_UNIT_ASSERT( data->typeName() == "List" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "f" ) == "3" )
-}
-
-void SettingsTest::SimpleQoutedList()
-{
-    std::stringstream ss;
-    ss << "a.b.c = List( d = \"1\", e =\"2\", f= \"3\" )\n";
-
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::Settings settings;
-    settings.load(&ts);
-
-    Pt::String concat;
-    const Pt::SerializationInfo* data = settings.findMember("a.b");
-    PT_UNIT_ASSERT( data )
-
-    data = data->findMember("c");
-    PT_UNIT_ASSERT( data )
-    PT_UNIT_ASSERT( data->typeName() == "List" )
-
-    PT_UNIT_ASSERT( data->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "e" ) == "2" )
-    PT_UNIT_ASSERT( data->getValue<std::string>( "f" ) == "3" )
-}
-
-void SettingsTest::QoutedComplexType()
-{
-    std::stringstream ss;
-    ss << "a.b.c = ( d =\"1\", x= ( g =9) , e = \"2\" \"2\" , f= ( g =\"3\") )\n";
-
-    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
-    Pt::SettingsReader reader(ts);
-    Pt::Settings settings;
-    reader.read(settings);
-
-    std::string concat;
-    const Pt::SerializationInfo* a = settings.findMember("a.b");
-    PT_UNIT_ASSERT( a )
-
-    a = a->findMember("c");
-    PT_UNIT_ASSERT( a )
-
-    PT_UNIT_ASSERT( a->getValue<std::string>( "d" ) == "1" )
-    PT_UNIT_ASSERT( a->getValue<std::string>( "e" ) == "22" )
-
-    a = a->findMember( "f" );
-    PT_UNIT_ASSERT( a )
-
-    for( Pt::Settings::ConstIterator it = a->begin(); it != a->end(); ++it)
-    {
-        concat += it->toValue<std::string>();
-    }
-
-    PT_UNIT_ASSERT( concat == "3")
-
-    //Pt::StringStream sout;
-    //settings.save(sout);
-    //std::cerr << "\n" << sout.str().narrow() << std::endl;
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d") )
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("v") == "1")
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("u") == "2")
 }

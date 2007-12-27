@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/SettingsParser.h"
+#include "SettingsParser.h"
 
 namespace Pt {
 
@@ -179,5 +179,31 @@ void SettingsParser::pushName()
     _current->setName( _token.narrow() );
     _token.clear();
 }
+
+
+/*
+bool SettingsReader::getEscaped(Pt::String& s)
+{
+    Pt::Char ch;
+    if( ! _is->get(ch) )
+        return false;
+
+    switch( ch.value() )
+    {
+        case 'n':
+            s += Pt::Char(L'\n');
+            break;
+
+        case 'r':
+            s += Pt::Char(L'\r');
+            break;
+
+        default:
+            s += ch;
+    }
+
+    return true;
+}
+*/
 
 }

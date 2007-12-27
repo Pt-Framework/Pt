@@ -16,58 +16,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Settings_h
-#define Pt_Settings_h
+#ifndef Pt_SettingsWriter_h
+#define Pt_SettingsWriter_h
 
-#include <Pt/Api.h>
-#include <Pt/String.h>
-#include <Pt/SerializationInfo.h>
+#include "Pt/Api.h"
+#include "Pt/Char.h"
+#include "Pt/SerializationInfo.h"
 #include <iostream>
-#include <sstream>
-#include <cassert>
 
 namespace Pt {
 
-class PT_API SettingsError : public std::runtime_error
+class SettingsWriter
 {
     public:
-        SettingsError(const std::string& what, unsigned line);
+        SettingsWriter( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is)
+        : _os(os)
+        , _is(is)
+        , _indent(0)
+        { }
 
-        unsigned line() const
-        { return _line; }
+        ~SettingsWriter()
+        {}
+
+        void write(const SerializationInfo& si);
+
+    protected:
+        void writeParent(const SerializationInfo& sd, const std::string& prefix);
+
+        void writeChild(const SerializationInfo& node);
+
+        void writeEntry(const std::string& name, const Pt::String& value, const std::string& type);
+
+        void writeSection(const Pt::String& prefix);
 
     private:
-        unsigned _line;
-};
-
-
-class PT_API Settings : public SerializationInfo
-{
-    public:
-        Settings();
-
-        void load( std::basic_istream<Pt::Char>* is );
-
-        void save( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is = 0 ) const;
-
-        // TODO getSerializable
-        template <typename T>
-        const bool getObject(T& type, const std::string& name) const
-        {
-            const SerializationInfo* si = this->findMember(name);
-            if(si == 0)
-                return false;
-
-            *si >>= type;
-            return true;
-        }
-
-        template <typename T>
-        const void setObject(const T& type, const std::string& name)
-        {
-            SerializationInfo& si = this->addMember(name);
-            si <<= type;
-        }
+        std::basic_ostream<Pt::Char>* _os;
+        std::basic_istream<Pt::Char>* _is;
+        size_t _indent;
 };
 
 }

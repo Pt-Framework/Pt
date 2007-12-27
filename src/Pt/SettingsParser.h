@@ -19,12 +19,10 @@
 #ifndef Pt_SettingsParser_h
 #define Pt_SettingsParser_h
 
-#include <Pt/Api.h>
-#include <Pt/String.h>
-#include <Pt/SerializationInfo.h>
+#include "Pt/Api.h"
+#include "Pt/Char.h"
+#include "Pt/SerializationInfo.h"
 #include <iostream>
-#include <sstream>
-#include <cassert>
 #include <cctype>
 
 namespace Pt {
