@@ -76,6 +76,7 @@ void SettingsReader::parse(SerializationInfo& si)
     state->onChar( std::char_traits<char>::eof(), *this );
 }
 
+
 void SettingsReader::enterMember()
 {
     //
@@ -127,6 +128,7 @@ void SettingsReader::enterMember()
     _token.clear();
 }
 
+
 void SettingsReader::leaveMember()
 {
     //std::cerr << "@" << std::endl;
@@ -146,17 +148,20 @@ void SettingsReader::leaveMember()
     }
 }
 
+
 void SettingsReader::pushValue()
 {
     _current->setValue(_token);
     _token.clear();
 }
 
+
 void SettingsReader::pushTypeName()
 {
     _current->setTypeName( _token.narrow() );
     _token.clear();
 }
+
 
 void SettingsReader::pushName()
 {
@@ -165,29 +170,25 @@ void SettingsReader::pushName()
 }
 
 
-/*
-bool SettingsReader::getEscaped(Pt::String& s)
+Pt::Char SettingsReader::getEscaped()
 {
     Pt::Char ch;
     if( ! _is->get(ch) )
-        return false;
+        throw SettingsError("unexpected EOF", _line);
 
     switch( ch.value() )
     {
         case 'n':
-            s += Pt::Char(L'\n');
+            return Pt::Char(L'\n');
             break;
 
         case 'r':
-            s += Pt::Char(L'\r');
+            return Pt::Char(L'\r');
             break;
-
-        default:
-            s += ch;
     }
 
-    return true;
+    return ch;
 }
-*/
+
 
 }

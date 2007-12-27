@@ -416,6 +416,9 @@ class SettingsReader
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
+                if(c == '\\')
+                    c = reader.getEscaped();
+
                 reader.buildToken(c);
                 return this;
             }
@@ -706,6 +709,8 @@ class SettingsReader
 
         State* endComment() const
         { return _beforeComment; }
+
+        Pt::Char getEscaped();
 
     private:
         State* state;
