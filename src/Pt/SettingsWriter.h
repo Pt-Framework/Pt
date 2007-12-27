@@ -29,9 +29,8 @@ namespace Pt {
 class SettingsWriter
 {
     public:
-        SettingsWriter( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is)
-        : _os(os)
-        , _is(is)
+        SettingsWriter( std::basic_ostream<Pt::Char>& os)
+        : _os(&os)
         , _indent(0)
         { }
 
@@ -51,7 +50,6 @@ class SettingsWriter
 
     private:
         std::basic_ostream<Pt::Char>* _os;
-        std::basic_istream<Pt::Char>* _is;
         size_t _indent;
 };
 

@@ -93,7 +93,7 @@ void SettingsTest::LoadSaveSerializable()
 
     std::ostringstream ss;
     Pt::Text::TextOStream ts(ss, new Pt::Text::Utf8Codec);
-    settings.save(&ts);
+    settings.save(ts);
 
     Pt::Date date2(2000, 1, 1);
     settings.getObject(date2, "myDate");
@@ -113,7 +113,7 @@ void SettingsTest::Comment()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT("1#;2" == settings.getValue<std::string>("a") );
     PT_UNIT_ASSERT(2 == settings.getValue<int>("b") );
@@ -127,7 +127,7 @@ void SettingsTest::ArrayOfArrays()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(2 == settings.getMember("a").memberCount() );
     PT_UNIT_ASSERT(2 == settings.getMember("b").memberCount() );
@@ -142,7 +142,7 @@ void SettingsTest::SimpleValue()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
     PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
@@ -156,7 +156,7 @@ void SettingsTest::SimpleTypedValue()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
     PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
@@ -170,7 +170,7 @@ void SettingsTest::SimpleQoutedValue()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("a") );
     PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("b") );
@@ -184,7 +184,7 @@ void SettingsTest::SimpleArray()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 }
 
 void SettingsTest::SimpleNamedArray()
@@ -195,7 +195,7 @@ void SettingsTest::SimpleNamedArray()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 }
 
 void SettingsTest::SimpleQoutedArray()
@@ -206,7 +206,7 @@ void SettingsTest::SimpleQoutedArray()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 }
 
 void SettingsTest::SimpleTypedArray()
@@ -217,7 +217,7 @@ void SettingsTest::SimpleTypedArray()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 }
 
 void SettingsTest::SimpleArrayQoutedTypedValues()
@@ -228,7 +228,7 @@ void SettingsTest::SimpleArrayQoutedTypedValues()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 }
 
 void SettingsTest::ComplexType()
@@ -239,7 +239,7 @@ void SettingsTest::ComplexType()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
     PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
@@ -253,7 +253,7 @@ void SettingsTest::ComplexTypeNamedQoutedValues()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
     PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
@@ -267,7 +267,7 @@ void SettingsTest::ComplexNamedType()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
     PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
@@ -282,7 +282,7 @@ void SettingsTest::Section()
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
-    settings.load(&ts);
+    settings.load(ts);
 
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "1");

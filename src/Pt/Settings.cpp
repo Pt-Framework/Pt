@@ -34,16 +34,16 @@ Settings::Settings()
 {}
 
 
-void Settings::load(std::basic_istream<Pt::Char>* is)
+void Settings::load(std::basic_istream<Pt::Char>& is)
 {
-    SettingsReader reader(*is);
+    SettingsReader reader(is);
     reader.parse(*this);
 }
 
 
-void Settings::save(std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is ) const
+void Settings::save(std::basic_ostream<Pt::Char>& os ) const
 {
-    SettingsWriter writer(os,is);
+    SettingsWriter writer(os);
     writer.write(*this);
 }
 

@@ -46,9 +46,9 @@ class PT_API Settings : public SerializationInfo
     public:
         Settings();
 
-        void load( std::basic_istream<Pt::Char>* is );
+        void load( std::basic_istream<Pt::Char>& is );
 
-        void save( std::basic_ostream<Pt::Char>* os, std::basic_istream<Pt::Char>* is = 0 ) const;
+        void save( std::basic_ostream<Pt::Char>& os ) const;
 
         // TODO getSerializable
         template <typename T>

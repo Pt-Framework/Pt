@@ -54,14 +54,6 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
     SerializationInfo::ConstIterator it;
     for(it = sd.begin(); it != sd.end(); ++it)
     {
-        if( _is != 0 )
-        {
-            Pt::String line;
-
-            while( getline(*_is,line) && line[0] == ';')
-                *_os <<line<<std::endl;
-        }
-
         if( it->category() == SerializationInfo::Value )
         {
             *_os << Pt::String::widen( prefix ) << '.';
