@@ -38,6 +38,7 @@ SettingsReader::OnQoutedTypedValue SettingsReader::onQoutedTypedValue;
 SettingsReader::EndTypedValue SettingsReader::endTypedValue;
 SettingsReader::AfterValue SettingsReader::afterValue;
 
+
 SettingsReader::SettingsReader(std::basic_istream<Pt::Char>& is)
 : state(0)
 , _beforeComment(0)
@@ -77,11 +78,6 @@ void SettingsReader::parse(SerializationInfo& si)
 
 void SettingsReader::enterMember()
 {
-    //std::cerr << std::endl;
-    //for(unsigned n = 0; n < _depth; ++n)
-    //    std::cerr << "   ";
-    //std::cerr << "+" << _token.narrow() << std::endl;
-
     //
     // Consider namespace at top-level. For example a.b.c means c
     // as a child of a.b. both are only added when not present.
@@ -152,30 +148,18 @@ void SettingsReader::leaveMember()
 
 void SettingsReader::pushValue()
 {
-    //for(unsigned n = 0; n < _depth; ++n)
-    //    std::cerr << "   ";
-    //std::cerr << "- value: " << _token.narrow() << std::endl;
-
     _current->setValue(_token);
     _token.clear();
 }
 
 void SettingsReader::pushTypeName()
 {
-    //for(unsigned n = 0; n < _depth; ++n)
-    //    std::cerr << "   ";
-    //std::cerr << "- type: " << _token.narrow() << std::endl;
-
     _current->setTypeName( _token.narrow() );
     _token.clear();
 }
 
 void SettingsReader::pushName()
 {
-    //for(unsigned n = 0; n < _depth; ++n)
-    //    std::cerr << "   ";
-    //std::cerr << "- name: " << _token.narrow() << std::endl;
-
     _current->setName( _token.narrow() );
     _token.clear();
 }
