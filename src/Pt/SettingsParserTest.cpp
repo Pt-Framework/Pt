@@ -35,6 +35,8 @@ class SettingsParserTest : public Pt::Unit::TestSuite
         SettingsParserTest()
         : Pt::Unit::TestSuite("SettingsParserTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "Comment", *this, &SettingsParserTest::Comment );
+
             Pt::Unit::TestSuite::registerMethod( "SimpleValue", *this, &SettingsParserTest::SimpleValue );
             Pt::Unit::TestSuite::registerMethod( "SimpleTypedValue", *this, &SettingsParserTest::SimpleTypedValue );
             Pt::Unit::TestSuite::registerMethod( "SimpleQoutedValue", *this, &SettingsParserTest::SimpleQoutedValue );
@@ -48,9 +50,13 @@ class SettingsParserTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "ComplexType", *this, &SettingsParserTest::ComplexType );
             Pt::Unit::TestSuite::registerMethod( "ComplexTypeNamedQoutedValues", *this, &SettingsParserTest::ComplexTypeNamedQoutedValues );
             Pt::Unit::TestSuite::registerMethod( "ComplexNamedType", *this, &SettingsParserTest::ComplexNamedType );
+
+            Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsParserTest::Section );
+            Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsParserTest::ArrayOfArrays );
         }
 
     protected:
+        void Comment();
         void SimpleValue();
         void SimpleTypedValue();
         void SimpleQoutedValue();
@@ -62,9 +68,54 @@ class SettingsParserTest : public Pt::Unit::TestSuite
         void ComplexNamedType();
         void ComplexType();
         void ComplexTypeNamedQoutedValues();
+        void Section();
+        void ArrayOfArrays();
 };
 
 Pt::Unit::RegisterTest<SettingsParserTest> register_SettingsTest;
+
+/*
+std::ifstream in("/home/marc/Desktop/maprenderer.settings");
+PT_UNIT_ASSERT(in)
+
+Pt::Text::TextIStream ts(in, new Pt::Text::Utf8Codec);
+
+Pt::SerializationInfo si;
+Pt::SettingsParser parser(ts);
+parser.parse(si);
+*/
+
+void SettingsParserTest::Comment()
+{
+    std::stringstream ss;
+    ss << ";first comment\n";
+    ss << "a = \"1#;2\"\n";
+    ss << "#second comment\n";
+    ss << "b = 2\n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+
+    PT_UNIT_ASSERT("1#;2" == si.getValue<std::string>("a") );
+    PT_UNIT_ASSERT(2 == si.getValue<int>("b") );
+}
+
+void SettingsParserTest::ArrayOfArrays()
+{
+    std::stringstream ss;
+    ss << "a={array{1,2,3},array{4,5,6}}\n";
+    ss << "b = { { 1 , 2 , 3 } , { 4 , 5 , 6 } }\n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+
+    PT_UNIT_ASSERT(2 == si.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(2 == si.getMember("b").memberCount() );
+}
 
 
 void SettingsParserTest::SimpleValue()
@@ -215,4 +266,21 @@ void SettingsParserTest::ComplexNamedType()
 
     PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
     PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
+}
+
+void SettingsParserTest::Section()
+{
+    std::stringstream ss;
+    ss << "[a.b.c]\n";
+    ss << "d.v = 1\n";
+    ss << "d.u = 2\n";
+    Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
+
+    Pt::SerializationInfo si;
+    Pt::SettingsParser parser(ts);
+    parser.parse(si);
+
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d") )
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("v") == "1")
+    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("u") == "2")
 }

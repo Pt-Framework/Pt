@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                      *
+ *   Copyright (C) 2005-2007 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -153,10 +153,10 @@ class SettingsParser
                     return this;
                 }
 
-                virtual State* onHash(Pt::Char c, SettingsParser&)
+                virtual State* onHash(Pt::Char c, SettingsParser& parser)
                 {
-                    throw std::runtime_error("parse error (comments not implemented)");
-                    return this;
+                    parser.beginComment(); // save current state
+                    return &onComment;
                 }
 
                 virtual State* onAlpha(Pt::Char c, SettingsParser&)
@@ -171,6 +171,22 @@ class SettingsParser
                     return this;
                 }
         };
+
+
+        static class OnComment : public State
+        {
+            public:
+                State* onChar(Pt::Char c, SettingsParser& parser)
+                {
+                    if( c == '\n' )
+                    {
+                        // restore state before comment
+                        return parser.endComment();
+                    }
+
+                    return this;
+                }
+        } onComment;
 
 
         static class BeginStatement : public State
@@ -194,9 +210,15 @@ class SettingsParser
                 return &onSection;
             }
 
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            {
+                parser.enterMember();
+                return &onCurly;
+            }
+
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
             {
-                parser.beginToken(c);
+                parser.buildToken(c);
                 return &beginType;
             }
 
@@ -216,7 +238,6 @@ class SettingsParser
 
             virtual State* onCloseSquareBrace(Pt::Char c, SettingsParser& parser)
             {
-                parser.reportSection();
                 return &beginStatement;
             }
 
@@ -259,6 +280,16 @@ class SettingsParser
                 return &beginTypedValue;
             }
 
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            {
+                if(parser.depth() == 0)
+                    throw std::runtime_error("expected '=' before '{'");
+
+                parser.pushTypeName();
+                parser.enterMember();
+                return &onCurly;
+            }
+
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
             {
                 parser.pushValue();
@@ -299,7 +330,6 @@ class SettingsParser
 
             virtual State* onQoute(Pt::Char c, SettingsParser& parser)
             {
-                parser.beginToken();
                 return &onQoutedValue;
             }
 
@@ -311,7 +341,7 @@ class SettingsParser
 
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
             {
-                parser.beginToken(c);
+                parser.buildToken(c);
                 return &onRValue;
             }
         } onEqual;
@@ -338,6 +368,12 @@ class SettingsParser
             }
 
             virtual State* onEqual(Pt::Char c, SettingsParser& parser)
+            {
+                parser.buildToken(c);
+                return this;
+            }
+
+            virtual State* onHash(Pt::Char c, SettingsParser& parser)
             {
                 parser.buildToken(c);
                 return this;
@@ -498,7 +534,7 @@ class SettingsParser
             {
                 parser.pushValue();
                 parser.leaveMember();
-                parser.beginToken(c);
+                parser.buildToken(c);
                 return &beginType;
             }
         } afterRValue;
@@ -530,7 +566,7 @@ class SettingsParser
 
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
             {
-                parser.beginToken(c);
+                parser.buildToken(c);
                 return &beginType;
             }
         } onCurly;
@@ -552,9 +588,12 @@ class SettingsParser
             virtual State* onComma(Pt::Char c, SettingsParser& parser)
             {
                 if(parser.depth() == 0)
-                    return &beginStatement;
+                {
+                    throw std::runtime_error("comma outside braces");
+                }
 
-                return &beginStatement; /// TODO: untested -> matix
+                parser.enterMember();
+                return &beginStatement;
             }
 
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
@@ -587,7 +626,7 @@ class SettingsParser
 
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
             {
-                parser.beginToken(c);
+                parser.buildToken(c);
                 return &onTypedValue;
             }
         } beginTypedValue;
@@ -627,7 +666,7 @@ class SettingsParser
         {
             virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
             {
-                throw std::runtime_error("parse error");
+                throw std::runtime_error("parse error at end of value");
                 return this;
             }
         } endTypedValue;
@@ -638,12 +677,6 @@ class SettingsParser
         void parse(SerializationInfo& si);
 
     protected:
-        void beginToken()
-        { _token.clear(); }
-
-        void beginToken(Pt::Char c)
-        { _token = c; }
-
         void buildToken(Pt::Char c)
         { _token += c; }
 
@@ -653,64 +686,29 @@ class SettingsParser
         void buildSection(Pt::Char c)
         { _section += c; }
 
-        void reportSection()
-        {}
-
         size_t depth() const
         { return _depth; }
 
-        void enterMember()
-        {
-            //std::cerr << std::endl;
-            //for(unsigned n = 0; n < _depth; ++n)
-            //    std::cerr << "   ";
-            //std::cerr << "+" << _token.narrow() << std::endl;
+        void enterMember();
 
-            _current = &( _current->addMember( _token.narrow() ) );
-            _token.clear();
-            ++_depth;
-        }
-        void leaveMember()
-        {
-            if(0 == _current->parent() )
-                throw std::runtime_error("parse error");
+        void leaveMember();
 
-            _current = _current->parent();
-            --_depth;
-        }
+        void pushValue();
 
-        void pushValue()
-        {
-            //for(unsigned n = 0; n < _depth; ++n)
-            //    std::cerr << "   ";
-            //std::cerr << "- value: " << _token.narrow() << std::endl;
+        void pushTypeName();
 
-            _current->setValue(_token);
-            _token.clear();
-        }
+        void pushName();
 
-        void pushTypeName()
-        {
-            //for(unsigned n = 0; n < _depth; ++n)
-            //    std::cerr << "   ";
-            //std::cerr << "- type: " << _token.narrow() << std::endl;
+        void beginComment()
+        { _beforeComment = state; }
 
-            _current->setTypeName( _token.narrow() );
-            _token.clear();
-        }
-
-        void pushName()
-        {
-            //for(unsigned n = 0; n < _depth; ++n)
-            //    std::cerr << "   ";
-            //std::cerr << "- name: " << _token.narrow() << std::endl;
-
-            _current->setName( _token.narrow() );
-            _token.clear();
-        }
+        State* endComment() const
+        { return _beforeComment; }
 
     private:
         State* state;
+
+        State* _beforeComment;
 
         SerializationInfo* _current;
 
@@ -719,6 +717,8 @@ class SettingsParser
         size_t _line;
 
         size_t _depth;
+
+        bool _isDotted;
 
         Pt::String _token;
 
