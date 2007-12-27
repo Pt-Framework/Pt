@@ -19,6 +19,7 @@
 #undef PT_API_EXPORT
 
 #include "Pt/Settings.h"
+#include "Pt/Date.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Unit/Assertion.h"
@@ -26,6 +27,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
+#include <sstream>
 
 class SettingsTest : public Pt::Unit::TestSuite
 {
@@ -51,6 +53,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsTest::Section );
             Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsTest::ArrayOfArrays );
+            Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
         }
 
     protected:
@@ -68,6 +71,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeNamedQoutedValues();
         void Section();
         void ArrayOfArrays();
+        void LoadSaveSerializable();
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
@@ -80,6 +84,24 @@ Pt::Text::TextIStream ts(in, new Pt::Text::Utf8Codec);
 Pt::Settings settings;
 settings.load(&ts);
 */
+
+void SettingsTest::LoadSaveSerializable()
+{
+    Pt::Date date(2001, 11, 15);
+    Pt::Settings settings;
+    settings.setObject(date, "myDate");
+
+    std::ostringstream ss;
+    Pt::Text::TextOStream ts(ss, new Pt::Text::Utf8Codec);
+    settings.save(&ts);
+
+    Pt::Date date2(2000, 1, 1);
+    settings.getObject(date2, "myDate");
+    PT_UNIT_ASSERT( date2.year() == 2001 );
+    PT_UNIT_ASSERT( date2.month() == 11 );
+    PT_UNIT_ASSERT( date2.day() == 15 );
+}
+
 
 void SettingsTest::Comment()
 {
