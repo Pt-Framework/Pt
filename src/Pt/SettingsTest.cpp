@@ -18,7 +18,6 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include "SettingsParser.h"
 #include "Pt/Settings.h"
 #include "Pt/Text/TextStream.h"
 #include "Pt/Text/Utf8Codec.h"
@@ -78,10 +77,8 @@ std::ifstream in("/home/marc/Desktop/maprenderer.settings");
 PT_UNIT_ASSERT(in)
 
 Pt::Text::TextIStream ts(in, new Pt::Text::Utf8Codec);
-
-Pt::SerializationInfo si;
-Pt::SettingsParser parser(ts);
-parser.parse(si);
+Pt::Settings settings;
+settings.load(&ts);
 */
 
 void SettingsTest::Comment()
@@ -107,12 +104,11 @@ void SettingsTest::ArrayOfArrays()
     ss << "b = { { 1 , 2 , 3 } , { 4 , 5 , 6 } }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(2 == si.getMember("a").memberCount() );
-    PT_UNIT_ASSERT(2 == si.getMember("b").memberCount() );
+    PT_UNIT_ASSERT(2 == settings.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(2 == settings.getMember("b").memberCount() );
 }
 
 
@@ -123,12 +119,11 @@ void SettingsTest::SimpleValue()
     ss << "b=6\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(5 == si.getValue<int>("a") );
-    PT_UNIT_ASSERT(6 == si.getValue<int>("b") );
+    PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
+    PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
 }
 
 void SettingsTest::SimpleTypedValue()
@@ -138,12 +133,11 @@ void SettingsTest::SimpleTypedValue()
     ss << "b = int(6)\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(5 == si.getValue<int>("a") );
-    PT_UNIT_ASSERT(6 == si.getValue<int>("b") );
+    PT_UNIT_ASSERT(5 == settings.getValue<int>("a") );
+    PT_UNIT_ASSERT(6 == settings.getValue<int>("b") );
 }
 
 void SettingsTest::SimpleQoutedValue()
@@ -153,12 +147,11 @@ void SettingsTest::SimpleQoutedValue()
     ss << "b = \"a b c\"\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT("a b c" == si.getValue<std::string>("a") );
-    PT_UNIT_ASSERT("a b c" == si.getValue<std::string>("b") );
+    PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("a") );
+    PT_UNIT_ASSERT("a b c" == settings.getValue<std::string>("b") );
 }
 
 void SettingsTest::SimpleArray()
@@ -168,9 +161,8 @@ void SettingsTest::SimpleArray()
     ss << "b = { 4 , 5 , 6 } \n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 }
 
 void SettingsTest::SimpleNamedArray()
@@ -180,9 +172,8 @@ void SettingsTest::SimpleNamedArray()
     ss << "b = array { 4 , 5 , 6 } \n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 }
 
 void SettingsTest::SimpleQoutedArray()
@@ -192,9 +183,8 @@ void SettingsTest::SimpleQoutedArray()
     ss << "b = { \"4\" , \"5\" , \"6\" } \n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 }
 
 void SettingsTest::SimpleTypedArray()
@@ -204,9 +194,8 @@ void SettingsTest::SimpleTypedArray()
     ss << "b = { int( 4 ) , int( 5 ) , int( 6 ) }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 }
 
 void SettingsTest::SimpleArrayQoutedTypedValues()
@@ -216,9 +205,8 @@ void SettingsTest::SimpleArrayQoutedTypedValues()
     ss << "b = { int( \"4\" ) , int( \"5\" ) , int( \"6\" ) }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 }
 
 void SettingsTest::ComplexType()
@@ -228,12 +216,11 @@ void SettingsTest::ComplexType()
     ss << "b = { red = 4 , green = 5 , blue = 6 }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
-    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
+    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
 }
 
 void SettingsTest::ComplexTypeNamedQoutedValues()
@@ -243,12 +230,11 @@ void SettingsTest::ComplexTypeNamedQoutedValues()
     ss << "b = { red = \"4\" , green = \"5\" , blue = \"6\" }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
-    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
+    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
 }
 
 void SettingsTest::ComplexNamedType()
@@ -258,12 +244,11 @@ void SettingsTest::ComplexNamedType()
     ss << "b = Color { red = int ( 4 ) , green = int ( 5 ) , blue = int ( 6 ) }\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT(3 == si.getMember("a").memberCount() )
-    PT_UNIT_ASSERT(3 ==  si.getMember("b").memberCount() )
+    PT_UNIT_ASSERT(3 == settings.getMember("a").memberCount() );
+    PT_UNIT_ASSERT(3 ==  settings.getMember("b").memberCount() );
 }
 
 void SettingsTest::Section()
@@ -274,11 +259,10 @@ void SettingsTest::Section()
     ss << "d.u = 2\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
-    Pt::SerializationInfo si;
-    Pt::SettingsParser parser(ts);
-    parser.parse(si);
+    Pt::Settings settings;
+    settings.load(&ts);
 
-    PT_UNIT_ASSERT( si.findMember("a.b.c.d") )
-    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("v") == "1")
-    PT_UNIT_ASSERT( si.findMember("a.b.c.d")->getValue<std::string>("u") == "2")
+    PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
+    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "1");
+    PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "2");
 }

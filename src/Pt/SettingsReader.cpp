@@ -16,29 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "SettingsParser.h"
+#include "SettingsReader.h"
 
 namespace Pt {
 
-SettingsParser::OnComment SettingsParser::onComment;
-SettingsParser::BeginStatement SettingsParser::beginStatement;
-SettingsParser::OnSection SettingsParser::onSection;
-SettingsParser::BeginType SettingsParser::beginType;
-SettingsParser::AfterName SettingsParser::afterName;
-SettingsParser::OnEqual SettingsParser::onEqual;
-SettingsParser::OnCurly SettingsParser::onCurly;
-SettingsParser::OnCloseCurly SettingsParser::onCloseCurly;
-SettingsParser::OnQoutedValue SettingsParser::onQoutedValue;
-SettingsParser::AfterQoutedValue SettingsParser::afterQoutedValue;
-SettingsParser::OnRValue SettingsParser::onRValue;
-SettingsParser::AfterRValue SettingsParser::afterRValue;
-SettingsParser::BeginTypedValue SettingsParser::beginTypedValue;
-SettingsParser::OnTypedValue SettingsParser::onTypedValue;
-SettingsParser::OnQoutedTypedValue SettingsParser::onQoutedTypedValue;
-SettingsParser::EndTypedValue SettingsParser::endTypedValue;
-SettingsParser::AfterValue SettingsParser::afterValue;
+SettingsReader::OnComment SettingsReader::onComment;
+SettingsReader::BeginStatement SettingsReader::beginStatement;
+SettingsReader::OnSection SettingsReader::onSection;
+SettingsReader::BeginType SettingsReader::beginType;
+SettingsReader::AfterName SettingsReader::afterName;
+SettingsReader::OnEqual SettingsReader::onEqual;
+SettingsReader::OnCurly SettingsReader::onCurly;
+SettingsReader::OnCloseCurly SettingsReader::onCloseCurly;
+SettingsReader::OnQoutedValue SettingsReader::onQoutedValue;
+SettingsReader::AfterQoutedValue SettingsReader::afterQoutedValue;
+SettingsReader::OnRValue SettingsReader::onRValue;
+SettingsReader::AfterRValue SettingsReader::afterRValue;
+SettingsReader::BeginTypedValue SettingsReader::beginTypedValue;
+SettingsReader::OnTypedValue SettingsReader::onTypedValue;
+SettingsReader::OnQoutedTypedValue SettingsReader::onQoutedTypedValue;
+SettingsReader::EndTypedValue SettingsReader::endTypedValue;
+SettingsReader::AfterValue SettingsReader::afterValue;
 
-SettingsParser::SettingsParser(std::basic_istream<Pt::Char>& is)
+SettingsReader::SettingsReader(std::basic_istream<Pt::Char>& is)
 : state(0)
 , _beforeComment(0)
 , _current(0)
@@ -49,7 +49,7 @@ SettingsParser::SettingsParser(std::basic_istream<Pt::Char>& is)
 { }
 
 
-void SettingsParser::parse(SerializationInfo& si)
+void SettingsReader::parse(SerializationInfo& si)
 {
     _current = &si;
     state = &beginStatement;
@@ -75,7 +75,7 @@ void SettingsParser::parse(SerializationInfo& si)
     state->onChar( std::char_traits<char>::eof(), *this );
 }
 
-void SettingsParser::enterMember()
+void SettingsReader::enterMember()
 {
     //std::cerr << std::endl;
     //for(unsigned n = 0; n < _depth; ++n)
@@ -131,7 +131,7 @@ void SettingsParser::enterMember()
     _token.clear();
 }
 
-void SettingsParser::leaveMember()
+void SettingsReader::leaveMember()
 {
     //std::cerr << "@" << std::endl;
 
@@ -150,7 +150,7 @@ void SettingsParser::leaveMember()
     }
 }
 
-void SettingsParser::pushValue()
+void SettingsReader::pushValue()
 {
     //for(unsigned n = 0; n < _depth; ++n)
     //    std::cerr << "   ";
@@ -160,7 +160,7 @@ void SettingsParser::pushValue()
     _token.clear();
 }
 
-void SettingsParser::pushTypeName()
+void SettingsReader::pushTypeName()
 {
     //for(unsigned n = 0; n < _depth; ++n)
     //    std::cerr << "   ";
@@ -170,7 +170,7 @@ void SettingsParser::pushTypeName()
     _token.clear();
 }
 
-void SettingsParser::pushName()
+void SettingsReader::pushName()
 {
     //for(unsigned n = 0; n < _depth; ++n)
     //    std::cerr << "   ";

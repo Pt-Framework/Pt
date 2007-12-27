@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "Pt/Settings.h"
-#include "SettingsParser.h"
+#include "SettingsReader.h"
 #include "SettingsWriter.h"
 
 namespace Pt {
@@ -36,7 +36,7 @@ Settings::Settings()
 
 void Settings::load(std::basic_istream<Pt::Char>* is)
 {
-    SettingsParser reader(*is);
+    SettingsReader reader(*is);
     reader.parse(*this);
 }
 

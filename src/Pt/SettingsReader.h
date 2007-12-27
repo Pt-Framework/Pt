@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_SettingsParser_h
-#define Pt_SettingsParser_h
+#ifndef Pt_SettingsReader_h
+#define Pt_SettingsReader_h
 
 #include "Pt/Api.h"
 #include "Pt/Char.h"
@@ -27,17 +27,17 @@
 
 namespace Pt {
 
-class SettingsParser
+class SettingsReader
 {
     public:
         class State
         {
             public:
-                virtual State* onChar(Pt::Char c, SettingsParser& parser)
+                virtual State* onChar(Pt::Char c, SettingsReader& reader)
                 {
                     if( c == std::char_traits<Pt::Char>::to_char_type( std::char_traits<Pt::Char>::eof() ) )
                     {
-                            return this->onEof(c, parser);
+                            return this->onEof(c, reader);
                     }
 
                     switch( c.value() )
@@ -46,41 +46,41 @@ class SettingsParser
                             case ' ':
                             case '\t':
                             case '\r':
-                                return this->onSpace(c, parser);
+                                return this->onSpace(c, reader);
 
                             case '"':
-                                return this->onQoute(c, parser);
+                                return this->onQoute(c, reader);
 
                             case ',':
-                                return this->onComma(c, parser);
+                                return this->onComma(c, reader);
 
                             case '=':
-                                return this->onEqual(c, parser);
+                                return this->onEqual(c, reader);
 
                             case '#':
                             case ';':
-                                return this->onHash(c, parser);
+                                return this->onHash(c, reader);
 
                             case '{':
-                                return this->onOpenCurlyBrace(c, parser);
+                                return this->onOpenCurlyBrace(c, reader);
 
                             case '}':
-                                return this->onCloseCurlyBrace(c, parser);
+                                return this->onCloseCurlyBrace(c, reader);
 
                             case '(':
-                                return this->onOpenBrace(c, parser);
+                                return this->onOpenBrace(c, reader);
 
                             case ')':
-                                return this->onCloseBrace(c, parser);
+                                return this->onCloseBrace(c, reader);
 
                             case '[':
-                                return this->onOpenSquareBrace(c, parser);
+                                return this->onOpenSquareBrace(c, reader);
 
                             case ']':
-                                return this->onCloseSquareBrace(c, parser);
+                                return this->onCloseSquareBrace(c, reader);
 
                             default:
-                                return this->onAlpha(c, parser);
+                                return this->onAlpha(c, reader);
                     }
 
                     throw std::runtime_error( "Unexpected token" );
@@ -91,79 +91,79 @@ class SettingsParser
                 {}
 
             private:
-                virtual State* onSpace(Pt::Char c, SettingsParser&)
+                virtual State* onSpace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error space");
                     return this;
                 }
 
-                virtual State* onQoute(Pt::Char c, SettingsParser&)
+                virtual State* onQoute(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error \"");
                     return this;
                 }
 
-                virtual State* onComma(Pt::Char c, SettingsParser&)
+                virtual State* onComma(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error ,");
                     return this;
                 }
 
-                virtual State* onEqual(Pt::Char c, SettingsParser&)
+                virtual State* onEqual(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error =");
                     return this;
                 }
 
-                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser&)
+                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error {");
                     return this;
                 }
 
-                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser&)
+                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error }");
                     return this;
                 }
 
-                virtual State* onOpenBrace(Pt::Char c, SettingsParser&)
+                virtual State* onOpenBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error (");
                     return this;
                 }
 
-                virtual State* onCloseBrace(Pt::Char c, SettingsParser&)
+                virtual State* onCloseBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error )");
                     return this;
                 }
 
-                virtual State* onOpenSquareBrace(Pt::Char c, SettingsParser&)
+                virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error [");
                     return this;
                 }
 
-                virtual State* onCloseSquareBrace(Pt::Char c, SettingsParser&)
+                virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error ]");
                     return this;
                 }
 
-                virtual State* onHash(Pt::Char c, SettingsParser& parser)
+                virtual State* onHash(Pt::Char c, SettingsReader& reader)
                 {
-                    parser.beginComment(); // save current state
+                    reader.beginComment(); // save current state
                     return &onComment;
                 }
 
-                virtual State* onAlpha(Pt::Char c, SettingsParser&)
+                virtual State* onAlpha(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error alpha");
                     return this;
                 }
 
-                virtual State* onEof(Pt::Char c, SettingsParser&)
+                virtual State* onEof(Pt::Char c, SettingsReader&)
                 {
                     throw std::runtime_error("parse error EOF");
                     return this;
@@ -174,12 +174,12 @@ class SettingsParser
         static class OnComment : public State
         {
             public:
-                State* onChar(Pt::Char c, SettingsParser& parser)
+                State* onChar(Pt::Char c, SettingsReader& reader)
                 {
                     if( c == '\n' )
                     {
                         // restore state before comment
-                        return parser.endComment();
+                        return reader.endComment();
                     }
 
                     return this;
@@ -189,38 +189,38 @@ class SettingsParser
 
         static class BeginStatement : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() == 0)
+                if(reader.depth() == 0)
                     throw std::runtime_error("unexpected ','");
 
                 return &onQoutedValue;
             }
 
-            virtual State* onOpenSquareBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.beginSection();
+                reader.beginSection();
                 return &onSection;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.enterMember();
+                reader.enterMember();
                 return &onCurly;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return &beginType;
             }
 
-            virtual State* onEof(Pt::Char c, SettingsParser& parser)
+            virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
@@ -229,19 +229,19 @@ class SettingsParser
 
         static class OnSection : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onCloseSquareBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
             {
                 return &beginStatement;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildSection(c);
+                reader.buildSection(c);
                 return this;
             }
         } onSection;
@@ -249,56 +249,56 @@ class SettingsParser
 
         static class BeginType : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return &afterName;
             }
 
-            virtual State* onEqual(Pt::Char c, SettingsParser& parser)
+            virtual State* onEqual(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() == 0)
-                    parser.enterMember();
+                if(reader.depth() == 0)
+                    reader.enterMember();
                 else
-                    parser.pushName();
+                    reader.pushName();
 
-                return &SettingsParser::onEqual;
+                return &SettingsReader::onEqual;
             }
 
-            virtual State* onComma(Pt::Char c, SettingsParser& parser)
+            virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
-                parser.enterMember();
+                reader.pushValue();
+                reader.leaveMember();
+                reader.enterMember();
                 return &beginStatement;
             }
 
-            virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushTypeName();
+                reader.pushTypeName();
                 return &beginTypedValue;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() == 0)
+                if(reader.depth() == 0)
                     throw std::runtime_error("expected '=' before '{'");
 
-                parser.pushTypeName();
-                parser.enterMember();
+                reader.pushTypeName();
+                reader.enterMember();
                 return &onCurly;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
-                parser.leaveMember();
+                reader.pushValue();
+                reader.leaveMember();
+                reader.leaveMember();
                 return &onCloseCurly;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
         } beginType;
@@ -306,12 +306,12 @@ class SettingsParser
 
         static class AfterName : public BeginType
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 throw std::runtime_error("parse error after name");
                 return this;
@@ -321,25 +321,25 @@ class SettingsParser
 
         static class OnEqual : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 return &onQoutedValue;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.enterMember();
+                reader.enterMember();
                 return &onCurly;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return &onRValue;
             }
         } onEqual;
@@ -347,75 +347,75 @@ class SettingsParser
 
         static class OnQoutedValue : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
+                reader.pushValue();
                 return &afterQoutedValue;
             }
 
-            virtual State* onComma(Pt::Char c, SettingsParser& parser)
+            virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onEqual(Pt::Char c, SettingsParser& parser)
+            virtual State* onEqual(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onHash(Pt::Char c, SettingsParser& parser)
+            virtual State* onHash(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onCloseBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onOpenSquareBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onCloseSquareBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
         } onQoutedValue;
@@ -423,35 +423,35 @@ class SettingsParser
 
         static class AfterValue : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onComma(Pt::Char c, SettingsParser& parser)
+            virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
-                parser.leaveMember();
-                parser.enterMember();
+                reader.leaveMember();
+                reader.enterMember();
                 return &beginStatement;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.leaveMember();
-                parser.leaveMember();
+                reader.leaveMember();
+                reader.leaveMember();
                 return &onCloseCurly;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.leaveMember();
-                parser.buildToken(c);
+                reader.leaveMember();
+                reader.buildToken(c);
                 return &beginType;
             }
 
-            virtual State* onEof(Pt::Char c, SettingsParser& parser)
+            virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() > 1)
+                if(reader.depth() > 1)
                     throw std::runtime_error("unexpected EOF");
 
                 return this;
@@ -461,7 +461,7 @@ class SettingsParser
 
         static class AfterQoutedValue : public AfterValue
         {
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 /// TODO: multi-line strings
                 return this;
@@ -472,50 +472,50 @@ class SettingsParser
 
         static class OnRValue : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return &afterRValue;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushTypeName();
-                parser.enterMember();
+                reader.pushTypeName();
+                reader.enterMember();
                 return &onCurly;
             }
 
-            virtual State* onOpenBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushTypeName();
+                reader.pushTypeName();
                 return &beginTypedValue;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
-                parser.leaveMember();
+                reader.pushValue();
+                reader.leaveMember();
+                reader.leaveMember();
                 return &onCloseCurly;
             }
 
-            virtual State* onComma(Pt::Char c, SettingsParser& parser)
+            virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
-                parser.enterMember();
+                reader.pushValue();
+                reader.leaveMember();
+                reader.enterMember();
                 return &beginStatement;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
 
-            virtual State* onEof(Pt::Char c, SettingsParser& parser)
+            virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
+                reader.pushValue();
+                reader.leaveMember();
                 return &beginStatement;
             }
         } onRValue;
@@ -523,16 +523,16 @@ class SettingsParser
 
         static class AfterRValue : public OnRValue
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
-                parser.leaveMember();
-                parser.buildToken(c);
+                reader.pushValue();
+                reader.leaveMember();
+                reader.buildToken(c);
                 return &beginType;
             }
         } afterRValue;
@@ -540,31 +540,31 @@ class SettingsParser
 
         static class OnCurly : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.enterMember();
+                reader.enterMember();
                 return &onCurly;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.leaveMember();
+                reader.leaveMember();
                 return &onCloseCurly;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 return &onQoutedValue;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return &beginType;
             }
         } onCurly;
@@ -572,37 +572,37 @@ class SettingsParser
 
         static class OnCloseCurly : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.leaveMember();
+                reader.leaveMember();
                 return this;
             }
 
-            virtual State* onComma(Pt::Char c, SettingsParser& parser)
+            virtual State* onComma(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() == 0)
+                if(reader.depth() == 0)
                 {
                     throw std::runtime_error("comma outside braces");
                 }
 
-                parser.enterMember();
+                reader.enterMember();
                 return &beginStatement;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return &beginType;
             }
 
-            virtual State* onEof(Pt::Char c, SettingsParser& parser)
+            virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
-                if(parser.depth() != 0)
+                if(reader.depth() != 0)
                     throw std::runtime_error("missing closing curly brace");
 
                 return this;
@@ -612,19 +612,19 @@ class SettingsParser
 
         static class BeginTypedValue : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
             }
 
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 return &onQoutedTypedValue;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return &onTypedValue;
             }
         } beginTypedValue;
@@ -632,20 +632,20 @@ class SettingsParser
 
         static class OnTypedValue : public State
         {
-            virtual State* onSpace(Pt::Char c, SettingsParser& parser)
+            virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return &endTypedValue;
             }
 
-            virtual State* onCloseBrace(Pt::Char c, SettingsParser& parser)
+            virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
             {
-                parser.pushValue();
+                reader.pushValue();
                 return &afterValue;
             }
 
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                parser.buildToken(c);
+                reader.buildToken(c);
                 return this;
             }
         } onTypedValue;
@@ -653,7 +653,7 @@ class SettingsParser
 
         static class OnQoutedTypedValue : public OnQoutedValue
         {
-            virtual State* onQoute(Pt::Char c, SettingsParser& parser)
+            virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 return &endTypedValue;
             }
@@ -662,7 +662,7 @@ class SettingsParser
 
         static class EndTypedValue : public OnTypedValue
         {
-            virtual State* onAlpha(Pt::Char c, SettingsParser& parser)
+            virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
                 throw std::runtime_error("parse error at end of value");
                 return this;
@@ -670,7 +670,7 @@ class SettingsParser
         } endTypedValue;
 
     public:
-        SettingsParser(std::basic_istream<Pt::Char>& is);
+        SettingsReader(std::basic_istream<Pt::Char>& is);
 
         void parse(SerializationInfo& si);
 
