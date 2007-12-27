@@ -132,7 +132,7 @@ void SettingsReader::leaveMember()
     //std::cerr << "@" << std::endl;
 
     if(0 == _current->parent() )
-        throw std::runtime_error("parse error too many closing braces");
+        throw SettingsError("too many closing braces", _line);
 
     _current = _current->parent();
     --_depth;

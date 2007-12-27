@@ -21,6 +21,7 @@
 
 #include "Pt/Api.h"
 #include "Pt/Char.h"
+#include "Pt/Settings.h"
 #include "Pt/SerializationInfo.h"
 #include <iostream>
 #include <cctype>
@@ -83,7 +84,7 @@ class SettingsReader
                                 return this->onAlpha(c, reader);
                     }
 
-                    throw std::runtime_error( "Unexpected token" );
+                    throw SettingsError( "Unexpected token", reader.line() );
                     return 0;
                 }
 
@@ -91,63 +92,63 @@ class SettingsReader
                 {}
 
             private:
-                virtual State* onSpace(Pt::Char c, SettingsReader&)
+                virtual State* onSpace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error space");
+                    throw SettingsError("unexpected whitespace", reader.line() );
                     return this;
                 }
 
-                virtual State* onQoute(Pt::Char c, SettingsReader&)
+                virtual State* onQoute(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error \"");
+                    throw SettingsError("unexpected token '\"'", reader.line() );
                     return this;
                 }
 
-                virtual State* onComma(Pt::Char c, SettingsReader&)
+                virtual State* onComma(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error ,");
+                    throw SettingsError("unexpected token ','", reader.line() );
                     return this;
                 }
 
-                virtual State* onEqual(Pt::Char c, SettingsReader&)
+                virtual State* onEqual(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error =");
+                    throw SettingsError("unexpected token '='", reader.line() );
                     return this;
                 }
 
-                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader&)
+                virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error {");
+                    throw SettingsError("unexpected token '{'", reader.line() );
                     return this;
                 }
 
-                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader&)
+                virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error }");
+                    throw SettingsError("unexpected token '}'", reader.line() );
                     return this;
                 }
 
-                virtual State* onOpenBrace(Pt::Char c, SettingsReader&)
+                virtual State* onOpenBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error (");
+                    throw SettingsError("unexpected token '('", reader.line() );
                     return this;
                 }
 
-                virtual State* onCloseBrace(Pt::Char c, SettingsReader&)
+                virtual State* onCloseBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error )");
+                    throw SettingsError("unexpected token ')'", reader.line() );
                     return this;
                 }
 
-                virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader&)
+                virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error [");
+                    throw SettingsError("unexpected token '['", reader.line() );
                     return this;
                 }
 
-                virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader&)
+                virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error ]");
+                    throw SettingsError("unexpected token ']'", reader.line() );
                     return this;
                 }
 
@@ -157,15 +158,15 @@ class SettingsReader
                     return &onComment;
                 }
 
-                virtual State* onAlpha(Pt::Char c, SettingsReader&)
+                virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error alpha");
+                    throw SettingsError("unexpected character", reader.line() );
                     return this;
                 }
 
-                virtual State* onEof(Pt::Char c, SettingsReader&)
+                virtual State* onEof(Pt::Char c, SettingsReader& reader)
                 {
-                    throw std::runtime_error("parse error EOF");
+                    throw SettingsError("unexpected EOF", reader.line() );
                     return this;
                 }
         };
@@ -197,7 +198,7 @@ class SettingsReader
             virtual State* onQoute(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    throw std::runtime_error("unexpected ','");
+                    throw SettingsError("unexpected token ','", reader.line() );
 
                 return &onQoutedValue;
             }
@@ -281,7 +282,7 @@ class SettingsReader
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
-                    throw std::runtime_error("expected '=' before '{'");
+                    throw SettingsError("unexpected token '{'", reader.line() );
 
                 reader.pushTypeName();
                 reader.enterMember();
@@ -313,7 +314,7 @@ class SettingsReader
 
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                throw std::runtime_error("parse error after name");
+                throw SettingsError("unexpected token", reader.line() );
                 return this;
             }
         } afterName;
@@ -452,7 +453,7 @@ class SettingsReader
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() > 1)
-                    throw std::runtime_error("unexpected EOF");
+                    throw SettingsError("unexpected EOF", reader.line() );
 
                 return this;
             }
@@ -587,7 +588,7 @@ class SettingsReader
             {
                 if(reader.depth() == 0)
                 {
-                    throw std::runtime_error("comma outside braces");
+                    throw SettingsError("unexpected token ','", reader.line() );
                 }
 
                 reader.enterMember();
@@ -603,7 +604,7 @@ class SettingsReader
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() != 0)
-                    throw std::runtime_error("missing closing curly brace");
+                    throw SettingsError("unexpected EOF", reader.line() );
 
                 return this;
             }
@@ -664,7 +665,7 @@ class SettingsReader
         {
             virtual State* onAlpha(Pt::Char c, SettingsReader& reader)
             {
-                throw std::runtime_error("parse error at end of value");
+                throw SettingsError("unexpected token", reader.line() );
                 return this;
             }
         } endTypedValue;
@@ -686,6 +687,9 @@ class SettingsReader
 
         size_t depth() const
         { return _depth; }
+
+        size_t line() const
+        { return _line; }
 
         void enterMember();
 
