@@ -23,7 +23,7 @@
 #define PT_DB_SQLITE_STATEMENT_H
 
 #include <Pt/Db/IStatement.h>
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/SmartPtr.h>
 #include "sqlite3.h"
 

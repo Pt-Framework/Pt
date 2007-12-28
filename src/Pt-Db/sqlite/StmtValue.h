@@ -24,7 +24,7 @@
 
 #include "Statement.h"
 
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Db/IValue.h>
 

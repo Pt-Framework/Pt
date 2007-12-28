@@ -24,7 +24,7 @@
 
 #include <Pt/Db/Api.h>
 #include <Pt/Db/IValue.h>
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>

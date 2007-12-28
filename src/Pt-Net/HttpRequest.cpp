@@ -324,34 +324,20 @@ void HttpRequest::receive(Pt::Net::TcpSocket& connection)
         }
     }
 
-    // read binary data.
-    if (0 < availableBytes)
+    _body.clear();
+    _body.reserve( availableBytes );
+
+    if(availableBytes == 0)
+        return;
+
+    // read from the network as long as pending data are available.
+    char buf[4096];
+    size_t totalSize = 0;
+    while( 0 < connection.availableBytes() )
     {
-        // read from the network as long as pending data are available.
-        std::vector<Pt::Blob> singleBuffers;
-        size_t totalBufferSize = 0;
-        while (0 < (availableBytes = connection.availableBytes()))
-        {
-            char* buffer = new char[availableBytes];
-            connection.read(buffer, availableBytes);
-            singleBuffers.push_back(Pt::Blob(buffer, availableBytes));
-            totalBufferSize += availableBytes;
-        }
-
-        // copy the single input buffers into one total buffer.
-        Pt::Blob totalBuffer(new char[totalBufferSize], totalBufferSize);
-        const char* currentBuffer = totalBuffer.data();
-        std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
-        while (singleBuffer != singleBuffers.end())
-        {
-            std::memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
-            currentBuffer += (*singleBuffer).size();
-            singleBuffer++;
-        }
-        singleBuffers.clear();
-
-        // the total buffer is the read body data.
-        _body = totalBuffer;
+        size_t readBytes = _connection.read(buf, 4096);
+        _body.append(buf, readBytes);
+        totalSize += readBytes;
     }
 }
 

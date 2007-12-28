@@ -21,7 +21,7 @@
 
 #include "ValueImpl.h"
 
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/Date.h>
 #include <Pt/Time.h>
 #include <Pt/DateTime.h>

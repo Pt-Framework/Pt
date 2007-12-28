@@ -23,7 +23,7 @@
 #define PT_DB_IVALUE_H
 
 #include <Pt/RefCounted.h>
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/Db/Api.h>
 #include <string>
 

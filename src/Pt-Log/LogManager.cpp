@@ -67,8 +67,7 @@ LogManager::LogManager()
     // initialise settings if .settings exist
     std::ifstream fs("Pt-Log.settings");
     Pt::Text::TextIStream ts(fs, new Pt::Text::Utf8Codec);
-    SettingsReader reader(ts);
-    reader.read(_settings);
+    _settings.load(ts);
     _settings.getObject( *_rootTarget, "" );
     _settings.getObject( *logTarget, "Pt-Log" );
 

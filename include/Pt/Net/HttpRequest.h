@@ -18,11 +18,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Net_HttpRequest_h
 #define Pt_Net_HttpRequest_h
 
-#include <Pt/Blob.h>
 #include <Pt/Types.h>
 #include <Pt/Net/Api.h>
 #include <Pt/Net/QueryParams.h>
@@ -86,7 +84,7 @@ namespace Net {
         header_type _header;
 
         /** Body data that are send in case of a POST request. */
-        Pt::Blob _body;
+        std::string _body;
 
         /**
          * @brief Sends a HTTP GET request.
@@ -274,7 +272,7 @@ namespace Net {
          *
          * @return The body data as binary data.
          */
-        const Pt::Blob getBody() const
+        const std::string& getBody() const
         {
             return _body;
         }
@@ -284,19 +282,9 @@ namespace Net {
          *
          * @param body The body data as binary data.
          */
-        void setBody(const Pt::Blob body)
-        {
-            _body = body;
-        }
-
-        /**
-         * @brief Sets the body data for a POST request.
-         *
-         * @param body The body data as string.
-         */
         void setBody(const std::string& body)
         {
-            _body.assign(body.data(), body.length());
+            _body = body;
         }
 
         /**

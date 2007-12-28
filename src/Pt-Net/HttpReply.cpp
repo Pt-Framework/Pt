@@ -18,8 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Blob.h"
 #include "Pt/Net/HttpReply.h"
 #include "Pt/Net/HttpRequest.h"
 #include <sstream>
@@ -339,40 +337,22 @@ void HttpReply::receive()
     }
 
     std::string value = getHeader("Content-Length", "0");
-    const size_t contentLength = std::atol(value.data());
-    size_t totalBufferSize = 0;
+    const size_t contentLength = std::atol( value.c_str() );
 
-    // read binary data.
-    if (totalBufferSize < contentLength)
+    _body.clear();
+    _body.reserve( contentLength );
+
+    if(contentLength <= 0 || availableBytes == 0)
+        return;
+
+    // read from the network as long as pending data are available.
+    char buf[4096];
+    size_t totalSize = 0;
+    while ( 0 < _connection.availableBytes() )
     {
-        // read from the network as long as pending data are available.
-        std::vector<Pt::Blob> singleBuffers;
-        while (totalBufferSize < contentLength)
-        {
-            // availableBytes = _connection.availableBytes();
-            if (0 < (availableBytes = _connection.availableBytes()))
-            {
-                char* buffer = new char[availableBytes];
-                _connection.read(buffer, availableBytes);
-                singleBuffers.push_back(Pt::Blob(buffer, availableBytes));
-                totalBufferSize += availableBytes;
-            }
-        }
-
-        // copy the single input buffers into one total buffer.
-        Pt::Blob totalBuffer(new char[totalBufferSize], totalBufferSize);
-        const char* currentBuffer = totalBuffer.data();
-        std::vector<Pt::Blob>::iterator singleBuffer = singleBuffers.begin();
-        while (singleBuffer != singleBuffers.end())
-        {
-            std::memcpy((void*) currentBuffer, (*singleBuffer).data(), (*singleBuffer).size());
-            currentBuffer += (*singleBuffer).size();
-            singleBuffer++;
-        }
-        singleBuffers.clear();
-
-        // the total buffer is the read body data.
-        _body = totalBuffer;
+        size_t readBytes = _connection.read(buf, 4096);
+        _body.append(buf, readBytes);
+        totalSize += readBytes;
     }
 }
 

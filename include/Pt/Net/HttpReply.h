@@ -136,7 +136,7 @@ namespace Net {
         StatusCode _returncode;
 
         /** The data of the HTTP response. */
-        Pt::Blob _body;
+        std::string _body;
 
     public:
         /* HTTP status codes: 1xx Informational. */
@@ -306,7 +306,7 @@ namespace Net {
          *
          * @param The body of the HTTP resonse as binary data.
          */
-        Pt::Blob getBody() const
+        const std::string& getBody() const
         {
             return _body;
         }
@@ -316,19 +316,9 @@ namespace Net {
          *
          * @param body The body data as binary data.
          */
-        void setBody(const Pt::Blob body)
-        {
-            _body = body;
-        }
-
-        /**
-         * @brief Sets the body data for a POST response.
-         *
-         * @param body The body data as string.
-         */
         void setBody(const std::string& body)
         {
-            _body.assign(body.data(), body.length());
+            _body = body;
         }
 
         /**

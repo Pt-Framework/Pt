@@ -18,13 +18,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_DB_VALUEIMPL_H
 #define PT_DB_VALUEIMPL_H
 
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <Pt/Db/IValue.h>
-//#include <Pt/Variant.h>
 
 
 namespace Pt {

@@ -24,7 +24,7 @@
 
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
-#include <Pt/Blob.h>
+#include <Pt/Db/Blob.h>
 #include <string>
 
 
