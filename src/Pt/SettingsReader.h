@@ -455,6 +455,7 @@ class SettingsReader
 
             virtual State* onEof(Pt::Char c, SettingsReader& reader)
             {
+                reader.leaveMember();
                 if(reader.depth() > 1)
                     throw SettingsError("unexpected EOF", reader.line() );
 
