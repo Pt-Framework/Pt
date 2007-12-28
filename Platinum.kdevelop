@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q</makeoptions>
+      <makeoptions> -q SettingsTest.unit SerializationTest.unit</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

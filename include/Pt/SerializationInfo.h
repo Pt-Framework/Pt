@@ -45,7 +45,7 @@ class PT_API SerializationError : public std::logic_error
 
 class PT_API SerializationInfo
 {
-    typedef std::vector<SerializationInfo*> Nodes;
+    typedef std::vector<SerializationInfo> Nodes;
 
     public:
         enum Category {
@@ -191,11 +191,11 @@ class PT_API SerializationInfo
         SerializationInfo* _parent;
         Category _category;
         std::string _name;
-        std::string _id;
-        mutable void* _fixupAddr;
         std::string _type;
-        Pt::String _value;
-        Nodes _nodes;
+        std::string _id;
+        mutable void* _fixupAddr; // only refs
+        Pt::String _value;        // values
+        Nodes _nodes;             // objects/arrays
 };
 
 
@@ -206,7 +206,7 @@ class PT_API SerializationInfo::Iterator
 
         Iterator(const Iterator& other);
 
-        Iterator(SerializationInfo** info);
+        Iterator(SerializationInfo* info);
 
         Iterator& operator=(const Iterator& other);
 
@@ -219,7 +219,7 @@ class PT_API SerializationInfo::Iterator
         bool operator!=(const Iterator& other) const;
 
     private:
-        SerializationInfo** _info;
+        SerializationInfo* _info;
 };
 
 
@@ -230,7 +230,7 @@ class PT_API SerializationInfo::ConstIterator
 
         ConstIterator(const ConstIterator& other);
 
-        ConstIterator(SerializationInfo* const* info);
+        ConstIterator(const SerializationInfo* info);
 
         ConstIterator& operator=(const ConstIterator& other);
 
@@ -243,7 +243,7 @@ class PT_API SerializationInfo::ConstIterator
         bool operator!=(const ConstIterator& other) const;
 
     private:
-        SerializationInfo* const* _info;
+        const SerializationInfo* _info;
 };
 
 

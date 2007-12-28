@@ -1,8 +1,6 @@
 #include <Pt/SerializationInfo.h>
 
-
 namespace Pt {
-
 
 SerializationError::SerializationError(const std::string& msg, const SourceInfo& si)
 : std::logic_error(msg + "'" + si)
@@ -15,6 +13,7 @@ SerializationError::~SerializationError() throw()
 SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)
+, _fixupAddr(0)
 {
     _nodes.reserve(10);
 }
@@ -23,8 +22,9 @@ SerializationInfo::SerializationInfo(const SerializationInfo& si)
 : _parent(0)
 , _category(si._category)
 , _name(si._name)
-, _id(si._id)
 , _type(si._type)
+, _id(si._id)
+, _fixupAddr(si._fixupAddr)
 , _value(si._value)
 , _nodes(si._nodes)
 {
@@ -39,7 +39,7 @@ SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
     _type = si._type;
     _value = si._value;
     _nodes = si._nodes;
-
+    _fixupAddr = si._fixupAddr;
     return *this;
 }
 
@@ -47,11 +47,13 @@ SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
 
 SerializationInfo::~SerializationInfo()
 {
-    Nodes::iterator it;
+///
+    /*Nodes::iterator it;
     for(it = _nodes.begin(); it != _nodes.end(); ++it)
     {
         delete *it;
-    }
+    }*/
+///
 }
 
 
@@ -146,13 +148,19 @@ const Pt::String& SerializationInfo::toString() const
 
 SerializationInfo& SerializationInfo::addMember(const std::string& name)
 {
-    SerializationInfo* info = new SerializationInfo();
-    info->setParent(*this);
-    info->setName(name);
+    ///SerializationInfo* info = new SerializationInfo();
+    ///info->setParent(*this);
+    ///info->setName(name);
+    ///_nodes.push_back( info );
+    SerializationInfo info;
     _nodes.push_back( info );
+    _nodes.back().setParent(*this);
+    _nodes.back().setName(name);
 
     _category = Object;
-    return *info;
+
+    ///return *info;
+    return _nodes.back();
 }
 
 
@@ -197,8 +205,8 @@ const SerializationInfo& SerializationInfo::getMember(const std::string& name) c
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name )
-            return **it;
+        if( it->name() == name )
+            return *it;
     }
 
     throw SerializationError("Missing info for '" + name + "'", PT_SOURCEINFO);
@@ -210,8 +218,8 @@ const SerializationInfo* SerializationInfo::findMember(const std::string& name) 
     Nodes::const_iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name )
-            return *it;
+        if( it->name() == name )
+            return &(*it);
     }
 
     return 0;
@@ -223,8 +231,8 @@ SerializationInfo* SerializationInfo::findMember(const std::string& name)
     Nodes::iterator it = _nodes.begin();
     for(; it != _nodes.end(); ++it)
     {
-        if( (*it)->name() == name )
-            return *it;
+        if( it->name() == name )
+            return &(*it);
     }
 
     return 0;
@@ -247,7 +255,7 @@ SerializationInfo::Iterator::Iterator(const Iterator& other)
 {}
 
 
-SerializationInfo::Iterator::Iterator(SerializationInfo** info)
+SerializationInfo::Iterator::Iterator(SerializationInfo* info)
 : _info(info)
 {}
 
@@ -268,13 +276,13 @@ SerializationInfo::Iterator& SerializationInfo::Iterator::operator++()
 
 SerializationInfo& SerializationInfo::Iterator::operator*()
 {
-    return **_info;
+    return *_info;
 }
 
 
 SerializationInfo* SerializationInfo::Iterator::operator->()
 {
-    return *_info;
+    return _info;
 }
 
 
@@ -294,7 +302,7 @@ SerializationInfo::ConstIterator::ConstIterator(const ConstIterator& other)
 {}
 
 
-SerializationInfo::ConstIterator::ConstIterator(SerializationInfo* const* info)
+SerializationInfo::ConstIterator::ConstIterator(const SerializationInfo* info)
 : _info(info)
 {}
 
@@ -315,12 +323,12 @@ SerializationInfo::ConstIterator& SerializationInfo::ConstIterator::operator++()
 
 const SerializationInfo& SerializationInfo::ConstIterator::operator*() const
 {
-    return **_info;
+    return *_info;
 }
 
 
 const SerializationInfo* SerializationInfo::ConstIterator::operator->() const
-{ return *_info; }
+{ return _info; }
 
 
 bool SerializationInfo::ConstIterator::operator!=(const ConstIterator& other) const
