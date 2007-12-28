@@ -71,8 +71,6 @@ LogManager::LogManager()
     _settings.getObject( *_rootTarget, "" );
     _settings.getObject( *logTarget, "Pt-Log" );
 
-    std::cerr << "LogLevel" << logTarget->logLevel() << std::endl;
-    std::cerr << _settings.getMember("Pt-Log").getValue<std::string>("channel") << std::endl;
     _logger->beginLog(PT_SOURCEINFO) << info << "Logging system initialized" << endlog;
 
     logger.release();
