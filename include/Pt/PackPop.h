@@ -18,11 +18,11 @@
  ***************************************************************************/
 
 #if defined __GNUC__
-    #if (__GNUC__ < 4)
-        #pragma pack()
-    #elif (__GNUC__ >=4)
-        #define PT_PACKED __attribute__ ((packed))
-    #endif
+    //#if (__GNUC__ < 4)
+    //    #pragma pack()
+    //#elif (__GNUC__ >=4)
+    //    #define PT_PACKED __attribute__ ((packed))
+    //#endif
 #elif defined(_MSC_VER)
     #pragma pack(pop)
 #elif defined(__INTEL_COMPILER)

@@ -17,14 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #if defined __GNUC__
-    #if (__GNUC__ < 4)
-        #pragma pack(1)
-        #ifndef PT_PACKED
-            #define PT_PACKED
-        #endif
-    #elif (__GNUC__ >=4)
-        #define PT_PACKED __attribute__ ((packed))
-    #endif
+    #define PT_PACKED __attribute__ ((packed))
 #elif defined (_MSC_VER)
     #pragma pack(push, 1)
     #ifndef PT_PACKED
