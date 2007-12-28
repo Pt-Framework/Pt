@@ -77,7 +77,7 @@ class IBlob : public RefCounted
         const char* data() const
         { return _data; }
 
-        /** qbrief Returns true if the two instances contain the same data
+        /** @brief Returns true if the two instances contain the same data
         */
         bool operator==(const IBlob& other) const
         {
