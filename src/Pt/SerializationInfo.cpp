@@ -14,9 +14,8 @@ SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)
 , _fixupAddr(0)
-{
-    _nodes.reserve(10);
-}
+{ }
+
 
 SerializationInfo::SerializationInfo(const SerializationInfo& si)
 : _parent(0)
@@ -30,6 +29,7 @@ SerializationInfo::SerializationInfo(const SerializationInfo& si)
 {
 }
 
+
 SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
 {
     // don't assign parent on purpose !!!
@@ -42,7 +42,6 @@ SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
     _fixupAddr = si._fixupAddr;
     return *this;
 }
-
 
 
 SerializationInfo::~SerializationInfo()
