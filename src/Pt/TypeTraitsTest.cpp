@@ -23,7 +23,6 @@
 #include <string>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
 
@@ -81,4 +80,4 @@ class TypeTraitsTest : public Pt::Unit::TestSuite
         }
 };
 
-Pt::Unit::RegisterTest<TypeTraitsTest> register_AtomicTestSuite;
+Pt::Unit::RegisterTest<TypeTraitsTest> register_TypeTraitsTest;

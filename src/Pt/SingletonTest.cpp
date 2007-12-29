@@ -22,7 +22,6 @@
 #include "Pt/Singleton.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
 
 #include <iostream>
@@ -58,5 +57,5 @@ class SingletonTest : public Pt::Unit::TestSuite
 
 };
 
-Pt::Unit::RegisterTest<SingletonTest> register_TypesTest;
+Pt::Unit::RegisterTest<SingletonTest> register_SingletonTest;
 

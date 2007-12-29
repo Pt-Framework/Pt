@@ -24,7 +24,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt/bin/SettingsParserTestd</mainprogram>
+      <mainprogram></mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q SettingsTest.unit SerializationTest.unit</makeoptions>
+      <makeoptions> -q Pt-all</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>
