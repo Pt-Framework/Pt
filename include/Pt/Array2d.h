@@ -34,7 +34,7 @@ namespace Pt {
  * @brief A dynamic two dimensional array.
  *
  */
-template <typename T>
+template <typename T, typename Allocator = std::allocator<T> >
 class Array2d
 {
 
@@ -64,7 +64,7 @@ public:
      *
      * @param rhs The Array2d object to be copied.
      */
-    Array2d(const Array2d& rhs)
+    Array2d(const Array2d<T, Allocator>& rhs)
     : m_height(rhs.height)
     , m_array(rhs.m_array)
     {
@@ -80,7 +80,7 @@ public:
      *
      * @param rhs The Array2d object to be copied.
      */
-    Array2d& operator=(const Array2d& rhs)
+    Array2d<T, Allocator>& operator=(const Array2d<T, Allocator>& rhs)
     {
         m_array = rhs.m_array;
         m_height = rhs.m_height;
@@ -195,7 +195,7 @@ public:
      *
      * @param other Reference to the Array2d object to exchange contents with.
      */
-    void swap(Array2d<T>& other)
+    void swap(Array2d<T, Allocator>& other)
     {
         m_array.swap(other.m_array);
         swap(m_height, other.m_height);
@@ -246,7 +246,7 @@ private:
     Pt::size_t m_height;
 
     /** @brief The two dimensional array stored as vector. */
-    std::vector<T> m_array;
+    std::vector<T, Allocator> m_array;
 
 
 };
