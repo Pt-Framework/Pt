@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007 by Tommi Maekitalo                                 *
- *   Copyright (C) 2007 by Marc Duerner                                    *
+ *   Copyright (C) 200-2008 by Marc Duerner                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -36,8 +36,7 @@ namespace Pt {
     IBlob::assign, IBlob::create and IBlob::destroy. The main purpose of these
     methods is to customize memory allocation of blob-data, aswell as the shared
     implementation class derived from IBlob. A default implementation, called
-    BlobData, is provided, that uses malloc()/free() to aquire space for the
-    blob-data and new/delete for the implementation class.
+    BlobImpl, is provided, that uses new/delete and the implementation class.
 */
 class IBlob : public RefCounted
 {
@@ -91,12 +90,6 @@ class IBlob : public RefCounted
         , _size(0)
         { }
 
-        IBlob(size_t refs)
-        : RefCounted(refs)
-        , _data(0)
-        , _size(0)
-        { }
-
         char* _data;
         size_t _size;
 };
@@ -104,29 +97,34 @@ class IBlob : public RefCounted
 /** @brief Default Blob value implementation
 
     This implementation uses new/delete to create and destroy
-    the shared objects and malloc/free to allocate memory for
+    the shared objects and new/delete to allocate memory for
     the blob-data.
 */
-class BlobData : public IBlob
+class BlobImpl : public IBlob
 {
     public:
-        BlobData()
+        BlobImpl()
         { }
 
-        ~BlobData()
+        ~BlobImpl()
         {
-            if(_data)
-                std::free(_data);
+            delete[] _data;
         }
 
         virtual void assign(const char* data, size_t len)
         {
+            if (len == 0)
+            {
+                delete[] _data;
+                _data = 0;
+                _size = 0;
+                return;
+            }
+
             if( len > this->size() )
             {
-                if(_data)
-                    std::free(_data);
-
-                _data = (char*)std::malloc(len);
+                delete[] _data;
+                _data = new char[len];
             }
 
             std::memcpy(_data, data, len);
@@ -134,35 +132,34 @@ class BlobData : public IBlob
         }
 
         virtual IBlob* create() const
-        { return new BlobData(); }
+        { return new BlobImpl(); }
 
         virtual void destroy()
         { delete this; }
 
-        static BlobData* emptyInstance()
+        static BlobImpl* emptyInstance()
         {
-            static BlobData empty(1);
+            static BlobImpl empty(1);
             return &empty;
         }
 
     protected:
-        BlobData(size_t refs)
-        : IBlob(refs)
-        {}
+        BlobImpl(size_t n)
+        { RefCounted::addRef(); }
 };
 
 
-/** @internal Initialize statics in BlobData during static initialization
+/** @internal Initialize statics in BlobImpl during static initialization
 
     Thread-safety.
 */
-static struct BlobDataInitializer
+static struct BlobStaticInitializer
 {
-    BlobDataInitializer()
+    BlobStaticInitializer()
     {
-        BlobData::emptyInstance();
+        BlobImpl::emptyInstance();
     }
-} pt_blobdata_initializer;
+} pt_blob_static_initializer;
 
 
 /** @brief Binary large objects
@@ -181,25 +178,24 @@ class Blob
 
 public:
     Blob()
-    : m_data( BlobData::emptyInstance() )
+    : m_data( BlobImpl::emptyInstance() )
     { }
 
     /** Construct a Blob with data of a given length
 
-        Constructs a Blob using a default implementation using malloc/free
-        to manage the blob-data and new/delete to manage the shared data
-        object. The first \a len bytes of the data pointed to by \a data are
-        copied to this Blob.
+        Constructs a Blob using a default implementation using new/delete
+        to manage the blob-data and the shared data object. The first \a len
+        bytes of the data pointed to by \a data are copied to this Blob.
     */
     Blob(const char* data, size_t len)
-    : m_data( new BlobData() )
+    : m_data( new BlobImpl() )
     {
         m_data->assign(data, len);
     }
 
     /** Construct a Blob to use a customized implementation
     */
-    Blob(IBlob* b)
+    explicit Blob(IBlob* b)
     : m_data(b)
     { }
 
@@ -228,16 +224,15 @@ public:
     */
     const char* data() const
     {
-    return  m_data->data();
+        return  m_data->data();
     }
 
     /** Returns the size of the data
     */
     size_t size() const
     {
-    return m_data->size();
+        return m_data->size();
     }
-
 };
 
 } // namespace Pt
