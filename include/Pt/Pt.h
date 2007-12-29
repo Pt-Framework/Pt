@@ -158,7 +158,6 @@ namespace Pt {
     struct Void;
     class SourceInfo;
     class NonCopyable;
-
 }
 
 /** \page "Basic Types"
