@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Dr. Marc Boris Duener                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duener                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -61,6 +61,8 @@ class PT_API SerializationInfo
         SerializationInfo(const SerializationInfo& si);
 
         ~SerializationInfo();
+
+        void reserve(size_t n);
 
         Category category() const;
 
@@ -194,7 +196,7 @@ class PT_API SerializationInfo
         std::string _type;
         std::string _id;
         mutable void* _fixupAddr; // only refs
-        Pt::String _value;        // values
+        Pt::String _value;        // values/refs
         Nodes _nodes;             // objects/arrays
 };
 

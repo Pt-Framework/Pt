@@ -1,7 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Maekitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Duerner                               *
- *   Copyright (C) 2006 by Stefan Bueder                                    *
+ *   Copyright (C) 2007 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,140 +23,15 @@
 #include "Pt/Date.h"
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
-#include "Pt/System/Clock.h"
+#include "Pt/Math/MathUtils.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/Math/MathUtils.h"
-#include "Pt/Convert.h"
-
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-
-
-class Serializer
-{
-    public:
-        Serializer()
-        {}
-
-        template <typename T>
-        void serialize(const T& type, const std::string& name)
-        {
-            Pt::SerializationInfo& si = _root.addMember(name);
-            si <<= type;
-            this->addObject(&type, si);
-        }
-
-        void addObject(const void* ref, Pt::SerializationInfo& si)
-        {
-            _ids[ref] = &si;
-        }
-
-        void fixdown(Pt::SerializationInfo& si)
-        {
-            if(si.category() == Pt::SerializationInfo::Reference)
-            {
-                const void* p = si.toValue<void*>();
-                Pt::SerializationInfo* pointee = _ids[p];
-                pointee->setId( Pt::convert<std::string>(pointee) );
-                si.setReference( pointee );
-            }
-            else if(si.category() == Pt::SerializationInfo::Object)
-            {
-                Pt::SerializationInfo::Iterator it;
-                for(it = si.begin(); it != si.end(); ++it)
-                {
-                    this->fixdown(*it);
-                }
-            }
-
-        }
-
-        void fixdown()
-        {
-            this->fixdown(_root);
-        }
-
-    private:
-        Pt::SerializationInfo _root;
-        std::map<const void*, Pt::SerializationInfo*> _ids;
-};
-
-
-class Deserializer
-{
-    public:
-        Deserializer()
-        {}
-
-        template <typename T>
-        void deserialize(const Pt::SerializationInfo& si, T& type)
-        {
-            si >>= type;
-            _types[ si.id() ] = &type;
-            _fixups[ si.id() ] = &Deserializer::do_fixup<T>;
-        }
-
-        void fixup(const Pt::SerializationInfo& si)
-        {
-            Pt::SerializationInfo::ConstIterator it;
-            for(it = si.begin(); it != si.end(); ++it)
-            {
-                if(it->category() == Pt::SerializationInfo::Reference)
-                {
-                    void* target = _types[ it->toValue<std::string>() ];
-        
-                    void* d = it->fixupAddr();
-                    void** destination = (void**)d;
-        
-                    _fixups[ it->toValue<std::string>() ]( destination, target);
-                }
-        
-                if(it->category() == Pt::SerializationInfo::Object)
-                {
-                    this->fixup(*it);
-                }
-            }
-        }
-
-        template <typename T>
-        static void do_fixup(void** ref , void* val)
-        {
-            *( (T**)(ref) ) = (T*)(val);
-        }
-
-    private:
-        std::map<std::string, void*> _types;
-
-        typedef void (*Fixup)(void**, void*);
-        std::map<std::string, Fixup> _fixups;
-};
-
-
-struct DateRef
-{
-    Pt::Date* date;
-};
-
-
-
-void operator >>=(const Pt::SerializationInfo& si, DateRef& dr)
-{
-    si.getReference("date", dr.date );
-}
-
-
-void operator <<=(Pt::SerializationInfo& si, const DateRef& dr)
-{
-    si.addReference("date", dr.date);
-}
-
-
-
 
 
 class SerializationTest : public Pt::Unit::TestSuite
@@ -166,68 +40,26 @@ class SerializationTest : public Pt::Unit::TestSuite
         SerializationTest()
         : Pt::Unit::TestSuite("SerializationTest")
         {
+            //std::cerr << "\n# sizeof Pt::SerializationInfo: " << sizeof(Pt::SerializationInfo) << std::endl;
+
             Pt::Unit::TestSuite::registerMethod( "BuiltInTypesTest", *this, &SerializationTest::BuiltInTypesTest );
             Pt::Unit::TestSuite::registerMethod( "StdVectorTest", *this, &SerializationTest::StdVectorTest );
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
-            Pt::Unit::TestSuite::registerMethod( "DateTimeTest", *this, &SerializationTest::DateTimeTest );
-            //Pt::Unit::TestSuite::registerMethod( "SerializeDeserializeTest", *this, &SerializationTest::SerializeDeserializeTest );
         }
-
     protected:
-
         void BuiltInTypesTest();
         void StdVectorTest();
         void DateTest();
         void TimeTest();
         void DateTimeTest();
-        void SerializeDeserializeTest();
-
 };
 
 Pt::Unit::RegisterTest<SerializationTest> register_SerializationTest;
 
 
-void SerializationTest::SerializeDeserializeTest()
-{
-    Pt::Date date;
-    date.set(2020, 11, 21);
-    
-    DateRef dref;
-    dref.date = &date;
-
-    Serializer ser;
-    ser.serialize(date, "myDate");
-    ser.serialize(dref, "MyDateRef");
-    ser.fixdown();
-
-    Pt::SerializationInfo si1;
-    si1.setName("myDate");
-    si1 <<= date;
-    si1.setId("11223344");
-
-    Pt::SerializationInfo si2;
-    si2.setName("myDateRef");
-
-    Pt::SerializationInfo& pd = si2.addMember("date");
-    pd.setCategory( Pt::SerializationInfo::Reference );
-    pd.setId("11223344");
-
-    Pt::Date date2;
-    DateRef dref2;
-    Deserializer dser;
-    dser.deserialize(si1, date2);
-    dser.deserialize(si2, dref2);
-    dser.fixup(si2);
-
-    PT_UNIT_ASSERT(date2 == date);
-    PT_UNIT_ASSERT(dref2.date == &date2);
-}
-
-
 void SerializationTest::BuiltInTypesTest()
 {
-
     Pt::SerializationInfo si;
 
     bool boolVal1 = true;
@@ -241,7 +73,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= boolVal2;
     PT_UNIT_ASSERT(boolVal2 == true);
 
-
     char charVal1 = 'c';
     char charVal2;
     si <<= charVal1;
@@ -252,7 +83,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"c") );
     si >>= charVal2;
     PT_UNIT_ASSERT(charVal2 == 'c');
-
 
     signed char sigCharVal1 = -127;
     signed char sigCharVal2;
@@ -265,7 +95,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= sigCharVal2;
     PT_UNIT_ASSERT(sigCharVal2 == -127);
 
-
     unsigned char usigCharVal1 = 255;
     unsigned char usigCharVal2;
     si <<= usigCharVal1;
@@ -276,7 +105,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"255") );
     si >>= usigCharVal2;
     PT_UNIT_ASSERT(usigCharVal2 == 255);
-
 
     short shortVal1 = -32767;
     short shortVal2;
@@ -289,7 +117,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= shortVal2;
     PT_UNIT_ASSERT(shortVal2 == -32767);
 
-
     unsigned short ushortVal1 = 65535;
     unsigned short ushortVal2;
     si <<= ushortVal1;
@@ -300,7 +127,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= ushortVal2;
     PT_UNIT_ASSERT(ushortVal2 == 65535);
-
 
     int intVal1 = -32767;
     int intVal2;
@@ -313,7 +139,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= intVal2;
     PT_UNIT_ASSERT(intVal2 == -32767);
 
-
     unsigned int uintVal1 = 65535;
     unsigned int uintVal2;
     si <<= uintVal1;
@@ -324,7 +149,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= uintVal2;
     PT_UNIT_ASSERT(uintVal2 == 65535);
-
 
     long longVal1 = -32767;
     long longVal2;
@@ -337,7 +161,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= longVal2;
     PT_UNIT_ASSERT(longVal2 == -32767);
 
-
     unsigned long ulongVal1 = 65535;
     unsigned long ulongVal2;
     si <<= ulongVal1;
@@ -348,7 +171,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
     si >>= ulongVal2;
     PT_UNIT_ASSERT(ulongVal2 == 65535);
-
 
     float floatVal1 = 77.3547f;
     float floatVal2;
@@ -361,7 +183,6 @@ void SerializationTest::BuiltInTypesTest()
     si >>= floatVal2;
     PT_UNIT_ASSERT(floatVal2 == 77.3547f);
 
-
     double doubleVal1 = 198.8196;
     double doubleVal2;
     si <<= doubleVal1;
@@ -373,7 +194,6 @@ void SerializationTest::BuiltInTypesTest()
     PT_UNIT_ASSERT( asString.find(L"198.8196") != Pt::String::npos );
     si >>= doubleVal2;
     PT_UNIT_ASSERT(doubleVal2 == 198.8196);
-
 }
 
 
@@ -415,6 +235,7 @@ void SerializationTest::StdVectorTest()
     }
 }
 
+
 void SerializationTest::DateTest()
 {
     Pt::Date date(2000, 10, 20);
@@ -427,6 +248,7 @@ void SerializationTest::DateTest()
     PT_UNIT_ASSERT(date == date2);
 }
 
+
 void SerializationTest::TimeTest()
 {
     Pt::Time time(18, 40, 5, 1);
@@ -438,6 +260,7 @@ void SerializationTest::TimeTest()
 
     PT_UNIT_ASSERT(time == time2);
 }
+
 
 void SerializationTest::DateTimeTest()
 {
@@ -457,4 +280,3 @@ void SerializationTest::DateTimeTest()
 
     PT_UNIT_ASSERT(time == time2);
 }
-
