@@ -138,7 +138,6 @@ src/Pt/StringStreamTest.cpp
 src/Pt/StringTest.cpp
 src/Pt/Time.cpp
 src/Pt/Timespan.cpp
-src/Pt/Timestamp.cpp
 src/Pt/TimeTest.cpp
 src/Pt/TypesTest.cpp
 src/Pt/TypeTraitsTest.cpp

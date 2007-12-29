@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 by Sebastian Pieck                            *
+ *   Copyright (C) 2007-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,12 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#if defined __GNUC__
-    //#if (__GNUC__ < 4)
-    //    #pragma pack()
-    //#elif (__GNUC__ >=4)
-    //    #define PT_PACKED __attribute__ ((packed))
-    //#endif
+#if defined (__GNUC__)
+    // nothing
 #elif defined(_MSC_VER)
     #pragma pack(pop)
 #elif defined(__INTEL_COMPILER)

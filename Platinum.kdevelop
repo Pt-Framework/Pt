@@ -24,7 +24,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram></mainprogram>
+      <mainprogram>/home/marc/Pt</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -50,7 +50,7 @@
       <dontact>false</dontact>
       <makebin>./jam/jam.linux.x86</makebin>
       <defaulttarget></defaulttarget>
-      <makeoptions> -q Pt-all</makeoptions>
+      <makeoptions> -q</makeoptions>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug>

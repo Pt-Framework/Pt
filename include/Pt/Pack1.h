@@ -1,5 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 by Sebastian Pieck                            *
+ *   Copyright (C) 2007-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,7 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#if defined __GNUC__
+
+#if defined (__GNUC__)
     #define PT_PACKED __attribute__ ((packed))
 #elif defined (_MSC_VER)
     #pragma pack(push, 1)
@@ -24,14 +26,9 @@
         #define PT_PACKED
     #endif
     #if ( _MSC_VER >= 800 )
-            #pragma warning(disable:4103)
+        #pragma warning(disable:4103)
     #endif
-#elif defined(__INTEL_COMPILER)
-    #pragma pack(1)
-    #ifndef PT_PACKED
-        #define PT_PACKED
-    #endif
-#elif defined(__xlC__)
+#elif defined(__INTEL_COMPILER) || defined(__xlC__)
     #pragma pack(1)
     #ifndef PT_PACKED
         #define PT_PACKED
