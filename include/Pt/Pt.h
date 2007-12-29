@@ -28,13 +28,6 @@
     including other dates, times and timespans.
 */
 
-/** @defgroup CTTI
-    @brief Compile time type information
-
-    Compile time type information allows a programmer to specialize and branch
-    code at compile time depending on type. 
-*/
-
 /** @defgroup Unicode
     @brief Unicode string handling
 
@@ -50,8 +43,8 @@
 
     This module is the base module for all other modules and has no dependency
     to any system specific libraries except the standard c++ library. It
-    provides some basic types, support for byte-order handling, a CTTI system,
-    an unicode string and character class, reflection and a signals/delegates
+    provides some basic types, support for byte-order handling, type-traits,
+    an unicode string and character class, serialization and a signals/delegates
     based callback mechanism.
 */
 namespace Pt {

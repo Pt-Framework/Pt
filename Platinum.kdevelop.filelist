@@ -1000,3 +1000,10 @@ src/Pt-Xml/XmlWriter.cpp
 src/Pt-Xml/XmlWriterTest.cpp
 src/Pt/ConversionTest.cpp
 include/Pt/Convert.h
+include/Pt/Atomicity.pthread.h
+include/Pt/Deserializer.h
+include/Pt/Facets.h
+include/Pt/Pack1.h
+include/Pt/PackPop.h
+include/Pt/Serializer.h
+include/Pt/Variant.h
