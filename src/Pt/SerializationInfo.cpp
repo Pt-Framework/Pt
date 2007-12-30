@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2008 by Dr. Marc Boris Duener                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -164,6 +164,18 @@ void SerializationInfo::getReference(void*& type, const std::type_info& ti) cons
     _fixupInfo = &ti;
     //_id = convert<std::string>(&type);
     //type = 0;
+}
+
+
+void* SerializationInfo::fixupAddr() const
+{
+    return _fixupAddr;
+}
+
+
+const std::type_info& SerializationInfo::fixupInfo() const
+{
+    return *_fixupInfo;
 }
 
 

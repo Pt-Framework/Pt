@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2008 by Dr. Marc Boris Duener                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -50,7 +50,7 @@ class PT_API SerializationInfo
 
     public:
         enum Category {
-            Void = 0, Value = 1, Object = 2, Array = 4, Reference = 8
+            Void = 0, Value = 1, Object = 2, Reference = 4
         };
 
         class Iterator;
@@ -181,16 +181,9 @@ class PT_API SerializationInfo
 
         SerializationInfo& operator =(const SerializationInfo& si);
 
-        void* fixupAddr() const
-        { return _fixupAddr; }
+        void* fixupAddr() const;
 
-        const std::type_info& fixupInfo() const
-        {
-            if( ! _fixupInfo )
-                throw std::logic_error("invalid reference type");
-
-            return *_fixupInfo;
-        }
+        const std::type_info& fixupInfo() const;
 
     protected:
         void getReference(void*& type, const std::type_info& ti) const;
