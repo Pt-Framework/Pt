@@ -35,17 +35,13 @@ namespace Pt {
  *
  */
 template <typename T, typename Allocator = std::allocator<T> >
-class Array2d
+class Vector2d
 {
 
 public:
 
     /** @brief Default constructor. */
-    Array2d()
-    : m_height(0)
-    , m_array()
-    {
-    }
+    Vector2d();
 
     /**
      * @brief Constructs a two dimensional array with given width and height.
@@ -53,39 +49,24 @@ public:
      * @param width The width of the Array2d object to be constructed.
      * @param height The height of the Array2d object to be constructed.
      */
-    Array2d(const Pt::size_t width, const Pt::size_t height)
-    : m_height(height)
-    , m_array(width * height)
-    {
-    }
+    Vector2d(Pt::size_t width, Pt::size_t height);
 
     /**
      * @brief Copies an Array2d object.
      *
      * @param rhs The Array2d object to be copied.
      */
-    Array2d(const Array2d<T, Allocator>& rhs)
-    : m_height(rhs.height)
-    , m_array(rhs.m_array)
-    {
-    }
+    Vector2d(const Vector2d<T, Allocator>& rhs);
 
     /** @brief Destructor. */
-    ~Array2d()
-    {
-    }
+    ~Vector2d();
 
     /**
      * @brief Assignment operator.
      *
      * @param rhs The Array2d object to be copied.
      */
-    Array2d<T, Allocator>& operator=(const Array2d<T, Allocator>& rhs)
-    {
-        m_array = rhs.m_array;
-        m_height = rhs.m_height;
-        return *this;
-    }
+    Vector2d<T, Allocator>& operator=(const Vector2d<T, Allocator>& rhs);
 
     /**
      * @brief Returns a constant reference to an element
@@ -95,10 +76,7 @@ public:
      * @param y The vertical index inside the array.
      * @return Reference to the element at the given index.
      */
-    const T& operator()(const Pt::size_t x, const Pt::size_t y) const
-    {
-        return m_array[index(x, y)];
-    }
+    const T& operator()(Pt::size_t x, Pt::size_t y) const;
 
     /**
      * @brief Returns a reference to an element
@@ -108,10 +86,7 @@ public:
      * @param y The vertical index inside the array.
      * @return Reference to the element at the given index.
      */
-    T& operator()(const Pt::size_t x, const Pt::size_t y)
-    {
-        return m_array[index(x, y)];
-    }
+    T& operator()(Pt::size_t x, Pt::size_t y);
 
     /**
      * @brief Returns a constant reference to an element
@@ -121,18 +96,7 @@ public:
      * @param y The vertical index inside the array.
      * @return Reference to the element at the given index.
      */
-    const T& at(const Pt::size_t x, const Pt::size_t y) const
-    {
-        if (x >= width())
-        {
-            throw std::out_of_range();
-        }
-        if (y >= height())
-        {
-            throw std::out_of_range();
-        }
-        return m_array.at(index(x, y));
-    }
+    const T& at(Pt::size_t x, Pt::size_t y) const;
 
     /**
      * @brief Returns a reference to an element
@@ -142,38 +106,20 @@ public:
      * @param y The vertical index inside the array.
      * @return Reference to the element at the given index.
      */
-    T& at(const Pt::size_t x, const Pt::size_t y)
-    {
-        if (x >= width())
-        {
-            throw std::out_of_range();
-        }
-        if (y >= height())
-        {
-            throw std::out_of_range();
-        }
-        return m_array.at(index(x, y));
-    }
+    T& at(Pt::size_t x, Pt::size_t y);
 
     /**
      * @brief Returns if the array is empty.
      *
      * @return \c true if the array is empty, \c false otherwise.
      */
-    bool empty() const
-    {
-        return m_array.empty();
-    }
+    bool empty() const;
 
     /**
      * @brief Deletes all elements of the two dimensional array
      *        and sets width and height to zero.
      */
-    void clear()
-    {
-        m_height = 0;
-        m_array.clear();
-    }
+    void clear();
 
     /**
      * @brief Resizes the array to given sizes.
@@ -181,11 +127,7 @@ public:
      * @param width The horizontal size of the array.
      * @param height The vertical size of the array.
      */
-    void resize(const Pt::size_t width, const Pt::size_t height)
-    {
-        m_array.resize(width * height);
-        m_height = height;
-    }
+    void resize(Pt::size_t width, Pt::size_t height);
 
     /**
      * @brief Exchanges contents of the current array
@@ -195,35 +137,21 @@ public:
      *
      * @param other Reference to the Array2d object to exchange contents with.
      */
-    void swap(Array2d<T, Allocator>& other)
-    {
-        m_array.swap(other.m_array);
-        swap(m_height, other.m_height);
-    }
+    void swap(Vector2d<T, Allocator>& other);
 
     /**
      * @brief Returns the height of this two dimensional array.
      *
      * @return The heigth of this two dimensional array.
      */
-    inline Pt::size_t height() const
-    {
-        return m_height;
-    }
+    inline Pt::size_t height() const;
 
     /**
      * @brief Returns the width of this two dimensional array.
      *
      * @return The width of this two dimensional array.
      */
-    inline Pt::size_t width() const
-    {
-        if (m_height == 0)
-        {
-            return 0;
-        }
-        return m_array.size() / m_height;
-    }
+    inline Pt::size_t width() const;
 
 
 private:
@@ -233,11 +161,9 @@ private:
      *
      * @param x The horizontal index inside the array.
      * @param y The vertical index inside the array.
+     * @return The index inside m_array.
      */
-    inline Pt::size_t index(const Pt::size_t x, const Pt::size_t y) const
-    {
-        return x * m_height + y;
-    }
+    inline Pt::size_t index(Pt::size_t x, Pt::size_t y) const;
 
 
 private:
@@ -250,6 +176,8 @@ private:
 
 
 };
+
+#include "Vector2d.tpp"
 
 } // namespace Pt
 
