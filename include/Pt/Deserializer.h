@@ -11,7 +11,7 @@ namespace Pt {
 class PT_API Deserializer
 {
     public:
-        typedef void (*Fixup)(void**, void*);
+        typedef void (*Fixup)(void**, const std::type_info&, void*);
 
         virtual ~Deserializer();
 
@@ -23,14 +23,14 @@ class PT_API Deserializer
         template <typename T>
         void deserialize(T& type)
         {
-            SerializationInfo& si = this->next();
+            SerializationInfo& si = this->get();
             si >>= type;
             this->markFixup(si, &type, &Deserializer::do_fixup<T>);
         }
 
         SerializationInfo& peek();
 
-        void fixup();
+        void finish();
 
     protected:
         Deserializer();
@@ -38,7 +38,7 @@ class PT_API Deserializer
         virtual void read(SerializationInfo& si) = 0;
 
     private:
-        Pt::SerializationInfo& next();
+        Pt::SerializationInfo& get();
 
         void markFixup(Pt::SerializationInfo& si, void* type, Fixup fixup);
 
@@ -54,9 +54,12 @@ class PT_API Deserializer
         std::map<std::string, Fixup> _fixups;
 
         template <typename T>
-        static void do_fixup(void** ref , void* val)
+        static void do_fixup(void** fixme, const std::type_info& fixmeInfo , void* obj)
         {
-            *( (T**)(ref) ) = (T*)(val);
+            if( fixmeInfo != typeid(T) )
+                throw SerializationError("reference fixup failed, type mismatch", PT_SOURCEINFO);
+
+            *( (T**)(fixme) ) = (T*)(obj);
         }
 };
 

@@ -74,7 +74,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.serialize(date1, "date1");
             ser.serialize(dr, "dref");
 
-            ser.fixdown();
+            ser.finish();
             ser.flush();
 
             std::cerr << "\n##########\n" << std::endl;
@@ -88,7 +88,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             Pt::Xml::XmlDeserializer deser(input);
             deser.deserialize(date2);
             deser.deserialize(dr);
-            deser.fixup();
+            deser.finish();
             //std::cerr << "PTR: "<< &(*(dr.date)) << " - " << &date2 << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
@@ -100,7 +100,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             std::stringstream output;
             Pt::Xml::XmlSerializer ser(output);
             ser.serialize(date1, "date1");
-            ser.fixdown();
+            ser.finish();
             ser.flush();
 
             Pt::DateTime date2(1, 1, 1, 1, 1, 1, 1);

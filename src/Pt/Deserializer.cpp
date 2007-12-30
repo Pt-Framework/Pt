@@ -44,7 +44,7 @@ SerializationInfo& Deserializer::peek()
 }
 
 
-void Deserializer::fixup()
+void Deserializer::finish()
 {
     std::list<Pt::SerializationInfo>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)
@@ -52,12 +52,13 @@ void Deserializer::fixup()
         this->fixup(*it);
     }
 
+    _peeking = false;
     _objects.clear();
     _stack.clear();
 }
 
 
-Pt::SerializationInfo& Deserializer::next()
+Pt::SerializationInfo& Deserializer::get()
 {
     if( ! _peeking )
     {
@@ -88,12 +89,10 @@ void Deserializer::fixup(const Pt::SerializationInfo& si)
     {
         if(it->category() == Pt::SerializationInfo::Reference)
         {
-            void* target = _objects[ it->toValue<std::string>() ];
-
-            void* d = it->fixupAddr();
-            void** destination = (void**)d;
-
-            _fixups[ it->toValue<std::string>() ]( destination, target);
+            void* obj = _objects[ it->toValue<std::string>() ];
+            void* fixme = it->fixupAddr();
+            Fixup fixupHandler = _fixups[ it->toValue<std::string>() ];
+            fixupHandler( (void**)(&fixme), it->fixupInfo(), obj);
         }
 
         if(it->category() == Pt::SerializationInfo::Object)

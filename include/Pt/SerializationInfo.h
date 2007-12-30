@@ -23,6 +23,7 @@
 #include <Pt/Convert.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
+#include <typeinfo>
 
 namespace Pt {
 
@@ -91,13 +92,13 @@ class PT_API SerializationInfo
         template <typename T>
         void toReference(T*& type) const
         {
-            this->getReference( reinterpret_cast<void*&>(type) );
+            this->getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
         template <typename T>
         void getReference(const std::string& name, T*& type) const
         {
-            this->getMember(name).getReference( reinterpret_cast<void*&>(type) );
+            this->getMember(name).getReference( reinterpret_cast<void*&>(type), typeid(T) );
         }
 
         template <typename T>
@@ -183,8 +184,16 @@ class PT_API SerializationInfo
         void* fixupAddr() const
         { return _fixupAddr; }
 
+        const std::type_info& fixupInfo() const
+        {
+            if( ! _fixupInfo )
+                throw std::logic_error("invalid reference type");
+
+            return *_fixupInfo;
+        }
+
     protected:
-        void getReference(void*& type) const;
+        void getReference(void*& type, const std::type_info& ti) const;
 
         void setParent(SerializationInfo& si)
         { _parent = &si; }
@@ -196,6 +205,7 @@ class PT_API SerializationInfo
         std::string _type;
         std::string _id;
         mutable void* _fixupAddr; // only refs
+        mutable const std::type_info* _fixupInfo; // only refs
         Pt::String _value;        // values/refs
         Nodes _nodes;             // objects/arrays
 };

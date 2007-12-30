@@ -28,7 +28,7 @@ Serializer::~Serializer()
 { }
 
 
-SerializationInfo& Serializer::append(const void* obj)
+SerializationInfo& Serializer::push(const void* obj)
 {
     _stack.resize( _stack.size() + 1 );
     SerializationInfo& si = _stack.back();
@@ -38,7 +38,7 @@ SerializationInfo& Serializer::append(const void* obj)
 }
 
 
-void Serializer::fixdown()
+void Serializer::finish()
 {
     std::list<Pt::SerializationInfo>::iterator it;
     for(it = _stack.begin(); it != _stack.end(); ++it)

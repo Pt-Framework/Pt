@@ -32,6 +32,7 @@ SerializationInfo::SerializationInfo()
 : _parent(0)
 , _category(Value)
 , _fixupAddr(0)
+, _fixupInfo(0)
 { }
 
 
@@ -42,6 +43,7 @@ SerializationInfo::SerializationInfo(const SerializationInfo& si)
 , _type(si._type)
 , _id(si._id)
 , _fixupAddr(si._fixupAddr)
+, _fixupInfo(si._fixupInfo)
 , _value(si._value)
 , _nodes(si._nodes)
 {
@@ -58,6 +60,7 @@ SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
     _value = si._value;
     _nodes = si._nodes;
     _fixupAddr = si._fixupAddr;
+    _fixupInfo = si._fixupInfo;
     return *this;
 }
 
@@ -155,9 +158,10 @@ SerializationInfo& SerializationInfo::addReference(const std::string& name, void
 }
 
 
-void SerializationInfo::getReference(void*& type) const
+void SerializationInfo::getReference(void*& type, const std::type_info& ti) const
 {
     _fixupAddr = &type;
+    _fixupInfo = &ti;
     //_id = convert<std::string>(&type);
     //type = 0;
 }

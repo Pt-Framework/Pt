@@ -23,7 +23,7 @@ class PT_API Serializer
         template <typename T>
         void serialize(const T& type, const std::string& name)
         {
-            SerializationInfo& si = this->append(&type);
+            SerializationInfo& si = this->push(&type);
             si.setName(name);
             si <<= type;
         }
@@ -32,7 +32,7 @@ class PT_API Serializer
 
             Writes all serialized objects.
         */
-        void fixdown();
+        void finish();
 
     protected:
         Serializer();
@@ -40,7 +40,7 @@ class PT_API Serializer
         virtual void write(const SerializationInfo& si) = 0;
 
     private:
-        SerializationInfo& append(const void* obj);
+        SerializationInfo& push(const void* obj);
 
         //! @internal
         void fixdown(Pt::SerializationInfo& si);
