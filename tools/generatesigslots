@@ -5,8 +5,9 @@
 # signals/slots library (the STL version, not the pt-framework
 # version).
 #
-# Written by Stephan Beal. Marc Duerner (author of the sigslot code)
-# acted as technical consultant and debuggerer.
+# The generator was written by Stephan Beal. The underlying C++ code was
+# written by Marc Duerner (he also acted as technical consultant and
+# debuggerer for this generator).
 #
 ########################################################################
 # Configurable parts:
@@ -97,8 +98,8 @@ print "// auto-generated [".localtime()."] by $0\n";
 if( $main_inst ) {
 print << 'EOF'
 /***************************************************************************
- *   Copyright (C) 2004-2007 by Dr. Marc Boris Duerner                     *
- *   Copyright (C) 2005,2007 Stephan Beal                                  *
+ *   Copyright (C) 2004-2008 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005,2007-2008 Stephan Beal                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -135,29 +136,38 @@ for( $i = 1; $i <= $argc; $i++ ) {
 }
 
 
+########################################################################
 # $arg_params_names: a1, a2, ... aN
 $arg_params_names = join( ",", @argn );
 print "//arg_params_names=$arg_params_names\n";
 
+########################################################################
 # $arg_tmpl_decl: class A1, class A2, ... class AN
 $arg_tmpl_decl = (@decl_typenames
 		  ? ("class ".join(", class ",@decl_typenames))
 		  : '');
 print "//arg_tmpl_decl=$arg_tmpl_decl\n";
+
+########################################################################
 # $comma_arg_tmpl_decl: $arg_tmpl_decl with leading comma
 $comma_arg_tmpl_decl = (@decl_typenames
 			 ? ','.${arg_tmpl_decl}
 			 : '');
 print "//comma_arg_tmpl_decl=$comma_arg_tmpl_decl\n";
+
+########################################################################
 # $arg_tmpl_types: A1, A2, ... AN
 $arg_tmpl_types = join(',',@decl_typenames);
 print "//arg_tmpl_types=$arg_tmpl_types\n";
 
+########################################################################
 # $comma_arg_tmpl_types: $arg_tmpl_types with leading comma
 $comma_arg_tmpl_types = (@decl_typenames
 			 ? ','.${arg_tmpl_types}
 			 : '');
 print "//comma_arg_tmpl_types=$comma_arg_tmpl_types\n";
+
+########################################################################
 # $arg_tmpl_decl_main_inst: class A1 = Void, ... class AN = Void
 $arg_tmpl_decl_main_inst = '';
 for( $i = 1; $i <= $max_types; ++$i ) {
@@ -171,8 +181,11 @@ for( $i=$argc; $i < $max_types; ++$i ) {
 	push(@typelist,'Void');
 }
 
+########################################################################
 # $arg_tmpl_decl_1toN: typename A1, ... typename AN
 $arg_tmpl_decl_1toN = '';
+
+########################################################################
 # $arg_tmpl_spec_1toN: A1, ... AN
 $arg_tmpl_spec_1toN = '';
 if( $argc ) {
@@ -185,17 +198,15 @@ if( $argc ) {
 print "//arg_tmpl_decl_1toN=$arg_tmpl_decl_1toN\n";
 print "//arg_tmpl_spec_1toN=$arg_tmpl_spec_1toN\n";
 
+########################################################################
 # $arg_tmpl_types_all: A1, A2, AN, ... Void, Void, Void
 $arg_tmpl_types_all = join(',',@typelist);
 print "//arg_tmpl_types_all=$arg_tmpl_types_all\n";
 
+########################################################################
 # $comma_arg_tmpl_types_all: $arg_tmpl_types_all with leading comma
 $comma_arg_tmpl_types_all = ', '.$arg_tmpl_types_all;
 print "//comma_arg_tmpl_types_all=$comma_arg_tmpl_types_all\n";
-
-# $arg_type_list: A1, A2, ... AN
-# $arg_type_list = join(", ",@decl_typenames);
-
 
 undef @decl_typenames;
 undef @argn;
@@ -209,7 +220,11 @@ print "// BEGIN_Invokable ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
-// main instance
+/**
+Invokable is a type which can be "called" via
+the invoke() member. It serves as a base type
+for other types in the Pt signals/slots framework.
+*/
 template <${arg_tmpl_decl_main_inst}>
 class Invokable {
 EOF
@@ -223,11 +238,13 @@ EOF
 ;
 }
 
-print << "EOF"
+print << "EOF" # Invokable
     public:
+        /** Does nothing. Does not throw. */
         virtual ~Invokable()
         {}
 
+        /** Behaviour is determined by subclass implementations. */
         virtual void invoke(${arg_type_list_named}) const = 0;
 };
 // END_Invokable ${argc}
@@ -238,6 +255,13 @@ EOF
 # BasicSlot<> 
 if( $main_inst ) {
 	print "// BEGIN_BasicSlot ${argc}\n";
+
+    print << "EOF"
+    /**
+        BasicSlot is a base type for various "slot" types.
+    */
+EOF
+;
     print "template < typename R,";
     for( $i = 1; $i <= $argc; ++$i ) {
 	    $comma = (($i==$argc) ? '' : ', ');
@@ -247,6 +271,10 @@ if( $main_inst ) {
 print << "EOF"
     class BasicSlot : public Slot {
         public:
+            /**
+            Creates a copy of this object and returns it. The caller
+            owns the returned object.
+            */
             virtual Slot* clone() const = 0;
     };
 // END_BasicSlot ${argc}
@@ -261,7 +289,10 @@ print "// BEGIN_Callable ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
-    // main instantiation
+    /**
+      Callable represents a "callable" type, which is fundamentally
+      similar to an Invokable but is semantically richer.
+    */
     template <typename R, ${arg_tmpl_decl_main_inst}>
     class Callable : public Invokable<${arg_tmpl_types}> {
 EOF
@@ -281,18 +312,26 @@ print "\t\tpublic:\n";
 #	++$i;
 #	print "\t\ttypedef ".$t." Arg".$i."T;\n";
 #}
-print << "EOF"
+print << "EOF" # Callable:
             typedef R ReturnT;
             enum { NumArgs = ${argc} };
 
         public:
+            /**
+              Creates a copy of this object and returns it. Caller owns
+              the returned object.
+            */
             virtual Callable* clone() const = 0;
 
+            /** Exact behaviour is defined by subclass implementations. */
             virtual ReturnT operator()(${arg_type_list_named}) const = 0;
 
+            /** Same as calling this->operator()(...). */
             ReturnT call(${arg_type_list_named}) const
             { return this->operator()(${arg_params_names}); }
 
+            /** Same as calling this->operator()(...), except that the return value
+            of that method is ignored. */
             void invoke(${arg_type_list_named}) const
             { this->operator()(${arg_params_names}); }
     };
@@ -310,7 +349,7 @@ print << "EOF"
     /** Multicast Signal
 
         A Signal can be connected to multiple targets. The return
-        value of the target is ignored, when the signal is sent.
+        value of the target(s) is/are ignored.
     */
     template <${arg_tmpl_decl_main_inst}>
     class Signal : public SignalBase {
@@ -326,25 +365,36 @@ EOF
 }
 
 
-print << "EOF"
+print << "EOF" # Signal<>:
         public:
             typedef Invokable<${arg_tmpl_types_all}> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, ${arg_tmpl_types_all}>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(${arg_type_list_named}) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -381,6 +431,7 @@ print << "EOF"
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(${arg_type_list_named}) const
             { this->send(${arg_params_names}); }
     };
@@ -392,30 +443,41 @@ print "// END_Signal ${argc}\n";
 print "// BEGIN_SignalSlot ${argc}\n";
 
 if( $main_inst ) {
-print << "EOF"
-    // main instantiation
+print << "EOF" # SignalSlot<>:
+    /**
+      SignalSlot is a "slot wrapper" for Signal objects. That is, it
+      effectively converts a Signal object into a Slot object, so that it
+      can be used as the target of another Signal. This allows chaining of
+      Signals.
+    */
     template <${arg_tmpl_decl_main_inst}>
     class SignalSlot : public BasicSlot<void${comma_arg_tmpl_types}>
     {
         public:
+            /** Wraps signal. */
             SignalSlot(Signal<${arg_tmpl_types}>& signal)
             : _method( signal, &Signal<${arg_tmpl_types}>::send )
             {}
 
+            /** Creates a clone of this object and returns it. Caller owns
+            the returned object. */
             BasicSlot<void${comma_arg_tmpl_types}>* clone() const
             { return new SignalSlot(*this); }
 
+            /** Returns a pointer to this object's internal Callable object. */
             virtual const void* callable() const
             {
                 return &_method;
             }
 
+            /** ??? */
             virtual bool opened(const Connection& c)
             {
                 Connectable& connectable = _method.object();
                 return connectable.opened(c);
             }
 
+            /** ??? */
             virtual void closed(const Connection& c)
             {
                 Connectable& connectable = _method.object();
@@ -426,11 +488,14 @@ print << "EOF"
             mutable ConstMethod<void, Signal<${arg_tmpl_types}>${comma_arg_tmpl_types} > _method;
     };
 
+    /** Creates a SignalSlot object from an equivalent Signal. */
     template <${arg_tmpl_decl}>
     SignalSlot<${arg_tmpl_types}> slot( Signal<${arg_tmpl_types}> & signal )
     { return SignalSlot<${arg_tmpl_types}>( signal ); }
 
 
+    /** Connects the given signal and slot objects and returns that Connection
+    object (which can normally be ignored). */
     template <typename R${comma_arg_tmpl_decl}>
     Connection connect(Signal<${arg_tmpl_types}>& signal, const BasicSlot<R${comma_arg_tmpl_types}>& slot)
     {
@@ -464,14 +529,6 @@ print << "EOF"
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <${arg_tmpl_decl}>
-    Connection connect(Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
 EOF
 ;
 
@@ -479,7 +536,7 @@ if( 0 == $argc ) {
 # connect(Signal<>,Signal<>) requires a special case non-template inline function
 # to avoid multiple definition errors. Not quite sure why.
 print << "EOF"
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     inline Connection connect(Signal<>& sender, Signal<>& receiver)
     {
         return connect( sender, slot(receiver) );
@@ -488,7 +545,7 @@ EOF
 ;
 } else {
 print << "EOF"
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <${arg_tmpl_decl}>
     Connection connect(Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver)
     {
@@ -503,6 +560,10 @@ print "// BEGIN_Function ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
+/**
+ The Function class wraps free functions in the form of a Callable, for use
+with the signals/slots framework.
+*/
 template < typename R,${arg_tmpl_decl_main_inst}>
 class Function : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
@@ -518,23 +579,33 @@ EOF
 print << "EOF"
 {
     public:
+        /** The function signature wrapped by this class. */
         typedef R (*FuncT)(${arg_tmpl_types});
 
+        /** Wraps func. */
         Function(FuncT func) throw()
         : _funcPtr(func) { }
 
+        /** Deeply copies f. */
         Function(const Function& f) throw()
         { this->operator=(f); }
 
+        /** Call the wrapped function, passing it the arguments as-is and returning
+        its return value. */
         R operator()(${arg_type_list_named}) const
         { return (*_funcPtr)(${arg_params_names}); }
 
+        /** Creates a clone of this object and returns it. The caller owns the returned object. */
         Function<R${comma_arg_tmpl_types}>* clone() const
         { return new Function(*this); }
 
+
+        /** Deeply copies function and returns this object. */
         Function& operator=(const Function& function)
         {
-            _funcPtr = function._funcPtr;
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
             return (*this);
         }
 
@@ -546,6 +617,9 @@ EOF
 
 if( $main_inst ) {
 print << "EOF"
+/** FunctionSlot wraps Function objects so that they can act as
+Slots.
+*/
 template < typename R,${arg_tmpl_decl_main_inst}>
 class FunctionSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
 {
@@ -554,9 +628,11 @@ class FunctionSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
         : _func( func )
         {}
 
+        /** Returns a pointer to this object's internal Callable. */
         virtual const void* callable() const
         { return &_func; }
 
+        /** Creates a copy of this object and returns it. Caller owns the returned object. */
         Slot* clone() const
         { return new FunctionSlot(*this); }
 
@@ -577,10 +653,12 @@ EOF
 
 print << "EOF"
 
+/** Creates and returns a Function wrapper for the given free/static function. */
 template <typename R${comma_arg_tmpl_decl}>
 Function<R${comma_arg_tmpl_types}> callable(R (*func)(${arg_type_list_named})) throw()
 { return Function<R${comma_arg_tmpl_types}>(func); }
 
+/** Creates and returns a FunctionSlot object for the given free/static function. */
 template <typename R${comma_arg_tmpl_decl}>
 FunctionSlot<R${comma_arg_tmpl_types}> slot( R (*func)(${arg_type_list_named}) ) throw()
 { return FunctionSlot<R${comma_arg_tmpl_types}>( callable(func) ); }
@@ -595,14 +673,16 @@ print "// BEGIN_ConstMethod ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+    The ConstMethod class wraps const member functions as Callable objects
+    so that they can be used with the signals/slots framework.
+*/
 template < typename R,typename ClassT,${arg_tmpl_decl_main_inst}>
 class ConstMethod : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
 ;
 } else {
 print << "EOF"
-// Specialization
 template < typename R, typename ClassT${comma_arg_tmpl_decl}>
 class ConstMethod<R,ClassT${comma_arg_tmpl_types_all}> : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
@@ -612,25 +692,34 @@ EOF
 print << "EOF"
 {
     public:
+        /** Convenience typedef for the wrapped member function type. */
         typedef R (ClassT::*MemFuncT)(${arg_tmpl_types}) const;
 
+        /** Wraps the given member function of the given object. */
         ConstMethod(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _method(ptr)
         { }
 
-        ConstMethod(const ConstMethod& method) throw()
+        /** Deeply copies rhs. */
+        ConstMethod(const ConstMethod& rhs) throw()
         : Callable<R${comma_arg_tmpl_types_all}>()
-        { this->operator=(method); }
+        { this->operator=(rhs); }
 
+        /** Returns a reference to this object's bound ClassT object. */
         ClassT& object()
         { return *_object;}
 
+        /** Returns a const reference to this object's bound ClassT object. */
         const ClassT& object() const
         { return *_object;}
 
+        /** Calls the bound member function of the bound object, passing all
+        parameters to that member function. Returns the value of that member.
+        */
         R operator()(${arg_type_list_named}) const
         { return (_object->*_method)(${arg_params_names}); }
 
+        /** Creates a copy of this object and returns it.  Caller owns the returned object. */ 
         ConstMethod<R, ClassT${comma_arg_tmpl_types}>* clone() const
         { return new ConstMethod(*this); }
 
@@ -639,6 +728,7 @@ print << "EOF"
         MemFuncT _method;
 };
 
+/** Creates and  returns a ConstMethod object from the given object and method pair. */
 template <class R, class ClassT${comma_arg_tmpl_decl}>
 ConstMethod<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (ClassT::*ptr)(${arg_type_list_named}) const ) throw()
 { return ConstMethod<R,ClassT${comma_arg_tmpl_types}>(obj,ptr); }
@@ -648,18 +738,24 @@ EOF
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+ConstMethodSlot is a wrapper which allows ConstMethod objects to behave
+like Slot objects.
+*/
 template < typename R, typename ClassT,${arg_tmpl_decl_main_inst}>
 class ConstMethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
 {
     public:
+        /** Wraps the given ConstMethod object. */
         ConstMethodSlot(const ConstMethod<R, ClassT${comma_arg_tmpl_types}>& method)
         : _method( method )
         {}
 
+        /** Creates a copy of this object and returns it. Caller owns the returned object. */
         Slot* clone() const
         { return new ConstMethodSlot(*this); }
 
+        /** Returns a pointer to this object's internal Callable. */
         virtual const void* callable() const
         { return &_method; }
 
@@ -683,6 +779,9 @@ EOF
 }
 
 print << "EOF"
+/**
+  Creates and returns a ConstMethodSlot for the given object/method pair.
+*/
 template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
 ConstMethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) const ) throw()
 {
@@ -697,14 +796,15 @@ print "// BEGIN_Method ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+The Method class wraps member functions for use with the signals/slots framework.
+*/
 template < typename R,typename ClassT,${arg_tmpl_decl_main_inst}>
 class Method : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
 ;
 } else {
 print << "EOF"
-// Specialization
 template < typename R, typename ClassT${comma_arg_tmpl_decl}>
 class Method<R,ClassT${comma_arg_tmpl_types_all}> : public Callable<R${comma_arg_tmpl_types_all}>
 EOF
@@ -714,35 +814,53 @@ EOF
 print << "EOF"
 {
     public:
+        /** Convenience typedef of the wrapped member function signature. */
         typedef R (ClassT::*MemFuncT)(${arg_tmpl_types});
 
+        /** Wraps the given object/member pair. */
         explicit Method(ClassT& object, MemFuncT ptr) throw()
         : _object(&object), _memFunc(ptr)
         { }
 
-        Method(const Method& method) throw()
+        /** Deeply copies rhs. */
+        Method(const Method& rhs) throw()
         : Callable<R${comma_arg_tmpl_types_all}>()
-        { this->operator=(method); }
+        { this->operator=(rhs); }
 
+
+        /** Returns a reference to this object's wrapped ClassT object. */
         ClassT& object()
         { return *_object;}
 
+        /** Returns a const reference to this object's wrapped ClassT object. */
         const ClassT& object() const
         { return *_object;}
 
+        /** Returns a reference to this object's wrapped MemFuncT. */
         const MemFuncT& method() const
         { return _memFunc;}
 
+        /**
+          Passes on all arguments to the wrapped object/member pair and returns
+          the result of that member.
+        */
         inline R operator()(${arg_type_list_named}) const
         { return (_object->*_memFunc)(${arg_params_names}); }
 
+        /**
+        Creates a copy of this object and returns it. The caller
+        owns the returned object.
+        */
         Method<R, ClassT${comma_arg_tmpl_types_all}>* clone() const
         { return new Method(*this); }
 
-        Method& operator=(const Method& method)
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            _object = method._object;
-            _memFunc = method._memFunc;
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
             return (*this);
         }
 
@@ -751,6 +869,9 @@ print << "EOF"
         MemFuncT _memFunc;
 };
 
+/**
+Creates and returns a Method object for the given object/method pair.
+*/
 template <class R, class ClassT${comma_arg_tmpl_decl}>
 Method<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (ClassT::*ptr)(${arg_type_list_named})) throw()
 {
@@ -761,18 +882,26 @@ EOF
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+  MethodSlot wraps Method objects so that they can act as Slots.
+*/
 template < typename R, typename ClassT,${arg_tmpl_decl_main_inst}>
 class MethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
 {
     public:
+        /** Wraps the given Method object. */
         MethodSlot(const Method<R, ClassT${comma_arg_tmpl_types}>& method)
         : _method( method )
         {}
 
+        /**
+        Creates a copy of this object and returns it. The caller
+        owns the returned object.
+        */
         Slot* clone() const
         { return new MethodSlot(*this); }
 
+        /** Returns a pointer to this object's internal Callable. */
         virtual const void* callable() const
         { return &_method; }
 
@@ -796,6 +925,7 @@ EOF
 }
 
 print << "EOF"
+/** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
 MethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) ) throw()
 {
@@ -811,14 +941,15 @@ print "// BEGIN_Delegate ${argc}\n";
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+A Delegate is essentially a Signal with only a single target slot.
+*/
 template < typename R,${arg_tmpl_decl_main_inst}>
 class Delegate : public DelegateBase
 EOF
 ;
 } else {
 print << "EOF"
-// Specialization
 template < typename R${comma_arg_tmpl_decl}>
 class Delegate<R${comma_arg_tmpl_types_all}> : public DelegateBase
 EOF
@@ -831,28 +962,39 @@ print << "EOF"
             typedef Callable<R${comma_arg_tmpl_types}> Callable;
 
         public:
+            /** Does nothing. */
             Delegate()
             { }
 
-            Delegate(const Delegate& other)
+            /** Deeply copies rhs. */
+            Delegate(const Delegate& rhs)
             {
-                DelegateBase::operator=(other);
+                DelegateBase::operator=(rhs);
             }
 
+            /** Connects this object to the given slot and returns that Connection. */
             Connection connect(const BasicSlot<R${comma_arg_tmpl_types}>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+              Passes on all arguments to the connected slot and returns the return value
+              of that slot. If no slot is connect then an exception is thrown.
+            */
             inline R call(${arg_type_list_named}) const
             {
                 if( !_target.valid() ) {
-                    throw std::logic_error("Delegate not connected");
+                    throw std::logic_error("Delegate<R${comma_arg_tmpl_types}>::call(): Delegate not connected");
                 }
                 const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
                 return cb->call(${arg_params_names});
             }
 
+            /**
+              Passes on all arguments to the connected slot and ignores the return value. If
+              No slot is connected, the call is silently ignored.
+            */
             inline void invoke(${arg_type_list_named}) const
             {
                 if( !_target.valid() ) {
@@ -862,6 +1004,7 @@ print << "EOF"
                 cb->call(${arg_params_names});
             }
 
+            /** Identical to call(...). */
             R operator()(${arg_type_list_named}) const
             { return this->call(${arg_params_names}); }
     };
@@ -870,18 +1013,23 @@ EOF
 
 if( $main_inst ) {
 print << "EOF"
-// Main instantiation
+/**
+DelegateSlot wraps Deletegate object so that they can behave like Slots.
+*/
 template < typename R,${arg_tmpl_decl_main_inst}>
 class DelegateSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
 {
         public:
+            /** Wraps the given Delegate. */
             DelegateSlot(Delegate<R, ${arg_tmpl_types_all}>& delegate)
             : _method( delegate, &Delegate<R,${arg_tmpl_types_all}>::call )
             {}
 
+            /** Creates a copy of this object and returns it. Caller owns the returned object. */
             BasicSlot<R,${arg_tmpl_types_all}>* clone() const
             { return new DelegateSlot(*this); }
 
+            /** Returns a pointer to this object's internal Callable. */
             virtual const void* callable() const
             {
                 return &_method;
@@ -903,6 +1051,7 @@ class DelegateSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
             mutable ConstMethod<R, Delegate<R, ${arg_tmpl_types_all}>, ${arg_tmpl_types_all} > _method;
 };
 
+/** Creates and returns a DelegateSlot for the given Delegate. */
     template < typename R${comma_arg_tmpl_decl}>
     DelegateSlot<R${comma_arg_tmpl_types}> slot( Delegate<R${comma_arg_tmpl_types}>& delegate )
     { return DelegateSlot<R${comma_arg_tmpl_types}>( delegate ); }
@@ -913,7 +1062,7 @@ EOF
 
 
 print << "EOF"
-    /** Connect a Delegate to another Delegate
+    /** Connect a Delegate to another Delegate.
     */
     template <typename R${comma_arg_tmpl_decl}>
     Connection connect(Delegate<R${comma_arg_tmpl_types}>& delegate, Delegate<R${comma_arg_tmpl_types}>& receiver)
@@ -921,7 +1070,7 @@ print << "EOF"
         return connect( delegate,  slot(receiver) );
     }
 
-    /** Connect a Delegate to a slot
+    /** Connect a Delegate to a Slot.
     */
     template <typename R${comma_arg_tmpl_decl}>
     Connection connect(Delegate<R${comma_arg_tmpl_types}>& delegate, const BasicSlot<R${comma_arg_tmpl_types}>& slot)
@@ -930,7 +1079,7 @@ print << "EOF"
     }
 
 
-    /** Connect a Delegate to a function
+    /** Connect a Delegate to a function.
     */
     template <typename R${comma_arg_tmpl_decl}>
     Connection connect(Delegate<R${comma_arg_tmpl_types}>& delegate, R(*func)(${arg_tmpl_types}))
@@ -939,7 +1088,7 @@ print << "EOF"
     }
 
 
-    /** Connect a Delegate to a member function
+    /** Connect a Delegate to a member function.
     */
     template <typename R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
     Connection connect(Delegate<R${comma_arg_tmpl_types}>& delegate, BaseT& object, R(ClassT::*memFunc)(${arg_tmpl_types}))
@@ -947,7 +1096,7 @@ print << "EOF"
         return connect( delegate, slot(object, memFunc) );
     }
 
-    /** Connect a Delegate to a const member function
+    /** Connect a Delegate to a const member function.
     */
     template <typename R, class ClassT${comma_arg_tmpl_decl}>
     Connection connect(Delegate<R${comma_arg_tmpl_args}>& delegate, ClassT& object, R(ClassT::*memFunc)(${arg_tmpl_types}) const)

@@ -2,7 +2,7 @@
     /** Multicast Signal
 
         A Signal can be connected to multiple targets. The return
-        value of the target is ignored, when the signal is sent.
+        value of the target(s) is/are ignored.
     */
     template <class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
     class Signal : public SignalBase {
@@ -10,20 +10,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -60,35 +71,47 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); }
     };
 
 // END_Signal 10
 // BEGIN_SignalSlot 10
-    // main instantiation
+    /**
+      SignalSlot is a "slot wrapper" for Signal objects. That is, it
+      effectively converts a Signal object into a Slot object, so that it
+      can be used as the target of another Signal. This allows chaining of
+      Signals.
+    */
     template <class A1 = Void, class A2 = Void, class A3 = Void, class A4 = Void, class A5 = Void, class A6 = Void, class A7 = Void, class A8 = Void, class A9 = Void, class A10 = Void>
     class SignalSlot : public BasicSlot<void,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
     {
         public:
+            /** Wraps signal. */
             SignalSlot(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal)
             : _method( signal, &Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>::send )
             {}
 
+            /** Creates a clone of this object and returns it. Caller owns
+            the returned object. */
             BasicSlot<void,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
             { return new SignalSlot(*this); }
 
+            /** Returns a pointer to this object's internal Callable object. */
             virtual const void* callable() const
             {
                 return &_method;
             }
 
+            /** ??? */
             virtual bool opened(const Connection& c)
             {
                 Connectable& connectable = _method.object();
                 return connectable.opened(c);
             }
 
+            /** ??? */
             virtual void closed(const Connection& c)
             {
                 Connectable& connectable = _method.object();
@@ -99,11 +122,14 @@
             mutable ConstMethod<void, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
     };
 
+    /** Creates a SignalSlot object from an equivalent Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     SignalSlot<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> slot( Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> & signal )
     { return SignalSlot<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>( signal ); }
 
 
+    /** Connects the given signal and slot objects and returns that Connection
+    object (which can normally be ignored). */
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
     {
@@ -132,15 +158,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& receiver)
     {
@@ -155,20 +173,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -205,6 +234,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8,a9); }
     };
@@ -233,15 +263,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& receiver)
     {
@@ -256,20 +278,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -306,6 +339,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8); }
     };
@@ -334,15 +368,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8>& receiver)
     {
@@ -357,20 +383,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -407,6 +444,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
             { this->send(a1,a2,a3,a4,a5,a6,a7); }
     };
@@ -435,15 +473,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7>& sender, Signal<A1,A2,A3,A4,A5,A6,A7>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7>& sender, Signal<A1,A2,A3,A4,A5,A6,A7>& receiver)
     {
@@ -458,20 +488,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -508,6 +549,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
             { this->send(a1,a2,a3,a4,a5,a6); }
     };
@@ -536,15 +578,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5, class A6>
-    Connection connect(Signal<A1,A2,A3,A4,A5,A6>& sender, Signal<A1,A2,A3,A4,A5,A6>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5, class A6>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6>& sender, Signal<A1,A2,A3,A4,A5,A6>& receiver)
     {
@@ -559,20 +593,31 @@
             typedef Invokable<A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -609,6 +654,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
             { this->send(a1,a2,a3,a4,a5); }
     };
@@ -637,15 +683,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4, class A5>
-    Connection connect(Signal<A1,A2,A3,A4,A5>& sender, Signal<A1,A2,A3,A4,A5>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4, class A5>
     Connection connect(Signal<A1,A2,A3,A4,A5>& sender, Signal<A1,A2,A3,A4,A5>& receiver)
     {
@@ -660,20 +698,31 @@
             typedef Invokable<A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3, A4 a4) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -710,6 +759,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
             { this->send(a1,a2,a3,a4); }
     };
@@ -738,15 +788,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3, class A4>
-    Connection connect(Signal<A1,A2,A3,A4>& sender, Signal<A1,A2,A3,A4>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3, class A4>
     Connection connect(Signal<A1,A2,A3,A4>& sender, Signal<A1,A2,A3,A4>& receiver)
     {
@@ -761,20 +803,31 @@
             typedef Invokable<A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2, A3 a3) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -811,6 +864,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2, A3 a3) const
             { this->send(a1,a2,a3); }
     };
@@ -839,15 +893,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2, class A3>
-    Connection connect(Signal<A1,A2,A3>& sender, Signal<A1,A2,A3>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2, class A3>
     Connection connect(Signal<A1,A2,A3>& sender, Signal<A1,A2,A3>& receiver)
     {
@@ -862,20 +908,31 @@
             typedef Invokable<A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1, A2 a2) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -912,6 +969,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1, A2 a2) const
             { this->send(a1,a2); }
     };
@@ -940,15 +998,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1, class A2>
-    Connection connect(Signal<A1,A2>& sender, Signal<A1,A2>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1, class A2>
     Connection connect(Signal<A1,A2>& sender, Signal<A1,A2>& receiver)
     {
@@ -963,20 +1013,31 @@
             typedef Invokable<A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send(A1 a1) const
             {
                 // The sentry will set the Signal to the sending state and
@@ -1013,6 +1074,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()(A1 a1) const
             { this->send(a1); }
     };
@@ -1041,15 +1103,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <class A1>
-    Connection connect(Signal<A1>& sender, Signal<A1>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     template <class A1>
     Connection connect(Signal<A1>& sender, Signal<A1>& receiver)
     {
@@ -1064,20 +1118,31 @@
             typedef Invokable<Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> Invokable;
 
         public:
+            /** Does nothing. */
             Signal()
             { }
 
-            Signal(const Signal& signal)
+            /** Deeply copies rhs. */
+            Signal(const Signal& rhs)
             {
-                Signal::operator=(signal);
+                Signal::operator=(rhs);
             }
 
+            /**
+            Connects slot to this signal, such that firing this signal
+            will invoke slot.
+            */
             template <typename R>
             Connection connect(const BasicSlot<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
             }
 
+            /**
+            Invokes all slots connected to this signal, in an undefined
+            order. Their return values are ignored. Calling of connected slots will
+            be interrupted if a slot deletes this Signal object or throws an exception.
+            */
             inline void send() const
             {
                 // The sentry will set the Signal to the sending state and
@@ -1114,6 +1179,7 @@
                 }
             }
 
+            /** Same as send(...). */
             inline void operator()() const
             { this->send(); }
     };
@@ -1142,15 +1208,7 @@
         return connect( signal, slot(object, memFunc) );
     }
 
-    /// Connects a Signal to another Signal
-/**
-    template <>
-    Connection connect(Signal<>& sender, Signal<>& receiver)
-    {
-        return connect( sender, slot(receiver) );
-    }
-*/
-    /// Connects a Signal to another Signal
+    /** Connects a Signal to another Signal. */
     inline Connection connect(Signal<>& sender, Signal<>& receiver)
     {
         return connect( sender, slot(receiver) );
