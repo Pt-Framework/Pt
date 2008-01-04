@@ -3,42 +3,45 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gui/$(GUI:L) ;
 SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 
-SharedLibrary Pt-Gui :  Application.cpp
-                        Pixmap.cpp
-                        Widget.cpp
-                        CloseEvent.cpp
-                        Button.cpp
-                        Event.cpp
-                        HorizontalLayout.cpp
-                        ImageButton.cpp
-                        KeyEvent.cpp
-                        Label.cpp
-                        LayoutManager.cpp
-                        NullLayout.cpp
-                        MouseEvent.cpp
-                        MouseMoveEvent.cpp
-                        MoveEvent.cpp
-                        PaintEvent.cpp
-                        Painter.cpp
-                        Panel.cpp
-                        ProgressBar.cpp
-                        ResizeEvent.cpp
-                        BorderLayout.cpp
-                        SimpleGridLayout.cpp
-                        VerticalLayout.cpp
-                       ;
-
-SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
-SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
-SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
-SharedLibrary_MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
-
-Main WidgetDemo : WidgetDemo.cpp ;
-Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
-Main_MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
-
-Main Scribble : Scribble.cpp ;
-Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
-Main_MakeLocate Scribble : $(OUTPUT_TARGET) ;
+if $(GUI) != "cocoa"
+{
+	SharedLibrary Pt-Gui :  Application.cpp
+	                        Pixmap.cpp
+	                        Widget.cpp
+	                        CloseEvent.cpp
+	                        Button.cpp
+	                        Event.cpp
+	                        HorizontalLayout.cpp
+	                        ImageButton.cpp
+	                        KeyEvent.cpp
+	                        Label.cpp
+	                        LayoutManager.cpp
+	                        NullLayout.cpp
+	                        MouseEvent.cpp
+	                        MouseMoveEvent.cpp
+	                        MoveEvent.cpp
+	                        PaintEvent.cpp
+	                        Painter.cpp
+	                        Panel.cpp
+	                        ProgressBar.cpp
+	                        ResizeEvent.cpp
+	                        BorderLayout.cpp
+	                        SimpleGridLayout.cpp
+	                        VerticalLayout.cpp
+	                       ;
+	
+	SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
+	SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
+	SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
+	SharedLibrary_MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
+	
+	Main WidgetDemo : WidgetDemo.cpp ;
+	Main_LinkSharedLibraries WidgetDemo : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
+	Main_MakeLocate WidgetDemo : $(OUTPUT_TARGET) ;
+	
+	Main Scribble : Scribble.cpp ;
+	Main_LinkSharedLibraries Scribble : Pt Pt-System Pt-Gfx Pt-Gui Pt-Text ;
+	Main_MakeLocate Scribble : $(OUTPUT_TARGET) ;
+}
 
 SubInclude TOP src Pt-Gui $(GUI:L) ;

@@ -1,0 +1,17 @@
+SubDir TOP src Pt-Gui cocoa ;
+SubDirHdrs $(TOP)/include ;
+SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
+
+#Library Pt-Gui-gdi : ApplicationImpl.cpp
+#                     PainterImpl.cpp
+#                     PixmapImpl.cpp
+#                     PixmapPainter.cpp
+#                     WidgetImpl.cpp
+#                     WidgetPainter.cpp
+#                     ;
+
+Main nstest : nstest.mm ;
+Main_AddLibraries nstest : $(GUILIBS) ;
+Main_MakeLocate nstest : $(OUTPUT_TARGET) ;
+
+#Library_MakeLocate Pt-Gui-gdi : $(OUTPUT_TARGET) ;
