@@ -14,7 +14,7 @@ if $(TARGET_OS:L) = linux
 if $(TARGET_OS:L) = macosx
 {
     SYS ?= posix ;
-    GUI ?= none ;
+    GUI ?= cocoa ;
 }
 if $(TARGET_OS) = aix
 {
@@ -153,12 +153,15 @@ if $(GUI:L) = "gf"
     }
 }
 
-
 if $(GUI:L) = "photon"
 {
     GUILIBS = -lphrender -lph ;
 }
 
+if $(GUI:L) = "cocoa"
+{
+    GUILIBS = -framework AppKit -framework Foundation ;
+}
 
 # Must search X11 includes in these locations (sorted by priority) :
 # /usr/X11R7/include/X11

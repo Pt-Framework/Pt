@@ -1,22 +1,13 @@
-
+#
 # Initialize variables
 #
 CC        = gcc ;
 C++       = g++ ;
-if $(CXX)
-{
-	C++ = $(CXX) ;
-}
 RANLIB		?= ranlib ;
 
-
+#
 # Flags and options
 #
-# TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
-#       options below can be enabled ???
-#
-#CCFLAGS 	+= -fvisibility-inlines-hidden -fvisibility=hidden ;
-#LINKFLAGS	?= -fvisibility-inlines-hidden -fvisibility=hidden ;
 LINKLIBS	+= -lstdc++ ;
 
 if $(CONFIG:L) = debug
