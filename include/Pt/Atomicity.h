@@ -41,6 +41,11 @@
 
         #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
 
+    #elif defined(PT_X86_64) || \
+        defined(__x86_64__) || defined(__amd64__)
+
+        #define PT_ATOMICITY_H "Atomicity.gcc.x86_64.h"
+
     #elif defined(PT_ARM) || \
           defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
 

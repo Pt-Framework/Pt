@@ -1,24 +1,12 @@
 #
-# Dear developers,
+# The following format is used for TASKs and ITEMS:
 #
-# When editing ITEMs and TASKs in this TODO file, please format them as follows:
+# ITEM P<N> S<N> "Item's description"
+#     TASK "Task's description"
+#     TASK "Task's description"
 #
-# ITEM P? S? "Item's description"
-# <TAB> TASK "Task's description"
-# <TAB> TASK "Task's description"
+# P<N> - <N> is the priority from 1 (lowest) to 10 (highest)
+# S<N> - <N> is the size as Fibonacci number 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
 #
-# Priority is from 1 (lowest) to 10 (highest)
-# Size is a Fibonacci numbers 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
+# Use P0 and/or S99 if the priority and/or the size has/have not yet decided
 #
-# One may use P0 and/or S99 if the priority and/or the size has/have not yet decided
-#
-# In the (near) future when we want to have a front-end for these SCRUM files or
-# want to display their contents in our web, we must write a parser for the files.
-# So, please ensure that the formatting is correct so that we won't get any problem
-# when we want to parse the files later.
-#
-# regards,
-# Aloysius
-#
-
-

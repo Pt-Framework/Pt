@@ -36,6 +36,8 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
     protected:
         void Integer()
         {
+            PT_UNIT_ASSERT( sizeof(Pt::atomic_t) == sizeof(std::ptrdiff_t) );
+
             volatile Pt::atomic_t v = 0;
 
             Pt::atomicIncrement(v);
