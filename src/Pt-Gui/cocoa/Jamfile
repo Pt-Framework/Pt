@@ -10,7 +10,8 @@ SubDirC++Flags [ FDefines PT_GUI_API_EXPORT ] ;
 #                     WidgetPainter.cpp
 #                     ;
 
-Main nstest : nstest.mm ;
+Main nstest : nstest.cpp ApplicationImpl.mm WidgetImpl.mm ../MouseEvent.cpp ../Event.cpp ;
+Main_LinkSharedLibraries nstest : Pt ;
 Main_AddLibraries nstest : $(GUILIBS) ;
 Main_MakeLocate nstest : $(OUTPUT_TARGET) ;
 
