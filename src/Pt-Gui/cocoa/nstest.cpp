@@ -1,13 +1,13 @@
-#include "ApplicationImpl.h"
-#include "WidgetImpl.h"
+#include "Pt/Gui/Application.h"
+#include "Pt/Gui/Widget.h"
 #include <iostream>
 
 int main( int argc, const char* argv[])
 {
     std::cerr << "Started" << std::endl;
-    Pt::Gui::ApplicationImpl app;
+    Pt::Gui::Application app;
 
-    Pt::Gui::WidgetImpl widget( Pt::Math::Point(50, 400), Pt::Math::Size(300, 200) );
+    Pt::Gui::Widget widget( Pt::Math::Point(50, 400), Pt::Math::Size(300, 200) );
     widget.show();
 
     app.run();
