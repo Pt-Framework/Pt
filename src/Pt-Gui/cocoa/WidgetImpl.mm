@@ -66,6 +66,13 @@ WidgetImpl::WidgetImpl(/*Widget& apiWidget, Widget* parent,*/ const Math::Point&
 }
 
 
+WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
+//: _apiWidget(apiWidget)
+{
+
+}
+
+
 WidgetImpl::~WidgetImpl()
 {
 
@@ -88,10 +95,10 @@ void WidgetImpl::setTitle(const Pt::String& text)
 }
 
 
-//Painter WidgetImpl::painter()
-//{
-//	return Painter(&_painter);
-//}
+Painter WidgetImpl::painter()
+{
+	return Painter(0);
+}
 
 
 void WidgetImpl::show()

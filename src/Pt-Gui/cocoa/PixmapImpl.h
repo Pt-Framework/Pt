@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 Marc Boris Duerner                                 *
+ *   Copyright (C) 2006 Marc Boris Duerner                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,99 +16,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#import "ApplicationImpl.h"
-#import "Pt/Gui/MouseEvent.h"
-#include <iostream>
+#ifndef Pt_Gui_PixmapImpl_h
+#define Pt_Gui_PixmapImpl_h
 
-@implementation PtGuiApplication
-
-+ (void)sharedApplication:(Pt::Gui::Application*) app
-{
-    [[NSAutoreleasePool alloc] init];
-    [PtGuiApplication sharedApplication];
-    [NSApp setApplication: app];
-}
-
-- (void) release
-{
-    [pool release];
-    [super release];
-}
-
-- (void)processEvent:(Pt::Gui::Event*) ev
-{
-    std::cerr << "processEvent:" << std::endl;
-    if(application)
-    {
-        application->event.send(*ev);
-    }
-}
-
-- (void)setApplication:(Pt::Gui::Application*) app
-{
-    application = app;
-}
-@end
-
+#include "Pt/Api.h"
+#include "Pt/Math/Size.h"
+#include "Pt/Gui/Painter.h"
+//#include "PixmapPainterImpl.h"
 
 namespace Pt {
 
 namespace Gui {
 
-ApplicationImpl::ApplicationImpl(Application& a)
-: app(&a)
-{
-    [PtGuiApplication sharedApplication: app];
-}
+    class PixmapImpl {
+        public:
+            PixmapImpl(size_t width, size_t height);
 
+            PixmapImpl(const PixmapImpl& pimpl);
 
-ApplicationImpl::ApplicationImpl()
-: app(0)
-{
+            virtual ~PixmapImpl();
 
-    [PtGuiApplication sharedApplication: app];
-}
+            const Math::Size& size() const
+            { return _size; }
 
+            Painter painter();
 
-ApplicationImpl::~ApplicationImpl()
-{
-    [NSApp release];
-}
-
-
-void ApplicationImpl::commitEvent(const Pt::Event& event)
-{
-}
-
-
-void ApplicationImpl::queueEvent(const Pt::Event& event)
-{
-}
-
-
-void ApplicationImpl::processEvents()
-{
-}
-
-
-int ApplicationImpl::run()
-{  
-	[NSApp run];
-	return 0;
-}
-
-
-void ApplicationImpl::wake()
-{
-
-}
-
-
-void ApplicationImpl::exit()
-{
-    [NSApp stop: nil];
-}
+        private:
+            Math::Size _size;
+            //PixmapPainterImpl _painter;
+    };
 
 } // namespace Gui
 
 } // namespace Pt
+
+#endif

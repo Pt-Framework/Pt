@@ -22,7 +22,7 @@
 //#include "WidgetPainterImpl.h"
 #include <Pt/Gui/Api.h>
 //#include <Pt/Gui/Widget.h>
-//#include <Pt/Gui/Painter.h>
+#include <Pt/Gui/Painter.h>
 #include <Pt/Math/Point.h>
 #include <Pt/Math/Rect.h>
 #include <Pt/String.h>
@@ -55,13 +55,17 @@ namespace Gui {
                          const Math::Point& at = Math::Point(0, 0),
                          const Math::Size& size = Math::Size(400, 300) );
 
+            WidgetImpl( Widget& apiWidget, Widget* parent,
+                        const Math::Point& at = Math::Point(0, 0),
+                        const Math::Size& size = Math::Size(400, 300) );
+
             virtual ~WidgetImpl();
 
             void setTitle(const Pt::String& text);
 
             Pt::String title() const;
 
-            //Painter painter();
+            Painter painter();
 
             void setParent(Widget* parent);
 
