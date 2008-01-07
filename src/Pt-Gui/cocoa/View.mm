@@ -16,62 +16,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_WidgetImpl_h
-#define Pt_Gui_WidgetImpl_h
+#import "View.h"
+#import "Application.h"
+//#include <Pt/Gui/PaintEvent.h>
+#include <Pt/Gui/MouseEvent.h>
+#import <Foundation/NSString.h>
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSEvent.h>
 
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Painter.h>
-#include <Pt/Gui/Widget.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
-#include <Pt/String.h>
-
-#ifdef __OBJC__
-    #import "View.h"
-    #import <AppKit/NSWindow.h>
-#else
-    struct PtGuiView;
-    struct NSWindow;
-#endif
-
-namespace Pt {
-
-namespace Gui {
-
-    class WidgetImpl
+@implementation PtGuiView
+- (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) widget
+{
+    self = [super init];
+    if(self)
     {
-        public:
-            WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(0, 0),
-                         const Math::Size& size = Math::Size(400, 300) );
-
-            virtual ~WidgetImpl();
-
-            void setTitle(const Pt::String& text);
-
-            Pt::String title() const;
-
-            Painter painter();
-
-            void setParent(Widget* parent);
-
-            void move(size_t x, size_t y);
-
-            void resize(size_t width, size_t height);
-
-            void show();
-
-            void hide();
-
-        private:
-            Widget& _apiWidget;
-            NSWindow* window; 
-            PtGuiView* view;
-            //WidgetPainterImpl _painter;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+        _widget = widget;
+    }
+    
+    return self;
+}
+- (void) mouseDown:(NSEvent*)ev{
+    NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
+    
+    Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
+                            Pt::Gui::MouseEvent::LeftButton, 
+                            Pt::Gui::MouseEvent::Press, 
+                            0); //modifiers
+    
+    [NSApp processEvent: &mev];
+    [super mouseDown: ev];
+}
+@end

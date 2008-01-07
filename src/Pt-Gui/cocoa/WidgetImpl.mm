@@ -18,34 +18,14 @@
  ***************************************************************************/
 #include "WidgetImpl.h"
 #include "ApplicationImpl.h"
-#include <Pt/Gui/Widget.h>
-//#include <Pt/Gui/PaintEvent.h>
-
-#import <Foundation/NSString.h>
-#import <AppKit/NSApplication.h>
-#import <AppKit/NSEvent.h>
-
-@implementation PtGuiView- (void)mouseDown:(NSEvent*)ev{
-    NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
-    
-    Pt::Gui::Widget* widget = 0;
-    Pt::Gui::MouseEvent mev(*widget, local_point.x, local_point.y, 
-                            Pt::Gui::MouseEvent::LeftButton, 
-                            Pt::Gui::MouseEvent::Press, 
-                            0); //modifiers
-    
-    [NSApp processEvent: &mev];
-    
-    [super mouseDown: ev];
-}
-@end
+#include <iostream>
 
 namespace Pt {
 
 namespace Gui {
 
-WidgetImpl::WidgetImpl(/*Widget& apiWidget, Widget* parent,*/ const Math::Point& at, const Math::Size& size)
-//: _apiWidget(apiWidget)
+WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
+: _apiWidget(apiWidget)
 {
 
     window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())      
@@ -55,43 +35,48 @@ WidgetImpl::WidgetImpl(/*Widget& apiWidget, Widget* parent,*/ const Math::Point&
                                                              NSResizableWindowMask
                                                    backing:NSBackingStoreBuffered
                                                    defer:YES];
-    [window autorelease];
-    [window setTitle:@"Unknown Window"];
+
+    //[window setTitle:@"Unknown Window"];
     [window setDelegate: window];
     [window setAcceptsMouseMovedEvents:YES];
-
     
-    view = [[PtGuiView alloc] init];
+    view = [[PtGuiView alloc] initWithWidget: &apiWidget];
     [window setContentView: view];
-}
-
-
-WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
-//: _apiWidget(apiWidget)
-{
-
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-
+    [window release];
+    [view release];
 }
 
 
 Pt::String WidgetImpl::title() const
 { 
+/*    
+    NSString* str = [window title];
+    [str getBytes:(void *)buffer 
+                  maxLength:(NSUInteger)
+                  usedLength:(NSUInteger *)
+                  encoding:(NSStringEncoding)
+                  options:(NSStringEncodingConversionOptions)options 
+                  range:(NSRange)range 
+                  remainingRange:(NSRangePointer)leftover
+*/
+                  
     return L""; 
 }
 
 
 void WidgetImpl::setTitle(const Pt::String& text)
 {
-    NSString* str = [[NSString alloc] initWithBytes: text.data() 
-                                                     length: text.size()
-                                                     encoding: NSUTF32StringEncoding];
-    [str autorelease];
+    //TODO: use Byteorder.h to determine endianess of encoding
+    NSString* str = [[NSString alloc] initWithBytes: text.c_str() 
+                                                     length: text.size() * sizeof(Pt::Char)
+                                                     encoding: NSUTF32LittleEndianStringEncoding];
     [window setTitle:str];
+    [str release];
 }
 
 

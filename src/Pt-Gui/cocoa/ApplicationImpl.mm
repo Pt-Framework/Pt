@@ -22,31 +22,22 @@
 
 @implementation PtGuiApplication
 
-+ (void)sharedApplication:(Pt::Gui::Application*) app
+- (void) initWithApplication:(Pt::Gui::Application*) app
 {
-    [[NSAutoreleasePool alloc] init];
-    [PtGuiApplication sharedApplication];
-    [NSApp setApplication: app];
-}
-
-- (void) release
-{
-    [pool release];
-    [super release];
-}
-
-- (void)processEvent:(Pt::Gui::Event*) ev
-{
-    std::cerr << "processEvent:" << std::endl;
-    if(application)
-    {
-        application->event.send(*ev);
-    }
-}
-
-- (void)setApplication:(Pt::Gui::Application*) app
-{
+    pool = [[NSAutoreleasePool alloc] init];
     application = app;
+}
+
+- (void) dealloc
+{
+    [super dealloc];
+    [pool release];
+}
+
+- (void) processEvent:(Pt::Gui::Event*) ev
+{
+    //std::cerr << "processEvent" << std::endl;
+    application->event.send(*ev);
 }
 @end
 
@@ -58,15 +49,8 @@ namespace Gui {
 ApplicationImpl::ApplicationImpl(Application& a)
 : app(&a)
 {
-    [PtGuiApplication sharedApplication: app];
-}
-
-
-ApplicationImpl::ApplicationImpl()
-: app(0)
-{
-
-    [PtGuiApplication sharedApplication: app];
+    [PtGuiApplication sharedApplication];
+    [NSApp initWithApplication: app];
 }
 
 

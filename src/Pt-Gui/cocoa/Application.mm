@@ -16,62 +16,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_WidgetImpl_h
-#define Pt_Gui_WidgetImpl_h
+#import "Application.h"
+#include <iostream>
 
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Painter.h>
-#include <Pt/Gui/Widget.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
-#include <Pt/String.h>
+@implementation PtGuiApplication
 
-#ifdef __OBJC__
-    #import "View.h"
-    #import <AppKit/NSWindow.h>
-#else
-    struct PtGuiView;
-    struct NSWindow;
-#endif
+- (void) initWithApplication:(Pt::Gui::Application*) app
+{
+    pool = [[NSAutoreleasePool alloc] init];
+    application = app;
+}
 
-namespace Pt {
+- (void) dealloc
+{
+    [super dealloc];
+    [pool release];
+}
 
-namespace Gui {
-
-    class WidgetImpl
-    {
-        public:
-            WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(0, 0),
-                         const Math::Size& size = Math::Size(400, 300) );
-
-            virtual ~WidgetImpl();
-
-            void setTitle(const Pt::String& text);
-
-            Pt::String title() const;
-
-            Painter painter();
-
-            void setParent(Widget* parent);
-
-            void move(size_t x, size_t y);
-
-            void resize(size_t width, size_t height);
-
-            void show();
-
-            void hide();
-
-        private:
-            Widget& _apiWidget;
-            NSWindow* window; 
-            PtGuiView* view;
-            //WidgetPainterImpl _painter;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+- (void) processEvent:(Pt::Gui::Event*) ev
+{
+    //std::cerr << "processEvent" << std::endl;
+    application->event.send(*ev);
+}
+@end

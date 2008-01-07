@@ -8,6 +8,7 @@ int main( int argc, const char* argv[])
     Pt::Gui::Application app;
 
     Pt::Gui::Widget widget( Pt::Math::Point(50, 400), Pt::Math::Size(300, 200) );
+    widget.setTitle(L"NSTest");
     widget.show();
 
     app.run();

@@ -21,36 +21,12 @@
 
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Event.h>
-#include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/Application.h>
-#include <Pt/Signal.h>
 
 #ifdef __OBJC__
-
-    #import <Foundation/NSGeometry.h>
-    #import <Foundation/NSAutoreleasePool.h>
-    #import <AppKit/NSApplication.h>
-
-    @interface PtGuiApplication : NSApplication
-    {
-        Pt::Gui::Application* application;
-        NSAutoreleasePool* pool;
-    }
-
-        + (void)sharedApplication:(Pt::Gui::Application*) app;
-        
-        - (void) release;
-    
-        - (void)processEvent:(Pt::Gui::Event*) mev;
-        
-        - (void)setApplication:(Pt::Gui::Application*) app;
-    
-    @end
-
+    #import "Application.h"
 #else
-
     struct PtGuiApplication;
-
 #endif
 
 namespace Pt {
@@ -61,8 +37,6 @@ class PT_GUI_API ApplicationImpl
 {
     public:
         ApplicationImpl(Application& app);
-        
-        ApplicationImpl();
 
         ~ApplicationImpl();
 
