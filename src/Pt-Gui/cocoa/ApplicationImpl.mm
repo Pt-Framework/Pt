@@ -19,7 +19,6 @@
 #import "ApplicationImpl.h"
 #import "Application.h"
 #import "Pt/Gui/MouseEvent.h"
-#include <iostream>
 
 namespace Pt {
 
