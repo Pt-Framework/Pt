@@ -17,30 +17,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #import "ApplicationImpl.h"
+#import "Application.h"
 #import "Pt/Gui/MouseEvent.h"
 #include <iostream>
-
-@implementation PtGuiApplication
-
-- (void) initWithApplication:(Pt::Gui::Application*) app
-{
-    pool = [[NSAutoreleasePool alloc] init];
-    application = app;
-}
-
-- (void) dealloc
-{
-    [super dealloc];
-    [pool release];
-}
-
-- (void) processEvent:(Pt::Gui::Event*) ev
-{
-    //std::cerr << "processEvent" << std::endl;
-    application->event.send(*ev);
-}
-@end
-
 
 namespace Pt {
 

@@ -23,12 +23,6 @@
 #include <Pt/Gui/Event.h>
 #include <Pt/Gui/Application.h>
 
-#ifdef __OBJC__
-    #import "Application.h"
-#else
-    struct PtGuiApplication;
-#endif
-
 namespace Pt {
 
 namespace Gui {
