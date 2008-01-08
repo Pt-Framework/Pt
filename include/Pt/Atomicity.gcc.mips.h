@@ -26,7 +26,6 @@ namespace Pt {
 
 typedef std::sig_atomic_t atomic_t;
 
-
 inline  atomicIncrement(volatile atomic_t& val)
 {
     atomic_t tmp, result = 0;
@@ -141,7 +140,6 @@ inline atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
                             : "m" (*dest), "r" (add));
     return result;
 }
-
 
 } // namespace Pt
 
