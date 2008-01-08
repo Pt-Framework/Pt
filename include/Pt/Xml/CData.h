@@ -52,8 +52,8 @@ namespace Pt {
                  * @brief Returns the content of this CData object.
                  *
                  * The content includes the data in the XML's CData-element without the surrounding
-                 * CDATA-"tag". When parsing $<![CDATA[<Element>This is a cdata element</Element>]]>$ the
-                 * following content will be returned: $<Element>This is a cdata element</Element>$
+                 * CDATA-"tag". When parsing $&lt;![CDATA[&lt;Element&gt;This is a cdata element&lt;/Element&gt;]]&gt;$ the
+                 * following content will be returned: $&lt;Element&gt;This is a cdata element&lt;/Element&gt;$
                  *
                  * @return The content of this CData object.
                  */

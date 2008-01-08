@@ -52,7 +52,7 @@ namespace Xml {
 
             /**
              * @brief Sets the name of this attribute.
-             * @param The new name of this attribute.
+             * @param name The new name of this attribute.
              */
             void setName(const String name)
             {_name = name;}
@@ -66,7 +66,7 @@ namespace Xml {
 
             /**
              * @brief Sets the value of this attribute.
-             * @param The new value of this attribute.
+             * @param value The new value of this attribute.
              */
             void setValue(const String value)
             {_value = value;}
@@ -148,7 +148,7 @@ namespace Xml {
 
             /**
              * @brief Sets the tag name of the end start for which this StartElement object was created.
-             * @param content The new name for this StartElement object.
+             * @param name The new name for this StartElement object.
              */
             void setName(const String name)
             {_name = name;}

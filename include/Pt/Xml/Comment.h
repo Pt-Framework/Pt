@@ -66,9 +66,9 @@ namespace Pt {
 
                 /**
                  * @brief Sets the Text of this Comment object.
-                 * @param content The new Text for this Comment object.
+                 * @param text The new Text for this Comment object.
                  */
-                void setText(const String Text);
+                void setText(const String text);
 
             private:
                 //! The Text of this Comment object.

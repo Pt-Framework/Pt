@@ -71,7 +71,7 @@ namespace Pt {
 
                 /**
                  * @brief Sets the tag name of the end tag for which this EndElement object was created.
-                 * @param content The new name for this EndElement object.
+                 * @param name The new name for this EndElement object.
                  */
                 void setName(const String name);
 
