@@ -30,9 +30,11 @@
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Image.h>
 #include <Pt/String.h>
+#include <vector>
 #include <list>
 
 #ifdef __OBJC__
+    #import <Foundation/NSGeometry.h>
     #import <AppKit/NSBezierPath.h>
 #else
     struct NSBezierPath;
@@ -50,9 +52,9 @@ namespace Gui {
 
             virtual ~PainterImpl();
 
-            virtual void begin() = 0;
+            virtual void begin();
 
-            virtual void end() = 0;
+            virtual void end();
 
             void setPen(const Gfx::Pen& pen);
 
@@ -112,7 +114,7 @@ namespace Gui {
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-            NSBezierPath* _path;
+            std::vector<NSBezierPath*> _paths;
     };
 
 } // namespace Gui

@@ -24,8 +24,6 @@
 #include "Pt/Gfx/FontMetrics.h"
 #include <iostream>
 
-#import <Foundation/NSGeometry.h>
-
 namespace Pt {
 
 namespace Gui {
@@ -33,19 +31,35 @@ namespace Gui {
 PainterImpl::PainterImpl()
 : _font("sans-serif")
 {
-    _path = [NSBezierPath bezierPath];
 }
 
 
 PainterImpl::~PainterImpl()
 {
-    [_path release];
+}
+
+
+void PainterImpl::begin()
+{   
+}
+
+
+void PainterImpl::end()
+{
+    std::vector<NSBezierPath*>::iterator it;
+    for(it = _paths.begin(); it != _paths.end(); ++it)
+    {
+        [*it stroke];
+        [*it release];
+    }
+
+    _paths.clear();
 }
 
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
-
+    _pen = pen;
 }
 
 
@@ -106,9 +120,13 @@ void PainterImpl::drawPixel(const Math::Point& to)
 
 void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
-    NSPoint begin = { from.x(), from.y() };
-    NSPoint end = { to.x(), to.y() };
-    [NSBezierPath strokeLineFromPoint:begin toPoint:end];
+    NSBezierPath* path = [NSBezierPath bezierPath];
+    [path setLineWidth:_pen.size()];
+    
+    [path moveToPoint:NSMakePoint( from.x(), from.y() )];
+    [path lineToPoint:NSMakePoint( to.x(), to.y() )];
+    
+    _paths.push_back(path);
 }
 
 

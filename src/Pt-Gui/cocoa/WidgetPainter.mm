@@ -24,6 +24,7 @@ namespace Gui {
 
 WidgetPainter::WidgetPainter()
 {
+    _view = nil;
 }
 
 
@@ -34,12 +35,14 @@ WidgetPainter::~WidgetPainter()
 
 void WidgetPainter::begin()
 {
-    [_view lockFocus];
+
 }
 
 
 void WidgetPainter::end()
 {
+    [_view lockFocus];
+    PainterImpl::end();
     [_view unlockFocus]; 
 }
 
