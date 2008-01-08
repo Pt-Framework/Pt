@@ -19,7 +19,8 @@
 #ifndef Pt_Arg_h
 #define Pt_Arg_h
 
-#include <Pt/VariantTraits.h>
+#include <Pt/Api.h>
+#include <Pt/Convert.h>
 
 namespace Pt
 {
@@ -126,7 +127,7 @@ namespace Pt
               for (int i = 1; i < argc - 1; ++i)
                 if (argv[i][0] == '-' && argv[i][1] == ch && argv[i][2] == '\0')
                 {
-                  if (VariantTraits<T>::fromData(m_value, argv[i + 1]))
+                  Pt::convert(m_value, argv[i + 1]);
                   {
                     m_isset = true;
                     for ( ; i < argc - 2; ++i)
@@ -162,7 +163,7 @@ namespace Pt
               for (int i = 1; i < argc - 1; ++i)
                 if (std::strcmp(argv[i], str) == 0)
                 {
-                  if (VariantTraits<T>::fromData(m_value, argv[i + 1]))
+                  Pt::convert(m_value, argv[i + 1]);
                   {
                     m_isset = true;
                     for ( ; i < argc - 2; ++i)
@@ -186,7 +187,7 @@ namespace Pt
 
                 if (argc > 1)
                 {
-                  if (VariantTraits<T>::fromData(m_value, argv[1]))
+                  Pt::convert(m_value, argv[1]);
                   {
                     m_isset = true;
                     for (int i = 1; i < argc - 1; ++i)
@@ -194,8 +195,8 @@ namespace Pt
                     argc -= 1;
                     argv[argc] = 0;
                   }
-                  else
-                    m_isset = false;
+                  //else
+                  //  m_isset = false;
                 }
                 else
                   m_isset = false;
