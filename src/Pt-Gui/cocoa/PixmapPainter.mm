@@ -16,43 +16,67 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_cocoa_WidgetPainter_h
-#define Pt_Gui_cocoa_WidgetPainter_h
-
-#include "PainterImpl.h"
-
-#ifdef __OBJC__
-    #import <AppKit/NSView.h>
-#else
-    struct NSView;
-#endif
+#include "PixmapPainterImpl.h"
+#include "PixmapImpl.h"
+#include "Pt/Gui/Pixmap.h"
+#include "Pt/Gfx/Rect.h"
 
 namespace Pt {
 
 namespace Gui {
 
-	class Widget;
+PixmapPainterImpl::PixmapPainterImpl( )
+: _pixmap(0)
+{
+}
 
-    class WidgetPainter : public PainterImpl
-    {
-        public:
-            WidgetPainter();
 
-            ~WidgetPainter();
+PixmapPainterImpl::~PixmapPainterImpl()
+{
+}
 
-            void setView(NSView* view)
-            { _view = view; }
 
-            virtual void begin();
+void PixmapPainterImpl::set(PixmapImpl& pixmap)
+{
+	_pixmap = &pixmap;
+}
 
-            virtual void end();
 
-        private:
-            NSView* _view;
-    };
+void PixmapPainterImpl::begin()
+{
+}
+
+
+void PixmapPainterImpl::end()
+{
+}
+
+
+void PixmapPainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
+{
+}
+
+
+void PixmapPainterImpl::drawRect(const Gfx::Rect& rect)
+{
+}
+
+
+void PixmapPainterImpl::fillRect(const Gfx::Rect& rect)
+{
+}
+
+
+void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+{
+}
+
+
+void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
+{
+}
 
 } // namespace Gui
 
 } // namespace Pt
 
-#endif

@@ -16,39 +16,42 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_cocoa_WidgetPainter_h
-#define Pt_Gui_cocoa_WidgetPainter_h
+#ifndef Pt_Gui_cocoa_PixmapPainter_h
+#define Pt_Gui_cocoa_PixmapPainter_h
 
 #include "PainterImpl.h"
-
-#ifdef __OBJC__
-    #import <AppKit/NSView.h>
-#else
-    struct NSView;
-#endif
 
 namespace Pt {
 
 namespace Gui {
 
-	class Widget;
+	class PixmapImpl;
 
-    class WidgetPainter : public PainterImpl
+    class PixmapPainterImpl : public PainterImpl 
     {
         public:
-            WidgetPainter();
+            PixmapPainterImpl();
 
-            ~WidgetPainter();
+            virtual ~PixmapPainterImpl();
 
-            void setView(NSView* view)
-            { _view = view; }
+            void set(PixmapImpl& pixmap);
 
-            virtual void begin();
+            void begin();
 
-            virtual void end();
+            void end();
+
+            void drawLine(const Math::Point& from, const Math::Point& to);
+
+            void drawRect(const Gfx::Rect& rect);
+
+            void fillRect(const Gfx::Rect& rect);
+
+            void drawPixmap(const Math::Point& to, Pixmap& pm);
+
+            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
         private:
-            NSView* _view;
+            PixmapImpl* _pixmap;
     };
 
 } // namespace Gui
