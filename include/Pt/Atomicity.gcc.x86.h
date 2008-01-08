@@ -80,7 +80,6 @@ inline void* atomicExchange(void* volatile& val, void* new_val)
 {
         void* ret;
 
-        ///TODO: __x86_64__ use cmpxchgq
         asm volatile ("1:; lock; cmpxchgl %2, %0; jne 1b"
                       : "=m" (val), "=a" (ret)
                       : "r" (new_val), "m" (val), "a" (val));
