@@ -181,7 +181,7 @@ namespace Gfx {
              * which this painter is active. A printer device might provide more, less or different
              * fonts than a display (widget) device.
              *
-             * @param A list of installed font names on the current platform and device.
+             * @return A list of installed font names on the current platform and device.
              */
             virtual const std::list<std::string>& fontFamilyNames() = 0;
 
@@ -218,8 +218,8 @@ namespace Gfx {
              * Text is drawn is the base-line of the Text/font.
              *
              * @param to Draws the Text at this position on the painter.
-             * @param Text The Text to be drawn.
-             * @param Outline The Text outline.
+             * @param text The Text to be drawn.
+             * @param outline The Text outline.
              * @see setPen()
              * @see setFont()
              */
@@ -332,8 +332,8 @@ namespace Gfx {
              *
              * The current pen attributes are used to draw the polyline.
              *
-             * @param The points of which the polyline is drawn.
-             * @param Specifies the number of points of the points array that should be
+             * @param points The points of which the polyline is drawn.
+             * @param pointCount Specifies the number of points of the points array that should be
              * used to draw the polyline.
              */
             virtual void drawPolyline(const Pt::Math::Point* points, const size_t pointCount) = 0;
@@ -350,8 +350,8 @@ namespace Gfx {
              *
              * The current brush attributes are used to draw the polygon.
              *
-             * @param The points of which the polygon is drawn.
-             * @param Specifies the number of points of the points array that should be
+             * @param points The points of which the polygon is drawn.
+             * @param pointCount Specifies the number of points of the points array that should be
              * used to draw the polygon.
              */
             virtual void fillPolygon(const Pt::Math::Point* points, const size_t pointCount) = 0;
