@@ -111,7 +111,7 @@ namespace Pt {
     /** @brief Type-traits for for void
     */
     template <>
-    struct PT_API TypeTraits<void>
+    struct TypeTraits<void>
     {
         typedef void Value;
         typedef void ConstType;
