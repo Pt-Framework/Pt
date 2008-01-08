@@ -25,35 +25,35 @@ class XmlWriterTest : public Pt::Unit::TestSuite
 
     protected:
 
-	    void Element()
-	    {
-	        std::stringstream ss;
-	        Pt::Xml::XmlWriter writer(ss);
-	        writer.writeStartElement(L"first");
-	        writer.writeEndElement();
-	        writer.flush();
+        void Element()
+        {
+            std::stringstream ss;
+            Pt::Xml::XmlWriter writer(ss);
+            writer.writeStartElement(L"first");
+            writer.writeEndElement();
+            writer.flush();
 
-	        std::stringstream result;
-	        result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+            std::stringstream result;
+            result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<first>" << std::endl;
             result << "</first>" << std::endl;
 
-		    PT_UNIT_ASSERT( result.str() == ss.str());
-	    }
+            PT_UNIT_ASSERT( result.str() == ss.str());
+        }
 
-	    void TextElement()
-	    {
-	        std::stringstream ss;
-	        Pt::Xml::XmlWriter writer(ss);
+        void TextElement()
+        {
+            std::stringstream ss;
+            Pt::Xml::XmlWriter writer(ss);
             writer.writeElement(L"fourth", L"Hello world!");
             writer.flush();
 
-	        std::stringstream result;
-	        result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+            std::stringstream result;
+            result << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
             result << "<fourth>Hello world!</fourth>" << std::endl;
 
-		    PT_UNIT_ASSERT( result.str() == ss.str());
-	    }
+            PT_UNIT_ASSERT( result.str() == ss.str());
+        }
 };
 
 Pt::Unit::RegisterTest<XmlWriterTest> register_XmlWriterTest;
