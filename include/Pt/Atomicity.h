@@ -36,8 +36,7 @@
 
     #if defined(PT_X86) || \
         defined (i386) || defined(__i386) || defined (__i386__) || \
-        defined(_X86_) || defined(sun386) || defined (_M_IX86) || \
-        defined(__x86_64__) || defined(__amd64__)
+        defined(_X86_) || defined(sun386) || defined (_M_IX86)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
 
