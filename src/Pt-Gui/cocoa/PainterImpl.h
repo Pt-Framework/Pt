@@ -32,6 +32,11 @@
 #include <Pt/String.h>
 #include <list>
 
+#ifdef __OBJC__
+    #import <AppKit/NSBezierPath.h>
+#else
+    struct NSBezierPath;
+#endif
 
 namespace Pt {
 
@@ -69,25 +74,25 @@ namespace Gui {
 
             virtual void drawPixel(const Math::Point& to);
 
-            virtual void drawLine(const Math::Point& from, const Math::Point& to) = 0;
+            virtual void drawLine(const Math::Point& from, const Math::Point& to);
 
             virtual void drawText(const Math::Point& to, const Pt::String& text);
 
-            virtual void drawRect(const Gfx::Rect& rect) = 0;
+            virtual void drawRect(const Gfx::Rect& rect) {}
 
             virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
             virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
 
-            virtual void fillRect(const Gfx::Rect& rect) = 0;
+            virtual void fillRect(const Gfx::Rect& rect) {}
 
             virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
             virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm) = 0;
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm) {}
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) = 0;
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) {}
 
             virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
@@ -107,6 +112,7 @@ namespace Gui {
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
+            NSBezierPath* _path;
     };
 
 } // namespace Gui

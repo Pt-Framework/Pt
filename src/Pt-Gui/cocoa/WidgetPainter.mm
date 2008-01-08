@@ -16,65 +16,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_WidgetImpl_h
-#define Pt_Gui_WidgetImpl_h
-
 #include "WidgetPainter.h"
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Painter.h>
-#include <Pt/Gui/Widget.h>
-#include <Pt/Math/Point.h>
-#include <Pt/Math/Rect.h>
-#include <Pt/String.h>
-
-#ifdef __OBJC__
-    #import "View.h"
-    #import <AppKit/NSWindow.h>
-    #import <AppKit/NSGraphicsContext.h>
-#else
-    struct PtGuiView;
-    struct NSWindow;
-    struct NSGraphicsContext;
-#endif
 
 namespace Pt {
 
 namespace Gui {
 
-    class WidgetImpl
-    {
-        public:
-            WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(0, 0),
-                         const Math::Size& size = Math::Size(400, 300) );
+WidgetPainter::WidgetPainter()
+{
+}
 
-            virtual ~WidgetImpl();
 
-            void setTitle(const Pt::String& text);
+WidgetPainter::~WidgetPainter()
+{
+}
 
-            Pt::String title() const;
 
-            Painter painter();
+void WidgetPainter::begin()
+{
+    [_view lockFocus];
+}
 
-            void setParent(Widget* parent);
 
-            void move(size_t x, size_t y);
+void WidgetPainter::end()
+{
+    [_view unlockFocus]; 
+}
 
-            void resize(size_t width, size_t height);
-
-            void show();
-
-            void hide();
-
-        private:
-            Widget& _apiWidget;
-            NSWindow* window; 
-            PtGuiView* view;
-            WidgetPainter _painter;
-    };
 
 } // namespace Gui
 
 } // namespace Pt
-
-#endif

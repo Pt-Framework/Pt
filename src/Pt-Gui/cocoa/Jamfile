@@ -9,11 +9,10 @@ Library Pt-Gui-cocoa : Application.mm
                        # PixmapPainter.cpp
                        View.mm
                        WidgetImpl.mm
-                       # WidgetPainter.cpp
+                       WidgetPainter.mm
                        ;
+Library_MakeLocate Pt-Gui-cocoa : $(OUTPUT_TARGET) ;
 
 Main nstest : nstest.cpp ;
 Main_LinkSharedLibraries nstest : Pt Pt-Text Pt-Gfx Pt-Gui ;
 Main_MakeLocate nstest : $(OUTPUT_TARGET) ;
-
-#Library_MakeLocate Pt-Gui-gdi : $(OUTPUT_TARGET) ;

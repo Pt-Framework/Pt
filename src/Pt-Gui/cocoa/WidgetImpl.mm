@@ -34,14 +34,15 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
                                                              NSMiniaturizableWindowMask |
                                                              NSResizableWindowMask
                                                    backing:NSBackingStoreBuffered
-                                                   defer:YES];
+                                                   defer:NO];
 
-    //[window setTitle:@"Unknown Window"];
     [window setDelegate: window];
     [window setAcceptsMouseMovedEvents:YES];
     
     view = [[PtGuiView alloc] initWithWidget: &apiWidget];
     [window setContentView: view];
+    
+    _painter.setView(view);
 }
 
 
@@ -82,7 +83,7 @@ void WidgetImpl::setTitle(const Pt::String& text)
 
 Painter WidgetImpl::painter()
 {
-	return Painter(0);
+	return Painter( &_painter );
 }
 
 

@@ -1,5 +1,6 @@
 #include "Pt/Gui/Application.h"
 #include "Pt/Gui/Widget.h"
+#include "Pt/Gui/Painter.h"
 #include <iostream>
 
 int main( int argc, const char* argv[])
@@ -11,6 +12,7 @@ int main( int argc, const char* argv[])
     widget.setTitle(L"NSTest");
     widget.show();
 
+    widget.painter().drawLine( Pt::Math::Point(10, 10), Pt::Math::Point(100, 100) );
     app.run();
     return 0;
 }
