@@ -20,38 +20,36 @@
 #define Pt_Gui_cocoa_PixmapPainter_h
 
 #include "PainterImpl.h"
+#include <Pt/Gui/Painter.h>
+
+#ifdef __OBJC__
+    #import <AppKit/NSImage.h>
+#else
+    struct NSImage;
+#endif
 
 namespace Pt {
 
 namespace Gui {
 
-	class PixmapImpl;
+	class Widget;
 
-    class PixmapPainterImpl : public PainterImpl 
+    class PixmapPainter : public PainterImpl
     {
         public:
-            PixmapPainterImpl();
+            PixmapPainter();
 
-            virtual ~PixmapPainterImpl();
+            ~PixmapPainter();
 
-            void set(PixmapImpl& pixmap);
+            void setImage(NSImage* image)
+            { _image = image; }
 
-            void begin();
+            virtual void begin();
 
-            void end();
-
-            void drawLine(const Math::Point& from, const Math::Point& to);
-
-            void drawRect(const Gfx::Rect& rect);
-
-            void fillRect(const Gfx::Rect& rect);
-
-            void drawPixmap(const Math::Point& to, Pixmap& pm);
-
-            void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
+            virtual void end();
 
         private:
-            PixmapImpl* _pixmap;
+            NSImage* _image;
     };
 
 } // namespace Gui

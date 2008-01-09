@@ -17,10 +17,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PixmapImpl.h"
-//#include "PixmapPainterImpl.h"
-#include "Pt/Gui/Application.h"
-#include "Pt/Gui/Pixmap.h"
-#include <iostream>
 
 namespace Pt {
 
@@ -29,26 +25,28 @@ namespace Gui {
 PixmapImpl::PixmapImpl(size_t width, size_t height)
 : _size( std::max(width, size_t(1)), std::max(height, size_t(1)) )
 {
-
+    _image = [[NSImage alloc] initWithSize:NSMakeSize(width,  height)];
+    _painter.setImage(_image);
 }
 
 
 PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 : _size( pimpl.size() )
 {
-
+    _image = [pimpl._image copy];
+    _painter.setImage(_image);
 }
 
 
 PixmapImpl::~PixmapImpl()
 {
-
+    [_image release];
 }
 
 
 Painter PixmapImpl::painter()
 {
-    return Painter(0);
+    return Painter( &_painter );
 }
 
 

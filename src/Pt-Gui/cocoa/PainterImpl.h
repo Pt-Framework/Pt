@@ -92,7 +92,7 @@ namespace Gui {
 
             virtual void fillPolygon(const Math::Point* points, const size_t pointCount);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm) {}
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
 
             virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) {}
 

@@ -16,66 +16,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "PixmapPainterImpl.h"
-#include "PixmapImpl.h"
-#include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
+#include "PixmapPainter.h"
 
 namespace Pt {
 
 namespace Gui {
 
-PixmapPainterImpl::PixmapPainterImpl( )
-: _pixmap(0)
+PixmapPainter::PixmapPainter()
+{
+    _image = nil;
+}
+
+
+PixmapPainter::~PixmapPainter()
 {
 }
 
 
-PixmapPainterImpl::~PixmapPainterImpl()
+void PixmapPainter::begin()
 {
+
 }
 
 
-void PixmapPainterImpl::set(PixmapImpl& pixmap)
+void PixmapPainter::end()
 {
-	_pixmap = &pixmap;
+    [_image lockFocus];
+    PainterImpl::end();
+    [_image unlockFocus]; 
 }
-
-
-void PixmapPainterImpl::begin()
-{
-}
-
-
-void PixmapPainterImpl::end()
-{
-}
-
-
-void PixmapPainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
-{
-}
-
-
-void PixmapPainterImpl::drawRect(const Gfx::Rect& rect)
-{
-}
-
-
-void PixmapPainterImpl::fillRect(const Gfx::Rect& rect)
-{
-}
-
-
-void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
-{
-}
-
-
-void PixmapPainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
-{
-}
-
 } // namespace Gui
 
 } // namespace Pt

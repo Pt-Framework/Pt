@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PainterImpl.h"
-//#include "PixmapImpl.h"
+#include "PixmapImpl.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
@@ -46,6 +46,7 @@ void PainterImpl::begin()
 
 void PainterImpl::end()
 {
+    [[NSColor blueColor] setStroke];
     std::vector<NSBezierPath*>::iterator it;
     for(it = _paths.begin(); it != _paths.end(); ++it)
     {
@@ -157,6 +158,17 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
 void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
 
+}
+
+
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
+{
+    this->end();
+    this->begin();
+    [pm.impl().image() drawAtPoint:NSMakePoint( to.x(), to.y() ) 
+                       fromRect:NSZeroRect 
+                       operation:NSCompositeCopy 
+                       fraction:1.0];
 }
 
 

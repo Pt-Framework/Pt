@@ -16,13 +16,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Gui_PixmapImpl_h
-#define Pt_Gui_PixmapImpl_h
+#ifndef Pt_Gui_cocoa_PixmapImpl_h
+#define Pt_Gui_cocoa_PixmapImpl_h
 
-#include "Pt/Api.h"
-#include "Pt/Math/Size.h"
-#include "Pt/Gui/Painter.h"
-//#include "PixmapPainterImpl.h"
+#include "PixmapPainter.h"
+#include <Pt/Gui/Api.h>
+#include <Pt/Gui/Painter.h>
+#include <Pt/Math/Size.h>
+
+#ifdef __OBJC__
+    #import <AppKit/NSImage.h>
+    #import <AppKit/NSColor.h>
+#else
+    struct NSImage;
+#endif
 
 namespace Pt {
 
@@ -41,9 +48,13 @@ namespace Gui {
 
             Painter painter();
 
+            NSImage* image() const
+            { return _image; }
+        
         private:
-            Math::Size _size;
-            //PixmapPainterImpl _painter;
+            Pt::Math::Size _size;
+            NSImage* _image;
+            PixmapPainter _painter;
     };
 
 } // namespace Gui
