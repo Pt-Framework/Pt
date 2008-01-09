@@ -1,6 +1,6 @@
 # Makefile for jam
 
-CC = gcc
+CC = cc
 CFLAGS = -O2
 EXENAME = ./jam.bin
 TARGET = -o $(EXENAME)

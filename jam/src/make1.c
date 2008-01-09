@@ -918,14 +918,14 @@ make1cmds( TARGET *t )
             string logs[1];
 
             for (targetIter = t; targetIter->dependents; targetIter = targetIter->dependents->target)
-          //  while (targetIter != 0) 
+          /*  while (targetIter != 0) */
             {
                 if ((targetIter->flags & T_FLAG_LOGTOFILE) && !(targetIter->logname == NULL))
                 {
                     char *stringend;
                     string_new(logs);
 
-                    // give the process a target for logging
+                    /* give the process a target for logging */
                     string_append(logs, " >> ");
                     string_append(logs, globs.logfilepath);
                     stringend = strchr(globs.logfilepath, '\0');
@@ -939,10 +939,10 @@ make1cmds( TARGET *t )
                     string_append(logs, ".log 2>&1 \n\0");
 
 
-                    // copy string into log-list
+                    /* copy string into log-list */
                     logFile = list_new( L0, newstr(logs->value) );
 
-                    // free logs-string
+                    /* free logs-string */
                     string_free( logs );
                     break;
                 }

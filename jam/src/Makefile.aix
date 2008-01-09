@@ -1,6 +1,6 @@
-CC=gcc
-CFLAGS=-O2
-TARGET=./jam.aix
+CC=cc
+CFLAGS = -O2
+TARGET=./jam
 
 SOURCES = command.c compile.c debug.c execunix.c expand.c \
 fileunix.c glob.c hash.c hdrmacro.c headers.c jam.c jambase.c jamgram.c lists.c \
@@ -14,5 +14,5 @@ all:
 	$(CC) -o $(TARGET) $(CFLAGS) $(SOURCES) $(LINKLIBS)
 
 clean: 
-	rm $(EXENAME)
+	rm $(TARGET)
 
