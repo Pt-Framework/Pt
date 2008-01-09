@@ -47,14 +47,6 @@ namespace Pt {
 
 namespace Gui {
 
-//
-// For translating X11 keysym to UTF-16
-//
-// The key symbols conversion code was taken from :
-//   fxkeysym.cpp.c
-//   The FOX GUI Library, fox-1.6.1.tar.gz
-//   http://www.fox-toolkit.org
-
 struct XKeySym2UCS {
     int     sym;
     wchar_t ucs;
