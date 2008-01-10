@@ -90,7 +90,7 @@ namespace Pt {
         */
         template<typename InIteratorT, typename OutIteratorT>
         void blockScale(InIteratorT  from, uint fromWidth, uint fromHeight,
-                                OutIteratorT to,   uint toWidth,   uint toHeight);
+                        OutIteratorT to,   uint toWidth,   uint toHeight);
 
         /** @brief Block-scale a pixel range.
         *
