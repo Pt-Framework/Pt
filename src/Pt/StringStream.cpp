@@ -25,13 +25,13 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(std::ios::openmode mode)
 {
 // When building a DLL under Visual studio, we need to imbue here
 #ifndef PT_WITHOUT_STD_LOCALE
-    if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
+    /*if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
     {
         std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-    }
+    }*/
 #endif
 }
 
@@ -39,7 +39,7 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
 : std::basic_stringbuf<Pt::Char>(str, mode)
 {
 // When building a DLL under Visual studio, we need to imbue here
-#ifndef PT_WITHOUT_STD_LOCALE
+/*#ifndef PT_WITHOUT_STD_LOCALE
     if( false == std::has_facet< std::ctype<Pt::Char> >( std::locale() ) )
     {
         std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
@@ -47,7 +47,7 @@ BasicStringStreamBuffer::BasicStringStreamBuffer(const Pt::String& str, std::ios
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
     }
-#endif
+#endif*/
 }
 
 } // namespace Pt

@@ -456,28 +456,6 @@ namespace std {
 
 } // namespace std
 
-/*
-#include "Pt/String.h"
-
-namespace Pt {
-
-    //! @internal Import symbols from this library
-    class PT_API CharDummyStream : public std::basic_iostream<Pt::Char>
-    {
-        public:
-          CharDummyStream();
-    };
-
-
-    //! @internal Import symbols from this library
-    class PT_API CharDummyStreamBuf : public std::basic_streambuf<Pt::Char>
-    {
-        public:
-          CharDummyStreamBuf();
-    };
-    
-} // namespace Pt
-*/
 
 #include <Pt/Facets.h>
 

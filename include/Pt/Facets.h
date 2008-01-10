@@ -20,7 +20,7 @@
 #define PT_FACETS_H
 
 #include <Pt/Api.h>
-//#include <Pt/Char.h>
+#include <Pt/String.h>
 #include <cctype>
 
 
@@ -396,6 +396,19 @@ namespace std {
             virtual int do_max_length() const throw() = 0;
     };
 
+static struct InitLocale
+{
+    InitLocale()
+    {
+        #ifndef PT_WITHOUT_STD_LOCALE
+        std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
+        std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
+        #endif
+    }
+} _initLocale;
+    
 }
 
 #endif
