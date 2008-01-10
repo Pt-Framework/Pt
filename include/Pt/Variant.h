@@ -112,7 +112,7 @@ namespace Pt {
             template <typename T>
             void get(T& tgt) const throw()
             {
-                return convert(tgt , _data);
+                convert(tgt , _data);
             }
 
             /**
@@ -252,6 +252,22 @@ namespace Pt {
     {
         std::string s;
         std::getline( is, s, static_cast<std::istream::char_type>(std::istream::traits_type::eof()) );
+        var.set(s);
+        return is;
+    }
+    
+    
+    inline std::basic_ostream<Pt::Char>& operator<<(std::basic_ostream<Pt::Char>& os, const Variant& var)
+    {
+        os << var.str();
+        return os;
+    }
+    
+    
+    inline std::basic_istream<Pt::Char>& operator>>(std::basic_istream<Pt::Char>& is, Variant& var)
+    {
+        Pt::String s;
+        std::getline( is, s, static_cast<std::basic_istream<Pt::Char>::char_type>(std::basic_istream<Pt::Char>::traits_type::eof()));
         var.set(s);
         return is;
     }
