@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Stefan Büder                                    *
+ *   Copyright (C) 2006 by Tommi Maekitalo                                 *
+ *   Copyright (C) 2006 by Marc Boris Duerner                               *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -31,24 +31,23 @@
 
 class TimeTest : public Pt::Unit::TestSuite
 {
-    public:
-        TimeTest()
-        : Pt::Unit::TestSuite("TimeTest")
-        {
-            Pt::Unit::TestSuite::registerMethod( "Assign", *this, &TimeTest::Assign );
-            Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &TimeTest::IsoConvert );
-        }
+public:
+    TimeTest()
+    : Pt::Unit::TestSuite("TimeTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("testAssign", *this, &TimeTest::testAssign);
+        Pt::Unit::TestSuite::registerMethod("testIsoConvert", *this, &TimeTest::testIsoConvert);
+    }
 
-    protected:
-        void Null();
-        void Assign();
-        void IsoConvert();
+protected:
+    void testAssign();
+    void testIsoConvert();
 };
 
 Pt::Unit::RegisterTest<TimeTest> register_TimeTest;
 
 
-void TimeTest::Assign()
+void TimeTest::testAssign()
 {
     Pt::Time time(12, 45, 23, 956);
     PT_UNIT_ASSERT( time.hour() == 12 );
@@ -64,7 +63,7 @@ void TimeTest::Assign()
 }
 
 
-void TimeTest::IsoConvert()
+void TimeTest::testIsoConvert()
 {
     Pt::Time time(12, 45, 23, 956);
     std::string isoString = time.toIsoString();
