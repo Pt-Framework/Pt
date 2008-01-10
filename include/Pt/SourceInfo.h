@@ -105,6 +105,9 @@ class SourceInfo {
         inline unsigned int line() const throw()
         { return _line; }
 
+        operator std::string() const
+        { return std::string(_msg); }
+
         /** @brief Returns a string describing the location
         */
         inline const char* where() const
