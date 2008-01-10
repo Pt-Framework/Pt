@@ -38,6 +38,7 @@ PT_TESTS = AnyTest.cpp
            DateTimeTest.cpp
            DelegateTest.cpp
            ExceptionTest.cpp
+           NonCopyableTest.cpp
            SerializationTest.cpp
            SettingsTest.cpp
            SingletonTest.cpp
