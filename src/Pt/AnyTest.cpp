@@ -32,13 +32,13 @@ class AnyTest : public Pt::Unit::TestSuite
         AnyTest()
         : Pt::Unit::TestSuite("AnyTest")
         {
-            this->registerMethod( "Init", *this, &AnyTest::InitTest );
-            this->registerMethod( "Bool", *this, &AnyTest::BoolTest );
-            this->registerMethod( "Char", *this, &AnyTest::CharTest );
-            this->registerMethod( "Int", *this, &AnyTest::IntTest );
-            this->registerMethod( "Float", *this, &AnyTest::FloatTest );
-            this->registerMethod( "Double", *this, &AnyTest::DoubleTest );
-            this->registerMethod( "StdString", *this, &AnyTest::StdStringTest );
+            this->registerMethod( "InitTest", *this, &AnyTest::InitTest );
+            this->registerMethod( "BoolTest", *this, &AnyTest::BoolTest );
+            this->registerMethod( "CharTest", *this, &AnyTest::CharTest );
+            this->registerMethod( "IntTest", *this, &AnyTest::IntTest );
+            this->registerMethod( "FloatTest", *this, &AnyTest::FloatTest );
+            this->registerMethod( "DoubleTest", *this, &AnyTest::DoubleTest );
+            this->registerMethod( "StdStringTest", *this, &AnyTest::StdStringTest );
         }
 
     protected:
