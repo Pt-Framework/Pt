@@ -65,11 +65,10 @@ rule SharedLibraryImpl
 rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
-    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
-    Depends $(_target) : $(_deps) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+    Depends $(_target) : $(_libs) ;
 
-    local _l = $(>:S=$(SUFDLL)) ;
-    SHLIBS on $(_target) += $(_l) ;
+    SHLIBS on $(_target) += $(_libs) ;
     LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 }
 
