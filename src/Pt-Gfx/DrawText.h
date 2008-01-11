@@ -125,10 +125,8 @@ class DrawText
 
                     const int px = yOffset + x ;
 
-                                        void *p = &(*pixel);
-                                        void *b = &(*image.begin());
-                                        void *e = &(*image.end());
-                                        assert(p>=b && p<=e);
+                    assert( &(*pixel) >= &(*image.begin()) && 
+                            &(*pixel) <= &(*image.end()) );
 
                     if( buffer[ px ] )
                         mixColor( *pixel, color, buffer[ px ] );
