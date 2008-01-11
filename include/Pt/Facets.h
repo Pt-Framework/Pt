@@ -396,7 +396,7 @@ namespace std {
             virtual int do_max_length() const throw() = 0;
     };
 
-static struct InitLocale
+static struct PT_API InitLocale
 {
     InitLocale()
     {
