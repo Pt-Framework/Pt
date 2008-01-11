@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 Aloysius Indrayanto                                *
- *   Copyright (C) 2004 Marc Boris Dürner                                  *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,69 +18,125 @@
  ***************************************************************************/
 #undef PT_API_EXPORT
 
-#include "Pt/Byteorder.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
-#include "Pt/System/Clock.h"
-#include <limits>
+
+#include "Pt/Types.h"
+#include "Pt/Byteorder.h"
+
 
 class ByteorderTest : public Pt::Unit::TestSuite
 {
-    public:
+public:
     ByteorderTest()
     : TestSuite("ByteorderTest")
     {
-        this->registerMethod("Swab", *this, &ByteorderTest::test );
-        //this->registerMethod("Performance", *this, &ByteorderTest::perf );
+        Pt::Unit::TestSuite::registerMethod("testBeToLe", *this, &ByteorderTest::testBeToLe);
+        Pt::Unit::TestSuite::registerMethod("testLeToBe", *this, &ByteorderTest::testLeToBe);
     }
 
-    void test()
-    {
-        #if defined(PT_LE)
-            Pt::uint16_t a = 0xaabb;
-            PT_UNIT_ASSERT( Pt::uint16_t(0xbbaa) == Pt::hostToBe(a) );
+protected:
+    void testBeToLe();
+    void testLeToBe();
+};
 
-            Pt::int16_t b = (Pt::int16_t)(0xaabb);
-            PT_UNIT_ASSERT( Pt::int16_t(0xbbaa) == Pt::hostToBe(b) );
 
-            Pt::uint32_t c = 0xaabbccdd;
-            PT_UNIT_ASSERT( Pt::uint32_t(0xddccbbaa) == Pt::hostToBe(c) );
+Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;
 
-            Pt::int32_t d = 0xaabbccdd;
-            PT_UNIT_ASSERT( Pt::int32_t(0xddccbbaa) == Pt::hostToBe(d) );
 
-            #if defined(PT_WITH_INT64)
-            Pt::uint64_t e = 0x1122334455667788ULL;
-            PT_UNIT_ASSERT( Pt::uint64_t(0x8877665544332211ULL) == Pt::hostToBe(e) );
+void ByteorderTest::testBeToLe()
+{
 
-            Pt::int64_t f = 0x1122334455667788LL;
-            PT_UNIT_ASSERT( Pt::int64_t(0x8877665544332211LL) == Pt::hostToBe(f) );
-            #endif
-        #elif defined(PT_BE)
-            Pt::uint16_t a = 0xbbaa;
-            PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToLe(a) );
+#ifdef PTV_LE
+    Pt::uint16_t a = 0xaabb;
+    PT_UNIT_ASSERT( Pt::uint16_t(0xbbaa) == Pt::hostToBe(a) );
 
-            Pt::int16_t b = (Pt::int16_t)(0xbbaa);
-            PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToLe(b) );
+    Pt::int16_t b = (Pt::int16_t)(0xaabb);
+    PT_UNIT_ASSERT( Pt::int16_t(0xbbaa) == Pt::hostToBe(b) );
 
-            Pt::uint32_t c = 0xddccbbaa;
-            PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToLe(c) );
+    Pt::uint32_t c = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::uint32_t(0xddccbbaa) == Pt::hostToBe(c) );
 
-            Pt::int32_t d = 0xddccbbaa;
-            PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToLe(d) );
+    Pt::int32_t d = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::int32_t(0xddccbbaa) == Pt::hostToBe(d) );
 
-            #if defined(PT_WITH_INT64)
-            Pt::uint64_t e = 0x8877665544332211ULL;
-            PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToLe(e) );
+   #ifdef PTV_64BIT
+    Pt::uint64_t e = 0x1122334455667788ULL;
+    PT_UNIT_ASSERT( Pt::uint64_t(0x8877665544332211ULL) == Pt::hostToBe(e) );
 
-            Pt::int64_t f = 0x8877665544332211LL;
-            PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToLe(f) );
-            #endif
-        #else
-            #error "Neither PT_BE not PT_LE is defined"
-        #endif
-    }
+    Pt::int64_t f = 0x1122334455667788LL;
+    PT_UNIT_ASSERT( Pt::int64_t(0x8877665544332211LL) == Pt::hostToBe(f) );
+   #endif
+#elif PTV_BE
+    Pt::uint16_t a = 0xaabb;
+    PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToBe(a) );
+
+    Pt::int16_t b = (Pt::int16_t)(0xaabb);
+    PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToBe(b) );
+
+    Pt::uint32_t c = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToBe(c) );
+
+    Pt::int32_t d = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToBe(d) );
+
+   #ifdef PTV_64BIT
+    Pt::uint64_t e = 0x1122334455667788ULL;
+    PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToBe(e) );
+
+    Pt::int64_t f = 0x1122334455667788LL;
+    PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToBe(f) );
+   #endif
+#endif
+
+}
+
+void ByteorderTest::testLeToBe()
+{
+#ifdef PTV_LE
+    Pt::uint16_t a = 0xaabb;
+    PT_UNIT_ASSERT( Pt::uint16_t(0xaabb) == Pt::hostToLe(a) );
+
+    Pt::int16_t b = (Pt::int16_t) 0xaabb;
+    PT_UNIT_ASSERT( Pt::int16_t(0xaabb) == Pt::hostToLe(b) );
+
+    Pt::uint32_t c = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::uint32_t(0xaabbccdd) == Pt::hostToLe(c) );
+
+    Pt::int32_t d = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::int32_t(0xaabbccdd) == Pt::hostToLe(d) );
+
+   #ifdef PTV_64BIT
+    Pt::uint64_t e = 0x1122334455667788ULL;
+    PT_UNIT_ASSERT( Pt::uint64_t(0x1122334455667788ULL) == Pt::hostToLe(e) );
+
+    Pt::int64_t f = 0x1122334455667788LL;
+    PT_UNIT_ASSERT( Pt::int64_t(0x1122334455667788LL) == Pt::hostToLe(f) );
+   #endif
+#elif PTV_BE
+    Pt::uint16_t a = 0xaabb;
+    PT_UNIT_ASSERT( Pt::uint16_t(0xbbaa) == Pt::hostToLe(a) );
+
+    Pt::int16_t b = (Pt::int16_t) 0xaabb;
+    PT_UNIT_ASSERT( Pt::int16_t(0xbbaa) == Pt::hostToLe(b) );
+
+    Pt::uint32_t c = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::uint32_t(0xddccbbaa) == Pt::hostToLe(c) );
+
+    Pt::int32_t d = 0xaabbccdd;
+    PT_UNIT_ASSERT( Pt::int32_t(0xddccbbaa) == Pt::hostToLe(d) );
+
+   #ifdef PTV_64BIT
+    Pt::uint64_t e = 0x1122334455667788ULL;
+    PT_UNIT_ASSERT( Pt::uint64_t(0x8877665544332211ULL) == Pt::hostToLe(e) );
+
+    Pt::int64_t f = 0x1122334455667788LL;
+    PT_UNIT_ASSERT( Pt::int64_t(0x8877665544332211ULL) == Pt::hostToLe(f) );
+   #endif
+#endif
+}
+
 /*
     void perf()
     {
@@ -101,6 +156,3 @@ class ByteorderTest : public Pt::Unit::TestSuite
         std::cerr << "\n Sec:" << tv.seconds() << " Micro-Secs:" << tv.microSeconds() << std::endl;
     }
 */
-};
-
-Pt::Unit::RegisterTest<ByteorderTest> register_ByteorderTest;
