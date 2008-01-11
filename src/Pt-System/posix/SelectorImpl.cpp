@@ -135,27 +135,30 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    std::vector<IOResultImpl*>::iterator iter = _readers.begin();
-    while( iter != _readers.end() )
+    //Do not use iterators here since clients may insert new IOResults during the inputReady signal!
+    size_t size = _readers.size();
+    for( size_t n = 0; n < size; )
     {
-        IOResult* result = *iter;
+        IOResult* result = _readers[n];
         int fd = result->impl()->fd();
 
         if( FD_ISSET(fd, &rfds) )
         {
             result->device()->inputReady(*result);
-            iter = _readers.erase(iter);
+            _readers.erase(_readers.begin() + n);
+            size--;
             avail = true;
         }
         else if( FD_ISSET(fd, &wfds) )
         {
             result->device()->outputReady(*result);
-            iter = _readers.erase(iter);
+            _readers.erase(_readers.begin() + n);
+            size--;
             avail = true;
         }
         else
         {
-            ++iter;
+            ++n;
         }
     }
 
