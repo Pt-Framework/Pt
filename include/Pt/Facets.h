@@ -396,6 +396,10 @@ namespace std {
             virtual int do_max_length() const throw() = 0;
     };
 
+}
+
+namespace Pt {
+
 static struct PT_API InitLocale
 {
     InitLocale()
@@ -408,7 +412,7 @@ static struct PT_API InitLocale
         #endif
     }
 } _initLocale;
-    
+
 }
 
 #endif
