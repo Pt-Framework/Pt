@@ -23,10 +23,9 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include <vector>
 #include <sys/select.h>
 #include <sys/time.h>
-
+#include <list>
 
 namespace Pt {
 
@@ -51,7 +50,7 @@ class SelectorImpl
         bool select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msecs);
 
     private:
-        std::vector<IOResultImpl*> _readers;
+        std::list<IOResultImpl*> _results;
         int _wakePipe[2];
 };
 

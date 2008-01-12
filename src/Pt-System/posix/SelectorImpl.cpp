@@ -55,18 +55,20 @@ SelectorImpl::~SelectorImpl()
 
 void SelectorImpl::complete( IOResult& result )
 {
-    _readers.push_back( result.impl() );
+    // insert at the front so that the added result wont be checked
+    // if it is added from a IODevice::inputReady slot
+    _results.push_front( result.impl() );
 }
 
 
-void SelectorImpl::cancel( IOResult& result )
+void SelectorImpl::cancel(IOResult& result)
 {
-    std::vector<IOResultImpl*>::iterator it;
-    for( it = _readers.begin(); it != _readers.end(); ++it )
+    std::list<IOResultImpl*>::iterator it;
+    for( it = _results.begin(); it != _results.end(); ++it )
     {
         if(&result == *it)
         {
-            _readers.erase(it);
+            _results.erase(it);
             return;
         }
     }
@@ -87,14 +89,13 @@ bool SelectorImpl::wait(unsigned int msecs)
 
     // Add all waitable handles to the read descriptor sets.
     // Not waitable handles are handled differently later
-    std::vector<IOResultImpl*>::iterator iter;
-    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
+    std::list<IOResultImpl*>::iterator iter;
+    for( iter = _results.begin(); iter != _results.end(); ++iter )
     {
         IOResultImpl* result = *iter;
         int fd = result->impl()->fd();
 
         result->add(rfds, wfds);
-        //FD_SET( fd, &rfds );
         maxfd = std::max( maxfd , fd );
     }
 
@@ -135,37 +136,37 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
             throw IOError( "Could not select on file descriptors", PT_SOURCEINFO );
     }
 
-    //Do not use iterators here since clients may insert new IOResults during the inputReady signal!
-    size_t size = _readers.size();
-    for( size_t n = 0; n < size; )
+    // we use a list so that removal of IOResults in a slot connected to
+    // IODevice::inputReady doesn't invalidate the iterator. If a slot
+    // adds IOResults they are pushed to front and we dont process them here
+    std::list<IOResultImpl*>::iterator iter;
+    for( iter = _results.begin(); iter != _results.end();  )
     {
-        IOResult* result = _readers[n];
+        IOResult* result = *iter;
         int fd = result->impl()->fd();
 
         if( FD_ISSET(fd, &rfds) )
         {
             result->device()->inputReady(*result);
-            _readers.erase(_readers.begin() + n);
-            size--;
+            iter = _results.erase(iter);
             avail = true;
+            continue;
         }
         else if( FD_ISSET(fd, &wfds) )
         {
             result->device()->outputReady(*result);
-            _readers.erase(_readers.begin() + n);
-            size--;
+            iter = _results.erase(iter);
             avail = true;
+            continue;
         }
-        else
-        {
-            ++n;
-        }
+
+        ++iter;
     }
 
     if( FD_ISSET( _wakePipe[0], &rfds ) )
     {
-        std::vector<char> msgbuf(10);
-        read( _wakePipe[0], &msgbuf[0], msgbuf.size() );
+        char msgbuf[10];
+        ::read( _wakePipe[0], msgbuf, 10 );
         avail = true;
     }
 
