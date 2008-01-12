@@ -21,7 +21,7 @@
 #define PT_REFCOUNTED_H
 
 #include <Pt/Api.h>
-#include <Pt/Types.h>
+#include <Pt/Atomicity.h>
 #include <Pt/NonCopyable.h>
 
 
@@ -34,29 +34,29 @@ namespace Pt
             : _refs(0)
             { }
 
-            explicit RefCounted(size_t refs)
+            explicit RefCounted(atomic_t refs)
             : _refs(refs)
             { }
 
             virtual ~RefCounted()
             { }
 
-            virtual void addRef()
-            { ++_refs; }
+            virtual atomic_t addRef()
+            { return atomicIncrement(_refs); }
 
             virtual void release()
             {
-                if (--_refs == 0)
+                if (atomicDecrement(_refs) == 0)
                 {
                     delete this;
                 }
             }
 
-            size_t refs() const
+            atomic_t refs() const
             { return _refs; }
 
         private:
-            size_t _refs;
+            atomic_t _refs;
     };
 }
 

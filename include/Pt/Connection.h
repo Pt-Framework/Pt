@@ -3,8 +3,9 @@
 
 #include <Pt/Api.h>
 #include <Pt/Slot.h>
+#include <Pt/Atomicity.h>
 #include <Pt/RefCounted.h>
-#include <Pt/SmartPtr.h>
+
 
 
 namespace Pt {
@@ -31,13 +32,13 @@ namespace Pt {
             ~ConnectionData()
             { delete _slot; }
 
-            size_t ref()
-            { return ++_refs; }
+            atomic_t ref()
+            { return atomicIncrement(_refs); }
 
-            size_t unref()
-            { return --_refs; }
+            atomic_t unref()
+            { return atomicDecrement(_refs); }
 
-            size_t refs() const
+            atomic_t refs() const
             { return _refs; }
 
             bool valid() const
@@ -59,7 +60,7 @@ namespace Pt {
             { return *_slot; }
 
         private:
-            size_t _refs;
+            atomic_t _refs;
             bool _valid;
             Slot* _slot;
             Connectable* _sender;

@@ -21,7 +21,7 @@
 #ifndef PT_SMARTPTR_H
 #define PT_SMARTPTR_H
 
-#include <Pt/Types.h>
+#include <Pt/Atomicity.h>
 #include <cstdio>
 
 namespace Pt {
@@ -122,7 +122,7 @@ namespace Pt {
     class ExternalRefCounted
     {
         public:
-            size_t refs() const
+            atomic_t refs() const
             { return _count ? *_count : 0; }
 
         protected:
@@ -133,7 +133,7 @@ namespace Pt {
             //! \brief unlink a smart pointer from a managed object
             bool unlink(T* object)
             {
-                if ( _count && !--*_count)
+                if ( _count && !atomicDecrement(*_count))
                 {
                     delete _count;
                     // no need to set _count to 0 since the pointer is either
@@ -150,12 +150,12 @@ namespace Pt {
                 if(object)
                 {
                     if(ptr._count == 0) {
-                        _count = new size_t(1);
+                        _count = new atomic_t(1);
                     }
                     else
                     {
                         _count = ptr._count;
-                        ++*_count;
+                        atomicIncrement(*_count);
                     }
                 }
                 else
@@ -163,7 +163,7 @@ namespace Pt {
             }
 
         private:
-            size_t* _count;
+            atomic_t* _count;
     };
 
 
