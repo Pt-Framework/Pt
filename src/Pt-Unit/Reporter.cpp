@@ -161,7 +161,7 @@ void CSVReporter::finished(const TestContext& test)
         m_allMessages.erase(m_allMessages.length() - 3, 3);
     }
 
-    unsigned int pos = std::string::npos;
+    std::string::size_type pos = std::string::npos;
     while((pos = m_allMessages.find('\n', 0)) != std::string::npos)
     {
         m_allMessages.replace(pos, 1, "; ");
