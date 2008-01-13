@@ -46,15 +46,14 @@ void PainterImpl::begin()
 
 void PainterImpl::end()
 {
-    [[NSColor blueColor] setStroke];
-    std::vector<NSBezierPath*>::iterator it;
-    for(it = _paths.begin(); it != _paths.end(); ++it)
+    std::vector<Paint*>::iterator it;
+    for(it = _paintQueue.begin(); it != _paintQueue.end(); ++it)
     {
-        [*it stroke];
-        [*it release];
+        (*it)->paint();
+        delete *it;
     }
 
-    _paths.clear();
+    _paintQueue.clear();
 }
 
 
@@ -121,13 +120,13 @@ void PainterImpl::drawPixel(const Math::Point& to)
 
 void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
 {
-    NSBezierPath* path = [NSBezierPath bezierPath];
-    [path setLineWidth:_pen.size()];
-    
-    [path moveToPoint:NSMakePoint( from.x(), from.y() )];
-    [path lineToPoint:NSMakePoint( to.x(), to.y() )];
-    
-    _paths.push_back(path);
+    _paintQueue.push_back( new DrawLine(from, to, _pen) );
+}
+
+
+void PainterImpl::drawRect(const Gfx::Rect& rect)
+{
+    _paintQueue.push_back( new DrawRect(rect, _pen) );
 }
 
 
@@ -149,6 +148,12 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
 }
 
 
+void PainterImpl::fillRect(const Gfx::Rect& rect)
+{
+        _paintQueue.push_back(new FillRect(rect, _brush) );
+}
+
+
 void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
 
@@ -163,12 +168,7 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
-    this->end();
-    this->begin();
-    [pm.impl().image() drawAtPoint:NSMakePoint( to.x(), to.y() ) 
-                       fromRect:NSZeroRect 
-                       operation:NSCompositeCopy 
-                       fraction:1.0];
+    _paintQueue.push_back(new DrawPixmap(to, pm) );
 }
 
 
@@ -188,6 +188,103 @@ void PainterImpl::drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
 void PainterImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
 
+}
+
+
+PainterImpl::DrawLine::DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen)
+: _from(from)
+, _to(to)
+, _pen(pen)
+{
+}
+
+
+PainterImpl::DrawLine::~DrawLine()
+{
+}
+
+
+void PainterImpl::DrawLine::paint()
+{
+    [[NSColor colorWithDeviceRed: _pen.color().red() / float(0xffff)
+              green: _pen.color().green() / float(0xffff)
+              blue: _pen.color().blue() / float(0xffff)
+              alpha: 1.0 ] setStroke];
+    
+    [NSBezierPath setDefaultLineWidth:_pen.size()];
+    [NSBezierPath strokeLineFromPoint:NSMakePoint( _from.x(), _from.y() )
+                  toPoint:NSMakePoint( _to.x(), _to.y() )];
+}
+
+
+PainterImpl::DrawRect::DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen)
+: _rect(rect)
+, _pen(pen)
+{
+
+}
+
+
+PainterImpl::DrawRect::~DrawRect()
+{
+
+}
+
+
+void PainterImpl::DrawRect::paint()
+{
+    [[NSColor colorWithDeviceRed: _pen.color().red() / float(0xffff)
+              green: _pen.color().green() / float(0xffff)
+              blue: _pen.color().blue() / float(0xffff)
+              alpha: 1.0 ] setStroke];
+    NSFrameRectWithWidth( NSMakeRect(_rect.x(), _rect.y(), _rect.width(), _rect.height() ), _pen.size() );
+}
+
+
+PainterImpl::DrawPixmap::DrawPixmap(const Math::Point& to, Pixmap& pm)
+: _to(to)
+{
+    _image = pm.impl().image();
+    [_image retain];
+}
+
+
+PainterImpl::DrawPixmap::~DrawPixmap()
+{
+    [_image release];
+}
+
+
+void PainterImpl::DrawPixmap::paint()
+{
+    [_image drawAtPoint:NSMakePoint( _to.x(), _to.y() ) 
+            fromRect:NSZeroRect 
+            operation:NSCompositeCopy 
+            fraction:1.0];
+}
+
+
+PainterImpl::FillRect::FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush)
+: _rect(rect)
+, _brush(brush)
+{
+
+}
+
+
+PainterImpl::FillRect::~FillRect()
+{
+
+}
+
+
+void PainterImpl::FillRect::paint()
+{
+    [[NSColor colorWithDeviceRed: _brush.color().red() / float(0xffff)
+              green: _brush.color().green() / float(0xffff)
+              blue: _brush.color().blue() / float(0xffff)
+              alpha: 1.0 ] setFill];
+    NSRectFill( NSMakeRect(_rect.x(), _rect.y(), _rect.width(), _rect.height() ) );
 }
 
 } // namespace Gui

@@ -18,11 +18,14 @@
  ***************************************************************************/
 #import "View.h"
 #import "Application.h"
-//#include <Pt/Gui/PaintEvent.h>
-#include <Pt/Gui/MouseEvent.h>
+#include "Pt/Gui/CloseEvent.h"
+#include "Pt/Gui/PaintEvent.h"
+#include "Pt/Gui/MouseEvent.h"
+#include "Pt/Gui/MouseMoveEvent.h"
 #import <Foundation/NSString.h>
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
+#include <iostream>
 
 @implementation PtGuiView
 - (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) widget
@@ -37,7 +40,7 @@
 }
 - (void) mouseDown:(NSEvent*)ev{
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
-    
+
     Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
                             Pt::Gui::MouseEvent::LeftButton, 
                             Pt::Gui::MouseEvent::Press, 
@@ -45,5 +48,36 @@
     
     [NSApp processEvent: &mev];
     [super mouseDown: ev];
+}
+
+- (void) mouseDragged:(NSEvent*)event
+{
+    NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
+
+    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
+                                Pt::Gui::MouseMoveEvent::Moved,  
+                                Pt::Gui::MouseMoveEvent::LeftButtonDown);
+    
+    [NSApp processEvent: &mev];
+    [super mouseMoved: event];
+}
+
+- (void) mouseMoved:(NSEvent *)event
+{
+    NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
+
+    Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
+                                Pt::Gui::MouseMoveEvent::Moved,  
+                                0);
+    
+    [NSApp processEvent: &mev];
+    [super mouseMoved: event];
+}
+
+- (BOOL)windowShouldClose:(id)window
+{
+    Pt::Gui::CloseEvent cev(*_widget);
+    [NSApp processEvent: &cev];
+    return YES;
 }
 @end

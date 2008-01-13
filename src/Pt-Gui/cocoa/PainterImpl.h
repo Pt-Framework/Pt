@@ -36,8 +36,10 @@
 #ifdef __OBJC__
     #import <Foundation/NSGeometry.h>
     #import <AppKit/NSBezierPath.h>
+    #import <AppKit/NSImage.h>
 #else
     struct NSBezierPath;
+    struct NSImage;
 #endif
 
 namespace Pt {
@@ -46,7 +48,14 @@ namespace Gui {
 
 	class Pixmap;
 
-    class PainterImpl {
+    class PainterImpl 
+    {
+        class Paint;
+        class DrawLine;
+        class DrawRect;
+        class DrawPixmap;
+        class FillRect;
+        
         public:
             PainterImpl();
 
@@ -80,13 +89,13 @@ namespace Gui {
 
             virtual void drawText(const Math::Point& to, const Pt::String& text);
 
-            virtual void drawRect(const Gfx::Rect& rect) {}
+            virtual void drawRect(const Gfx::Rect& rect);
 
             virtual void drawEllipse(const Math::Point& topLeft, const Math::Size& size);
 
             virtual void drawPolyline(const Math::Point* points, const size_t pointCount);
 
-            virtual void fillRect(const Gfx::Rect& rect) {}
+            virtual void fillRect(const Gfx::Rect& rect);
 
             virtual void fillEllipse(const Math::Point& topLeft, const Math::Size& size);
 
@@ -114,9 +123,75 @@ namespace Gui {
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-            std::vector<NSBezierPath*> _paths;
+            std::vector<Paint*> _paintQueue;
     };
 
+    class PainterImpl::Paint
+    {
+        public:
+            virtual ~Paint() {}
+            virtual void paint() = 0;
+    };
+
+    class PainterImpl::DrawLine : public PainterImpl::Paint
+    {
+        public:
+            DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen);
+            
+            virtual ~DrawLine();
+            
+            virtual void paint();
+        
+        private:
+            Math::Point _from;
+            Math::Point _to;
+            Gfx::Pen _pen;
+    };
+
+
+    class PainterImpl::DrawRect : public PainterImpl::Paint
+    {
+        public:
+            DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen);
+            
+            virtual ~DrawRect();
+            
+            virtual void paint();
+        
+        private:
+            const Gfx::Rect& _rect;
+            Gfx::Pen _pen;
+    };
+
+
+    class PainterImpl::DrawPixmap : public PainterImpl::Paint
+    {
+        public:
+            DrawPixmap(const Math::Point& to, Pixmap& pm);
+            
+            virtual ~DrawPixmap();
+            
+            virtual void paint();
+        
+        private:
+            Math::Point _to;
+            NSImage* _image;
+    };
+
+
+    class PainterImpl::FillRect : public PainterImpl::Paint
+    {
+        public:
+            FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush);
+            
+            virtual ~FillRect();
+            
+            virtual void paint();
+        
+        private:
+            const Gfx::Rect& _rect;
+            Gfx::Brush _brush;
+    };
 } // namespace Gui
 
 } // namespace Pt

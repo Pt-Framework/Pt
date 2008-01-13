@@ -36,12 +36,12 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
                                                    backing:NSBackingStoreBuffered
                                                    defer:NO];
 
-    [window setDelegate: window];
     [window setAcceptsMouseMovedEvents:YES];
-    
+
     view = [[PtGuiView alloc] initWithWidget: &apiWidget];
     [window setContentView: view];
-    
+    [window setDelegate: view];
+
     _painter.setView(view);
 }
 

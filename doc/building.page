@@ -1,62 +1,44 @@
 /** \page building Building
 
-@section b1 The jam build tool
+@section b1 The jam build-tool
 Jam is a make-like program that provides a versatile, unified build process 
-across many platforms including automated unit-tests, cross-compilation and 
-concurrent execution of build steps. This document intends to be a step-by-step
-introduction to the jam-based build %system. Most examples demonstrate the usage
-of jam on a windows NT build host, but differ only in the name of the jam
-executable on other build hosts.
-
-@section b2 Requirements
-It is usually not neccessary to install any additional tools since precompiled 
-jam binaries for several platforms are provided in the 'jam' subdirectory of 
-the project and nothing else is required. The following table lists the 
-available precompiled binaries.
-
-<table>
-<tr><td>OS</td> <td>CPU</td> <td>Jam binary</td> </tr>
-<tr><td>Linux</td> <td>x86</td> <td>jam.linux.x86</td></tr>
-<tr><td>Linux</td> <td>x86-64</td> <td>jam.linux.x86-64</td></tr>
-<tr><td>Linux</td> <td>ppc</td> <td>jam.linux.ppc</td></tr>
-<tr><td>Windows NT/XP</td> <td>x86</td> <td>jam.exe</td></tr>
-<tr><td>QNX6.3.0</td> <td>x86</td> <td>jam.qnx630.x86</td></tr>
-</table>
-
-If no precompiled tool is available for the desired platform, the complete 
-source code can be found in the jam directory in the project tree. Makefiles 
-for win32-based and posix-based systems are available. The jam binary itself
-can be built with a regular C compiler and has no further dependencies than
-the %system C runtime library.
+across many platforms including cross-compilation, build-configuration, automated 
+unit-tests, and concurrent execution of build steps. This document intends to be 
+a step-by-step introduction to the jam-based build %system. The examples 
+demonstrate the usage of jam on a Windows NT build host, on POSIX-based
+systems such as UNIX, Linux, Mac OS-X or QNX and show how to cross-compile.
 
 @section b3 Starting the build process
 The jam tool must be invoked in the project root, where a 'jam' subdirectory 
-and a file called 'Jambase' are located. If jam is run without any arguments, 
-default build options are tried to be deduced from the environment. This will 
-work well from a unix shell or the 'build command shell' provided by 
-Microsoft visual studio installations. 
+and the files named 'Jambase', 'Jamrule' and 'Jamfile' are located. A precompiled 
+binary of the jam program is provided for Windows platforms and a POSIX shell script 
+for all other platforms, which builds the jam executable the first time it is excuted.
+If jam is run without any arguments, default build options are attempted to be deduced 
+from the environment. This will work well from a unix shell or the 'build command shell' 
+provided by Microsoft visual studio installations. 
 
 To start a build with default build options simply change to the project 
-root directory and call the required jam binary. The command below builds
-the project on NT:
+root directory and execute the jam binary (-q means stop on first error). The 
+command below builds the project on Windows when executed in the 'build command shell':
 
 @code
-jam\jam.exe 
+jam.exe -q
 @endcode
 
-Accordingly, on a power-pc linux %system the following command can be used
-from the project root:
+Accordingly, on POSIX %systems, a script named jam.sh can be used to build the jam 
+executable first and then the project in one simple step. The script builds the 
+jam binary the first time it is executed and passes on any command-line arguments.
+Th following is the equivalent to executing jam.exe on Windows:
 
 @code
-./jam/jam.linux.ppc
+./jam.sh -q
 @endcode
 
 @b NOTE: \n
-After a checkout the jam binary needs to be made executable with the chmod command.
-To do so for a linux/X86 binary enter the following command:
+After a checkout the jam-script may needs to be made executable with the chmod command:
 
 @verbatim
-chmod +x ./jam/jam.linux.x86
+chmod +x ./jam.sh
 @endverbatim
 
 @section b4 Building specific targets
@@ -70,7 +52,7 @@ a target name. The following command will build the target program.exe and
 all its dependencies:
 
 @code
-jam\jam.exe program.exe
+jam.exe program.exe
 @endcode
 
 Some important pseudo-targets are all, lib or exe. The target 'all' will 
@@ -81,7 +63,7 @@ as explicitly calling jam to build the target 'all'. To build all libraries
 and their dependencies in a project, invoke jam like so:
 
 @code
-jam\jam.exe lib
+jam.exe lib
 @endcode
 
 @section b5 Rebuilding targets
@@ -91,25 +73,25 @@ or without a specific target. Thus the following command will rebuild
 the whole project:
 
 @code
-jam\jam.exe -a
+jam.exe -a
 @endcode
 
 A specific target can be rebuild by combining -a and a target name. The target
 program.exe will be completely rebuild with the following command:
 
 @code
-jam\jam.exe -a program.exe
+jam.exe -a program.exe
 @endcode
 
 @section b6 Cleaning the project
 The pseudo-target 'clean' plays a special role in the jam build %system. All
 artefacts that are created during the build process are dependents of
-the 'clean' peseudo-target. When jam is invoked with the target clean all 
+the 'clean' peseudo-target. When jam is invoked with the target clean, all 
 artefacts will be deleted if they exist. Therefore the following command
 will remove all artefacts that were created by a build with default options:
 
 @code
-jam\jam.exe clean
+jam.exe clean
 @endcode
 
 @section b7 Command line options
@@ -137,33 +119,38 @@ One important jam variable is named CONFIG and can be set to 'debug' or
 build a release version of a project, use the following command:
 
 @code
-jam\jam.exe -sCONFIG=release
+jam.exe -sCONFIG=release
 @endcode 
 
 Most variables have default values or are deduced from environment variables.
 The default for CONFIG is 'debug'. The following table gives an overview
 which jam variables are used to enable certain build options:
 
-<b>Target Operating System (TARGET_OS):</b> nt, linux, qnx-nto, wince \n
-<b>Target Platform (TARGET_OSPLAT):</b> x86, ppc, arm, mips, sh4 \n
+<b>Target Operating System (TARGET_OS):</b> nt, linux, qnxnto, wince, macox, solarix, aix \n
+<b>Target Platform (TARGET_OSPLAT):</b> x86, ppc, arm, mips, sh4, sparc \n
 <b>Configuration (CONFIG):</b> debug, release \n
-<b>Compiler/Toolchain (TOOLSET):</b> vc7, vc8, gcc, icpp, qcc, evc4 \n
+<b>Compiler/Toolchain (TOOLSET):</b> vc7, vc8, vc9, gcc, icpp, qcc, xlc, mingw \n
 
 More than one variable can be set when jam is invoked. The following command 
-builds a release version with the gnu compiler toolset on a linux host:
+builds a release version with the gnu compiler toolset on a POSIX host:
 
 @code
-./jam/jam.linux.x86 -sCONFIG=release -sTOOLSET=gcc
+./jam.sh -sCONFIG=release -sTOOLSET=gcc
 @endcode
 
-@section b9 Compiling for Linux with GCC
-Compiling for Linux with the GNU compiler is done from a normal shell. The 
-default value for the TOOLSET is gcc. The following command builds a release 
-version on a X86 linux %system:
+@section b9 Compiling for Linux/Unix/Mac OS-X
+Compiling for Linux or Mac OS-X with the GNU compiler is done from a normal shell. 
+The default value for the TOOLSET is gcc already, so it doesn't have to be set explicitly. 
+The following command builds a release version on a Linux %system:
 
 @code
-./jam/jam.linux.x86 -sCONFIG=release
+./jam.sh -sCONFIG=release
 @endcode
+
+The default TOOLSET on a Unix host may not be gcc, but the compiler/linker of the 
+respective vendor. For example, the default TOOLSET on AIX is the xlc compiler
+and the default TOOSET on Solaris is the Sun compiler. The Gnu compiler can be
+used on these systems by setting the TOOLSET to gcc explicitly.
 
 @section b10 Compiling for Windows NT/XP with Visual Studio 7/8
 The Microsoft visual studio installation contains a special 'build command 
@@ -172,18 +159,19 @@ variables are set. If the build command shell is not used, the VISUALC variable
 has to be set either as environment variable or with -s when jam is invoked. 
 If the path to the visual studio installation contains whitespace the path has 
 to be put in quotes. The following command demonstrates how a build can be 
-started from a regular console on windows to build with VisualC++ 2003 (vc7):
+started from a regular console on windows to build with VisualC++ 2005 (vc8):
 
 @code
-jam\jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 2003 .Net" 
-            -sTOOLSET=vc7
+jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 2005" -sTOOLSET=vc8
 @endcode
 
 If the special 'build command shell' is used, VISUALC is determined from other 
 environment variables and does not have to be specified. Also, the TOOLSET is 
-determined from the environment and does not have to be specified. It is not 
-possible to build vc7 targets from the 'build command shell' provided by a 
-Microsoft visual studio 8 installation. 
+deduced from the environment and does not have to be specified. If the express
+version of Visual Studio 2005 is used, the path to the Platform SDK must be specified
+with -sPLATFORMSDK=C:⁄path⁄to⁄PlatformSDK. To build with VisualC++ 2003, set the
+TOOLSET to vc7. It is not possible to build vc7 targets from the 'build command shell' 
+provided by a Microsoft visual studio 8 installation or vice versa. 
 
 @section b11 Compiling Windows CE targets
 Windows CE targets need to be cross compiled under Windows NT/XP. Therefore 
@@ -193,16 +181,16 @@ path to the Visual studio installation has to be set and a regular command
 shell has to be used. The following command builds for ARM CPU's:
 
 @code
-./jam/jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 8" 
-              -sTOOLSET=vc8 -sTARGET_OS=wince -sTARGET_OSPLAT=arm
+jam.exe -sVISUALC="C:\Programme\Microsoft Visual Studio 8" 
+        -sTOOLSET=vc8 -sTARGET_OS=wince -sTARGET_OSPLAT=arm
 @endcode
 
 @section b12 Compiling QNX targets
-%Building with jam on a QNX host is not much different than on unix systems.
-To build on a X86 QNX %system enter:
+%Building with jam on a QNX host is not different from building on unix systems.
+To build on a QNX %system simply execute the shell script:
 
 @code
-./jam/jam.qnx630.x86
+./jam.sh
 @endcode 
 
 QNX targets can be cross compiled or directly compiled on a QNX host. Cross 
@@ -212,13 +200,13 @@ variables need to be set. The following command will build a project on a
 Windows NT/XP host for QNX systems with X86 processors.
 
 @code
-./jam/jam.exe -sTARGET_OS=qnx630 -sTARGET_OSPLAT=x86
+jam.exe -sTARGET_OS=qnxnto -sTARGET_OSPLAT=x86
 @endcode 
 
 To cross compile for QNX on a QNX host the TARGET_OSPLAT needs to be set:
 
 @code
-./jam/jam.qnx630.x86 -sTARGET_OSPLAT=ppc
+./jam.sh -sTARGET_OSPLAT=ppc
 @endcode
 
 @section b13 Setting up a new Project
@@ -227,8 +215,7 @@ a project:
 
 - 'jam' subdirectory \n
 The 'jam' subdirectory must be located in the project root. It contains 
-precompiled jam binaries for the most common platforms and a libraray of
-Jamrules for different platforms, toolkits and configurations. This
+a libraray of Jamrules for different platforms, toolkits and configurations. This
 library is usually called the Jambase.
 
 - 'Jambase' file \n

@@ -68,7 +68,7 @@ void ApplicationImpl::wake()
 
 void ApplicationImpl::exit()
 {
-    [NSApp stop: nil];
+    [NSApp terminate: nil];
 }
 
 } // namespace Gui

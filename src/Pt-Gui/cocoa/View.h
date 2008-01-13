@@ -26,4 +26,10 @@
 - (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) w;
 
 - (void) mouseDown:(NSEvent*)event;
+
+- (void) mouseDragged:(NSEvent*)event;
+
+- (void) mouseMoved:(NSEvent*)event;
+
+- (BOOL)windowShouldClose:(id)window;
 @end

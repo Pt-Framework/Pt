@@ -43,7 +43,7 @@ void WidgetPainter::end()
 {
     [_view lockFocus];
     PainterImpl::end();
-    [_view unlockFocus]; 
+    [_view unlockFocus];
 }
 
 
