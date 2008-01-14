@@ -21,6 +21,7 @@
 #ifndef PT_ATOMICITY_WINDOWS_H
 #define PT_ATOMICITY_WINDOWS_H
 
+#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
 #include <windows.h>
 
 namespace Pt {
