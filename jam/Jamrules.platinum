@@ -21,6 +21,11 @@ if $(TARGET_OS) = aix
     SYS ?= posix ;
     GUI ?= x11 ;
 }
+if $(TARGET_OS) = solaris
+{
+    SYS ?= posix ;
+    GUI ?= x11 ;
+}
 if $(TARGET_OS:L) = qnxnto
 {
     SYS ?= posix ;
@@ -67,6 +72,12 @@ if $(TARGET_OS) = aix
     SYSLIBS = -bdynamic -ldl -lpthread -lrt ;
     LINKLIBS += $(SYSLIBS) ;
     # NETLIBS =
+}
+
+if $(TARGET_OS:L) = solaris
+{
+    SYSLIBS     = -ldl -lpthread -lrt ;
+    NETLIBS     = -lsocket -lnsl ;
 }
 
 if $(TARGET_OS:L) = qnxnto

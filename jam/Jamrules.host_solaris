@@ -1,0 +1,10 @@
+# Shell commands
+#
+CHMOD       = chmod ;
+CHGRP       = chgrp ;
+CHOWN       = chown ;
+LEX         = lex ;
+YACC        = yacc ;
+YACCFILES   = y.tab ;
+YACCFLAGS   = -d ;
+YACCGEN     = .c ;

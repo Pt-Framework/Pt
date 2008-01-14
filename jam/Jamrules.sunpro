@@ -1,0 +1,80 @@
+# Initialize variables
+#
+CC     = cc ;
+C++    = CC ;
+RANLIB ?= ranlib ;
+
+if $(CONFIG:L) = debug
+{
+    CCFLAGS += -DDEBUG -g ;
+    OPTIM   ?= ;
+}
+else
+{
+    CCFLAGS += -DNDEBUG ;
+    OPTIM	  ?= -fast ;
+}
+
+C++FLAGS  += $(CCFLAGS) ;
+WARN ?= +w2 ;
+
+if $(LIBC++) = stlport4
+{
+    C++FLAGS += -library=stlport4 ;
+}
+
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule MainImpl
+{
+    # Add executable name decoration
+    local _target = $(<:S=$(SUFEXE)) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    SHLIBS on $(_target) += $(_libs) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+}
+
+
+rule SharedLibraryImpl
+{
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -G ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+    Depends $(_target) : $(_libs) ;
+
+    SHLIBS on $(_target) += $(_libs) ;
+    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+}
+
+
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+}
+
