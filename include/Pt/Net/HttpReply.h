@@ -240,7 +240,7 @@ namespace Net {
          * @brief Returns the response HTTP header data.
          *
          * @param name Name of the header (e.g. "Content-Length", "Content-Type")
-         * @param default The default value if the header was not found.
+         * @param defaultValue The default value if the header was not found.
          * @return The value of the responsed header name.
          */
         const std::string& getHeader(const std::string& name, const std::string& defaultValue) const
@@ -251,8 +251,9 @@ namespace Net {
 
         /**
          * @brief Adds one HTTP header data to the response.
-         * 
+         *
          * @param name Name of the header (e.g. "Content-Length", "Content-Type")
+         * @param value Value of the header.
          * @return The value of the responsed header name.
          */
         void addHeader(const std::string& name, const std::string& value)
@@ -304,7 +305,7 @@ namespace Net {
         /**
          * @brief Returns the body of the HTTP response.
          *
-         * @param The body of the HTTP resonse as binary data.
+         * @return The body of the HTTP resonse as binary data.
          */
         const std::string& getBody() const
         {
