@@ -71,7 +71,13 @@ void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mod
         throw IOError("Could not get termios attributes", PT_SOURCEINFO);
 
     // Disable canonical
-    ::cfmakeraw(&ios);
+    //::cfmakeraw(&ios);
+    ios.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
+                    | INLCR | IGNCR | ICRNL | IXON);
+    ios.c_oflag &= ~OPOST;
+    ios.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    ios.c_cflag &= ~(CSIZE | PARENB);
+    ios.c_cflag |= CS8;
 
     if( ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &ios) == -1  )
         throw IOError("Could not set termios attributes", PT_SOURCEINFO);
@@ -343,7 +349,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError("Could not set flow control", PT_SOURCEINFO);
 
-    #if defined(linux) || defined(_AIX) || defined(__APPLE__)
+    #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun)
         ios.c_cflag &= ~CRTSCTS;
     #else
         ios.c_cflag &= ~IHFLOW; // INPUT hardware control
@@ -362,7 +368,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         case SerialDevice::FlowControlBoth:
             ios.c_iflag |= (IXON | IXANY | IXOFF);
         case SerialDevice::FlowControlHard:
-            #if defined(linux) || defined(_AIX) || defined(__APPLE__)
+            #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun)
                ios.c_cflag |= CRTSCTS;
             #else
                ios.c_cflag |= IHFLOW; // INPUT hardware control
