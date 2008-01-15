@@ -150,6 +150,11 @@ if $(GUI:L) = "x11"
         Echo "Checking for Xft includes... $(_xftIncludes)" ;
         GUILIBS += -lXft ; #-lXrender ;
     }
+
+    # TODO: Solaris
+    # SubDirHdrs /usr/sfw/include ;
+    # SubDirHdrs /usr/sfw/include/freetype2 ;
+    # /usr/sfw/lib/libXrender.so
 }
 
 if $(GUI:L) = "gf"
