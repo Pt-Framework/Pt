@@ -170,7 +170,7 @@ void TextStreamTest::testTextBufferFromUnicodeToUTF8()
 
     std::string str = ss.str();
     for (unsigned int i = 0; i < str.size(); i++) {
-        //CPPUNIT_ASSERT(str[i] == _TextUTF8[i]);
+        //PT_UNIT_ASSERT(str[i] == _TextUTF8[i]);
     }
 }
 
@@ -184,7 +184,7 @@ void TextStreamTest::testTextStreamFromUnicodeToUTF8()
 
     std::string str = ss.str();
     for (unsigned int i = 0; i < str.size(); i++) {
-        //CPPUNIT_ASSERT(str[i] == _TextUTF8[i]);
+        //PT_UNIT_ASSERT(str[i] == _TextUTF8[i]);
     }
 }
 
@@ -201,12 +201,12 @@ void TextStreamTest::testTextStreamFromUTF32ToUnicode()
 
     //std::cerr << c[0] << std::endl;
 
-    //CPPUNIT_ASSERT(c[0] == _TextUnicode[0]);
-    //CPPUNIT_ASSERT(c[1] == _TextUnicode[1]);
-    //CPPUNIT_ASSERT(c[2] == _TextUnicode[2]);
-    //CPPUNIT_ASSERT(c[3] == _TextUnicode[3]);
-    //CPPUNIT_ASSERT(c[4] == _TextUnicode[4]);
-    //CPPUNIT_ASSERT(c[5] == _TextUnicode[5]);
+    //PT_UNIT_ASSERT(c[0] == _TextUnicode[0]);
+    //PT_UNIT_ASSERT(c[1] == _TextUnicode[1]);
+    //PT_UNIT_ASSERT(c[2] == _TextUnicode[2]);
+    //PT_UNIT_ASSERT(c[3] == _TextUnicode[3]);
+    //PT_UNIT_ASSERT(c[4] == _TextUnicode[4]);
+    //PT_UNIT_ASSERT(c[5] == _TextUnicode[5]);
 }
 
 
