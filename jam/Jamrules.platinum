@@ -148,7 +148,7 @@ if $(GUI:L) = "x11"
     else
     {
         Echo "Checking for Xft includes... $(_xftIncludes)" ;
-        GUILIBS += -lXft -lXrender ;
+        GUILIBS += -lXft ; #-lXrender ;
     }
 }
 
