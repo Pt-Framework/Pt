@@ -39,12 +39,12 @@ int main(int argc, char** argv)
     TestMain::argc = argc;
     TestMain::argv = argv;
 
-    // CppUnit(mini) test launcher
+    // Pt-Unit(mini) test launcher
     // command line option syntax:
     // test [OPTIONS]
     // where OPTIONS are
-    //     -t=CLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
-    //     -f=FILE           save output in file FILE instead of stdout
+    //     -tCLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
+    //     -fFILE           save output in file FILE instead of stdout
 
     Pt::Unit::BriefReporter fileReporter;
     Pt::Unit::BriefReporter consoleReporter;
