@@ -66,12 +66,14 @@ class MyTestCase : public Pt::Unit::TestCase
 /** \page "Build System Integration"
 !!!Build System Integration
 \n
-The Jamrules.Unit rule set containes rules to build a Unit test and have it
+The Jamrules.unit rule set containes rules to build a Unit test and have it
 automatically run after it has been build. Instead of the rule 'Main' the rule
-'PtvUnitTest' has to be used in a Jamfile:
+'PtUnitTest' has to be used in a Jamfile:
 
 @code
-PtvUnitTest mytest : mytest.cpp ;
+PtUnitTest               DateTest : DateTest.cpp ;
+Main_LinkSharedLibraries DateTest : Pt Pt-Text Pt-Unit ;
+PtUnitTest_MakeLocate    DateTest : $(OUTPUT_TARGET) ;
 @endcode
 
 This will cause the jam tool to report a failed build if the Unit
