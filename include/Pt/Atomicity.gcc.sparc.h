@@ -116,7 +116,7 @@ inline void* atomicCompareExchange(void* volatile& ptr, void* exch, void* comp)
     register void* _exch asm("o5") = exch;
 
     asm volatile(
-#ifdef SPARCV9
+#if defined(__sparcv9)
         /* casx [%%g1], %%o4, %%o5 */
         ".word 0xdbf0500c"
 #else
@@ -160,13 +160,13 @@ inline void* atomicExchange(void* volatile& ptr, void* exch)
        register void* ret asm("o5");
 
        asm volatile(
-#ifdef SPARCV9
+#if defined(__sparcv9)
                "1:     ldx     [%%g1], %%o4\n\t"
 #else
                "1:     ld      [%%g1], %%o4\n\t"
 #endif
                "       mov     %3, %%o5\n\t"
-#ifdef SPARCV9
+#if defined(__sparcv9)
                /*      casx    [%%g1], %%o4, %%o5 */
                "       .word   0xdbf0500c\n\t"
 #else

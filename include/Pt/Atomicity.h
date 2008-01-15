@@ -64,7 +64,8 @@
         #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
 
     #elif defined(PT_SPARC) || \
-          defined(__sparc__) || defined(sparc) || defined(__sparc)
+          defined(__sparc__) || defined(sparc) || defined(__sparc) || \
+          defined(__sparcv8) || defined(__sparcv9)
 
         #define PT_ATOMICITY_H "Atomicity.gcc.sparc.h"
 
