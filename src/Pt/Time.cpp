@@ -117,19 +117,19 @@ Time Time::addMSecs(Pt::int64_t ms) const
     Time t;
     if (ms < 0)
     {
-        int negdays = static_cast<int>( (MSECS_PER_DAY - ms) / MSECS_PER_DAY );
-        t._msecs = static_cast<unsigned>( (_msecs + ms + negdays * MSECS_PER_DAY) % MSECS_PER_DAY );
+        Pt::int64_t negdays = (MSECS_PER_DAY - ms) / MSECS_PER_DAY;
+        t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSECS_PER_DAY) % MSECS_PER_DAY);
     }
     else
     {
-        t._msecs = static_cast<unsigned>( (_msecs + ms) % MSECS_PER_DAY );
+        t._msecs = static_cast<unsigned>((_msecs + ms) % MSECS_PER_DAY);
     }
 
     return t;
 }
 
 
-int Time::msecsTo(const Time &t) const
+Pt::int64_t Time::msecsTo(const Time &t) const
 {
     return t._msecs - _msecs;
 }

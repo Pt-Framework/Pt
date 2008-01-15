@@ -349,8 +349,6 @@ class basic_string< Pt::Char > {
         Pt::StringData* _data;
     };
 
-    static const basic_string< Pt::Char > Pt_String_null(L"");
-
     inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 

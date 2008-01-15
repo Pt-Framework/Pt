@@ -44,6 +44,21 @@ InvalidDate::~InvalidDate() throw()
 }
 
 
+const Pt::uint16_t Date::DAYS_PER_YEAR        = 365;
+const Pt::uint16_t Date::DAYS_PER_LEAPYEAR    = 366;
+const Pt::uint8_t  Date::DAYS_OF_JANUARY      = 31;
+const Pt::uint8_t  Date::DAYS_OF_FEBUARY      = 28;
+const Pt::uint8_t  Date::DAYS_OF_LEAP_FEBUARY = 29;
+const Pt::uint8_t  Date::DAYS_OF_MARCH        = 31;
+const Pt::uint8_t  Date::DAYS_OF_APRIL        = 30;
+const Pt::uint8_t  Date::DAYS_OF_MAY          = 31;
+const Pt::uint8_t  Date::DAYS_OF_JUNE         = 30;
+const Pt::uint8_t  Date::DAYS_OF_JULY         = 31;
+const Pt::uint8_t  Date::DAYS_OF_AUGUST       = 31;
+const Pt::uint8_t  Date::DAYS_OF_SEPTEMBER    = 30;
+const Pt::uint8_t  Date::DAYS_OF_OCTOBER      = 31;
+const Pt::uint8_t  Date::DAYS_OF_NOVEMBER     = 30;
+const Pt::uint8_t  Date::DAYS_OF_DECEMBER     = 31;
 
 
 void Date::greg2jul(unsigned& jd, int y, int m, int d)

@@ -53,7 +53,7 @@ PT_TESTS = AnyTest.cpp
            ;
 
 PtUnitTest Pt-test : Pt-test.cpp $(PT_TESTS) ;
-Main_LinkSharedLibraries Pt-test : Pt Pt-Text Pt-Unit ;
+Main_LinkSharedLibraries Pt-test : Pt Pt-System Pt-Text Pt-Unit ;
 PtUnitTest_MakeLocate Pt-test : $(OUTPUT_TARGET) ;
 
 NOTFILE Pt-all ;

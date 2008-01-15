@@ -47,13 +47,13 @@ class InvalidDate : public std::invalid_argument
 class PT_API Date
 {
     public:
-        enum
+        enum Month
         {
             Jan = 1, Feb, Mar,  Apr, May, Jun,
             Jul, Aug, Sep, Oct, Nov, Dec
         };
 
-        enum
+        enum WeekDay
         {
             Sun = 0, Mon, Tue, Wed, Thu, Fri, Sat
         };
@@ -216,7 +216,7 @@ class PT_API Date
             returns a Date-object. When the string is not in ISO-format, an
             exception is thrown.
 
-            \param Iso formated date string.
+            \param s Iso formated date string.
             \return Date result
             \throw IllegalArgument
         */
@@ -238,6 +238,82 @@ class PT_API Date
         /** @brief Converts a julian day to a gregorian date
         */
         static void jul2greg(unsigned jd, int& y, int& m, int& d);
+
+    public:
+        /**
+        * @brief Constant for the number of days of an ordinary year.
+        */
+        static const Pt::uint16_t DAYS_PER_YEAR;
+
+        /**
+        * @brief Constant for the number of days of a leap year.
+        */
+        static const Pt::uint16_t DAYS_PER_LEAPYEAR;
+
+        /**
+        * @brief Constant for the number of days of a January.
+        */
+        static const Pt::uint8_t DAYS_OF_JANUARY;
+        
+        /**
+        * @brief Constant for the number of days of a February.
+        */
+        static const Pt::uint8_t DAYS_OF_FEBUARY;
+
+        /**
+        * @brief Constant for the number of days of a February in a leap year.
+        */
+        static const Pt::uint8_t DAYS_OF_LEAP_FEBUARY;
+
+        /**
+        * @brief Constant for the number of days of a March.
+        */
+        static const Pt::uint8_t DAYS_OF_MARCH;
+
+        /**
+        * @brief Constant for the number of days of a April.
+        */
+        static const Pt::uint8_t DAYS_OF_APRIL;
+
+        /**
+        * @brief Constant for the number of days of a May.
+        */
+        static const Pt::uint8_t DAYS_OF_MAY;
+
+        /**
+        * @brief Constant for the number of days of a June.
+        */
+        static const Pt::uint8_t DAYS_OF_JUNE;
+
+        /**
+        * @brief Constant for the number of days of a July.
+        */
+        static const Pt::uint8_t DAYS_OF_JULY;
+
+        /**
+        * @brief Constant for the number of days of a August.
+        */
+        static const Pt::uint8_t DAYS_OF_AUGUST;
+
+        /**
+        * @brief Constant for the number of days of a September.
+        */
+        static const Pt::uint8_t DAYS_OF_SEPTEMBER;
+
+        /**
+        * @brief Constant for the number of days of a October.
+        */
+        static const Pt::uint8_t DAYS_OF_OCTOBER;
+
+        /**
+        * @brief Constant for the number of days of a November.
+        */
+        static const Pt::uint8_t DAYS_OF_NOVEMBER;
+
+        /**
+        * @brief Constant for the number of days of a December.
+        */
+        static const Pt::uint8_t DAYS_OF_DECEMBER;
 
     private:
         //! @internal

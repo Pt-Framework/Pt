@@ -44,12 +44,19 @@ class InvalidTime : public std::invalid_argument
 class PT_API Time
 {
     public:
-        static const int SecsPerDay = 86400;
-        static const int MSecsPerDay = 86400000;
-        static const int SecsPerHour = 3600;
-        static const int MSecsPerHour = 3600000;
-        static const int SecsPerMin = 60;
-        static const int MSecsPerMin = 60000;
+        static const Pt::uint8_t HOURS_PER_DAY      = 24;
+        static const Pt::uint8_t MAX_HOUR           = 23;
+        static const Pt::uint8_t MINUTES_PER_HOUR   = 60;
+        static const Pt::uint8_t MAX_MINUTE         = 59;
+        static const Pt::uint8_t SECONDS_PER_MINUTE = 60;
+        static const Pt::uint8_t MAX_SECOND         = 59;
+        static const Pt::int64_t SECS_PER_DAY       = 86400;
+        static const Pt::int64_t MSECS_PER_DAY      = 86400000;
+        static const Pt::int64_t SECS_PER_HOUR      = 3600;
+        static const Pt::int64_t MSECS_PER_HOUR     = 3600000;
+        static const Pt::int64_t SECS_PER_MIN       = 60;
+        static const Pt::int64_t MSECS_PER_MIN      = 60000;
+        static const Pt::int64_t MSECS_PER_SEC      = 1000;
 
         /** \brief Creates a Time set to zero.
         */
@@ -118,7 +125,7 @@ class PT_API Time
 
         /** @brief Determines milliseconds until another time
         */
-        int msecsTo(const Time &) const;
+        Pt::int64_t msecsTo(const Time &) const;
 
         /** @brief Assignment operator
         */
@@ -159,7 +166,7 @@ class PT_API Time
         */
         Time& operator+=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
+            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSECS_PER_DAY;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
         }
@@ -169,8 +176,8 @@ class PT_API Time
         Time& operator-=(const Timespan& ts)
         {
             Pt::int64_t msecs = ts.totalMSecs();
-            Pt::int64_t days = ( MSecsPerDay - msecs ) / MSecsPerDay;
-            msecs = (_msecs + msecs + days * MSecsPerDay) % MSecsPerDay;
+            Pt::int64_t days = ( MSECS_PER_DAY - msecs ) / MSECS_PER_DAY;
+            msecs = (_msecs + msecs + days * MSECS_PER_DAY) % MSECS_PER_DAY;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
         }

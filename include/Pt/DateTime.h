@@ -26,6 +26,7 @@
 #include <Pt/Time.h>
 #include <Pt/Date.h>
 #include <string>
+#include <map>
 
 
 namespace Pt {
@@ -35,9 +36,6 @@ namespace Pt {
 */
 class PT_API DateTime
 {
-    //friend PT_API const Archive& operator>>(const Archive&, DateTime& );
-    //friend PT_API Archive& operator<<(Archive&, const DateTime& );
-
     public:
         DateTime();
 
@@ -47,6 +45,18 @@ class PT_API DateTime
         DateTime(unsigned julianDay);
 
         DateTime(const DateTime& dateTime);
+        
+        /**
+         * @brief Creates a DateTime object with the specified milliseconds since January 1st 1970.
+         *
+         * The construction does currently not take care of any time zones. I.e. the milliseconds will
+         * be treated as if they were in the same time zone as the reference (January 1st 1970).
+         * Thus specifying a "time-zoned" millisecond value will lead to a "time-zoned" DateTime. And
+         * accordingly a "GMT" millisecond value will lead to a "GMT" DateTime.
+         *
+         * @param milliSecondsSinceJan1st1970 The elapsed milliseconds since or until January 1st 1970.
+         */
+        DateTime(const Pt::int64_t milliSecondsSinceJan1st1970);
 
         ~DateTime();
 
@@ -112,6 +122,18 @@ class PT_API DateTime
         */
         unsigned msec() const
         { return time().msec(); }
+        
+        /**
+         * @brief Returns the milliseconds between January 1st 1970 and this DateTime object.
+         *
+         * The calculation does currently not take care of any time zones. I.e. the milliseconds will
+         * be calculated as if they were in the same time zone as the reference (January 1st 1970).
+         * Thus calling this API on a "time-zoned" DateTime will lead to a "time-zoned" millisecond value. And
+         * accordingly calling this API on a "GMT" DateTime will lead to a "GMT" millisecond value.
+         *
+         * @return The milliseconds between January 1st 1970 and this DateTime object.
+         */
+        Pt::int64_t msecsSinceJan1st1970() const;
 
         static DateTime fromIsoString(const std::string& s);
 
@@ -136,10 +158,10 @@ class PT_API DateTime
         DateTime& operator+=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
 
-            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
-            if( overrun + _time.totalMSecs() > Time::MSecsPerDay)
+            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
+            if( overrun + _time.totalMSecs() > Time::MSECS_PER_DAY)
                 days += 1;
 
             _date += static_cast<int>(days);
@@ -153,9 +175,9 @@ class PT_API DateTime
         DateTime& operator-=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
 
-            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
+            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
             if( overrun > _time.totalMSecs() )
                 days += 1;
             _date -= static_cast<int>(days);
@@ -169,10 +191,13 @@ class PT_API DateTime
             Pt::int64_t dayDiff      = Pt::int64_t(first.date().julian())     - Pt::int64_t(second.date().julian());
             Pt::int64_t milliSecDiff = Pt::int64_t(first.time().totalMSecs()) - Pt::int64_t(second.time().totalMSecs());
             
-            Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
+            Pt::int64_t result = (dayDiff * Time::MSECS_PER_DAY + milliSecDiff) * 1000;
             
             return Timespan(result < 0 ? -result : result);
         }
+    
+    private:
+        std::map<Pt::Date::Month, Pt::uint8_t>& monthMap() const;
 
     private:
         Date _date;
