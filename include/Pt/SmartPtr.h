@@ -21,6 +21,7 @@
 #ifndef PT_SMARTPTR_H
 #define PT_SMARTPTR_H
 
+#include <Pt/Api.h>
 #include <Pt/Atomicity.h>
 #include <cstdio>
 
