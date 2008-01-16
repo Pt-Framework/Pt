@@ -28,7 +28,6 @@
 #include <string>
 #include <map>
 
-
 namespace Pt {
 
 /** @brief Combined %Date and %Time value
@@ -54,9 +53,9 @@ class PT_API DateTime
          * Thus specifying a "time-zoned" millisecond value will lead to a "time-zoned" DateTime. And
          * accordingly a "GMT" millisecond value will lead to a "GMT" DateTime.
          *
-         * @param milliSecondsSinceJan1st1970 The elapsed milliseconds since or until January 1st 1970.
+         * @param msecsUnixEpoch The elapsed milliseconds since or until January 1st 1970.
          */
-        DateTime(const Pt::int64_t milliSecondsSinceJan1st1970);
+        DateTime(const Pt::int64_t msecsUnixEpoch);
 
         ~DateTime();
 
@@ -133,7 +132,7 @@ class PT_API DateTime
          *
          * @return The milliseconds between January 1st 1970 and this DateTime object.
          */
-        Pt::int64_t msecsSinceJan1st1970() const;
+        Pt::int64_t msecsUnixEpoch() const;
 
         static DateTime fromIsoString(const std::string& s);
 
@@ -181,8 +180,7 @@ class PT_API DateTime
             if( overrun > _time.totalMSecs() )
                 days += 1;
             _date -= static_cast<int>(days);
-
-            _time -= Timespan( overrun );
+            _time -= Timespan( -overrun * 1000 );
             return *this;
         }
 
@@ -198,9 +196,6 @@ class PT_API DateTime
 
             return result;
         }
-
-    private:
-        std::map<Pt::Date::Month, Pt::uint8_t>& monthMap() const;
 
     private:
         Date _date;

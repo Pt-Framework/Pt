@@ -36,20 +36,19 @@ class DateTimeTest : public Pt::Unit::TestSuite
         DateTimeTest()
         : Pt::Unit::TestSuite("DateTimeTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "Assign", *this, &DateTimeTest::Assign );
-            Pt::Unit::TestSuite::registerMethod( "msecSinceJan1st1970", *this, &DateTimeTest::msecSinceJan1st1970 );
-            Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &DateTimeTest::IsoConvert );
+            Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &DateTimeTest::testAssign );
+            Pt::Unit::TestSuite::registerMethod( "testMsecsUnixEpoch", *this, &DateTimeTest::testMsecsUnixEpoch );
+            Pt::Unit::TestSuite::registerMethod( "testIsoConvert", *this, &DateTimeTest::testIsoConvert );
         }
 
     protected:
-        void Assign();
-        void msecSinceJan1st1970();
-        void IsoConvert();
+        void testAssign();
+        void testMsecsUnixEpoch();
+        void testIsoConvert();
 };
 
-Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;
 
-void DateTimeTest::Assign()
+void DateTimeTest::testAssign()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     PT_UNIT_ASSERT( dt.year() == 2001 );
@@ -60,7 +59,7 @@ void DateTimeTest::Assign()
     PT_UNIT_ASSERT( dt.second() == 23 );
     PT_UNIT_ASSERT( dt.msec() == 956 );
 
-	dt.set(1789, 5, 12, 23, 59, 59, 999);
+    dt.set(1789, 5, 12, 23, 59, 59, 999);
     PT_UNIT_ASSERT( dt.year() == 1789 );
     PT_UNIT_ASSERT( dt.month() == 5 );
     PT_UNIT_ASSERT( dt.day() == 12 );
@@ -70,74 +69,75 @@ void DateTimeTest::Assign()
     PT_UNIT_ASSERT( dt.msec() == 999 );
 }
 
-void DateTimeTest::msecSinceJan1st1970()
+
+void DateTimeTest::testMsecsUnixEpoch()
 {
     Pt::DateTime dt = Pt::System::Clock::getCurrentTime();
-    Pt::DateTime dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    Pt::DateTime dt2 = Pt::DateTime(dt.msecsUnixEpoch());   
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1970, 8, 1, 12, 11, 25, 0);
-    PT_UNIT_ASSERT(18360685000LL == dt.msecsSinceJan1st1970());
+    PT_UNIT_ASSERT(18360685000LL == dt.msecsUnixEpoch());
     dt = Pt::DateTime(1970, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1983, 5, 11, 13, 39, 52, 762);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2064, 1, 15, 2, 54, 33, 122);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2099, 12, 31, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2100, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2400, 2, 29, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2400, 3, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1968, 2, 29, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1968, 3, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 12, 31, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 4, 17, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 2, 17, 23, 59, 59, 999);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 10, 1, 12, 11, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1735, 10, 1, 12, 11, 0, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 1, 1, 0, 0, 0, 1);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1735, 7, 1, 12, 11, 25, 0);
-    dt2 = Pt::DateTime(dt.msecsSinceJan1st1970());
+    dt2 = Pt::DateTime(dt.msecsUnixEpoch());
     PT_UNIT_ASSERT(dt == dt2);
 
     /*dt = Pt::DateTime(1735, 1, 1, 12, 11, 25, 0);
-    for(Pt::int64_t i = 0; i > dt.msecsSinceJan1st1970(); i-=3600)
+    for(Pt::int64_t i = 0; i > dt.msecsUnixEpoch(); i-=3600)
     {
     std::cout<<Pt::DateTime(i).toIsoString() << std::endl;
     }*/
 }
 
 
-void DateTimeTest::IsoConvert()
+void DateTimeTest::testIsoConvert()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     std::string isoString = dt.toIsoString();
@@ -153,3 +153,4 @@ void DateTimeTest::IsoConvert()
     PT_UNIT_ASSERT( dt.msec() == 999 );
 }
 
+Pt::Unit::RegisterTest<DateTimeTest> register_DateTimeTest;
