@@ -1022,6 +1022,21 @@ rule Objects
     }
 }
 
+
+# Adds a resource to be linked with a binary.
+# Not implemented for GCC - on Windows, it can be 
+# used to add an icon to the binary
+#
+# param 1 executable
+# param 2 resource file
+# param 3 output directory of compiled resource file
+#
+# Resource prog : resources.rc : output_directory ;
+rule Resource
+{
+}
+
+
 # @brief Copies resources (images, settings files) of an executable to the 
 # output directory if missing or old.
 #
