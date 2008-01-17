@@ -166,20 +166,33 @@ class PT_API Time
         */
         Time& operator+=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSECS_PER_DAY;
-            _msecs = static_cast<unsigned>(msecs);
-            return *this;
+            if( ts.totalMSecs() < 0 )
+            {
+                return this->operator -=( Timespan(-ts.totalMSecs()*1000) );
+            }
+            else
+            {
+                Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSECS_PER_DAY;
+                _msecs = static_cast<unsigned>(msecs);
+                return *this;
+            }
         }
 
         /** @brief Assignment by difference operator
         */
         Time& operator-=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ts.totalMSecs();
-            Pt::int64_t days = ( MSECS_PER_DAY - msecs ) / MSECS_PER_DAY;
-            msecs = (_msecs + msecs + days * MSECS_PER_DAY) % MSECS_PER_DAY;
-            _msecs = static_cast<unsigned>(msecs);
-            return *this;
+            if( ts.totalMSecs() < 0 )
+            {
+                return this->operator +=( Timespan(-ts.totalMSecs()*1000) );
+            }
+            else
+            {
+                Pt::int64_t msecs = ( _msecs - ts.totalMSecs() ) % MSECS_PER_DAY;
+                msecs = msecs < 0 ? MSECS_PER_DAY + msecs : msecs;
+                _msecs = static_cast<unsigned>(msecs);
+                return *this;
+            }
         }
 
         /** @brief Addition operator

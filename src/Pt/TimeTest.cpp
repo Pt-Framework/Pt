@@ -36,11 +36,13 @@ public:
     : Pt::Unit::TestSuite("TimeTest")
     {
         Pt::Unit::TestSuite::registerMethod("testAssign", *this, &TimeTest::testAssign);
+        Pt::Unit::TestSuite::registerMethod("testOperators", *this, &TimeTest::testOperators);
         Pt::Unit::TestSuite::registerMethod("testIsoConvert", *this, &TimeTest::testIsoConvert);
     }
 
 protected:
     void testAssign();
+    void testOperators();
     void testIsoConvert();
 };
 
@@ -56,12 +58,41 @@ void TimeTest::testAssign()
     PT_UNIT_ASSERT( time.msec() == 956 );
 
     time.set(23, 59, 59, 999);
-    PT_UNIT_ASSERT( time.hour() == 23 );
+    PT_UNIT_ASSERT( time.hour()   == 23 );
     PT_UNIT_ASSERT( time.minute() == 59 );
     PT_UNIT_ASSERT( time.second() == 59 );
-    PT_UNIT_ASSERT( time.msec() == 999 );
+    PT_UNIT_ASSERT( time.msec()   == 999 );
 }
 
+void TimeTest::testOperators()
+{
+    Pt::Time time(20, 30, 50, 200);
+    Pt::Timespan timespan(100, 80*1000);
+    time += timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 32 );
+    PT_UNIT_ASSERT( time.second() == 30 );
+    PT_UNIT_ASSERT( time.msec()   == 280 );
+
+    time -= timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 30 );
+    PT_UNIT_ASSERT( time.second() == 50 );
+    PT_UNIT_ASSERT( time.msec()   == 200 );
+
+    timespan = Pt::Timespan(-100, -80*1000);
+    time -= timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 32 );
+    PT_UNIT_ASSERT( time.second() == 30 );
+    PT_UNIT_ASSERT( time.msec()   == 280 );
+
+    time += timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 30 );
+    PT_UNIT_ASSERT( time.second() == 50 );
+    PT_UNIT_ASSERT( time.msec()   == 200 );
+}
 
 void TimeTest::testIsoConvert()
 {
@@ -70,9 +101,9 @@ void TimeTest::testIsoConvert()
     PT_UNIT_ASSERT( isoString == "12:45:23.956" );
 
     time = Pt::Time::fromIsoString("23:59:59.999");
-    PT_UNIT_ASSERT( time.hour() == 23 );
+    PT_UNIT_ASSERT( time.hour()   == 23 );
     PT_UNIT_ASSERT( time.minute() == 59 );
     PT_UNIT_ASSERT( time.second() == 59 );
-    PT_UNIT_ASSERT( time.msec() == 999 );
+    PT_UNIT_ASSERT( time.msec()   == 999 );
 }
 

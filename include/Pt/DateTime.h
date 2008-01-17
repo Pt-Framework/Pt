@@ -156,32 +156,46 @@ class PT_API DateTime
         */
         DateTime& operator+=(const Timespan& ts)
         {
-            Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
+            if( ts.totalMSecs() < 0 )
+            {
+                return this->operator -=( Timespan(-ts.totalMSecs()*1000) );
+            }
+            else
+            {
+                Pt::int64_t totalMSecs = ts.totalMSecs();
+                Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
 
-            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
-            if( overrun + _time.totalMSecs() > Time::MSECS_PER_DAY)
-                days += 1;
+                Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
+                if( overrun + _time.totalMSecs() > Time::MSECS_PER_DAY)
+                    days += 1;
 
-            _date += static_cast<int>(days);
-
-            _time += Timespan(overrun * 1000);
-            return *this;
+                _date += static_cast<int>(days);
+                _time += Timespan(overrun * 1000);
+                return *this;
+            }
         }
 
         /** @brief Assignment by difference operator
         */
         DateTime& operator-=(const Timespan& ts)
         {
-            Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
+            if( ts.totalMSecs() < 0 )
+            {
+                return this->operator +=( Timespan(-ts.totalMSecs()*1000) );
+            }
+            else
+            {
+                Pt::int64_t totalMSecs = ts.totalMSecs();
+                Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
 
-            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
-            if( overrun > _time.totalMSecs() )
-                days += 1;
-            _date -= static_cast<int>(days);
-            _time -= Timespan( -overrun * 1000 );
-            return *this;
+                Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
+                if( overrun > _time.totalMSecs() )
+                    days += 1;
+
+                _date -= static_cast<int>(days);
+                _time -= Timespan( overrun * 1000 );
+                return *this;
+            }
         }
 
         friend Timespan operator-(const DateTime& first, const DateTime& second)

@@ -37,12 +37,14 @@ class DateTimeTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("DateTimeTest")
         {
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &DateTimeTest::testAssign );
+            Pt::Unit::TestSuite::registerMethod( "testOperators", *this, &DateTimeTest::testOperators );
             Pt::Unit::TestSuite::registerMethod( "testMsecsUnixEpoch", *this, &DateTimeTest::testMsecsUnixEpoch );
             Pt::Unit::TestSuite::registerMethod( "testIsoConvert", *this, &DateTimeTest::testIsoConvert );
         }
 
     protected:
         void testAssign();
+        void testOperators();
         void testMsecsUnixEpoch();
         void testIsoConvert();
 };
@@ -51,28 +53,74 @@ class DateTimeTest : public Pt::Unit::TestSuite
 void DateTimeTest::testAssign()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
-    PT_UNIT_ASSERT( dt.year() == 2001 );
-    PT_UNIT_ASSERT( dt.month() == 11 );
-    PT_UNIT_ASSERT( dt.day() == 15 );
-    PT_UNIT_ASSERT( dt.hour() == 12 );
+    PT_UNIT_ASSERT( dt.year()   == 2001 );
+    PT_UNIT_ASSERT( dt.month()  == 11 );
+    PT_UNIT_ASSERT( dt.day()    == 15 );
+    PT_UNIT_ASSERT( dt.hour()   == 12 );
     PT_UNIT_ASSERT( dt.minute() == 45 );
     PT_UNIT_ASSERT( dt.second() == 23 );
-    PT_UNIT_ASSERT( dt.msec() == 956 );
+    PT_UNIT_ASSERT( dt.msec()   == 956 );
 
     dt.set(1789, 5, 12, 23, 59, 59, 999);
-    PT_UNIT_ASSERT( dt.year() == 1789 );
-    PT_UNIT_ASSERT( dt.month() == 5 );
-    PT_UNIT_ASSERT( dt.day() == 12 );
-    PT_UNIT_ASSERT( dt.hour() == 23 );
+    PT_UNIT_ASSERT( dt.year()   == 1789 );
+    PT_UNIT_ASSERT( dt.month()  == 5 );
+    PT_UNIT_ASSERT( dt.day()    == 12 );
+    PT_UNIT_ASSERT( dt.hour()   == 23 );
     PT_UNIT_ASSERT( dt.minute() == 59 );
     PT_UNIT_ASSERT( dt.second() == 59 );
-    PT_UNIT_ASSERT( dt.msec() == 999 );
+    PT_UNIT_ASSERT( dt.msec()   == 999 );
+}
+
+
+void DateTimeTest::testOperators()
+{
+    Pt::DateTime dt(1998, 06, 27, 11, 45, 20, 800);
+    Pt::Timespan timespan;
+
+    timespan.set(4, 3, 6, 50, 300*1000); // d, h, min, sec, usec
+    dt += timespan;
+    PT_UNIT_ASSERT( dt.year()   == 1998 );
+    PT_UNIT_ASSERT( dt.month()  == 07 );
+    PT_UNIT_ASSERT( dt.day()    == 01 );
+    PT_UNIT_ASSERT( dt.hour()   == 14 );
+    PT_UNIT_ASSERT( dt.minute() == 52 );
+    PT_UNIT_ASSERT( dt.second() == 11 );
+    PT_UNIT_ASSERT( dt.msec()   == 100 );
+
+    dt -= timespan;
+    PT_UNIT_ASSERT( dt.year()   == 1998 );
+    PT_UNIT_ASSERT( dt.month()  == 06 );
+    PT_UNIT_ASSERT( dt.day()    == 27 );
+    PT_UNIT_ASSERT( dt.hour()   == 11 );
+    PT_UNIT_ASSERT( dt.minute() == 45 );
+    PT_UNIT_ASSERT( dt.second() == 20 );
+    PT_UNIT_ASSERT( dt.msec()   == 800 );
+
+    timespan.set(-4, -3, -6, -50, -300*1000);
+    dt -= timespan;
+    PT_UNIT_ASSERT( dt.year()   == 1998 );
+    PT_UNIT_ASSERT( dt.month()  == 07 );
+    PT_UNIT_ASSERT( dt.day()    == 01 );
+    PT_UNIT_ASSERT( dt.hour()   == 14 );
+    PT_UNIT_ASSERT( dt.minute() == 52 );
+    PT_UNIT_ASSERT( dt.second() == 11 );
+    PT_UNIT_ASSERT( dt.msec()   == 100 );
+
+    dt += timespan;
+    PT_UNIT_ASSERT( dt.year()   == 1998 );
+    PT_UNIT_ASSERT( dt.month()  == 06 );
+    PT_UNIT_ASSERT( dt.day()    == 27 );
+    PT_UNIT_ASSERT( dt.hour()   == 11 );
+    PT_UNIT_ASSERT( dt.minute() == 45 );
+    PT_UNIT_ASSERT( dt.second() == 20 );
+    PT_UNIT_ASSERT( dt.msec()   == 800 );
+
 }
 
 
 void DateTimeTest::testMsecsUnixEpoch()
 {
-    Pt::DateTime dt = Pt::System::Clock::getCurrentTime();
+	Pt::DateTime dt = Pt::System::Clock::getCurrentTime();
     Pt::DateTime dt2 = Pt::DateTime(dt.msecsUnixEpoch());   
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1970, 8, 1, 12, 11, 25, 0);

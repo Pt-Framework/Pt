@@ -60,8 +60,7 @@ DateTime::DateTime(const DateTime& dateTime)
 DateTime::DateTime(const Pt::int64_t msecsUnixEpoch)
 {
     DateTime dt(1970, 1, 1);
-    msecsUnixEpoch > 0 ? dt += Timespan(msecsUnixEpoch*1000) 
-                       : dt -= Timespan(-msecsUnixEpoch*1000);
+	dt += Timespan(msecsUnixEpoch*1000);
     _date = dt.date();
     _time = dt.time();
 }
