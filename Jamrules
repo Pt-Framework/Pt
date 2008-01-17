@@ -1,35 +1,252 @@
-JamInclude Jamrules.unit ;
-JamInclude Jamrules.platinum ;
+#############################################################################
+# Platform settings
+#############################################################################
+if $(TARGET_OS:L) = "nt"
+{
+    SYS     ?= win32 ;
+    GUI     ?= gdi ;
+    SYSLIBS = version.lib Winmm.lib Psapi.lib ;
+    NETLIBS = wsock32.lib ws2_32.lib ;
 
-#C++FLAGS += [ FDefines "PT_"$(TARGET_OS:U) ] ;
-#C++FLAGS += [ FDefines "PT_"$(TARGET_OSPLAT:U) ] ;
-#C++FLAGS += [ FDefines "PT_"$(TOOLSET:U) ] ;
-#C++FLAGS += [ FDefines "PT_"$(BYTEORDER:U) ] ;
+    if $(MINGW)
+    {
+        SYSLIBS = $(MINGW)$(SLASH)lib$(SLASH)libversion.a
+                  $(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
+                  $(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
+        NETLIBS = $(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
+                  $(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
+    }
+}
+if $(TARGET_OS:L) = "linux"
+{
+    SYS     ?= posix ;
+    GUI     ?= x11 ;
+    SYSLIBS = -ldl -lpthread -lrt ;
+    NETLIBS = -lnsl ;
+}
+if $(TARGET_OS:L) = "macosx"
+{
+    SYS     ?= posix ;
+    GUI     ?= cocoa ;
+    SYSLIBS = -ldl -lpthread ;
+    #NETLIBS =  ;
+}
+if $(TARGET_OS) = "aix"
+{
+    SYS      ?= posix ;
+    GUI      ?= x11 ;
+    SYSLIBS  = -bdynamic -ldl -lpthread -lrt ;
+    LINKLIBS += $(SYSLIBS) ;
+    # NETLIBS =
+}
+if $(TARGET_OS) = "solaris"
+{
+    SYS     ?= posix ;
+    GUI     ?= x11 ;
+    SYSLIBS = -ldl -lpthread -lrt ;
+    NETLIBS = -lsocket -lnsl ;
+}
+if $(TARGET_OS:L) = "qnxnto"
+{
+    SYS     ?= posix ;
+    GUI     ?= photon ;
+    SYSLIBS =  ;
+    NETLIBS = -lsocket ;
+}
+if $(TARGET_OS:L) = "wince"
+{
+    SYS     ?= wince ;
+    GUI     ?= gdi ;
+    SYSLIBS = mmtimer.lib ;
+    NETLIBS = winsock.lib Ws2.lib ;
+}
 
-# set directory to build object files into
-OBJECT_TARGET = tmp ;
 
-# set directory to build library/binary files into
-OUTPUT_TARGET = bin ;
+#############################################################################
+# GUI libraries and includes
+#############################################################################
+if $(GUI:L) = "gdi"
+    {
+    if $(TARGET_OS:L) = "nt"
+    {
+        GUILIBS = gdi32.lib user32.lib ;
+    }
+    if $(MINGW)
+    {
+        GUILIBS = $(MINGW)$(SLASH)lib$(SLASH)libgdi32.a
+                  $(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
+    }
+}
 
-# Print project information
-Echo ;
-Echo "Project                         :" "Platinum C++ Framework" ;
-Echo "Configuration (CONFIG)          :" $(CONFIG) ;
-Echo "Toolset (TOOLSET)               :" $(TOOLSET) ;
-Echo "Host Operating System (OS)      :" $(OS:L) ;
-Echo "Host Platform (OSPLAT)          :" $(OSPLAT:L) ;
-Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
-Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
-Echo "Graphic User Interface (GUI)    :" $(GUI) ;
-Echo "System Interface (SYS)          :" $(SYS) ;
-Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
-Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
-Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
-Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
-Echo "Warnings (WARN)                 :" $(WARN) ;
-Echo ;
+if $(GUI:L) = "x11"
+{
+    JamInclude x11.jam ;
 
+    local x11incl = [ X11Includes ] ;
+    if $(x11incl) = ""
+    {
+        Echo "    ERROR: X11 includes are required!" ;
+    }
+
+    local x11libs = [ X11Libs ] ;
+    if $(x11libs) = ""
+    {
+        Echo "    ERROR: X11 libraries are required!" ;
+    }
+
+    local xextlibs = [ XextLibs ] ;
+    if $(xextlibs) = ""
+    {
+        Echo "    ERROR: Xext libraries are required!" ;
+    }
+
+    local xftincl = [ XftIncludes ] ;
+    if $(xftincl) = ""
+    {
+        Echo "    INFO: Xft includes not available!" ;
+    }
+
+    local xftlibs = [ XftLibs ] ;
+    if $(xftlibs) = ""
+    {
+        Echo "    INFO: Xft libraries not available!" ;
+    }
+
+    GUILIBS += $(x11libs) $(xextlibs) $(xftlibs) ;
+}
+
+if $(GUI:L) = "gf"
+{
+    if $(CONFIG:L) = "release"
+    {
+        GUILIBS = -L/usr/lib -lgfS ;
+    }
+    else
+    {
+        GUILIBS = -L/usr/lib -lgfS_g ;
+    }
+}
+
+if $(GUI:L) = "photon"
+{
+    GUILIBS = -lphrender -lph ;
+}
+
+if $(GUI:L) = "cocoa"
+{
+    GUILIBS = -framework AppKit -framework Foundation ;
+}
+
+
+#############################################################################
+# Unit testing rules and actions
+#############################################################################
+# Special targets
+#
+NOTFILE test ;
+DEPENDS test : files ;
+DEPENDS all-test : all test ;
+NOTFILE all-test ;
+
+
+# Build a unit test program
+#
+# Replaces the Main rule to build unit tests executables. The built target 
+# becomes a dependency of the special target 'test'.
+#
+rule PtUnitTest
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+  local _output = $(<:S=.unit) ;
+
+  Main $(<) : $(>) ;
+
+  Depends $(_output) : $(_target) ;
+  Depends test : $(_output) ;
+
+  Clean clean : $(_output) ;
+  MakeLocate $(_output) : $(LOCATE_TARGET) ;
+
+  PtUnitTestAction $(_output) : $(_target) ;
+}
+
+rule PtUnitTest_MakeLocate
+{
+  local _output = $(<:S=.unit) ;
+
+  Main_MakeLocate $(<) : $(>) ;
+  MakeLocate $(_output) : $(>) ;
+}
+
+
+if $(UNIX)
+{
+
+  # $(<) : <path_to_test>/test.unit
+  # $(>) : <path_to_test>/testd.exe
+  actions PtUnitTestAction
+  {
+    cd $(>:D)
+    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:. ./$(>:BS) -f$(<:BS)"
+  }
+
+}
+else if $(TARGET_OS:L) = "wince"
+{
+
+  actions PtUnitTestAction
+  {
+      ce del \$(<:BS).failed > nul
+      ce copy $(>) \$(>:BS)
+
+      rem start will return after process has started
+      ce start "\$(>:BS)" -f\$(<:BS)
+
+      :Loop
+        ping 127.0.0.1 -n 5 -w 1000 > nul
+        ce tlist | findstr "$(>:BS)" > nul
+        IF %ERRORLEVEL% EQU 0 GOTO Loop
+
+      ce get \$(<:BS).failed $(<).failed > nul
+
+      SET TEST_FAILED=0
+      IF EXIST $(<).failed (
+        SET TEST_FAILED=1
+        ce get \$(<:BS) $(<).failed
+        ce del \$(<:BS).failed
+      ) ELSE (
+        ce get \$(<:BS) $(<)
+        IF EXIST $(<) (
+          SET TEST_FAILED=0
+        ) ELSE (
+          SET TEST_FAILED=1
+        )
+      )
+      ce del \$(<:BS)
+      ce del \$(>:BS)
+
+      rem taskkill /F /IM DeviceEmulator.exe
+      rem IF EXIST $(<).failed $(RM) $(<).failed
+
+      EXIT %TEST_FAILED%
+  }
+
+}
+else
+{
+
+  actions PtUnitTestAction
+  {
+    cd $(>:D)
+    $(>:BS) -f$(<:BS)
+  }
+
+}
+
+
+#############################################################################
+# TNT-net rules and actions
+#############################################################################
 #if $(SYS) = "posix"
 #{
   TNTNETLIBS = -ltntnet ;
@@ -62,3 +279,32 @@ actions Ecppc
 {
     ecppc -o $(<) -n $(<:B) $(>)
 }
+
+
+#############################################################################
+# General values and settings
+#############################################################################
+
+# set directory to build object files into
+OBJECT_TARGET = tmp ;
+
+# set directory to build library/binary files into
+OUTPUT_TARGET = bin ;
+
+# Print project information
+Echo ;
+Echo "Project                         :" "Platinum C++ Framework" ;
+Echo "Configuration (CONFIG)          :" $(CONFIG) ;
+Echo "Toolset (TOOLSET)               :" $(TOOLSET) ;
+Echo "Host Operating System (OS)      :" $(OS:L) ;
+Echo "Host Platform (OSPLAT)          :" $(OSPLAT:L) ;
+Echo "Target OS (TARGET_OS)           :" $(TARGET_OS:L) ;
+Echo "Target Platform (TARGET_OSPLAT) :" $(TARGET_OSPLAT:L) ;
+Echo "Graphic User Interface (GUI)    :" $(GUI) ;
+Echo "System Interface (SYS)          :" $(SYS) ;
+Echo "Remote tests (REMOTE_TESTS)     :" $(REMOTE_TESTS) ;
+Echo "C++ Flags (C++FLAGS)            :" $(C++FLAGS) ;
+Echo "C Flags (CCFLAGS)               :" $(CCFLAGS) ;
+Echo "Optimisation (OPTIM)            :" $(OPTIM) ;
+Echo "Warnings (WARN)                 :" $(WARN) ;
+Echo ;

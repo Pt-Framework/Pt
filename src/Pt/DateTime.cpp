@@ -44,10 +44,10 @@ DateTime::DateTime(int year, unsigned month, unsigned day,
 }
 
 
-DateTime::DateTime(unsigned julianDay)
+/*DateTime::DateTime(unsigned julianDay)
 : _date(julianDay)
 {
-}
+}*/
 
 
 DateTime::DateTime(const DateTime& dateTime)

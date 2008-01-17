@@ -41,7 +41,7 @@ class PT_API DateTime
         DateTime(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
-        DateTime(unsigned julianDay);
+        //DateTime(unsigned julianDay);
 
         DateTime(const DateTime& dateTime);
         
