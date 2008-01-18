@@ -51,7 +51,7 @@ Pt::Unit::RegisterTest<DateTest> register_DateTest;
 void DateTest::Assign()
 {
     Pt::Date date2(1);
-    std::cerr << "\n Null Date: "<< date2.day() << " " << date2.month() << " " << date2.year() << std::endl;
+    //std::cerr << "\n Null Date: "<< date2.day() << " " << date2.month() << " " << date2.year() << std::endl;
 
     Pt::Date date(2001, 11, 15);
     PT_UNIT_ASSERT( date.year() == 2001 );
