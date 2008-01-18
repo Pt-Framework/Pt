@@ -77,9 +77,9 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             ser.finish();
             ser.flush();
 
-            std::cerr << "\n##########\n" << std::endl;
-            std::cerr << output.str() << std::endl;
-            std::cerr << "##########" << std::endl;
+            //std::cerr << "\n##########\n" << std::endl;
+            //std::cerr << output.str() << std::endl;
+            //std::cerr << "##########" << std::endl;
 
             Pt::Date date2(1, 1, 1);
             dr.date = 0;
