@@ -219,10 +219,8 @@ class PT_API DateTime
         }
 
     private:
-        inline DateTime::DateTime(unsigned d)
-        : _date(d)
-        {
-        }           
+        inline DateTime(unsigned d)
+        : _date(d) {}           
 
     private:
         Date _date;
