@@ -41,10 +41,15 @@ class PT_API DateTime
         DateTime(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
-        //DateTime(unsigned julianDay);
-
         DateTime(const DateTime& dateTime);
-        
+               
+        ~DateTime();
+
+        static inline DateTime fromJulianDays(unsigned julianDays)
+        {
+            return DateTime(julianDays);
+        }
+
         /**
          * @brief Creates a DateTime object with the specified milliseconds since January 1st 1970.
          *
@@ -55,9 +60,11 @@ class PT_API DateTime
          *
          * @param msecsUnixEpoch The elapsed milliseconds since or until January 1st 1970.
          */
-        DateTime(const Pt::int64_t msecsUnixEpoch);
-
-        ~DateTime();
+        static inline DateTime fromMsecsUnixEpoch(const Pt::int64_t msecsUnixEpoch)
+        {
+            DateTime dt(1970, 1, 1);
+            return dt += Timespan(msecsUnixEpoch*1000);
+        }
 
         DateTime& operator=(const DateTime& dateTime);
 
@@ -210,6 +217,12 @@ class PT_API DateTime
 
             return result;
         }
+
+    private:
+        inline DateTime::DateTime(unsigned d)
+        : _date(d)
+        {
+        }           
 
     private:
         Date _date;

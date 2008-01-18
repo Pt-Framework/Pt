@@ -43,26 +43,10 @@ DateTime::DateTime(int year, unsigned month, unsigned day,
 {
 }
 
-
-/*DateTime::DateTime(unsigned julianDay)
-: _date(julianDay)
-{
-}*/
-
-
 DateTime::DateTime(const DateTime& dateTime)
 : _date( dateTime.date() )
 , _time( dateTime.time() )
 {
-}
-
-
-DateTime::DateTime(const Pt::int64_t msecsUnixEpoch)
-{
-    DateTime dt(1970, 1, 1);
-	dt += Timespan(msecsUnixEpoch*1000);
-    _date = dt.date();
-    _time = dt.time();
 }
 
 
