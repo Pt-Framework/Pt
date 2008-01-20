@@ -1,0 +1,13 @@
+/** \page requirements Requirements
+
+@section SupportedTools Supported Platforms and Toolsets
+
+Most modules of the Platinum C++ framework can be compiled for any platform
+that provides an ISO C++ implementation, the system dependent parts of %Pt 
+are designed to be very portable. The %Pt build process supports a variety
+of platforms and compilers. The supported operating systems include Windows
+2000/XP/Vista, Windows Mobile 5.x/6.x, Linux, MacOS-X, AIX, Solaris and QNX.
+Big-endian as well as little-endian architectures are supported,
+including X86, X86-64, PPC, Sparc, ARM, MIPS and SH. 64-bit support
+is available for the respective platforms.
+*/
