@@ -20,11 +20,12 @@
 #define PT_ATOMICINT_GCC_X86_H
 
 #include <csignal>
+#include <unistd.h>
 
 
 namespace Pt {
 
-typedef std::sig_atomic_t atomic_t;
+typedef ssize_t atomic_t;
 
 
 inline atomic_t atomicIncrement(volatile atomic_t& val)
@@ -40,11 +41,12 @@ inline atomic_t atomicIncrement(volatile atomic_t& val)
 
 inline atomic_t atomicDecrement(volatile atomic_t& val)
 {
+        static const atomic_t d = -1;
         volatile register atomic_t tmp;
 
         asm volatile ("lock; xaddq %0, %1"
                       : "=r" (tmp), "=m" (val)
-                      : "0" (-1), "m" (val));
+                      : "0" (d), "m" (val));
 
         return tmp-1;
 }
