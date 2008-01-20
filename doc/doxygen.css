@@ -422,30 +422,30 @@ HR { height: 1px;
 }
 
 .sidebar-major {
-       background-color:rgb(195, 0, 20);
-       color:white;
-       padding-bottom:7px;
-       padding-top:7px;
-       padding-left:1.5em;
-       font-size: 120%;
-        -moz-border-radius: 0px 12px 12px 0px;
+    background-color:rgb(195, 0, 20);
+    color:white;
+    padding-bottom:7px;
+    padding-top:7px;
+    padding-left:1.5em;
+    font-size: 120%;
+    -moz-border-radius: 0px 12px 12px 0px;
 }
 
 .sidebar ul {
     list-style: none;
 }
 
+.sidebar ul li:hover {
+    list-style: disc;
+}
+
 .sidebar a {
     text-decoration: none;
 }
 
-/*.sidebar a:hover {
+.sidebar a:hover {
     text-decoration: none;
-    font-weight: bold;
-}*/
-
-.sidebar ul li:hover {
-    list-style: disc;
+    color: #154374;
 }
 
 
