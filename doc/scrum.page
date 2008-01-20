@@ -13,19 +13,19 @@
 
             <br>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/backlog">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/project/backlog">
                 Backlog
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/todo">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/project/todo">
                 Todo
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/ongoing">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/project/ongoing">
                 Ongoing
             </a>
             <br>
-            <a href="https://svn.sourceforge.net/svnroot/pt-framework/trunk/scrum/done">
+            <a href="https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk/project/done">
                 Done
             </a>
        </p>
