@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Stefan Büder                                    *
+ *   Copyright (C) 2006 by Tommi Maekitalo                                 *
+ *   Copyright (C) 2006-2008 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-class InvalidTime : public std::invalid_argument
+class PT_API InvalidTime : public std::invalid_argument
 {
     public:
         InvalidTime(const SourceInfo& si);
@@ -44,19 +44,19 @@ class InvalidTime : public std::invalid_argument
 class PT_API Time
 {
     public:
-        static const Pt::uint8_t HOURS_PER_DAY      = 24;
-        static const Pt::uint8_t MAX_HOUR           = 23;
-        static const Pt::uint8_t MINUTES_PER_HOUR   = 60;
-        static const Pt::uint8_t MAX_MINUTE         = 59;
-        static const Pt::uint8_t SECONDS_PER_MINUTE = 60;
-        static const Pt::uint8_t MAX_SECOND         = 59;
-        static const Pt::int64_t SECS_PER_DAY       = 86400;
-        static const Pt::int64_t MSECS_PER_DAY      = 86400000;
-        static const Pt::int64_t SECS_PER_HOUR      = 3600;
-        static const Pt::int64_t MSECS_PER_HOUR     = 3600000;
-        static const Pt::int64_t SECS_PER_MIN       = 60;
-        static const Pt::int64_t MSECS_PER_MIN      = 60000;
-        static const Pt::int64_t MSECS_PER_SEC      = 1000;
+        static const unsigned MaxHours         = 23;
+        static const unsigned HoursPerDay      = 24;
+        static const unsigned MaxMinutes       = 59;
+        static const unsigned MinutesPerHour   = 60;
+        static const unsigned MinutesPerDay    = 1440;
+        static const unsigned MaxSeconds       = 59;
+        static const unsigned SecondsPerDay    = 86400;
+        static const unsigned SecondsPerHour   = 3600;
+        static const unsigned SecondsPerMinute = 60;
+        static const unsigned MSecsPerDay      = 86400000;
+        static const unsigned MSecsPerHour     = 3600000;
+        static const unsigned MSecsPerMinute   = 60000;
+        static const unsigned MSecsPerSecond   = 1000;
 
         /** \brief Creates a Time set to zero.
         */
@@ -166,8 +166,8 @@ class PT_API Time
         */
         Time& operator+=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSECS_PER_DAY;
-            msecs = msecs < 0 ? MSECS_PER_DAY + msecs : msecs;
+            Pt::int64_t msecs = ( _msecs + ts.totalMSecs() ) % MSecsPerDay;
+            msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
         }
@@ -176,8 +176,8 @@ class PT_API Time
         */
         Time& operator-=(const Timespan& ts)
         {
-            Pt::int64_t msecs = ( _msecs - ts.totalMSecs() ) % MSECS_PER_DAY;
-            msecs = msecs < 0 ? MSECS_PER_DAY + msecs : msecs;
+            Pt::int64_t msecs = ( _msecs - ts.totalMSecs() ) % MSecsPerDay;
+            msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
             _msecs = static_cast<unsigned>(msecs);
             return *this;
         }
@@ -200,7 +200,6 @@ class PT_API Time
         */
         friend Timespan operator-(const Time& a, const Time& b)
         {
-
             return b.msecsTo(a);
         }
 
@@ -229,32 +228,9 @@ class PT_API Time
         unsigned _msecs;
     };
 
+    PT_API void operator >>=(const SerializationInfo& si, Time& time);
 
-    inline void operator >>=(const SerializationInfo& si, Time& time)
-    {
-        unsigned hour = si.getValue<unsigned>("hour");
-        unsigned min = si.getValue<unsigned>("minute");
-        unsigned sec = si.getValue<unsigned>("second");
-        unsigned msec = si.getValue<unsigned>("millisec");
-        time.set(hour, min, sec, msec);
-    }
-
-
-    inline void operator <<=(SerializationInfo& si, const Time& time)
-    {
-        unsigned hour = 0;
-        unsigned min = 0;
-        unsigned sec = 0;
-        unsigned msec = 0;
-        time.get(hour, min, sec, msec);
-
-        si.addValue("hour", hour );
-        si.addValue("minute", min );
-        si.addValue("second", sec );
-        si.addValue("millisec", msec );
-        si.setTypeName("Time");
-    }
-
+    PT_API void operator <<=(SerializationInfo& si, const Time& time);
 }
 
 #endif // PT_TIME_H

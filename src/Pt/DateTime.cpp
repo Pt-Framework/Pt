@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Duerner                               *
- *   Copyright (C) 2006 by Stefan Bueder                                    *
+ *   Copyright (C) 2006 by Tommi Maekitalo                                 *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,10 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include <Pt/DateTime.h>
 #include "Pt/SourceInfo.h"
-
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
@@ -42,6 +40,7 @@ DateTime::DateTime(int year, unsigned month, unsigned day,
 , _time(hour, minute, second, msec)
 {
 }
+
 
 DateTime::DateTime(const DateTime& dateTime)
 : _date( dateTime.date() )
@@ -190,9 +189,28 @@ std::string DateTime::toIsoString() const
     return std::string(ret, 23);
 }
 
-Pt::int64_t DateTime::msecsUnixEpoch() const
+
+void operator >>=(const SerializationInfo& si, DateTime& datetime)
 {
-    return (*this - DateTime(1970, 1, 1)).totalMSecs();
+    Date date(1,1,1);
+    si.getMember("date") >>= date;
+    datetime.setDate(date);
+
+    Time time;
+    si.getMember("time") >>= time;
+    datetime.setTime(time);
+}
+
+
+void operator <<=(SerializationInfo& si, const DateTime& datetime)
+{
+    si.setTypeName("DateTime");
+
+    SerializationInfo& date = si.addMember("date");
+    date <<= datetime.date();
+
+    SerializationInfo& time  = si.addMember("time");
+    time <<= datetime.time();
 }
 
 }

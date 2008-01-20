@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,7 +20,6 @@
 #include <sstream>
 #include <cctype>
 
-
 namespace {
 
 static const unsigned char monthDays[13]=
@@ -29,7 +28,6 @@ static const unsigned char monthDays[13]=
 };
 
 }
-
 
 namespace Pt {
 
@@ -42,23 +40,6 @@ InvalidDate::InvalidDate(const SourceInfo& si)
 InvalidDate::~InvalidDate() throw()
 {
 }
-
-
-const Pt::uint16_t Date::DAYS_PER_YEAR        = 365;
-const Pt::uint16_t Date::DAYS_PER_LEAPYEAR    = 366;
-const Pt::uint8_t  Date::DAYS_OF_JANUARY      = 31;
-const Pt::uint8_t  Date::DAYS_OF_FEBUARY      = 28;
-const Pt::uint8_t  Date::DAYS_OF_LEAP_FEBUARY = 29;
-const Pt::uint8_t  Date::DAYS_OF_MARCH        = 31;
-const Pt::uint8_t  Date::DAYS_OF_APRIL        = 30;
-const Pt::uint8_t  Date::DAYS_OF_MAY          = 31;
-const Pt::uint8_t  Date::DAYS_OF_JUNE         = 30;
-const Pt::uint8_t  Date::DAYS_OF_JULY         = 31;
-const Pt::uint8_t  Date::DAYS_OF_AUGUST       = 31;
-const Pt::uint8_t  Date::DAYS_OF_SEPTEMBER    = 30;
-const Pt::uint8_t  Date::DAYS_OF_OCTOBER      = 31;
-const Pt::uint8_t  Date::DAYS_OF_NOVEMBER     = 30;
-const Pt::uint8_t  Date::DAYS_OF_DECEMBER     = 31;
 
 
 void Date::greg2jul(unsigned& jd, int y, int m, int d)
@@ -141,8 +122,7 @@ int Date::year() const
 
 unsigned Date::dayOfWeek() const
 {
-    //return (((_julian+1)%7)+6)%7;        // Monday is day 0 of week
-    return (_julian+1)%7;                  // Sunday is day 0 of week
+    return (_julian+1) % 7;
 }
 
 
@@ -252,6 +232,24 @@ Date Date::fromIsoString(const std::string& s)
 
     const char* d = s.data();
     return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+}
+
+
+void operator >>=(const SerializationInfo& si, Date& date)
+{
+    int year = si.getValue<int>("year");
+    unsigned month = si.getValue<unsigned>("month");
+    unsigned day = si.getValue<unsigned>("day");
+    date.set(year, month, day);
+}
+
+
+void operator <<=(SerializationInfo& si, const Date& date)
+{
+    si.addValue("year",  date.year() );
+    si.addValue("month", date.month() );
+    si.addValue("day",   date.day() );
+    si.setTypeName( "Date");
 }
 
 // Return current local date

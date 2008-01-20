@@ -121,64 +121,64 @@ void DateTimeTest::testOperators()
 void DateTimeTest::testMsecsUnixEpoch()
 {
 	   Pt::DateTime dt = Pt::System::Clock::getCurrentTime();
-    Pt::DateTime dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());   
+    Pt::DateTime dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1970, 8, 1, 12, 11, 25, 0);
-    PT_UNIT_ASSERT(18360685000LL == dt.msecsUnixEpoch());
+    PT_UNIT_ASSERT(18360685000LL == dt.msecsSinceEpoch());
     dt = Pt::DateTime(1970, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1983, 5, 11, 13, 39, 52, 762);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2064, 1, 15, 2, 54, 33, 122);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2099, 12, 31, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2100, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2400, 2, 29, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(2400, 3, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1968, 2, 29, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1968, 3, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 12, 31, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 4, 17, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 2, 17, 23, 59, 59, 999);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 1, 1, 0, 0, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1967, 10, 1, 12, 11, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1735, 10, 1, 12, 11, 0, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1969, 1, 1, 0, 0, 0, 1);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
     dt = Pt::DateTime(1735, 7, 1, 12, 11, 25, 0);
-    dt2 = Pt::DateTime::fromMsecsUnixEpoch(dt.msecsUnixEpoch());
+    dt2 = Pt::DateTime::fromMSecsSinceEpoch(dt.msecsSinceEpoch());
     PT_UNIT_ASSERT(dt == dt2);
 
     /*dt = Pt::DateTime(1735, 1, 1, 12, 11, 25, 0);
-    for(Pt::int64_t i = 0; i > dt.msecsUnixEpoch(); i-=3600)
+    for(Pt::int64_t i = 0; i > dt.msecsSinceEpoch(); i-=3600)
     {
     std::cout<<Pt::DateTime(i).toIsoString() << std::endl;
     }*/

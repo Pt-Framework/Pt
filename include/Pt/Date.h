@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 Marc Boris Dürner                             *
- *   Copyright (C) 2005,2007 by Jeroen van der Zijp.                       *
+ *   Copyright (C) 2004-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,17 +23,15 @@
 #include <Pt/SerializationInfo.h>
 #include <string>
 
-
 namespace Pt {
 
-class InvalidDate : public std::invalid_argument
+class PT_API InvalidDate : public std::invalid_argument
 {
     public:
         InvalidDate(const SourceInfo& si);
 
         ~InvalidDate() throw();
 };
-
 
 /*
   Notes:
@@ -57,6 +54,81 @@ class PT_API Date
         {
             Sun = 0, Mon, Tue, Wed, Thu, Fri, Sat
         };
+
+        /**
+        * @brief The number of days of an ordinary year.
+        */
+        static const unsigned DaysPerYear = 365;
+
+        /**
+        * @brief The number of days of a leap year.
+        */
+        static const unsigned DaysPerLeapYear = 366;
+
+        /**
+        * @brief The number of days of a January.
+        */
+        static const unsigned DaysOfJan = 31;
+
+        /**
+        * @brief The number of days of a February.
+        */
+        static const unsigned DaysOfFeb = 28;
+
+        /**
+        * @brief The number of days of a February in a leap year.
+        */
+        static const unsigned DaysOfLeapFeb = 290;
+
+        /**
+        * @brief The number of days of a March.
+        */
+        static const unsigned DaysOfMar = 31;
+
+        /**
+        * @brief The number of days of a April.
+        */
+        static const unsigned DaysOfApr = 30;
+
+        /**
+        * @brief The number of days of a May.
+        */
+        static const unsigned DaysOfMay = 31;
+
+        /**
+        * @brief The number of days of a June.
+        */
+        static const unsigned DaysOfJun = 30;
+
+        /**
+        * @brief The number of days of a July.
+        */
+        static const unsigned DaysOfJul = 31;
+
+        /**
+        * @brief The number of days of a August.
+        */
+        static const unsigned DaysOfAug = 31;
+
+        /**
+        * @brief The number of days of a September.
+        */
+        static const unsigned DaysOfSep = 30;
+
+        /**
+        * @brief The number of days of a October.
+        */
+        static const unsigned DaysOfOct = 31;
+
+        /**
+        * @brief The number of days of a November.
+        */
+        static const unsigned DaysOfNov = 31;
+
+        /**
+        * @brief The number of days of a December.
+        */
+        static const unsigned DaysOfDec = 31;
 
     public:
         /** \brief Default constructor.
@@ -82,8 +154,8 @@ class PT_API Date
 
         /** \brief Constructs a Date from a julian day
         */
-        Date(unsigned j)
-        : _julian(j)
+        explicit Date(unsigned julianDays)
+        : _julian(julianDays)
         {}
 
         /** @brief Sets the Date to a julian day
@@ -239,105 +311,14 @@ class PT_API Date
         */
         static void jul2greg(unsigned jd, int& y, int& m, int& d);
 
-    public:
-        /**
-        * @brief Constant for the number of days of an ordinary year.
-        */
-        static const Pt::uint16_t DAYS_PER_YEAR;
-
-        /**
-        * @brief Constant for the number of days of a leap year.
-        */
-        static const Pt::uint16_t DAYS_PER_LEAPYEAR;
-
-        /**
-        * @brief Constant for the number of days of a January.
-        */
-        static const Pt::uint8_t DAYS_OF_JANUARY;
-        
-        /**
-        * @brief Constant for the number of days of a February.
-        */
-        static const Pt::uint8_t DAYS_OF_FEBUARY;
-
-        /**
-        * @brief Constant for the number of days of a February in a leap year.
-        */
-        static const Pt::uint8_t DAYS_OF_LEAP_FEBUARY;
-
-        /**
-        * @brief Constant for the number of days of a March.
-        */
-        static const Pt::uint8_t DAYS_OF_MARCH;
-
-        /**
-        * @brief Constant for the number of days of a April.
-        */
-        static const Pt::uint8_t DAYS_OF_APRIL;
-
-        /**
-        * @brief Constant for the number of days of a May.
-        */
-        static const Pt::uint8_t DAYS_OF_MAY;
-
-        /**
-        * @brief Constant for the number of days of a June.
-        */
-        static const Pt::uint8_t DAYS_OF_JUNE;
-
-        /**
-        * @brief Constant for the number of days of a July.
-        */
-        static const Pt::uint8_t DAYS_OF_JULY;
-
-        /**
-        * @brief Constant for the number of days of a August.
-        */
-        static const Pt::uint8_t DAYS_OF_AUGUST;
-
-        /**
-        * @brief Constant for the number of days of a September.
-        */
-        static const Pt::uint8_t DAYS_OF_SEPTEMBER;
-
-        /**
-        * @brief Constant for the number of days of a October.
-        */
-        static const Pt::uint8_t DAYS_OF_OCTOBER;
-
-        /**
-        * @brief Constant for the number of days of a November.
-        */
-        static const Pt::uint8_t DAYS_OF_NOVEMBER;
-
-        /**
-        * @brief Constant for the number of days of a December.
-        */
-        static const Pt::uint8_t DAYS_OF_DECEMBER;
-
     private:
         //! @internal
         unsigned _julian;
 };
 
+PT_API void operator >>=(const SerializationInfo& si, Date& date);
 
-inline void operator >>=(const SerializationInfo& si, Date& date)
-{
-    int year = si.getValue<int>("year");
-    unsigned month = si.getValue<unsigned>("month");
-    unsigned day = si.getValue<unsigned>("day");
-    date.set(year, month, day);
-}
-
-
-inline void operator <<=(SerializationInfo& si, const Date& date)
-{
-    si.addValue("year",  date.year() );
-    si.addValue("month", date.month() );
-    si.addValue("day",   date.day() );
-    si.setTypeName( "Date");
-}
-
+PT_API void operator <<=(SerializationInfo& si, const Date& date);
 
 inline Date operator+(const Date& d, int days)
 { return Date(d._julian + days); }
@@ -347,7 +328,6 @@ inline Date operator+(int days, const Date& d)
 
 inline int operator-(const Date& a, const Date& b)
 { return a._julian - b._julian; }
-
 
 }
 

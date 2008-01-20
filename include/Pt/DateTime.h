@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Duerner                               *
- *   Copyright (C) 2006 by Stefan Bueder                                    *
+ *   Copyright (C) 2006 by Tommi Maekitalo                                 *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_DATETIME_H
 #define PT_DATETIME_H
 
@@ -42,7 +41,7 @@ class PT_API DateTime
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
         DateTime(const DateTime& dateTime);
-               
+
         ~DateTime();
 
         static inline DateTime fromJulianDays(unsigned julianDays)
@@ -50,20 +49,22 @@ class PT_API DateTime
             return DateTime(julianDays);
         }
 
-        /**
-         * @brief Creates a DateTime object with the specified milliseconds since January 1st 1970.
-         *
-         * The construction does currently not take care of any time zones. I.e. the milliseconds will
-         * be treated as if they were in the same time zone as the reference (January 1st 1970).
-         * Thus specifying a "time-zoned" millisecond value will lead to a "time-zoned" DateTime. And
-         * accordingly a "GMT" millisecond value will lead to a "GMT" DateTime.
-         *
-         * @param msecsUnixEpoch The elapsed milliseconds since or until January 1st 1970.
-         */
-        static inline DateTime fromMsecsUnixEpoch(const Pt::int64_t msecsUnixEpoch)
+        /** @brief Creates a DateTime object relative to the Unix epoch.
+
+            The DateTime will be relative to the unix-epoch (Jan 1st 1970)
+            by the milli-seconds specified by \a msecsSinceEpoch. The
+            construction does not take care of any time zones. I.e. the
+            milliseconds will be treated as if they were in the same time
+            zone as the reference (January 1st 1970). Thus specifying a
+            "time-zoned" millisecond value will lead to a "time-zoned"
+            DateTime. And accordingly a "GMT" millisecond value will lead
+            to a "GMT" DateTime.
+        */
+        static inline DateTime fromMSecsSinceEpoch(const Pt::int64_t msecsSinceEpoch)
         {
-            DateTime dt(1970, 1, 1);
-            return dt += Timespan(msecsUnixEpoch*1000);
+            static const DateTime dt(1970, 1, 1);
+            Timespan ts(msecsSinceEpoch*1000);
+            return dt + ts;
         }
 
         DateTime& operator=(const DateTime& dateTime);
@@ -129,17 +130,20 @@ class PT_API DateTime
         unsigned msec() const
         { return time().msec(); }
 
-        /**
-         * @brief Returns the milliseconds between January 1st 1970 and this DateTime object.
-         *
-         * The calculation does currently not take care of any time zones. I.e. the milliseconds will
-         * be calculated as if they were in the same time zone as the reference (January 1st 1970).
-         * Thus calling this API on a "time-zoned" DateTime will lead to a "time-zoned" millisecond value. And
-         * accordingly calling this API on a "GMT" DateTime will lead to a "GMT" millisecond value.
-         *
-         * @return The milliseconds between January 1st 1970 and this DateTime object.
-         */
-        Pt::int64_t msecsUnixEpoch() const;
+        /** @brief Returns the milliseconds relative to the Unix-epoch.
+
+            The calculation does currently not take care of any time zones.
+            I.e. the milliseconds will be calculated as if they were in the
+            same time zone as the reference (January 1st 1970). Thus calling
+            this API on a "time-zoned" DateTime will lead to a "time-zoned"
+            millisecond value. And  accordingly calling this API on a "GMT"
+            DateTime will lead to a "GMT" millisecond value.
+        */
+        Pt::int64_t msecsSinceEpoch() const
+        {
+            static const DateTime dt(1970, 1, 1);
+            return (*this - dt).totalMSecs();
+        }
 
         static DateTime fromIsoString(const std::string& s);
 
@@ -164,14 +168,14 @@ class PT_API DateTime
         DateTime& operator+=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
-            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
+            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 
             if( (-overrun) > _time.totalMSecs()  )
             {
                 days -= 1;
             }
-            else if( overrun + _time.totalMSecs() > Time::MSECS_PER_DAY)
+            else if( overrun + _time.totalMSecs() > Time::MSecsPerDay)
             {
                 days += 1;
             }
@@ -186,14 +190,14 @@ class PT_API DateTime
         DateTime& operator-=(const Timespan& ts)
         {
             Pt::int64_t totalMSecs = ts.totalMSecs();
-            Pt::int64_t days = totalMSecs / Time::MSECS_PER_DAY;
-            Pt::int64_t overrun = totalMSecs % Time::MSECS_PER_DAY;
+            Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
+            Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 
             if( overrun > _time.totalMSecs() )
             {
                 days += 1;
             }
-            else if(_time.totalMSecs() - overrun > Time::MSECS_PER_DAY)
+            else if(_time.totalMSecs() - overrun > Time::MSecsPerDay)
             {
                 days -= 1;
             }
@@ -211,43 +215,38 @@ class PT_API DateTime
             Pt::int64_t milliSecDiff = Pt::int64_t( first.time().totalMSecs() ) -
                                        Pt::int64_t( second.time().totalMSecs() );
 
-            Pt::int64_t result = (dayDiff * Time::MSECS_PER_DAY + milliSecDiff) * 1000;
+            Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
 
             return result;
         }
 
+        friend DateTime operator+(const DateTime& dt, const Timespan& ts)
+        {
+            DateTime tmp = dt;
+            tmp += ts;
+            return tmp;
+        }
+
+        friend DateTime operator-(const DateTime& dt, const Timespan& ts)
+        {
+            DateTime tmp = dt;
+            tmp -= ts;
+            return tmp;
+        }
+
     private:
-        inline DateTime(unsigned d)
-        : _date(d) {}
+        DateTime(unsigned jd)
+        : _date(jd)
+        {}
 
     private:
         Date _date;
         Time _time;
 };
 
+PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 
-inline void operator >>=(const SerializationInfo& si, DateTime& datetime)
-{
-    Date date(1,1,1);
-    si.getMember("date") >>= date;
-    datetime.setDate(date);
-
-    Time time;
-    si.getMember("time") >>= time;
-    datetime.setTime(time);
-}
-
-
-inline void operator <<=(SerializationInfo& si, const DateTime& datetime)
-{
-    si.setTypeName("DateTime");
-
-    SerializationInfo& date = si.addMember("date");
-    date <<= datetime.date();
-
-    SerializationInfo& time  = si.addMember("time");
-    time <<= datetime.time();
-}
+PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
 
 }
 

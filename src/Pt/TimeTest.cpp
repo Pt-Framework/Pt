@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006 by Tommi Maekitalo                                 *
- *   Copyright (C) 2006 by Marc Boris Duerner                               *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
  *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

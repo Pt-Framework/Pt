@@ -1,7 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2006 by Tommi Mäkitalo                                  *
- *   Copyright (C) 2006 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Stefan Büder                                    *
+ *   Copyright (C) 2006 by Tommi Maekitalo                                 *
+ *   Copyright (C) 2006 by Marc Boris Duerner                              *
+ *   Copyright (C) 2006 by Stefan Bueder                                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,21 +21,6 @@
 #include <Pt/Time.h>
 #include <sstream>
 #include <cctype>
-
-
-namespace {
-
-    enum {
-        SECS_PER_DAY = 86400,
-        MSECS_PER_DAY = 86400000,
-        SECS_PER_HOUR = 3600,
-        MSECS_PER_HOUR = 3600000,
-        SECS_PER_MIN = 60,
-        MSECS_PER_MIN = 60000
-    };
-
-}
-
 
 namespace Pt {
 
@@ -58,19 +43,19 @@ Time::Time(unsigned h, unsigned m, unsigned s, unsigned ms)
 
 unsigned Time::hour() const
 {
-    return _msecs / MSECS_PER_HOUR;
+    return _msecs / MSecsPerHour;
 }
 
 
 unsigned Time::minute() const
 {
-    return (_msecs % MSECS_PER_HOUR) / MSECS_PER_MIN;
+    return (_msecs % MSecsPerHour) / MSecsPerMinute;
 }
 
 
 unsigned Time::second() const
 {
-    return (_msecs / 1000) % SECS_PER_MIN;
+    return (_msecs / 1000) % SecondsPerMinute;
 }
 
 
@@ -87,7 +72,7 @@ void Time::set(unsigned h, unsigned m, unsigned s, unsigned ms)
         throw InvalidTime(PT_SOURCEINFO);
     }
 
-    _msecs = (h*SECS_PER_HOUR + m*SECS_PER_MIN + s) * 1000 + ms;
+    _msecs = (h*SecondsPerHour + m*SecondsPerMinute + s) * 1000 + ms;
 }
 
 
@@ -117,12 +102,12 @@ Time Time::addMSecs(Pt::int64_t ms) const
     Time t;
     if (ms < 0)
     {
-        Pt::int64_t negdays = (MSECS_PER_DAY - ms) / MSECS_PER_DAY;
-        t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSECS_PER_DAY) % MSECS_PER_DAY);
+        Pt::int64_t negdays = (MSecsPerDay - ms) / MSecsPerDay;
+        t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
     }
     else
     {
-        t._msecs = static_cast<unsigned>((_msecs + ms) % MSECS_PER_DAY);
+        t._msecs = static_cast<unsigned>((_msecs + ms) % MSecsPerDay);
     }
 
     return t;
@@ -202,6 +187,32 @@ Time Time::fromIsoString(const std::string& s)
                 getNumber3(d + 9));
 }
 
+
+void operator >>=(const SerializationInfo& si, Time& time)
+{
+    unsigned hour = si.getValue<unsigned>("hour");
+    unsigned min = si.getValue<unsigned>("minute");
+    unsigned sec = si.getValue<unsigned>("second");
+    unsigned msec = si.getValue<unsigned>("millisec");
+    time.set(hour, min, sec, msec);
+}
+
+
+void operator <<=(SerializationInfo& si, const Time& time)
+{
+    unsigned hour = 0;
+    unsigned min = 0;
+    unsigned sec = 0;
+    unsigned msec = 0;
+    time.get(hour, min, sec, msec);
+
+    si.addValue("hour", hour );
+    si.addValue("minute", min );
+    si.addValue("second", sec );
+    si.addValue("millisec", msec );
+    si.setTypeName("Time");
+}
+
 } // namespace Pt
 
 
@@ -214,7 +225,7 @@ Time Time::currentTime()
     SYSTEMTIME st;
     memset(&st, 0, sizeof(SYSTEMTIME));
     GetLocalTime(&st);
-    ct._msecs = MSECS_PER_HOUR * st.wHour + MSECS_PER_MIN * st.wMinute + 1000 * st.wSecond
+    ct._msecs = MSecsPerHour * st.wHour + MSecsPerMin * st.wMinute + 1000 * st.wSecond
              + st.wMilliseconds;
 #elif defined(Q_OS_UNIX)
     // posix compliant system
@@ -231,14 +242,14 @@ Time Time::currentTime()
     t = localtime(&ltime);
 #endif
 
-    ct._msecs = MSECS_PER_HOUR * t->tm_hour + MSECS_PER_MIN * t->tm_min + 1000 * t->tm_sec
+    ct._msecs = MSecsPerHour * t->tm_hour + MSecsPerMin * t->tm_min + 1000 * t->tm_sec
              + tv.tv_usec / 1000;
 #else
     time_t ltime; // no millisecond resolution
     ::time(&ltime);
     tm *t;
     localtime(&ltime);
-    ct._msecs = MSECS_PER_HOUR * t->tm_hour + MSECS_PER_MIN * t->tm_min + 1000 * t->tm_sec;
+    ct._msecs = MSecsPerHour * t->tm_hour + MSecsPerMin * t->tm_min + 1000 * t->tm_sec;
 #endif
     return ct;
 }
