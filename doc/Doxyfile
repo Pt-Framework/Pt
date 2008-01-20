@@ -417,7 +417,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ./main.page ./news.page ./license.page ./docs.page ./acknowledgements.page ./whatsnew.page ./requirements.page ./building.page ./download.page ./faq.page ./mailinglist.page ./people.page ./scrum.page ./plugins.page sigslot.page ./unittests.page ../include/Pt ../include/Pt/Unit ../include/Pt/Log ../include/Pt/Db  ../include/Pt/Reflex ../include/Pt/Net   ../include/Pt/Xml ../include/Pt/System ../include/Pt/Text ../include/Pt/Gui ../include/Pt/Gfx
+INPUT                  = ./main.page ./news.page ./license.page ./docs.page ./acknowledgements.page ./whatsnew.page ./requirements.page ./building.page ./download.page ./faq.page ./mailinglist.page ./people.page ./project.page ./plugins.page sigslot.page ./unittests.page ../include/Pt ../include/Pt/Unit ../include/Pt/Log ../include/Pt/Db  ../include/Pt/Reflex ../include/Pt/Net   ../include/Pt/Xml ../include/Pt/System ../include/Pt/Text ../include/Pt/Gui ../include/Pt/Gfx
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
