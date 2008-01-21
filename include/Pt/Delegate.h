@@ -79,6 +79,11 @@ namespace Pt {
             {
                 Connectable::closed(c);
             }
+            
+            virtual bool isConnected() const
+            {
+                return _target.valid();
+            }
 
         protected:
             Connection _target;
