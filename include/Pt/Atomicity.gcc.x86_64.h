@@ -16,25 +16,24 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_ATOMICINT_GCC_X86_H
-#define PT_ATOMICINT_GCC_X86_H
+#ifndef PT_ATOMICITY_GCC_X86_64_H
+#define PT_ATOMICITY_GCC_X86_64_H
 
-#include <csignal>
-#include <unistd.h>
-
+#include <Pt/Types.h>
 
 namespace Pt {
 
-typedef ssize_t atomic_t;
+typedef Pt::int64_t atomic_t;
 
 
 inline atomic_t atomicIncrement(volatile atomic_t& val)
 {
+        static const atomic_t d = 1;
         atomic_t tmp;
 
         asm volatile ("lock; xaddq %0, %1"
                       : "=r" (tmp), "=m" (val)
-                      : "0" (1), "m" (val));
+                      : "0" (d), "m" (val));
 
         return tmp+1;
 }
