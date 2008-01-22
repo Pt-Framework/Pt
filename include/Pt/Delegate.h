@@ -79,7 +79,7 @@ namespace Pt {
             {
                 Connectable::closed(c);
             }
-            
+
             bool isConnected() const
             {
                 return _target.valid();
