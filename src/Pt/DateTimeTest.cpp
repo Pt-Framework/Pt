@@ -115,6 +115,17 @@ void DateTimeTest::testOperators()
     PT_UNIT_ASSERT( dt.second() == 20 );
     PT_UNIT_ASSERT( dt.msec()   == 800 );
 
+    Pt::DateTime dt2(1998, 06, 26, 10, 44, 19, 500);
+    Pt::int64_t msecsDiff = Pt::Time::MSecsPerDay + 
+                            Pt::Time::MSecsPerHour + 
+                            Pt::Time::MSecsPerMinute + 
+                            Pt::Time::MSecsPerSecond + 300;
+
+    Pt::Timespan ts(dt - dt2);
+    PT_UNIT_ASSERT( ts.totalMSecs() == msecsDiff );
+    
+    ts = dt2 - dt;
+    PT_UNIT_ASSERT( ts.totalMSecs() == -msecsDiff );
 }
 
 
