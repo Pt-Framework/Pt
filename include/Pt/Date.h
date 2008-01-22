@@ -123,7 +123,7 @@ class PT_API Date
         /**
         * @brief The number of days of a November.
         */
-        static const unsigned DaysOfNov = 31;
+        static const unsigned DaysOfNov = 30;
 
         /**
         * @brief The number of days of a December.
