@@ -78,7 +78,7 @@ class PT_API Date
         /**
         * @brief The number of days of a February in a leap year.
         */
-        static const unsigned DaysOfLeapFeb = 290;
+        static const unsigned DaysOfLeapFeb = 29;
 
         /**
         * @brief The number of days of a March.
