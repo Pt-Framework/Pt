@@ -80,7 +80,7 @@ namespace Pt {
                 Connectable::closed(c);
             }
             
-            virtual bool isConnected() const
+            bool isConnected() const
             {
                 return _target.valid();
             }
