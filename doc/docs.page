@@ -32,7 +32,7 @@
 			<div class="docs-page-body">
 				<ul>
 				<li><a href="mailinglist.html">Mailing Lists</a></li>
-				<li><a href="scrum.html">Project Overview</a></li>
+				<li><a href="project.html">Project Overview</a></li>
 				<li><a href="index.html">Recommended Reading</a></li>
 				</ul>
 			</div>
@@ -58,12 +58,11 @@
 			<div class="docs-page-header">Concepts</div>
 			<div class="docs-page-body">
 				<ul>
+                <li><a href="byteorder.html">Byteorder handling</a></li>
 				<li><a href="sigslot.html">Signals and Delegates</a></li>
-				<li><a href="docs.html">Reflection</a></li>
-                <li><a href="docs.html">Dates and Times</a></li>
-				<li><a href="docs.html">Components</a></li>
+				<li><a href="group__Reflection.html">Reflection</a></li>
+                <li><a href="group__DateTime.html">Dates and Times</a></li>
 				<li><a href="plugins.html">Plugins</a></li>
-				<li><a href="docs.html">Synchronous I/O Multiplexing</a></li>
 				<li><a href="unittests.html">Unit Testing</a></li>
 				</ul>
 			</div>
@@ -72,11 +71,11 @@
 			<div class="docs-page-header">Tools</div>
 			<div class="docs-page-body">
 				<ul>
-				<li><a href="index.html">Jam Build Tool</a></li>
-				<li><a href="index.html">Doxygen</a></li>
-				<li><a href="index.html">Subversion</a></li>
-				<li><a href="index.html">GNU Toolset</a></li>
-				<li><a href="index.html">GNU for Win32</a></li>
+				<li><a href="http://www.perforce.com/jam/jam.html">Jam Build Tool</a></li>
+				<li><a href="http://www.doxygen.org">Doxygen</a></li>
+				<li><a href="http://subversion.tigris.org/">Subversion</a></li>
+				<li><a href="http://gcc.gnu.org/">GNU Toolset</a></li>
+				<li><a href="http://www.mingw.org/">GNU for Win32</a></li>
 				</ul>
 			</div>
 		</td>
