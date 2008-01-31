@@ -87,7 +87,7 @@ void SerializationTest::BuiltInTypesTest()
     signed char sigCharVal2;
     si <<= sigCharVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "signed char");
+    PT_UNIT_ASSERT(si.typeName() == "char");
     si.toValue(sigCharVal2);
     PT_UNIT_ASSERT(sigCharVal2 == -127);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-127") );
@@ -98,7 +98,7 @@ void SerializationTest::BuiltInTypesTest()
     unsigned char usigCharVal2;
     si <<= usigCharVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "unsigned char");
+    PT_UNIT_ASSERT(si.typeName() == "char");
     si.toValue(usigCharVal2);
     PT_UNIT_ASSERT(usigCharVal2 == 255);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"255") );
@@ -109,7 +109,7 @@ void SerializationTest::BuiltInTypesTest()
     short shortVal2;
     si <<= shortVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "short");
+    PT_UNIT_ASSERT(si.typeName() == "int");
     si.toValue(shortVal2);
     PT_UNIT_ASSERT(shortVal2 == -32767);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-32767") );
@@ -120,7 +120,7 @@ void SerializationTest::BuiltInTypesTest()
     unsigned short ushortVal2;
     si <<= ushortVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "unsigned short");
+    PT_UNIT_ASSERT(si.typeName() == "int");
     si.toValue(ushortVal2);
     PT_UNIT_ASSERT(ushortVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
@@ -142,7 +142,7 @@ void SerializationTest::BuiltInTypesTest()
     unsigned int uintVal2;
     si <<= uintVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "unsigned int");
+    PT_UNIT_ASSERT(si.typeName() == "int");
     si.toValue(uintVal2);
     PT_UNIT_ASSERT(uintVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
@@ -153,7 +153,7 @@ void SerializationTest::BuiltInTypesTest()
     long longVal2;
     si <<= longVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "long");
+    PT_UNIT_ASSERT(si.typeName() == "int");
     si.toValue(longVal2);
     PT_UNIT_ASSERT(longVal2 == -32767);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"-32767") );
@@ -164,7 +164,7 @@ void SerializationTest::BuiltInTypesTest()
     unsigned long ulongVal2;
     si <<= ulongVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "unsigned long");
+    PT_UNIT_ASSERT(si.typeName() == "int");
     si.toValue(ulongVal2);
     PT_UNIT_ASSERT(ulongVal2 == 65535);
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"65535") );
@@ -175,7 +175,7 @@ void SerializationTest::BuiltInTypesTest()
     float floatVal2;
     si <<= floatVal1;
     PT_UNIT_ASSERT(si.category() == Pt::SerializationInfo::Value);
-    PT_UNIT_ASSERT(si.typeName() == "float");
+    PT_UNIT_ASSERT(si.typeName() == "double");
     si.toValue(floatVal2);
     PT_UNIT_ASSERT( Pt::Math::equal(floatVal2, 77.3547f,   Pt::Math::Eps3) );
     PT_UNIT_ASSERT(si.toString() == Pt::String(L"77.3547") );

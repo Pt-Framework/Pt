@@ -288,7 +288,7 @@ inline void operator >>=(const SerializationInfo& si, signed char& n)
 inline void operator <<=(SerializationInfo& si, signed char n)
 {
     si.setValue(n);
-    si.setTypeName("signed char");
+    si.setTypeName("char");
 }
 
 
@@ -301,7 +301,7 @@ inline void operator >>=(const SerializationInfo& si, unsigned char& n)
 inline void operator <<=(SerializationInfo& si, unsigned char n)
 {
     si.setValue(n);
-    si.setTypeName("unsigned char");
+    si.setTypeName("char");
 }
 
 
@@ -327,7 +327,7 @@ inline void operator >>=(const SerializationInfo& si, short& n)
 inline void operator <<=(SerializationInfo& si, short n)
 {
     si.setValue(n);
-    si.setTypeName("short");
+    si.setTypeName("int");
 }
 
 
@@ -340,7 +340,7 @@ inline void operator >>=(const SerializationInfo& si, unsigned short& n)
 inline void operator <<=(SerializationInfo& si, unsigned short n)
 {
     si.setValue(n);
-    si.setTypeName("unsigned short");
+    si.setTypeName("int");
 }
 
 
@@ -366,7 +366,7 @@ inline void operator >>=(const SerializationInfo& si, unsigned int& n)
 inline void operator <<=(SerializationInfo& si, unsigned int n)
 {
     si.setValue(n);
-    si.setTypeName("unsigned int");
+    si.setTypeName("int");
 }
 
 
@@ -379,7 +379,7 @@ inline void operator >>=(const SerializationInfo& si, long& n)
 inline void operator <<=(SerializationInfo& si, long n)
 {
     si.setValue(n);
-    si.setTypeName("long");
+    si.setTypeName("int");
 }
 
 
@@ -392,7 +392,7 @@ inline void operator >>=(const SerializationInfo& si, unsigned long& n)
 inline void operator <<=(SerializationInfo& si, unsigned long n)
 {
     si.setValue(n);
-    si.setTypeName("unsigned long");
+    si.setTypeName("int");
 }
 
 
@@ -405,7 +405,7 @@ inline void operator >>=(const SerializationInfo& si, float& n)
 inline void operator <<=(SerializationInfo& si, float n)
 {
     si.setValue(n);
-    si.setTypeName("float");
+    si.setTypeName("double");
 }
 
 
