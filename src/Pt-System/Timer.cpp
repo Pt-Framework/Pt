@@ -1,6 +1,6 @@
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
-#include <climits>
+#include <limits>
 
 
 namespace {
