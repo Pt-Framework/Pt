@@ -23,11 +23,14 @@
 
 #include <Pt/Api.h>
 #include <Pt/Timespan.h>
-#include <Pt/SerializationInfo.h>
+#include <Pt/SourceInfo.h>
 #include <string>
-
+#include <stdexcept>
 
 namespace Pt {
+
+class SerializationInfo;
+
 
 class PT_API InvalidTime : public std::invalid_argument
 {
