@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 Marc Boris Duerner                                 *
+ *   Copyright (C) 2007-2008 Marc Boris Duerner                            *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,84 +18,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Main.h>
-/*#include <Pt/System/Selector.h>
-#include <Pt/System/SerialDevice.h>
-#include <fstream>
+#include <Pt/System/EventLoop.h>
+#include <Pt/System/Timer.h>
+#include <Pt/System/Pipe.h>
+#include <iostream>
 
+char buffer[255];
 
-class Multiplexer : public Pt::Connectable
+void onRead(Pt::System::IOResult& result)
 {
-    public:
-        Multiplexer()
-        : _device("/dev/ttyUSB0", std::ios_base::in)
-        //, _device2("COM1:", std::ios_base::in)
-        {
-            _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
-            _device.setCharSize(8);
-            _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
-            _device.setParity(Pt::System::SerialDevice::ParityEven);
-            _device.setTimeout( 10 );
-*/
-/*
-            _device2.setBaudRate(Pt::System::SerialDevice::BaudRate1200);
-            _device2.setCharSize(7);
-            _device2.setStopBits(Pt::System::SerialDevice::OneStopBit);
-            _device2.setParity(Pt::System::SerialDevice::ParityEven);
-            _device2.setTimeout( 10 );
-*/
-/*
-
-            //_selector.addDevice( _device, Pt::System::Selector::WaitInput );
-            Pt::connect( _device.inputReady, *this, &Multiplexer::onInput );
-            Pt::connect( _selector.timeout, *this, &Multiplexer::onTimeout );
-        }
-
-        void run()
-        {
-            for(int i = 0; i < 5000; ++i)
-            {
-                _selector.wait(100);
-            }
-        }
-
-        void onTimeout( )
-        {
-            std::cerr << "--- TIMEOUT ---" << std::endl;
-        }
-
-        void onInput()
-        {
-            char buffer[201];
-            memset( buffer, 0, 201);
-            size_t size = _device.read( buffer, 200);
-            std::cerr.write(buffer, size);
-        }
-
-        void onInput2()
-        {
-
-        }
-
-    private:
-        Pt::System::SerialDevice   _device;
-        //Pt::System::SerialDevice _device2;
-        Pt::System::Selector       _selector;
-        std::ofstream              _out;
-};*/
-
+    size_t n = result.device()->endRead(result);
+    std::cout.write(buffer, n) << std::endl;
+}
 
 int main( int argc, char* argv[] )
 {
-    /*try
+    try 
     {
-        Multiplexer m;
-        m.run();
-        std::cerr << "\n\nSUCCESS\n";
-    }
-    catch( const std::exception& e )
-    {
-        std::cerr << e.what() << std::endl;
-    }*/
+        Pt::System::EventLoop loop;
+        Pt::System::Pipe pipe(Pt::System::IODevice::Async);
+        pipe.output().write("Hello", 6);
 
-    return 0;
+        connect(pipe.input().inputReady, &onRead);
+        Pt::System::IOResult& readResult = pipe.input().beginRead(buffer, 255);
+
+        Pt::System::Timer stopper;
+        stopper.start(5000);
+        connect(stopper.timeout, loop, &Pt::System::EventLoop::exit);
+
+        loop.add(stopper);
+        loop.add(readResult);
+        loop.run();
+    }
+    catch(const std::exception& e)
+    { 
+        std::cerr << e.what() << std::endl; 
+    }
 }
