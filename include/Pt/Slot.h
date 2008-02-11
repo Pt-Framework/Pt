@@ -4,14 +4,11 @@
 #include <Pt/Api.h>
 #include <Pt/Void.h>
 
-
-//! \addtogroup Pt
 namespace Pt {
 
     class Connection;
 
-
-    class PT_EXPORT Slot {
+    class Slot {
         public:
             virtual ~Slot() {}
 
@@ -24,12 +21,9 @@ namespace Pt {
             virtual void closed(const Connection& c) = 0;
     };
 
-
 #include <Pt/Slot.tpp>
 
 }
 
-
 #endif
-
 

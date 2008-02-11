@@ -16,20 +16,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Invokable_h
 #define Pt_Invokable_h
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
 
-
-//! \addtogroup Pt
 namespace Pt {
 
 #include <Pt/Invokable.tpp>
 
 } // namespace Pt
-
 
 #endif
