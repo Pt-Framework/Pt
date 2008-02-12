@@ -101,7 +101,7 @@ namespace Text {
              *
              * See BasicTextOStream::BasicTextOStream() for a more detailed description.
              *
-             * @param is The output-stream (external device) which is wrapped by this object.
+             * @param os The output-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data to the external device.
              */
             TextOStream(std::ostream& os, CodecT* codec);
@@ -130,7 +130,7 @@ namespace Text {
              *
              * See BasicTextStream::BasicTextStream() for a more detailed description.
              *
-             * @param is The I/O-stream (external device) which is wrapped by this object.
+             * @param ios The I/O-stream (external device) which is wrapped by this object.
              * @param codec The codec which is used to convert data from or to the external device.
              */
             TextStream(std::iostream& ios, CodecT* codec);
