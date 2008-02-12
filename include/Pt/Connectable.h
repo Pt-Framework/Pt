@@ -22,7 +22,7 @@
 #include <Pt/Api.h>
 #include <Pt/Connection.h>
 #include <list>
-
+#include <cstddef>
 
 namespace Pt {
 
@@ -72,7 +72,7 @@ namespace Pt {
             virtual void closed(const Connection& c);
 
             //! @internal @brief For unit tests only.
-            size_t connectionCount() const
+            std::size_t connectionCount() const
             { return _connections.size(); }
 
         protected:
