@@ -27,29 +27,40 @@ namespace Gui {
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _apiWidget(apiWidget)
 {
+    _window = nil;
+    _view = [[PtGuiView alloc] initWithWidget: &apiWidget];
 
-    window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())      
-                                                   styleMask:NSTitledWindowMask | 
-                                                             NSClosableWindowMask | 
-                                                             NSMiniaturizableWindowMask |
-                                                             NSResizableWindowMask
-                                                   backing:NSBackingStoreBuffered
-                                                   defer:NO];
-
-    [window setAcceptsMouseMovedEvents:YES];
-
-    view = [[PtGuiView alloc] initWithWidget: &apiWidget];
-    [window setContentView: view];
-    [window setDelegate: view];
-
-    _painter.setView(view);
+    if(parent == 0)
+    {
+        std::cerr << "Parent" << std::endl;
+        _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())      
+                                                       styleMask:NSTitledWindowMask | 
+                                                                 NSClosableWindowMask | 
+                                                                 NSMiniaturizableWindowMask |
+                                                                 NSResizableWindowMask
+                                                       backing:NSBackingStoreBuffered
+                                                       defer:NO];
+    
+        [_window setAcceptsMouseMovedEvents:YES];   
+        [_window setContentView: _view];
+        [_window setDelegate: _view];
+    }
+    else
+    {
+        std::cerr << "Child" << std::endl;
+        [parent->impl()._view addSubview:_view];
+        [_view setFrame:NSMakeRect(at.x(), at.y(), size.width(), size.height())];
+    }
+    
+    _painter.setView(_view);
+    std::cerr << "DONE" << std::endl;
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-    [window release];
-    [view release];
+    [_window release];
+    [_view release];
 }
 
 
@@ -76,7 +87,7 @@ void WidgetImpl::setTitle(const Pt::String& text)
     NSString* str = [[NSString alloc] initWithBytes: text.c_str() 
                                                      length: text.size() * sizeof(Pt::Char)
                                                      encoding: NSUTF32LittleEndianStringEncoding];
-    [window setTitle:str];
+    [_window setTitle:str];
     [str release];
 }
 
@@ -89,15 +100,15 @@ Painter WidgetImpl::painter()
 
 void WidgetImpl::show()
 {
-    [window makeKeyAndOrderFront:nil];
-    [view setHidden:NO];
+    [_window makeKeyAndOrderFront:nil];
+    [_view setHidden:NO];
 }
 
 
 void WidgetImpl::hide()
 {
-    [window orderOut:nil];
-    [view setHidden:YES];
+    [_window orderOut:nil];
+    [_view setHidden:YES];
 }
 
 

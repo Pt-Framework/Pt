@@ -25,7 +25,7 @@ namespace Gui {
 PixmapImpl::PixmapImpl(size_t width, size_t height)
 : _size( std::max(width, size_t(1)), std::max(height, size_t(1)) )
 {
-    _image = [[NSImage alloc] initWithSize:NSMakeSize(width,  height)];
+    _image = [[NSImage alloc] initWithSize:NSMakeSize(_size.width(),  _size.height())];
     _painter.setImage(_image);
 }
 

@@ -256,7 +256,7 @@ PainterImpl::DrawPixmap::~DrawPixmap()
 
 
 void PainterImpl::DrawPixmap::paint()
-{
+{ std::cerr << "Drawing pixmap" << std::endl;
     [_image drawAtPoint:NSMakePoint( _to.x(), _to.y() ) 
             fromRect:NSZeroRect 
             operation:NSCompositeCopy 

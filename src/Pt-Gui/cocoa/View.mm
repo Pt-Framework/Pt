@@ -39,6 +39,7 @@
     return self;
 }
 - (void) mouseDown:(NSEvent*)ev{
+    std::cerr << "Mouse: " << _widget << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
     Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
@@ -47,7 +48,7 @@
                             0); //modifiers
     
     [NSApp processEvent: &mev];
-    [super mouseDown: ev];
+    //[super mouseDown: ev];
 }
 
 - (void) mouseDragged:(NSEvent*)event

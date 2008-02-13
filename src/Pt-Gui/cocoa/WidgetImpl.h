@@ -34,6 +34,7 @@
 #else
     struct PtGuiView;
     struct NSWindow;
+    struct NSResponder;
     struct NSGraphicsContext;
 #endif
 
@@ -68,8 +69,8 @@ namespace Gui {
 
         private:
             Widget& _apiWidget;
-            NSWindow* window; 
-            PtGuiView* view;
+            NSWindow* _window; 
+            NSView* _view;
             WidgetPainter _painter;
     };
 
