@@ -4,6 +4,7 @@
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <vector>
+#include <cstddef>
 
 
 namespace Pt {
@@ -62,7 +63,7 @@ namespace System {
 
                 Returns the current interval of the timer in milliseconds.
             */
-            size_t interval() const;
+            std::size_t interval() const;
 
             /** @brief Sets the timer interval
 
@@ -71,7 +72,7 @@ namespace System {
 
                 @param msecs The timer inteval in milliseconds
             */
-            void setInterval(size_t msecs);
+            void setInterval(std::size_t msecs);
 
             /** @brief Starts the timer
 
@@ -101,7 +102,7 @@ namespace System {
 
             /** @brief Returns the remaining time to the next timeout
             */
-            size_t remaining() const;
+            std::size_t remaining() const;
 
             /** @brief Notifies about interval timeouts
 
