@@ -25,7 +25,15 @@
 }    
 - (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) w;
 
+- (void) drawRect:(NSRect)rect;
+
+- (void) setFrameOrigin:(NSPoint)origin;
+
+- (void) setFrameSize:(NSSize)frameSize;
+
 - (void) mouseDown:(NSEvent*)event;
+
+- (void) mouseUp:(NSEvent*)ev;
 
 - (void) mouseDragged:(NSEvent*)event;
 
