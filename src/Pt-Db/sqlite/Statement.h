@@ -66,7 +66,7 @@ namespace sqlite {
             virtual void setDate(const std::string& col, const Date& data);
             virtual void setTime(const std::string& col, const Time& data);
             virtual void setDatetime(const std::string& col, const DateTime& data);
-            virtual void setBlob(const std::string& col, const Pt::Blob& data);
+            virtual void setBlob(const std::string& col, const Blob& data);
 
             virtual size_type execute();
             virtual Result select();

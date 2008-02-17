@@ -187,7 +187,7 @@ namespace Db {
             //DoTo: extra blob function needed??? ->    alternative: read all text values with blob sql function
             //void getBlob(std::string& blobdata) const { return _value->getBlob(blobdata); }
 
-            void getBlob(Pt::Blob& blobdata) const
+            void getBlob(Blob& blobdata) const
             { return _value->getBlob(blobdata); }
     };
 

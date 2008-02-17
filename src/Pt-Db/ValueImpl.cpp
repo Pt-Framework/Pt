@@ -163,7 +163,7 @@ DateTime ValueImpl::getDateTime() const
     return DateTime::fromIsoString(_data);
 }
 
-void ValueImpl::getBlob(Pt::Blob& blob) const
+void ValueImpl::getBlob(Blob& blob) const
 {
     if (_null)
         throw std::logic_error("Value is null." + PT_SOURCEINFO);

@@ -300,7 +300,7 @@ namespace sqlite {
         }
     }
 
-    void Statement::setBlob(const std::string& col, const Pt::Blob& data)
+    void Statement::setBlob(const std::string& col, const Blob& data)
     {
         int idx = getBindIndex(col);
         sqlite3_stmt* stmt = getBindStmt();

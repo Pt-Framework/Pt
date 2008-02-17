@@ -79,7 +79,7 @@ namespace Db {
 
             virtual DateTime getDateTime() const;
 
-            virtual void getBlob(Pt::Blob& blob) const;
+            virtual void getBlob(Blob& blob) const;
     };
 
 } // namespace Db

@@ -63,11 +63,11 @@ Pt::Unit::RegisterTest<ValueImplTest> register_ValueImplTest;
 
 void ValueImplTest::Blob()
 {
-    Pt::Blob blob("Hello", 5);
+    Pt::Db::Blob blob("Hello", 5);
     PT_UNIT_ASSERT(blob.size() == 5);
     PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello", 5) == 0);
 
-    Pt::Blob blob2;
+    Pt::Db::Blob blob2;
     PT_UNIT_ASSERT(blob2.size() == 0);
     PT_UNIT_ASSERT(blob2.data() == 0);	
 

@@ -179,7 +179,7 @@ namespace Db {
                 \param data New variable value
                 \return Self reference
             */
-            Statement& set(const std::string& col, const Pt::Blob& data)
+            Statement& set(const std::string& col, const Blob& data)
             { _stmt->setBlob(col, data); return *this; }
 
             /** Set a host-variable to a string value

@@ -28,6 +28,8 @@
 
 namespace Pt {
 
+namespace Db {
+
 /** @brief Implementation base of Blob values
 
     This class serves as the base for the shared implementation classes used
@@ -234,6 +236,8 @@ public:
         return m_data->size();
     }
 };
+
+} // namespace Db
 
 } // namespace Pt
 

@@ -60,7 +60,7 @@ namespace sqlite {
 
             //TODO: extra blob function needed??? ->    alternative: read all text values with blob sql function
             //virtual void getBlob(std::string& blobdata) const;
-            virtual void getBlob(Pt::Blob& blobdata) const;
+            virtual void getBlob(Blob& blobdata) const;
 
             // specific methods of sqlite-driver
             sqlite3_stmt* getStmt() const   { return _stmt; }

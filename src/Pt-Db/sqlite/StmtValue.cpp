@@ -108,7 +108,7 @@ namespace sqlite {
         data.assign( (const char*)ret, bytes );
     }*/
 
-    void StmtValue::getBlob(Pt::Blob& blob) const
+    void StmtValue::getBlob(Blob& blob) const
     {
         int bytes = ::sqlite3_column_bytes(getStmt(), _iCol);
         const void* ret = ::sqlite3_column_blob(getStmt(), _iCol);
