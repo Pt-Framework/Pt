@@ -54,6 +54,7 @@ void PainterImpl::end()
     }
 
     _paintQueue.clear();
+    [[NSGraphicsContext currentContext] flushGraphics];
 }
 
 
@@ -168,7 +169,14 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
 {
-    _paintQueue.push_back(new DrawPixmap(to, pm) );
+    Pt::Gfx::Region region( Pt::Math::Point(0, 0), pm.size() );
+    _paintQueue.push_back(new DrawPixmap(to, pm, region) );
+}
+
+
+void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion)
+{
+    _paintQueue.push_back(new DrawPixmap(to, pm, pmRegion) );
 }
 
 
@@ -241,8 +249,9 @@ void PainterImpl::DrawRect::paint()
 }
 
 
-PainterImpl::DrawPixmap::DrawPixmap(const Math::Point& to, Pixmap& pm)
+PainterImpl::DrawPixmap::DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
 : _to(to)
+, _region(region)
 {
     _image = pm.impl().image();
     [_image retain];
@@ -257,7 +266,8 @@ PainterImpl::DrawPixmap::~DrawPixmap()
 
 void PainterImpl::DrawPixmap::paint()
 { 
-    std::cerr << "Drawing pixmap" << std::endl;
+    //std::cerr << "Drawing pixmap" << std::endl;
+
     [_image drawAtPoint:NSMakePoint( _to.x(), _to.y() ) 
             fromRect:NSZeroRect 
             operation:NSCompositeCopy 
@@ -281,6 +291,8 @@ PainterImpl::FillRect::~FillRect()
 
 void PainterImpl::FillRect::paint()
 {
+    //std::cerr << "PainterImpl::fillRect " << _rect.width() << " " << _rect.height() << std::endl;
+
     [[NSColor colorWithDeviceRed: _brush.color().red() / float(0xffff)
               green: _brush.color().green() / float(0xffff)
               blue: _brush.color().blue() / float(0xffff)

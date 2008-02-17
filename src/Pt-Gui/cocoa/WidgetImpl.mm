@@ -28,18 +28,17 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 : _apiWidget(apiWidget)
 {
     _window = nil;
-    _view = [[PtGuiView alloc] initWithWidget: &apiWidget];
+    _view = [[WidgetView alloc] initWithWidget: &apiWidget];
 
     if(parent == 0)
     {
-        std::cerr << "Parent" << std::endl;
         _window = [[NSWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height())      
-                                                       styleMask:NSTitledWindowMask | 
-                                                                 NSClosableWindowMask | 
-                                                                 NSMiniaturizableWindowMask |
-                                                                 NSResizableWindowMask
-                                                       backing:NSBackingStoreBuffered
-                                                       defer:NO];
+                                                        styleMask:NSTitledWindowMask | 
+                                                                  NSClosableWindowMask | 
+                                                                  NSMiniaturizableWindowMask |
+                                                                  NSResizableWindowMask
+                                                         backing:NSBackingStoreBuffered
+                                                         defer:NO];
     
         [_window setAcceptsMouseMovedEvents:YES];   
         [_window setContentView: _view];
@@ -47,13 +46,11 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
     }
     else
     {
-        std::cerr << "Child" << std::endl;
         [parent->impl()._view addSubview:_view];
         [_view setFrame:NSMakeRect(at.x(), at.y(), size.width(), size.height())];
     }
     
     _painter.setView(_view);
-    std::cerr << "DONE" << std::endl;
 }
 
 

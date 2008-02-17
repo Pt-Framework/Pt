@@ -79,6 +79,7 @@ const Pt::String& Button::text() const
 
 void Button::update()
 {
+    //std::cerr << "Button::update" << std::endl;
     Painter widgetPainter = painter();
     Painter backbufferPainter = _backbuffer->painter();
 

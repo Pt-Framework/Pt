@@ -24,6 +24,8 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Region.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Rgb888Image.h>
@@ -35,6 +37,7 @@
 
 #ifdef __OBJC__
     #import <Foundation/NSGeometry.h>
+    #import <AppKit/NSGraphicsContext.h>
     #import <AppKit/NSBezierPath.h>
     #import <AppKit/NSImage.h>
 #else
@@ -103,7 +106,7 @@ namespace Gui {
 
             virtual void drawPixmap(const Math::Point& to, Pixmap& pm);
 
-            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion) {}
+            virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
             virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
 
@@ -159,7 +162,7 @@ namespace Gui {
             virtual void paint();
         
         private:
-            const Gfx::Rect& _rect;
+            const Gfx::Rect _rect;
             Gfx::Pen _pen;
     };
 
@@ -167,7 +170,7 @@ namespace Gui {
     class PainterImpl::DrawPixmap : public PainterImpl::Paint
     {
         public:
-            DrawPixmap(const Math::Point& to, Pixmap& pm);
+            DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region);
             
             virtual ~DrawPixmap();
             
@@ -175,6 +178,7 @@ namespace Gui {
         
         private:
             Math::Point _to;
+            Gfx::Region _region;
             NSImage* _image;
     };
 
@@ -189,7 +193,7 @@ namespace Gui {
             virtual void paint();
         
         private:
-            const Gfx::Rect& _rect;
+            const Gfx::Rect _rect;
             Gfx::Brush _brush;
     };
 } // namespace Gui

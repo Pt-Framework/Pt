@@ -18,18 +18,19 @@
  ***************************************************************************/
 #import "View.h"
 #import "Application.h"
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSEvent.h>
+
 #include "Pt/Gui/CloseEvent.h"
 #include "Pt/Gui/PaintEvent.h"
 #include "Pt/Gui/ResizeEvent.h"
+#include "Pt/Gui/MoveEvent.h"
 #include "Pt/Gui/MouseEvent.h"
 #include "Pt/Gui/MouseMoveEvent.h"
-#import <Foundation/NSString.h>
-#import <AppKit/NSApplication.h>
-#import <AppKit/NSEvent.h>
 #include <iostream>
 
-@implementation PtGuiView
-- (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) widget
+@implementation WidgetView
+- (WidgetView*) initWithWidget: (Pt::Gui::Widget*) widget
 {
     self = [super init];
     if(self)
@@ -41,13 +42,13 @@
 }
 
 
-- (void) drawRect:(NSRect)rect{    std::cerr << "View::drawRect " << _widget << " " 
-              << rect.size.width << ", " << rect.size.height << std::endl;
+- (void) drawRect:(NSRect)rect{    //std::cerr << "View::drawRect " << _widget << " " 
+    //          << rect.size.width << ", " << rect.size.height << std::endl;
 
     Pt::Gui::PaintEvent pev(*_widget, Pt::Math::Point(rect.origin.x, rect.origin.y), 
                                       Pt::Math::Size(rect.size.width, rect.size.height));
 
-    //[NSApp processEvent: &pev];
+    [NSApp processEvent: &pev];
     //[super drawRect:rect];}
 
 
@@ -56,14 +57,14 @@
     //std::cerr << "View::setFrame " << frameRect.size.width << ", " << frameRect.size.height << std::endl;
     [super setFrameOrigin:origin];
     
-    //Pt::Gui::ResizeEvent rev(*_widget, frameRect.size.width, frameRect.size.height);
-    //[NSApp processEvent: &rev];
+    Pt::Gui::MoveEvent mev(*_widget, origin.x, origin.y);
+    [NSApp processEvent: &mev];
 }
 
 
 - (void)setFrameSize:(NSSize)frameSize
 {
-    std::cerr << "View::setFrameSize " << frameSize.width << ", " << frameSize.height << std::endl;
+    //std::cerr << "View::setFrameSize " << frameSize.width << ", " << frameSize.height << std::endl;
     [super setFrameSize:frameSize];
     
     Pt::Gui::ResizeEvent rev(*_widget, frameSize.width, frameSize.height);
@@ -71,7 +72,7 @@
 }
 
 - (void) mouseDown:(NSEvent*)ev{
-    std::cerr << "Mouse Down: " << std::endl;
+    //std::cerr << "Mouse Down: " << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
     Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
@@ -84,7 +85,7 @@
 }
 
 - (void) mouseUp:(NSEvent*)ev{
-    std::cerr << "Mouse Up: " << std::endl;
+    //std::cerr << "Mouse Up: " << std::endl;
     NSPoint local_point = [self convertPoint:[ev locationInWindow] fromView:nil];
 
     Pt::Gui::MouseEvent mev(*_widget, local_point.x, local_point.y, 
@@ -98,7 +99,7 @@
 
 - (void) mouseDragged:(NSEvent*)event
 {
-    std::cerr << "Mouse Dragged: " << std::endl;
+    //std::cerr << "Mouse Dragged: " << std::endl;
     NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
 
     Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
@@ -111,7 +112,7 @@
 
 - (void) mouseMoved:(NSEvent *)event
 {
-    std::cerr << "Mouse Moved: " << std::endl;
+    //std::cerr << "Mouse Moved: " << std::endl;
     NSPoint local_point = [self convertPoint:[event locationInWindow] fromView:nil];
 
     Pt::Gui::MouseMoveEvent mev(*_widget, local_point.x, local_point.y, 
@@ -122,7 +123,7 @@
     //[super mouseMoved: event];
 }
 
-- (BOOL)windowShouldClose:(id)window
+- (BOOL) windowShouldClose:(id)window
 {
     Pt::Gui::CloseEvent cev(*_widget);
     [NSApp processEvent: &cev];

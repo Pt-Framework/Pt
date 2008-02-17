@@ -20,10 +20,10 @@
 #include <Pt/Gui/Widget.h>
 #import <AppKit/NSView.h>
 
-@interface PtGuiView : NSView{
+@interface WidgetView : NSView{
     Pt::Gui::Widget* _widget;
 }    
-- (PtGuiView*) initWithWidget: (Pt::Gui::Widget*) w;
+- (WidgetView*) initWithWidget: (Pt::Gui::Widget*) w;
 
 - (void) drawRect:(NSRect)rect;
 
@@ -39,5 +39,5 @@
 
 - (void) mouseMoved:(NSEvent*)event;
 
-- (BOOL)windowShouldClose:(id)window;
+- (BOOL) windowShouldClose:(id)window;
 @end

@@ -32,7 +32,6 @@ class ScribbleWidget : public Pt::Gui::Widget
         , _penSize(2)
         , _penColor(0, 0, 0)
         {
-            std::cerr << "Scribble: " << this << std::endl;
             Widget::setTitle(L"Scribble");
 
             _redButton.reset  ( new Button( *this, Math::Point(10, 10),  Math::Size(70, 30), L"RED")   );
@@ -40,13 +39,12 @@ class ScribbleWidget : public Pt::Gui::Widget
             _blueButton.reset ( new Button( *this, Math::Point(10, 80),  Math::Size(70, 30), L"BLUE")  );
             _clearButton.reset( new Button( *this, Math::Point(10, 115), Math::Size(70, 30), L"CLEAR") );
             
-            _pixmap.reset( new Pixmap( 0, 0 ) );
+            _pixmap.reset( new Pixmap( size().width(), size().height() ) );
 
             updatePen();
 
+            // Clear the backbuffer (pixmap) with white color
             Gui::Painter pixmapPainter = _pixmap->painter();
-
-            // Clear the backbuffer (pixmap) with white color.
             pixmapPainter.setBrush( Brush(ARgbColor(65535, 65535, 65535)) );
             pixmapPainter.fillRect( Gfx::Rect(Math::Point(0, 0), this->size() ) );
 
@@ -127,9 +125,7 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _mouseEvent(const MouseEvent& event)
         {
-            std::cerr << "Scribble:MouseEvent" << std::endl;
-            //Gui::Painter widgetPainter = painter();
-            //Gui::Painter pixmapPainter = _pixmap->painter();
+            //std::cerr << "Scribble:MouseEvent" << std::endl;
 
             if (event.action() == MouseEvent::Press && event.button() == MouseEvent::LeftButton)
             {
@@ -140,7 +136,8 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _resizeEvent(const ResizeEvent& event)
         {
-        	std::cerr << "Scribble:Resize:" << event.width() << ":" << event.height()  << std::endl;
+        	//std::cerr << "Scribble:Resize:" << event.width() << ":" << event.height()  << std::endl;
+
             if (event.resizeType() == ResizeEvent::Minimized) {
                 return;
             }
@@ -159,11 +156,11 @@ class ScribbleWidget : public Pt::Gui::Widget
 
         virtual void _paintEvent(const PaintEvent& event)
         {
-        	std::cerr << "Scribble Paint:" << this << " "
-        	          << event.region().width() << ":" << event.region().height() << std::endl;
+        	//std::cerr << "Scribble Paint:" << this << " "
+        	//          << event.region().width() << ":" << event.region().height() << std::endl;
             
-            //Gui::Painter widgetPainter = painter();
-            //widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
+            Gui::Painter widgetPainter = painter();
+            widgetPainter.drawPixmap(event.origin(), *_pixmap, event.region());
         }
 
         virtual void _keyEvent(const KeyEvent& event)
