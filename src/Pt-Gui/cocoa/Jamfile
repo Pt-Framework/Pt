@@ -7,7 +7,7 @@ Library Pt-Gui-cocoa : Application.mm
                        PainterImpl.mm
                        PixmapImpl.mm
                        PixmapPainter.mm
-                       View.mm
+                       WidgetView.mm
                        WidgetImpl.mm
                        WidgetPainter.mm
                        ;

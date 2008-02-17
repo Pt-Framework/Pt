@@ -18,7 +18,6 @@
  ***************************************************************************/
 #import "ApplicationImpl.h"
 #import "Application.h"
-#import "Pt/Gui/MouseEvent.h"
 
 namespace Pt {
 

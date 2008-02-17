@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#import "View.h"
+#import "WidgetView.h"
 #import "Application.h"
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>

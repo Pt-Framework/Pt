@@ -196,6 +196,7 @@ namespace Gui {
             const Gfx::Rect _rect;
             Gfx::Brush _brush;
     };
+
 } // namespace Gui
 
 } // namespace Pt

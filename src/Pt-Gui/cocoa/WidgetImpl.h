@@ -28,7 +28,7 @@
 #include <Pt/String.h>
 
 #ifdef __OBJC__
-    #import "View.h"
+    #import "WidgetView.h"
     #import <AppKit/NSWindow.h>
     #import <AppKit/NSGraphicsContext.h>
 #else
