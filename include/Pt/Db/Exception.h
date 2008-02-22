@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
  *   Copyright (C) 2005-2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,7 +36,7 @@ namespace Db {
         @ingroup Pt
 
         An exception of class AccessError is used to report failed access
-        to a resource due to missing authorization, mising access rights
+        to a resource due to missing authorization, missing access rights
         or if a resource is in an otherwise inaccessible state. This class
         implements std::logic_error. Use the PT_SOURCEINFO macro to pass
         SourceInfo to Exception.
