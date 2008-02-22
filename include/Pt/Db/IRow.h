@@ -24,7 +24,7 @@
 
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
-#include <stdio.h>
+#include <stddef.h>
 
 namespace Pt {
 
