@@ -24,7 +24,7 @@ namespace Pt {
 
 namespace Unit {
 
-void TestCase::run(const SerializationInfo* si, size_t argCount)
+void TestCase::run(const SerializationInfo* si, std::size_t argCount)
 {
     // TODO: use a TestMethod here and register a protected function
 

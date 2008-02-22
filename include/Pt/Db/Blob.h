@@ -52,7 +52,7 @@ class IBlob : public RefCounted
             The \a len bytes of the data pointed to by \a data are copied
             to this blob.
         */
-        virtual void assign(const char* data, size_t len) = 0;
+        virtual void assign(const char* data, std::size_t len) = 0;
 
         /** @brief Create a value implementation
 
@@ -70,7 +70,7 @@ class IBlob : public RefCounted
 
         /** @brief Returns the size of the blob-data.
         */
-        size_t size() const
+        std::size_t size() const
         { return _size; }
 
         /** @brief Returns a pointer to the blob-data or 0 if the blob is empty
@@ -93,7 +93,7 @@ class IBlob : public RefCounted
         { }
 
         char* _data;
-        size_t _size;
+        std::size_t _size;
 };
 
 /** @brief Default Blob value implementation
@@ -113,7 +113,7 @@ class BlobImpl : public IBlob
             delete[] _data;
         }
 
-        virtual void assign(const char* data, size_t len)
+        virtual void assign(const char* data, std::size_t len)
         {
             if (len == 0)
             {
@@ -146,7 +146,7 @@ class BlobImpl : public IBlob
         }
 
     protected:
-        BlobImpl(size_t n)
+        BlobImpl(std::size_t n)
         { RefCounted::addRef(); }
 };
 
@@ -189,7 +189,7 @@ public:
         to manage the blob-data and the shared data object. The first \a len
         bytes of the data pointed to by \a data are copied to this Blob.
     */
-    Blob(const char* data, size_t len)
+    Blob(const char* data, std::size_t len)
     : m_data( new BlobImpl() )
     {
         m_data->assign(data, len);
@@ -201,7 +201,7 @@ public:
     : m_data(b)
     { }
 
-    void assign(const char* data, size_t len)
+    void assign(const char* data, std::size_t len)
     {
         // copy-on-write
         if ( m_data->refs() > 1 )
@@ -231,7 +231,7 @@ public:
 
     /** Returns the size of the data
     */
-    size_t size() const
+    std::size_t size() const
     {
         return m_data->size();
     }

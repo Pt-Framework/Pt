@@ -154,7 +154,7 @@ namespace Unit {
         private:
             /** @brief Number of errors that occured during a run
             */
-            static size_t _errors;
+            static std::size_t _errors;
 
             /** @brief Currently used reporter
             */

@@ -22,7 +22,7 @@ namespace Pt {
 
 namespace Unit {
 
-size_t Application::_errors = 0;
+std::size_t Application::_errors = 0;
 
 Reporter* Application::_reporter = 0;
 

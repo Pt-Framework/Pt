@@ -35,7 +35,7 @@ namespace Unit {
     {
         public:
             TestContext(TestFixture& fixture, Test& test,
-                        const SerializationInfo* args = 0, size_t argCount = 0);
+                        const SerializationInfo* args = 0, std::size_t argCount = 0);
 
             virtual ~TestContext();
 
@@ -47,7 +47,7 @@ namespace Unit {
             TestFixture& _fixture;
             Test& _test;
             const SerializationInfo* _args;
-            size_t _argCount;
+            std::size_t _argCount;
             bool _setUp;
     };
 

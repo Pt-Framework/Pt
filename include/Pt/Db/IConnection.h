@@ -45,7 +45,7 @@ namespace Db {
     class PT_DB_API IConnection : public RefCounted
     {
         public:
-            typedef size_t size_type;
+            typedef std::size_t size_type;
 
             virtual void beginTransaction() = 0;
             virtual void commitTransaction() = 0;

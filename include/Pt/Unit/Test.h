@@ -89,7 +89,7 @@ namespace Unit {
                 the signal 'error' indicates an unknown exception or error.
                 This method should not propagate any exceptions
             */
-            virtual void run(const SerializationInfo* si, size_t argCount) = 0;
+            virtual void run(const SerializationInfo* si, std::size_t argCount) = 0;
 
             void run()
             {

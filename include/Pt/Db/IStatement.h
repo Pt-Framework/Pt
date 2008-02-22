@@ -44,7 +44,7 @@ namespace Db {
     class PT_DB_API IStatement : public RefCounted
     {
     public:
-        typedef size_t size_type;
+        typedef std::size_t size_type;
 
         virtual void clear() = 0;
 

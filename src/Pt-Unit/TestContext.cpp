@@ -24,7 +24,7 @@ namespace Pt {
 
 namespace Unit {
 
-TestContext::TestContext(TestFixture& fixture, Test& test, const SerializationInfo* args, size_t argCount )
+TestContext::TestContext(TestFixture& fixture, Test& test, const SerializationInfo* args, std::size_t argCount )
 : _fixture(fixture)
 , _test(test)
 , _args(args)

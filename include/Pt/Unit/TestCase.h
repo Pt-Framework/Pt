@@ -84,7 +84,7 @@ namespace Unit {
                 'test' and finally 'tearDown'. Signals inherited from
                 Unit::Test are sent appropriatly.
             */
-            virtual void run(const SerializationInfo* si, size_t argCount);
+            virtual void run(const SerializationInfo* si, std::size_t argCount);
 
             /** \brief Set up conText before running a test.
 

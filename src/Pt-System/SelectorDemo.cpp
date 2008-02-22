@@ -27,7 +27,7 @@ char buffer[255];
 
 void onRead(Pt::System::IOResult& result)
 {
-    size_t n = result.device()->endRead(result);
+    std::size_t n = result.device()->endRead(result);
     std::cout.write(buffer, n) << std::endl;
 }
 

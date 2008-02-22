@@ -24,7 +24,7 @@
 
 #include <Pt/RefCounted.h>
 #include <Pt/Db/Api.h>
-
+#include <stdio.h>
 
 namespace Pt {
 
@@ -38,7 +38,7 @@ namespace Db {
     class PT_DB_API IRow : public RefCounted
     {
         public:
-            typedef size_t size_type;
+            typedef std::size_t size_type;
 
             virtual size_type size() const = 0;
             virtual Value getValue(size_type field_num) const = 0;
