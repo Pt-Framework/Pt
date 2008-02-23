@@ -5,14 +5,15 @@
 \htmlonly
 
     <div id="content">
-        <h3>15-10-2008, TR-3 released</h3>
+        <h3>15-02-2008, TR-3 released</h3>
         <p>
             Starting with this TR, the Pt core module is in a soft-freeze, 
-            which means that source compatibility should not be broken except 
-            for critical bugs. Changes can still be made, if they do not break
-            sorce compatibility. New features include support for Solaris, and 
-            OS-X. The GUI module for OS-X is based on the Cocoa API's, but not
-            yet complete.
+            thus source compatibility should not be broken except in case of
+            critical bugs. Changes and additions can still be made of course,
+            if they do not break sorce compatibility.
+            New features include support for Solaris, and OS-X. The GUI module
+            for Mac OS-X uses the Objective-C Cocoa API's, though it is not yet
+            complete.
         </p>
         <h3>16-10-2007, TR-2 released</h3>
         <p>
