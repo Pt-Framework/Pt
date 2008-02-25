@@ -1,20 +1,15 @@
+#include "SelectorImpl.h"
 #include "Pt/System/Selector.h"
 #include "Pt/System/Timer.h"
-#include "SelectorImpl.h"
-
-
-#include <Pt/System/Clock.h>
-#include <Pt/System/TimeValue.h>
-
+#include "Pt/System/Clock.h"
+#include "Pt/System/TimeValue.h"
 
 namespace Pt {
 
 namespace System {
 
-
 Selector::Selector()
 : _impl( 0 )
-
 {
     _impl = new SelectorImpl();
 }
@@ -28,11 +23,8 @@ Selector::~Selector()
 
 void Selector::add( IOResult& result )
 {
-    void (Selector::*removeResult)(IOResult&);
-    removeResult = &Selector::remove;
-
+    result.setSelector(this);
     _impl->complete(result);
-     connect(result.canceled, *this, removeResult);
 }
 
 

@@ -27,17 +27,15 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/IOResult.h>
-
 #include <limits>
 #include <ios>
-
 
 namespace Pt {
 
 namespace System {
 
-class IOResult;
 class IODeviceImpl;
+
 
 struct IO
 {
@@ -54,7 +52,6 @@ struct IO
     virtual ~IO()
     {}
 };
-
 
 
 /** @brief Endpoint for I/O operations
@@ -98,7 +95,7 @@ class BasicIODevice : public IO, protected NonCopyable {
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
             IOResult& result = _beginRead(buffer, n, _eof);
-            result.init(*this);
+            result.setDevice(this);
             return result;
         }
 
@@ -137,7 +134,7 @@ class BasicIODevice : public IO, protected NonCopyable {
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
             IOResult& result = _beginWrite(buffer, n);
-            result.init(*this);
+            result.setDevice(this);
             return result;
         }
 
@@ -340,7 +337,7 @@ typedef BasicIODevice<char> IODevice;
 class PT_SYSTEM_API DummyIODevice : public IODevice
 {
     public:
-      DummyIODevice();     
+      DummyIODevice();
 };
 
 } // namespace System

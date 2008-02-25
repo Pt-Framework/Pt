@@ -50,6 +50,12 @@ SelectorImpl::~SelectorImpl()
         ::close(_wakePipe[0]);
         ::close(_wakePipe[1]);
     }
+
+    std::list<IOResultImpl*>::iterator it;
+    for( it = _results.begin(); it != _results.end(); ++it )
+    {
+        (*it)->setSelector(0);
+    }
 }
 
 
@@ -68,6 +74,7 @@ void SelectorImpl::cancel(IOResult& result)
     {
         if(&result == *it)
         {
+            (*it)->setSelector(0);
             _results.erase(it);
             return;
         }
@@ -148,6 +155,7 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
         if( FD_ISSET(fd, &rfds) )
         {
             result->device()->inputReady(*result);
+            result->setSelector(0);
             iter = _results.erase(iter);
             avail = true;
             continue;
@@ -155,6 +163,7 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
         else if( FD_ISSET(fd, &wfds) )
         {
             result->device()->outputReady(*result);
+            result->setSelector(0);
             iter = _results.erase(iter);
             avail = true;
             continue;

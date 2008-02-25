@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Bjoern Oliver Streule                         *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -24,41 +24,50 @@
 #include "Pt/System/Selector.h"
 #include <algorithm>
 
-
 namespace Pt {
 
 namespace System {
 
 SelectorImpl::SelectorImpl()
-{    
+{
     _readers.push_back( &_wakeResult );
 }
 
+
 SelectorImpl::~SelectorImpl()
-{    
+{
+    std::vector<IOResult*>::iterator iter;
+    for( iter = _readers.begin(); iter != _readers.end(); ++iter )
+    {
+        IOResult* result = *iter;
+        result->setSelector(0);
+    }
 }
 
+
 void SelectorImpl::complete( IOResult& result )
-{   
+{
     //TODO: check if result exists.
-	_readers.push_back(&result);
+    _readers.push_back(&result);
 }
+
 
 void SelectorImpl::cancel( IOResult& result )
 {
-    std::vector<IOResult*>::iterator it = _readers.begin();
-	for (;it != _readers.end(); ++it)
-	{
-        if (*it != &result) 
-            continue;
-        
-		it = _readers.erase(it);    
-        break;        
-	}
+    std::vector<IOResult*>::iterator it;
+    for (it = _readers.begin() ; it != _readers.end(); ++it)
+    {
+        if (*it == &result)
+        {
+            (*it)->setSelector(0);
+            it = _readers.erase(it);
+        }
+    }
 }
 
+
 bool SelectorImpl::wait( unsigned int msecs )
-{    
+{
     std::vector<HANDLE> waitHandles;
 
     if( msecs == Selector::WaitInfinite ) {
@@ -86,16 +95,20 @@ bool SelectorImpl::wait( unsigned int msecs )
 
     if (res != static_cast<IOResult*>(&_wakeResult) )
     {
-        _readers.erase(_readers.begin() + handleIndex);
+        std::vector<IOResult*>::iterator done = _readers.begin() + handleIndex;
+        (*done)->setSelector(0);
+        _readers.erase(done);
     }
 
     return true;
 }
+
 
 void SelectorImpl::wake()
 {
     _wakeResult.wake();
 }
 
-}//namespace System
-}//namespace Pt
+} //namespace System
+
+} //namespace Pt

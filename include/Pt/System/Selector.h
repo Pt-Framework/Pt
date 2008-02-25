@@ -24,14 +24,13 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/IODevice.h>
 #include <list>
-
 
 namespace Pt {
 
 namespace System {
 
+    class IOResult;
     class Timer;
 
     /** @brief Reports activity on a set of devices.
