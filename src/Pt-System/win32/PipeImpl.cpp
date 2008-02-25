@@ -32,7 +32,7 @@ namespace System {
 PipeIODevice::PipeIODevice()
 : _handle(INVALID_HANDLE_VALUE)
 {
-	_readResult.init(*this);
+	_readResult.setDevice(this);
 
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
