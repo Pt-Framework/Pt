@@ -61,6 +61,7 @@ void SelectorImpl::cancel( IOResult& result )
         {
             (*it)->setSelector(0);
             it = _readers.erase(it);
+            return;
         }
     }
 }
@@ -91,14 +92,13 @@ bool SelectorImpl::wait( unsigned int msecs )
     const Pt::ssize_t handleIndex  = (result - WAIT_OBJECT_0);
 
     IOResult* res = _readers[handleIndex];
-    res->impl()->onComplete();
-
     if (res != static_cast<IOResult*>(&_wakeResult) )
     {
         std::vector<IOResult*>::iterator done = _readers.begin() + handleIndex;
         (*done)->setSelector(0);
         _readers.erase(done);
     }
+    res->impl()->onComplete();
 
     return true;
 }
