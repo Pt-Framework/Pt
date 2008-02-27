@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,20 +16,31 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include <Pt/Unit/TestCase.h>
-
+#include "Pt/Unit/TestCase.h"
+#include "Pt/Unit/TestContext.h"
 
 namespace Pt {
 
 namespace Unit {
 
+TestCase::TestCase(const std::string& name)
+: Test(name)
+, _testMethod(name, *this, &TestCase::test)
+{
+    connect(_testMethod.started,   this->started);
+    connect(_testMethod.finished,  this->finished);
+    connect(_testMethod.success,   this->success);
+    connect(_testMethod.assertion, this->assertion);
+    connect(_testMethod.exception, this->exception);
+    connect(_testMethod.error,     this->error);
+    connect(_testMethod.message,   this->message);
+}
+
+
 void TestCase::run(const SerializationInfo* si, std::size_t argCount)
 {
-    // TODO: use a TestMethod here and register a protected function
-
-    //TestContext ctx(*this, *this, si, argCount);
-    //ctx.run();
+    TestContext ctx(*this, _testMethod, si, argCount);
+    ctx.run();
 }
 
 

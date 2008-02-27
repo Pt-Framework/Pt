@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,8 +21,9 @@
 
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
+#include <Pt/Unit/TestFixture.h>
+#include <Pt/Unit/TestMethod.h>
 #include <string>
-
 
 namespace Pt {
 
@@ -75,9 +76,7 @@ namespace Unit {
 
                 @param name Name of the test
             */
-            TestCase(const std::string& name)
-            : Test(name)
-            { }
+            TestCase(const std::string& name);
 
             /** @brief Runs the test
                 When the test is run, 'setUp' will be called first, then
@@ -100,11 +99,22 @@ namespace Unit {
                 initialized in TestCase::setUp.
             */
             virtual void tearDown();
+
+        protected:
+            /** @brief Implements the actual test procedure
+                When the test is run, this method will be called after setUp
+                and before tearDown.
+            */
+            virtual void test()
+            {}
+
+        private:
+            //! @internal
+            TestMethod<TestCase> _testMethod;
     };
 
 } // namespace Unit
 
 } // namespace Pt
 
-#endif // for header
-
+#endif

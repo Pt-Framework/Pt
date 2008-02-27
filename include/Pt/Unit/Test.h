@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,9 +23,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Assertion.h>
-
 #include <string>
-
 
 namespace Pt {
 
@@ -34,31 +32,6 @@ namespace Pt {
 namespace Unit {
 
     class TestContext;
-
-
-    class PT_UNIT_API TestFixture
-    {
-        public:
-            virtual ~TestFixture()
-            {}
-
-            /** \brief Set up conText before running a test.
-
-                This function is called before each registered tester function
-                is invoked. It is meant to initialize any required resources.
-            */
-            virtual void setUp()
-            {}
-
-            /** \brief Clean up after the test run.
-
-                This function is called after each registered tester function
-                is invoked. It is meant to remove any resources previously
-                initialized in TestCase::setUp.
-            */
-            virtual void tearDown()
-            {}
-    };
 
     /** @brief Test base class
         @ingroup UnitTests

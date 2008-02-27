@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,15 +16,13 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include <Pt/Unit/TestSuite.h>
-#include <Pt/SerializationInfo.h>
-
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/TestContext.h"
+#include "Pt/SerializationInfo.h"
 
 namespace Pt {
 
 namespace Unit {
-
 
 TestProtocol TestSuite::defaultProtocol;
 

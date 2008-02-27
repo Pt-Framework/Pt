@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -20,10 +20,8 @@
 #define PT_UNIT_TESTCONTEXT_H
 
 #include <Pt/Unit/Api.h>
-#include <Pt/Unit/Test.h>
-
 #include <string>
-
+#include <cstddef>
 
 namespace Pt {
 
@@ -31,15 +29,18 @@ namespace Pt {
 
 namespace Unit {
 
+    class Test;
+    class TestFixture;
+
     class PT_UNIT_API TestContext
     {
         public:
             TestContext(TestFixture& fixture, Test& test,
                         const SerializationInfo* args = 0, std::size_t argCount = 0);
 
-            virtual ~TestContext();
+            ~TestContext();
 
-            virtual std::string testName() const;
+            std::string testName() const;
 
             void run();
 

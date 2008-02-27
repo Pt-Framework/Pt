@@ -89,6 +89,7 @@ include/Pt/Time.h
 include/Pt/Timespan.h
 include/Pt/TypeTraits.h
 include/Pt/Types.h
+include/Pt/Unit
 include/Pt/Unit/Application.h
 include/Pt/Unit/Assertion.h
 include/Pt/Unit/PerformanceTest.h
@@ -97,7 +98,9 @@ include/Pt/Unit/Reporter.h
 include/Pt/Unit/Test.h
 include/Pt/Unit/TestCase.h
 include/Pt/Unit/TestContext.h
+include/Pt/Unit/TestFixture.h
 include/Pt/Unit/TestMain.h
+include/Pt/Unit/TestMethod.h
 include/Pt/Unit/TestProtocol.h
 include/Pt/Unit/TestSuite.h
 include/Pt/Unit/TextProtocol.h

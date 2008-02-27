@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Drner                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,17 +16,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Unit/Test.h>
+#ifndef PT_UNIT_TESTFIXTURE_H
+#define PT_UNIT_TESTFIXTURE_H
+
+#include <Pt/Unit/Api.h>
 
 namespace Pt {
 
 namespace Unit {
 
-const std::string& Test::name() const
+class TestFixture
 {
-    return _name;
-}
+    public:
+        virtual ~TestFixture()
+        {}
 
-}
+        /** \brief Set up conText before running a test.
 
-}
+            This function is called before each registered tester function
+            is invoked. It is meant to initialize any required resources.
+        */
+        virtual void setUp()
+        {}
+
+        /** \brief Clean up after the test run.
+
+            This function is called after each registered tester function
+            is invoked. It is meant to remove any resources previously
+            initialized in TestCase::setUp.
+        */
+        virtual void tearDown()
+        {}
+};
+
+} // namespace Unit
+
+} // namespace Pt
+
+#endif
