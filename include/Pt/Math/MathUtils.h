@@ -55,14 +55,19 @@ namespace Pt {
 
         // accuracy for equal comparison
         static const double Eps9    = 10e-9;
+        static const double Eps8    = 10e-8;
+        static const double Eps7    = 10e-7;
         static const double Eps6    = 10e-6;
+        static const double Eps5    = 10e-5;
+        static const double Eps4    = 10e-4;
         static const double Eps3    = 10e-3;
+        static const double Eps2    = 10e-2;
         static const double Eps1    = 10e-1;
 
         template<typename T>
         inline bool equal(const T& val, const T& val2, const double& eps)
         {
-            double diff = fabs(val - val2);
+            double diff = std::fabs(val - val2);
             return diff < eps;
         }
 
@@ -90,14 +95,14 @@ namespace Pt {
             const T B = 4 / PI;
             const T C = -4 / PI_SQR;
 
-            T y = B * localTheta + C * localTheta * fabs(localTheta);
+            T y = B * localTheta + C * localTheta * std::fabs(localTheta);
 
             if (accurate)
             {
              //  const float Q = 0.775;
                  const T P = 0.225;
 
-                 y = P * (y * fabs(y) - y) + y;   // Q * y + P * y * abs(y)
+y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
             }
 
             return y;
