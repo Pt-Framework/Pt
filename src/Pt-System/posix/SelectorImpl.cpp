@@ -154,17 +154,17 @@ bool SelectorImpl::select(int maxfd, fd_set rfds, fd_set wfds, unsigned int msec
 
         if( FD_ISSET(fd, &rfds) )
         {
-            result->device()->inputReady(*result);
             result->setSelector(0);
             iter = _results.erase(iter);
+            result->device()->inputReady(*result);
             avail = true;
             continue;
         }
         else if( FD_ISSET(fd, &wfds) )
         {
-            result->device()->outputReady(*result);
             result->setSelector(0);
             iter = _results.erase(iter);
+            result->device()->outputReady(*result);
             avail = true;
             continue;
         }
