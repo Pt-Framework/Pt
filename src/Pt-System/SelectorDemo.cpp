@@ -23,27 +23,29 @@
 #include <Pt/System/Pipe.h>
 #include <iostream>
 
+Pt::System::EventLoop loop;
+Pt::System::Pipe mypipe(Pt::System::IODevice::Async);
 char buffer[255];
 
 void onRead(Pt::System::IOResult& result)
 {
     std::size_t n = result.device()->endRead(result);
     std::cout.write(buffer, n) << std::endl;
+    Pt::System::IOResult& readResult = mypipe.input().beginRead(buffer, 4);
+    loop.add(readResult);
 }
 
 int main( int argc, char* argv[] )
 {
-    try 
+    try
     {
-        Pt::System::EventLoop loop;
-        Pt::System::Pipe pipe(Pt::System::IODevice::Async);
-        pipe.output().write("Hello", 6);
+        mypipe.output().write("Hello World!", 12);
 
-        connect(pipe.input().inputReady, &onRead);
-        Pt::System::IOResult& readResult = pipe.input().beginRead(buffer, 255);
+        connect(mypipe.input().inputReady, &onRead);
+        Pt::System::IOResult& readResult = mypipe.input().beginRead(buffer, 4);
 
         Pt::System::Timer stopper;
-        stopper.start(5000);
+        stopper.start(2000);
         connect(stopper.timeout, loop, &Pt::System::EventLoop::exit);
 
         loop.add(stopper);
@@ -51,7 +53,7 @@ int main( int argc, char* argv[] )
         loop.run();
     }
     catch(const std::exception& e)
-    { 
+    {
         std::cerr << e.what() << std::endl; 
     }
 }
