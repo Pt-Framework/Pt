@@ -448,6 +448,42 @@ HR { height: 1px;
     color: #154374;
 }
 
+.news-table {
+    text-align:left;
+}
+
+.news-table-date {
+    width:110; 
+}
+
+.news-article {
+    text-align:left;
+    border: 1px solid #CCCCCC;
+    -moz-border-radius: 12px 12px 0px 0px;
+    width:100%;
+}
+
+.news-article-header {
+    background-color:#f0f0f0;
+    border-bottom: 1px solid #CCCCCC;
+    -moz-border-radius: 12px 12px 0px 0px;
+    padding-left:16px;
+    padding-top:4px;
+    padding-bottom:2px;
+}
+
+.news-article-header b {
+    font-size: 120%;
+    color:#154374;
+}
+
+.news-article-header i {
+    font-size: 80%;
+}
+
+.news-article-body {
+    padding:7px;
+}
 
 .docs-page-header {
     padding:5px 10px 5px 15px;
