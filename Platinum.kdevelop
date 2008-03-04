@@ -20,11 +20,11 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description></description>
     <projectname>Platinum</projectname>
-    <defaultencoding></defaultencoding>
+    <defaultencoding/>
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>/home/marc/Pt</mainprogram>
+      <mainprogram>home/marc/Pt</mainprogram>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -33,7 +33,7 @@
       <envvars>
         <envvar value="/home/marc/Pt/bin" name="LD_LIBRARY_PATH" />
       </envvars>
-      <globaldebugarguments></globaldebugarguments>
+      <globaldebugarguments/>
       <globalcwd>/home/marc/Pt</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <autoinstall>false</autoinstall>
@@ -172,9 +172,9 @@
     </blacklist>
     <other>
       <prio>0</prio>
-      <otherbin></otherbin>
-      <defaulttarget></defaulttarget>
-      <otheroptions></otheroptions>
+      <otherbin/>
+      <defaulttarget/>
+      <otheroptions/>
       <selectedenvironment>Debug</selectedenvironment>
       <environments>
         <Debug/>
@@ -184,7 +184,7 @@
   <kdevdebugger>
     <general>
       <dbgshell></dbgshell>
-      <programargs/>
+      <programargs></programargs>
       <gdbpath></gdbpath>
       <configGdbScript></configGdbScript>
       <runShellScript></runShellScript>
@@ -291,8 +291,8 @@
       <root>/usr/lib/qt3-gcc3.4</root>
       <includestyle>3</includestyle>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake></qmake>
-      <designer></designer>
+      <qmake/>
+      <designer/>
       <designerpluginpaths/>
     </qt>
     <creategettersetter>

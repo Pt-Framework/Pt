@@ -30,9 +30,10 @@ char buffer[255];
 void onRead(Pt::System::IOResult& result)
 {
     std::size_t n = result.device()->endRead(result);
-    std::cout.write(buffer, n) << std::endl;
     Pt::System::IOResult& readResult = mypipe.input().beginRead(buffer, 4);
     loop.add(readResult);
+
+    std::cout.write(buffer, n) << std::endl;
 }
 
 int main( int argc, char* argv[] )

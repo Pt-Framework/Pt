@@ -43,7 +43,7 @@ TestContext::~TestContext()
     catch(...)
     {}
 
-    _test.finished.send(*this);
+    _test.finished(*this);
 }
 
 
@@ -57,35 +57,35 @@ void TestContext::run()
 {
     try
     {
-        _test.started.send(*this);
+        _test.started(*this);
         _fixture.setUp();
         _setUp = true;
         _test.run(_args, _argCount);
-        _test.success.send(*this);
+        _test.success(*this);
     }
     catch(const Assertion& assertion)
     {
-        _test.assertion.send(*this, assertion);
+        _test.assertion(*this, assertion);
     }
     catch(const std::range_error& ex)
     {
-        _test.exception.send(*this, ex);
+        _test.exception(*this, ex);
     }
     catch(const std::runtime_error& ex)
     {
-        _test.exception.send(*this, ex);
+        _test.exception(*this, ex);
     }
     catch(const std::logic_error& ex)
     {
-        _test.exception.send(*this, ex);
+        _test.exception(*this, ex);
     }
     catch(const std::exception& ex)
     {
-        _test.exception.send(*this, ex);
+        _test.exception(*this, ex);
     }
     catch(...)
     {
-        _test.error.send(*this);
+        _test.error(*this);
     }
 }
 

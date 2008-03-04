@@ -90,7 +90,8 @@ int main(int argc, char** argv)
     app.addReporter(consoleReporter);
 
     try {
-        return app.run(testName);
+        app.run(testName);
+        return app.errors();
     }
     catch(const std::exception& ex)
     {

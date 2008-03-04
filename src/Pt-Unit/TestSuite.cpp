@@ -106,14 +106,7 @@ Test* TestSuite::findTest(const std::string& name)
 
 void TestSuite::registerTest(Test* test)
 {
-    connect(test->started,   this->started);
-    connect(test->finished,  this->finished);
-    connect(test->success,   this->success);
-    connect(test->assertion, this->assertion);
-    connect(test->exception, this->exception);
-    connect(test->error,     this->error);
-    connect(test->message,   this->message);
-
+    test->setParent(this);
     _tests.insert( std::make_pair(test->name(), test) );
 }
 

@@ -22,39 +22,44 @@ namespace Pt {
 
 namespace Unit {
 
-std::size_t Application::_errors = 0;
-
-Reporter* Application::_reporter = 0;
-
-std::list<Reporter*> Application::_reporterList;
+Application* Application::_app = 0;
 
 
-void Application::setReporter(Reporter& reporter)
+Application::Application()
+: Test("")
+, _errors(0)
 {
-    Application::_reporter = &reporter;
+    _app = this;
+
+    std::list<Test*>::iterator it;
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
+    {
+        (*it)->setParent( this );
+    }
 }
 
 
-void Application::addReporter(Reporter& reporter)
+Application::~Application()
 {
-    Application::_reporterList.push_back(&reporter);
+}
+
+
+Application* Application::instance()
+{
+    if( ! _app )
+        throw std::logic_error("application not initialized");
+
+    return _app;
 }
 
 
 void Application::registerTest(Test& test)
 {
-    connect(test.started, &Application::started);
-    connect(test.finished, &Application::finished);
-    connect(test.success, &Application::success);
-    connect(test.assertion, &Application::assertion);
-    connect(test.exception, &Application::exception);
-    connect(test.error, &Application::error);
-    connect(test.message, &Application::message);
     Application::tests().push_back(&test);
 }
 
 
-int Application::run()
+void Application::run()
 {
     _errors = 0;
 
@@ -63,12 +68,10 @@ int Application::run()
     {
             (*it)->run();
     }
-
-    return _errors;
 }
 
 
-int Application::run(const std::string& testName)
+void Application::run(const std::string& testName)
 {
     _errors = 0;
 
@@ -78,8 +81,11 @@ int Application::run(const std::string& testName)
         if(testName == "" || (*it)->name() == testName)
             (*it)->run();
     }
+}
 
-    return _errors;
+
+void Application::run(const SerializationInfo* si, std::size_t argCount)
+{
 }
 
 
@@ -87,124 +93,6 @@ std::list<Test*>& Application::tests()
 {
     static std::list<Test*> _allTests;
     return _allTests;
-}
-
-
-void Application::started(const TestContext& test)
-{
-    if(_reporter)
-    {
-        _reporter->started(test);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->started(test);
-    }
-}
-
-
-void Application::finished(const TestContext& test)
-{
-    if(_reporter)
-    {
-        _reporter->finished(test);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->finished(test);
-    }
-}
-
-
-void Application::success(const TestContext& test)
-{
-    if(_reporter)
-    {
-        _reporter->success(test);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->success(test);
-    }
-}
-
-
-void Application::assertion(const TestContext& test, const Assertion& a)
-{
-    ++_errors;
-
-    if(_reporter)
-    {
-        _reporter->assertion(test, a);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->assertion(test, a);
-    }
-}
-
-
-void Application::exception(const TestContext& test, const std::exception& ex)
-{
-    ++_errors;
-
-    if(_reporter)
-    {
-        _reporter->exception(test, ex);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->exception(test, ex);
-    }
-}
-
-
-void Application::error(const TestContext& test)
-{
-    ++_errors;
-
-    if(_reporter)
-    {
-        _reporter->error(test);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->error(test);
-    }
-}
-
-
-void Application::message(const std::string& msg)
-{
-    if(_reporter)
-    {
-        _reporter->message(msg);
-    }
-
-
-    std::list<Reporter*>::iterator it;
-    for(it = _reporterList.begin(); it != _reporterList.end(); ++it)
-    {
-        (*it)->message(msg);
-    }
 }
 
 } //namespace Unit

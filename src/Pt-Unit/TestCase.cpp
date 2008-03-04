@@ -27,13 +27,7 @@ TestCase::TestCase(const std::string& name)
 : Test(name)
 , _testMethod(name, *this, &TestCase::test)
 {
-    connect(_testMethod.started,   this->started);
-    connect(_testMethod.finished,  this->finished);
-    connect(_testMethod.success,   this->success);
-    connect(_testMethod.assertion, this->assertion);
-    connect(_testMethod.exception, this->exception);
-    connect(_testMethod.error,     this->error);
-    connect(_testMethod.message,   this->message);
+    _testMethod.setParent(this);
 }
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -22,9 +22,7 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Test.h>
-
 #include <sstream>
-
 
 namespace Pt {
 
@@ -52,7 +50,7 @@ namespace Unit {
         The TestMain.h include already defines a main loop with an application
         for the common use case.
     */
-    class PT_UNIT_API Application
+    class PT_UNIT_API Application : public Test
     {
         template <typename TestT>
         friend struct RegisterTest;
@@ -60,25 +58,13 @@ namespace Unit {
         public:
             /** @brief Default Constructor
             */
-            Application()
-            {}
+            Application();
 
             /** @brief Destructor
             */
-            virtual ~Application()
-            {}
+            virtual ~Application();
 
-            /** @brief Set Reporter for test events
-
-                Sets a new reporter to report test events. Caller owns the
-                reporter and must make sure it lives as long as the
-                application.
-
-                @param reporter Reporeter to be used
-            */
-            void setReporter(Reporter& reporter);
-
-            void addReporter(Reporter& reporter);
+            static Application* instance();
 
             /** @brief Register a test
 
@@ -102,7 +88,7 @@ namespace Unit {
 
                 @return Number of failed tests.
             */
-            int run();
+            void run();
 
             /** @brief Run test by name
 
@@ -115,7 +101,9 @@ namespace Unit {
                 @param testName name of the test to be run
                 @return Number of failed tests.
             */
-            int run(const std::string& testName);
+            void run(const std::string& testName);
+
+            virtual void run(const SerializationInfo* si, std::size_t argCount);
 
             /** @brief Returns a list of all registered test
 
@@ -123,46 +111,17 @@ namespace Unit {
             */
             static std::list<Test*>& tests();
 
-            /** @brief Process started event
-            */
-            static void started(const TestContext& test);
-
-            /** @brief Process finished event
-            */
-            static void finished(const TestContext& test);
-
-            /** @brief Process success event
-            */
-            static void success(const TestContext& test);
-
-            /** @brief Process assertion event
-            */
-            static void assertion(const TestContext& test, const Assertion& a);
-
-            /** @brief Process exception event
-            */
-            static void exception(const TestContext& test, const std::exception& ex);
-
-            /** @brief Process error event
-            */
-            static void error(const TestContext& test);
-
-            /** @brief Process informational messages
-            */
-            static void message(const std::string& msg);
+            //! @brief Returns the number of errors which occured during a run
+            unsigned errors()
+            { return _errors; }
 
         private:
+            static Application* _app;
+
             /** @brief Number of errors that occured during a run
             */
-            static std::size_t _errors;
-
-            /** @brief Currently used reporter
-            */
-            static Reporter* _reporter;
-
-            static std::list<Reporter*> _reporterList;
+            unsigned _errors;
     };
-
 
 } // namespace Unit
 

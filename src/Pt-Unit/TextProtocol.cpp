@@ -23,10 +23,9 @@
 #include <sstream>
 #include <cctype>
 
+namespace Pt {
 
-using namespace Pt;
-using namespace Unit;
-
+namespace Unit {
 
 void TextProtocol::run(Pt::Unit::TestSuite& suite)
 {
@@ -176,3 +175,8 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
         }
     }
 }
+
+} // namespace Unit
+
+} // namesoace Pt
+

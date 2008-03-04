@@ -22,6 +22,7 @@
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Unit/Api.h>
+#include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Assertion.h>
 #include <string>
 
@@ -72,49 +73,144 @@ namespace Unit {
 
             const std::string& name() const;
 
-            /** @brief Start notification
-
-                This signal is sent when the test has started.
-                TODO: use TestContext as paramater
+            /** @brief Reports the start of a test
             */
-            Signal<const TestContext&> started;
+            virtual void started(const TestContext& ctx)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->started(ctx);
+                }
+
+                if(_parent)
+                    _parent->started(ctx);
+            }
 
             /** @brief Finished notification
 
                 This signal is sent when the test finished. It does not
                 indicate that the test was successful.
             */
-            Signal<const TestContext&> finished;
+            void finished(const TestContext& ctx)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->finished(ctx);
+                }
+
+                if(_parent)
+                    _parent->finished(ctx);
+            }
 
             /** @brief Success notification
 
                 This signal is sent when the test was successful.
             */
-            Signal<const TestContext&> success;
+            void success(const TestContext& ctx)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->success(ctx);
+                }
+
+                if(_parent)
+                    _parent->success(ctx);
+            }
 
             /** @brief Assertion notification
 
                 This signal is sent when a assertion failed.
             */
-            Signal<const TestContext&, const Assertion&> assertion;
+            void assertion(const TestContext& ctx, const Assertion& ass)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->assertion(ctx, ass);
+                }
 
+                if(_parent)
+                    _parent->assertion(ctx, ass);
+            }
             /** @brief Exception notification
 
                 This signal is sent when a regular std::exception occured.
             */
-            Signal<const TestContext&, const std::exception&> exception;
+            void exception(const TestContext& ctx, const std::exception& ex)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->exception(ctx, ex);
+                }
 
+                if(_parent)
+                    _parent->exception(ctx, ex);
+            }
             /** @brief Error notification
 
                 This signal is sent when an unknown error occured.
             */
-            Signal<const TestContext&> error;
+            void error(const TestContext& ctx)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->error(ctx);
+                }
 
+                if(_parent)
+                    _parent->error(ctx);
+            }
             /** @brief Message notification
 
                 This signal can be sent to report informational messages.
             */
-            Signal<const std::string&> message;
+            void message(const std::string& msg)
+            {
+                std::list<Reporter*>::iterator it;
+                for(it = _reporter.begin(); it != _reporter.end(); ++it)
+                {
+                    (*it)->message(msg);
+                }
+
+                if(_parent)
+                    _parent->message(msg);
+            }
+
+            void setParent(Test* test)
+            {
+                _parent = test;
+            }
+
+            Test* parent()
+            {
+                return _parent;
+            }
+
+            const Test* parent() const
+            {
+                return _parent;
+            }
+
+            /** @brief Add reporter for test events
+
+                Adds the reporter \a r to report test events. The caller 
+                owns the reporter and must make sure it lives as long as 
+                the test.
+            */
+            void addReporter(Reporter& r)
+            {
+                _reporter.push_back(&r);
+            }
+
+            void removeReporter(Reporter& r)
+            {
+                _reporter.remove(&r);
+            }
 
         protected:
             /** @brief Construct a test by name
@@ -122,10 +218,13 @@ namespace Unit {
             */
             Test(const std::string& name)
             : _name(name)
+            , _parent(0)
             { }
 
         private:
             std::string _name;
+            Test* _parent;
+            std::list<Reporter*> _reporter;
     };
 
 } // namespace Unit
