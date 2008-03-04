@@ -66,6 +66,33 @@ namespace Unit {
 
             static Application* instance();
 
+            /** @brief Run test by name
+
+                This method will run a previously registered test. Use the
+                RegisterTest<T> template to register a test to the application.
+
+                @param testName name of the test to be run
+            */
+            void run(const std::string& testName);
+
+            /** @brief Run all tests
+
+                This method will run all tests that have been registered
+                previously. Use the RegisterTest<T> template to register
+                a test to the application.
+            */
+            virtual void run(const SerializationInfo* si, std::size_t argCount);
+
+            //! @brief Returns the number of errors which occured during a run
+            unsigned errors() const
+            { return _errors; }
+
+            /** @brief Returns a list of all registered test
+
+                @return Reference to the registered tests.
+            */
+            static std::list<Test*>& tests();
+
             /** @brief Register a test
 
                 Registers a test to the application. The application will
@@ -77,43 +104,6 @@ namespace Unit {
                 @param test Test to register
             */
             static void registerTest(Test& test);
-
-            /** @brief Run all tests
-
-                This method will run all tests that have been regietered
-                previously. Use the RegisterTest<T> template to register
-                a test to the application. The function will return the
-                number of failed tests, so that its return value can directly
-                be used to return from the main function.
-
-                @return Number of failed tests.
-            */
-            void run();
-
-            /** @brief Run test by name
-
-                This method will a previously registered tests. Use the
-                RegisterTest<T> template to register a test to the application.
-                The function will return the number of failed tests, so that
-                its return value can directly be used to return from the main
-                function.
-
-                @param testName name of the test to be run
-                @return Number of failed tests.
-            */
-            void run(const std::string& testName);
-
-            virtual void run(const SerializationInfo* si, std::size_t argCount);
-
-            /** @brief Returns a list of all registered test
-
-                @return Reference to the registered tests.
-            */
-            static std::list<Test*>& tests();
-
-            //! @brief Returns the number of errors which occured during a run
-            unsigned errors()
-            { return _errors; }
 
         private:
             static Application* _app;

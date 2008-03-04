@@ -59,18 +59,6 @@ void Application::registerTest(Test& test)
 }
 
 
-void Application::run()
-{
-    _errors = 0;
-
-    std::list<Test*>::iterator it;
-    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
-    {
-            (*it)->run();
-    }
-}
-
-
 void Application::run(const std::string& testName)
 {
     _errors = 0;
@@ -86,6 +74,13 @@ void Application::run(const std::string& testName)
 
 void Application::run(const SerializationInfo* si, std::size_t argCount)
 {
+    _errors = 0;
+
+    std::list<Test*>::iterator it;
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
+    {
+            (*it)->run();
+    }
 }
 
 
