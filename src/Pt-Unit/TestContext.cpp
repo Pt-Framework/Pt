@@ -43,7 +43,12 @@ TestContext::~TestContext()
     catch(...)
     {}
 
-    _test.finished(*this);
+    try
+    {
+        _test.finished(*this);
+    }
+    catch(...)
+    {}
 }
 
 
