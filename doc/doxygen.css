@@ -452,8 +452,12 @@ HR { height: 1px;
     text-align:left;
 }
 
+.news-table-header {
+    border-bottom: 2px solid #CCCCCC;
+}
+
 .news-table-date {
-    width:110; 
+    width:8em;
 }
 
 .news-article {

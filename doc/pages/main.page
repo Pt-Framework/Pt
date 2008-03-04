@@ -52,18 +52,15 @@
             to write commercial and open-source applications and be part of the
             great community that develops Pt and determines its future.
         </p>
-        <br/>
         <h2>Latest News</h2>        <table class="news-table">            <tr>
-                <th>Date</th>                <th>Headline</th>
-            </tr>            <tr>                <td valign="top" class="news-table-date"><b>15&nbsp;Feb 2008</b></td>                <td><a href="news.html">TR-3 released</a></td>            </tr>            <tr>                <td valign="top" class="news-table-date"><b>16&nbsp;Oct 2007</b></td>                <td><a href="news.html">TR-2 released</a></td>            </tr>
+                <th class="news-table-header">Date</th>                <th class="news-table-header">Headline</th>
+            </tr>            <tr>                <td valign="top" class="news-table-date"><b>15&nbsp;Feb 2008</b></td>                <td><a href="news.html">Technical Release (TR-3) released</a></td>            </tr>            <tr>                <td valign="top" class="news-table-date"><b>16&nbsp;Oct 2007</b></td>                <td><a href="news.html">Technical Release (TR-2) released</a></td>            </tr>
             
             <tr>                <td valign="top" class="news-table-date"><b>21&nbsp;May 2007</b></td>                <td><a href="news.html">TR-2 coming soon</a></td>            </tr>
     
-            <tr>                <td valign="top" class="news-table-date"><b>25&nbsp;Feb 2007</b></td>                <td><a href="news.html">New Project Website</a></td>            </tr>
+            <tr>                <td valign="top" class="news-table-date"><b>25&nbsp;Feb 2007</b></td>                <td><a href="news.html">New Project Website available</a></td>            </tr>
           
-            <tr>                <td valign="top" class="news-table-date"><b>05&nbsp;Feb 2007</b></td>                <td><a href="news.html">TR-1 released</a></td>            </tr>
- 
-            <tr>                <td valign="top" class="news-table-date"><b>05&nbsp;Feb 2007</b></td>                <td><a href="news.html">TR-1 released</a></td>            </tr>
+            <tr>                <td valign="top" class="news-table-date"><b>05&nbsp;Feb 2007</b></td>                <td><a href="news.html">Technical Release (TR-1) released</a></td>            </tr>
                     </table>        <p>View <a href="news.html" title="more news">more news...</a></p>
     </div>
 
