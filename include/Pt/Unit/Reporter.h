@@ -22,7 +22,8 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestContext.h>
-
+#include <Pt/Signal.h>
+#include <Pt/NonCopyable.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -38,13 +39,13 @@ namespace Unit {
         on perticular events during the test. Reporters can be made to print
         information to the console or write XML logs.
     */
-    class PT_UNIT_API Reporter
+    class PT_UNIT_API Reporter : protected NonCopyable
     {
         public:
             /** @brief Destructor
             */
             virtual ~Reporter()
-            {}
+            { destroyed.send(*this);}
 
             /** @brief Start notification
 
@@ -109,6 +110,8 @@ namespace Unit {
             */
             virtual void error(const TestContext& test) = 0;
 
+            Signal<Reporter&> destroyed;
+
         protected:
             /** @brief Constructs a reporter
             */
@@ -126,6 +129,9 @@ namespace Unit {
 
             virtual ~BriefReporter()
             {}
+
+            void setOutput(std::ostream& out)
+            { m_out = &out; }
 
             virtual void started(const TestContext& test);
 

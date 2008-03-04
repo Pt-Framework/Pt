@@ -53,7 +53,7 @@ class Callee : public Pt::Connectable
 };
 
 
-class SignalTest : public Pt::Unit::TestSuite, public Pt::Connectable
+class SignalTest : public Pt::Unit::TestSuite
 {
     public:
         SignalTest()

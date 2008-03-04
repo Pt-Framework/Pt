@@ -18,11 +18,11 @@
  ***************************************************************************/
 #ifndef PT_UNIT_TESTMAIN_H
 #define PT_UNIT_TESTMAIN_H
+
 #include <Pt/Main.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Application.h>
-
 #include <fstream>
 #include <cstring>
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     std::ofstream logFile(fileName);
     if (fileLoggingEnabled)
     {
-      fileReporter = Pt::Unit::BriefReporter(&logFile);
+      fileReporter.setOutput(logFile);
       app.addReporter(fileReporter);
     }
     app.addReporter(consoleReporter);
@@ -101,7 +101,4 @@ int main(int argc, char** argv)
     return 1;
 }
 
-
-
 #endif// PT_UNIT_TESTMAIN_H
-

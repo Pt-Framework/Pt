@@ -53,7 +53,7 @@ class Callee : public Pt::Connectable
 };
 
 
-class DelegateTest : public Pt::Unit::TestSuite, public Pt::Connectable
+class DelegateTest : public Pt::Unit::TestSuite
 {
     public:
         DelegateTest()

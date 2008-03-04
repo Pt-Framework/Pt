@@ -19,11 +19,11 @@
 #ifndef PT_UNIT_TEST_H
 #define PT_UNIT_TEST_H
 
-#include <Pt/Signal.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Assertion.h>
+#include <Pt/Connectable.h>
+#include <Pt/NonCopyable.h>
 #include <string>
 
 namespace Pt {
@@ -42,7 +42,8 @@ namespace Unit {
         is overriden by the derived classes and signals to inform about
         events that occur while the test is run.
     */
-    class PT_UNIT_API Test : protected NonCopyable
+    class PT_UNIT_API Test : public Connectable,
+                             protected NonCopyable
     {
         public:
             /** @brief Destructor
@@ -204,6 +205,7 @@ namespace Unit {
             */
             void addReporter(Reporter& r)
             {
+                connect(r.destroyed, *this, &Test::removeReporter);
                 _reporter.push_back(&r);
             }
 
