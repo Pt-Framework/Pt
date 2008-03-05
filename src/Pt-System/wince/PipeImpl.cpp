@@ -59,6 +59,7 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
     _handle = handle; 
     
     MSGQUEUEINFO info;
+    memset(&info, 0, sizeof(info));
     info.dwSize = sizeof(MSGQUEUEINFO);
         
     if ( TRUE == GetMsgQueueInfo(_handle, &info) )
