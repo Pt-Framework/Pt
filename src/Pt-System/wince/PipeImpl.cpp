@@ -59,6 +59,8 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
     _handle = handle; 
     
     MSGQUEUEINFO info;
+    info.dwSize = sizeof(MSGQUEUEINFO);
+        
     if ( TRUE == GetMsgQueueInfo(_handle, &info) )
     {
         _msgSize    = info.cbMaxMessage;        
