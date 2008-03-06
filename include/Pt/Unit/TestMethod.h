@@ -29,6 +29,23 @@ namespace Pt {
 
 namespace Unit {
 
+    class TestMethod : public Pt::Unit::Test
+    {
+        public:
+            TestMethod(const std::string& name)
+            : Pt::Unit::Test(name)
+            {}
+
+            virtual ~TestMethod()
+            {}
+
+            virtual void run()
+            {}
+
+            virtual void run(const SerializationInfo* si, unsigned argCount) = 0;
+    };
+
+
     template < class C,
                typename A1 = Pt::Void,
                typename A2 = Pt::Void,
@@ -38,20 +55,20 @@ namespace Unit {
                typename A6 = Pt::Void,
                typename A7 = Pt::Void,
                typename A8 = Pt::Void >
-    class TestMethod : public Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>
-                     , public Pt::Unit::Test
+    class BasicTestMethod : public Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>
+                          , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 8)
                     throw std::invalid_argument("invalid number of arguments");
@@ -91,28 +108,28 @@ namespace Unit {
                typename A3,
                typename A4,
                typename A5>
-    class TestMethod<C,
-                     A1,
-                     A2,
-                     A3,
-                     A4,
-                     A5,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4, A5>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          A1,
+                          A2,
+                          A3,
+                          A4,
+                          A5,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4, A5>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4, A5>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 5)
                     throw std::invalid_argument("invalid number of arguments");
@@ -142,28 +159,28 @@ namespace Unit {
                typename A2,
                typename A3,
                typename A4>
-    class TestMethod<C,
-                     A1,
-                     A2,
-                     A3,
-                     A4,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          A1,
+                          A2,
+                          A3,
+                          A4,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C, A1, A2, A3, A4>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 4)
                     throw std::invalid_argument("invalid number of arguments");
@@ -189,28 +206,28 @@ namespace Unit {
                typename A1,
                typename A2,
                typename A3>
-    class TestMethod<C,
-                     A1,
-                     A2,
-                     A3,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C, A1, A2, A3>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          A1,
+                          A2,
+                          A3,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C, A1, A2, A3>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 3)
                     throw std::invalid_argument("invalid number of arguments");
@@ -232,28 +249,28 @@ namespace Unit {
     template < class C,
                typename A1,
                typename A2>
-    class TestMethod<C,
-                     A1,
-                     A2,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C, A1, A2>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          A1,
+                          A2,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C, A1, A2>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 2)
                     throw std::invalid_argument("invalid number of arguments");
@@ -271,28 +288,28 @@ namespace Unit {
 
     template < class C,
                typename A1>
-    class TestMethod<C,
-                     A1,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C, A1>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          A1,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C, A1>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1);
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* args, size_t argCount)
+            void run(const SerializationInfo* args, unsigned argCount)
             {
                 if(argCount != 1)
                     throw std::invalid_argument("invalid number of arguments");
@@ -305,28 +322,28 @@ namespace Unit {
 
 
     template < class C >
-    class TestMethod<C,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void,
-                     Pt::Void> : public Pt::Method<void, C>
-                               , public Pt::Unit::Test
+    class BasicTestMethod<C,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void,
+                          Pt::Void> : public Pt::Method<void, C>
+                                    , public TestMethod
     {
         public:
             typedef C ClassT;
             typedef void (C::*MemFuncT)();
 
         public:
-            TestMethod(const std::string& name, C& object, MemFuncT ptr)
+            BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C>(object, ptr)
-            , Pt::Unit::Test(name)
+            , TestMethod(name)
             {}
 
-            void run(const SerializationInfo* si, size_t argCount)
+            void run(const SerializationInfo* si, unsigned argCount)
             {
                 Pt::Method<void, C>::call();
             }

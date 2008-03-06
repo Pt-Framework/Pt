@@ -81,7 +81,7 @@ namespace Unit {
                 previously. Use the RegisterTest<T> template to register
                 a test to the application.
             */
-            virtual void run(const SerializationInfo* si, std::size_t argCount);
+            virtual void run();
 
             //! @brief Returns the number of errors which occured during a run
             unsigned errors() const

@@ -36,7 +36,7 @@ TestSuite::TestSuite(const std::string& name, TestProtocol& protocol)
 
 TestSuite::~TestSuite()
 {
-    std::multimap<std::string, Test*>::iterator it;
+    std::multimap<std::string, TestMethod*>::iterator it;
     for(it = _tests.begin(); it != _tests.end(); ++it)
     {
         delete it->second;
@@ -65,7 +65,7 @@ void TestSuite::tearDown()
 }
 
 
-void TestSuite::run(const SerializationInfo* si, size_t argCount)
+void TestSuite::run()
 {
     _protocol->run(*this);
 }
@@ -73,30 +73,31 @@ void TestSuite::run(const SerializationInfo* si, size_t argCount)
 
 void TestSuite::runTest( const std::string& name, const SerializationInfo* si, size_t argCount )
 {
-    Test* test = this->findTest(name);
+    TestMethod* test = this->findTest(name);
     if(!test)
         throw std::runtime_error("No such test");
 
-    TestContext ctx(*this, *test, si, argCount);
+    Context ctx(*this, *test, si, argCount);
     ctx.run();
 }
 
 
 void TestSuite::runAll()
 {
-    std::multimap<std::string, Test*>::iterator it;
+    const SerializationInfo* si = 0;
+    std::multimap<std::string, TestMethod*>::iterator it;
     for(it = _tests.begin(); it != _tests.end(); ++it)
     {
-        Test* test = it->second;
-        TestContext ctx(*this, *test);
+        TestMethod* test = it->second;
+        Context ctx(*this, *test, si, 0);
         ctx.run();
     }
 }
 
 
-Test* TestSuite::findTest(const std::string& name)
+TestMethod* TestSuite::findTest(const std::string& name)
 {
-    std::multimap<std::string, Test*>::iterator it = _tests.find(name);
+    std::multimap<std::string, TestMethod*>::iterator it = _tests.find(name);
     if( it== _tests.end() )
         return 0;
 
@@ -104,7 +105,7 @@ Test* TestSuite::findTest(const std::string& name)
 }
 
 
-void TestSuite::registerTest(Test* test)
+void TestSuite::registerTest(TestMethod* test)
 {
     test->setParent(this);
     _tests.insert( std::make_pair(test->name(), test) );

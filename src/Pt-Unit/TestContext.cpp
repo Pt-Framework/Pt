@@ -24,11 +24,9 @@ namespace Pt {
 
 namespace Unit {
 
-TestContext::TestContext(TestFixture& fixture, Test& test, const SerializationInfo* args, std::size_t argCount )
+TestContext::TestContext(TestFixture& fixture, Test& test )
 : _fixture(fixture)
 , _test(test)
-, _args(args)
-, _argCount(argCount)
 , _setUp(false)
 { }
 
@@ -65,24 +63,12 @@ void TestContext::run()
         _test.started(*this);
         _fixture.setUp();
         _setUp = true;
-        _test.run(_args, _argCount);
+        this->exec();
         _test.success(*this);
     }
     catch(const Assertion& assertion)
     {
         _test.assertion(*this, assertion);
-    }
-    catch(const std::range_error& ex)
-    {
-        _test.exception(*this, ex);
-    }
-    catch(const std::runtime_error& ex)
-    {
-        _test.exception(*this, ex);
-    }
-    catch(const std::logic_error& ex)
-    {
-        _test.exception(*this, ex);
     }
     catch(const std::exception& ex)
     {

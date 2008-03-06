@@ -25,8 +25,6 @@
 
 namespace Pt {
 
-    class SerializationInfo;
-
 namespace Unit {
 
     class Test;
@@ -35,20 +33,20 @@ namespace Unit {
     class PT_UNIT_API TestContext
     {
         public:
-            TestContext(TestFixture& fixture, Test& test,
-                        const SerializationInfo* args = 0, std::size_t argCount = 0);
-
-            ~TestContext();
+            virtual ~TestContext();
 
             std::string testName() const;
 
             void run();
 
+        protected:
+            TestContext(TestFixture& fixture, Test& test);
+
+            virtual void exec() = 0;
+
         private:
             TestFixture& _fixture;
             Test& _test;
-            const SerializationInfo* _args;
-            std::size_t _argCount;
             bool _setUp;
     };
 

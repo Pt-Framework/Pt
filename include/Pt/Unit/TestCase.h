@@ -22,7 +22,6 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/TestFixture.h>
-#include <Pt/Unit/TestMethod.h>
 #include <string>
 
 namespace Pt {
@@ -69,6 +68,23 @@ namespace Unit {
     class PT_UNIT_API TestCase : public Test
                                , public TestFixture
     {
+        private:
+            class PT_UNIT_API Context : public TestContext
+            {
+                public:
+                    Context(TestFixture& fixture, TestCase& test)
+                    : TestContext(fixture, test)
+                    , _test(test)
+                    {}
+
+                protected:
+                    virtual void exec()
+                    { _test.test(); }
+
+                private:
+                    TestCase& _test;
+            };
+
         public:
             /** @brief Construct by name
 
@@ -83,7 +99,7 @@ namespace Unit {
                 'test' and finally 'tearDown'. Signals inherited from
                 Unit::Test are sent appropriatly.
             */
-            virtual void run(const SerializationInfo* si, std::size_t argCount);
+            virtual void run();
 
             /** \brief Set up conText before running a test.
 
@@ -105,12 +121,7 @@ namespace Unit {
                 When the test is run, this method will be called after setUp
                 and before tearDown.
             */
-            virtual void test()
-            {}
-
-        private:
-            //! @internal
-            TestMethod<TestCase> _testMethod;
+            virtual void test() = 0;
     };
 
 } // namespace Unit

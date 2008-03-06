@@ -28,8 +28,6 @@
 
 namespace Pt {
 
-    class SerializationInfo;
-
 namespace Unit {
 
     class TestContext;
@@ -64,13 +62,7 @@ namespace Unit {
                 the signal 'error' indicates an unknown exception or error.
                 This method should not propagate any exceptions
             */
-            virtual void run(const SerializationInfo* si, std::size_t argCount) = 0;
-
-            void run()
-            {
-                const SerializationInfo* si = 0;
-                this->run(si, 0);
-            }
+            virtual void run() = 0;
 
             const std::string& name() const;
 

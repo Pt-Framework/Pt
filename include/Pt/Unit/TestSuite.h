@@ -66,6 +66,32 @@ namespace Unit {
     class PT_UNIT_API TestSuite : public Test
                                 , public TestFixture
     {
+        private:
+            class PT_UNIT_API Context : public TestContext
+            {
+                public:
+                    Context(TestFixture& fixture, TestMethod& test, const SerializationInfo* args, unsigned argCount)
+                    : TestContext(fixture, test)
+                    , _test(test)
+                    , _args(args)
+                    , _argCount(argCount)
+                    {}
+
+                    virtual ~Context()
+                    {}
+
+                protected:
+                    virtual void exec()
+                    {
+                        _test.run(_args, _argCount);
+                    }
+
+                private:
+                    TestMethod& _test;
+                    const SerializationInfo* _args;
+                    unsigned _argCount;
+            };
+
         public:
             /** @brief Construct by name and protocol
 
@@ -108,7 +134,7 @@ namespace Unit {
                 The TestProtocol assosiated with the test will be executed.
                 The default protocol will simply call all registered tests.
             */
-            virtual void run(const SerializationInfo* si, size_t argCount);
+            virtual void run();
 
             /** @brief Runs a registered test
 
@@ -126,58 +152,58 @@ namespace Unit {
             void runAll();
 
         protected:
-            Test* findTest(const std::string& name);
-
             template <class ParentT>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)() )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
             template <class ParentT, typename A1>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1) )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT, A1>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT, A1>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2) )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT, A1, A2>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3) )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT, A1, A2, A3>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4) )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3, A4>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT, A1, A2, A3, A4>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
             template <class ParentT, typename A1, typename A2, typename A3, typename A4, typename A5>
             void registerMethod(const std::string& name, ParentT& parent, void (ParentT::*method)(A1, A2, A3, A4, A5) )
             {
-                Pt::Unit::Test* test = new TestMethod<ParentT, A1, A2, A3, A4, A5>(this->name() + "::" + name, parent, method);
+                Pt::Unit::TestMethod* test = new BasicTestMethod<ParentT, A1, A2, A3, A4, A5>(this->name() + "::" + name, parent, method);
                 this->registerTest(test);
             }
 
-            void registerTest(Test* test);
-
         private:
+            void registerTest(TestMethod* test);
+
+            TestMethod* findTest(const std::string& name);
+
             /** @brief The assoziated test protocol
             */
             TestProtocol* _protocol;
 
-            std::multimap<std::string, Test*> _tests;
+            std::multimap<std::string, TestMethod*> _tests;
 
         public:
             static TestProtocol defaultProtocol;

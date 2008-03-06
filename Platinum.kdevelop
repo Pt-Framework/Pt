@@ -184,7 +184,7 @@
   <kdevdebugger>
     <general>
       <dbgshell/>
-      <programargs></programargs>
+      <programargs/>
       <gdbpath/>
       <configGdbScript/>
       <runShellScript/>
@@ -291,8 +291,8 @@
       <root>/usr/lib/qt3-gcc3.4</root>
       <includestyle>3</includestyle>
       <designerintegration>EmbeddedKDevDesigner</designerintegration>
-      <qmake/>
-      <designer/>
+      <qmake></qmake>
+      <designer></designer>
       <designerpluginpaths/>
     </qt>
     <creategettersetter>

@@ -72,7 +72,7 @@ void Application::run(const std::string& testName)
 }
 
 
-void Application::run(const SerializationInfo* si, std::size_t argCount)
+void Application::run()
 {
     _errors = 0;
 

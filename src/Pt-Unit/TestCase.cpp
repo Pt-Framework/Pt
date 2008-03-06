@@ -25,15 +25,13 @@ namespace Unit {
 
 TestCase::TestCase(const std::string& name)
 : Test(name)
-, _testMethod(name, *this, &TestCase::test)
 {
-    _testMethod.setParent(this);
 }
 
 
-void TestCase::run(const SerializationInfo* si, std::size_t argCount)
+void TestCase::run()
 {
-    TestContext ctx(*this, _testMethod, si, argCount);
+    Context ctx(*this, *this);
     ctx.run();
 }
 
