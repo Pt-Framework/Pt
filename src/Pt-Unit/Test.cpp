@@ -27,6 +27,127 @@ const std::string& Test::name() const
     return _name;
 }
 
+void Test::started(const TestContext& ctx)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->started(ctx);
+    }
+
+    if(_parent)
+        _parent->started(ctx);
+}
+
+
+void Test::finished(const TestContext& ctx)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->finished(ctx);
+    }
+
+    if(_parent)
+        _parent->finished(ctx);
+}
+
+
+void Test::success(const TestContext& ctx)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->success(ctx);
+    }
+
+    if(_parent)
+        _parent->success(ctx);
+}
+
+
+void Test::assertion(const TestContext& ctx, const Assertion& ass)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->assertion(ctx, ass);
+    }
+
+    if(_parent)
+        _parent->assertion(ctx, ass);
+}
+
+
+void Test::exception(const TestContext& ctx, const std::exception& ex)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->exception(ctx, ex);
+    }
+
+    if(_parent)
+        _parent->exception(ctx, ex);
+}
+
+
+void Test::error(const TestContext& ctx)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->error(ctx);
+    }
+
+    if(_parent)
+        _parent->error(ctx);
+}
+
+
+void Test::message(const std::string& msg)
+{
+    std::list<Reporter*>::iterator it;
+    for(it = _reporter.begin(); it != _reporter.end(); ++it)
+    {
+        (*it)->message(msg);
+    }
+
+    if(_parent)
+        _parent->message(msg);
+}
+
+
+void Test::setParent(Test* test)
+{
+    _parent = test;
+}
+
+
+Test* Test::parent()
+{
+    return _parent;
+}
+
+
+const Test* Test::parent() const
+{
+    return _parent;
+}
+
+
+void Test::addReporter(Reporter& r)
+{
+    connect(r.destroyed, *this, &Test::removeReporter);
+    _reporter.push_back(&r);
+}
+
+
+void Test::removeReporter(Reporter& r)
+{
+    _reporter.remove(&r);
+}
+
 }
 
 }

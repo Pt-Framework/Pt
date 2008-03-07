@@ -64,7 +64,13 @@ namespace Unit {
             */
             virtual ~Application();
 
-            static Application* instance();
+            static Application& instance();
+
+            /** @brief Find a test by name
+
+                Returns a pointer to the found test or 0 if not found.
+            */
+            Test* findTest(const std::string& testname);
 
             /** @brief Run test by name
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -44,12 +44,25 @@ Application::~Application()
 }
 
 
-Application* Application::instance()
+Application& Application::instance()
 {
     if( ! _app )
         throw std::logic_error("application not initialized");
 
-    return _app;
+    return *_app;
+}
+
+
+Test* findTest(const std::string& testname)
+{
+    std::list<Test*>::iterator it;
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
+    {
+        if( (*it)->name() == testname)
+            return *it;
+    }
+
+    return 0;
 }
 
 
