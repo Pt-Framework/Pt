@@ -221,7 +221,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             }
             catch( const Pt::System::OpenFailed& )
             {
-                message( "No such serial device: " + url ); 
+                reportMessage( "No such serial device: " + url ); 
             }
         }
 };
