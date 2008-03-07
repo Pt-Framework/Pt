@@ -38,11 +38,9 @@ int main(int argc, char** argv)
 {
     TestMain::argc = argc;
     TestMain::argv = argv;
-
     Pt::Unit::Application app;
 
     Pt::Arg<bool> help(argc, argv, 'h');
-
     if( help )
     {
         std::cerr << "Usage: " << argv[0] << " [-t<testname>] [-f<logfile>]\n";

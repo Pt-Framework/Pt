@@ -107,7 +107,7 @@ namespace Unit {
             { return _errors; }
 
             /** @brief Returns a list of all registered test
-
+                TODO: find another way to query available tests
                 @return Reference to the registered tests.
             */
             static std::list<Test*>& tests();
