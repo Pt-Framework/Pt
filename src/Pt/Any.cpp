@@ -19,8 +19,7 @@
 #include "Pt/Any.h"
 #include <algorithm>
 #include <utility>
- 
- 
+
 namespace Pt {
 
 Any::Any()
