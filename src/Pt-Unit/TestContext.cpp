@@ -43,7 +43,7 @@ TestContext::~TestContext()
 
     try
     {
-        _test.finished(*this);
+        _test.reportFinish(*this);
     }
     catch(...)
     {}
@@ -60,23 +60,23 @@ void TestContext::run()
 {
     try
     {
-        _test.started(*this);
+        _test.reportStart(*this);
         _fixture.setUp();
         _setUp = true;
         this->exec();
-        _test.success(*this);
+        _test.reportSuccess(*this);
     }
     catch(const Assertion& assertion)
     {
-        _test.assertion(*this, assertion);
+        _test.reportAssertion(*this, assertion);
     }
     catch(const std::exception& ex)
     {
-        _test.exception(*this, ex);
+        _test.reportException(*this, ex);
     }
     catch(...)
     {
-        _test.error(*this);
+        _test.reportError(*this);
     }
 }
 

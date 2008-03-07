@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,22 +16,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include <Pt/Unit/Assertion.h>
-
 #include <iostream>
 
+namespace Pt {
 
-using namespace Pt;
-using namespace Unit;
+namespace Unit {
 
-
-const char* Assertion::what() const throw()
+Assertion::Assertion(const std::string& what, const SourceInfo& si)
+: std::logic_error(what)
+, _sourceInfo(si)
 {
-    return _what.c_str();
 }
+
 
 const Pt::SourceInfo& Assertion::sourceInfo() const
 {
     return _sourceInfo;
+}
+
+}
+
 }

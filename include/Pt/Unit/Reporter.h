@@ -24,221 +24,129 @@
 #include <Pt/Unit/TestContext.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <iosfwd>
+#include <stdexcept>
 
 namespace Pt {
 
 namespace Unit {
 
-    /** @brief Test event reporter
+/** @brief Test event reporter
 
-        This class is the base class for all reporters for test events. It
-        lets the implementor override several virtual methods that are called
-        on perticular events during the test. Reporters can be made to print
-        information to the console or write XML logs.
-    */
-    class PT_UNIT_API Reporter : protected NonCopyable
-    {
-        public:
-            /** @brief Destructor
-            */
-            virtual ~Reporter()
-            { destroyed.send(*this);}
-
-            /** @brief Start notification
-
-                This method is called when a test has started. Every test sends
-                this signal at startup.
-
-                @param test The started test
-            */
-            virtual void started(const TestContext& test) = 0;
-
-            /** @brief Finished notification
-
-                This method is called when a test has finished. Every test sends
-                this signal at its end no matter if it failed or succeeded.
-
-                @param test The finished test
-            */
-            virtual void finished(const TestContext& test) = 0;
-
-            /** @brief Message notification
-
-                This method is called when a test has produced an informational
-                message.
-
-                @param msg The message
-            */
-            virtual void message(const std::string& msg) = 0;
-
-            /** @brief Success notification
-
-                This method is called when a test was successful.
-
-                @param test The succeeded test
-            */
-            virtual void success(const TestContext& test) = 0;
-
-            /** @brief Assertion notification
-
-                This method is called when a an assertion failed during a test. an
-                assertion fails when a user defined condition is not met.
-
-                @param test The failed test
-            */
-            virtual void assertion(const TestContext& test, const Assertion& a) = 0;
-
-            /** @brief Exception notification
-
-                This method is called when a an exception failed during a test. An
-                exception usually means that an error occured that was even u
-                nexpected in a test scenario
-
-                @param test The failed test
-            */
-            virtual void exception(const TestContext& test, const std::exception& ex) = 0;
-
-            /** @brief Error notification
-
-                This method is called when a an unknown error occurs during a
-                test.
-
-                @param test The failed test
-            */
-            virtual void error(const TestContext& test) = 0;
-
-            Signal<Reporter&> destroyed;
-
-        protected:
-            /** @brief Constructs a reporter
-            */
-            Reporter()
-            {}
-    };
-
-
-    class PT_UNIT_API BriefReporter : public Reporter
-    {
-        public:
-            BriefReporter(std::ostream* out = &std::cerr)
-            : m_out(out)
-            {}
-
-            virtual ~BriefReporter()
-            {}
-
-            void setOutput(std::ostream& out)
-            { m_out = &out; }
-
-            virtual void started(const TestContext& test);
-
-            virtual void finished(const TestContext& test);
-
-            virtual void message(const std::string& msg);
-
-            virtual void success(const TestContext& test);
-
-            virtual void assertion(const TestContext& test, const Assertion& a);
-
-            virtual void exception(const TestContext& test, const std::exception& ex);
-
-            virtual void error(const TestContext& test);
-
-        private:
-            /** @brief Ostream to print output to
-            */
-            std::ostream* m_out;
-    };
-
-
-    class PT_UNIT_API XMLReporter : public Reporter
-    {
+    This class is the base class for all reporters for test events. It
+    lets the implementor override several virtual methods that are called
+    on perticular events during the test. Reporters can be made to print
+    information to the console or write XML logs.
+*/
+class PT_UNIT_API Reporter : protected NonCopyable
+{
     public:
-        XMLReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
-        : m_out(out)
-        , m_indentWidth(indentWidth)
-        , m_indent(0)
-        {
-            *m_out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
-            *m_out << std::endl;
-            *m_out << "<ComponentTester>" << std::endl;
-            *m_out << std::endl;
-        }
+        /** @brief Destructor
+        */
+        virtual ~Reporter()
+        { destroyed.send(*this);}
 
-        virtual ~XMLReporter()
-        {
-            *m_out << std::endl;
-            *m_out << "</ComponentTester>" << std::endl;
-        }
+        /** @brief Start notification
 
-        virtual void started(const TestContext& test);
+            This method is called when a test has started. Every test sends
+            this signal at startup.
 
-        virtual void finished(const TestContext& test);
+            @param test The started test
+        */
+        virtual void reportStart(const TestContext& test) = 0;
 
-        virtual void message(const std::string& msg);
+        /** @brief Finished notification
 
-        virtual void success(const TestContext& test);
+            This method is called when a test has finished. Every test sends
+            this signal at its end no matter if it failed or succeeded.
 
-        virtual void assertion(const TestContext& test, const Assertion& a);
+            @param test The finished test
+        */
+        virtual void reportFinish(const TestContext& test) = 0;
 
-        virtual void exception(const TestContext& test, const std::exception& ex);
+        /** @brief Message notification
 
-        virtual void error(const TestContext& test);
+            This method is called when a test has produced an informational
+            message.
 
-        private:
-            std::ostream* m_out;
-            int m_indentWidth;
-            int m_indent;
-            void beginTag(std::string tag);
-            void endTag(std::string tag);
-            void writeData(std::string data);
-    };
+            @param msg The message
+        */
+        virtual void reportMessage(const std::string& msg) = 0;
 
+        /** @brief Success notification
 
-    class PT_UNIT_API CSVReporter : public Reporter
-    {
-    public:
-        CSVReporter(std::ostream* out = &std::cerr, int indentWidth = 4)
-        : m_out(out)
-        , m_timestampSaved(false)
-        , m_performanceSaved(false)
-        {
-            *m_out << "\"ComponentTester\"" << std::endl;
-            *m_out << std::endl;
-            *m_out << std::endl;
-            *m_out << "\"Timestamp\";\"Test\";\"Performance\";\"Result\"" << std::endl;
-            *m_out << std::endl;
-        }
+            This method is called when a test was successful.
 
-        virtual ~CSVReporter()
+            @param test The succeeded test
+        */
+        virtual void reportSuccess(const TestContext& test) = 0;
+
+        /** @brief Assertion notification
+
+            This method is called when a an assertion failed during a test. an
+            assertion fails when a user defined condition is not met.
+
+            @param test The failed test
+        */
+        virtual void reportAssertion(const TestContext& test, const Assertion& a) = 0;
+
+        /** @brief Exception notification
+
+            This method is called when a an exception failed during a test. An
+            exception usually means that an error occured that was even u
+            nexpected in a test scenario
+
+            @param test The failed test
+        */
+        virtual void reportException(const TestContext& test, const std::exception& ex) = 0;
+
+        /** @brief Error notification
+
+            This method is called when a an unknown error occurs during a
+            test.
+
+            @param test The failed test
+        */
+        virtual void reportError(const TestContext& test) = 0;
+
+        Signal<Reporter&> destroyed;
+
+    protected:
+        /** @brief Constructs a reporter
+        */
+        Reporter()
         {}
+};
 
-        virtual void started(const TestContext& test);
 
-        virtual void finished(const TestContext& test);
+class PT_UNIT_API BriefReporter : public Reporter
+{
+    public:
+        explicit BriefReporter(std::ostream* out = &std::cout);
 
-        virtual void message(const std::string& msg);
+        virtual ~BriefReporter();
 
-        virtual void success(const TestContext& test);
+        void setOutput(std::ostream& out);
 
-        virtual void assertion(const TestContext& test, const Assertion& a);
+        virtual void reportStart(const TestContext& test);
 
-        virtual void exception(const TestContext& test, const std::exception& ex);
+        virtual void reportFinish(const TestContext& test);
 
-        virtual void error(const TestContext& test);
+        virtual void reportMessage(const std::string& msg);
+
+        virtual void reportSuccess(const TestContext& test);
+
+        virtual void reportAssertion(const TestContext& test, const Assertion& a);
+
+        virtual void reportException(const TestContext& test, const std::exception& ex);
+
+        virtual void reportError(const TestContext& test);
 
     private:
-        std::ostream* m_out;
-        std::string m_testName;
-        std::string m_allMessages;
-        bool m_timestampSaved;
-        bool m_performanceSaved;
-
-        bool extractData(std::string key, const std::string& msg, bool isFirstColumn = false);
-    };
+        /** @brief Ostream to print output to
+        */
+        std::ostream* _out;
+};
 
 } // namespace Unit
 

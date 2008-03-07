@@ -187,7 +187,7 @@ if $(UNIX)
   actions PtUnitTestAction
   {
     cd $(>:D)
-    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:. ./$(>:BS) -f$(<:BS)"
+    sh -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:. ./$(>:BS) -f $(<:BS)"
   }
 
 }
@@ -200,7 +200,7 @@ else if $(TARGET_OS:L) = "wince"
       ce copy $(>) \$(>:BS)
 
       rem start will return after process has started
-      ce start "\$(>:BS)" -f\$(<:BS)
+      ce start "\$(>:BS)" -f \$(<:BS)
 
       :Loop
         ping 127.0.0.1 -n 5 -w 1000 > nul
@@ -238,7 +238,7 @@ else
   actions PtUnitTestAction
   {
     cd $(>:D)
-    $(>:BS) -f$(<:BS)
+    $(>:BS) -f $(<:BS)
   }
 
 }

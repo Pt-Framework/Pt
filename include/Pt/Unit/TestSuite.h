@@ -102,12 +102,12 @@ namespace Unit {
                 @param name Name of the test
                 @param protocol Protocol for the test.
             */
-            TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol);
+            explicit TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol);
 
             ~TestSuite();
 
             //! @brief TODO: rename setParameter
-            virtual void setProperty(const std::string& name, const Pt::SerializationInfo& value);
+            virtual void setParameter(const std::string& name, const Pt::SerializationInfo& value);
 
             /** @brief Sets the protocol.
                 @param protocol Protocol for the test

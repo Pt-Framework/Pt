@@ -68,44 +68,44 @@ namespace Unit {
 
             /** @brief Reports the start of a test
             */
-            void started(const TestContext& ctx);
+            void reportStart(const TestContext& ctx);
 
             /** @brief Finished notification
 
                 This signal is sent when the test finished. It does not
                 indicate that the test was successful.
             */
-            void finished(const TestContext& ctx);
+            void reportFinish(const TestContext& ctx);
 
             /** @brief Success notification
 
                 This signal is sent when the test was successful.
             */
-            void success(const TestContext& ctx);
+            void reportSuccess(const TestContext& ctx);
 
             /** @brief Assertion notification
 
                 This signal is sent when a assertion failed.
             */
-            void assertion(const TestContext& ctx, const Assertion& ass);
+            void reportAssertion(const TestContext& ctx, const Assertion& ass);
 
             /** @brief Exception notification
 
                 This signal is sent when a regular std::exception occured.
             */
-            void exception(const TestContext& ctx, const std::exception& ex);
+            void reportException(const TestContext& ctx, const std::exception& ex);
 
             /** @brief Error notification
 
                 This signal is sent when an unknown error occured.
             */
-            void error(const TestContext& ctx);
+            void reportError(const TestContext& ctx);
 
             /** @brief Message notification
 
                 This signal can be sent to report informational messages.
             */
-            void message(const std::string& msg);
+            void reportMessage(const std::string& msg);
 
             void setParent(Test* test);
 
@@ -119,15 +119,15 @@ namespace Unit {
                 owns the reporter and must make sure it lives as long as 
                 the test.
             */
-            void addReporter(Reporter& r);
+            void attachReporter(Reporter& r);
 
-            void removeReporter(Reporter& r);
+            void detachReporter(Reporter& r);
 
         protected:
             /** @brief Construct a test by name
                 @param name Name of the test
             */
-            Test(const std::string& name)
+            explicit Test(const std::string& name)
             : _name(name)
             , _parent(0)
             { }

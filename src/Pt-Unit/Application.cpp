@@ -53,7 +53,7 @@ Application& Application::instance()
 }
 
 
-Test* findTest(const std::string& testname)
+Test* Application::findTest(const std::string& testname)
 {
     std::list<Test*>::iterator it;
     for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
@@ -66,9 +66,19 @@ Test* findTest(const std::string& testname)
 }
 
 
-void Application::registerTest(Test& test)
+void Application::attachReporter(Reporter& r)
 {
-    Application::tests().push_back(&test);
+    Test::attachReporter(r);
+}
+
+
+void Application::attachReporter(Reporter& r, const std::string& testname)
+{
+    Test* test = this->findTest(testname);
+    if( ! test )
+        return;
+
+    test->attachReporter(r);
 }
 
 
@@ -94,6 +104,12 @@ void Application::run()
     {
             (*it)->run();
     }
+}
+
+
+void Application::registerTest(Test& test)
+{
+    Application::tests().push_back(&test);
 }
 
 

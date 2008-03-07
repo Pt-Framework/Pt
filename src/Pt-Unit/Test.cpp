@@ -27,94 +27,94 @@ const std::string& Test::name() const
     return _name;
 }
 
-void Test::started(const TestContext& ctx)
+void Test::reportStart(const TestContext& ctx)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->started(ctx);
+        (*it)->reportStart(ctx);
     }
 
     if(_parent)
-        _parent->started(ctx);
+        _parent->reportStart(ctx);
 }
 
 
-void Test::finished(const TestContext& ctx)
+void Test::reportFinish(const TestContext& ctx)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->finished(ctx);
+        (*it)->reportFinish(ctx);
     }
 
     if(_parent)
-        _parent->finished(ctx);
+        _parent->reportFinish(ctx);
 }
 
 
-void Test::success(const TestContext& ctx)
+void Test::reportSuccess(const TestContext& ctx)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->success(ctx);
+        (*it)->reportSuccess(ctx);
     }
 
     if(_parent)
-        _parent->success(ctx);
+        _parent->reportSuccess(ctx);
 }
 
 
-void Test::assertion(const TestContext& ctx, const Assertion& ass)
+void Test::reportAssertion(const TestContext& ctx, const Assertion& ass)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->assertion(ctx, ass);
+        (*it)->reportAssertion(ctx, ass);
     }
 
     if(_parent)
-        _parent->assertion(ctx, ass);
+        _parent->reportAssertion(ctx, ass);
 }
 
 
-void Test::exception(const TestContext& ctx, const std::exception& ex)
+void Test::reportException(const TestContext& ctx, const std::exception& ex)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->exception(ctx, ex);
+        (*it)->reportException(ctx, ex);
     }
 
     if(_parent)
-        _parent->exception(ctx, ex);
+        _parent->reportException(ctx, ex);
 }
 
 
-void Test::error(const TestContext& ctx)
+void Test::reportError(const TestContext& ctx)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->error(ctx);
+        (*it)->reportError(ctx);
     }
 
     if(_parent)
-        _parent->error(ctx);
+        _parent->reportError(ctx);
 }
 
 
-void Test::message(const std::string& msg)
+void Test::reportMessage(const std::string& msg)
 {
     std::list<Reporter*>::iterator it;
     for(it = _reporter.begin(); it != _reporter.end(); ++it)
     {
-        (*it)->message(msg);
+        (*it)->reportMessage(msg);
     }
 
     if(_parent)
-        _parent->message(msg);
+        _parent->reportMessage(msg);
 }
 
 
@@ -136,14 +136,14 @@ const Test* Test::parent() const
 }
 
 
-void Test::addReporter(Reporter& r)
+void Test::attachReporter(Reporter& r)
 {
-    connect(r.destroyed, *this, &Test::removeReporter);
+    connect(r.destroyed, *this, &Test::detachReporter);
     _reporter.push_back(&r);
 }
 
 
-void Test::removeReporter(Reporter& r)
+void Test::detachReporter(Reporter& r)
 {
     _reporter.remove(&r);
 }

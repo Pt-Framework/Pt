@@ -72,6 +72,19 @@ namespace Unit {
             */
             Test* findTest(const std::string& testname);
 
+            /** @brief Add reporter for test events
+
+                Adds the reporter \a r to report test events.
+            */
+            void attachReporter(Reporter& r);
+
+            /** @brief Add reporter for test events
+
+                Adds the reporter \a r to report test events of the test
+                name \a testname.
+            */
+            void attachReporter(Reporter& r, const std::string& testname);
+
             /** @brief Run test by name
 
                 This method will run a previously registered test. Use the

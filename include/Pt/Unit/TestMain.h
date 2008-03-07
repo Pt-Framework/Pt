@@ -20,13 +20,13 @@
 #define PT_UNIT_TESTMAIN_H
 
 #include <Pt/Main.h>
+#include <Pt/Arg.h>
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Application.h>
 #include <fstream>
-#include <cstring>
 
-
+// TODO: move to application class later
 namespace TestMain
 {
     static int argc = 0;
@@ -39,58 +39,49 @@ int main(int argc, char** argv)
     TestMain::argc = argc;
     TestMain::argv = argv;
 
-    // Pt-Unit(mini) test launcher
-    // command line option syntax:
-    // test [OPTIONS]
-    // where OPTIONS are
-    //     -tCLASS[::TEST]  run the test class CLASS or member test CLASS::TEST
-    //     -fFILE           save output in file FILE instead of stdout
-
-    Pt::Unit::BriefReporter fileReporter;
-    Pt::Unit::BriefReporter consoleReporter;
     Pt::Unit::Application app;
-    bool fileLoggingEnabled = false;
 
-    const char* fileName = "";
-    const char* testName = "";
+    Pt::Arg<bool> help(argc, argv, 'h');
 
-    for(int i = 1; i < argc; ++i)
+    if( help )
     {
-        if(argv[i][0] != '-')
-            break;
-
-        if( !std::strncmp(argv[i], "--help", 6) )
+        std::cerr << "Usage: " << argv[0] << " [-t<testname>] [-f<logfile>]\n";
+        std::cerr << "Available Tests:\n";
+        std::list<Pt::Unit::Test*>::const_iterator it;
+        for( it = app.tests().begin(); it != app.tests().end(); ++it)
         {
-            std::cerr << "Usage: " << argv[0] << " [-t<testname>] [-f<logfile>]\n";
-            std::cerr << "Available Tests:\n";
-            std::list<Pt::Unit::Test*>::const_iterator it;
-            for( it = app.tests().begin(); it != app.tests().end(); ++it)
-            {
-                std::cerr << "  - "<< (*it)->name() << std::endl;
-            }
-            return 0;
+            std::cerr << "  - "<< (*it)->name() << std::endl;
         }
-        else if( !std::strncmp(argv[i], "-t", 2) )
-        {
-            testName = argv[i] + 2;
-        }
-        else if( !std::strncmp(argv[i], "-f", 2) )
-        {
-          fileName = argv[i] + 2;
-          fileLoggingEnabled = true;
-        }
+        return 0;
     }
 
-    std::ofstream logFile(fileName);
-    if (fileLoggingEnabled)
+    Pt::Unit::BriefReporter consoleReporter;
+    app.attachReporter(consoleReporter);
+
+    Pt::Arg<std::string> file(argc, argv, 'f');
+    std::ofstream logFile;
+    Pt::Unit::BriefReporter fileReporter;
+    std::string fileName = file.getValue();
+
+    if( ! fileName.empty() )
     {
-      fileReporter.setOutput(logFile);
-      app.addReporter(fileReporter);
+        logFile.open( fileName.c_str() );
+        fileReporter.setOutput(logFile);
+        app.attachReporter(fileReporter);
     }
-    app.addReporter(consoleReporter);
 
     try {
-        app.run(testName);
+        Pt::Arg<std::string> test(argc, argv, 't');
+        std::string testName = test.getValue();
+        if( testName.empty() )
+        {
+            app.run();
+        }
+        else
+        {
+            app.run(testName);
+        }
+
         return app.errors();
     }
     catch(const std::exception& ex)

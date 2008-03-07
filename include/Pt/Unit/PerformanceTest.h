@@ -70,7 +70,7 @@ public:
             msg << " [" << m_msg << "]";
         }
 
-        m_test.message(msg.str());
+        m_test.reportMessage(msg.str());
 
 
         msg.str("");
@@ -81,7 +81,7 @@ public:
             msg << " [" << m_msg << "]";
         }
 
-        m_test.message(msg.str());
+        m_test.reportMessage(msg.str());
     }
 
 private:

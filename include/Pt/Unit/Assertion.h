@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
+ *   Copyright (C) 2005-2008 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -24,7 +24,6 @@
 #include <stdexcept>
 #include <iostream>
 
-
 namespace Pt {
 
 namespace Unit {
@@ -48,7 +47,7 @@ namespace Unit {
             }
         @endcode
     */
-    class PT_UNIT_API Assertion : public std::exception
+    class PT_UNIT_API Assertion : public std::logic_error
     {
         public:
             /** @brief Construct from a message and source info.
@@ -61,30 +60,11 @@ namespace Unit {
                 @param what Error message
                 @param si Info where the assertion failed
             */
-            Assertion(const std::string& what, const SourceInfo& si)
-            : _what(what + si)
-            , _sourceInfo(si)
-            {}
-
-            /** @brief Copy constructor.
-
-                @param a Other asstertion exception
-            */
-            //Assertion(const Assertion& a)
-            //: Exception(a)
-            //{}
+            Assertion(const std::string& what, const SourceInfo& si);
 
             const Pt::SourceInfo& sourceInfo() const;
 
-            /** @brief Destructor.
-            */
-            ~Assertion() throw()
-            {}
-
-            const char* what() const throw();
-
         private:
-            std::string _what;
             Pt::SourceInfo _sourceInfo;
     };
 

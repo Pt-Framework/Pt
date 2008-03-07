@@ -122,7 +122,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
             Pt::SerializationInfo si;
             si.setName(propertyName);
             si.setValue(token);
-            suite.setProperty(propertyName, si);
+            suite.setParameter(propertyName, si);
         }
         // method line
         else if(token.compare("method") == 0)

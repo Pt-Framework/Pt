@@ -44,7 +44,7 @@ TestSuite::~TestSuite()
 }
 
 
-void TestSuite::setProperty(const std::string& name, const Pt::SerializationInfo& si)
+void TestSuite::setParameter(const std::string& name, const Pt::SerializationInfo& si)
 {
 }
 
