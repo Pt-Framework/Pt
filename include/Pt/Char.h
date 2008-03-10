@@ -81,14 +81,14 @@ namespace Pt {
             {}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
-            //Char(short val)
-            //: _value( (uint16_t)(val) )
-            //{}
+            Char(short val)
+            : _value( (uint32_t)(val) )
+            {}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
-            //Char(unsigned short val)
-            //: _value(val)
-            //{}
+            Char(unsigned short val)
+            : _value(val)
+            {}
 
             //! Constructs a character using the given 32-bit integer as base for the character value.
             Char(const int32_t& val)
@@ -149,9 +149,6 @@ namespace Pt {
             uint32_t value() const
             { return _value; }
 
-            operator wchar_t() const
-            { return _value; }
-
             /**
              * @brief This conversion operator converts the internal value of this character to unsigned 32 bits.
              *
@@ -160,18 +157,7 @@ namespace Pt {
              *
              * @return The character converted to unsigned 32-bit.
              */
-            operator uint32_t() const
-            { return _value; }
-
-            /**
-             * @brief This conversion operator converts the internal value of this character to unsigned 32 bits.
-             *
-             * As the internal value also is an unsigned 32-bit value, the internal value of this character
-             * ist returned.
-             *
-             * @return The character converted to unsigned 32-bit.
-             */
-            operator uint32_t()
+            operator int() const
             { return _value; }
 
             /**

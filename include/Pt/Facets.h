@@ -170,7 +170,45 @@ namespace std {
 
 #endif
 
+// Workaround for stlport4
+template <typename _OutputIter, typename Flags>
+_OutputIter __put_integer(char* __buf, char* __iend,
+                          _OutputIter __s,
+                          std::ios_base& __f,
+                          Flags __flags, Pt::Char __fill)
+{
+    wchar_t wfill = __fill.value();
+    return __put_integer(__buf, __iend, __s, __f, __flags, wfill);
+}
 
+// Workaround for stlport4
+template <class _OutputIter>
+_OutputIter __put_float(char* __ibuf, char* __iend, _OutputIter __out,
+                        std::ios_base& __f, Pt::Char __fill,
+                        Pt::Char __decimal_point,
+                        Pt::Char __sep, const std::string& __grouping)
+{
+    wchar_t wfill = __fill.value();
+    wchar_t wdecimal_point = __decimal_point.value();
+    wchar_t wsep = __sep.value();
+
+    return __put_float(__ibuf, __iend, __out, __f,
+                       wfill, wdecimal_point, wsep, __grouping);
+}
+
+// Workaround for stlport4
+template <class _InputIter, class _Integer, class TrueOrFalse>
+bool __get_integer(_InputIter& __first, _InputIter& __last,
+                   int __base, _Integer& __val,
+                   int __got, bool __is_negative, Pt::Char __separator,
+                   const std::string& __grouping, const TrueOrFalse& tt)
+{
+    wchar_t wseparator = __separator.value();
+    return __get_integer(__first, __last,__base, __val, __got, __is_negative,
+                         wseparator, __grouping, tt);
+}
+
+// Workaround for stlport4
 inline void _Initialize_get_float(const std::ctype<Pt::Char>&,
                                   Pt::Char& Plus, Pt::Char& Minus,
                                   Pt::Char& pow_e, Pt::Char& pow_E,
@@ -182,7 +220,7 @@ inline void _Initialize_get_float(const std::ctype<Pt::Char>&,
     pow_E = L'E';
 }
 
-
+// Workaround for stlport4
 // TODO: Is this really correct?
 inline bool __get_fdigit_or_sep(Pt::Char& __c, Pt::Char __sep, const Pt::Char*)
 {
@@ -195,7 +233,7 @@ inline bool __get_fdigit_or_sep(Pt::Char& __c, Pt::Char __sep, const Pt::Char*)
     return ( __c >= L'0' && __c <= L'9');
 }
 
-
+// Workaround for stlport4
 // TODO: Is this really correct?
 inline bool __get_fdigit(Pt::Char& __c, const Pt::Char*)
 {
