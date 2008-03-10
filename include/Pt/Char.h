@@ -81,14 +81,14 @@ namespace Pt {
             {}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
-            Char(const int16_t& val)
-            : _value( (uint16_t)(val) )
-            {}
+            //Char(short val)
+            //: _value( (uint16_t)(val) )
+            //{}
 
             //! Constructs a character using the given 16-bit integer as base for the character value.
-            Char(const uint16_t& val)
-            : _value(val)
-            {}
+            //Char(unsigned short val)
+            //: _value(val)
+            //{}
 
             //! Constructs a character using the given 32-bit integer as base for the character value.
             Char(const int32_t& val)
@@ -147,6 +147,9 @@ namespace Pt {
              * @return The 32-bit-value of this character.
              */
             uint32_t value() const
+            { return _value; }
+
+            operator wchar_t() const
             { return _value; }
 
             /**
@@ -253,6 +256,12 @@ namespace Pt {
             //! @return $true$ if the numeric value of a is equal or less than the numeric value of b; $false$ otherwise.
             friend  bool operator<=(const Char& a, const Char& b)
             { return a.value() <= b.value(); }
+
+            friend  bool operator<=(const Char& a, const wchar_t b)
+            { return a.value() <= static_cast<uint32_t>(b); }
+
+            friend  bool operator>=(const Char& a, const wchar_t b)
+            { return a.value() >= static_cast<uint32_t>(b); }
 
             //! @brief Returns $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
             //! @return $true$ if the numeric value of a is equals or greater than the numeric value of b; $false$ otherwise.
