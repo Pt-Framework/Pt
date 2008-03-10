@@ -21,8 +21,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
+#include <iosfwd>
 #include <cctype>
-
 
 #ifndef PT_WITHOUT_STD_LOCALE
 
@@ -170,7 +170,43 @@ namespace std {
 
 #endif
 
+
 namespace std {
+
+template <typename _OutputIter, typename Flags>
+_OutputIter __put_integer(char* __buf, char* __iend,
+                          _OutputIter __s,
+                          std::ios_base& __f,
+                          Flags __flags, Pt::Char __fill)
+{
+    wchar_t wfill = __fill.value();
+    return __put_integer(__buf, __iend, __s, __f, __flags, wfill);
+}
+
+
+template <class _OutputIter>
+_OutputIter __put_float(char* __ibuf, char* __iend, _OutputIter __out,
+                        std::ios_base& __f, Pt::Char __fill,
+                        Pt::Char __decimal_point,
+                        Pt::Char __sep, const std::string& __grouping)
+{
+    wchar_t wfill = __fill.value();
+    wchar_t wdecimal_point = __decimal_point.value();
+    wchar_t wsep = __sep.value();
+
+    return __put_float(__ibuf, __iend, __out, __f,
+                       wfill, wdecimal_point, wsep, __grouping);
+}
+
+/*
+template <class _InputIter, class _Integer>
+bool _STLP_CALL
+__get_integer(_InputIter& __first, _InputIter& __last,
+          int __base, _Integer& __val, 
+          int __got, bool __is_negative, char __separator, const string& __grouping, const __true_type&) 
+{
+}
+*/
 
     /** @brief Numpunct localization facet
         @ingroup Unicode
