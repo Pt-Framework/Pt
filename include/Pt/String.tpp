@@ -412,6 +412,12 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string
 }
 
 
+inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* begin, const Pt::Char* end)
+{
+    return this->append( begin, end-begin );
+}
+
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, const Pt::Char* str)
 {
     return this->insert( pos, str, traits_type::length(str) );

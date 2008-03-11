@@ -29,6 +29,10 @@
 
     #define PT_ATOMICITY_H "Atomicity.windows.h"
 
+#elif defined(__sun)
+
+    #define PT_ATOMICITY_H "Atomicity.generic.h"
+
 // use AT&T-style inline asm
 #elif defined(PT_ASM_ATT) || \
       defined(__GNUC__) || defined(__xlC__) || \

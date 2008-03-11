@@ -191,6 +191,8 @@ class basic_string< Pt::Char > {
 
         basic_string& append(const basic_string& str, size_type pos, size_type n);
 
+        basic_string& append(const Pt::Char* begin, const Pt::Char* end);
+
         basic_string& insert(size_type pos, const Pt::Char* str);
 
         basic_string& insert(size_type pos, const Pt::Char* str, size_type n);

@@ -39,7 +39,7 @@
     #endif
 // otherwise use standard macro
 #else
-    #define PT_PRETTY_FUNCTION __FUNCTION__
+    #define PT_PRETTY_FUNCTION "unknown symbol"
 #endif
 
 #define PT_SOURCEINFO_STRINGIFY(x) #x
