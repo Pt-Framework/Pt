@@ -18,7 +18,6 @@
  ***************************************************************************/
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestContext.h"
-#include "Pt/SerializationInfo.h"
 
 namespace Pt {
 
