@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Dr. Marc Boris D�rner                      *
+ *   Copyright (C) 2005-2006 by Dr. Marc Boris Duerner                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -34,7 +34,7 @@ int main(int, char**);
 */
 int wmain(int argc, wchar_t* wargv[])
 {
-    char** argv;
+    char** argv = 0;
     argv = new char*[argc];
 
     // convert arguments to char*
