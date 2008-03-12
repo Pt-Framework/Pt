@@ -97,17 +97,6 @@ namespace System {
             /// time the thread has locked the mutex.
             void lock();
 
-            //! Try locking the mutex with timeout
-            ///
-            /// This method does the same as lock() but also supports a timeout-
-            /// value. If the lock cannot be acquired in the given interval the
-            /// method returns without locking the mutex and a FALSE return value.
-            ///
-            /// \param timeout the timeout in milliseconds to wait for the mutex. If
-            ///                zero is specified the method returns immediatly.
-            /// \return true if the mutex has been locked, false otherwise.
-            bool tryLock(unsigned int msec = 0);
-
             //! @brief Unlock the mutex
             ///
             /// Unlocks the mutex. If the mutex was locked more than one time by the

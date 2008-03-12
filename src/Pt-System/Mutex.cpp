@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Dürner                          *
+ *   Copyright (C) 2005-2006 by Marc Boris Dï¿½rner                          *
  *   Copyright (C) 2005-2006 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -44,12 +44,6 @@ Mutex::~Mutex()
 void Mutex::lock()
 {
     _impl->lock();
-}
-
-
-bool Mutex::tryLock(unsigned int timeout)
-{
-    return _impl->tryLock(timeout);
 }
 
 
