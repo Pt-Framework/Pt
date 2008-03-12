@@ -52,9 +52,6 @@ namespace Unit {
     */
     class PT_UNIT_API Application : public Test
     {
-        template <typename TestT>
-        friend struct RegisterTest;
-
         public:
             /** @brief Default Constructor
             */

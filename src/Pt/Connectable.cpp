@@ -26,7 +26,7 @@ Connectable::Connectable()
 {}
 
 
-Connectable::Connectable(const Connectable& c)
+Connectable::Connectable(const Connectable&)
 {
 }
 
@@ -47,7 +47,7 @@ void Connectable::clear()
 }
 
 
-Connectable& Connectable::operator=(const Connectable& other)
+Connectable& Connectable::operator=(const Connectable&)
 {
     return (*this);
 }
