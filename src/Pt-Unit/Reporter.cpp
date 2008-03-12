@@ -46,7 +46,7 @@ void BriefReporter::reportStart(const TestContext& test)
 }
 
 
-void BriefReporter::reportFinish(const TestContext& test)
+void BriefReporter::reportFinish(const TestContext&)
 {
 }
 
@@ -57,27 +57,27 @@ void BriefReporter::reportMessage(const std::string& msg)
 }
 
 
-void BriefReporter::reportSuccess(const TestContext& test)
+void BriefReporter::reportSuccess(const TestContext&)
 {
     *_out << "OK" << std::endl;
 }
 
 
-void BriefReporter::reportAssertion(const TestContext& test, const Assertion& a)
+void BriefReporter::reportAssertion(const TestContext&, const Assertion& a)
 {
     *_out << "ASSERTION at " << a.sourceInfo().file() << ":" << a.sourceInfo().line() << std::endl;
     *_out << '\t' << a.what() << std::endl;
 }
 
 
-void BriefReporter::reportException(const TestContext& test, const std::exception& ex)
+void BriefReporter::reportException(const TestContext&, const std::exception& ex)
 {
     *_out << "EXCEPTION" << std::endl;
     *_out << '\t' << ex.what() << std::endl;
 }
 
 
-void BriefReporter::reportError(const TestContext& test)
+void BriefReporter::reportError(const TestContext&)
 {
     *_out << "ERROR" << std::endl;
 }
