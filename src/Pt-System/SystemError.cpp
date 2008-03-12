@@ -2,7 +2,6 @@
  *   Copyright (C) 2004-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2005-2007 Aloysius Indrayanto                           *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,14 +18,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/SystemError.h"
-
 
 namespace Pt {
 
 namespace System {
-
 
 SystemError::SystemError(const std::string & what, const SourceInfo& si)
 : std::runtime_error(what + si)
@@ -35,7 +31,6 @@ SystemError::SystemError(const std::string & what, const SourceInfo& si)
 
 SystemError::~SystemError() throw()
 { }
-
 
 } // namespace System
 
