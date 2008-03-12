@@ -16,7 +16,7 @@ else
 }
 
 C++FLAGS  += $(CCFLAGS) ;
-WARN ?= +w2 ;
+WARN ?= +w2 -erroff=doubunder ;
 
 if $(LIBC++) = stlport4
 {
