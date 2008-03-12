@@ -46,17 +46,20 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::atomicIncrement(v);
             PT_UNIT_ASSERT(v == 2);
 
-            Pt::atomicIncrement(v);
-            PT_UNIT_ASSERT(v == 3);
-
-            Pt::atomicDecrement(v);
-            PT_UNIT_ASSERT(v == 2);
-
             Pt::atomicDecrement(v);
             PT_UNIT_ASSERT(v == 1);
 
             Pt::atomicDecrement(v);
             PT_UNIT_ASSERT(v == 0);
+
+            Pt::atomicDecrement(v);
+            PT_UNIT_ASSERT(v == -1);
+
+            Pt::atomicDecrement(v);
+            PT_UNIT_ASSERT(v == -2);
+
+            Pt::atomicExchange(v, -5);
+            PT_UNIT_ASSERT(v == -5);
 
             Pt::atomicExchange(v, 1);
             PT_UNIT_ASSERT(v == 1);
@@ -67,7 +70,10 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
             Pt::atomicExchangeAdd(v, 3);
             PT_UNIT_ASSERT(v == 3);
 
-            Pt::atomicExchangeAdd(v, 1);
+            Pt::atomicExchangeAdd(v, -5);
+            PT_UNIT_ASSERT(v == -2);
+
+            Pt::atomicExchangeAdd(v, 6);
             PT_UNIT_ASSERT(v == 4);
 
             Pt::atomicCompareExchange(v, 5, 4);
@@ -75,6 +81,12 @@ class AtomicTestSuite : public Pt::Unit::TestSuite
 
             Pt::atomicCompareExchange(v, 9, 7);
             PT_UNIT_ASSERT(v == 5);
+
+            Pt::atomicCompareExchange(v, -20, 5);
+            PT_UNIT_ASSERT(v == -20);
+
+            Pt::atomicCompareExchange(v, -200, -20);
+            PT_UNIT_ASSERT(v == -200);
         }
 
         void Pointer()
