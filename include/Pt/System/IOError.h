@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 Marc Boris Dürner                             *
+ *   Copyright (C) 2004-2006 Marc Boris Duerner                            *
  *   Copyright (C) 2005 Aloysius Indrayanto                                *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,7 +30,6 @@ namespace Pt {
 
 namespace System {
 
-    // DEPRECATED, use ios::failure instead
     class PT_SYSTEM_API IOError : public std::ios::failure {
         public:
             IOError(const std::string& what, const SourceInfo& si);
