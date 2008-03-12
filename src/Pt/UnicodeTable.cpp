@@ -973,7 +973,7 @@ int main(int argc, char* argv[])
     {
         unsigned char cat = category_data[n];
 
-        f << "    (";
+        f << "    std::ctype_base::mask((";
 
         switch( int(cat) )
         {
@@ -1041,19 +1041,19 @@ int main(int argc, char* argv[])
 
         if(n >=9 && n <= 13)
         {
-            f << "|space) & ~(print),\n";
+            f << "|space) & ~(print)),\n";
             continue;
         }
 
         if(n >=65 && n <= 70)
         {
-            f << "|xdigit) & ~(digit|lower|punct|space),\n";
+            f << "|xdigit) & ~(digit|lower|punct|space)),\n";
             continue;
         }
 
         if(n >=97 && n <= 107)
         {
-            f << "|xdigit) & ~(digit|upper|punct|space),\n";
+            f << "|xdigit) & ~(digit|upper|punct|space)),\n";
             continue;
         }
 
@@ -1123,10 +1123,10 @@ int main(int argc, char* argv[])
                 break;
         }
 
-        f << "),\n";
+        f << ")),\n";
     }
 
-     f << " 0 };\n";
+     f << " std::ctype_base::mask(0) };\n";
 
     return 0;
 }

@@ -1,6 +1,6 @@
 # Initialize variables
 #
-CC     = cc ;
+CC     = CC ;
 C++    = CC ;
 RANLIB ?= ranlib ;
 
@@ -16,11 +16,12 @@ else
 }
 
 C++FLAGS  += $(CCFLAGS) ;
-WARN ?= +w2 -erroff=doubunder ;
+WARN ?= +w2 -erroff=doubunder,hidef,notused,hidevf -errtags=yes ;
 
 if $(LIBC++) = stlport4
 {
     C++FLAGS += -library=stlport4 ;
+    LINKFLAGS += -library=stlport4 ;
 }
 
 
@@ -75,6 +76,6 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 
 actions Link bind NEEDLIBS SHLIBS
 {
-    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+    $(CC) -o $(<) $(LINKFLAGS) -L$(SHLIBS:P) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
 }
 
