@@ -375,6 +375,24 @@ class basic_string< Pt::Char > {
     inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
     { return a.compare(b) == 0; }
 
+    inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { return a.compare(b) < 0; }
+
+    inline bool operator<(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { return b.compare(a) > 0; }
+
+    inline bool operator<(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) < 0; }
+
+    inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { return a.compare(b) > 0; }
+
+    inline bool operator>(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { return b.compare(a) < 0; }
+
+    inline bool operator>(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) > 0; }
+
 } // namespace std
 
 
