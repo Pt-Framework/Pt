@@ -16,7 +16,7 @@ else
 }
 
 C++FLAGS  += $(CCFLAGS) ;
-WARN ?= +w2 -erroff=doubunder,hidef,notused,hidevf -errtags=yes ;
+WARN ?= +w  -erroff=doubunder,hidef -errtags=yes ;
 
 if $(LIBC++) = stlport4
 {
