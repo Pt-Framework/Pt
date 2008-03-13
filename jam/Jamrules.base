@@ -854,7 +854,11 @@ rule MainLinkExtLibraries
 
 rule MakeLocate
 {
-    if $(>)
+    if $(LOCATE_TARGET) = $(>)
+    {
+        LOCATE on $(<) = $(>) ;
+    }
+    else if $(>)
     {
         LOCATE on $(<) = $(>) ;
         Depends $(<) : $(>[1]) ;
