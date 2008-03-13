@@ -74,10 +74,12 @@ int main(int argc, char** argv)
         if( testName.empty() )
         {
             app.run();
+            return app.errors();
         }
         else
         {
             app.run(testName);
+            return app.errors();
         }
 
         return app.errors();

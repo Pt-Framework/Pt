@@ -16,11 +16,47 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <Pt/Unit/Application.h>
+#include "Pt/Unit/Application.h"
 
 namespace Pt {
 
 namespace Unit {
+
+class ErrorCounter : public Reporter
+{
+    public:
+        ErrorCounter()
+        : _errors(0)
+        {}
+
+        unsigned errors()
+        { return _errors; }
+
+        virtual void reportStart(const TestContext& test)
+        {}
+
+        virtual void reportFinish(const TestContext& test)
+        {}
+
+        virtual void reportMessage(const std::string& msg)
+        {}
+
+        virtual void reportSuccess(const TestContext& test)
+        {}
+
+        virtual void reportAssertion(const TestContext& test, const Assertion& a)
+        { ++_errors; }
+
+        virtual void reportException(const TestContext& test, const std::exception& ex)
+        { ++_errors; }
+
+        virtual void reportError(const TestContext& test)
+        { ++_errors; }
+
+    private:
+        unsigned _errors;
+};
+
 
 Application* Application::_app = 0;
 
@@ -84,7 +120,8 @@ void Application::attachReporter(Reporter& r, const std::string& testname)
 
 void Application::run(const std::string& testName)
 {
-    _errors = 0;
+    ErrorCounter ec;
+    this->attachReporter(ec);
 
     std::list<Test*>::iterator it;
     for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
@@ -92,18 +129,25 @@ void Application::run(const std::string& testName)
         if(testName == "" || (*it)->name() == testName)
             (*it)->run();
     }
+
+    this->detachReporter(ec);
+    _errors = ec.errors();
 }
 
 
 void Application::run()
 {
-    _errors = 0;
+    ErrorCounter ec;
+    this->attachReporter(ec);
 
     std::list<Test*>::iterator it;
     for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
     {
-            (*it)->run();
+        (*it)->run();
     }
+
+    this->detachReporter(ec);
+    _errors = ec.errors();
 }
 
 

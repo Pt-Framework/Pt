@@ -262,7 +262,8 @@ void SettingsTest::ComplexNamedType()
 {
     std::stringstream ss;
     ss << "a=Color{red=int(1),green=int(2),blue=int(3)}\n";
-    ss << "b = Color { red = int ( 4 ) , green = int ( 5 ) , blue = int ( 6 ) }\n";
+    ss << "b = Color { red = int ( 4 ) , green = int ( 5 ) , blue = int ( 6 ) }";
+    ss << "[section]\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
@@ -278,6 +279,9 @@ void SettingsTest::Section()
     ss << "[a.b.c]\n";
     ss << "d.v = 1\n";
     ss << "d.u = 2\n";
+    ss << "[x.y.z]\n";
+    ss << "u.v = 3\n";
+    ss << "u.w = 4\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
@@ -286,4 +290,8 @@ void SettingsTest::Section()
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d") )
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("v") == "1");
     PT_UNIT_ASSERT( settings.findMember("a.b.c.d")->getValue<std::string>("u") == "2");
+
+    PT_UNIT_ASSERT( settings.findMember("x.y.z.u") )
+    PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("v") == "3");
+    PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("w") == "4");
 }

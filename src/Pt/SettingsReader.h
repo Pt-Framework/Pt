@@ -482,6 +482,15 @@ class SettingsReader
                 return &afterRValue;
             }
 
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.pushValue();
+                reader.leaveMember();
+
+                reader.beginSection();
+                return &onSection;
+            }
+
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.pushTypeName();
@@ -580,6 +589,12 @@ class SettingsReader
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
             {
                 return this;
+            }
+
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.beginSection();
+                return &onSection;
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
