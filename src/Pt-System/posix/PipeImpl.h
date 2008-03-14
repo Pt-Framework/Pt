@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,13 +20,10 @@
 #ifndef Pt_System_posix_PipeImpl_h
 #define Pt_System_posix_PipeImpl_h
 
+#include "IODeviceImpl.h"
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
-#include "IODeviceImpl.h"
-
-#ifdef __QNX__
 #include <unistd.h>
-#endif
 
 namespace Pt {
 
@@ -77,7 +73,6 @@ class PipeImpl
         PipeIODevice _input;
         PipeIODevice _output;
 };
-
 
 } // namespace System
 

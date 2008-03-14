@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,7 +22,6 @@
 #include <cerrno>
 #include <unistd.h>
 #include <fcntl.h>
-
 
 namespace Pt {
 
@@ -92,8 +90,6 @@ void PipeIODevice::_sync() const
 {
     IODeviceImpl::sync();
 }
-
-
 
 
 PipeImpl::PipeImpl(bool isAsync)
