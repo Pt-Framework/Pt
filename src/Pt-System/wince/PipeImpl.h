@@ -26,6 +26,7 @@
 #include "IODeviceImpl.h"
 #include <windows.h>
 #include <vector>
+#include <cassert>
 #include "..\win32\IOResultImpl.h"
 
 namespace Pt {
@@ -48,8 +49,12 @@ public:
 
     void attach(char* buffer, size_t size)
     {
-        _buffer = buffer;
-        _bufferSize = size;
+        assert(buffer);
+        if(buffer && size > 0)
+        {
+            _buffer = buffer;
+            _bufferSize = size;
+        }
     }    
 
     char* buffer() const
@@ -78,8 +83,12 @@ public:
 
     void attach(const char* buffer, size_t size)
     {
-        _buffer = buffer;
-        _bufferSize = size;
+        assert(buffer);
+        if(buffer && size > 0)
+        {
+            _buffer = buffer;
+            _bufferSize = size;
+        }
     }    
 
     const char* buffer() const
