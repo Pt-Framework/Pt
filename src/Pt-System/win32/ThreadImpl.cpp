@@ -5,8 +5,10 @@
 
 #include "ThreadImpl.h"
 
+#include "Pt/Types.h"
 #include "Pt/System/SystemError.h"
 
+#include <sstream>
 
 namespace Pt {
 
@@ -88,7 +90,10 @@ void ThreadImpl::start(Thread::Mode mode)
 
     if(_handle == NULL) {
         _id = 0;
-        throw SystemError("Could not create thread", PT_SOURCEINFO);
+        Pt::uint32_t errorCode = GetLastError();
+        std::stringstream ss;
+        ss << "Could not create thread. System error code: " << errorCode;
+        throw SystemError(ss.str(), PT_SOURCEINFO);
     }
 
     _state = Thread::Running;

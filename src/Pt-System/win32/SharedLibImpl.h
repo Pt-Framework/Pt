@@ -85,7 +85,7 @@ class SharedLibImpl {
             {
                 Pt::uint32_t errorCode = GetLastError();
                 std::stringstream ss;
-                ss << "Could not open shared library(" << libraryFile.path() << "), Error code: " << errorCode;
+                ss << "Could not open shared library(" << libraryFile.path() << "). System error code: " << errorCode;
                 throw SystemError(ss.str(), PT_SOURCEINFO);
             }
         }
