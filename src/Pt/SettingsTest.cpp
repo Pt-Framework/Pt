@@ -281,7 +281,10 @@ void SettingsTest::Section()
     ss << "d.u = 2\n";
     ss << "[x.y.z]\n";
     ss << "u.v = 3\n";
-    ss << "u.w = 4\n";
+    ss << "u.w = \"4\"\n";
+    ss << "[e.f.g]\n";
+    ss << "u.v = \"5\"\n";
+    ss << "u.w = 6\n";
     Pt::Text::TextIStream ts(ss, new Pt::Text::Utf8Codec);
 
     Pt::Settings settings;
@@ -294,4 +297,8 @@ void SettingsTest::Section()
     PT_UNIT_ASSERT( settings.findMember("x.y.z.u") )
     PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("v") == "3");
     PT_UNIT_ASSERT( settings.findMember("x.y.z.u")->getValue<std::string>("w") == "4");
+
+    PT_UNIT_ASSERT( settings.findMember("e.f.g.u") )
+    PT_UNIT_ASSERT( settings.findMember("e.f.g.u")->getValue<std::string>("v") == "5");
+    PT_UNIT_ASSERT( settings.findMember("e.f.g.u")->getValue<std::string>("w") == "6");
 }

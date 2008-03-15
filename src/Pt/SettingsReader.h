@@ -472,6 +472,13 @@ class SettingsReader
                 return this;
             }
 
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.leaveMember();
+                reader.beginSection();
+                return &onSection;
+            }
+
         } afterQoutedValue ;
 
 
