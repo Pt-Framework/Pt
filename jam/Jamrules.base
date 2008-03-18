@@ -929,9 +929,13 @@ rule Object
 
     Clean clean : $(<) ;
 
-    if $(OBJECT_TARGET)
+    if $(LOCATE_OBJECTS) != $(LOCATE_TARGET)
     {
-    	MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
+        MakeLocate $(<) : $(LOCATE_OBJECTS) ;
+    }
+    else if $(OBJECT_TARGET)
+    {
+        MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
     }
     else
     {
@@ -1255,7 +1259,8 @@ rule SubDir
     SEARCH_SOURCE = $(SUBDIR) ;
     LOCATE_SOURCE = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
     LOCATE_TARGET = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
-    
+    LOCATE_OBJECTS = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
+
     SOURCE_GRIST = [ FGrist $(<[2-]) ] ;
 
     # Reset per-directory ccflags, hdrs
@@ -1263,6 +1268,12 @@ rule SubDir
     SUBDIRCCFLAGS = ;
     SUBDIRC++FLAGS = ;
     SUBDIRHDRS = ;
+}
+
+
+rule SubDirObjects
+{
+    LOCATE_OBJECTS = $(<) ;
 }
 
 
