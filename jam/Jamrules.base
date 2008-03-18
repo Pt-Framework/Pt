@@ -1273,7 +1273,7 @@ rule SubDir
 
 rule SubDirObjects
 {
-    LOCATE_OBJECTS = $(<) ;
+    LOCATE_OBJECTS = [ FDirName $(<) ] ;
 }
 
 
