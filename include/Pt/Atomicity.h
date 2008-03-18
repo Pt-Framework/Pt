@@ -27,11 +27,11 @@
 // always use Interlocked-functions when compiling for win32
 #if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
 
-    #define PT_ATOMICITY_H "Atomicity.windows.h"
+    #define PT_ATOMICITY_H <Pt/Atomicity.windows.h>
 
 #elif defined(__sun)
 
-    #define PT_ATOMICITY_H "Atomicity.generic.h"
+    #define PT_ATOMICITY_H <Pt/Atomicity.generic.h>
 
 // use AT&T-style inline asm
 #elif defined(PT_ASM_ATT) || \
@@ -42,46 +42,46 @@
         defined (i386) || defined(__i386) || defined (__i386__) || \
         defined(_X86_) || defined(sun386) || defined (_M_IX86)
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.x86.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.x86.h>
 
     #elif defined(PT_X86_64) || \
         defined(__x86_64__) || defined(__amd64__)
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.x86_64.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.x86_64.h>
 
     #elif defined(PT_ARM) || \
           defined (ARM) || defined(__arm__) || defined(_M_ARM) || defined(_M_ARMT)
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.arm.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.arm.h>
 
     #elif defined(PT_PPC) || \
           defined( _M_PPC  ) || defined( PPC         ) || \
           defined( ppc     ) || defined( __powerpc__ ) || \
           defined( __ppc__ )
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.ppc.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.ppc.h>
 
     #elif defined(PT_MIPS) || \
           defined(__mips__) || defined(MIPSEB) || defined(_MIPSEB) || \
           defined(MIPSEL) || defined(_MIPSEL)
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.mips.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.mips.h>
 
     #elif defined(PT_SPARC) || \
           defined(__sparc__) || defined(sparc) || defined(__sparc) || \
           defined(__sparcv8) || defined(__sparcv9)
 
-        #define PT_ATOMICITY_H "Atomicity.gcc.sparc.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.gcc.sparc.h>
 
     #else
 
-        #define PT_ATOMICITY_H "Atomicity.generic.h"
+        #define PT_ATOMICITY_H <Pt/Atomicity.generic.h>
 
     #endif
 
 #else
     #define PT_ATOMICITY_WITH_PTHREAD
-    #define PT_ATOMICITY_H "Atomicity.pthread.h"
+    #define PT_ATOMICITY_H <Pt/Atomicity.pthread.h>
 
 #endif
 
