@@ -5,6 +5,38 @@ CC        = gcc ;
 C++       = g++ ;
 RANLIB		?= ranlib ;
 
+if $(TARGET_OS) = "aspen"
+{
+    if $(TARGET_OSPLAT) = "armv6"
+    {
+        CC = /Developer/Platforms/Aspen.platform/Developer/usr/bin/gcc-4.0 ;
+        C++ = /Developer/Platforms/Aspen.platform/Developer/usr/bin/g++-4.0 ;
+        RANLIB = /Developer/Platforms/Aspen.platform/Developer/usr/bin/ranlib ;
+        
+        CCFLAGS += -arch armv6 -maspen-version-min=1.2 -gdwarf-2 -mthumb ;
+        CCFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
+        
+        LINKFLAGS += -arch armv6 ;
+        LINKFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
+        LINKFLAGS += -maspen-version-min=1.2 -Wl,-dead_strip ;
+    }
+    else if $(TARGET_OSPLAT) = "x86"
+    {
+        CC = /Developer/usr/bin/gcc-4.0 ;
+        C++ = /Developer/usr/bin/g++-4.0 ;
+        RANLIB = /Developer/usr/bin/ranlib ;
+
+        CCFLAGS += -arch i386 -DASPEN_SIMULATOR=1 -D__ASPEN_VERSION_MIN_REQUIRED=10200 ;
+        CCFLAGS += -mmacosx-version-min=10.5 -gdwarf-2 ; 
+        CCFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+
+        LINKFLAGS += -arch i386 ;
+        LINKFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+        LINKFLAGS += -Wl,-rpath,/Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
+        LINKFLAGS += -mmacosx-version-min=10.5 ;
+    }
+}
+
 #
 # Flags and options
 #
@@ -18,7 +50,7 @@ if $(CONFIG:L) = debug
 else
 {
 	CCFLAGS += -DNDEBUG ;
-	OPTIM	  ?= -O1 ;
+	OPTIM	  ?= -O2 ;
 }
 
 WARN ?= -Wall ;

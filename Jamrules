@@ -31,6 +31,12 @@ if $(TARGET_OS:L) = "macosx"
     SYSLIBS = -ldl -lpthread ;
     #NETLIBS =  ;
 }
+if $(TARGET_OS:L) = "aspen"
+{
+    SYS     ?= posix ;
+    GUI     ?= uikit ;
+    SYSLIBS = -ldl -lpthread ;
+}
 if $(TARGET_OS) = "aix"
 {
     SYS      ?= posix ;
@@ -137,6 +143,10 @@ if $(GUI:L) = "cocoa"
     GUILIBS = -framework AppKit -framework Foundation ;
 }
 
+if $(GUI:L) = "uikit"
+{
+    GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+}
 
 #############################################################################
 # Unit testing rules and actions
