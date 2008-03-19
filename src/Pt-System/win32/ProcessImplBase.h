@@ -48,6 +48,8 @@ namespace System {
 
             const std::string& args();
 
+			void setInput( IODevice* dev){}
+			void setOutput( IODevice* dev){}
             void start();
 
             void kill();
