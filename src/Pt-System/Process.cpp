@@ -36,6 +36,16 @@ const std::string& Process::args()
 }
 
 
+  void Process::setInput( IODevice* dev)
+  {
+	_impl->setInput( dev);
+  }
+		  
+  void Process::setOutput( IODevice* dev)
+  {
+	_impl->setOutput( dev);
+  }
+
 void Process::start()
 {
      _impl->start();

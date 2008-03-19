@@ -59,8 +59,9 @@ namespace System {
 
             virtual void sync() const;
 
-        private:
+	protected:
             int _fd;
+	private:
             ReadResult _readResult;
             WriteResult _writeResult;
     };

@@ -54,6 +54,8 @@ class PT_API ProcessImpl
     
         const std::string& args();
     
+		void setInput( IODevice* dev);
+		void setOutput( IODevice* dev);
         void start();
     
         void kill();
@@ -64,6 +66,9 @@ class PT_API ProcessImpl
         pid_t m_pid;
         std::string m_command;
         std::string m_args;
+		IODevice* m_devIn;
+		IODevice* m_devOut;
+ 
 };
 
 } // namespace System

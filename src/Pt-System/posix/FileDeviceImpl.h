@@ -48,12 +48,6 @@ class FileDeviceImpl : public IODeviceImpl
         size_t size();
 
         size_t peek(char* buffer, size_t count);
-
-        int fd() const
-        { return _fd; }
-
-    private:
-        int _fd;
 };
 
 } //namespace System

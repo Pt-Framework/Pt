@@ -1,4 +1,5 @@
 #include "ProcessImpl.h"
+#include "IODeviceImpl.h"
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -9,99 +10,118 @@
 
 namespace Pt {
 
-namespace System {
+  namespace System {
+
+	ProcessImpl::ProcessImpl(const std::string& strCommand)
+ :m_command(strCommand)
+ ,m_devIn( 0)
+ ,m_devOut( 0)
+
+	{
+
+	}
+
+	ProcessImpl::~ProcessImpl()
+	{
+	}
 
 
-ProcessImpl::ProcessImpl(const std::string& strCommand)
-:m_command(strCommand)
-{
-}
+	const std::string& ProcessImpl::command()
+	{
+	  return m_command;
+	}
 
 
-ProcessImpl::~ProcessImpl()
-{
-}
+	void ProcessImpl::setArgs(const std::string& strArgs)
+	{
+	  m_args=strArgs;
+	}
 
 
-const std::string& ProcessImpl::command()
-{
-    return m_command;
-}
+	const std::string& ProcessImpl::args()
+	{
+	  return m_args;
+	}
 
+	void ProcessImpl::setInput( IODevice* dev)
+	{
+	  m_devIn = dev;
+	}
 
-void ProcessImpl::setArgs(const std::string& strArgs)
-{
-    m_args=strArgs;
-}
+	void ProcessImpl::setOutput( IODevice* dev)
+	{
+	  m_devOut = dev;
+	}
 
+	void ProcessImpl::start()
+	{
+	  m_devOut->write( "cucu", 4);
+	  printf( "written in m_devOut\n");
+	  m_devOut->sync();
 
-const std::string& ProcessImpl::args()
-{
-    return m_args;
-}
+	  m_pid = fork();
 
-
-void ProcessImpl::start()
-{
-    m_pid = fork();
-
-    if( m_pid < 0 )
-    {
+	  if( m_pid < 0 )
+	  {
         m_pid=-1;
         throw SystemError("System call FORK() Failed!",PT_SOURCEINFO);
-    }
+	  }
 
-    if( m_pid == 0)    // child Process
-    {
-        std::string strCommArgs = m_command + " " + m_args;
-        std::vector<char> buffer( strCommArgs.length() );
-        std::copy( strCommArgs.begin(), strCommArgs.end(), buffer.begin() );
-        buffer.push_back('\0');
+	  if( m_pid == 0)    // child Process
+	  {
+		if( m_devOut)
+		{
 
-        //char cp[strCommArgs.length() + 1];
-        //strcpy(cp, strCommArgs.c_str());
+		  int fd = m_devOut->impl()->fd();
+		  dup2( fd, 1);
+		}
 
-        char* cpArgs[ buffer.size() ];
+		if( m_devIn)
+		{
+		  int fd = m_devIn->impl()->fd();
+		  dup2( fd, 0);
+		}
 
-        unsigned int j = 0;
-		cpArgs[j++] = std::strtok(&buffer[0]," ");	// allocate the command to cpArgs
+		std::vector<char> args( m_args.length() );
+		std::copy( m_args.begin(), m_args.end(), args.begin() );
+		args.push_back('\0');
+		   
+		char* p = &args[0];
+		if( 0 > execvp(m_command.c_str(), &p))
+		{
+		  throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
+		  std::exit(-1);
+		}
+	  }
 
-		while( j < m_args.length()+1 && ( cpArgs[j++] = std::strtok(NULL," ") ) != NULL);	// allocate the arguments to cpArgs
-
-        if( 0 > execvp(cpArgs[0], cpArgs))
-        {
-            throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
-			std::exit(-1);
-        }
-    }
-    // Parent Process
-    return;
-}
-
-
-void ProcessImpl::kill()
-{
-    if( 0 > ::kill(m_pid,SIGINT) )
-    {
-		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-    }
-    if( m_pid != ::wait(NULL) )
-    {
-		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-    }
-}
+	  // Parent Process
+	  return;
+	}
 
 
-void ProcessImpl::wait()
-{
-    int iStatus;
-    if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
-    {
-		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-    }
-}
+	  void ProcessImpl::kill()
+	  {
+		if( 0 > ::kill(m_pid,SIGINT) )
+		{
+		  throw SystemError(std::strerror(errno),PT_SOURCEINFO);
+		}
+		if( m_pid != ::wait(NULL) )
+		{
+		  throw SystemError(std::strerror(errno),PT_SOURCEINFO);
+		}
+	  }
 
-} // namespace Pt
 
-} //namespace System
+	  void ProcessImpl::wait()
+	  {
+		int iStatus;
+		if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
+		{
+		  throw SystemError(std::strerror(errno),PT_SOURCEINFO);
+		}
+	  }
+
+	} // namespace Pt
+
+  } //namespace System
 

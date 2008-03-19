@@ -29,7 +29,6 @@ namespace Pt{
 namespace System{
 
 FileDeviceImpl::FileDeviceImpl()
-: _fd(-1)
 { }
 
 FileDeviceImpl::~FileDeviceImpl()

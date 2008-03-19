@@ -8,6 +8,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/Types.h>
 #include <Pt/SourceInfo.h>
+#include <Pt/System/IODevice.h>
 #include <Pt/System/SystemError.h>
 #include <string>
 #include <stdexcept>
@@ -45,6 +46,9 @@ class PT_SYSTEM_API Process {
             @return Arguments of the process
         */
         const std::string& args();
+
+		void setInput( IODevice* dev);
+		void setOutput( IODevice* dev);
 
         //! Start/Create the Process
         /**

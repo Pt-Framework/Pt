@@ -268,6 +268,8 @@ class BasicIODevice : public IO, protected NonCopyable {
         */
         Signal<IOResult&> outputReady;
 
+		virtual IODeviceImpl* impl() = 0;
+
     protected:
         //! @brief Default Constructor
         BasicIODevice()
