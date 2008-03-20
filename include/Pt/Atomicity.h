@@ -79,6 +79,10 @@
 
     #endif
 
+#elif defined(__SYMBIAN32__)
+	// x86 32bit inline assembly with Microsoft inline assembly syntax	
+	#define PT_ATOMICITY_H <Pt/Atomicity.cw.x86.h>
+
 #else
     #define PT_ATOMICITY_WITH_PTHREAD
     #define PT_ATOMICITY_H <Pt/Atomicity.pthread.h>
