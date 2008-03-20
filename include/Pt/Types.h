@@ -97,7 +97,7 @@ namespace Pt {
     typedef long long int64_t;
     /// \exclude
     typedef unsigned long long uint64_t;
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__MWERKS_SYMBIAN__)
     #define PT_WITH_INT64 1
     /// \exclude
     typedef long long int64_t;
