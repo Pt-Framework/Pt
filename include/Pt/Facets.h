@@ -21,8 +21,8 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <iosfwd>
 #include <cctype>
+
 
 #ifndef PT_WITHOUT_STD_LOCALE
 
@@ -170,77 +170,6 @@ namespace std {
 
 #endif
 
-// Workaround for stlport4
-template <typename _OutputIter, typename Flags>
-_OutputIter __put_integer(char* __buf, char* __iend,
-                          _OutputIter __s,
-                          std::ios_base& __f,
-                          Flags __flags, Pt::Char __fill)
-{
-    wchar_t wfill = __fill.value();
-    return __put_integer(__buf, __iend, __s, __f, __flags, wfill);
-}
-
-// Workaround for stlport4
-template <class _OutputIter>
-_OutputIter __put_float(char* __ibuf, char* __iend, _OutputIter __out,
-                        std::ios_base& __f, Pt::Char __fill,
-                        Pt::Char __decimal_point,
-                        Pt::Char __sep, const std::string& __grouping)
-{
-    wchar_t wfill = __fill.value();
-    wchar_t wdecimal_point = __decimal_point.value();
-    wchar_t wsep = __sep.value();
-
-    return __put_float(__ibuf, __iend, __out, __f,
-                       wfill, wdecimal_point, wsep, __grouping);
-}
-
-// Workaround for stlport4
-template <class _InputIter, class _Integer, class TrueOrFalse>
-bool __get_integer(_InputIter& __first, _InputIter& __last,
-                   int __base, _Integer& __val,
-                   int __got, bool __is_negative, Pt::Char __separator,
-                   const std::string& __grouping, const TrueOrFalse& tt)
-{
-    wchar_t wseparator = __separator.value();
-    return __get_integer(__first, __last,__base, __val, __got, __is_negative,
-                         wseparator, __grouping, tt);
-}
-
-// Workaround for stlport4
-inline void _Initialize_get_float(const std::ctype<Pt::Char>&,
-                                  Pt::Char& Plus, Pt::Char& Minus,
-                                  Pt::Char& pow_e, Pt::Char& pow_E,
-                                  Pt::Char*)
-{
-    Plus = L'+';
-    Minus = L'-';
-    pow_e = L'e';
-    pow_E = L'E';
-}
-
-// Workaround for stlport4
-// TODO: Is this really correct?
-inline bool __get_fdigit_or_sep(Pt::Char& __c, Pt::Char __sep, const Pt::Char*)
-{
-    if (__c == __sep)
-    {
-        __c = L',' ; 
-        return true ;
-    }
-
-    return ( __c >= L'0' && __c <= L'9');
-}
-
-// Workaround for stlport4
-// TODO: Is this really correct?
-inline bool __get_fdigit(Pt::Char& __c, const Pt::Char*)
-{
-    return __c >= L'0' && __c <= L'9';
-}
-
-
 namespace std {
 
     /** @brief Numpunct localization facet
@@ -257,9 +186,9 @@ namespace std {
 			typedef __numpunct_cache<Pt::Char>  __cache_type;
 			#endif
             // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-            #if __GNUC__ == 3 && __GNUC_MINOR__ == 4
-            typedef __numpunct_cache<Pt::Char>  __cache_type;
-            #endif
+			//#if __GNUC__ == 3 && __GNUC_MINOR__ == 4
+            //typedef __numpunct_cache<Pt::Char>  __cache_type;
+            //#endif
 
             static locale::id id;
 
@@ -395,7 +324,187 @@ namespace std {
                                                char dfault, char* dest) const;
     };
 
+#if PT_STLPORT
+    template <>
+    class PT_API num_put<Pt::Char> : public locale::facet {
+	public:
+		typedef Pt::Char    char_type;
+        typedef ostreambuf_iterator<Pt::Char>   iter_type;
 
+        typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
+        locale loc;
+        const num_put<wchar_t,iter_type_w>& numput_wchar;
+		
+		explicit num_put(size_t refs = 0);
+
+#if !defined (_STLP_NO_BOOL)
+		iter_type put(iter_type s, ios_base& f, char_type fill, 
+            bool val) const;
+#endif
+		
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            long val) const;
+
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            unsigned long val) const;
+
+#if defined (_STLP_LONG_LONG)
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            long long val) const;
+
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+        	unsigned long long val) const;
+#endif
+
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            double val) const;
+		
+#if !defined (_STLP_NO_LONG_DOUBLE)
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            long double val) const;
+#endif
+        
+        iter_type put(iter_type s, ios_base& f, char_type fill, 
+            void* val) const;
+
+        static locale::id id;
+
+	protected:
+        virtual ~num_put()
+        {
+        }
+
+#if !defined (_STLP_NO_BOOL)
+		virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+			bool val) const;
+#endif
+		
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+			long val) const;
+        
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+			unsigned long val) const;
+		
+#if defined (_STLP_LONG_LONG)
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, 
+            long long val) const;
+
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill, 
+            unsigned long long val) const;
+#endif
+
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+			double val) const;
+		
+#if !defined (_STLP_NO_LONG_DOUBLE)
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+			long double  val) const;
+#endif
+        
+        virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
+            void*) const;
+	};
+
+    template <>
+    class PT_API num_get<Pt::Char> : public locale::facet {
+    public:
+        typedef Pt::Char    char_type;
+        typedef istreambuf_iterator<Pt::Char>   iter_type;
+
+        typedef istreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
+        locale loc;
+        const num_get<wchar_t,iter_type_w>& numget_wchar;
+
+        explicit num_get(size_t refs = 0);
+
+#if !defined (_STLP_NO_BOOL)
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, bool& val) const;
+#endif
+        
+        iter_type get(iter_type, iter_type, ios_base& ,
+            ios_base::iostate&, long&) const;
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned short& val) const;
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned int& val) const;
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned long& val) const;
+
+#if defined (_STLP_LONG_LONG)
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, long long& val) const;
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned long long& val) const;
+#endif
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, float& val) const;
+
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, double& val) const;
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, long double& val) const;
+#endif
+        
+        iter_type get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, void* val) const;
+
+        static locale::id id;
+    protected:
+        virtual ~num_get()
+        {
+        }
+
+#if !defined (_STLP_NO_BOOL)
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, bool& val) const;
+#endif
+        
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate&, long& val) const;
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned short& val) const;
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned int& val) const;
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned long& val) const;
+
+#if defined (_STLP_LONG_LONG)
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, long long& val) const;
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, unsigned long long& val) const;
+#endif
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, float& val) const;
+
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, double& val) const;
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, long double& val) const;
+#endif
+        
+        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
+            ios_base::iostate& state, void* val) const;
+    };
+
+
+#endif
+    
 #if (defined _MSC_VER || defined __QNX__)
 
     class PT_API codecvt_base;

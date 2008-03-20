@@ -18,6 +18,9 @@
  ***************************************************************************/
 #include "Pt/Char.h"
 #include "Pt/String.h"
+#ifdef PT_STLPORT
+#include <sstream>
+#endif
 
 namespace std {
 
@@ -160,6 +163,332 @@ ctype<Pt::Char>::do_narrow(const Pt::Char* begin, const Pt::Char* end, char dfau
     return end;
 }
 
+#if PT_STLPORT
+//
+// num_put facet
+//
+template<class val_type>
+static num_put<Pt::Char>::iter_type put_val(const num_put<wchar_t,num_put<Pt::Char>::iter_type_w>& numput_wchar,
+                                     num_put<Pt::Char>::iter_type s, ios_base& f, num_put<Pt::Char>::char_type fill,
+                                     val_type val)
+{
+    basic_ostringstream<wchar_t> tmp;
+
+    num_put<Pt::Char>::iter_type_w begin(tmp);
+
+    // take over flags
+    tmp.flags(f.flags());
+    numput_wchar.put(begin, tmp, static_cast<wchar_t>(fill), val);
+
+    basic_string<wchar_t> str = tmp.str();
+
+    basic_string<wchar_t>::iterator srcit = str.begin();
+    const size_t len = str.length();
+    for (size_t i = 0; i < len; ++i)
+        *s++ = *srcit++;
+
+    return s;    
+}
+
+locale::id num_put<Pt::Char>::id;
+
+num_put<Pt::Char>::num_put(size_t refs) 
+: locale::facet(refs), numput_wchar(use_facet<num_put<wchar_t,iter_type_w> >(loc))
+{
+}
+
+#if !defined (_STLP_NO_BOOL)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+              bool val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+              long val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+                                                    unsigned long val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+
+#if defined (_STLP_LONG_LONG)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+              long long val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+              unsigned long long val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+              double val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+                                                    long double val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
+                                                    void* val) const
+{
+    return this->do_put(s, f, fill, val);
+}
+
+#if !defined (_STLP_NO_BOOL)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                    bool val) const
+{
+    return put_val<bool>(numput_wchar, s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                    long val) const
+{
+    return put_val<long>(numput_wchar, s, f, fill, val);
+}
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                       unsigned long val) const
+{
+    return put_val<unsigned long>(numput_wchar, s, f, fill, val);
+}
+
+#if defined (_STLP_LONG_LONG)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                    long long val) const
+{
+    return put_val<long long>(numput_wchar, s, f, fill, val);
+}
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                    unsigned long long val) const
+{
+    return put_val<unsigned long long>(numput_wchar, s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                    double val) const
+{
+    return put_val<double>(numput_wchar, s, f, fill, val);
+}
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                       long double val) const
+{
+    return put_val<long double>(numput_wchar, s, f, fill, val);
+}
+#endif
+
+num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
+                                                       void* val) const
+{
+    return put_val<void*>(numput_wchar, s, f, fill, val);
+}
+
+//
+// num_get facet
+//
+template<class val_type>
+static num_get<Pt::Char>::iter_type get_val(const num_get<wchar_t,num_get<Pt::Char>::iter_type_w>& numget_wchar,
+                                     num_get<Pt::Char>::iter_type s, num_get<Pt::Char>::iter_type e, ios_base& f,
+                                     ios_base::iostate& state, val_type val)
+{
+    typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > oiter_type_w;
+    typedef istreambuf_iterator<wchar_t,char_traits<wchar_t> > iiter_type_w;
+
+    // convert Pt::Char stream into wchar_t
+    basic_ostringstream<wchar_t> tmpstream;
+    oiter_type_w dst(tmpstream);
+
+    while (s != e)
+        *dst++ = *s++;
+
+    // take the result as input stream
+    basic_string<wchar_t> str = tmpstream.str();
+
+    basic_istringstream<wchar_t> ins(str);
+    iiter_type_w begin(ins);
+    iiter_type_w end;
+
+    // take over format flags
+    ins.flags(f.flags());
+
+    numget_wchar.get(begin, end, ins, state, val);
+    return s;
+}
+
+locale::id num_get<Pt::Char>::id;
+
+num_get<Pt::Char>::num_get(size_t refs) 
+: locale::facet(refs), numget_wchar(use_facet<num_get<wchar_t,iter_type_w> >(loc))
+{
+}
+
+#if !defined (_STLP_NO_BOOL)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, bool& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, long& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, unsigned short& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, unsigned int& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, unsigned long& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+#if defined (_STLP_LONG_LONG)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, long long& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, unsigned long long& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, float& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, double& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, long double& val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, void* val) const
+{
+    return this->do_get(s, e, f, state, val);
+}
+
+#if !defined (_STLP_NO_BOOL)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                    ios_base::iostate& state, bool& val) const
+{
+    return get_val<bool&>(numget_wchar, s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, long& val) const
+{
+    return get_val<long&>(numget_wchar, s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, unsigned short& val) const
+{
+    return get_val<unsigned short&>(numget_wchar, s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, unsigned int& val) const
+{
+    return get_val<unsigned int&>(numget_wchar, s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, unsigned long& val) const
+{
+    return get_val<unsigned long&>(numget_wchar, s, e, f, state, val);
+}
+
+#if defined (_STLP_LONG_LONG)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, long long& val) const
+{
+    return get_val<long long&>(numget_wchar, s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, unsigned long long& val) const
+{
+    return get_val<unsigned long long&>(numget_wchar, s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, float& val) const
+{
+    return get_val<float&>(numget_wchar, s, e, f, state, val);
+}
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, double& val) const
+{
+    return get_val<double&>(numget_wchar, s, e, f, state, val);
+}
+
+#if !defined (_STLP_NO_LONG_DOUBLE)
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, long double& val) const
+{
+    return get_val<long double&>(numget_wchar, s, e, f, state, val);
+}
+#endif
+
+num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
+                                                       ios_base::iostate& state, void* val) const
+{
+    return get_val<void*>(numget_wchar, s, e, f, state, val);
+}
+
+#endif
 
 //
 // numpunct facet
