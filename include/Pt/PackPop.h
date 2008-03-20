@@ -20,7 +20,7 @@
 
 #if defined (__GNUC__)
     // nothing
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) || defined (__MWERKS_SYMBIAN__)
     #pragma pack(pop)
 #elif defined(__INTEL_COMPILER)
     #pragma pack()

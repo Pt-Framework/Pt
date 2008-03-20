@@ -20,7 +20,7 @@
 
 #if defined (__GNUC__)
     #define PT_PACKED __attribute__ ((packed))
-#elif defined (_MSC_VER)
+#elif defined (_MSC_VER) || defined (__MWERKS_SYMBIAN__)
     #pragma pack(push, 1)
     #ifndef PT_PACKED
         #define PT_PACKED
