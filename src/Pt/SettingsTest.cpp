@@ -278,7 +278,7 @@ void SettingsTest::Section()
     std::stringstream ss;
     ss << "[a.b.c]\n";
     ss << "d.v = 1\n";
-    ss << "d.u = 2\n";
+    ss << "d.u = \"2\"\n";
     ss << "[x.y.z]\n";
     ss << "u.v = 3\n";
     ss << "u.w = \"4\"\n";
