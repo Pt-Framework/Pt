@@ -85,11 +85,13 @@ namespace Pt {
             : _value( (uint32_t)(val) )
             {}
 
+#ifndef __SYMBIAN32__            
             //! Constructs a character using the given 16-bit integer as base for the character value.
             Char(unsigned short val)
-            : _value(val)
+            : _value( (uint32_t)(val) )
             {}
-
+#endif
+            
             //! Constructs a character using the given 32-bit integer as base for the character value.
             Char(const int32_t& val)
             : _value( (uint32_t)(val) )
