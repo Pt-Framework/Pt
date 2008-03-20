@@ -23,8 +23,14 @@ class PT_SYSTEM_API Process {
         //! Constructs a Process with a command
         /**
             @param command Name of the executable
+            @param suppStdin  [IN] if true, suppresses standard in
+            @param suppStdOut [IN] if true, suppresses standard out
+            @param suppStdErr [IN] if true, suppresses standard err
         */
-        Process(const std::string& command);
+        Process(const std::string& command,
+                bool supStdIn = false,
+                bool supStdOut = false,
+                bool supStdErr = false);
 
         //! Dtor
         ~Process();
@@ -47,8 +53,23 @@ class PT_SYSTEM_API Process {
         */
         const std::string& args();
 
-		void setInput( IODevice* dev);
-		void setOutput( IODevice* dev);
+        //! Redirects the standar input, output, error
+        /** 
+         * @param dev [IN] redirection device
+         */
+		void setInput( IODevice& dev);
+
+        //! Redirects the standar output
+        /** 
+         * @param dev [IN] redirection device
+         */
+		void setOutput( IODevice& dev);
+
+        //! Redirects the standar error
+        /** 
+         * @param dev [IN] redirection device
+         */
+        void setErrput( IODevice& dev);
 
         //! Start/Create the Process
         /**

@@ -10,9 +10,12 @@ namespace Pt {
 
 namespace System {
 
-Process::Process(const std::string& command)
+Process::Process(const std::string& command,
+                 bool suppStdIn,
+                 bool suppStdOut,
+                 bool suppStdErr)
 {
-    _impl = new ProcessImpl(command);
+    _impl = new ProcessImpl(command, suppStdIn, suppStdOut, suppStdErr);
 }
 
 Process::~Process()
@@ -35,16 +38,20 @@ const std::string& Process::args()
      return _impl->args();
 }
 
-
-  void Process::setInput( IODevice* dev)
-  {
+void Process::setInput( IODevice& dev)
+{
 	_impl->setInput( dev);
-  }
+}
 		  
-  void Process::setOutput( IODevice* dev)
-  {
+void Process::setOutput( IODevice& dev)
+{
 	_impl->setOutput( dev);
-  }
+}
+
+void Process::setErrput( IODevice& dev)
+{
+	_impl->setErrput( dev);
+}
 
 void Process::start()
 {
