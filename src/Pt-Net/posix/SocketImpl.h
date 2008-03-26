@@ -36,7 +36,7 @@
     #include <sys/socket.h>
     #include <unistd.h>
     #include <cerrno>
-    #ifdef __QNX__
+    #if defined(__QNX__) || defined(__SYMBIAN32__)
         #include <sys/select.h>
     #else
         #include <sys/poll.h>
