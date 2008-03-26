@@ -77,6 +77,11 @@
 #elif __GNUC__ >= 4
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
+#elif __SYMBIAN32__
+    // leave that empty on symbian for now
+    // dynamic linking is not yet supported
+    #define PT_EXPORT
+    #define PT_IMPORT
 #else
     #define PT_EXPORT
     #define PT_IMPORT

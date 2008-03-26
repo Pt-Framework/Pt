@@ -52,23 +52,6 @@ class MethodInfoBase : public CallableInfo
         size_t argSize() const
         { return 8; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-                case 3: return TypeTraits<A4>::typeName();
-                case 4: return TypeTraits<A5>::typeName();
-                case 5: return TypeTraits<A6>::typeName();
-                case 6: return TypeTraits<A7>::typeName();
-                case 7: return TypeTraits<A8>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -85,9 +68,6 @@ class MethodInfoBase : public CallableInfo
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -117,20 +97,6 @@ class MethodInfoBase<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : p
         size_t argSize() const
         { return 5; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-                case 3: return TypeTraits<A4>::typeName();
-                case 4: return TypeTraits<A5>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -144,9 +110,6 @@ class MethodInfoBase<R, C, A1, A2, A3, A4, A5, Pt::Void, Pt::Void, Pt::Void> : p
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -175,19 +138,6 @@ class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Voi
         size_t argSize() const
         { return 4; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-                case 3: return TypeTraits<A4>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -200,9 +150,6 @@ class MethodInfoBase<R, C, A1, A2, A3, A4, Pt::Void, Pt::Void, Pt::Void, Pt::Voi
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -230,18 +177,6 @@ class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, P
         size_t argSize() const
         { return 3; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-                case 2: return TypeTraits<A3>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -253,9 +188,6 @@ class MethodInfoBase<R, C, A1, A2, A3, Pt::Void, Pt::Void, Pt::Void, Pt::Void, P
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -282,17 +214,6 @@ class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::V
         size_t argSize() const
         { return 2; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-                case 1: return TypeTraits<A2>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -303,9 +224,6 @@ class MethodInfoBase<R, C, A1, A2, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::V
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -331,16 +249,6 @@ class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void,
         size_t argSize() const
         { return 1; }
 
-        const char* argName(size_t index) const
-        {
-            switch(index)
-            {
-                case 0: return TypeTraits<A1>::typeName();
-            }
-
-            throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
-        }
-
         const std::type_info& argType(size_t index) const
         {
             switch(index)
@@ -350,9 +258,6 @@ class MethodInfoBase<R, C, A1, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void,
 
             throw std::invalid_argument("No such argument" + PT_SOURCEINFO);
         }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }
@@ -377,14 +282,8 @@ class MethodInfoBase<R, C, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt::Void, Pt:
         size_t argSize() const
         { return 0; }
 
-        const char* argName(size_t index) const
-        { throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
-
         const std::type_info& argType(size_t index) const
         { throw std::invalid_argument("No such argument" + PT_SOURCEINFO); }
-
-        const char* retName() const
-        { return TypeTraits<R>::typeName(); }
 
         const std::type_info& retType() const
         { return typeid(R); }

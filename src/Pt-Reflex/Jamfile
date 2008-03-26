@@ -9,9 +9,9 @@ SharedLibrary_LinkSharedLibraries Pt-Reflex : Pt ;
 SharedLibrary_MakeLocate Pt-Reflex : $(OUTPUT_TARGET) ;
 SharedLibrary_Install Pt-Reflex ;
 
-#PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
-#Main_LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
-#PtUnitTest_MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
+PtUnitTest Pt-Reflex-test : ReflectableTest.cpp ;
+Main_LinkSharedLibraries Pt-Reflex-test : Pt Pt-Reflex Pt-Unit ;
+PtUnitTest_MakeLocate Pt-Reflex-test : $(OUTPUT_TARGET) ;
 
 # Define pseudo targets to call from projects
 NOTFILE Pt-Reflex-all ;

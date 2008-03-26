@@ -40,11 +40,7 @@ namespace Reflex {
         public:
             virtual size_t argSize() const = 0;
 
-            virtual const char* argName(size_t index) const = 0;
-
             virtual const std::type_info& argType(size_t index) const = 0;
-
-            virtual const char* retName() const = 0;
 
             virtual const std::type_info& retType() const = 0;
 

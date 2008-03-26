@@ -1,30 +1,42 @@
-# Initialize variables
-#
-CC     = CC ;
+##############################################################################
+# Tools and utilities
+##############################################################################
+CC     = cc ;
 C++    = CC ;
 RANLIB ?= ranlib ;
 
+##############################################################################
+# Compiler flags
+##############################################################################
+WARN ?= +w  -erroff=doubunder -errtags=yes ; # , hidef,hidevf -errtags=yes ;
+
 if $(CONFIG:L) = debug
 {
-    CCFLAGS += -DDEBUG -g ;
+    CCFLAGS += -DEBUG -g ;
     OPTIM   ?= ;
 }
-else
+else if $(CONFIG:L) = release
 {
     CCFLAGS += -DNDEBUG ;
-    OPTIM	  ?= -fast ;
+    OPTIM	?= -fast ;
 }
+
+CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
 
 C++FLAGS  += $(CCFLAGS) ;
-WARN ?= +w  -erroff=doubunder,hidef -errtags=yes ;
+C++FLAGS += -library=stlport4 ;
 
-if $(LIBC++) = stlport4
-{
-    C++FLAGS += -library=stlport4 ;
-    LINKFLAGS += -library=stlport4 ;
-}
+##############################################################################
+# Linker flags
+##############################################################################
+LINKFLAGS += -mt -lpthread ;
 
+C++LINKFLAGS += $(LINKFLAGS) ;
+C++LINKFLAGS += -library=stlport4 ;
 
+##############################################################################
+# Rules
+##############################################################################
 rule FDefines
 { return -D$(<) ; }
 
@@ -38,7 +50,17 @@ rule MainImpl
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
-    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case * :    LINK on $(_target) = $(CC) ;
+                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    }
 }
 
 
@@ -59,7 +81,19 @@ rule SharedLibraryImpl
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-    LINKFLAGS on $(_target) += $(LINKFLAGS) -G ;
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case * :    LINK on $(_target) = $(CC) ;
+                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    }
+
+    LINKFLAGS on $(_target) += -G ;
 }
 
 
@@ -73,9 +107,11 @@ rule SharedLibrary_LinkSharedLibrariesImpl
     LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 }
 
-
+##############################################################################
+# Actions
+##############################################################################
 actions Link bind NEEDLIBS SHLIBS
 {
-    $(CC) -o $(<) $(LINKFLAGS) -L$(SHLIBS:P) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+    $(LINK) -o $(<) $(LINKFLAGS) -L$(SHLIBS:P) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(NEEDLIBS) $(LINKLIBS) 
 }
 

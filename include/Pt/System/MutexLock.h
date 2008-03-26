@@ -61,7 +61,7 @@ namespace System {
     */
     class MutexLock {
         public:
-            //! Constructor
+            //! @brief Constructor
             /**
                 Construct a MutexLock object and lock the enclosing mutex.
 
@@ -69,14 +69,29 @@ namespace System {
             */
             MutexLock(Mutex& m)
             : _mutex(m)
+            , _isLocked(true)
             { _mutex.lock(); }
 
-            //! Destructor
+            //! @brief Destructor
             /**
                 The destructor unlocks the mutex.
              */
-             ~MutexLock()
-             { _mutex.unlock(); }
+            ~MutexLock()
+            {
+                try
+                {
+                    if(_isLocked)
+                        _mutex.unlock();
+                }
+                catch(...) {}
+            }
+
+            //! @brief Unlock so that the destructor does not unlock
+            void unlock()
+            {
+                _mutex.unlock();
+                _isLocked = false;
+            }
 
              //! @brief Get the mutex object
              /**
@@ -94,6 +109,7 @@ namespace System {
 
             private:
                 Mutex& _mutex;
+                bool _isLocked;
     };
 
 

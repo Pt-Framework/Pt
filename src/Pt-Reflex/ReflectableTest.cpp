@@ -218,7 +218,7 @@ class TestReflectable : public Pt::Reflex::Reflectable
 };
 
 
-class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
+class ReflectableTest : public Pt::Unit::TestSuite
 {
     public:
         ReflectableTest()
@@ -320,7 +320,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             ++it;
             PT_UNIT_ASSERT( it == reflectable.propertiesEnd() );
         }
-
+/*
         void Method1()
         {
             TestReflectable refl;
@@ -341,6 +341,7 @@ class ReflectableTest : public Pt::Unit::TestSuite, public Pt::Connectable
             PT_UNIT_ASSERT( refl.methodInfo("method3").argName(1) == std::string("bool") );
             PT_UNIT_ASSERT( refl.methodInfo("method3").argName(2) == std::string("char") );
         }
+*/
 };
 
 
