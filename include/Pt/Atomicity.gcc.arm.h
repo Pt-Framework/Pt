@@ -121,6 +121,7 @@ inline atomic_t atomicExchange(volatile atomic_t& dest, atomic_t exch)
        return a;
 }
 
+#ifndef __GCCE__
 template <typename T>
 T* atomicExchange(T* volatile& dest, T* exch)
 {
@@ -132,6 +133,18 @@ T* atomicExchange(T* volatile& dest, T* exch)
 
        return a;
 }
+#else
+void* atomicExchange(void* volatile& dest, void* exch)
+{
+	   void* a;
+
+       asm volatile ( "swp %0, %2, [%1]"
+                      : "=&r" (a)
+                      : "r" (&dest), "r" (exch));
+
+       return a;
+}
+#endif
 
 
 inline atomic_t atomicExchangeAdd(volatile atomic_t& dest, atomic_t add)
