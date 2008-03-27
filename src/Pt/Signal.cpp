@@ -17,14 +17,107 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Signal.h"
-using namespace Pt;
 
-#include <iostream>
-using namespace std;
+namespace Pt {
+
+SignalBase::Sentry::Sentry(const SignalBase* signal)
+: _signal(signal)
+{
+    _signal->_sentry = this;
+    _signal->_sending = true;
+    _signal->_dirty = false;
+}
 
 
+SignalBase::Sentry::~Sentry()
+{
+    if( _signal )
+        this->detach();
+}
 
 
+void SignalBase::Sentry::detach()
+{
+    _signal->_sending = false;
 
+    if( _signal->_dirty == false )
+    {
+        _signal->_sentry = 0;
+        _signal = 0;
+        return;
+    }
+
+    std::list<Connection>::iterator it = _signal->_connections.begin();
+    while( it != _signal->_connections.end() )
+    {
+        if( it->valid() )
+        {
+            ++it;
+        }
+        else
+        {
+            it = _signal->_connections.erase(it);
+        }
+    }
+
+    _signal->_dirty = false;
+    _signal->_sentry = 0;
+    _signal = 0;
+}
+
+
+SignalBase::SignalBase()
+: _sentry(0)
+, _sending(false)
+{ }
+
+
+SignalBase::~SignalBase()
+{
+    if(_sentry)
+    {
+        _sentry->detach();
+    }
+}
+
+
+SignalBase& SignalBase::operator=(const SignalBase& other)
+{
+    this->clear();
+
+    std::list<Connection>::const_iterator it = other.connections().begin();
+    std::list<Connection>::const_iterator end = other.connections().end();
+
+    for( ; it != end; ++it) {
+        const Slot& slot = it->slot();
+        Connection connection( *this, slot.clone()  );
+    }
+
+    return *this;
+}
+
+
+bool SignalBase::opened(const Connection& c)
+{
+    return Connectable::opened(c);
+}
+
+
+void SignalBase::closed(const Connection& c)
+{
+    // if the signal is currently calling its slots, do not
+    // remove the connection now, but only set the cleanup flag
+    // Any invalid connection objects will be removed after
+    // the signal has finished calling its slots by the Sentry.
+    if( _sending )
+    {
+        _dirty = true;
+    }
+    else
+    {
+        Connectable::closed(c);
+    }
+}
+
+}

@@ -38,9 +38,9 @@ namespace System {
     {
         public:
             ProcessImplBase(const string& command,
-                            bool suppStdIn,
-                            bool suppSdtOut,
-                            bool suppStdErr);
+                            bool suppStdIn = false,
+                            bool suppSdtOut = false,
+                            bool suppStdErr = false);
 
             static void sleep(unsigned int milliSec)
             { ::Sleep(milliSec); }
@@ -70,9 +70,9 @@ namespace System {
         
         bool m_suppStdStream[3];
         
-        IODevice* m_stdIn;
-        IODevice* m_stdOut;
-        IODevice* m_stdErr;
+        IODevice* m_devIn;
+        IODevice* m_devOut;
+        IODevice* m_devErr;
         string m_args;
     };
 

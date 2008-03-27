@@ -30,58 +30,20 @@
 #include <list>
 #include <algorithm>
 
-
 namespace Pt {
 
     /** @internal
     */
-    class SignalBase : public Connectable
+    class PT_API SignalBase : public Connectable
     {
         public:
-            struct Sentry
+            struct PT_API Sentry
             {
-                Sentry(const SignalBase* signal)
-                : _signal(signal)
-                {
-                    _signal->_sentry = this;
-                    _signal->_sending = true;
-                    _signal->_dirty = false;
-                }
+                Sentry(const SignalBase* signal);
 
-                ~Sentry()
-                {
-                    if( _signal )
-                        this->detach();
-                }
+                ~Sentry();
 
-                void detach()
-                {
-                    _signal->_sending = false;
-
-                    if( _signal->_dirty == false )
-                    {
-                        _signal->_sentry = 0;
-                        _signal = 0;
-                        return;
-                    }
-
-                    std::list<Connection>::iterator it = _signal->_connections.begin();
-                    while( it != _signal->_connections.end() )
-                    {
-                        if( it->valid() )
-                        {
-                            ++it;
-                        }
-                        else
-                        {
-                            it = _signal->_connections.erase(it);
-                        }
-                    }
-
-                    _signal->_dirty = false;
-                    _signal->_sentry = 0;
-                    _signal = 0;
-                }
+                void detach();
 
                 bool operator!() const
                 { return _signal == 0; }
@@ -89,54 +51,15 @@ namespace Pt {
                 const SignalBase* _signal;
             };
 
-            SignalBase()
-            : _sentry(0)
-            , _sending(false)
-            { }
+            SignalBase();
 
-            ~SignalBase()
-            {
-                if(_sentry)
-                {
-                    _sentry->detach();
-                }
-            }
+            ~SignalBase();
 
-            SignalBase& operator=(const SignalBase& other)
-            {
-                this->clear();
+            SignalBase& operator=(const SignalBase& other);
 
-                std::list<Connection>::const_iterator it = other.connections().begin();
-                std::list<Connection>::const_iterator end = other.connections().end();
+            virtual bool opened(const Connection& c);
 
-                for( ; it != end; ++it) {
-                    const Slot& slot = it->slot();
-                    Connection connection( *this, slot.clone()  );
-                }
-
-                return *this;
-            }
-
-            virtual bool opened(const Connection& c)
-            {
-                return Connectable::opened(c);
-            }
-
-            virtual void closed(const Connection& c)
-            {
-                // if the signal is currently calling its slots, do not
-                // remove the connection now, but only set the cleanup flag
-                // Any invalid connection objects will be removed after
-                // the signal has finished calling its slots by the Sentry.
-                if( _sending )
-                {
-                    _dirty = true;
-                }
-                else
-                {
-                    Connectable::closed(c);
-                }
-            }
+            virtual void closed(const Connection& c);
 
         private:
             mutable Sentry* _sentry;
