@@ -274,8 +274,12 @@ namespace Pt {
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
         struct AssignElements
         {
-            static void assign(ArrayA& to, const ArrayB& from)
-            {
+#ifdef __MWERKS_SYMBIAN__
+        	static void assign(ArrayA& to, ArrayB& from)
+#else
+        	static void assign(ArrayA& to, const ArrayB& from)
+#endif
+        	{
                 to[N] = from[N];
                 AssignElements<N-1, Min, ArrayA, ArrayB>::assign(to, from);
             }
@@ -293,13 +297,21 @@ namespace Pt {
         template<typename ArrayA, typename ArrayB>
         struct AssignElements<0, 0, ArrayA, ArrayB>
         {
+#ifdef __MWERKS_SYMBIAN__        	
+            static void assign(ArrayA& to, ArrayB& from)
+#else
             static void assign(ArrayA& to, const ArrayB& from)
+#endif
             { to[0] = from[0]; }
         };
 
         //! \internal
         template<size_t N, size_t Min, typename ArrayA, typename ArrayB>
+#ifdef __MWERKS_SYMBIAN__
+        void assignElements(ArrayA& to, ArrayB& from)
+#else
         void assignElements(ArrayA& to, const ArrayB& from)
+#endif
         { AssignElements<N-1, Min, ArrayA, ArrayB>::assign(to, from); }
 
 
