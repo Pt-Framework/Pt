@@ -178,6 +178,7 @@ static num_put<Pt::Char>::iter_type put_val(const num_put<wchar_t,num_put<Pt::Ch
 
     // take over flags
     tmp.flags(f.flags());
+    tmp.precision(f.precision());
     numput_wchar.put(begin, tmp, static_cast<wchar_t>(fill), val);
 
     basic_string<wchar_t> str = tmp.str();
@@ -332,6 +333,7 @@ static num_get<Pt::Char>::iter_type get_val(const num_get<wchar_t,num_get<Pt::Ch
 
     // take over format flags
     ins.flags(f.flags());
+    ins.precision(f.precision());
 
     numget_wchar.get(begin, end, ins, state, val);
     return s;
