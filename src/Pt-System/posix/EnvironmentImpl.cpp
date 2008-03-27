@@ -87,6 +87,13 @@ const std::string EnvironmentImpl::currentDirectory()
     return std::string(cwd);
 }
 
+bool EnvironmentImpl::changeDirectory( const std::string& path)
+{
+    int retVal = chdir( path.c_str());
+    return retVal != -1;
+}
+    
+
 const std::string EnvironmentImpl::tempDirectory()
 {
     std::string tmpDir = Process::getEnvVar("TEMP");

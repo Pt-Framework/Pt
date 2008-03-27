@@ -71,6 +71,15 @@ namespace System {
              */
             static Directory currentDirectory();
 
+	    /** 
+	     * @brief changes the current directory
+	     * 
+	     * @param Directory [IN] the path for the working directory
+	     * 
+	     * @return true on success
+	     */
+	    static bool changeDirectory( Directory);	    
+
             /**
              *  @brief Returns the systems tmp directory.
              *               
@@ -81,7 +90,7 @@ namespace System {
              *  tmp directory does not exist, the current directory is returned.                                       
              */
             static Directory tempDirectory();
-            
+	    
             /*
              * @return the total physical memory in kiloByte (kB)
              */

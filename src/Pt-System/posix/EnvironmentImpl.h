@@ -42,6 +42,8 @@ public:
     
     static const std::string currentDirectory();
 
+    static bool changeDirectory( const std::string& path);
+
     static const std::string tempDirectory();
 
     static char pathSeparator()

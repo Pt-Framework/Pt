@@ -64,6 +64,12 @@ Directory Environment::currentDirectory()
     return Directory( path.c_str() );
 }
 
+bool Environment::changeDirectory( Directory workingDir)
+{
+    std::string path = workingDir.path();
+    return EnvironmentImpl::changeDirectory( path);
+}
+    
 Directory Environment::tempDirectory()
 {
     std::string path = EnvironmentImpl::tempDirectory();
