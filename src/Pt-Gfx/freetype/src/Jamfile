@@ -3,7 +3,7 @@ SubDir TOP src Pt-Gfx freetype src ;
 SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-Gfx/freetype/include ;
 
-CCFLAGS += [ FDefines FT2_BUILD_LIBRARY ] ;
+SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
 
 Library Pt-Gfx-freetype :
 	[ FDirName autofit autofit.c ]
