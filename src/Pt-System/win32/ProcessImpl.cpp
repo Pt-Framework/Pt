@@ -8,8 +8,8 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const string& command, bool, bool, bool)
-: ProcessImplBase(command)
+ProcessImpl::ProcessImpl(const string& command, bool suppIn, bool suppOut, bool suppErr)
+: ProcessImplBase(command, suppIn, suppOut, suppErr)
 {}
 
 

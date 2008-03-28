@@ -30,7 +30,7 @@ namespace System {
 class ProcessImpl : public ProcessImplBase
 {
     public:
-        ProcessImpl(const string& command);
+        ProcessImpl(const string& command, bool noIn, bool noOut, bool noErr);
 
         static std::string getEnvVar(const string& name);
         

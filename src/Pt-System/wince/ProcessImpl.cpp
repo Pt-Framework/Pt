@@ -25,8 +25,8 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const string& command)
-: ProcessImplBase(command)
+ProcessImpl::ProcessImpl(const string& command, bool noIn, bool noOut, bool noErr)
+: ProcessImplBase(command, noIn, noOut, noErr)
 {}
 
 

@@ -79,7 +79,13 @@ const std::string EnvironmentImpl::currentDirectory()
 
 bool EnvironmentImpl::changeDirectory( const std::string& path)
 {
-    return SetCurrentDirectory(path.c_str()) != 0;
+	#ifdef _WIN32_WCE
+    
+        throw std::runtime_error("SetCurrentDirectory not supported." + PT_SOURCEINFO);
+		return false;
+	#else	
+	return ::SetCurrentDirectory(path.c_str()) != 0;
+	#endif
 }
 
 

@@ -1,10 +1,8 @@
 #include "ProcessImplBase.h"
+#include "IODeviceImpl.h"
+
 #include "win32.h"
 #include <vector>
-
-#include <iostream>
-using namespace std;
-
 
 namespace Pt {
 
@@ -42,15 +40,51 @@ const std::string& ProcessImplBase::args()
     return m_args;
 }
 
-
 void ProcessImplBase::start()
 {
     ZeroMemory( &m_startUp, sizeof(m_startUp) );
     m_startUp.cb = sizeof(m_startUp);
     ZeroMemory( &m_pid, sizeof(m_pid) );
 
+#ifndef _WIN32_WCE
+	if( m_devIn)
+	{
+		SetHandleInformation( m_devIn->impl()->deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, 0);
+		m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
+	}
+	else
+	{
+		if( m_suppStdStream[0])
+			m_startUp.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+	}
 
-#ifdef _WIN32_WCE
+	if( m_devOut)
+	{
+		SetHandleInformation( m_devOut->impl()->deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, 0);
+		m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
+	}
+	else
+	{
+		if( m_suppStdStream[1])
+			m_startUp.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	}
+
+	if( m_devErr)
+	{
+		SetHandleInformation( m_devErr->impl()->deviceHandle(), 
+							  HANDLE_FLAG_INHERIT, 0);
+		m_startUp.hStdError = m_devErr->impl()->deviceHandle();
+	}
+	else
+	{
+		if( m_suppStdStream[2])
+			m_startUp.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+	}
+
+    m_startUp.dwFlags |= STARTF_USESTDHANDLES;
+
     std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command  );
     std::basic_string<TCHAR> targs = win32::fromMultiByte( m_args );
     BOOL ret = CreateProcess( tcommand.c_str(), targs.c_str(), NULL, NULL,
