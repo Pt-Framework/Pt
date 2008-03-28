@@ -12,16 +12,16 @@ namespace System {
 
 ProcessImplBase::ProcessImplBase(const string& command,
                             bool suppStdIn,
-                            bool suppSdtOut,
+                            bool suppStdOut,
                             bool suppStdErr)
   : m_command(command)
   , m_devIn(0)
   , m_devOut(0)
   , m_devErr(0)
 {
-    m_suppStdStream[0] = 0;
-    m_suppStdStream[1] = 0;
-    m_suppStdStream[2] = 0;    
+    m_suppStdStream[0] = suppStdIn;
+    m_suppStdStream[1] = suppStdOut;
+    m_suppStdStream[2] = suppStdErr;    
 }
 
 
