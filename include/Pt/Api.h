@@ -73,7 +73,10 @@
 
 #if defined(_MSC_VER) || defined(WIN32) || defined(_WIN32)
     #define PT_EXPORT __declspec(dllexport)
-    #define PT_IMPORT __declspec(dllimport)    
+    #define PT_IMPORT __declspec(dllimport)
+    #if !defined(_NATIVE_WCHAR_T_DEFINED)
+        #define PT_WCHAR_T_IS_USHORT
+    #endif
 #elif __GNUC__ >= 4
     #define PT_EXPORT __attribute__((visibility("default")))
     #define PT_IMPORT
@@ -82,6 +85,7 @@
     // dynamic linking is not yet supported
     #define PT_EXPORT
     #define PT_IMPORT
+    #define PT_WCHAR_T_IS_USHORT
 #else
     #define PT_EXPORT
     #define PT_IMPORT
@@ -91,7 +95,7 @@
     #define PT_API PT_EXPORT
 #else
     #define PT_API PT_IMPORT
-# endif
+#endif
 
 #endif
 

@@ -85,7 +85,7 @@ namespace Pt {
             : _value( (uint32_t)(val) )
             {}
 
-#ifndef _STLP_WCHAR_T_IS_USHORT            
+#ifndef PT_WCHAR_T_IS_USHORT            
             //! Constructs a character using the given 16-bit integer as base for the character value.
             Char(unsigned short val)
             : _value( (uint32_t)(val) )
