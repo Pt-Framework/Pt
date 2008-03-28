@@ -181,17 +181,11 @@ namespace std {
             typedef Pt::Char char_type;
             typedef std::basic_string<Pt::Char> string_type;
 
-
             // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-			#if __GLIBCXX__ <= 20050421 && __GLIBCXX__ >= 20040419
+			#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
 			typedef __numpunct_cache<Pt::Char>  __cache_type;
 			#endif
-
-            // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-			//#if __GNUC__ == 3 && __GNUC_MINOR__ == 4
-            //typedef __numpunct_cache<Pt::Char>  __cache_type;
-            //#endif
-
+            
             static locale::id id;
 
         public:
