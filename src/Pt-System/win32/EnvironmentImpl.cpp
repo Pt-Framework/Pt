@@ -79,7 +79,7 @@ const std::string EnvironmentImpl::currentDirectory()
 
 bool EnvironmentImpl::changeDirectory( const std::string& path)
 {
-    return SetCurrentDirectory( path.c_str());
+    return SetCurrentDirectory(path.c_str()) != 0;
 }
 
 
