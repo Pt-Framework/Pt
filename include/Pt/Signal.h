@@ -21,6 +21,7 @@
 #ifndef Pt_Signal_h
 #define Pt_Signal_h
 
+#include <Pt/Api.h>
 #include <Pt/Void.h>
 #include <Pt/Function.h>
 #include <Pt/Method.h>
