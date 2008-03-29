@@ -33,7 +33,9 @@ if $(TARGET_OS) = "aspen"
         LINKFLAGS += -arch i386 ;
         LINKFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
         LINKFLAGS += -Wl,-rpath,/Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
-        LINKFLAGS += -mmacosx-version-min=10.5 ;
+        LINKFLAGS += -mmacosx-version-min=10.5 -rpath,/bin ;
+        
+        Echo LINKFLAGS $(LINKFLAGS) ;
     }
 }
 
@@ -72,6 +74,14 @@ rule FIncludes
 { return -I$(<) ; }
 
 
+rule FLinkLibs
+{ return -l$(<) ; }
+
+
+rule FLinkPath
+{ return -L$(<) ; }
+
+
 rule MainImpl
 {
     # Add executable name decoration
@@ -82,12 +92,18 @@ rule MainImpl
 rule Main_LinkSharedLibrariesImpl
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
 
-    SHLIBS on $(_target) += $(_libs) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+	if $(3)
+	{
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+	}
+	else
+	{
+		Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
 }
 
 
@@ -96,7 +112,7 @@ rule SharedLibraryImpl
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-    LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib ;
+    LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib -install_name $(_target) ;
 }
 
 
