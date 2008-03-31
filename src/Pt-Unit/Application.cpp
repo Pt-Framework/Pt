@@ -67,6 +67,8 @@ Application::Application()
 {
     _app = this;
 
+    // become parent of all tests that have been registered during
+    // static initialization
     std::list<Test*>::iterator it;
     for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
     {
@@ -77,6 +79,11 @@ Application::Application()
 
 Application::~Application()
 {
+    std::list<Test*>::iterator it;
+    for(it = Application::tests().begin(); it != Application::tests().end(); ++it)
+    {
+        (*it)->setParent( 0 );
+    }
 }
 
 
@@ -154,6 +161,14 @@ void Application::run()
 void Application::registerTest(Test& test)
 {
     Application::tests().push_back(&test);
+    test.setParent(this);
+}
+
+
+void Application::deregisterTest(Test& test)
+{
+    Application::tests().remove(&test);
+    test.setParent(0);
 }
 
 

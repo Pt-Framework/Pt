@@ -103,23 +103,22 @@ namespace Unit {
             unsigned errors() const
             { return _errors; }
 
+            /** @brief Register a test
+
+                Registers the test \a test to the application. The application
+                will not own the test and the caller has to make sure it exists
+                as long as the application object. Tests can be deregistered
+                by calling %deregisterTest.
+            */
+            void registerTest(Test& test);
+
+            void deregisterTest(Test& test);
+
             /** @brief Returns a list of all registered test
                 TODO: find another way to query available tests
                 @return Reference to the registered tests.
             */
             static std::list<Test*>& tests();
-
-            /** @brief Register a test
-
-                Registers a test to the application. The application will
-                not own the test and the caller has to make sure it exists
-                as long as the application object. This method is called
-                by the RegisterTest class template and does not need to
-                be called directly.
-
-                @param test Test to register
-            */
-            static void registerTest(Test& test);
 
         private:
             static Application* _app;
