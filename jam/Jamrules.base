@@ -647,6 +647,7 @@ rule Library
 {
     local _l = $(PRELIB)$(<)$(SUFLIB) ;
     Depends $(<) : $(_l) ;
+    NotFile $(<) ;
 
     LibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) : $(1) ;
@@ -763,7 +764,7 @@ rule Main
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
-    Depends exe : $(1) ;
+    Depends exe : $(<) ;
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
     Objects $(>) ;
@@ -1087,6 +1088,7 @@ rule SharedLibrary
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     Depends $(<) : $(_target) ;
+    NotFile $(<) ;
 
     SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) ;
