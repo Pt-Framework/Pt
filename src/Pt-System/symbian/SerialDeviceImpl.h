@@ -20,19 +20,12 @@
 #ifndef PT_SYSTEM_SERIALDEVICEIMPL_H
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
-#ifndef __SYMBIAN32__
-#include <termios.h>
-#else
-#include <sys/termios.h>
-#endif
-
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 #include "IODeviceImpl.h"
-
 #include <string>
-
+#include <termios.h>
 
 namespace Pt {
 

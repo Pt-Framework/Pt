@@ -21,12 +21,10 @@
 #define PT_SYSTEM_SERIALDEVICEIMPL_H
 
 #include <termios.h>
-
 #include "Pt/System/IODevice.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SerialDevice.h"
 #include "IODeviceImpl.h"
-
 #include <string>
 
 
