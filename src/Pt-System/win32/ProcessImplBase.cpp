@@ -85,16 +85,16 @@ void ProcessImplBase::start()
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
-    std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command  );
-    std::basic_string<TCHAR> targs = win32::fromMultiByte( m_args );
-    BOOL ret = CreateProcess( tcommand.c_str(), targs.c_str(), NULL, NULL,
-                              0, 0, NULL, NULL, &m_startUp, &m_pid);
-#else
     std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command + " " + m_args  );
     m_buffer.assign( tcommand.begin(), tcommand.end() );
     m_buffer.push_back(0);
     BOOL ret = CreateProcess( NULL, &m_buffer[0], NULL, NULL,
                               true, 0, NULL, NULL, &m_startUp, &m_pid);
+#else
+    std::basic_string<TCHAR> tcommand = win32::fromMultiByte( m_command  );
+    std::basic_string<TCHAR> targs = win32::fromMultiByte( m_args );
+    BOOL ret = CreateProcess( tcommand.c_str(), targs.c_str(), NULL, NULL,
+                              0, 0, NULL, NULL, &m_startUp, &m_pid);
 #endif
 
     if( !ret )
