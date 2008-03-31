@@ -296,7 +296,7 @@ actions Ecppc
 #############################################################################
 
 # set directory to build object files into
-OBJECT_TARGET = tmp ;
+ALL_LOCATE_OBJECTS = tmp ;
 
 # set directory to build library/binary files into
 OUTPUT_TARGET = bin ;

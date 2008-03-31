@@ -196,7 +196,7 @@ YACC        ?= ;
 YACCFILES   ?= ;
 YACCFLAGS   ?= ;
 TEMP_TARGET ?= ;
-OBJECT_TARGET ?= tmp ;
+# OBJECT_TARGET ?= tmp ;
 SPACE = " " ;
 
 
@@ -930,18 +930,20 @@ rule Object
 
     Clean clean : $(<) ;
 
-    if $(LOCATE_OBJECTS) != $(LOCATE_TARGET)
-    {
-        MakeLocate $(<) : $(LOCATE_OBJECTS) ;
-    }
-    else if $(OBJECT_TARGET)
-    {
-        MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
-    }
-    else
-    {
-        MakeLocate $(<) : $(LOCATE_TARGET) ;
-    }
+    #if $(LOCATE_OBJECTS) != $(LOCATE_TARGET)
+    #{
+    #    MakeLocate $(<) : $(LOCATE_OBJECTS) ;
+    #}
+    #else if $(OBJECT_TARGET)
+    #{
+    #    MakeLocate $(<) : [ FDirName $(OBJECT_TARGET) $(LOCATE_TARGET) ] ;
+    #}
+    #else
+    #{
+    #   MakeLocate $(<) : $(LOCATE_OBJECTS) ;
+    #}
+
+    MakeLocate $(<) : $(LOCATE_OBJECTS) ;
 
     SEARCH on $(>) = $(SEARCH_SOURCE) ;
 
@@ -1021,9 +1023,6 @@ rule ObjectHdrs
 rule Objects
 {
     local _i ;
-
-    local _targetDir = [ FDirName $(OBJECT_TARGET) $(>) ] ;
-    
     for _i in [ FGristFiles $(<) ]
     {
         Object $(_i:S=$(SUFOBJ)) : $(_i) ;
@@ -1261,7 +1260,7 @@ rule SubDir
     SEARCH_SOURCE = $(SUBDIR) ;
     LOCATE_SOURCE = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
     LOCATE_TARGET = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
-    LOCATE_OBJECTS = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
+    LOCATE_OBJECTS = [ FDirName $(ALL_LOCATE_OBJECTS) $(SUBDIR) ] ;
 
     SOURCE_GRIST = [ FGrist $(<[2-]) ] ;
 
