@@ -91,8 +91,7 @@ rule SharedLibrary_LinkSharedLibrariesImpl
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;
     Depends $(_target) : $(_deps) ;
 
-    local _l = $(>:S=$(SUFDLL)) ;
-    SHLIBS on $(_target) += $(_l) ;
+    SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
     LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 
     # Add all shared libraries required by this shared library in a

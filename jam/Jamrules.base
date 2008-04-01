@@ -855,12 +855,16 @@ rule MainLinkExtLibraries
 
 rule MakeLocate
 {
-    if $(LOCATE_TARGET) = $(>)
+    if $(SUBDIR) = $(>)
     {
+        # directory already exists, because it is part of the source tree,
+        # so only set LOCATE
         LOCATE on $(<) = $(>) ;
     }
     else if $(>)
     {
+        # directory possibly does not exist, so create it and
+        # add a dependency to the directory, besides setting LOCATE
         LOCATE on $(<) = $(>) ;
         Depends $(<) : $(>[1]) ;
         MkDir $(>[1]) ;
@@ -868,6 +872,8 @@ rule MakeLocate
 
     if $(<:D)
     {
+        # target to be located is passed with a path, so we create it
+        # and add a dependency to the directory
         local _dir = [ FDirName $(>) $(_i:D) ] ;
         Depends $(<) : $(_dir) ;
         MkDir $(_dir) ;
@@ -1117,28 +1123,28 @@ rule SharedLibrary_AddLibraries
 #
 rule SharedLibraryFromObjects
 {
-	# Add grist to file names
-	local _objects = [ FGristFiles $(>) ] ;
+    # Add grist to file names
+    local _objects = [ FGristFiles $(>) ] ;
 
-	# Add library name decorations <name><.dll/.so>
-	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    # Add library name decorations <name><.dll/.so>
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
 
-	# setup dependencies
-	Depends exe : $(_target) ;
-	Depends lib : $(_target) ;
-	Depends $(_target) : $(_objects) ;
+    # setup dependencies
+    Depends exe : $(_target) ;
+    Depends lib : $(_target) ;
+    Depends $(_target) : $(_objects) ;
 
-	Clean clean : $(_target) ;
-	MakeLocate $(_target) : $(LOCATE_TARGET) ;
-	
-	Link $(_target) : $(_objects) ;
+    Clean clean : $(_target) ;
+    MakeLocate $(_target) : $(LOCATE_TARGET) ;
+
+    Link $(_target) : $(_objects) ;
 }
 
 
 rule SharedLibrary_Install
 {
-		local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-		InstallLib $(LIBDIR) : $(_target) ;
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    InstallLib $(LIBDIR) : $(_target) ;
 }
 
 
@@ -1157,7 +1163,8 @@ rule SharedLibrary_LinkLibraries
 
 rule SharedLibrary_MakeLocate
 {
-    MakeLocate $(PRELIB)$(<:S=$(SUFDLL)) : $(>) ;
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    MakeLocate $(_target) : $(>) ;
     SharedLibrary_MakeLocateImpl $(<) : $(>) ;
 }
 
@@ -1258,9 +1265,9 @@ rule SubDir
     # subsequently be redefined.
 
     SEARCH_SOURCE = $(SUBDIR) ;
-    LOCATE_SOURCE = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
-    LOCATE_TARGET = $(ALL_LOCATE_TARGET) $(SUBDIR) ;
-    LOCATE_OBJECTS = [ FDirName $(ALL_LOCATE_OBJECTS) $(SUBDIR) ] ;
+    LOCATE_SOURCE = $(ALL_LOCATE_TARGET) $(SUBDIR) ; # no subdirs
+    LOCATE_TARGET = $(ALL_LOCATE_TARGET) $(SUBDIR) ; # no subdirs
+    LOCATE_OBJECTS = [ FDirName $(ALL_LOCATE_OBJECTS) $(SUBDIR) ] ; # with subdirs
 
     SOURCE_GRIST = [ FGrist $(<[2-]) ] ;
 
