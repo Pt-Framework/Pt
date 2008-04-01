@@ -25,7 +25,8 @@
 #include "Pt/System/SerialDevice.h"
 #include "IODeviceImpl.h"
 #include <string>
-#include <termios.h>
+// Header does exist on Symbian with OpenC but library is missing implementation
+//#include <termios.h>
 
 namespace Pt {
 
@@ -69,8 +70,8 @@ class SerialDeviceImpl : public IODeviceImpl
         void flush();
 
     private:
-        termios                     _prevIos;
-        SerialDevice::FlowControl   _flowControl;
+        //termios                     _prevIos;
+        //SerialDevice::FlowControl   _flowControl;
 };
 
 } //namespace System
