@@ -71,7 +71,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
     private:
         //termios                     _prevIos;
-        //SerialDevice::FlowControl   _flowControl;
+        SerialDevice::FlowControl   _flowControl;
 };
 
 } //namespace System
