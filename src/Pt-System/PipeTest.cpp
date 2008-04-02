@@ -48,22 +48,22 @@ class PipeTest : public Pt::Unit::TestSuite
         void redirectStreams();
 };
 
-void PipeTest::redirectStreams()
-{
-    Pt::System::Process p("dir");
-    Pt::System::Pipe pi();
+// void PipeTest::redirectStreams()
+// {
+//     Pt::System::Process p("dir");
+//     Pt::System::Pipe pi();
 
 
-    p.setOutput( pi.output());
+//     p.setOutput( pi.output());
 
-    p.start();
-    p.wait();
+//     p.start();
+//     p.wait();
 
-    char buffer[1024];
-    int n = pi.input().read( buffer, 1024);
+//     char buffer[1024];
+//     int n = p.input().read( buffer, 1024);
 
-    PT_UNIT_ASSERT( n > 0);
-}
+//     PT_UNIT_ASSERT( n > 0);
+// }
 
 
 void PipeTest::testAsyncWriteRead()
