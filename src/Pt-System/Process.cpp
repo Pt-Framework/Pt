@@ -63,9 +63,9 @@ void Process::kill()
      _impl->kill();
 }
 
-void Process::wait() 
+int Process::wait() 
 {
-     _impl->wait();
+    return _impl->wait();
 }
 
 void Process::setArgs(const std::string& strArgs)

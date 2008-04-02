@@ -65,7 +65,7 @@ class PT_API ProcessImpl
     
         void kill();
     
-        void wait();
+        int wait();
     
     private:
         pid_t m_pid;

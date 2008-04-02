@@ -87,7 +87,7 @@ class PT_SYSTEM_API Process {
         /**
             @throw SystemError
         */
-        void wait();
+        int wait();
 
     public:
         //! Set environment variable

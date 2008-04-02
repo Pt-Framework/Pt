@@ -145,13 +145,14 @@ void ProcessImpl::kill()
 }
 
 
-void ProcessImpl::wait()
+int ProcessImpl::wait()
 {
     int iStatus;
     if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
     {
         throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
+    return iStatus;
 }
 
 } // namespace Pt

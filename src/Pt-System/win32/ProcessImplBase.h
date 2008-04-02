@@ -59,7 +59,7 @@ namespace System {
 
             void kill();
 
-            void wait();
+            int wait();
 
     private:
         STARTUPINFO m_startUp;

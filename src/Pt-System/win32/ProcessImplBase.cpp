@@ -119,6 +119,11 @@ void ProcessImplBase::wait()
     {
         throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
     }
+    DWORD exitCode;
+
+    GetExitCodeProcess( m_pid.hProcess, &exitCode);
+
+    return exitCode;    
 }
 
 } // namespace Pt
