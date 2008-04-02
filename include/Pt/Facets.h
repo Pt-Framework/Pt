@@ -181,11 +181,15 @@ namespace std {
             typedef Pt::Char char_type;
             typedef std::basic_string<Pt::Char> string_type;
 
-            // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
-			#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
+
+			#if __GLIBCXX__ == 20050421
 			typedef __numpunct_cache<Pt::Char>  __cache_type;
 			#endif
-            
+            // gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
+			//#if __GNUC__ == 3 && __GNUC_MINOR__ == 4
+            //typedef __numpunct_cache<Pt::Char>  __cache_type;
+            //#endif
+
             static locale::id id;
 
         public:
@@ -361,7 +365,7 @@ namespace std {
 #endif
         
         iter_type put(iter_type s, ios_base& f, char_type fill, 
-            void* val) const;
+            const void* val) const;
 
         static locale::id id;
 
@@ -398,7 +402,7 @@ namespace std {
 #endif
         
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,
-            void*) const;
+            const void*) const;
 	};
 
     template <>
@@ -450,7 +454,7 @@ namespace std {
 #endif
         
         iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, void* val) const;
+            ios_base::iostate& state, void*& val) const;
 
         static locale::id id;
     protected:
@@ -495,7 +499,7 @@ namespace std {
 #endif
         
         virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, void* val) const;
+            ios_base::iostate& state, void*& val) const;
     };
 
 

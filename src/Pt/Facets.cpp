@@ -176,9 +176,10 @@ static num_put<Pt::Char>::iter_type put_val(const num_put<wchar_t,num_put<Pt::Ch
 
     num_put<Pt::Char>::iter_type_w begin(tmp);
 
-    // take over flags
+    // take over flags and other settings
     tmp.flags(f.flags());
     tmp.precision(f.precision());
+    tmp.width(f.width());
     numput_wchar.put(begin, tmp, static_cast<wchar_t>(fill), val);
 
     basic_string<wchar_t> str = tmp.str();
@@ -247,7 +248,7 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, ch
 #endif
 
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::put(iter_type s, ios_base& f, char_type fill, 
-                                                    void* val) const
+                                                    const void* val) const
 {
     return this->do_put(s, f, fill, val);
 }
@@ -301,9 +302,15 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f,
 #endif
 
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
-                                                       void* val) const
+                                                       const void* val) const
 {
-    return put_val<void*>(numput_wchar, s, f, fill, val);
+	// force writing with hexadecimal value
+    ios_base::fmtflags flags = f.flags();
+    f.setf(ios_base::hex, ios_base::basefield);
+    f.setf(ios_base::showbase);	
+    iter_type result = put_val<const void*>(numput_wchar, s, f, fill, val);
+    f.flags(flags);
+	return result;
 }
 
 //
@@ -331,10 +338,10 @@ static num_get<Pt::Char>::iter_type get_val(const num_get<wchar_t,num_get<Pt::Ch
     iiter_type_w begin(ins);
     iiter_type_w end;
 
-    // take over format flags
+    // take over format flags and other settings
     ins.flags(f.flags());
     ins.precision(f.precision());
-
+    ins.width(f.width());
     numget_wchar.get(begin, end, ins, state, val);
     return s;
 }
@@ -413,7 +420,7 @@ num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, io
 #endif
 
 num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, void* val) const
+                                                    ios_base::iostate& state, void*& val) const
 {
     return this->do_get(s, e, f, state, val);
 }
@@ -485,9 +492,15 @@ num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e,
 #endif
 
 num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, void* val) const
+                                                       ios_base::iostate& state, void*& val) const
 {
-    return get_val<void*>(numget_wchar, s, e, f, state, val);
+	// force reading with hexadecimal value
+    ios_base::fmtflags flags = f.flags();
+    f.setf(ios_base::hex, ios_base::basefield);
+    f.setf(ios_base::showbase);	
+	iter_type result = get_val<void*&>(numget_wchar, s, e, f, state, val);
+	f.flags(flags);
+	return result;
 }
 
 #endif
