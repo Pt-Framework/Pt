@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     Pt::Arg<bool> help(argc, argv, 'h');
     if( help )
     {
-        std::cerr << "Usage: " << argv[0] << " [-t<testname>] [-f<logfile>]\n";
+        std::cerr << "Usage: " << argv[0] << " [-t <testname>] [-f <logfile>]\n";
         std::cerr << "Available Tests:\n";
         std::list<Pt::Unit::Test*>::const_iterator it;
         for( it = app.tests().begin(); it != app.tests().end(); ++it)
