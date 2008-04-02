@@ -39,7 +39,7 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "testAsyncWriteRead", *this, &PipeTest::testAsyncWriteRead );
             Pt::Unit::TestSuite::registerMethod( "testSyncWriteRead", *this, &PipeTest::testSyncWriteRead );
-	    Pt::Unit::TestSuite::registerMethod( "redirectStreams", *this, &PipeTest::redirectStreams );
+	    // Pt::Unit::TestSuite::registerMethod( "redirectStreams", *this, &PipeTest::redirectStreams );
         }
 
     protected:
