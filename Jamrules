@@ -291,6 +291,39 @@ actions Ecppc
 }
 
 
+NOTFILE configure ;
+rule CheckCompile
+{
+    Depends configure : $(1).result ;
+    Depends $(1).result : $(1).out ;
+    Depends $(1).out : $(1).cpp ;
+
+    Echo $(1).cpp : $(2) ;
+    TryC++ $(1).out : $(1).cpp ;
+    CheckCompile1 $(1).result : $(1).out ;
+}
+
+actions Echo
+{
+    echo "$(2)" > $(1) 
+}
+
+actions ignore TryC++
+{
+    $(C++) -c -o $(1) $(2)
+}
+
+actions CheckCompile1
+{
+    if test -f $(2); then
+        echo "success" > $(1)
+    else
+        echo "fail" > $(1)
+    fi
+}
+
+# CheckCompile check1 : "int main() { x return 0; }" ;
+
 #############################################################################
 # General values and settings
 #############################################################################
