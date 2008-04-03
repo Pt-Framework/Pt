@@ -45,11 +45,7 @@ namespace Pt {
                 { assignElements<NumberOfChannels, 0>(_data, data); }
 
                 const ConstColorData& data() const
-#ifdef __MWERKS_SYMBIAN__
-                { return const_cast<const ConstColorData&>(_data); }
-#else
                 { return _data; }
-#endif
                 
             protected:
                 ConstColorData _data;
@@ -145,11 +141,7 @@ namespace Pt {
                 { return _data; }
 
                 const ColorData& colorData() const
-#ifdef __MWERKS_SYMBIAN__
-                { return const_cast<const ColorData&>(_data); }
-#else
                 { return _data; }
-#endif
                 
             protected:
                 ColorData _data;
