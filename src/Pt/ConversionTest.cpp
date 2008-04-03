@@ -39,6 +39,7 @@ class ConversionTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "stdstring", *this, &ConversionTest::stdstring );
             Pt::Unit::TestSuite::registerMethod( "Float", *this, &ConversionTest::Float );
             Pt::Unit::TestSuite::registerMethod( "Double", *this, &ConversionTest::Double );
+            Pt::Unit::TestSuite::registerMethod( "VoidPtr", *this, &ConversionTest::VoidPtr );
         }
 
     protected:
@@ -50,6 +51,7 @@ class ConversionTest : public Pt::Unit::TestSuite
         void stdstring();
         void Float();
         void Double();
+        void VoidPtr();
 };
 
 Pt::Unit::RegisterTest<ConversionTest> register_ConversionTest;
@@ -147,4 +149,12 @@ void ConversionTest::Double()
     str = L"2.3456789";
     value = Pt::convert<double>(str);
     PT_UNIT_ASSERT( value > 2.3 && value < 2.4 );
+}
+
+void ConversionTest::VoidPtr()
+{
+    void* value = (void*)0x12345678;
+    Pt::String str = Pt::convert<Pt::String>(value);
+    void* value2 = Pt::convert<void*>(str);
+    PT_UNIT_ASSERT( value == value2 );
 }
