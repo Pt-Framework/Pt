@@ -113,17 +113,16 @@ void ProcessImplBase::kill()
 }
 
 
-void ProcessImplBase::wait()
+int ProcessImplBase::wait()
 {
     if( WAIT_FAILED == WaitForSingleObject(m_pid.hProcess, INFINITE) )
     {
         throw SystemError("System call WaitForSingleObject() Failed!",PT_SOURCEINFO);
     }
+
     DWORD exitCode;
-
     GetExitCodeProcess( m_pid.hProcess, &exitCode);
-
-    return exitCode;    
+    return exitCode;
 }
 
 } // namespace Pt

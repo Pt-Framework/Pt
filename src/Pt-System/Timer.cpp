@@ -45,7 +45,7 @@ size_t Timer::interval() const
 }
 
 
-void Timer::setInterval(size_t msecs)
+void Timer::setInterval(unsigned msecs)
 {
     _interval = msecs;
 
