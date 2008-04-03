@@ -1,28 +1,8 @@
-/***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *   Copyright (C) 2006 by Roman Schnider                                  *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
 #ifndef Pt_System_MutexLock_h
 #define Pt_System_MutexLock_h
 
 #include <Pt/System/Api.h>
 #include <Pt/System/Mutex.h>
-
 
 namespace Pt {
 
@@ -67,10 +47,13 @@ namespace System {
 
                 \param m the enclosing Mutex object
             */
-            MutexLock(Mutex& m)
+            MutexLock(Mutex& m, bool doLock = true)
             : _mutex(m)
-            , _isLocked(true)
-            { _mutex.lock(); }
+            , _isLocked(false)
+            {
+                if(doLock)
+                    this->lock();
+            }
 
             //! @brief Destructor
             /**
@@ -86,11 +69,23 @@ namespace System {
                 catch(...) {}
             }
 
+            void lock()
+            {
+                if(!_isLocked)
+                {
+                    _mutex.lock();
+                    _isLocked = true;
+                }
+            }
+
             //! @brief Unlock so that the destructor does not unlock
             void unlock()
             {
-                _mutex.unlock();
-                _isLocked = false;
+                if(_isLocked)
+                {
+                    _mutex.unlock();
+                    _isLocked = false;
+                }
             }
 
              //! @brief Get the mutex object
@@ -111,7 +106,6 @@ namespace System {
                 Mutex& _mutex;
                 bool _isLocked;
     };
-
 
 } // !namespace System
 

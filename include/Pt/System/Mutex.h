@@ -43,27 +43,6 @@ namespace System {
             class MutexImpl* _impl;
 
         public:
-            //! Lock class for Mutex.
-            class Lock {
-                public:
-                    Lock(Mutex& m)
-                    : _mutex(m)
-                    { _mutex.lock(); }
-
-                    ~Lock()
-                    { _mutex.unlock(); }
-
-                    Mutex& mutex()
-                    { return _mutex; }
-
-                    const Mutex& mutex() const
-                    { return _mutex; }
-
-                private:
-                    Mutex& _mutex;
-            };
-
-        public:
             //! @brief Enumeration to select recursive or non-recursive mode.
             /// 
             /// Mutex can be created either as recursive or as non-recursive Mutex.
@@ -77,7 +56,7 @@ namespace System {
             //! @brief Default constructor
             ///
             /// Construct the Mutex object.
-            Mutex(Mode mode);
+            explicit Mutex(Mode mode);
 
             //! Destructor
             ///

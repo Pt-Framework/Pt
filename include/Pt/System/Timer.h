@@ -72,7 +72,7 @@ namespace System {
 
                 @param msecs The timer inteval in milliseconds
             */
-            void setInterval(std::size_t msecs);
+            void setInterval(unsigned msecs);
 
             /** @brief Starts the timer
 
