@@ -134,7 +134,7 @@ T* atomicExchange(T* volatile& dest, T* exch)
        return a;
 }
 #else
-void* atomicExchange(void* volatile& dest, void* exch)
+inline void* atomicExchange(void* volatile& dest, void* exch)
 {
 	   void* a;
 
