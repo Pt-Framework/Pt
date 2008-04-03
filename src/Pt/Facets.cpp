@@ -304,13 +304,13 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f,
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
                                                        const void* val) const
 {
-	// force writing with hexadecimal value
+    // force writing with hexadecimal value
     ios_base::fmtflags flags = f.flags();
     f.setf(ios_base::hex, ios_base::basefield);
     f.setf(ios_base::showbase);	
     iter_type result = put_val<const void*>(numput_wchar, s, f, fill, val);
     f.flags(flags);
-	return result;
+    return result;
 }
 
 //
@@ -494,13 +494,13 @@ num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e,
 num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
                                                        ios_base::iostate& state, void*& val) const
 {
-	// force reading with hexadecimal value
+    // force reading with hexadecimal value
     ios_base::fmtflags flags = f.flags();
     f.setf(ios_base::hex, ios_base::basefield);
     f.setf(ios_base::showbase);	
-	iter_type result = get_val<void*&>(numget_wchar, s, e, f, state, val);
-	f.flags(flags);
-	return result;
+    iter_type result = get_val<void*&>(numget_wchar, s, e, f, state, val);
+    f.flags(flags);
+    return result;
 }
 
 #endif
