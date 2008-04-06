@@ -293,54 +293,62 @@ actions Ecppc
 
 NOTFILE configure ;
 
-rule Configure
-{
-    CONFIGURE_DEFINES = $(1) ;
-    Depends configure : $(CONFIGURE_DEFINES) ;
-}
-
 rule ConfigureC++
 {
-    local _source = $(1).cpp ;
-    local _target = $(1) ;
+    local _source = $(2:S=.cpp) ;
+    local _target = $(2:S=$(SUFOBJ)) ;
+    local _defines = $(1) ;
 
-    if ! $(CONFIGURE_DEFINES)
+    local _include ;
+    for local _line in $(3)
     {
-        Exit "Use Configure rule" ;
+        _include = [ Match "(<[a-z,A-Z,0-9]*>)" : $(_line) ] ;
+        _include = [ Match "([a-z,A-Z,0-9][a-z,A-Z,0-9]*)" : $(_include) ] ;
+
+        if $(_include)
+        {
+            if $(NT)
+            {
+                AppendFile $(_source) : "#include" "^<"$(_include)"^>" ;
+            }
+            else
+            {
+                AppendFile $(_source) : "#include" "<"$(_include)">" ;
+            }
+        }
+        else
+        {
+            AppendFile $(_source) : $(_line) ;
+        }
     }
 
-    Depends $(CONFIGURE_DEFINES) : $(_target) ;
+    Depends configure : $(1) ;
+    Depends $(1) : $(_target) ;
     Depends $(_target) : $(_source) ;
 
-    for local _line in $(2)
-    {
-        AppendFile $(_source) : $(_line) ;
-    }
-
     CheckC++ $(_target) : $(_source) ;
-    CheckDefine config.h : $(_target) ;
+    CheckDefine $(1) : $(_target) ;
 
-    RmTemps $(CONFIGURE_DEFINES) : $(_target) ;
-    RmTemps $(CONFIGURE_DEFINES) : $(_source) ;
-
-    Clean clean : $(CONFIGURE_DEFINES) ;
+    RmTemps $(1) : $(_target) ;
+    RmTemps $(1) : $(_source) ;
+    Clean clean : $(1) ;
 }
 
 if $(NT)
 {
     actions quietly AppendFile
     {
-        echo "$(2)" >> $(1)
+        echo $(2) >> $(1)
     }
 
     actions quietly CheckDefine
     {
-        if exists $(2) goto exists
-        echo $(2:B)"=0" >> $(1)
+        if exist $(2) goto exists
+        echo #define $(2:B) 0 >> $(1)
         goto end
 
         :exists
-            echo $(2:B)"=1" >> $(1)
+            echo #define $(2:B) 1 >> $(1)
 
         :end
     }
@@ -349,7 +357,7 @@ else
 {
     actions quietly AppendFile
     {
-        printf "$(2)\n" >> $(1)
+        prinf "$(2)\n" >> $(1) >> ;
     }
 
     actions quietly CheckDefine
@@ -367,7 +375,7 @@ if $(VISUALC)
     actions ignore CheckC++
     {
         set PATH=$(VISUALC)\Common7\IDE;%PATH%
-        "$(C++)" /c /Fo$(<) /Tp $(>)
+        "$(C++)" /c /Fo$(<) /EHsc /Tp $(>)
     }
 }
 else
@@ -378,9 +386,8 @@ else
     }
 }
 
-#Configure config.h ;
-#ConfigureC++ WITH_STD_LOCALE : "#include <locale>"
-#                               "int main() { return 0; }" ;
+#ConfigureC++ config.h : WITH_STD_LOCALE : "#include <locale>"
+#                                          "int main() { return 0; }" ;
 
 #############################################################################
 # General values and settings
