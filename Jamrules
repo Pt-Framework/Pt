@@ -309,11 +309,11 @@ rule ConfigureC++
         {
             if $(NT)
             {
-                AppendFile $(_source) : "#include" "^<"$(_include)"^>" ;
+                AppendFile $(_source) : "#include ^<"$(_include)"^>" ;
             }
             else
             {
-                AppendFile $(_source) : "#include" "<"$(_include)">" ;
+                AppendFile $(_source) : "#include <"$(_include)">" ;
             }
         }
         else
@@ -357,7 +357,7 @@ else
 {
     actions quietly AppendFile
     {
-        prinf "$(2)\n" >> $(1) >> ;
+        printf "$(2)\n" >> $(1)
     }
 
     actions quietly CheckDefine
@@ -386,8 +386,8 @@ else
     }
 }
 
-#ConfigureC++ config.h : WITH_STD_LOCALE : "#include <locale>"
-#                                          "int main() { return 0; }" ;
+ConfigureC++ config.h : WITH_STD_LOCALE : "#include <locale>"
+                                          "int main() { return 0; }" ;
 
 #############################################################################
 # General values and settings
