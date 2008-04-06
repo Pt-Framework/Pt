@@ -295,15 +295,32 @@ NOTFILE configure ;
 
 rule ConfigureC++
 {
+    local _defines = $(1) ;
     local _source = $(2:S=.cpp) ;
     local _target = $(2:S=$(SUFOBJ)) ;
-    local _defines = $(1) ;
+    local _libs = $(4) ;
+
+    Depends configure : $(1) ;
+    Depends $(1) : $(_target) ;
+    
+    LINKLIBS on $(_target) = $(_libs) ;
+    CheckC++ $(_target) : $(_source) : $(3) ;
+    CheckDefine $(1) : $(_target) ;
+
+    Clean clean : $(1) ;
+}
+
+rule CheckC++
+{
+    local _target = $(1) ;
+    local _source = $(2) ;
+    local _prog = $(3) ;
 
     local _include ;
-    for local _line in $(3)
+    for local _line in $(_prog)
     {
-        _include = [ Match "(<[a-z,A-Z,0-9]*>)" : $(_line) ] ;
-        _include = [ Match "([a-z,A-Z,0-9][a-z,A-Z,0-9]*)" : $(_include) ] ;
+        _include = [ Match "(<[a-z,A-Z,0-9,.]*>)" : $(_line) ] ;
+        _include = [ Match "([a-z,A-Z,0-9][a-z,A-Z,0-9,.]*)" : $(_include) ] ;
 
         if $(_include)
         {
@@ -322,16 +339,11 @@ rule ConfigureC++
         }
     }
 
-    Depends configure : $(1) ;
-    Depends $(1) : $(_target) ;
     Depends $(_target) : $(_source) ;
-
-    CheckC++ $(_target) : $(_source) ;
-    CheckDefine $(1) : $(_target) ;
 
     RmTemps $(1) : $(_target) ;
     RmTemps $(1) : $(_source) ;
-    Clean clean : $(1) ;
+    RmTemps $(1) : $(_target:S=$(SUFEXE)) ;
 }
 
 if $(NT)
@@ -374,21 +386,27 @@ if $(VISUALC)
 {
     actions ignore CheckC++
     {
-        set PATH=$(VISUALC)\Common7\IDE;%PATH%
-        "$(C++)" /c /Fo$(<) /EHsc /Tp $(>)
+        set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
+        "$(C++)" /Fo$(<:S=.obj) /Fe$(<:S=.exe) /I$(HDRS) /I$(STDHDRS) /EHsc /TP $(>) /link $(LINKLIBS)
     }
 }
 else
 {
     actions ignore CheckC++
     {
-        $(C++) -c -o $(1) $(2)
+        $(C++) -o $(1:S=SUFEXE) $(2) -l $(LINKLIBS) 
     }
 }
 
 ConfigureC++ config.h : WITH_STD_LOCALE : "#include <locale>"
                                           "int main() { return 0; }" ;
 
+ConfigureC++ config.h : WITH_WINMM 
+                      : "#include <windows.h>"
+                        "#include <mmsystem.h>"                       
+                        "int main() { return timeGetTime(); }" 
+                      : winmm.lib ;
+                                          
 #############################################################################
 # General values and settings
 #############################################################################
