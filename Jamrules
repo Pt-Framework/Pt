@@ -292,37 +292,95 @@ actions Ecppc
 
 
 NOTFILE configure ;
-rule CheckCompile
-{
-    Depends configure : $(1).result ;
-    Depends $(1).result : $(1).out ;
-    Depends $(1).out : $(1).cpp ;
 
-    Echo $(1).cpp : $(2) ;
-    TryC++ $(1).out : $(1).cpp ;
-    CheckCompile1 $(1).result : $(1).out ;
+rule Configure
+{
+    CONFIGURE_DEFINES = $(1) ;
+    Depends configure : $(CONFIGURE_DEFINES) ;
 }
 
-actions Echo
+rule ConfigureC++
 {
-    echo "$(2)" > $(1) 
+    local _source = $(1).cpp ;
+    local _target = $(1) ;
+
+    if ! $(CONFIGURE_DEFINES)
+    {
+        Exit "Use Configure rule" ;
+    }
+
+    Depends $(CONFIGURE_DEFINES) : $(_target) ;
+    Depends $(_target) : $(_source) ;
+
+    for local _line in $(2)
+    {
+        AppendFile $(_source) : $(_line) ;
+    }
+
+    CheckC++ $(_target) : $(_source) ;
+    CheckDefine config.h : $(_target) ;
+
+    RmTemps $(CONFIGURE_DEFINES) : $(_target) ;
+    RmTemps $(CONFIGURE_DEFINES) : $(_source) ;
+
+    Clean clean : $(CONFIGURE_DEFINES) ;
 }
 
-actions ignore TryC++
+if $(NT)
 {
-    $(C++) -c -o $(1) $(2)
+    actions quietly AppendFile
+    {
+        echo "$(2)" >> $(1)
+    }
+
+    actions quietly CheckDefine
+    {
+        if exists $(2) goto exists
+        echo $(2:B)"=0" >> $(1)
+        goto end
+
+        :exists
+            echo $(2:B)"=1" >> $(1)
+
+        :end
+    }
+}
+else
+{
+    actions quietly AppendFile
+    {
+        printf "$(2)\n" >> $(1)
+    }
+
+    actions quietly CheckDefine
+    {
+        if test -f $(2); then
+            echo $(2:B)"=1" >> $(1)
+        else
+            echo $(2:B)"=0" >> $(1)
+        fi
+    }
 }
 
-actions CheckCompile1
+if $(VISUALC)
 {
-    if test -f $(2); then
-        echo "success" > $(1)
-    else
-        echo "fail" > $(1)
-    fi
+    actions ignore CheckC++
+    {
+        set PATH=$(VISUALC)\Common7\IDE;%PATH%
+        "$(C++)" /c /Fo$(<) /Tp $(>)
+    }
+}
+else
+{
+    actions ignore CheckC++
+    {
+        $(C++) -c -o $(1) $(2)
+    }
 }
 
-# CheckCompile check1 : "int main() { x return 0; }" ;
+#Configure config.h ;
+#ConfigureC++ WITH_STD_LOCALE : "#include <locale>"
+#                               "int main() { return 0; }" ;
 
 #############################################################################
 # General values and settings
