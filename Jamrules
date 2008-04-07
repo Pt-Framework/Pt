@@ -294,9 +294,11 @@ actions Ecppc
 #############################################################################
 # Auto configuration rules and actions
 #############################################################################
-NOTFILE configure ;
+NOTFILE configure configure-clean ;
 Depends configure : Jamconfig ;
-Clean clean : Jamconfig ;
+Depends Jamconfig : configure-clean ;
+Clean configure-clean : Jamconfig ;
+
 
 rule ConfigureC++
 {
@@ -379,8 +381,6 @@ else
     {
         if test -f $(2:S=$(SUFEXE)); then
             echo $(2)" = 1 ;" >> $(1)
-        else
-            echo $(2)" = 0 ;" >> $(1)
         fi
     }
 }
@@ -401,13 +401,25 @@ else
     }
 }
 
-rule ConfigureDefines
+
+rule ConfigureDefine
 {
-    if $(2) = "1"
+    Clean configure-clean : $(1) ;
+
+    if $(3)
     {
-        AppendFile $(1) : "#define"$(2)"=1" ;
+        AppendFile $(1) : "#ifndef "$(2) ;
+        AppendFile $(1) : "#define "$(2)" "$(3) ;
+        AppendFile $(1) : "#endif" ;
+        AppendFile $(1) : "" ;
     }
 }
+
+actions Configure
+{
+    $(ARGV[0]) configure
+}
+
 
 JAMCONFIG = [ Glob "" : Jamconfig ] ;
 if $(JAMCONFIG)
@@ -415,14 +427,34 @@ if $(JAMCONFIG)
     include Jamconfig ;
 }
 
+ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+ConfigureDefine test.h : PT_VERSION_MINOR : 1 ;
+ConfigureDefine test.h : PT_VERSION_REV : 1 ;
+
 ConfigureC++ WITH_STD_LOCALE : "#include <locale>"
                                "int main() { return 0; }" ;
-ConfigureDefines test.h : WITH_STD_LOCALE ;
 
-ConfigureC++ WITH_WINMM : "#include <windows.h>"
-                          "#include <mmsystem.h>"
-                          "int main() { return timeGetTime(); }" 
-                        : winmm.lib ;
+ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+
+#ConfigureC++ WITH_WINMM : "#include <windows.h>"
+#                          "#include <mmsystem.h>"
+#                          "int main() { return timeGetTime(); }" 
+#                        : winmm.lib ;
+#
+#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
+#
+#ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
+#                            "#include <mmsystem.h>"
+#                            "int main() { return timeGetTime(); }" 
+#                          : mmtimer.lib ;
+#
+#ConfigureC++ WITH_UNIX_SOCKETS : "#include <sys/types.h>"
+#                                 "#include <sys/socket.h>"
+#                                 "int main() { return socket(0,0,0); }" : socket ;
+#
+#ConfigureC++ WITH_UNIX_NSL : "#include <sys/types.h>"
+#                             "#include <sys/socket.h>"
+#                             "int main() { return socket(0,0,0); }" : nsl ;
 
 #############################################################################
 # General values and settings
