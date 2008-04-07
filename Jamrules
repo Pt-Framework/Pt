@@ -296,7 +296,7 @@ actions Ecppc
 #############################################################################
 NOTFILE configure ;
 Depends configure : Jamconfig ;
-Clean Jamconfig : Jamconfig ;
+Clean clean : Jamconfig ;
 
 rule ConfigureC++
 {
@@ -317,6 +317,8 @@ rule CheckC++
     local _target = $(1) ;
     local _source = $(2) ;
     local _prog = $(3) ;
+
+    NOCARE $(1) ;
 
     local _include ;
     for local _line in $(_prog)
