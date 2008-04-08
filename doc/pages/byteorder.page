@@ -2,7 +2,7 @@
 
 @section OverviewByteorder Overview
 
-The byteoder API consists of two layers. One layer is responsible for
+The byteorder API consists of two layers. One layer is responsible for
 swapping the byteorder of a type and the high-level API can be used to
 convert from an exernal byteorder to the host byteorder.
 
