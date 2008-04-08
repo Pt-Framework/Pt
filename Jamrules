@@ -417,8 +417,8 @@ rule ConfigureDefine
 }
 
 
-NOTFILE conf configure-host ;
-ALWAYS configure-host ;
+NOTFILE conf configure-toolset ;
+ALWAYS configure-toolset ;
 
 actions Configure
 {
