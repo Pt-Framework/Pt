@@ -404,6 +404,7 @@ else
 
 rule ConfigureDefine
 {
+    NOUPDATE $(1) ;
     Clean configure-clean : $(1) ;
 
     if $(3)
@@ -415,10 +416,18 @@ rule ConfigureDefine
     }
 }
 
+
+NOTFILE conf configure-host ;
+ALWAYS configure-host ;
+
 actions Configure
 {
-    $(ARGV[0]) configure
+    $(ARGV[0]) $(2) ;
 }
+
+Depends conf : configure-toolset ;
+Configure configure-toolset : config ;
+AppendFile config : "SOME_STUFF = 0" ;
 
 
 JAMCONFIG = [ Glob "" : Jamconfig ] ;
@@ -427,7 +436,7 @@ if $(JAMCONFIG)
     include Jamconfig ;
 }
 
-ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+ConfigureDefine test.h : PT_VERSION_MAJOR : 0 ;
 ConfigureDefine test.h : PT_VERSION_MINOR : 1 ;
 ConfigureDefine test.h : PT_VERSION_REV : 1 ;
 
