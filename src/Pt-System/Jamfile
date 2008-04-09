@@ -8,6 +8,8 @@ Main PipeDemo : PipeDemo.cpp ;
 Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
+Main ProcessTestChild : ProcessTestChild.cpp ;
+Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
 
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
@@ -85,6 +87,11 @@ PtUnitTest_MakeLocate SerialDeviceTest : $(OUTPUT_TARGET) ;
 PtUnitTest PipeTest : PipeTest.cpp ;
 Main_LinkSharedLibraries PipeTest : Pt Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate PipeTest : $(OUTPUT_TARGET) ;
+
+PtUnitTest ProcessTest : ProcessTest.cpp ;
+Main_LinkSharedLibraries ProcessTest : Pt Pt-System Pt-Unit ;
+PtUnitTest_MakeLocate ProcessTest : $(OUTPUT_TARGET) ;
+Depends ProcessTest : ProcessTestChild ;
 
 PtUnitTest TimeValueTest : TimeValueTest.cpp ;
 Main_LinkSharedLibraries TimeValueTest : Pt Pt-System Pt-Unit ;

@@ -50,7 +50,7 @@ void ProcessImplBase::start()
 	if( m_devIn)
 	{
 		SetHandleInformation( m_devIn->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, 0);
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
 	}
 	else
@@ -62,7 +62,7 @@ void ProcessImplBase::start()
 	if( m_devOut)
 	{
 		SetHandleInformation( m_devOut->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, 0);
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
 	}
 	else
@@ -74,7 +74,7 @@ void ProcessImplBase::start()
 	if( m_devErr)
 	{
 		SetHandleInformation( m_devErr->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, 0);
+							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		m_startUp.hStdError = m_devErr->impl()->deviceHandle();
 	}
 	else

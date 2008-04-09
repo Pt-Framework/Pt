@@ -20,7 +20,6 @@
  ***************************************************************************/
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Selector.h"
-#include "Pt/System/Process.h"
 
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -39,32 +38,12 @@ class PipeTest : public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "testAsyncWriteRead", *this, &PipeTest::testAsyncWriteRead );
             Pt::Unit::TestSuite::registerMethod( "testSyncWriteRead", *this, &PipeTest::testSyncWriteRead );
-	    // Pt::Unit::TestSuite::registerMethod( "redirectStreams", *this, &PipeTest::redirectStreams );
         }
 
     protected:
         void testAsyncWriteRead();
         void testSyncWriteRead();
-        void redirectStreams();
 };
-
-// void PipeTest::redirectStreams()
-// {
-//     Pt::System::Process p("dir");
-//     Pt::System::Pipe pi();
-
-
-//     p.setOutput( pi.output());
-
-//     p.start();
-//     p.wait();
-
-//     char buffer[1024];
-//     int n = p.input().read( buffer, 1024);
-
-//     PT_UNIT_ASSERT( n > 0);
-// }
-
 
 void PipeTest::testAsyncWriteRead()
 {
