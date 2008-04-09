@@ -1752,20 +1752,22 @@ LIST *builtin_shell( PARSE *parse, FRAME *frame )
 
 #endif
 
-LIST *
+LIST*
 builtin_writefile(
-    PARSE    *parse,
-    FRAME *frame )
+    PARSE* parse,
+    FRAME* frame )
 {
     LIST* fname = lol_get( frame->args, 0 );
     LIST* text = lol_get( frame->args, 1 );
-
+    FILE* file = NULL;
+    
     if(fname && text)
     {
-        FILE* file = fopen(fname->string, "wa");
+        file = fopen(fname->string, "a");
         if(file)
         {
             fprintf( file, "%s\n", text->string );
+            fclose(file);
         }
     }
 
