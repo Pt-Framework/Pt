@@ -436,6 +436,11 @@ if $(JAMCONFIG)
     include Jamconfig ;
 }
 
+#COMMAND "echo \"int main() {}\" > test.cpp" : "exit-status" : "no-output" ;
+#result = [ COMMAND "gcc -o test.o test.cpp" : "exit-status" : "no-output" ] ;
+#COMMAND "rm test.cpp test.o" : "exit-status" : "no-output" ;
+#Exit "RETURN: " $(result) ;
+
 ConfigureDefine test.h : PT_VERSION_MAJOR : 0 ;
 ConfigureDefine test.h : PT_VERSION_MINOR : 1 ;
 ConfigureDefine test.h : PT_VERSION_REV : 1 ;
