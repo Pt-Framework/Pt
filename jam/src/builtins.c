@@ -499,26 +499,6 @@ builtin_echo(
 }
 
 
-LIST *
-builtin_writefile(
-    PARSE    *parse,
-    FRAME *frame )
-{
-    LIST* fname = lol_get( frame->args, 0 );
-    LIST* text = lol_get( frame->args, 1 );
-
-    if(fname && text)
-    {
-        FILE* file = fopen(fname->string, "wa");
-        if(file)
-        {
-            fprintf( file, "%s\n", text->string );
-        }
-    }
-
-    return L0;
-}
-
 /*
  * builtin_exit() - EXIT rule
  *
