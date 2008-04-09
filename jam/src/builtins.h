@@ -48,6 +48,7 @@ LIST *builtin_nearest_user_location( PARSE *parse, FRAME *frame );
 LIST *builtin_check_if_file( PARSE *parse, FRAME *frame );
 LIST *builtin_python_import_rule( PARSE *parse, FRAME *frame );
 LIST *builtin_shell( PARSE *parse, FRAME *frame );
+LIST *builtin_writefile( PARSE *parse, FRAME *args );
 
 void backtrace( FRAME *frame );
 

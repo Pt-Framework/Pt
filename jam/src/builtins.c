@@ -98,6 +98,8 @@ load_builtins()
       bind_builtin( "ECHO" ,
                     builtin_echo, 0, 0 ) ) );
 
+    bind_builtin( "WriteFile" ,
+                  builtin_writefile, 0, 0 );
 
     {
         char * args[] = { "message", "*", ":", "result-value", "?", 0 };
@@ -493,6 +495,27 @@ builtin_echo(
 {
     list_print( lol_get( frame->args, 0 ) );
     printf( "\n" );
+    return L0;
+}
+
+
+LIST *
+builtin_writefile(
+    PARSE    *parse,
+    FRAME *frame )
+{
+    LIST* fname = lol_get( frame->args, 0 );
+    LIST* text = lol_get( frame->args, 1 );
+
+    if(fname && text)
+    {
+        FILE* file = fopen(fname->string, "wa");
+        if(file)
+        {
+            fprintf( file, "%s\n", text->string );
+        }
+    }
+
     return L0;
 }
 
@@ -1748,3 +1771,23 @@ LIST *builtin_shell( PARSE *parse, FRAME *frame )
 }
 
 #endif
+
+LIST *
+builtin_writefile(
+    PARSE    *parse,
+    FRAME *frame )
+{
+    LIST* fname = lol_get( frame->args, 0 );
+    LIST* text = lol_get( frame->args, 1 );
+
+    if(fname && text)
+    {
+        FILE* file = fopen(fname->string, "wa");
+        if(file)
+        {
+            fprintf( file, "%s\n", text->string );
+        }
+    }
+
+    return L0;
+}
