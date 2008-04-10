@@ -95,7 +95,7 @@ namespace System {
             BasicStreamBuffer<CharT>* rdbuf()
             { return _buffer; }
 
-            //! @brief Peeks bytes in the stream buffer.
+            //! @brief Peeks bytes in the stream buffer.rb
             /**
                The number of bytes that can be peeked depends on the current
                stream buffer get area and maybe less than requested,
@@ -104,12 +104,11 @@ namespace System {
             std::streamsize peeksome(char* buffer, std::streamsize size) throw(IOError)
             { return _buffer->peeksome(buffer, size); }
 
-         protected:
+        protected:
             explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
             : std::basic_iostream<CharT>( buffer ),
               _buffer(buffer)
-          { }
-
+            { }
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
