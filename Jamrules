@@ -402,20 +402,6 @@ else
 }
 
 
-rule ConfigureDefine
-{
-    NOUPDATE $(1) ;
-    Clean configure-clean : $(1) ;
-
-    if $(3)
-    {
-        AppendFile $(1) : "#ifndef "$(2) ;
-        AppendFile $(1) : "#define "$(2)" "$(3) ;
-        AppendFile $(1) : "#endif" ;
-        AppendFile $(1) : "" ;
-    }
-}
-
 
 NOTFILE conf configure-toolset ;
 ALWAYS configure-toolset ;
@@ -436,19 +422,57 @@ if $(JAMCONFIG)
     include Jamconfig ;
 }
 
-#COMMAND "echo \"int main() {}\" > test.cpp" : "exit-status" : "no-output" ;
-#result = [ COMMAND "gcc -o test.o test.cpp" : "exit-status" : "no-output" ] ;
-#COMMAND "rm test.cpp test.o" : "exit-status" : "no-output" ;
-#Exit "RETURN: " $(result) ;
 
-ConfigureDefine test.h : PT_VERSION_MAJOR : 0 ;
-ConfigureDefine test.h : PT_VERSION_MINOR : 1 ;
-ConfigureDefine test.h : PT_VERSION_REV : 1 ;
 
-ConfigureC++ WITH_STD_LOCALE : "#include <locale>"
-                               "int main() { return 0; }" ;
+rule ConfigureDefine
+{
+    local _line = "#ifndef" $(2) ;
+    WriteFile $(1) : $(_line:J=" ") ;
 
-ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+    _line = "#define" $(2) "=" $(3) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    WriteFile $(1) : "#endif" ;
+}
+
+
+rule CheckCompileC++
+{
+    local _line ;
+    for _line in $(2)
+    {
+        WriteFile $(1).cpp : $(_line) ;
+    }
+
+    local _cmd = $(C++) -o $(1:S=$(SUFEXE)) $(1).cpp ;
+    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
+
+    _cmd = $(RM) $(1).cpp ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
+    _cmd = $(RM) $(1:S=$(SUFEXE)) ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
+    if $(_result[2]) = 0
+    {
+        return 1 ;
+    }
+    else
+    {
+        return 0 ;
+    }
+}
+
+
+#WITH_STD_LOCALE = [ CheckCompileC++ WITH_STD_LOCALE : "#include <locale>"
+#                                                      "int main() { return 0; }" ] ;
+
+#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
+#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+
+#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+
 
 #ConfigureC++ WITH_WINMM : "#include <windows.h>"
 #                          "#include <mmsystem.h>"
