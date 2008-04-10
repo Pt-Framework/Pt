@@ -813,7 +813,7 @@ rule Main_LinkLibraries
 
 rule Main_LinkSharedLibraries
 {
-  Main_LinkSharedLibrariesImpl $(<) : $(>) ;
+  Main_LinkSharedLibrariesImpl $(<) : $(>) : $(3) ;
 }
 
 

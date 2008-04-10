@@ -104,11 +104,12 @@ namespace System {
             std::streamsize peeksome(char* buffer, std::streamsize size) throw(IOError)
             { return _buffer->peeksome(buffer, size); }
 
-        protected:
+
             explicit BasicIOStream(BasicIOBuffer<CharT>* buffer) throw(IOError)
             : std::basic_iostream<CharT>( buffer ),
               _buffer(buffer)
-            { }
+          { }
+
 
         private:
             BasicStreamBuffer<CharT>* _buffer;
