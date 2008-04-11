@@ -11,26 +11,67 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/SystemError.h>
 #include <string>
+#include <vector>
 #include <stdexcept>
 
 namespace Pt {
 
 namespace System {
 
+//! Process parameters
+class PT_SYSTEM_API ProcessInfo
+{
+    public:
+        //! process info can contain at least the command
+        ProcessInfo( const std::string& command = std::string());
+
+        /** 
+         * @brief adds an argument to the list of arguments
+         *
+         * An argument can contain white spaces
+         * 
+         * @param argument [IN] string containing the argument
+         */
+        void addArgument( const std::string& argument);
+
+        unsigned argCount() const;
+        std::string getArgument( unsigned idx) const;
+
+        //! replaces or, if null, closes the standard input
+        void setStdInput( IODevice* dev);
+        IODevice* getStdInput() const;
+
+        //! replaces or, if null, closes the standard output
+        void setStdOutput( IODevice* dev);
+        IODevice* getStdOutput() const;
+
+        //! replaces or, if null, closes the standard error
+        void setStdError( IODevice* dev);
+        IODevice* getStdError() const;
+
+        unsigned short mask() const;
+        
+    private:
+        std::string m_command;
+        unsigned short m_mask;
+        std::vector< std::string> m_argList;
+
+        IODevice* m_devInput;
+        IODevice* m_devOutput;
+        IODevice* m_devError;
+};
+
 //! Process Environment
 class PT_SYSTEM_API Process {
     public:
-        //! Constructs a Process with a command
+        //! Constructs a Process with a command including its arguments
         /**
-            @param command Name of the executable
-            @param suppStdin  [IN] if true, suppresses standard in
-            @param suppStdOut [IN] if true, suppresses standard out
-            @param suppStdErr [IN] if true, suppresses standard err
+            @param command Name of the executable along with its arguments
         */
-        Process(const std::string& command,
-                bool supStdIn = false,
-                bool supStdOut = false,
-                bool supStdErr = false);
+        Process( const std::string& commandline);
+
+        //! Constructs a Process with a process info structure
+        Process( const ProcessInfo& procInfo);
 
         //! Dtor
         ~Process();
@@ -40,36 +81,6 @@ class PT_SYSTEM_API Process {
             @return Name of the executable
         */
         const std::string& command();
-
-        //! Set the Command Arguments
-        /**
-            @param args Arguments given to the process
-        */
-        void setArgs(const std::string& args);
-
-        //! Get the Command Arguments
-        /**
-            @return Arguments of the process
-        */
-        const std::string& args();
-
-        //! Redirects the standar input, output, error
-        /** 
-         * @param dev [IN] redirection device
-         */
-		void setInput( IODevice& dev);
-
-        //! Redirects the standar output
-        /** 
-         * @param dev [IN] redirection device
-         */
-		void setOutput( IODevice& dev);
-
-        //! Redirects the standar error
-        /** 
-         * @param dev [IN] redirection device
-         */
-        void setErrput( IODevice& dev);
 
         //! Start/Create the Process
         /**

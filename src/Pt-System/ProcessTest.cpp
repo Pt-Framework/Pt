@@ -41,17 +41,16 @@ class ProcessTest : public Pt::Unit::TestSuite
 void ProcessTest::redirectOutputStream()
 {
 #ifdef NDEBUG
-    Pt::System::Process p("ProcessTestChild");
+    Pt::System::ProcessInfo procInfo( "ProcessTestChild");
 #else
-    Pt::System::Process p("ProcessTestChildd");
+    Pt::System::ProcessInfo procInfo( "ProcessTestChild");
 #endif
-	std::string testString( "testString");
-	
-	p.setArgs( testString.c_str());
-	
+    procInfo.addArgument( "testString");
+    
     Pt::System::Pipe pipe;
-
-    p.setOutput( pipe.output());
+    procInfo.setStdOutput( &pipe.output());
+    
+    Pt::System::Process p(procInfo);
 
     p.start();
     p.wait();
@@ -59,11 +58,11 @@ void ProcessTest::redirectOutputStream()
     char buffer[1024];
     int n = pipe.input().read( buffer, 1024);
 	buffer[n] = '\0';
-	
-	reportMessage( buffer);
+    
+	reportMessage( std::string("child output: ") + buffer);
 	
     PT_UNIT_ASSERT( n > 0);
-	PT_UNIT_ASSERT( std::string( buffer) == testString);
+	PT_UNIT_ASSERT( std::string( buffer) == "testString");
 }
 
 Pt::Unit::RegisterTest<ProcessTest> register_ProcessTest;

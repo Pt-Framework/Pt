@@ -37,24 +37,14 @@ namespace System {
     class ProcessImplBase
     {
         public:
-            ProcessImplBase(const string& command,
-                            bool suppStdIn = false,
-                            bool suppSdtOut = false,
-                            bool suppStdErr = false);
+            ProcessImplBase(const string& command);
+            ProcessImplBase(const ProcessInfo& procInfo);
 
             static void sleep(unsigned int milliSec)
             { ::Sleep(milliSec); }
 
             const std::string& command();
 
-            void setArgs(const std::string& strArgs);
-
-            const std::string& args();
-
-			void setInput(  IODevice& dev){ m_devIn  = &dev;  }
-			void setOutput( IODevice& dev){ m_devOut = &dev; }
-            void setErrput( IODevice& dev){ m_devErr = &dev; }
-            
             void start();
 
             void kill();
@@ -68,7 +58,7 @@ namespace System {
         
         string m_command;
         
-        bool m_suppStdStream[3];
+        unsigned short m_mask;
         
         IODevice* m_devIn;
         IODevice* m_devOut;

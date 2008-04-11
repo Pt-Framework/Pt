@@ -8,36 +8,31 @@ namespace Pt {
 
 namespace System {
 
-ProcessImplBase::ProcessImplBase(const string& command,
-                            bool suppStdIn,
-                            bool suppStdOut,
-                            bool suppStdErr)
-  : m_command(command)
-  , m_devIn(0)
-  , m_devOut(0)
-  , m_devErr(0)
+ProcessImplBase::ProcessImplBase(const string& command)
+    : m_command(command)
+    , m_mask(0)
+    , m_devIn(0)
+    , m_devOut(0)
+    , m_devErr(0)
 {
-    m_suppStdStream[0] = suppStdIn;
-    m_suppStdStream[1] = suppStdOut;
-    m_suppStdStream[2] = suppStdErr;    
+}
+
+ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
+{
+    m_mask = procInfo.mask();
+    
+    m_devIn  = procInfo.getStdInput();
+    m_devOut = procInfo.getStdOutput();
+    m_devErr = procInfo.getStdError();
+
+    for( unsigned i = 0; i < procInfo.argCount(); i++)
+        m_args += procInfo.getArgument( i);
 }
 
 
 const std::string& ProcessImplBase::command()
 {
     return m_command;
-}
-
-
-void ProcessImplBase::setArgs(const string& strArgs)
-{
-    m_args = strArgs;
-}
-
-
-const std::string& ProcessImplBase::args()
-{
-    return m_args;
 }
 
 void ProcessImplBase::start()
@@ -47,40 +42,26 @@ void ProcessImplBase::start()
     ZeroMemory( &m_pid, sizeof(m_pid) );
 
 #ifndef _WIN32_WCE
-	if( m_devIn)
-	{
-		SetHandleInformation( m_devIn->impl()->deviceHandle(), 
+    // --- standard in
+    if( (m_mask & 0x1) &&  m_devIn)
+    {
+        SetHandleInformation( m_devIn->impl()->deviceHandle(), 
 							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
-	}
-	else
-	{
-		if( m_suppStdStream[0])
-			m_startUp.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-	}
-
-	if( m_devOut)
-	{
+        m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
+    }
+            
+    if( (m_mask & 0x2) && m_devIn)
+    {
 		SetHandleInformation( m_devOut->impl()->deviceHandle(), 
 							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
 	}
-	else
-	{
-		if( m_suppStdStream[1])
-			m_startUp.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	}
 
-	if( m_devErr)
+	if( (m_mask & 0x4) && m_devErr)
 	{
 		SetHandleInformation( m_devErr->impl()->deviceHandle(), 
 							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 		m_startUp.hStdError = m_devErr->impl()->deviceHandle();
-	}
-	else
-	{
-		if( m_suppStdStream[2])
-			m_startUp.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 	}
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;

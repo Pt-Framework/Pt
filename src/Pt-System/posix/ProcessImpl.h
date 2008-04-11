@@ -15,10 +15,9 @@ namespace System {
 class PT_API ProcessImpl
 {
     public:
-        ProcessImpl(const std::string& command,
-                    bool suppStdIn,
-                    bool suppStdOut,
-                    bool suppStdErr);
+        ProcessImpl(const std::string& command);
+        ProcessImpl(const ProcessInfo& procInfo);
+
 
         ~ProcessImpl();
 
@@ -53,14 +52,6 @@ class PT_API ProcessImpl
     
         const std::string& command();
     
-        void setArgs(const std::string& strArgs);
-    
-        const std::string& args();
-    
-		void setInput( IODevice& dev) { m_devIn  = &dev; }
-        void setOutput( IODevice& dev){ m_devOut = &dev; }
-        void setErrput( IODevice& dev){ m_devErr = &dev; }
-                
         void start();
     
         void kill();
@@ -72,7 +63,7 @@ class PT_API ProcessImpl
         std::string m_command;
         std::string m_args;
 
-        bool m_suppStdStream[3];
+        unsigned short m_mask;
         
 		IODevice* m_devIn;
 		IODevice* m_devOut;

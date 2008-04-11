@@ -12,19 +12,27 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const std::string& strCommand,
-                         bool suppStdIn,
-                         bool suppStdOut,
-                         bool suppStdErr)
-    :m_command(strCommand)
-    ,m_devIn(0)
-    ,m_devOut(0)
-    ,m_devErr(0)
+ProcessImpl::ProcessImpl(const std::string& strCommand)
+    : m_command(strCommand)
+    , m_mask( 0)
+    , m_devIn(0)
+    , m_devOut(0)
+    , m_devErr(0)
 {
-    m_suppStdStream[0] = suppStdIn;
-    m_suppStdStream[1] = suppStdOut;
-    m_suppStdStream[2] = suppStdErr;
 }
+
+ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
+{
+    m_mask = procInfo.mask();
+    
+    m_devIn  = procInfo.getStdInput();
+    m_devOut = procInfo.getStdOutput();
+    m_devErr = procInfo.getStdError();
+
+    for( unsigned i = 0; i < procInfo.argCount(); i++)
+        m_args += procInfo.getArgument( i);
+}
+
 
 ProcessImpl::~ProcessImpl()
 {
@@ -34,18 +42,6 @@ ProcessImpl::~ProcessImpl()
 const std::string& ProcessImpl::command()
 {
     return m_command;
-}
-
-
-void ProcessImpl::setArgs(const std::string& strArgs)
-{
-    m_args=strArgs;
-}
-      
-      
-const std::string& ProcessImpl::args()
-{
-    return m_args;
 }
 
 void ProcessImpl::start()
@@ -61,30 +57,24 @@ void ProcessImpl::start()
     if( m_pid == 0)    // child Process
     {
         // --- standard in
-        if( m_devIn)
-            dup2( m_devIn->impl()->fd(), STDIN_FILENO);
-        else
+        if( m_mask & 0x1)
         {
-            if( !m_suppStdStream[0])
-                fclose( stdin);
+            if( m_devIn)  dup2( m_devIn->impl()->fd(), STDIN_FILENO);
+            else fclose( stdin);
         }
 
         // --- standard out
-        if( m_devOut)
-            dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
-        else
+        if( m_mask & 0x2)
         {
-            if( !m_suppStdStream[1])
-                fclose( stdout);
+            if( m_devOut)  dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
+            else fclose( stdout);
         }
 
         // --- standard err
-        if( m_devErr)
-            dup2( m_devErr->impl()->fd(), STDERR_FILENO);
-        else
+        if( m_mask & 0x4)
         {
-            if( !m_suppStdStream[2])
-                fclose( stderr);
+            if( m_devErr)  dup2( m_devErr->impl()->fd(), STDERR_FILENO);
+            else fclose( stderr);
         }
 
         // split m_command and args in anrray of pointers
