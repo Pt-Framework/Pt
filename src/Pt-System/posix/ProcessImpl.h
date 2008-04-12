@@ -37,7 +37,7 @@ class PT_API ProcessImpl
         static std::string getEnvVar(const std::string& name)
         {
             std::string ret;
-			const char* cp = std::getenv(name.c_str());
+            const char* cp = std::getenv(name.c_str());
             if( NULL == cp )
             {
                 return ret;

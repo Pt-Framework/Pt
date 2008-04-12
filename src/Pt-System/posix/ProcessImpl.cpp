@@ -22,9 +22,9 @@ ProcessImpl::ProcessImpl(const std::string& strCommand)
 
 ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
 {
-	m_command = procInfo.command();
+    m_command = procInfo.command();
     m_mask = procInfo.mask();
-    
+
     m_devIn  = procInfo.getStdInput();
     m_devOut = procInfo.getStdOutput();
     m_devErr = procInfo.getStdError();
@@ -47,13 +47,13 @@ const std::string& ProcessImpl::command()
 void ProcessImpl::start()
 {
     m_pid = fork();
-        
+
     if( m_pid < 0 )
     {
         m_pid = -1;
         throw SystemError("System call FORK() Failed!", PT_SOURCEINFO);
     }
-        
+
     if( m_pid == 0)    // child Process
     {
         // --- standard in
@@ -116,12 +116,12 @@ void ProcessImpl::start()
             std::exit(-1);
         }
     }
-        
+
     // Parent Process
     return;
 }
 
-      
+
 void ProcessImpl::kill()
 {
     if( 0 > ::kill(m_pid,SIGINT) )
