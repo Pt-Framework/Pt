@@ -14,7 +14,6 @@ namespace System {
 
 ProcessImpl::ProcessImpl(const std::string& strCommand)
     : m_command(strCommand)
-    , m_mask( 0)
     , m_devIn(0)
     , m_devOut(0)
     , m_devErr(0)
@@ -23,6 +22,7 @@ ProcessImpl::ProcessImpl(const std::string& strCommand)
 
 ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
 {
+	m_command = procInfo.command();
     m_mask = procInfo.mask();
     
     m_devIn  = procInfo.getStdInput();
@@ -57,21 +57,21 @@ void ProcessImpl::start()
     if( m_pid == 0)    // child Process
     {
         // --- standard in
-        if( m_mask & 0x1)
+        if( m_mask[0])
         {
             if( m_devIn)  dup2( m_devIn->impl()->fd(), STDIN_FILENO);
             else fclose( stdin);
         }
 
         // --- standard out
-        if( m_mask & 0x2)
+        if( m_mask[1])
         {
             if( m_devOut)  dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
             else fclose( stdout);
         }
 
         // --- standard err
-        if( m_mask & 0x4)
+        if( m_mask[2])
         {
             if( m_devErr)  dup2( m_devErr->impl()->fd(), STDERR_FILENO);
             else fclose( stderr);

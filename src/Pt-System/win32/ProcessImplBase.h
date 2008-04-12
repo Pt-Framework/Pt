@@ -22,13 +22,12 @@
 #include "Pt/System/Process.h"
 
 #include <windows.h>
+#include <stdlib.h>
 
 #include <cstdlib>
 #include <sstream>
-#include <stdlib.h>
 #include <vector>
-using namespace std;
-
+#include <bitset>
 
 namespace Pt {
 
@@ -37,7 +36,7 @@ namespace System {
     class ProcessImplBase
     {
         public:
-            ProcessImplBase(const string& command);
+            ProcessImplBase(const std::string& command);
             ProcessImplBase(const ProcessInfo& procInfo);
 
             static void sleep(unsigned int milliSec)
@@ -52,18 +51,17 @@ namespace System {
             int wait();
 
     private:
-        STARTUPINFO m_startUp;
-        PROCESS_INFORMATION m_pid;
-        std::vector<TCHAR> m_buffer;
+		PROCESS_INFORMATION m_pid;
+	
+        std::string m_command;
         
-        string m_command;
-        
-        unsigned short m_mask;
+        std::bitset<3> m_mask;
         
         IODevice* m_devIn;
         IODevice* m_devOut;
         IODevice* m_devErr;
-        string m_args;
+		
+        std::string m_args;
     };
 
 } // namespace System

@@ -63,7 +63,7 @@ class PT_API ProcessImpl
         std::string m_command;
         std::string m_args;
 
-        unsigned short m_mask;
+        std::bitset<3> m_mask;
         
 		IODevice* m_devIn;
 		IODevice* m_devOut;

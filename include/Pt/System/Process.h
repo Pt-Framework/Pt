@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <bitset>
 
 namespace Pt {
 
@@ -23,15 +24,17 @@ class PT_SYSTEM_API ProcessInfo
 {
     public:
         //! process info can contain at least the command
-        ProcessInfo( const std::string& command = std::string());
+        ProcessInfo( const std::string& command);
 
+		const std::string& command() const;
+		
         /** 
-         * @brief adds an argument to the list of arguments
-         *
-         * An argument can contain white spaces
-         * 
-         * @param argument [IN] string containing the argument
-         */
+		* @brief adds an argument to the list of arguments
+		*
+		* An argument can contain white spaces
+		* 
+		* @param argument [IN] string containing the argument
+		*/
         void addArgument( const std::string& argument);
 
         unsigned argCount() const;
@@ -49,11 +52,11 @@ class PT_SYSTEM_API ProcessInfo
         void setStdError( IODevice* dev);
         IODevice* getStdError() const;
 
-        unsigned short mask() const;
+        std::bitset<3> mask() const;
         
     private:
         std::string m_command;
-        unsigned short m_mask;
+		std::bitset<3> m_mask;
         std::vector< std::string> m_argList;
 
         IODevice* m_devInput;

@@ -43,7 +43,7 @@ void ProcessTest::redirectOutputStream()
 #ifdef NDEBUG
     Pt::System::ProcessInfo procInfo( "ProcessTestChild");
 #else
-    Pt::System::ProcessInfo procInfo( "ProcessTestChild");
+    Pt::System::ProcessInfo procInfo( "ProcessTestChildd");
 #endif
     procInfo.addArgument( "testString");
     

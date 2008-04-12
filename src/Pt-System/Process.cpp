@@ -13,11 +13,15 @@ namespace System {
 
 ProcessInfo::ProcessInfo( const std::string& command)
     : m_command( command)
-    , m_mask(0)
     , m_devInput(0)
     , m_devOutput(0)
     , m_devError(0)
 { }
+
+const std::string& ProcessInfo::command() const
+{
+	return m_command;
+}
 
 void ProcessInfo::addArgument( const std::string& argument)
 {
@@ -26,7 +30,7 @@ void ProcessInfo::addArgument( const std::string& argument)
 
 void ProcessInfo::setStdInput( IODevice* dev)
 {
-    m_mask &= 1;
+    m_mask.set(0);
     m_devInput = dev;
 }
 
@@ -38,7 +42,7 @@ IODevice* ProcessInfo:: getStdInput() const
  
 void ProcessInfo::setStdOutput( IODevice* dev)
 {
-    m_mask &= 2;
+    m_mask.set(1);
     m_devOutput = dev;
 }
 
@@ -50,7 +54,7 @@ IODevice* ProcessInfo::getStdOutput() const
  
 void ProcessInfo::setStdError( IODevice* dev)
 {
-    m_mask &=4;
+    m_mask.set(2);
     m_devError = dev;
 }
 
@@ -59,7 +63,7 @@ IODevice* ProcessInfo::getStdError() const
     return m_devError;
 }
 
-unsigned short ProcessInfo::mask() const
+std::bitset<3> ProcessInfo::mask() const
 {
     return m_mask;
 }

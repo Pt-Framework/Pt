@@ -38,7 +38,9 @@ namespace System {
     class ProcessImpl : public ProcessImplBase 
     {
         public:
-            ProcessImpl(const string& command, bool, bool, bool);
+            ProcessImpl(const string& command);
+
+			ProcessImpl(const ProcessInfo& procInfo);
 
             static void setEnvVar(const string& name, const string& value);
         
