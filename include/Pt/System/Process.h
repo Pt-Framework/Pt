@@ -26,15 +26,15 @@ class PT_SYSTEM_API ProcessInfo
         //! process info can contain at least the command
         ProcessInfo( const std::string& command);
 
-		const std::string& command() const;
+	const std::string& command() const;
 		
         /** 
-		* @brief adds an argument to the list of arguments
-		*
-		* An argument can contain white spaces
-		* 
-		* @param argument [IN] string containing the argument
-		*/
+	 * @brief adds an argument to the list of arguments
+	 *
+	 * An argument can contain white spaces
+	 * 
+	 * @param argument [IN] string containing the argument
+	 */
         void addArgument( const std::string& argument);
 
         unsigned argCount() const;

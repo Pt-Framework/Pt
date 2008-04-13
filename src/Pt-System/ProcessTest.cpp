@@ -27,15 +27,14 @@
   
 class ProcessTest : public Pt::Unit::TestSuite
 {
-	public:
-		ProcessTest()
-        : Pt::Unit::TestSuite("ProcessTest")
-        {
-		Pt::Unit::TestSuite::registerMethod( "redirectOutputStream", *this, &ProcessTest::redirectOutputStream );
-        }
-
-    protected:
-        void redirectOutputStream();
+public:
+    ProcessTest() : Pt::Unit::TestSuite("ProcessTest")
+    {
+        Pt::Unit::TestSuite::registerMethod( "redirectOutputStream", *this, &ProcessTest::redirectOutputStream );
+    }
+    
+protected:
+    void redirectOutputStream();
 };
 
 void ProcessTest::redirectOutputStream()
@@ -49,7 +48,7 @@ void ProcessTest::redirectOutputStream()
 
     Pt::System::Pipe pipe;
     procInfo.setStdOutput( &pipe.output());
-
+    
     Pt::System::Process p(procInfo);
 
     p.start();
@@ -58,11 +57,11 @@ void ProcessTest::redirectOutputStream()
     char buffer[1024];
     int n = pipe.input().read( buffer, 1024);
     buffer[n] = '\0';
-
+    
     reportMessage( std::string("child output: ") + buffer);
-
+    
     PT_UNIT_ASSERT( n > 0);
-	PT_UNIT_ASSERT( std::string( buffer) == "testString");
+    PT_UNIT_ASSERT( std::string( buffer) == "testString");
 }
 
 Pt::Unit::RegisterTest<ProcessTest> register_ProcessTest;

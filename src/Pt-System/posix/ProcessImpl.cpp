@@ -1,12 +1,12 @@
 #include "ProcessImpl.h"
 #include "IODeviceImpl.h"
+
 #include <cstdlib>
-#include <iostream>
 #include <vector>
 #include <signal.h>
 #include <errno.h>
-#include <sys/wait.h>
 
+#include <sys/wait.h>
 
 namespace Pt {
 
@@ -47,7 +47,7 @@ const std::string& ProcessImpl::command()
 void ProcessImpl::start()
 {
     m_pid = fork();
-
+    
     if( m_pid < 0 )
     {
         m_pid = -1;
@@ -57,21 +57,21 @@ void ProcessImpl::start()
     if( m_pid == 0)    // child Process
     {
         // --- standard in
-        if( m_mask[0])
+        if( m_mask.test(0))
         {
             if( m_devIn)  dup2( m_devIn->impl()->fd(), STDIN_FILENO);
             else fclose( stdin);
         }
 
         // --- standard out
-        if( m_mask[1])
+        if( m_mask.test(1))
         {
-            if( m_devOut)  dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
+	    if( m_devOut) dup2( m_devOut->impl()->fd(), STDOUT_FILENO);
             else fclose( stdout);
         }
 
         // --- standard err
-        if( m_mask[2])
+        if( m_mask.test(2))
         {
             if( m_devErr)  dup2( m_devErr->impl()->fd(), STDERR_FILENO);
             else fclose( stderr);
@@ -108,8 +108,8 @@ void ProcessImpl::start()
             }
         }
         cpArgs[j] = 0;
-
-        // call exec
+        
+	// call exec
         if( 0 > execvp(cpArgs[0], cpArgs))
         {
             throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
