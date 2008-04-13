@@ -294,13 +294,13 @@ actions Ecppc
 #############################################################################
 # Auto configuration rules and actions
 #############################################################################
-NOTFILE configure configure-clean ;
-Depends configure : Jamconfig ;
-Depends Jamconfig : configure-clean ;
-Clean configure-clean : Jamconfig ;
+#NOTFILE configure configure-clean ;
+#Depends configure : Jamconfig ;
+#Depends Jamconfig : configure-clean ;
+#Clean configure-clean : Jamconfig ;
 
 
-rule ConfigureC++
+rule _ConfigureC++
 {
     local _defines = Jamconfig ;
     local _source = $(1:S=.cpp) ;
@@ -314,7 +314,7 @@ rule ConfigureC++
     Jamconfig Jamconfig : $(1) ;
 }
 
-rule CheckC++
+rule _CheckC++
 {
     local _target = $(1) ;
     local _source = $(2) ;
@@ -353,12 +353,12 @@ rule CheckC++
 
 if $(NT)
 {
-    actions quietly AppendFile
+    actions quietly _AppendFile
     {
         echo $(2) >> $(1)
     }
 
-    actions quietly Jamconfig
+    actions quietly _Jamconfig
     {
         if exist $(2:S=$(SUFEXE)) goto exists
         echo $(2) = 0 ; >> $(1)
@@ -372,12 +372,12 @@ if $(NT)
 }
 else
 {
-    actions quietly AppendFile
+    actions quietly _AppendFile
     {
         printf "$(2)\n" >> $(1)
     }
 
-    actions quietly Jamconfig
+    actions quietly _Jamconfig
     {
         if test -f $(2:S=$(SUFEXE)); then
             echo $(2)" = 1 ;" >> $(1)
@@ -387,7 +387,7 @@ else
 
 if $(VISUALC)
 {
-    actions ignore CheckC++
+    actions ignore _CheckC++
     {
         set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
         "$(C++)" /Fo$(<:S=.obj) /Fe$(<) /I$(HDRS) /I$(STDHDRS) /EHsc /TP $(>) /link $(LINKLIBS)
@@ -395,7 +395,7 @@ if $(VISUALC)
 }
 else
 {
-    actions ignore CheckC++
+    actions ignore _CheckC++
     {
         $(C++) -o $(<) $(>) -l$(LINKLIBS)
     }
@@ -403,40 +403,20 @@ else
 
 
 
-NOTFILE conf configure-toolset ;
-ALWAYS configure-toolset ;
+#NOTFILE conf configure-toolset ;
+#ALWAYS configure-toolset ;
 
-actions Configure
+actions _Configure
 {
     $(ARGV[0]) $(2) ;
 }
 
-Depends conf : configure-toolset ;
-Configure configure-toolset : config ;
-AppendFile config : "SOME_STUFF = 0" ;
+#Depends conf : configure-toolset ;
+#Configure configure-toolset : config ;
+#AppendFile config : "SOME_STUFF = 0" ;
 
 
-JAMCONFIG = [ Glob "" : Jamconfig ] ;
-if $(JAMCONFIG)
-{
-    include Jamconfig ;
-}
-
-
-
-rule ConfigureDefine
-{
-    local _line = "#ifndef" $(2) ;
-    WriteFile $(1) : $(_line:J=" ") ;
-
-    _line = "#define" $(2) "=" $(3) ;
-    WriteFile $(1) : $(_line:J=" ") ;
-
-    WriteFile $(1) : "#endif" ;
-}
-
-
-rule CheckCompileC++
+rule CheckC++
 {
     local _line ;
     for _line in $(2)
@@ -455,17 +435,95 @@ rule CheckCompileC++
 
     if $(_result[2]) = 0
     {
+    	WriteFile Jamconfig : $(1)" = 1 ;"  ;
         return 1 ;
     }
     else
     {
+    	WriteFile Jamconfig :  $(1)" = 0 ;"   ;
         return 0 ;
     }
 }
 
 
-#WITH_STD_LOCALE = [ CheckCompileC++ WITH_STD_LOCALE : "#include <locale>"
-#                                                      "int main() { return 0; }" ] ;
+rule ConfigureDefine
+{
+    local _line = "#ifndef" $(2) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    _line = "#define" $(2) "=" $(3) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    WriteFile $(1) : "#endif" ;
+}
+
+
+rule ConfigureCommand
+{
+	local _var = $(1) ;
+	local _val = $(2) ;
+    local _cmd = $(3) ;
+
+    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
+
+    if $(_result[2]) = 0
+    {
+    	$(_var) = $(_val) ;
+    	WriteFile Jamconfig :  $(_var)" = "$(_val)" ;"   ;
+        return 1 ;
+    }
+}
+
+
+rule ConfigureC++
+{
+	local _cmd ;
+	local _result ;
+
+	WriteFile check.cpp : "#include <string>" ;
+	WriteFile check.cpp : "int main() { return 0; } " ;
+
+	if [ ConfigureCommand C++ : "g++" : "g++ -o check check.cpp" ]
+	{
+		Echo "Checking for C++ compiler... g++" ;
+    	_cmd = $(RM) "check" ;
+    	COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    	_result = "g++" ;
+	}
+	else if [ ConfigureCommand C++ : "CC" : "CC -o check check.cpp" ]
+	{
+	    Echo "Checking for C++ compiler... CC" ;
+    	_cmd = $(RM) "check" ;
+    	COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    	_result = "CC" ;
+	}
+
+    _cmd = $(RM) "check.cpp" ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    
+	if ! $(_result)
+	{
+		Exit "Checking for C++ compiler... NOT FOUND" ;
+	}
+
+	return $(_result) ;
+}
+
+
+#JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
+if ! $(JAM_JAMCONFIG)
+{
+	# reconfigure if Jamconfig.toolset does not exist
+	#             if TOOLSET has changed (command line)
+	#ConfigureC++ ;
+
+    #WITH_STD_LOCALE = [ CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
+    #                                                  "int main() { return 0; }" ] ;
+                                                         
+	#ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
+}
+
+#Exit WITH_STD_LOCALE $(WITH_STD_LOCALE) ;
 
 #ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
 #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
