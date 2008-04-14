@@ -19,7 +19,7 @@
  
 #include "Pt/System/Process.h"
 #include "Pt/System/Pipe.h"
- 
+
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/TestMain.h"
@@ -51,6 +51,7 @@ void ProcessTest::redirectOutputStream()
     
     Pt::System::Process p(procInfo);
 
+    p.setEnvVar( "PATH", ".");
     p.start();
     p.wait();
 
