@@ -16,13 +16,9 @@ rule JamInclude
 }
 
 #
-# Set Target OS to host OS if unset
+# Set target OS/platform to host OS/platform if unset
 #
-TARGET_OS ?= $(OS:L) ;
-
-#
-# Set target platform to host platform if unset
-#
+TARGET_OS     ?= $(OS:L) ;
 TARGET_OSPLAT ?= $(OSPLAT:L) ;
 
 #
@@ -60,13 +56,8 @@ rule CheckC++
 
     if $(_result[2]) = 0
     {
+    	$(1) = 1 ;
         WriteFile Jamconfig : $(1)" = 1 ;"  ;
-        return 1 ;
-    }
-    else
-    {
-        WriteFile Jamconfig :  $(1)" = 0 ;"   ;
-        return 0 ;
     }
 }
 
@@ -136,9 +127,12 @@ rule ConfigureC++
     JamInclude $(TOOLSET).jam ;
 
     WriteFile Jamconfig :  "TOOLSET = "$(TOOLSET)" ;" ;
-    WriteFile Jamconfig :  "JamInclude "$(TOOLSET)".jam ;" ;
 }
 
+
+#############################################################################
+# Detect compile and link configuration
+#############################################################################
 
 JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
 
@@ -146,7 +140,7 @@ if ! $(JAM_JAMCONFIG)
 {
     if ! $(CONFIGURE)
     {
-        Exit "Run 'jam configure' first." ;
+        Exit "Run 'jam configure' to configure the build first." ;
     }
 }
 
@@ -183,22 +177,16 @@ if $(CONFIGURE)
     #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
     #ConfigureDefine test.h : PT_VERSION_REV : 0 ;
 
-    #WITH_STD_LOCALE = [ CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
-    #                                                  "int main() { return 0; }" ] ;
+    CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
+                                  "int main() { return 0; }" ;
 
     #ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
-
-    Exit "You can run jam now to build targets" ;
+    
+    Exit "Run jam now to build targets." ;
 }
-else
-{
-    include Jamconfig ;
-}
-
 
 
 #ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
-
 
 #ConfigureC++ WITH_WINMM : "#include <windows.h>"
 #                          "#include <mmsystem.h>"
@@ -220,18 +208,12 @@ else
 #                             "#include <sys/socket.h>"
 #                             "int main() { return socket(0,0,0); }" : nsl ;
 
-# Include host platform specifics
 #
-# This adds/sets platform specific rules and variables. May override base 
-# rules and variables.
+# Include 
 #
+include Jamconfig ;
 
-#
-# Include target platform specifics
-#
+JamInclude $(TOOLSET:LS=".jam") ;
 JamInclude $(TARGET_OS:LS=".jam") ;
 
-#
-# Include the project top level Jamfile
-#
 include Jamfile ;
