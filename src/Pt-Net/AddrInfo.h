@@ -27,8 +27,10 @@
     //#endif
     #include <winsock2.h>
     #include <ws2tcpip.h>
-	#ifndef __GNUC__
-//		#include <wspiapi.h>
+	#if !defined( __GNUC__)  
+		#if NTDDI_VERSION  == NTDDI_WIN2K
+			#include <wspiapi.h>
+		#endif
 	#endif
 #else
     #include <sys/types.h>
@@ -39,7 +41,6 @@
 #include <iterator>
 #include <string>
 #include <sstream>
-
 
 namespace Pt {
 
