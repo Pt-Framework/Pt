@@ -1,0 +1,237 @@
+#
+# OS specific string for current directory
+#
+DOT = . ;
+JAMDIR ?= jam ;
+
+#
+# Includes a jam package
+#
+rule JamInclude
+{
+    local _s = $(DOT) ;
+    _s = $(JAMDIR:R=$(_s)) ;
+    _s = $(<:R=$(_s)) ;
+    include $(_s) ;
+}
+
+#
+# Set Target OS to host OS if unset
+#
+TARGET_OS ?= $(OS:L) ;
+
+#
+# Set target platform to host platform if unset
+#
+TARGET_OSPLAT ?= $(OSPLAT:L) ;
+
+#
+# Set configuration, use debug if not set
+#
+CONFIG ?= debug ;
+CONFIG = $(CONFIG:L) ;
+
+#
+# Include base rules
+#
+JamInclude Jamrules.base ;
+
+
+#############################################################################
+# Auto configuration rules and actions
+#############################################################################
+
+rule CheckC++
+{
+    local _line ;
+    for _line in $(2)
+    {
+        WriteFile $(1).cpp : $(_line) ;
+    }
+
+    local _cmd = $(C++) -o $(1:S=$(SUFEXE)) $(1).cpp ;
+    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
+
+    _cmd = $(RM) $(1).cpp ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
+    _cmd = $(RM) $(1:S=$(SUFEXE)) ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
+    if $(_result[2]) = 0
+    {
+        WriteFile Jamconfig : $(1)" = 1 ;"  ;
+        return 1 ;
+    }
+    else
+    {
+        WriteFile Jamconfig :  $(1)" = 0 ;"   ;
+        return 0 ;
+    }
+}
+
+
+rule ConfigureDefine
+{
+    local _line = "#ifndef" $(2) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    _line = "#define" $(2) "=" $(3) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    WriteFile $(1) : "#endif" ;
+}
+
+
+rule ConfigureCommand
+{
+    local _var = $(1) ;
+    local _val = $(2) ;
+    local _cmd = $(3) ;
+
+    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
+
+    if $(_result[2]) = 0
+    {
+        $(_var) = $(_val) ;
+        WriteFile Jamconfig :  $(_var)" = "$(_val)" ;" ;
+        return 1 ;
+    }
+}
+
+
+rule ConfigureC++
+{
+    if ! $(TOOLSET)
+    {
+        local _cmd ;
+
+        WriteFile check.cpp : "#include <string.h>" ;
+        WriteFile check.cpp : "int main() { return 0; } " ;
+
+        if [ ConfigureCommand C++ : "gcc" : "gcc -o check check.cpp" ]
+        {
+            Echo "Checking for C++ toolset... gcc" ;
+            _cmd = $(RM) "check" ;
+            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+            TOOLSET = "gcc" ;
+        }
+        else if [ ConfigureCommand C++ : "CC" : "CC -o check check.cpp" ]
+        {
+            Echo "Checking for C++ toolset... CC" ;
+            _cmd = $(RM) "check" ;
+            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+            TOOLSET = "sunpro" ;
+        }
+
+        _cmd = $(RM) "check.cpp" ;
+        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    }
+
+    if ! $(TOOLSET)
+    {
+        Exit "Checking for C++ toolset... NOT FOUND" ;
+    }
+
+    JamInclude $(TOOLSET).jam ;
+
+    WriteFile Jamconfig :  "TOOLSET = "$(TOOLSET)" ;" ;
+    WriteFile Jamconfig :  "JamInclude "$(TOOLSET)".jam ;" ;
+}
+
+
+JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
+
+if ! $(JAM_JAMCONFIG)
+{
+    if ! $(CONFIGURE)
+    {
+        Exit "Run 'jam configure' first." ;
+    }
+}
+
+
+if $(CONFIGURE)
+{
+    local _cmd = $(RM) Jamconfig ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
+    #
+    # TODO: host configuration
+    #
+    if $(NT)
+    {
+        MV = move /y ;
+        CP = copy ;
+        RM = del /f/q ;
+        RMDIR = rmdir /s/q ;
+        SLASH = \\ ;
+    }
+    else
+    {
+        CHMOD = chmod ;
+        CHGRP = chgrp ;
+        CHOWN = chown ;
+    }
+
+    #
+    # Toolset configuration
+    #
+    ConfigureC++ ;
+
+    #ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+    #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
+    #ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+
+    #WITH_STD_LOCALE = [ CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
+    #                                                  "int main() { return 0; }" ] ;
+
+    #ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
+
+    Exit "You can run jam now to build targets" ;
+}
+else
+{
+    include Jamconfig ;
+}
+
+
+
+#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+
+
+#ConfigureC++ WITH_WINMM : "#include <windows.h>"
+#                          "#include <mmsystem.h>"
+#                          "int main() { return timeGetTime(); }" 
+#                        : winmm.lib ;
+#
+#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
+#
+#ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
+#                            "#include <mmsystem.h>"
+#                            "int main() { return timeGetTime(); }" 
+#                          : mmtimer.lib ;
+#
+#ConfigureC++ WITH_UNIX_SOCKETS : "#include <sys/types.h>"
+#                                 "#include <sys/socket.h>"
+#                                 "int main() { return socket(0,0,0); }" : socket ;
+#
+#ConfigureC++ WITH_UNIX_NSL : "#include <sys/types.h>"
+#                             "#include <sys/socket.h>"
+#                             "int main() { return socket(0,0,0); }" : nsl ;
+
+# Include host platform specifics
+#
+# This adds/sets platform specific rules and variables. May override base 
+# rules and variables.
+#
+
+#
+# Include target platform specifics
+#
+JamInclude $(TARGET_OS:LS=".jam") ;
+
+#
+# Include the project top level Jamfile
+#
+include Jamfile ;
