@@ -25,10 +25,13 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const string& command, bool noIn, bool noOut, bool noErr)
-: ProcessImplBase(command, noIn, noOut, noErr)
+ProcessImpl::ProcessImpl(const string& command)
+: ProcessImplBase(command)
 {}
 
+ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
+: ProcessImplBase( procInfo)
+{}
 
 std::string ProcessImpl::getEnvVar(const string& name)
 {
