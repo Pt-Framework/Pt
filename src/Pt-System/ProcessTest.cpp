@@ -47,7 +47,8 @@ void ProcessTest::redirectOutputStream()
     procInfo.addArgument( "testString");
 
     Pt::System::Pipe pipe;
-    procInfo.setStdOutput( &pipe.output());
+    procInfo.setStdOutput(&pipe.output());
+	procInfo.setStdError(0);
     
     Pt::System::Process p(procInfo);
 

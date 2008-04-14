@@ -28,7 +28,7 @@ ProcessImplBase::ProcessImplBase(const ProcessInfo& procInfo)
     m_devErr = procInfo.getStdError();
 
     for( unsigned i = 0; i < procInfo.argCount(); i++)
-        m_args += procInfo.getArgument( i);
+        m_args += " " + procInfo.getArgument( i);
 }
 
 
@@ -47,25 +47,40 @@ void ProcessImplBase::start()
 
 #ifndef _WIN32_WCE
     // --- standard in
-    if( (m_mask.test(0)) &&  m_devIn)
-    {
-        SetHandleInformation( m_devIn->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-        m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
-    }
-
-    if( (m_mask.test(1)) && m_devOut)
-    {
-		SetHandleInformation( m_devOut->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
+    if( m_mask.test(0))
+	{
+		if( m_devIn)
+		{
+			SetHandleInformation( m_devIn->impl()->deviceHandle(), 
+								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+			m_startUp.hStdInput = m_devIn->impl()->deviceHandle();
+		}
+		else
+			m_startUp.hStdInput = INVALID_HANDLE_VALUE;
 	}
 
-	if( (m_mask.test(2)) && m_devErr)
+    if( m_mask.test(1))
+	{ 
+		if(m_devOut)
+		{
+			SetHandleInformation( m_devOut->impl()->deviceHandle(), 
+								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+			m_startUp.hStdOutput = m_devOut->impl()->deviceHandle();
+		}
+		else
+			m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
+	}
+
+	if( m_mask.test(2))
 	{
-		SetHandleInformation( m_devErr->impl()->deviceHandle(), 
-							  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		m_startUp.hStdError = m_devErr->impl()->deviceHandle();
+		if( m_devErr)
+		{
+			SetHandleInformation( m_devErr->impl()->deviceHandle(), 
+								HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+			m_startUp.hStdError = m_devErr->impl()->deviceHandle();
+		}
+		else
+			m_startUp.hStdError = INVALID_HANDLE_VALUE;
 	}
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;

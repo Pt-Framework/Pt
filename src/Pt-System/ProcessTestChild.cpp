@@ -23,6 +23,7 @@
 
 int main( int argc, char* argv[])
 {
+	std::cerr << "abc" << std::endl;
     if( argc >= 2)
     {
         std::cout << argv[1];
