@@ -29,7 +29,7 @@
     #include <ws2tcpip.h>
 	#if !defined( __GNUC__)  
 		#if NTDDI_VERSION  == NTDDI_WIN2K
-			#include <wspiapi.h>
+			//#include <wspiapi.h>
 		#endif
 	#endif
 #else

@@ -31,7 +31,7 @@ namespace System {
 class ProcessImpl : public ProcessImplBase
 {
     public:
-        ProcessImpl(const string& command);
+        ProcessImpl(const std::string& command);
 		
 		ProcessImpl(const ProcessInfo& procInfo);
 
