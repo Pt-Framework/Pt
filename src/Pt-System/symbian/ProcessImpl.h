@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <unistd.h>
+#include <e32base.h>
 
 #include "Pt/System/Process.h"
 
@@ -45,7 +46,7 @@ class PT_API ProcessImpl
         }
 
         static void sleep(size_t milliSec){
-            usleep(milliSec*1000);
+            User::After(milliSec*1000);
         }
     
         const std::string& command();
@@ -61,7 +62,8 @@ class PT_API ProcessImpl
         void wait();
     
     private:
-        pid_t m_pid;
+        //pid_t m_pid;
+        RProcess m_process;
         std::string m_command;
         std::string m_args;
 };

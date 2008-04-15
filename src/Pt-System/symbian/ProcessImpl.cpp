@@ -15,7 +15,6 @@ namespace System {
 ProcessImpl::ProcessImpl(const std::string& strCommand)
 :m_command(strCommand)
 {
-	throw SystemError("Process management not supported on Symbian",PT_SOURCEINFO);
 }
 
 
@@ -44,62 +43,46 @@ const std::string& ProcessImpl::args()
 
 void ProcessImpl::start()
 {
-//    m_pid = fork();
-//
-//    if( m_pid < 0 )
-//    {
-//        m_pid=-1;
-//        throw SystemError("System call FORK() Failed!",PT_SOURCEINFO);
-//    }
-//
-//    if( m_pid == 0)    // child Process
-//    {
-//        std::string strCommArgs = m_command + " " + m_args;
-//        std::vector<char> buffer( strCommArgs.length() );
-//        std::copy( strCommArgs.begin(), strCommArgs.end(), buffer.begin() );
-//        buffer.push_back('\0');
-//
-//        //char cp[strCommArgs.length() + 1];
-//        //strcpy(cp, strCommArgs.c_str());
-//
-//        char* cpArgs[ buffer.size() ];
-//
-//        unsigned int j = 0;
-//		cpArgs[j++] = std::strtok(&buffer[0]," ");	// allocate the command to cpArgs
-//
-//		while( j < m_args.length()+1 && ( cpArgs[j++] = std::strtok(NULL," ") ) != NULL);	// allocate the arguments to cpArgs
-//
-//        if( 0 > execvp(cpArgs[0], cpArgs))
-//        {
-//            throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
-//			std::exit(-1);
-//        }
-//    }
-//    // Parent Process
-//    return;
+    if (m_command.length() > KMaxPath)
+        throw std::logic_error("Command path too long");        
+    
+    TPtrC8 ptrCommand(reinterpret_cast<const TUint8*>(m_command.c_str()));
+    TBuf<KMaxPath> descriptorCommand;
+    descriptorCommand.Copy(ptrCommand);
+    
+    // apparently KMaxPath has got nothing to do with the arguments
+    // but still we need some maximum for a limit
+    if (m_args.length() > KMaxPath)
+        throw std::logic_error("Arguments too long");        
+
+    TPtrC8 ptrArgs(reinterpret_cast<const TUint8*>(m_args.c_str()));
+    TBuf<KMaxPath> descriptorArgs;
+    descriptorArgs.Copy(ptrArgs);
+
+    if (m_process.Create(descriptorCommand, descriptorArgs) != KErrNone)
+    {
+        throw SystemError("System call RProcess::Create() Failed!", PT_SOURCEINFO);
+    }
+    
+    // execute
+    m_process.Resume();
+    
 }
 
 
 void ProcessImpl::kill()
-{
-//    if( 0 > ::kill(m_pid,SIGINT) )
-//    {
-//		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-//    }
-//    if( m_pid != ::wait(NULL) )
-//    {
-//		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-//    }
+{    
+    m_process.Terminate(0);
 }
 
 
 void ProcessImpl::wait()
 {
-//    int iStatus;
-//    if( 0 > waitpid(m_pid,&iStatus,WUNTRACED) )
-//    {
-//		throw SystemError(std::strerror(errno),PT_SOURCEINFO);
-//    }
+    // wait for process to exit busy loop style
+    while (m_process.ExitType() == EExitPending)
+    {
+        User::After(1000);
+    }    
 }
 
 } // namespace Pt
