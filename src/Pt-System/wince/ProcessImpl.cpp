@@ -25,7 +25,7 @@ namespace Pt {
 
 namespace System {
 
-ProcessImpl::ProcessImpl(const string& command)
+ProcessImpl::ProcessImpl(const std::string& command)
 : ProcessImplBase(command)
 {}
 
@@ -33,7 +33,7 @@ ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
 : ProcessImplBase( procInfo)
 {}
 
-std::string ProcessImpl::getEnvVar(const string& name)
+std::string ProcessImpl::getEnvVar(const std::string& name)
 {
     HKEY hk;
 
@@ -69,7 +69,7 @@ std::string ProcessImpl::getEnvVar(const string& name)
 }
 
 
-void ProcessImpl::setEnvVar(const string& name, const string& value)
+void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
 {
     HKEY hk;
     DWORD ret = 0;

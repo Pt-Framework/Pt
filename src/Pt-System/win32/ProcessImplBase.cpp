@@ -4,12 +4,13 @@
 #include "win32.h"
 #include <sstream>
 #include <vector>
+#include <string>
 
 namespace Pt {
 
 namespace System {
 
-ProcessImplBase::ProcessImplBase(const string& command)
+ProcessImplBase::ProcessImplBase(const std::string& command)
     : m_command(command)
     , m_devIn(0)
     , m_devOut(0)

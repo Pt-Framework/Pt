@@ -22,6 +22,7 @@
 #include "../win32/ProcessImplBase.h"
 #include "../win32/win32.h"
 
+#include <string>
 
 namespace Pt {
 
@@ -34,11 +35,11 @@ class ProcessImpl : public ProcessImplBase
 		
 		ProcessImpl(const ProcessInfo& procInfo);
 
-        static std::string getEnvVar(const string& name);
+        static std::string getEnvVar(const std::string& name);
         
-        static void setEnvVar(const string& name, const string& value);
+        static void setEnvVar(const std::string& name, const std::string& value);
         
-        static void unsetEnvVar(const string& name)
+        static void unsetEnvVar(const std::string& name)
         {
             ProcessImpl::setEnvVar(name, "");
         }

@@ -28,9 +28,6 @@
 
 #include <windows.h>
 
-using namespace std;
-
-
 namespace Pt {
 
 namespace System {
@@ -38,15 +35,15 @@ namespace System {
     class ProcessImpl : public ProcessImplBase 
     {
         public:
-            ProcessImpl(const string& command);
+            ProcessImpl(const std::string& command);
 
 			ProcessImpl(const ProcessInfo& procInfo);
 
-            static void setEnvVar(const string& name, const string& value);
+            static void setEnvVar(const std::string& name, const std::string& value);
         
-            static void unsetEnvVar(const string& name);
+            static void unsetEnvVar(const std::string& name);
         
-            static std::string getEnvVar(const string& name);
+            static std::string getEnvVar(const std::string& name);
     };
 
 } // namespace System
