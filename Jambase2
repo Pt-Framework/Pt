@@ -31,50 +31,14 @@ CONFIG = $(CONFIG:L) ;
 # Include base rules
 #
 JamInclude Jamrules.base ;
+JamInclude $(TARGET_OS:LS=".jam") ;
 
 
-#############################################################################
+###############################################################################
 # Auto configuration rules and actions
-#############################################################################
+###############################################################################
 
-rule CheckC++
-{
-    local _line ;
-    for _line in $(2)
-    {
-        WriteFile $(1).cpp : $(_line) ;
-    }
-
-    local _cmd = $(C++) -o $(1:S=$(SUFEXE)) $(1).cpp ;
-    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
-
-    _cmd = $(RM) $(1).cpp ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-    _cmd = $(RM) $(1:S=$(SUFEXE)) ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-    if $(_result[2]) = 0
-    {
-    	$(1) = 1 ;
-        WriteFile Jamconfig : $(1)" = 1 ;"  ;
-    }
-}
-
-
-rule ConfigureDefine
-{
-    local _line = "#ifndef" $(2) ;
-    WriteFile $(1) : $(_line:J=" ") ;
-
-    _line = "#define" $(2) "=" $(3) ;
-    WriteFile $(1) : $(_line:J=" ") ;
-
-    WriteFile $(1) : "#endif" ;
-}
-
-
-rule ConfigureCommand
+rule TryCommand
 {
     local _var = $(1) ;
     local _val = $(2) ;
@@ -91,51 +55,78 @@ rule ConfigureCommand
 }
 
 
-rule ConfigureC++
+rule CheckCommand
 {
     if $(CONFIGURE)
     {
-        if ! $(TOOLSET)
+        TryCommand $(1) : $(2) : $(3) ;
+
+        if $($(1))
         {
-            local _cmd ;
-
-            WriteFile check.cpp : "#include <string.h>" ;
-            WriteFile check.cpp : "int main() { return 0; } " ;
-
-            if [ ConfigureCommand C++ : "gcc" : "gcc -o check check.cpp" ]
-            {
-                Echo "Checking for C++ toolset... gcc" ;
-                _cmd = $(RM) "check" ;
-                COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-                TOOLSET = "gcc" ;
-            }
-            else if [ ConfigureCommand C++ : "CC" : "CC -o check check.cpp" ]
-            {
-                Echo "Checking for C++ toolset... CC" ;
-                _cmd = $(RM) "check" ;
-                COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-                TOOLSET = "sunpro" ;
-            }
-
-            _cmd = $(RM) "check.cpp" ;
-            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+            Echo "Checking for "$(1)"... yes" ;
+            return 1 ;
         }
-
-        if ! $(TOOLSET)
+        else
         {
-            Exit "Checking for C++ toolset... NOT FOUND" ;
+            Echo "Checking for "$(1)"... no" ;
         }
-
-        WriteFile Jamconfig :  "TOOLSET = "$(TOOLSET)" ;" ;
     }
-
-    JamInclude $(TOOLSET:LS=".jam") ;
 }
 
 
-#############################################################################
+rule CheckCc
+{
+    if $(CONFIGURE)
+    {
+        TryCc $(1) : $(2) : $(3) : $(4) ;
+
+        if $($(1))
+        {
+            Echo "Checking for "$(1)"... yes" ;
+            return 1 ;
+        }
+        else
+        {
+            Echo "Checking for "$(1)"... no" ;
+        }
+    }
+}
+
+
+rule CheckC++
+{
+    if $(CONFIGURE)
+    {
+        TryC++ $(1) : $(2) : $(3) : $(4) ;
+
+        if $($(1))
+        {
+            Echo "Checking for "$(1)"... yes" ;
+            return 1 ;
+        }
+        else
+        {
+            Echo "Checking for "$(1)"... no" ;
+        }
+    }
+}
+
+
+rule ConfigureDefine
+{
+    local _line = "#ifndef" $(2) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    _line = "#define" $(2) "=" $(3) ;
+    WriteFile $(1) : $(_line:J=" ") ;
+
+    WriteFile $(1) : "#endif" ;
+}
+
+
+###############################################################################
 # Detect compile and link configuration
-#############################################################################
+###############################################################################
 
 JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
 
@@ -170,56 +161,89 @@ if $(CONFIGURE)
         CHGRP = chgrp ;
         CHOWN = chown ;
     }
+
+    #
+    # Toolset configuration
+    #
+    if ! $(TOOLSET)
+    {
+        local _cmd ;
+
+        WriteFile check.cpp : "#include <string.h>" ;
+        WriteFile check.cpp : "int main() { return 0; } " ;
+
+        if [ TryCommand CC : "gcc" : "gcc -o check check.cpp" ]
+        {
+            Echo "Checking for C compiler... gcc" ;
+            _cmd = $(RM) "check" ;
+            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+            TOOLSET = "gcc" ;
+        }
+        else if [ TryCommand CC : "cc" : "cc -o check check.cpp" ]
+        {
+            Echo "Checking for C compiler... cc" ;
+            _cmd = $(RM) "check" ;
+            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+            TOOLSET = "sunpro" ;
+        }
+
+        _cmd = $(RM) "check.cpp" ;
+        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    }
+
+    if ! $(TOOLSET)
+    {
+        Exit "Checking for C compiler... FAILED !!!" ;
+    }
+
+    WriteFile Jamconfig : "TOOLSET = "$(TOOLSET)" ;" ;
 }
 
-#
-# Toolset configuration
-#
-ConfigureC++ ;
+include Jamconfig ;
 
-#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
-#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
-#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+JamInclude $(TOOLSET:LS=".jam") ;
+
+
+###############################################################################
+# Project specific configuration
+###############################################################################
 
 CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
                               "int main() { return 0; }" ;
 
-#ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
+CheckCc WITH_UNIX_SOCKETS : "#include <sys/types.h>"
+                            "#include <sys/socket.h>"
+                            "int main() { return socket(0,0,0); }" 
+                          : socket ;
+
+CheckC++ WITH_UNIX_NSL : "#include <sys/types.h>"
+                         "#include <sys/socket.h>"
+                         "int main() { return socket(0,0,0); }" 
+                       : nsl ;
+
+CheckC++ WITH_WINMM : "#include <windows.h>"
+                      "#include <mmsystem.h>"
+                      "int main() { return timeGetTime(); }" 
+                    : winmm.lib ;
+
+CheckC++ WITH_MMTIMER : "#include <windows.h>"
+                        "#include <mmsystem.h>"
+                        "int main() { return timeGetTime(); }" 
+                      : mmtimer.lib ;
+
+#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
+#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
+#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
+
 
 if $(CONFIGURE)
 {
     Exit "Run jam now to build targets." ;
 }
 
-
-#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
-
-#ConfigureC++ WITH_WINMM : "#include <windows.h>"
-#                          "#include <mmsystem.h>"
-#                          "int main() { return timeGetTime(); }" 
-#                        : winmm.lib ;
-#
-#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
-#
-#ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
-#                            "#include <mmsystem.h>"
-#                            "int main() { return timeGetTime(); }" 
-#                          : mmtimer.lib ;
-#
-#ConfigureC++ WITH_UNIX_SOCKETS : "#include <sys/types.h>"
-#                                 "#include <sys/socket.h>"
-#                                 "int main() { return socket(0,0,0); }" : socket ;
-#
-#ConfigureC++ WITH_UNIX_NSL : "#include <sys/types.h>"
-#                             "#include <sys/socket.h>"
-#                             "int main() { return socket(0,0,0); }" : nsl ;
-
-#
-# Include 
-#
-include Jamconfig ;
-
-JamInclude $(TOOLSET:LS=".jam") ;
-JamInclude $(TARGET_OS:LS=".jam") ;
-
+###############################################################################
+# Include main Jamfile
+###############################################################################
 include Jamfile ;
