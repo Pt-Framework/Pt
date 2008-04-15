@@ -93,40 +93,43 @@ rule ConfigureCommand
 
 rule ConfigureC++
 {
-    if ! $(TOOLSET)
+    if $(CONFIGURE)
     {
-        local _cmd ;
-
-        WriteFile check.cpp : "#include <string.h>" ;
-        WriteFile check.cpp : "int main() { return 0; } " ;
-
-        if [ ConfigureCommand C++ : "gcc" : "gcc -o check check.cpp" ]
+        if ! $(TOOLSET)
         {
-            Echo "Checking for C++ toolset... gcc" ;
-            _cmd = $(RM) "check" ;
+            local _cmd ;
+
+            WriteFile check.cpp : "#include <string.h>" ;
+            WriteFile check.cpp : "int main() { return 0; } " ;
+
+            if [ ConfigureCommand C++ : "gcc" : "gcc -o check check.cpp" ]
+            {
+                Echo "Checking for C++ toolset... gcc" ;
+                _cmd = $(RM) "check" ;
+                COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+                TOOLSET = "gcc" ;
+            }
+            else if [ ConfigureCommand C++ : "CC" : "CC -o check check.cpp" ]
+            {
+                Echo "Checking for C++ toolset... CC" ;
+                _cmd = $(RM) "check" ;
+                COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+                TOOLSET = "sunpro" ;
+            }
+
+            _cmd = $(RM) "check.cpp" ;
             COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-            TOOLSET = "gcc" ;
-        }
-        else if [ ConfigureCommand C++ : "CC" : "CC -o check check.cpp" ]
-        {
-            Echo "Checking for C++ toolset... CC" ;
-            _cmd = $(RM) "check" ;
-            COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-            TOOLSET = "sunpro" ;
         }
 
-        _cmd = $(RM) "check.cpp" ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+        if ! $(TOOLSET)
+        {
+            Exit "Checking for C++ toolset... NOT FOUND" ;
+        }
+
+        WriteFile Jamconfig :  "TOOLSET = "$(TOOLSET)" ;" ;
     }
 
-    if ! $(TOOLSET)
-    {
-        Exit "Checking for C++ toolset... NOT FOUND" ;
-    }
-
-    JamInclude $(TOOLSET).jam ;
-
-    WriteFile Jamconfig :  "TOOLSET = "$(TOOLSET)" ;" ;
+    JamInclude $(TOOLSET:LS=".jam") ;
 }
 
 
@@ -167,21 +170,24 @@ if $(CONFIGURE)
         CHGRP = chgrp ;
         CHOWN = chown ;
     }
+}
 
-    #
-    # Toolset configuration
-    #
-    ConfigureC++ ;
+#
+# Toolset configuration
+#
+ConfigureC++ ;
 
-    #ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
-    #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
-    #ConfigureDefine test.h : PT_VERSION_REV : 0 ;
+#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
+#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
+#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
 
-    CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
-                                  "int main() { return 0; }" ;
+CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
+                              "int main() { return 0; }" ;
 
-    #ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
-    
+#ConfigureDefine config.h : PT_WITH_STDC+_LOCALE : $(WITH_STDC++_LOCALE) ;
+
+if $(CONFIGURE)
+{
     Exit "Run jam now to build targets." ;
 }
 
