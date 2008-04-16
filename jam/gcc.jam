@@ -4,71 +4,31 @@
 
 rule TryCompile
 {
-    local _var = $(1) ;
-    local _cc = $(2) ;
-    local _prog = $(3) ;
+    local _cc = $(1) ;
+    local _prog = $(2) ;
+    local _flags = $(3) ;
     local _l = $(4) ;
     local _L = $(5) ;
-    local _out = check ;
 
-    local _line ;
-    for _line in $(3)
-    {
-        WriteFile check.cpp : $(_line) ;
-    }
-
-    local _cmd = $(_cc) -o $(_out:S=$(SUFEXE)) check.cpp -L$(_L) -l$(_l) "&> NUL" ;
-    local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
-
-    _cmd = $(RM) check.cpp ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-    _cmd = $(RM) NUL ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-    _cmd = $(RM) $(_out:S=$(SUFEXE)) ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-    if $(_result[2]) = 0
-    {
-        $(_var) = 1 ;
-        WriteFile Jamconfig : $(_var)" = 1 ;"  ;
-        return 1 ;
-    }
-}
-
-rule CheckCompile
-{
-    if $(CONFIGURE)
-    {
-        TryCompile $(1) : $(2) : $(3) : $(4) : $(5) ;
-
-        if $($(1))
-        {
-            Echo "Checking for "$(1)"... yes" ;
-        }
-        else
-        {
-            Echo "Checking for "$(1)"... no" ;
-        }
-    }
+    local _cmd = $(_cc) $(_flags) -o $(_out:S=$(SUFEXE)) $(_prog) -L$(_L) -l$(_l) ;
+    return [ TryCommand $(_cmd) ] ;
 }
 
 
 rule TryCc
 {
-    TryCompile $(1) : gcc : $(2) : $(3) : $(4) ;
+    return [ TryCompile gcc : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
 
 rule TryC++
 {
-    TryCompile $(1) : g++ : $(2) : $(3) : $(4) ;
+    return [ TryCompile g++ : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
-CheckCompile WITH_ATTR_VISIBILITY 
-             : "gcc -fvisibility-inlines-hidden -fvisibility=hidden"
-             : "int main() { return 0; }" ;
+
+CheckCc WITH_ATTR_VISIBILITY  : "int main() { return 0; }"
+                              : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
 
 ##############################################################################
 # Tools and utilities
