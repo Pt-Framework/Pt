@@ -71,7 +71,17 @@ rule MainImpl
 
 rule Main_LinkSharedLibrariesImpl
 {
-  LinkLibraries $(<) : $(>) ;
+  local _target = $(<:S=$(SUFEXE)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    LinkLibraries $(<) : $(>) ;
+  }
 }
 
 
@@ -129,13 +139,23 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 {
   # Add library name decorations <name><.dll/.so>
   local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    LinkLibraries $(<) : $(>) ;
+     
+    # make library dependency of target   
+    Depends $(_target) : $(>:S=$(SUFLIB)) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
     
-  # make library dependency of target   
-  Depends $(_target) : $(>:S=$(SUFLIB)) ;
-  Depends $(_target) : $(>:S=$(SUFDLL)) ;
-  
-  # set NEEDLIBS variable used by 'Link'    
-  NEEDLIBS on $(_target) += $(>:S=$(SUFLIB)) ;
+    # set NEEDLIBS variable used by 'Link'    
+    NEEDLIBS on $(_target) += $(>:S=$(SUFLIB)) ;
+  }
 }
 
 
