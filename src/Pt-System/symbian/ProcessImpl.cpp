@@ -52,11 +52,16 @@ void ProcessImpl::start()
     
     // apparently KMaxPath has got nothing to do with the arguments
     // but still we need some maximum for a limit
-    if (m_args.length() > KMaxPath)
+    enum
+    {
+        KMaxCmdLine = KMaxPath*4
+    };
+    
+    if (m_args.length() > KMaxCmdLine)
         throw std::logic_error("Arguments too long");        
 
     TPtrC8 ptrArgs(reinterpret_cast<const TUint8*>(m_args.c_str()));
-    TBuf<KMaxPath> descriptorArgs;
+    TBuf<KMaxCmdLine> descriptorArgs;
     descriptorArgs.Copy(ptrArgs);
 
     if (m_process.Create(descriptorCommand, descriptorArgs) != KErrNone)

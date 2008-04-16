@@ -62,7 +62,6 @@ class PT_API ProcessImpl
         void wait();
     
     private:
-        //pid_t m_pid;
         RProcess m_process;
         std::string m_command;
         std::string m_args;
