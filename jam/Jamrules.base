@@ -1180,8 +1180,8 @@ rule SharedLibrary_MakeLocateImpl
 # @param > list of shared libraries to link
 #
 rule SharedLibrary_LinkSharedLibraries
-{  
-    SharedLibrary_LinkSharedLibrariesImpl $(<) : $(>) ;
+{
+    SharedLibrary_LinkSharedLibrariesImpl $(<) : $(>) : $(3) ;
 }
 
 rule SharedLibrary_LinkSharedLibrariesImpl

@@ -44,12 +44,18 @@ rule MainImpl
 rule Main_LinkSharedLibrariesImpl
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
 
-    SHLIBS on $(_target) += $(_libs) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    if $(3)
+    {
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
 }
 
 
@@ -66,10 +72,17 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _libs = $(PRELIB)$(>)$(SUFDLL) ;
-    Depends $(_target) : $(_libs) ;
 
-    SHLIBS on $(_target) += $(_libs) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    if $(3)
+    {
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
 }
 
 

@@ -63,22 +63,20 @@ rule Main_LinkSharedLibrariesImpl
 {
     #local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     #Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     #local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     #SHLIBS on $(_target) += $(_libs) ;
     #LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
 
-	if $(3)
-	{
+    if $(3)
+    {
         LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
-	}
-	else
-	{
-		Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
         SHLIBS on $(_target) += $(_libs) ;
         LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
     }
@@ -98,30 +96,37 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;
-    Depends $(_target) : $(_deps) ;
 
-    SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
-
-    # Add all shared libraries required by this shared library in a
-    # variable called RPATHLIBS so that their paths can be added as
-    # rpath-link option to the linker command later
-    for local _d in $(_deps)
+    if $(3)
     {
-        local _found = false ;
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 
-        for _r in $(RPATHLIBS)
+        # Add all shared libraries required by this shared library in a
+        # variable called RPATHLIBS so that their paths can be added as
+        # rpath-link option to the linker command later
+        for local _d in $(_deps)
         {
-            if $(_r) = $(_d)
+            local _found = false ;
+
+            for _r in $(RPATHLIBS)
             {
-                _found = true ;
+                if $(_r) = $(_d)
+                {
+                    _found = true ;
+                }
             }
-        }
 
-        # only add if not added previously
-        if $(_found) = false
-        {
-            RPATHLIBS += $(_d)  ;
+            # only add if not added previously
+            if $(_found) = false
+            {
+                RPATHLIBS += $(_d)  ;
+            }
         }
     }
 }

@@ -21,10 +21,15 @@ else if $(CONFIG:L) = release
     OPTIM	?= -fast ;
 }
 
+if $(TARGET_OSPLAT) = sparc9
+{
+    CCFLAGS += -xtarget=ultra -xarch=v9 ;
+	LINKFLAGS += -xtarget=ultra -xarch=v9 ;
+}
+
 CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
 
 C++FLAGS  += $(CCFLAGS) ;
-C++FLAGS += -library=stlport4 ;
 
 ##############################################################################
 # Linker flags
@@ -32,7 +37,21 @@ C++FLAGS += -library=stlport4 ;
 LINKFLAGS += -mt -lpthread ;
 
 C++LINKFLAGS += $(LINKFLAGS) ;
-C++LINKFLAGS += -library=stlport4 ;
+
+##############################################################################
+# C++ STL version
+##############################################################################
+LIBSTDC++ ?= stlport4 ;
+if $(LIBSTDC++) = stlport4
+{
+	LIBSTDC++ = stlport4 ;
+    C++FLAGS += -library=stlport4 ;
+    C++LINKFLAGS += -library=stlport4 ;
+}
+else if $(LIBSTDC++) != roguewave
+{
+    Exit "Please specify LIBSTDC++ (roguewave, stlport4)." ;
+}
 
 ##############################################################################
 # Rules
@@ -67,12 +86,18 @@ rule MainImpl
 rule Main_LinkSharedLibrariesImpl
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-    Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
 
-    SHLIBS on $(_target) += $(_libs) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    if $(3)
+    {
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
 }
 
 
@@ -101,10 +126,17 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _libs = $(PRELIB)$(>)$(SUFDLL) ;
-    Depends $(_target) : $(_libs) ;
 
-    SHLIBS on $(_target) += $(_libs) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    if $(3)
+    {
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
 }
 
 ##############################################################################
