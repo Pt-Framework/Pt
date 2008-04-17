@@ -24,7 +24,7 @@ namespace Pt {
 inline StringData::StringData( const allocator_type& a )
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-    _str = (Pt::Char*) _allocator.allocate(1, _str);
+    _str = _allocator.allocate(1, _str);
     _str[0] = Pt::Char::null();
     this->updateInternalStringData();
 }
@@ -33,7 +33,7 @@ inline StringData::StringData( const allocator_type& a )
 inline StringData::StringData(const Pt::Char* s, size_type length, const allocator_type& a)
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-    _str = (Pt::Char*) _allocator.allocate(length + 1, _str);
+    _str = _allocator.allocate(length + 1, _str);
     _capacity = length;
 
     traits_type::copy(_str, s, length);
@@ -46,7 +46,7 @@ inline StringData::StringData(const Pt::Char* s, size_type length, const allocat
 inline StringData::StringData(const wchar_t* wstr, size_type length, const allocator_type& a)
 : _str(0), _length(0), _capacity(0), _allocator(a), _n(1)
 {
-    _str = (Pt::Char*) _allocator.allocate(length + 1, _str);
+    _str = _allocator.allocate(length + 1, _str);
     _str[length] = Pt::Char::null();
     _capacity = length;
     _length = length;
@@ -65,7 +65,7 @@ inline StringData::StringData(const wchar_t* wstr, size_type length, const alloc
 inline StringData::StringData(size_type length, Pt::Char ch)
 : _str(0), _length(0), _capacity(0), _allocator(), _n(1)
 {
-    _str = (Pt::Char*) _allocator.allocate(length + 1, _str);
+    _str = _allocator.allocate(length + 1, _str);
     _capacity = length;
 
     traits_type::assign(_str, length, ch);
@@ -279,7 +279,7 @@ inline void StringData::reserve(size_type n)
         return;
 
     // make room for new string AND NULL TERMINATION CHAR
-    Pt::Char* newStr = (Pt::Char*) _allocator.allocate(n + 1, _str);
+    Pt::Char* newStr = _allocator.allocate(n + 1, _str);
 
     // backup old string
     traits_type::copy(newStr, _str, _length);
@@ -326,7 +326,7 @@ inline void StringData::allocate(size_type n)
         _allocator.deallocate(_str, _capacity + 1 );
     }
 
-    _str = (Pt::Char*) _allocator.allocate(n + 1, _str);
+    _str = _allocator.allocate(n + 1, _str);
     _capacity = n;
 }
 

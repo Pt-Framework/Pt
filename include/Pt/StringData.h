@@ -17,17 +17,71 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_STRINGDATA_H
 #define PT_STRINGDATA_H
 
 #include <Pt/Api.h>
 #include <Pt/Char.h>
-
 #include <string>
 #include <iterator>
 #include <algorithm>
 
+namespace std {
+
+    template<>
+    class allocator<Pt::Char>
+    {
+        public:
+            typedef size_t          size_type;
+            typedef ptrdiff_t       difference_type;
+            typedef Pt::Char*       pointer;
+            typedef const Pt::Char* const_pointer;
+            typedef Pt::Char&       reference;
+            typedef const Pt::Char& const_reference;
+            typedef Pt::Char        value_type;
+
+            template<typename U>
+            struct rebind
+            { typedef allocator<U> other; };
+
+            allocator()
+            { }
+
+            allocator(const allocator&)
+            { }
+
+            template<typename U>
+            allocator(const allocator<U>&)
+            { }
+
+            ~allocator()
+            { }
+
+            pointer address(reference x) const
+            { return &x; }
+
+            const_pointer address(const_reference x) const
+            { return &x; }
+
+            pointer allocate(size_type n, const void* = 0)
+            {
+                return static_cast<value_type*>(::operator new(n * sizeof(value_type)));
+            }
+
+            void deallocate(pointer p, size_type)
+            { ::operator delete(p); }
+
+            size_type max_size() const throw()
+            { return size_t(-1) / sizeof(value_type); }
+
+            void construct(pointer p, const value_type& val)
+            { ::new(p) value_type(val); }
+
+            void destroy(pointer p)
+            { p->~value_type(); }
+    };
+
+} // namespace std
 
 namespace Pt {
 
