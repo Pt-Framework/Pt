@@ -41,7 +41,7 @@ C++LINKFLAGS += $(LINKFLAGS) ;
 ##############################################################################
 # C++ STL version
 ##############################################################################
-LIBSTDC++ ?= stlport4 ;
+LIBSTDC++ ?= roguewave ;
 if $(LIBSTDC++) = stlport4
 {
 	LIBSTDC++ = stlport4 ;
