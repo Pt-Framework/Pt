@@ -31,7 +31,8 @@
 
 #elif defined(__sun)
 
-    #define PT_ATOMICITY_H <Pt/Atomicity.generic.h>
+    #define PT_ATOMICITY_H <Pt/Api.h>
+    #include <Pt/Atomicity.sun.h>
 
 // use AT&T-style inline asm
 #elif defined(PT_ASM_ATT) || \
