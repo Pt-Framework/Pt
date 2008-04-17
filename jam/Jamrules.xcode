@@ -43,8 +43,6 @@ if $(TARGET_OS) = "aspen"
 #
 # Flags and options
 #
-LINKLIBS	+= -lstdc++ ;
-
 if $(CONFIG:L) = debug
 {
 	CCFLAGS += -DDEBUG -g ;
