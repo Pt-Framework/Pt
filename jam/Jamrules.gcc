@@ -17,7 +17,6 @@ RANLIB		?= ranlib ;
 #
 #CCFLAGS 	+= -fvisibility-inlines-hidden -fvisibility=hidden ;
 #LINKFLAGS	?= -fvisibility-inlines-hidden -fvisibility=hidden ;
-LINKLIBS	+= -lstdc++ ;
 
 if $(CONFIG:L) = debug
 {
@@ -56,6 +55,14 @@ rule MainImpl
 
     # linker flag -E: export global symbols from the executable
     LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -89,6 +96,14 @@ rule SharedLibraryImpl
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
     LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -134,6 +149,6 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(CC) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
+    $(LINK) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
 }
 

@@ -1,9 +1,10 @@
 #
 # Initialize variables
 #
-CC        = gcc ;
-C++       = g++ ;
-RANLIB		?= ranlib ;
+CC     = gcc ;
+C++    = g++ ;
+RANLIB ?= ranlib ;
+LINK   = $(CC) ;
 
 if $(TARGET_OS) = "aspen"
 {
@@ -12,10 +13,10 @@ if $(TARGET_OS) = "aspen"
         CC = /Developer/Platforms/Aspen.platform/Developer/usr/bin/gcc-4.0 ;
         C++ = /Developer/Platforms/Aspen.platform/Developer/usr/bin/g++-4.0 ;
         RANLIB = /Developer/Platforms/Aspen.platform/Developer/usr/bin/ranlib ;
-        
+
         CCFLAGS += -arch armv6 -maspen-version-min=1.2 -gdwarf-2 -mthumb ;
         CCFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
-        
+
         LINKFLAGS += -arch armv6 ;
         LINKFLAGS += -isysroot /Developer/Platforms/Aspen.platform/Developer/SDKs/Aspen1.2.sdk ;
         LINKFLAGS += -maspen-version-min=1.2 -Wl,-dead_strip ;
@@ -34,7 +35,7 @@ if $(TARGET_OS) = "aspen"
         LINKFLAGS += -isysroot /Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
         LINKFLAGS += -Wl,-rpath,/Developer/Platforms/AspenSimulator.platform/Developer/SDKs/AspenSimulator1.2.sdk ;
         LINKFLAGS += -mmacosx-version-min=10.5 -rpath,/bin ;
-        
+
         Echo LINKFLAGS $(LINKFLAGS) ;
     }
 }
@@ -86,6 +87,14 @@ rule MainImpl
 {
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -113,6 +122,14 @@ rule SharedLibraryImpl
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
     LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib -install_name $(_target) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -129,6 +146,6 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 
 actions Link bind NEEDLIBS SHLIBS
 {
-    $(CC) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
+    $(LINK) $(LINKFLAGS) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS)
 }
 
