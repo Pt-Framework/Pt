@@ -26,7 +26,6 @@
 #include <memory>
 #include <cstdlib>
 
-
 namespace Pt {
 
     /** @brief Singleton class template
@@ -71,7 +70,7 @@ namespace Pt {
                 {
                     try
                     {
-                        _instance = _allocator.allocate(1);
+                        _instance = (T*)_allocator.allocate(1);
                         new (_instance) T();
                         std::atexit(&atExit);
                     }
@@ -110,7 +109,7 @@ namespace Pt {
              */
             static void atExit()
             {
-                _allocator.destroy(_instance);
+                _instance->~T();
                 _allocator.deallocate(_instance, 1);
                 _instance = 0;
             }
