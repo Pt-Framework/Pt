@@ -1029,7 +1029,7 @@ template < typename R>
 class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R> Callable;
+            typedef Callable<R> CallableT;
 
         public:
             /** Does nothing. */
@@ -1057,7 +1057,7 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call();
             }
 
@@ -1070,7 +1070,7 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call();
             }
 
