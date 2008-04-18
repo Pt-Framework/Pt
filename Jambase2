@@ -76,7 +76,17 @@ rule ConfigureDefine
 
 rule TryCommand
 {
-    local _cmd = $(1)  "&> NUL" ;
+    local _cmd ;
+
+    if $(NT)
+    {
+        _cmd = $(1) "2> NUL" ;
+    }
+    else
+    {
+        _cmd = $(1) "&> NUL" ;
+    }
+
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 
     if $(_result[2]) = 0
@@ -161,6 +171,14 @@ rule CheckC++
 # Detect compile and link configuration
 ###############################################################################
 
+for _arg in $(ARGV)
+{
+    if $(_arg) = configure
+    {
+        CONFIGURE = 1 ;
+    }
+}
+
 JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
 
 if ! $(JAM_JAMCONFIG)
@@ -202,22 +220,39 @@ if $(CONFIGURE)
     {
         local _cmd ;
         local _out = check$(SUFEXE) ;
+        local _obj = check$(SUFOBJ) ;
 
+        TryCommand $(RM) "check.c" ;
+        
         WriteFile check.c : "#include <string.h>" ;
         WriteFile check.c : "int main() { return 0; } " ;
 
-        if [ CheckCommand TOOLSET : "gcc" : "gcc -o "$(_out)" check.c" ]
+        if [ TryCommand "cl /Fo$(_obj) /Fe$(_out) check.c" ]
         {
+            TOOLSET = msvc ;
+            WriteFile Jamconfig : "TOOLSET = msvc ;"  ;
+            Echo "Checking for toolset ... msvc" ;
         }
-        else if [ CheckCommand TOOLSET : "cc" : "cc -o "$(_out)" check.c" ]
+        else if [ TryCommand "gcc -o "$(_out)" check.c" ]
         {
+            TOOLSET = gcc ;
+            WriteFile Jamconfig : "TOOLSET = gcc ;"  ;
+            Echo "Checking for toolset ... gcc" ;
         }
-
-        _cmd = $(RM) "check.c" ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) $(_out) ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+        else if [ TryCommand "cc -o "$(_out)" check.c" ]
+        {
+            TOOLSET = cc ;
+            WriteFile Jamconfig : "TOOLSET = cc ;"  ;
+            Echo "Checking for toolset ... cc" ;
+        }
+        else
+        {
+            Exit "Checking for toolset ... failed" ;
+        }
+        
+        TryCommand $(RM) "check.c" ;
+        TryCommand $(RM) $(_out) ;
+        TryCommand $(RM) $(_obj) ;
     }
     else
     {
@@ -232,6 +267,13 @@ if $(CONFIGURE)
 }
 
 include Jamconfig ;
+
+JAM_TOOLSET = [ CHECK_IF_FILE $(TOOLSET:LS=".jam") ] ;
+
+if ! $(JAM_TOOLSET)
+{
+    Exit "No such toolset configured." ; 
+}
 
 JamInclude $(TOOLSET:LS=".jam") ;
 
