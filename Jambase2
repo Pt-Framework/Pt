@@ -12,6 +12,7 @@ rule JamInclude
     local _s = $(DOT) ;
     _s = $(JAMDIR:R=$(_s)) ;
     _s = $(<:R=$(_s)) ;
+
     include $(_s) ;
 }
 
@@ -89,6 +90,9 @@ rule TryCommand
 
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 
+    _cmd = $(RM) NUL ;
+    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+
     if $(_result[2]) = 0
     {
         return 1 ;
@@ -102,7 +106,6 @@ rule CheckCommand
     {
         local _r = [ TryCommand $(3) ] ;
         ConfigureEcho $(1) : $(_r) : $(2) ;
-        return $(_r) ;
     }
 }
 
@@ -113,6 +116,8 @@ rule CheckCc
 
     if $(CONFIGURE)
     {
+        TryCommand $(RM) "check.c" ;
+
         local _line ;
         for _line in $(2)
         {
@@ -122,17 +127,9 @@ rule CheckCc
         local _r = [ TryCc $(1) : check.c : $(3) : $(4) : $(5) ] ;
         ConfigureEcho $(1) : $(_r) ;
 
-        local _cmd = $(RM) check.c ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) NUL ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) $(_out:S=$(SUFEXE)) ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) $(_out:S=$(SUFOBJ)) ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+        TryCommand $(RM) "check.c" ;
+        TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
+        TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
     }
 }
 
@@ -143,6 +140,8 @@ rule CheckC++
 
     if $(CONFIGURE)
     {
+        TryCommand $(RM) "check.cpp" ;
+
         local _line ;
         for _line in $(2)
         {
@@ -152,17 +151,9 @@ rule CheckC++
         local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
         ConfigureEcho $(1) : $(_r) ;
 
-        local _cmd = $(RM) check.cpp ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) NUL ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) $(_out:S=$(SUFEXE)) ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
-
-        _cmd = $(RM) $(_out:S=$(SUFOBJ)) ;
-        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+        TryCommand $(RM) "check.cpp" ;
+        TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
+        TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
     }
 }
 
@@ -192,8 +183,7 @@ if ! $(JAM_JAMCONFIG)
 
 if $(CONFIGURE)
 {
-    local _cmd = $(RM) Jamconfig ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    TryCommand $(RM) "Jamconfig" ;
 
     #
     # TODO: host configuration
@@ -223,56 +213,46 @@ if $(CONFIGURE)
         local _obj = check$(SUFOBJ) ;
 
         TryCommand $(RM) "check.c" ;
-        
+
         WriteFile check.c : "#include <string.h>" ;
         WriteFile check.c : "int main() { return 0; } " ;
 
         if [ TryCommand "cl /Fo$(_obj) /Fe$(_out) check.c" ]
         {
-            TOOLSET = msvc ;
             WriteFile Jamconfig : "TOOLSET = msvc ;"  ;
-            Echo "Checking for toolset ... msvc" ;
+            Echo "Checking for toolset ...msvc" ;
         }
         else if [ TryCommand "gcc -o "$(_out)" check.c" ]
         {
-            TOOLSET = gcc ;
             WriteFile Jamconfig : "TOOLSET = gcc ;"  ;
-            Echo "Checking for toolset ... gcc" ;
+            Echo "Checking for toolset ...gcc" ;
         }
         else if [ TryCommand "cc -o "$(_out)" check.c" ]
         {
-            TOOLSET = cc ;
             WriteFile Jamconfig : "TOOLSET = cc ;"  ;
-            Echo "Checking for toolset ... cc" ;
+            Echo "Checking for toolset ...cc" ;
         }
         else
         {
             Exit "Checking for toolset ... failed" ;
         }
-        
+
         TryCommand $(RM) "check.c" ;
         TryCommand $(RM) $(_out) ;
         TryCommand $(RM) $(_obj) ;
     }
     else
     {
-        Echo "Using given TOOLSET "$(TOOLSET) ;
+        Echo "Using toolset "$(TOOLSET) ;
         WriteFile Jamconfig : TOOLSET" = "$(TOOLSET)" ;"  ;
-    }
-
-    if ! $(TOOLSET)
-    {
-        Exit "Checking for TOOLSET ... FAILED !!!" ;
     }
 }
 
 include Jamconfig ;
 
-JAM_TOOLSET = [ CHECK_IF_FILE $(TOOLSET:LS=".jam") ] ;
-
-if ! $(JAM_TOOLSET)
+if ! $(TOOLSET)
 {
-    Exit "No such toolset configured." ; 
+    Exit "Checking for TOOLSET ... FAILED !!!" ;
 }
 
 JamInclude $(TOOLSET:LS=".jam") ;
