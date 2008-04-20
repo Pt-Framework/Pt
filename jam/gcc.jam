@@ -1,5 +1,5 @@
 ##############################################################################
-# Auto-configuration
+# Auto-configuration rules
 ##############################################################################
 
 rule TryCompile
@@ -26,9 +26,27 @@ rule TryC++
     return [ TryCompile g++ : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
+##############################################################################
+# Auto-configuration
+##############################################################################
 
-CheckCc WITH_ATTR_VISIBILITY  : "int main() { return 0; }"
-                              : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
+CheckCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
+                                  : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
+
+CheckCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
+                             : "-Wl,-E" ;
+
+CheckCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
+                            : "-Wl,-rpath-link jam" ;
+
+CheckCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
+                                : "-Wl,--start-group -Wl,--end-group" ;
+
+CheckCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
+                                 : "-dynamiclib" ;
+
+CheckCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
+                             : "-shared" ;
 
 ##############################################################################
 # Tools and utilities
@@ -52,12 +70,11 @@ LINK   = $(C++) ;
 # Compiler and linker flags
 ##############################################################################
 
-# TODO: How to detect if the GCC version is >= 4.0.0 and thus the visibility
-#       options below can be enabled ???
-#
-#CCFLAGS    += -fvisibility-inlines-hidden -fvisibility=hidden ;
-#LINKFLAGS  ?= -fvisibility-inlines-hidden -fvisibility=hidden ;
-#LINKLIBS    += -lstdc++ ;
+if $(WITH_GCC_FLAG_VISIBILITY)
+{
+    CCFLAGS    += -fvisibility-inlines-hidden -fvisibility=hidden ;
+    LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
+}
 
 if $(CONFIG:L) = debug
 {
@@ -72,7 +89,6 @@ else
 
 WARN ?= -Wall ;
 
-
 if $(TARGET_OSPLAT:U) != X86
 {
     CCFLAGS += -fPIC ;
@@ -80,9 +96,16 @@ if $(TARGET_OSPLAT:U) != X86
 
 C++FLAGS += $(CCFLAGS) ;
 
+if $(WITH_GCC_FLAG_GROUPLIBS)
+{
+	GCC_START_GROUP = -Wl,--start-group ;
+	GCC_END_GROUP = -Wl,--end-group ;
+}
+
 ##############################################################################
-# Rules
+# Build rules
 ##############################################################################
+
 rule FDefines
 { return -D$(<) ; }
 
@@ -97,7 +120,18 @@ rule MainImpl
     local _target = $(<:S=$(SUFEXE)) ;
 
     # linker flag -E: export global symbols from the executable
-    LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+    if $(WITH_GCC_FLAG_EXPORT)
+    {
+        LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
+	}
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -105,9 +139,7 @@ rule Main_LinkSharedLibrariesImpl
 {
     #local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     #Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     #local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
-
     #SHLIBS on $(_target) += $(_libs) ;
     #LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 
@@ -132,7 +164,22 @@ rule SharedLibraryImpl
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-    LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+	if $(WITH_GCC_FLAG_DYNAMICLIB)
+	{
+        LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib -install_name $(_target)  ;
+	}
+	else
+	{
+		LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+	}
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
 }
 
 
@@ -140,41 +187,52 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;
-    Depends $(_target) : $(_deps) ;
 
-    SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
-    LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
-
-    # Add all shared libraries required by this shared library in a
-    # variable called RPATHLIBS so that their paths can be added as
-    # rpath-link option to the linker command later
-    for local _d in $(_deps)
+    if $(3)
     {
-        local _found = false ;
+        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
 
-        for _r in $(RPATHLIBS)
+        # Add all shared libraries required by this shared library in a
+        # variable called RPATHLIBS so that their paths can be added as
+        # rpath-link option to the linker command later
+        if $(WITH_GCC_FLAG_RPATH)
         {
-            if $(_r) = $(_d)
-            {
-                _found = true ;
-            }
-        }
+        	for local _d in $(_deps)
+        	{
+         	   local _found = false ;
 
-        # only add if not added previously
-        if $(_found) = false
-        {
-            RPATHLIBS += $(_d)  ;
+         	   for _r in $(RPATHLIBS)
+         	   {
+         	       if $(_r) = $(_d)
+         	       {
+          	          _found = true ;
+                	}
+            	}
+
+            	# only add if not added previously
+            	if $(_found) = false
+            	{
+                	RPATHLIBS += $(_d)  ;
+            	}
+        	}
         }
     }
 }
 
 ##############################################################################
-# Actions
+# Build actions
 ##############################################################################
 
 actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
-    $(LINK) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) -Wl,--end-group
+  $(LINK) $(LINKFLAGS) -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
 }
+
 
 
