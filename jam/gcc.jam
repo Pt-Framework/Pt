@@ -43,7 +43,7 @@ CheckCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
                                 : "-Wl,--start-group -Wl,--end-group" ;
 
 CheckCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
-                                 : "-dynamiclib" ;
+                                 : "-dynamiclib -install_name test" ;
 
 CheckCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
                              : "-shared" ;
@@ -98,8 +98,8 @@ C++FLAGS += $(CCFLAGS) ;
 
 if $(WITH_GCC_FLAG_GROUPLIBS)
 {
-	GCC_START_GROUP = -Wl,--start-group ;
-	GCC_END_GROUP = -Wl,--end-group ;
+    GCC_START_GROUP = -Wl,--start-group ;
+    GCC_END_GROUP = -Wl,--end-group ;
 }
 
 ##############################################################################
@@ -164,14 +164,14 @@ rule SharedLibraryImpl
     # Add library name decorations <lib><name><.so>
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
 
-	if $(WITH_GCC_FLAG_DYNAMICLIB)
-	{
+    if $(WITH_GCC_FLAG_DYNAMICLIB)
+    {
         LINKFLAGS on $(_target) += $(LINKFLAGS) -dynamiclib -install_name $(_target)  ;
-	}
-	else
-	{
-		LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
-	}
+    }
+    else if $(WITH_GCC_FLAG_SHARED)
+    {
+        LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+    }
 
     switch $(>:S)
     {
@@ -203,24 +203,24 @@ rule SharedLibrary_LinkSharedLibrariesImpl
         # rpath-link option to the linker command later
         if $(WITH_GCC_FLAG_RPATH)
         {
-        	for local _d in $(_deps)
-        	{
-         	   local _found = false ;
+            for local _d in $(_deps)
+            {
+            local _found = false ;
 
-         	   for _r in $(RPATHLIBS)
-         	   {
-         	       if $(_r) = $(_d)
-         	       {
-          	          _found = true ;
-                	}
-            	}
+            for _r in $(RPATHLIBS)
+            {
+                if $(_r) = $(_d)
+                {
+                    _found = true ;
+                    }
+                }
 
-            	# only add if not added previously
-            	if $(_found) = false
-            	{
-                	RPATHLIBS += $(_d)  ;
-            	}
-        	}
+                # only add if not added previously
+                if $(_found) = false
+                {
+                    RPATHLIBS += $(_d)  ;
+                }
+            }
         }
     }
 }
