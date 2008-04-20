@@ -77,16 +77,7 @@ rule ConfigureDefine
 
 rule TryCommand
 {
-    local _cmd ;
-
-    if $(NT)
-    {
-        _cmd = $(1) "2> NUL" ;
-    }
-    else
-    {
-        _cmd = $(1) "&> NUL" ;
-    }
+    local _cmd  = $(1) "2> NUL" ;
 
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 

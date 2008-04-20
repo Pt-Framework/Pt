@@ -72,7 +72,7 @@ LINK   = $(C++) ;
 
 if $(WITH_GCC_FLAG_VISIBILITY)
 {
-    CCFLAGS    += -fvisibility-inlines-hidden -fvisibility=hidden ;
+    CCFLAGS    += -fvisibility=hidden ;
     LINKFLAGS  += -fvisibility-inlines-hidden -fvisibility=hidden ;
 }
 
@@ -95,6 +95,11 @@ if $(TARGET_OSPLAT:U) != X86
 }
 
 C++FLAGS += $(CCFLAGS) ;
+if $(WITH_GCC_FLAG_VISIBILITY)
+{
+    C++FLAGS += -fvisibility-inlines-hidden ;
+}
+
 
 if $(WITH_GCC_FLAG_GROUPLIBS)
 {
@@ -123,7 +128,7 @@ rule MainImpl
     if $(WITH_GCC_FLAG_EXPORT)
     {
         LINKFLAGS on $(_target) += $(LINKFLAGS) -Wl,-E ;
-	}
+    }
 
     switch $(>:S)
     {
@@ -137,12 +142,6 @@ rule MainImpl
 
 rule Main_LinkSharedLibrariesImpl
 {
-    #local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-    #Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
-    #local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
-    #SHLIBS on $(_target) += $(_libs) ;
-    #LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
-
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
 
