@@ -195,7 +195,7 @@ if $(CONFIGURE)
     }
 
     #
-    # Toolset configuration
+    # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
     #
     if ! $(TOOLSET)
     {
@@ -212,6 +212,17 @@ if $(CONFIGURE)
         {
             WriteFile Jamconfig : "TOOLSET = msvc ;"  ;
             Echo "Checking for toolset ...msvc" ;
+        }
+        else if [ TryCommand "xlC -o "$(_out)" check.c" ]
+        {
+            WriteFile Jamconfig : "TOOLSET = xlc ;"  ;
+            Echo "Checking for toolset ...xlc" ;
+            Exit "NOT IMPLEMENTED" ;
+        }
+        else if [ TryCommand "CC -o "$(_out)" check.c" ]
+        {
+            WriteFile Jamconfig : "TOOLSET = sunpro ;"  ;
+            Echo "Checking for toolset ...sunpro" ;
         }
         else if [ TryCommand "gcc -o "$(_out)" check.c" ]
         {
@@ -262,11 +273,10 @@ CheckCc WITH_UNIX_SOCKETS : "#include <sys/types.h>"
                           : ""
                           : socket ;
 
-CheckC++ WITH_UNIX_NSL : "#include <sys/types.h>"
-                         "#include <sys/socket.h>"
-                         "int main() { return socket(0,0,0); }" 
-                       : ""
-                       : nsl ;
+CheckCc WITH_UNIX_NSL : "#include <netdb.h>"
+                        "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                      : ""
+                      : nsl ;
 
 CheckC++ WITH_WINMM : "#include <windows.h>"
                       "#include <mmsystem.h>"
