@@ -1,0 +1,112 @@
+##############################################################################
+# Auto-configuration rules
+##############################################################################
+
+rule TryCompile
+{
+    local _cc = $(1) ;
+    local _prog = $(2) ;
+    local _flags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+
+    local _cmd = $(_cc) /c /Fo$(_prog:S=$(SUFOBJ)) $(_flags) /I$(STDHDRS) /Tp $(_prog) ;
+    #Echo $(_cmd) ;
+    local _r = [ TryCommand $(_cmd) ] ;
+    #Echo cc $(_r) ;
+
+    if $(_r)
+    {
+        _cmd = link /nologo /out:$(_prog:S=$(SUFEXE)) $(_prog:S=$(SUFOBJ)) /LIBPATH:$(STDLIBS) /LIBPATH:$(_L) $(_l) ;
+        #Echo $(_cmd) ;
+        _r = [ TryCommand $(_cmd) ] ;
+        #Echo link $(_r) ;
+    }
+
+    return $(_r) ;
+}
+
+
+rule TryCc
+{
+    return [ TryCompile cl /nologo : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
+
+rule TryC++
+{
+    return [ TryCompile cl /nologo : $(2) : $(3) : $(4) : $(5) ] ;
+}
+
+##############################################################################
+# Tools and utilities
+##############################################################################
+
+VISUALC ?= $(VISUALC:J=" ") ;
+VISUALC ?= $(VSINSTALLDIR:J=" ") ;
+VISUALC ?= $(VCINSTALLDIR:J=" ") ;
+
+if ! $(VISUALC)
+{
+  Echo "Checking for VISUALC" ...FAILED ;
+  Exit "Please specify path to the Visual Studio installation with -sVISUALC" ;
+}
+
+if [ CHECK_IF_FILE $(VISUALC)\\vc\\include\\string ] 
+{
+    STDHDRS += \"$(VISUALC)\\vc\\include\" ;
+    STDLIBS += \"$(VISUALC)\\vc\\lib\" ;
+}
+else if  [ CHECK_IF_FILE $(VISUALC)\\vc7\\include\\string ]
+{
+    STDHDRS += \"$(VISUALC)\\vc7\\include\" ;
+    STDLIBS += \"$(VISUALC)\\vc7\\lib\" ;
+}
+Echo "Checking for VISUALC" ...$(VISUALC) ;
+
+
+CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
+                          "int main() { return 0; }" 
+                        : /I\"$(PLATFORMSDK)\\include\" 
+                        : 
+                        : \"$(PLATFORMSDK)\\lib\" ;
+
+if $(HAS_PLATFORMSDK)
+{
+    if $(PLATFORMSDK)
+    {
+        STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
+        STDHDRS += \"$(PLATFORMSDK)\\include\" ;
+        Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
+    }
+    else
+    {
+        Echo "Checking for PLATFORMSDK" ...default path ;
+    }
+}
+else if [ GLOB $(VISUALC)\\vc\\PlatformSDK\\include : * ] 
+{
+    #
+    # TODO replace with CheckCc because GLOB doesnt handle spaces in paths
+    #
+    PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
+    STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
+    STDHDRS += \"$(PLATFORMSDK)\\include\" ;
+    Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
+}
+else if [ GLOB $(VISUALC)\\vc7\\PlatformSDK\\include : * ]
+{
+    #
+    # TODO replace with CheckCc because GLOB doesnt handle spaces in paths
+    #
+    PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
+    STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
+    STDHDRS += \"$(PLATFORMSDK)\\include\" ;
+    Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
+}
+else
+{                       
+    Echo "Checking for PLATFORMSDK" ...FAILED ;
+    Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
+}
+

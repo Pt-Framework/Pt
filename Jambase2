@@ -77,12 +77,14 @@ rule ConfigureDefine
 
 rule TryCommand
 {
-    local _cmd  = $(1) "2> NUL" ; # 1>&2 > NUL
-
+    local _cmd  = $(1) " 2>&1 > check.out" ;
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 
-    _cmd = $(RM) NUL ;
-    COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    if [ CHECK_IF_FILE check.out ]
+    {
+        _cmd = $(RM) check.out ;
+        COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
+    }
 
     if $(_result[2]) = 0
     {
@@ -296,6 +298,7 @@ CheckC++ WITH_MMTIMER : "#include <windows.h>"
 #ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
 #ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
 
+Exit "----------------DONE--------------------" ;
 
 if $(CONFIGURE)
 {
