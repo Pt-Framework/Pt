@@ -24,6 +24,7 @@ SerializationError::SerializationError(const std::string& msg, const SourceInfo&
 : std::logic_error(msg + "'" + si)
 { }
 
+
 SerializationError::~SerializationError() throw()
 {}
 
@@ -37,7 +38,7 @@ SerializationInfo::SerializationInfo()
 
 
 SerializationInfo::SerializationInfo(const SerializationInfo& si)
-: _parent(0)
+: _parent(si._parent)
 , _category(si._category)
 , _name(si._name)
 , _type(si._type)
@@ -52,7 +53,7 @@ SerializationInfo::SerializationInfo(const SerializationInfo& si)
 
 SerializationInfo& SerializationInfo::operator =(const SerializationInfo& si)
 {
-    // don't assign parent on purpose !!!
+    _parent = si._parent;
     _category = si._category;
     _name = si._name;
     _id = si._id;
