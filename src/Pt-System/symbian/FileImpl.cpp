@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
+ *   Copyright (C) 2008 Peter Barth                                        *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -21,6 +22,7 @@
 #include "FileImpl.h"
 
 #include "Pt/System/SystemError.h"
+#include "SymbianTools.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -134,8 +136,11 @@ void FileImpl::copy(const std::string& to) const
 
 void FileImpl::move(const std::string& to)
 {
-    if (0 != ::rename(_path.c_str(), to.c_str()))
-        throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
+    SymbianTools::rename(_path.c_str(), to.c_str());
+    
+    // this doesn't work on Symbian with PIPS/OpenC
+    //if (0 != ::rename(_path.c_str(), to.c_str()))
+    //    throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
     _path = to;
 }
 

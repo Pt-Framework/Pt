@@ -43,8 +43,10 @@ const std::string& ProcessImpl::args()
 
 void ProcessImpl::start()
 {
-    if (m_command.length() > KMaxPath)
+    if (m_command.length() > (unsigned)KMaxPath)
+    {
         throw std::logic_error("Command path too long");        
+    }
     
     TPtrC8 ptrCommand(reinterpret_cast<const TUint8*>(m_command.c_str()));
     TBuf<KMaxPath> descriptorCommand;
@@ -57,8 +59,10 @@ void ProcessImpl::start()
         KMaxCmdLine = KMaxPath*4
     };
     
-    if (m_args.length() > KMaxCmdLine)
+    if (m_args.length() > (unsigned)KMaxCmdLine)
+    {
         throw std::logic_error("Arguments too long");        
+    }
 
     TPtrC8 ptrArgs(reinterpret_cast<const TUint8*>(m_args.c_str()));
     TBuf<KMaxCmdLine> descriptorArgs;

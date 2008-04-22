@@ -1,7 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,15 +20,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "DirectoryImpl.h"
+
 #include "Pt/System/SystemError.h"
+#include "SymbianTools.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
-
-
 
 namespace Pt {
 
@@ -163,10 +165,13 @@ void DirectoryImpl::remove(const std::string& path)
 
 void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
-    if (0 != ::rename(oldName.c_str(), newName.c_str()))
-    {
-        throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
-    }
+    SymbianTools::rename(oldName, newName);
+    
+    // this doesn't work on Symbian with PIPS/OpenC
+    //if (0 != ::rename(oldName.c_str(), newName.c_str()))
+    //{
+    //    throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
+    //}
 }
 
 
