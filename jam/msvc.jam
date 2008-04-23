@@ -42,9 +42,14 @@ rule TryC++
 # Tools and utilities
 ##############################################################################
 
-VISUALC ?= $(VISUALC:J=" ") ;
-VISUALC ?= $(VSINSTALLDIR:J=" ") ;
-VISUALC ?= $(VCINSTALLDIR:J=" ") ;
+if $(MSVCDir)
+{
+    VISUALC ?= $(VCINSTALLDIR:J=" ") ;
+}
+else if $(VSINSTALLDIR)
+{
+    VISUALC ?= $(VSINSTALLDIR:J=" ") ;
+}
 
 if ! $(VISUALC)
 {
@@ -71,6 +76,26 @@ CheckCc HAS_PLATFORMSDK : "#include <windows.h>"
                         : 
                         : \"$(PLATFORMSDK)\\lib\" ;
 
+if ! $(HAS_PLATFORMSDK)
+{
+    PLATFROMSDK = $(VISUALC)\\vc\\PlatformSDK ;
+
+    CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
+                              "int main() { return 0; }" 
+                            : /I\"$(PLATFORMSDK)\\include\" 
+                            : 
+                            : \"$(PLATFORMSDK)\\lib\" ;
+}
+if ! $(HAS_PLATFORMSDK)
+{
+    PLATFROMSDK = $(VISUALC)\\vc7\\PlatformSDK ;
+
+    CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
+                              "int main() { return 0; }" 
+                            : /I\"$(PLATFORMSDK)\\include\" 
+                            : 
+                            : \"$(PLATFORMSDK)\\lib\" ;
+}
 if $(HAS_PLATFORMSDK)
 {
     if $(PLATFORMSDK)
@@ -83,26 +108,6 @@ if $(HAS_PLATFORMSDK)
     {
         Echo "Checking for PLATFORMSDK" ...default path ;
     }
-}
-else if [ GLOB $(VISUALC)\\vc\\PlatformSDK\\include : * ] 
-{
-    #
-    # TODO replace with CheckCc because GLOB doesnt handle spaces in paths
-    #
-    PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
-    STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
-    STDHDRS += \"$(PLATFORMSDK)\\include\" ;
-    Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
-}
-else if [ GLOB $(VISUALC)\\vc7\\PlatformSDK\\include : * ]
-{
-    #
-    # TODO replace with CheckCc because GLOB doesnt handle spaces in paths
-    #
-    PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
-    STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
-    STDHDRS += \"$(PLATFORMSDK)\\include\" ;
-    Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
 }
 else
 {                       
