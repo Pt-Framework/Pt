@@ -120,7 +120,7 @@ rule Main_LinkSharedLibrariesImpl
 
     if $(3)
     {
-        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
     }
     else
     {
@@ -159,7 +159,7 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 
     if $(3)
     {
-        LINKLIBS on $(_target) = $(LINKLIBS) -L$(3) -l$(2) ;
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
     }
     else
     {
