@@ -31,7 +31,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <iostream>
-#include <memory>
+#include <vector>
+
 using namespace std;
 
 
@@ -80,7 +81,6 @@ void FileImpl::remove()
         throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 
-
 void FileImpl::copy(const std::string& to) const
 {
 
@@ -102,14 +102,14 @@ void FileImpl::copy(const std::string& to) const
         throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
     }
     
-    auto_ptr<char> buffer(new char[blockSize]);
+    std::vector<char> buffer(blockSize);
     
     try
     {
         int n;
-        while ((n = read(sd, buffer.get(), blockSize)) > 0)
+        while ((n = read(sd, &buffer[0], blockSize)) > 0)
         {
-            if (write(dd, buffer.get(), n) != n)
+            if (write(dd, &buffer[0], n) != n)
                 throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
         }
         if (n < 0)
