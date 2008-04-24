@@ -29,16 +29,28 @@ rule TryCompile
 
 rule TryCc
 {
-    return [ TryCompile cl /nologo : $(2) : $(3) : $(4) : $(5) ] ;
+    return [ TryCompile $(CC) : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
 
 rule TryC++
 {
-    return [ TryCompile cl /nologo : $(2) : $(3) : $(4) : $(5) ] ;
+    return [ TryCompile $(C++) : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
-##############################################################################
+
+rule CheckFile
+{
+    if $(1)
+    {
+        if [ CHECK_IF_FILE $(1:J=" ") ]
+        {
+            return 1 ;
+        }
+    }
+}
+
+#############################################################################
 # Tools and utilities
 ##############################################################################
 
@@ -50,25 +62,91 @@ else if $(VSINSTALLDIR)
 {
     VISUALC ?= $(VSINSTALLDIR:J=" ") ;
 }
-
 if ! $(VISUALC)
 {
   Echo "Checking for VISUALC" ...FAILED ;
   Exit "Please specify path to the Visual Studio installation with -sVISUALC" ;
 }
-
-if [ CHECK_IF_FILE $(VISUALC)\\vc\\include\\string ] 
-{
-    STDHDRS += \"$(VISUALC)\\vc\\include\" ;
-    STDLIBS += \"$(VISUALC)\\vc\\lib\" ;
-}
-else if  [ CHECK_IF_FILE $(VISUALC)\\vc7\\include\\string ]
-{
-    STDHDRS += \"$(VISUALC)\\vc7\\include\" ;
-    STDLIBS += \"$(VISUALC)\\vc7\\lib\" ;
-}
 Echo "Checking for VISUALC" ...$(VISUALC) ;
 
+
+if [ CheckFile $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" ]
+{
+    VCDIR = $(VISUALC)\\vc ;
+}
+else if [ CheckFile $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" ]
+{
+    VCDIR = $(VISUALC)\\vc7 ;
+}
+else
+{
+    Echo "Checking for VCDIR" ...FAILED ;
+    Exit "Please specify path to the Visual Studio vc directory -sVCDIR" ;
+}
+
+AR          = $(VCDIR)\\bin\\lib ;
+AS          = masm386 ;
+CC          = $(VCDIR)\\bin\\cl /nologo ;
+C++         = $(CC) ;
+RC          = $(VCDIR)\\bin\\rc ;
+MT          = $(VCDIR)\\bin\\mt -nologo ;
+LINK        = $$(VCDIR)\\bin\\link /nologo ;
+
+##############################################################################
+# Compiler and linker flags
+##############################################################################
+
+if [ CheckFile $(PLATFORMSDK:J=" ")"\\Include\\windows.h" ]
+{
+}
+else if [ CheckFile $(WindowsSdkDir:J=" ")"Include\\windows.h" ] 
+{
+    PLATFORMSDK = $(WindowsSdkDir:J=" ")"Include\\windows.h" ;
+}
+else if [ CheckFile $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ]
+{
+    PLATFORMSDK = $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ;
+}
+else if [ CheckFile $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ]
+{
+    PLATFORMSDK = $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ;
+}
+else
+{
+    Echo "Checking for PLATFORMSDK" ...FAILED ;
+    Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
+}
+Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
+
+
+STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
+STDHDRS += \"$(PLATFORMSDK)\\include\" ;
+LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
+
+CCFLAGS    += /D_CRT_SECURE_NO_DEPRECATE /DWIN32 ;
+C++FLAGS   += $(CCFLAGS) /EHsc /GR /FD /Zc:wchar_t ;
+LINKLIBS   ?= "" ;
+UNDEFFLAG   = "/u _" ;
+LINKFLAGS  += "/INCREMENTAL:NO" ;
+WARN       ?= /Wall ;
+
+if $(CONFIG:L) = debug 
+{
+    CCFLAGS   += /MDd /Zi /RTC1 ;
+    OPTIM     ?= /Od ;
+    LINKFLAGS += /DEBUG ;
+}
+else if $(CONFIG:L) = release 
+{
+    CCFLAGS += /MD /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
+}
+else if $(CONFIG:L) = aqtime
+{
+    CCFLAGS += /MD /Zi /D "NDEBUG" ;
+    OPTIM   ?= /Ox /Ot /Oy ;
+    LINKFLAGS += /DEBUG ;
+}
 
 CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
                           "int main() { return 0; }" 
@@ -76,42 +154,223 @@ CheckCc HAS_PLATFORMSDK : "#include <windows.h>"
                         : 
                         : \"$(PLATFORMSDK)\\lib\" ;
 
-if ! $(HAS_PLATFORMSDK)
-{
-    PLATFROMSDK = $(VISUALC)\\vc\\PlatformSDK ;
+##############################################################################
+# Build rules
+##############################################################################
 
-    CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
-                              "int main() { return 0; }" 
-                            : /I\"$(PLATFORMSDK)\\include\" 
-                            : 
-                            : \"$(PLATFORMSDK)\\lib\" ;
-}
-if ! $(HAS_PLATFORMSDK)
-{
-    PLATFROMSDK = $(VISUALC)\\vc7\\PlatformSDK ;
-
-    CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
-                              "int main() { return 0; }" 
-                            : /I\"$(PLATFORMSDK)\\include\" 
-                            : 
-                            : \"$(PLATFORMSDK)\\lib\" ;
-}
-if $(HAS_PLATFORMSDK)
-{
-    if $(PLATFORMSDK)
-    {
-        STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
-        STDHDRS += \"$(PLATFORMSDK)\\include\" ;
-        Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
-    }
-    else
-    {
-        Echo "Checking for PLATFORMSDK" ...default path ;
-    }
-}
-else
-{                       
-    Echo "Checking for PLATFORMSDK" ...FAILED ;
-    Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
+rule FDefines 
+{ 
+  return /D$(<) ; 
 }
 
+
+rule FIncludes 
+{ 
+  return /I$(<) ; 
+}
+
+
+rule LibraryImpl
+{
+  local _target = $(PRELIB)$(<)$(SUFLIB) ;
+  
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.idb) ;
+
+  local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+  Depends $(_objects) : first ;
+}
+
+
+rule Library_MakeLocateImpl
+{
+  local _target = $(PRELIB)$(<:S=$(SUFLIB)) ;
+  
+  MakeLocate $(_target:S=.pdb) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+
+rule MainImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+
+  Clean clean : $(_target) ;
+  Clean clean : $(_target:S=.lib) ;
+  Clean clean : $(_target:S=.exp) ; 
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.ilk) ;
+  Clean clean : $(_target:S=.idb) ;
+  Clean clean : $(_target:S=.exe.manifest) ;
+
+  local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+
+  # embed manifest into exe
+  EmbedManifest $(_target) : $(_target:S=.exe.manifest) ;
+  
+  LINKFLAGS on $(_target) += $(LINKFLAGS) $(MAINLINKFLAGS) ;
+
+  Depends $(_objects) : first ;
+}
+
+
+rule Main_LinkSharedLibrariesImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    LinkLibraries $(<) : $(>) ;
+  }
+}
+
+
+rule Main_MakeLocateImpl
+{
+  local _target = $(<:S=$(SUFEXE)) ;
+  
+  MakeLocate $(_target:S=.lib) : $(>) ;
+  MakeLocate $(_target:S=.exp) : $(>) ;
+  MakeLocate $(_target:S=.pdb) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  MakeLocate $(_target:S=.ilk) : $(>) ;
+  MakeLocate $(_target:S=.exe.manifest) : $(>) ;
+    
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+
+rule SharedLibraryImpl
+{
+  # Add grist to file names
+  local _sources = [ FGristFiles $(>) ] ;
+  local _objects = $(_sources:S=$(SUFOBJ)) ;
+
+  # Add library name decorations <name><.dll/.so>
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  Clean clean : $(_target) ;
+  Clean clean : $(_target:S=.lib) ;
+  Clean clean : $(_target:S=.exp) ; 
+  Clean clean : $(_target:S=.pdb) ;
+  Clean clean : $(_target:S=.ilk) ;
+  Clean clean : $(_target:S=.idb) ;
+  Clean clean : $(_target).manifest ;
+
+  PDB on $(_objects) = $(_target:S=.pdb) ;
+  Depends $(_sources) : first ;
+  Depends $(PRELIB)$(<:S=$(SUFLIB)) : $(_target) ;
+
+  # embed manifest into dll
+  EmbedManifest $(_target) : $(_target).manifest ;
+
+  # The *.lib is created before its *.dll and therefore has an older timestamp.
+  # However, the lib depends on the dll and will be recreated everytime a 
+  # target is called using this dll because it seems to be 'old'.
+  # NOUPDATE will ignore the lib's timestamp once it has been created.
+  NOUPDATE $(PRELIB)$(<:S=$(SUFLIB)) ;
+
+  LINKFLAGS on $(_target) += /dll $(LINKFLAGS) ;
+}
+
+
+rule SharedLibrary_LinkSharedLibrariesImpl
+{
+  # Add library name decorations <name><.dll/.so>
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  if $(3) 
+  {
+    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += /LIBPATH:$(3) ;
+  }
+  else
+  {
+    LinkLibraries $(<) : $(>) ;
+     
+    # make library dependency of target   
+    Depends $(_target) : $(>:S=$(SUFLIB)) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
+    
+    # set NEEDLIBS variable used by 'Link'    
+    NEEDLIBS on $(_target) += $(>:S=$(SUFLIB)) ;
+  }
+}
+
+
+rule SharedLibrary_MakeLocateImpl
+{
+  local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+  MakeLocate $(_target:S=.lib) : $(>) ;
+  MakeLocate $(_target:S=.exp) : $(>) ;
+  MakeLocate $(_target:S=.pdb) : $(>) ;   
+  MakeLocate $(_target:S=.ilk) : $(>) ;
+  MakeLocate $(_target:S=.idb) : $(>) ;
+  MakeLocate $(_target:S=.dll.manifest) : $(>) ;
+    
+  # create dir before C++ rule creates .pdb files
+  Depends first : $(>) ;
+}
+
+##############################################################################
+# Build actions
+##############################################################################
+
+actions updated together piecemeal Archive
+{
+  set PATH=$(VISUALC)\Common7/IDE;%PATH%
+
+  set _inputfile_=archive.cmd
+  echo "$(>)" > %_inputfile_%
+
+  if exist $(<) set _$(<:B)_=$(<)
+
+  "$(AR)" /NOLOGO /out:$(<) %_$(<:B)_% @%_inputfile_%
+
+  del %_inputfile_%
+}
+# set PATH=$(VISUALC)\Common7/IDE;%PATH%
+# if exist $(<) set _$(<:B)_=$(<)
+# "$(AR)" /out:$(<) %_$(<:B)_% $(>)
+
+
+actions As
+{
+  set PATH=$(VISUALC)\Common7/IDE;%PATH%
+  "$(AS)" /Ml /p /v /w2 $(>) $(<) ,nul,nul;
+}
+
+
+actions Cc bind PDB
+{
+  set PATH=$(VISUALC)\Common7/IDE;%PATH%
+  "$(CC)" /c $(CCFLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) $(>)
+}
+
+
+actions C++ bind PDB
+{ 
+  set PATH=$(VISUALC)\Common7\IDE;%PATH%
+  "$(C++)" /c $(C++FLAGS) $(OPTIM) $(WARN) /Fo$(<) /Fd$(PDB) /I$(HDRS) /I$(STDHDRS) /Tp $(>)
+}
+
+
+actions together Link bind NEEDLIBS
+{
+  set PATH=$(VISUALC)\vc\bin;%PATH%
+  set PATH=$(VISUALC)\Common7\IDE;%PATH%
+  set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
+  "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
