@@ -142,6 +142,11 @@ inline std::string operator+(const std::string& what, const SourceInfo& info)
     return std::string( info.where() ) + ": " + what;
 }
 
+inline std::string operator+(const char* what, const SourceInfo& info)
+{
+    return std::string( info.where() ) + ": " + what;
+}
+
 } // namespace Pt
 
 #endif
