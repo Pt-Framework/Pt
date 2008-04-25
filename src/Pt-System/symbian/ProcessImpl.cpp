@@ -1,11 +1,12 @@
 #include "ProcessImpl.h"
+#include <f32file.h>
+#include <collate.h>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <signal.h>
 #include <errno.h>
 #include <sys/wait.h>
-
 
 namespace Pt {
 
@@ -51,6 +52,19 @@ void ProcessImpl::start()
     TPtrC8 ptrCommand(reinterpret_cast<const TUint8*>(m_command.c_str()));
     TBuf<KMaxPath> descriptorCommand;
     descriptorCommand.Copy(ptrCommand);
+
+    TParse parser;
+    if (parser.SetNoWild(descriptorCommand, 0, 0) == KErrNone) 
+    {
+        _LIT(sysPath, "\\sys\\bin");
+        TCollationMethod cm = *Mem::CollationMethodByIndex( 0 ); // default collation method
+        cm.iFlags |= TCollationMethod::EFoldCase;
+        // case insensitive comparison for path
+        if (parser.Path().CompareC( sysPath, 0, &cm ) != 0)
+        {
+            throw std::logic_error("On Symbian path information must be empty or sys\\bin.");
+        }
+    }
     
     // apparently KMaxPath has got nothing to do with the arguments
     // but still we need some maximum for a limit
