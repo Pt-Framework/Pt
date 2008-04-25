@@ -56,13 +56,16 @@ void ProcessImpl::start()
     TParse parser;
     if (parser.SetNoWild(descriptorCommand, 0, 0) == KErrNone) 
     {
-        _LIT(sysPath, "\\sys\\bin");
-        TCollationMethod cm = *Mem::CollationMethodByIndex( 0 ); // default collation method
-        cm.iFlags |= TCollationMethod::EFoldCase;
-        // case insensitive comparison for path
-        if (parser.Path().CompareC( sysPath, 0, &cm ) != 0)
+        if (parser.PathPresent())
         {
-            throw std::logic_error("On Symbian path information must be empty or sys\\bin.");
+            _LIT(sysPath, "\\sys\\bin");
+            TCollationMethod cm = *Mem::CollationMethodByIndex( 0 ); // default collation method
+            cm.iFlags |= TCollationMethod::EFoldCase;
+            // case insensitive comparison for path
+            if (parser.Path().CompareC( sysPath, 0, &cm ) != 0)
+            {
+                throw std::logic_error("On Symbian path information must be empty or sys\\bin.");
+            }
         }
     }
     
