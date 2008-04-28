@@ -2,7 +2,7 @@
  *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2008 Peter Barth                                        *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -136,11 +136,14 @@ void FileImpl::copy(const std::string& to) const
 
 void FileImpl::move(const std::string& to)
 {
-    SymbianTools::rename(_path.c_str(), to.c_str());
+    //SymbianTools::rename(_path.c_str(), to.c_str());
     
-    // this doesn't work on Symbian with PIPS/OpenC
-    //if (0 != ::rename(_path.c_str(), to.c_str()))
-    //    throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
+    // Peter Barth (2008-04-28)
+    // At some point the unit tests failed for a POSIX
+    // rename(), so I added a rename equivalent based on Symbian APIs
+    // Later I ran the tests again and it worked fine (strange?)
+    if (0 != ::rename(_path.c_str(), to.c_str()))
+        throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
     _path = to;
 }
 

@@ -165,13 +165,16 @@ void DirectoryImpl::remove(const std::string& path)
 
 void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
-    SymbianTools::rename(oldName, newName);
+    //SymbianTools::rename(oldName, newName);
     
-    // this doesn't work on Symbian with PIPS/OpenC
-    //if (0 != ::rename(oldName.c_str(), newName.c_str()))
-    //{
-    //    throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
-    //}
+    // Peter Barth (2008-04-28)
+    // At some point the unit tests failed for a POSIX
+    // rename(), so I added a rename equivalent based on Symbian APIs
+    // Later I ran the tests again and it worked fine (strange?)
+    if (0 != ::rename(oldName.c_str(), newName.c_str()))
+    {
+        throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
+    }
 }
 
 

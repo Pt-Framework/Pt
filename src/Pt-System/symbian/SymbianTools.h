@@ -92,7 +92,8 @@ static void rename(const std::string& oldName, const std::string& newName)
     // TODO Rename only works when both directories 
     // are located on the same drive. When they are located on different drives
     // call Move instead of Rename
-    if (fileMan->Rename(descOldName, descNewName, 0) != KErrNone)
+    // TODO If destination directory exists Rename will fail
+    if (fileMan->Rename(descOldName, descNewName) != KErrNone)
     {
         throw SystemError("Could not move/rename directory/file '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);        
     }
