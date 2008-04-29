@@ -62,6 +62,7 @@ class SignalTest : public Pt::Unit::TestSuite
         , _caller(0)
         , _callee(0)
         {
+            Pt::Unit::TestSuite::registerMethod( "Disconnect", *this, &SignalTest::Disconnect );
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileSend", *this, &SignalTest::DeleteWhileSend );
             Pt::Unit::TestSuite::registerMethod( "CopySignal", *this, &SignalTest::CopySignal );
             Pt::Unit::TestSuite::registerMethod( "Send0", *this, &SignalTest::Send0 );
@@ -80,6 +81,16 @@ class SignalTest : public Pt::Unit::TestSuite
             _caller = 0;
             delete _callee;
             _callee = 0;
+        }
+
+        void Disconnect()
+        {
+            Pt::Signal<> sn;
+            connect(sn, *this, &SignalTest::slot0);
+            sn.disconnect( slot(*this, &SignalTest::slot0) );
+
+            //std::cerr << "COCO: " << sn.connectionCount() << std::endl;
+            PT_UNIT_ASSERT(sn.connectionCount() == 0)
         }
 
     protected:

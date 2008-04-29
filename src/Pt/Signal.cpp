@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris Dürner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Dï¿½rner                           *
  *   Copyright (C) 2005 Stephan Beal                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -117,6 +117,22 @@ void SignalBase::closed(const Connection& c)
     else
     {
         Connectable::closed(c);
+    }
+}
+
+
+void SignalBase::disconnectSlot(const Slot& slot)
+{
+    std::list<Connection>::iterator it = Connectable::connections().begin();
+    std::list<Connection>::iterator end = Connectable::connections().end();
+
+    for(; it != end; ++it)
+    {
+        if( it->slot().equals(slot) )
+        {
+            it->close();
+            return;
+        }
     }
 }
 

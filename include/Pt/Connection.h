@@ -6,12 +6,9 @@
 #include <Pt/Atomicity.h>
 #include <Pt/RefCounted.h>
 
-
-
 namespace Pt {
 
     class Connectable;
-
 
     class PT_API ConnectionData : public RefCounted {
         public:

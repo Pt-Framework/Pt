@@ -62,6 +62,9 @@ namespace Pt {
 
             virtual void closed(const Connection& c);
 
+        protected:
+            void disconnectSlot(const Slot&);
+
         private:
             mutable Sentry* _sentry;
             mutable bool _sending;

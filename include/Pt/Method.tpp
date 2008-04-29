@@ -104,6 +104,16 @@ class MethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             connectable.closed(c);
         }
 
+        virtual bool equals(const Slot& slot) const
+        {
+            const MethodSlot* ms = dynamic_cast<const MethodSlot*>(&slot);
+            if(!ms)
+                return false;
+
+            return (&_method.object() == &ms->_method.object()) &&
+                   (_method.method() == ms->_method.method());
+        }
+
     private:
         Method<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> _method;
 };

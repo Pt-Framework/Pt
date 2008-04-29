@@ -1138,6 +1138,12 @@
                 return Connection(*this, slot.clone() );
             }
 
+            template <typename R>
+            void disconnect(const BasicSlot<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
+            }
+
             /**
             Invokes all slots connected to this signal, in an undefined
             order. Their return values are ignored. Calling of connected slots will

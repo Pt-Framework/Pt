@@ -19,6 +19,9 @@ namespace Pt {
             virtual bool opened(const Connection& c) = 0;
 
             virtual void closed(const Connection& c) = 0;
+
+            virtual bool equals(const Slot& slot) const
+            { return false; }
     };
 
 #include <Pt/Slot.tpp>

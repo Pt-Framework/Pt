@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2006 by Marc Boris Duerner                         *
+ *   Copyright (C) 2004-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -19,14 +19,10 @@
 
 #include "Pt/Connectable.h"
 #include "Pt/Callable.h"
-
 #include <iostream>
 #include <memory>
-using namespace std;
-
 
 namespace Pt {
-
 
 Connection::Connection()
 {
@@ -93,9 +89,9 @@ void Connection::close()
     if( !this->valid() )
         return;
 
+    _data->setValid(false);
     _data->slot().closed( *this );
     _data->sender().closed( *this );
-    _data->setValid(false);
 }
 
 
@@ -103,10 +99,10 @@ Connection& Connection::operator=(const Connection& connection)
 {
     if( 0 == _data->unref()) 
     {
-        this->close();        
-        delete _data;   
+        this->close();
+        delete _data;
     }
-    
+
     _data = connection._data;
     _data->ref();
     return (*this);
