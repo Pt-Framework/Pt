@@ -46,7 +46,7 @@ public:
 
     static char pathSeparator()
     {
-        return '/';
+        return '\\';
     }
     
     static unsigned long getTotalMemory();
