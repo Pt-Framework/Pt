@@ -46,6 +46,17 @@ OpenFailed::~OpenFailed() throw()
 {
 }
 
+
+CloseFailed::CloseFailed(const std::string& what, const SourceInfo& si)
+: IOError(what, si)
+{
+}
+
+
+CloseFailed::~CloseFailed() throw()
+{
+}
+
 } // namespace System
 
 } // namespace Pt

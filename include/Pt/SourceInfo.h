@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2004-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2004-2008 Marc Boris Duerner                            *
  *   Copyright (C)      2006 Aloysius Indrayanto                           *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,21 +25,23 @@
 
 // GNU C++ compiler
 #ifdef __GNUC__
-    #define PT_PRETTY_FUNCTION __PRETTY_FUNCTION__
+    #define PT_FUNCTION __PRETTY_FUNCTION__
 // Borland C++
 #elif defined(__BORLANDC__)
-    #define PT_PRETTY_FUNCTION __FUNC__
+    #define PT_FUNCTION __FUNC__
 // Microsoft C++ compiler
 #elif defined(_MSC_VER)
     // .NET 2003 support's demangled function names
     #if _MSC_VER >= 1300
-        #define PT_PRETTY_FUNCTION __FUNCDNAME__
+        #define PT_FUNCTION __FUNCDNAME__
     #else
-        #define PT_PRETTY_FUNCTION __FUNCTION__
+        #define PT_FUNCTION __FUNCTION__
     #endif
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+    #define PT_FUNCTION __func__
 // otherwise use standard macro
 #else
-    #define PT_PRETTY_FUNCTION "unknown symbol"
+    #define PT_FUNCTION "unknown symbol"
 #endif
 
 #define PT_SOURCEINFO_STRINGIFY(x) #x
@@ -53,7 +55,7 @@
 /** @brief Construct a Pt::SourceInfo object
     @ingroup Pt
 */
-#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_PRETTY_FUNCTION, \
+#define PT_SOURCEINFO Pt::SourceInfo(__FILE__, __LINE__, PT_FUNCTION, \
                                      __FILE__ ":" PT_SOURCEINFO_TOSTRING(__LINE__) )
 
 namespace Pt {
@@ -143,6 +145,16 @@ inline std::string operator+(const std::string& what, const SourceInfo& info)
 }
 
 inline std::string operator+(const char* what, const SourceInfo& info)
+{
+    return std::string( info.where() ) + ": " + what;
+}
+
+inline std::string operator+( const SourceInfo& info, const std::string& what)
+{
+    return std::string( info.where() ) + ": " + what;
+}
+
+inline std::string operator+(const SourceInfo& info, const char* what)
 {
     return std::string( info.where() ) + ": " + what;
 }

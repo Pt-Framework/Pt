@@ -44,6 +44,13 @@ namespace System {
             ~OpenFailed() throw();
     };
 
+    class PT_SYSTEM_API CloseFailed : public IOError {
+        public:
+            CloseFailed(const std::string& what, const SourceInfo& si);
+
+            ~CloseFailed() throw();
+    };
+
 } // namespace System
 
 } // namespace Pt

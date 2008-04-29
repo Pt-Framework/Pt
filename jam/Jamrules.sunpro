@@ -27,7 +27,7 @@ if $(TARGET_OSPLAT) = sparc9
 	LINKFLAGS += -xtarget=ultra -xarch=v9 ;
 }
 
-CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
+CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ -features=extensions ;
 
 C++FLAGS  += $(CCFLAGS) ;
 
