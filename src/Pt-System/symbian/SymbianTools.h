@@ -31,38 +31,51 @@ namespace System {
 
 namespace SymbianTools {
 
-static char* wchar2char(const TUint16* in, char* out, int len) // UCS2 -> UTF8
+// UCS2 -> UTF8
+static char* wchar2char(const TUint16* in, char* out, int len, int bufferSize) 
 {
     int i = 0, j = 0;
     while (i < len)
     {
         TUint16 c = in[i++];
-        if(c <= 0x7f)
+        if (c <= 0x7f)
         {
-            out[j++] = c;
+            if (j < bufferSize)
+                out[j++] = c;
         }
-        else if(c <= 0x7ff)
+        else if (c <= 0x7ff)
         {
-            out[j++] = 0xc0 | (c >>   6); // first 5 bits
-            out[j++] = 0x80 | (c & 0x3f); // last 6 bits
+            if (j < bufferSize)
+                out[j++] = 0xc0 | (c >>   6); // first 5 bits
+            if (j < bufferSize)
+                out[j++] = 0x80 | (c & 0x3f); // last 6 bits
         }
-        else if(c <= 0x7fff)
+        else if (c <= 0x7fff)
         {
-            out[j++] = 0xe0 | (c >>  12);         // first 5 bits
-            out[j++] = 0x80 | ((c>>6) & 0x3f);    // next 6 bits
-            out[j++] = 0x80 | (c & 0x3f);         // last 6 bits
+            if (j < bufferSize)
+                out[j++] = 0xe0 | (c >>  12);         // first 5 bits
+            if (j < bufferSize)
+                out[j++] = 0x80 | ((c>>6) & 0x3f);    // next 6 bits
+            if (j < bufferSize)
+                out[j++] = 0x80 | (c & 0x3f);         // last 6 bits
         }
     }
-    out[j] = 0;
+    
+    if ((j == bufferSize) && (bufferSize > 0))
+        out[bufferSize-1] = 0;
+    else
+        out[j] = 0;
+    
     return out;
 }
 
 // safe but not very efficient
 static std::string TPtrC2string(TPtrC src) 
 {
-    std::vector<char> dst(src.Length()*2);    
+    const int maxSize = src.Length()*4;
+    std::vector<char> dst(maxSize);    
 
-    wchar2char(src.Ptr(), &dst[0], src.Length());
+    wchar2char(src.Ptr(), &dst[0], src.Length(), maxSize);
     
     return std::string(&dst[0]);
 }
