@@ -46,14 +46,10 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -110,8 +106,7 @@ class MethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             if(!ms)
                 return false;
 
-            return (&_method.object() == &ms->_method.object()) &&
-                   (_method.method() == ms->_method.method());
+            return _method == ms->_method;
         }
 
     private:
@@ -170,14 +165,10 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -246,14 +237,10 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -322,14 +309,10 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -398,14 +381,10 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -474,14 +453,10 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
         Method<R, ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -550,14 +525,10 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
         Method<R, ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -626,14 +597,10 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
         Method<R, ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -702,14 +669,10 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
         Method<R, ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -778,14 +741,10 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
         Method<R, ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:
@@ -854,14 +813,10 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
         Method<R, ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        /** Deeply copies rhs. */
-        Method& operator=(const Method& rhs)
+        bool operator==(const Method& other) const
         {
-            if( this != &rhs ) {
-                _object = rhs._object;
-                _memFunc = rhs._memFunc;
-            }
-            return (*this);
+            return (_object == other._object) &&
+                   (_memFunc == other._memFunc);
         }
 
     private:

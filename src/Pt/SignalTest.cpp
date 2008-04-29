@@ -7,6 +7,16 @@
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
  *                                                                         *
+ *   As a special exception, you may use this file as part of a free       *
+ *   software library without restriction. Specifically, if other files    *
+ *   instantiate templates or use macros or inline functions from this     *
+ *   file, or you compile this file and link it with other files to        *
+ *   produce an executable, this file does not by itself cause the         *
+ *   resulting executable to be covered by the GNU General Public          *
+ *   License. This exception does not however invalidate any other         *
+ *   reasons why the executable file might be covered by the GNU General   *
+ *   Public License.                                                       *
+ *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
@@ -25,6 +35,9 @@
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+
+void function0()
+{}
 
 class Callee : public Pt::Connectable
 {
@@ -58,7 +71,6 @@ class SignalTest : public Pt::Unit::TestSuite
     public:
         SignalTest()
         : Pt::Unit::TestSuite("SignalTest")
-        , _called0(false)
         , _caller(0)
         , _callee(0)
         {
@@ -86,10 +98,16 @@ class SignalTest : public Pt::Unit::TestSuite
         void Disconnect()
         {
             Pt::Signal<> sn;
-            connect(sn, *this, &SignalTest::slot0);
-            sn.disconnect( slot(*this, &SignalTest::slot0) );
+            connect(sn, *this, &SignalTest::method0);
+            disconnect(sn, *this, &SignalTest::method0);;
+            PT_UNIT_ASSERT(sn.connectionCount() == 0)
 
-            //std::cerr << "COCO: " << sn.connectionCount() << std::endl;
+            connect(sn, *this, &SignalTest::constMethod0);
+            disconnect(sn, *this, &SignalTest::constMethod0);
+            PT_UNIT_ASSERT(sn.connectionCount() == 0)
+
+            connect(sn, &function0);
+            disconnect(sn, &function0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0)
         }
 
@@ -156,11 +174,11 @@ class SignalTest : public Pt::Unit::TestSuite
 
         void DeleteWhileSend()
         {
-            connect(*_caller, *this, &SignalTest::slot0);
+            connect(*_caller, *this, &SignalTest::method0);
             connect(*_caller, *this, &SignalTest::deleteCallee );
-            connect(*_caller, *this, &SignalTest::slot0);
+            connect(*_caller, *this, &SignalTest::method0);
             connect(*_caller, *this, &SignalTest::deleteCaller);
-            connect(*_caller, *this, &SignalTest::slot0);
+            connect(*_caller, *this, &SignalTest::method0);
 
             _caller->send();
         }
@@ -179,11 +197,13 @@ class SignalTest : public Pt::Unit::TestSuite
             _caller = 0;
         }
 
-        void slot0()
-        { _called0 = true; }
+        void method0()
+        { }
+
+        void constMethod0() const
+        { }
 
     private:
-        bool _called0;
         Pt::Signal<>* _caller;
         Callee* _callee;
 };

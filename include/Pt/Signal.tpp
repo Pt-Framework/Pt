@@ -30,6 +30,12 @@
                 return Connection(*this, slot.clone() );
             }
 
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
+            {
+                this->disconnectSlot(slot);
+            }
+
             /**
             Invokes all slots connected to this signal, in an undefined
             order. Their return values are ignored. Calling of connected slots will
@@ -118,6 +124,15 @@
                 connectable.closed(c);
             }
 
+            virtual bool equals(const Slot& slot) const
+            {
+                const SignalSlot* ss = dynamic_cast<const SignalSlot*>(&slot);
+                if(!ss)
+                    return false;
+
+                return _method == ss->_method;
+            }
+
         private:
             mutable ConstMethod<void, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
     };
@@ -133,7 +148,7 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     Connection connect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
     {
-        return Connection(signal, slot.clone() );
+        return signal.connect(slot);
     }
 
 
@@ -164,6 +179,38 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
+    {
+         signal.disconnect( slot );
+    }
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 10
 // BEGIN_Signal 9
     // specialization
@@ -191,6 +238,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -269,6 +322,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8,A9))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 9
 // BEGIN_Signal 8
     // specialization
@@ -296,6 +375,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -374,6 +459,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 8
 // BEGIN_Signal 7
     // specialization
@@ -401,6 +512,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -479,6 +596,33 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
+    {
+        signal.disconnect(  slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& sender, Signal<A1,A2,A3,A4,A5,A6,A7>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 7
 // BEGIN_Signal 6
     // specialization
@@ -506,6 +650,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -584,6 +734,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5, class A6>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, R(*func)(A1,A2,A3,A4,A5,A6))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5, class A6>
+    void disconnect(Signal<A1,A2,A3,A4,A5,A6>& sender, Signal<A1,A2,A3,A4,A5,A6>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 6
 // BEGIN_Signal 5
     // specialization
@@ -611,6 +787,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -689,6 +871,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4, class A5>
+    void disconnect(Signal<A1,A2,A3,A4,A5>& signal, R(*func)(A1,A2,A3,A4,A5))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5>
+    void disconnect(Signal<A1,A2,A3,A4,A5>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4, class A5>
+    void disconnect(Signal<A1,A2,A3,A4,A5>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4, class A5>
+    void disconnect(Signal<A1,A2,A3,A4,A5>& sender, Signal<A1,A2,A3,A4,A5>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 5
 // BEGIN_Signal 4
     // specialization
@@ -716,6 +924,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -794,6 +1008,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3, class A4>
+    void disconnect(Signal<A1,A2,A3,A4>& signal, R(*func)(A1,A2,A3,A4))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4>
+    void disconnect(Signal<A1,A2,A3,A4>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3, class A4>
+    void disconnect(Signal<A1,A2,A3,A4>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3, class A4>
+    void disconnect(Signal<A1,A2,A3,A4>& sender, Signal<A1,A2,A3,A4>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 4
 // BEGIN_Signal 3
     // specialization
@@ -821,6 +1061,12 @@
             Connection connect(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -899,6 +1145,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2, class A3>
+    void disconnect(Signal<A1,A2,A3>& signal, R(*func)(A1,A2,A3))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2, class A3>
+    void disconnect(Signal<A1,A2,A3>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2, class A3>
+    void disconnect(Signal<A1,A2,A3>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2, class A3>
+    void disconnect(Signal<A1,A2,A3>& sender, Signal<A1,A2,A3>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 3
 // BEGIN_Signal 2
     // specialization
@@ -926,6 +1198,12 @@
             Connection connect(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -1004,6 +1282,32 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1, class A2>
+    void disconnect(Signal<A1,A2>& signal, R(*func)(A1,A2))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1, class A2>
+    void disconnect(Signal<A1,A2>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1, class A2>
+    void disconnect(Signal<A1,A2>& signal, ClassT& object, R(ClassT::*memFunc)(A1,A2) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1, class A2>
+    void disconnect(Signal<A1,A2>& sender, Signal<A1,A2>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
 // END_SignalSlot 2
 // BEGIN_Signal 1
     // specialization
@@ -1031,6 +1335,12 @@
             Connection connect(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            template <typename R>
+            void disconnect(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -1109,6 +1419,33 @@
     {
         return connect( sender, slot(receiver) );
     }
+
+
+    template <typename R,class A1>
+    void disconnect(Signal<A1>& signal, R(*func)(A1))
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT,class A1>
+    void disconnect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1))
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT,class A1>
+    void disconnect(Signal<A1>& signal, ClassT& object, R(ClassT::*memFunc)(A1) const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <class A1>
+    void disconnect(Signal<A1>& sender, Signal<A1>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
+    }
+
+
 // END_SignalSlot 1
 // BEGIN_Signal 0
     // specialization
@@ -1218,5 +1555,29 @@
     inline Connection connect(Signal<>& sender, Signal<>& receiver)
     {
         return connect( sender, slot(receiver) );
+    }
+
+
+    template <typename R>
+    void disconnect(Signal<>& signal, R(*func)())
+    {
+        signal.disconnect( slot(func) );
+    }
+
+    template <typename R, class BaseT, class ClassT>
+    void disconnect(Signal<>& signal, BaseT& object, R(ClassT::*memFunc)())
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    template <typename R, class ClassT>
+    void disconnect(Signal<>& signal, ClassT& object, R(ClassT::*memFunc)() const)
+    {
+        signal.disconnect( slot(object, memFunc) );
+    }
+
+    inline void disconnect(Signal<>& sender, Signal<>& receiver)
+    {
+        sender.disconnect( slot(receiver) );
     }
 // END_SignalSlot 0
