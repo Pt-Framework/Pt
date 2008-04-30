@@ -95,6 +95,7 @@ class SignalTest : public Pt::Unit::TestSuite
             _callee = 0;
         }
 
+    protected:
         void Disconnect()
         {
             Pt::Signal<> sn;
@@ -111,7 +112,6 @@ class SignalTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(sn.connectionCount() == 0)
         }
 
-    protected:
         void Send0()
         {
             Callee* recv = new Callee;

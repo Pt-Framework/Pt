@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Dr. Marc Boris D�rner                           *
+ *   Copyright (C) 2005 by Dr. Marc Boris Duerner                          *
  *   Copyright (C) 2005 Stephan Beal                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
