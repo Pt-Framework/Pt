@@ -72,6 +72,10 @@ Main PluginDemo : PluginDemo.cpp ;
 Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : $(OUTPUT_TARGET) ;
 
+PtUnitTest DirectoryTest : DirectoryTest.cpp ;
+Main_LinkSharedLibraries DirectoryTest : Pt Pt-System Pt-Unit ;
+PtUnitTest_MakeLocate DirectoryTest : $(OUTPUT_TARGET) ;
+
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
