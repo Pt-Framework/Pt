@@ -18,11 +18,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_System_FileSystemNode_h
 #define Pt_System_FileSystemNode_h
 
-#include <Pt/Types.h>
 #include <Pt/System/Api.h>
 #include <string>
 
@@ -35,30 +33,36 @@ class PT_SYSTEM_API FileSystemNode
     public:
         enum Type
         {
-            File = 0,
-            Directory
+            Invalid   = 0,
+            File      = 1,
+            Directory = 2
         };
 
         virtual ~FileSystemNode()
         {}
 
+        virtual Type type() const = 0;
+
+        virtual std::string name() const = 0;
+
         //! Returns the path of the file system node.
         virtual const std::string& path() const = 0;
 
-        virtual std::string parentPath() const = 0;
-
-        virtual std::string name() const = 0;
+        virtual std::string dirName() const = 0;
 
         //! Returns the size of the file system node.
         virtual std::size_t size() const = 0;
 
         virtual void remove() = 0;
 
-        virtual bool exists() const = 0;
-
         virtual void move(const std::string& newname) = 0;
 
-        virtual Type type() const = 0;
+        //virtual void copy(const std::string& to) const = 0;
+
+        static Type stat(const char* path);
+
+        static bool exists(const char* path)
+        { return FileSystemNode::stat(path) != FileSystemNode::Invalid; }
 
         static FileSystemNode* create(const char* path);
 };

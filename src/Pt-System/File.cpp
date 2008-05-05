@@ -25,7 +25,6 @@
 
 #include "FileImpl.h"
 
-
 namespace Pt {
 
 namespace System {
@@ -73,26 +72,6 @@ File& File::operator=(const File& file)
 }
 
 
-bool File::create()
-{
-    if (_impl->exists())
-    {
-        return false; // File already exists and does not have to be created.
-    }
-    
-    try
-    {
-        _impl->create();
-    }
-    catch (SystemError e)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-
 const std::string& File::path() const
 {
     return _impl->path();
@@ -108,12 +87,6 @@ std::size_t File::size() const
 void File::resize(std::size_t newSize)
 {
     _impl->resize(newSize);
-}
-
-
-bool File::exists() const
-{
-    return _impl->exists();
 }
 
 
@@ -139,7 +112,7 @@ void File::move(const std::string& newPath)
 // though a parent is available.
 // TODO This is identical to Directory::parentPath(). Maybe this should be moved into
 // the common base class FileSystemNode.
-std::string File::parentPath() const
+std::string File::dirName() const
 {
     // Find last slash. This separates the file name from the path.
     std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
@@ -205,6 +178,17 @@ std::string File::extension() const
     }
 }
 
+
+bool File::create(const char* path)
+{
+    if( FileSystemNode::exists(path) )
+    {
+        return false;
+    }
+
+    FileImpl::create(path);
+    return true;
+}
 
 } // namespace System
 } // namespace Pt

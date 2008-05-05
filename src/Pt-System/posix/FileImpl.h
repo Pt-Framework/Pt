@@ -49,7 +49,9 @@ class PT_API FileImpl {
         bool exists() const;
 
         void create();
-        
+
+        static void create(const char* path);
+
     private:
         std::string _path;
 };

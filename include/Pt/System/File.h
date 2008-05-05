@@ -55,27 +55,11 @@ class PT_SYSTEM_API File : public FileSystemNode {
 
         File& operator=(const File& file);
 
-        /**
-         * @brief Creates a file in the file system which is described by this
-         * File object's abstract path name.
-         *
-         * If this File object points to a file which already exists, nothing is
-         * done but $false$ is returned. If the file does not yet exist, it is
-         * created. If the file could not be created, for example because there
-         * were not enough access privileges, $false$ is returned. If the file
-         * was successfully created, $true$ is returned.
-         *
-         * @return $true$ if the file could successfully be created; $false$ otherwise.
-         */
-        bool create();
-
         virtual const std::string& path() const;
 
         virtual std::size_t size() const;
 
         void resize(std::size_t newSize);
-
-        bool exists() const;
 
         virtual Type type() const
         {
@@ -101,7 +85,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
          *
          * @return The directory in which this file resides.
          */
-        virtual std::string parentPath() const;
+        virtual std::string dirName() const;
 
         /**
          * @brief Returns the file name of the file this object points to.
@@ -135,6 +119,8 @@ class PT_SYSTEM_API File : public FileSystemNode {
          * @brief The file name extension of this file.
          */
         std::string extension() const;
+
+        static bool create(const char* path);
 };
 
 // TODO This operator should check the files on file-system layer by checking if

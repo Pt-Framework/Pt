@@ -16,7 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/Api.h"
+#include "Pt/System/Api.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
 
@@ -30,7 +30,7 @@ namespace Pt {
 
 namespace System {
 
-    class PT_API FileSystemNodeImpl
+    class PT_SYSTEM_API FileSystemNodeImpl
     {
         public:
             static FileSystemNode* create(const char* path)
@@ -47,9 +47,9 @@ namespace System {
                 {
                     return new Directory(path);
                 }
-                else {
-                    return new File(path);
-                }
+
+                return new File(path);
+
                 /*
                 else if(S_ISCHR(st.st_mode))
                     type = File::CharDevice;
@@ -66,9 +66,26 @@ namespace System {
                     type = File::Link;
                 #endif
                 */
-
-                return 0;
             }
+
+            static FileSystemNode::Type stat(const char* path)
+            {
+                struct stat st;
+                if( 0 != ::stat(path, &st) )
+                    return FileSystemNode::Invalid;
+
+                if( S_ISREG(st.st_mode) )
+                {
+                    return FileSystemNode::File;
+                }
+                else if( S_ISDIR(st.st_mode) ) 
+                {
+                    return FileSystemNode::Directory;
+                }
+
+                return FileSystemNode::File;
+            }
+
     };
 
 } // namespace System

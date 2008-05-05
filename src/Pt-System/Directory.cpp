@@ -121,32 +121,6 @@ Directory::~Directory()
 }
 
 
-bool Directory::create() const
-{
-    if (this->exists())
-    {
-        return false; // The directory already exists. We don't have to create it.
-    }
-    
-    try
-    {
-        DirectoryImpl::create(_path);
-    }
-    catch (SystemError e)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-
-bool Directory::exists() const
-{
-    return DirectoryImpl::exists(_path);
-}
-
-
 const std::string& Directory::path() const
 {
     return _path;
@@ -173,7 +147,7 @@ void Directory::move(const std::string& newPath)
 
 // TODO This is identical to File::parentPath(). Maybe this should be moved into
 // the common base class FileSystemNode.
-std::string Directory::parentPath() const
+std::string Directory::dirName() const
 {
     // Find last slash. This separates the last path segment from the rest of the path
     std::string::size_type separatorPos = _path.find_last_of(Environment::pathSeparator());
@@ -205,6 +179,18 @@ std::string Directory::name() const
     {
         return _path;
     }    
+}
+
+
+bool Directory::create(const char* path)
+{
+    if( FileSystemNode::exists(path) )
+    {
+        return false;
+    }
+
+    DirectoryImpl::create(path);
+    return true;
 }
 
 } // namespace System

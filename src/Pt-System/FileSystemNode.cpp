@@ -27,6 +27,12 @@ FileSystemNode* FileSystemNode::create(const char* path)
     return FileSystemNodeImpl::create(path);
 }
 
+
+FileSystemNode::Type FileSystemNode::stat(const char* path)
+{
+    return FileSystemNodeImpl::stat(path);
+}
+
 } // namespace System
 
 } // namespace Pt

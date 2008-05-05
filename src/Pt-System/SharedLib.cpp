@@ -142,7 +142,7 @@ File SharedLib::convertToPlatformSpecificLibraryFile(const File& file)
         extension = "." + extension;
     }
     
-    return File(file.parentPath(), Pt::System::Environment::sharedLibraryPrefix() + file.baseName() + extension);
+    return File(file.dirName(), Pt::System::Environment::sharedLibraryPrefix() + file.baseName() + extension);
 }
 
 

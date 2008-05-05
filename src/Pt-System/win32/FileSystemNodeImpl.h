@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris D�rner                               *
+ *   Copyright (C) 2005 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -50,6 +50,25 @@ class FileSystemNodeImpl
             }
 
             return 0;
+        }
+
+        static FileSystemNode::Type create(const char* path)
+        {
+            std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+            DWORD attr = GetFileAttributes( tpath.c_str() );
+
+            if(attr == 0xffffffff)
+            {
+                if( 0 != strstr(path, ".sys") )
+                    return FileSystemNode::File;
+
+                return FileSystemNode::Invalid;
+            }
+
+            if(attr & FILE_ATTRIBUTE_DIRECTORY)
+                return FileSystemNode::Directory;
+
+            return FileSystemNode::File;
         }
 };
 

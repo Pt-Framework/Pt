@@ -102,10 +102,6 @@ while (it != d.end())
 
             ~Directory();
 
-            bool create() const;
-
-            bool exists() const;
-
             virtual const std::string& path() const;
 
             virtual std::size_t size() const;
@@ -139,7 +135,7 @@ while (it != d.end())
              *
              * @return The directory in which this directory resides.
              */
-            virtual std::string parentPath() const;
+            virtual std::string dirName() const;
 
             /**
              * @brief Returns the name of thi directory, excluding the complete path
@@ -153,6 +149,8 @@ while (it != d.end())
             {
                 return FileSystemNode::Directory;
             }
+
+            static bool create(const char* path);
 
         private:
             std::string _path;

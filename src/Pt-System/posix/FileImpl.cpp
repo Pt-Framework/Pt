@@ -161,6 +161,16 @@ bool FileImpl::exists() const
     return true;
 }
 
+
+void FileImpl::create(const char* path)
+{
+    FILE* f = fopen(path, "w");
+    if (!f)
+        throw SystemError("Could not create file " + std::string(path), PT_SOURCEINFO);
+
+    fclose(f);
+}
+
 }
 
 }
