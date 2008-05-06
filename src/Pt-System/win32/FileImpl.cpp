@@ -24,11 +24,9 @@
 #include <iostream>
 #include <windows.h>
 
-
 namespace Pt {
 
 namespace System {
-
 
 FileImpl::FileImpl(const std::string& path)
 : _path(path)
@@ -39,7 +37,6 @@ FileImpl::FileImpl(const std::string& path)
 FileImpl::~FileImpl()
 {
 }
-
 
 
 std::size_t FileImpl::size() const
@@ -132,7 +129,7 @@ void FileImpl::move(const std::string& to)
 }
 
 
-bool FileImpl::exists() const
+/*bool FileImpl::exists() const
 {
     DWORD file_attr;
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
@@ -140,9 +137,9 @@ bool FileImpl::exists() const
     file_attr = ::GetFileAttributes( tpath.c_str() );
 
     return file_attr != 0xffffffff;
-}
+}*/
 
-
+/*
 void FileImpl::create()
 {
     HANDLE hFile;
@@ -176,8 +173,43 @@ void FileImpl::create()
     }
 
     CloseHandle(hFile);
-}
+}*/
 
+
+void FileImpl::create(const char* path)
+{
+    HANDLE hFile;
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
+
+// WinCE does not support overlapped I/O
+#ifdef _WIN32_WCE
+    hFile = CreateFile(tpath.c_str(),   // file to create
+            GENERIC_WRITE,          // open for writing
+            0,                      // do not share
+            NULL,                   // default security
+            CREATE_ALWAYS,          // overwrite existing
+            FILE_ATTRIBUTE_NORMAL | // normal file
+            NULL,                   // asynchronous I/O
+            NULL);
+#else
+    hFile = CreateFile(tpath.c_str(),   // file to create
+            GENERIC_WRITE,          // open for writing
+            0,                      // do not share
+            NULL,                   // default security
+            CREATE_ALWAYS,          // overwrite existing
+            FILE_ATTRIBUTE_NORMAL | // normal file
+            FILE_FLAG_OVERLAPPED,   // asynchronous I/O
+            NULL);                  // no attr. template
+#endif
+
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        throw SystemError( "Could not create file" , PT_SOURCEINFO);
+
+    }
+
+    CloseHandle(hFile);
+}
 
 } // namespace System
 

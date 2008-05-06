@@ -32,7 +32,6 @@ namespace System
 
 class FileImpl
 {
-
     public:
         FileImpl(const std::string& path);
 
@@ -51,9 +50,11 @@ class FileImpl
 
         void move(const std::string& to);
 
-        bool exists() const;
+        //bool exists() const;
 
-        void create();
+        //void create();
+
+        static void create(const char* path);
 
     private:
         std::string _path;

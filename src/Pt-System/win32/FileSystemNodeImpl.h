@@ -52,7 +52,7 @@ class FileSystemNodeImpl
             return 0;
         }
 
-        static FileSystemNode::Type create(const char* path)
+        static FileSystemNode::Type stat(const char* path)
         {
             std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
             DWORD attr = GetFileAttributes( tpath.c_str() );
