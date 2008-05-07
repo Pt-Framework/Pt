@@ -17,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_Delegate_h
 #define Pt_Delegate_h
 
@@ -28,7 +27,6 @@
 #include <Pt/Connectable.h>
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
-
 
 namespace Pt {
 
