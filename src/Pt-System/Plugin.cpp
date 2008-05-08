@@ -69,7 +69,7 @@ std::list<SharedLib*>& PluginManagerBase::sharedLibs()
 
 SharedLib* PluginManagerBase::openPlugin(const std::string& path)
 {
-    SharedLib* shlib = new SharedLib(Pt::System::File(path));
+    SharedLib* shlib = new SharedLib(path);
     return shlib;
 }
 

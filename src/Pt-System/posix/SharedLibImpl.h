@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -23,63 +23,33 @@
 
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/SystemError.h"
-
 #include <string>
-#include <iostream>
-
 #include <dlfcn.h>
-
 
 namespace Pt {
 
 namespace System {
 
-//! @brief Implementation of SharedLib class for POSIX systems
-/**
-    This class represents the implementation of the bridge pattern of
-    the SharedLib class for POSIX systems. It implements the specific
-    procedures of SharedLib in a system dependend manner. The behaviour
-    of the shared library loading is adapted to the behaviour of shared
-    library loading under MS Windows operating systems.
-    This means that the mode of loading shared libraries is limitted
-    to the RTLD_NOW mode only.
-
-    @see SharedLib documentation
-*/
-class SharedLibImpl {
+class SharedLibImpl
+{
     public:
-        //! @brief default Constructor
         SharedLibImpl()
         : _handle(0)
         { }
 
-        /**
-         * @brief Constructor which takes the path to the shared library to load
-         * @see SharedLib#SharedLib()
-         * @param libraryFile A File object referencing the library in the file system.
-         */
-        SharedLibImpl(const File& libraryFile)
+        SharedLibImpl(const std::string& path)
         : _handle(0)
         {
-            this->open(libraryFile);
+            this->open(path);
         }
 
-        //! @brief Destructor
         ~SharedLibImpl()
         {
             if(_handle)
                 ::dlclose(_handle);
         }
 
-        /**
-         * @brief Loads the shared library specified by path
-         *
-         * This method holds the operating system dependend code to actually
-         * load the shared library.
-         * @see SharedLib#open()
-         * @param libraryFile A File object referencing the library in the file system.
-         */
-        void open(const File& libraryFile)
+        void open(const std::string& path)
         {
             if(_handle)
                 return;
@@ -90,21 +60,12 @@ class SharedLibImpl {
             */
             int flags = RTLD_NOW | RTLD_GLOBAL;
 
-            _handle = ::dlopen(libraryFile.path().c_str(), flags);
+            _handle = ::dlopen(path.c_str(), flags);
             if( !_handle ) {
                 throw SystemError(dlerror(), PT_SOURCEINFO);
             }
         }
 
-        /**
-         * @brief Resolves the symbol specified by symbol
-         *
-         * This method holds the operating system dependend code to actually
-         * resolve the symbol within the shared library.
-         * @see SharedLib#resolve()
-         * @param symbol the symbol to resolve
-         * @return the resolved symbol or 0 if the symbol cannot be resolved
-         */
         void* resolve(const char* symbol)
         {
             if(_handle)
@@ -113,33 +74,8 @@ class SharedLibImpl {
             return 0;
         }
 
-        /**
-         * @brief Returns if the loading of the shared library was successful or not
-         * @see SharedLib#failed()
-         * @return true if the loading of the shared library has failed, false otherwise.
-         */
         bool failed()
         { return _handle == 0; }
-
-    public:
-        /**
-         * @brief Implicitely loads the shared library specified by path and tries to resolve the symbol specified by symbol
-         * 
-         * This method contains the operating system dependend code to load the
-         * shared library and to resolve the desired symbol.
-         * @see SharedLib::failed()
-         * @param libraryFile A File object referencing the library in the file system.
-         * @param symbol The symbol to resolve within the loaded library.
-         * @return The resolved symbol or 0 if the loading of the shared library has failed.
-         */
-        static void* openResolve(const File& libraryFile, const char* symbol)
-        {
-            void* handle = ::dlopen(libraryFile.path().c_str(), RTLD_NOW);
-            if(handle)
-                return ::dlsym(handle, symbol);
-
-            return 0;
-        }
 
     private:
         void* _handle;
