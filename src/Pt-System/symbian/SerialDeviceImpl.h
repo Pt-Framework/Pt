@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -25,8 +26,10 @@
 #include "Pt/System/SerialDevice.h"
 #include "IODeviceImpl.h"
 #include <string>
-// Header does exist on Symbian with OpenC but library is missing implementation
-//#include <termios.h>
+
+// symbian APIs
+#include "btextnotifiers.h"
+#include "es_sock.h"
 
 namespace Pt {
 
@@ -39,10 +42,26 @@ class SerialDeviceImpl : public IODeviceImpl
 
         ~SerialDeviceImpl();
 
-        void open(const std::string& path, std::ios_base::openmode mode, bool isAsync );
+        void open(const std::string& path, std::ios_base::openmode mode, bool isAsync);
+
+        void open(int fd, bool isAsync);
 
         void close();
 
+        IOResult& beginRead(char* buffer, size_t n, bool& eof);
+
+        size_t endRead(IOResult& result, bool& eof);
+
+        size_t read( char* buffer, size_t count, bool& eof );
+
+        IOResult& beginWrite(const char* buffer, size_t n);
+
+        size_t endWrite(IOResult& result);
+
+        size_t write( const char* buffer, size_t count );
+
+        void sync() const;        
+        
         void setBaudRate( SerialDevice::BaudRate rate );
 
         SerialDevice::BaudRate baudRate() const;
@@ -70,8 +89,30 @@ class SerialDeviceImpl : public IODeviceImpl
         void flush();
 
     private:
-        //termios                     _prevIos;
-        SerialDevice::FlowControl   _flowControl;
+        TBTDevAddr doBluetoothDeviceQuery();
+        
+        void openBluetoothSocket(const TBTDevAddr& devAddr, int portNum);
+        
+        // Listening socket
+        RSocket _listenSock;      
+        bool _socketConnected;
+        RSocketServ _socketServ;
+        // indicates connection to RSocketServ
+        bool _servConnected;
+        
+        ReadResultSymbian _readResult;
+        WriteResultSymbian _writeResult;
+
+        SerialDevice::BaudRate _rate;
+        int _charSize;
+        SerialDevice::StopBits _bits;
+        SerialDevice::Parity _parity;
+        SerialDevice::FlowControl _flowControl;
+        size_t _timeOut;
+        
+        // some variables to overcome Panic 14 in synchronous read
+        HBufC8* _hBuf;
+        TPtr8 _tempBuffer;     
 };
 
 } //namespace System

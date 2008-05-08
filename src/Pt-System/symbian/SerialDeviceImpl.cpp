@@ -1,6 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2007 Marc Boris Drner                                  *
  *   Copyright (C) 2007 Laurentiu-Gheorghe Crisan                          *
+ *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,433 +19,320 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
 #include "SerialDeviceImpl.h"
 
-#include <cerrno>
 #include <iostream>
+#include <sstream>
 
-/*
- * #if defined(__QNX__)
-#define CRTSCTS (IHFLOW | OHFLOW)
-#endif
-*/
-
-#if defined(_THR_UNIXWARE) || defined(__hpux) || defined(_AIX)
-#include <sys/termiox.h>
-#define CRTSCTS (CTSXON | RTSXOFF)
-#endif
-
+// symbian APIs
+#include <bt_sock.h>
 
 namespace Pt {
 
 namespace System {
 
-SerialDeviceImpl::SerialDeviceImpl( )
+SerialDeviceImpl::SerialDeviceImpl( ) 
+: _socketConnected(false), _servConnected(false), _hBuf(0), _tempBuffer(0,0,0)    
 {
 }
 
 
 SerialDeviceImpl::~SerialDeviceImpl()
 {
-}
+    close();
 
+    if (_hBuf)
+        delete _hBuf;
+}
 
 void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
 {
-    throw OpenFailed("open: Serial port not supported on Symbian", PT_SOURCEINFO);
-	
-//    try
-//    {
-//        IODeviceImpl::open(path, mode, isAsync);
-//    }
-//    catch (const OpenFailed& e)
-//    {
-//        throw OpenFailed("Could not open port " + path, PT_SOURCEINFO);
-//    }
-//
-//    struct termios ios;
-//    if( ::tcgetattr( IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
-//
-//    if( ::tcgetattr( IODeviceImpl::fd(), &_prevIos) == -1 )
-//        throw IOError("Could not get termios attributes", PT_SOURCEINFO);
-//
-//    // Disable canonical
-//    //::cfmakeraw(&ios);
-//    ios.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
-//                    | INLCR | IGNCR | ICRNL | IXON);
-//    ios.c_oflag &= ~OPOST;
-//    ios.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-//    ios.c_cflag &= ~(CSIZE | PARENB);
-//    ios.c_cflag |= CS8;
-//
-//    if( ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &ios) == -1  )
-//        throw IOError("Could not set termios attributes", PT_SOURCEINFO);
+    // try to determine whether user tries to connect BTCOMM
+    // syntax is BTCOMM::n where n is a decimal port number
+    
+    std::string::size_type pos = path.rfind("::");
+    
+    if (pos == std::string::npos)
+    {
+        throw OpenFailed("open: Failed to open port. Wrong port name syntax.", PT_SOURCEINFO);        
+    }
+
+    // extract base name
+    std::string strDeviceName = path.substr(0, pos);
+
+    if (strDeviceName != "BTCOMM")
+    {
+        throw OpenFailed("open: Failed to open port. Unknown port.", PT_SOURCEINFO);                
+    }
+    
+    std::string strPortNumber = path.substr(pos+2, path.length());
+    
+    std::istringstream iss(strPortNumber);
+    int portNum;
+    iss >> portNum;
+    
+    openBluetoothSocket(doBluetoothDeviceQuery(), portNum);
 }
 
+TBTDevAddr SerialDeviceImpl::doBluetoothDeviceQuery()
+{
+    // 1. Create a notifier
+    RNotifier notifier;
+    TInt err = notifier.Connect();
+    if (err != KErrNone)
+        throw OpenFailed("open: Can't query bluetooth devices (RNotifier::Connect() failed)", PT_SOURCEINFO);
+
+    // 2. Start the device selection plug-in
+    TBTDeviceSelectionParams selectionFilter;
+    TUUID targetServiceClass(0x1101);
+    selectionFilter.SetUUID(targetServiceClass);
+    TBTDeviceSelectionParamsPckg pckg(selectionFilter);
+    TBTDeviceResponseParams result;
+    TBTDeviceResponseParamsPckg resultPckg(result);
+    TRequestStatus status;
+    notifier.StartNotifierAndGetResponse(status, KDeviceSelectionNotifierUid, pckg, resultPckg);
+    User::After(2000000);
+
+    // 3. Wait for dialog to hide, if it was canceled we can't proceed
+    User::WaitForRequest(status);
+    err = status.Int();
+    if (err != KErrNone)
+        throw OpenFailed("open: Can't query bluetooth devices (Waiting for StartNotifierAndGetResponse failed)", PT_SOURCEINFO);
+        
+    // 4. Clean up
+    notifier.CancelNotifier(KDeviceSelectionNotifierUid);
+    notifier.Close();    
+    
+    return resultPckg().BDAddr();
+}
+
+_LIT(KRfComm,"RFCOMM");
+
+void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNum)
+{
+    TInt err = _servConnected ? KErrNone : _socketServ.Connect();
+    
+    if (err != KErrNone && err != KErrAlreadyExists)
+    {
+        _servConnected = false;
+        throw OpenFailed("open: Can't open Bluetooth socket (RSocketServ::Connect() failed)", PT_SOURCEINFO);
+    }
+    
+    _servConnected = true;
+    
+    TProtocolDesc pdesc;
+    
+    err = _socketServ.FindProtocol(KRfComm(), pdesc);
+    if (err != KErrNone)
+    {
+        throw OpenFailed("open: Can't open Bluetooth socket (RSocketServ::FindProtocol() failed)", PT_SOURCEINFO);
+    }
+
+    err = _listenSock.Open(_socketServ, pdesc.iAddrFamily, pdesc.iSockType, KRFCOMM);
+    if (err != KErrNone)
+    {
+        throw OpenFailed("open: Can't open Bluetooth socket (RSocket::Open() failed)", PT_SOURCEINFO);
+    }
+    
+    // Bluetooth socket address object
+    TBTSockAddr btsockaddr;
+    btsockaddr.SetPort(portNum);
+    btsockaddr.SetBTAddr(devAddr);
+    
+    TRequestStatus stat;
+    _listenSock.Connect(btsockaddr, stat);
+    User::WaitForRequest(stat);
+    
+    err = stat.Int();    
+    if (err != KErrNone)
+    {
+        throw OpenFailed("open: Can't query bluetooth devices (Waiting for Connect failed)", PT_SOURCEINFO);
+    }
+    
+    _socketConnected = true;
+}
+
+void SerialDeviceImpl::open(int fd, bool isAsync)
+{
+    throw OpenFailed("Open with file descriptor not supported on Symbian", PT_SOURCEINFO);    
+}
 
 void SerialDeviceImpl::close()
 {
-    throw IOError("close: Serial port not supported on Symbian", PT_SOURCEINFO);
-
-//    if( IODeviceImpl::fd() != -1)
-//    {
-//        ::tcsetattr( IODeviceImpl::fd(), TCSANOW, &_prevIos );
-//
-//        IODeviceImpl::close();
-//    }
+    if (_socketConnected)
+    {
+       _listenSock.Close();
+       _socketConnected = false;
+    }
+    
+    if (_servConnected)
+    {
+        _socketServ.Close();
+        _servConnected = false;
+    }
 }
 
+IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+{
+    _readResult.attach(buffer, n);
+    _readResult.allocSymbianBuffer(n);
+    
+    if ((size_t)_readResult._hBuf->Des().MaxSize() != n)
+    {
+        throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
+    }
+    
+    _listenSock.Read(_readResult._tempBuffer, _readResult._status);
+    
+    // How do we know yet?
+    eof = false;
+    
+    return _readResult;
+}
+
+size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
+{
+    if (_readResult._status.Int() == KErrNone || 
+        _readResult._status.Int() == KErrEof)
+    {
+        eof = _readResult._status.Int() == KErrEof;
+        return _readResult.transferData();
+    }
+    
+    return 0;
+}
+
+size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+{
+    if (_hBuf)
+        delete _hBuf;
+    
+    TRAPD(allocError, _hBuf = HBufC8::NewL(count));
+    if (allocError)
+        throw IOError("Failed to allocate Symbian HBufC8.", PT_SOURCEINFO);  
+    
+    _tempBuffer.Set(_hBuf->Des());
+    _tempBuffer.Zero();
+    TRequestStatus status;
+    _listenSock.Read(_tempBuffer, status);
+    User::WaitForRequest(status);
+
+    if (status.Int() != KErrNone && 
+        status.Int() != KErrEof)
+    {
+        throw IOError("Read failed for unkown reason.", PT_SOURCEINFO);                                        
+    }   
+
+    eof = status.Int() == KErrEof;
+    
+    if ((unsigned)_tempBuffer.Size() > count)
+    {
+        throw IOError("Read too much data.", PT_SOURCEINFO);                                        
+    }
+    
+    char* dst = buffer;
+    for (int j = 0; j < _tempBuffer.Size(); j++)
+        dst[j] = _tempBuffer[j];  
+    
+    size_t result = (size_t)_tempBuffer.Size();
+    
+    return result;
+}
+
+IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+{
+    return _writeResult;
+}
+
+size_t SerialDeviceImpl::endWrite(IOResult& result)
+{
+    return 0;
+}
+
+size_t SerialDeviceImpl::write( const char* buffer, size_t count )
+{
+    return 0;
+}
+
+void SerialDeviceImpl::sync() const
+{
+}
 
 void SerialDeviceImpl::setBaudRate( SerialDevice::BaudRate br )
 {
-    throw IOError("setBaudRate: Serial port not supported on Symbian", PT_SOURCEINFO);	
-	
-//    struct termios ios;
-//
-//    if( ::tcgetattr( IODeviceImpl::fd(), &ios ) == -1  )
-//    {
-//        throw IOError( "Could not set baud rate", PT_SOURCEINFO);
-//    }
-//
-//    speed_t rate = B0;
-//
-//    switch(br)
-//    {
-//        case SerialDevice::BaudRate0 : rate = B0; break;
-//        case SerialDevice::BaudRate50: rate = B50; break;
-//        case SerialDevice::BaudRate75: rate = B75; break;
-//        case SerialDevice::BaudRate110: rate = B110; break;
-//        case SerialDevice::BaudRate134: rate = B134; break;
-//        case SerialDevice::BaudRate150: rate = B150; break;
-//        case SerialDevice::BaudRate200: rate = B200; break;
-//        case SerialDevice::BaudRate300: rate = B300; break;
-//        case SerialDevice::BaudRate600: rate = B600; break;
-//        case SerialDevice::BaudRate1200: rate = B1200; break;
-//        case SerialDevice::BaudRate1800: rate = B1800; break;
-//        case SerialDevice::BaudRate2400: rate = B2400; break;
-//        case SerialDevice::BaudRate4800: rate = B4800; break;
-//        case SerialDevice::BaudRate9600: rate = B9600; break;
-//        case SerialDevice::BaudRate19200: rate = B19200; break;
-//        case SerialDevice::BaudRate38400: rate = B38400; break;
-//        #ifdef B57600
-//            case SerialDevice::BaudRate57600: rate = B57600; break;
-//        #endif
-//        #ifdef B115200
-//            case SerialDevice::BaudRate115200: rate = B115200; break;
-//        #endif
-//        #ifdef B230400
-//            case SerialDevice::BaudRate230400: rate = B230400; break;
-//        #endif
-//        throw IOError("Baud rate not available", PT_SOURCEINFO);
-//    }
-//
-//    ::cfsetispeed( &ios, rate );
-//    ::cfsetospeed( &ios, rate );
-//
-//    if( ::tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios) == -1  )
-//    {
-//        throw IOError("Could not set baud rate", PT_SOURCEINFO);
-//    }
+    // we're currently simulating Bluetooth serial communication 
+    // in Symbian over Bluetooth sockets
+    // There is no way we can change all the low level details
+    // but we should behave gracefully when user tries to set these
+    // details
+    _rate = br;
 }
 
 
 SerialDevice::BaudRate SerialDeviceImpl::baudRate() const
 {
-    throw IOError("baudRate: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//    {
-//        throw IOError("Could not get baud rate", PT_SOURCEINFO);
-//    }
-//
-//    speed_t rate = ::cfgetispeed( &ios ) ;
-//    switch(rate)
-//    {
-//        case B0:      return SerialDevice::BaudRate0;
-//        case B50:     return SerialDevice::BaudRate50;
-//        case B75:     return SerialDevice::BaudRate75;
-//        case B110:    return SerialDevice::BaudRate110;
-//        case B134:    return SerialDevice::BaudRate134;
-//        case B150:    return SerialDevice::BaudRate150;
-//        case B200:    return SerialDevice::BaudRate200;
-//        case B300:    return SerialDevice::BaudRate300;
-//        case B600:    return SerialDevice::BaudRate600;
-//        case B1200:   return SerialDevice::BaudRate1200;
-//        case B1800:   return SerialDevice::BaudRate1800;
-//        case B2400:   return SerialDevice::BaudRate2400;
-//        case B4800:   return SerialDevice::BaudRate4800;
-//        case B9600:   return SerialDevice::BaudRate9600;
-//        case B19200:  return SerialDevice::BaudRate19200;
-//        case B38400:  return SerialDevice::BaudRate38400;
-//        
-//        #ifdef B57600
-//            case B57600:  return SerialDevice::BaudRate57600;
-//        #endif
-//
-//        #ifdef B115200
-//            case B115200: return SerialDevice::BaudRate115200;
-//        #endif
-//        
-//        #ifdef B230400
-//            case B230400: return SerialDevice::BaudRate230400;
-//        #endif
-//    }
-
-    return SerialDevice::BaudRate0;
+    return _rate;
 }
 
 
 void SerialDeviceImpl::setCharSize( int size )
 {
-    throw IOError("setCharSize: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not set char size", PT_SOURCEINFO);
-//
-//    ios.c_cflag &= ~CSIZE;
-//
-//    switch(size)
-//    {
-//        case 5:
-//            ios.c_cflag |= CS5;
-//            break;
-//        case 6:
-//            ios.c_cflag |= CS6;
-//            break;
-//        case 7:
-//            ios.c_cflag |= CS7;
-//            break;
-//        case 8:
-//            ios.c_cflag |= CS8;
-//            break;
-//        default:
-//            throw IOError("Invalid char size", PT_SOURCEINFO);
-//    }
-//
-//    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
+    _charSize = size;
 }
 
 
 int SerialDeviceImpl::charSize() const
 {
-    throw IOError("setCharSize: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get char size", PT_SOURCEINFO);
-//
-//    int size = ios.c_cflag & CSIZE;
-//    switch(size)
-//    {
-//        case CS5: return 5;
-//        case CS6: return 6;
-//        case CS7: return 7;
-//        case CS8: return 8;
-//        default:
-//            throw IOError("Invalid char size", PT_SOURCEINFO);
-//    }
-
-    return 0;
+    return _charSize;
 }
 
 
 void SerialDeviceImpl::setStopBits( SerialDevice::StopBits bits )
 {
-    throw IOError("setStopBits: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get stop bits", PT_SOURCEINFO);
-//
-//    ios.c_cflag &= ~CSTOPB;
-//
-//    switch(bits)
-//    {
-//        case SerialDevice::OneStopBit:
-//            ios.c_cflag &= ~CSTOPB;
-//            break;
-//        case SerialDevice::TwoStopBits:
-//            ios.c_cflag |= CSTOPB;
-//            break;
-//        default:
-//            throw IOError("Invalid stop bits", PT_SOURCEINFO);
-//    }
-//
-//    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
+    _bits = bits;
 }
 
 
 SerialDevice::StopBits SerialDeviceImpl::stopBits() const
 {
-    throw IOError("stopBits: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get stop bits", PT_SOURCEINFO);
-//
-//    if( ios.c_cflag & CSTOPB )
-//    {
-//        return SerialDevice::TwoStopBits;
-//    } else
-//    {
-//        return SerialDevice::OneStopBit;
-//    }
-//
-//   throw IOError("Invalid stop bits", PT_SOURCEINFO);
-   return SerialDevice::OneStopBit;
+    return _bits;
 }
 
 
 void SerialDeviceImpl::setParity( SerialDevice::Parity parity )
 {
-    throw IOError("setParity: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get parity", PT_SOURCEINFO);
-//
-//    ios.c_cflag &= ~(PARENB | PARODD);
-//
-//    switch(parity)
-//    {
-//        case SerialDevice::ParityEven:
-//            ios.c_cflag |= PARENB;
-//            break;
-//        case SerialDevice::ParityOdd:
-//            ios.c_cflag |= (PARENB | PARODD);
-//            break;
-//        case SerialDevice::ParityNone:
-//            break;
-//        default:
-//            throw IOError("Invalid parity", PT_SOURCEINFO);
-//    }
-//
-//    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
+    _parity = parity;
 }
 
 
 SerialDevice::Parity SerialDeviceImpl::parity() const
 {
-    throw IOError("parity: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not get parity", PT_SOURCEINFO);
-//
-//    if( ios.c_cflag & PARENB )
-//    {
-//        if( ios.c_cflag & PARODD )
-//        {
-//            return SerialDevice::ParityOdd ;
-//        }
-//        else
-//        {
-//            return SerialDevice::ParityEven ;
-//        }
-//    }
-
-    return SerialDevice::ParityNone;
+    return _parity;
 }
 
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
-    throw IOError("setFlowControl: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    static const int CTRL_Q = 0x11;
-//    static const int CTRL_S = 0x13;
-//
-//   struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not set flow control", PT_SOURCEINFO);
-//
-//    #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun) || defined(__SYMBIAN32__)
-//        ios.c_cflag &= ~CRTSCTS;
-//    #else
-//        ios.c_cflag &= ~IHFLOW; // INPUT hardware control
-//        ios.c_cflag &= ~OHFLOW; // OUTPUT hardware control
-//    #endif
-//    ios.c_iflag &= ~(IXON | IXANY | IXOFF);
-//
-//    switch(flowControl)
-//    {
-//        case SerialDevice::FlowControlSoft:
-//            ios.c_iflag |= (IXON | IXANY | IXOFF);
-//            ios.c_cc[VSTART] = CTRL_Q ;
-//            ios.c_cc[VSTOP]  = CTRL_S ;
-//            break;
-//
-//        case SerialDevice::FlowControlBoth:
-//            ios.c_iflag |= (IXON | IXANY | IXOFF);
-//        case SerialDevice::FlowControlHard:
-//            #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun) || defined(__SYMBIAN32__)
-//               ios.c_cflag |= CRTSCTS;
-//            #else
-//               ios.c_cflag |= IHFLOW; // INPUT hardware control
-//               ios.c_cflag |= OHFLOW; // OUTPUT hardware control
-//            #endif
-//            ios.c_cc[VSTART] = _POSIX_VDISABLE;
-//            ios.c_cc[VSTOP] = _POSIX_VDISABLE;
-//            break;
-//    }
-//
-//    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
-//    _flowControl = flowControl;
-}
-
-void SerialDeviceImpl::setTimeout( size_t msec )
-{
-    throw IOError("setTimeout: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not set time out", PT_SOURCEINFO);
-//
-//    ios.c_cc[VTIME]  = ( msec / 100 ) ;
-//
-//    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
-
-}
-
-size_t SerialDeviceImpl::timeout() const
-{
-    throw IOError("timeout: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
-    return 0;
-//    struct termios ios;
-//
-//    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-//        throw IOError("Could not set time out", PT_SOURCEINFO);
-//
-//    return ios.c_cc[VTIME] * 100 ;
+    _flowControl = flowControl;
 }
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
-    throw IOError("flowControl: Serial port not supported on Symbian", PT_SOURCEINFO);	
-
     return _flowControl;
 }
 
+void SerialDeviceImpl::setTimeout( size_t msec )
+{
+    _timeOut = msec;    
+}
+
+size_t SerialDeviceImpl::timeout() const
+{
+    return _timeOut;
+}
 
 void SerialDeviceImpl::flush()
 {
-    throw IOError("flush: Serial port not supported on Symbian", PT_SOURCEINFO);	
-//    ::tcflush(IODeviceImpl::fd(), TCIFLUSH);
 }
 
 } //namespace System

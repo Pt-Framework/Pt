@@ -1,7 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -61,8 +62,8 @@ namespace System {
 
         private:
             int _fd;
-            ReadResult _readResult;
-            WriteResult _writeResult;
+            ReadResultPosix _readResult;
+            WriteResultPosix _writeResult;
     };
 
 }//namespace System

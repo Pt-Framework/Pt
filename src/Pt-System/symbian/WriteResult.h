@@ -1,7 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -33,10 +34,10 @@ namespace Pt {
 
 namespace System {
 
-    class WriteResult : public IOResultImpl
+    class WriteResultPosix : public IOResultImpl
     {
         public:
-            WriteResult()
+            WriteResultPosix()
             {}
 
             virtual void add(fd_set& readFds, fd_set& writeFds)
@@ -56,6 +57,25 @@ namespace System {
             }
     };
 
+    class WriteResultSymbian : public IOResultImpl
+    {
+        public:
+            WriteResultSymbian()
+            {}
+
+            virtual void add(fd_set& readFds, fd_set& writeFds)
+            {  
+                throw IOError("This method is not allowed on a Symbian IOResult instance.", PT_SOURCEINFO);                    
+            }
+
+        protected:
+            virtual bool _wait(unsigned int msecs)
+            {
+                return false;
+            }
+    };    
+    
+    
 }//namespace System
 
 }//namespace Pt
