@@ -32,6 +32,7 @@
 
 // symbian APIs
 #include <e32base.h>
+#include "SymbianTools.h"
 
 namespace Pt {
 
@@ -66,7 +67,8 @@ namespace System {
         public:
             ReadResultSymbian()
             : _hBuf(0), _tempBuffer(0,0,0)
-            {                
+            {
+                memset(&_status, 0, sizeof(_status));
             }
 
             ~ReadResultSymbian()
@@ -82,13 +84,15 @@ namespace System {
         protected:
             virtual bool _wait(unsigned int msecs)
             {
-                // TODO: Handle timeout
-                User::WaitForRequest(_status);                
-                return (_status.Int() == KErrNone || 
-                        _status.Int() == KErrEof);
+                return waitForRequestWithTimeOut(_status, msecs);
             }
         
-        private:
+        private:            
+            bool isReadPending()
+            {
+                return (_status.Int() != KErrNone && _status.Int() != KErrEof);               
+            }
+            
             void allocSymbianBuffer(size_t size)
             {
                 freeSymbianBuffer();
@@ -126,6 +130,45 @@ namespace System {
                 return (size_t)_tempBuffer.Size();
             }
             
+            static bool waitForRequestWithTimeOut(TRequestStatus& status, unsigned int msecs)
+            {
+                if (msecs == IOResult::WaitInfinite)
+                {
+                    User::WaitForRequest(status);  
+                    return (status.Int() == KErrNone || 
+                            status.Int() == KErrEof);                    
+                }
+                
+                RTimer timer;
+                TRequestStatus timerStatus;
+                timer.CreateLocal();
+                timer.After(timerStatus, msecs * 1000);
+                User::WaitForRequest(status, timerStatus);  
+                
+                TInt timerCompletionCode = timerStatus.Int();
+                TInt readCompletionCode = status.Int();
+                
+                // timed out and read is not finished
+                if (timerCompletionCode == KErrNone &&
+                    readCompletionCode != KErrNone &&
+                    readCompletionCode != KErrEof)
+                {
+                    
+                    return false;
+                }
+
+                // cancel timer if read is done 
+                if ((readCompletionCode == KErrNone ||
+                    readCompletionCode == KErrEof) &&
+                    timerCompletionCode != KErrNone)
+                {
+                    timer.Cancel();
+                }
+                
+                return (readCompletionCode == KErrNone || 
+                        readCompletionCode == KErrEof);                
+            }
+
             // symbian buffer
             HBufC8* _hBuf;
             TPtr8 _tempBuffer;  

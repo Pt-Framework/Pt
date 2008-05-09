@@ -32,7 +32,8 @@ namespace Pt {
 namespace System {
 
 SerialDeviceImpl::SerialDeviceImpl( ) 
-: _socketConnected(false), _servConnected(false), _hBuf(0), _tempBuffer(0,0,0)    
+: _socketConnected(false), _servConnected(false), _timeOut(IOResult::WaitInfinite),
+_hBuf(0), _tempBuffer(0,0,0)
 {
 }
 
@@ -146,10 +147,12 @@ void SerialDeviceImpl::openBluetoothSocket(const TBTDevAddr& devAddr, int portNu
     err = stat.Int();    
     if (err != KErrNone)
     {
-        throw OpenFailed("open: Can't query bluetooth devices (Waiting for Connect failed)", PT_SOURCEINFO);
+        throw OpenFailed("open: Can't open Bluetooth socket (Waiting for RSocket::Connect() failed)", PT_SOURCEINFO);
     }
     
     _socketConnected = true;
+    // default is infinite timout value
+    _timeOut = IOResult::WaitInfinite;
 }
 
 void SerialDeviceImpl::open(int fd, bool isAsync)
@@ -174,6 +177,11 @@ void SerialDeviceImpl::close()
 
 IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 {
+    if (_readResult.isReadPending())
+    {
+        return _readResult;                                                        
+    }
+    
     _readResult.attach(buffer, n);
     _readResult.allocSymbianBuffer(n);
     
@@ -198,6 +206,8 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
         eof = _readResult._status.Int() == KErrEof;
         return _readResult.transferData();
     }
+
+    throw IOError("There is still a pending read. Data can not be fetched yet.", PT_SOURCEINFO);                                                        
     
     return 0;
 }
@@ -211,16 +221,24 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     if (allocError)
         throw IOError("Failed to allocate Symbian HBufC8.", PT_SOURCEINFO);  
     
+    if ((size_t)_hBuf->Des().MaxSize() != count)
+    {
+        throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
+    }
+
     _tempBuffer.Set(_hBuf->Des());
     _tempBuffer.Zero();
+    
     TRequestStatus status;
     _listenSock.Read(_tempBuffer, status);
-    User::WaitForRequest(status);
-
+    
+    //User::WaitForRequest(status);
+    bool res = ReadResultSymbian::waitForRequestWithTimeOut(status, _timeOut);
+    
     if (status.Int() != KErrNone && 
         status.Int() != KErrEof)
     {
-        throw IOError("Read failed for unkown reason.", PT_SOURCEINFO);                                        
+        throw IOError(res ? "Read failed for unkown reason." : "Read timed out.", PT_SOURCEINFO);        
     }   
 
     eof = status.Int() == KErrEof;

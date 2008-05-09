@@ -28,8 +28,8 @@
 #include <string>
 
 // symbian APIs
-#include "btextnotifiers.h"
-#include "es_sock.h"
+#include <btextnotifiers.h>
+#include <es_sock.h>
 
 namespace Pt {
 
@@ -128,10 +128,8 @@ class SerialDeviceImpl : public IODeviceImpl
         // Currently unsupported
         SerialDevice::FlowControl flowControl() const;
 
-        // Currently unsupported
         void setTimeout( size_t msec );
 
-        // Currently unsupported
         size_t timeout() const;
 
         // Currently unsupported
@@ -162,6 +160,9 @@ class SerialDeviceImpl : public IODeviceImpl
         // some variables to overcome Panic 14 in synchronous read
         HBufC8* _hBuf;
         TPtr8 _tempBuffer;     
+        
+        friend class ReadResultSymbian;
+        friend class WriteResultSymbian;
 };
 
 } //namespace System
