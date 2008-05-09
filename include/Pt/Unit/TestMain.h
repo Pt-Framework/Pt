@@ -26,12 +26,6 @@
 #include <Pt/Unit/Application.h>
 #include <fstream>
 
-// This is a GCCE toolchain workaround needed when compiling with GCCE
-// and using main() entry point
-#ifdef __GCCE__
-#include <staticlibinit_gcce.h>
-#endif
-
 // TODO: move to application class later
 namespace TestMain
 {

@@ -19,6 +19,12 @@
 #ifndef PT_MAIN_H
 #define PT_MAIN_H
 
+// This is a GCCE (Symbian) toolchain workaround needed when compiling
+// with GCCE and using main() entry point
+#ifdef __GCCE__
+#include <staticlibinit_gcce.h>
+#endif
+
 #ifdef _WIN32_WCE
 
 #include <string.h>
