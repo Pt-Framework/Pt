@@ -24,42 +24,6 @@
 #include <sstream>
 #include <memory>
 
-namespace {
-
-void findLibrary(std::string& path)
-{
-    using namespace Pt::System;
-
-    if( FileSystemNode::exists( path.c_str() ) )
-        return;
-
-    char sep = Environment::pathSeparator();
-    std::string::size_type idx = path.find(sep);
-
-    if(++idx == path.length())
-    {
-        throw SystemError("Invalid file name " + path , PT_SOURCEINFO);
-    }
-
-    path += Environment::sharedLibraryExtension();
-    if( FileSystemNode::exists( path.c_str() ) )
-        return;
-
-    if(idx == std::string::npos)
-    {
-        idx = 0;
-    }
-    path.insert( idx, Environment::sharedLibraryPrefix() );
-
-    if( ! FileSystemNode::exists( path.c_str() ) )
-    {
-        // TODO FileNotFound
-        throw SystemError("Shared library not found " + path , PT_SOURCEINFO);
-    }
-}
-
-}
-
 namespace Pt {
 
 namespace System {
@@ -71,19 +35,10 @@ SharedLib::SharedLib()
 }
 
 
-/*SharedLib::SharedLib(const Directory& baseDirectory, const std::string& libraryName)
-: _impl(0)
-, _libraryFile(createLibraryFile(baseDirectory, libraryName))
-{
-    _impl = new SharedLibImpl(_libraryFile);
-}*/
-
-
 SharedLib::SharedLib(const std::string& path)
 : _impl(0)
-, _path(path)
 {
-    findLibrary(_path);
+    _path = find(path);
     _impl = new SharedLibImpl(_path);
 }
 
@@ -96,21 +51,15 @@ SharedLib::~SharedLib()
 
 SharedLib& SharedLib::open(const std::string& path)
 {
-    if( ! path.empty() )
+    if( ! _path.empty() )
     {
         throw SystemError("Shared library " + _path + " is already opened.", PT_SOURCEINFO);
     }
 
+    _path = find(path);
     _impl->open(path);
-    _path = path;
     return *this;
 }
-
-
-/*SharedLib& SharedLib::open(const Directory& baseDirectory, const std::string& libraryName)
-{
-    return this->open(createLibraryFile(baseDirectory, libraryName));
-}*/
 
 
 void* SharedLib::operator[](const char* symbol)
@@ -140,6 +89,42 @@ bool SharedLib::operator!()
 const std::string& SharedLib::path() const
 {
     return _path;
+}
+
+
+std::string SharedLib::find(const std::string& path_)
+{
+    std::string path = path_;
+
+    if( FileSystemNode::exists( path.c_str() ) )
+        return path;
+
+    char sep = Environment::pathSeparator();
+    std::string::size_type idx = path.find(sep);
+
+    if(++idx == path.length())
+    {
+        throw SystemError("Invalid file name " + path , PT_SOURCEINFO);
+    }
+
+    path += Environment::sharedLibraryExtension();
+    if( FileSystemNode::exists( path.c_str() ) )
+        return path;
+
+    if(idx == std::string::npos)
+    {
+        idx = 0;
+    }
+    path.insert( idx, Environment::sharedLibraryPrefix() );
+
+    if( ! FileSystemNode::exists( path.c_str() ) )
+    {
+        // TODO FileNotFound
+        //throw SystemError("Shared library not found " + path , PT_SOURCEINFO);
+        return "";
+    }
+
+    return path;
 }
 
 /*

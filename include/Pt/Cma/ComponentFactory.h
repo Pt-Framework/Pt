@@ -62,26 +62,7 @@ namespace Cma {
             *
             * @param libraryFile A File object referencing the library in the file system.
             */
-            void loadLibrary(const Pt::System::File& libraryFile);
-
-            /**
-            * @brief Loads the described library so later components of this library can be
-            * created by this factory.
-            *
-            * A platform-specific library location is constructed from the given directory and library name.
-            * The library is searched for in the given base directory. The library name is extended by the
-            * platform's library prefix and the platform's default library extension. (There is no check done
-            * for any existing prefixes or extensions before the prefix and extension is added.) The library
-            * name thus needs to be the plain library name.
-            *
-            * If the library was loaded before, nothing happens and the library is not loaded
-            * again.
-            *
-            * @param baseDirectory The directory in which the references library resides.
-            * @param libraryName The base library name (without any platform-specific information) which
-            * is extended with the platform specific prefix and extension.
-            */
-            void loadLibrary(const Pt::System::Directory& baseDirectory, const std::string& libraryName);
+            void loadLibrary(const std::string& file);
 
             /**
             * @brief Unloads the given library.
@@ -93,24 +74,7 @@ namespace Cma {
             *
             * @param libraryFile A File object referencing the library in the file system.
             */
-            bool unload(const Pt::System::File& libraryFile);
-
-            /**
-            * @brief Unloads the described library
-            *
-            * A platform-specific library location is constructed from the given directory and library name.
-            * The library name is extended by the platform's library prefix and the platform's default library
-            * extension. (There is no check done for any existing prefixes or extensions before the prefix and
-            * extension is added.) The library name thus needs to be the plain library name. This library
-            * is unloaded.
-            *
-            * If the library was not loaded before, nothing happens.
-            *
-            * @param baseDirectory The directory in which the references library resides.
-            * @param libraryName The base library name (without any platform-specific information) which
-            * is extended with the platform specific prefix and extension.
-            */
-            bool unload(const Pt::System::Directory& baseDirectory, const std::string& libraryName);
+            bool unload(const std::string& file);
 
             /**
             * @brief Unloads all libraries which were loaded before.
@@ -160,36 +124,7 @@ namespace Cma {
             * the component is tried to be loaded; otherwise no configuration is loaded.
             * @return An IUnknown pointer to the interfaces of the component.
             */
-            IUnknown* loadComponent(const Pt::System::File& libraryFile, bool loadConfig = true);
-
-            /**
-            * @brief Loads the described library and returns an IUnknown pointer to the first component
-            * of the library, if any.
-            *
-            * This method basically does the same as calling loadLibrary() followed by a call to
-            * createComponent() for the first component. The library is loaded and stored in this
-            * factory. After that the first component, which can be found in the library, is created
-            * and returned as IUnknown pointer to the caller.
-            *
-            * A platform-specific library location is constructed from the given directory and library name.
-            * The library is searched for in the given base directory. The library name is extended by the
-            * platform's library prefix and the platform's default library extension. (There is no check done
-            * for any existing prefixes or extensions before the prefix and extension is added.) The library
-            * name thus needs to be the plain library name.
-            *
-            * If the library was loaded before, nothing happens and the library is not loaded
-            * again.
-            *
-            * @param baseDirectory The directory in which the references library resides.
-            * @param libraryName The base library name (without any platform-specific information) which
-            * is extended with the platform specific prefix and extension.
-            * @param loadConfig Optional parameter: When true is passed, the configuration of
-            * the component is tried to be loaded; otherwise no configuration is loaded.
-            * @return An IUnknown pointer to the interfaces of the component.
-            */
-            IUnknown* loadComponent(const Pt::System::Directory& baseDirectory,
-                                    const std::string& libraryName,
-                                    bool loadConfig = true);
+            IUnknown* loadComponent(const std::string& file, bool loadConfig = true);
 
             /**
             * @brief Returns true if the given library already was loaded.
@@ -200,22 +135,7 @@ namespace Cma {
             * @param libraryFile A File object referencing the library in the file system.
             * @return true if the library was already loaded by this factory; false otherwise.
             */
-            bool isLoaded(const Pt::System::File& libraryFile);
-
-            /**
-            * @brief Returns true if the given library already was loaded.
-            *
-            * A platform-specific library location is constructed from the given directory and library name.
-            * The library name is extended by the platform's library prefix and the platform's default
-            * library extension. (There is no check done for any existing prefixes or extensions before
-            * the prefix and extension is added.) The library name thus needs to be the plain library name.
-            *
-            * @param baseDirectory The directory in which the references library resides.
-            * @param libraryName The base library name (without any platform-specific information) which
-            * is extended with the platform specific prefix and extension.
-            * @return true if the library was already loaded by this factory; false otherwise.
-            */
-            bool isLoaded(const Pt::System::Directory& baseDirectory, const std::string& libraryName);
+            bool isLoaded(const std::string& file);
 
         private:
             /**
@@ -228,7 +148,7 @@ namespace Cma {
             * @return Pointer to the corresponding ComponentLibrary object of the library
             * which was loaded.
             */
-            ComponentLibrary* _loadLibrary(const Pt::System::File& libraryFile);
+            ComponentLibrary* _loadLibrary(const std::string& file);
 
             /**
             * @brief Returns a pointer to the ComponentLibrary object for the given library
@@ -241,7 +161,7 @@ namespace Cma {
             * @return A pointer to the corresponding ComponentLibrary for the given library
             * file; or 0 if the library was not yet loaded.
             */
-            ComponentLibrary* library(const Pt::System::File& libraryFile);
+            ComponentLibrary* library(const std::string& file);
 
             /**
             * @brief Loads the configuration for the given component.
@@ -263,8 +183,8 @@ namespace Cma {
             * @param builder The builder by which the given Component ('component') was built.
             */
             void loadConfiguration(const ComponentLibrary& library,
-                                IUnknown& component,
-                                const IComponentBuilder& builder);
+                                   IUnknown& component,
+                                   const IComponentBuilder& builder);
 
         protected:
             LibraryList _libraries;

@@ -2,13 +2,12 @@
 #include "Pt/Cma/IComponentBuilder.h"
 #include <iostream>
 
-
 namespace Pt {
 
 namespace Cma {
 
-ComponentLibrary::ComponentLibrary(const Pt::System::File& libraryFile)
-: SharedLib(libraryFile)
+ComponentLibrary::ComponentLibrary(const std::string& file)
+: SharedLib(file)
 {
     IComponentBuilder** builderList = (IComponentBuilder**) this->resolve("Ptv_ComponentList");
 
@@ -67,9 +66,9 @@ size_t ComponentLibrary::size() const
     return _builders.size();
 }
 
-const Pt::System::File& ComponentLibrary::libraryFile() const
+const std::string& ComponentLibrary::path() const
 {
-    return SharedLib::libraryFile();
+    return SharedLib::path();
 }
 
 }

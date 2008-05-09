@@ -1,20 +1,15 @@
 #ifndef PT_CMA_COMPONENTLIBRARY_H
 #define PT_CMA_COMPONENTLIBRARY_H
 
+#include <Pt/Api.h>
+#include <Pt/System/SharedLib.h>
+#include <Pt/Cma/IComponentBuilder.h>
 #include <map>
 #include <string>
 
-#include <Pt/Api.h>
-#include <Pt/System/SharedLib.h>
-#include <Pt/System/File.h>
-#include <Pt/Cma/IComponentBuilder.h>
+namespace Pt {
 
-
-namespace Pt
-{
-
-namespace Cma
-{
+namespace Cma {
 
     /**
      *  Class to handle dynamic libraries that contain components.
@@ -28,7 +23,7 @@ namespace Cma
              * Constructor
              * @param library the name of the dynamic library
              */
-            ComponentLibrary(const Pt::System::File& libraryFile);
+            ComponentLibrary(const std::string& file);
 
             /**
              * Test whether this library is used (referenced) or not.
@@ -58,7 +53,7 @@ namespace Cma
              * Get the library file.
              * @return the library file.
              */
-            const Pt::System::File& libraryFile() const;
+            const std::string& path() const;
 
         protected:
             BuilderMap _builders;

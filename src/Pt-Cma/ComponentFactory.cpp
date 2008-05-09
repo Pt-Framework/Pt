@@ -5,17 +5,13 @@
 #include "Pt/Cma/IUnknown.h"
 #include "Pt/Cma/TypeId.h"
 #include "Pt/SourceInfo.h"
-#include "Pt/System/Directory.h"
-#include "Pt/System/Environment.h"
 #include "Pt/System/SharedLib.h"
-
-#include <iostream>
-
+#include "Pt/System/File.h"
+#include <stdexcept>
 
 namespace Pt {
 
 namespace Cma {
-
 
 ComponentFactory::ComponentFactory()
 {
@@ -27,30 +23,29 @@ ComponentFactory::~ComponentFactory()
 }
 
 
-void ComponentFactory::loadLibrary(const Pt::System::File& libraryFile)
+void ComponentFactory::loadLibrary(const std::string& file)
 {
-    this->_loadLibrary(libraryFile);
+    this->_loadLibrary(file);
 }
 
 
-void ComponentFactory::loadLibrary(const Pt::System::Directory& baseDirectory, const std::string& libraryName)
+bool ComponentFactory::unload(const std::string& file)
 {
-    this->_loadLibrary(System::SharedLib::createLibraryFile(baseDirectory, libraryName));
-}
+    std::string path = System::SharedLib::find(file);
+    if( path.empty() )
+    {
+        return false;
+    }
 
-
-bool ComponentFactory::unload(const Pt::System::File& libraryFile)
-{
     LibraryList::iterator iter;
-
     for (iter = _libraries.begin(); iter != _libraries.end(); iter++)
     {
-        if (libraryFile != (*iter)->libraryFile())
+        if (path != (*iter)->path())
         {
             continue;
         }
 
-        if((*iter)->isUsed())
+        if( (*iter)->isUsed() )
         {
             continue;
         }
@@ -62,11 +57,6 @@ bool ComponentFactory::unload(const Pt::System::File& libraryFile)
     }
 
     return false;
-}
-
-bool ComponentFactory::unload(const Pt::System::Directory& baseDirectory, const std::string& libraryName)
-{
-    return this->unload(System::SharedLib::createLibraryFile(baseDirectory, libraryName));
 }
 
 
@@ -83,7 +73,6 @@ void ComponentFactory::unloadAll()
         }
 
         delete (*iter);
-
         iter = _libraries.erase(iter);
     }
 }
@@ -119,13 +108,12 @@ IUnknown* ComponentFactory::createComponent(const std::string& componentTypeName
 }
 
 
-IUnknown* ComponentFactory::loadComponent(const Pt::System::File& libraryFile, bool loadConfig)
+IUnknown* ComponentFactory::loadComponent(const std::string& file, bool loadConfig)
 {
-    ComponentLibrary* lib = this->library(libraryFile);
-
+    ComponentLibrary* lib = this->library(file);
     if (lib == 0)
     {
-        lib = this->_loadLibrary(libraryFile);
+        lib = this->_loadLibrary(file);
 
         if (lib == 0)
         {
@@ -146,39 +134,23 @@ IUnknown* ComponentFactory::loadComponent(const Pt::System::File& libraryFile, b
 }
 
 
-IUnknown* ComponentFactory::loadComponent(const Pt::System::Directory& baseDirectory,
-                                          const std::string& libraryName,
-                                          bool loadConfig)
+bool ComponentFactory::isLoaded(const std::string& file)
 {
-    return this->loadComponent(System::SharedLib::createLibraryFile(baseDirectory, libraryName), loadConfig);
+    return this->library(file) != 0;
 }
 
 
-bool ComponentFactory::isLoaded(const Pt::System::File& libraryFile)
+ComponentLibrary* ComponentFactory::_loadLibrary(const std::string& file)
 {
-    return this->library(libraryFile) != 0;
-}
-
-
-bool ComponentFactory::isLoaded(const Pt::System::Directory& baseDirectory, const std::string& libraryName)
-{
-    return this->library(System::SharedLib::createLibraryFile(baseDirectory, libraryName)) != 0;
-}
-
-
-ComponentLibrary* ComponentFactory::_loadLibrary(const Pt::System::File& libraryFile)
-{
-    ComponentLibrary* lib = this->library(libraryFile);
-
-    if (lib)
+    ComponentLibrary* lib = this->library(file);
+    if(lib)
     {
         return lib;  // We already have loaded this library before.
     }
 
+    lib = new ComponentLibrary(file);
 
-    lib = new ComponentLibrary(libraryFile);
-
-    if (!lib->size())
+    if ( ! lib->size() )
     {
         // Library has no builders. Return 0.
         delete lib;
@@ -186,18 +158,22 @@ ComponentLibrary* ComponentFactory::_loadLibrary(const Pt::System::File& library
     }
 
     _libraries.push_back(lib);
-
     return lib;
 }
 
 
-ComponentLibrary* ComponentFactory::library(const Pt::System::File& libraryFile)
+ComponentLibrary* ComponentFactory::library(const std::string& file)
 {
-    LibraryList::iterator iter;
+    std::string path = System::SharedLib::find(file);
+    if( path.empty() )
+    {
+        return 0;
+    }
 
+    LibraryList::iterator iter;
     for (iter = _libraries.begin(); iter != _libraries.end(); iter++)
     {
-        if (libraryFile == (*iter)->libraryFile())
+        if( path == (*iter)->path() )
         {
             return *iter;
         }
@@ -207,7 +183,8 @@ ComponentLibrary* ComponentFactory::library(const Pt::System::File& libraryFile)
 }
 
 
-void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnknown& component, const IComponentBuilder& builder)
+void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnknown& component,
+                                         const IComponentBuilder& builder)
 {
     IPrefs* prefs = component.queryInterface<IPrefs>();
 
@@ -216,14 +193,16 @@ void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnkno
         return; // Component does not provide IPrefs interface, so no configuration is loaded.
     }
 
-    // TODO Later we want to support not only .properties files for component based configuration storage.
-    Pt::System::File configFile(library.libraryFile().parentPath()
-                                + std::string(builder.typeId().name())
-                                + ".properties");
+    // TODO Later we want to support not only .properties files for component
+    // based configuration storage.
+    Pt::System::File libFile( library.path() );
+    std::string configFile = libFile.dirName()
+                             + std::string( builder.typeId().name() )
+                             + ".properties";
 
-    if( configFile.exists() )
+    // Load configuration if config file exists.
+    if( Pt::System::FileSystemNode::exists( configFile.c_str() ) )
     {
-        // Load configuration if config file exists.
         prefs->loadPrefs(configFile);
     }
 

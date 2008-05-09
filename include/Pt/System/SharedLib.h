@@ -97,6 +97,8 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
          */
         const std::string& path() const;
 
+        static std::string find(const std::string& path);
+
     private:
         //! @internal
         class SharedLibImpl* _impl;
