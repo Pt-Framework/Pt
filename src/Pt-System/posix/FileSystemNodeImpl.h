@@ -43,29 +43,37 @@ namespace System {
                 {
                     return new File(path);
                 }
-                else if( S_ISDIR(st.st_mode) ) 
+                else if( S_ISDIR(st.st_mode) )
                 {
                     return new Directory(path);
                 }
+                else if( S_ISCHR(st.st_mode) )
+                {
+                    return new File(path);
+                }
+                else if( S_ISBLK(st.st_mode) )
+                {
+                    return new File(path);
+                }
+                else if( S_ISFIFO(st.st_mode) )
+                {
+                    return new File(path);
+                }
+#ifdef S_ISSOCK
+                else if( S_ISSOCK(st.st_mode) )
+                {
+                    return new File(path);
+                }
+#endif
+
+#ifdef S_ISLNK
+                else if( S_ISLNK(st.st_mode) )
+                {
+                    return new File(path);
+                }
+#endif
 
                 return new File(path);
-
-                /*
-                else if(S_ISCHR(st.st_mode))
-                    type = File::CharDevice;
-                else if(S_ISBLK(st.st_mode))
-                    type = File::BlockDevice;
-                else if(S_ISFIFO(st.st_mode))
-                    type = File::Pipe;
-                #ifdef S_ISSOCK
-                else if(S_ISSOCK(st.st_mode))
-                    type = File::Pipe;
-                #endif
-                #ifdef S_ISLNK
-                else if(S_ISLNK(st.st_mode))
-                    type = File::Link;
-                #endif
-                */
             }
 
             static FileSystemNode::Type stat(const char* path)

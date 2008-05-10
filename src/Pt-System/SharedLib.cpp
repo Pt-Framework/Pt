@@ -21,6 +21,7 @@
 #include "Pt/System/File.h"
 #include "Pt/System/Environment.h"
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <memory>
 

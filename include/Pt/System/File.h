@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -18,7 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_System_File_h
 #define Pt_System_File_h
 
@@ -29,25 +28,21 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
 
-
 namespace Pt {
 
 namespace System {
 
-/**
- * @brief Provides common operations on files.
+/** @brief Provides common operations on files.
  */
-class PT_SYSTEM_API File : public FileSystemNode {
-
+class PT_SYSTEM_API File : public FileSystemNode 
+{
     friend bool operator==(const File& a, const File& b);
 
     private:
         class FileImpl* _impl;
 
     public:
-        File(const std::string& path = "");
-
-        File(const System::Directory& baseDir, const std::string& fileName);
+        explicit File(const std::string& path);
 
         File(const File& file);
 
@@ -61,10 +56,7 @@ class PT_SYSTEM_API File : public FileSystemNode {
 
         void resize(std::size_t newSize);
 
-        virtual Type type() const
-        {
-            return FileSystemNode::File;
-        }
+        virtual Type type() const;
 
         virtual void remove();
 
@@ -123,8 +115,6 @@ class PT_SYSTEM_API File : public FileSystemNode {
         static bool create(const char* path);
 };
 
-// TODO This operator should check the files on file-system layer by checking if
-// they share the same node or something like this.
 inline bool operator==(const File& a, const File& b)
 {
     return a.path() == b.path();
@@ -134,7 +124,6 @@ inline bool operator!=(const File& a, const File& b)
 {
     return !(a == b);
 }
-
 
 } // namespace System
 

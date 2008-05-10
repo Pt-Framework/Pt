@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -18,40 +18,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
+#include "FileImpl.h"
 #include "Pt/System/File.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/Environment.h"
 
-#include "FileImpl.h"
-
 namespace Pt {
 
 namespace System {
-
 
 File::File(const std::string& path)
 {
     _impl = new FileImpl(path);
 }
 
-File::File(const System::Directory& baseDir, const std::string& fileName)
-{
-    const std::string& baseDirPath = baseDir.path();
-    
-    // Add seperator between base directory and file name only if there
-    // is not yet a separator at the end of the path and if the path
-    // is not empty. (In the latter case, adding a separator would lead
-    // to a path which is relative to root (/).)
-    if (baseDirPath.empty() || baseDirPath[baseDirPath.length() - 1] == Environment::pathSeparator())
-    {
-        _impl = new FileImpl(baseDir.path() + fileName);
-    }
-    else
-    {
-        _impl = new FileImpl(baseDir.path() + Environment::pathSeparator() + fileName);
-    }
-}
 
 File::File(const File& file)
 {
@@ -90,6 +70,12 @@ void File::resize(std::size_t newSize)
 }
 
 
+FileSystemNode::Type File::type() const
+{
+    return FileSystemNode::File;
+}
+
+
 void File::remove()
 {
     _impl->remove();
@@ -116,24 +102,25 @@ std::string File::dirName() const
 {
     // Find last slash. This separates the file name from the path.
     std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
-    
+
     // If there is no separator, the file is relative to the current directory. So an empty path is returned.
     if (separatorPos == std::string::npos)
     {
         return "";
     }
-    
+
     // Include trailing separator to be able to distinguish between no path ("") and a path
     // which is relative to the root ("/"), for example.
     return path().substr(0, separatorPos + 1);
 }
+
 
 // TODO This is identical to Directory::name(). Maybe this should be moved into
 // the common base class FileSystemNode.
 std::string File::name() const
 {
     std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
-    
+
     if (separatorPos != std::string::npos)
     {
         return path().substr(separatorPos + 1);
@@ -148,9 +135,9 @@ std::string File::name() const
 std::string File::baseName() const
 {
     std::string fileName = this->name();
-    
+
     std::string::size_type extensionPointPos = fileName.rfind('.');
-    
+
     if (extensionPointPos != std::string::npos)
     {
         return fileName.substr(0, extensionPointPos);
@@ -165,9 +152,9 @@ std::string File::baseName() const
 std::string File::extension() const
 {
     std::string fileName = this->name();
-    
+
     std::string::size_type extensionPointPos = fileName.rfind('.');
-    
+
     if (extensionPointPos != std::string::npos)
     {
         return fileName.substr(extensionPointPos + 1);
@@ -191,4 +178,5 @@ bool File::create(const char* path)
 }
 
 } // namespace System
+
 } // namespace Pt

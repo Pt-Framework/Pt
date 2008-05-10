@@ -18,12 +18,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
+#include "DirectoryImpl.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/Environment.h"
-
-#include "DirectoryImpl.h"
-
 
 namespace Pt {
 
@@ -108,8 +105,6 @@ FileSystemNode& DirectoryIterator::operator*() const
 }
 
 
-
-
 Directory::Directory(const std::string& path)
 : _path(path)
 {
@@ -151,14 +146,14 @@ std::string Directory::dirName() const
 {
     // Find last slash. This separates the last path segment from the rest of the path
     std::string::size_type separatorPos = _path.find_last_of(Environment::pathSeparator());
-    
+
     // If there is no separator, this directory is relative to the current current directory.
     // So an empty path is returned.
     if (separatorPos == std::string::npos)
     {
         return "";
     }
-    
+
     // Include trailing separator to be able to distinguish between no path ("") and a path
     // which is relative to the root ("/"), for example.
     return path().substr(0, separatorPos + 1);
@@ -170,7 +165,7 @@ std::string Directory::dirName() const
 std::string Directory::name() const
 {
     std::string::size_type separatorPos = _path.rfind(Environment::pathSeparator());
-    
+
     if (separatorPos != std::string::npos)
     {
         return _path.substr(separatorPos + 1);
@@ -178,7 +173,7 @@ std::string Directory::name() const
     else
     {
         return _path;
-    }    
+    }
 }
 
 

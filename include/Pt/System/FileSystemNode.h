@@ -59,13 +59,18 @@ class PT_SYSTEM_API FileSystemNode
 
         //virtual void copy(const std::string& to) const = 0;
 
+    public:
         static Type stat(const char* path);
 
-        static bool exists(const char* path)
-        { return FileSystemNode::stat(path) != FileSystemNode::Invalid; }
+        static bool exists(const char* path);
 
         static FileSystemNode* create(const char* path);
 };
+
+inline bool FileSystemNode::exists(const char* path)
+{
+    return FileSystemNode::stat(path) != FileSystemNode::Invalid; 
+}
 
 } // namespace System
 

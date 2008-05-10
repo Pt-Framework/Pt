@@ -19,27 +19,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FileImpl.h"
-
 #include "Pt/System/SystemError.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <iostream>
-using namespace std;
-
 
 namespace Pt {
 
 namespace System {
 
 FileImpl::FileImpl(const std::string& path)
-: _path(path)   
+: _path(path)
 {
-
 }
 
 
@@ -80,9 +74,9 @@ void FileImpl::remove()
 
 void FileImpl::copy(const std::string& to) const
 {
-
     int sd = open(_path.c_str(), O_RDONLY);
-    if (sd == -1) throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+    if (sd == -1) 
+        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
 
     struct stat st;
     if (fstat(sd, &st) != 0)
@@ -98,6 +92,7 @@ void FileImpl::copy(const std::string& to) const
         close(sd);
         throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
     }
+
     char buffer[blockSize];
     try
     {
@@ -116,16 +111,15 @@ void FileImpl::copy(const std::string& to) const
         close(dd);
         throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);;
     }
+
     close(sd);
     if (fsync(dd) != 0)
     {
         close(dd);
         throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
     }
-    if (close(dd) != 0)
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
 
-
+    close(dd);
 }
 
 
@@ -136,6 +130,7 @@ void FileImpl::move(const std::string& to)
     _path = to;
 }
 
+
 void FileImpl::create()
 {
     FILE* f = fopen(_path.c_str(), "w");
@@ -144,6 +139,7 @@ void FileImpl::create()
 
     fclose(f);
 }
+
 
 bool FileImpl::exists() const
 {
