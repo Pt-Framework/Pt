@@ -39,6 +39,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl()
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
+  _path(path),
   _node(0),
   _findHandle(INVALID_HANDLE_VALUE)
 {
@@ -54,14 +55,13 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
     if(_findHandle == INVALID_HANDLE_VALUE)
         throw SystemError("Could not open find handle.", PT_SOURCEINFO);
 
-    _path = path;
+    if( ! _path.empty() && _path[_path.size()-1] != '\\')
+        _path += "\\\0";
 }
 
 
 DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
-    delete _node;
-
     if(_findHandle == INVALID_HANDLE_VALUE)
         ::FindClose(_findHandle);
 }
@@ -87,7 +87,6 @@ bool DirectoryIteratorImpl::advance()
     }
 
     // the current node becomes invalid now
-    delete _node;
     _node = 0;
 
     // _findHandle = INVALID_HANDLE_VALUE means end
@@ -107,25 +106,35 @@ FileSystemNode& DirectoryIteratorImpl::node()
     if(_node)
         return *_node;
 
-    // build complete path
-    std::string path = _path;
-    if( !path.empty() && path[path.size()-1] != '\\')
-        path += '\\';
-    path += this->name();
+    // build complete path, ctor makes sure there is always a trailing 
+    // slash and one character following it so idx+1 works out
+    std::string::size_type idx = _path.rfind('\\') + 1;
+    _path.replace(idx, _path.size(), _current.cFileName);
 
-    // create file system node by full path
-    _node = FileSystemNode::create( path.c_str() );
-    if(!_node)
-        throw SystemError("Unknown file system node", PT_SOURCEINFO);
+    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
+    if(type == FileSystemNode::Directory)
+    {
+        _dir.setPath(_path);
+        _node = &_dir;
+    }
+    else if(type == FileSystemNode::File)
+    {
+        _file.setPath(_path);
+        _node = &_file;
+    }
+    else
+    {
+        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
+    }
 
     return *_node;
 }
 
 
-std::string DirectoryIteratorImpl::name() const
+const char* DirectoryIteratorImpl::name() const
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
-        return win32::toMultiByte( _current.cFileName );
+        return win32::toMultiByte( _current.cFileName ).c_str();
 
     return "";
 }

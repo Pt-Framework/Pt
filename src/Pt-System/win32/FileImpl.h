@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2006-2008 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -18,46 +18,32 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/Api.h"
-#include "Pt/System/File.h"
+#include "Pt/Types.h"
 #include <windows.h>
 
+namespace Pt {
 
-namespace Pt
-{
-
-namespace System
-{
+namespace System {
 
 class FileImpl
 {
     public:
-        FileImpl(const std::string& path);
+        FileImpl();
 
         ~FileImpl();
 
-        const std::string& path()
-        { return _path; }
+        static std::size_t size(const char* path);
 
-        std::size_t size() const;
+        static void resize(const char* path, std::size_t n);
 
-        void resize(std::size_t newSize);
+        static void remove(const char* path);
 
-        void remove();
+        static void copy(const char* path, const char* to);
 
-        void copy(const std::string& to) const;
-
-        void move(const std::string& to);
-
-        //bool exists() const;
-
-        //void create();
+        static void move(const char* path, const char* to);
 
         static void create(const char* path);
-
-    private:
-        std::string _path;
 };
 
 } // namespace System

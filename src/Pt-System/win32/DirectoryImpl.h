@@ -20,6 +20,8 @@
  ***************************************************************************/
 
 #include "Pt/System/FileSystemNode.h"
+#include "Pt/System/File.h"
+#include "Pt/System/Directory.h"
 #include <string>
 #include <windows.h>
 
@@ -44,12 +46,14 @@ class DirectoryIteratorImpl {
 
         FileSystemNode& node();
 
-        std::string name() const;
+        const char* name() const;
 
     private:
         unsigned int    _refs;
         std::string     _path;
         FileSystemNode* _node;
+        File _file;
+        Directory _dir;
         HANDLE          _findHandle;
         WIN32_FIND_DATA _current;
 };

@@ -19,6 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FileImpl.h"
+#include "Pt/System/SystemError.h"
 #include "win32.h"
 #include <string>
 #include <iostream>
@@ -28,8 +29,7 @@ namespace Pt {
 
 namespace System {
 
-FileImpl::FileImpl(const std::string& path)
-: _path(path)
+FileImpl::FileImpl()
 {
 }
 
@@ -39,10 +39,10 @@ FileImpl::~FileImpl()
 }
 
 
-std::size_t FileImpl::size() const
+std::size_t FileImpl::size(const char* path)
 {
     WIN32_FIND_DATA data;
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
     HANDLE h = FindFirstFile(tpath.c_str(), &data);
     if(h == INVALID_HANDLE_VALUE)
@@ -58,9 +58,9 @@ std::size_t FileImpl::size() const
 }
 
 
-void FileImpl::resize(std::size_t newSize)
+void FileImpl::resize(const char* path, std::size_t newSize)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
     HANDLE fileHandle = ::CreateFile(tpath.c_str(),
                                      GENERIC_READ|GENERIC_WRITE,
@@ -93,18 +93,18 @@ void FileImpl::resize(std::size_t newSize)
 }
 
 
-void FileImpl::remove()
+void FileImpl::remove(const char* path)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
     if(FALSE == ::DeleteFile( tpath.c_str() ))
         throw SystemError("Could not unlink file", PT_SOURCEINFO);
 }
 
 
-void FileImpl::copy(const std::string& to) const
+void FileImpl::copy(const char* path, const char* to)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
 
     if(FALSE == ::CopyFile( tpath.c_str(), tto.c_str(), FALSE ))
@@ -112,68 +112,19 @@ void FileImpl::copy(const std::string& to) const
 }
 
 
-void FileImpl::move(const std::string& to)
+void FileImpl::move(const char* path, const char* to)
 {
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
 
-    #ifdef _WIN32_WCE
-        if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-            throw SystemError("Could not move file", PT_SOURCEINFO);
-    #else
-        if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
-            throw SystemError("Could not move file", PT_SOURCEINFO);
-    #endif
-
-    _path = to;
-}
-
-
-/*bool FileImpl::exists() const
-{
-    DWORD file_attr;
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
-
-    file_attr = ::GetFileAttributes( tpath.c_str() );
-
-    return file_attr != 0xffffffff;
-}*/
-
-/*
-void FileImpl::create()
-{
-    HANDLE hFile;
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte(_path);
-
-// WinCE does not support overlapped I/O
 #ifdef _WIN32_WCE
-    hFile = CreateFile(tpath.c_str(),   // file to create
-            GENERIC_WRITE,          // open for writing
-            0,                      // do not share
-            NULL,                   // default security
-            CREATE_ALWAYS,          // overwrite existing
-            FILE_ATTRIBUTE_NORMAL | // normal file
-            NULL,                   // asynchronous I/O
-            NULL);
+    if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
+        throw SystemError("Could not move file", PT_SOURCEINFO);
 #else
-    hFile = CreateFile(tpath.c_str(),   // file to create
-            GENERIC_WRITE,          // open for writing
-            0,                      // do not share
-            NULL,                   // default security
-            CREATE_ALWAYS,          // overwrite existing
-            FILE_ATTRIBUTE_NORMAL | // normal file
-            FILE_FLAG_OVERLAPPED,   // asynchronous I/O
-            NULL);                  // no attr. template
+    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), MOVEFILE_COPY_ALLOWED) )
+        throw SystemError("Could not move file", PT_SOURCEINFO);
 #endif
-
-    if (hFile == INVALID_HANDLE_VALUE)
-    {
-        throw SystemError( "Could not create file" , PT_SOURCEINFO);
-
-    }
-
-    CloseHandle(hFile);
-}*/
+}
 
 
 void FileImpl::create(const char* path)
@@ -205,7 +156,6 @@ void FileImpl::create(const char* path)
     if (hFile == INVALID_HANDLE_VALUE)
     {
         throw SystemError( "Could not create file" , PT_SOURCEINFO);
-
     }
 
     CloseHandle(hFile);

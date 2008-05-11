@@ -64,8 +64,6 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 
 DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
-    delete _node;
-
     if(_handle)
         ::closedir(_handle);
 }
