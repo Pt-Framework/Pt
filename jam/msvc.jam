@@ -39,50 +39,31 @@ rule TryC++
 }
 
 
-rule CheckFile
-{
-    if $(1)
-    {
-        if [ CHECK_IF_FILE $(1:J=" ") ]
-        {
-            return 1 ;
-        }
-    }
-}
-
 #############################################################################
 # Tools and utilities
 ##############################################################################
 
-if $(MSVCDir)
-{
-    VISUALC ?= $(VCINSTALLDIR:J=" ") ;
-}
-else if $(VSINSTALLDIR)
-{
-    VISUALC ?= $(VSINSTALLDIR:J=" ") ;
-}
+CheckDefault VISUALC ;
+CheckVariable VISUALC : MSVCDir      : $(VCINSTALLDIR:J=" ") ;
+CheckVariable VISUALC : VSINSTALLDIR : $(VSINSTALLDIR:J=" ") ;
+
 if ! $(VISUALC)
 {
   Echo "Checking for VISUALC" ...FAILED ;
   Exit "Please specify path to the Visual Studio installation with -sVISUALC" ;
 }
-Echo "Checking for VISUALC" ...$(VISUALC) ;
 
 
-if [ CheckFile $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" ]
-{
-    VCDIR = $(VISUALC)\\vc ;
-}
-else if [ CheckFile $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" ]
-{
-    VCDIR = $(VISUALC)\\vc7 ;
-}
-else
+CheckDefault VCDIR ;
+CheckFile VCDIR : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" : $(VISUALC:J=" ")"\\vc" ;
+CheckFile VCDIR : $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" : $(VISUALC:J=" ")"\\vc7" ;
+
+if ! $(VCDIR)
 {
     Echo "Checking for VCDIR" ...FAILED ;
     Exit "Please specify path to the Visual Studio vc directory -sVCDIR" ;
 }
+
 
 AR          = $(VCDIR)\\bin\\lib ;
 AS          = masm386 ;
@@ -90,33 +71,27 @@ CC          = $(VCDIR)\\bin\\cl /nologo ;
 C++         = $(CC) ;
 RC          = $(VCDIR)\\bin\\rc ;
 MT          = $(VCDIR)\\bin\\mt -nologo ;
-LINK        = $$(VCDIR)\\bin\\link /nologo ;
+LINK        = $(VCDIR)\\bin\\link /nologo ;
 
 ##############################################################################
 # Compiler and linker flags
 ##############################################################################
 
-if [ CheckFile $(PLATFORMSDK:J=" ")"\\Include\\windows.h" ]
-{
-}
-else if [ CheckFile $(WindowsSdkDir:J=" ")"Include\\windows.h" ] 
-{
-    PLATFORMSDK = $(WindowsSdkDir:J=" ")"Include\\windows.h" ;
-}
-else if [ CheckFile $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ]
-{
-    PLATFORMSDK = $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ;
-}
-else if [ CheckFile $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ]
-{
-    PLATFORMSDK = $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ;
-}
-else
+CheckDefault PLATFORMSDK ;
+CheckFile PLATFORMSDK : $(PLATFORMSDK:J=" ")"\\Include\\windows.h" 
+                      : $(PLATFORMSDK:J=" ") ;
+CheckFile PLATFORMSDK : $(WindowsSdkDir:J=" ")"Include\\windows.h" 
+                      : $(WindowsSdkDir:J=" ");
+CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" 
+                      : $(VISUALC:J=" ")"\\vc\\PlatformSDK" ;
+CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" 
+                      : $(VISUALC:J=" ")"\\vc7\\PlatformSDK" ;
+
+if ! $(PLATFORMSDK)
 {
     Echo "Checking for PLATFORMSDK" ...FAILED ;
     Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
 }
-Echo "Checking for PLATFORMSDK" ...$(PLATFORMSDK) ;
 
 
 STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
@@ -124,11 +99,10 @@ STDHDRS += \"$(PLATFORMSDK)\\include\" ;
 LINKFLAGS += /LIBPATH:"\"$(PLATFORMSDK)\\lib"\" ;
 
 CCFLAGS    += /D_CRT_SECURE_NO_DEPRECATE /DWIN32 ;
-C++FLAGS   += $(CCFLAGS) /EHsc /GR /FD /Zc:wchar_t ;
 LINKLIBS   ?= "" ;
 UNDEFFLAG   = "/u _" ;
 LINKFLAGS  += "/INCREMENTAL:NO" ;
-WARN       ?= /Wall ;
+WARN       ?= /W3 ;
 
 if $(CONFIG:L) = debug 
 {
@@ -147,6 +121,8 @@ else if $(CONFIG:L) = aqtime
     OPTIM   ?= /Ox /Ot /Oy ;
     LINKFLAGS += /DEBUG ;
 }
+
+C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /Zc:wchar_t ;
 
 CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
                           "int main() { return 0; }" 
@@ -167,6 +143,19 @@ rule FDefines
 rule FIncludes 
 { 
   return /I$(<) ; 
+}
+
+
+rule EmbedManifest
+{
+  MFTYPE on $(<) = 1 ;
+  
+  if $(<:S) = $(SUFDLL:S)
+  {
+    MFTYPE on $(<) = 2 ;
+  }
+
+  Mt $(<) : $(>) ;
 }
 
 
@@ -373,4 +362,11 @@ actions together Link bind NEEDLIBS
   set PATH=$(VISUALC)\Common7\IDE;%PATH%
   set LIB=$(VCDIR)\lib\;$(PLATFORMSDK)\lib\;%LIB% 
   "$(LINK)" $(LINKFLAGS) /PDB:$(<:S=.pdb) /out:$(<) $(UNDEFS) $(>) $(NEEDLIBS) $(LINKLIBS)
+}
+
+actions Mt
+{
+  set PATH=$(VISUALC)\vc\bin;%PATH%
+  "$(MT)" -manifest $(>) -b$(3) -outputresource:$(<);$(MFTYPE)
+  $(RM) $(>)
 }
