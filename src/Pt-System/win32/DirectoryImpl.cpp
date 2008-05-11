@@ -44,17 +44,18 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _findHandle(INVALID_HANDLE_VALUE)
 {
     std::string firstFile = path;
-    if( !firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
-        firstFile += "\\";
+    if( ! firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
+        firstFile += '\\';
 
     firstFile += '*';
 
-    std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
+    _std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
     if(_findHandle == INVALID_HANDLE_VALUE)
         throw SystemError("Could not open find handle.", PT_SOURCEINFO);
 
+    _path = path;
     if( ! _path.empty() && _path[_path.size()-1] != '\\')
         _path += "\\\0";
 }
@@ -109,7 +110,8 @@ FileSystemNode& DirectoryIteratorImpl::node()
     // build complete path, ctor makes sure there is always a trailing 
     // slash and one character following it so idx+1 works out
     std::string::size_type idx = _path.rfind('\\') + 1;
-    _path.replace(idx, _path.size(), _current.cFileName);
+    _path.replace(idx, _path.size(),
+                  win32::toMultiByte( _current.cFileName ).c_str() );
 
     FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
     if(type == FileSystemNode::Directory)
@@ -134,7 +136,10 @@ FileSystemNode& DirectoryIteratorImpl::node()
 const char* DirectoryIteratorImpl::name() const
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
-        return win32::toMultiByte( _current.cFileName ).c_str();
+    {
+        _tname = win32::toMultiByte( _current.cFileName );
+        return _tname.c_str();
+    }
 
     return "";
 }

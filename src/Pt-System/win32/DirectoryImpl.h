@@ -50,7 +50,8 @@ class DirectoryIteratorImpl {
 
     private:
         unsigned int    _refs;
-        std::string     _path;
+        std::string _path;
+        std::basic_string<TCHAR> _tname;
         FileSystemNode* _node;
         File _file;
         Directory _dir;
