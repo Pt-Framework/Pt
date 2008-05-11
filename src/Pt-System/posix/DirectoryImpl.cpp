@@ -27,12 +27,9 @@
 #include <errno.h>
 #include <stdio.h>
 
-
-
 namespace Pt {
 
 namespace System {
-
 
 DirectoryIteratorImpl::DirectoryIteratorImpl()
 : _refs(1),
@@ -45,6 +42,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl()
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
+  _path(path),
   _node(0),
   _handle(0),
   _current(0)
@@ -56,7 +54,10 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
         throw SystemError("Could not open directory", PT_SOURCEINFO);
     }
 
-    _path = path;
+    // build complete path
+    if( ! _path.empty() && _path[_path.size()-1] != '/')
+        _path += "/\0";
+
     this->advance();
 }
 
@@ -67,6 +68,12 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 
     if(_handle)
         ::closedir(_handle);
+}
+
+
+const char* DirectoryIteratorImpl::name() const
+{
+    return _current->d_name;
 }
 
 
@@ -84,7 +91,6 @@ int DirectoryIteratorImpl::deref()
 
 bool DirectoryIteratorImpl::advance()
 {
-    delete _node;
     _node = 0;
 
     // _current == 0 means end
@@ -99,27 +105,28 @@ FileSystemNode& DirectoryIteratorImpl::node()
     if(_node)
         return *_node;
 
-    // build complete path
-    std::string path = _path;
-    if( !path.empty() && path[path.size()] != '/')
-        path += '/';
-    path += this->name();
+    // build complete path, ctor makes sure there is always a trailing 
+    // slash and one character following it so idx+1 works out
+    std::string::size_type idx = _path.rfind('/') + 1;
+    _path.replace(idx, _path.size(), _current->d_name);
 
-    // create file system node by full path
-    _node = FileSystemNode::create( path.c_str() );
-    if(!_node)
-        throw SystemError("Unknown file system node", PT_SOURCEINFO);
+    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
+    if(type == FileSystemNode::Directory)
+    {
+        _dir.setPath(_path);
+        _node = &_dir;
+    }
+    else if(type == FileSystemNode::File)
+    {
+        _file.setPath(_path);
+        _node = &_file;
+    }
+    else
+    {
+        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
+    }
 
     return *_node;
-}
-
-
-std::string DirectoryIteratorImpl::name() const
-{
-    if(_current)
-        return _current->d_name;
-
-    return "";
 }
 
 
@@ -137,14 +144,14 @@ bool DirectoryImpl::exists(const std::string& path)
 {
     struct stat buff;
     int err = stat(path.c_str(), &buff);
-    
+
     if (err == -1 )
     {
         if (errno == ENOENT || errno == ENOTDIR)
         {
             return false;
         }
-        
+
         throw SystemError("Could not stat file '" + path + "'", PT_SOURCEINFO);
     }
 

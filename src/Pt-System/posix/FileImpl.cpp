@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -20,9 +20,9 @@
  ***************************************************************************/
 #include "FileImpl.h"
 #include "Pt/System/SystemError.h"
+#include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -31,8 +31,7 @@ namespace Pt {
 
 namespace System {
 
-FileImpl::FileImpl(const std::string& path)
-: _path(path)
+FileImpl::FileImpl()
 {
 }
 
@@ -42,22 +41,22 @@ FileImpl::~FileImpl()
 }
 
 
-std::size_t FileImpl::size() const
+std::size_t FileImpl::size(const char* path)
 {
     struct stat buff;
 
-    if( 0 != stat(_path.c_str(), &buff) )
+    if( 0 != stat(path, &buff) )
         throw SystemError("Could not stat file", PT_SOURCEINFO);
 
     return buff.st_size;
 }
 
 
-void FileImpl::resize(std::size_t newSize)
+void FileImpl::resize(const char* path, std::size_t newSize)
 {
     int ret = 0;
     do {
-        ret = truncate(_path.c_str(), newSize);
+        ret = truncate(path, newSize);
     } while ( ret == EINTR );
 
     if(ret != 0)
@@ -65,32 +64,35 @@ void FileImpl::resize(std::size_t newSize)
 }
 
 
-void FileImpl::remove()
+void FileImpl::remove(const char* path)
 {
-    if(0 != ::remove(_path.c_str()) == -1)
+    if(0 != ::remove(path) == -1)
         throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 
 
-void FileImpl::copy(const std::string& to) const
+void FileImpl::copy(const char* path, const char* to)
 {
-    int sd = open(_path.c_str(), O_RDONLY);
+    int sd = open(path, O_RDONLY);
     if (sd == -1) 
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);
 
     struct stat st;
     if (fstat(sd, &st) != 0)
     {
         close(sd);
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);
     }
     const long blockSize = st.st_blksize;
 
-    int dd = open(to.c_str(), O_CREAT | O_TRUNC | O_WRONLY, st.st_mode & S_IRWXU);
+    int dd = open(to, O_CREAT | O_TRUNC | O_WRONLY, st.st_mode & S_IRWXU);
     if (dd == -1)
     {
         close(sd);
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);
     }
 
     char buffer[blockSize];
@@ -100,61 +102,38 @@ void FileImpl::copy(const std::string& to) const
         while ((n = read(sd, buffer, blockSize)) > 0)
         {
             if (write(dd, buffer, n) != n)
-                throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+                throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                                  PT_SOURCEINFO);
         }
         if (n < 0)
-            throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+            throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                              PT_SOURCEINFO);
     }
     catch (...)
     {
         close(sd);
         close(dd);
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);;
+        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);;
     }
 
     close(sd);
     if (fsync(dd) != 0)
     {
         close(dd);
-        throw SystemError("Could not copy file" + _path + " to " + to, PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);
     }
 
     close(dd);
 }
 
 
-void FileImpl::move(const std::string& to)
+void FileImpl::move(const char* path, const char* to)
 {
-    if (0 != ::rename(_path.c_str(), to.c_str()))
-        throw SystemError("Could not move file " + _path + " to " + to , PT_SOURCEINFO);
-    _path = to;
-}
-
-
-void FileImpl::create()
-{
-    FILE* f = fopen(_path.c_str(), "w");
-    if (!f)
-        throw SystemError("Could not create file " + _path, PT_SOURCEINFO);
-
-    fclose(f);
-}
-
-
-bool FileImpl::exists() const
-{
-    struct stat buff;
-
-    int err = stat(_path.c_str(), &buff);
-    if (err == -1 )
-    {
-        if (errno == ENOENT || errno == ENOTDIR)
-            return false;
-
-        throw SystemError("Could not stat file " + _path, PT_SOURCEINFO);
-    }
-
-    return true;
+    if (0 != ::rename(path, to))
+        throw SystemError("Could not move file " + std::string(path) + " to " + std::string(to),
+                          PT_SOURCEINFO);
 }
 
 

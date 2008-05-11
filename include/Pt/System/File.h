@@ -23,23 +23,33 @@
 
 #include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/Directory.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
+#include <stdexcept>
 
 namespace Pt {
 
 namespace System {
 
+class File;
+
+class PT_SYSTEM_API FileNotFound : public SystemError
+{
+    public:
+        FileNotFound(const File& file, const SourceInfo& si);
+
+        ~FileNotFound() throw();
+};
+
 /** @brief Provides common operations on files.
  */
-class PT_SYSTEM_API File : public FileSystemNode 
+class PT_SYSTEM_API File : public FileSystemNode
 {
     friend bool operator==(const File& a, const File& b);
-
-    private:
-        class FileImpl* _impl;
+    friend class DirectoryIteratorImpl;
 
     public:
         explicit File(const std::string& path);
@@ -50,8 +60,6 @@ class PT_SYSTEM_API File : public FileSystemNode
 
         File& operator=(const File& file);
 
-        virtual const std::string& path() const;
-
         virtual std::size_t size() const;
 
         void resize(std::size_t newSize);
@@ -60,7 +68,7 @@ class PT_SYSTEM_API File : public FileSystemNode
 
         virtual void remove();
 
-        //void copy(const std::string& to) const;
+        void copy(const std::string& to) const;
 
         virtual void move(const std::string& newPath);
 
@@ -112,7 +120,18 @@ class PT_SYSTEM_API File : public FileSystemNode
          */
         std::string extension() const;
 
-        static bool create(const char* path);
+        static void create(const char* path);
+
+        static bool exists(const char* path)
+        {
+            return FileSystemNode::stat(path) == FileSystemNode::File;
+        }
+
+    protected:
+        File();
+
+    private:
+        class FileImpl* _impl;
 };
 
 inline bool operator==(const File& a, const File& b)

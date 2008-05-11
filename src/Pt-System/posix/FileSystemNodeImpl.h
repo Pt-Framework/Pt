@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris D�rner                               *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -80,7 +80,9 @@ namespace System {
             {
                 struct stat st;
                 if( 0 != ::stat(path, &st) )
+                {
                     return FileSystemNode::Invalid;
+                }
 
                 if( S_ISREG(st.st_mode) )
                 {

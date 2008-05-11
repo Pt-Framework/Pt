@@ -27,46 +27,60 @@ namespace Pt {
 
 namespace System {
 
-File::File(const std::string& path)
+FileNotFound::FileNotFound(const File& file, const SourceInfo& si)
+: SystemError("File not found: " + file.path(), si)
 {
-    _impl = new FileImpl(path);
+}
+
+
+FileNotFound::~FileNotFound() throw()
+{
+}
+
+
+File::File()
+: _impl(0)
+{
+}
+
+
+File::File(const std::string& path)
+: FileSystemNode(path)
+, _impl(0)
+{
+    if( ! File::exists( path.c_str() ) )
+        throw FileNotFound(*this, PT_SOURCEINFO);
 }
 
 
 File::File(const File& file)
+: FileSystemNode( file.path() )
+, _impl(0)
 {
-    _impl = new FileImpl( *file._impl );
 }
 
 
 File::~File()
 {
-    delete _impl;
 }
 
 
 File& File::operator=(const File& file)
 {
-    *_impl = *(file._impl);
+    this->setPath( file.path() );
     return *this;
-}
-
-
-const std::string& File::path() const
-{
-    return _impl->path();
 }
 
 
 std::size_t File::size() const
 {
-    return _impl->size();
+    return FileImpl::size( path().c_str() );
 }
 
 
 void File::resize(std::size_t newSize)
 {
-    _impl->resize(newSize);
+    FileImpl::resize(path().c_str(), newSize);
 }
 
 
@@ -78,19 +92,20 @@ FileSystemNode::Type File::type() const
 
 void File::remove()
 {
-    _impl->remove();
+    FileImpl::remove( path().c_str() );
 }
 
-/*
+
 void File::copy(const std::string& to) const
 {
-    return _impl->copy(to);
+    return _impl->copy( path().c_str(), to.c_str() );
 }
-*/
 
-void File::move(const std::string& newPath)
+
+void File::move(const std::string& to)
 {
-    _impl->move(newPath);
+    FileImpl::move(path().c_str(), to.c_str());
+    this->setPath(to);
 }
 
 // TODO This should be done on a file system basis. If we'd have a relative file here,
@@ -166,15 +181,9 @@ std::string File::extension() const
 }
 
 
-bool File::create(const char* path)
+void File::create(const char* path)
 {
-    if( FileSystemNode::exists(path) )
-    {
-        return false;
-    }
-
     FileImpl::create(path);
-    return true;
 }
 
 } // namespace System

@@ -26,6 +26,22 @@ namespace Pt {
 
 namespace System {
 
+DirectoryNotFound::DirectoryNotFound(const Directory& dir, const SourceInfo& si)
+: SystemError("Directory not found: " + dir.path(), si)
+{
+}
+
+
+DirectoryNotFound::~DirectoryNotFound() throw()
+{
+}
+
+
+DirectoryIterator::DirectoryIterator()
+: _impl(0)
+{ }
+
+
 DirectoryIterator::DirectoryIterator(const char* path)
 {
     _impl = new DirectoryIteratorImpl(path);
@@ -63,7 +79,6 @@ DirectoryIterator& DirectoryIterator::operator++()
         _impl = 0;
     }
 
-
     return *this;
 }
 
@@ -87,7 +102,7 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 }
 
 
-std::string DirectoryIterator::name() const
+const char* DirectoryIterator::name() const
 {
     if(_impl)
         return _impl->name();
@@ -105,20 +120,35 @@ FileSystemNode& DirectoryIterator::operator*() const
 }
 
 
-Directory::Directory(const std::string& path)
-: _path(path)
+FileSystemNode* DirectoryIterator::operator->() const
 {
+    if(_impl == 0)
+        throw std::out_of_range("directory iterator out of range");
+
+    return &_impl->node();
+}
+
+
+
+
+Directory::Directory()
+: FileSystemNode()
+, _impl(0)
+{
+}
+
+
+Directory::Directory(const std::string& path)
+: FileSystemNode(path)
+, _impl(0)
+{
+    if( ! Directory::exists( path.c_str() ) )
+        throw DirectoryNotFound(*this, PT_SOURCEINFO);
 }
 
 
 Directory::~Directory()
 {
-}
-
-
-const std::string& Directory::path() const
-{
-    return _path;
 }
 
 
@@ -130,13 +160,13 @@ std::size_t Directory::size() const
 
 void Directory::remove()
 {
-    DirectoryImpl::remove(_path);
+    DirectoryImpl::remove( path() );
 }
 
-void Directory::move(const std::string& newPath)
+void Directory::move(const std::string& to)
 {
-    DirectoryImpl::move(_path, newPath);
-    _path = newPath;
+    DirectoryImpl::move(path(), to);
+    this->setPath(to);
 }
 
 
@@ -145,7 +175,7 @@ void Directory::move(const std::string& newPath)
 std::string Directory::dirName() const
 {
     // Find last slash. This separates the last path segment from the rest of the path
-    std::string::size_type separatorPos = _path.find_last_of(Environment::pathSeparator());
+    std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
 
     // If there is no separator, this directory is relative to the current current directory.
     // So an empty path is returned.
@@ -164,28 +194,28 @@ std::string Directory::dirName() const
 // the common base class FileSystemNode.
 std::string Directory::name() const
 {
-    std::string::size_type separatorPos = _path.rfind(Environment::pathSeparator());
+    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
 
     if (separatorPos != std::string::npos)
     {
-        return _path.substr(separatorPos + 1);
+        return path().substr(separatorPos + 1);
     }
     else
     {
-        return _path;
+        return path();
     }
 }
 
 
-bool Directory::create(const char* path)
+FileSystemNode::Type Directory::type() const
 {
-    if( FileSystemNode::exists(path) )
-    {
-        return false;
-    }
+    return FileSystemNode::Directory;
+}
 
+
+void Directory::create(const char* path)
+{
     DirectoryImpl::create(path);
-    return true;
 }
 
 } // namespace System

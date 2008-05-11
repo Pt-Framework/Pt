@@ -18,39 +18,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PTV_SYSTEM_DIRECTORY_H
-#define PTV_SYSTEM_DIRECTORY_H
+#ifndef PT_SYSTEM_DIRECTORY_H
+#define PT_SYSTEM_DIRECTORY_H
 
-#include <Pt/System/System.h>
+#include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
-#include <Pt/System/Api.h>
 #include <string>
-#include <list>
 
 namespace Pt {
 
 namespace System {
 
-/** Cycling through Directories.
-    *
-    * You use the iterator as follows:
-\code
-Directory d("/usr");
-Directory::iterator it = d.begin();
-while (it != d.end())
-{
-    std::cout << "name : " << (*it).path() << std::endl;
-    ++it;
-}
-\endcode
-*/
-class PT_SYSTEM_API DirectoryIterator 
+class Directory;
+
+class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
-        DirectoryIterator()
-        : _impl(0)
-        { }
+        DirectoryNotFound(const Directory& dir, const SourceInfo& si);
+
+        ~DirectoryNotFound() throw();
+};
+
+/** @brief Cycling through Directories.
+
+    You use the iterator as follows:
+    \code
+    Directory d("/usr");
+    Directory::iterator it = d.begin();
+    while (it != d.end())
+    {
+        std::cout << "name : " << (*it).path() << std::endl;
+        ++it;
+    }
+    \endcode
+*/
+class PT_SYSTEM_API DirectoryIterator
+{
+    public:
+        DirectoryIterator();
 
         DirectoryIterator(const char* path);
 
@@ -68,49 +74,51 @@ class PT_SYSTEM_API DirectoryIterator
         bool operator!=(const DirectoryIterator& it) const
         { return _impl != it._impl; }
 
-        std::string name() const;
+        const char* name() const;
 
         FileSystemNode& operator*() const;
+
+        FileSystemNode* operator->() const;
 
     private:
         class DirectoryIteratorImpl* _impl;
 };
 
-/** Directory Operations.
- This class contains methods to create, move, delete directories and gives to possibility to iterate over the contents of the directory.
+/** @brief Directory Operations.
+    This class contains methods to create, move, delete directories and 
+    gives to possibility to iterate over the contents of the directory.
 
-!Iterator Example:
-
-\code
-Directory d("/usr");
-Directory::iterator it = d.begin();
-while (it != d.end())
-{
-    std::cout << "name : " << (*it).path() << std::endl;
-    ++it;
-}
-\endcode
+    Iterator Example:
+    \code
+    Directory d("/usr");
+    Directory::iterator it = d.begin();
+    while (it != d.end())
+    {
+        std::cout << "name : " << (*it).path() << std::endl;
+        ++it;
+    }
+    \endcode
 */
 class PT_SYSTEM_API Directory : public FileSystemNode 
 {
+    friend class DirectoryIteratorImpl;
+
     public:
         typedef DirectoryIterator Iterator;
 
-        Directory(const std::string& path);
+        explicit Directory(const std::string& path);
 
         ~Directory();
 
-        virtual const std::string& path() const;
-
         virtual std::size_t size() const;
 
-        //! Returns an iterator to the node in the directory.
+        //! @brief Returns an iterator to the node in the directory.
         DirectoryIterator begin() const
         {
-            return DirectoryIterator( _path.c_str() );
+            return DirectoryIterator( path().c_str() );
         }
 
-        //! Returns an iterator to the end of the directory.
+        //! @brief Returns an iterator to the end of the directory.
         DirectoryIterator end() const
         {
             return DirectoryIterator();
@@ -120,38 +128,39 @@ class PT_SYSTEM_API Directory : public FileSystemNode
 
         virtual void move(const std::string& newPath);
 
-        /**
-            * @brief Returns the directory in which this directory resides.
-            *
-            * If no directory is specified when the Directory object is created, so the
-            * directory is seen as relative to the current directory, an empty string is
-            * returned. If the directory is contained in the root directory of the file
-            * system, for linux a slash ("/") is returned.
-            *
-            * A returned directory always ends with a trailing path separator character.
-            * (A backslash in Windows and a slash in Linux, for example.)
-            *
-            * @return The directory in which this directory resides.
-            */
+        /** @brief Returns the directory in which this directory resides.
+
+            If no directory is specified when the Directory object is created, so the
+            directory is seen as relative to the current directory, an empty string is
+            returned. If the directory is contained in the root directory of the file
+            system, for linux a slash ("/") is returned.
+
+            A returned directory always ends with a trailing path separator character.
+            (A backslash in Windows and a slash in Linux, for example.)
+
+            @return The directory in which this directory resides.
+        */
         virtual std::string dirName() const;
 
-        /**
-            * @brief Returns the name of thi directory, excluding the complete path
-            * except the last element -- the directory name.
-            *
-            * @return The directory name of this Directory object.
-            */
+        /** @brief Returns the name of the directory excluding the path.
+        */
         virtual std::string name() const;
 
-        virtual Type type() const
+        virtual Type type() const;
+
+    public:
+        static void create(const char* path);
+
+        static bool exists(const char* path)
         {
-            return FileSystemNode::Directory;
+            return FileSystemNode::stat(path) == FileSystemNode::Directory;
         }
 
-        static bool create(const char* path);
+    protected:
+        Directory();
 
     private:
-        std::string _path;
+        class DirectoryImpl* _impl;
 };
 
 }

@@ -28,21 +28,29 @@ class DirectoryTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
-            Pt::System::Directory dirx("xxxDIR");
             if( Pt::System::FileSystemNode::exists("xxxDIR") )
+            {
+                Pt::System::Directory dirx("xxxDIR");
                 dirx.remove();
+            }
 
-            Pt::System::Directory diry("yyyDIR");
             if( Pt::System::FileSystemNode::exists("yyyDIR") )
+            {
+                Pt::System::Directory diry("yyyDIR");
                 diry.remove();
+            }
 
-            Pt::System::File f1("TestFile1");
             if( Pt::System::FileSystemNode::exists("TestFile1") )
+            {
+                Pt::System::File f1("TestFile1");
                 f1.remove();
+            }
 
-            Pt::System::File f2("TestFile2");
             if( Pt::System::FileSystemNode::exists("TestFile2") )
+            {
+                Pt::System::File f2("TestFile2");
                 f2.remove();
+            }
         }
 
     protected:
@@ -173,6 +181,15 @@ void DirectoryTest::removeFile()
 
 void DirectoryTest::DirectoryIterator()
 {
+    //printf("--------------\n");
+    Pt::System::Directory dir1(".");
+    Pt::System::DirectoryIterator it = dir1.begin();
+    for (; it != dir1.end(); ++it)
+    {
+        std::string name = it->path();
+        //this->reportMessage(name);
+    }
+
 /*	std::string dir("yyyDIR");
     std::string file(dir + Pt::System::Directory::separator() + "file");
 

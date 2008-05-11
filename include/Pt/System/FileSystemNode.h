@@ -28,8 +28,12 @@ namespace Pt {
 
 namespace System {
 
+/** @brief Base class for file system objects
+*/
 class PT_SYSTEM_API FileSystemNode
 {
+    friend class DirectoryIteratorImpl;
+
     public:
         enum Type
         {
@@ -38,6 +42,7 @@ class PT_SYSTEM_API FileSystemNode
             Directory = 2
         };
 
+        //! @brief Destructor
         virtual ~FileSystemNode()
         {}
 
@@ -45,12 +50,13 @@ class PT_SYSTEM_API FileSystemNode
 
         virtual std::string name() const = 0;
 
-        //! Returns the path of the file system node.
-        virtual const std::string& path() const = 0;
+        //! @brief Returns the path of the file system node
+        const std::string& path() const
+        { return _path; }
 
         virtual std::string dirName() const = 0;
 
-        //! Returns the size of the file system node.
+        //! @brief Returns the size of the file system node
         virtual std::size_t size() const = 0;
 
         virtual void remove() = 0;
@@ -64,7 +70,19 @@ class PT_SYSTEM_API FileSystemNode
 
         static bool exists(const char* path);
 
-        static FileSystemNode* create(const char* path);
+    protected:
+        FileSystemNode()
+        {}
+
+        explicit FileSystemNode(const std::string& path)
+        : _path(path)
+        {}
+
+        void setPath(const std::string& path)
+        { _path = path; }
+
+    private:
+        std::string _path;
 };
 
 inline bool FileSystemNode::exists(const char* path)

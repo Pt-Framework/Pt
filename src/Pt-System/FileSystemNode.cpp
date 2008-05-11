@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Dürner                                  *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -21,12 +21,6 @@
 namespace Pt {
 
 namespace System {
-
-FileSystemNode* FileSystemNode::create(const char* path)
-{
-    return FileSystemNodeImpl::create(path);
-}
-
 
 FileSystemNode::Type FileSystemNode::stat(const char* path)
 {

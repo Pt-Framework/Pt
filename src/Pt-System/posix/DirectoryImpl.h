@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *   Copyright (C) 2006-2007 Tobias Mueller                                *
  *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
@@ -18,69 +18,59 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Api.h"
+#include "Pt/System/File.h"
+#include "Pt/System/Directory.h"
 #include "Pt/System/FileSystemNode.h"
-
 #include <string>
-
 #include <dirent.h>
-
 
 namespace Pt {
 
 namespace System {
 
-    class FileSystemNode;
+class PT_API DirectoryIteratorImpl
+{
+    public:
+        DirectoryIteratorImpl();
+
+        DirectoryIteratorImpl(const char* path);
+
+        ~DirectoryIteratorImpl();
+
+        const char* name() const;
+
+        int ref();
+
+        int deref();
+
+        bool advance();
+
+        FileSystemNode& node();
+
+    private:
+        unsigned int _refs;
+        std::string _path;
+        FileSystemNode* _node;
+        File _file;
+        Directory _dir;
+        DIR* _handle;
+        ::dirent* _current;
+};
 
 
-    class PT_API DirectoryIteratorImpl {
-        public:
-            DirectoryIteratorImpl();
+class PT_API DirectoryImpl  
+{
+    public:
+        static void create(const std::string& path);
 
-            DirectoryIteratorImpl(const char* path);
+        static void remove(const std::string& path);
 
-            ~DirectoryIteratorImpl();
+        static void move(const std::string& oldName, const std::string& newName);
 
-            int ref();
+        static bool exists(const std::string& path);
 
-            int deref();
-
-            bool advance();
-
-            const char* path() const
-            { return _path.c_str(); }
-
-            FileSystemNode& node();
-
-            std::string name() const;
-
-        private:
-            unsigned int _refs;
-            std::string _path;
-            FileSystemNode* _node;
-            DIR* _handle;
-            ::dirent* _current;
-    };
-
-
-    class PT_API DirectoryImpl {
-        public:
-            DirectoryImpl() {}
-            ~DirectoryImpl() {}
-
-        public:
-            static void create(const std::string& path);
-
-            static void remove(const std::string& path);
-
-            static void move(const std::string& oldName, const std::string& newName);
-
-            static bool exists(const std::string& path);
-
-            static void changeCurrent(const std::string& dirpath);
-
-    };
+        static void changeCurrent(const std::string& dirpath);
+};
 
 } // namespace System
 
