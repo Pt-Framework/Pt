@@ -164,7 +164,7 @@ class SerialDeviceImpl : public IODeviceImpl
         size_t _timeOut;
         
         // some variables to overcome Panic 14 in synchronous read
-        HBufC8* _hBuf;
+        char* _buff;
         TPtr8 _tempBuffer;     
         
         friend class ReadResultSymbian;

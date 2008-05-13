@@ -36,7 +36,7 @@ namespace System {
 
 SerialDeviceImpl::SerialDeviceImpl( ) 
 : _socketConnected(false), _servConnected(false), _timeOut(IOResult::WaitInfinite),
-_hBuf(0), _tempBuffer(0,0,0)
+_buff(0), _tempBuffer(0,0,0)
 {
 }
 
@@ -45,8 +45,8 @@ SerialDeviceImpl::~SerialDeviceImpl()
 {
     close();
 
-    if (_hBuf)
-        delete _hBuf;
+    if (_buff)
+        delete[] _buff;
 }
 
 void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
@@ -188,7 +188,7 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
     _readResult.attach(buffer, n);
     _readResult.allocSymbianBuffer(n);
     
-    if ((size_t)_readResult._hBuf->Des().MaxSize() != n)
+    if ((size_t)_readResult._tempBuffer.MaxSize() != n)
     {
         throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
     }
@@ -226,21 +226,22 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
 
 size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 {
-    if (_hBuf)
-        delete _hBuf;
+    if (_buff)
+    {
+        delete[] _buff;
+        _buff = 0;
+    }
     
-    TRAPD(allocError, _hBuf = HBufC8::NewL(count));
-    if (allocError)
-        throw IOError("Failed to allocate Symbian HBufC8.", PT_SOURCEINFO);  
+    _buff = new char[count];
     
-    if ((size_t)_hBuf->Des().MaxSize() != count)
+    _tempBuffer.Set((TUint8*)_buff, 0, count);
+    _tempBuffer.Zero();
+    
+    if ((size_t)_tempBuffer.MaxSize() != count)
     {
         throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
     }
 
-    _tempBuffer.Set(_hBuf->Des());
-    _tempBuffer.Zero();
-    
     TRequestStatus status;
     _listenSock.Read(_tempBuffer, status);
     
@@ -264,7 +265,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     {
         throw IOError("Read too much data.", PT_SOURCEINFO);                                        
     }
-    
+
     char* dst = buffer;
     for (int j = 0; j < _tempBuffer.Size(); j++)
         dst[j] = _tempBuffer[j];  
