@@ -34,10 +34,10 @@ namespace Pt {
 
 namespace System {
 
-    class WriteResultPosix : public IOResultImpl
+    class WriteResult : public IOResultImpl
     {
         public:
-            WriteResultPosix()
+            WriteResult()
             {}
 
             virtual void add(fd_set& readFds, fd_set& writeFds)
@@ -56,25 +56,6 @@ namespace System {
                 return select( this->fd(), rfds, fds, msecs);
             }
     };
-
-    class WriteResultSymbian : public IOResultImpl
-    {
-        public:
-            WriteResultSymbian()
-            {}
-
-            virtual void add(fd_set& readFds, fd_set& writeFds)
-            {  
-                throw IOError("This method is not allowed on a Symbian IOResult instance.", PT_SOURCEINFO);                    
-            }
-
-        protected:
-            virtual bool _wait(unsigned int msecs)
-            {
-                return false;
-            }
-    };    
-    
     
 }//namespace System
 

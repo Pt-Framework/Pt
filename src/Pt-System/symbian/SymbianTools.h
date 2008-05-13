@@ -20,10 +20,12 @@
 #ifndef PT_SYMBIANTOOLS_H_
 #define PT_SYMBIANTOOLS_H_
 
+#include <vector>
+#include <pthread.h>
+
 // Symbian native APIs
 #include <e32base.h>
 #include <f32file.h>
-#include <vector>
 
 namespace Pt {
 
@@ -79,6 +81,161 @@ static std::string TPtrC2string(TPtrC src)
     
     return std::string(&dst[0]);
 }
+
+// msecs == -1 => wait infinitely
+static bool WaitForRequestWithTimeOut(TRequestStatus& status, int msecs)
+{
+    if (msecs == -1)
+    {
+        User::WaitForRequest(status);  
+        return (status.Int() == KErrNone || 
+                status.Int() == KErrEof);                    
+    }
+    
+    RTimer timer;
+    TRequestStatus timerStatus;
+    timer.CreateLocal();
+    timer.After(timerStatus, msecs * 1000);
+    User::WaitForRequest(status, timerStatus);  
+    
+    TInt timerCompletionCode = timerStatus.Int();
+    TInt readCompletionCode = status.Int();
+    
+    // timed out and read is not finished
+    if (timerCompletionCode == KErrNone &&
+        readCompletionCode == KRequestPending)
+    {                    
+        return false;
+    }
+
+    // cancel timer if read is done 
+    if ((readCompletionCode != KRequestPending) &&
+        timerCompletionCode != KErrNone)
+    {
+        timer.Cancel();
+    }
+    
+    return (readCompletionCode == KErrNone || 
+            readCompletionCode == KErrEof);                
+}
+
+class StatusRequestWatcher
+{
+public:
+    struct NotificationListener
+    {
+        virtual void OnStatusRequestComplete(StatusRequestWatcher& src) = 0;
+    };
+    
+    StatusRequestWatcher(const TRequestStatus& status)
+    : _status(status), _running(false), _notificationListener(0)
+    {
+        ::pthread_mutex_init(&_mutex, NULL);
+        ::pthread_cond_init(&_cond, NULL);
+        ::pthread_cond_init(&_startCond, NULL);        
+    }
+    
+    ~StatusRequestWatcher()
+    {
+        stop();
+        
+        ::pthread_cond_destroy(&_startCond);
+        ::pthread_cond_destroy(&_cond);
+        ::pthread_mutex_destroy(&_mutex);
+    }
+    
+    // do not call when watcher is running
+    void setNotificationListener(NotificationListener* notificationListener)
+    { 
+        if (_running)
+        {
+            throw std::logic_error("Watcher already running" + PT_SOURCEINFO);
+        }
+        _notificationListener = notificationListener; 
+    }
+    
+    bool start()
+    {
+        if (_running)
+            return false;
+        
+        int rc = ::pthread_create(&_thread, NULL, WatcherThreadEntry, 
+                reinterpret_cast<void*>(this));
+        
+        if (!rc)
+        {
+            ::pthread_mutex_lock(&_mutex);
+            ::pthread_cond_wait(&_startCond, &_mutex);
+            ::pthread_mutex_unlock(&_mutex);
+        
+            return true;
+        }
+                       
+        return false;
+    }
+    
+    bool stop()
+    {
+        if (!_running)
+            return false;
+        
+        ::pthread_mutex_lock(&_mutex);
+        _running = false;
+        ::pthread_mutex_unlock(&_mutex);
+        
+        int rc = ::pthread_join(_thread, NULL);
+        
+        return rc == 0;
+    }
+    
+private:
+    static void* WatcherThreadEntry(void* threadID)
+    {
+        StatusRequestWatcher* self = 
+            reinterpret_cast<StatusRequestWatcher*>(threadID);
+    
+        self->watcherThread();
+        
+        ::pthread_exit(NULL);
+        
+        return NULL;
+    }
+
+    void watcherThread()
+    {
+        ::pthread_mutex_lock(&_mutex);
+        _running = true;
+        ::pthread_mutex_unlock(&_mutex);
+        
+        ::pthread_cond_signal(&_startCond);
+        
+        while (_running && _status.Int() == KRequestPending)
+        {
+            // Wait a bit, otherwise this is a very busy loop
+            User::After(1000);
+            //printf("Waiting for request\n");
+        }
+        
+        if (_notificationListener)
+            _notificationListener->OnStatusRequestComplete(*this);
+        
+        ::pthread_mutex_lock(&_mutex);
+        _running = false;
+        ::pthread_mutex_unlock(&_mutex);
+    }
+    
+    const TRequestStatus& _status;
+    
+    pthread_mutex_t _mutex;
+    pthread_cond_t _cond;
+    pthread_cond_t _startCond;
+    pthread_t _thread;
+    
+    bool _running;
+
+    NotificationListener* _notificationListener;
+    
+};
 
 // obsolete
 //static void rename(const std::string& oldName, const std::string& newName)

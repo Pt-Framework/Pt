@@ -42,12 +42,14 @@ namespace System {
     The purpose of this class is to allow to read data from Bluetooth devices
     without the need to access any real COM port.
     
+    Explanation:
     It seems that serial communication through Bluetooth virtual COM port
     on Symbian is not possible with the S60 SDK. The API (btdefcommport.h)
     which will let you map a Bluetooth device address to a virtual COM port 
-    has been removed from the SDK in version 8 due to unknown reasons:
+    has been removed from the SDK in version 8 due to unknown reasons.
     
-    There are a number of architectural changes in the Bluetooth APIs 
+    Quote from the S60 SDK (3rd edition):
+    "There are a number of architectural changes in the Bluetooth APIs 
     provided by Symbian OS in v8.0, affecting both source and binary 
     compatibility. The Bluetooth Registry API managing Bluetooth device 
     registry has been removed (and replaced by the RBTRegServ, 
@@ -57,7 +59,7 @@ namespace System {
     legacy serial port applications has also been removed, and there 
     are changes in the Bluetooth Security Manager API, Bluetooth Device API, 
     and in Bluetooth sockets. 
-    See S60 Platform: Source and Binary Compatibility for more details.    
+    See S60 Platform: Source and Binary Compatibility for more details." 
     
 */
 class SerialDeviceImpl : public IODeviceImpl
@@ -82,8 +84,10 @@ class SerialDeviceImpl : public IODeviceImpl
         // Works as expected
         IOResult& beginRead(char* buffer, size_t n, bool& eof);
 
+        // Works as expected
         size_t endRead(IOResult& result, bool& eof);
 
+        // Works as expected
         size_t read( char* buffer, size_t count, bool& eof );
 
         // Currently unsupported
@@ -128,8 +132,10 @@ class SerialDeviceImpl : public IODeviceImpl
         // Currently unsupported
         SerialDevice::FlowControl flowControl() const;
 
+        // Works as expected
         void setTimeout( size_t msec );
 
+        // Works as expected
         size_t timeout() const;
 
         // Currently unsupported

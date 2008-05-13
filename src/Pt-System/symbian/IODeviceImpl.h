@@ -24,7 +24,8 @@
 
 #include "ReadResult.h"
 #include "WriteResult.h"
-
+#include "ReadResultSymbian.h"
+#include "WriteResultSymbian.h"
 
 namespace Pt {
 
@@ -62,8 +63,8 @@ namespace System {
 
         private:
             int _fd;
-            ReadResultPosix _readResult;
-            WriteResultPosix _writeResult;
+            ReadResult _readResult;
+            WriteResult _writeResult;
     };
 
 }//namespace System

@@ -27,6 +27,9 @@
 // symbian APIs
 #include <bt_sock.h>
 
+// Helper
+#include "SymbianTools.h"
+
 namespace Pt {
 
 namespace System {
@@ -190,10 +193,14 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
         throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
     }
     
+    TRequestStatus& status = _readResult._status;
     _listenSock.Read(_readResult._tempBuffer, _readResult._status);
     
     // How do we know yet?
     eof = false;
+    
+    // TODO: check result
+    bool res = _readResult.start();    
     
     return _readResult;
 }
@@ -203,11 +210,16 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     if (_readResult._status.Int() == KErrNone || 
         _readResult._status.Int() == KErrEof)
     {
+        // TODO: check result
+        bool res = _readResult.end();    
+
         eof = _readResult._status.Int() == KErrEof;
         return _readResult.transferData();
     }
-
-    throw IOError("There is still a pending read. Data can not be fetched yet.", PT_SOURCEINFO);                                                        
+    else if (_readResult.isReadPending())
+    {
+        throw IOError("There is still a pending read. Data can not be fetched yet.", PT_SOURCEINFO);                                                        
+    }
     
     return 0;
 }
@@ -233,7 +245,12 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
     _listenSock.Read(_tempBuffer, status);
     
     //User::WaitForRequest(status);
-    bool res = ReadResultSymbian::waitForRequestWithTimeOut(status, _timeOut);
+    bool res;
+    
+    if (_timeOut == IOResult::WaitInfinite)
+        res = SymbianTools::WaitForRequestWithTimeOut(status, -1);
+    else
+        res = SymbianTools::WaitForRequestWithTimeOut(status, _timeOut);
     
     if (status.Int() != KErrNone && 
         status.Int() != KErrEof)

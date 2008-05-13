@@ -38,10 +38,10 @@ namespace Pt {
 
 namespace System {
 
-    class ReadResultPosix : public IOResultImpl
+    class ReadResult : public IOResultImpl
     {
         public:
-            ReadResultPosix()
+            ReadResult()
             {}
 
             virtual void add(fd_set& readFds, fd_set& writeFds)
@@ -60,123 +60,6 @@ namespace System {
                 return select( this->fd(), fds, wfds, msecs);
             }
     };
-
-    // This class is used in the serial device implementation for Symbian
-    class ReadResultSymbian : public IOResultImpl
-    {
-        public:
-            ReadResultSymbian()
-            : _hBuf(0), _tempBuffer(0,0,0)
-            {
-                memset(&_status, 0, sizeof(_status));
-            }
-
-            ~ReadResultSymbian()
-            {
-                freeSymbianBuffer();
-            }
-
-            virtual void add(fd_set& readFds, fd_set& writeFds)
-            {  
-                throw IOError("This method is not allowed on a Symbian IOResult instance.", PT_SOURCEINFO);                    
-            }
-
-        protected:
-            virtual bool _wait(unsigned int msecs)
-            {
-                return waitForRequestWithTimeOut(_status, msecs);
-            }
-        
-        private:            
-            bool isReadPending()
-            {
-                return (_status.Int() != KErrNone && _status.Int() != KErrEof);               
-            }
-            
-            void allocSymbianBuffer(size_t size)
-            {
-                freeSymbianBuffer();
-
-                TRAPD(allocError, _hBuf = HBufC8::NewL(size));
-                if (allocError)
-                {
-                    throw IOError("Failed to allocate Symbian HBufC8.", PT_SOURCEINFO);                                        
-                }
-                
-                _tempBuffer.Set(_hBuf->Des());        
-                _tempBuffer.Zero();
-            }
-            
-            void freeSymbianBuffer()
-            {
-                if (_hBuf)
-                {
-                    delete _hBuf;
-                    _hBuf = 0;
-                }
-            }
-            
-            size_t transferData()
-            {
-                if ((unsigned)_tempBuffer.Size() > bufferSize())
-                {
-                    throw IOError("Read too much data.", PT_SOURCEINFO);                                        
-                }
-                
-                char* dst = this->buffer();
-                for (int j = 0; j < _tempBuffer.Size(); j++)
-                    dst[j] = _tempBuffer[j];  
-                
-                return (size_t)_tempBuffer.Size();
-            }
-            
-            static bool waitForRequestWithTimeOut(TRequestStatus& status, unsigned int msecs)
-            {
-                if (msecs == IOResult::WaitInfinite)
-                {
-                    User::WaitForRequest(status);  
-                    return (status.Int() == KErrNone || 
-                            status.Int() == KErrEof);                    
-                }
-                
-                RTimer timer;
-                TRequestStatus timerStatus;
-                timer.CreateLocal();
-                timer.After(timerStatus, msecs * 1000);
-                User::WaitForRequest(status, timerStatus);  
-                
-                TInt timerCompletionCode = timerStatus.Int();
-                TInt readCompletionCode = status.Int();
-                
-                // timed out and read is not finished
-                if (timerCompletionCode == KErrNone &&
-                    readCompletionCode != KErrNone &&
-                    readCompletionCode != KErrEof)
-                {
-                    
-                    return false;
-                }
-
-                // cancel timer if read is done 
-                if ((readCompletionCode == KErrNone ||
-                    readCompletionCode == KErrEof) &&
-                    timerCompletionCode != KErrNone)
-                {
-                    timer.Cancel();
-                }
-                
-                return (readCompletionCode == KErrNone || 
-                        readCompletionCode == KErrEof);                
-            }
-
-            // symbian buffer
-            HBufC8* _hBuf;
-            TPtr8 _tempBuffer;  
-            TRequestStatus _status;
-            
-            // tight coupling is ok for our purposes
-            friend class SerialDeviceImpl;
-    };    
     
 }//namespace System
 
