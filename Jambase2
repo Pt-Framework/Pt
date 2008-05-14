@@ -53,7 +53,7 @@ rule Slashify
         {
             _r = $(_s:B) ;
         }
-        
+
         _s = $(_s:D) ;
     }
 
@@ -61,9 +61,10 @@ rule Slashify
     {
         _r = $(_s:D)"\\"$(_r) ;
     }
-    
+
     return $(_r) ;
 }
+
 
 rule ConfigureEcho
 {
@@ -76,13 +77,13 @@ rule ConfigureEcho
                 Echo "Checking for "$(1)" ..."$(3) ;
                 $(1) = $(3) ;
                 local _s = [ Slashify $(3) ] ;
-                WriteFile Jamconfig : $(1)" ?= "\"$(_s)\"" ;"  ;
+                WriteFile config.jam : $(1)" ?= "\"$(_s)\"" ;"  ;
             }
             else
             {
                 Echo "Checking for "$(1)"... yes" ;
                 $(1) = $(2) ;
-                WriteFile Jamconfig : $(1)" ?= "$(2)" ;"  ;
+                WriteFile config.jam : $(1)" ?= "$(2)" ;"  ;
             }
         }
         else
@@ -230,10 +231,6 @@ rule CheckC++
 }
 
 
-###############################################################################
-# Detect compile and link configuration
-###############################################################################
-
 for _arg in $(ARGV)
 {
     if $(_arg) = configure
@@ -242,7 +239,7 @@ for _arg in $(ARGV)
     }
 }
 
-JAM_JAMCONFIG = [ CHECK_IF_FILE Jamconfig ] ;
+JAM_JAMCONFIG = [ CHECK_IF_FILE config.jam ] ;
 
 if ! $(JAM_JAMCONFIG)
 {
@@ -253,138 +250,114 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
-if $(CONFIGURE)
+rule CheckToolset
 {
-    TryCommand $(RM) "Jamconfig" ;
-
-    #
-    # TODO: host configuration
-    #
-    if $(NT)
+    if $(CONFIGURE)
     {
-        MV = move /y ;
-        CP = copy ;
-        RM = del /f/q ;
-        RMDIR = rmdir /s/q ;
-        SLASH = \\ ;
-    }
-    else
-    {
-        CHMOD = chmod ;
-        CHGRP = chgrp ;
-        CHOWN = chown ;
-    }
-
-    #
-    # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
-    #
-    if ! $(TOOLSET)
-    {
-        local _cmd ;
-        local _out = check$(SUFEXE) ;
-        local _obj = check$(SUFOBJ) ;
-
-        TryCommand $(RM) "check.c" ;
-
-        WriteFile check.c : "#include <string.h>" ;
-        WriteFile check.c : "int main() { return 0; } " ;
-
-        if [ TryCommand "cl /Fo$(_obj) /Fe$(_out) check.c" ]
+        #
+        # TODO: host configuration
+        #
+        if $(NT)
         {
-            WriteFile Jamconfig : "TOOLSET = msvc ;"  ;
-            Echo "Checking for toolset ...msvc" ;
-        }
-        else if [ TryCommand "xlC -o "$(_out)" check.c" ]
-        {
-            WriteFile Jamconfig : "TOOLSET = xlc ;"  ;
-            Echo "Checking for toolset ...xlc" ;
-            Exit "NOT IMPLEMENTED" ;
-        }
-        else if [ TryCommand "CC -o "$(_out)" check.c" ]
-        {
-            WriteFile Jamconfig : "TOOLSET = sunpro ;"  ;
-            Echo "Checking for toolset ...sunpro" ;
-        }
-        else if [ TryCommand "gcc -o "$(_out)" check.c" ]
-        {
-            WriteFile Jamconfig : "TOOLSET = gcc ;"  ;
-            Echo "Checking for toolset ...gcc" ;
-        }
-        else if [ TryCommand "cc -o "$(_out)" check.c" ]
-        {
-            WriteFile Jamconfig : "TOOLSET = cc ;"  ;
-            Echo "Checking for toolset ...cc" ;
+            MV = move /y ;
+            CP = copy ;
+            RM = del /f/q ;
+            RMDIR = rmdir /s/q ;
+            SLASH = \\ ;
         }
         else
         {
-            Exit "Checking for toolset ... failed" ;
+            CHMOD = chmod ;
+            CHGRP = chgrp ;
+            CHOWN = chown ;
         }
 
-        TryCommand $(RM) "check.c" ;
-        TryCommand $(RM) $(_out) ;
-        TryCommand $(RM) $(_obj) ;
+        #
+        # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
+        #
+        if ! $(TOOLSET)
+        {
+            local _cmd ;
+            local _out = check$(SUFEXE) ;
+            local _obj = check$(SUFOBJ) ;
+
+            TryCommand $(RM) "check.c" ;
+
+            WriteFile check.c : "#include <string.h>" ;
+            WriteFile check.c : "int main() { return 0; } " ;
+
+            if [ TryCommand "cl /Fo$(_obj) /Fe$(_out) check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = msvc ;"  ;
+                TOOLSET = msvc ;
+                Echo "Checking for toolset ...msvc" ;
+            }
+            else if [ TryCommand "xlC -o "$(_out)" check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = xlc ;"  ;
+                TOOLSET = xlc ;
+                Echo "Checking for toolset ...xlc" ;
+                Exit "NOT IMPLEMENTED" ;
+            }
+            else if [ TryCommand "CC -o "$(_out)" check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = sunpro ;"  ;
+                TOOLSET = sunpro ;
+                Echo "Checking for toolset ...sunpro" ;
+            }
+            else if [ TryCommand "gcc -o "$(_out)" check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = gcc ;"  ;
+                TOOLSET = gcc ;
+                Echo "Checking for toolset ...gcc" ;
+            }
+            else if [ TryCommand "cc -o "$(_out)" check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = cc ;"  ;
+                TOOLSET = cc ;
+                Echo "Checking for toolset ...cc" ;
+            }
+            else
+            {
+                Exit "Checking for toolset ... failed" ;
+            }
+
+            TryCommand $(RM) "check.c" ;
+            TryCommand $(RM) $(_out) ;
+            TryCommand $(RM) $(_obj) ;
+        }
+        else
+        {
+            Echo "Using toolset "$(TOOLSET) ;
+            WriteFile config.jam : TOOLSET" = "$(TOOLSET)" ;"  ;
+        }
     }
-    else
+
+    if ! $(TOOLSET)
     {
-        Echo "Using toolset "$(TOOLSET) ;
-        WriteFile Jamconfig : TOOLSET" = "$(TOOLSET)" ;"  ;
+        Exit "Checking for TOOLSET ...FAILED !!!" ;
     }
+
+    JamInclude $(TOOLSET:LS=".jam") ;
 }
-
-include Jamconfig ;
-
-if ! $(TOOLSET)
-{
-    Exit "Checking for TOOLSET ... FAILED !!!" ;
-}
-
-JamInclude $(TOOLSET:LS=".jam") ;
-
-
-###############################################################################
-# Project specific configuration
-###############################################################################
-
-CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
-                              "int main() { return 0; }" ;
-
-CheckCc WITH_UNIX_SOCKETS : "#include <sys/types.h>"
-                            "#include <sys/socket.h>"
-                            "int main() { return socket(0,0,0); }"
-                          : ""
-                          : socket ;
-
-CheckCc WITH_UNIX_NSL : "#include <netdb.h>"
-                        "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                      : ""
-                      : nsl ;
-
-CheckC++ WITH_WINMM : "#include <windows.h>"
-                      "#include <mmsystem.h>"
-                      "int main() { return timeGetTime(); }" 
-                    : ""
-                    : winmm.lib ;
-
-CheckC++ WITH_MMTIMER : "#include <windows.h>"
-                        "#include <mmsystem.h>"
-                        "int main() { return timeGetTime(); }" 
-                      : ""
-                      : mmtimer.lib ;
-
-#ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
-#ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;
-#ConfigureDefine test.h : PT_VERSION_REV : 0 ;
-#ConfigureDefine test.h : PT_WITH_STD_LOCALE : $(WITH_STD_LOCALE) ;
-#ConfigureDefine test.h : PT_WITH_WINMM : $(WITH_WINMM) ;
 
 #Exit "----------------DONE--------------------" ;
 
+###############################################################################
+# Include main Jamfile and Jamconf
+###############################################################################
+
 if $(CONFIGURE)
 {
+    TryCommand $(RM) "config.jam" ;
+
+    include Jamconf ;
+
     Exit "Run jam now to build targets." ;
 }
 
-###############################################################################
-# Include main Jamfile
-###############################################################################
+include config.jam ;
+
+JamInclude $(TOOLSET:LS=".jam") ;
+
 include Jamfile ;
