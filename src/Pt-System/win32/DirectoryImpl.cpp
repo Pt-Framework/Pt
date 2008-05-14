@@ -49,7 +49,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 
     firstFile += '*';
 
-    _std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
+    std::basic_string<TCHAR> tpath = win32::fromMultiByte( firstFile );
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
 
     if(_findHandle == INVALID_HANDLE_VALUE)
@@ -95,9 +95,12 @@ bool DirectoryIteratorImpl::advance()
     {
         ::FindClose(_findHandle);
         _findHandle = INVALID_HANDLE_VALUE;
+        _name.clear();
+        return false;
     }
 
-    return _findHandle != INVALID_HANDLE_VALUE;
+    _name = win32::toMultiByte( _current.cFileName );
+    return true;
 }
 
 
@@ -137,8 +140,7 @@ const char* DirectoryIteratorImpl::name() const
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
     {
-        _tname = win32::toMultiByte( _current.cFileName );
-        return _tname.c_str();
+        return _name.c_str();
     }
 
     return "";
