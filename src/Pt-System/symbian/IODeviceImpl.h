@@ -24,8 +24,6 @@
 
 #include "ReadResult.h"
 #include "WriteResult.h"
-#include "ReadResultSymbian.h"
-#include "WriteResultSymbian.h"
 
 namespace Pt {
 
