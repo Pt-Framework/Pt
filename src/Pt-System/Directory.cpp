@@ -37,6 +37,131 @@ DirectoryNotFound::~DirectoryNotFound() throw()
 }
 
 
+Directory::Directory()
+: FileSystemNode()
+, _impl(0)
+{
+}
+
+
+Directory::Directory(const std::string& path)
+: FileSystemNode(path)
+, _impl(0)
+{
+    if( ! Directory::exists( path.c_str() ) )
+        throw DirectoryNotFound(*this, PT_SOURCEINFO);
+}
+
+
+Directory::~Directory()
+{
+}
+
+
+std::size_t Directory::size() const
+{
+    return 0;
+}
+
+
+DirectoryIterator Directory::begin() const
+{
+    return DirectoryIterator( path().c_str() );
+}
+
+
+DirectoryIterator Directory::end() const
+{
+    return DirectoryIterator();
+}
+
+
+void Directory::remove()
+{
+    DirectoryImpl::remove( path() );
+}
+
+void Directory::move(const std::string& to)
+{
+    DirectoryImpl::move(path(), to);
+    this->setPath(to);
+}
+
+
+// TODO This is identical to File::parentPath(). Maybe this should be moved into
+// the common base class FileSystemNode.
+std::string Directory::dirName() const
+{
+    // Find last slash. This separates the last path segment from the rest of the path
+    std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
+
+    // If there is no separator, this directory is relative to the current current directory.
+    // So an empty path is returned.
+    if (separatorPos == std::string::npos)
+    {
+        return "";
+    }
+
+    // Include trailing separator to be able to distinguish between no path ("") and a path
+    // which is relative to the root ("/"), for example.
+    return path().substr(0, separatorPos + 1);
+}
+
+
+// TODO This is identical to File::name(). Maybe this should be moved into
+// the common base class FileSystemNode.
+std::string Directory::name() const
+{
+    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
+
+    if (separatorPos != std::string::npos)
+    {
+        return path().substr(separatorPos + 1);
+    }
+    else
+    {
+        return path();
+    }
+}
+
+
+FileSystemNode::Type Directory::type() const
+{
+    return FileSystemNode::Directory;
+}
+
+
+void Directory::create(const char* path)
+{
+    DirectoryImpl::create(path);
+}
+
+
+const FileSystemNode& DirectoryEntry::node() const
+{
+    if(_node)
+        return *_node;
+
+    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
+    if(type == FileSystemNode::Directory)
+    {
+        _dir.setPath(_path);
+        _node = &_dir;
+    }
+    else if(type == FileSystemNode::File)
+    {
+        _file.setPath(_path);
+        _node = &_file;
+    }
+    else
+    {
+        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
+    }
+
+    return *_node;
+}
+
+
 DirectoryIterator::DirectoryIterator()
 : _impl(0)
 { }
@@ -129,93 +254,9 @@ FileSystemNode* DirectoryIterator::operator->() const
 }
 
 
-
-
-Directory::Directory()
-: FileSystemNode()
-, _impl(0)
+DirectoryEntry& DirectoryIterator::entry()
 {
-}
-
-
-Directory::Directory(const std::string& path)
-: FileSystemNode(path)
-, _impl(0)
-{
-    if( ! Directory::exists( path.c_str() ) )
-        throw DirectoryNotFound(*this, PT_SOURCEINFO);
-}
-
-
-Directory::~Directory()
-{
-}
-
-
-std::size_t Directory::size() const
-{
-    return 0;
-}
-
-
-void Directory::remove()
-{
-    DirectoryImpl::remove( path() );
-}
-
-void Directory::move(const std::string& to)
-{
-    DirectoryImpl::move(path(), to);
-    this->setPath(to);
-}
-
-
-// TODO This is identical to File::parentPath(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string Directory::dirName() const
-{
-    // Find last slash. This separates the last path segment from the rest of the path
-    std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
-
-    // If there is no separator, this directory is relative to the current current directory.
-    // So an empty path is returned.
-    if (separatorPos == std::string::npos)
-    {
-        return "";
-    }
-
-    // Include trailing separator to be able to distinguish between no path ("") and a path
-    // which is relative to the root ("/"), for example.
-    return path().substr(0, separatorPos + 1);
-}
-
-
-// TODO This is identical to File::name(). Maybe this should be moved into
-// the common base class FileSystemNode.
-std::string Directory::name() const
-{
-    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
-
-    if (separatorPos != std::string::npos)
-    {
-        return path().substr(separatorPos + 1);
-    }
-    else
-    {
-        return path();
-    }
-}
-
-
-FileSystemNode::Type Directory::type() const
-{
-    return FileSystemNode::Directory;
-}
-
-
-void Directory::create(const char* path)
-{
-    DirectoryImpl::create(path);
+    return _impl->entry();
 }
 
 } // namespace System

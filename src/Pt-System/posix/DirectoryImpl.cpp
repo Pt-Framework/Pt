@@ -35,7 +35,8 @@ DirectoryIteratorImpl::DirectoryIteratorImpl()
 : _refs(1),
   _node(0),
   _handle(0),
-  _current(0)
+  _current(0),
+  _dirty(true)
 {
 }
 
@@ -45,7 +46,8 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _path(path),
   _node(0),
   _handle(0),
-  _current(0)
+  _current(0),
+  _dirty(true)
 {
     _handle = ::opendir( path );
 
@@ -90,6 +92,7 @@ int DirectoryIteratorImpl::deref()
 bool DirectoryIteratorImpl::advance()
 {
     _node = 0;
+    _dirty  = true;
 
     // _current == 0 means end
     _current = ::readdir( _handle );
@@ -127,6 +130,20 @@ FileSystemNode& DirectoryIteratorImpl::node()
     return *_node;
 }
 
+
+DirectoryEntry& DirectoryIteratorImpl::entry()
+{
+    if(_dirty)
+    {
+        // build complete path, ctor makes sure there is always a trailing 
+        // slash and one character following it so idx+1 works out
+        std::string::size_type idx = _path.rfind('/') + 1;
+        _path.replace(idx, _path.size(), _current->d_name);
+        _entry.setPath(_path);
+    }
+
+    return _entry;
+}
 
 
 

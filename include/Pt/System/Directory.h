@@ -24,6 +24,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
+#include <Pt/System/File.h>
 #include <string>
 
 namespace Pt {
@@ -31,6 +32,8 @@ namespace Pt {
 namespace System {
 
 class Directory;
+class DirectoryEntry;
+class DirectoryIterator;
 
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
@@ -38,50 +41,6 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
         DirectoryNotFound(const Directory& dir, const SourceInfo& si);
 
         ~DirectoryNotFound() throw();
-};
-
-/** @brief Cycling through Directories.
-
-    You use the iterator as follows:
-    \code
-    Directory d("/usr");
-    Directory::iterator it = d.begin();
-    while (it != d.end())
-    {
-        std::cout << "name : " << (*it).path() << std::endl;
-        ++it;
-    }
-    \endcode
-*/
-class PT_SYSTEM_API DirectoryIterator
-{
-    public:
-        DirectoryIterator();
-
-        DirectoryIterator(const char* path);
-
-        DirectoryIterator(const DirectoryIterator& it);
-
-        ~DirectoryIterator();
-
-        DirectoryIterator& operator++();
-
-        DirectoryIterator& operator=(const DirectoryIterator& it);
-
-        bool operator==(const DirectoryIterator& it) const
-        { return _impl == it._impl; }
-
-        bool operator!=(const DirectoryIterator& it) const
-        { return _impl != it._impl; }
-
-        const char* name() const;
-
-        FileSystemNode& operator*() const;
-
-        FileSystemNode* operator->() const;
-
-    private:
-        class DirectoryIteratorImpl* _impl;
 };
 
 /** @brief Directory Operations.
@@ -102,6 +61,7 @@ class PT_SYSTEM_API DirectoryIterator
 class PT_SYSTEM_API Directory : public FileSystemNode 
 {
     friend class DirectoryIteratorImpl;
+    friend class DirectoryEntry;
 
     public:
         typedef DirectoryIterator Iterator;
@@ -113,16 +73,10 @@ class PT_SYSTEM_API Directory : public FileSystemNode
         virtual std::size_t size() const;
 
         //! @brief Returns an iterator to the node in the directory.
-        DirectoryIterator begin() const
-        {
-            return DirectoryIterator( path().c_str() );
-        }
+        DirectoryIterator begin() const;
 
         //! @brief Returns an iterator to the end of the directory.
-        DirectoryIterator end() const
-        {
-            return DirectoryIterator();
-        }
+        DirectoryIterator end() const;
 
         virtual void remove();
 
@@ -161,6 +115,82 @@ class PT_SYSTEM_API Directory : public FileSystemNode
 
     private:
         class DirectoryImpl* _impl;
+};
+
+
+class DirectoryEntry
+{
+    public:
+        DirectoryEntry()
+        : _node(0)
+        {}
+
+        ~DirectoryEntry()
+        {}
+
+        const std::string& path() const
+        { return _path; }
+
+        void setPath(const std::string& path)
+        {
+            _path = path;
+            _node = 0;
+        }
+
+        const FileSystemNode& node() const;
+
+    private:
+        mutable File _file;
+        mutable Directory _dir;
+        mutable FileSystemNode* _node;
+        std::string _path;
+};
+
+
+/** @brief Cycling through Directories.
+
+    You use the iterator as follows:
+    \code
+    Directory d("/usr");
+    Directory::iterator it = d.begin();
+    while (it != d.end())
+    {
+        std::cout << "name : " << it->path() << std::endl;
+        ++it;
+    }
+    \endcode
+*/
+class PT_SYSTEM_API DirectoryIterator
+{
+    public:
+        DirectoryIterator();
+
+        DirectoryIterator(const char* path);
+
+        DirectoryIterator(const DirectoryIterator& it);
+
+        ~DirectoryIterator();
+
+        DirectoryIterator& operator++();
+
+        DirectoryIterator& operator=(const DirectoryIterator& it);
+
+        bool operator==(const DirectoryIterator& it) const
+        { return _impl == it._impl; }
+
+        bool operator!=(const DirectoryIterator& it) const
+        { return _impl != it._impl; }
+
+        const char* name() const;
+
+        FileSystemNode& operator*() const;
+
+        FileSystemNode* operator->() const;
+
+        DirectoryEntry& entry();
+
+    private:
+        class DirectoryIteratorImpl* _impl;
 };
 
 }

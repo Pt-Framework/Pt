@@ -47,14 +47,18 @@ class PT_API DirectoryIteratorImpl
 
         FileSystemNode& node();
 
+        DirectoryEntry& entry();
+
     private:
         unsigned int _refs;
-        std::string _path;
+        mutable std::string _path;
         FileSystemNode* _node;
         File _file;
         Directory _dir;
         DIR* _handle;
         ::dirent* _current;
+        DirectoryEntry _entry;
+        bool _dirty;
 };
 
 

@@ -182,12 +182,12 @@ void DirectoryTest::removeFile()
 void DirectoryTest::DirectoryIterator()
 {
     //printf("--------------\n");
-    Pt::System::Directory dir1(".");
+    Pt::System::Directory dir1("..");
     Pt::System::DirectoryIterator it = dir1.begin();
     for (; it != dir1.end(); ++it)
     {
-        std::string name = it->path();
-        //this->reportMessage(name);
+        std::string name = it.entry().path();
+        this->reportMessage(name);
     }
 
 /*	std::string dir("yyyDIR");

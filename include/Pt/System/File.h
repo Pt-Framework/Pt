@@ -22,10 +22,8 @@
 #define Pt_System_File_h
 
 #include <Pt/Types.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/Directory.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
 #include <stdexcept>
@@ -50,6 +48,7 @@ class PT_SYSTEM_API File : public FileSystemNode
 {
     friend bool operator==(const File& a, const File& b);
     friend class DirectoryIteratorImpl;
+    friend class DirectoryEntry;
 
     public:
         explicit File(const std::string& path);

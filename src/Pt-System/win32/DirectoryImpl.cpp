@@ -32,7 +32,8 @@ namespace System {
 DirectoryIteratorImpl::DirectoryIteratorImpl()
 : _refs(1),
   _node(0),
-  _findHandle(INVALID_HANDLE_VALUE)
+  _findHandle(INVALID_HANDLE_VALUE),
+  _dirty(true)
 {
 }
 
@@ -41,7 +42,8 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
   _path(path),
   _node(0),
-  _findHandle(INVALID_HANDLE_VALUE)
+  _findHandle(INVALID_HANDLE_VALUE),
+  _dirty(true)
 {
     std::string firstFile = path;
     if( ! firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
@@ -89,6 +91,7 @@ bool DirectoryIteratorImpl::advance()
 
     // the current node becomes invalid now
     _node = 0;
+    _dirty  = true;
 
     // _findHandle = INVALID_HANDLE_VALUE means end
     if( FALSE == FindNextFile(_findHandle, &_current) )
@@ -146,6 +149,21 @@ const char* DirectoryIteratorImpl::name() const
     return "";
 }
 
+
+DirectoryEntry& DirectoryIteratorImpl::entry()
+{
+    if(_dirty)
+    {
+        // build complete path, ctor makes sure there is always a trailing 
+        // slash and one character following it so idx+1 works out
+        std::string::size_type idx = _path.rfind('\\') + 1;
+        _path.replace(idx, _path.size(),
+                      win32::toMultiByte( _current.cFileName ).c_str() );
+        _entry.setPath(_path);
+    }
+
+    return _entry;
+}
 
 
 

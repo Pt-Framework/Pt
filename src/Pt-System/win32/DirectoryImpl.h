@@ -30,7 +30,8 @@ namespace Pt {
 
 namespace System {
 
-class DirectoryIteratorImpl {
+class DirectoryIteratorImpl 
+{
     public:
         DirectoryIteratorImpl();
 
@@ -48,6 +49,8 @@ class DirectoryIteratorImpl {
 
         const char* name() const;
 
+        DirectoryEntry& entry();
+
     private:
         unsigned int    _refs;
         std::string _path;
@@ -57,6 +60,8 @@ class DirectoryIteratorImpl {
         Directory _dir;
         HANDLE          _findHandle;
         WIN32_FIND_DATA _current;
+        DirectoryEntry _entry;
+        bool _dirty;
 };
 
 
@@ -64,7 +69,7 @@ class DirectoryImpl
 {
     public:
         DirectoryImpl();
-        
+
         ~DirectoryImpl();
 
     public:
