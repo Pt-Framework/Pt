@@ -51,6 +51,11 @@ SerialDeviceImpl::~SerialDeviceImpl()
 
 void SerialDeviceImpl::open(const std::string& path, std::ios_base::openmode mode, bool isAsync)
 {
+    if ((mode & std::ios_base::out) || !(mode & std::ios_base::in))    
+    {
+        throw OpenFailed("open: Writing to the port is currently not supported.", PT_SOURCEINFO);                
+    }
+    
     // try to determine whether user tries to connect BTCOMM
     // syntax is BTCOMM::n where n is a decimal port number
     
@@ -224,7 +229,7 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     return 0;
 }
 
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+size_t SerialDeviceImpl::read(char* buffer, size_t count, bool& eof)
 {
     if (_buff)
     {
@@ -277,16 +282,22 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 
 IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
 {
+    // TODO: Implement me
+    throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
     return _writeResult;
 }
 
 size_t SerialDeviceImpl::endWrite(IOResult& result)
 {
+    // TODO: Implement me
+    throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
     return 0;
 }
 
 size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 {
+    // TODO: Implement me
+    throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
     return 0;
 }
 

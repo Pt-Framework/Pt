@@ -119,6 +119,8 @@ static bool WaitForRequestWithTimeOut(TRequestStatus& status, int msecs)
             readCompletionCode == KErrEof);                
 }
 
+// This class is used to monitor a symbian TRequestStatus
+// in a separate pthread.
 class StatusRequestWatcher
 {
 public:

@@ -32,7 +32,14 @@ namespace Pt {
 
 namespace System {
 
-    // This class is used in the serial device implementation for Symbian
+    // This class represents an IOResult for the SerialDeviceImpl class
+    // on Symbian.
+    // The goal is to provide a posix-style interface so 
+    // Pt::System::Selector can be used to monitor the device 
+    // with the underlying posix call select().
+    // This is achieved by using an ordinary pipe which will signal
+    // a successful read when the Symbian asynchronous request has 
+    // been finished. 
     class ReadResultSymbian : 
         public ReadResult, 
         public SymbianTools::StatusRequestWatcher::NotificationListener
@@ -49,7 +56,7 @@ namespace System {
                     throw std::runtime_error("Could not open pipe." + PT_SOURCEINFO);
                 }
                 
-                this->setFd(_notificationPipe[0]);
+                setFdPrivate(_notificationPipe[0]);
                 
                 ::pthread_mutex_init(&_mutex, NULL);                
             }
@@ -67,8 +74,16 @@ namespace System {
                 ::pthread_mutex_destroy(&_mutex);
             }
 
+            virtual void setFd(int fd)
+            { 
+                throw std::logic_error("File descriptor is read-only." + PT_SOURCEINFO);                  
+            }
+
         private:            
-            bool isReadPending()
+            void setFdPrivate(int fd)
+            { ReadResult::setFd(fd); }
+
+            bool isReadPending() const
             {
                 return (_status.Int() == KRequestPending);               
             }
@@ -80,16 +95,6 @@ namespace System {
                 _buff = new char[size];
                 _tempBuffer.Set((TUint8*)_buff, 0, size);
                 _tempBuffer.Zero();
-                
-                //TRAPD(allocError, _hBuf = HBufC8::NewL(size));
-                //if (allocError)
-                //{
-                //    throw std::runtime_error("Failed to allocate Symbian HBufC8." + PT_SOURCEINFO);
-                //    throw IOError("Failed to allocate Symbian HBufC8.", PT_SOURCEINFO);                                        
-                //}
-                
-                //_tempBuffer.Set(_hBuf->Des());        
-                //_tempBuffer.Zero();
             }
             
             void freeSymbianBuffer()
@@ -138,6 +143,8 @@ namespace System {
                 //return true;
             }
             
+            // this will be called asynchronously through a pthread
+            // by the StatusRequestWatcher
             virtual void OnStatusRequestComplete(SymbianTools::StatusRequestWatcher& src)
             {
                 ::pthread_mutex_lock(&_mutex);

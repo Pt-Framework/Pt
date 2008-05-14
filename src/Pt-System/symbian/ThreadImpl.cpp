@@ -150,7 +150,7 @@ void ThreadImpl::exit()
 void ThreadImpl::terminate()
 {
 	// TODO: Find counterpart on Symbian	
-    throw std::logic_error("Thread termination not supported on Symbian.");  
+    throw std::logic_error("Thread termination not supported on Symbian." + PT_SOURCEINFO);  
 
 //    int ret = pthread_kill(_id, SIGKILL);
 //

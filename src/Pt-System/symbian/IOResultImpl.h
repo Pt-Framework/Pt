@@ -40,10 +40,10 @@ namespace System {
             virtual IOResultImpl* impl()
             { return this; }
 
-            void setFd(int fd)
+            virtual void setFd(int fd)
             { _fd = fd; }
 
-            int fd() const
+            virtual int fd() const
             { return _fd; }
 
             void attach(char* buffer, size_t size)
