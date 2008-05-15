@@ -62,6 +62,7 @@ class PT_SYSTEM_API Directory : public FileSystemNode
 {
     friend class DirectoryIteratorImpl;
     friend class DirectoryEntry;
+    friend class FileInfo;
 
     public:
         typedef DirectoryIterator Iterator;
@@ -113,6 +114,40 @@ class DirectoryEntry
         {}
 
         ~DirectoryEntry()
+        {}
+
+        const std::string& path() const
+        { return _path; }
+
+        void setPath(const std::string& path)
+        {
+            _path = path;
+            _node = 0;
+        }
+
+        const FileSystemNode& node() const;
+
+    private:
+        mutable File _file;
+        mutable Directory _dir;
+        mutable FileSystemNode* _node;
+        std::string _path;
+};
+
+
+class FileInfo
+{
+    public:
+        FileInfo()
+        : _node(0)
+        {}
+
+        explicit FileInfo(const std::string& path)
+        : _node(0)
+        , _path(path)
+        {}
+
+        ~FileInfo()
         {}
 
         const std::string& path() const

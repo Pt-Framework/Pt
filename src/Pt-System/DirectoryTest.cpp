@@ -183,11 +183,14 @@ void DirectoryTest::DirectoryIterator()
 {
     //printf("--------------\n");
     Pt::System::Directory dir1("..");
-    Pt::System::DirectoryIterator it = dir1.begin();
-    for (; it != dir1.end(); ++it)
+    Pt::System::DirectoryIterator it;
+    for(it = dir1.begin(); it != dir1.end(); ++it)
     {
         std::string name = it.entry().path();
-        this->reportMessage(name);
+
+        Pt::System::FileInfo info( name );
+
+        this->reportMessage( name );
     }
 
 /*	std::string dir("yyyDIR");

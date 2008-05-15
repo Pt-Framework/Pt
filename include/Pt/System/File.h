@@ -49,6 +49,7 @@ class PT_SYSTEM_API File : public FileSystemNode
     friend bool operator==(const File& a, const File& b);
     friend class DirectoryIteratorImpl;
     friend class DirectoryEntry;
+    friend class FileInfo;
 
     public:
         explicit File(const std::string& path);

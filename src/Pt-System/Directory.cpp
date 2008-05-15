@@ -163,6 +163,31 @@ const FileSystemNode& DirectoryEntry::node() const
 }
 
 
+const FileSystemNode& FileInfo::node() const
+{
+    if(_node)
+        return *_node;
+
+    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
+    if(type == FileSystemNode::Directory)
+    {
+        _dir.setPath(_path);
+        _node = &_dir;
+    }
+    else if(type == FileSystemNode::File)
+    {
+        _file.setPath(_path);
+        _node = &_file;
+    }
+    else
+    {
+        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
+    }
+
+    return *_node;
+}
+
+
 DirectoryIterator::DirectoryIterator()
 : _impl(0)
 { }
