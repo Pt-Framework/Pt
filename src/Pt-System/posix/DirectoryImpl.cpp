@@ -187,7 +187,7 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 {
     if (0 != ::rename(oldName.c_str(), newName.c_str()))
     {
-        throw SystemError("Could not move/rename directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
+        throw SystemError("Could not move directory '" + oldName + "' to '" + newName + "'", PT_SOURCEINFO);
     }
 }
 
@@ -200,6 +200,6 @@ void DirectoryImpl::changeCurrent(const std::string& path)
     }
 }
 
-
 } // namespace System
+
 } // namespace Pt

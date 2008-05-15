@@ -82,22 +82,9 @@ class PT_SYSTEM_API Directory : public FileSystemNode
 
         virtual void move(const std::string& newPath);
 
-        /** @brief Returns the directory in which this directory resides.
-
-            If no directory is specified when the Directory object is created, so the
-            directory is seen as relative to the current directory, an empty string is
-            returned. If the directory is contained in the root directory of the file
-            system, for linux a slash ("/") is returned.
-
-            A returned directory always ends with a trailing path separator character.
-            (A backslash in Windows and a slash in Linux, for example.)
-
-            @return The directory in which this directory resides.
-        */
         virtual std::string dirName() const;
 
-        /** @brief Returns the name of the directory excluding the path.
-        */
+        //! @brief Returns the name of the directory excluding the path.
         virtual std::string name() const;
 
         virtual Type type() const;
@@ -188,6 +175,8 @@ class PT_SYSTEM_API DirectoryIterator
         FileSystemNode* operator->() const;
 
         DirectoryEntry& entry();
+
+        const DirectoryEntry& entry() const;
 
     private:
         class DirectoryIteratorImpl* _impl;

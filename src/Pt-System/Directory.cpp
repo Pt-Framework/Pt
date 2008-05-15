@@ -81,6 +81,7 @@ void Directory::remove()
     DirectoryImpl::remove( path() );
 }
 
+
 void Directory::move(const std::string& to)
 {
     DirectoryImpl::move(path(), to);
@@ -255,6 +256,12 @@ FileSystemNode* DirectoryIterator::operator->() const
 
 
 DirectoryEntry& DirectoryIterator::entry()
+{
+    return _impl->entry();
+}
+
+
+const DirectoryEntry& DirectoryIterator::entry() const
 {
     return _impl->entry();
 }
