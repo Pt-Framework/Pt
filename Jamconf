@@ -1,4 +1,3 @@
-CheckToolset ;
 
 CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
                               "int main() { return 0; }" ;

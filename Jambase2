@@ -250,31 +250,69 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
+#
+# TODO: host configuration
+#
+rule CheckHost
+{
+    #RM = ;
+    #WriteFile checkrm.txt : "JAMCONFIG RM TEST" ;
+    #if [ TryCommand "rm -f checkrm.txt" ]
+    #{
+    #    ConfigureEcho RM : 1 : "rm -f" ;
+    #}
+    #else if [ TryCommand "del /f/q checkrm.txt" ]
+    #{
+    #    ConfigureEcho RM : 1 : "del /f/q" ;
+    #}
+
+    #if ! $(RM)
+    #{
+    #    Echo "Checking for RM ...FAILED !!!" ;
+    #    Exit "Please specify the command for removing files."
+    #}
+    #Exit ;
+
+    if $(NT)
+    {
+        CHMOD  =  ;
+        CHGRP  =  ;
+        CHOWN  =  ;
+        MV     = move /y ;
+        CP     = copy ;
+        RM     = del /f/q ;
+        RMDIR  = rmdir /s/q ;
+        MKDIR  = mkdir ;
+        DOT    = . ;
+        DOTDOT = .. ;
+        SLASH  = \\ ;
+    }
+    else
+    {
+        CHMOD  = chmod ;
+        CHGRP  = chgrp ;
+        CHOWN  = chown ;
+        CP     = cp -f ;
+        MV     = mv -f ;
+        RM     = rm -f ;
+        LN     = ln ;
+        MKDIR  = mkdir ;
+        DOT    = . ;
+        DOTDOT = .. ;
+        SLASH  = / ;
+    }
+
+    Echo "Checking for host platform ..."$(OS:L) ;
+}
+
+
+#
+# Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
+#
 rule CheckToolset
 {
     if $(CONFIGURE)
     {
-        #
-        # TODO: host configuration
-        #
-        if $(NT)
-        {
-            MV = move /y ;
-            CP = copy ;
-            RM = del /f/q ;
-            RMDIR = rmdir /s/q ;
-            SLASH = \\ ;
-        }
-        else
-        {
-            CHMOD = chmod ;
-            CHGRP = chgrp ;
-            CHOWN = chown ;
-        }
-
-        #
-        # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
-        #
         if ! $(TOOLSET)
         {
             local _cmd ;
@@ -350,6 +388,9 @@ rule CheckToolset
 if $(CONFIGURE)
 {
     TryCommand $(RM) "config.jam" ;
+
+    CheckHost ;
+    CheckToolset ;
 
     include Jamconf ;
 
