@@ -76,7 +76,7 @@ rule ConfigureEcho
             {
                 Echo "Checking for "$(1)" ..."$(3) ;
                 $(1) = $(3) ;
-                local _s = [ Slashify $(3) ] ;
+                local _s = $(3) ; #[ Slashify $(3) ] ;
                 WriteFile config.jam : $(1)" ?= "\"$(_s)\"" ;"  ;
             }
             else
@@ -114,7 +114,7 @@ rule TryCommand
     local _cmd  = $(1) " 2>&1 > check.out" ;
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 
-    if [ CHECK_IF_FILE check.out ]
+    if [ CHECK_IF_FILE check.out ] && $(RM)
     {
         _cmd = $(RM) check.out ;
         COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
@@ -134,7 +134,7 @@ rule CheckDefault
         local _val = $($(1)) ;
         if $(_val)
         {
-            ConfigureEcho $(1) : 1 : $(_val:J=" ") ;
+            ConfigureEcho $(1) : 1 : [ Slashify $(_val:J=" ") ] ;
         }
     }
 }
@@ -255,23 +255,23 @@ if ! $(JAM_JAMCONFIG)
 #
 rule CheckHost
 {
-    #RM = ;
-    #WriteFile checkrm.txt : "JAMCONFIG RM TEST" ;
-    #if [ TryCommand "rm -f checkrm.txt" ]
-    #{
-    #    ConfigureEcho RM : 1 : "rm -f" ;
-    #}
-    #else if [ TryCommand "del /f/q checkrm.txt" ]
-    #{
-    #    ConfigureEcho RM : 1 : "del /f/q" ;
-    #}
-
-    #if ! $(RM)
-    #{
-    #    Echo "Checking for RM ...FAILED !!!" ;
-    #    Exit "Please specify the command for removing files."
-    #}
-    #Exit ;
+    RM = ;
+    WriteFile checkrm.txt : "JAMCONFIG RM TEST" ;
+    
+    if [ TryCommand "del /f/q checkrm.txt" ]
+    {
+        ConfigureEcho RM : 1 : "del /f/q" ;
+    }
+    else if [ TryCommand "rm -f checkrm.txt" ]
+    {
+        ConfigureEcho RM : 1 : "rm -f" ;
+    }
+    
+    if ! $(RM)
+    {
+        Echo "Checking for RM ...FAILED !!!" ;
+        Exit "Please specify the command for removing files." ;
+    }
 
     if $(NT)
     {

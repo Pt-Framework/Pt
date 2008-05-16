@@ -45,7 +45,7 @@ rule TryC++
 
 CheckDefault VISUALC ;
 CheckVariable VISUALC : MSVCDir      : $(VCINSTALLDIR:J=" ") ;
-CheckVariable VISUALC : VSINSTALLDIR : $(VSINSTALLDIR:J=" ") ;
+CheckVariable VISUALC : VSINSTALLDIR : [ Slashify $(VSINSTALLDIR:J=" ") ] ;
 
 if ! $(VISUALC)
 {
@@ -55,7 +55,7 @@ if ! $(VISUALC)
 
 
 CheckDefault VCDIR ;
-CheckFile VCDIR : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" : $(VISUALC:J=" ")"\\vc" ;
+CheckFile VCDIR : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" : [ Slashify $(VISUALC:J=" ")"\\vc" ] ;
 CheckFile VCDIR : $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" : $(VISUALC:J=" ")"\\vc7" ;
 
 if ! $(VCDIR)
@@ -79,7 +79,7 @@ LINK        = $(VCDIR)\\bin\\link /nologo ;
 
 CheckDefault PLATFORMSDK ;
 CheckFile PLATFORMSDK : $(PLATFORMSDK:J=" ")"\\Include\\windows.h" 
-                      : $(PLATFORMSDK:J=" ") ;
+                      : [ Slashify $(PLATFORMSDK:J=" ") ] ;
 CheckFile PLATFORMSDK : $(WindowsSdkDir:J=" ")"Include\\windows.h" 
                       : $(WindowsSdkDir:J=" ");
 CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" 
