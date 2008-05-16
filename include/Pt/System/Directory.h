@@ -145,19 +145,45 @@ class FileInfo
         explicit FileInfo(const std::string& path)
         : _node(0)
         , _path(path)
-        {}
+        {
+            // stat path
+        }
+
+        /*explicit FileInfo(DirectoryIterator dit)
+        : _node(0)
+        , _path( dit->path() )
+        {}*/
+
+        FileInfo(const FileInfo& fi)
+        {
+            //TODO
+        }
+
+        FileInfo& operator=(const FileInfo& f)
+        {
+            //TODO
+            return *this;
+        }
 
         ~FileInfo()
         {}
 
+        const char* name() const
+        {
+            //TODO
+            // return last part of _path
+            return "";
+        }
+
         const std::string& path() const
         { return _path; }
 
-        void setPath(const std::string& path)
-        {
-            _path = path;
-            _node = 0;
-        }
+//         void setPath(const std::string& path)
+//         {
+//             // stat path
+//             _path = path;
+//             _node = 0;
+//         }
 
         const FileSystemNode& node() const;
 
@@ -204,6 +230,8 @@ class PT_SYSTEM_API DirectoryIterator
         { return _impl != it._impl; }
 
         const char* name() const;
+
+        const char* path() const;
 
         FileSystemNode& operator*() const;
 
