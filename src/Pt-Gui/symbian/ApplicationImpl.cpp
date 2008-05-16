@@ -41,7 +41,7 @@ using namespace std;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // IMPORTANT NOTE:
-// The Symbian all classes have to reside in the global namespace
+// ALL Symbian classes have to reside in the global namespace
 // otherwise results are undefined
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 const TUid KUidsymbian = { 0x0D7113C1 };
