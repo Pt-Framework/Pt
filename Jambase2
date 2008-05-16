@@ -86,9 +86,9 @@ rule ConfigureEcho
                 WriteFile config.jam : $(1)" ?= "$(2)" ;"  ;
             }
         }
-        else
+        else if $(4)
         {
-            Echo "Checking for "$(1)"... no" ;
+            Echo "Checking for "$(1)"..." $(4) ;
         }
     }
 }
@@ -165,7 +165,7 @@ rule CheckFile
             {
                 if [ CHECK_IF_FILE $(2:J=" ") ]
                 {
-                    ConfigureEcho $(1) : 1 : $(3) ;
+                    ConfigureEcho $(1) : 1 : $(3) : "no" ;
                 }
             }
         }
@@ -175,10 +175,11 @@ rule CheckFile
 
 rule CheckCommand
 {
-    if $(CONFIGURE)
+    if $(CONFIGURE) && ! $($(1))
     {
         local _r = [ TryCommand $(3) ] ;
         ConfigureEcho $(1) : $(_r) : $(2) ;
+        return $(_r) ;
     }
 }
 
@@ -198,7 +199,7 @@ rule CheckCc
         }
 
         local _r = [ TryCc $(1) : check.c : $(3) : $(4) : $(5) ] ;
-        ConfigureEcho $(1) : $(_r) ;
+        ConfigureEcho $(1) : $(_r) : "yes" : "no" ;
 
         TryCommand $(RM) "check.c" ;
         TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
@@ -222,7 +223,7 @@ rule CheckC++
         }
 
         local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
-        ConfigureEcho $(1) : $(_r) ;
+        ConfigureEcho $(1) : $(_r) : "yes" : "no" ;
 
         TryCommand $(RM) "check.cpp" ;
         TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
@@ -255,16 +256,25 @@ if ! $(JAM_JAMCONFIG)
 #
 rule CheckHost
 {
-    RM = ;
-    WriteFile checkrm.txt : "JAMCONFIG RM TEST" ;
+    Echo "Checking for host platform ..."$(OS:L) ;
     
-    if [ TryCommand "del /f/q checkrm.txt" ]
+    #
+    # Check for a shell command to remove files
+    #
+    RM = ;
+    WriteFile check_rm.in : "This file is a leftover of the jam configure process and can be deleted." ;
+    if $(RM)
     {
-        ConfigureEcho RM : 1 : "del /f/q" ;
+        Echo Using command RM ...$(RM) ;
     }
-    else if [ TryCommand "rm -f checkrm.txt" ]
+    else if [ CheckCommand RM : "xxx" : "xxx /f/q check_rm.in" ]
     {
-        ConfigureEcho RM : 1 : "rm -f" ;
+    }
+    else if [ CheckCommand RM : "del /f/q" : "del /f/q check_rm.in" ]
+    {
+    }
+    else if [ CheckCommand RM : "rm -f" : "rm -f check_rm.in" ]
+    {
     }
     
     if ! $(RM)
@@ -273,14 +283,61 @@ rule CheckHost
         Exit "Please specify the command for removing files." ;
     }
 
+    #
+    # Check for a shell command to move files
+    #
+    MV = ;
+    WriteFile check_mv.in : "This file is a leftover of the jam configure process and can be deleted." ;
+
+    if $(MV)
+    {
+        Echo Using command MV ...$(MV) ;
+    }
+
+    CheckCommand MV : "move /y" : "move /y check_mv.in check_mv.out" ;
+    CheckCommand MV : "mv -f" : "mv -f check_mv.in check_mv.out" ;
+
+    TryCommand $(RM) "check_mv.in" ;
+    TryCommand $(RM) "check_mv.out" ;
+    
+    if ! $(MV)
+    {
+        Echo "Checking for MV ...FAILED !!!" ;
+        Exit "Please specify the command for removing files." ;
+    }
+
+    #
+    # Check for a shell command to copy files
+    # 
+    CP = ;
+    WriteFile check_cp.in : "This file is a leftover of the jam configure process and can be deleted." ;
+
+    if $(CP)
+    {
+        Echo Using command CP ...$(CP) ;
+    }
+    else if [ CheckCommand CP : "copy" : "copy check_cp.in check_cp.out"  ]
+    { 
+    }
+    else if [ CheckCommand CP : "cp -f" : "cp -f check_cp.in check_cp.out" ]
+    { 
+    }
+
+    TryCommand $(RM) "check_cp.in" ;
+    TryCommand $(RM) "check_cp.out" ;
+
+    if ! $(CP)
+    {
+        Echo "Checking for CP ...FAILED !!!" ;
+        Exit "Please specify the command for copying files." ;
+    }
+    
     if $(NT)
     {
         CHMOD  =  ;
         CHGRP  =  ;
         CHOWN  =  ;
-        MV     = move /y ;
         CP     = copy ;
-        RM     = del /f/q ;
         RMDIR  = rmdir /s/q ;
         MKDIR  = mkdir ;
         DOT    = . ;
@@ -292,17 +349,15 @@ rule CheckHost
         CHMOD  = chmod ;
         CHGRP  = chgrp ;
         CHOWN  = chown ;
-        CP     = cp -f ;
-        MV     = mv -f ;
-        RM     = rm -f ;
         LN     = ln ;
         MKDIR  = mkdir ;
+        RMDIR = rmdir ;
         DOT    = . ;
         DOTDOT = .. ;
         SLASH  = / ;
     }
 
-    Echo "Checking for host platform ..."$(OS:L) ;
+
 }
 
 
@@ -387,7 +442,8 @@ rule CheckToolset
 
 if $(CONFIGURE)
 {
-    TryCommand $(RM) "config.jam" ;
+    TryCommand "rm -f config.jam" ;
+    TryCommand "del /f/q config.jam" ;
 
     CheckHost ;
     CheckToolset ;
