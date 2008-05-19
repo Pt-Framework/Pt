@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2008 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,39 +17,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef SYMBAPP_H_
+#define SYMBAPP_H_
 
-#ifndef PT_GUI_SYMBIAN_WIDGETPAINTER_H
-#define PT_GUI_SYMBIAN_WIDGETPAINTER_H
-
-#include "PainterImpl.h"
-
-#include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
+#include <aknapp.h>
 
 namespace Pt {
-
 namespace Gui {
+class ApplicationImpl;
+}
+}
 
-    class WidgetImpl;
+const TUid KUidsymbian = { 0x0D7113C1 };
 
-    class WidgetPainter : public PainterImpl 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// IMPORTANT NOTE:
+// ALL Symbian classes have to reside in the global namespace
+// otherwise results are undefined
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class SymbApp : public CAknApplication
+{
+private:        
+    CApaDocument* CreateDocumentL();
+    
+    // TODO: Find solution for delivering/setting UID
+    TUid AppDllUid() const 
+    { 
+        return KUidsymbian; 
+    }
+
+    Pt::Gui::ApplicationImpl* _appImpl;
+    class SymbDoc* _document;
+    
+public:
+    SymbApp(Pt::Gui::ApplicationImpl* appImpl) : _appImpl(appImpl), _document(0)
     {
-        public:
-            WidgetPainter(WidgetImpl& parentWidgetImpl);
+    }
+    
+    virtual TFileName ResourceFileName() const;
+    
+    SymbDoc& GetDocument() { return *_document; }
 
-            virtual ~WidgetPainter();
+    Pt::Gui::ApplicationImpl* GetApplicationImpl() { return _appImpl; }
+    
+    bool HasInitialized() const { return _document != 0; }
+};
 
-            virtual void begin();
-
-            virtual void end();
-            
-        private:
-            WidgetImpl& _parentWidgetImpl;
-            bool _active;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+#endif /*SYMBAPP_H_*/

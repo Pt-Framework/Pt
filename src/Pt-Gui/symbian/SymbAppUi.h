@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2008 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,39 +17,34 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef SYMBAPPUI_H_
+#define SYMBAPPUI_H_
 
-#ifndef PT_GUI_SYMBIAN_WIDGETPAINTER_H
-#define PT_GUI_SYMBIAN_WIDGETPAINTER_H
+#include <aknappui.h>
 
-#include "PainterImpl.h"
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// IMPORTANT NOTE:
+// ALL Symbian classes have to reside in the global namespace
+// otherwise results are undefined
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class SymbAppUi : public CAknAppUi
+{
+public:     
+    void ConstructL();    
+    ~SymbAppUi();
+    void CloseApp();
 
-#include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
+    void SetParentDoc(class SymbDoc* parentDoc);
+    
+private:
+    void DynInitMenuPaneL(TInt, CEikMenuPane*);
 
-namespace Pt {
+    void HandleCommandL(TInt);
+    
+    virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, 
+            TEventCode aType);
 
-namespace Gui {
+    class SymbDoc* _parentDoc;
+};
 
-    class WidgetImpl;
-
-    class WidgetPainter : public PainterImpl 
-    {
-        public:
-            WidgetPainter(WidgetImpl& parentWidgetImpl);
-
-            virtual ~WidgetPainter();
-
-            virtual void begin();
-
-            virtual void end();
-            
-        private:
-            WidgetImpl& _parentWidgetImpl;
-            bool _active;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+#endif /*SYMBAPPUI_H_*/

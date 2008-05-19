@@ -20,6 +20,7 @@
  ***************************************************************************/
 
 #include "ApplicationImpl.h"
+#include "WidgetImpl.h"
 
 #include "Pt/Gui/Application.h"
 #include <Pt/Gui/Widget.h>
@@ -30,160 +31,21 @@
 #include <Pt/Gui/MouseMoveEvent.h>
 
 #include <iostream>
+#include <assert.h>
 
 // Symbian APIs
-#include <aknapp.h>
-#include <akndoc.h>
-#include <aknappui.h>
 #include <eikstart.h>
+// Our own classes
+#include "SymbAppUi.h"
+#include "SymbDoc.h"
+#include "SymbApp.h"
 
 using namespace std;
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// IMPORTANT NOTE:
-// ALL Symbian classes have to reside in the global namespace
-// otherwise results are undefined
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const TUid KUidsymbian = { 0x0D7113C1 };
-
-class AppUi : public CAknAppUi
-{
-public:     
-    void ConstructL()
-    {
-        BaseConstructL(ENoAppResourceFile);
-        SetKeyBlockMode(ENoKeyBlock);
-        //iEikonEnv->AppUiFactory()->StatusPane()->MakeVisible( EFalse );
-    }
-    
-    ~AppUi()
-    {
-        
-    }
-
-    void CloseApp() 
-    { 
-        Exit(); 
-    }
-
-    void SetParentDoc(class Document* parentDoc)
-    {
-        _parentDoc = parentDoc;
-    }
-    
-private:
-    void DynInitMenuPaneL(TInt, CEikMenuPane*) 
-    {
-        
-    }
-
-    void HandleCommandL( TInt )
-    {
-        
-    }
-    
-    virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, 
-            TEventCode aType)
-    {
-        switch (aType)
-        {
-            case EEventKeyDown:
-                if (aKeyEvent.iScanCode == 0xA5)
-                {
-                    Exit();
-                    return EKeyWasConsumed;
-                }
-                break;
-            default:
-                return EKeyWasNotConsumed;
-        }
-        return EKeyWasNotConsumed;
-    }
-    
-    class Document* _parentDoc;
-};
-
-class Document : public CAknDocument
-{
-public:
-    static Document* NewL(CEikApplication& aApp)
-    {
-        Document* self = new (ELeave)Document(aApp);
-        CleanupStack::PushL(self);
-        self->ConstructL();
-        CleanupStack::Pop();
-        return self;        
-    }
-    
-    virtual ~Document() 
-    {
-        
-    }
-    
-    CEikApplication& GetParentApp() { return _parentApp; }
-    AppUi& GetAppUi() { return *_appUi; }
-  
-private:
-    Document(CEikApplication& app) : CAknDocument(app), _parentApp(app)
-    {        
-    }
-    
-    void ConstructL() 
-    {        
-    }
-    
-    CEikAppUi* CreateAppUiL() 
-    {
-        // there is only one AppUi, we should remember it for further
-        // reference, but note that this is used as a factory 
-        // there is no reason to delete all the AppUis created here
-        _appUi = new (ELeave)AppUi;
-        _appUi->SetParentDoc(this);
-        return _appUi; 
-    }
-        
-    CEikApplication& _parentApp;
-    AppUi* _appUi;
-};
-
-class SymbianApp : public CAknApplication
-{
-private:    
-    CApaDocument* CreateDocumentL() 
-    { 
-        // get the parent Pt::Gui::ApplicationImpl instance
-        // this is a bit messy since SymbianApp is created by
-        // a static global factory function
-        _appImpl = Pt::Gui::ApplicationImpl::_self;
-        _appImpl->_symbApp = this;
-        Pt::Gui::ApplicationImpl::unlockAppInstance();
-        // there is only one document, we should remember it for further
-        // reference, but note that this is used as a factory 
-        // there is no reason to delete all the documents created here
-        _document = Document::NewL(*this);
-        return _document; 
-    }
-    
-    TUid AppDllUid() const 
-    { 
-        return KUidsymbian; 
-    }
-
-    Pt::Gui::ApplicationImpl* _appImpl;
-    Document* _document;
-    
-public:
-    virtual TFileName ResourceFileName() const
-    {
-        return TFileName();
-    }    
-    
-    Document& GetDocument() { return *_document; }
-};
-
+// this is used as symbian application factory
 static CApaApplication* NewApplication()
 {
-    return new SymbianApp;
+    return Pt::Gui::ApplicationImpl::_self->_symbApp;
 }
 
 namespace Pt {
@@ -191,14 +53,20 @@ namespace Pt {
 namespace Gui {
 
 ApplicationImpl::ApplicationImpl(Application& app) 
-: _app(app), /*_eventLoopThread(_eventLoop), */_symbApp(0)
+: _app(app), /*_eventLoopThread(_eventLoop), */_symbApp(new SymbApp(this))
 {
+    connect(eventQueueSignal, app.event);
+    lockAppInstance();
+    assert(ApplicationImpl::_self == 0);
+    ApplicationImpl::_self = this;
 }
 
 ApplicationImpl::~ApplicationImpl()
 {
     //_eventLoop.exit();
     //_eventLoopThread.wait();
+    ApplicationImpl::_self = 0;
+    unlockAppInstance();
 }
 
 void ApplicationImpl::commitEvent(const Pt::Event& e)
@@ -216,7 +84,7 @@ void ApplicationImpl::queueEvent(const Pt::Event& e)
 int ApplicationImpl::run()
 {
     //_eventLoopThread.start();    
-    return ApplicationImpl::createAndRunAppInstance(*this);
+    return EikStart::RunApplication(NewApplication);
 }
 
 
@@ -234,9 +102,14 @@ void ApplicationImpl::processEvents()
     //_eventLoop.processEvents();
 }
 
-ApplicationImpl* ApplicationImpl::_self = NULL;
-System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
+void ApplicationImpl::dispatchEvent(Pt::Event& event)
+{
+    eventQueueSignal.send(event);
+}
 
+// assuming that there is only one Application instance at a time
+ApplicationImpl* ApplicationImpl::_self = 0;
+System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
 
 void ApplicationImpl::lockAppInstance()
 {
@@ -248,11 +121,14 @@ void ApplicationImpl::unlockAppInstance()
     _mutex.unlock();    
 }
 
-int ApplicationImpl::createAndRunAppInstance(ApplicationImpl& impl)
+void ApplicationImpl::constructBackendWidgets()
 {
-    lockAppInstance();
-    ApplicationImpl::_self = &impl;  
-    return EikStart::RunApplication(NewApplication);
+    for (unsigned int i = 0; i < _widgets.size(); ++i)
+    {
+        Widget* widget = _widgets.at(i);
+        widget->impl().construct();
+    }
+    _widgets.clear();
 }
 
 } // namespace Gui

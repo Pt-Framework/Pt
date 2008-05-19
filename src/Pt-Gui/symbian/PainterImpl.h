@@ -36,6 +36,8 @@
 #include <vector>
 #include <list>
 
+class CGraphicsContext;
+
 namespace Pt {
 
 namespace Gui {
@@ -104,6 +106,9 @@ namespace Gui {
             virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
                                        const Gfx::Region& imageRegion);
 
+            void setGc(CGraphicsContext* gc) { _gc = gc; }
+            CGraphicsContext* getGc() { return _gc; }
+
         protected:
             template <typename Iterator>
             void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
@@ -113,79 +118,86 @@ namespace Gui {
 
             void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
 
+            void updatePen();
+            void updateFont();
+            void updateBrush();
+
         protected:
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
-            std::vector<Paint*> _paintQueue;
+            
+            CGraphicsContext* _gc;
+            
+            //std::vector<Paint*> _paintQueue;
     };
 
-    class PainterImpl::Paint
-    {
-        public:
-            virtual ~Paint() {}
-            virtual void paint() = 0;
-    };
-
-    class PainterImpl::DrawLine : public PainterImpl::Paint
-    {
-        public:
-            DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen);
-            
-            virtual ~DrawLine();
-            
-            virtual void paint();
-        
-        private:
-            Math::Point _from;
-            Math::Point _to;
-            Gfx::Pen _pen;
-    };
-
-
-    class PainterImpl::DrawRect : public PainterImpl::Paint
-    {
-        public:
-            DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen);
-            
-            virtual ~DrawRect();
-            
-            virtual void paint();
-        
-        private:
-            const Gfx::Rect _rect;
-            Gfx::Pen _pen;
-    };
-
-
-    class PainterImpl::DrawPixmap : public PainterImpl::Paint
-    {
-        public:
-            DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region);
-            
-            virtual ~DrawPixmap();
-            
-            virtual void paint();
-        
-        private:
-            Math::Point _to;
-            Gfx::Region _region;
-    };
-
-
-    class PainterImpl::FillRect : public PainterImpl::Paint
-    {
-        public:
-            FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush);
-            
-            virtual ~FillRect();
-            
-            virtual void paint();
-        
-        private:
-            const Gfx::Rect _rect;
-            Gfx::Brush _brush;
-    };
+//    class PainterImpl::Paint
+//    {
+//        public:
+//            virtual ~Paint() {}
+//            virtual void paint() = 0;
+//    };
+//
+//    class PainterImpl::DrawLine : public PainterImpl::Paint
+//    {
+//        public:
+//            DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen);
+//            
+//            virtual ~DrawLine();
+//            
+//            virtual void paint();
+//        
+//        private:
+//            Math::Point _from;
+//            Math::Point _to;
+//            Gfx::Pen _pen;
+//    };
+//
+//
+//    class PainterImpl::DrawRect : public PainterImpl::Paint
+//    {
+//        public:
+//            DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen);
+//            
+//            virtual ~DrawRect();
+//            
+//            virtual void paint();
+//        
+//        private:
+//            const Gfx::Rect _rect;
+//            Gfx::Pen _pen;
+//    };
+//
+//
+//    class PainterImpl::DrawPixmap : public PainterImpl::Paint
+//    {
+//        public:
+//            DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region);
+//            
+//            virtual ~DrawPixmap();
+//            
+//            virtual void paint();
+//        
+//        private:
+//            Math::Point _to;
+//            Gfx::Region _region;
+//    };
+//
+//
+//    class PainterImpl::FillRect : public PainterImpl::Paint
+//    {
+//        public:
+//            FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush);
+//            
+//            virtual ~FillRect();
+//            
+//            virtual void paint();
+//        
+//        private:
+//            const Gfx::Rect _rect;
+//            Gfx::Brush _brush;
+//    };
 
 } // namespace Gui
 

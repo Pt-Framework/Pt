@@ -18,12 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "WidgetPainter.h"
+#include "WidgetImpl.h"
+#include <assert.h>
+
+// symbian APIs
+#include <coecntrl.h>
 
 namespace Pt {
 
 namespace Gui {
 
-WidgetPainter::WidgetPainter()
+WidgetPainter::WidgetPainter(WidgetImpl& parentWidgetImpl)
+: _parentWidgetImpl(parentWidgetImpl), _active(false)
 {
 }
 
@@ -33,11 +39,13 @@ WidgetPainter::~WidgetPainter()
 
 void WidgetPainter::begin()
 {
-
+    assert(_gc != 0);
+    _active = true;    
 }
 
 void WidgetPainter::end()
 {
+    _active = false;    
 }
 
 } // namespace Gui

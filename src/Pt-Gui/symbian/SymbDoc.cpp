@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2008 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,38 +18,39 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_GUI_SYMBIAN_WIDGETPAINTER_H
-#define PT_GUI_SYMBIAN_WIDGETPAINTER_H
+#include "SymbDoc.h"
+#include "SymbAppUi.h"
 
-#include "PainterImpl.h"
+SymbDoc* SymbDoc::NewL(CEikApplication& aApp)
+{
+    SymbDoc* self = new (ELeave)SymbDoc(aApp);
+    CleanupStack::PushL(self);
+    self->ConstructL();
+    CleanupStack::Pop();
+    return self;        
+}
 
-#include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
+SymbDoc::~SymbDoc() 
+{
 
-namespace Pt {
+}
 
-namespace Gui {
+SymbDoc::SymbDoc(CEikApplication& app) 
+: CAknDocument(app), _parentApp(app)
+{        
+}
 
-    class WidgetImpl;
+void SymbDoc::ConstructL() 
+{        
+}
 
-    class WidgetPainter : public PainterImpl 
-    {
-        public:
-            WidgetPainter(WidgetImpl& parentWidgetImpl);
+CEikAppUi* SymbDoc::CreateAppUiL() 
+{
+    // there is only one AppUi, we should remember it for further
+    // reference, but note that this is used as a factory 
+    // there is no reason to delete all the AppUis created here
+    _appUi = new (ELeave)SymbAppUi;
+    _appUi->SetParentDoc(this);
+    return _appUi; 
+}
 
-            virtual ~WidgetPainter();
-
-            virtual void begin();
-
-            virtual void end();
-            
-        private:
-            WidgetImpl& _parentWidgetImpl;
-            bool _active;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif

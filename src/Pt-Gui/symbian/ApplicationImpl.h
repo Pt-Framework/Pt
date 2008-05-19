@@ -36,7 +36,7 @@
 #include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/KeyEvent.h>
 
-class SymbianApp;
+class SymbApp;
 
 namespace Pt {
 
@@ -78,14 +78,25 @@ namespace Gui {
 
             static System::Mutex _mutex;
 
-            static int createAndRunAppInstance(ApplicationImpl& impl);
-
+            friend class Widget;
+            
         public:
-            SymbianApp* _symbApp;
+            Signal<const Pt::Event&> eventQueueSignal;
+
+            void dispatchEvent(Pt::Event& event);
+            
+            SymbApp* _symbApp;
             static ApplicationImpl* _self;
 
             static void lockAppInstance();
             static void unlockAppInstance();
+
+            // Widgets we need to construct when the application is run
+            std::vector<Widget*> _widgets;
+            
+            // Widget backend construction becomes delayed until 
+            // application instance is running and MVC hierachy is built
+            void constructBackendWidgets();            
     };
 
 } // namespace Gui

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2008 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,39 +17,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef SYMBDOC_H_
+#define SYMBDOC_H_
 
-#ifndef PT_GUI_SYMBIAN_WIDGETPAINTER_H
-#define PT_GUI_SYMBIAN_WIDGETPAINTER_H
+#include <akndoc.h>
 
-#include "PainterImpl.h"
+class SymbAppUi;
 
-#include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// IMPORTANT NOTE:
+// ALL Symbian classes have to reside in the global namespace
+// otherwise results are undefined
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+class SymbDoc : public CAknDocument
+{
+public:
+    static SymbDoc* NewL(CEikApplication& aApp);    
+    
+    virtual ~SymbDoc();
+    
+    CEikApplication& GetParentApp() { return _parentApp; }
+    SymbAppUi& GetAppUi() { return *_appUi; }
+  
+private:
+    SymbDoc(CEikApplication& app);
+    
+    void ConstructL();
+    
+    CEikAppUi* CreateAppUiL();
+        
+    CEikApplication& _parentApp;
+    SymbAppUi* _appUi;
+};
 
-namespace Pt {
-
-namespace Gui {
-
-    class WidgetImpl;
-
-    class WidgetPainter : public PainterImpl 
-    {
-        public:
-            WidgetPainter(WidgetImpl& parentWidgetImpl);
-
-            virtual ~WidgetPainter();
-
-            virtual void begin();
-
-            virtual void end();
-            
-        private:
-            WidgetImpl& _parentWidgetImpl;
-            bool _active;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+#endif /*SYMBDOC_H_*/

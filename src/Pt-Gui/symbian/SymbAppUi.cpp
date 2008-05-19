@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2008 PTV AG                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,38 +18,62 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PT_GUI_SYMBIAN_WIDGETPAINTER_H
-#define PT_GUI_SYMBIAN_WIDGETPAINTER_H
+#include "SymbAppUi.h"
+#include "ApplicationImpl.h"
+#include <assert.h>
+#include "Widget.h"
 
-#include "PainterImpl.h"
+void SymbAppUi::ConstructL()
+{
+    BaseConstructL(ENoAppResourceFile);
+    SetKeyBlockMode(ENoKeyBlock);
+    
+    // there must be an application Impl running, 
+    // otherwise something is wrong at this point
+    Pt::Gui::ApplicationImpl* appImpl = Pt::Gui::ApplicationImpl::_self;    
+    assert(appImpl);
+    appImpl->constructBackendWidgets();
+}
 
-#include <Pt/Api.h>
-#include <Pt/Gfx/Gfx.h>
+SymbAppUi::~SymbAppUi()
+{
 
-namespace Pt {
+}
 
-namespace Gui {
+void SymbAppUi::CloseApp() 
+{ 
+    Exit(); 
+}
 
-    class WidgetImpl;
+void SymbAppUi::SetParentDoc(SymbDoc* parentDoc)
+{
+    _parentDoc = parentDoc;
+}
 
-    class WidgetPainter : public PainterImpl 
+void SymbAppUi::DynInitMenuPaneL(TInt, CEikMenuPane*) 
+{
+
+}
+
+void SymbAppUi::HandleCommandL(TInt commandID)
+{
+
+}
+
+TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, 
+        TEventCode aType)
+{
+    switch (aType)
     {
-        public:
-            WidgetPainter(WidgetImpl& parentWidgetImpl);
-
-            virtual ~WidgetPainter();
-
-            virtual void begin();
-
-            virtual void end();
-            
-        private:
-            WidgetImpl& _parentWidgetImpl;
-            bool _active;
-    };
-
-} // namespace Gui
-
-} // namespace Pt
-
-#endif
+    case EEventKeyDown:
+        if (aKeyEvent.iScanCode == 0xA5)
+        {
+            Exit();
+            return EKeyWasConsumed;
+        }
+        break;
+    default:
+        return EKeyWasNotConsumed;
+    }
+    return EKeyWasNotConsumed;
+}

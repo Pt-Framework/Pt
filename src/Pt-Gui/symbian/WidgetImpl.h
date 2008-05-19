@@ -28,6 +28,8 @@
 #include <Pt/Math/Rect.h>
 #include <Pt/String.h>
 
+class CCoeControl;
+
 namespace Pt {
 
 namespace Gui {
@@ -35,9 +37,11 @@ namespace Gui {
     class WidgetImpl
     {
         public:
+            static const ssize_t KPositionUnused;
+            
             WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(0, 0),
-                         const Math::Size& size = Math::Size(400, 300) );
+                         const Math::Point& at = Math::Point(KPositionUnused, KPositionUnused),
+                         const Math::Size& size = Math::Size(KPositionUnused, KPositionUnused) );
 
             virtual ~WidgetImpl();
 
@@ -61,9 +65,36 @@ namespace Gui {
 
             void repaint();
 
+            // construct symbian backend control
+            void construct();
+            
+            // destruct
+            void destruct();
+            
+            // dispatch events to slots
+            void dispatchEvent(Pt::Event& event);    
+            
+            // get backend control
+            CCoeControl* getControl() { return _control; }
+            
+            // enable drawing to native graphics context
+            void beginDraw();            
+            
+            // disable drawing to native gfx context
+            void endDraw();
+            
         private:
+            void synchronize();
+            
             Widget& _apiWidget;
+            Pt::Math::Point _initialLocation;
+            Pt::Math::Size _initialSize;
+
             WidgetPainter _painter;
+            
+            // symbian control
+            CCoeControl* _control;
+            
     };
 
 } // namespace Gui
