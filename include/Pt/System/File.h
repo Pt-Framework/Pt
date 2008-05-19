@@ -32,12 +32,10 @@ namespace Pt {
 
 namespace System {
 
-class File;
-
 class PT_SYSTEM_API FileNotFound : public SystemError
 {
     public:
-        FileNotFound(const File& file, const SourceInfo& si);
+        FileNotFound(const std::string& path, const SourceInfo& si);
 
         ~FileNotFound() throw();
 };

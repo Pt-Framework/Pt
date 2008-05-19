@@ -27,8 +27,8 @@ namespace Pt {
 
 namespace System {
 
-FileNotFound::FileNotFound(const File& file, const SourceInfo& si)
-: SystemError("File not found: " + file.path(), si)
+FileNotFound::FileNotFound(const std::string& path, const SourceInfo& si)
+: SystemError("File not found: " + path, si)
 {
 }
 
@@ -49,7 +49,7 @@ File::File(const std::string& path)
 , _impl(0)
 {
     if( ! File::exists( path.c_str() ) )
-        throw FileNotFound(*this, PT_SOURCEINFO);
+        throw FileNotFound(path, PT_SOURCEINFO);
 }
 
 

@@ -31,14 +31,12 @@ namespace Pt {
 
 namespace System {
 
-class Directory;
-
 /** @brief A directory could not be found at a given path
 */
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
-        DirectoryNotFound(const Directory& dir, const SourceInfo& si);
+        DirectoryNotFound(const std::string& dir, const SourceInfo& si);
 
         ~DirectoryNotFound() throw();
 };
@@ -172,7 +170,6 @@ class FileInfo
         File _file;
         Directory _dir;
         FileSystemNode* _node;
-        std::string _path;
 };
 
 }

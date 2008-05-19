@@ -26,8 +26,8 @@ namespace Pt {
 
 namespace System {
 
-DirectoryNotFound::DirectoryNotFound(const Directory& dir, const SourceInfo& si)
-: SystemError("Directory not found: " + dir.path(), si)
+DirectoryNotFound::DirectoryNotFound(const std::string& path, const SourceInfo& si)
+: SystemError("Directory not found: " + path, si)
 {
 }
 
@@ -145,7 +145,7 @@ Directory::Directory(const std::string& path)
 , _impl(0)
 {
     if( ! Directory::exists( path.c_str() ) )
-        throw DirectoryNotFound(*this, PT_SOURCEINFO);
+        throw DirectoryNotFound(path, PT_SOURCEINFO);
 }
 
 
@@ -257,7 +257,7 @@ FileInfo::FileInfo(const char* path)
     }
     else
     {
-        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
+        throw SystemError("Unknown file system node " + std::string(path), PT_SOURCEINFO);
     }
 }
 
