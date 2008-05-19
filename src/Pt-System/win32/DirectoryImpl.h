@@ -18,13 +18,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include "Pt/System/FileSystemNode.h"
-#include "Pt/System/File.h"
-#include "Pt/System/Directory.h"
 #include <string>
 #include <windows.h>
-
 
 namespace Pt {
 
@@ -38,29 +34,23 @@ class DirectoryIteratorImpl
         DirectoryIteratorImpl(const char* path);
 
         ~DirectoryIteratorImpl();
-
+        
         int ref();
 
         int deref();
 
         bool advance();
 
-        FileSystemNode& node();
-
         const char* name() const;
-
-        DirectoryEntry& entry();
+        
+        const char* path() const;
 
     private:
-        unsigned int    _refs;
-        std::string _path;
+        unsigned int _refs;
+        mutable std::string _path;
         std::string _name;
-        FileSystemNode* _node;
-        File _file;
-        Directory _dir;
-        HANDLE          _findHandle;
+        HANDLE _findHandle;
         WIN32_FIND_DATA _current;
-        DirectoryEntry _entry;
         bool _dirty;
 };
 

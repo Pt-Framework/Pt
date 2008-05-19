@@ -31,7 +31,6 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl()
 : _refs(1),
-  _node(0),
   _findHandle(INVALID_HANDLE_VALUE),
   _dirty(true)
 {
@@ -41,7 +40,6 @@ DirectoryIteratorImpl::DirectoryIteratorImpl()
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
   _path(path),
-  _node(0),
   _findHandle(INVALID_HANDLE_VALUE),
   _dirty(true)
 {
@@ -90,7 +88,6 @@ bool DirectoryIteratorImpl::advance()
     }
 
     // the current node becomes invalid now
-    _node = 0;
     _dirty  = true;
 
     // _findHandle = INVALID_HANDLE_VALUE means end
@@ -107,38 +104,6 @@ bool DirectoryIteratorImpl::advance()
 }
 
 
-FileSystemNode& DirectoryIteratorImpl::node()
-{
-    // reuse previously created node
-    if(_node)
-        return *_node;
-
-    // build complete path, ctor makes sure there is always a trailing 
-    // slash and one character following it so idx+1 works out
-    std::string::size_type idx = _path.rfind('\\') + 1;
-    _path.replace(idx, _path.size(),
-                  win32::toMultiByte( _current.cFileName ).c_str() );
-
-    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
-    if(type == FileSystemNode::Directory)
-    {
-        _dir.setPath(_path);
-        _node = &_dir;
-    }
-    else if(type == FileSystemNode::File)
-    {
-        _file.setPath(_path);
-        _node = &_file;
-    }
-    else
-    {
-        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
-    }
-
-    return *_node;
-}
-
-
 const char* DirectoryIteratorImpl::name() const
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
@@ -150,19 +115,22 @@ const char* DirectoryIteratorImpl::name() const
 }
 
 
-DirectoryEntry& DirectoryIteratorImpl::entry()
+const char* DirectoryIteratorImpl::path() const
 {
-    if(_dirty)
+    if(_findHandle != INVALID_HANDLE_VALUE)
     {
-        // build complete path, ctor makes sure there is always a trailing 
-        // slash and one character following it so idx+1 works out
-        std::string::size_type idx = _path.rfind('\\') + 1;
-        _path.replace(idx, _path.size(),
-                      win32::toMultiByte( _current.cFileName ).c_str() );
-        _entry.setPath(_path);
-    }
+        if(_dirty)
+        {
+            // build complete path, ctor makes sure there is always a trailing 
+            // slash and one character following it so idx+1 works out
+            std::string::size_type idx = _path.rfind('\\') + 1;
+            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
+        }
 
-    return _entry;
+        return _path.c_str();
+    }
+    
+    return "";
 }
 
 
