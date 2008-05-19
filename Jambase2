@@ -127,6 +127,17 @@ rule TryCommand
 }
 
 
+rule CheckCommand
+{
+    if $(CONFIGURE) && ! $($(1))
+    {
+        local _r = [ TryCommand $(3) ] ;
+        ConfigureEcho $(1) : $(_r) : $(2) ;
+        return $(_r) ;
+    }
+}
+
+
 rule CheckDefault
 {
     if $(CONFIGURE)
@@ -169,17 +180,6 @@ rule CheckFile
                 }
             }
         }
-    }
-}
-
-
-rule CheckCommand
-{
-    if $(CONFIGURE) && ! $($(1))
-    {
-        local _r = [ TryCommand $(3) ] ;
-        ConfigureEcho $(1) : $(_r) : $(2) ;
-        return $(_r) ;
     }
 }
 
@@ -232,6 +232,25 @@ rule CheckC++
 }
 
 
+rule Require
+{
+    if ! $($(1))
+    {
+        Echo "Checking for "$(1)" ...FAILED !!!" ;
+    }
+}
+
+
+rule Erase
+{
+    local _f ;
+    for _f in $(1)
+    {
+        TryCommand $(RM) $(_f) ;
+    }
+}
+
+
 for _arg in $(ARGV)
 {
     if $(_arg) = configure
@@ -251,113 +270,97 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
+
+
 #
 # TODO: host configuration
 #
 rule CheckHost
 {
     Echo "Checking for host platform ..."$(OS:L) ;
-    
+
     #
     # Check for a shell command to remove files
     #
     RM = ;
     WriteFile check_rm.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    if $(RM)
-    {
-        Echo Using command RM ...$(RM) ;
-    }
-    else if [ CheckCommand RM : "xxx" : "xxx /f/q check_rm.in" ]
-    {
-    }
-    else if [ CheckCommand RM : "del /f/q" : "del /f/q check_rm.in" ]
-    {
-    }
-    else if [ CheckCommand RM : "rm -f" : "rm -f check_rm.in" ]
-    {
-    }
-    
-    if ! $(RM)
-    {
-        Echo "Checking for RM ...FAILED !!!" ;
-        Exit "Please specify the command for removing files." ;
-    }
+    CheckDefault RM ;
+    CheckCommand RM : "del /f/q" : "del /f/q check_rm.in" ;
+    CheckCommand RM : "rm -f" : "rm -f check_rm.in" ;
+    Require RM ;
 
     #
     # Check for a shell command to move files
     #
     MV = ;
     WriteFile check_mv.in : "This file is a leftover of the jam configure process and can be deleted." ;
-
-    if $(MV)
-    {
-        Echo Using command MV ...$(MV) ;
-    }
-
+    CheckDefault MV ;
     CheckCommand MV : "move /y" : "move /y check_mv.in check_mv.out" ;
     CheckCommand MV : "mv -f" : "mv -f check_mv.in check_mv.out" ;
-
-    TryCommand $(RM) "check_mv.in" ;
-    TryCommand $(RM) "check_mv.out" ;
-    
-    if ! $(MV)
-    {
-        Echo "Checking for MV ...FAILED !!!" ;
-        Exit "Please specify the command for removing files." ;
-    }
+    Erase "check_mv.in" "check_mv.out" ;
+    Require MV ;
 
     #
     # Check for a shell command to copy files
     # 
     CP = ;
     WriteFile check_cp.in : "This file is a leftover of the jam configure process and can be deleted." ;
+    CheckDefault CP ;
+    CheckCommand CP : "copy" : "copy check_cp.in check_cp.out" ;
+    CheckCommand CP : "cp -f" : "cp -f check_cp.in check_cp.out" ;
+    Erase "check_cp.in" "check_cp.out" ;
+    Require CP ;
 
-    if $(CP)
+    #
+    # Check for a shell command to create directories
+    # 
+    MKDIR = ;
+    CheckDefault MKDIR ;
+    CheckCommand MKDIR : "mkdir" : "mkdir check_dir" ;
+    Require MKDIR ;
+
+    #
+    # Check for a shell command to remove directories
+    #
+    RMDIR = ;
+    CheckDefault RMDIR ;
+    CheckCommand RMDIR : "rmdir /s/q" : "rmdir /s/q check_dir" ;
+    CheckCommand RMDIR : "rmdir" : "rmdir check_dir" ;
+    CheckCommand RMDIR : "rm -rf" : "rm -rf check_dir" ;
+    Require RMDIR ;
+
+    #
+    # Check for a shell command to set access rights
+    # 
+    CHMOD = ;
+    WriteFile check_chmod.in : "This file is a leftover of the jam configure process and can be deleted." ;
+    CheckDefault CHMOD ;
+    CheckCommand CHMOD : "chmod" : "chmod 777 check_chmod.in" ;
+    Erase "check_chmod.in" ;
+    if $(CHMOD)
     {
-        Echo Using command CP ...$(CP) ;
-    }
-    else if [ CheckCommand CP : "copy" : "copy check_cp.in check_cp.out"  ]
-    { 
-    }
-    else if [ CheckCommand CP : "cp -f" : "cp -f check_cp.in check_cp.out" ]
-    { 
+        ConfigureEcho CHGRP : 1 : chgrp ;
+        ConfigureEcho CHGRP : 1 : chown ;
     }
 
-    TryCommand $(RM) "check_cp.in" ;
-    TryCommand $(RM) "check_cp.out" ;
+    LN = ;
+    WriteFile check_ln.in : "This file is a leftover of the jam configure process and can be deleted." ;
+    CheckDefault LN ;
+    CheckCommand LN : "ln" : "ln check_ln.in check_ln.out" ;
+    Erase "check_ln.in" "check_ln.out" ;
 
-    if ! $(CP)
-    {
-        Echo "Checking for CP ...FAILED !!!" ;
-        Exit "Please specify the command for copying files." ;
-    }
-    
-    if $(NT)
-    {
-        CHMOD  =  ;
-        CHGRP  =  ;
-        CHOWN  =  ;
-        CP     = copy ;
-        RMDIR  = rmdir /s/q ;
-        MKDIR  = mkdir ;
-        DOT    = . ;
-        DOTDOT = .. ;
-        SLASH  = \\ ;
-    }
-    else
-    {
-        CHMOD  = chmod ;
-        CHGRP  = chgrp ;
-        CHOWN  = chown ;
-        LN     = ln ;
-        MKDIR  = mkdir ;
-        RMDIR = rmdir ;
-        DOT    = . ;
-        DOTDOT = .. ;
-        SLASH  = / ;
-    }
+    DOT = ;
+    CheckCommand DOT : "." : "cd ." ;
+    Require DOT ;
 
+    DOTDOT = ;
+    CheckCommand DOTDOR : ".." : "cd .." ;
+    Require DOTDOT ;
 
+    SLASH = ;
+    CheckCommand SLASH : "/" : "cd ./" ;
+    CheckCommand SLASH : "\\" : "cd .\\" ;
+    Require SLASH ;
 }
 
 
