@@ -37,6 +37,102 @@ DirectoryNotFound::~DirectoryNotFound() throw()
 }
 
 
+
+
+DirectoryIterator::DirectoryIterator()
+: _impl(0)
+{ }
+
+
+DirectoryIterator::DirectoryIterator(const char* path)
+{
+    _impl = new DirectoryIteratorImpl(path);
+}
+
+
+DirectoryIterator::DirectoryIterator(const DirectoryIterator& it)
+: _impl(0)
+{
+    _impl = it._impl;
+
+    if(_impl)
+        _impl->ref();
+}
+
+
+DirectoryIterator::~DirectoryIterator()
+{
+    if( _impl && 0 == _impl->deref() ) {
+        delete _impl;
+    }
+}
+
+
+DirectoryIterator& DirectoryIterator::operator++()
+{
+    if( _impl && _impl->advance() )
+    {
+        return *this;
+    }
+
+    if( _impl && 0 == _impl->deref() )
+    {
+        delete _impl;
+        _impl = 0;
+    }
+
+    return *this;
+}
+
+
+DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
+{
+    if (*this == it )
+        return *this;
+
+    if( _impl && 0 == _impl->deref() )
+    {
+        delete _impl;
+    }
+
+    _impl = it._impl;
+
+    if(_impl)
+        _impl->ref();
+
+    return *this;
+}
+
+
+const char* DirectoryIterator::path() const
+{
+    if(_impl)
+        return _impl->path();
+
+    return "";
+}
+
+
+const char* DirectoryIterator::name() const
+{
+    if(_impl)
+        return _impl->name();
+
+    return "";
+}
+
+
+const char* DirectoryIterator::operator*() const
+{
+    if(_impl)
+        return _impl->name();
+
+    return "";
+}
+
+
+
+
 Directory::Directory()
 : FileSystemNode()
 , _impl(0)
@@ -138,157 +234,82 @@ void Directory::create(const char* path)
 }
 
 
-const FileSystemNode& DirectoryEntry::node() const
-{
-    if(_node)
-        return *_node;
 
-    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
+
+FileInfo::FileInfo()
+: _node(0)
+{}
+
+
+FileInfo::FileInfo(const char* path)
+: _node(0)
+{
+    FileSystemNode::Type type = FileSystemNode::stat( path );
     if(type == FileSystemNode::Directory)
     {
-        _dir.setPath(_path);
+        _dir.setPath(path);
         _node = &_dir;
     }
     else if(type == FileSystemNode::File)
     {
-        _file.setPath(_path);
+        _file.setPath(path);
         _node = &_file;
     }
     else
     {
         throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
     }
-
-    return *_node;
 }
 
 
-const FileSystemNode& FileInfo::node() const
+FileInfo::~FileInfo()
 {
-    if(_node)
-        return *_node;
+}
 
-    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
-    if(type == FileSystemNode::Directory)
+
+FileInfo::FileInfo(const FileInfo& fi)
+{
+    this->operator=(fi);
+}
+
+
+FileInfo& FileInfo::operator=(const FileInfo& fi)
+{
+    if(fi._node == &fi._dir)
     {
-        _dir.setPath(_path);
+        _dir = fi._dir;
         _node = &_dir;
     }
-    else if(type == FileSystemNode::File)
+    else if(fi._node == &fi._file)
     {
-        _file.setPath(_path);
+        _file = fi._file;
         _node = &_file;
     }
-    else
-    {
-        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
-    }
-
-    return *_node;
-}
-
-
-DirectoryIterator::DirectoryIterator()
-: _impl(0)
-{ }
-
-
-DirectoryIterator::DirectoryIterator(const char* path)
-{
-    _impl = new DirectoryIteratorImpl(path);
-}
-
-
-DirectoryIterator::DirectoryIterator(const DirectoryIterator& it)
-: _impl(0)
-{
-    _impl = it._impl;
-
-    if(_impl)
-        _impl->ref();
-}
-
-
-DirectoryIterator::~DirectoryIterator()
-{
-    if( _impl && 0 == _impl->deref() ) {
-        delete _impl;
-    }
-}
-
-
-DirectoryIterator& DirectoryIterator::operator++()
-{
-    if( _impl && _impl->advance() )
-    {
-        return *this;
-    }
-
-    if( _impl && 0 == _impl->deref() )
-    {
-        delete _impl;
-        _impl = 0;
-    }
 
     return *this;
 }
 
 
-DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
+const char* FileInfo::name() const
 {
-    if (*this == it )
-        return *this;
+    if(_node)
+        return _node->name().c_str();
 
-    if( _impl && 0 == _impl->deref() )
-    {
-        delete _impl;
-    }
-
-    _impl = it._impl;
-
-    if(_impl)
-        _impl->ref();
-
-    return *this;
+    return "";
 }
 
-
-const char* DirectoryIterator::name() const
+const char* FileInfo::path() const
 {
-    if(_impl)
-        return _impl->name();
+    if(_node)
+        return _node->path().c_str();
 
     return "";
 }
 
 
-FileSystemNode& DirectoryIterator::operator*() const
+const FileSystemNode& FileInfo::node() const
 {
-    if(_impl == 0)
-        throw std::out_of_range("directory iterator out of range");
-
-    return _impl->node();
-}
-
-
-FileSystemNode* DirectoryIterator::operator->() const
-{
-    if(_impl == 0)
-        throw std::out_of_range("directory iterator out of range");
-
-    return &_impl->node();
-}
-
-
-DirectoryEntry& DirectoryIterator::entry()
-{
-    return _impl->entry();
-}
-
-
-const DirectoryEntry& DirectoryIterator::entry() const
-{
-    return _impl->entry();
+    return *_node;
 }
 
 } // namespace System

@@ -72,8 +72,6 @@ class PT_SYSTEM_API FileSystemNode
 
         virtual void move(const std::string& newname) = 0;
 
-        //virtual void copy(const std::string& to) const = 0;
-
     public:
         static Type stat(const char* path);
 

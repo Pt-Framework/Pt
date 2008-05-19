@@ -47,8 +47,6 @@ class PT_SYSTEM_API FileNotFound : public SystemError
 class PT_SYSTEM_API File : public FileSystemNode
 {
     friend bool operator==(const File& a, const File& b);
-    friend class DirectoryIteratorImpl;
-    friend class DirectoryEntry;
     friend class FileInfo;
 
     public:

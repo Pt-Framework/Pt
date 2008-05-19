@@ -19,7 +19,7 @@ try {
     Pt::System::Directory::Iterator it;
     for(it = dir.begin(); it != dir.end(); ++it)
     {
-        std::cerr << (*it).name() << std::endl;
+        std::cerr << it.name() << std::endl;
     }
 }catch(const std::exception& e)
 {

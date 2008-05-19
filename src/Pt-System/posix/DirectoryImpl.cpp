@@ -33,7 +33,6 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl()
 : _refs(1),
-  _node(0),
   _handle(0),
   _current(0),
   _dirty(true)
@@ -44,7 +43,6 @@ DirectoryIteratorImpl::DirectoryIteratorImpl()
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
   _path(path),
-  _node(0),
   _handle(0),
   _current(0),
   _dirty(true)
@@ -77,6 +75,20 @@ const char* DirectoryIteratorImpl::name() const
 }
 
 
+const char* DirectoryIteratorImpl::path() const
+{
+    if(_dirty)
+    {
+        // build complete path, ctor makes sure there is always a trailing 
+        // slash and one character following it so idx+1 works out
+        std::string::size_type idx = _path.rfind('/') + 1;
+        _path.replace(idx, _path.size(), _current->d_name);
+    }
+
+    return _path.c_str();
+}
+
+
 int DirectoryIteratorImpl::ref()
 {
     return ++_refs;
@@ -91,7 +103,6 @@ int DirectoryIteratorImpl::deref()
 
 bool DirectoryIteratorImpl::advance()
 {
-    _node = 0;
     _dirty  = true;
 
     // _current == 0 means end
@@ -99,51 +110,6 @@ bool DirectoryIteratorImpl::advance()
     return _current != 0;
 }
 
-
-FileSystemNode& DirectoryIteratorImpl::node()
-{
-    // reuse previously created node
-    if(_node)
-        return *_node;
-
-    // build complete path, ctor makes sure there is always a trailing 
-    // slash and one character following it so idx+1 works out
-    std::string::size_type idx = _path.rfind('/') + 1;
-    _path.replace(idx, _path.size(), _current->d_name);
-
-    FileSystemNode::Type type = FileSystemNode::stat(_path.c_str());
-    if(type == FileSystemNode::Directory)
-    {
-        _dir.setPath(_path);
-        _node = &_dir;
-    }
-    else if(type == FileSystemNode::File)
-    {
-        _file.setPath(_path);
-        _node = &_file;
-    }
-    else
-    {
-        throw SystemError("Unknown file system node " + _path, PT_SOURCEINFO);
-    }
-
-    return *_node;
-}
-
-
-DirectoryEntry& DirectoryIteratorImpl::entry()
-{
-    if(_dirty)
-    {
-        // build complete path, ctor makes sure there is always a trailing 
-        // slash and one character following it so idx+1 works out
-        std::string::size_type idx = _path.rfind('/') + 1;
-        _path.replace(idx, _path.size(), _current->d_name);
-        _entry.setPath(_path);
-    }
-
-    return _entry;
-}
 
 
 

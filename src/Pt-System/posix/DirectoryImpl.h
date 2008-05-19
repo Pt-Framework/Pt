@@ -18,8 +18,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/System/File.h"
-#include "Pt/System/Directory.h"
 #include "Pt/System/FileSystemNode.h"
 #include <string>
 #include <dirent.h>
@@ -39,30 +37,24 @@ class PT_API DirectoryIteratorImpl
 
         const char* name() const;
 
+        const char* path() const;
+
         int ref();
 
         int deref();
 
         bool advance();
 
-        FileSystemNode& node();
-
-        DirectoryEntry& entry();
-
     private:
         unsigned int _refs;
         mutable std::string _path;
-        FileSystemNode* _node;
-        File _file;
-        Directory _dir;
         DIR* _handle;
         ::dirent* _current;
-        DirectoryEntry _entry;
         bool _dirty;
 };
 
 
-class PT_API DirectoryImpl  
+class PT_API DirectoryImpl
 {
     public:
         static void create(const std::string& path);

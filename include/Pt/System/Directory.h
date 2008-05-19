@@ -32,9 +32,9 @@ namespace Pt {
 namespace System {
 
 class Directory;
-class DirectoryEntry;
-class DirectoryIterator;
 
+/** @brief A directory could not be found at a given path
+*/
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
@@ -43,7 +43,51 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
         ~DirectoryNotFound() throw();
 };
 
-/** @brief Directory Operations.
+/** @brief Iterates over entries of a directory.
+
+    You use the iterator as follows:
+    \code
+    Directory d("/usr");
+    Directory::iterator it = d.begin();
+    while (it != d.end())
+    {
+        std::cout << "name : " << it->path() << std::endl;
+        ++it;
+    }
+    \endcode
+*/
+class PT_SYSTEM_API DirectoryIterator
+{
+    public:
+        DirectoryIterator();
+
+        DirectoryIterator(const char* path);
+
+        DirectoryIterator(const DirectoryIterator& it);
+
+        ~DirectoryIterator();
+
+        DirectoryIterator& operator++();
+
+        DirectoryIterator& operator=(const DirectoryIterator& it);
+
+        bool operator==(const DirectoryIterator& it) const
+        { return _impl == it._impl; }
+
+        bool operator!=(const DirectoryIterator& it) const
+        { return _impl != it._impl; }
+
+        const char* path() const;
+
+        const char* name() const;
+
+        const char* operator*() const;
+
+    private:
+        class DirectoryIteratorImpl* _impl;
+};
+
+/** @brief Represents a single directory in the file-system.
     This class contains methods to create, move, delete directories and 
     gives to possibility to iterate over the contents of the directory.
 
@@ -60,8 +104,6 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
 */
 class PT_SYSTEM_API Directory : public FileSystemNode 
 {
-    friend class DirectoryIteratorImpl;
-    friend class DirectoryEntry;
     friend class FileInfo;
 
     public:
@@ -105,144 +147,32 @@ class PT_SYSTEM_API Directory : public FileSystemNode
         class DirectoryImpl* _impl;
 };
 
-
-class DirectoryEntry
-{
-    public:
-        DirectoryEntry()
-        : _node(0)
-        {}
-
-        ~DirectoryEntry()
-        {}
-
-        const std::string& path() const
-        { return _path; }
-
-        void setPath(const std::string& path)
-        {
-            _path = path;
-            _node = 0;
-        }
-
-        const FileSystemNode& node() const;
-
-    private:
-        mutable File _file;
-        mutable Directory _dir;
-        mutable FileSystemNode* _node;
-        std::string _path;
-};
-
-
+/** @brief Provides information about a node in the file-system.
+*/
 class FileInfo
 {
     public:
-        FileInfo()
-        : _node(0)
-        {}
+        FileInfo();
 
-        explicit FileInfo(const std::string& path)
-        : _node(0)
-        , _path(path)
-        {
-            // stat path
-        }
+        explicit FileInfo(const char* path);
 
-        /*explicit FileInfo(DirectoryIterator dit)
-        : _node(0)
-        , _path( dit->path() )
-        {}*/
+        FileInfo(const FileInfo& fi);
 
-        FileInfo(const FileInfo& fi)
-        {
-            //TODO
-        }
+        ~FileInfo();
 
-        FileInfo& operator=(const FileInfo& f)
-        {
-            //TODO
-            return *this;
-        }
-
-        ~FileInfo()
-        {}
-
-        const char* name() const
-        {
-            //TODO
-            // return last part of _path
-            return "";
-        }
-
-        const std::string& path() const
-        { return _path; }
-
-//         void setPath(const std::string& path)
-//         {
-//             // stat path
-//             _path = path;
-//             _node = 0;
-//         }
-
-        const FileSystemNode& node() const;
-
-    private:
-        mutable File _file;
-        mutable Directory _dir;
-        mutable FileSystemNode* _node;
-        std::string _path;
-};
-
-
-/** @brief Cycling through Directories.
-
-    You use the iterator as follows:
-    \code
-    Directory d("/usr");
-    Directory::iterator it = d.begin();
-    while (it != d.end())
-    {
-        std::cout << "name : " << it->path() << std::endl;
-        ++it;
-    }
-    \endcode
-*/
-class PT_SYSTEM_API DirectoryIterator
-{
-    public:
-        DirectoryIterator();
-
-        DirectoryIterator(const char* path);
-
-        DirectoryIterator(const DirectoryIterator& it);
-
-        ~DirectoryIterator();
-
-        DirectoryIterator& operator++();
-
-        DirectoryIterator& operator=(const DirectoryIterator& it);
-
-        bool operator==(const DirectoryIterator& it) const
-        { return _impl == it._impl; }
-
-        bool operator!=(const DirectoryIterator& it) const
-        { return _impl != it._impl; }
+        FileInfo& operator=(const FileInfo& f);
 
         const char* name() const;
 
         const char* path() const;
 
-        FileSystemNode& operator*() const;
-
-        FileSystemNode* operator->() const;
-
-        DirectoryEntry& entry();
-
-        const DirectoryEntry& entry() const;
+        const FileSystemNode& node() const;
 
     private:
-        class DirectoryIteratorImpl* _impl;
+        File _file;
+        Directory _dir;
+        FileSystemNode* _node;
+        std::string _path;
 };
 
 }
