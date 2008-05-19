@@ -24,7 +24,6 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
-#include <Pt/System/File.h>
 #include <string>
 
 namespace Pt {
@@ -36,7 +35,7 @@ namespace System {
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
-        DirectoryNotFound(const std::string& dir, const SourceInfo& si);
+        DirectoryNotFound(const std::string& path, const SourceInfo& si);
 
         ~DirectoryNotFound() throw();
 };
@@ -143,33 +142,6 @@ class PT_SYSTEM_API Directory : public FileSystemNode
 
     private:
         class DirectoryImpl* _impl;
-};
-
-/** @brief Provides information about a node in the file-system.
-*/
-class FileInfo
-{
-    public:
-        FileInfo();
-
-        explicit FileInfo(const char* path);
-
-        FileInfo(const FileInfo& fi);
-
-        ~FileInfo();
-
-        FileInfo& operator=(const FileInfo& f);
-
-        const char* name() const;
-
-        const char* path() const;
-
-        const FileSystemNode& node() const;
-
-    private:
-        File _file;
-        Directory _dir;
-        FileSystemNode* _node;
 };
 
 }

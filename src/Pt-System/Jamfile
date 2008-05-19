@@ -35,6 +35,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           EventLoop.cpp
                           File.cpp
                           FileDevice.cpp
+                          FileInfo.cpp
                           FileStream.cpp
                           FileSystemNode.cpp
                           IOError.cpp
