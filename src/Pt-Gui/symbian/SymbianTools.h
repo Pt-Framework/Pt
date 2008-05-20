@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008 Peter Barth                                        *
- *   Copyright (C) 2008 PTV AG                                             *
+ *   Copyright (C) 2008 by PTV AG                                          *
+ *   Copyright (C) 2008 by Peter Barth                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,43 +17,47 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYMBAPPUI_H_
-#define SYMBAPPUI_H_
+#ifndef PT_SYMBIANTOOLS_H_
+#define PT_SYMBIANTOOLS_H_
 
-#include <aknappui.h>
+#include <Pt/Math/Point.h>
+#include <Pt/Math/Rect.h>
+#include "Pt/Gfx/Rect.h"
 
-namespace Pt
+#include <e32std.h>
+
+namespace Pt {
+
+namespace Gui {
+
+namespace SymbianTools {
+
+static TRect makeTRect(const Gfx::Rect& rect)
 {
-namespace Gui
-{
-class Widget;
+    return TRect(rect.x(), rect.y(), 
+            rect.x() + rect.width(), rect.y() + rect.height());
 }
+
+static TRect makeTRect(const Math::Point& point, const Math::Size& size)
+{
+    return TRect(point.x(), point.y(), 
+            point.x() + size.width(), 
+            point.y() + size.height());
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// IMPORTANT NOTE:
-// ALL Symbian classes have to reside in the global namespace
-// otherwise results are undefined
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-class SymbAppUi : public CAknAppUi
+static Pt::Gfx::Region makeRegion(const TRect& rect)
 {
-public:     
-    void ConstructL();    
-    ~SymbAppUi();
-    void CloseApp();
+    return Pt::Gfx::Region(
+            Pt::Math::Point(rect.iTl.iX, rect.iTl.iY),
+            Pt::Math::Size(rect.iBr.iX - rect.iTl.iX, 
+                    rect.iBr.iY - rect.iTl.iY)
+    );    
+}
 
-    void SetParentDoc(class SymbDoc* parentDoc);
-    
-private:
-    void DynInitMenuPaneL(TInt, CEikMenuPane*);
+}
 
-    void HandleCommandL(TInt);
-    
-    virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, 
-            TEventCode aType);
+}
 
-    class SymbDoc* _parentDoc;
-    Pt::Gui::Widget* _widget;
-};
+}
 
-#endif /*SYMBAPPUI_H_*/
+#endif /*PT_SYMBIANTOOLS_H_*/

@@ -29,6 +29,8 @@
 #include <Pt/String.h>
 
 class CCoeControl;
+class CGraphicsContext;
+class CFont;
 
 namespace Pt {
 
@@ -71,6 +73,8 @@ namespace Gui {
             // destruct
             void destruct();
             
+            bool isConstructed() { return _control != 0; }
+            
             // dispatch events to slots
             void dispatchEvent(Pt::Event& event);    
             
@@ -78,7 +82,8 @@ namespace Gui {
             CCoeControl* getControl() { return _control; }
             
             // enable drawing to native graphics context
-            void beginDraw();            
+            void beginDraw(CGraphicsContext* gc,
+                    const CFont* defaultFont);            
             
             // disable drawing to native gfx context
             void endDraw();

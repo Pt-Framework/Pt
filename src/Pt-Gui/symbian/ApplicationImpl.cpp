@@ -52,6 +52,93 @@ namespace Pt {
 
 namespace Gui {
 
+WidgetRegistry::WidgetRegistry() 
+{
+    //_widgets = new Widget*[RegistrySize];
+    //reset();
+}
+
+WidgetRegistry::~WidgetRegistry()
+{
+    //delete[] _widgets;
+}
+
+void WidgetRegistry::registerWidget(Widget* widget)
+{
+    _widgets.push_back(widget);
+    
+//    for (int i = 0; i < RegistrySize; ++i)
+//    {
+//        if (!_widgets[i])
+//        {
+//            _widgets[i] = widget;
+//            return;
+//        }
+//    }
+//    
+//    assert(false);
+}
+
+void WidgetRegistry::unregisterWidget(Widget* widget)
+{
+    // make new list and remove ourselves
+    std::vector<Widget*> newList;
+    for (unsigned int i = 0; i < _widgets.size(); ++i)
+    {
+        if (_widgets.at(i) != widget)
+            newList.push_back(_widgets.at(i));
+    }
+
+    _widgets = newList;
+
+//    for (int i = 0; i < RegistrySize; ++i)
+//    {
+//        if (_widgets[i] == widget)
+//        {
+//            _widgets[i] = 0;
+//            return;
+//        }
+//    }
+}
+
+// Widget backend construction becomes delayed until 
+// application instance is running and MVC hierachy is built
+void WidgetRegistry::constructBackendControls()
+{
+    for (unsigned int i = 0; i < _widgets.size(); ++i)
+    {
+        Widget* widget = _widgets.at(i);
+        widget->impl().construct();
+    }
+    
+//    for (int i = 0; i < RegistrySize; ++i)
+//    {
+//        if (_widgets[i])
+//            _widgets[i]->impl().construct();
+//    }
+}
+
+void WidgetRegistry::destructBackendControls()
+{
+    for (unsigned int i = 0; i < _widgets.size(); ++i)
+    {
+        Widget* widget = _widgets.at(i);
+        widget->impl().destruct();
+    }
+    
+//    for (int i = 0; i < RegistrySize; ++i)
+//    {
+//        if (_widgets[i])
+//            _widgets[i]->impl().destruct();
+//    }
+}
+
+void WidgetRegistry::reset()
+{
+    _widgets.clear();
+    //memset(_widgets, 0, RegistrySize*sizeof(Widget*));
+}
+
 ApplicationImpl::ApplicationImpl(Application& app) 
 : _app(app), /*_eventLoopThread(_eventLoop), */_symbApp(new SymbApp(this))
 {
@@ -84,6 +171,15 @@ void ApplicationImpl::queueEvent(const Pt::Event& e)
 int ApplicationImpl::run()
 {
     //_eventLoopThread.start();    
+    
+    // Note:
+    // It is important to make sure the WidgetRegistry singleton instance
+    // is existing before entering EikStart::RunApplication
+    // If it's created from a constructor the Symbian kernel will panic
+    // with a memory leak error code.
+    // The following call will not do anything except ensuring the
+    // singleton instance has been created
+    WidgetRegistry::instance().destructBackendControls();
     return EikStart::RunApplication(NewApplication);
 }
 
@@ -119,16 +215,6 @@ void ApplicationImpl::lockAppInstance()
 void ApplicationImpl::unlockAppInstance()
 {
     _mutex.unlock();    
-}
-
-void ApplicationImpl::constructBackendWidgets()
-{
-    for (unsigned int i = 0; i < _widgets.size(); ++i)
-    {
-        Widget* widget = _widgets.at(i);
-        widget->impl().construct();
-    }
-    _widgets.clear();
 }
 
 } // namespace Gui

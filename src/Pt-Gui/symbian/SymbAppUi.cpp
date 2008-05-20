@@ -22,22 +22,28 @@
 #include "ApplicationImpl.h"
 #include <assert.h>
 #include "Widget.h"
+#include "WidgetImpl.h"
 
 void SymbAppUi::ConstructL()
 {
     BaseConstructL(ENoAppResourceFile);
     SetKeyBlockMode(ENoKeyBlock);
     
-    // there must be an application Impl running, 
-    // otherwise something is wrong at this point
-    Pt::Gui::ApplicationImpl* appImpl = Pt::Gui::ApplicationImpl::_self;    
-    assert(appImpl);
-    appImpl->constructBackendWidgets();
+    //_widget = new Pt::Gui::Widget();    
+    
+    //_widget->impl().construct();
+    
+    // Important Note:
+    // If this singleton instance has not been created before 
+    // Symbian will report a memory leak panic which is actually stupid.
+    Pt::Gui::WidgetRegistry::instance().constructBackendControls();
 }
 
 SymbAppUi::~SymbAppUi()
 {
+    Pt::Gui::WidgetRegistry::instance().destructBackendControls();
 
+    //delete _widget;
 }
 
 void SymbAppUi::CloseApp() 

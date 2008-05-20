@@ -20,19 +20,24 @@
 #include "PainterImpl.h"
 #include "PixmapImpl.h"
 #include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
 #include "Pt/Gfx/FontMetrics.h"
+#include "Pt/Text/Utf16Codec.h"
+#include "Pt/Text/AsciiCodec.h"
+#include "Pt/Text/TextStream.h"
+#include "SymbianTools.h"
+
 #include <iostream>
 
 // symbian APIs
 #include <gdi.h>
+#include <eikenv.h>
 
 namespace Pt {
 
 namespace Gui {
 
 PainterImpl::PainterImpl()
-: _font("sans-serif"), _gc(0)
+: _font("sans-serif"), _gc(0), _nativeFont(0)
 {
 }
 
@@ -59,6 +64,7 @@ void PainterImpl::end()
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
+    updatePen();
 }
 
 const Gfx::Pen& PainterImpl::pen() const
@@ -123,7 +129,13 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 
 void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
 {
-
+    TPtrC8 temp(reinterpret_cast<const TUint8*>(text.narrow().c_str()));
+    // TODO: Find dynamic size solution
+    TBuf<1024> desc;
+    desc.Copy(temp);
+    
+    assert(_gc != 0);
+    _gc->DrawText(desc, TPoint(to.x(), to.y()));
 }
 
 void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
@@ -134,16 +146,14 @@ void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCoun
 
 void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size)
 {
-
+    assert(_gc != 0);
+    _gc->DrawEllipse(SymbianTools::makeTRect(topLeft, size));    
 }
 
 void PainterImpl::fillRect(const Gfx::Rect& rect)
 {
-    TRect rc(rect.x(), rect.y(), 
-            rect.x() + rect.width(), rect.y() + rect.height());
-    
     assert(_gc != 0);
-    _gc->DrawRect(rc);
+    _gc->DrawRect(SymbianTools::makeTRect(rect));
 }
 
 void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
@@ -186,20 +196,46 @@ void PainterImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size
 
 void PainterImpl::updatePen()
 {
+    assert(_gc != 0);
+    
+    Gfx::Rgb888Color col;
+    assign(col, _pen.color());    
+    _gc->SetPenColor(TRgb(col.red(), col.green(), col.blue()));
+
+    _gc->SetPenSize(TSize(_pen.size(), _pen.size()));
+    
+    switch (_pen.style()) 
+    {
+         case Gfx::Pen::SolidStyle:
+             _gc->SetPenStyle(CGraphicsContext::ESolidPen);
+             break;
+
+         case Gfx::Pen::DashStyle:
+             _gc->SetPenStyle(CGraphicsContext::EDashedPen);
+             break;
+         
+         case Gfx::Pen::DoubleDash:
+             _gc->SetPenStyle(CGraphicsContext::EDotDashPen);
+             break;
+         
+         default:
+             return;
+     }    
 }
 
 void PainterImpl::updateBrush()
 {
     assert(_gc != 0);
+
+    Gfx::Rgb888Color col;
+    assign(col, _brush.color());
+    _gc->SetBrushColor(TRgb(col.red(), col.green(), col.blue()));
     
     switch (_brush.fillStyle()) 
     {
          case Gfx::Brush::SolidFill: 
          {
              _gc->SetBrushStyle(CGraphicsContext::ESolidBrush);
-             Gfx::Rgb888Color col;
-             assign( col, _brush.color() );
-             _gc->SetBrushColor(TRgb(col.red(), col.green(), col.blue()));
              break;
          }
 
@@ -210,8 +246,7 @@ void PainterImpl::updateBrush()
 
          default:
              return;
-     }
-    
+     }    
 }
 
 void PainterImpl::updateFont()

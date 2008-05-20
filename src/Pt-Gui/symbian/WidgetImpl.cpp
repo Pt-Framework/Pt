@@ -31,6 +31,7 @@
 #include "SymbAppUi.h"
 #include "SymbDoc.h"
 #include "SymbApp.h"
+#include "SymbianTools.h"
 
 #include <limits>
 #include <iostream>
@@ -47,7 +48,7 @@ public:  // Constructors and destructor
     {
     }
 
-    void ConstructL(const TRect& aRect)
+    void ConstructL(const TRect& rect)
     {
         _windowGroup=RWindowGroup(iCoeEnv->WsSession());
         
@@ -56,8 +57,9 @@ public:  // Constructors and destructor
         _windowGroup.SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
         _windowGroup.EnableReceiptOfFocus(EFalse);
         
+        // we're automatically becoming a window-owning control 
         CreateWindowL(&_windowGroup);
-        SetRect(aRect);
+        SetRect(rect);
         EnableDragEvents();
         ActivateL();        
     }
@@ -73,7 +75,7 @@ private: // Functions from base classes
      * From CCoeControl,Draw.
      * @param Specified area for drawing
      */
-    void Draw(const TRect& aRect) const
+    void Draw(const TRect& rect) const
     {
         //CWindowGc& gc = SystemGc();
         //gc.SetPenStyle(CGraphicsContext::ENullPen);
@@ -81,15 +83,12 @@ private: // Functions from base classes
         //gc.SetBrushColor(KRgbBlue);
         //gc.DrawRect(aRect);        
     
-        Pt::Gfx::Region region(
-            Pt::Math::Point(aRect.iTl.iX, aRect.iTl.iY),
-            Pt::Math::Size(aRect.iBr.iX - aRect.iTl.iX, 
-                    aRect.iBr.iY - aRect.iTl.iY)
-        );
-
-        _parentWidget.impl().beginDraw();
+        _parentWidget.impl().beginDraw(&SystemGc(),
+                iEikonEnv->AnnotationFont());
         
-        Pt::Gui::PaintEvent paintEvent(_parentWidget, region);    
+        Pt::Gui::PaintEvent paintEvent(_parentWidget, 
+                Pt::Gui::SymbianTools::makeRegion(rect)); 
+        
         _parentWidget.impl().dispatchEvent(paintEvent);
 
         _parentWidget.impl().endDraw();
@@ -112,12 +111,13 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 _initialLocation(at), _initialSize(size),
 _painter(*this), _control(0)
 {
-    construct();
+    WidgetRegistry::instance().registerWidget(&_apiWidget);
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
+    WidgetRegistry::instance().unregisterWidget(&_apiWidget);
     destruct();
 }
 
@@ -172,8 +172,11 @@ void WidgetImpl::resize(size_t width, size_t height)
 
 void WidgetImpl::construct()
 {
+    if (_control)
+        destruct();
+    
     assert(Pt::Gui::ApplicationImpl::_self);        
-
+    
     if (Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
     {
         SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi();
@@ -192,21 +195,12 @@ void WidgetImpl::construct()
         if ((ssize_t)size.height() == KPositionUnused)
             size.setHeight(ui.ClientRect().Height());
         
-        TRect rect(location.x(), location.y(), 
-                location.x() + size.width(), 
-                location.y() + size.height());
-        
-        control->ConstructL(rect);
+        control->ConstructL(SymbianTools::makeTRect(location, size));
         control->SetMopParent(&ui);
         ui.AddToStackL(control);
         _control = control;    
         
         synchronize();
-    }
-    else
-    {
-        assert(Pt::Gui::ApplicationImpl::_self);
-        Pt::Gui::ApplicationImpl::_self->_widgets.push_back(&_apiWidget);
     }
 }
 
@@ -214,23 +208,17 @@ void WidgetImpl::destruct()
 {
     assert(Pt::Gui::ApplicationImpl::_self);        
 
-    if (Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
+    if (_control && Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
     {
         SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi();
         ui.RemoveFromStack(_control); 
-        delete _control;    
     }
-    else
+
+    if (_control)
     {
-        // make new list and remove ourselves
-        std::vector<Widget*> newList;
-        for (unsigned int i = 0; i < Pt::Gui::ApplicationImpl::_self->_widgets.size(); ++i)
-        {
-            if (Pt::Gui::ApplicationImpl::_self->_widgets.at(i) != &_apiWidget)
-                newList.push_back(Pt::Gui::ApplicationImpl::_self->_widgets.at(i));
-        }
-        newList = Pt::Gui::ApplicationImpl::_self->_widgets;
-    }
+        delete _control;    
+        _control = 0;
+    }    
 }
 
 void WidgetImpl::dispatchEvent(Pt::Event& event)
@@ -239,14 +227,18 @@ void WidgetImpl::dispatchEvent(Pt::Event& event)
     Pt::Gui::ApplicationImpl::_self->dispatchEvent(event);
 }
 
-void WidgetImpl::beginDraw()
+void WidgetImpl::beginDraw(CGraphicsContext* gc,
+        const CFont* defaultFont)            
 {
-    _painter.setGc(&_control->SystemGc());
+    gc->UseFont(defaultFont);
+    _painter.setGc(gc);
+    _painter.setNativeFont(defaultFont);
 }
 
 void WidgetImpl::endDraw()
 {
     _painter.setGc(0);    
+    _painter.setNativeFont(0);
 }
 
 void WidgetImpl::synchronize()

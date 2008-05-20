@@ -37,6 +37,7 @@
 #include <list>
 
 class CGraphicsContext;
+class CFont;
 
 namespace Pt {
 
@@ -107,8 +108,8 @@ namespace Gui {
                                        const Gfx::Region& imageRegion);
 
             void setGc(CGraphicsContext* gc) { _gc = gc; }
-            CGraphicsContext* getGc() { return _gc; }
-
+            void setNativeFont(const CFont* font) { _nativeFont = font; }
+            
         protected:
             template <typename Iterator>
             void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
@@ -128,6 +129,7 @@ namespace Gui {
             Gfx::Font  _font;
             
             CGraphicsContext* _gc;
+            const CFont* _nativeFont;            
             
             //std::vector<Paint*> _paintQueue;
     };

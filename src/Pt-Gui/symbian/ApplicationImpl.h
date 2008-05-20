@@ -46,6 +46,36 @@ namespace Gui {
     class Widget;
     class Event;
 
+    class WidgetRegistry : public Pt::Singleton<WidgetRegistry>
+    {
+        public:
+            WidgetRegistry();
+
+            ~WidgetRegistry();
+
+            void registerWidget(Widget* widget);
+            void unregisterWidget(Widget* widget);
+
+            // Widget backend construction becomes delayed until 
+            // application instance is running and MVC hierachy is built
+            void constructBackendControls(); 
+            
+            void destructBackendControls();
+            
+            void reset();
+
+        private:
+            enum 
+            {
+                RegistrySize = 1024
+            };
+            
+            // Widgets we need to construct when the application is run
+            std::vector<Widget*> _widgets;
+            
+            //Widget** _widgets;
+    };    
+    
     /**
      * @brief Basic Application implementation for GUI application.
      */
@@ -90,13 +120,6 @@ namespace Gui {
 
             static void lockAppInstance();
             static void unlockAppInstance();
-
-            // Widgets we need to construct when the application is run
-            std::vector<Widget*> _widgets;
-            
-            // Widget backend construction becomes delayed until 
-            // application instance is running and MVC hierachy is built
-            void constructBackendWidgets();            
     };
 
 } // namespace Gui
