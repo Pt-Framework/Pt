@@ -121,12 +121,12 @@ rule ConfigureDefine
 
 rule TryCommand
 {
-    local _cmd  = $(1) " 2>&1 > check.out" ;
+    local _cmd  = $(1) " 2>&1 > check.log" ;
     local _result = [ COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ] ;
 
-    if [ CHECK_IF_FILE check.out ] && $(RM)
+    if [ CHECK_IF_FILE check.log ] && $(RM)
     {
-        _cmd = $(RM) check.out ;
+        _cmd = $(RM) check.log ;
         COMMAND $(_cmd:J=" ") : "exit-status" : "no-output" ;
     }
 
@@ -139,22 +139,10 @@ rule TryCommand
 
 rule CheckCommand
 {
-    if $(CONFIGURE) && ! $($(1))
-    {
-        local _r = [ TryCommand $(3) ] ;
-        ConfigureEcho $(1) : $(_r) : $(2) ;
-        return $(_r) ;
-    }
-}
-
-
-rule CheckCommand2
-{
     local _r = [ TryCommand $(3) ] ;
     if $(_r)
     {
         $(1) = $(2) ;
-        #Configure $(1) : $(2) ;
     }
     return $(_r) ;
 }
@@ -221,7 +209,15 @@ rule CheckCc
         }
 
         local _r = [ TryCc $(1) : check.c : $(3) : $(4) : $(5) ] ;
-        ConfigureEcho $(1) : $(_r) : "yes" : "no" ;
+        if $(_r)
+        {
+            Configure $(1) : 1 ;
+            Echo "Checking for" $(1)"... yes" ;
+        }
+        else
+        {
+            Echo "Checking for" $(1)"... no" ;
+        }
 
         TryCommand $(RM) "check.c" ;
         TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
@@ -245,20 +241,19 @@ rule CheckC++
         }
 
         local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
-        ConfigureEcho $(1) : $(_r) : "yes" : "no" ;
+        if $(_r)
+        {
+            Configure $(1) : 1 ;
+            Echo "Checking for" $(1)"... yes" ;
+        }
+        else
+        {
+            Echo "Checking for" $(1)"... no" ;
+        }
 
         TryCommand $(RM) "check.cpp" ;
         TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
         TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
-    }
-}
-
-
-rule Require
-{
-    if ! $($(1))
-    {
-        Echo "Checking for "$(1)" ...FAILED !!!" ;
     }
 }
 
@@ -299,79 +294,100 @@ rule CheckHost
 {
     Echo "Checking for host platform ..."$(OS:L) ;
 
-    #
-    # Check for a shell command to remove files
-    #
     RM = ;
-    WriteFile check_rm.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    CheckDefault RM ;
-    CheckCommand RM : "del /f/q" : "del /f/q check_rm.in" ;
-    CheckCommand RM : "rm -f" : "rm -f check_rm.in" ;
-    Require RM ;
-
-    #
-    # Check for a shell command to move files
-    #
-    MV = ;
-    WriteFile check_mv.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    CheckDefault MV ;
-    CheckCommand MV : "move /y" : "move /y check_mv.in check_mv.out" ;
-    CheckCommand MV : "mv -f" : "mv -f check_mv.in check_mv.out" ;
-    Erase "check_mv.in" "check_mv.out" ;
-    Require MV ;
-
-    #
-    # Check for a shell command to copy files
-    # 
-    CP = ;
-    WriteFile check_cp.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    CheckDefault CP ;
-    CheckCommand CP : "copy" : "copy check_cp.in check_cp.out" ;
-    CheckCommand CP : "cp -f" : "cp -f check_cp.in check_cp.out" ;
-    Erase "check_cp.in" "check_cp.out" ;
-    Require CP ;
-
-    #
-    # Check for a shell command to create directories
-    # 
-    MKDIR = ;
-    CheckDefault MKDIR ;
-    CheckCommand MKDIR : "mkdir" : "mkdir check_dir" ;
-    Require MKDIR ;
-
-    #
-    # Check for a shell command to remove directories
-    #
-    RMDIR = ;
-    CheckDefault RMDIR ;
-    CheckCommand RMDIR : "rmdir /s/q" : "rmdir /s/q check_dir" ;
-    CheckCommand RMDIR : "rmdir" : "rmdir check_dir" ;
-    CheckCommand RMDIR : "rm -rf" : "rm -rf check_dir" ;
-    Require RMDIR ;
-
-    #
-    # Check for a shell command to set access rights
-    # 
-    CHMOD = ;
-    WriteFile check_chmod.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    CheckDefault CHMOD ;
-    CheckCommand CHMOD : "chmod" : "chmod 777 check_chmod.in" ;
-    Erase "check_chmod.in" ;
-    if $(CHMOD)
+    WriteFile check.in : "delete me" ;
+    if $(RM) ||
+       [ CheckCommand RM : "del /f/q" : "del /f/q check.in" ] ||
+       [ CheckCommand RM : "rm -f" : "rm -f check.in"  ]
     {
-        ConfigureEcho CHGRP : 1 : chgrp ;
-        ConfigureEcho CHGRP : 1 : chown ;
+        Configure RM : $(RM) ;
+        Echo "Checking for rm command..." $(RM) ;
+    }
+    else
+    {
+        Exit "Checking for rm command... FAILED!" ;
+    }
+    Erase "check.in" "check.out" "check.log" ;
+
+    MV = ;
+    WriteFile check.in : "delete me" ;
+    if $(MV) ||
+       [ CheckCommand MV : "move /y" : "move /y check.in check.out" ] ||
+       [ CheckCommand MV : "mv -f" : "mv -f check.in check.out" ]
+    {
+        Configure MV : $(MV) ;
+        Echo "Checking for move command..." $(MV) ;
+    }
+    Erase "check.in" "check.out" ;
+    if ! $(MV)
+    {
+        Exit "Checking for move command... FAILED!" ;
     }
 
+    CP = ;
+    WriteFile check.in : "delete me" ;
+    if $(CP) ||
+       [ CheckCommand CP : "copy" : "copy check.in check.out" ] ||
+       [ CheckCommand CP : "cp -f" : "cp -f check.in check.out" ]
+    {
+        Configure CP : $(CP) ;
+        Echo "Checking for copy command..." $(CP) ;
+    }
+    Erase "check.in" "check.out" ;
+    if ! $(CP)
+    {
+        Exit "Checking for copy command... FAILED!" ;
+    }
+
+    MKDIR = ;
+    if $(MKDIR) ||
+       [ CheckCommand MKDIR : "mkdir" : "mkdir check_dir" ]
+    {
+        Configure MKDIR : $(MKDIR) ;
+        Echo "Checking for mkdir command..." $(MKDIR) ;
+    }
+    else
+    {
+        Exit "Checking for mkdir command... FAILED!" ;
+    }
+
+    RMDIR = ;
+    if $(RMDIR) 
+       || [ CheckCommand RMDIR : "rmdir /s/q" : "rmdir /s/q check_dir" ]
+       || [ CheckCommand RMDIR : "rmdir" : "rmdir check_dir" ]
+       || [ CheckCommand RMDIR : "rm -rf" : "rm -rf check_dir" ]
+    {
+        Configure RMDIR : $(RMDIR) ;
+        Echo "Checking for rmdir command..." $(RMDIR) ;
+    }
+    else
+    {
+        Exit "Checking for rmdir command... FAILED!" ;
+    }
+
+    CHMOD = ;
+    WriteFile check.in : "delete me" ;
+    if $(CHMOD)
+       || [ CheckCommand CHMOD : "chmod" : "chmod 777 check.in" ]
+    {
+        Configure CHMOD : $(CHMOD) ;
+        Configure CHGRP :  chgrp ;
+        Configure CHOWN :  chown ;
+        Echo "Checking for chmod command..." $(CHMOD) ;
+        Echo "Checking for chgrp command..." $(CHGRP) ;
+        Echo "Checking for chown command..." $(CHOWN) ;
+    }
+    Erase "check.in" ;
+
     LN = ;
-    WriteFile check_ln.in : "delete me" ;
+    WriteFile check.in : "delete me" ;
     if $(LN) 
-       || [ CheckCommand2 LN : "ln" : "ln check_ln.in check_ln.out" ]
+       || [ CheckCommand LN : "ln" : "ln check.in check.out" ]
     {
         Configure LN : $(LN) ;
         Echo "Checking for link command..." $(LN) ;
     }
-    Erase "check_ln.in" "check_ln.out" ;
+    Erase "check.in" "check.out" ;
  
     if ! $(LN)
     {
@@ -380,7 +396,7 @@ rule CheckHost
 
     DOT = ;
     if $(DOT) 
-       || [ CheckCommand2 DOT : "." : "cd ." ]
+       || [ CheckCommand DOT : "." : "cd ." ]
     {
         Configure DOT : $(DOT) ;
         Echo "Checking for directory dot..." $(DOT) ;
@@ -392,7 +408,7 @@ rule CheckHost
 
     DOTDOT = ;
     if $(DOTDOT) 
-       || [ CheckCommand2 DOTDOT : ".." : "cd .." ]
+       || [ CheckCommand DOTDOT : ".." : "cd .." ]
     {
         Configure DOTDOT : $(DOTDOT) ;
         Echo "Checking for directory dotdot..." $(DOTDOT) ;
@@ -404,8 +420,8 @@ rule CheckHost
     
     SLASH = ;   
     if $(SLASH)
-       || [ CheckCommand2 SLASH : "\\\\" : "cd .\\" ]
-       || [ CheckCommand2 SLASH : "/"  : "cd ./" ]
+       || [ CheckCommand SLASH : "\\\\" : "cd .\\" ]
+       || [ CheckCommand SLASH : "/"  : "cd ./" ]
     {
         Configure SLASH : $(SLASH) ;
         if $(SLASH) = "\\\\"
