@@ -94,6 +94,16 @@ rule ConfigureEcho
 }
 
 
+rule Configure
+{
+    if $(CONFIGURE)
+    {
+        $(1) = $(2) ;
+        WriteFile config.jam : $(1)" ?= "\"$(2)\"" ;"  ;
+   }
+}
+
+
 rule ConfigureDefine
 {
     if $(CONFIGURE)
@@ -135,6 +145,18 @@ rule CheckCommand
         ConfigureEcho $(1) : $(_r) : $(2) ;
         return $(_r) ;
     }
+}
+
+
+rule CheckCommand2
+{
+    local _r = [ TryCommand $(3) ] ;
+    if $(_r)
+    {
+        $(1) = $(2) ;
+        #Configure $(1) : $(2) ;
+    }
+    return $(_r) ;
 }
 
 
@@ -270,8 +292,6 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
-
-
 #
 # TODO: host configuration
 #
@@ -344,23 +364,60 @@ rule CheckHost
     }
 
     LN = ;
-    WriteFile check_ln.in : "This file is a leftover of the jam configure process and can be deleted." ;
-    CheckDefault LN ;
-    CheckCommand LN : "ln" : "ln check_ln.in check_ln.out" ;
+    WriteFile check_ln.in : "delete me" ;
+    if $(LN) 
+       || [ CheckCommand2 LN : "ln" : "ln check_ln.in check_ln.out" ]
+    {
+        Configure LN : $(LN) ;
+        Echo "Checking for link command..." $(LN) ;
+    }
     Erase "check_ln.in" "check_ln.out" ;
+ 
+    if ! $(LN)
+    {
+        Exit "Checking for link command... FAILED!" ;
+    }
 
     DOT = ;
-    CheckCommand DOT : "." : "cd ." ;
-    Require DOT ;
+    if $(DOT) 
+       || [ CheckCommand2 DOT : "." : "cd ." ]
+    {
+        Configure DOT : $(DOT) ;
+        Echo "Checking for directory dot..." $(DOT) ;
+    }
+    else
+    {
+        Exit "Checking for directory dot... FAILED!" ;
+    }
 
     DOTDOT = ;
-    CheckCommand DOTDOR : ".." : "cd .." ;
-    Require DOTDOT ;
-
-    SLASH = ;
-    CheckCommand SLASH : "/" : "cd ./" ;
-    CheckCommand SLASH : "\\" : "cd .\\" ;
-    Require SLASH ;
+    if $(DOTDOT) 
+       || [ CheckCommand2 DOTDOT : ".." : "cd .." ]
+    {
+        Configure DOTDOT : $(DOTDOT) ;
+        Echo "Checking for directory dotdot..." $(DOTDOT) ;
+    }
+    else
+    {
+        Exit "Checking for directory dotdot... FAILED!" ;
+    }
+    
+    SLASH = ;   
+    if $(SLASH)
+       || [ CheckCommand2 SLASH : "\\\\" : "cd .\\" ]
+       || [ CheckCommand2 SLASH : "/"  : "cd ./" ]
+    {
+        Configure SLASH : $(SLASH) ;
+        if $(SLASH) = "\\\\"
+        {
+            SLASH = \\ ;
+        }
+        Echo "Checking for directory separator..." $(SLASH) ;
+    }
+    else
+    {
+        Exit "Checking for directory separator... FAILED!" ;
+    }
 }
 
 
