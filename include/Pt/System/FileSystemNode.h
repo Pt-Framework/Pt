@@ -32,9 +32,6 @@ namespace System {
 */
 class PT_SYSTEM_API FileSystemNode
 {
-    friend class DirectoryIteratorImpl;
-    friend class DirectoryEntry;
-
     public:
         enum Type
         {

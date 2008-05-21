@@ -92,8 +92,62 @@ const char* FileInfo::path() const
     return "";
 }
 
+std::string FileInfo::dirName() const
+{
+    if(_node)
+        return _node->dirName();
+
+    return "";
+}
+
+
+std::size_t FileInfo::size() const
+{
+    if(_node)
+        return _node->size();
+
+    return 0;
+}
+
+
+bool FileInfo::isDirectory() const
+{
+    if(_node)
+        return _node->type() == FileSystemNode::Directory;
+
+    return false;
+}
+
+
+bool FileInfo::isFile() const
+{
+    if(_node)
+        return _node->type() == FileSystemNode::File;
+
+    return false;
+}
+
+
+void FileInfo::remove()
+{
+    if(_node)
+        _node->remove();
+}
+
+
+void FileInfo::move(const std::string& newname)
+{
+    if(_node)
+        _node->move(newname);
+}
 
 const FileSystemNode& FileInfo::node() const
+{
+    return *_node;
+}
+
+
+FileSystemNode& FileInfo::node()
 {
     return *_node;
 }

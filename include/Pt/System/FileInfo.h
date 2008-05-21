@@ -46,13 +46,28 @@ class FileInfo
 
         const char* path() const;
 
+        std::string dirName() const;
+
+        std::size_t size() const;
+
+        bool isDirectory() const;
+
+        bool isFile() const;
+
+        void remove();
+
+        void move(const std::string& newname);
+
         const FileSystemNode& node() const;
+
+        FileSystemNode& node();
 
     private:
         File _file;
         Directory _dir;
         FileSystemNode* _node;
 };
+
 } // namespace System
 
 } // namespace Pt
