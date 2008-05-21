@@ -36,13 +36,9 @@ class FileInfo
 
         explicit FileInfo(const char* path);
 
-        FileInfo(const FileInfo& fi);
-
         ~FileInfo();
 
-        FileInfo& operator=(const FileInfo& f);
-
-        const char* name() const;
+        std::string name() const;
 
         const char* path() const;
 
@@ -58,14 +54,9 @@ class FileInfo
 
         void move(const std::string& newname);
 
-        const FileSystemNode& node() const;
-
-        FileSystemNode& node();
-
     private:
-        File _file;
-        Directory _dir;
-        FileSystemNode* _node;
+        int _type;
+        std::string _path;
 };
 
 } // namespace System

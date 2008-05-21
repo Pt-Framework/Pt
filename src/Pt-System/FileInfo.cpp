@@ -16,35 +16,24 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "FileImpl.h"
+#include "DirectoryImpl.h"
 #include "Pt/System/FileInfo.h"
+#include "Pt/System/Environment.h"
 
 namespace Pt {
 
 namespace System {
 
 FileInfo::FileInfo()
-: _node(0)
+: _type(FileSystemNode::Invalid)
 {}
 
 
 FileInfo::FileInfo(const char* path)
-: _node(0)
+: _path(path)
 {
-    FileSystemNode::Type type = FileSystemNode::stat( path );
-    if(type == FileSystemNode::Directory)
-    {
-        _dir.setPath(path);
-        _node = &_dir;
-    }
-    else if(type == FileSystemNode::File)
-    {
-        _file.setPath(path);
-        _node = &_file;
-    }
-    else
-    {
-        throw SystemError("Unknown file system node " + std::string(path), PT_SOURCEINFO);
-    }
+    _type = FileSystemNode::stat( path );
 }
 
 
@@ -53,7 +42,7 @@ FileInfo::~FileInfo()
 }
 
 
-FileInfo::FileInfo(const FileInfo& fi)
+/*FileInfo::FileInfo(const FileInfo& fi)
 {
     this->operator=(fi);
 }
@@ -73,38 +62,54 @@ FileInfo& FileInfo::operator=(const FileInfo& fi)
     }
 
     return *this;
-}
+}*/
 
 
-const char* FileInfo::name() const
+std::string FileInfo::name() const
 {
-    if(_node)
-        return _node->name().c_str();
+    std::string::size_type pos = _path.rfind(Environment::pathSeparator());
 
-    return "";
+    if (pos != std::string::npos)
+    {
+        return _path.substr(pos + 1);
+    }
+    else
+    {
+        return _path;
+    }
 }
+
 
 const char* FileInfo::path() const
 {
-    if(_node)
-        return _node->path().c_str();
-
-    return "";
+    return _path.c_str();
 }
+
 
 std::string FileInfo::dirName() const
 {
-    if(_node)
-        return _node->dirName();
+    // Find last slash. This separates the file name from the path.
+    std::string::size_type pos = _path.find_last_of(Environment::pathSeparator());
 
-    return "";
+    // If there is no separator, the file is relative to the current 
+    // directory. So an empty path is returned.
+    if (pos == std::string::npos)
+    {
+        return "";
+    }
+
+    // Include trailing separator to be able to distinguish between no 
+    // path ("") and a path which is relative to the root ("/"), for example.
+    return _path.substr(0, pos + 1);
 }
 
 
 std::size_t FileInfo::size() const
 {
-    if(_node)
-        return _node->size();
+    if(_type == FileSystemNode::File)
+    {
+        return FileImpl::size( _path.c_str() );
+    }
 
     return 0;
 }
@@ -112,44 +117,35 @@ std::size_t FileInfo::size() const
 
 bool FileInfo::isDirectory() const
 {
-    if(_node)
-        return _node->type() == FileSystemNode::Directory;
-
-    return false;
+    return _type == FileSystemNode::Directory;
 }
 
 
 bool FileInfo::isFile() const
 {
-    if(_node)
-        return _node->type() == FileSystemNode::File;
-
-    return false;
+    return _type == FileSystemNode::File;
 }
 
 
 void FileInfo::remove()
 {
-    if(_node)
-        _node->remove();
+    if(_type == FileSystemNode::File)
+    {
+        return FileImpl::remove( _path.c_str() );
+    }
+
+    return DirectoryImpl::remove( _path.c_str() );
 }
 
 
 void FileInfo::move(const std::string& newname)
 {
-    if(_node)
-        _node->move(newname);
-}
+    if(_type == FileSystemNode::File)
+    {
+        return FileImpl::move( _path.c_str(), newname.c_str() );
+    }
 
-const FileSystemNode& FileInfo::node() const
-{
-    return *_node;
-}
-
-
-FileSystemNode& FileInfo::node()
-{
-    return *_node;
+    return DirectoryImpl::move( _path.c_str(), newname.c_str() );
 }
 
 } // namespace System
