@@ -18,29 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PixmapPainter.h"
+#include "PixmapImpl.h"
 
 namespace Pt {
 
 namespace Gui {
 
-PixmapPainter::PixmapPainter()
+PixmapPainter::PixmapPainter(PixmapImpl& parentPixmapImpl)
+: _parentPixmapImpl(parentPixmapImpl), _active(false)
 {
 }
 
 
 PixmapPainter::~PixmapPainter()
 {
+    if (_active)
+        end(); 
 }
 
 
 void PixmapPainter::begin()
 {
-
+    if (!_active)
+    {
+        _parentPixmapImpl.beginDraw();
+        _active = true;
+    }
 }
 
 
 void PixmapPainter::end()
 {
+    if (_active)
+    {
+        _parentPixmapImpl.endDraw();        
+        _active = false;
+    }
 }
 
 } // namespace Gui

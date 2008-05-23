@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 #include "SymbAppUi.h"
+#include "SymbDoc.h"
+#include "SymbApp.h"
 #include "ApplicationImpl.h"
 #include <assert.h>
 #include "Widget.h"
@@ -34,14 +36,21 @@ void SymbAppUi::ConstructL()
     //_widget->impl().construct();
     
     // Important Note:
-    // If this singleton instance has not been created before 
-    // Symbian will report a memory leak panic which is actually stupid.
-    Pt::Gui::WidgetRegistry::instance().constructBackendControls();
+    // When doing symbian debug builds debug marks are placed on certain
+    // call stack levels and there will be panics when the debug marks are not
+    // as expected when leaving the call stack.
+    // This is apparently a problem when accessing singleton instances
+    // in constructors etc.
+    // We are just confident that these panics are not caused by real
+    // memory leaks.
+    Pt::Gui::ResourceRegistry::instance().constructPixmaps();
+    Pt::Gui::ResourceRegistry::instance().constructWidgets();
 }
 
 SymbAppUi::~SymbAppUi()
 {
-    Pt::Gui::WidgetRegistry::instance().destructBackendControls();
+    Pt::Gui::ResourceRegistry::instance().destructWidgets();
+    Pt::Gui::ResourceRegistry::instance().destructPixmaps();
 
     //delete _widget;
 }
@@ -54,6 +63,13 @@ void SymbAppUi::CloseApp()
 void SymbAppUi::SetParentDoc(SymbDoc* parentDoc)
 {
     _parentDoc = parentDoc;
+}
+
+Pt::Gui::ApplicationImpl& SymbAppUi::GetApplicationImpl()
+{
+    Pt::Gui::ApplicationImpl* appImpl = static_cast<SymbApp&>(_parentDoc->GetParentApp()).GetApplicationImpl();
+    assert(appImpl);
+    return *appImpl;
 }
 
 void SymbAppUi::DynInitMenuPaneL(TInt, CEikMenuPane*) 
@@ -74,7 +90,7 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent,
     case EEventKeyDown:
         if (aKeyEvent.iScanCode == 0xA5)
         {
-            Exit();
+            handleExit();
             return EKeyWasConsumed;
         }
         break;
@@ -82,4 +98,9 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent,
         return EKeyWasNotConsumed;
     }
     return EKeyWasNotConsumed;
+}
+
+void SymbAppUi::handleExit()
+{
+    GetApplicationImpl().exit();    
 }

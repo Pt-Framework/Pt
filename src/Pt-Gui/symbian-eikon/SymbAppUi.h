@@ -27,6 +27,7 @@ namespace Pt
 namespace Gui
 {
 class Widget;
+class ApplicationImpl;
 }
 }
 
@@ -44,6 +45,8 @@ public:
 
     void SetParentDoc(class SymbDoc* parentDoc);
     
+    Pt::Gui::ApplicationImpl& GetApplicationImpl();
+    
 private:
     void DynInitMenuPaneL(TInt, CEikMenuPane*);
 
@@ -52,6 +55,8 @@ private:
     virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, 
             TEventCode aType);
 
+    void handleExit();
+    
     class SymbDoc* _parentDoc;
     Pt::Gui::Widget* _widget;
 };

@@ -33,13 +33,17 @@ namespace Gui {
     class PixmapPainter : public PainterImpl
     {
         public:
-            PixmapPainter();
+            PixmapPainter(PixmapImpl& parentPixmapImpl);
 
             virtual ~PixmapPainter();
 
             virtual void begin();
 
             virtual void end();
+            
+        private:
+            PixmapImpl& _parentPixmapImpl;
+            bool _active;            
     };
 
 } // namespace Gui

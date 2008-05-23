@@ -43,37 +43,77 @@ namespace Pt {
 namespace Gui {
 
     class Application;
-    class Widget;
+    class WidgetImpl;
+    class PixmapImpl;
     class Event;
 
-    class WidgetRegistry : public Pt::Singleton<WidgetRegistry>
+    class ResourceRegistry : public Pt::Singleton<ResourceRegistry>
     {
         public:
-            WidgetRegistry();
+            ResourceRegistry();
 
-            ~WidgetRegistry();
-
-            void registerWidget(Widget* widget);
-            void unregisterWidget(Widget* widget);
+            ~ResourceRegistry();
 
             // Widget backend construction becomes delayed until 
             // application instance is running and MVC hierachy is built
-            void constructBackendControls(); 
-            
-            void destructBackendControls();
-            
-            void reset();
+            // (window server connection is made)
+            void registerWidget(WidgetImpl* widget);
+            void unregisterWidget(WidgetImpl* widget);
+            void constructWidgets();             
+            void destructWidgets();
 
+            // same goes for the pixmaps
+            void registerPixmap(PixmapImpl* pixmap);
+            void unregisterPixmap(PixmapImpl* pixmap);
+            void constructPixmaps();             
+            void destructPixmaps();
+            
         private:
-            enum 
-            {
-                RegistrySize = 1024
-            };
-            
             // Widgets we need to construct when the application is run
-            std::vector<Widget*> _widgets;
+            std::vector<WidgetImpl*> _widgets;
+            // Pixmaps we need to construct when the application is run
+            std::vector<PixmapImpl*> _pixmaps;
             
-            //Widget** _widgets;
+            template<class type>
+            static void registerResource(std::vector<type*>& container, type* resource)
+            {
+                container.push_back(resource);                
+            }
+            
+            template<class type>
+            static void unregisterResource(std::vector<type*>& container, type* resource)
+            {
+                // make new list and remove ourselves
+                std::vector<type*> newContainer;
+                for (unsigned int i = 0; i < container.size(); ++i)
+                {
+                    if (container.at(i) != resource)
+                        newContainer.push_back(container.at(i));
+                }
+
+                container = newContainer;                
+            }
+
+            template<class type>
+            static void constructResources(std::vector<type*>& container)
+            {
+                for (unsigned int i = 0; i < container.size(); ++i)
+                {
+                    type* resource = container.at(i);
+                    resource->construct();
+                }                
+            }
+            
+            template<class type>
+            static void destructResources(std::vector<type*>& container)
+            {
+                for (unsigned int i = 0; i < container.size(); ++i)
+                {
+                    type* resource = container.at(i);
+                    resource->destruct();
+                }                
+            }
+            
     };    
     
     /**
@@ -102,6 +142,7 @@ namespace Gui {
             
         private:
             Application& _app;
+            System::Mutex _eventMutex;
             
             //System::EventLoop _eventLoop;
             //System::Thread _eventLoopThread;
@@ -112,8 +153,8 @@ namespace Gui {
             
         public:
             Signal<const Pt::Event&> eventQueueSignal;
-
-            void dispatchEvent(Pt::Event& event);
+            
+            void dispatchEvent(const Pt::Event& event);
             
             SymbApp* _symbApp;
             static ApplicationImpl* _self;

@@ -37,7 +37,9 @@
 #include <list>
 
 class CGraphicsContext;
+class CGraphicsDevice;
 class CFont;
+class CFbsBitmap;
 
 namespace Pt {
 
@@ -102,34 +104,47 @@ namespace Gui {
 
             virtual void drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& pmRegion);
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image);
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image);
+            
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image);
 
-            virtual void drawImage(const Math::Point& to, const Gfx::ARgbImage& image,
-                                       const Gfx::Region& imageRegion);
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
+            
+            void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image, const Pt::Gfx::Region& imageRegion);
 
             void setGc(CGraphicsContext* gc) { _gc = gc; }
+            void setDevice(const CGraphicsDevice* device) { _device = device; }
             void setNativeFont(const CFont* font) { _nativeFont = font; }
             
         protected:
             template <typename Iterator>
-            void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
+            void drawImage(ssize_t x, ssize_t y, Iterator begin, Iterator end, size_t width, size_t height)
             {
-
+                Gfx::Rgb888Image rgb32Image(width, height);
+                assign(begin, end, rgb32Image.begin());
+                drawCompatibleImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
             }
 
-            void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
+            void drawCompatibleImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 
             void updatePen();
             void updateFont();
             void updateBrush();
 
+            bool ensureActiveContext();
+            
         protected:
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
             
             CGraphicsContext* _gc;
-            const CFont* _nativeFont;            
+            const CGraphicsDevice* _device;
+            const CFont* _nativeFont;
+            
+            // TODO: Use auto_ptr
+            CFbsBitmap* _brushBitmap;
+            CFbsBitmap* _drawBitmap;
             
             //std::vector<Paint*> _paintQueue;
     };

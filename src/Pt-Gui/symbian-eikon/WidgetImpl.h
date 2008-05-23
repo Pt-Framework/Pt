@@ -28,8 +28,9 @@
 #include <Pt/Math/Rect.h>
 #include <Pt/String.h>
 
-class CCoeControl;
+class CControl;
 class CGraphicsContext;
+class CGraphicsDevice;
 class CFont;
 
 namespace Pt {
@@ -79,17 +80,16 @@ namespace Gui {
             void dispatchEvent(Pt::Event& event);    
             
             // get backend control
-            CCoeControl* getControl() { return _control; }
+            CControl* getControl() { return _control; }
             
-            // enable drawing to native graphics context
-            void beginDraw(CGraphicsContext* gc,
-                    const CFont* defaultFont);            
+            // enable drawing to native graphics context                        
+            void beginDraw();            
             
             // disable drawing to native gfx context
             void endDraw();
             
         private:
-            void synchronize();
+            void synchronize(bool initial = false);
             
             Widget& _apiWidget;
             Pt::Math::Point _initialLocation;
@@ -98,7 +98,7 @@ namespace Gui {
             WidgetPainter _painter;
             
             // symbian control
-            CCoeControl* _control;
+            CControl* _control;
             
     };
 

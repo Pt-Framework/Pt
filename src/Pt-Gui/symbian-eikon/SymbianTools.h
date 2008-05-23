@@ -32,6 +32,11 @@ namespace Gui {
 
 namespace SymbianTools {
 
+static TPoint makeTPoint(const Math::Point& point)
+{
+    return TPoint(point.x(), point.y());
+}
+
 static TRect makeTRect(const Gfx::Rect& rect)
 {
     return TRect(rect.x(), rect.y(), 
@@ -43,6 +48,12 @@ static TRect makeTRect(const Math::Point& point, const Math::Size& size)
     return TRect(point.x(), point.y(), 
             point.x() + size.width(), 
             point.y() + size.height());
+}
+
+static TRect makeTRect(const Pt::Gfx::Region& rgn)
+{
+    return TRect(rgn.x(), rgn.y(), 
+            rgn.x() + rgn.width(), rgn.y() + rgn.height());
 }
 
 static Pt::Gfx::Region makeRegion(const TRect& rect)

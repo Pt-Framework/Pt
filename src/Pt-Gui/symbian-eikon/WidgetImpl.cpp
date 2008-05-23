@@ -39,10 +39,28 @@
 
 // symbian APIs
 #include <coecntrl.h>
+#include <w32std.h>
 
 class CControl : public CCoeControl
 {
-public:  // Constructors and destructor
+public:
+    struct GraphicContext
+    {
+        GraphicContext()
+        : _gc(0)
+        , _device(0)
+        , _nativeFont(0)
+        , _drawingActive(false)
+        {            
+        }
+        
+        CGraphicsContext* _gc;
+        const CGraphicsDevice* _device;
+        const CFont* _nativeFont; 
+        bool _drawingActive;
+    };
+    
+    // Constructors and destructor
     CControl(Pt::Gui::Widget& parentWidget) 
     : _parentWidget(parentWidget)
     {
@@ -69,6 +87,27 @@ public:  // Constructors and destructor
         _windowGroup.Close();        
     }
 
+    const GraphicContext& BeginDraw()
+    {
+        _graphicContext._gc = &SystemGc();
+        _graphicContext._device = iEikonEnv->ScreenDevice();
+        _graphicContext._nativeFont = iEikonEnv->AnnotationFont();
+        if (!_graphicContext._drawingActive)
+            SystemGc().Activate(Window());  
+        _graphicContext._gc->UseFont(_graphicContext._nativeFont);
+    
+        return _graphicContext;
+    }
+    
+    void EndDraw()
+    {
+        _graphicContext._gc = 0;
+        _graphicContext._device = 0;
+        _graphicContext._nativeFont = 0;
+        if (!_graphicContext._drawingActive)
+            SystemGc().Deactivate();                    
+    }
+    
 private: // Functions from base classes
 
     /**
@@ -77,27 +116,24 @@ private: // Functions from base classes
      */
     void Draw(const TRect& rect) const
     {
+        _graphicContext._drawingActive = true;
         //CWindowGc& gc = SystemGc();
         //gc.SetPenStyle(CGraphicsContext::ENullPen);
         //gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
         //gc.SetBrushColor(KRgbBlue);
         //gc.DrawRect(aRect);        
     
-        _parentWidget.impl().beginDraw(&SystemGc(),
-                iEikonEnv->AnnotationFont());
-        
         Pt::Gui::PaintEvent paintEvent(_parentWidget, 
                 Pt::Gui::SymbianTools::makeRegion(rect)); 
         
         _parentWidget.impl().dispatchEvent(paintEvent);
-
-        _parentWidget.impl().endDraw();
+        _graphicContext._drawingActive = false;
     }
 
 private:  // Data
-    Pt::Gui::Widget& _parentWidget;
-    
+    Pt::Gui::Widget& _parentWidget;    
     RWindowGroup _windowGroup;
+    mutable GraphicContext _graphicContext;
 };
 
 namespace Pt {
@@ -107,17 +143,19 @@ namespace Gui {
 const ssize_t WidgetImpl::KPositionUnused = std::numeric_limits<ssize_t>::max();
 
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
-: _apiWidget(apiWidget), 
-_initialLocation(at), _initialSize(size),
-_painter(*this), _control(0)
+: _apiWidget(apiWidget)
+, _initialLocation(at)
+, _initialSize(size)
+, _painter(*this)
+, _control(0)
 {
-    WidgetRegistry::instance().registerWidget(&_apiWidget);
+    ResourceRegistry::instance().registerWidget(this);
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-    WidgetRegistry::instance().unregisterWidget(&_apiWidget);
+    ResourceRegistry::instance().unregisterWidget(this);
     destruct();
 }
 
@@ -168,6 +206,17 @@ void WidgetImpl::move(size_t x, size_t y)
 
 void WidgetImpl::resize(size_t width, size_t height)
 {
+    if (isConstructed())
+    {
+        _control->SetSize(TSize(width, height));
+        // will handle resize events
+        synchronize();
+    }
+    else
+    {
+        _initialSize.setWidth(width);
+        _initialSize.setHeight(height);
+    }
 }
 
 void WidgetImpl::construct()
@@ -200,7 +249,7 @@ void WidgetImpl::construct()
         ui.AddToStackL(control);
         _control = control;    
         
-        synchronize();
+        synchronize(true);
     }
 }
 
@@ -227,33 +276,52 @@ void WidgetImpl::dispatchEvent(Pt::Event& event)
     Pt::Gui::ApplicationImpl::_self->dispatchEvent(event);
 }
 
-void WidgetImpl::beginDraw(CGraphicsContext* gc,
-        const CFont* defaultFont)            
+void WidgetImpl::beginDraw()            
 {
-    gc->UseFont(defaultFont);
-    _painter.setGc(gc);
-    _painter.setNativeFont(defaultFont);
+    if (!isConstructed())
+        return;
+
+    const CControl::GraphicContext& graphicContext = _control->BeginDraw();
+    _painter.setGc(graphicContext._gc);
+    _painter.setDevice(graphicContext._device);
+    _painter.setNativeFont(graphicContext._nativeFont);
 }
 
 void WidgetImpl::endDraw()
 {
+    if (!isConstructed())
+        return;
+
     _painter.setGc(0);    
     _painter.setNativeFont(0);
+    _painter.setDevice(0);
+    
+    _control->EndDraw();
 }
 
-void WidgetImpl::synchronize()
+void WidgetImpl::synchronize(bool initial/* = false*/)
 {
     assert(_control);
     
-    TRect rect = _control->Rect();
-
-    MoveEvent moveEvent(_apiWidget, rect.iTl.iX, rect.iTl.iY);
-    dispatchEvent(moveEvent);
+    // see if we need to inform about changed position
+    if (initial || 
+        _control->Position().iX != (signed)_apiWidget.x() || 
+        _control->Position().iY != (signed)_apiWidget.y())
+    {
+        MoveEvent moveEvent(_apiWidget, _control->Position().iX, _control->Position().iY);
+        dispatchEvent(moveEvent);
+    }
     
-    ResizeEvent::Type resizeType = ResizeEvent::Resize;
-    ResizeEvent resizeEvent(_apiWidget, rect.Width(), rect.Height(), resizeType);
+    // see if we need to inform about changed size
+    if (initial || 
+        _control->Rect().Width() != (signed)_apiWidget.size().width() || 
+        _control->Rect().Height() != (signed)_apiWidget.size().height())
+    {
+        ResizeEvent::Type resizeType = ResizeEvent::Resize;
+        ResizeEvent resizeEvent(_apiWidget, _control->Rect().Width(), _control->Rect().Height(), resizeType);
+        dispatchEvent(resizeEvent);
+    }
     
-    dispatchEvent(resizeEvent);
 }
 
 } // namespace Gui

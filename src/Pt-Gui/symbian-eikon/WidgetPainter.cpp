@@ -21,9 +21,6 @@
 #include "WidgetImpl.h"
 #include <assert.h>
 
-// symbian APIs
-#include <coecntrl.h>
-
 namespace Pt {
 
 namespace Gui {
@@ -35,17 +32,26 @@ WidgetPainter::WidgetPainter(WidgetImpl& parentWidgetImpl)
 
 WidgetPainter::~WidgetPainter()
 {
+    if (_active)
+        end(); 
 }
 
 void WidgetPainter::begin()
 {
-    assert(_gc != 0);
-    _active = true;    
+    if (!_active)
+    {
+        _parentWidgetImpl.beginDraw();
+        _active = true;
+    }
 }
 
 void WidgetPainter::end()
 {
-    _active = false;    
+    if (_active)
+    {
+        _parentWidgetImpl.endDraw();        
+        _active = false;
+    }
 }
 
 } // namespace Gui

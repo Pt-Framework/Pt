@@ -26,6 +26,10 @@
 #include <Pt/Gui/Painter.h>
 #include <Pt/Math/Size.h>
 
+class CFbsBitmap;
+class CFbsBitGc;
+class CFbsBitmapDevice;
+
 namespace Pt {
 
 namespace Gui {
@@ -42,10 +46,29 @@ namespace Gui {
             { return _size; }
 
             Painter painter();
+            
+            // enable drawing to native graphics context                        
+            void beginDraw();            
+            
+            // disable drawing to native gfx context
+            void endDraw();            
 
-        private:
+            // This can return 0 if the bitmap has not been constructed properly
+            CFbsBitmap* getNativeBitmap() { return _bitmap; }
+            
+            void construct();
+            void destruct();
+
+        private:            
             Pt::Math::Size _size;
             PixmapPainter _painter;
+
+            // TODO: Use auto_ptr
+            CFbsBitmap* _bitmap;
+            CFbsBitGc* _bitmapGc;
+            CFbsBitmapDevice* _bitmapDevice;
+            
+            int _lastError;
     };
 
 } // namespace Gui
