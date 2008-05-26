@@ -24,7 +24,7 @@
 #include <Pt/Types.h>
 //#include <iostream>
 #include <string>
-
+#include <cstring> // memcpy/memmove()
 namespace Pt {
 
     /**
@@ -398,14 +398,14 @@ namespace std {
     inline char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::move(char_type* s1, const char_type* s2, int_type n)
     {
-        return (Pt::Char*)memmove(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*)std::memmove(s1, s2, n * sizeof(Pt::Char));
     }
 
 
     inline char_traits<Pt::Char>::char_type*
     char_traits<Pt::Char>::copy(char_type* s1, const char_type* s2, size_t n)
     {
-        return (Pt::Char*)memcpy(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*)std::memcpy(s1, s2, n * sizeof(Pt::Char));
     }
 
 

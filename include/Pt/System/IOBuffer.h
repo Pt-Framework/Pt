@@ -23,6 +23,7 @@
 #include <Pt/System/IODevice.h>
 #include <Pt/System/StreamBuffer.h>
 #include <algorithm>
+#include <cstring> //memcpy/memmove()
 
 namespace Pt {
 

@@ -16,6 +16,7 @@
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Insets.h>
 #include <cstddef>
+#include <memory>
 
 
 namespace Pt {

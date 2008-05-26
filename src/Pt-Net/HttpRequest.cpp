@@ -22,6 +22,7 @@
 #include <Pt/Net/HttpRequest.h>
 #include <sstream>
 #include <cctype>
+#include <cstring>
 
 
 namespace Pt {

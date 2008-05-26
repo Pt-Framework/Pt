@@ -66,7 +66,7 @@ void FileImpl::resize(const char* path, std::size_t newSize)
 
 void FileImpl::remove(const char* path)
 {
-    if(0 != ::remove(path) == -1)
+    if(0 != ::remove(path))
         throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 

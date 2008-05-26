@@ -24,6 +24,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <cstdlib> // atoi()
 using namespace std;
 
 
@@ -419,7 +420,7 @@ Url& Url::operator=(const std::string& url)
     {
         string portStr = host.substr(portStartPos + 1, string::npos);
         host = host.substr(0, portStartPos);
-        port = atoi(portStr.c_str());
+        port = std::atoi(portStr.c_str());
     }
 
     _proto  = proto;

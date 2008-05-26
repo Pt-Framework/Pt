@@ -22,6 +22,7 @@
 #define Pt_Net_TcpSocketImpl_h
 
 #include <string>
+#include <cstring>
 #include <Pt/Api.h>
 #include "AddrInfo.h"
 #include "SocketImpl.h"

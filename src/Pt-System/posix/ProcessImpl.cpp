@@ -5,7 +5,7 @@
 #include <vector>
 #include <signal.h>
 #include <errno.h>
-
+#include <cstring> // strerror()
 #include <sys/wait.h>
 
 namespace Pt {

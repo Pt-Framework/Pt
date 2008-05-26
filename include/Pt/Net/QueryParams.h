@@ -385,8 +385,8 @@ class PT_NET_API QueryParams
     /// checks if the named parameter exists
     bool has(const string& name) const
     {
-      return named_params.find(name) != named_params.end()
-          || useParentValues() && parent->has(name);
+      return (named_params.find(name) != named_params.end())
+	|| (useParentValues() && parent->has(name));
     }
 
     /// replace named parameter in parent or this class if no parent exists

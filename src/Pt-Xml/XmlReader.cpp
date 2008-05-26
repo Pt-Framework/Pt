@@ -404,7 +404,7 @@ void XmlReader::onComment()
 bool XmlReader::parseAttribute(String& name, String& value)
 {
     typedef std::char_traits<Pt::Char> CharTraits;
-    static const uint32_t eof = CharTraits::eof();
+    //static const uint32_t eof = CharTraits::eof();
 
     if( _textBuffer->sgetc() == '>' || _textBuffer->sgetc() == '/') {
         return false;
