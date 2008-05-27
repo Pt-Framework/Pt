@@ -216,7 +216,7 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
-rule CheckHost
+rule ConfigureHost
 {
     Echo "Checking for host platform ..."$(OS:L) ;
 
@@ -366,7 +366,7 @@ rule CheckHost
 #
 # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
 #
-rule CheckToolset
+rule ConfigureToolset
 {
     if $(CONFIGURE)
     {
@@ -447,8 +447,8 @@ if $(CONFIGURE)
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
 
-    CheckHost ;
-    CheckToolset ;
+    ConfigureHost ;
+    ConfigureToolset ;
 
     include Jamconf ;
 
