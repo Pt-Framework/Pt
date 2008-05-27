@@ -38,7 +38,6 @@ DirectoryNotFound::~DirectoryNotFound() throw()
 
 
 
-
 DirectoryIterator::DirectoryIterator()
 : _impl(0)
 { }
@@ -132,7 +131,6 @@ const char* DirectoryIterator::operator*() const
 
 
 
-
 Directory::Directory()
 : FileSystemNode()
 , _impl(0)
@@ -146,6 +144,15 @@ Directory::Directory(const std::string& path)
 {
     if( ! Directory::exists( path.c_str() ) )
         throw DirectoryNotFound(path, PT_SOURCEINFO);
+}
+
+
+Directory::Directory(const FileInfo& fi)
+: FileSystemNode( fi.path() )
+, _impl(0)
+{
+    if( ! fi.isDirectory() )
+        throw DirectoryNotFound(fi.path(), PT_SOURCEINFO);
 }
 
 

@@ -57,7 +57,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 
     _path = path;
     if( ! _path.empty() && _path[_path.size()-1] != '\\')
-        _path += "\\\0";
+        _path += '\\';
 }
 
 
@@ -119,15 +119,21 @@ const char* DirectoryIteratorImpl::path() const
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
     {
-        if(_dirty)
-        {
-            // build complete path, ctor makes sure there is always a trailing 
-            // slash and one character following it so idx+1 works out
-            std::string::size_type idx = _path.rfind('\\') + 1;
-            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
-        }
-
-        return _path.c_str();
+	    if(_dirty)
+    	{
+        	// replace substring after last slash with the new file-name or
+        	// append the file-name if we have a trailing slash. Ctor makes
+        	// sure we have a trailing slash.
+        	std::string::size_type idx = _path.rfind('\\');
+        	if(idx != std::string::npos && ++idx < _path.size() )
+        	{
+        		_path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
+        	}
+        	else
+        	{
+        		_path += win32::toMultiByte( _current.cFileName );
+        	}
+    	}
     }
     
     return "";

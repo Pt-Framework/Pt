@@ -10,7 +10,7 @@ class DirectoryTest : public Pt::Unit::TestSuite
     public:
         DirectoryTest()
         : Pt::Unit::TestSuite("DirectoryTest")
-        {
+        { 
             Pt::Unit::TestSuite::registerMethod( "allocDir", *this, &DirectoryTest::allocDir );
             Pt::Unit::TestSuite::registerMethod( "moveDir", *this, &DirectoryTest::moveDir );
             Pt::Unit::TestSuite::registerMethod( "removeDir", *this, &DirectoryTest::removeDir );

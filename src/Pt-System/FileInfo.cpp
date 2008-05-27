@@ -42,29 +42,6 @@ FileInfo::~FileInfo()
 }
 
 
-/*FileInfo::FileInfo(const FileInfo& fi)
-{
-    this->operator=(fi);
-}
-
-
-FileInfo& FileInfo::operator=(const FileInfo& fi)
-{
-    if(fi._node == &fi._dir)
-    {
-        _dir = fi._dir;
-        _node = &_dir;
-    }
-    else if(fi._node == &fi._file)
-    {
-        _file = fi._file;
-        _node = &_file;
-    }
-
-    return *this;
-}*/
-
-
 std::string FileInfo::name() const
 {
     std::string::size_type pos = _path.rfind(Environment::pathSeparator());
@@ -151,3 +128,27 @@ void FileInfo::move(const std::string& newname)
 } // namespace System
 
 } // namespace Pt
+
+
+/*FileInfo::FileInfo(const FileInfo& fi)
+{
+    this->operator=(fi);
+}
+
+
+FileInfo& FileInfo::operator=(const FileInfo& fi)
+{
+    if(fi._node == &fi._dir)
+    {
+        _dir = fi._dir;
+        _node = &_dir;
+    }
+    else if(fi._node == &fi._file)
+    {
+        _file = fi._file;
+        _node = &_file;
+    }
+
+    return *this;
+}*/
+

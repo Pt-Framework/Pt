@@ -24,6 +24,7 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/System/FileSystemNode.h>
+#include <Pt/System/FileInfo.h>
 #include <string>
 
 namespace Pt {
@@ -48,7 +49,7 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
     Directory::iterator it = d.begin();
     while (it != d.end())
     {
-        std::cout << "name : " << it->path() << std::endl;
+        std::cout << "name : " << *it << std::endl;
         ++it;
     }
     \endcode
@@ -94,7 +95,7 @@ class PT_SYSTEM_API DirectoryIterator
     Directory::iterator it = d.begin();
     while (it != d.end())
     {
-        std::cout << "name : " << (*it).path() << std::endl;
+        std::cout << "name : " << *it << std::endl;
         ++it;
     }
     \endcode
@@ -107,6 +108,8 @@ class PT_SYSTEM_API Directory : public FileSystemNode
         typedef DirectoryIterator Iterator;
 
         explicit Directory(const std::string& path);
+
+		explicit Directory(const FileInfo& fi);
 
         ~Directory();
 

@@ -54,9 +54,10 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
         throw SystemError("Could not open directory", PT_SOURCEINFO);
     }
 
-    // build complete path
+    // append a trailing slash if not empty, so we can add the
+    // directory entry name easily
     if( ! _path.empty() && _path[_path.size()-1] != '/')
-        _path += "/\0";
+        _path += '/';
 
     this->advance();
 }
@@ -79,10 +80,18 @@ const char* DirectoryIteratorImpl::path() const
 {
     if(_dirty)
     {
-        // build complete path, ctor makes sure there is always a trailing 
-        // slash and one character following it so idx+1 works out
-        std::string::size_type idx = _path.rfind('/') + 1;
-        _path.replace(idx, _path.size(), _current->d_name);
+        // replace substring after last slash with the new file-name or
+        // append the file-name if we have a trailing slash. Ctor makes
+        // sure we have a trailing slash.
+        std::string::size_type idx = _path.rfind('/');
+        if(idx != std::string::npos && ++idx < _path.size() )
+        {
+        	_path.replace(idx, _path.size(), _current->d_name);
+        }
+        else
+        {
+        	_path += _current->d_name;
+        }
     }
 
     return _path.c_str();
