@@ -554,33 +554,33 @@ print << "EOF"
 */
 
     template <typename R${comma_arg_tmpl_decl}>
-    Connection disconnect(Signal<${arg_tmpl_types}>& signal, const BasicSlot<R${comma_arg_tmpl_types}>& slot)
+    void disconnect(Signal<${arg_tmpl_types}>& signal, const BasicSlot<R${comma_arg_tmpl_types}>& slot)
     {
         return signal.disconnect( slot );
     }
 
     template <typename R${comma_arg_tmpl_decl}>
-    Connection disconnect(Signal<${arg_tmpl_types}>& signal, R(*func)(${arg_tmpl_types}))
+    void disconnect(Signal<${arg_tmpl_types}>& signal, R(*func)(${arg_tmpl_types}))
     {
-        return signal.disconnect( slot(func) );
+        signal.disconnect( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT${comma_arg_tmpl_decl}>
-    Connection disconnect(Signal<${arg_tmpl_types}>& signal, BaseT & object, R(ClassT::*memFunc)(${arg_tmpl_types}))
+    void disconnect(Signal<${arg_tmpl_types}>& signal, BaseT & object, R(ClassT::*memFunc)(${arg_tmpl_types}))
     {
-        return signal.disconnect( slot( object, memFunc ) );
+        signal.disconnect( slot( object, memFunc ) );
     }
 
     template <typename R, typename ClassT${comma_arg_tmpl_decl}>
-    Connection disconnect(Signal<${arg_tmpl_types}>& signal, ClassT & object, R(ClassT::*memFunc)(${arg_tmpl_types}) const)
+    void disconnect(Signal<${arg_tmpl_types}>& signal, ClassT & object, R(ClassT::*memFunc)(${arg_tmpl_types}) const)
     {
-        return signal.disconnect( slot( object, memFunc ) );
+        signal.disconnect( slot( object, memFunc ) );
     }
 
     template <typename R${comma_arg_tmpl_decl}>
-    Connection disconnect( Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver )
+    void disconnect( Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver )
     {
-        return sender.disconnect( slot(receiver) );
+        sender.disconnect( slot(receiver) );
     }
 
 EOF
