@@ -38,10 +38,11 @@ class ConstMethod : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -86,14 +87,10 @@ class ConstMethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             Connectable& connectable = _method.object();
             connectable.closed(c);
         }
-
         virtual bool equals(const Slot& slot) const
         {
             const ConstMethodSlot* ms = dynamic_cast<const ConstMethodSlot*>(&slot);
-            if(!ms)
-                return false;
-
-            return _method == ms->_method;
+            return ms ? (_method == ms->_method) : false;
         }
 
     private:
@@ -144,10 +141,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -205,10 +203,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -266,10 +265,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callab
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6,A7>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -327,10 +327,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Call
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5,A6>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -388,10 +389,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Ca
         ConstMethod<R, ClassT,A1,A2,A3,A4,A5>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -449,10 +451,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public 
         ConstMethod<R, ClassT,A1,A2,A3,A4>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -510,10 +513,11 @@ class ConstMethod<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : publi
         ConstMethod<R, ClassT,A1,A2,A3>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -571,10 +575,11 @@ class ConstMethod<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : pub
         ConstMethod<R, ClassT,A1,A2>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -632,10 +637,11 @@ class ConstMethod<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : p
         ConstMethod<R, ClassT,A1>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:
@@ -693,10 +699,11 @@ class ConstMethod<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> :
         ConstMethod<R, ClassT>* clone() const
         { return new ConstMethod(*this); }
 
-        bool operator==(const ConstMethod& other) const
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
         {
-            return (_object == other._object) &&
-                   (_method == other._method);
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
         }
 
     private:

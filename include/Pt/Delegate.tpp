@@ -6,7 +6,7 @@ template < typename R,class A1 = Void, class A2 = Void, class A3 = Void, class A
 class Delegate : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> CallableT;
 
         public:
             /** Does nothing. */
@@ -34,7 +34,7 @@ class Delegate : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
             }
 
@@ -47,7 +47,7 @@ class Delegate : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
             }
 
@@ -92,10 +92,7 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             virtual bool equals(const Slot& slot) const
             {
                 const DelegateSlot* ds = dynamic_cast<const DelegateSlot*>(&slot);
-                if(!ds)
-                    return false;
-
-                return _method == ds->_method;
+                return ds ? (_method == ds->_method) : false;
             }
 
         private:
@@ -156,7 +153,7 @@ template < typename R,class A1, class A2, class A3, class A4, class A5, class A6
 class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8,A9> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8,A9> CallableT;
 
         public:
             /** Does nothing. */
@@ -184,7 +181,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9);
             }
 
@@ -197,7 +194,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9);
             }
 
@@ -254,7 +251,7 @@ template < typename R,class A1, class A2, class A3, class A4, class A5, class A6
 class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7,A8> CallableT;
 
         public:
             /** Does nothing. */
@@ -282,7 +279,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8);
             }
 
@@ -295,7 +292,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8);
             }
 
@@ -352,7 +349,7 @@ template < typename R,class A1, class A2, class A3, class A4, class A5, class A6
 class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5,A6,A7> CallableT;
 
         public:
             /** Does nothing. */
@@ -380,7 +377,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7);
             }
 
@@ -393,7 +390,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7);
             }
 
@@ -450,7 +447,7 @@ template < typename R,class A1, class A2, class A3, class A4, class A5, class A6
 class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5,A6> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5,A6> CallableT;
 
         public:
             /** Does nothing. */
@@ -478,7 +475,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6);
             }
 
@@ -491,7 +488,7 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5,a6);
             }
 
@@ -548,7 +545,7 @@ template < typename R,class A1, class A2, class A3, class A4, class A5>
 class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4,A5> Callable;
+            typedef Callable<R,A1,A2,A3,A4,A5> CallableT;
 
         public:
             /** Does nothing. */
@@ -576,7 +573,7 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4,a5);
             }
 
@@ -589,7 +586,7 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4,a5);
             }
 
@@ -646,7 +643,7 @@ template < typename R,class A1, class A2, class A3, class A4>
 class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3,A4> Callable;
+            typedef Callable<R,A1,A2,A3,A4> CallableT;
 
         public:
             /** Does nothing. */
@@ -674,7 +671,7 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3,a4);
             }
 
@@ -687,7 +684,7 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3,a4);
             }
 
@@ -744,7 +741,7 @@ template < typename R,class A1, class A2, class A3>
 class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2,A3> Callable;
+            typedef Callable<R,A1,A2,A3> CallableT;
 
         public:
             /** Does nothing. */
@@ -772,7 +769,7 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2,a3);
             }
 
@@ -785,7 +782,7 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2,a3);
             }
 
@@ -842,7 +839,7 @@ template < typename R,class A1, class A2>
 class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1,A2> Callable;
+            typedef Callable<R,A1,A2> CallableT;
 
         public:
             /** Does nothing. */
@@ -870,7 +867,7 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1,A2>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1,a2);
             }
 
@@ -883,7 +880,7 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1,a2);
             }
 
@@ -940,7 +937,7 @@ template < typename R,class A1>
 class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public DelegateBase
     {
         public:
-            typedef Callable<R,A1> Callable;
+            typedef Callable<R,A1> CallableT;
 
         public:
             /** Does nothing. */
@@ -968,7 +965,7 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R,A1>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(a1);
             }
 
@@ -981,7 +978,7 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(a1);
             }
 

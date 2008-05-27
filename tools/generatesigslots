@@ -17,7 +17,7 @@
 #
 # - Change $HEADER_DIR to the directory part of your #include <INCLUDES/foo.hpp>
 # calls for this code. By default it is equal to the namespace ($NS), e.g.
-# it assumes that #include<$NS/foo.hpp> is valid.
+# it assumes that #include <$NS/foo.hpp> is valid.
 #
 # - Change $max_types to some number greater than 1. Passing that
 # number to this app causes it to generate the unspecialized variants
@@ -367,7 +367,7 @@ EOF
 
 print << "EOF" # Signal<>:
         public:
-            typedef Invokable<${arg_tmpl_types_all}> Invokable;
+            typedef Invokable<${arg_tmpl_types_all}> InvokableT;
 
         public:
             /** Does nothing. */
@@ -388,6 +388,13 @@ print << "EOF" # Signal<>:
             Connection connect(const BasicSlot<R, ${arg_tmpl_types_all}>& slot)
             {
                 return Connection(*this, slot.clone() );
+            }
+
+            /** The converse of connect(). */
+            template <typename R>
+            void disconnect(const BasicSlot<R, ${arg_tmpl_types_all}>& slot)
+            {
+                this->disconnectSlot(slot);
             }
 
             /**
@@ -421,7 +428,7 @@ print << "EOF" # Signal<>:
                     //   calling any slots immediately
                     // - A new Connection might get added to this Signal in
                     //   the slot
-                    const Invokable* invokable = static_cast<const Invokable*>( it->slot().callable() );
+                    const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
                     invokable->invoke(${arg_params_names});
 
                     // if this signal gets deleted by the slot, the Sentry
@@ -483,6 +490,12 @@ print << "EOF" # SignalSlot<>:
                 Connectable& connectable = _method.object();
                 connectable.closed(c);
             }
+            /** returns true if this object and rhs are equivalent. */
+            virtual bool equals(const Slot& rhs) const
+            {
+                const SignalSlot* ss = dynamic_cast<const SignalSlot*>(&rhs);
+                return ss ? (_method == ss->_method) : false;
+            }
 
         private:
             mutable ConstMethod<void, Signal<${arg_tmpl_types}>${comma_arg_tmpl_types} > _method;
@@ -501,6 +514,8 @@ print << "EOF" # SignalSlot<>:
     {
         return Connection(signal, slot.clone() );
     }
+
+
 
 EOF
 ;
@@ -527,6 +542,45 @@ print << "EOF"
     Connection connect(Signal<${arg_tmpl_types}>& signal, ClassT& object, R(ClassT::*memFunc)(${arg_tmpl_types}) const)
     {
         return connect( signal, slot(object, memFunc) );
+    }
+
+    /// Connects a Signal to another Signal
+/**
+    template <${arg_tmpl_decl}>
+    Connection connect(Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver)
+    {
+        return connect( sender, slot(receiver) );
+    }
+*/
+
+    template <typename R${comma_arg_tmpl_decl}>
+    Connection disconnect(Signal<${arg_tmpl_types}>& signal, const BasicSlot<R${comma_arg_tmpl_types}>& slot)
+    {
+        return signal.disconnect( slot );
+    }
+
+    template <typename R${comma_arg_tmpl_decl}>
+    Connection disconnect(Signal<${arg_tmpl_types}>& signal, R(*func)(${arg_tmpl_types}))
+    {
+        return signal.disconnect( slot(func) );
+    }
+
+    template <typename R, typename BaseT, typename ClassT${comma_arg_tmpl_decl}>
+    Connection disconnect(Signal<${arg_tmpl_types}>& signal, BaseT & object, R(ClassT::*memFunc)(${arg_tmpl_types}))
+    {
+        return signal.disconnect( slot( object, memFunc ) );
+    }
+
+    template <typename R, typename ClassT${comma_arg_tmpl_decl}>
+    Connection disconnect(Signal<${arg_tmpl_types}>& signal, ClassT & object, R(ClassT::*memFunc)(${arg_tmpl_types}) const)
+    {
+        return signal.disconnect( slot( object, memFunc ) );
+    }
+
+    template <typename R${comma_arg_tmpl_decl}>
+    Connection disconnect( Signal<${arg_tmpl_types}>& sender, Signal<${arg_tmpl_types}>& receiver )
+    {
+        return sender.disconnect( slot(receiver) );
     }
 
 EOF
@@ -600,6 +654,7 @@ print << "EOF"
         { return new Function(*this); }
 
 
+#if 0
         /** Deeply copies function and returns this object. */
         Function& operator=(const Function& function)
         {
@@ -607,6 +662,13 @@ print << "EOF"
                 _funcPtr = function._funcPtr;
             }
             return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -641,6 +703,11 @@ class FunctionSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
 
         virtual void closed(const Connection& c)
         { }
+        virtual bool equals(const Slot& slot) const
+        {
+            const FunctionSlot* fs = dynamic_cast<const FunctionSlot*>(&slot);
+            return fs ? (_func == fs->_func) : false;
+        }
 
     private:
         Function<R${comma_arg_tmpl_types}> _func;
@@ -723,6 +790,13 @@ print << "EOF"
         ConstMethod<R, ClassT${comma_arg_tmpl_types}>* clone() const
         { return new ConstMethod(*this); }
 
+        /** Returns true if rhs and this object point to the same object and method. */
+        bool operator==(const ConstMethod& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_method == rhs._method);
+        }
+
     private:
         ClassT* _object;
         MemFuncT _method;
@@ -769,6 +843,11 @@ class ConstMethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
         {
             Connectable& connectable = _method.object();
             connectable.closed(c);
+        }
+        virtual bool equals(const Slot& slot) const
+        {
+            const ConstMethodSlot* ms = dynamic_cast<const ConstMethodSlot*>(&slot);
+            return ms ? (_method == ms->_method) : false;
         }
 
     private:
@@ -864,6 +943,14 @@ print << "EOF"
             return (*this);
         }
 
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
+        }
+
     private:
         ClassT* _object;
         MemFuncT _memFunc;
@@ -917,6 +1004,13 @@ class MethodSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
             connectable.closed(c);
         }
 
+        virtual bool equals(const Slot& slot) const
+        {
+            const MethodSlot* ms = dynamic_cast<const MethodSlot*>(&slot);
+            return ms ? (_method == ms->_method) : false;
+        }
+
+
     private:
         Method<R, ClassT${comma_arg_tmpl_types}> _method;
 };
@@ -959,7 +1053,7 @@ EOF
 print << "EOF"
     {
         public:
-            typedef Callable<R${comma_arg_tmpl_types}> Callable;
+            typedef Callable<R${comma_arg_tmpl_types}> CallableT;
 
         public:
             /** Does nothing. */
@@ -987,7 +1081,7 @@ print << "EOF"
                 if( !_target.valid() ) {
                     throw std::logic_error("Delegate<R${comma_arg_tmpl_types}>::call(): Delegate not connected");
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 return cb->call(${arg_params_names});
             }
 
@@ -1000,7 +1094,7 @@ print << "EOF"
                 if( !_target.valid() ) {
                     return;
                 }
-                const Callable* cb = static_cast<const Callable*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
                 cb->call(${arg_params_names});
             }
 
@@ -1045,6 +1139,12 @@ class DelegateSlot : public BasicSlot<R${comma_arg_tmpl_types_all}>
             {
                 Connectable& connectable = _method.object();
                 connectable.closed(c);
+            }
+
+            virtual bool equals(const Slot& slot) const
+            {
+                const DelegateSlot* ds = dynamic_cast<const DelegateSlot*>(&slot);
+                return ds ? (_method == ds->_method) : false;
             }
 
         private:

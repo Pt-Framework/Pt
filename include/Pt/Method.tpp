@@ -46,10 +46,22 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -103,11 +115,9 @@ class MethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         virtual bool equals(const Slot& slot) const
         {
             const MethodSlot* ms = dynamic_cast<const MethodSlot*>(&slot);
-            if(!ms)
-                return false;
-
-            return _method == ms->_method;
+            return ms ? (_method == ms->_method) : false;
         }
+
 
     private:
         Method<R, ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> _method;
@@ -165,10 +175,22 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -237,10 +259,22 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -309,10 +343,22 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -381,10 +427,22 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<
         Method<R, ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -453,10 +511,22 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
         Method<R, ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -525,10 +595,22 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
         Method<R, ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -597,10 +679,22 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
         Method<R, ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -669,10 +763,22 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
         Method<R, ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -741,10 +847,22 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
         Method<R, ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:
@@ -813,10 +931,22 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
         Method<R, ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>* clone() const
         { return new Method(*this); }
 
-        bool operator==(const Method& other) const
+        /** Deeply copies rhs. */
+        Method& operator=(const Method& rhs)
         {
-            return (_object == other._object) &&
-                   (_memFunc == other._memFunc);
+            if( this != &rhs ) {
+                _object = rhs._object;
+                _memFunc = rhs._memFunc;
+            }
+            return (*this);
+        }
+
+        /** Returns true if rhs and this object point to the same object
+            and method. */
+        bool operator==(const Method& rhs) const
+        {
+            return (_object == rhs._object) &&
+                   (_memFunc == rhs._memFunc);
         }
 
     private:

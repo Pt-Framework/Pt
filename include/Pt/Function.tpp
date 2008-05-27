@@ -27,9 +27,22 @@ class Function : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -59,14 +72,10 @@ class FunctionSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 
         virtual void closed(const Connection& c)
         { }
-
         virtual bool equals(const Slot& slot) const
         {
             const FunctionSlot* fs = dynamic_cast<const FunctionSlot*>(&slot);
-            if(!fs)
-                return false;
-
-            return _func == fs->_func;
+            return fs ? (_func == fs->_func) : false;
         }
 
     private:
@@ -110,9 +119,22 @@ class Function<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,A2,A3
         Function<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -155,9 +177,22 @@ class Function<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A1,A2,
         Function<R,A1,A2,A3,A4,A5,A6,A7,A8>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -200,9 +235,22 @@ class Function<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R, A1,A
         Function<R,A1,A2,A3,A4,A5,A6,A7>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -245,9 +293,22 @@ class Function<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<R, A1
         Function<R,A1,A2,A3,A4,A5,A6>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -290,9 +351,22 @@ class Function<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callable<R, 
         Function<R,A1,A2,A3,A4,A5>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -335,9 +409,22 @@ class Function<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Callable<R
         Function<R,A1,A2,A3,A4>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -380,9 +467,22 @@ class Function<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Callable
         Function<R,A1,A2,A3>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -425,9 +525,22 @@ class Function<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Callab
         Function<R,A1,A2>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -470,9 +583,22 @@ class Function<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Call
         Function<R,A1>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
@@ -515,9 +641,22 @@ class Function<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Ca
         Function<R>* clone() const
         { return new Function(*this); }
 
-        bool operator==(const Function& other) const
+
+#if 0
+        /** Deeply copies function and returns this object. */
+        Function& operator=(const Function& function)
         {
-            return (_funcPtr == other._funcPtr);
+            if( this != &function ) {
+                _funcPtr = function._funcPtr;
+            }
+            return (*this);
+        }
+#endif
+
+        /** Returns true if rhs and this object point to the same function. */
+        bool operator==(const Function& rhs) const
+        {
+            return (_funcPtr == rhs._funcPtr);
         }
 
     private:
