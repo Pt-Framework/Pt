@@ -31,6 +31,8 @@ namespace Pt {
 
 namespace System {
 
+class FileInfo;
+
 /** @brief A directory could not be found at a given path
 */
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
