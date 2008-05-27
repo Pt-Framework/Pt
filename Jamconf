@@ -1,29 +1,29 @@
 
-CheckC++ WITH_STDC++_LOCALE : "#include <locale>"
-                              "int main() { return 0; }" ;
+ConfigureC++ WITH_STDC++_LOCALE : "#include <locale>"
+                                  "int main() { return 0; }" ;
 
-CheckCc WITH_UNIX_SOCKETS : "#include <sys/types.h>"
-                            "#include <sys/socket.h>"
-                            "int main() { return socket(0,0,0); }"
+ConfigureCc WITH_UNIX_SOCKETS : "#include <sys/types.h>"
+                                "#include <sys/socket.h>"
+                                "int main() { return socket(0,0,0); }"
+                              : ""
+                              : socket ;
+
+ConfigureCc WITH_UNIX_NSL : "#include <netdb.h>"
+                            "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
                           : ""
-                          : socket ;
+                          : nsl ;
 
-CheckCc WITH_UNIX_NSL : "#include <netdb.h>"
-                        "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
-                      : ""
-                      : nsl ;
+ConfigureC++ WITH_WINMM : "#include <windows.h>"
+                          "#include <mmsystem.h>"
+                          "int main() { return timeGetTime(); }"
+                        : ""
+                        : winmm.lib ;
 
-CheckC++ WITH_WINMM : "#include <windows.h>"
-                      "#include <mmsystem.h>"
-                      "int main() { return timeGetTime(); }"
-                    : ""
-                    : winmm.lib ;
-
-CheckC++ WITH_MMTIMER : "#include <windows.h>"
-                        "#include <mmsystem.h>"
-                        "int main() { return timeGetTime(); }"
-                      : ""
-                      : mmtimer.lib ;
+ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
+                            "#include <mmsystem.h>"
+                            "int main() { return timeGetTime(); }"
+                          : ""
+                          : mmtimer.lib ;
 
 #ConfigureDefine test.h : PT_VERSION_MAJOR : 1 ;
 #ConfigureDefine test.h : PT_VERSION_MINOR : 0 ;

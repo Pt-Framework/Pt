@@ -48,23 +48,26 @@ LINK   = $(C++) ;
 # Compiler and linker flags
 ##############################################################################
 
-CheckCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
-                                  : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
+if $(CONFIGURE)
+{
+    ConfigureCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
+                                          : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
 
-CheckCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
-                             : "-Wl,-E" ;
+    ConfigureCc WITH_GCC_FLAG_EXPORT : "int main() { return 0; }"
+                                     : "-Wl,-E" ;
 
-CheckCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
-                            : "-Wl,-rpath-link jam" ;
+    ConfigureCc WITH_GCC_FLAG_RPATH : "int main() { return 0; }"
+                                    : "-Wl,-rpath-link jam" ;
 
-CheckCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
-                                : "-Wl,--start-group -Wl,--end-group" ;
+    ConfigureCc WITH_GCC_FLAG_GROUPLIBS : "int main() { return 0; }"
+                                        : "-Wl,--start-group -Wl,--end-group" ;
 
-CheckCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
-                                 : "-dynamiclib -install_name test" ;
+    ConfigureCc WITH_GCC_FLAG_DYNAMICLIB : "int main() { return 0; }"
+                                         : "-dynamiclib -install_name test" ;
 
-CheckCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
-                             : "-shared" ;
+    ConfigureCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
+                                     : "-shared" ;
+}
 
 if $(WITH_GCC_FLAG_VISIBILITY)
 {

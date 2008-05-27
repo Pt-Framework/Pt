@@ -38,32 +38,47 @@ rule TryC++
     return [ TryCompile $(C++) : $(2) : $(3) : $(4) : $(5) ] ;
 }
 
-
 #############################################################################
 # Tools and utilities
 ##############################################################################
-
-CheckDefault VISUALC ;
-CheckVariable VISUALC : MSVCDir      : [ Slashify $(VCINSTALLDIR:J=" ") ] ;
-CheckVariable VISUALC : VSINSTALLDIR : [ Slashify $(VSINSTALLDIR:J=" ") ] ;
-
-if ! $(VISUALC)
+if $(CONFIGURE)
 {
-  Echo "Checking for VISUALC" ...FAILED ;
-  Exit "Please specify path to the Visual Studio installation with -sVISUALC" ;
+    if $(VISUALC)
+    {
+        Configure VISUALC : $(VISUALC) ;
+        Echo "Checking for VISUALC directory..." $(VISUALC) ;
+    }
+    else if $(MSVCDir)
+    {
+        Configure VISUALC : [ Slashify $(VCINSTALLDIR:J=" ") ] ;
+        Echo "Checking for VISUALC directory..." $(VCINSTALLDIR:J=" ") ;
+    }
+    else if $(VSINSTALLDIR)
+    {
+        Configure VISUALC : [ Slashify $(VSINSTALLDIR:J=" ") ] ;
+        Echo "Checking for VISUALC directory..." $(VSINSTALLDIR:J=" ") ;
+    }
+    else
+    {
+      Echo "Checking for VISUALC" ...FAILED ;
+      Exit "Please specify path to the Visual Studio installation with -sVISUALC" ;
+    }
+
+    if $(VCDIR)
+       || [ CheckFile VCDIR : [ Slashify $(VISUALC:J=" ")"\\vc" ] 
+                            : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" ]
+       || [ CheckFile VCDIR : [ Slashify $(VISUALC:J=" ")"\\vc7" ] 
+                            : $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" ]
+    {
+        Configure VCDIR : $(VCDIR) ;
+        Echo "Checking for VCDIR directory..." $(VCDIR) ;
+    }
+    else
+    {
+        Echo "Checking for VCDIR" ...FAILED ;
+        Exit "Please specify path to the Visual Studio vc directory -sVCDIR" ;
+    }
 }
-
-
-CheckDefault VCDIR ;
-CheckFile VCDIR : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" : [ Slashify $(VISUALC:J=" ")"\\vc" ] ;
-CheckFile VCDIR : $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" : [ Slashify $(VISUALC:J=" ")"\\vc7" ] ;
-
-if ! $(VCDIR)
-{
-    Echo "Checking for VCDIR" ...FAILED ;
-    Exit "Please specify path to the Visual Studio vc directory -sVCDIR" ;
-}
-
 
 AR          = $(VCDIR)\\bin\\lib ;
 AS          = masm386 ;
@@ -77,22 +92,27 @@ LINK        = $(VCDIR)\\bin\\link /nologo ;
 # Compiler and linker flags
 ##############################################################################
 
-CheckDefault PLATFORMSDK ;
-CheckFile PLATFORMSDK : $(PLATFORMSDK:J=" ")"\\Include\\windows.h" 
-                      : [ Slashify $(PLATFORMSDK:J=" ") ] ;
-CheckFile PLATFORMSDK : $(WindowsSdkDir:J=" ")"Include\\windows.h" 
-                      : [ Slashify $(WindowsSdkDir:J=" ") ] ;
-CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" 
-                      : [ Slashify $(VISUALC:J=" ")"\\vc\\PlatformSDK" ] ;
-CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" 
-                      : [ Slashify $(VISUALC:J=" ")"\\vc7\\PlatformSDK" ] ;
-
-if ! $(PLATFORMSDK)
+if $(CONFIGURE)
 {
-    Echo "Checking for PLATFORMSDK" ...FAILED ;
-    Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
+    if $(PLATFORMSDK)
+       || [ CheckFile PLATFORMSDK : [ Slashify $(PLATFORMSDK:J=" ") ] 
+                                  : $(PLATFORMSDK:J=" ")"\\Include\\windows.h" ]
+       ||Ê[ CheckFile PLATFORMSDK : [ Slashify $(WindowsSdkDir:J=" ") ]
+                                  : $(WindowsSdkDir:J=" ")"Include\\windows.h" ]
+       || [ CheckFile PLATFORMSDK : [ Slashify $(VISUALC:J=" ")"\\vc\\PlatformSDK" ] 
+                                  : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ]                                ]
+       || [ CheckFile PLATFORMSDK : [ Slashify $(VISUALC:J=" ")"\\vc7\\PlatformSDK" ]
+                                  : $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ]                              :  ]
+    {
+        Configure PLATFORMSDK : $(PLATFORMSDK) ;
+        Echo "Checking for PLATFORMSDK directory..." $(PLATFORMSDK) ;
+    }
+    else
+    {
+        Echo "Checking for PLATFORMSDK" ...FAILED ;
+        Exit "Please specify path to the Platform SDK with -sPLATFORMSDK" ;
+    }
 }
-
 
 STDLIBS += \"$(PLATFORMSDK)\\lib\" ;
 STDHDRS += \"$(PLATFORMSDK)\\include\" ;
@@ -124,11 +144,14 @@ else if $(CONFIG:L) = aqtime
 
 C++FLAGS += $(CCFLAGS) /EHsc /GR /FD /Zc:wchar_t ;
 
-CheckCc HAS_PLATFORMSDK : "#include <windows.h>" 
-                          "int main() { return 0; }" 
-                        : /I\"$(PLATFORMSDK)\\include\" 
-                        : 
-                        : \"$(PLATFORMSDK)\\lib\" ;
+if $(CONFIGURE)
+{
+    ConfigureCc HAS_PLATFORMSDK : "#include <windows.h>" 
+                                  "int main() { return 0; }" 
+                                : /I\"$(PLATFORMSDK)\\include\" 
+                                : 
+                                : \"$(PLATFORMSDK)\\lib\" ;
+}
 
 ##############################################################################
 # Build rules

@@ -66,56 +66,10 @@ rule Slashify
 }
 
 
-rule ConfigureEcho
-{
-    if $(CONFIGURE)
-    {
-        if $(2)
-        {
-            if $(3)
-            {
-                Echo "Checking for "$(1)" ..."$(3) ;
-                $(1) = $(3) ;
-                local _s = $(3) ; #[ Slashify $(3) ] ;
-                WriteFile config.jam : $(1)" ?= "\"$(_s)\"" ;"  ;
-            }
-            else
-            {
-                Echo "Checking for "$(1)"... yes" ;
-                $(1) = $(2) ;
-                WriteFile config.jam : $(1)" ?= "$(2)" ;"  ;
-            }
-        }
-        else if $(4)
-        {
-            Echo "Checking for "$(1)"..." $(4) ;
-        }
-    }
-}
-
-
 rule Configure
 {
-    if $(CONFIGURE)
-    {
-        $(1) = $(2) ;
-        WriteFile config.jam : $(1)" ?= "\"$(2)\"" ;"  ;
-   }
-}
-
-
-rule ConfigureDefine
-{
-    if $(CONFIGURE)
-    {
-        local _line = "#ifndef" $(2) ;
-        WriteFile $(1) : $(_line:J=" ") ;
-
-        _line = "#define" $(2) "=" $(3) ;
-        WriteFile $(1) : $(_line:J=" ") ;
-
-        WriteFile $(1) : "#endif" ;
-    }
+    $(1) = $(2) ;
+    WriteFile config.jam : $(1)" ?= "\"$(2)\"" ;"  ;
 }
 
 
@@ -148,49 +102,14 @@ rule CheckCommand
 }
 
 
-rule CheckDefault
-{
-    if $(CONFIGURE)
-    {
-        local _val = $($(1)) ;
-        if $(_val)
-        {
-            ConfigureEcho $(1) : 1 : [ Slashify $(_val:J=" ") ] ;
-        }
-    }
-}
-
-
-rule CheckVariable
-{
-    if $(CONFIGURE)
-    {
-        if ! $($(1))
-        {
-            if $($(2))
-            {
-                ConfigureEcho $(1) : 1 : $(3) ;
-            }
-        }
-    }
-}
-
-
 rule CheckFile
 {
-    if $(CONFIGURE)
+    local _r = [ CHECK_IF_FILE $(3:J=" ") ] ;
+    if $(_r)
     {
-        if ! $($(1))
-        {
-            if $(2)
-            {
-                if [ CHECK_IF_FILE $(2:J=" ") ]
-                {
-                    ConfigureEcho $(1) : 1 : $(3) : "no" ;
-                }
-            }
-        }
+        $(1) = $(2) ;
     }
+    return $(_r) ;
 }
 
 
@@ -198,63 +117,73 @@ rule CheckCc
 {
     local _out = check ;
 
-    if $(CONFIGURE)
+    TryCommand $(RM) "check.c" ;
+
+    local _line ;
+    for _line in $(2)
     {
-        TryCommand $(RM) "check.c" ;
-
-        local _line ;
-        for _line in $(2)
-        {
-            WriteFile check.c : $(_line) ;
-        }
-
-        local _r = [ TryCc $(1) : check.c : $(3) : $(4) : $(5) ] ;
-        if $(_r)
-        {
-            Configure $(1) : 1 ;
-            Echo "Checking for" $(1)"... yes" ;
-        }
-        else
-        {
-            Echo "Checking for" $(1)"... no" ;
-        }
-
-        TryCommand $(RM) "check.c" ;
-        TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
-        TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
+        WriteFile check.c : $(_line) ;
     }
+
+    local _r = [ TryCc $(1) : check.c : $(3) : $(4) : $(5) ] ;
+    if $(_r)
+    {
+        $(1) = 1 ;
+    }
+
+    TryCommand $(RM) "check.c" ;
+    TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
+    TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
+    
+    return $(_r) ;
 }
 
 
-rule CheckC++
+rule ConfigureCc
+{
+    local _r = [ CheckCc $(1) : $(2) : $(3) : $(4) : $(5) : $(6) ] ;
+    if $(_r)
+    {
+        Configure $(1) : 1 ;
+        Echo "Checking for" $(1)"... yes" ;
+    }
+    else
+    {
+        Echo "Checking for" $(1)"... no" ;
+    }
+    
+    return $(_r) ;
+}
+
+
+rule ConfigureC++
 {
     local _out = check ;
 
-    if $(CONFIGURE)
+    TryCommand $(RM) "check.cpp" ;
+
+    local _line ;
+    for _line in $(2)
     {
-        TryCommand $(RM) "check.cpp" ;
-
-        local _line ;
-        for _line in $(2)
-        {
-            WriteFile check.cpp : $(_line) ;
-        }
-
-        local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
-        if $(_r)
-        {
-            Configure $(1) : 1 ;
-            Echo "Checking for" $(1)"... yes" ;
-        }
-        else
-        {
-            Echo "Checking for" $(1)"... no" ;
-        }
-
-        TryCommand $(RM) "check.cpp" ;
-        TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
-        TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
+        WriteFile check.cpp : $(_line) ;
     }
+
+    local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
+    if $(_r)
+    {
+        Configure $(1) : 1 ;
+        Echo "Checking for" $(1)"... yes" ;
+    }
+    else
+    {
+        Echo "Checking for" $(1)"... no" ;
+    }
+
+    TryCommand $(RM) "check.cpp" ;
+    TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
+    TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
+    
+    return $(_r) ;
 }
 
 
@@ -287,9 +216,6 @@ if ! $(JAM_JAMCONFIG)
 }
 
 
-#
-# TODO: host configuration
-#
 rule CheckHost
 {
     Echo "Checking for host platform ..."$(OS:L) ;
@@ -468,17 +394,17 @@ rule CheckToolset
                 Echo "Checking for toolset ...xlc" ;
                 Exit "NOT IMPLEMENTED" ;
             }
-            else if [ TryCommand "CC -o "$(_out)" check.c" ]
-            {
-                WriteFile config.jam : "TOOLSET = sunpro ;"  ;
-                TOOLSET = sunpro ;
-                Echo "Checking for toolset ...sunpro" ;
-            }
             else if [ TryCommand "gcc -o "$(_out)" check.c" ]
             {
                 WriteFile config.jam : "TOOLSET = gcc ;"  ;
                 TOOLSET = gcc ;
                 Echo "Checking for toolset ...gcc" ;
+            }
+            else if [ TryCommand "CC -o "$(_out)" check.c" ]
+            {
+                WriteFile config.jam : "TOOLSET = sunpro ;"  ;
+                TOOLSET = sunpro ;
+                Echo "Checking for toolset ...sunpro" ;
             }
             else if [ TryCommand "cc -o "$(_out)" check.c" ]
             {
