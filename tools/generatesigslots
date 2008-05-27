@@ -29,7 +29,7 @@
 #
 #  $0 NUMBER [-main [MAX]]
 #
-# Run with only a number, it generates template specializations for
+# Run with only one number, it generates template specializations for
 # that many template arguments. It assumed that ${max_types}
 # (default=8) is the "master" (unspecialized) template instantiation
 # and generates slightly different class declarations when NUMBER is
