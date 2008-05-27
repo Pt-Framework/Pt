@@ -156,17 +156,17 @@ namespace Pt {
                 /** @brief Set the red component of this color (range 0 to 255).
                  */
                 inline void setRed(uint8_t r)
-                { _val = _val & 0xFF00FFFF | (uint32_t(r) << 16); }
+                { _val = (_val & 0xFF00FFFF) | (uint32_t(r) << 16); }
 
                 /** @brief Set the green component of this color (range 0 to 255).
                  */
                 inline void setGreen(uint8_t g)
-                { _val = _val & 0xFFFF00FF | (uint32_t(g) << 8); }
+                { _val = (_val & 0xFFFF00FF) | (uint32_t(g) << 8); }
 
                 /** @brief Set the blue component of this color (range 0 to 255).
                  */
                 inline void setBlue(uint8_t b)
-                { _val = _val & 0xFFFFFF00 | uint32_t(b); }
+                { _val = (_val & 0xFFFFFF00) | uint32_t(b); }
 
             protected:
                 uint32_t _val;
