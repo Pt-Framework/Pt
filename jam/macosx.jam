@@ -3,6 +3,7 @@ SUFLIB    = .a ;
 SUFDLL    = .so ;
 SUFEXE	  = "" ;
 SUFDBG    = "" ;
+SUFOBJ    = .o ;
 
 if $(CONFIG:L) = debug 
 {

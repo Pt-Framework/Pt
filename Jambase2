@@ -1,12 +1,14 @@
-#
+###############################################################################
 # OS specific string for current directory
-#
-DOT = . ;
+###############################################################################
+
+# DOT = . ;
 JAMDIR ?= jam ;
 
-#
+###############################################################################
 # Includes a jam package
-#
+###############################################################################
+
 rule JamInclude
 {
     local _s = $(DOT) ;
@@ -16,27 +18,8 @@ rule JamInclude
     include $(_s) ;
 }
 
-#
-# Set target OS/platform to host OS/platform if unset
-#
-TARGET_OS     ?= $(OS:L) ;
-TARGET_OSPLAT ?= $(OSPLAT:L) ;
-
-#
-# Set configuration, use debug if not set
-#
-CONFIG ?= debug ;
-CONFIG = $(CONFIG:L) ;
-
-#
-# Include base rules
-#
-JamInclude Jamrules.base ;
-JamInclude $(TARGET_OS:LS=".jam") ;
-
-
 ###############################################################################
-# Auto configuration rules and actions
+# Configuration rules
 ###############################################################################
 
 rule Slashify
@@ -139,6 +122,32 @@ rule CheckCc
 }
 
 
+rule CheckC++
+{
+    local _out = check ;
+
+    TryCommand $(RM) "check.cpp" ;
+
+    local _line ;
+    for _line in $(2)
+    {
+        WriteFile check.cpp : $(_line) ;
+    }
+
+    local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
+    if $(_r)
+    {
+        $(1) = 1 ;
+    }
+
+    TryCommand $(RM) "check.cpp" ;
+    TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
+    TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
+    
+    return $(_r) ;
+}
+
+
 rule ConfigureCc
 {
     local _r = [ CheckCc $(1) : $(2) : $(3) : $(4) : $(5) : $(6) ] ;
@@ -158,17 +167,7 @@ rule ConfigureCc
 
 rule ConfigureC++
 {
-    local _out = check ;
-
-    TryCommand $(RM) "check.cpp" ;
-
-    local _line ;
-    for _line in $(2)
-    {
-        WriteFile check.cpp : $(_line) ;
-    }
-
-    local _r = [ TryC++ $(1) : check.cpp : $(3) : $(4) : $(5) ] ;
+    local _r = [ CheckC++ $(1) : $(2) : $(3) : $(4) : $(5) : $(6) ] ;
     if $(_r)
     {
         Configure $(1) : 1 ;
@@ -178,48 +177,16 @@ rule ConfigureC++
     {
         Echo "Checking for" $(1)"... no" ;
     }
-
-    TryCommand $(RM) "check.cpp" ;
-    TryCommand $(RM) $(_out:S=$(SUFEXE)) ;
-    TryCommand $(RM) $(_out:S=$(SUFOBJ)) ;
     
     return $(_r) ;
 }
 
+###############################################################################
+# Configure removal of files
+###############################################################################
 
-rule Erase
+rule ConfigureRm
 {
-    local _f ;
-    for _f in $(1)
-    {
-        TryCommand $(RM) $(_f) ;
-    }
-}
-
-
-for _arg in $(ARGV)
-{
-    if $(_arg) = configure
-    {
-        CONFIGURE = 1 ;
-    }
-}
-
-JAM_JAMCONFIG = [ CHECK_IF_FILE config.jam ] ;
-
-if ! $(JAM_JAMCONFIG)
-{
-    if ! $(CONFIGURE)
-    {
-        Exit "Run 'jam configure' to configure the build first." ;
-    }
-}
-
-
-rule ConfigureHost
-{
-    Echo "Checking for host platform ..."$(OS:L) ;
-
     RM = ;
     WriteFile check.in : "delete me" ;
     if $(RM) ||
@@ -233,8 +200,15 @@ rule ConfigureHost
     {
         Exit "Checking for rm command... FAILED!" ;
     }
-    Erase "check.in" "check.out" "check.log" ;
+    TryCommand $(RM) "check.in" "check.out" "check.log" ;
+}
 
+###############################################################################
+# Configure moving of files
+###############################################################################
+
+rule ConfigureMv
+{
     MV = ;
     WriteFile check.in : "delete me" ;
     if $(MV) ||
@@ -244,12 +218,20 @@ rule ConfigureHost
         Configure MV : $(MV) ;
         Echo "Checking for move command..." $(MV) ;
     }
-    Erase "check.in" "check.out" ;
+    TryCommand $(RM) "check.in" "check.out" ;
+
     if ! $(MV)
     {
         Exit "Checking for move command... FAILED!" ;
     }
+}
 
+###############################################################################
+# Configure copying of files
+###############################################################################
+
+rule ConfigureCp
+{
     CP = ;
     WriteFile check.in : "delete me" ;
     if $(CP) ||
@@ -259,12 +241,19 @@ rule ConfigureHost
         Configure CP : $(CP) ;
         Echo "Checking for copy command..." $(CP) ;
     }
-    Erase "check.in" "check.out" ;
+    TryCommand $(RM) "check.in" "check.out" ;
     if ! $(CP)
     {
         Exit "Checking for copy command... FAILED!" ;
     }
+}
 
+###############################################################################
+# Configure creation and removal of directories
+###############################################################################
+
+rule ConfigureMkDir
+{
     MKDIR = ;
     if $(MKDIR) ||
        [ CheckCommand MKDIR : "mkdir" : "mkdir check_dir" ]
@@ -290,7 +279,14 @@ rule ConfigureHost
     {
         Exit "Checking for rmdir command... FAILED!" ;
     }
+}
 
+###############################################################################
+# Configure file access rights commands
+###############################################################################
+
+rule ConfigureChMod
+{
     CHMOD = ;
     WriteFile check.in : "delete me" ;
     if $(CHMOD)
@@ -303,8 +299,15 @@ rule ConfigureHost
         Echo "Checking for chgrp command..." $(CHGRP) ;
         Echo "Checking for chown command..." $(CHOWN) ;
     }
-    Erase "check.in" ;
+    TryCommand $(RM) "check.in" ;
+}
 
+###############################################################################
+# Configure file link command
+###############################################################################
+
+rule ConfigureLn
+{
     LN = ;
     WriteFile check.in : "delete me" ;
     if $(LN) 
@@ -313,13 +316,20 @@ rule ConfigureHost
         Configure LN : $(LN) ;
         Echo "Checking for link command..." $(LN) ;
     }
-    Erase "check.in" "check.out" ;
+    TryCommand $(RM) "check.in" "check.out" ;
  
     if ! $(LN)
     {
         Exit "Checking for link command... FAILED!" ;
     }
+}
 
+###############################################################################
+# Configure path separator and relative path symbols
+###############################################################################
+
+rule ConfigureDotSlash
+{
     DOT = ;
     if $(DOT) 
        || [ CheckCommand DOT : "." : "cd ." ]
@@ -362,10 +372,10 @@ rule ConfigureHost
     }
 }
 
-
-#
+###############################################################################
 # Toolset configuration (cl KCC CC cxx cc++ xlC aCC c++ g++ egcs gcc)
-#
+###############################################################################
+
 rule ConfigureToolset
 {
     if $(CONFIGURE)
@@ -432,31 +442,57 @@ rule ConfigureToolset
     {
         Exit "Checking for TOOLSET ...FAILED !!!" ;
     }
-
+    
+    # TODO: we only need to include the configure part
     JamInclude $(TOOLSET:LS=".jam") ;
 }
-
-#Exit "----------------DONE--------------------" ;
 
 ###############################################################################
 # Include main Jamfile and Jamconf
 ###############################################################################
+
+TARGET_OS     ?= $(OS:L) ;
+TARGET_OSPLAT ?= $(OSPLAT:L) ;
+CONFIG        ?= debug ;
+CONFIG        = $(CONFIG:L) ;
+
+for _arg in $(ARGV)
+{
+    if $(_arg) = configure
+    {
+        CONFIGURE = 1 ;
+    }
+}
+
+if ! [ CHECK_IF_FILE config.jam ] && 
+   ! $(CONFIGURE)
+{
+    Exit "Run 'jam configure' to configure the build first." ;
+}
 
 if $(CONFIGURE)
 {
     TryCommand "rm -f config.jam" ;
     TryCommand "del /f/q config.jam" ;
 
-    ConfigureHost ;
+    Echo "Checking for host platform ..."$(OS:L) ;
+    ConfigureRm ;
+    ConfigureMv ;
+    ConfigureCp ;
+    ConfigureMkDir ;
+    ConfigureChMod ;
+    ConfigureLn ;
+    ConfigureDotSlash ;
+
+	JamInclude $(TARGET_OS:LS=".jam") ;
+
     ConfigureToolset ;
-
     include Jamconf ;
-
     Exit "Run jam now to build targets." ;
 }
 
 include config.jam ;
-
+JamInclude Jamrules.base ;
+JamInclude $(TARGET_OS:LS=".jam") ;
 JamInclude $(TOOLSET:LS=".jam") ;
-
 include Jamfile ;
