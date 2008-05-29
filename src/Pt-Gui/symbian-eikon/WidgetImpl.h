@@ -79,6 +79,8 @@ namespace Gui {
             // dispatch events to slots
             void dispatchEvent(Pt::Event& event);    
             
+            Widget* getParent() { return _parent; }
+            
             // get backend control
             CControl* getControl() { return _control; }
             
@@ -88,10 +90,11 @@ namespace Gui {
             // disable drawing to native gfx context
             void endDraw();
             
-        private:
             void synchronize(bool initial = false);
             
+        private:
             Widget& _apiWidget;
+            Widget* _parent;
             Pt::Math::Point _initialLocation;
             Pt::Math::Size _initialSize;
 

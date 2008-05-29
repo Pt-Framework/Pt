@@ -41,6 +41,7 @@ PainterImpl::PainterImpl()
 , _gc(0)
 , _device(0)
 , _nativeFont(0)
+, _offset(0, 0)
 , _brushBitmap(0)
 , _drawBitmap(0)
 {
@@ -105,12 +106,29 @@ const Gfx::Font& PainterImpl::font() const
 
 Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
-    return Gfx::FontMetrics(0, 0, 0, 0);
+    if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
+        return Gfx::FontMetrics(0, 0, 0, 0); 
+    
+    return Gfx::FontMetrics(_nativeFont->AscentInPixels(), 
+            _nativeFont->DescentInPixels(), 
+            _nativeFont->MaxCharWidthInPixels(), 
+            _nativeFont->HeightInPixels());
 }
 
 Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
-    return Gfx::FontMetrics(0, 0, 0, 0);
+    if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
+        return Gfx::FontMetrics(0, 0, 0, 0); 
+
+    TPtrC8 temp(reinterpret_cast<const TUint8*>(text.narrow().c_str()));
+    // TODO: Find dynamic size solution
+    TBuf<1024> desc;
+    desc.Copy(temp);
+
+    return Gfx::FontMetrics(_nativeFont->AscentInPixels(), 
+            _nativeFont->DescentInPixels(), 
+            _nativeFont->TextWidthInPixels(desc), 
+            _nativeFont->HeightInPixels());
 }
 
 const std::list<std::string>& PainterImpl::fontFamilyNames()
@@ -122,7 +140,10 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 
 void PainterImpl::drawPixel(const Math::Point& to)
 {
+    if (!ensureActiveContext())
+        return;
 
+    _gc->Plot(SymbianTools::makeTPoint(to) + _offset);
 }
 
 void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
@@ -130,13 +151,30 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
     if (!ensureActiveContext())
         return;
     
-    _gc->DrawLine(SymbianTools::makeTPoint(from), SymbianTools::makeTPoint(to));
+    _gc->DrawLine(SymbianTools::makeTPoint(from) + _offset, 
+            SymbianTools::makeTPoint(to) + _offset);
 }
 
 
 void PainterImpl::drawRect(const Gfx::Rect& rect)
 {
-    //_paintQueue.push_back( new DrawRect(rect, _pen) );
+    if (!ensureActiveContext())
+        return;
+
+    TPoint p1(rect.x(), rect.y());
+    TPoint p2(rect.x()+rect.width(), rect.y());
+    TPoint p3(rect.x()+rect.width(), rect.y()+rect.height());
+    TPoint p4(rect.x(), rect.y()+rect.height());
+
+    p1+=_offset;
+    p2+=_offset;
+    p3+=_offset;
+    p4+=_offset;
+    
+    _gc->DrawLine(p1,p2);
+    _gc->DrawLine(p2,p3);
+    _gc->DrawLine(p3,p4);
+    _gc->DrawLine(p4,p1);
 }
 
 void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
@@ -149,7 +187,7 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     TBuf<1024> desc;
     desc.Copy(temp);
     
-    _gc->DrawText(desc, TPoint(to.x(), to.y()));
+    _gc->DrawText(desc, SymbianTools::makeTPoint(to) + _offset);
 }
 
 void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
@@ -163,10 +201,13 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
     if (!ensureActiveContext())
         return;
 
+    TRect rect(SymbianTools::makeTRect(topLeft, size));
+    rect.Move(_offset.iX, _offset.iY);
+    
     // ellipse is filled by default on symbian, arc will do the job just fine
-    _gc->DrawArc(SymbianTools::makeTRect(topLeft, size),
-            SymbianTools::makeTPoint(topLeft),
-            SymbianTools::makeTPoint(topLeft));
+    _gc->DrawArc(rect,
+            SymbianTools::makeTPoint(topLeft) + _offset,
+            SymbianTools::makeTPoint(topLeft) + _offset);
 }
 
 void PainterImpl::fillRect(const Gfx::Rect& rect)
@@ -174,7 +215,17 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
     if (!ensureActiveContext())
         return;
 
-    _gc->DrawRect(SymbianTools::makeTRect(rect));
+    // rect has got outline with pen color
+    _gc->SetPenStyle(CGraphicsContext::ENullPen);
+
+    TRect rect_(SymbianTools::makeTRect(rect));
+    rect_.Move(-1, -1);
+    rect_.Grow(1, 1);
+    rect_.Move(_offset.iX, _offset.iY);
+
+    _gc->DrawRect(rect_);
+    // restore pen
+    updatePen();
 }
 
 void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size)
@@ -187,6 +238,7 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
     TRect rect = SymbianTools::makeTRect(topLeft, size);
     rect.Move(-1, -1);
     rect.Grow(1, 1);
+    rect.Move(_offset.iX, _offset.iY);
     _gc->DrawEllipse(rect);    
     // restore pen
     updatePen();
@@ -210,12 +262,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
     
     bitmap->SetSizeInTwips(_device);
     
-    bitmap->LockHeap();
-    
-    unsigned char* data = (unsigned char*)bitmap->DataAddress();
-    _gc->DrawBitmap(SymbianTools::makeTPoint(to), bitmap);
-
-    bitmap->UnlockHeap();
+    _gc->DrawBitmap(SymbianTools::makeTPoint(to) + _offset, bitmap);
 
     bitmap->SetSizeInTwips(sizeInTwips);
 }
@@ -235,7 +282,10 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
 
     bitmap->SetSizeInTwips(_device);
 
-    _gc->DrawBitmap(SymbianTools::makeTRect(to, pm.size()), bitmap, SymbianTools::makeTRect(pmRegion));
+    TRect rect(SymbianTools::makeTRect(to, pm.size()));
+    rect.Move(_offset.iX, _offset.iY);
+    TRect pmRect(SymbianTools::makeTRect(pmRegion));
+    _gc->DrawBitmap(rect, bitmap, pmRect);
 
     bitmap->SetSizeInTwips(sizeInTwips);
 }
@@ -307,7 +357,7 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, const char* data, size
     // otherwise nothing will be drawn at all
     bitmap->SetSizeInTwips(_device); 
 
-    _gc->DrawBitmap(TPoint(x,y), bitmap);
+    _gc->DrawBitmap(TPoint(x,y) + _offset, bitmap);
 }
 
 void PainterImpl::updatePen()

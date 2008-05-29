@@ -74,7 +74,8 @@ void PixmapImpl::beginDraw()
     {
         _painter.setGc(_bitmapGc);
         _painter.setDevice(_bitmapDevice);
-        _painter.setNativeFont(CEikonEnv::Static()->AnnotationFont());
+        _painter.setNativeFont(CEikonEnv::Static()->NormalFont());
+        _bitmapGc->UseFont(CEikonEnv::Static()->NormalFont());
         //_bitmapDevice->DrawingBegin(ETrue);
     }
     else
@@ -84,7 +85,8 @@ void PixmapImpl::beginDraw()
         {
             _painter.setGc(_bitmapGc);
             _painter.setDevice(_bitmapDevice);
-            _painter.setNativeFont(CEikonEnv::Static()->AnnotationFont());
+            _painter.setNativeFont(CEikonEnv::Static()->NormalFont());
+            _bitmapGc->UseFont(CEikonEnv::Static()->NormalFont());
             //_bitmapDevice->DrawingBegin(ETrue);
         }
     }

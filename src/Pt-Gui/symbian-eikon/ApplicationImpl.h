@@ -24,6 +24,7 @@
 #include <Pt/Api.h>
 #include <memory>
 #include <iostream>
+#include <list>
 
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
@@ -68,50 +69,40 @@ namespace Gui {
             void constructPixmaps();             
             void destructPixmaps();
             
+            std::list<WidgetImpl*>& getWidgets() { return _widgets; }         
+            
         private:
             // Widgets we need to construct when the application is run
-            std::vector<WidgetImpl*> _widgets;
+            std::list<WidgetImpl*> _widgets;
             // Pixmaps we need to construct when the application is run
-            std::vector<PixmapImpl*> _pixmaps;
+            std::list<PixmapImpl*> _pixmaps;
             
             template<class type>
-            static void registerResource(std::vector<type*>& container, type* resource)
+            static void registerResource(std::list<type*>& container, type* resource)
             {
                 container.push_back(resource);                
             }
             
             template<class type>
-            static void unregisterResource(std::vector<type*>& container, type* resource)
+            static void unregisterResource(std::list<type*>& container, type* resource)
             {
-                // make new list and remove ourselves
-                std::vector<type*> newContainer;
-                for (unsigned int i = 0; i < container.size(); ++i)
-                {
-                    if (container.at(i) != resource)
-                        newContainer.push_back(container.at(i));
-                }
-
-                container = newContainer;                
+                container.remove(resource);
             }
 
             template<class type>
-            static void constructResources(std::vector<type*>& container)
+            static void constructResources(std::list<type*>& container)
             {
-                for (unsigned int i = 0; i < container.size(); ++i)
-                {
-                    type* resource = container.at(i);
-                    resource->construct();
-                }                
+                typename std::list<type*>::iterator i;
+                for (i = container.begin(); i != container.end(); ++i)
+                    (*i)->construct();
             }
             
             template<class type>
-            static void destructResources(std::vector<type*>& container)
+            static void destructResources(std::list<type*>& container)
             {
-                for (unsigned int i = 0; i < container.size(); ++i)
-                {
-                    type* resource = container.at(i);
-                    resource->destruct();
-                }                
+                typename std::list<type*>::iterator i;
+                for (i = container.begin(); i != container.end(); ++i)
+                    (*i)->destruct();
             }
             
     };    

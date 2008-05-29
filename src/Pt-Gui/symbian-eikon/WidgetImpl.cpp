@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "WidgetImpl.h"
-#include "Widget.h"
+#include <Pt/Gui/Widget.h>
 #include "ApplicationImpl.h"
 
 #include <Pt/Gfx/Region.h>
@@ -50,33 +50,47 @@ public:
         : _gc(0)
         , _device(0)
         , _nativeFont(0)
-        , _drawingActive(false)
+        , _drawingActive(0)
+        , _references(0)
         {            
         }
         
         CGraphicsContext* _gc;
         const CGraphicsDevice* _device;
         const CFont* _nativeFont; 
-        bool _drawingActive;
+        int _drawingActive;
+        int _references;
     };
     
     // Constructors and destructor
     CControl(Pt::Gui::Widget& parentWidget) 
-    : _parentWidget(parentWidget)
+    : _apiWidget(parentWidget)
     {
     }
 
     void ConstructL(const TRect& rect)
     {
-        _windowGroup=RWindowGroup(iCoeEnv->WsSession());
-        
-        User::LeaveIfError(_windowGroup.Construct((TUint32)&_windowGroup));
-        
-        _windowGroup.SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
-        _windowGroup.EnableReceiptOfFocus(EFalse);
-        
-        // we're automatically becoming a window-owning control 
-        CreateWindowL(&_windowGroup);
+        if (!_apiWidget.impl().getParent())
+        {
+            _windowGroup=RWindowGroup(iCoeEnv->WsSession());
+
+            User::LeaveIfError(_windowGroup.Construct((TUint32)&_windowGroup));
+
+            _windowGroup.SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
+            _windowGroup.EnableReceiptOfFocus(EFalse);
+
+            // we're automatically becoming a window-owning control 
+            CreateWindowL(&_windowGroup);
+        }
+        else
+        {
+            // get parent native control
+            Pt::Gui::WidgetImpl& impl = _apiWidget.impl().getParent()->impl();
+            CControl* control = impl.getControl();
+            // this is our container
+            SetContainerWindowL(*control);
+            control->AddControl(this);
+        }
         SetRect(rect);
         EnableDragEvents();
         ActivateL();        
@@ -84,28 +98,104 @@ public:
 
     virtual ~CControl()
     {
-        _windowGroup.Close();        
+        if (!_apiWidget.impl().getParent())
+            _windowGroup.Close();        
+    }
+    
+    TPoint GetRelativePosition() const
+    {
+        TPoint offset(0,0);
+        if (_apiWidget.impl().getParent())
+        {
+            // bla?
+            // adjust relative position
+            Pt::Gui::Widget* widget = &_apiWidget;
+            do
+            {
+                CControl* control = widget->impl().getControl();
+                offset+=control->Position();
+                widget = widget->impl().getParent();
+            } while (widget && widget->impl().getParent());       
+        }
+        
+        return offset;
     }
 
     const GraphicContext& BeginDraw()
     {
-        _graphicContext._gc = &SystemGc();
-        _graphicContext._device = iEikonEnv->ScreenDevice();
-        _graphicContext._nativeFont = iEikonEnv->AnnotationFont();
-        if (!_graphicContext._drawingActive)
-            SystemGc().Activate(Window());  
-        _graphicContext._gc->UseFont(_graphicContext._nativeFont);
-    
-        return _graphicContext;
+        Pt::Gui::Widget* parent = _apiWidget.parent();
+        Pt::Gui::Widget* this_ = &_apiWidget;
+        while (parent)
+        {
+            this_ = parent;
+            parent = parent->parent();
+        }
+        
+        Pt::Gui::WidgetImpl& impl = this_->impl();
+
+        CControl* control = impl.getControl();
+        GraphicContext& graphicContext = control->_graphicContext;
+        
+        if (!graphicContext._gc)
+        {
+            graphicContext._gc = &SystemGc();
+            graphicContext._device = iEikonEnv->ScreenDevice();
+            graphicContext._nativeFont = iEikonEnv->NormalFont();
+            if (!graphicContext._drawingActive)
+            {
+                ActivateGc();
+            }
+            graphicContext._gc->UseFont(_graphicContext._nativeFont);
+            graphicContext._references = 1;
+        }
+        else
+        {
+            graphicContext._references++;
+        }
+        
+        return graphicContext;
     }
     
     void EndDraw()
     {
-        _graphicContext._gc = 0;
-        _graphicContext._device = 0;
-        _graphicContext._nativeFont = 0;
-        if (!_graphicContext._drawingActive)
-            SystemGc().Deactivate();                    
+        Pt::Gui::Widget* parent = _apiWidget.parent();
+        Pt::Gui::Widget* this_ = &_apiWidget;
+        while (parent)
+        {
+            this_ = parent;
+            parent = parent->parent();
+        }
+        
+        Pt::Gui::WidgetImpl& impl = this_->impl();
+
+        CControl* control = impl.getControl();
+        GraphicContext& graphicContext = control->_graphicContext;
+
+        graphicContext._references--;
+        if (graphicContext._references == 0)
+        {
+            graphicContext._gc = 0;
+            graphicContext._device = 0;
+            graphicContext._nativeFont = 0;
+            if (!graphicContext._drawingActive)
+                DeactivateGc();                    
+        }
+    }
+    
+protected:
+    void AddControl(CControl* control)
+    {
+        _controls.push_back(control);
+    }
+    
+    virtual CCoeControl* ComponentControl(TInt aIndex) const
+    {
+        return _controls.at(aIndex);
+    }
+    
+    virtual TInt CountComponentControls() const
+    {
+        return _controls.size();
     }
     
 private: // Functions from base classes
@@ -116,24 +206,46 @@ private: // Functions from base classes
      */
     void Draw(const TRect& rect) const
     {
-        _graphicContext._drawingActive = true;
+        Pt::Gui::Widget* parent = _apiWidget.parent();
+        Pt::Gui::Widget* this_ = &_apiWidget;
+        while (parent)
+        {
+            this_ = parent;
+            parent = parent->parent();
+        }
+        
+        Pt::Gui::WidgetImpl& impl = this_->impl();
+
+        CControl* control = impl.getControl();
+        GraphicContext& graphicContext = control->_graphicContext;
+        
+        graphicContext._drawingActive++;        
+        
         //CWindowGc& gc = SystemGc();
         //gc.SetPenStyle(CGraphicsContext::ENullPen);
         //gc.SetBrushStyle(CGraphicsContext::ESolidBrush);
         //gc.SetBrushColor(KRgbBlue);
         //gc.DrawRect(aRect);        
-    
-        Pt::Gui::PaintEvent paintEvent(_parentWidget, 
-                Pt::Gui::SymbianTools::makeRegion(rect)); 
+
+        TRect rc(rect);
+        // if we're having a parent we need to adjust the update rectangle
+        // to be located in 0/0
+        if (_apiWidget.impl().getParent())
+            rc.Move(-_apiWidget.region().x(), -_apiWidget.region().y());
         
-        _parentWidget.impl().dispatchEvent(paintEvent);
-        _graphicContext._drawingActive = false;
+        Pt::Gui::PaintEvent paintEvent(_apiWidget, 
+                Pt::Gui::SymbianTools::makeRegion(rc)); 
+        
+        _apiWidget.impl().dispatchEvent(paintEvent);
+
+        graphicContext._drawingActive--;        
     }
 
-private:  // Data
-    Pt::Gui::Widget& _parentWidget;    
+    Pt::Gui::Widget& _apiWidget;    
     RWindowGroup _windowGroup;
     mutable GraphicContext _graphicContext;
+    
+    std::vector<CControl*> _controls;
 };
 
 namespace Pt {
@@ -144,6 +256,7 @@ const ssize_t WidgetImpl::KPositionUnused = std::numeric_limits<ssize_t>::max();
 
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _apiWidget(apiWidget)
+, _parent(parent)
 , _initialLocation(at)
 , _initialSize(size)
 , _painter(*this)
@@ -201,6 +314,16 @@ void WidgetImpl::setParent(Widget* parent)
 
 void WidgetImpl::move(size_t x, size_t y)
 {
+    if (isConstructed())
+    {
+        _control->SetPosition(TPoint(x, y));
+        // will handle resize events
+        //synchronize();
+    }
+    else
+    {
+        _initialLocation = Pt::Math::Point(x,y);
+    }
 }
 
 
@@ -210,7 +333,7 @@ void WidgetImpl::resize(size_t width, size_t height)
     {
         _control->SetSize(TSize(width, height));
         // will handle resize events
-        synchronize();
+        //synchronize();
     }
     else
     {
@@ -235,6 +358,8 @@ void WidgetImpl::construct()
         Pt::Math::Point location(_initialLocation);
         Pt::Math::Size size(_initialSize);        
         
+        //TRect rect = ui.ClientRect();
+        
         if (location.x() == KPositionUnused)
             location.setX(ui.ClientRect().iTl.iX);
         if (location.y() == KPositionUnused)
@@ -245,8 +370,10 @@ void WidgetImpl::construct()
             size.setHeight(ui.ClientRect().Height());
         
         control->ConstructL(SymbianTools::makeTRect(location, size));
+        if (!_parent)
+            ui.AddToStackL(control);
+        
         control->SetMopParent(&ui);
-        ui.AddToStackL(control);
         _control = control;    
         
         synchronize(true);
@@ -278,24 +405,62 @@ void WidgetImpl::dispatchEvent(Pt::Event& event)
 
 void WidgetImpl::beginDraw()            
 {
+//    Widget* parent = _parent;
+//    Widget* this_ = &_apiWidget;
+//    while (parent)
+//    {
+//        this_ = parent;
+//        parent = parent->parent();
+//    }
+//    
+//    WidgetImpl& impl = this_->impl();
+//
+//    if (!impl.isConstructed())
+//        return;
+//
+//    CControl* control = impl.getControl();
+//    const CControl::GraphicContext& graphicContext = control->BeginDraw();
+
     if (!isConstructed())
         return;
-
+    
     const CControl::GraphicContext& graphicContext = _control->BeginDraw();
     _painter.setGc(graphicContext._gc);
     _painter.setDevice(graphicContext._device);
-    _painter.setNativeFont(graphicContext._nativeFont);
+    _painter.setNativeFont(graphicContext._nativeFont);    
+
+    TPoint offset(0, 0);
+    if (isConstructed())
+        offset = _control->GetRelativePosition();
+    
+    _painter.setOffset(offset);
 }
 
 void WidgetImpl::endDraw()
 {
-    if (!isConstructed())
-        return;
+//    Widget* parent = _parent;
+//    Widget* this_ = &_apiWidget;
+//    while (parent)
+//    {
+//        this_ = parent;
+//        parent = parent->parent();
+//    }
+//    
+//    WidgetImpl& impl = this_->impl();
+//
+//    if (!impl.isConstructed())
+//        return;
 
     _painter.setGc(0);    
     _painter.setNativeFont(0);
     _painter.setDevice(0);
-    
+    _painter.setOffset(TPoint(0,0));
+
+    if (!isConstructed())
+        return;
+
+    //CControl* control = impl.getControl();
+ 
     _control->EndDraw();
 }
 

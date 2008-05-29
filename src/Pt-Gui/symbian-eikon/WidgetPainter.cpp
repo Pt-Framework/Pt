@@ -41,7 +41,8 @@ void WidgetPainter::begin()
     if (!_active)
     {
         _parentWidgetImpl.beginDraw();
-        _active = true;
+        if (_gc)
+            _active = true;
     }
 }
 

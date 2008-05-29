@@ -115,6 +115,7 @@ namespace Gui {
             void setGc(CGraphicsContext* gc) { _gc = gc; }
             void setDevice(const CGraphicsDevice* device) { _device = device; }
             void setNativeFont(const CFont* font) { _nativeFont = font; }
+            void setOffset(const TPoint& offset) { _offset = offset; }
             
         protected:
             template <typename Iterator>
@@ -141,6 +142,7 @@ namespace Gui {
             CGraphicsContext* _gc;
             const CGraphicsDevice* _device;
             const CFont* _nativeFont;
+            TPoint _offset;
             
             // TODO: Use auto_ptr
             CFbsBitmap* _brushBitmap;

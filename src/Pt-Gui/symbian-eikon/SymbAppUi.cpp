@@ -23,7 +23,7 @@
 #include "SymbApp.h"
 #include "ApplicationImpl.h"
 #include <assert.h>
-#include "Widget.h"
+#include <Pt/Gui/Widget.h>
 #include "WidgetImpl.h"
 
 void SymbAppUi::ConstructL()
@@ -45,6 +45,15 @@ void SymbAppUi::ConstructL()
     // memory leaks.
     Pt::Gui::ResourceRegistry::instance().constructPixmaps();
     Pt::Gui::ResourceRegistry::instance().constructWidgets();
+    
+    // after everything has been constructed notify again about sizes
+    std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
+
+    for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
+        (*i)->synchronize(true);   
+    
+    //for (std::list<Pt::Gui::WidgetImpl*>::reverse_iterator i = widgets.rbegin(); i != widgets.rend(); ++i) 
+    //    (*i)->synchronize(true);   
 }
 
 SymbAppUi::~SymbAppUi()
