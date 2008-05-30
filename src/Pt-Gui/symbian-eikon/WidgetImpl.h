@@ -79,10 +79,10 @@ namespace Gui {
             // dispatch events to slots
             void dispatchEvent(Pt::Event& event);    
             
-            Widget* getParent() { return _parent; }
+            Widget* parent() { return _parent; }
             
             // get backend control
-            CControl* getControl() { return _control; }
+            CControl* nativeControl() { return _control; }
             
             // enable drawing to native graphics context                        
             void beginDraw();            
@@ -91,6 +91,8 @@ namespace Gui {
             void endDraw();
             
             void synchronize(bool initial = false);
+            
+            Widget& apiWidget() const { return _apiWidget; }
             
         private:
             Widget& _apiWidget;

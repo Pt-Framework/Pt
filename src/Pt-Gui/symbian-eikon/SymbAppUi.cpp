@@ -21,10 +21,12 @@
 #include "SymbAppUi.h"
 #include "SymbDoc.h"
 #include "SymbApp.h"
-#include "ApplicationImpl.h"
-#include <assert.h>
+
 #include <Pt/Gui/Widget.h>
 #include "WidgetImpl.h"
+#include "ApplicationImpl.h"
+
+#include <assert.h>
 
 void SymbAppUi::ConstructL()
 {
@@ -108,6 +110,13 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent,
     }
     return EKeyWasNotConsumed;
 }
+
+//void SymbAppUi::HandlePointerEventL(const TPointerEvent& aPointerEvent)
+//{
+//   int i = 0;
+//   i++;
+//   i--;
+//}
 
 void SymbAppUi::handleExit()
 {

@@ -158,14 +158,14 @@ void ApplicationImpl::processEvents()
 
 void ApplicationImpl::dispatchEvent(const Pt::Event& event)
 {
-    _eventMutex.lock();
+    //_eventMutex.lock();
     eventQueueSignal.send(event);
-    _eventMutex.unlock();
+    //_eventMutex.unlock();
 }
 
 // assuming that there is only one Application instance at a time
 ApplicationImpl* ApplicationImpl::_self = 0;
-System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
+System::Mutex ApplicationImpl::_mutex(System::Mutex::Recursive);
 
 void ApplicationImpl::lockAppInstance()
 {

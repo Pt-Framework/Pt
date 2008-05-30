@@ -61,14 +61,6 @@ void PainterImpl::begin()
 
 void PainterImpl::end()
 {
-//    std::vector<Paint*>::iterator it;
-//    for(it = _paintQueue.begin(); it != _paintQueue.end(); ++it)
-//    {
-//        (*it)->paint();
-//        delete *it;
-//    }
-//
-//    _paintQueue.clear();
 }
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
@@ -186,7 +178,10 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     // TODO: Find dynamic size solution
     TBuf<1024> desc;
     desc.Copy(temp);
-    
+
+    // make sure font is enabled
+    assert(_nativeFont);
+    _gc->UseFont(_nativeFont);
     _gc->DrawText(desc, SymbianTools::makeTPoint(to) + _offset);
 }
 
