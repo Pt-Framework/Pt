@@ -174,7 +174,9 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     if (!ensureActiveContext())
         return;
 
-    TPtrC8 temp(reinterpret_cast<const TUint8*>(text.narrow().c_str()));
+    std::string narrowString = text.narrow();
+    const TUint8* str = reinterpret_cast<const TUint8*>(narrowString.c_str());
+    TPtrC8 temp(str);
     // TODO: Find dynamic size solution
     TBuf<1024> desc;
     desc.Copy(temp);
@@ -214,8 +216,6 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
     _gc->SetPenStyle(CGraphicsContext::ENullPen);
 
     TRect rect_(SymbianTools::makeTRect(rect));
-    rect_.Move(-1, -1);
-    rect_.Grow(1, 1);
     rect_.Move(_offset.iX, _offset.iY);
 
     _gc->DrawRect(rect_);
@@ -253,13 +253,13 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
     if (!bitmap)
         return;
     
-    TSize sizeInTwips = bitmap->SizeInTwips();
+    //TSize sizeInTwips = bitmap->SizeInTwips();
     
-    bitmap->SetSizeInTwips(_device);
+    //bitmap->SetSizeInTwips(_device);
     
     _gc->DrawBitmap(SymbianTools::makeTPoint(to) + _offset, bitmap);
 
-    bitmap->SetSizeInTwips(sizeInTwips);
+    //bitmap->SetSizeInTwips(sizeInTwips);
 }
 
 
@@ -273,16 +273,16 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
     if (!bitmap)
         return;
     
-    TSize sizeInTwips = bitmap->SizeInTwips();
+    //TSize sizeInTwips = bitmap->SizeInTwips();
 
-    bitmap->SetSizeInTwips(_device);
+    //bitmap->SetSizeInTwips(_device);
 
     TRect rect(SymbianTools::makeTRect(to, pm.size()));
     rect.Move(_offset.iX, _offset.iY);
     TRect pmRect(SymbianTools::makeTRect(pmRegion));
     _gc->DrawBitmap(rect, bitmap, pmRect);
 
-    bitmap->SetSizeInTwips(sizeInTwips);
+    //bitmap->SetSizeInTwips(sizeInTwips);
 }
 
 void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image)

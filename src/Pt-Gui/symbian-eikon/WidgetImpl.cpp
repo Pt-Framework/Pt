@@ -66,9 +66,12 @@ public:
     CControl(Pt::Gui::WidgetImpl& owner) 
     : _apiWidgetImpl(owner)
     , _pointerEventConsumed(false)
+    , _allowRootRedrawing(false)
     {
     }
 
+    void SetAllowRootRedrawing(bool allowRootRedrawing) { _allowRootRedrawing = allowRootRedrawing; }
+    
     void ConstructL(const TRect& rect)
     {
         if (!_apiWidgetImpl.parent())
@@ -77,7 +80,7 @@ public:
 
             User::LeaveIfError(_windowGroup.Construct((TUint32)&_windowGroup));
 
-            _windowGroup.SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
+            _windowGroup.SetOrdinalPosition(0, /*ECoeWinPriorityAlwaysAtFront*/ECoeWinPriorityHigh);
             _windowGroup.EnableReceiptOfFocus(EFalse);
 
             // we're automatically becoming a window-owning control 
@@ -105,7 +108,7 @@ public:
             _windowGroup.Close();        
     }
     
-    TPoint RelativePosition() const
+    TPoint AbsolutePosition() const
     {
         TPoint offset(0,0);
         if (_apiWidgetImpl.parent())
@@ -129,10 +132,10 @@ public:
         
         // no context active
         if (!graphicContext._gc)
-        {
+        {            
             graphicContext._gc = &SystemGc();
             graphicContext._device = iEikonEnv->ScreenDevice();
-            graphicContext._nativeFont = iEikonEnv->NormalFont();
+            graphicContext._nativeFont = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
             if (!graphicContext._drawingActive)
             {
                 ActivateGc();
@@ -140,7 +143,7 @@ public:
             graphicContext._gc->UseFont(_graphicContext._nativeFont);
             if (RootControl() != this)
             {
-                TPoint p = RelativePosition();
+                TPoint p = AbsolutePosition();
                 TRect rc(p, Rect().Size());
                 graphicContext._gc->SetClippingRect(rc);
             }
@@ -165,6 +168,7 @@ public:
             graphicContext._references--;
             if (graphicContext._references == 0)
             {
+                graphicContext._gc->DiscardFont();
                 graphicContext._gc = 0;
                 graphicContext._device = 0;
                 graphicContext._nativeFont = 0;
@@ -180,40 +184,36 @@ public:
 
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {
-        CCoeControl::HandlePointerEventL(aPointerEvent);
+        //CCoeControl::HandlePointerEventL(aPointerEvent);
+        CControl* root = RootControl();        
         
-        CControl* root = RootControl();
+        // make sure event is delivered to all children
+        // NOTE: Apparently calling CCoeControl::HandlePointerEventL(aPointerEvent)
+        // should be responsible for routing the event to the children
+        // but doing so not all children receive the event, I wonder what was wrong
+        // This code will do the job
+        for (std::vector<CControl*>::iterator i = _controls.begin(); i != _controls.end(); ++i) 
+        {
+            CControl* control = *i;
+            if (control->IsVisible())
+            {
+                TPoint p = control->AbsolutePosition();
+                TRect rect(p, control->Size());
+                if (rect.Contains(aPointerEvent.iPosition))
+                {
+                    control->HandlePointerEventL(aPointerEvent);
+                    if (root != this && root->_pointerEventConsumed)
+                        return;
+                }
+            }
+        }
         
         if (root != this && root->_pointerEventConsumed)
             return;
         
         if ((root == this && !root->_pointerEventConsumed) || (root != this))
         {
-            unsigned int modifiers = 0;
-
-            Pt::Gui::MouseEvent::Button button;
-            Pt::Gui::MouseEvent::Action action;
-
-            TPoint pt = RelativePosition();
-            int x = aPointerEvent.iPosition.iX - pt.iX;
-            int y = aPointerEvent.iPosition.iY - pt.iY;
-
-            switch (aPointerEvent.iType)
-            {
-            case TPointerEvent::EButton1Down:
-                button = Pt::Gui::MouseEvent::LeftButton;
-                action = Pt::Gui::MouseEvent::Press;                
-                break;
-
-            case TPointerEvent::EButton1Up:
-                button = Pt::Gui::MouseEvent::LeftButton;
-                action = Pt::Gui::MouseEvent::Release;                
-                break;
-            }
-
-            Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
-
-            _apiWidgetImpl.dispatchEvent(mouseEvent);
+            TranslateMouseEvent(aPointerEvent);
         }
         
         if (root != this)
@@ -222,26 +222,36 @@ public:
             root->_pointerEventConsumed = false;
     }
             
-protected:
     void AddControl(CControl* control)
     {
         _controls.push_back(control);
     }
-    
-    virtual CCoeControl* ComponentControl(TInt aIndex) const
+
+    void RemoveControl(CControl* control)
     {
-        return _controls.at(aIndex);
+        size_t size = _controls.size();
+        std::vector<CControl*>::iterator where;
+        where = std::remove(_controls.begin(), _controls.end(), control);
+        _controls.erase(where, _controls.end());
+        assert(_controls.size() == size-1);
     }
     
-    virtual TInt CountComponentControls() const
+protected:
+//    virtual CCoeControl* ComponentControl(TInt aIndex) const
+//    {
+//        return _controls.at(aIndex);
+//    }
+//    
+//    virtual TInt CountComponentControls() const
+//    {
+//        return _controls.size();
+//    }
+
+    virtual void SizeChanged()
     {
-        return _controls.size();
+        if (_allowRootRedrawing)
+            RootControl()->DrawDeferred();
     }
-    
-    //virtual void SizeChanged()
-    //{
-    //    DrawNow();
-    //}
     
 private:
     CControl* RootControl() const
@@ -272,6 +282,12 @@ private:
      */
     void Draw(const TRect& rect) const
     {
+        CControl* ctrl = 0;
+        if (CountComponentControls())
+        {
+            ctrl = _controls.at(0);
+        }
+        
         GraphicContext& graphicContext = WorkingContext();
         
         graphicContext._drawingActive++;        
@@ -279,15 +295,56 @@ private:
         TRect rc(rect);
         // if we're having a parent we need to adjust the update rectangle
         // to be located in 0/0
+        TPoint absolutePos = AbsolutePosition();
         if (_apiWidgetImpl.parent())
-            rc.Move(-apiWidget().region().x(), -apiWidget().region().y());
+            rc.Move(-absolutePos.iX, -absolutePos.iY);
         
         Pt::Gui::PaintEvent paintEvent(apiWidget(), 
                 Pt::Gui::SymbianTools::makeRegion(rc)); 
         
         _apiWidgetImpl.dispatchEvent(paintEvent);
 
+        for (std::vector<CControl*>::const_iterator i = _controls.begin(); i != _controls.end(); ++i) 
+        {
+            const CControl* control = *i;
+            TRect crect(control->AbsolutePosition(), control->Size());
+            crect.Intersection(rect);
+            if (control->IsVisible() && !crect.IsEmpty())
+                control->Draw(crect);
+        }
+        
         graphicContext._drawingActive--;        
+    }
+    
+    void TranslateMouseEvent(const TPointerEvent& aPointerEvent)
+    {
+        unsigned int modifiers = 0;
+
+        Pt::Gui::MouseEvent::Button button;
+        Pt::Gui::MouseEvent::Action action;
+
+        TPoint pt = AbsolutePosition();
+        int x = aPointerEvent.iPosition.iX - pt.iX;
+        int y = aPointerEvent.iPosition.iY - pt.iY;
+
+        switch (aPointerEvent.iType)
+        {
+        case TPointerEvent::EButton1Down:
+            button = Pt::Gui::MouseEvent::LeftButton;
+            action = Pt::Gui::MouseEvent::Press;                
+            break;
+
+        case TPointerEvent::EButton1Up:
+            button = Pt::Gui::MouseEvent::LeftButton;
+            action = Pt::Gui::MouseEvent::Release;                
+            break;
+        default:
+            return;
+        }
+
+        Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
+
+        _apiWidgetImpl.dispatchEvent(mouseEvent);        
     }
     
     Pt::Gui::Widget& apiWidget() const { return _apiWidgetImpl.apiWidget(); }
@@ -296,6 +353,7 @@ private:
     RWindowGroup _windowGroup;
     mutable GraphicContext _graphicContext;
     bool _pointerEventConsumed;
+    bool _allowRootRedrawing;
     
     std::vector<CControl*> _controls;
 };
@@ -311,6 +369,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 , _parent(parent)
 , _initialLocation(at)
 , _initialSize(size)
+, _initialVisibility(true)
 , _painter(*this)
 , _control(0)
 {
@@ -348,24 +407,66 @@ Painter WidgetImpl::painter()
 
 void WidgetImpl::show()
 {
+    if (isConstructed())
+        _control->MakeVisible(ETrue);
+    else
+        _initialVisibility = true;
 }
 
 
 void WidgetImpl::hide()
 {
+    if (isConstructed())
+        _control->MakeVisible(EFalse);
+    else
+        _initialVisibility = false;
 }
 
 bool WidgetImpl::isVisible() const
 {
-    return true;
+    if (isConstructed())
+        return _control->IsVisible() != EFalse;
+   
+    return _initialVisibility;
 }
 
 void WidgetImpl::repaint()
 {    
+    if (isConstructed())
+        _control->DrawNow();
 }
 
 void WidgetImpl::setParent(Widget* parent)
 {
+    if (!isConstructed())
+        return;
+        
+    Widget* currentParent = this->parent();
+    
+    // Do we have a parent widget?
+    if (currentParent)
+    {
+        // Remove ourselves from parent
+        CControl* parentControl = currentParent->impl().nativeControl();
+        parentControl->RemoveControl(this->nativeControl());
+        // We should update the old parent, the window server won't do it
+        parentControl->DrawDeferred();
+    }
+    // we don't have a parent and we're going to have one
+    else if (parent)
+    {
+        // TODO: Change window owning status
+    }
+    
+    if (parent)
+    {
+        CControl* parentControl = parent->impl().nativeControl();
+        parentControl->AddControl(this->nativeControl());
+    }
+    else
+    {
+        // TODO: Make it window owning
+    }
 }
 
 
@@ -424,13 +525,17 @@ void WidgetImpl::construct()
             size.setHeight(ui.ClientRect().Height());
         
         control->ConstructL(SymbianTools::makeTRect(location, size));
+        // TODO: Handle leave
         if (!_parent)
             ui.AddToStackL(control);
         
         control->SetMopParent(&ui);
+        control->MakeVisible(_initialVisibility ? ETrue : EFalse);
         _control = control;    
         
         synchronize(true);
+        
+        _control->SetAllowRootRedrawing(true);
     }
 }
 
@@ -469,7 +574,7 @@ void WidgetImpl::beginDraw()
 
     TPoint offset(0, 0);
     if (isConstructed())
-        offset = _control->RelativePosition();
+        offset = _control->AbsolutePosition();
     
     _painter.setOffset(offset);
 }

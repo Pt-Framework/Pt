@@ -74,7 +74,7 @@ namespace Gui {
             // destruct
             void destruct();
             
-            bool isConstructed() { return _control != 0; }
+            bool isConstructed() const { return _control != 0; }
             
             // dispatch events to slots
             void dispatchEvent(Pt::Event& event);    
@@ -99,6 +99,7 @@ namespace Gui {
             Widget* _parent;
             Pt::Math::Point _initialLocation;
             Pt::Math::Size _initialSize;
+            bool _initialVisibility;
 
             WidgetPainter _painter;
             

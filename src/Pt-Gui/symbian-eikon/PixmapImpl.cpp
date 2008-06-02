@@ -20,6 +20,8 @@
 #include "PixmapImpl.h"
 #include "ApplicationImpl.h"
 #include "SymbApp.h"
+#include "SymbDoc.h"
+#include "SymbAppUi.h"
 
 #include <iostream>
 
@@ -74,8 +76,9 @@ void PixmapImpl::beginDraw()
     {
         _painter.setGc(_bitmapGc);
         _painter.setDevice(_bitmapDevice);
-        _painter.setNativeFont(CEikonEnv::Static()->NormalFont());
-        _bitmapGc->UseFont(CEikonEnv::Static()->NormalFont());
+        const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
+        _painter.setNativeFont(font);
+        _bitmapGc->UseFont(font);
         //_bitmapDevice->DrawingBegin(ETrue);
     }
     else
@@ -85,8 +88,9 @@ void PixmapImpl::beginDraw()
         {
             _painter.setGc(_bitmapGc);
             _painter.setDevice(_bitmapDevice);
-            _painter.setNativeFont(CEikonEnv::Static()->NormalFont());
-            _bitmapGc->UseFont(CEikonEnv::Static()->NormalFont());
+            const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
+            _painter.setNativeFont(font);
+            _bitmapGc->UseFont(font);
             //_bitmapDevice->DrawingBegin(ETrue);
         }
     }
@@ -119,7 +123,7 @@ void PixmapImpl::construct()
         {
             delete _bitmap;
             _bitmap = 0;
-            // Throw error
+            // TODO: Throw error
             std::cout << "Bitmap creation failed";
         }
 
@@ -128,6 +132,11 @@ void PixmapImpl::construct()
         {
             _bitmap->SetSizeInTwips(CEikonEnv::Static()->ScreenDevice());
             
+            //TSize sizeInTwips = _bitmap->SizeInTwips();
+            //TSize sizeInPixels = _bitmap->SizeInPixels();
+            
+            //float xs = (float)sizeInTwips.iWidth / (float)sizeInPixels.iWidth;
+            //float ys = (float)sizeInTwips.iHeight / (float)sizeInPixels.iHeight;
             // TODO: Handle leave
             _bitmapGc = CFbsBitGc::NewL();
             _bitmapGc->Activate(_bitmapDevice);
@@ -154,6 +163,11 @@ void PixmapImpl::destruct()
         delete _bitmapGc;
         _bitmapGc = 0;
     }
+}
+
+PixmapImpl& PixmapImpl::operator =(const PixmapImpl& pimpl)
+{
+    return *this;
 }
 
 } // namespace Gui

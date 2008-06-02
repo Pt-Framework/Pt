@@ -47,6 +47,8 @@ public:
     
     Pt::Gui::ApplicationImpl& GetApplicationImpl();
     
+    const CFont* Font() const { return _font; }
+    
 private:
     void DynInitMenuPaneL(TInt, CEikMenuPane*);
 
@@ -57,8 +59,16 @@ private:
 
     void handleExit();
     
+    bool HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset = 5);
+    
     class SymbDoc* _parentDoc;
-    Pt::Gui::Widget* _widget;
+    //Pt::Gui::Widget* _widget;
+
+    CFont* _font;
+    
+    class CCursorControl* _cursorControl;
+
+    bool _firstKey[256];
 };
 
 #endif /*SYMBAPPUI_H_*/

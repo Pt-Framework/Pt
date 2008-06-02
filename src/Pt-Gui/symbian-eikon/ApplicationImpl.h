@@ -86,7 +86,11 @@ namespace Gui {
             template<class type>
             static void unregisterResource(std::list<type*>& container, type* resource)
             {
-                container.remove(resource);
+                size_t size = container.size();
+                typename std::list<type*>::iterator where;
+                where = std::remove(container.begin(), container.end(), resource);
+                container.erase(where, container.end());
+                assert(container.size() == size-1);
             }
 
             template<class type>
