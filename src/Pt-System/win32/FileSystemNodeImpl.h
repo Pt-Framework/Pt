@@ -17,8 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "win32.h"
-#include "Pt/System/Directory.h"
-#include "Pt/System/File.h"
+#include "Pt/System/FileInfo.h"
 #include <cstring>
 #include <windows.h>
 
@@ -26,10 +25,10 @@ namespace Pt {
 
 namespace System {
 
-class FileSystemNodeImpl
+class FileInfoImpl
 {
     public:
-        static FileSystemNode* create(const char* path)
+        static FileInfo::Type getType(const char* path)
         {
             std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
             DWORD attr = GetFileAttributes( tpath.c_str() );
@@ -37,38 +36,15 @@ class FileSystemNodeImpl
             if(attr == 0xffffffff)
             {
                 if( 0 != strstr(path, ".sys") )
-                    return new File(path);
+                    return FileInfo::File;
 
-                throw SystemError( std::string("Could not get file attributes: ") + path, PT_SOURCEINFO);
-            }
-
-            if(attr & FILE_ATTRIBUTE_DIRECTORY) {
-                return new Directory(path);
-            }
-            else {
-                return new File(path);
-            }
-
-            return 0;
-        }
-
-        static FileSystemNode::Type stat(const char* path)
-        {
-            std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
-            DWORD attr = GetFileAttributes( tpath.c_str() );
-
-            if(attr == 0xffffffff)
-            {
-                if( 0 != strstr(path, ".sys") )
-                    return FileSystemNode::File;
-
-                return FileSystemNode::Invalid;
+                return FileInfo::Invalid;
             }
 
             if(attr & FILE_ATTRIBUTE_DIRECTORY)
-                return FileSystemNode::Directory;
+                return FileInfo::Directory;
 
-            return FileSystemNode::File;
+            return FileInfo::File;
         }
 };
 

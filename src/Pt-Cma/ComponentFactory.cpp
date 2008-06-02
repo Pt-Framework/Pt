@@ -201,7 +201,7 @@ void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnkno
                              + ".properties";
 
     // Load configuration if config file exists.
-    if( Pt::System::FileSystemNode::exists( configFile.c_str() ) )
+    if( Pt::System::File::exists( configFile.c_str() ) )
     {
         prefs->loadPrefs(configFile);
     }

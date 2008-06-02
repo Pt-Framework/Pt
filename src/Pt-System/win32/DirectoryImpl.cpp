@@ -63,7 +63,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 
 DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
-    if(_findHandle == INVALID_HANDLE_VALUE)
+    if(_findHandle != INVALID_HANDLE_VALUE)
         ::FindClose(_findHandle);
 }
 
@@ -82,15 +82,10 @@ int DirectoryIteratorImpl::deref()
 
 bool DirectoryIteratorImpl::advance()
 {
-    // cannot advance an unintialised iterator
-    if(_findHandle == INVALID_HANDLE_VALUE) {
-        return false;
-    }
-
     // the current node becomes invalid now
     _dirty  = true;
 
-    // _findHandle = INVALID_HANDLE_VALUE means end
+    // _findHandle set to INVALID_HANDLE_VALUE means end
     if( FALSE == FindNextFile(_findHandle, &_current) )
     {
         ::FindClose(_findHandle);
@@ -104,39 +99,31 @@ bool DirectoryIteratorImpl::advance()
 }
 
 
-const char* DirectoryIteratorImpl::name() const
+const std::string& DirectoryIteratorImpl::name() const
 {
-    if(_findHandle != INVALID_HANDLE_VALUE)
-    {
-        return _name.c_str();
-    }
-
-    return "";
+    return _name;
 }
 
 
-const char* DirectoryIteratorImpl::path() const
+const std::string& DirectoryIteratorImpl::path() const
 {
-    if(_findHandle != INVALID_HANDLE_VALUE)
+    if(_dirty)
     {
-	    if(_dirty)
-    	{
-        	// replace substring after last slash with the new file-name or
-        	// append the file-name if we have a trailing slash. Ctor makes
-        	// sure we have a trailing slash.
-        	std::string::size_type idx = _path.rfind('\\');
-        	if(idx != std::string::npos && ++idx < _path.size() )
-        	{
-        		_path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
-        	}
-        	else
-        	{
-        		_path += win32::toMultiByte( _current.cFileName );
-        	}
-    	}
+        // replace substring after last slash with the new file-name or
+        // append the file-name if we have a trailing slash. Ctor makes
+        // sure we have a trailing slash.
+        std::string::size_type idx = _path.rfind('\\');
+        if(idx != std::string::npos && ++idx < _path.size() )
+        {
+            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
+        }
+        else
+        {
+            _path += win32::toMultiByte( _current.cFileName );
+        }
     }
     
-    return "";
+    return _path;
 }
 
 

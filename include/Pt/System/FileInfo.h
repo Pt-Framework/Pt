@@ -39,7 +39,7 @@ namespace System {
 
 /** @brief Provides information about a node in the file-system.
 */
-class FileInfo
+class PT_SYSTEM_API FileInfo
 {
 	public:
 		//! @brief File-node type

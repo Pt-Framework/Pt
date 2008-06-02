@@ -41,14 +41,14 @@ class DirectoryIteratorImpl
 
         bool advance();
 
-        const char* name() const;
+        const std::string& name() const;
         
-        const char* path() const;
+        const std::string& path() const;
 
     private:
         unsigned int _refs;
         mutable std::string _path;
-        std::string _name;
+        mutable std::string _name;
         HANDLE _findHandle;
         WIN32_FIND_DATA _current;
         bool _dirty;
