@@ -35,9 +35,9 @@ class PT_API DirectoryIteratorImpl
 
         ~DirectoryIteratorImpl();
 
-        const char* name() const;
+        const std::string& name() const;
 
-        const char* path() const;
+        const std::string& path() const;
 
         int ref();
 
@@ -48,6 +48,7 @@ class PT_API DirectoryIteratorImpl
     private:
         unsigned int _refs;
         mutable std::string _path;
+        mutable std::string _name;
         DIR* _handle;
         ::dirent* _current;
         bool _dirty;

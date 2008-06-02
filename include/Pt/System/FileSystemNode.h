@@ -30,7 +30,7 @@ namespace System {
 
 /** @brief Base class for file system objects
 */
-class PT_SYSTEM_API FileSystemNode
+/*class PT_SYSTEM_API FileSystemNode
 {
     public:
         enum Type
@@ -46,20 +46,13 @@ class PT_SYSTEM_API FileSystemNode
 
         virtual Type type() const = 0;
 
-        virtual std::string name() const = 0;
-
         //! @brief Returns the path of the file system node
         const std::string& path() const
         { return _path; }
 
-        /** @brief Returns the parent directory path
+        virtual std::string name() const = 0;
 
-            This method might return an empty string if the node was created
-            without a complete path. If the directory is located in the root
-            directory of a unix file system, a slash ("/") is returned. A
-            returned directory path always ends with a trailing path separator
-            character. (A backslash in Windows and a slash in Unix, for example.)
-        */
+
         virtual std::string dirName() const = 0;
 
         //! @brief Returns the size of the file system node
@@ -68,11 +61,6 @@ class PT_SYSTEM_API FileSystemNode
         virtual void remove() = 0;
 
         virtual void move(const std::string& newname) = 0;
-
-    public:
-        static Type stat(const char* path);
-
-        static bool exists(const char* path);
 
     protected:
         FileSystemNode()
@@ -87,12 +75,7 @@ class PT_SYSTEM_API FileSystemNode
 
     private:
         std::string _path;
-};
-
-inline bool FileSystemNode::exists(const char* path)
-{
-    return FileSystemNode::stat(path) != FileSystemNode::Invalid; 
-}
+};*/
 
 } // namespace System
 

@@ -22,11 +22,6 @@ namespace Pt {
 
 namespace System {
 
-FileSystemNode::Type FileSystemNode::stat(const char* path)
-{
-    return FileSystemNodeImpl::stat(path);
-}
-
 } // namespace System
 
 } // namespace Pt

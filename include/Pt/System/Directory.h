@@ -1,12 +1,20 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   As a special exception, you may use this file as part of a free       *
+ *   software library without restriction. Specifically, if other files    *
+ *   instantiate templates or use macros or inline functions from this     *
+ *   file, or you compile this file and link it with other files to        *
+ *   produce an executable, this file does not by itself cause the         *
+ *   resulting executable to be covered by the GNU General Public          *
+ *   License. This exception does not however invalidate any other         *
+ *   reasons why the executable file might be covered by the GNU Library   *
+ *   General Public License.                                               *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -21,31 +29,39 @@
 #ifndef PT_SYSTEM_DIRECTORY_H
 #define PT_SYSTEM_DIRECTORY_H
 
+#include <Pt/Types.h>
+#include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/SystemError.h>
-#include <Pt/System/FileSystemNode.h>
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/SystemError.h>
 #include <string>
 
 namespace Pt {
 
 namespace System {
 
-class FileInfo;
-
 /** @brief A directory could not be found at a given path
 */
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
+    	/** @brief Construct from path and source info
+    		
+    		Constructs the exception from the path where the directory 
+    		could not be found and the location in the source code where
+    		he exception was thrown.
+    	*/
         DirectoryNotFound(const std::string& path, const SourceInfo& si);
 
+		//! @brief Destructor
         ~DirectoryNotFound() throw();
 };
 
 /** @brief Iterates over entries of a directory.
 
-    You use the iterator as follows:
+    A %DirectoryIterator is created by the Directory class and
+    can be used as follows:
+
     \code
     Directory d("/usr");
     Directory::iterator it = d.begin();
@@ -59,35 +75,45 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
 class PT_SYSTEM_API DirectoryIterator
 {
     public:
+    	//! @brief Default constructor
         DirectoryIterator();
 
-        DirectoryIterator(const char* path);
+		//! @brief Constructs an iterator pointing at the file given by Úa path
+        DirectoryIterator(const std::string& path);
 
+		//! @brief Copy constructor
         DirectoryIterator(const DirectoryIterator& it);
 
+		//! @brief Destructor
         ~DirectoryIterator();
 
+		//! @brief Advances the iterator to the next file
         DirectoryIterator& operator++();
 
+		//! @brief Assignment operator
         DirectoryIterator& operator=(const DirectoryIterator& it);
 
+		//! @brief Equality comparison
         bool operator==(const DirectoryIterator& it) const
         { return _impl == it._impl; }
 
+		//! @brief Inequality comparison
         bool operator!=(const DirectoryIterator& it) const
         { return _impl != it._impl; }
 
-        const char* path() const;
+		//! @brief Returns the full path of the file the iterator points at
+        const std::string& path() const;
 
-        const char* name() const;
-
-        const char* operator*() const;
+		//! @brief Returns the name of the file the iterator points at
+        const std::string& operator*() const;
 
     private:
+    	//! @internal
         class DirectoryIteratorImpl* _impl;
 };
 
 /** @brief Represents a single directory in the file-system.
+
     This class contains methods to create, move, delete directories and 
     gives to possibility to iterate over the contents of the directory.
 
@@ -102,52 +128,121 @@ class PT_SYSTEM_API DirectoryIterator
     }
     \endcode
 */
-class PT_SYSTEM_API Directory : public FileSystemNode 
+class PT_SYSTEM_API Directory
 {
-    friend class FileInfo;
-
     public:
         typedef DirectoryIterator Iterator;
+        typedef DirectoryIterator iterator;
 
+	public:
+    	/** @brief Constructs a %Directory object from the path Úa path
+    	
+    	    If no directory exists at Úa path, an exception of type DirectoryNotFound
+    	    is thrown.
+    	*/
         explicit Directory(const std::string& path);
 
+		/** @brief Constructs a %Directory object from a FileInfo object
+		
+		    An exception of type %DirectoryNotFound is thrown if the %FileInfo
+		    does not represent a directory.
+		*/
 		explicit Directory(const FileInfo& fi);
 
+		//! @brief Copy constructor
+		Directory(const Directory& dir);
+
+		//! @brief Destructor
         ~Directory();
 
-        virtual std::size_t size() const;
+		//! @brief Assignment operator
+		Directory& operator=(const Directory& dir);
 
-        //! @brief Returns an iterator to the node in the directory.
-        DirectoryIterator begin() const;
+        /** @brief Returns the path of the directory
 
-        //! @brief Returns an iterator to the end of the directory.
-        DirectoryIterator end() const;
+        	This method may return a relative path, or a fully qualified one
+        	depending on how this object was constructed.
+        */
+        const std::string& path() const
+        { return _path; }
 
-        virtual void remove();
+		//! @brief Returns the size of the directory in bytes
+        std::size_t size() const;
 
-        virtual void move(const std::string& newPath);
+        /** @brief Returns the parent directory path
 
-        virtual std::string dirName() const;
+            This method might return an empty string if the node was created
+            without a complete path. If the directory is located in the root
+            directory of a unix file system, a slash ("/") is returned. A
+            returned directory path always ends with a trailing path separator
+            character. (A backslash in Windows and a slash in Unix, for example.)
+        */
+        std::string dirName() const;
 
         //! @brief Returns the name of the directory excluding the path.
-        virtual std::string name() const;
+        std::string name() const;
 
-        virtual Type type() const;
+		/** @brief Removes the directory
+		    
+		    This object will be invalid after calling this method.
+		*/
+        void remove();
+
+		/** @brief Moves the directory to the location given by Úa to
+		
+		    The %Directory object will stay valid after this method was called and 
+		    point to the moved directory.
+		*/
+        void move(const std::string& to);
+
+        //! @brief Returns an iterator to the first entry in the directory.
+        Iterator begin() const;
+
+        //! @brief Returns an iterator to the end of the directory entries.
+        Iterator end() const;
 
     public:
-        static void create(const char* path);
+    	//! @brief Creates a new directory at the path given by Úa path
+        static Directory create(const std::string& path);
 
-        static bool exists(const char* path)
-        {
-            return FileSystemNode::stat(path) == FileSystemNode::Directory;
-        }
+		//! @brief Returns true if a directory exists at Úa path, or false otherwise
+        static bool exists(const std::string& path);
+
+		//! @brief Returns the string representng the current directory in path names
+		static const std::string& curdir();
+		
+		//! @brief Returns the string representng the upper directory in path names
+		static const std::string& updir();
+		
+		//! @brief Returns the string representng the separator in path names
+		static const std::string& sep();
 
     protected:
+    	//! @brief Default Constructor
         Directory();
 
     private:
+    	//! @internal
+        std::string _path;
+        
+        //! @internal
         class DirectoryImpl* _impl;
 };
+
+inline bool operator<(const Directory& a, const Directory& b)
+{
+    return a.path() < b.path();
+}
+
+inline bool operator==(const Directory& a, const Directory& b)
+{
+    return a.path() == b.path();
+}
+
+inline bool operator!=(const Directory& a, const Directory& b)
+{
+    return !(a == b);
+}
 
 }
 

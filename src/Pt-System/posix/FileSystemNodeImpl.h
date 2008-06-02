@@ -16,10 +16,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "Pt/System/Api.h"
-#include "Pt/System/Directory.h"
-#include "Pt/System/File.h"
-
+#include "Pt/System/FileInfo.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -30,72 +27,28 @@ namespace Pt {
 
 namespace System {
 
-    class PT_SYSTEM_API FileSystemNodeImpl
+    class PT_SYSTEM_API FileInfoImpl
     {
         public:
-            static FileSystemNode* create(const char* path)
-            {
-                struct stat st;
-                if( 0 != ::stat(path, &st) )
-                    throw SystemError("Could not stat file", PT_SOURCEINFO);
-
-                if( S_ISREG(st.st_mode) )
-                {
-                    return new File(path);
-                }
-                else if( S_ISDIR(st.st_mode) )
-                {
-                    return new Directory(path);
-                }
-                else if( S_ISCHR(st.st_mode) )
-                {
-                    return new File(path);
-                }
-                else if( S_ISBLK(st.st_mode) )
-                {
-                    return new File(path);
-                }
-                else if( S_ISFIFO(st.st_mode) )
-                {
-                    return new File(path);
-                }
-#ifdef S_ISSOCK
-                else if( S_ISSOCK(st.st_mode) )
-                {
-                    return new File(path);
-                }
-#endif
-
-#ifdef S_ISLNK
-                else if( S_ISLNK(st.st_mode) )
-                {
-                    return new File(path);
-                }
-#endif
-
-                return new File(path);
-            }
-
-            static FileSystemNode::Type stat(const char* path)
+            static FileInfo::Type getType(const char* path)
             {
                 struct stat st;
                 if( 0 != ::stat(path, &st) )
                 {
-                    return FileSystemNode::Invalid;
+                    return FileInfo::Invalid;
                 }
 
                 if( S_ISREG(st.st_mode) )
                 {
-                    return FileSystemNode::File;
+                    return FileInfo::File;
                 }
                 else if( S_ISDIR(st.st_mode) ) 
                 {
-                    return FileSystemNode::Directory;
+                    return FileInfo::Directory;
                 }
 
-                return FileSystemNode::File;
+                return FileInfo::File;
             }
-
     };
 
 } // namespace System

@@ -4,6 +4,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Directory.h"
 #include "Pt/System/File.h"
+#include "Pt/System/FileInfo.h"
 
 class DirectoryTest : public Pt::Unit::TestSuite
 {
@@ -28,25 +29,25 @@ class DirectoryTest : public Pt::Unit::TestSuite
 
         void tearDown()
         {
-            if( Pt::System::FileSystemNode::exists("xxxDIR") )
+            if( Pt::System::FileInfo::exists("xxxDIR") )
             {
                 Pt::System::Directory dirx("xxxDIR");
                 dirx.remove();
             }
 
-            if( Pt::System::FileSystemNode::exists("yyyDIR") )
+            if( Pt::System::FileInfo::exists("yyyDIR") )
             {
                 Pt::System::Directory diry("yyyDIR");
                 diry.remove();
             }
 
-            if( Pt::System::FileSystemNode::exists("TestFile1") )
+            if( Pt::System::FileInfo::exists("TestFile1") )
             {
                 Pt::System::File f1("TestFile1");
                 f1.remove();
             }
 
-            if( Pt::System::FileSystemNode::exists("TestFile2") )
+            if( Pt::System::FileInfo::exists("TestFile2") )
             {
                 Pt::System::File f2("TestFile2");
                 f2.remove();
@@ -77,7 +78,7 @@ void DirectoryTest::allocDir()
     Pt::System::Directory dir2("xxxDIR");
 
     try {
-        ok = Pt::System::FileSystemNode::exists("xxxDIR");
+        ok = Pt::System::FileInfo::exists("xxxDIR");
     } catch (...) {
         ok = false;
     }
@@ -102,7 +103,7 @@ void DirectoryTest::moveDir()
     Pt::System::Directory dir2("yyyDIR");
 
     try {
-        ok = Pt::System::FileSystemNode::exists("yyyDIR");
+        ok = Pt::System::FileInfo::exists("yyyDIR");
     } catch (...) {
         ok = false;
     }
@@ -122,7 +123,7 @@ void DirectoryTest::removeDir()
     }
 
     PT_UNIT_ASSERT( true == ok );
-    PT_UNIT_ASSERT( false == Pt::System::FileSystemNode::exists("yyyDIR") );
+    PT_UNIT_ASSERT( false == Pt::System::FileInfo::exists("yyyDIR") );
 }
 
 
@@ -132,7 +133,7 @@ void DirectoryTest::createFile()
     std::string name = "TestFile1";
     Pt::System::File::create( name.c_str() );
     PT_UNIT_ASSERT( 0 == Pt::System::File("TestFile1").size() );
-    PT_UNIT_ASSERT( true == Pt::System::FileSystemNode::exists("TestFile1") );
+    PT_UNIT_ASSERT( true == Pt::System::FileInfo::exists("TestFile1") );
 }
 
 
@@ -158,7 +159,7 @@ void DirectoryTest::moveFile()
     PT_UNIT_ASSERT( true == result );
 
     Pt::System::File file2("TestFile2");
-    PT_UNIT_ASSERT( Pt::System::FileSystemNode::exists("TestFile2") );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("TestFile2") );
 }
 
 
@@ -175,7 +176,7 @@ void DirectoryTest::removeFile()
     }
 
     PT_UNIT_ASSERT( true == result );
-    PT_UNIT_ASSERT( Pt::System::FileSystemNode::exists("TestFile1") == false );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("TestFile1") == false );
 }
 
 

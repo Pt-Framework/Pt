@@ -1,12 +1,20 @@
 /***************************************************************************
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   As a special exception, you may use this file as part of a free       *
+ *   software library without restriction. Specifically, if other files    *
+ *   instantiate templates or use macros or inline functions from this     *
+ *   file, or you compile this file and link it with other files to        *
+ *   produce an executable, this file does not by itself cause the         *
+ *   resulting executable to be covered by the GNU General Public          *
+ *   License. This exception does not however invalidate any other         *
+ *   reasons why the executable file might be covered by the GNU Library   *
+ *   General Public License.                                               *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -43,9 +51,9 @@ DirectoryIterator::DirectoryIterator()
 { }
 
 
-DirectoryIterator::DirectoryIterator(const char* path)
+DirectoryIterator::DirectoryIterator(const std::string& path)
 {
-    _impl = new DirectoryIteratorImpl(path);
+    _impl = new DirectoryIteratorImpl( path.c_str() );
 }
 
 
@@ -103,43 +111,27 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 }
 
 
-const char* DirectoryIterator::path() const
+const std::string& DirectoryIterator::path() const
 {
-    if(_impl)
-        return _impl->path();
-
-    return "";
+    return _impl->path();
 }
 
 
-const char* DirectoryIterator::name() const
+const std::string& DirectoryIterator::operator*() const
 {
-    if(_impl)
-        return _impl->name();
-
-    return "";
-}
-
-
-const char* DirectoryIterator::operator*() const
-{
-    if(_impl)
-        return _impl->name();
-
-    return "";
+    return _impl->name();
 }
 
 
 
 Directory::Directory()
-: FileSystemNode()
-, _impl(0)
+: _impl(0)
 {
 }
 
 
 Directory::Directory(const std::string& path)
-: FileSystemNode(path)
+: _path(path)
 , _impl(0)
 {
     if( ! Directory::exists( path.c_str() ) )
@@ -148,7 +140,7 @@ Directory::Directory(const std::string& path)
 
 
 Directory::Directory(const FileInfo& fi)
-: FileSystemNode( fi.path() )
+: _path( fi.path() )
 , _impl(0)
 {
     if( ! fi.isDirectory() )
@@ -156,8 +148,21 @@ Directory::Directory(const FileInfo& fi)
 }
 
 
+Directory::Directory(const Directory& dir)
+: _path(dir._path)
+{
+}
+
+
 Directory::~Directory()
 {
+}
+
+
+Directory& Directory::operator=(const Directory& dir)
+{
+	_path = dir._path;
+	return *this;
 }
 
 
@@ -167,13 +172,13 @@ std::size_t Directory::size() const
 }
 
 
-DirectoryIterator Directory::begin() const
+Directory::Iterator Directory::begin() const
 {
     return DirectoryIterator( path().c_str() );
 }
 
 
-DirectoryIterator Directory::end() const
+Directory::Iterator Directory::end() const
 {
     return DirectoryIterator();
 }
@@ -188,7 +193,7 @@ void Directory::remove()
 void Directory::move(const std::string& to)
 {
     DirectoryImpl::move(path(), to);
-    this->setPath(to);
+    _path = to;
 }
 
 
@@ -229,15 +234,37 @@ std::string Directory::name() const
 }
 
 
-FileSystemNode::Type Directory::type() const
+Directory Directory::create(const std::string& path)
 {
-    return FileSystemNode::Directory;
+    DirectoryImpl::create( path.c_str() );
+    return Directory(path);
 }
 
 
-void Directory::create(const char* path)
+bool Directory::exists(const std::string& path)
 {
-    DirectoryImpl::create(path);
+    return FileInfo::getType( path.c_str() ) == FileInfo::Directory;
+}
+
+
+const std::string& Directory::curdir()
+{
+	static const std::string _dot(".");
+	return _dot;
+}
+
+
+const std::string& Directory::updir()
+{
+	static const std::string _dotdot("..");
+	return _dotdot;
+}
+
+
+const std::string& Directory::sep()
+{
+	static const std::string _slash("/");
+	return _slash;
 }
 
 } // namespace System

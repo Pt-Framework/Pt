@@ -70,13 +70,13 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
-const char* DirectoryIteratorImpl::name() const
+const std::string& DirectoryIteratorImpl::name() const
 {
-    return _current->d_name;
+    return _name;
 }
 
 
-const char* DirectoryIteratorImpl::path() const
+const std::string& DirectoryIteratorImpl::path() const
 {
     if(_dirty)
     {
@@ -94,7 +94,7 @@ const char* DirectoryIteratorImpl::path() const
         }
     }
 
-    return _path.c_str();
+    return _path;
 }
 
 
@@ -116,6 +116,9 @@ bool DirectoryIteratorImpl::advance()
 
     // _current == 0 means end
     _current = ::readdir( _handle );
+    if(_current)
+    	_name = _current->d_name;
+    
     return _current != 0;
 }
 

@@ -103,7 +103,7 @@ const std::string EnvironmentImpl::tempDirectory()
     }
     if (tmpDir.length() == 0)
     {
-        tmpDir = ( Pt::System::FileSystemNode::exists("/tmp") ? "/tmp" : "" );
+        tmpDir = ( Pt::System::FileInfo::exists("/tmp") ? "/tmp" : "" );
     }
 
     return tmpDir;

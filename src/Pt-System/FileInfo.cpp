@@ -6,6 +6,16 @@
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
  *                                                                         *
+ *   As a special exception, you may use this file as part of a free       *
+ *   software library without restriction. Specifically, if other files    *
+ *   instantiate templates or use macros or inline functions from this     *
+ *   file, or you compile this file and link it with other files to        *
+ *   produce an executable, this file does not by itself cause the         *
+ *   resulting executable to be covered by the GNU General Public          *
+ *   License. This exception does not however invalidate any other         *
+ *   reasons why the executable file might be covered by the GNU Library   *
+ *   General Public License.                                               *
+ *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
@@ -18,6 +28,7 @@
  ***************************************************************************/
 #include "FileImpl.h"
 #include "DirectoryImpl.h"
+#include "FileSystemNodeImpl.h"
 #include "Pt/System/FileInfo.h"
 #include "Pt/System/Environment.h"
 
@@ -26,19 +37,43 @@ namespace Pt {
 namespace System {
 
 FileInfo::FileInfo()
-: _type(FileSystemNode::Invalid)
+: _type(FileInfo::Invalid)
+, _reserved(0)
 {}
 
 
-FileInfo::FileInfo(const char* path)
+FileInfo::FileInfo(const std::string& path)
 : _path(path)
+, _reserved(0)
 {
-    _type = FileSystemNode::stat( path );
+    _type = FileInfoImpl::getType( path.c_str() );
+}
+
+
+FileInfo::FileInfo(const FileInfo& fi)
+: _type(fi._type)
+, _path(fi._path)
+, _reserved(0)
+{
 }
 
 
 FileInfo::~FileInfo()
 {
+}
+
+
+FileInfo& FileInfo::operator=(const FileInfo& fi)
+{
+	_type = fi._type;
+	_path = fi._path;
+	return *this;
+}
+
+
+FileInfo::Type FileInfo::type() const
+{
+	return _type;
 }
 
 
@@ -57,16 +92,16 @@ std::string FileInfo::name() const
 }
 
 
-const char* FileInfo::path() const
+const std::string& FileInfo::path() const
 {
-    return _path.c_str();
+    return _path;
 }
 
 
 std::string FileInfo::dirName() const
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type pos = _path.find_last_of(Environment::pathSeparator());
+    std::string::size_type pos = _path.find_last_of( Environment::pathSeparator() );
 
     // If there is no separator, the file is relative to the current 
     // directory. So an empty path is returned.
@@ -83,7 +118,7 @@ std::string FileInfo::dirName() const
 
 std::size_t FileInfo::size() const
 {
-    if(_type == FileSystemNode::File)
+    if(_type == FileInfo::File)
     {
         return FileImpl::size( _path.c_str() );
     }
@@ -94,19 +129,19 @@ std::size_t FileInfo::size() const
 
 bool FileInfo::isDirectory() const
 {
-    return _type == FileSystemNode::Directory;
+    return _type == FileInfo::Directory;
 }
 
 
 bool FileInfo::isFile() const
 {
-    return _type == FileSystemNode::File;
+    return _type == FileInfo::File;
 }
 
 
 void FileInfo::remove()
 {
-    if(_type == FileSystemNode::File)
+    if(_type == FileInfo::File)
     {
         return FileImpl::remove( _path.c_str() );
     }
@@ -115,40 +150,28 @@ void FileInfo::remove()
 }
 
 
-void FileInfo::move(const std::string& newname)
+void FileInfo::move(const std::string& to)
 {
-    if(_type == FileSystemNode::File)
+    if(_type == FileInfo::File)
     {
-        return FileImpl::move( _path.c_str(), newname.c_str() );
+        return FileImpl::move( _path.c_str(), to.c_str() );
     }
 
-    return DirectoryImpl::move( _path.c_str(), newname.c_str() );
+    return DirectoryImpl::move( _path.c_str(), to.c_str() );
+}
+
+
+bool FileInfo::exists(const std::string& path)
+{
+    return FileInfo::getType( path.c_str() ) != FileInfo::Invalid;
+}
+
+
+FileInfo::Type FileInfo::getType(const std::string& path)
+{
+    return FileInfoImpl::getType( path.c_str() );
 }
 
 } // namespace System
 
 } // namespace Pt
-
-
-/*FileInfo::FileInfo(const FileInfo& fi)
-{
-    this->operator=(fi);
-}
-
-
-FileInfo& FileInfo::operator=(const FileInfo& fi)
-{
-    if(fi._node == &fi._dir)
-    {
-        _dir = fi._dir;
-        _node = &_dir;
-    }
-    else if(fi._node == &fi._file)
-    {
-        _file = fi._file;
-        _node = &_file;
-    }
-
-    return *this;
-}*/
-

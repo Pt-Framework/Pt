@@ -18,7 +18,7 @@
  ***************************************************************************/
 #include "SharedLibImpl.h"
 #include "Pt/System/SharedLib.h"
-#include "Pt/System/File.h"
+#include "Pt/System/FileInfo.h"
 #include "Pt/System/Environment.h"
 #include <string>
 #include <iostream>
@@ -97,7 +97,7 @@ std::string SharedLib::find(const std::string& path_)
 {
     std::string path = path_;
 
-    if( FileSystemNode::exists( path.c_str() ) )
+    if( FileInfo::exists( path.c_str() ) )
         return path;
 
     char sep = Environment::pathSeparator();
@@ -109,7 +109,7 @@ std::string SharedLib::find(const std::string& path_)
     }
 
     path += Environment::sharedLibraryExtension();
-    if( FileSystemNode::exists( path.c_str() ) )
+    if( FileInfo::exists( path.c_str() ) )
         return path;
 
     if(idx == std::string::npos)
@@ -118,7 +118,7 @@ std::string SharedLib::find(const std::string& path_)
     }
     path.insert( idx, Environment::sharedLibraryPrefix() );
 
-    if( ! FileSystemNode::exists( path.c_str() ) )
+    if( ! FileInfo::exists( path.c_str() ) )
     {
         // TODO FileNotFound
         //throw SystemError("Shared library not found " + path , PT_SOURCEINFO);
