@@ -2,6 +2,9 @@
 
 # NT (with Microsoft compiler)
 # People with DevStudio settings already in shell environment.
+#
+# Unset conflicting MAKEFLAGS when QNX SDK is installed
+#
 CC = cl /nologo
 CFLAGS = -DNT /RTC1 /MT /Os -wd4996 kernel32.lib advapi32.lib
 TARGET = /Fejam
