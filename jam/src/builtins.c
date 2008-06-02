@@ -101,6 +101,9 @@ load_builtins()
     bind_builtin( "WriteFile" ,
                   builtin_writefile, 0, 0 );
 
+    bind_builtin( "Escape" ,
+                  builtin_escape, 0, 0 );
+
     {
         char * args[] = { "message", "*", ":", "result-value", "?", 0 };
         duplicate_rule( "exit" ,
@@ -1753,14 +1756,13 @@ LIST *builtin_shell( PARSE *parse, FRAME *frame )
 #endif
 
 LIST*
-builtin_writefile(
-    PARSE* parse,
-    FRAME* frame )
+builtin_writefile( PARSE* parse,
+                   FRAME* frame )
 {
     LIST* fname = lol_get( frame->args, 0 );
     LIST* text = lol_get( frame->args, 1 );
     FILE* file = NULL;
-    
+
     if(fname && text)
     {
         file = fopen(fname->string, "a");
@@ -1772,4 +1774,34 @@ builtin_writefile(
     }
 
     return L0;
+}
+
+LIST*
+builtin_escape( PARSE* parse,
+                FRAME* frame )
+{
+    const char* c = 0;
+    string s;
+    LIST* result = 0;
+    LIST* arg = lol_get( frame->args, 0 );
+
+    string_new( &s );
+
+    if(arg)
+    {
+        for(c = arg->string; *c != '\0' ; ++c)
+        {
+            string_push_back( &s, *c );
+            if(*c == '\\')
+            {
+                string_push_back( &s, *c );
+            }
+        }
+
+    }
+
+    result = list_new( L0, newstr(s.value) );
+    string_free(&s);
+
+    return result;
 }
