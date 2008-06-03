@@ -30,7 +30,6 @@
 #define Pt_System_FileInfo_h
 
 #include <Pt/System/Api.h>
-#include <Pt/System/FileSystemNode.h>
 #include <string>
 
 namespace Pt {

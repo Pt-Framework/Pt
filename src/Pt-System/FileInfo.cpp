@@ -26,9 +26,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "FileImpl.h"
+#include "FileInfoImpl.h"
+ #include "FileImpl.h"
 #include "DirectoryImpl.h"
-#include "FileSystemNodeImpl.h"
 #include "Pt/System/FileInfo.h"
 #include "Pt/System/Environment.h"
 
