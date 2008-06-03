@@ -128,15 +128,20 @@ namespace sqlite {
             // we have already a new statement-handle - destroy the old one
             //log_debug("sqlite3_finalize(" << stmt_ << ')');
             ::sqlite3_finalize(stmt);
+
+            if (_stmtInUse == stmt)
+            {
+                _stmtInUse = 0; // it is not in use any more
+            }
         }
     }
 
     int Statement::getBindIndex(const std::string& col)
     {
-        sqlite3_stmt* _stmt = getBindStmt();
+        sqlite3_stmt* stmt = getBindStmt();
 
         //log_debug("sqlite3_bind_parameter_index(" << _stmt << ", :" << col  << ')');
-        int idx = ::sqlite3_bind_parameter_index(_stmt, (':' + col).c_str());
+        int idx = ::sqlite3_bind_parameter_index(stmt, (':' + col).c_str());
         //if (idx == 0)
         //{
         //  log_warn("hostvariable :" << col << " not found");
@@ -290,7 +295,7 @@ namespace sqlite {
 
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
-            
+
             int ret = ::sqlite3_bind_text(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
@@ -311,7 +316,7 @@ namespace sqlite {
 
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
-            
+
             int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
