@@ -219,7 +219,7 @@ std::string DirectoryImpl::tmpdir()
     }
     if (tmpDir.length() == 0)
     {
-        tmpDir = ( File::exists("/tmp") ? "/tmp" : "" );
+        tmpDir = ( File::exists("/tmp") ? "/tmp" : curdir() );
     }
 
     return tmpDir;

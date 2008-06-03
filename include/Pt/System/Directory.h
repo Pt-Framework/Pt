@@ -220,15 +220,18 @@ class PT_SYSTEM_API Directory
         //! @brief Returns the string representng the upper directory in path names
         static std::string updir();
 
+        /** @brief Returns the system root path
+
+            Returns "/" (root) on Linux, "c:\" on Windows
+        */
         static std::string rootdir();
 
         /** @brief Returns the systems tmp directory.
 
-            On Windows, the environment variables TEMP and TMP are checked.
-            On Linux, the environment variable TMPDIR is checked and if not set,
-            "/tmp" is returned.
-            If none of the environment variables are set and the default system 
-            tmp directory does not exist, the current directory is returned.
+            The environment variables TEMP and TMP are checked first. If not set,
+            "/tmp" is returned if it exists. If none of the environment variables
+            are set and the default system tmp directory does not exist, the 
+            current directory is returned.
         */
         static std::string tmpdir();
 
