@@ -99,6 +99,18 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
 
         static std::string find(const std::string& path);
 
+        /** @brief Returns the extension for shared libraries
+
+            Returns ".so" on Linux, ".dll" on Windows.
+        */
+        //static std::string shlibSuffix();
+
+        /**  @brief Returns the prefix for shared libraries
+
+             Returns "lib" on Linux, "" on Windows 
+         */
+        //static std::string shlibPrefix();
+
     private:
         //! @internal
         class SharedLibImpl* _impl;

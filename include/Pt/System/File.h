@@ -132,18 +132,6 @@ class PT_SYSTEM_API File
         //! @brief Returns true if a file exists at \a path, or false otherwise
         static bool exists(const std::string& path);
 
-        /** @brief Returns the extension for shared libraries
-
-            Returns ".so" on Linux, ".dll" on Windows.
-        */
-        //static std::string shlibSuffix();
-
-        /**  @brief Returns the prefix for shared libraries
-
-             Returns "lib" on Linux, "" on Windows 
-         */
-        //static std::string shlibPrefix();
-
     protected:
         //! @brief Default Constructor
         File();
