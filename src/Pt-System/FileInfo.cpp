@@ -163,13 +163,13 @@ void FileInfo::move(const std::string& to)
 
 bool FileInfo::exists(const std::string& path)
 {
-    return FileInfo::getType( path.c_str() ) != FileInfo::Invalid;
+    return FileInfo::getType( path ) != FileInfo::Invalid;
 }
 
 
 FileInfo::Type FileInfo::getType(const std::string& path)
 {
-    return FileInfoImpl::getType( path.c_str() );
+    return FileInfoImpl::getType( path );
 }
 
 } // namespace System

@@ -20,6 +20,7 @@
  ***************************************************************************/
 #include "Pt/Api.h"
 #include "Pt/Types.h"
+#include <string>
 
 namespace Pt {
 
@@ -32,17 +33,17 @@ class PT_API FileImpl
 
         ~FileImpl();
 
-        static std::size_t size(const char* path);
+        static std::size_t size(const std::string& path);
 
-        static void resize(const char* path, std::size_t n);
+        static void resize(const std::string& path, std::size_t n);
 
-        static void remove(const char* path);
+        static void remove(const std::string& path);
 
-        static void copy(const char* path, const char* to);
+        static void copy(const std::string& path, const std::string& to);
 
-        static void move(const char* path, const char* to);
+        static void move(const std::string& path, const std::string& to);
 
-        static void create(const char* path);
+        static void create(const std::string& path);
 };
 
 } // namespace System

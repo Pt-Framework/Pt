@@ -28,14 +28,14 @@ namespace System {
 class FileInfoImpl
 {
     public:
-        static FileInfo::Type getType(const char* path)
+        static FileInfo::Type getType(const std::string& path)
         {
             std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
             DWORD attr = GetFileAttributes( tpath.c_str() );
 
             if(attr == 0xffffffff)
             {
-                if( 0 != strstr(path, ".sys") )
+                if( 0 != strstr(path.c_str(), ".sys") )
                     return FileInfo::File;
 
                 return FileInfo::Invalid;

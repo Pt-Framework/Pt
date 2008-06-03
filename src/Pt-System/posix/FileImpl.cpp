@@ -41,22 +41,22 @@ FileImpl::~FileImpl()
 }
 
 
-std::size_t FileImpl::size(const char* path)
+std::size_t FileImpl::size(const std::string& path)
 {
     struct stat buff;
 
-    if( 0 != stat(path, &buff) )
+    if( 0 != stat(path.c_str(), &buff) )
         throw SystemError("Could not stat file", PT_SOURCEINFO);
 
     return buff.st_size;
 }
 
 
-void FileImpl::resize(const char* path, std::size_t newSize)
+void FileImpl::resize(const std::string& path, std::size_t newSize)
 {
     int ret = 0;
     do {
-        ret = truncate(path, newSize);
+        ret = truncate(path.c_str(), newSize);
     } while ( ret == EINTR );
 
     if(ret != 0)
@@ -64,35 +64,32 @@ void FileImpl::resize(const char* path, std::size_t newSize)
 }
 
 
-void FileImpl::remove(const char* path)
+void FileImpl::remove(const std::string& path)
 {
-    if(0 != ::remove(path))
+    if(0 != ::remove(path.c_str()))
         throw SystemError("Could not remove file", PT_SOURCEINFO);
 }
 
 
-void FileImpl::copy(const char* path, const char* to)
+void FileImpl::copy(const std::string& path, const std::string& to)
 {
-    int sd = open(path, O_RDONLY);
+    int sd = open(path.c_str(), O_RDONLY);
     if (sd == -1) 
-        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
 
     struct stat st;
     if (fstat(sd, &st) != 0)
     {
         close(sd);
-        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
     }
     const long blockSize = st.st_blksize;
 
-    int dd = open(to, O_CREAT | O_TRUNC | O_WRONLY, st.st_mode & S_IRWXU);
+    int dd = open(to.c_str(), O_CREAT | O_TRUNC | O_WRONLY, st.st_mode & S_IRWXU);
     if (dd == -1)
     {
         close(sd);
-        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
     }
 
     char buffer[blockSize];
@@ -102,46 +99,42 @@ void FileImpl::copy(const char* path, const char* to)
         while ((n = read(sd, buffer, blockSize)) > 0)
         {
             if (write(dd, buffer, n) != n)
-                throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                                  PT_SOURCEINFO);
+                throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
         }
         if (n < 0)
-            throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
+            throw SystemError("Could not copy file" + path + " to " + to,
                               PT_SOURCEINFO);
     }
     catch (...)
     {
         close(sd);
         close(dd);
-        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);;
+        throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
     }
 
     close(sd);
     if (fsync(dd) != 0)
     {
         close(dd);
-        throw SystemError("Could not copy file" + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);
+        throw SystemError("Could not copy file" + path + " to " + to, PT_SOURCEINFO);
     }
 
     close(dd);
 }
 
 
-void FileImpl::move(const char* path, const char* to)
+void FileImpl::move(const std::string& path, const std::string& to)
 {
-    if (0 != ::rename(path, to))
-        throw SystemError("Could not move file " + std::string(path) + " to " + std::string(to),
-                          PT_SOURCEINFO);
+    if (0 != ::rename(path.c_str(), to.c_str()))
+        throw SystemError("Could not move file " + path + " to " + to, PT_SOURCEINFO);
 }
 
 
-void FileImpl::create(const char* path)
+void FileImpl::create(const std::string& path)
 {
-    FILE* f = fopen(path, "w");
+    FILE* f = fopen(path.c_str(), "w");
     if (!f)
-        throw SystemError("Could not create file " + std::string(path), PT_SOURCEINFO);
+        throw SystemError("Could not create file " + path, PT_SOURCEINFO);
 
     fclose(f);
 }

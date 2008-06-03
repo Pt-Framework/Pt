@@ -30,10 +30,10 @@ namespace System {
     class PT_SYSTEM_API FileInfoImpl
     {
         public:
-            static FileInfo::Type getType(const char* path)
+            static FileInfo::Type getType(const std::string& path)
             {
                 struct stat st;
-                if( 0 != ::stat(path, &st) )
+                if( 0 != ::stat(path.c_str(), &st) )
                 {
                     return FileInfo::Invalid;
                 }

@@ -39,7 +39,7 @@ FileImpl::~FileImpl()
 }
 
 
-std::size_t FileImpl::size(const char* path)
+std::size_t FileImpl::size(const std::string& path)
 {
     WIN32_FIND_DATA data;
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
@@ -58,7 +58,7 @@ std::size_t FileImpl::size(const char* path)
 }
 
 
-void FileImpl::resize(const char* path, std::size_t newSize)
+void FileImpl::resize(const std::string& path, std::size_t newSize)
 {
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
@@ -93,7 +93,7 @@ void FileImpl::resize(const char* path, std::size_t newSize)
 }
 
 
-void FileImpl::remove(const char* path)
+void FileImpl::remove(const std::string& path)
 {
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
 
@@ -102,7 +102,7 @@ void FileImpl::remove(const char* path)
 }
 
 
-void FileImpl::copy(const char* path, const char* to)
+void FileImpl::copy(const std::string& path, const std::string& to)
 {
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
@@ -112,7 +112,7 @@ void FileImpl::copy(const char* path, const char* to)
 }
 
 
-void FileImpl::move(const char* path, const char* to)
+void FileImpl::move(const std::string& path, const std::string& to)
 {
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
     std::basic_string<TCHAR> tto = win32::fromMultiByte(to);
@@ -127,7 +127,7 @@ void FileImpl::move(const char* path, const char* to)
 }
 
 
-void FileImpl::create(const char* path)
+void FileImpl::create(const std::string& path)
 {
     HANDLE hFile;
     std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
