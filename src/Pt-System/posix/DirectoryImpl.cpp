@@ -20,6 +20,8 @@
  ***************************************************************************/
 #include "DirectoryImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/Process.h"
+#include "Pt/System/File.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -118,7 +120,7 @@ bool DirectoryIteratorImpl::advance()
     _current = ::readdir( _handle );
     if(_current)
     	_name = _current->d_name;
-    
+
     return _current != 0;
 }
 
@@ -170,12 +172,63 @@ void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
 }
 
 
-void DirectoryImpl::changeCurrent(const std::string& path)
+void DirectoryImpl::chdir(const std::string& path)
 {
     if( -1 == ::chdir(path.c_str()) )
     {
         throw SystemError("Could not change working directory to '" + path + "'", PT_SOURCEINFO);
     }
+}
+
+
+std::string DirectoryImpl::cwd()
+{
+    char cwd[PATH_MAX];
+
+    if( !getcwd(cwd, PATH_MAX) )
+        throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
+
+    return std::string(cwd);
+}
+
+
+std::string DirectoryImpl::curdir()
+{
+    return ".";
+}
+
+
+std::string DirectoryImpl::updir()
+{;
+    return "..";
+}
+
+
+std::string DirectoryImpl::rootdir()
+{
+    return "/";
+}
+
+
+std::string DirectoryImpl::tmpdir()
+{
+    std::string tmpDir = Process::getEnvVar("TEMP");
+    if (tmpDir.length() == 0)
+    {
+        tmpDir = Process::getEnvVar("TMP");
+    }
+    if (tmpDir.length() == 0)
+    {
+        tmpDir = ( File::exists("/tmp") ? "/tmp" : "" );
+    }
+
+    return tmpDir;
+}
+
+
+std::string DirectoryImpl::sep()
+{
+    return "/";
 }
 
 } // namespace System

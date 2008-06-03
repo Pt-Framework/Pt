@@ -71,7 +71,19 @@ class DirectoryImpl
 
         static bool exists(const std::string& path);
 
-        static void changeCurrent(const std::string& path);
+        static void chdir(const std::string& path);
+
+        static std::string cwd();
+
+        static std::string curdir();
+
+        static std::string updir();
+
+        static std::string rootdir();
+
+        static std::string tmpdir();
+
+        static std::string sep();
 };
 
 } // namespace System

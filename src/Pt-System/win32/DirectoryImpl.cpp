@@ -18,9 +18,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "DirectoryImpl.h"
 #include "win32.h"
+#include "DirectoryImpl.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/Process.h"
 #include <vector>
 #include <windows.h>
 
@@ -183,7 +184,7 @@ void DirectoryImpl::remove(const std::string& path)
 }
 
 
-void DirectoryImpl::changeCurrent(const std::string& path)
+void DirectoryImpl::chdir(const std::string& path)
 {
     #ifdef _WIN32_WCE
     
@@ -197,6 +198,58 @@ void DirectoryImpl::changeCurrent(const std::string& path)
         }
         
     #endif
+}
+
+
+std::string DirectoryImpl::cwd()
+{
+#ifdef _WIN32_WCE
+
+    throw std::runtime_error("GetCurrentDirectory not supported." + PT_SOURCEINFO);
+
+#else
+
+    char path[MAX_PATH+2];
+    DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
+    return std::string(path, len);
+
+#endif
+}
+
+
+std::string DirectoryImpl::curdir()
+{
+    return ".";
+}
+
+
+std::string DirectoryImpl::updir()
+{
+    return "..";
+}
+
+
+std::string DirectoryImpl::rootdir()
+{
+    return "c:\\";
+}
+
+
+std::string DirectoryImpl::tmpdir()
+{
+    std::string tmpDir = Process::getEnvVar("TEMP");
+    if (tmpDir.length() == 0)
+    {
+        tmpDir = Process::getEnvVar("TMP");
+    }
+
+    return tmpDir;
+}
+
+
+std::string DirectoryImpl::sep()
+{
+    return "\\";
 }
 
 } // namespace System

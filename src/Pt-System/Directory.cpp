@@ -28,7 +28,6 @@
  ***************************************************************************/
 #include "DirectoryImpl.h"
 #include "Pt/System/Directory.h"
-#include "Pt/System/Environment.h"
 
 namespace Pt {
 
@@ -202,7 +201,7 @@ void Directory::move(const std::string& to)
 std::string Directory::dirName() const
 {
     // Find last slash. This separates the last path segment from the rest of the path
-    std::string::size_type separatorPos = path().find_last_of(Environment::pathSeparator());
+    std::string::size_type separatorPos = path().find_last_of( this->sep() );
 
     // If there is no separator, this directory is relative to the current current directory.
     // So an empty path is returned.
@@ -221,7 +220,7 @@ std::string Directory::dirName() const
 // the common base class FileSystemNode.
 std::string Directory::name() const
 {
-    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
+    std::string::size_type separatorPos = path().rfind( this->sep() );
 
     if (separatorPos != std::string::npos)
     {
@@ -247,24 +246,45 @@ bool Directory::exists(const std::string& path)
 }
 
 
-const std::string& Directory::curdir()
+void Directory::chdir(const std::string& path)
 {
-	static const std::string _dot(".");
-	return _dot;
+    DirectoryImpl::chdir(path);
 }
 
 
-const std::string& Directory::updir()
+std::string Directory::cwd()
 {
-	static const std::string _dotdot("..");
-	return _dotdot;
+    return DirectoryImpl::cwd();
 }
 
 
-const std::string& Directory::sep()
+std::string Directory::curdir()
 {
-	static const std::string _slash("/");
-	return _slash;
+    return DirectoryImpl::curdir();
+}
+
+
+std::string Directory::updir()
+{
+    return DirectoryImpl::updir();
+}
+
+
+std::string rootdir()
+{
+    return DirectoryImpl::rootdir();
+}
+
+
+std::string tmpdir()
+{
+    return DirectoryImpl::tmpdir();
+}
+
+
+std::string Directory::sep()
+{
+    return DirectoryImpl::sep();
 }
 
 } // namespace System

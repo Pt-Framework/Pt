@@ -53,38 +53,38 @@ class PT_SYSTEM_API FileNotFound : public SystemError
 class PT_SYSTEM_API File
 {
     public:
-    	/** @brief Constructs a %File object from the path Úa path
-    	
-    	    If no file exists at Úa path, an exception of type FileNotFound
-    	    is thrown.
-    	*/
+        /** @brief Constructs a %File object from the path \a path
+
+            If no file exists at \a path, an exception of type FileNotFound
+            is thrown.
+        */
         explicit File(const std::string& path);
 
-		/** @brief Constructs a %File object from a FileInfo object
-		
-		    An exception of type %FileNotFound is thrown if the %FileInfo
-		    does not represent a file.
-		*/
+        /** @brief Constructs a %File object from a FileInfo object
+
+            An exception of type %FileNotFound is thrown if the %FileInfo
+            does not represent a file.
+        */
         explicit File(const FileInfo& fi);
 
-		//! @brief Copy constructor
+        //! @brief Copy constructor
         File(const File& file);
 
-		//! @brief Destrctor
+        //! @brief Destrctor
         ~File();
 
-		//! @brief Assignment operator
+        //! @brief Assignment operator
         File& operator=(const File& file);
 
         /** @brief Returns the full path of file in the file-system
-        
-        	This method may return a relative path, or a fully qualified one
-        	depending on how this object was constructed.
+
+            This method may return a relative path, or a fully qualified one
+            depending on how this object was constructed.
         */
         const std::string& path() const
         { return _path; }
 
-		//! @brief Returns the size of the file in bytes
+        //! @brief Returns the size of the file in bytes
         std::size_t size() const;
 
         /** @brief Returns the parent directory path
@@ -103,43 +103,43 @@ class PT_SYSTEM_API File
         //! @brief Returns the file name without the exension
         std::string baseName() const;
 
-		//! @brief Returns the file name extension or an empty string if not present
+        //! @brief Returns the file name extension or an empty string if not present
         std::string extension() const;
 
-		//! @brief Resizes the file to a new size of Úa n bytes
+        //! @brief Resizes the file to a new size of \a n bytes
         void resize(std::size_t n);
 
-		//! @brief Copies the file to the location given by Úa to
+        //! @brief Copies the file to the location given by \a to
         void copy(const std::string& to) const;
 
-		/** @brief Removes the file.
-		    
-		    This object will be invalid after calling this method.
-		*/
+        /** @brief Removes the file.
+
+            This object will be invalid after calling this method.
+        */
         void remove();
 
-		/** @brief Moves the file to the location given by Úa to
-		
-		    The %File object will stay valid after this method was called and 
-		    point to the moved file.
-		*/
+        /** @brief Moves the file to the location given by ÃŸa to
+
+            The %File object will stay valid after this method was called and
+            point to the moved file.
+        */
         void move(const std::string& to);
 
-	public:
-		//! @brief Creates a new file at the path given by Úa path
+    public:
+        //! @brief Creates a new file at the path given by \a path
         static File create(const std::string& path);
 
-		//! @brief Returns true if a file exists at Úa path, or false otherwise
+        //! @brief Returns true if a file exists at \a path, or false otherwise
         static bool exists(const std::string& path);
 
     protected:
-  		//! @brief Default Constructor
+        //! @brief Default Constructor
         File();
 
     private:
-    	//! @internal
+        //! @internal
         std::string _path;
-        
+
         //! @internal
         class FileImpl* _impl;
 };

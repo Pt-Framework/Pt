@@ -27,10 +27,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "FileInfoImpl.h"
- #include "FileImpl.h"
+#include "FileImpl.h"
 #include "DirectoryImpl.h"
 #include "Pt/System/FileInfo.h"
-#include "Pt/System/Environment.h"
 
 namespace Pt {
 
@@ -79,7 +78,7 @@ FileInfo::Type FileInfo::type() const
 
 std::string FileInfo::name() const
 {
-    std::string::size_type pos = _path.rfind(Environment::pathSeparator());
+    std::string::size_type pos = _path.rfind( DirectoryImpl::sep() );
 
     if (pos != std::string::npos)
     {
@@ -101,7 +100,7 @@ const std::string& FileInfo::path() const
 std::string FileInfo::dirName() const
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type pos = _path.find_last_of( Environment::pathSeparator() );
+    std::string::size_type pos = _path.find_last_of( DirectoryImpl::sep() );
 
     // If there is no separator, the file is relative to the current 
     // directory. So an empty path is returned.

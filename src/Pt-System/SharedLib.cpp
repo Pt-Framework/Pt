@@ -19,6 +19,7 @@
 #include "SharedLibImpl.h"
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/FileInfo.h"
+#include "Pt/System/Directory.h"
 #include "Pt/System/Environment.h"
 #include <string>
 #include <iostream>
@@ -100,8 +101,7 @@ std::string SharedLib::find(const std::string& path_)
     if( FileInfo::exists( path.c_str() ) )
         return path;
 
-    char sep = Environment::pathSeparator();
-    std::string::size_type idx = path.find(sep);
+    std::string::size_type idx = path.find( Directory::sep() );
 
     if(++idx == path.length())
     {

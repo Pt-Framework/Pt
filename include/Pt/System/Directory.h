@@ -45,15 +45,15 @@ namespace System {
 class PT_SYSTEM_API DirectoryNotFound : public SystemError
 {
     public:
-    	/** @brief Construct from path and source info
-    		
-    		Constructs the exception from the path where the directory 
-    		could not be found and the location in the source code where
-    		he exception was thrown.
-    	*/
+        /** @brief Construct from path and source info
+
+            Constructs the exception from the path where the directory
+            could not be found and the location in the source code where
+            he exception was thrown.
+        */
         DirectoryNotFound(const std::string& path, const SourceInfo& si);
 
-		//! @brief Destructor
+        //! @brief Destructor
         ~DirectoryNotFound() throw();
 };
 
@@ -75,40 +75,40 @@ class PT_SYSTEM_API DirectoryNotFound : public SystemError
 class PT_SYSTEM_API DirectoryIterator
 {
     public:
-    	//! @brief Default constructor
+        //! @brief Default constructor
         DirectoryIterator();
 
-		//! @brief Constructs an iterator pointing at the file given by Úa path
+        //! @brief Constructs an iterator pointing at the file given by ï¿½a path
         DirectoryIterator(const std::string& path);
 
-		//! @brief Copy constructor
+        //! @brief Copy constructor
         DirectoryIterator(const DirectoryIterator& it);
 
-		//! @brief Destructor
+        //! @brief Destructor
         ~DirectoryIterator();
 
-		//! @brief Advances the iterator to the next file
+        //! @brief Advances the iterator to the next file
         DirectoryIterator& operator++();
 
-		//! @brief Assignment operator
+        //! @brief Assignment operator
         DirectoryIterator& operator=(const DirectoryIterator& it);
 
-		//! @brief Equality comparison
+        //! @brief Equality comparison
         bool operator==(const DirectoryIterator& it) const
         { return _impl == it._impl; }
 
-		//! @brief Inequality comparison
+        //! @brief Inequality comparison
         bool operator!=(const DirectoryIterator& it) const
         { return _impl != it._impl; }
 
-		//! @brief Returns the full path of the file the iterator points at
+        //! @brief Returns the full path of the file the iterator points at
         const std::string& path() const;
 
-		//! @brief Returns the name of the file the iterator points at
+        //! @brief Returns the name of the file the iterator points at
         const std::string& operator*() const;
 
     private:
-    	//! @internal
+        //! @internal
         class DirectoryIteratorImpl* _impl;
 };
 
@@ -134,39 +134,39 @@ class PT_SYSTEM_API Directory
         typedef DirectoryIterator Iterator;
         typedef DirectoryIterator iterator;
 
-	public:
-    	/** @brief Constructs a %Directory object from the path Úa path
-    	
-    	    If no directory exists at Úa path, an exception of type DirectoryNotFound
-    	    is thrown.
-    	*/
+    public:
+        /** @brief Constructs a %Directory object from the path \a path
+
+            If no directory exists at \a path, an exception of type DirectoryNotFound
+            is thrown.
+        */
         explicit Directory(const std::string& path);
 
-		/** @brief Constructs a %Directory object from a FileInfo object
-		
-		    An exception of type %DirectoryNotFound is thrown if the %FileInfo
-		    does not represent a directory.
-		*/
-		explicit Directory(const FileInfo& fi);
+        /** @brief Constructs a %Directory object from a FileInfo object
 
-		//! @brief Copy constructor
-		Directory(const Directory& dir);
+            An exception of type %DirectoryNotFound is thrown if the %FileInfo
+            does not represent a directory.
+        */
+        explicit Directory(const FileInfo& fi);
 
-		//! @brief Destructor
+        //! @brief Copy constructor
+        Directory(const Directory& dir);
+
+        //! @brief Destructor
         ~Directory();
 
-		//! @brief Assignment operator
-		Directory& operator=(const Directory& dir);
+        //! @brief Assignment operator
+        Directory& operator=(const Directory& dir);
 
         /** @brief Returns the path of the directory
 
-        	This method may return a relative path, or a fully qualified one
-        	depending on how this object was constructed.
+            This method may return a relative path, or a fully qualified one
+            depending on how this object was constructed.
         */
         const std::string& path() const
         { return _path; }
 
-		//! @brief Returns the size of the directory in bytes
+        //! @brief Returns the size of the directory in bytes
         std::size_t size() const;
 
         /** @brief Returns the parent directory path
@@ -182,17 +182,17 @@ class PT_SYSTEM_API Directory
         //! @brief Returns the name of the directory excluding the path.
         std::string name() const;
 
-		/** @brief Removes the directory
-		    
-		    This object will be invalid after calling this method.
-		*/
+        /** @brief Removes the directory
+
+            This object will be invalid after calling this method.
+        */
         void remove();
 
-		/** @brief Moves the directory to the location given by Úa to
-		
-		    The %Directory object will stay valid after this method was called and 
-		    point to the moved directory.
-		*/
+        /** @brief Moves the directory to the location given by \a to
+
+            The %Directory object will stay valid after this method was called and
+            point to the moved directory.
+        */
         void move(const std::string& to);
 
         //! @brief Returns an iterator to the first entry in the directory.
@@ -202,29 +202,47 @@ class PT_SYSTEM_API Directory
         Iterator end() const;
 
     public:
-    	//! @brief Creates a new directory at the path given by Úa path
+        //! @brief Creates a new directory at the path given by \a path
         static Directory create(const std::string& path);
 
-		//! @brief Returns true if a directory exists at Úa path, or false otherwise
+        //! @brief Returns true if a directory exists at \a path, or false otherwise
         static bool exists(const std::string& path);
 
-		//! @brief Returns the string representng the current directory in path names
-		static const std::string& curdir();
-		
-		//! @brief Returns the string representng the upper directory in path names
-		static const std::string& updir();
-		
-		//! @brief Returns the string representng the separator in path names
-		static const std::string& sep();
+        //! @brief Changes the current directory
+        static void chdir(const std::string& path);
+
+        //! @brief Returns the current directory
+        static std::string cwd();
+
+        //! @brief Returns the string representng the current directory in path names
+        static std::string curdir();
+
+        //! @brief Returns the string representng the upper directory in path names
+        static std::string updir();
+
+        static std::string rootdir();
+
+        /** @brief Returns the systems tmp directory.
+
+            On Windows, the environment variables TEMP and TMP are checked.
+            On Linux, the environment variable TMPDIR is checked and if not set,
+            "/tmp" is returned.
+            If none of the environment variables are set and the default system 
+            tmp directory does not exist, the current directory is returned.
+        */
+        static std::string tmpdir();
+
+        //! @brief Returns the string representng the separator in path names
+        static std::string sep();
 
     protected:
-    	//! @brief Default Constructor
+        //! @brief Default Constructor
         Directory();
 
     private:
-    	//! @internal
+        //! @internal
         std::string _path;
-        
+
         //! @internal
         class DirectoryImpl* _impl;
 };

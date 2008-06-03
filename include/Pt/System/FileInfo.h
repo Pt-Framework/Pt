@@ -40,44 +40,44 @@ namespace System {
 */
 class PT_SYSTEM_API FileInfo
 {
-	public:
-		//! @brief File-node type
-		enum Type
-		{
+    public:
+        //! @brief File-node type
+        enum Type
+        {
             Invalid = 0,
             Directory = 1,
             File = 2
-		};
+        };
 
     public:
-    	//! @brief Default constructor
+        //! @brief Default constructor
         FileInfo();
 
-    	/** @brief Constructs a %FileInfo object from the path Úa path
-    	
-    	    If no file or directory exists at Úa path, an exception of type 
-    	    FileNotFound is thrown.
-    	*/
+        /** @brief Constructs a %FileInfo object from the path \a path
+
+            If no file or directory exists at \a path, an exception of type
+            FileNotFound is thrown.
+        */
         explicit FileInfo(const std::string& path);
 
-		//! @brief Copy constructor
-		FileInfo(const FileInfo& fi);
+        //! @brief Copy constructor
+        FileInfo(const FileInfo& fi);
 
-		//! @brief Destructor
+        //! @brief Destructor
         ~FileInfo();
 
-		//! @brief Assignment operator
+        //! @brief Assignment operator
         FileInfo& operator=(const FileInfo& fi);
 
-		//! @brief Returns the type of the file node
-		Type type() const;
-		
+        //! @brief Returns the type of the file node
+        Type type() const;
+
         const std::string& path() const;
 
         /** @brief Returns the full path of node in the file-system
-        
-        	This method may return a relative path, or a fully qualified one
-        	depending on how this object was constructed.
+
+            This method may return a relative path, or a fully qualified one
+            depending on how this object was constructed.
         */
         std::string name() const;
 
@@ -91,42 +91,42 @@ class PT_SYSTEM_API FileInfo
         */
         std::string dirName() const;
 
-		//! @brief Returns the size of the file in bytes
+        //! @brief Returns the size of the file in bytes
         std::size_t size() const;
 
-		//! @brief Returns true if the node is a directory
+        //! @brief Returns true if the node is a directory
         bool isDirectory() const;
 
-		//! @brief Returns true if the node is a file
+        //! @brief Returns true if the node is a file
         bool isFile() const;
 
-		/** @brief Removes the file node.
-		    
-		    This object will be invalid after calling this method.
-		*/
+        /** @brief Removes the file node.
+
+            This object will be invalid after calling this method.
+        */
         void remove();
 
-		/** @brief Moves the file node to the location given by Úa to
-		
-		    The object will stay valid after this method was called and 
-		    point to the moved file node.
-		*/
+        /** @brief Moves the file node to the location given by \a to
+
+            The object will stay valid after this method was called and
+            point to the moved file node.
+        */
         void move(const std::string& to);
 
-	public:
-		//! @brief Returns true if a file or directory exists at Úa path
+    public:
+        //! @brief Returns true if a file or directory exists at \a path
         static bool exists(const std::string& path);
 
-		//! @brief Returns the type of file at Úa path
-		static Type getType(const std::string& path);
+        //! @brief Returns the type of file at \a path
+        static Type getType(const std::string& path);
 
     private:
-    	//! @internal
+        //! @internal
         Type _type;
-        
+
         //! @internal
         std::string _path;
-        
+
         //! @internal
         void* _reserved;
 };

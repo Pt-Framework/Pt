@@ -29,7 +29,6 @@
 #include "FileImpl.h"
 #include "Pt/System/File.h"
 #include "Pt/System/Directory.h"
-#include "Pt/System/Environment.h"
 
 namespace Pt {
 
@@ -127,7 +126,7 @@ void File::move(const std::string& to)
 std::string File::dirName() const
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type separatorPos = path().find_last_of( Environment::pathSeparator() );
+    std::string::size_type separatorPos = path().find_last_of( Directory::sep() );
 
     // If there is no separator, the file is relative to the current directory. So an empty path is returned.
     if (separatorPos == std::string::npos)
@@ -145,7 +144,7 @@ std::string File::dirName() const
 // the common base class FileSystemNode.
 std::string File::name() const
 {
-    std::string::size_type separatorPos = path().rfind(Environment::pathSeparator());
+    std::string::size_type separatorPos = path().rfind( Directory::sep() );
 
     if (separatorPos != std::string::npos)
     {
