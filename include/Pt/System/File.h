@@ -118,7 +118,7 @@ class PT_SYSTEM_API File
         */
         void remove();
 
-        /** @brief Moves the file to the location given by ßa to
+        /** @brief Moves the file to the location given by \a to
 
             The %File object will stay valid after this method was called and
             point to the moved file.
@@ -131,6 +131,18 @@ class PT_SYSTEM_API File
 
         //! @brief Returns true if a file exists at \a path, or false otherwise
         static bool exists(const std::string& path);
+
+        /** @brief Returns the extension for shared libraries
+
+            Returns ".so" on Linux, ".dll" on Windows.
+        */
+        //static const std::string& sharedLibraryExtension();
+
+        /**  @brief Returns the prefix for shared libraries
+
+             Returns "lib" on Linux, "" on Windows 
+         */
+        //static const std::string& sharedLibraryPrefix();
 
     protected:
         //! @brief Default Constructor
