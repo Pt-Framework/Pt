@@ -136,13 +136,13 @@ class PT_SYSTEM_API File
 
             Returns ".so" on Linux, ".dll" on Windows.
         */
-        //static const std::string& sharedLibraryExtension();
+        //static std::string shlibSuffix();
 
         /**  @brief Returns the prefix for shared libraries
 
              Returns "lib" on Linux, "" on Windows 
          */
-        //static const std::string& sharedLibraryPrefix();
+        //static std::string shlibPrefix();
 
     protected:
         //! @brief Default Constructor
