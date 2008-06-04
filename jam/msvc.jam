@@ -40,7 +40,8 @@ rule TryC++
 
 #############################################################################
 # Tools and utilities
-##############################################################################
+#############################################################################
+
 if $(CONFIGURE)
 {
     if $(VISUALC)
@@ -50,12 +51,12 @@ if $(CONFIGURE)
     }
     else if $(MSVCDir)
     {
-        Configure VISUALC : [ Slashify $(VCINSTALLDIR:J=" ") ] ;
+        Configure VISUALC : $(VCINSTALLDIR:J=" ") ;
         Echo "Checking for VISUALC directory..." $(VCINSTALLDIR:J=" ") ;
     }
     else if $(VSINSTALLDIR)
     {
-        Configure VISUALC : [ Slashify $(VSINSTALLDIR:J=" ") ] ;
+        Configure VISUALC : $(VSINSTALLDIR:J=" ") ;
         Echo "Checking for VISUALC directory..." $(VSINSTALLDIR:J=" ") ;
     }
     else
@@ -65,9 +66,9 @@ if $(CONFIGURE)
     }
 
     if $(VCDIR)
-       || [ CheckFile VCDIR : [ Slashify $(VISUALC:J=" ")"\\vc" ] 
+       || [ CheckFile VCDIR : $(VISUALC:J=" ")"\\vc" 
                             : $(VISUALC:J=" ")"\\vc\\vcvarsall.bat" ]
-       || [ CheckFile VCDIR : [ Slashify $(VISUALC:J=" ")"\\vc7" ] 
+       || [ CheckFile VCDIR : $(VISUALC:J=" ")"\\vc7" 
                             : $(VISUALC:J=" ")"\\vc7\\vcvarsall.bat" ]
     {
         Configure VCDIR : $(VCDIR) ;
@@ -95,14 +96,23 @@ LINK        = $(VCDIR)\\bin\\link /nologo ;
 if $(CONFIGURE)
 {
     if $(PLATFORMSDK)
-       || [ CheckFile PLATFORMSDK : [ Slashify $(PLATFORMSDK:J=" ") ] 
-                                  : $(PLATFORMSDK:J=" ")"\\Include\\windows.h" ]
-       ||Ê[ CheckFile PLATFORMSDK : [ Slashify $(WindowsSdkDir:J=" ") ]
-                                  : $(WindowsSdkDir:J=" ")"Include\\windows.h" ]
-       || [ CheckFile PLATFORMSDK : [ Slashify $(VISUALC:J=" ")"\\vc\\PlatformSDK" ] 
-                                  : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ]                                ]
-       || [ CheckFile PLATFORMSDK : [ Slashify $(VISUALC:J=" ")"\\vc7\\PlatformSDK" ]
-                                  : $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ]                              :  ]
+    {
+        Configure PLATFORMSDK : $(PLATFORMSDK) ;
+        Echo "Checking for PLATFORMSDK directory..." $(PLATFORMSDK) ;
+    }
+    else if $(WindowsSdkDir)
+    {
+        Configure PLATFORMSDK : $(WindowsSdkDir:J=" ") ;
+        Echo "Checking for PLATFORMSDK directory..." $(PLATFORMSDK) ;
+    }
+    else if [ CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc\\PlatformSDK"
+                                    : $(VISUALC:J=" ")"\\vc\\PlatformSDK\\Include\\windows.h" ]
+    {
+        Configure PLATFORMSDK : $(PLATFORMSDK) ;
+        Echo "Checking for PLATFORMSDK directory..." $(PLATFORMSDK) ;
+    }
+    else if [ CheckFile PLATFORMSDK : $(VISUALC:J=" ")"\\vc7\\PlatformSDK" 
+                                    : $(VISUALC:J=" ")"\\vc7\\PlatformSDK\\Include\\windows.h" ]
     {
         Configure PLATFORMSDK : $(PLATFORMSDK) ;
         Echo "Checking for PLATFORMSDK directory..." $(PLATFORMSDK) ;

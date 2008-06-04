@@ -22,37 +22,11 @@ rule JamInclude
 # Configuration rules
 ###############################################################################
 
-rule Slashify
-{
-    local _s = $(1) ;
-    local _r ;
-    while $(_s:B)
-    {
-        if $(_r)
-        {
-            _r = $(_s:B)"\\\\"$(_r) ;
-        }
-        else 
-        {
-            _r = $(_s:B) ;
-        }
-
-        _s = $(_s:D) ;
-    }
-
-    if $(_s:D)
-    {
-        _r = $(_s:D)"\\"$(_r) ;
-    }
-
-    return $(_r) ;
-}
-
-
 rule Configure
 {
     $(1) = $(2) ;
-    WriteFile config.jam : $(1)" ?= "\"$(2)\"" ;"  ;
+    local _val = [ Escape $(2) ] ;
+    WriteFile config.jam : $(1)" ?= "\"$(_val)\"" ;"  ;
 }
 
 
@@ -356,14 +330,10 @@ rule ConfigureDotSlash
     
     SLASH = ;   
     if $(SLASH)
-       || [ CheckCommand SLASH : "\\\\" : "cd .\\" ]
+       || [ CheckCommand SLASH : "\\" : "cd .\\" ]
        || [ CheckCommand SLASH : "/"  : "cd ./" ]
     {
         Configure SLASH : $(SLASH) ;
-        if $(SLASH) = "\\\\"
-        {
-            SLASH = \\ ;
-        }
         Echo "Checking for directory separator..." $(SLASH) ;
     }
     else
