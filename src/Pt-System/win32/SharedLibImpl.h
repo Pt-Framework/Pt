@@ -81,6 +81,16 @@ class SharedLibImpl
         bool failed()
         { return _handle == 0; }
 
+        static std::string suffix()
+        {
+            return ".dll";
+        }
+
+        static std::string prefix()
+        {
+            return "";
+        }
+
     private:
         HMODULE _handle;
 };

@@ -108,7 +108,7 @@ std::string SharedLib::find(const std::string& path_)
         throw SystemError("Invalid file name " + path , PT_SOURCEINFO);
     }
 
-    path += Environment::sharedLibraryExtension();
+    path += suffix();
     if( FileInfo::exists( path.c_str() ) )
         return path;
 
@@ -116,7 +116,7 @@ std::string SharedLib::find(const std::string& path_)
     {
         idx = 0;
     }
-    path.insert( idx, Environment::sharedLibraryPrefix() );
+    path.insert( idx, prefix() );
 
     if( ! FileInfo::exists( path.c_str() ) )
     {
@@ -127,6 +127,19 @@ std::string SharedLib::find(const std::string& path_)
 
     return path;
 }
+
+
+std::string SharedLib::suffix()
+{
+    return SharedLibImpl::suffix();
+}
+
+
+std::string SharedLib::prefix()
+{
+    return SharedLibImpl::prefix();
+}
+
 
 /*
 File SharedLib::createLibraryFile(const Pt::System::Directory& baseDir, const std::string& libraryName)

@@ -103,13 +103,13 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
 
             Returns ".so" on Linux, ".dll" on Windows.
         */
-        //static std::string shlibSuffix();
+        static std::string suffix();
 
         /**  @brief Returns the prefix for shared libraries
 
              Returns "lib" on Linux, "" on Windows 
-         */
-        //static std::string shlibPrefix();
+        */
+        static std::string prefix();
 
     private:
         //! @internal

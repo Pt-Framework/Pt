@@ -77,6 +77,16 @@ class SharedLibImpl
         bool failed()
         { return _handle == 0; }
 
+        static std::string suffix()
+        {
+            return ".so";
+        }
+
+        static std::string prefix()
+        {
+            return "lib";
+        }
+
     private:
         void* _handle;
 };
