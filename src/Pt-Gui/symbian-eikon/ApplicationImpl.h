@@ -25,19 +25,16 @@
 #include <memory>
 #include <iostream>
 #include <list>
+#include <assert.h>
 
 #include <Pt/Singleton.h>
 #include <Pt/Signal.h>
 
 #include <Pt/Event.h>
-//#include <Pt/System/EventLoop.h>
 #include <Pt/System/Mutex.h>
-//#include <Pt/System/Thread.h>
-
-#include <Pt/Gui/MouseEvent.h>
-#include <Pt/Gui/KeyEvent.h>
 
 class SymbApp;
+class SymbEventLoop;
 
 namespace Pt {
 
@@ -47,7 +44,24 @@ namespace Gui {
     class WidgetImpl;
     class PixmapImpl;
     class Event;
-
+    
+    class ExitEvent : public Pt::Event
+    {
+        public:
+            ExitEvent()
+            { }
+    
+            virtual const std::type_info& typeInfo() const
+            {
+                return typeid(ExitEvent);
+            }
+    
+            virtual Event* clone() const
+            {
+                return new ExitEvent(*this);
+            }
+    };
+    
     class ResourceRegistry : public Pt::Singleton<ResourceRegistry>
     {
         public:
@@ -139,14 +153,15 @@ namespace Gui {
             Application& _app;
             System::Mutex _eventMutex;
             
-            //System::EventLoop _eventLoop;
-            //System::Thread _eventLoopThread;
+            SymbEventLoop* _eventLoop;
 
             static System::Mutex _mutex;
 
             friend class Widget;
             
         public:
+            SymbEventLoop& eventLoop() { return *_eventLoop; }
+                        
             Signal<const Pt::Event&> eventQueueSignal;
             
             void dispatchEvent(const Pt::Event& event);

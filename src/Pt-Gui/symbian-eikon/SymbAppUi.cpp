@@ -21,6 +21,7 @@
 #include "SymbAppUi.h"
 #include "SymbDoc.h"
 #include "SymbApp.h"
+#include "SymbEventLoop.h"
 
 #include <Pt/Gui/Widget.h>
 #include "WidgetImpl.h"
@@ -30,6 +31,8 @@
 
 #include <coecntrl.h>
 #include <w32std.h>
+
+#include "Pt/Gui/CloseEvent.h"
 
 static void Redraw()
 {
@@ -96,20 +99,9 @@ void SymbAppUi::ConstructL()
     TFontSpec spec(Kface, 20*3);
     _font = iEikonEnv->CreateScreenFontL(spec);    
         
+    iEikonEnv->AppUiFactory()->StatusPane()->MakeVisible( EFalse );
     //SetKeyBlockMode(ENoKeyBlock);
     
-    //_widget = new Pt::Gui::Widget();    
-    
-    //_widget->impl().construct();
-    
-    // Important Note:
-    // When doing symbian debug builds debug marks are placed on certain
-    // call stack levels and there will be panics when the debug marks are not
-    // as expected when leaving the call stack.
-    // This is apparently a problem when accessing singleton instances
-    // in constructors etc.
-    // We are just confident that these panics are not caused by real
-    // memory leaks.
     Pt::Gui::ResourceRegistry::instance().constructPixmaps();
     Pt::Gui::ResourceRegistry::instance().constructWidgets();
     
@@ -126,11 +118,16 @@ void SymbAppUi::ConstructL()
     _cursorControl->ConstructL(TRect(0,0,15,15));
     AddToStackL(_cursorControl);    
     _cursorControl->SetMopParent(this);
-    
+        
+    // run event loop 
+    GetApplicationImpl().eventLoop().Start();
+    GetApplicationImpl().eventLoop().Watch();
 }
 
 SymbAppUi::~SymbAppUi()
 {
+    GetApplicationImpl().eventLoop().Stop();
+    
     RemoveFromStack(_cursorControl);
     delete _cursorControl;
     
@@ -230,7 +227,7 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent,
 
 void SymbAppUi::handleExit()
 {
-    GetApplicationImpl().exit();    
+    Exit();    
 }
 
 class CControl : public CCoeControl

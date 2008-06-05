@@ -22,6 +22,7 @@
 #include "ApplicationImpl.h"
 
 #include <Pt/Gfx/Region.h>
+#include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/CloseEvent.h>
 #include <Pt/Gui/PaintEvent.h>
@@ -66,11 +67,11 @@ public:
     CControl(Pt::Gui::WidgetImpl& owner) 
     : _apiWidgetImpl(owner)
     , _pointerEventConsumed(false)
-    , _allowRootRedrawing(false)
+    , _allowParentRedrawing(false)
     {
     }
 
-    void SetAllowRootRedrawing(bool allowRootRedrawing) { _allowRootRedrawing = allowRootRedrawing; }
+    void SetAllowParentRedrawing(bool allowParentRedrawing) { _allowParentRedrawing = allowParentRedrawing; }
     
     void ConstructL(const TRect& rect)
     {
@@ -108,24 +109,45 @@ public:
             _windowGroup.Close();        
     }
     
+    // Get absolute position of widget within parent widget
     TPoint AbsolutePosition() const
     {
-        TPoint offset(0,0);
-        if (_apiWidgetImpl.parent())
-        {
-            // adjust relative position
-            Pt::Gui::WidgetImpl* widgetImpl = &_apiWidgetImpl;
-            do
-            {
-                CControl* control = widgetImpl->nativeControl();
-                offset+=control->Position();
-                widgetImpl = &widgetImpl->parent()->impl();
-            } while (widgetImpl && widgetImpl->parent());       
-        }
-        
-        return offset;
+        return _apiWidgetImpl.parent() ? Position() : TPoint(0,0);
     }   
     
+    // Get relative position of widget within parent widget
+    // Don't call this function if there is no parent, it will not work 
+    void SetRelativePosition(const TPoint& position)
+    {
+        TPoint relativePos(0,0);
+        if (_apiWidgetImpl.parent())
+        {
+            assert(_apiWidgetImpl.parent()->impl().nativeControl());
+            relativePos = _apiWidgetImpl.parent()->impl().nativeControl()->AbsolutePosition();
+            relativePos+=position;
+            SetPosition(relativePos);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+
+    // Get relative position of widget within parent widget
+    TPoint RelativePosition()
+    {
+        TPoint relativePos(0,0);
+        if (_apiWidgetImpl.parent())
+        {
+            relativePos = Position();
+            assert(_apiWidgetImpl.parent()->impl().nativeControl());
+            TPoint parentPos(_apiWidgetImpl.parent()->impl().nativeControl()->AbsolutePosition());
+            relativePos-=parentPos;
+        }
+        
+        return relativePos;
+    }
+        
     const GraphicContext& BeginDraw()
     {       
         GraphicContext& graphicContext = WorkingContext();
@@ -139,6 +161,8 @@ public:
             if (!graphicContext._drawingActive)
             {
                 ActivateGc();
+                Window().Invalidate(Rect());
+                Window().BeginRedraw(Rect());                
             }
             graphicContext._gc->UseFont(_graphicContext._nativeFont);
             if (RootControl() != this)
@@ -173,7 +197,10 @@ public:
                 graphicContext._device = 0;
                 graphicContext._nativeFont = 0;
                 if (!graphicContext._drawingActive)
+                {
+                    Window().EndRedraw();
                     DeactivateGc();                    
+                }
             }
         }
         else
@@ -184,30 +211,10 @@ public:
 
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {
-        //CCoeControl::HandlePointerEventL(aPointerEvent);
-        CControl* root = RootControl();        
-        
-        // make sure event is delivered to all children
-        // NOTE: Apparently calling CCoeControl::HandlePointerEventL(aPointerEvent)
-        // should be responsible for routing the event to the children
-        // but doing so not all children receive the event, I wonder what was wrong
-        // This code will do the job
-        for (std::vector<CControl*>::iterator i = _controls.begin(); i != _controls.end(); ++i) 
-        {
-            CControl* control = *i;
-            if (control->IsVisible())
-            {
-                TPoint p = control->AbsolutePosition();
-                TRect rect(p, control->Size());
-                if (rect.Contains(aPointerEvent.iPosition))
-                {
-                    control->HandlePointerEventL(aPointerEvent);
-                    if (root != this && root->_pointerEventConsumed)
-                        return;
-                }
-            }
-        }
-        
+        // Make sure event is routed to children
+        CCoeControl::HandlePointerEventL(aPointerEvent);
+
+        CControl* root = RootControl();                
         if (root != this && root->_pointerEventConsumed)
             return;
         
@@ -237,23 +244,28 @@ public:
     }
     
 protected:
-//    virtual CCoeControl* ComponentControl(TInt aIndex) const
-//    {
-//        return _controls.at(aIndex);
-//    }
-//    
-//    virtual TInt CountComponentControls() const
-//    {
-//        return _controls.size();
-//    }
+    virtual CCoeControl* ComponentControl(TInt aIndex) const
+    {
+        return _controls.at(aIndex);
+    }
+    
+    virtual TInt CountComponentControls() const
+    {
+        return _controls.size();
+    }
 
     virtual void SizeChanged()
     {
-        if (_allowRootRedrawing)
-            RootControl()->DrawDeferred();
+        // If size has changed redraw our parent
+        if (_allowParentRedrawing && _apiWidgetImpl.parent() && 
+            _apiWidgetImpl.parent()->impl().nativeControl())
+        {
+            _apiWidgetImpl.parent()->impl().nativeControl()->DrawDeferred();
+        }
     }
     
 private:
+    // Traverse widget hierarchy up to the root widget
     CControl* RootControl() const
     {
         // find root window
@@ -282,12 +294,6 @@ private:
      */
     void Draw(const TRect& rect) const
     {
-        CControl* ctrl = 0;
-        if (CountComponentControls())
-        {
-            ctrl = _controls.at(0);
-        }
-        
         GraphicContext& graphicContext = WorkingContext();
         
         graphicContext._drawingActive++;        
@@ -295,7 +301,7 @@ private:
         TRect rc(rect);
         // if we're having a parent we need to adjust the update rectangle
         // to be located in 0/0
-        TPoint absolutePos = AbsolutePosition();
+        TPoint absolutePos(AbsolutePosition());
         if (_apiWidgetImpl.parent())
             rc.Move(-absolutePos.iX, -absolutePos.iY);
         
@@ -304,15 +310,6 @@ private:
         
         _apiWidgetImpl.dispatchEvent(paintEvent);
 
-        for (std::vector<CControl*>::const_iterator i = _controls.begin(); i != _controls.end(); ++i) 
-        {
-            const CControl* control = *i;
-            TRect crect(control->AbsolutePosition(), control->Size());
-            crect.Intersection(rect);
-            if (control->IsVisible() && !crect.IsEmpty())
-                control->Draw(crect);
-        }
-        
         graphicContext._drawingActive--;        
     }
     
@@ -353,7 +350,7 @@ private:
     RWindowGroup _windowGroup;
     mutable GraphicContext _graphicContext;
     bool _pointerEventConsumed;
-    bool _allowRootRedrawing;
+    bool _allowParentRedrawing;
     
     std::vector<CControl*> _controls;
 };
@@ -362,7 +359,7 @@ namespace Pt {
 
 namespace Gui {
 
-const ssize_t WidgetImpl::KPositionUnused = std::numeric_limits<ssize_t>::max();
+const ssize_t WidgetImpl::KUnused = std::numeric_limits<ssize_t>::max();
 
 WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at, const Math::Size& size)
 : _apiWidget(apiWidget)
@@ -474,7 +471,10 @@ void WidgetImpl::move(size_t x, size_t y)
 {
     if (isConstructed())
     {
-        _control->SetPosition(TPoint(x, y));
+        if (_parent)
+            _control->SetRelativePosition(TPoint(x, y));
+        else
+            _control->SetPosition(TPoint(x, y));
         synchronize(false);
     }
     else
@@ -513,17 +513,36 @@ void WidgetImpl::construct()
         Pt::Math::Point location(_initialLocation);
         Pt::Math::Size size(_initialSize);        
         
-        //TRect rect = ui.ClientRect();
-        
-        if (location.x() == KPositionUnused)
-            location.setX(ui.ClientRect().iTl.iX);
-        if (location.y() == KPositionUnused)
-            location.setY(ui.ClientRect().iTl.iY);        
-        if ((ssize_t)size.width() == KPositionUnused)
-            size.setWidth(ui.ClientRect().Width());
-        if ((ssize_t)size.height() == KPositionUnused)
-            size.setHeight(ui.ClientRect().Height());
-        
+        if (_parent)
+        {
+            assert(_parent->impl().nativeControl());
+            
+            if (location.x() == KUnused)
+                location.setX(0);
+            if (location.y() == KUnused)
+                location.setY(0);        
+            if ((ssize_t)size.width() == KUnused)
+                size.setWidth(_parent->impl().nativeControl()->Size().iWidth);
+            if ((ssize_t)size.height() == KUnused)
+                size.setHeight(_parent->impl().nativeControl()->Size().iHeight);            
+
+            int x = location.x() + _parent->impl().nativeControl()->AbsolutePosition().iX;
+            int y = location.y() + _parent->impl().nativeControl()->AbsolutePosition().iY;
+            
+            location.set(x, y);            
+        }
+        else
+        {
+            if (location.x() == KUnused)
+                location.setX(ui.ClientRect().iTl.iX);
+            if (location.y() == KUnused)
+                location.setY(ui.ClientRect().iTl.iY);        
+            if ((ssize_t)size.width() == KUnused)
+                size.setWidth(ui.ClientRect().Width());
+            if ((ssize_t)size.height() == KUnused)
+                size.setHeight(ui.ClientRect().Height());            
+        }
+                
         control->ConstructL(SymbianTools::makeTRect(location, size));
         // TODO: Handle leave
         if (!_parent)
@@ -535,7 +554,7 @@ void WidgetImpl::construct()
         
         synchronize(true);
         
-        _control->SetAllowRootRedrawing(true);
+        _control->SetAllowParentRedrawing(true);
     }
 }
 
@@ -601,7 +620,9 @@ void WidgetImpl::synchronize(bool initial/* = false*/)
         _control->Position().iX != (signed)_apiWidget.x() || 
         _control->Position().iY != (signed)_apiWidget.y())
     {
-        MoveEvent moveEvent(_apiWidget, _control->Position().iX, _control->Position().iY);
+        TPoint pos = _parent ? _control->RelativePosition() : _control->Position();
+        
+        MoveEvent moveEvent(_apiWidget, pos.iX, pos.iY);
         dispatchEvent(moveEvent);
     }
     

@@ -76,6 +76,8 @@ void PixmapImpl::beginDraw()
     {
         _painter.setGc(_bitmapGc);
         _painter.setDevice(_bitmapDevice);
+        
+        assert(Pt::Gui::ApplicationImpl::_self);        
         const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
         _painter.setNativeFont(font);
         _bitmapGc->UseFont(font);
@@ -88,6 +90,8 @@ void PixmapImpl::beginDraw()
         {
             _painter.setGc(_bitmapGc);
             _painter.setDevice(_bitmapDevice);
+
+            assert(Pt::Gui::ApplicationImpl::_self);        
             const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
             _painter.setNativeFont(font);
             _bitmapGc->UseFont(font);
@@ -133,10 +137,10 @@ void PixmapImpl::construct()
             _bitmap->SetSizeInTwips(CEikonEnv::Static()->ScreenDevice());
             
             //TSize sizeInTwips = _bitmap->SizeInTwips();
-            //TSize sizeInPixels = _bitmap->SizeInPixels();
-            
+            //TSize sizeInPixels = _bitmap->SizeInPixels();            
             //float xs = (float)sizeInTwips.iWidth / (float)sizeInPixels.iWidth;
             //float ys = (float)sizeInTwips.iHeight / (float)sizeInPixels.iHeight;
+            
             // TODO: Handle leave
             _bitmapGc = CFbsBitGc::NewL();
             _bitmapGc->Activate(_bitmapDevice);

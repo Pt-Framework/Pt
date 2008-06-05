@@ -40,11 +40,11 @@ namespace Gui {
     class WidgetImpl
     {
         public:
-            static const ssize_t KPositionUnused;
+            static const ssize_t KUnused;
             
             WidgetImpl( Widget& apiWidget, Widget* parent,
-                         const Math::Point& at = Math::Point(KPositionUnused, KPositionUnused),
-                         const Math::Size& size = Math::Size(KPositionUnused, KPositionUnused) );
+                         const Math::Point& at = Math::Point(KUnused, KUnused),
+                         const Math::Size& size = Math::Size(KUnused, KUnused) );
 
             virtual ~WidgetImpl();
 

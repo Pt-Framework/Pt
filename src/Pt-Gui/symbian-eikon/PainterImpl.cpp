@@ -253,13 +253,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
     if (!bitmap)
         return;
     
-    //TSize sizeInTwips = bitmap->SizeInTwips();
-    
-    //bitmap->SetSizeInTwips(_device);
-    
     _gc->DrawBitmap(SymbianTools::makeTPoint(to) + _offset, bitmap);
-
-    //bitmap->SetSizeInTwips(sizeInTwips);
 }
 
 
@@ -273,16 +267,10 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
     if (!bitmap)
         return;
     
-    //TSize sizeInTwips = bitmap->SizeInTwips();
-
-    //bitmap->SetSizeInTwips(_device);
-
     TRect rect(SymbianTools::makeTRect(to, pm.size()));
     rect.Move(_offset.iX, _offset.iY);
     TRect pmRect(SymbianTools::makeTRect(pmRegion));
     _gc->DrawBitmap(rect, bitmap, pmRect);
-
-    //bitmap->SetSizeInTwips(sizeInTwips);
 }
 
 void PainterImpl::drawImage(const Pt::Math::Point& to, const Gfx::ARgbImage& image)

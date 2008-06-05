@@ -41,6 +41,7 @@
 #include "SymbAppUi.h"
 #include "SymbDoc.h"
 #include "SymbApp.h"
+#include "SymbEventLoop.h"
 
 using namespace std;
 
@@ -105,59 +106,74 @@ void ResourceRegistry::destructPixmaps()
 ApplicationImpl::ApplicationImpl(Application& app) 
 : _app(app)
 , _eventMutex(System::Mutex::Normal)
-//, /*_eventLoopThread(_eventLoop)
+, _eventLoop(0)
 , _symbApp(new SymbApp(this))
 {
     connect(eventQueueSignal, app.event);
     lockAppInstance();
     assert(ApplicationImpl::_self == 0);
     ApplicationImpl::_self = this;
+
+    // TODO: Handle leave
+    // This only created an event loop, it's not being run until
+    // the view has been created
+    // The view will also stop the event loop
+    _eventLoop = SymbEventLoop::NewL(*this);
 }
 
 ApplicationImpl::~ApplicationImpl()
 {
-    //_eventLoop.exit();
-    //_eventLoopThread.wait();
     ApplicationImpl::_self = 0;
     unlockAppInstance();
+    delete _eventLoop;
 }
 
 void ApplicationImpl::commitEvent(const Pt::Event& e)
 {
-    dispatchEvent(e);
-    //_eventLoop.commitEvent(e);
+    _eventLoop->CommitEvent(e);
 }
 
 
 void ApplicationImpl::queueEvent(const Pt::Event& e)
 {
-    //_eventLoop.queueEvent(e);
+    _eventLoop->QueueEvent(e);
 }
 
 
 int ApplicationImpl::run()
 {
-    //_eventLoopThread.start();        
     return EikStart::RunApplication(NewApplication);
 }
 
 
 int ApplicationImpl::exit()
 {
-    _symbApp->GetDocument().GetAppUi().Exit();
-    //_eventLoop.exit();
-    //_eventLoopThread.wait();
-    // TODO: Find return code
+    // exit could be called from any thread, but we're only allowed 
+    // to exit the app from the creator thread
+    // Create an exit event which will cause the application to quit from
+    // the creator thread
+    ExitEvent event;
+    _eventLoop->CommitEvent(event);
     return 0;
 }
 
 void ApplicationImpl::processEvents()
 {
-    //_eventLoop.processEvents();
+    _eventLoop->ProcessEvents();
 }
 
 void ApplicationImpl::dispatchEvent(const Pt::Event& event)
 {
+    // If we're having an exit event we simply quit the application
+    if (event.typeInfo() == typeid(ExitEvent)) 
+    {
+        // since the application is going to exit the event we're getting
+        // will not be deleted, we NEED to do it here
+        delete &event;
+        _symbApp->GetDocument().GetAppUi().Exit(); 
+        return;
+    }
+
     //_eventMutex.lock();
     eventQueueSignal.send(event);
     //_eventMutex.unlock();
