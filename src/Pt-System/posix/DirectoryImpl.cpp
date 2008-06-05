@@ -1,12 +1,20 @@
 /***************************************************************************
- *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
- *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
+ *   Copyright (C) 2006-2008 Marc Boris Duerner                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
  *   published by the Free Software Foundation; either version 2 of the    *
  *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   As a special exception, you may use this file as part of a free       *
+ *   software library without restriction. Specifically, if other files    *
+ *   instantiate templates or use macros or inline functions from this     *
+ *   file, or you compile this file and link it with other files to        *
+ *   produce an executable, this file does not by itself cause the         *
+ *   resulting executable to be covered by the GNU General Public          *
+ *   License. This exception does not however invalidate any other         *
+ *   reasons why the executable file might be covered by the GNU Library   *
+ *   General Public License.                                               *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
@@ -20,7 +28,6 @@
  ***************************************************************************/
 #include "DirectoryImpl.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/Process.h"
 #include "Pt/System/File.h"
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -50,6 +57,13 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
   _dirty(true)
 {
     _handle = ::opendir( path );
+
+    // EACCES Permission denied.
+    // EMFILE Too many file descriptors in use by process.
+    // ENFILE Too many files are currently open in the system.
+    // ENOENT Directory does not exist, or name is an empty string.
+    // ENOMEM Insufficient memory to complete the operation.
+    // ENOTDIR name is not a directory.
 
     if( !_handle )
     {
@@ -212,17 +226,20 @@ std::string DirectoryImpl::rootdir()
 
 std::string DirectoryImpl::tmpdir()
 {
-    std::string tmpDir = Process::getEnvVar("TEMP");
-    if (tmpDir.length() == 0)
+    const char* tmpdir = getenv("TEMP");
+
+    if(tmpdir)
     {
-        tmpDir = Process::getEnvVar("TMP");
-    }
-    if (tmpDir.length() == 0)
-    {
-        tmpDir = ( File::exists("/tmp") ? "/tmp" : curdir() );
+        return tmpdir;
     }
 
-    return tmpDir;
+    tmpdir = getenv("TMP");
+    if(tmpdir)
+    {
+        return tmpdir;
+    }
+
+    return File::exists("/tmp") ? "/tmp" : curdir();
 }
 
 
