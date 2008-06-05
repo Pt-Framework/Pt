@@ -28,7 +28,6 @@
  ***************************************************************************/
 #include "DirectoryImpl.h"
 #include "Pt/System/SystemError.h"
-#include "Pt/System/File.h"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -239,7 +238,7 @@ std::string DirectoryImpl::tmpdir()
         return tmpdir;
     }
 
-    return File::exists("/tmp") ? "/tmp" : curdir();
+    return DirectoryImpl::exists("/tmp") ? "/tmp" : curdir();
 }
 
 
