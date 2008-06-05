@@ -121,7 +121,7 @@ void SymbAppUi::ConstructL()
         
     // run event loop 
     GetApplicationImpl().eventLoop().Start();
-    GetApplicationImpl().eventLoop().Watch();
+    GetApplicationImpl().eventLoop().WaitForEvents();
 }
 
 SymbAppUi::~SymbAppUi()

@@ -38,9 +38,11 @@ SymbEventLoop::SymbEventLoop(Pt::Gui::ApplicationImpl& appImpl)
 : CActive(EPriorityIdle)
 , _appImpl(appImpl)
 , _running(false)
+, _runningMutex(Pt::System::Mutex::Normal)
+, _mutex(Pt::System::Mutex::Normal)
 , _queueMutex(Pt::System::Mutex::Normal)
-//, _wakeMutex(Pt::System::Mutex::Normal)
 , _processMutex(Pt::System::Mutex::Normal)
+, _wakeMutex(Pt::System::Mutex::Normal)
 {
 }
 
@@ -50,20 +52,13 @@ void SymbEventLoop::ConstructL()
     _mainThreadId = thread.Id();
     thread.Close();
     
-    ::pthread_mutex_init(&_mutex, NULL);
-    ::pthread_cond_init(&_cond, NULL);
-    ::pthread_cond_init(&_startCond, NULL);     
-
+    // TODO: Leave when thread can't be created
     CreateThread();
 }
 
 SymbEventLoop::~SymbEventLoop()
 {
     Stop();
-
-    ::pthread_cond_destroy(&_startCond);
-    ::pthread_cond_destroy(&_cond);
-    ::pthread_mutex_destroy(&_mutex);
 }
 
 void SymbEventLoop::RunL()
@@ -71,7 +66,7 @@ void SymbEventLoop::RunL()
     if (iStatus.Int() == KErrNone)
     {
         ProcessEvents();    
-        Watch();
+        WaitForEvents();
     }
 }
 
@@ -81,15 +76,15 @@ void SymbEventLoop::DoCancel()
     User::RequestComplete(status, KErrCancel);
 }
 
-void SymbEventLoop::Watch()
+void SymbEventLoop::WaitForEvents()
 {
-    if (_running)
+    if (IsRunning())
     {
-        ::pthread_mutex_lock(&_mutex);
+        _mutex.lock();
         iStatus = KRequestPending;
         SetActive();        
-        ::pthread_cond_signal(&_cond);
-        ::pthread_mutex_unlock(&_mutex);            
+        _cond.signal();
+        _mutex.unlock();
     }
 }
 
@@ -100,9 +95,9 @@ bool SymbEventLoop::CreateThread()
     
     if (!rc)
     {
-        ::pthread_mutex_lock(&_mutex);
-        ::pthread_cond_wait(&_startCond, &_mutex);
-        ::pthread_mutex_unlock(&_mutex);
+        _mutex.lock();
+        _startCond.wait(_mutex);
+        _mutex.unlock();
         return true;
     }
 
@@ -120,16 +115,16 @@ bool SymbEventLoop::Start()
 
 bool SymbEventLoop::Stop()
 {
-    if (!_running)
+    if (!IsRunning())
         return false;
     
-    _running = false;
+    SetRunning(false);
 
     Wake();
     
     Deque();
     
-    ::pthread_cond_signal(&_cond);
+    _cond.signal();
     
     int rc = ::pthread_join(_thread, NULL);
 
@@ -182,11 +177,11 @@ void SymbEventLoop::QueueEvent(const Pt::Event& event)
 
 void SymbEventLoop::Wake()
 {
-    //Pt::System::MutexLock lock( _wakeMutex );
+    //Pt::System::MutexLock lock(_queueMutex);
     
-    //_wakeMutexCond.signal();
-    
-    _selector.wake();
+    //_selector.wake();
+
+    _wakeCondition.signal();
 }
 
 void SymbEventLoop::ProcessQueuedEvents()
@@ -217,7 +212,7 @@ void SymbEventLoop::ProcessEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
 
-    while ( true == _running )
+    while ( IsRunning() )
     {
         _queueMutex.lock();
 
@@ -255,26 +250,25 @@ void SymbEventLoop::EventLoopThread()
     RThread thread;
     thread.Open(_mainThreadId);
     
-    _running = true;
-        
-    ::pthread_cond_signal(&_startCond);
+    SetRunning(true);
+    
+    _startCond.signal();
 
-    while (_running)
+    while (IsRunning())
     {
-        //_wakeMutex.lock();
-
-        ::pthread_mutex_lock(&_mutex);
-        ::pthread_cond_wait(&_cond, &_mutex);
+        _mutex.lock();
+        _cond.wait(_mutex);
         
         _queueMutex.lock();
 
-        if (_eventQueue.empty() && _running)
+        if (_eventQueue.empty() && IsRunning())
         {
             _queueMutex.unlock();
 
-            //_wakeMutexCond.wait(_wakeMutex);
-
-            _selector.wait(Pt::System::Selector::WaitInfinite);
+            _wakeMutex.lock();
+            _wakeCondition.wait(_wakeMutex);
+            _wakeMutex.unlock();
+            //_selector.wait(Pt::System::Selector::WaitInfinite);
         }
         else
         {
@@ -285,17 +279,26 @@ void SymbEventLoop::EventLoopThread()
         TRequestStatus* status = &iStatus;
         if (*status == KRequestPending)
         {
-            thread.RequestComplete(status, KErrNone);
+            thread.RequestComplete(status, 
+                    IsRunning() ? KErrNone : KErrCompletion);
         }            
 
-        ::pthread_mutex_unlock(&_mutex);        
-        //_wakeMutex.unlock();
+        _mutex.unlock();    
     }
 
-    ::pthread_mutex_lock(&_mutex);
-    _running = false;
-    ::pthread_mutex_unlock(&_mutex);
-
+    SetRunning(false);
+    
     thread.Close();
 }
 
+void SymbEventLoop::SetRunning(bool running)
+{
+    Pt::System::MutexLock lock(_runningMutex);
+    _running = running;
+}
+
+bool SymbEventLoop::IsRunning()
+{
+    Pt::System::MutexLock lock(_runningMutex);
+    return _running;
+}
