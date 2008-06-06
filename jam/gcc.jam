@@ -5,6 +5,11 @@
 rule TryCompile
 {
     local _cc = $(1) ;
+    if $(TOOLSET_ROOT)
+    {
+        _cc = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH)$(_cc) ;
+    }
+
     local _prog = $(2) ;
     local _flags = $(3) ;
     local _l = $(4) ;
@@ -30,18 +35,24 @@ rule TryC++
 # Tools and utilities
 ##############################################################################
 
-TOOLSET_ROOT = "" ;
-
-if $(MINGW)
+if $(CONFIGURE)
 {
-    MINGW = $(MINGW:J=" ") ;
-    TOOLSET_ROOT = $(MINGW)$(SLASH)bin$(SLASH) ;
+    if $(TOOLSET_ROOT)
+    {
+        Configure TOOLSET_ROOT : $(TOOLSET_ROOT:J=" ") ;
+        Echo "Checking for TOOLSET_ROOT directory..." $(TOOLSET_ROOT) ;
+    }
+    else
+    {
+        Echo "Checking for TOOLSET_ROOT directory... default path" ;
+    }
 }
 
-CC     = $(TOOLSET_ROOT)gcc ;
-C++    = $(TOOLSET_ROOT)g++ ;
-RANLIB = $(TOOLSET_ROOT)ranlib ;
-AR     = $(TOOLSET_ROOT)ar ru ;
+GCC_ROOT = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+CC     = $(GCC_ROOT)gcc ;
+C++    = $(GCC_ROOT)g++ ;
+RANLIB = $(GCC_ROOT)ranlib ;
+AR     = $(GCC_ROOT)ar ru ;
 LINK   = $(C++) ;
 
 ##############################################################################
@@ -50,6 +61,9 @@ LINK   = $(C++) ;
 
 if $(CONFIGURE)
 {
+    ConfigureCc WITH_GCC_FLAG_PSEUDO_RELOC : "int main() { return 0; }"
+                                           : "-Wl,--enable-runtime-pseudo-reloc" ;
+
     ConfigureCc WITH_GCC_FLAG_VISIBILITY  : "int main() { return 0; }"
                                           : "-fvisibility-inlines-hidden -fvisibility=hidden" ;
 
@@ -67,6 +81,11 @@ if $(CONFIGURE)
 
     ConfigureCc WITH_GCC_FLAG_SHARED : "int main() { return 0; }"
                                      : "-shared" ;
+}
+
+if $(WITH_GCC_FLAG_PSEUDO_RELOC)
+{
+    LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
 }
 
 if $(WITH_GCC_FLAG_VISIBILITY)
