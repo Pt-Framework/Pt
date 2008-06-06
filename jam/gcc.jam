@@ -62,10 +62,10 @@ if $(TOOLSET_DIR)
     TOOLSET_DIR = $(TOOLSET_DIR:J=" ")$(SLASH) ;
 }
 
-CC     = $(TOOLSET_DIR)$(SLASH)gcc ;
-C++    = $(TOOLSET_DIR)$(SLASH)g++ ;
-RANLIB = $(TOOLSET_DIR)$(SLASH)ranlib ;
-AR     = $(TOOLSET_DIR)$(SLASH)ar ru ;
+CC     = $(TOOLSET_DIR)gcc ;
+C++    = $(TOOLSET_DIR)g++ ;
+RANLIB = $(TOOLSET_DIR)ranlib ;
+AR     = $(TOOLSET_DIR)ar ru ;
 LINK   = $(C++) ;
 
 ##############################################################################
