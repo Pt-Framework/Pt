@@ -5,13 +5,10 @@
 rule TryCompile
 {
     local _cc = $(1) ;
-    if $(TOOLSET_ROOT)
-    {
-        TOOLSET_DIR = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-    }
+
     if $(TOOLSET_DIR)
     {
-        _cc = $(TOOLSET_DIR:J=" ")$(SLASH)$(_cc) ;
+        _cc = $(TOOLSET_DIR:J=" ")$(_cc) ;
     }
 
     local _prog = $(2) ;
@@ -43,23 +40,14 @@ if $(CONFIGURE)
 {
     if $(TOOLSET_ROOT)
     {
-        Configure TOOLSET_ROOT : $(TOOLSET_ROOT:J=" ") ;
-        Echo "Checking for TOOLSET_ROOT directory..." $(TOOLSET_ROOT) ;
+        Configure TOOLSET_DIR : $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+        Echo "Checking for TOOLSET_DIR directory..." $(TOOLSET_DIR) ;
     }
     else if $(TOOLSET_DIR)
     {
-        Configure TOOLSET_DIR : $(TOOLSET_DIR:J=" ") ;
+        Configure TOOLSET_DIR : $(TOOLSET_DIR:J=" ")$(SLASH) ;
         Echo "Checking for TOOLSET_DIR directory..." $(TOOLSET_DIR) ;
     }
-}
-
-if $(TOOLSET_ROOT)
-{
-    TOOLSET_DIR = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-}
-if $(TOOLSET_DIR)
-{
-    TOOLSET_DIR = $(TOOLSET_DIR:J=" ")$(SLASH) ;
 }
 
 CC     = $(TOOLSET_DIR:E="")gcc ;
