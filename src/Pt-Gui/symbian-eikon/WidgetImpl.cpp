@@ -61,6 +61,7 @@ public:
         const CFont* _nativeFont; 
         int _drawingActive;
         int _references;
+        TRect _clipRect;
     };
     
     // Constructors and destructor
@@ -157,7 +158,7 @@ public:
         {            
             graphicContext._gc = &SystemGc();
             graphicContext._device = iEikonEnv->ScreenDevice();
-            graphicContext._nativeFont = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
+            graphicContext._nativeFont = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
             if (!graphicContext._drawingActive)
             {
                 ActivateGc();
@@ -169,10 +170,16 @@ public:
             {
                 TPoint p = AbsolutePosition();
                 TRect rc(p, Rect().Size());
+                rc.iBr.iX++;
+                rc.iBr.iY++;
+                graphicContext._clipRect = rc;
                 graphicContext._gc->SetClippingRect(rc);
             }
             else
+            {
+                graphicContext._clipRect = TRect(0, 0, 0, 0);
                 graphicContext._gc->CancelClippingRect();
+            }
             graphicContext._references = 1;
         }
         else
@@ -506,7 +513,7 @@ void WidgetImpl::construct()
     
     if (Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
     {
-        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi();
+        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi();
         // TODO: Handle leave
         CControl* control = new (ELeave)CControl(*this);
 
@@ -560,11 +567,16 @@ void WidgetImpl::construct()
 
 void WidgetImpl::destruct()
 {
-    assert(Pt::Gui::ApplicationImpl::_self);        
+    // got backend but no application instance running?
+    // => invalid state
+    if (_control && !Pt::Gui::ApplicationImpl::_self)
+        assert(false);        
 
-    if (_control && Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
+    if (_control && 
+        Pt::Gui::ApplicationImpl::_self &&
+        Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
     {
-        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi();
+        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi();
         ui.RemoveFromStack(_control); 
     }
 
@@ -572,7 +584,9 @@ void WidgetImpl::destruct()
     {
         delete _control;    
         _control = 0;
-    }    
+    }
+    
+    _painter.destructResources();
 }
 
 void WidgetImpl::dispatchEvent(Pt::Event& event)
@@ -590,12 +604,8 @@ void WidgetImpl::beginDraw()
     _painter.setGc(graphicContext._gc);
     _painter.setDevice(graphicContext._device);
     _painter.setNativeFont(graphicContext._nativeFont);    
-
-    TPoint offset(0, 0);
-    if (isConstructed())
-        offset = _control->AbsolutePosition();
-    
-    _painter.setOffset(offset);
+    _painter.setOffset(_control->AbsolutePosition());
+    _painter.setClipRect(graphicContext._clipRect);
 }
 
 void WidgetImpl::endDraw()
@@ -603,8 +613,9 @@ void WidgetImpl::endDraw()
     _painter.setGc(0);    
     _painter.setNativeFont(0);
     _painter.setDevice(0);
-    _painter.setOffset(TPoint(0,0));
-
+    _painter.setOffset(TPoint(0, 0));
+    _painter.setClipRect(TRect(0, 0, 0, 0));
+    
     if (!isConstructed())
         return;
 

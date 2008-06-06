@@ -1,0 +1,16 @@
+SubDir TOP src Pt-Gui symbian-eikon ;
+SubDirHdrs $(TOP)/include ;
+
+Library Pt-Gui-symbian-eikon : ApplicationImpl.cpp
+                               PainterImpl.cpp
+                               PixmapImpl.cpp
+                               PixmapPainter.cpp
+                               WidgetImpl.cpp
+                               WidgetPainter.cpp
+                               SymbApp.cpp
+                               SymbAppUi.cpp
+                               SymbDoc.cpp
+                               SymbEventLoop.cpp
+                               ;
+
+Library_MakeLocate Pt-Gui-symbian-eikon : $(OUTPUT_TARGET) ;

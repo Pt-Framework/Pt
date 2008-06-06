@@ -36,8 +36,8 @@ public:
     
     virtual ~SymbDoc();
     
-    CEikApplication& GetParentApp() { return _parentApp; }
-    SymbAppUi& GetAppUi() { return *_appUi; }
+    CEikApplication& ParentApp() { return _parentApp; }
+    SymbAppUi& AppUi() { return *_appUi; }
   
 private:
     SymbDoc(CEikApplication& app);

@@ -118,7 +118,13 @@ ApplicationImpl::ApplicationImpl(Application& app)
     // This only created an event loop, it's not being run until
     // the view has been created
     // The view will also stop the event loop
-    _eventLoop = SymbEventLoop::NewL(*this);
+    TRAPD(createError, _eventLoop = SymbEventLoop::NewL(*this));
+    if (createError != KErrNone)
+    {
+        delete _symbApp;
+        unlockAppInstance();
+        throw std::runtime_error("Event loop creation failed" + PT_SOURCEINFO);
+    }
 }
 
 ApplicationImpl::~ApplicationImpl()
@@ -170,7 +176,7 @@ void ApplicationImpl::dispatchEvent(const Pt::Event& event)
         // since the application is going to exit the event we're getting
         // will not be deleted, we NEED to do it here
         delete &event;
-        _symbApp->GetDocument().GetAppUi().Exit(); 
+        _symbApp->Document().AppUi().Exit(); 
         return;
     }
 

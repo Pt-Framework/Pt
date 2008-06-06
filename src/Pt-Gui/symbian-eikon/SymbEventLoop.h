@@ -106,6 +106,9 @@ private:
     //! @brief Private second constructor (Symbian two phase construction). Might leave.
     void ConstructL();    
 
+    //! @brief Destroy events which are still in queue but don't dispatch them.
+    void DrainQueue();
+    
     //! @brief Process events which have been queued without checking whether event loop is running.
     void ProcessQueuedEvents();
     

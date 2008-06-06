@@ -41,6 +41,8 @@ class CGraphicsDevice;
 class CFont;
 class CFbsBitmap;
 
+#include <e32std.h>
+
 namespace Pt {
 
 namespace Gui {
@@ -60,6 +62,10 @@ namespace Gui {
 
             virtual ~PainterImpl();
 
+            // will be called from Widget/Pixmap when the connection
+            // to the window/font server is about to be destroyed
+            void destructResources();
+            
             virtual void begin();
 
             virtual void end();
@@ -116,6 +122,7 @@ namespace Gui {
             void setDevice(const CGraphicsDevice* device) { _device = device; }
             void setNativeFont(const CFont* font) { _nativeFont = font; }
             void setOffset(const TPoint& offset) { _offset = offset; }
+            void setClipRect(const TRect& clipRect) { _clipRect = clipRect; }
             
         protected:
             template <typename Iterator>
@@ -143,6 +150,7 @@ namespace Gui {
             const CGraphicsDevice* _device;
             const CFont* _nativeFont;
             TPoint _offset;
+            TRect _clipRect;
             
             // TODO: Use auto_ptr
             CFbsBitmap* _brushBitmap;

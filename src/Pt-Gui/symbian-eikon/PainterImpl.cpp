@@ -42,6 +42,7 @@ PainterImpl::PainterImpl()
 , _device(0)
 , _nativeFont(0)
 , _offset(0, 0)
+, _clipRect(0, 0, 0, 0)
 , _brushBitmap(0)
 , _drawBitmap(0)
 {
@@ -53,6 +54,23 @@ PainterImpl::~PainterImpl()
         delete _brushBitmap;
     if (_drawBitmap)
         delete _drawBitmap;
+}
+
+void PainterImpl::destructResources()
+{
+    assert(!_gc);
+    
+    if (_brushBitmap)
+    {
+        delete _brushBitmap;
+        _brushBitmap = 0;
+    }
+    
+    if (_drawBitmap)
+    {
+        delete _drawBitmap;
+        _drawBitmap = 0;
+    }
 }
 
 void PainterImpl::begin()
@@ -187,9 +205,31 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     _gc->DrawText(desc, SymbianTools::makeTPoint(to) + _offset);
 }
 
+static void translatePoints(const Math::Point* points, const size_t pointCount, 
+        std::vector<TPoint>& points_, const TPoint& offset)
+{
+    for (size_t i = 0; i < pointCount; i++)
+    {
+        TPoint point(SymbianTools::makeTPoint(points[i]));
+        point+=offset;
+        points_.push_back(point);
+    }    
+}
+
 void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCount)
 {
+    if (!ensureActiveContext())
+        return;
 
+    std::vector<TPoint> points_;
+    for (size_t i = 0; i < pointCount; i++)
+    {
+        TPoint point(SymbianTools::makeTPoint(points[i]));
+        point+=_offset;
+        points_.push_back(point);
+    }   
+    
+    _gc->DrawPolyLine(&points_[0], pointCount);
 }
 
 
@@ -233,7 +273,7 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
     TRect rect = SymbianTools::makeTRect(topLeft, size);
     rect.Move(-1, -1);
     rect.Grow(1, 1);
-    rect.Move(_offset.iX, _offset.iY);
+    rect.Move(_offset);
     _gc->DrawEllipse(rect);    
     // restore pen
     updatePen();
@@ -241,6 +281,18 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
 
 void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount)
 {
+    if (!ensureActiveContext())
+        return;
+
+    std::vector<TPoint> points_;
+    for (size_t i = 0; i < pointCount; i++)
+    {
+        TPoint point(SymbianTools::makeTPoint(points[i]));
+        point+=_offset;
+        points_.push_back(point);
+    }   
+    
+    _gc->DrawPolygon(&points_[0], pointCount);    
 }
 
 void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
@@ -267,8 +319,8 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
     if (!bitmap)
         return;
     
-    TRect rect(SymbianTools::makeTRect(to, pm.size()));
-    rect.Move(_offset.iX, _offset.iY);
+    TRect rect(SymbianTools::makeTRect(to, pmRegion.size()));
+    rect.Move(_offset);
     TRect pmRect(SymbianTools::makeTRect(pmRegion));
     _gc->DrawBitmap(rect, bitmap, pmRect);
 }
@@ -465,76 +517,6 @@ bool PainterImpl::ensureActiveContext()
     }
     return true;
 }
-
-//PainterImpl::DrawLine::DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen)
-//: _from(from)
-//, _to(to)
-//, _pen(pen)
-//{
-//}
-//
-//
-//PainterImpl::DrawLine::~DrawLine()
-//{
-//}
-//
-//
-//void PainterImpl::DrawLine::paint()
-//{
-//}
-//
-//
-//PainterImpl::DrawRect::DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen)
-//: _rect(rect)
-//, _pen(pen)
-//{
-//}
-//
-//
-//PainterImpl::DrawRect::~DrawRect()
-//{
-//
-//}
-//
-//
-//void PainterImpl::DrawRect::paint()
-//{
-//}
-//
-//
-//PainterImpl::DrawPixmap::DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region)
-//: _to(to)
-//, _region(region)
-//{
-//}
-//
-//
-//PainterImpl::DrawPixmap::~DrawPixmap()
-//{
-//}
-//
-//
-//void PainterImpl::DrawPixmap::paint()
-//{ 
-//}
-//
-//
-//PainterImpl::FillRect::FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush)
-//: _rect(rect)
-//, _brush(brush)
-//{
-//
-//}
-//
-//PainterImpl::FillRect::~FillRect()
-//{
-//
-//}
-//
-//
-//void PainterImpl::FillRect::paint()
-//{
-//}
 
 } // namespace Gui
 

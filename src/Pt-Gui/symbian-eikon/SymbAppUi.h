@@ -45,7 +45,7 @@ public:
 
     void SetParentDoc(class SymbDoc* parentDoc);
     
-    Pt::Gui::ApplicationImpl& GetApplicationImpl();
+    Pt::Gui::ApplicationImpl& ApplicationImpl();
     
     const CFont* Font() const { return _font; }
     
@@ -54,15 +54,13 @@ private:
 
     void HandleCommandL(TInt);
     
-    virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, 
-            TEventCode aType);
+    virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 
     void handleExit();
     
     bool HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset = 5);
     
     class SymbDoc* _parentDoc;
-    //Pt::Gui::Widget* _widget;
 
     CFont* _font;
     

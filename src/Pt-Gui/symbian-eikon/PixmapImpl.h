@@ -59,8 +59,6 @@ namespace Gui {
             void construct();
             void destruct();
 
-            PixmapImpl& operator =(const PixmapImpl& pimpl);
-            
         private:            
             Pt::Math::Size _size;
             PixmapPainter _painter;

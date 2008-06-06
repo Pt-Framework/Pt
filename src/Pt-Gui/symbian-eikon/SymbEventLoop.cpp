@@ -27,6 +27,9 @@
 
 SymbEventLoop* SymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
 {
+    // TODO: Apparently SymbEventLoop could leave AND throw a regular
+    // c++ exception due to Pt attributes. 
+    // This should be considered in the future.
     SymbEventLoop* self = new (ELeave) SymbEventLoop(appImpl);
     CleanupStack::PushL(self);
     self->ConstructL();
@@ -48,17 +51,17 @@ SymbEventLoop::SymbEventLoop(Pt::Gui::ApplicationImpl& appImpl)
 
 void SymbEventLoop::ConstructL()
 {
-    RThread thread;
-    _mainThreadId = thread.Id();
-    thread.Close();
+    _mainThreadId = RThread().Id();
     
-    // TODO: Leave when thread can't be created
-    CreateThread();
+    bool res = CreateThread();
+    if (!res)
+        User::Leave(KErrGeneral);
 }
 
 SymbEventLoop::~SymbEventLoop()
 {
     Stop();
+    DrainQueue();
 }
 
 void SymbEventLoop::RunL()
@@ -192,7 +195,7 @@ void SymbEventLoop::ProcessQueuedEvents()
     {
         _queueMutex.lock();
 
-        if( _eventQueue.empty() )
+        if (_eventQueue.empty())
         {
             _queueMutex.unlock();
             break;
@@ -212,11 +215,11 @@ void SymbEventLoop::ProcessEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
 
-    while ( IsRunning() )
+    while (IsRunning())
     {
         _queueMutex.lock();
 
-        if( _eventQueue.empty() )
+        if (_eventQueue.empty())
         {
             _queueMutex.unlock();
             break;
@@ -231,6 +234,22 @@ void SymbEventLoop::ProcessEvents()
         
         delete ev;
     }
+}
+
+void SymbEventLoop::DrainQueue()
+{
+    Pt::System::MutexLock lock(_queueMutex);
+
+    while (true)
+    {
+        if (_eventQueue.empty())
+            break;
+
+        Pt::Event* ev = _eventQueue.front();
+        _eventQueue.remove(ev);
+
+        delete ev;
+    }    
 }
 
 void* SymbEventLoop::EventLoopThreadEntry(void* threadID)

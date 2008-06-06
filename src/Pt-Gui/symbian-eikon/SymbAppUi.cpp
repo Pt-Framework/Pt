@@ -120,13 +120,13 @@ void SymbAppUi::ConstructL()
     _cursorControl->SetMopParent(this);
         
     // run event loop 
-    GetApplicationImpl().eventLoop().Start();
-    GetApplicationImpl().eventLoop().WaitForEvents();
+    ApplicationImpl().eventLoop().Start();
+    ApplicationImpl().eventLoop().WaitForEvents();
 }
 
 SymbAppUi::~SymbAppUi()
 {
-    GetApplicationImpl().eventLoop().Stop();
+    ApplicationImpl().eventLoop().Stop();
     
     RemoveFromStack(_cursorControl);
     delete _cursorControl;
@@ -148,9 +148,9 @@ void SymbAppUi::SetParentDoc(SymbDoc* parentDoc)
     _parentDoc = parentDoc;
 }
 
-Pt::Gui::ApplicationImpl& SymbAppUi::GetApplicationImpl()
+Pt::Gui::ApplicationImpl& SymbAppUi::ApplicationImpl()
 {
-    Pt::Gui::ApplicationImpl* appImpl = static_cast<SymbApp&>(_parentDoc->GetParentApp()).GetApplicationImpl();
+    Pt::Gui::ApplicationImpl* appImpl = static_cast<SymbApp&>(_parentDoc->ParentApp()).ApplicationImpl();
     assert(appImpl);
     return *appImpl;
 }

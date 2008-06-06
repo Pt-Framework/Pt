@@ -22,6 +22,14 @@
 #include "SymbDoc.h"
 #include "ApplicationImpl.h"
 
+const TUid KUidsymbian = { 0x0D7113C1 };
+
+// TODO: Find solution for delivering/setting UID
+TUid SymbApp::AppDllUid() const 
+{ 
+    return KUidsymbian; 
+}
+
 CApaDocument* SymbApp::CreateDocumentL() 
 { 
     // there is only one document, we should remember it for further

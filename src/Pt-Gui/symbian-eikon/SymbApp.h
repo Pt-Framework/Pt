@@ -28,8 +28,6 @@ class ApplicationImpl;
 }
 }
 
-const TUid KUidsymbian = { 0x0D7113C1 };
-
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // IMPORTANT NOTE:
 // ALL Symbian classes have to reside in the global namespace
@@ -37,30 +35,29 @@ const TUid KUidsymbian = { 0x0D7113C1 };
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 class SymbApp : public CAknApplication
 {
-private:        
-    CApaDocument* CreateDocumentL();
-    
-    // TODO: Find solution for delivering/setting UID
-    TUid AppDllUid() const 
-    { 
-        return KUidsymbian; 
-    }
-
-    Pt::Gui::ApplicationImpl* _appImpl;
-    class SymbDoc* _document;
-    
 public:
-    SymbApp(Pt::Gui::ApplicationImpl* appImpl) : _appImpl(appImpl), _document(0)
+    SymbApp(Pt::Gui::ApplicationImpl* appImpl) 
+    : _appImpl(appImpl)
+    , _document(0)
     {
     }
     
     virtual TFileName ResourceFileName() const;
     
-    SymbDoc& GetDocument() { return *_document; }
+    class SymbDoc& Document() { return *_document; }
 
-    Pt::Gui::ApplicationImpl* GetApplicationImpl() { return _appImpl; }
+    Pt::Gui::ApplicationImpl* ApplicationImpl() { return _appImpl; }
     
     bool HasInitialized() const { return _document != 0; }
+
+private:        
+    CApaDocument* CreateDocumentL();
+    
+    // TODO: Find solution for delivering/setting UID
+    TUid AppDllUid() const;
+
+    Pt::Gui::ApplicationImpl* _appImpl;
+    SymbDoc* _document;    
 };
 
 #endif /*SYMBAPP_H_*/

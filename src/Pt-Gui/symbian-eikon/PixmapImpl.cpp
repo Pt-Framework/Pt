@@ -78,7 +78,7 @@ void PixmapImpl::beginDraw()
         _painter.setDevice(_bitmapDevice);
         
         assert(Pt::Gui::ApplicationImpl::_self);        
-        const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
+        const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
         _painter.setNativeFont(font);
         _bitmapGc->UseFont(font);
         //_bitmapDevice->DrawingBegin(ETrue);
@@ -92,7 +92,7 @@ void PixmapImpl::beginDraw()
             _painter.setDevice(_bitmapDevice);
 
             assert(Pt::Gui::ApplicationImpl::_self);        
-            const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->GetDocument().GetAppUi().Font();
+            const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
             _painter.setNativeFont(font);
             _bitmapGc->UseFont(font);
             //_bitmapDevice->DrawingBegin(ETrue);
@@ -167,11 +167,8 @@ void PixmapImpl::destruct()
         delete _bitmapGc;
         _bitmapGc = 0;
     }
-}
-
-PixmapImpl& PixmapImpl::operator =(const PixmapImpl& pimpl)
-{
-    return *this;
+    
+    _painter.destructResources();
 }
 
 } // namespace Gui
