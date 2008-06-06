@@ -19,6 +19,12 @@ ConfigureC++ WITH_WINMM : "#include <windows.h>"
                         : ""
                         : winmm.lib ;
 
+ConfigureC++ WITH_GNU_WINMM : "#include <windows.h>"
+                             "#include <mmsystem.h>"
+                             "int main() { return timeGetTime(); }"
+                            : ""
+                            : "winmm" ; 
+
 ConfigureC++ WITH_MMTIMER : "#include <windows.h>"
                             "#include <mmsystem.h>"
                             "int main() { return timeGetTime(); }"
