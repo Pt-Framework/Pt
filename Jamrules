@@ -8,13 +8,15 @@ if $(TARGET_OS:L) = "nt"
     SYSLIBS = version.lib Winmm.lib Psapi.lib ;
     NETLIBS = wsock32.lib ws2_32.lib ;
 
-    if $(MINGW)
+    if $(MINGW) || $(TOOLSET) = "gcc"
     {
-        SYSLIBS = $(MINGW)$(SLASH)lib$(SLASH)libversion.a
-                  $(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
-                  $(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
-        NETLIBS = $(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
-                  $(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
+        SYSLIBS = -lversion -lwinmm -lpsapi ; 
+                  #$(MINGW)$(SLASH)lib$(SLASH)libversion.a
+                  #$(MINGW)$(SLASH)lib$(SLASH)libwinmm.a
+                  #$(MINGW)$(SLASH)lib$(SLASH)libpsapi.a ;
+        NETLIBS = -lwsock32 -lws2_32 ;
+                  #$(MINGW)$(SLASH)lib$(SLASH)libwsock32.a
+                  #$(MINGW)$(SLASH)lib$(SLASH)libws2_32.a ;
     }
 }
 if $(TARGET_OS:L) = "linux"
@@ -77,10 +79,11 @@ if $(GUI:L) = "gdi"
     {
         GUILIBS = gdi32.lib user32.lib ;
     }
-    if $(MINGW)
+    if $(MINGW) || $(TOOLSET) = "gcc"
     {
-        GUILIBS = $(MINGW)$(SLASH)lib$(SLASH)libgdi32.a
-                  $(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
+        GUILIBS = -lgdi32 -luser32 ;
+                  #$(MINGW)$(SLASH)lib$(SLASH)libgdi32.a
+                  #$(MINGW)$(SLASH)lib$(SLASH)libuser32.a  ;
     }
 }
 
