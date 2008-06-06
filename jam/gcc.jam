@@ -6,9 +6,9 @@ rule TryCompile
 {
     local _cc = $(1) ;
 
-    if $(TOOLSET_DIR)
+    if $(TOOLSET_PATH)
     {
-        _cc = $(TOOLSET_DIR:J=" ")$(_cc) ;
+        _cc = $(TOOLSET_PATH:J=" ")$(_cc) ;
     }
 
     local _prog = $(2) ;
@@ -40,20 +40,20 @@ if $(CONFIGURE)
 {
     if $(TOOLSET_ROOT)
     {
-        Configure TOOLSET_DIR : $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-        Echo "Checking for TOOLSET_DIR directory..." $(TOOLSET_DIR) ;
+        Configure TOOLSET_PATH : $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+        Echo "Checking for TOOLSET_PATH..." $(TOOLSET_PATH) ;
     }
-    else if $(TOOLSET_DIR)
+    else if $(TOOLSET_PATH)
     {
-        Configure TOOLSET_DIR : $(TOOLSET_DIR:J=" ")$(SLASH) ;
-        Echo "Checking for TOOLSET_DIR directory..." $(TOOLSET_DIR) ;
+        Configure TOOLSET_PATH : $(TOOLSET_PATH:J=" ")$(SLASH) ;
+        Echo "Checking for TOOLSET_PATH..." $(TOOLSET_PATH) ;
     }
 }
 
-CC     = $(TOOLSET_DIR:E="")gcc ;
-C++    = $(TOOLSET_DIR:E="")g++ ;
-RANLIB = $(TOOLSET_DIR:E="")ranlib ;
-AR     = $(TOOLSET_DIR:E="")ar ru ;
+CC     = $(TOOLSET_PATH:E="")gcc ;
+C++    = $(TOOLSET_PATH:E="")g++ ;
+RANLIB = $(TOOLSET_PATH:E="")ranlib ;
+AR     = $(TOOLSET_PATH:E="")ar ru ;
 LINK   = $(C++) ;
 
 ##############################################################################
