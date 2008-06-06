@@ -7,7 +7,11 @@ rule TryCompile
     local _cc = $(1) ;
     if $(TOOLSET_ROOT)
     {
-        _cc = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH)$(_cc) ;
+        TOOLSET_DIR = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+    }
+    if $(TOOLSET_DIR)
+    {
+        _cc = $(TOOLSET_DIR:J=" ")$(SLASH)$(_cc) ;
     }
 
     local _prog = $(2) ;
@@ -42,17 +46,26 @@ if $(CONFIGURE)
         Configure TOOLSET_ROOT : $(TOOLSET_ROOT:J=" ") ;
         Echo "Checking for TOOLSET_ROOT directory..." $(TOOLSET_ROOT) ;
     }
-    else
+    else if $(TOOLSET_DIR)
     {
-        Echo "Checking for TOOLSET_ROOT directory... default path" ;
+        Configure TOOLSET_DIR : $(TOOLSET_DIR:J=" ") ;
+        Echo "Checking for TOOLSET_DIR directory..." $(TOOLSET_DIR) ;
     }
 }
 
-GCC_ROOT = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
-CC     = $(GCC_ROOT)gcc ;
-C++    = $(GCC_ROOT)g++ ;
-RANLIB = $(GCC_ROOT)ranlib ;
-AR     = $(GCC_ROOT)ar ru ;
+if $(TOOLSET_ROOT)
+{
+    TOOLSET_DIR = $(TOOLSET_ROOT:J=" ")$(SLASH)bin$(SLASH) ;
+}
+if $(TOOLSET_DIR)
+{
+    TOOLSET_DIR = $(TOOLSET_DIR:J=" ")$(SLASH) ;
+}
+
+CC     = $(TOOLSET_DIR)$(SLASH)gcc ;
+C++    = $(TOOLSET_DIR)$(SLASH)g++ ;
+RANLIB = $(TOOLSET_DIR)$(SLASH)ranlib ;
+AR     = $(TOOLSET_DIR)$(SLASH)ar ru ;
 LINK   = $(C++) ;
 
 ##############################################################################
