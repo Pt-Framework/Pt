@@ -30,6 +30,17 @@ namespace Pt {
 
 namespace System {
 
+
+SymbolNotFound::SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si)
+: SystemError("symbol not found: " + sym, si)
+, _symbol(sym)
+{ }
+
+
+SymbolNotFound::~SymbolNotFound() throw()
+{ }
+
+
 SharedLib::SharedLib()
 : _impl(0)
 {

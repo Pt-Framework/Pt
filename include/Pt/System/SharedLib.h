@@ -19,13 +19,31 @@
 #ifndef PT_SYSTEM_SHAREDLIB_H
 #define PT_SYSTEM_SHAREDLIB_H
 
-#include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/SystemError.h>
 #include <string>
 
 namespace Pt {
 
 namespace System {
+
+/** @brief Thrown, when a symbol is not found in a library
+*/
+class PT_SYSTEM_API SymbolNotFound : public SystemError
+{
+    std::string _symbol;
+
+    public:
+        SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si);
+
+        //! @brief Destructor
+        ~SymbolNotFound() throw();
+
+        //! @brief Returns the symbol, which was not found
+        const std::string& symbol() const
+        { return _symbol; }
+};
 
 /** @brief Shared library loader
 

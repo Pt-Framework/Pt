@@ -21,6 +21,7 @@
 #ifndef PT_SHAREDLIBIMPL_H
 #define PT_SHAREDLIBIMPL_H
 
+#include "Pt/RefCounted.h"
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/SystemError.h"
 #include <string>
@@ -30,7 +31,7 @@ namespace Pt {
 
 namespace System {
 
-class SharedLibImpl
+class SharedLibImpl : public RefCounted
 {
     public:
         SharedLibImpl()
