@@ -79,8 +79,9 @@ class SharedLibImpl
             int flags = RTLD_NOW | RTLD_GLOBAL;
 
             _handle = ::dlopen(path.c_str(), flags);
-            if( !_handle ) {
-                throw SystemError(dlerror(), PT_SOURCEINFO);
+            if( !_handle )
+            {
+                throw OpenLibraryFailed( dlerror(), PT_SOURCEINFO );
             }
         }
 
@@ -88,8 +89,7 @@ class SharedLibImpl
         {
             if(_handle)
             {
-                void* p =  ::dlsym(_handle, symbol);
-                return p;
+                return ::dlsym(_handle, symbol);
             }
 
             return 0;

@@ -49,9 +49,8 @@ class SharedLibImpl
 
         ~SharedLibImpl() throw()
         {
-            if(_handle != 0) {
+            if(_handle != 0)
                 ::FreeLibrary(_handle);
-            }
         }
 
         Pt::atomic_t refs() const
@@ -71,9 +70,8 @@ class SharedLibImpl
 
         void open(const std::string& path)
         {
-            if(_handle != 0) {
+            if(_handle != 0)
                 return;
-            }
 
             std::basic_string<TCHAR> tpath = win32::fromMultiByte(path);
             _handle = ::LoadLibrary( tpath.c_str() );
@@ -82,15 +80,14 @@ class SharedLibImpl
             {
                 std::stringstream ss;
                 ss << "Could not open shared library " << path << " error " << GetLastError();
-                throw SystemError(ss.str(), PT_SOURCEINFO);
+                throw OpenLibraryFailed( ss.str(), PT_SOURCEINFO );
             }
         }
 
         void* resolve(const char* symbol)
         {
-            if(_handle == 0) {
+            if(_handle == 0)
                 return 0;
-            }
 
             std::basic_string<TCHAR> tsymbol = win32::fromMultiByte(symbol);
             return (void*) ( ::GetProcAddress( _handle, tsymbol.c_str() ) );

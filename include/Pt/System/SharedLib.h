@@ -31,6 +31,17 @@ class Symbol;
 
 /** @brief Thrown, when a symbol is not found in a library
 */
+class PT_SYSTEM_API OpenLibraryFailed : public SystemError
+{
+    public:
+        OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si);
+
+        //! @brief Destructor
+        ~OpenLibraryFailed() throw();
+};
+
+/** @brief Thrown, when a symbol is not found in a library
+*/
 class PT_SYSTEM_API SymbolNotFound : public SystemError
 {
     std::string _symbol;
