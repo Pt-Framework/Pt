@@ -16,13 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "PainterImpl.h"
+
+#include "PainterImpl.h"
 #include "Pt/Gui/Painter.h"
 #include "Pt/Gfx/Rect.h"
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/Font.h"
 #include "Pt/Gfx/FontMetrics.h"
-
+
+
 namespace Pt {
 
 namespace Gui {
@@ -39,6 +41,11 @@ Painter::~Painter()
     if (_active) {
         _painterImpl->end();
     }
+// The symbian Impl tracks its own activation state
+// give it a chance to clean up internal context
+#ifdef __SYMBIAN32__
+    _painterImpl->cleanUp();    
+#endif
 }
 
 
@@ -172,7 +179,28 @@ void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 }
 
 
+void Painter::drawImage(const Math::Point& to, const Gfx::ARgb8888Image& image)
+{
+    if (image.empty()) {
+        return;  // Don't try to draw empty images.
+    }
+
+    this->begin();
+    _painterImpl->drawImage(to, image);
+}
+
 void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect)
+{
+    if (image.empty()) {
+        return;  // Don't try to draw empty images.
+    }
+
+    this->begin();
+    _painterImpl->drawImage(to, image, imageRect);
+}
+
+
+void Painter::drawImage(const Math::Point& to, const Gfx::ARgb8888Image& image, const Gfx::Region& imageRect)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.
@@ -202,6 +230,14 @@ void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
 
     this->begin();
     _painterImpl->drawPixmap(to, pm);
+}
+
+
+Pt::Gfx::ARgb8888Image& Painter::backBuffer()
+{
+    this->begin();
+    static Pt::Gfx::ARgb8888Image dummy;
+    return dummy;
 }
 
 
