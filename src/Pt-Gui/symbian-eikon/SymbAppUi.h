@@ -20,6 +20,8 @@
 #ifndef SYMBAPPUI_H_
 #define SYMBAPPUI_H_
 
+#include <Pt/Gui/KeyEvent.h>
+
 #include <aknappui.h>
 
 namespace Pt
@@ -56,9 +58,19 @@ private:
     
     virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 
-    void handleExit();
+    bool HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType);
+    bool HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType);
+    bool HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType);
     
+    void HandleExit();
+    
+    void DispatchFakePointerEvent(TPointerEvent& event);
     bool HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset = 5);
+
+    void RedrawWindows();
+    void DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
+            Pt::Gui::KeyEvent::KeyCode code,
+            wchar_t chr);
     
     class SymbDoc* _parentDoc;
 
@@ -66,7 +78,12 @@ private:
     
     class CCursorControl* _cursorControl;
 
+    // Flag that indicates if this is the first key event being produced
+    // (for each scancode)
     bool _firstKey[256];
+    // This table holds the virtual key code for each key being pressed
+    // (for each scancode)
+    TUint _keyDown[256];
 };
 
 #endif /*SYMBAPPUI_H_*/

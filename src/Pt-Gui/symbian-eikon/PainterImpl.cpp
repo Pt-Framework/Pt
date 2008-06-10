@@ -38,9 +38,13 @@ namespace Gui {
 
 PainterImpl::PainterImpl()
 : _font("sans-serif")
+, _oldPenRef(0)
+, _oldBrushRef(0)
+, _oldFontRef(0)
 , _gc(0)
 , _device(0)
 , _nativeFont(0)
+, _fontOwner(false)
 , _offset(0, 0)
 , _clipRect(0, 0, 0, 0)
 , _brushBitmap(0)
@@ -54,6 +58,19 @@ PainterImpl::~PainterImpl()
         delete _brushBitmap;
     if (_drawBitmap)
         delete _drawBitmap;
+}
+
+void PainterImpl::freeFont()
+{
+    if (_fontOwner && _nativeFont)
+    {
+        //assert(_coeEnv);
+        //_coeEnv->ReleaseScreenFont(const_cast<CFont*>(_nativeFont));
+        assert(_device);
+        _device->ReleaseFont(const_cast<CFont*>(_nativeFont));
+        _nativeFont = 0;
+        _fontOwner = false;
+    }    
 }
 
 void PainterImpl::destructResources()
@@ -71,20 +88,39 @@ void PainterImpl::destructResources()
         delete _drawBitmap;
         _drawBitmap = 0;
     }
+
+    freeFont();
 }
 
 void PainterImpl::begin()
 {
+    activateBrush();
+    activatePen();
+    activateFont();
 }
 
 void PainterImpl::end()
 {
+    if (_gc)
+    {
+        _gc->DiscardBrushPattern();       
+        _gc->DiscardFont();
+    }
+    
+    freeFont();
+    
+    _oldBrushRef = 0;
+    _oldPenRef = 0;
+    _oldFontRef = 0;
+}
+
+void PainterImpl::cleanUp()
+{    
 }
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
-    updatePen();
 }
 
 const Gfx::Pen& PainterImpl::pen() const
@@ -95,7 +131,6 @@ const Gfx::Pen& PainterImpl::pen() const
 void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
-    updateBrush();
 }
 
 
@@ -119,6 +154,8 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
     if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
         return Gfx::FontMetrics(0, 0, 0, 0); 
     
+    const_cast<PainterImpl*>(this)->activateFont();
+    
     return Gfx::FontMetrics(_nativeFont->AscentInPixels(), 
             _nativeFont->DescentInPixels(), 
             _nativeFont->MaxCharWidthInPixels(), 
@@ -130,7 +167,10 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
     if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
         return Gfx::FontMetrics(0, 0, 0, 0); 
 
-    TPtrC8 temp(reinterpret_cast<const TUint8*>(text.narrow().c_str()));
+    const_cast<PainterImpl*>(this)->activateFont();
+
+    std::string narrowString = text.narrow();
+    TPtrC8 temp(reinterpret_cast<const TUint8*>(narrowString.c_str()));
     // TODO: Find dynamic size solution
     TBuf<1024> desc;
     desc.Copy(temp);
@@ -142,8 +182,33 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 }
 
 const std::list<std::string>& PainterImpl::fontFamilyNames()
-{
-    static const std::list<std::string> _fontList;
+{ 
+    static std::list<std::string> _fontList;
+ 
+    if (_fontList.empty() && ensureActiveContext())
+    {
+        assert(_coeEnv);
+        
+        TInt numTypefaces = _coeEnv->ScreenDevice()->NumTypefaces();
+        TTypefaceSupport myTypefaceSupportNow;
+        for (TInt i = 0; i < numTypefaces; i++)
+        {
+            _coeEnv->ScreenDevice()->TypefaceSupport(myTypefaceSupportNow, i);
+            TTypeface& typeface = myTypefaceSupportNow.iTypeface;
+            
+            // construct string vector
+            std::vector<char> strVec;            
+            for (int j = 0; j < typeface.iName.Length(); ++j)
+            {
+                strVec.push_back((char)typeface.iName[j]);
+            }
+            strVec.push_back((char)0);
+            // convert string vector to std::string
+            std::string str((const char*)&strVec[0]);
+            
+            _fontList.push_back(str);
+        }
+    }
     return _fontList;
 }
 
@@ -153,6 +218,8 @@ void PainterImpl::drawPixel(const Math::Point& to)
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+    
     _gc->Plot(SymbianTools::makeTPoint(to) + _offset);
 }
 
@@ -161,6 +228,8 @@ void PainterImpl::drawLine(const Math::Point& from, const Math::Point& to)
     if (!ensureActiveContext())
         return;
     
+    activatePen();
+
     _gc->DrawLine(SymbianTools::makeTPoint(from) + _offset, 
             SymbianTools::makeTPoint(to) + _offset);
 }
@@ -171,6 +240,8 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
     if (!ensureActiveContext())
         return;
 
+    activatePen();    
+    
     TPoint p1(rect.x(), rect.y());
     TPoint p2(rect.x()+rect.width(), rect.y());
     TPoint p3(rect.x()+rect.width(), rect.y()+rect.height());
@@ -192,6 +263,9 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+    activateFont();
+    
     std::string narrowString = text.narrow();
     const TUint8* str = reinterpret_cast<const TUint8*>(narrowString.c_str());
     TPtrC8 temp(str);
@@ -200,8 +274,6 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     desc.Copy(temp);
 
     // make sure font is enabled
-    assert(_nativeFont);
-    _gc->UseFont(_nativeFont);
     _gc->DrawText(desc, SymbianTools::makeTPoint(to) + _offset);
 }
 
@@ -221,6 +293,8 @@ void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCoun
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+    
     std::vector<TPoint> points_;
     for (size_t i = 0; i < pointCount; i++)
     {
@@ -238,6 +312,8 @@ void PainterImpl::drawEllipse(const Math::Point& topLeft, const Math::Size& size
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+
     TRect rect(SymbianTools::makeTRect(topLeft, size));
     rect.Move(_offset.iX, _offset.iY);
     
@@ -252,6 +328,9 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+    activateBrush();
+
     // rect has got outline with pen color
     _gc->SetPenStyle(CGraphicsContext::ENullPen);
 
@@ -259,7 +338,7 @@ void PainterImpl::fillRect(const Gfx::Rect& rect)
     rect_.Move(_offset.iX, _offset.iY);
 
     _gc->DrawRect(rect_);
-    // restore pen
+    // force restore pen (we did change it)
     updatePen();
 }
 
@@ -268,6 +347,9 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
     if (!ensureActiveContext())
         return;
 
+    activatePen();
+    activateBrush();
+
     // ellipse has got outline with pen color
     _gc->SetPenStyle(CGraphicsContext::ENullPen);
     TRect rect = SymbianTools::makeTRect(topLeft, size);
@@ -275,7 +357,7 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
     rect.Grow(1, 1);
     rect.Move(_offset);
     _gc->DrawEllipse(rect);    
-    // restore pen
+    // force restore pen (we did change it)
     updatePen();
 }
 
@@ -283,6 +365,9 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
 {
     if (!ensureActiveContext())
         return;
+
+    activatePen();
+    activateBrush();
 
     std::vector<TPoint> points_;
     for (size_t i = 0; i < pointCount; i++)
@@ -400,6 +485,19 @@ void PainterImpl::updatePen()
     if (!ensureActiveContext())
         return;
     
+    _oldPenRef = 0;
+    
+    activatePen();
+}
+
+void PainterImpl::activatePen()
+{
+    if (_oldPenRef && *_oldPenRef == _pen)
+            return;
+    
+    if (!_gc)
+        return;
+
     Gfx::Rgb888Color col;
     assign(col, _pen.color());    
     _gc->SetPenColor(TRgb(col.red(), col.green(), col.blue()));
@@ -422,12 +520,28 @@ void PainterImpl::updatePen()
          
          default:
              return;
-     }    
+     }        
+
+    _oldPenRef = &_oldPen;
+    *_oldPenRef = _pen;
 }
 
 void PainterImpl::updateBrush()
 {
     if (!ensureActiveContext())
+        return;
+
+    _oldBrushRef = 0;
+
+    activateBrush();
+}
+
+void PainterImpl::activateBrush()
+{
+    if (_oldBrushRef && *_oldBrushRef == _brush)
+        return;
+
+    if (!_gc)
         return;
 
     switch (_brush.fillStyle()) 
@@ -500,11 +614,54 @@ void PainterImpl::updateBrush()
 
          default:
              return;
-     }    
+     }        
+
+    _oldBrushRef = &_oldBrush;
+    *_oldBrushRef = _brush;
 }
 
 void PainterImpl::updateFont()
 {
+    _oldFontRef = 0;
+
+    activateFont();
+}
+
+void PainterImpl::activateFont()
+{
+    if (_oldFontRef && *_oldFontRef == _font)
+        return;
+
+    if (!_gc)
+        return;
+    
+    if (!_coeEnv)
+        return;
+    
+    std::string narrowString = _font.name();
+    const TUint8* str = reinterpret_cast<const TUint8*>(narrowString.c_str());
+    TPtrC8 temp(str);
+    // TODO: Find dynamic size solution
+    TBuf<1024> desc;
+    desc.Copy(temp);
+
+    TFontSpec spec(desc, _device->VerticalPixelsToTwips(_font.size()));
+    // TODO: Handle leave
+    //_nativeFont = _coeEnv->CreateScreenFontL(spec);    
+    CFont* newFont = 0;
+    if (_device->GetNearestFontToDesignHeightInTwips(newFont, spec) == KErrNone && newFont)
+    {
+        freeFont();
+        _nativeFont = newFont;        
+        _fontOwner = true;
+    }
+    
+    assert(_nativeFont);
+    // old font is automatically discarded
+    _gc->UseFont(_nativeFont);
+
+    _oldFontRef = &_oldFont;
+    *_oldFontRef = _font;
 }
 
 bool PainterImpl::ensureActiveContext()

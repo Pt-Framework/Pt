@@ -57,7 +57,7 @@ public:
         }
         
         CGraphicsContext* _gc;
-        const CGraphicsDevice* _device;
+        CGraphicsDevice* _device;
         const CFont* _nativeFont; 
         int _drawingActive;
         int _references;
@@ -214,6 +214,11 @@ public:
         {
             assert(!graphicContext._gc);
         }
+        
+        // whenever the client area has changed we redraw the children
+        // to make sure they're visible
+        //for (int i = 0; i < CountComponentControls(); i++)
+        //    ComponentControl(i)->DrawDeferred();
     }
 
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent)
@@ -334,21 +339,53 @@ private:
         switch (aPointerEvent.iType)
         {
         case TPointerEvent::EButton1Down:
+        {
             button = Pt::Gui::MouseEvent::LeftButton;
-            action = Pt::Gui::MouseEvent::Press;                
+            action = Pt::Gui::MouseEvent::Press;                  
+            Pt::Gui::MouseEvent mouseEvent(
+                    apiWidget(), x, y, 
+                    button, action, modifiers
+                    );
+            _apiWidgetImpl.dispatchEvent(mouseEvent);        
             break;
-
+        }
+        
         case TPointerEvent::EButton1Up:
+        {
             button = Pt::Gui::MouseEvent::LeftButton;
             action = Pt::Gui::MouseEvent::Release;                
+            Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
+            _apiWidgetImpl.dispatchEvent(mouseEvent);        
             break;
+        }
+
+        case TPointerEvent::EDrag:
+        {
+            Pt::Gui::MouseMoveEvent mouseEvent(
+                    apiWidget(), x, y, 
+                    Pt::Gui::MouseMoveEvent::Moved, 
+                    Pt::Gui::MouseMoveEvent::LeftButtonDown
+                    );
+            _apiWidgetImpl.dispatchEvent(mouseEvent);        
+            break;
+        }
+        
+        case TPointerEvent::EMove:
+        {
+            Pt::Gui::MouseMoveEvent mouseEvent(
+                    apiWidget(), x, y, 
+                    Pt::Gui::MouseMoveEvent::Moved, 
+                    0
+                    );
+            _apiWidgetImpl.dispatchEvent(mouseEvent);        
+            break;
+        }
+
         default:
+            // TODO: Handle more mouse events
             return;
         }
 
-        Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
-
-        _apiWidgetImpl.dispatchEvent(mouseEvent);        
     }
     
     Pt::Gui::Widget& apiWidget() const { return _apiWidgetImpl.apiWidget(); }
@@ -603,7 +640,8 @@ void WidgetImpl::beginDraw()
     const CControl::GraphicContext& graphicContext = _control->BeginDraw();
     _painter.setGc(graphicContext._gc);
     _painter.setDevice(graphicContext._device);
-    _painter.setNativeFont(graphicContext._nativeFont);    
+    _painter.setNativeFont(graphicContext._nativeFont);  
+    _painter.setCoeEnv(CEikonEnv::Static());
     _painter.setOffset(_control->AbsolutePosition());
     _painter.setClipRect(graphicContext._clipRect);
 }
@@ -612,6 +650,7 @@ void WidgetImpl::endDraw()
 {
     _painter.setGc(0);    
     _painter.setNativeFont(0);
+    _painter.setCoeEnv(0);
     _painter.setDevice(0);
     _painter.setOffset(TPoint(0, 0));
     _painter.setClipRect(TRect(0, 0, 0, 0));

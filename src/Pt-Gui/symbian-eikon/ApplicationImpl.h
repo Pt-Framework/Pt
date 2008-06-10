@@ -151,7 +151,6 @@ namespace Gui {
             
         private:
             Application& _app;
-            System::Mutex _eventMutex;
             
             SymbEventLoop* _eventLoop;
 

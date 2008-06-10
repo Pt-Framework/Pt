@@ -32,15 +32,8 @@
 #include <coecntrl.h>
 #include <w32std.h>
 
-#include "Pt/Gui/CloseEvent.h"
-
-static void Redraw()
-{
-    std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
-    for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
-        if (!(*i)->parent())
-            (*i)->repaint();       
-}
+#include <Pt/Gui/CloseEvent.h>
+#include <Pt/Gui/Widget.h>
 
 // This class is used to simulate a mouse cursor
 // It's not a perfect solution but better than nothing
@@ -93,6 +86,8 @@ private:
 
 void SymbAppUi::ConstructL()
 {
+    memset(_keyDown, 0, sizeof(_keyDown));
+    
     BaseConstructL(ENoAppResourceFile);
  
     _LIT(Kface,"Arial");
@@ -100,7 +95,7 @@ void SymbAppUi::ConstructL()
     _font = iEikonEnv->CreateScreenFontL(spec);    
         
     iEikonEnv->AppUiFactory()->StatusPane()->MakeVisible( EFalse );
-    //SetKeyBlockMode(ENoKeyBlock);
+    SetKeyBlockMode(ENoKeyBlock);
     
     Pt::Gui::ResourceRegistry::instance().constructPixmaps();
     Pt::Gui::ResourceRegistry::instance().constructWidgets();
@@ -109,9 +104,6 @@ void SymbAppUi::ConstructL()
     std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
     for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
         (*i)->synchronize(true);   
-    
-    //for (std::list<Pt::Gui::WidgetImpl*>::reverse_iterator i = widgets.rbegin(); i != widgets.rend(); ++i) 
-    //    (*i)->synchronize(true);   
     
     // Create fake mouse cursor window
     _cursorControl = new (ELeave)CCursorControl();
@@ -134,7 +126,6 @@ SymbAppUi::~SymbAppUi()
     Pt::Gui::ResourceRegistry::instance().destructWidgets();
     Pt::Gui::ResourceRegistry::instance().destructPixmaps();
 
-    //delete _widget;
     iEikonEnv->ReleaseScreenFont(_font);
 }
 
@@ -165,67 +156,172 @@ void SymbAppUi::HandleCommandL(TInt commandID)
 
 }
 
-#define SYMBIAN_LEFT        0x0e
-#define SYMBIAN_RIGHT       0x0f
-#define SYMBIAN_UP          0x10
-#define SYMBIAN_DOWN        0x11
-#define SYMBIAN_SELECT      167
-
-TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, 
-        TEventCode aType)
+TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
+    TKeyCode code;
+    
     switch (aType)
     {
-    case EEventKeyDown:
-        if (aKeyEvent.iScanCode < 256)
-            _firstKey[aKeyEvent.iScanCode] = false;
-
-        if (aKeyEvent.iScanCode == 0xA5)
-        {
-            handleExit();
-            return EKeyWasConsumed;
-        }
-        else if (HandleFakePointer(aKeyEvent, aType))
-            return EKeyWasConsumed;
-        break;
-
-    // this is not what sounds like:
-    // This is only sent to a key click plug-in DLL (if one is present) to indicate a repeating key event.
-    //case EEventKeyRepeat:
-    //    if (HandleFakePointer(aKeyEvent, aType))
-    //        return EKeyWasConsumed;
-    //    break;
-    case EEventKey:
-        if (aKeyEvent.iScanCode < 256 && !_firstKey[aKeyEvent.iScanCode])
-            _firstKey[aKeyEvent.iScanCode] = true;
-        else if (aKeyEvent.iScanCode < 256)
-            _firstKey[aKeyEvent.iScanCode] = false;
-        
-        if (aKeyEvent.iScanCode < 256 && _firstKey[aKeyEvent.iScanCode])
-            return EKeyWasConsumed;
-
-        if (HandleFakePointer(aKeyEvent, aType, 30))
-            return EKeyWasConsumed;
-        
-    case EEventKeyUp:
-        if (HandleFakePointer(aKeyEvent, aType))
-            return EKeyWasConsumed;
-        break;
-        
-    default:
-        return EKeyWasNotConsumed;
+        case EEventKeyDown:
+            if (HandleEventKeyDown(aKeyEvent, aType))
+                return EKeyWasConsumed;
+            break;
+    
+        // This event is send repeatedly while the key is pressed
+        case EEventKey:
+            if (HandleEventKey(aKeyEvent, aType))
+                return EKeyWasConsumed;
+            break;
+            
+        case EEventKeyUp:
+            if (HandleEventKeyUp(aKeyEvent, aType))
+                return EKeyWasConsumed;
+            break;
+            
+        default:
+            return EKeyWasNotConsumed;
     }
+    
     return EKeyWasNotConsumed;
 }
 
-//void SymbAppUi::HandlePointerEventL(const TPointerEvent& aPointerEvent)
-//{
-//   int i = 0;
-//   i++;
-//   i--;
-//}
+bool SymbAppUi::HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType)
+{
+    // initialize firstkey flag to zero for this key's scancode
+    if (aKeyEvent.iScanCode < 256)
+        _firstKey[aKeyEvent.iScanCode] = false;
 
-void SymbAppUi::handleExit()
+    // Handle hardcoded Exit "key"
+    if (aKeyEvent.iScanCode == EStdKeyDevice1)
+    {
+        HandleExit();
+        return true;
+    }
+    else if (HandleFakePointer(aKeyEvent, aType, 5))
+        return true;
+
+    // Note that after this keydown event follows another event of type EEventKey
+    return false;
+}
+
+Pt::Gui::KeyEvent::KeyCode TranslateKeycode(TUint nativeCode)
+{
+    Pt::Gui::KeyEvent::KeyCode code = Pt::Gui::KeyEvent::Void;    
+
+    switch (nativeCode)
+    {
+        case EKeyBackspace:     code = Pt::Gui::KeyEvent::Backspace;    break;
+        case EKeyTab:           code = Pt::Gui::KeyEvent::Tab;          break;
+        case EKeyEnter:         code = Pt::Gui::KeyEvent::Enter;        break;
+        case EKeyEscape:        code = Pt::Gui::KeyEvent::Escape;       break;            
+        case EKeySpace:         code = Pt::Gui::KeyEvent::Space;        break;        
+        case EKeyDelete:        code = Pt::Gui::KeyEvent::Delete;       break;
+        case EKeyPrintScreen:   code = Pt::Gui::KeyEvent::PrintScreen;  break;
+        case EKeyPause:         code = Pt::Gui::KeyEvent::Pause;        break;
+        case EKeyHome:          code = Pt::Gui::KeyEvent::Home;         break;
+        case EKeyEnd:           code = Pt::Gui::KeyEvent::End;          break;
+        case EKeyPageUp:        code = Pt::Gui::KeyEvent::PageUp;       break;
+        case EKeyPageDown:      code = Pt::Gui::KeyEvent::PageDown;     break;
+        case EKeyInsert:        code = Pt::Gui::KeyEvent::Insert;       break;
+        case EKeyLeftArrow:     code = Pt::Gui::KeyEvent::Left;         break;
+        case EKeyRightArrow:    code = Pt::Gui::KeyEvent::Right;        break;
+        case EKeyUpArrow:       code = Pt::Gui::KeyEvent::Up;           break;
+        case EKeyDownArrow:     code = Pt::Gui::KeyEvent::Down;         break;
+        case EKeyLeftAlt:       code = Pt::Gui::KeyEvent::AltL;         break;
+        case EKeyRightAlt:      code = Pt::Gui::KeyEvent::AltR;         break;
+        case EKeyLeftCtrl:      code = Pt::Gui::KeyEvent::CtrlL;        break;
+        case EKeyRightCtrl:     code = Pt::Gui::KeyEvent::CtrlR;        break;
+        case EKeyLeftFunc:      code = Pt::Gui::KeyEvent::WindowsL;     break;
+        case EKeyRightFunc:     code = Pt::Gui::KeyEvent::WindowsR;     break;
+        case EKeyCapsLock:      code = Pt::Gui::KeyEvent::CapsLock;     break;
+        case EKeyNumLock:       code = Pt::Gui::KeyEvent::NumLock;      break;
+        case EKeyScrollLock:    code = Pt::Gui::KeyEvent::ScrollLock;   break;
+
+        case EKeyF1:            code = Pt::Gui::KeyEvent::F1;           break;
+        case EKeyF2:            code = Pt::Gui::KeyEvent::F2;           break;
+        case EKeyF3:            code = Pt::Gui::KeyEvent::F3;           break;
+        case EKeyF4:            code = Pt::Gui::KeyEvent::F4;           break;
+        case EKeyF5:            code = Pt::Gui::KeyEvent::F5;           break;
+        case EKeyF6:            code = Pt::Gui::KeyEvent::F6;           break;
+        case EKeyF7:            code = Pt::Gui::KeyEvent::F7;           break;
+        case EKeyF8:            code = Pt::Gui::KeyEvent::F8;           break;
+        case EKeyF9:            code = Pt::Gui::KeyEvent::F9;           break;
+        case EKeyF10:           code = Pt::Gui::KeyEvent::F10;          break;
+        case EKeyF11:           code = Pt::Gui::KeyEvent::F11;          break;
+        case EKeyF12:           code = Pt::Gui::KeyEvent::F12;          break;
+        case EKeyF13:           code = Pt::Gui::KeyEvent::F13;          break;
+        case EKeyF14:           code = Pt::Gui::KeyEvent::F14;          break;
+        case EKeyF15:           code = Pt::Gui::KeyEvent::F15;          break;
+        case EKeyF16:           code = Pt::Gui::KeyEvent::F16;          break;
+        case EKeyF17:           code = Pt::Gui::KeyEvent::F17;          break;
+        case EKeyF18:           code = Pt::Gui::KeyEvent::F18;          break;
+        case EKeyF19:           code = Pt::Gui::KeyEvent::F19;          break;
+        case EKeyF20:           code = Pt::Gui::KeyEvent::F20;          break;
+        case EKeyF21:           code = Pt::Gui::KeyEvent::F21;          break;
+        case EKeyF22:           code = Pt::Gui::KeyEvent::F22;          break;
+        case EKeyF23:           code = Pt::Gui::KeyEvent::F23;          break;
+        case EKeyF24:           code = Pt::Gui::KeyEvent::F24;          break;
+        case EKeyOff:           code = Pt::Gui::KeyEvent::Meta;         break;               
+        case EKeyMenu:          code = Pt::Gui::KeyEvent::ContextMenu;  break;
+    }
+    
+    return code;
+}
+
+bool SymbAppUi::HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType)
+{
+    // remember key code for key being pressed    
+    if (aKeyEvent.iCode && aKeyEvent.iScanCode < 256)
+        _keyDown[aKeyEvent.iScanCode] = aKeyEvent.iCode;
+    
+    // set first key flag if necessary
+    if (aKeyEvent.iScanCode < 256 && !_firstKey[aKeyEvent.iScanCode])
+        _firstKey[aKeyEvent.iScanCode] = true;
+    // otherwise clear it (not the first key)
+    else if (aKeyEvent.iScanCode < 256)
+        _firstKey[aKeyEvent.iScanCode] = false;    
+
+    // Handle our fake mouse cursor first
+    // if _firstKey is true we already handled the cursor in HandleEventKeyDown
+    if (!_firstKey[aKeyEvent.iScanCode])
+    {
+        if (HandleFakePointer(aKeyEvent, aType, 30))
+            return true;
+    }
+    else
+    {
+        Pt::Gui::KeyEvent::KeyCode code = TranslateKeycode(aKeyEvent.iCode);
+        Pt::Gui::KeyEvent::Type type = Pt::Gui::KeyEvent::Press;
+        wchar_t chr = aKeyEvent.iCode < ENonCharacterKeyBase ? aKeyEvent.iCode : 0;        
+        DispatchKeyEvent(type, code, chr);        
+        return true;
+    }
+
+    return false;    
+}
+
+bool SymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
+{
+    if (HandleFakePointer(aKeyEvent, aType))
+        return true;
+    else
+    {
+        TUint nativeCode = _keyDown[aKeyEvent.iScanCode];
+        Pt::Gui::KeyEvent::KeyCode code = TranslateKeycode(nativeCode);
+        Pt::Gui::KeyEvent::Type type = Pt::Gui::KeyEvent::Release;
+        wchar_t chr = nativeCode < ENonCharacterKeyBase ? nativeCode : 0;        
+        DispatchKeyEvent(type, code, chr);        
+        return true;
+        
+    }
+
+    if (aKeyEvent.iScanCode < 256)
+        _keyDown[aKeyEvent.iScanCode] = 0;
+
+    return false;    
+}
+
+void SymbAppUi::HandleExit()
 {
     Exit();    
 }
@@ -236,11 +332,33 @@ public:
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 };
 
+void SymbAppUi::DispatchFakePointerEvent(TPointerEvent& event)
+{
+    std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
+    for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
+    {
+        Pt::Gui::WidgetImpl* impl = *i;
+        if (!impl->parent())
+        {
+            TRect rect(impl->nativeControl()->Position(), impl->nativeControl()->Size());
+            if (rect.Contains(event.iPosition))
+            {
+                event.iPosition-=impl->nativeControl()->Position();
+                impl->nativeControl()->HandlePointerEventL(event);
+                return;
+            }
+        }            
+    }    
+}
+
 bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset/* = 5*/)
 {
     if (aType == EEventKeyDown || aType == EEventKey)
     {
-        if (aType == EEventKeyDown && aKeyEvent.iScanCode == SYMBIAN_SELECT)
+        TPoint oldPos = _cursorControl->Position();
+        bool handled = false;
+        
+        if (aType == EEventKeyDown && aKeyEvent.iScanCode == EStdKeyDevice3)
         {
             TPointerEvent event;
             memset(&event, 0, sizeof(event));
@@ -249,59 +367,58 @@ bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, 
             event.iPosition+=TPoint(2,2);
             event.iParentPosition = event.iPosition;
             
-            std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
-            for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
-            {
-                Pt::Gui::WidgetImpl* impl = *i;
-                if (!impl->parent())
-                {
-                    TRect rect(impl->nativeControl()->Position(), impl->nativeControl()->Size());
-                    if (rect.Contains(event.iPosition))
-                    {
-                        event.iPosition-=impl->nativeControl()->Position();
-                        impl->nativeControl()->HandlePointerEventL(event);
-                    }
-                }            
-            }
-        
-            return true;
+            DispatchFakePointerEvent(event);
+            handled = true;
         }
-        else if (aKeyEvent.iScanCode == SYMBIAN_LEFT)
+        else if (aKeyEvent.iScanCode == EStdKeyLeftArrow)
         {
             TPoint pos = _cursorControl->Position();
             pos.iX-=offset;
             _cursorControl->SetPosition(pos);
-            Redraw();
-            return true;
+            RedrawWindows();
+            handled = true;
         }
-        else if (aKeyEvent.iScanCode == SYMBIAN_RIGHT)
+        else if (aKeyEvent.iScanCode == EStdKeyRightArrow)
         {
             TPoint pos = _cursorControl->Position();
             pos.iX+=offset;
             _cursorControl->SetPosition(pos);
-            Redraw();
-            return true;
+            RedrawWindows();
+            handled = true;
         }
-        else if (aKeyEvent.iScanCode == SYMBIAN_UP)
+        else if (aKeyEvent.iScanCode == EStdKeyUpArrow)
         {
             TPoint pos = _cursorControl->Position();
             pos.iY-=offset;
             _cursorControl->SetPosition(pos);
-            Redraw();
-            return true;
+            RedrawWindows();
+            handled = true;
         }
-        else if (aKeyEvent.iScanCode == SYMBIAN_DOWN)
+        else if (aKeyEvent.iScanCode == EStdKeyDownArrow)
         {
             TPoint pos = _cursorControl->Position();
             pos.iY+=offset;
             _cursorControl->SetPosition(pos);
-            Redraw();
-            return true;
+            RedrawWindows();
+            handled = true;
         }
+    
+        if (oldPos != _cursorControl->Position())
+        {
+            TPointerEvent event;
+            memset(&event, 0, sizeof(event));
+            event.iType = _keyDown[EStdKeyDevice3] ? TPointerEvent::EDrag : TPointerEvent::EMove;
+            event.iPosition = _cursorControl->Position();
+            event.iPosition+=TPoint(2,2);
+            event.iParentPosition = event.iPosition;            
+            DispatchFakePointerEvent(event);            
+        }
+        
+        return handled;
     }
     else if (aType == EEventKeyUp)
     {
-        if (aKeyEvent.iScanCode == SYMBIAN_SELECT)
+        if (aKeyEvent.iScanCode == EStdKeyDevice3)
         {
             TPointerEvent event;
             memset(&event, 0, sizeof(event));
@@ -310,24 +427,33 @@ bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, 
             event.iPosition+=TPoint(2,2);
             event.iParentPosition = event.iPosition;
 
-            std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
-            for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
-            {
-                Pt::Gui::WidgetImpl* impl = *i;
-                if (!impl->parent())
-                {
-                    TRect rect(impl->nativeControl()->Position(), impl->nativeControl()->Size());
-                    if (rect.Contains(event.iPosition))
-                    {
-                        event.iPosition-=impl->nativeControl()->Position();
-                        impl->nativeControl()->HandlePointerEventL(event);
-                    }
-                }            
-            }
-                
+            DispatchFakePointerEvent(event);                
             return true;
         }
     }
     
     return false;
+}
+
+void SymbAppUi::RedrawWindows()
+{
+    // redraw all main windows
+    std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
+    for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
+        if (!(*i)->parent())
+            (*i)->repaint();       
+}
+
+void SymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
+        Pt::Gui::KeyEvent::KeyCode code,
+        wchar_t chr)
+{
+    // forward key event to all main windows
+    std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
+    for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
+        if (!(*i)->parent())
+        {
+            Pt::Gui::KeyEvent keyEvent((*i)->apiWidget(), type, code, chr);                        
+            ApplicationImpl().dispatchEvent(keyEvent);
+        }
 }

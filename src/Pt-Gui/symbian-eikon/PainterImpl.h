@@ -40,6 +40,7 @@ class CGraphicsContext;
 class CGraphicsDevice;
 class CFont;
 class CFbsBitmap;
+class CEikonEnv;
 
 #include <e32std.h>
 
@@ -70,6 +71,8 @@ namespace Gui {
 
             virtual void end();
 
+            virtual void cleanUp();
+            
             void setPen(const Gfx::Pen& pen);
 
             const Gfx::Pen& pen() const;
@@ -119,8 +122,9 @@ namespace Gui {
             void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image, const Pt::Gfx::Region& imageRegion);
 
             void setGc(CGraphicsContext* gc) { _gc = gc; }
-            void setDevice(const CGraphicsDevice* device) { _device = device; }
+            void setDevice(CGraphicsDevice* device) { _device = device; }
             void setNativeFont(const CFont* font) { _nativeFont = font; }
+            void setCoeEnv(CEikonEnv* coeEnv) { _coeEnv = coeEnv; }
             void setOffset(const TPoint& offset) { _offset = offset; }
             void setClipRect(const TRect& clipRect) { _clipRect = clipRect; }
             
@@ -136,95 +140,43 @@ namespace Gui {
             void drawCompatibleImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 
             void updatePen();
+            void activatePen();
+
             void updateFont();
+            void activateFont();
+
             void updateBrush();
+            void activateBrush();
 
             bool ensureActiveContext();
+            
+            void freeFont();
             
         protected:
             Gfx::Pen _pen;
             Gfx::Brush _brush;
             Gfx::Font  _font;
+
+            Gfx::Pen _oldPen;
+            Gfx::Brush _oldBrush;
+            Gfx::Font  _oldFont;
+
+            Gfx::Pen* _oldPenRef;
+            Gfx::Brush* _oldBrushRef;
+            Gfx::Font*  _oldFontRef;
             
             CGraphicsContext* _gc;
-            const CGraphicsDevice* _device;
+            CGraphicsDevice* _device;
             const CFont* _nativeFont;
+            bool _fontOwner;
+            CEikonEnv* _coeEnv;
             TPoint _offset;
             TRect _clipRect;
             
             // TODO: Use auto_ptr
             CFbsBitmap* _brushBitmap;
-            CFbsBitmap* _drawBitmap;
-            
-            //std::vector<Paint*> _paintQueue;
+            CFbsBitmap* _drawBitmap;            
     };
-
-//    class PainterImpl::Paint
-//    {
-//        public:
-//            virtual ~Paint() {}
-//            virtual void paint() = 0;
-//    };
-//
-//    class PainterImpl::DrawLine : public PainterImpl::Paint
-//    {
-//        public:
-//            DrawLine(const Math::Point& from, const Math::Point& to, const Gfx::Pen& pen);
-//            
-//            virtual ~DrawLine();
-//            
-//            virtual void paint();
-//        
-//        private:
-//            Math::Point _from;
-//            Math::Point _to;
-//            Gfx::Pen _pen;
-//    };
-//
-//
-//    class PainterImpl::DrawRect : public PainterImpl::Paint
-//    {
-//        public:
-//            DrawRect(const Gfx::Rect& rect, const Gfx::Pen& pen);
-//            
-//            virtual ~DrawRect();
-//            
-//            virtual void paint();
-//        
-//        private:
-//            const Gfx::Rect _rect;
-//            Gfx::Pen _pen;
-//    };
-//
-//
-//    class PainterImpl::DrawPixmap : public PainterImpl::Paint
-//    {
-//        public:
-//            DrawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Region& region);
-//            
-//            virtual ~DrawPixmap();
-//            
-//            virtual void paint();
-//        
-//        private:
-//            Math::Point _to;
-//            Gfx::Region _region;
-//    };
-//
-//
-//    class PainterImpl::FillRect : public PainterImpl::Paint
-//    {
-//        public:
-//            FillRect(const Gfx::Rect& rect, const Gfx::Brush& brush);
-//            
-//            virtual ~FillRect();
-//            
-//            virtual void paint();
-//        
-//        private:
-//            const Gfx::Rect _rect;
-//            Gfx::Brush _brush;
-//    };
 
 } // namespace Gui
 

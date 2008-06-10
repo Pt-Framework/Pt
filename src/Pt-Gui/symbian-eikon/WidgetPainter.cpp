@@ -44,15 +44,24 @@ void WidgetPainter::begin()
         if (_gc)
             _active = true;
     }
+    
+    PainterImpl::begin();
 }
 
 void WidgetPainter::end()
 {
+    PainterImpl::end();
+
     if (_active)
     {
         _parentWidgetImpl.endDraw();        
         _active = false;
     }
+}
+
+void WidgetPainter::cleanUp()
+{
+    end();
 }
 
 } // namespace Gui

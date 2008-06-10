@@ -44,16 +44,25 @@ void PixmapPainter::begin()
         _parentPixmapImpl.beginDraw();
         _active = true;
     }
+    
+    PainterImpl::begin();
 }
 
 
 void PixmapPainter::end()
 {
+    PainterImpl::end();
+    
     if (_active)
     {
         _parentPixmapImpl.endDraw();        
         _active = false;
     }
+}
+
+void PixmapPainter::cleanUp()
+{
+    end();
 }
 
 } // namespace Gui

@@ -105,7 +105,6 @@ void ResourceRegistry::destructPixmaps()
 
 ApplicationImpl::ApplicationImpl(Application& app) 
 : _app(app)
-, _eventMutex(System::Mutex::Normal)
 , _eventLoop(0)
 , _symbApp(new SymbApp(this))
 {
@@ -180,14 +179,12 @@ void ApplicationImpl::dispatchEvent(const Pt::Event& event)
         return;
     }
 
-    //_eventMutex.lock();
     eventQueueSignal.send(event);
-    //_eventMutex.unlock();
 }
 
 // assuming that there is only one Application instance at a time
 ApplicationImpl* ApplicationImpl::_self = 0;
-System::Mutex ApplicationImpl::_mutex(System::Mutex::Recursive);
+System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
 
 void ApplicationImpl::lockAppInstance()
 {
