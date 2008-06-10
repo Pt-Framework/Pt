@@ -27,6 +27,8 @@ namespace Pt {
 
 namespace System {
 
+class Symbol;
+
 /** @brief Thrown, when a symbol is not found in a library
 */
 class PT_SYSTEM_API SymbolNotFound : public SystemError
@@ -62,7 +64,6 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
 class PT_SYSTEM_API SharedLib
 {
     public:
-
         /** @brief Default Constructor which does not load a library.
          */
         SharedLib();
@@ -108,6 +109,8 @@ class PT_SYSTEM_API SharedLib
          */
         operator const void*() const;
 
+        Symbol getSymbol(const char* symbol);
+
         /** @brief Returns true if invalid
          */
         bool operator!() const;
@@ -139,6 +142,33 @@ class PT_SYSTEM_API SharedLib
 
         //! @internal
         std::string _path;
+};
+
+/** @brief Symbol resolved from a shared library
+*/
+class Symbol
+{
+    public:
+        Symbol()
+        : _sym(0)
+        { }
+
+        Symbol(const SharedLib& lib, void* sym)
+        : _lib(lib), _sym(sym)
+        { }
+
+        void* sym() const
+        { return _sym; }
+
+        const SharedLib& library() const
+        { return _lib; }
+
+        operator void*() const
+        { return _sym; }
+
+    private:
+        SharedLib _lib;
+        void* _sym;
 };
 
 } // namespace System

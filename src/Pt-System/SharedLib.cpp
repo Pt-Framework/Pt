@@ -118,6 +118,17 @@ void* SharedLib::resolve(const char* symbol)
 }
 
 
+Symbol SharedLib::getSymbol(const char* symbol)
+{
+    void* sym = this->resolve(symbol);
+    if (sym == 0)
+    {
+        throw SymbolNotFound(symbol, PT_SOURCEINFO);
+    }
+
+    return Symbol(*this, sym);
+}
+
 SharedLib::operator const void*() const
 {
     return _impl->failed() ? 0 : this;
