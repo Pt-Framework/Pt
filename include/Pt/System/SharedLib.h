@@ -19,7 +19,6 @@
 #ifndef PT_SYSTEM_SHAREDLIB_H
 #define PT_SYSTEM_SHAREDLIB_H
 
-#include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
 #include <string>
@@ -60,7 +59,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
         int result = proc();
     @endcode
 */
-class PT_SYSTEM_API SharedLib : private NonCopyable
+class PT_SYSTEM_API SharedLib
 {
     public:
 
@@ -78,6 +77,10 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
         */
         SharedLib(const std::string& path);
 
+        SharedLib(const SharedLib& other);
+
+        SharedLib& operator=(const SharedLib& other);
+
         /** @brief The destructor unloads the shared library from memory.
          */
         ~SharedLib();
@@ -87,9 +90,7 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
              If a file could not be found at the given path, the path will be extended
              by the platform-specific shared library extension first and then also by the
              shared library prefix. If still no file can be found an exception is thrown.
-
-             If a library was previously loaded by calling the constructor with a library file
-             or by calling one of the open()-methods, this method fails and throws a SystemError.
+             Calling this method twice might close the previously loaded library.
         */
         SharedLib& open(const std::string& path);
 
@@ -105,11 +106,11 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
 
         /** @brief Returns null if invalid
          */
-        operator void*();
+        operator const void*() const;
 
         /** @brief Returns true if invalid
          */
-        bool operator!();
+        bool operator!() const;
 
         /** @brief Returns the path to the shared library image
          */
@@ -128,6 +129,9 @@ class PT_SYSTEM_API SharedLib : private NonCopyable
              Returns "lib" on Linux, "" on Windows 
         */
         static std::string prefix();
+
+    protected:
+        void detach();
 
     private:
         //! @internal

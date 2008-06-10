@@ -20,7 +20,6 @@
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/FileInfo.h"
 #include "Pt/System/Directory.h"
-#include "Pt/System/Environment.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -29,7 +28,6 @@
 namespace Pt {
 
 namespace System {
-
 
 SymbolNotFound::SymbolNotFound(const std::string& sym, const Pt::SourceInfo& si)
 : SystemError("symbol not found: " + sym, si)
@@ -56,18 +54,51 @@ SharedLib::SharedLib(const std::string& path)
 }
 
 
-SharedLib::~SharedLib()
+SharedLib::SharedLib(const SharedLib& other)
 {
-    delete _impl;
+    _impl = other._impl;
+    _impl->ref();
 }
 
 
+SharedLib& SharedLib::operator=(const SharedLib& other)
+{
+    if(_impl == other._impl)
+        return *this;
+
+    other._impl->ref();
+
+    if( ! _impl->unref() )
+        delete _impl;
+
+    _impl = other._impl;
+
+    return *this;
+}
+
+
+SharedLib::~SharedLib()
+{
+    if ( ! _impl->unref() )
+        delete _impl;
+}
+
+
+void SharedLib::detach()
+{
+    if ( _impl->refs() == 1 )
+        return;
+
+    SharedLibImpl* x = _impl;
+    _impl = new SharedLibImpl();
+
+    if( ! x->unref() )
+        delete x;
+}
+
 SharedLib& SharedLib::open(const std::string& path)
 {
-    if( ! _path.empty() )
-    {
-        throw SystemError("Shared library " + _path + " is already opened.", PT_SOURCEINFO);
-    }
+    this->detach();
 
     _path = find(path);
     _impl->open(path);
@@ -87,13 +118,13 @@ void* SharedLib::resolve(const char* symbol)
 }
 
 
-SharedLib::operator void*()
+SharedLib::operator const void*() const
 {
     return _impl->failed() ? 0 : this;
 }
 
 
-bool SharedLib::operator!()
+bool SharedLib::operator!() const
 {
     return _impl->failed() ? true : false;
 }
@@ -151,15 +182,6 @@ std::string SharedLib::prefix()
     return SharedLibImpl::prefix();
 }
 
-
-/*
-File SharedLib::createLibraryFile(const Pt::System::Directory& baseDir, const std::string& libraryName)
-{
-    return Pt::System::File(baseDir,  Environment::sharedLibraryPrefix()
-                                    + libraryName
-                                    + Environment::sharedLibraryExtension());
-}
-*/
 } // namespace System
 
 } // namespace Pt

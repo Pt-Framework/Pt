@@ -21,7 +21,7 @@
 #ifndef PT_SHAREDLIBIMPL_H
 #define PT_SHAREDLIBIMPL_H
 
-#include "Pt/RefCounted.h"
+#include "Pt/Atomicity.h"
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/SystemError.h"
 #include <string>
@@ -31,15 +31,17 @@ namespace Pt {
 
 namespace System {
 
-class SharedLibImpl : public RefCounted
+class SharedLibImpl
 {
     public:
         SharedLibImpl()
-        : _handle(0)
+        : _refs(1)
+        , _handle(0)
         { }
 
         SharedLibImpl(const std::string& path)
-        : _handle(0)
+        : _refs(1)
+        , _handle(0)
         {
             this->open(path);
         }
@@ -48,6 +50,21 @@ class SharedLibImpl : public RefCounted
         {
             if(_handle)
                 ::dlclose(_handle);
+        }
+
+        Pt::atomic_t refs() const
+        {
+            return _refs;
+        }
+
+        Pt::atomic_t ref()
+        {
+            return Pt::atomicIncrement(_refs);
+        }
+
+        Pt::atomic_t unref()
+        {
+            return Pt::atomicDecrement(_refs);
         }
 
         void open(const std::string& path)
@@ -89,6 +106,7 @@ class SharedLibImpl : public RefCounted
         }
 
     private:
+        Pt::atomic_t _refs;
         void* _handle;
 };
 

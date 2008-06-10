@@ -19,6 +19,7 @@
 #ifndef PT_SHAREDLIBIMPL_H
 #define PT_SHAREDLIBIMPL_H
 
+#include "Pt/Atomicity.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/SharedLib.h"
 #include "win32.h"
@@ -35,11 +36,13 @@ class SharedLibImpl
 {
     public:
         SharedLibImpl()
-        : _handle(0)
+        : _refs(1)
+        , _handle(0)
         { }
 
         SharedLibImpl(const std::string& path)
-        : _handle(0)
+        : _refs(1)
+        , _handle(0)
         {
             this->open(path);
         }
@@ -49,6 +52,21 @@ class SharedLibImpl
             if(_handle != 0) {
                 ::FreeLibrary(_handle);
             }
+        }
+
+        Pt::atomic_t refs() const
+        {
+            return _refs;
+        }
+
+        Pt::atomic_t ref()
+        {
+            return Pt::atomicIncrement(_refs);
+        }
+
+        Pt::atomic_t unref()
+        {
+            return Pt::atomicDecrement(_refs);
         }
 
         void open(const std::string& path)
@@ -92,6 +110,7 @@ class SharedLibImpl
         }
 
     private:
+        Pt::atomic_t _refs;
         HMODULE _handle;
 };
 
