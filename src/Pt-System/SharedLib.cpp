@@ -56,6 +56,7 @@ SharedLib::SharedLib(const std::string& path)
 
 SharedLib::SharedLib(const SharedLib& other)
 {
+    _path = other._path;
     _impl = other._impl;
     _impl->ref();
 }
@@ -65,6 +66,8 @@ SharedLib& SharedLib::operator=(const SharedLib& other)
 {
     if(_impl == other._impl)
         return *this;
+
+    _path = other._path;
 
     other._impl->ref();
 
@@ -88,6 +91,8 @@ void SharedLib::detach()
 {
     if ( _impl->refs() == 1 )
         return;
+
+    _path.clear();
 
     SharedLibImpl* x = _impl;
     _impl = new SharedLibImpl();
