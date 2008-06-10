@@ -179,7 +179,7 @@ namespace System {
     void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path)
     {
         SharedLib* shlib = this->openPlugin(path);
-        if(!shlib) {
+        if( ! shlib ) {
             return;
         }
 

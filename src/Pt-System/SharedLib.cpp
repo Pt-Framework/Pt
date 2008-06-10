@@ -19,6 +19,7 @@
 #include "SharedLibImpl.h"
 #include "Pt/System/SharedLib.h"
 #include "Pt/System/FileInfo.h"
+#include "Pt/System/File.h"
 #include "Pt/System/Directory.h"
 #include <string>
 #include <iostream>
@@ -179,8 +180,7 @@ std::string SharedLib::find(const std::string& path_)
     if( ! FileInfo::exists( path.c_str() ) )
     {
         // TODO FileNotFound
-        //throw SystemError("Shared library not found " + path , PT_SOURCEINFO);
-        return "";
+        throw FileNotFound(path_ , PT_SOURCEINFO);
     }
 
     return path;

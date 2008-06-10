@@ -87,7 +87,10 @@ class SharedLibImpl
         void* resolve(const char* symbol)
         {
             if(_handle)
-                return ::dlsym(_handle, symbol);
+            {
+                void* p =  ::dlsym(_handle, symbol);
+                return p;
+            }
 
             return 0;
         }

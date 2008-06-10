@@ -10,35 +10,37 @@
 
 int main(int argc, char** argv)
 {
-	try
-	{
-	 /*   std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
+    try
+    {
+    /*   std::locale::global( std::locale(std::locale(), new std::ctype<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::numpunct<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
-*/
-		std::string  shlibName = "libTestPlugin";
+    */
+        std::string  shlibName = "libTestPlugin";
 
-		#ifndef NDEBUG
-		  shlibName += "d";
-		#endif
+        #ifndef NDEBUG
+            shlibName += "d";
+        #endif
 
-		Pt::System::PluginManager<TestPlugin> pm;
-		pm.loadPlugin( shlibName );
+        std::cerr << "Loading " << shlibName << std::endl;
 
-		TestPlugin* pl = pm.create("MyPlugin");
-		if(pl == 0)
-			throw std::runtime_error("No such plugin" + PT_SOURCEINFO);
+        Pt::System::PluginManager<TestPlugin> pm;
+        pm.loadPlugin( shlibName );
 
-		pl->test();
+        TestPlugin* pl = pm.create("MyPlugin");
+        if(pl == 0)
+            throw std::runtime_error(PT_SOURCEINFO + "No such plugin");
 
-		pm.destroy(pl);
-		return 0;
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
+        pl->test();
 
-	return 1;
+        pm.destroy(pl);
+        return 0;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return 1;
 }

@@ -77,7 +77,7 @@ SharedLib* PluginManagerBase::openPlugin(const std::string& path)
 PluginId** PluginManagerBase::resolvePlugin(SharedLib& shlib)
 {
     void* symbol = shlib.resolve( "PluginList" );
-    if( !symbol ) {
+    if( ! symbol ) {
         return 0;
     }
 
