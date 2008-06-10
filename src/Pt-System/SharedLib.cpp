@@ -188,7 +188,6 @@ std::string SharedLib::find(const std::string& path_)
 
     if( ! FileInfo::exists( path.c_str() ) )
     {
-        // TODO FileNotFound
         throw FileNotFound(path_ , PT_SOURCEINFO);
     }
 
