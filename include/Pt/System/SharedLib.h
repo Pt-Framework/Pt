@@ -29,11 +29,12 @@ namespace System {
 
 class Symbol;
 
-/** @brief Thrown, when a symbol is not found in a library
+/** @brief Thrown, when a shared library could not be loaded
 */
 class PT_SYSTEM_API OpenLibraryFailed : public SystemError
 {
     public:
+        //! @brief Contructs from a message string and source info
         OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si);
 
         //! @brief Destructor
