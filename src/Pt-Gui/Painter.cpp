@@ -179,28 +179,7 @@ void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image)
 }
 
 
-void Painter::drawImage(const Math::Point& to, const Gfx::ARgb8888Image& image)
-{
-    if (image.empty()) {
-        return;  // Don't try to draw empty images.
-    }
-
-    this->begin();
-    _painterImpl->drawImage(to, image);
-}
-
 void Painter::drawImage(const Math::Point& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRect)
-{
-    if (image.empty()) {
-        return;  // Don't try to draw empty images.
-    }
-
-    this->begin();
-    _painterImpl->drawImage(to, image, imageRect);
-}
-
-
-void Painter::drawImage(const Math::Point& to, const Gfx::ARgb8888Image& image, const Gfx::Region& imageRect)
 {
     if (image.empty()) {
         return;  // Don't try to draw empty images.
@@ -230,14 +209,6 @@ void Painter::drawPixmap(const Math::Point& to, Pixmap& pm)
 
     this->begin();
     _painterImpl->drawPixmap(to, pm);
-}
-
-
-Pt::Gfx::ARgb8888Image& Painter::backBuffer()
-{
-    this->begin();
-    static Pt::Gfx::ARgb8888Image dummy;
-    return dummy;
 }
 
 
