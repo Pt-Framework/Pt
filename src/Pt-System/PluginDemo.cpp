@@ -17,7 +17,7 @@ int main(int argc, char** argv)
         std::locale::global( std::locale(std::locale(), new std::num_get<Pt::Char>) );
         std::locale::global( std::locale(std::locale(), new std::num_put<Pt::Char>) );
     */
-        std::string  shlibName = "libTestPlugin";
+        std::string  shlibName = "TestPlugin";
 
         #ifndef NDEBUG
             shlibName += "d";
