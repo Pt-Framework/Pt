@@ -64,7 +64,7 @@ private:
     
     void HandleExit();
     
-    void DispatchFakePointerEvent(TPointerEvent& event);
+    void DispatchFakePointerEvent(const TPointerEvent& event);
     bool HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset = 5);
 
     void RedrawWindows();

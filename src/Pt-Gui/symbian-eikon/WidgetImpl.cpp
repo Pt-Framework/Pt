@@ -76,28 +76,7 @@ public:
     
     void ConstructL(const TRect& rect)
     {
-        if (!_apiWidgetImpl.parent())
-        {
-            _windowGroup = RWindowGroup(iCoeEnv->WsSession());
-
-            User::LeaveIfError(_windowGroup.Construct((TUint32)&_windowGroup));
-
-            _windowGroup.SetOrdinalPosition(0, /*ECoeWinPriorityAlwaysAtFront*/ECoeWinPriorityHigh);
-            _windowGroup.EnableReceiptOfFocus(EFalse);
-
-            // we're automatically becoming a window-owning control 
-            CreateWindowL(&_windowGroup);
-        }
-        else
-        {
-            // get parent native control
-            Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
-            CControl* parentControl = impl.nativeControl();
-            // this is our container
-            SetContainerWindowL(*parentControl);
-            // add ourselves to parent
-            parentControl->AddControl(this);
-        }
+        Reparent(false);
         
         SetRect(rect);
         EnableDragEvents();
@@ -108,6 +87,54 @@ public:
     {
         if (!_apiWidgetImpl.parent())
             _windowGroup.Close();        
+    }
+
+    void ReleaseWindow()
+    {
+        assert(OwnsWindow() != EFalse);
+        _windowGroup.Close();        
+        CloseWindow();        
+    }
+    
+    void Reparent(bool readjustChildren = true)
+    {
+        // no parent? We're becoming a window owning control
+        if (!_apiWidgetImpl.parent())
+        {
+            _windowGroup = RWindowGroup(iCoeEnv->WsSession());
+
+            User::LeaveIfError(_windowGroup.Construct((TUint32)&_windowGroup));
+
+            _windowGroup.SetOrdinalPosition(0, /*ECoeWinPriorityAlwaysAtFront*/ECoeWinPriorityHigh);
+            _windowGroup.EnableReceiptOfFocus(EFalse);
+
+            // we're becoming a window-owning control now
+            CreateWindowL(&_windowGroup);
+            
+            // All children need to adjust their window
+            if (readjustChildren)
+            {                
+                std::vector<CControl*>::iterator it;
+                for (it = _controls.begin(); it != _controls.end(); ++it)
+                    (*it)->ReadjustWindowOwning();
+            }
+        }
+        else
+        {
+            // get parent native control
+            Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
+            CControl* parentControl = impl.nativeControl();
+            // add ourselves to parent
+            parentControl->AddControl(this);
+            
+            // All children need to adjust their window
+            if (readjustChildren)
+                ReadjustWindowOwning();
+            else
+            {
+                SetContainerWindowL(*parentControl);
+            }
+        }
     }
     
     // Get absolute position of widget within parent widget
@@ -159,13 +186,17 @@ public:
             graphicContext._gc = &SystemGc();
             graphicContext._device = iEikonEnv->ScreenDevice();
             graphicContext._nativeFont = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
+            // we're not invoked out of Draw()
+            // we need to activate the context
             if (!graphicContext._drawingActive)
             {
-                ActivateGc();
-                Window().Invalidate(Rect());
-                Window().BeginRedraw(Rect());                
+                /*RootControl()->*/ActivateGc();
+                /*RootControl()->*/Window().Invalidate(Rect());
+                /*RootControl()->*/Window().BeginRedraw(Rect());                
             }
             graphicContext._gc->UseFont(_graphicContext._nativeFont);
+            // if we're not the window owning control (root)
+            // we setup a clipping rectangle too
             if (RootControl() != this)
             {
                 TPoint p = AbsolutePosition();
@@ -203,10 +234,12 @@ public:
                 graphicContext._gc = 0;
                 graphicContext._device = 0;
                 graphicContext._nativeFont = 0;
+                // not invoked out of Draw()
+                // deactivate context
                 if (!graphicContext._drawingActive)
                 {
-                    Window().EndRedraw();
-                    DeactivateGc();                    
+                    /*RootControl()->*/Window().EndRedraw();
+                    /*RootControl()->*/DeactivateGc();                    
                 }
             }
         }
@@ -215,7 +248,7 @@ public:
             assert(!graphicContext._gc);
         }
         
-        // whenever the client area has changed we redraw the children
+        // TODO: whenever the client area has changed we redraw the children
         // to make sure they're visible
         //for (int i = 0; i < CountComponentControls(); i++)
         //    ComponentControl(i)->DrawDeferred();
@@ -223,18 +256,27 @@ public:
 
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {
+        // start
+        if (RootControl() == this)
+            _pointerEventConsumed = false;
+
         // Make sure event is routed to children
         CCoeControl::HandlePointerEventL(aPointerEvent);
 
         CControl* root = RootControl();                
+        // pointer event has been consumed
         if (root != this && root->_pointerEventConsumed)
             return;
         
+        // we're the root window and pointer event has not been consumed
+        // or we're not the root window
+        // => dispatch pointer events
         if ((root == this && !root->_pointerEventConsumed) || (root != this))
         {
             TranslateMouseEvent(aPointerEvent);
         }
         
+        // we're not the root window, mark pointer event as consumed
         if (root != this)
             root->_pointerEventConsumed = true;
         else
@@ -255,6 +297,29 @@ public:
         assert(_controls.size() == size-1);
     }
     
+    void ReadjustRelativePosition(bool childrenOnly)
+    {
+        if (RootControl() == this)
+            return;
+        
+        if (!childrenOnly)
+        {
+            Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
+            CControl* parentControl = impl.nativeControl();
+            // this is our container
+            TPoint pos = parentControl->AbsolutePosition();
+
+            pos.iX+=apiWidget().region().topLeft().x();
+            pos.iY+=apiWidget().region().topLeft().y();
+
+            SetPosition(pos);
+        }
+
+        std::vector<CControl*>::iterator it;
+        for (it = _controls.begin(); it != _controls.end(); ++it)
+            (*it)->ReadjustRelativePosition(false);        
+    }
+        
 protected:
     virtual CCoeControl* ComponentControl(TInt aIndex) const
     {
@@ -338,56 +403,68 @@ private:
 
         switch (aPointerEvent.iType)
         {
-        case TPointerEvent::EButton1Down:
-        {
-            button = Pt::Gui::MouseEvent::LeftButton;
-            action = Pt::Gui::MouseEvent::Press;                  
-            Pt::Gui::MouseEvent mouseEvent(
-                    apiWidget(), x, y, 
-                    button, action, modifiers
-                    );
-            _apiWidgetImpl.dispatchEvent(mouseEvent);        
-            break;
-        }
-        
-        case TPointerEvent::EButton1Up:
-        {
-            button = Pt::Gui::MouseEvent::LeftButton;
-            action = Pt::Gui::MouseEvent::Release;                
-            Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
-            _apiWidgetImpl.dispatchEvent(mouseEvent);        
-            break;
-        }
-
-        case TPointerEvent::EDrag:
-        {
-            Pt::Gui::MouseMoveEvent mouseEvent(
-                    apiWidget(), x, y, 
-                    Pt::Gui::MouseMoveEvent::Moved, 
-                    Pt::Gui::MouseMoveEvent::LeftButtonDown
-                    );
-            _apiWidgetImpl.dispatchEvent(mouseEvent);        
-            break;
-        }
-        
-        case TPointerEvent::EMove:
-        {
-            Pt::Gui::MouseMoveEvent mouseEvent(
-                    apiWidget(), x, y, 
-                    Pt::Gui::MouseMoveEvent::Moved, 
-                    0
-                    );
-            _apiWidgetImpl.dispatchEvent(mouseEvent);        
-            break;
-        }
-
-        default:
-            // TODO: Handle more mouse events
-            return;
+            case TPointerEvent::EButton1Down:
+            {
+                button = Pt::Gui::MouseEvent::LeftButton;
+                action = Pt::Gui::MouseEvent::Press;                  
+                Pt::Gui::MouseEvent mouseEvent(
+                        apiWidget(), x, y, 
+                        button, action, modifiers
+                        );
+                _apiWidgetImpl.dispatchEvent(mouseEvent);        
+                break;
+            }
+            
+            case TPointerEvent::EButton1Up:
+            {
+                button = Pt::Gui::MouseEvent::LeftButton;
+                action = Pt::Gui::MouseEvent::Release;                
+                Pt::Gui::MouseEvent mouseEvent(apiWidget(), x, y, button, action, modifiers);
+                _apiWidgetImpl.dispatchEvent(mouseEvent);        
+                break;
+            }
+    
+            case TPointerEvent::EDrag:
+            {
+                Pt::Gui::MouseMoveEvent mouseEvent(
+                        apiWidget(), x, y, 
+                        Pt::Gui::MouseMoveEvent::Moved, 
+                        Pt::Gui::MouseMoveEvent::LeftButtonDown
+                        );
+                _apiWidgetImpl.dispatchEvent(mouseEvent);        
+                break;
+            }
+            
+            case TPointerEvent::EMove:
+            {
+                Pt::Gui::MouseMoveEvent mouseEvent(
+                        apiWidget(), x, y, 
+                        Pt::Gui::MouseMoveEvent::Moved, 
+                        0
+                        );
+                _apiWidgetImpl.dispatchEvent(mouseEvent);        
+                break;
+            }
+    
+            default:
+                // TODO: Handle more mouse events
+                return;
         }
 
     }
     
+    void ReadjustWindowOwning()
+    {
+        Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
+        CControl* parentControl = impl.nativeControl();
+        // this is our container
+        SetContainerWindowL(*parentControl);
+
+        std::vector<CControl*>::iterator it;
+        for (it = _controls.begin(); it != _controls.end(); ++it)
+            (*it)->ReadjustWindowOwning();
+    }
+
     Pt::Gui::Widget& apiWidget() const { return _apiWidgetImpl.apiWidget(); }
 
     Pt::Gui::WidgetImpl& _apiWidgetImpl;    
@@ -493,21 +570,16 @@ void WidgetImpl::setParent(Widget* parent)
         // We should update the old parent, the window server won't do it
         parentControl->DrawDeferred();
     }
-    // we don't have a parent and we're going to have one
+    // We don't have a parent widget but we're going to have one
     else if (parent)
     {
-        // TODO: Change window owning status
+        _control->ReleaseWindow();
     }
-    
-    if (parent)
-    {
-        CControl* parentControl = parent->impl().nativeControl();
-        parentControl->AddControl(this->nativeControl());
-    }
-    else
-    {
-        // TODO: Make it window owning
-    }
+
+    _parent = parent;
+    _control->Reparent();
+    _control->ReadjustRelativePosition(false);
+    _control->DrawDeferred();
 }
 
 
@@ -519,6 +591,9 @@ void WidgetImpl::move(size_t x, size_t y)
             _control->SetRelativePosition(TPoint(x, y));
         else
             _control->SetPosition(TPoint(x, y));
+        
+        _control->ReadjustRelativePosition(true);
+        
         synchronize(false);
     }
     else
@@ -602,7 +677,7 @@ void WidgetImpl::construct()
     }
 }
 
-void WidgetImpl::destruct()
+void WidgetImpl::destruct(bool destructPainterResources/* = true*/)
 {
     // got backend but no application instance running?
     // => invalid state
@@ -623,7 +698,8 @@ void WidgetImpl::destruct()
         _control = 0;
     }
     
-    _painter.destructResources();
+    if (destructPainterResources)
+        _painter.destructResources();
 }
 
 void WidgetImpl::dispatchEvent(Pt::Event& event)

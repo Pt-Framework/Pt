@@ -97,6 +97,10 @@ void SymbAppUi::ConstructL()
     iEikonEnv->AppUiFactory()->StatusPane()->MakeVisible( EFalse );
     SetKeyBlockMode(ENoKeyBlock);
     
+    // does nothing on series 60
+    //iEikonEnv->WsSession().SetPointerCursorArea(ClientRect());
+    //iEikonEnv->VirtualCursor().SetCursorStateL(TEikVirtualCursor::EOn, *(iEikonEnv));
+    
     Pt::Gui::ResourceRegistry::instance().constructPixmaps();
     Pt::Gui::ResourceRegistry::instance().constructWidgets();
     
@@ -260,8 +264,10 @@ Pt::Gui::KeyEvent::KeyCode TranslateKeycode(TUint nativeCode)
         case EKeyF22:           code = Pt::Gui::KeyEvent::F22;          break;
         case EKeyF23:           code = Pt::Gui::KeyEvent::F23;          break;
         case EKeyF24:           code = Pt::Gui::KeyEvent::F24;          break;
+        
         case EKeyOff:           code = Pt::Gui::KeyEvent::Meta;         break;               
         case EKeyMenu:          code = Pt::Gui::KeyEvent::ContextMenu;  break;
+        // TODO: Handle vendor specific cell phone keyboard scancodes
     }
     
     return code;
@@ -336,8 +342,9 @@ public:
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 };
 
-void SymbAppUi::DispatchFakePointerEvent(TPointerEvent& event)
+void SymbAppUi::DispatchFakePointerEvent(const TPointerEvent& event)
 {
+    // dispatch fake pointer event to all main windows
     std::list<Pt::Gui::WidgetImpl*>& widgets = Pt::Gui::ResourceRegistry::instance().getWidgets();
     for (std::list<Pt::Gui::WidgetImpl*>::iterator i = widgets.begin(); i != widgets.end(); ++i) 
     {
@@ -347,9 +354,9 @@ void SymbAppUi::DispatchFakePointerEvent(TPointerEvent& event)
             TRect rect(impl->nativeControl()->Position(), impl->nativeControl()->Size());
             if (rect.Contains(event.iPosition))
             {
-                event.iPosition-=impl->nativeControl()->Position();
-                impl->nativeControl()->HandlePointerEventL(event);
-                return;
+                TPointerEvent newEvent = event;
+                newEvent.iPosition-=impl->nativeControl()->Position();
+                impl->nativeControl()->HandlePointerEventL(newEvent);
             }
         }            
     }    

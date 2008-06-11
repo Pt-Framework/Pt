@@ -72,7 +72,7 @@ namespace Gui {
             void construct();
             
             // destruct
-            void destruct();
+            void destruct(bool destructPainterResources = true);
             
             bool isConstructed() const { return _control != 0; }
             
