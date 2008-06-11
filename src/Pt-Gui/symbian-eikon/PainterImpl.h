@@ -121,14 +121,29 @@ namespace Gui {
             
             void drawImage(const Pt::Math::Point& to, const Gfx::ARgb8888Image& image, const Pt::Gfx::Region& imageRegion);
 
-            void setGc(CGraphicsContext* gc) { _gc = gc; }
-            void setDevice(CGraphicsDevice* device) { _device = device; }
-            void setNativeFont(const CFont* font) { _nativeFont = font; }
-            void setCoeEnv(CEikonEnv* coeEnv) { _coeEnv = coeEnv; }
-            void setOffset(const TPoint& offset) { _offset = offset; }
-            void setClipRect(const TRect& clipRect) { _clipRect = clipRect; }
-            
+            struct ContextInfo
+            {
+                CGraphicsContext* _gc;
+                CGraphicsDevice* _device;
+                const CFont* _nativeFont;
+                CEikonEnv* _coeEnv;
+                TPoint _offset;
+                TRect _clipRect;
+                
+                ContextInfo() 
+                : _gc(0)
+                , _device(0)
+                , _nativeFont(0)
+                , _coeEnv(0)
+                , _offset(0, 0)
+                , _clipRect(0, 0, 0, 0)
+                {                    
+                }
+            };
+                        
         protected:
+            void applyContextInfo(const ContextInfo& contextInfo);
+            
             template <typename Iterator>
             void drawImage(ssize_t x, ssize_t y, Iterator begin, Iterator end, size_t width, size_t height)
             {

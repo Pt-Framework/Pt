@@ -72,18 +72,29 @@ private:
             Pt::Gui::KeyEvent::KeyCode code,
             wchar_t chr);
     
+    void MarkKeyDown(TUint scanCode, TUint keyCode);
+    void ResetKeyDown(TUint scanCode);
+    bool IsKeyDown(TUint scanCode, TUint& keyCode);
+    
+    void MarkFirstKey(TUint scanCode, bool down = true);
+    bool IsFirstKey(TUint scanCode);    
+    
     class SymbDoc* _parentDoc;
 
     CFont* _font;
     
     class CCursorControl* _cursorControl;
 
+    enum
+    {
+        KMaxScancode = 256
+    };
     // Flag that indicates if this is the first key event being produced
     // (for each scancode)
-    bool _firstKey[256];
+    bool _firstKey[KMaxScancode];
     // This table holds the virtual key code for each key being pressed
     // (for each scancode)
-    TUint _keyDown[256];
+    TUint _keyDown[KMaxScancode];
 };
 
 #endif /*SYMBAPPUI_H_*/

@@ -187,9 +187,8 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode a
 
 bool SymbAppUi::HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
-    // initialize firstkey flag to zero for this key's scancode
-    if (aKeyEvent.iScanCode < 256)
-        _firstKey[aKeyEvent.iScanCode] = false;
+    // initialize firstkey flag to false for this key's scancode
+    MarkFirstKey(aKeyEvent.iScanCode, false);
 
     // Handle hardcoded Exit "key"
     if (aKeyEvent.iScanCode == EStdKeyDevice1)
@@ -271,19 +270,22 @@ Pt::Gui::KeyEvent::KeyCode TranslateKeycode(TUint nativeCode)
 bool SymbAppUi::HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
     // remember key code for key being pressed    
-    if (aKeyEvent.iCode && aKeyEvent.iScanCode < 256)
-        _keyDown[aKeyEvent.iScanCode] = aKeyEvent.iCode;
+    MarkKeyDown(aKeyEvent.iScanCode, aKeyEvent.iCode);
     
     // set first key flag if necessary
-    if (aKeyEvent.iScanCode < 256 && !_firstKey[aKeyEvent.iScanCode])
-        _firstKey[aKeyEvent.iScanCode] = true;
-    // otherwise clear it (not the first key)
-    else if (aKeyEvent.iScanCode < 256)
-        _firstKey[aKeyEvent.iScanCode] = false;    
+    if (!IsFirstKey(aKeyEvent.iScanCode))
+    {
+        MarkFirstKey(aKeyEvent.iScanCode);
+    }
+    // otherwise reset it (not the first key)
+    else 
+    {
+        MarkFirstKey(aKeyEvent.iScanCode, false);
+    }
 
     // Handle our fake mouse cursor first
-    // if _firstKey is true we already handled the cursor in HandleEventKeyDown
-    if (!_firstKey[aKeyEvent.iScanCode])
+    // if this is the first key we already handled the cursor in HandleEventKeyDown
+    if (!IsFirstKey(aKeyEvent.iScanCode))
     {
         if (HandleFakePointer(aKeyEvent, aType, 30))
             return true;
@@ -306,17 +308,19 @@ bool SymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
         return true;
     else
     {
-        TUint nativeCode = _keyDown[aKeyEvent.iScanCode];
-        Pt::Gui::KeyEvent::KeyCode code = TranslateKeycode(nativeCode);
-        Pt::Gui::KeyEvent::Type type = Pt::Gui::KeyEvent::Release;
-        wchar_t chr = nativeCode < ENonCharacterKeyBase ? nativeCode : 0;        
-        DispatchKeyEvent(type, code, chr);        
-        return true;
-        
+        TUint nativeCode;
+        if (IsKeyDown(aKeyEvent.iScanCode, nativeCode))
+        {
+            Pt::Gui::KeyEvent::KeyCode code = TranslateKeycode(nativeCode);
+            Pt::Gui::KeyEvent::Type type = Pt::Gui::KeyEvent::Release;
+            wchar_t chr = nativeCode < ENonCharacterKeyBase ? nativeCode : 0;        
+            DispatchKeyEvent(type, code, chr);  
+            ResetKeyDown(aKeyEvent.iScanCode);
+            return true;
+        }
     }
 
-    if (aKeyEvent.iScanCode < 256)
-        _keyDown[aKeyEvent.iScanCode] = 0;
+    ResetKeyDown(aKeyEvent.iScanCode);
 
     return false;    
 }
@@ -407,7 +411,8 @@ bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, 
         {
             TPointerEvent event;
             memset(&event, 0, sizeof(event));
-            event.iType = _keyDown[EStdKeyDevice3] ? TPointerEvent::EDrag : TPointerEvent::EMove;
+            TUint code;
+            event.iType = IsKeyDown(EStdKeyDevice3, code) ? TPointerEvent::EDrag : TPointerEvent::EMove;
             event.iPosition = _cursorControl->Position();
             event.iPosition+=TPoint(2,2);
             event.iParentPosition = event.iPosition;            
@@ -456,4 +461,38 @@ void SymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
             Pt::Gui::KeyEvent keyEvent((*i)->apiWidget(), type, code, chr);                        
             ApplicationImpl().dispatchEvent(keyEvent);
         }
+}
+
+void SymbAppUi::MarkKeyDown(TUint scanCode, TUint keyCode)
+{
+    if (scanCode && scanCode < KMaxScancode)
+        _keyDown[scanCode] = keyCode;    
+}
+
+void SymbAppUi::ResetKeyDown(TUint scanCode)
+{
+    MarkKeyDown(scanCode, 0);
+}
+
+bool SymbAppUi::IsKeyDown(TUint scanCode, TUint& keyCode)
+{
+    keyCode = 0;
+    if (scanCode && scanCode < KMaxScancode)
+        keyCode = _keyDown[scanCode];
+    
+    return keyCode != 0;
+}
+
+void SymbAppUi::MarkFirstKey(TUint scanCode, bool down/* = true*/)
+{
+    if (scanCode && scanCode < KMaxScancode)
+        _firstKey[scanCode] = down;       
+}
+
+bool SymbAppUi::IsFirstKey(TUint scanCode) 
+{
+    if (scanCode && scanCode < KMaxScancode)
+        return _firstKey[scanCode];       
+
+    return false;
 }

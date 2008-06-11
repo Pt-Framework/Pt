@@ -41,8 +41,12 @@ void PixmapPainter::begin()
 {
     if (!_active)
     {
-        _parentPixmapImpl.beginDraw();
-        _active = true;
+        ContextInfo contextInfo = _parentPixmapImpl.beginDraw();
+        
+        applyContextInfo(contextInfo);
+        
+        if (_gc)
+            _active = true;
     }
     
     PainterImpl::begin();
@@ -58,11 +62,6 @@ void PixmapPainter::end()
         _parentPixmapImpl.endDraw();        
         _active = false;
     }
-}
-
-void PixmapPainter::cleanUp()
-{
-    end();
 }
 
 } // namespace Gui

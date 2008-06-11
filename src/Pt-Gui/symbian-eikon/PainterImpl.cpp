@@ -108,14 +108,34 @@ void PainterImpl::end()
     }
     
     freeFont();
+
+    _gc = 0;
+    _device = 0;
+    _nativeFont = 0;
+    _fontOwner = false;
+    _offset = TPoint(0, 0);
+    _clipRect = TRect(0, 0, 0, 0);
     
     _oldBrushRef = 0;
     _oldPenRef = 0;
     _oldFontRef = 0;
 }
 
+void PainterImpl::applyContextInfo(const ContextInfo& contextInfo)
+{
+    freeFont();
+    
+    _gc = contextInfo._gc;
+    _device = contextInfo._device;
+    _nativeFont = contextInfo._nativeFont;
+    _coeEnv = contextInfo._coeEnv;
+    _offset = contextInfo._offset;
+    _clipRect = contextInfo._clipRect;
+}
+
 void PainterImpl::cleanUp()
 {    
+    end();
 }
 
 void PainterImpl::setPen(const Gfx::Pen& pen)

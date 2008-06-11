@@ -70,42 +70,32 @@ Painter PixmapImpl::painter()
     return Painter(&_painter);
 }
 
-void PixmapImpl::beginDraw()
+PainterImpl::ContextInfo PixmapImpl::beginDraw()
 {
+    PainterImpl::ContextInfo contextInfo;
+    
+    if (!_bitmapGc)
+        construct();
+
     if (_bitmapGc)
     {
-        _painter.setGc(_bitmapGc);
-        _painter.setDevice(_bitmapDevice);
+        contextInfo._gc = _bitmapGc;
+        contextInfo._device = _bitmapDevice;
         
         assert(Pt::Gui::ApplicationImpl::_self);        
+        assert(Pt::Gui::ApplicationImpl::_self && Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized());
         const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
-        _painter.setNativeFont(font);
+        contextInfo._nativeFont = font;
+        
         _bitmapGc->UseFont(font);
-        //_bitmapDevice->DrawingBegin(ETrue);
+        contextInfo._coeEnv = CEikonEnv::Static();
     }
-    else
-    {
-        construct();
-        if (_bitmapGc)
-        {
-            _painter.setGc(_bitmapGc);
-            _painter.setDevice(_bitmapDevice);
 
-            assert(Pt::Gui::ApplicationImpl::_self);        
-            const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
-            _painter.setNativeFont(font);
-            _bitmapGc->UseFont(font);
-            //_bitmapDevice->DrawingBegin(ETrue);
-        }
-    }
+    return contextInfo;
 }
 
 void PixmapImpl::endDraw()
 {
-    _painter.setGc(0);
-    _painter.setDevice(0);
-    _painter.setNativeFont(0);
-    //_bitmapDevice->DrawingEnd(ETrue);
 }
 
 void PixmapImpl::construct()

@@ -48,7 +48,7 @@ namespace Gui {
             Painter painter();
             
             // enable drawing to native graphics context                        
-            void beginDraw();            
+            PainterImpl::ContextInfo beginDraw();            
             
             // disable drawing to native gfx context
             void endDraw();            

@@ -40,7 +40,10 @@ void WidgetPainter::begin()
 {
     if (!_active)
     {
-        _parentWidgetImpl.beginDraw();
+        ContextInfo contextInfo = _parentWidgetImpl.beginDraw();
+        
+        applyContextInfo(contextInfo);
+
         if (_gc)
             _active = true;
     }
@@ -57,11 +60,6 @@ void WidgetPainter::end()
         _parentWidgetImpl.endDraw();        
         _active = false;
     }
-}
-
-void WidgetPainter::cleanUp()
-{
-    end();
 }
 
 } // namespace Gui

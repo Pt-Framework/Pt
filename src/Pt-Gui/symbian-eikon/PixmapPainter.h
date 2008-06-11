@@ -41,9 +41,6 @@ namespace Gui {
 
             virtual void end();
             
-            virtual void cleanUp();
-
-            
         private:
             PixmapImpl& _parentPixmapImpl;
             bool _active;            

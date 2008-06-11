@@ -85,7 +85,7 @@ namespace Gui {
             CControl* nativeControl() { return _control; }
             
             // enable drawing to native graphics context                        
-            void beginDraw();            
+            PainterImpl::ContextInfo beginDraw();            
             
             // disable drawing to native gfx context
             void endDraw();

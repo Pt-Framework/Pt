@@ -632,29 +632,27 @@ void WidgetImpl::dispatchEvent(Pt::Event& event)
     Pt::Gui::ApplicationImpl::_self->dispatchEvent(event);
 }
 
-void WidgetImpl::beginDraw()            
+PainterImpl::ContextInfo WidgetImpl::beginDraw()            
 {
+    PainterImpl::ContextInfo contextInfo;
+
     if (!isConstructed())
-        return;
+        return contextInfo;
     
     const CControl::GraphicContext& graphicContext = _control->BeginDraw();
-    _painter.setGc(graphicContext._gc);
-    _painter.setDevice(graphicContext._device);
-    _painter.setNativeFont(graphicContext._nativeFont);  
-    _painter.setCoeEnv(CEikonEnv::Static());
-    _painter.setOffset(_control->AbsolutePosition());
-    _painter.setClipRect(graphicContext._clipRect);
+    
+    contextInfo._gc = graphicContext._gc;
+    contextInfo._device = graphicContext._device;
+    contextInfo._nativeFont = graphicContext._nativeFont;  
+    contextInfo._coeEnv = CEikonEnv::Static();
+    contextInfo._offset = _control->AbsolutePosition();
+    contextInfo._clipRect = graphicContext._clipRect;
+
+    return contextInfo;
 }
 
 void WidgetImpl::endDraw()
-{
-    _painter.setGc(0);    
-    _painter.setNativeFont(0);
-    _painter.setCoeEnv(0);
-    _painter.setDevice(0);
-    _painter.setOffset(TPoint(0, 0));
-    _painter.setClipRect(TRect(0, 0, 0, 0));
-    
+{    
     if (!isConstructed())
         return;
 

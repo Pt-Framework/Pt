@@ -43,8 +43,6 @@ namespace Gui {
 
             virtual void end();
             
-            virtual void cleanUp();
-            
         private:
             WidgetImpl& _parentWidgetImpl;
             bool _active;
