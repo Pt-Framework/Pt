@@ -60,8 +60,8 @@ void XmlReader::init()
     // see if byte order mark and a valid XML declaration is present
     static const String xmlDeclStart(L"<?xml");
     size_t pos = start.find(xmlDeclStart);
-    if(pos != 0)
-        throw std::logic_error("Invalid XML declaration." + PT_SOURCEINFO);
+    if(pos == String::npos)
+        throw std::runtime_error("Invalid XML document." + PT_SOURCEINFO);
 
     // read the whole XML declaration
     while( true )
@@ -69,7 +69,7 @@ void XmlReader::init()
         Char ch = _textBuffer->sbumpc();
 
         if(ch.value() == eof)
-            throw std::logic_error("Invalid XML declaration." + PT_SOURCEINFO);
+            throw std::runtime_error("Invalid XML document" + PT_SOURCEINFO);
 
         if(ch == '>')
             break;

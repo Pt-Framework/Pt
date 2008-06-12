@@ -9,7 +9,7 @@
 #include "Pt/Text/Utf8Codec.h"
 #include "Pt/Main.h"
 
-
+#include <fstream>
 #include <sstream>
 #include <ctime>
 
@@ -67,49 +67,53 @@ void test()
     input << "</dialog>";
     input << "</ui-description>";
 
+    // To test unicode we must read from a file
+    //std::ifstream fin("in.xml");
+    //XmlReader reader( fin );
+
     XmlReader reader( input );
+    for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
+    {
+        const Xml::Node& n = *it;
 
-    try {
-        for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
+        if( const Xml::StartElement* e = dynamic_cast<const Xml::StartElement*>(&n) )
         {
-            const Xml::Node& n = *it;
-
-            if( const Xml::StartElement* e = dynamic_cast<const Xml::StartElement*>(&n) )
+            cerr << "StartElement: '" << e->name().narrow() << "'" << endl;
+            if( e->attributes().size() > 0 )
             {
-                cerr << "StartElement: '" << e->name().narrow() << "'" << endl;
-                if( e->attributes().size() > 0 )
-                {
-                    cerr << "   Attribute: '" << e->attributes().front().name().narrow() << "'"
-                         << ": '" << e->attributes().front().value().narrow() << "'" << endl;
-                }
-            }
-            else if( const Xml::Characters* e = dynamic_cast<const Xml::Characters*>(&n) )
-            {
-                cerr << "Characters: '" << e->content().narrow() << "'" << endl;
-            }
-            else if( const Xml::Comment* e = dynamic_cast<const Xml::Comment*>(&n) )
-            {
-                cerr << "Comment: '" << e->text().narrow() << "'" << endl;
-            }
-            else if( const Xml::EndElement* e = dynamic_cast<const Xml::EndElement*>(&n) )
-            {
-                cerr << "EndElement: '" << e->name().narrow() << "'" << endl;
-            }
-            else {
-                cerr << "Unknown Node" << endl;
+                cerr << "   Attribute: '" << e->attributes().front().name().narrow() << "'"
+                     << ": '" << e->attributes().front().value().narrow() << "'" << endl;
             }
         }
+        else if( const Xml::Characters* e = dynamic_cast<const Xml::Characters*>(&n) )
+        {
+            cerr << "Characters: '" << e->content().narrow() << "'" << endl;
+        }
+        else if( const Xml::Comment* e = dynamic_cast<const Xml::Comment*>(&n) )
+        {
+            cerr << "Comment: '" << e->text().narrow() << "'" << endl;
+        }
+        else if( const Xml::EndElement* e = dynamic_cast<const Xml::EndElement*>(&n) )
+        {
+            cerr << "EndElement: '" << e->name().narrow() << "'" << endl;
+        }
+        else {
+            cerr << "Unknown Node" << endl;
+        }
     }
-    catch(const std::exception& e)
-    {
-        cerr << e.what() << endl;
-    }
+
 }
 
 
 int main(int argc, char* argv[])
 {
-    test();
-    //perfTest();
+    try {
+        test();
+        //perfTest();
+    }
+    catch(const std::exception& e)
+    {
+        cerr << e.what() << endl;
+    }
     return 0;
 }
