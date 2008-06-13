@@ -20,7 +20,7 @@ LN  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ld.exe\" ;
 AR  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ar.exe\" cr ;
 
 # Use the first available variant resource header file if not set
-VARIANT_HRH ?= [ GLOB $(EPOCROOT)\\epoc32\\include\\variant : *.* ] ;
+VARIANT_HRH ?= [ GLOB $(EPOCROOT)\\epoc32\\include\\variant : *.hrh ] ;
 VARIANT_HRH = $(VARIANT_HRH[0]) ;
 
 if ! $(VARIANT_HRH)
