@@ -14,17 +14,27 @@ if ! [ GLOB $(TOOLSET_ROOT)\\bin : arm-none-symbianelf-gcc.exe ]
 	Exit "Please specify TOOLSET_ROOT" ;
 }
 
+CC  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-gcc.exe\" ;
+C++ = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-g++.exe\" ;
+LN  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ld.exe\" ;
+AR  = \"$(TOOLSET_ROOT)\\bin\\arm-none-symbianelf-ar.exe\" cr ;
 
-CC = arm-none-symbianelf-gcc.exe ;
-C++ = arm-none-symbianelf-g++.exe ;
-LN = arm-none-symbianelf-ld.exe ;
-AR = arm-none-symbianelf-ar.exe cr ;
+# Use the first available variant resource header file if not set
+VARIANT_HRH ?= [ GLOB $(EPOCROOT)\\epoc32\\include\\variant : *.* ] ;
+VARIANT_HRH = $(VARIANT_HRH[0]) ;
+
+if ! $(VARIANT_HRH)
+{
+	Exit "Please specify path to the variant resource header (VARIANT_HRH)" ;
+}
 
 CCFLAGS += -Wall -march=armv5t -mapcs -pipe -nostdinc -c -msoft-float ;
-CCFLAGS += -D_UNICODE -D__SYMBIAN32__ -D__SERIES60_30__ -D__SERIES60_3X__ -D__GCCE__ -D__EPOC32__ -D__MARM__ -D__EABI__ -D__MARM_ARMV5__ -D__EXE__ -D__SUPPORT_CPP_EXCEPTIONS__ ;
-CCFLAGS += -D__PRODUCT_INCLUDE__=\"/Symbian/9.1/S60_3rd/epoc32/include/variant/Symbian_OS_v9.1.hrh\" ;
+CCFLAGS += -D_UNICODE -D__SYMBIAN32__ -D__SERIES60_30__ -D__SERIES60_3X__ -D__GCCE__ ;
+CCFLAGS += -D__EPOC32__ -D__MARM__ -D__EABI__ -D__MARM_ARMV5__ -D__EXE__ -D__SUPPORT_CPP_EXCEPTIONS__ ;
+CCFLAGS += -D__PRODUCT_INCLUDE__=\\\"$(VARIANT_HRH)\\\" ;
 CCFLAGS += -include $(EPOCROOT)\\EPOC32\\INCLUDE\\GCCE\\GCCE.h ;
 
+CCFLAGS += -I c:\\symb_stp\\stlport\\stlport ;
 
 if $(CONFIG:L) = debug
 {
