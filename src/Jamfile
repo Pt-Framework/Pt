@@ -1,24 +1,20 @@
 SubDir TOP src ;
 
 SubInclude TOP src Pt ;
+SubInclude TOP src Pt-Reflex ;
+SubInclude TOP src Pt-System ;
+SubInclude TOP src Pt-Cma ;
+SubInclude TOP src Pt-Log ;
+SubInclude TOP src Pt-Net ;
+SubInclude TOP src Pt-Db ;
+SubInclude TOP src Pt-Gfx ;
 
-if $(TARGET_OS) != symbian
+if $(GUI) != none
 {
-    SubInclude TOP src Pt-Reflex ;
-    SubInclude TOP src Pt-System ;
-    SubInclude TOP src Pt-Cma ;
-    SubInclude TOP src Pt-Log ;
-    SubInclude TOP src Pt-Net ;
-    SubInclude TOP src Pt-Db ;
-    SubInclude TOP src Pt-Gfx ;
-
-    if $(GUI) != none
-    {
-        SubInclude TOP src Pt-Gui ;
-    }
-
-    SubInclude TOP src Pt-Text ;
-    SubInclude TOP src Pt-Unit ;
-    SubInclude TOP src Pt-Math ;
-    SubInclude TOP src Pt-Xml ;
+    SubInclude TOP src Pt-Gui ;
 }
+
+SubInclude TOP src Pt-Text ;
+SubInclude TOP src Pt-Unit ;
+SubInclude TOP src Pt-Math ;
+SubInclude TOP src Pt-Xml ;

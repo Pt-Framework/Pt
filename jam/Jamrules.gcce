@@ -34,7 +34,6 @@ CCFLAGS += -D__EPOC32__ -D__MARM__ -D__EABI__ -D__MARM_ARMV5__ -D__EXE__ -D__SUP
 CCFLAGS += -D__PRODUCT_INCLUDE__=\\\"$(VARIANT_HRH)\\\" ;
 CCFLAGS += -include $(EPOCROOT)\\EPOC32\\INCLUDE\\GCCE\\GCCE.h ;
 
-CCFLAGS += -I c:\\symb_stp\\stlport\\stlport ;
 
 if $(CONFIG:L) = debug
 {
@@ -56,7 +55,11 @@ C++FLAGS    += -Wno-unused-function -Wno-unused-variable -DPT_STLPORT -DEH_DELET
 STDHDRS	    = ;
 STDHDRS     += $(EPOCROOT)\\epoc32\\include\\stdapis ;
 STDHDRS     += $(EPOCROOT)\\epoc32\\include ;
+
+# TODO: use installed path
 STDHDRS     += extern\\stlport\\stlport ;
+STDHDRS     += c:\\Symbian\\stlport\\stlport ;
+
 STDHDRS     += $(EPOCROOT)\\epoc32\\include\\variant ;
 STDHDRS     += "\"$(TOOLSET_ROOT)\\bin\\..\\lib\\gcc\\arm-none-symbianelf\\3.4.3\\include"\" ;
 

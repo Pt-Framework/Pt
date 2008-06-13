@@ -68,7 +68,13 @@ if $(TARGET_OS:L) = "wince"
     SYSLIBS = mmtimer.lib ;
     NETLIBS = winsock.lib Ws2.lib ;
 }
-
+if $(TARGET_OS:L) = "symbian"
+{
+    SYS     ?= symbian ;
+    GUI     ?= symbian-eikon ;
+    SYSLIBS =  ;
+    NETLIBS =  ;
+}
 
 #############################################################################
 # GUI libraries and includes
@@ -139,6 +145,23 @@ if $(GUI:L) = "gf"
 if $(GUI:L) = "photon"
 {
     GUILIBS = -lphrender -lph ;
+}
+
+if $(GUI:L) = "symbian-eikon"
+{
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
 
 if $(GUI:L) = "cocoa"
