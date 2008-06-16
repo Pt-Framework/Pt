@@ -44,6 +44,9 @@ void test()
     stringstream input;
     input << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
     input << "<!DOCTYPE ui-description SYSTEM \"UIDescription.dtd\">";
+
+    //input << "<aaa y-y=\"zzz\"type=\"text/css\" href=\"styles.css\" />";
+
     input << "<ui-description>";
     input << "<menu id=\"mainmenu\" label=\"Main-Menu\">";
     input << "<menu-ref menu-id=\"mainmenu_options\"/>";

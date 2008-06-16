@@ -401,6 +401,7 @@ void XmlReader::onComment()
 }
 
 
+/*
 bool XmlReader::parseAttribute(String& name, String& value)
 {
     typedef std::char_traits<Pt::Char> CharTraits;
@@ -442,7 +443,133 @@ bool XmlReader::parseAttribute(String& name, String& value)
 
     return true;
 }
+*/
 
+bool XmlReader::parseAttribute(String& name, String& value)
+{
+    enum AttributeParseState
+    {
+        BeforeName  = 0,
+        OnName      = 1,
+        BeforeEqual = 2,
+        BeforeValue = 3,
+        OnValue     = 4,
+        AfterValue  = 5
+    };
+
+    AttributeParseState state = BeforeName;
+
+    // stay on '/' or '<' when done.
+    typedef std::char_traits<Pt::Char> CharTraits;
+    const Char eof = CharTraits::to_char_type( CharTraits::eof() );
+    for( Char ch = _textBuffer->sgetc(); eof != ch; ch = _textBuffer->snextc() )
+    {
+        switch(state)
+        {
+            case BeforeName:
+            {
+               if( ch == '>' || ch == '/')
+               {
+                   return false;
+               }
+               else if( isspace(ch) )
+               {
+                   continue;
+               }
+               else
+               {
+                   name += ch;
+                   state = OnName;
+               }
+
+               break;
+            }
+
+            case OnName:
+            {
+               if( isspace(ch) )
+               {
+                   state = BeforeEqual;
+               }
+               else if( ch == '=')
+               {
+                   state = BeforeValue;
+               }
+               else
+               {
+                   name += ch;
+               }
+
+               break;
+            }
+
+            case BeforeEqual:
+            {
+               if( isspace(ch) )
+               {
+                   continue;
+               }
+               else if( ch == '=')
+               {
+                   state = BeforeValue;
+               }
+               else
+                   throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
+
+               break;
+            }
+
+            case BeforeValue:
+            {
+               if( isspace(ch) )
+               {
+                   continue;
+               }
+               else if( ch == '\'' || ch == '"')
+               {
+                   state = OnValue;
+               }
+               else
+               {
+                   throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
+                }
+
+               break;
+            }
+
+            case OnValue:
+            {
+               if( ch == '\'' || ch == '"')
+               {
+                   state = AfterValue;
+               }
+               else
+                   value += ch;
+
+               break;
+            }
+
+            case AfterValue:
+            {
+               if( isspace(ch) )
+               {
+                   continue;
+               }
+               else
+               {
+                   return true;
+               }
+
+               break;
+            }
+
+            default:
+                throw  std::runtime_error("Invalid XML attribute" + PT_SOURCEINFO);
+        }
+    }
+
+    return true;
+}
 
 
 bool XmlReader::parseStartElement(StartElement& to)

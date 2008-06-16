@@ -26,7 +26,7 @@ SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
 SharedLibrary_LinkSharedLibraries Pt-Xml : Pt-Text Pt ;
 SharedLibrary_MakeLocate Pt-Xml : $(OUTPUT_TARGET) ;
 
-PT_XML_TESTS = #XmlTest.cpp
+PT_XML_TESTS = XmlTest.cpp
                XmlSerializerTest.cpp
                #XmlWriterTest.cpp
                ;
