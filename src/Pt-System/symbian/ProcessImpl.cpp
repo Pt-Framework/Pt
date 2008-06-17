@@ -34,10 +34,17 @@ namespace System {
 
 
 ProcessImpl::ProcessImpl(const std::string& strCommand)
-:m_command(strCommand)
+: m_command(strCommand)
 {
 }
 
+ProcessImpl::ProcessImpl(const ProcessInfo& procInfo)
+{
+    m_command = procInfo.command();
+    
+    for( unsigned i = 0; i < procInfo.argCount(); i++)
+        m_args += procInfo.getArgument( i);
+}
 
 ProcessImpl::~ProcessImpl()
 {
@@ -47,18 +54,6 @@ ProcessImpl::~ProcessImpl()
 const std::string& ProcessImpl::command()
 {
     return m_command;
-}
-
-
-void ProcessImpl::setArgs(const std::string& strArgs)
-{
-    m_args=strArgs;
-}
-
-
-const std::string& ProcessImpl::args()
-{
-    return m_args;
 }
 
 
@@ -122,13 +117,16 @@ void ProcessImpl::kill()
 }
 
 
-void ProcessImpl::wait()
+int ProcessImpl::wait()
 {
     // wait for process to exit busy loop style
     while (m_process.ExitType() == EExitPending)
     {
         User::After(1000);
-    }    
+    }
+    
+    //FIXME: return exit code
+    return 0;
 }
 
 } // namespace Pt

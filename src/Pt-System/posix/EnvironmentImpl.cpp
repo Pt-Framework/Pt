@@ -79,9 +79,12 @@ const std::string& EnvironmentImpl::systemDirectory()
 
 const std::string EnvironmentImpl::currentDirectory()
 {
-    char cwd[PATH_MAX];
-
-    if( !getcwd(cwd, PATH_MAX) )
+    long size = pathconf(".", _PC_PATH_MAX);
+    if(size == -1)
+        throw SystemError("pathconf failed for .", PT_SOURCEINFO);
+    
+    char cwd[size];
+    if( !getcwd(cwd, size) )
         throw SystemError("Could not get current working directroy", PT_SOURCEINFO);
 
     return std::string(cwd);

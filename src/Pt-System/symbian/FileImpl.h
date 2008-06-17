@@ -1,7 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2005-2007 by Marc Boris Duerner                         *
- *   Copyright (C) 2006-2007 Tobias Mueller                                *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,44 +16,4 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/Api.h"
-#include <string>
-
-
-namespace Pt {
-
-namespace System {
-
-class PT_API FileImpl {
-    public:
-        FileImpl(const std::string& path);
-
-        ~FileImpl();
-
-        const std::string& path() const
-        { return _path; }
-
-        std::size_t size() const;
-
-        void resize(std::size_t newSize);
-
-        void remove();
-
-        void copy(const std::string& to) const;
-
-        void move(const std::string& to);
-
-        bool exists() const;
-
-        void create();
-        
-    private:
-        std::string _path;
-};
-
-} // namespace System
-
-} // namespace Pt
-
-
+#include "../posix/FileImpl.cpp"

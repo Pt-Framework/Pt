@@ -37,7 +37,9 @@ class PT_API ProcessImpl
 {
     public:
         ProcessImpl(const std::string& command);
-
+        
+        ProcessImpl(const ProcessInfo& procInfo);
+        
         ~ProcessImpl();
 
         static void setEnvVar(const std::string& name, const std::string& value)
@@ -71,15 +73,11 @@ class PT_API ProcessImpl
     
         const std::string& command();
     
-        void setArgs(const std::string& strArgs);
-    
-        const std::string& args();
-    
         void start();
     
         void kill();
     
-        void wait();
+        int wait();
     
     private:
         RProcess m_process;
