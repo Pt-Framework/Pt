@@ -957,16 +957,16 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT>
-Method<R,ClassT> callable( ClassT & obj, R (ClassT::*ptr)()) throw()
+template <class R, class BaseT, class ClassT>
+Method<R, ClassT> callable( ClassT & obj, R (BaseT::*ptr)()) throw()
 {
-    return Method<R,ClassT>(obj,ptr);
+    return Method<R, ClassT>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT>
-MethodSlot<R,BaseT> slot( ClassT & obj, R (BaseT::*memFunc)() ) throw()
+MethodSlot<R, ClassT> slot( ClassT & obj, R (BaseT::*memFunc)() ) throw()
 {
-    return MethodSlot<R,ClassT>( callable( obj, memFunc ) );
+    return MethodSlot<R, ClassT>( callable( obj, memFunc ) );
 }
 
 // END_Method 0
