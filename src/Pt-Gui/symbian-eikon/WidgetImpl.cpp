@@ -18,33 +18,49 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "WidgetImpl.h"
-#include <Pt/Gui/Widget.h>
-#include "ApplicationImpl.h"
 
-#include <Pt/Gfx/Region.h>
+#include <limits>
+#include <iostream>
+#include <assert.h>
+
+#include <Pt/Gui/Widget.h>
 #include <Pt/Gui/MouseEvent.h>
 #include <Pt/Gui/ResizeEvent.h>
 #include <Pt/Gui/CloseEvent.h>
 #include <Pt/Gui/PaintEvent.h>
 #include <Pt/Gui/MoveEvent.h>
 #include <Pt/Gui/MouseMoveEvent.h>
+#include <Pt/Gfx/Region.h>
 
+#include "ApplicationImpl.h"
 #include "SymbAppUi.h"
-#include "SymbDoc.h"
-#include "SymbApp.h"
 #include "SymbianTools.h"
-
-#include <limits>
-#include <iostream>
-#include <assert.h>
 
 // symbian APIs
 #include <coecntrl.h>
 #include <w32std.h>
 
+/**
+ * @brief This is the symbian backend control class.
+ * It represents functionality to be either a window owning (top level) control
+ * or a lodging control which is nested into another control.
+ * 
+ * When speaking of the "root" control the top level control which owns the 
+ * window is meant.
+ * 
+ * <b>Note</b> that a nested control still uses the graphic context of the root 
+ * window owning control. If you force redraw the content of the root window
+ * without redrawing the children you are likely to overdraw the nested controls.
+ * 
+ * Also accessing controls is NOT thread-safe. A Panic occurs when trying to do so.
+ */
 class CControl : public CCoeControl
 {
 public:
+    /**
+     * @brief Class to hold graphic context information used to begin
+     * drawing into the window or a control.
+     */
     struct GraphicContext
     {
         GraphicContext()
@@ -56,39 +72,59 @@ public:
         {            
         }
         
+        // Context to draw to
         CGraphicsContext* _gc;
+        // Device that holds the context
         CGraphicsDevice* _device;
+        // The default font which will be activated for this context
         const CFont* _nativeFont; 
+        // References of Draw() in current redraw callstack
         int _drawingActive;
+        // References to current open context
         int _references;
         TRect _clipRect;
     };
     
-    // Constructors and destructor
-    CControl(Pt::Gui::WidgetImpl& owner) 
+    /**
+     * @brief First phase constructor.
+     * 
+     * @param owner Widget implementation which owns this control.
+     * @param defaultFont Reference to an existing default font.
+     */
+    CControl(Pt::Gui::WidgetImpl& owner, const CFont& defaultFont) 
     : _apiWidgetImpl(owner)
+    , _defaultFont(defaultFont)
     , _pointerEventConsumed(false)
     , _allowParentRedrawing(false)
     {
     }
 
-    void SetAllowParentRedrawing(bool allowParentRedrawing) { _allowParentRedrawing = allowParentRedrawing; }
-    
+    /**
+     * @brief Second phase constructor.
+     * 
+     * @param rect Construction rectangle.
+     */
     void ConstructL(const TRect& rect)
     {
-        Reparent(false);
+        ReparentL(false);
         
         SetRect(rect);
         EnableDragEvents();
         ActivateL();        
     }
 
+    /**
+     * @brief Regular destructor.
+     */
     virtual ~CControl()
     {
         if (!_apiWidgetImpl.parent())
             _windowGroup.Close();        
     }
 
+    /**
+     * @brief Release the backend window if we are a window owning control.
+     */
     void ReleaseWindow()
     {
         assert(OwnsWindow() != EFalse);
@@ -96,7 +132,13 @@ public:
         CloseWindow();        
     }
     
-    void Reparent(bool readjustChildren = true)
+    /**
+     * @brief Call this if the parent of this control has changed. 
+     * Also Recursively adjust window references in case of nesting.
+     * 
+     * @param readjustChildren A flag to indicate whether to adjust the children or not.
+     */
+    void ReparentL(bool readjustChildren = true)
     {
         // no parent? We're becoming a window owning control
         if (!_apiWidgetImpl.parent())
@@ -137,14 +179,30 @@ public:
         }
     }
     
-    // Get absolute position of widget within parent widget
+    /**
+     * @brief Setting this flag will allow the control to redraw its parent 
+     * in case of a size change.
+     */
+    void SetAllowParentRedrawing(bool allowParentRedrawing) { _allowParentRedrawing = allowParentRedrawing; }
+    
+    /**
+     * @brief Get absolute position of widget within parent widget.
+     * If the control is a window owning control the returned position will be
+     * at the origin.
+     */
     TPoint AbsolutePosition() const
     {
         return _apiWidgetImpl.parent() ? Position() : TPoint(0,0);
     }   
     
-    // Get relative position of widget within parent widget
-    // Don't call this function if there is no parent, it will not work 
+    /**
+     * @brief Set relative position of widget within parent widget.
+     * Don't call this function if there is no parent, it will not work.
+     * <b>Note</b> that this function will not work in a recursive fashion i.e.
+     * children positions are unaffected.
+     * 
+     * @param position New position. 
+     */
     void SetRelativePosition(const TPoint& position)
     {
         TPoint relativePos(0,0);
@@ -161,7 +219,9 @@ public:
         }
     }
 
-    // Get relative position of widget within parent widget
+    /**
+     * @brief Get relative position of widget within parent widget.
+     */
     TPoint RelativePosition()
     {
         TPoint relativePos(0,0);
@@ -176,6 +236,11 @@ public:
         return relativePos;
     }
         
+    /**
+     * @brief Start drawing to this control. 
+     * This function will return all context information that is necessary
+     * when control is about being drawn into.
+     */
     const GraphicContext& BeginDraw()
     {       
         GraphicContext& graphicContext = WorkingContext();
@@ -183,18 +248,25 @@ public:
         // no context active
         if (!graphicContext._gc)
         {            
+            // the window handle of the root window needs to be the same
+            // with the current oen, otherwise something went wrong
+            assert(&Window() == &RootControl()->Window());
+
             graphicContext._gc = &SystemGc();
             graphicContext._device = iEikonEnv->ScreenDevice();
-            graphicContext._nativeFont = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
+            graphicContext._nativeFont = &_defaultFont;
+
             // we're not invoked out of Draw()
-            // we need to activate the context
+            // we need to activate the context                        
             if (!graphicContext._drawingActive)
             {
-                /*RootControl()->*/ActivateGc();
-                /*RootControl()->*/Window().Invalidate(Rect());
-                /*RootControl()->*/Window().BeginRedraw(Rect());                
+                ActivateGc();
+                Window().Invalidate(Rect());
+                Window().BeginRedraw(Rect());                
             }
+            
             graphicContext._gc->UseFont(_graphicContext._nativeFont);
+            
             // if we're not the window owning control (root)
             // we setup a clipping rectangle too
             if (RootControl() != this)
@@ -211,6 +283,7 @@ public:
                 graphicContext._clipRect = TRect(0, 0, 0, 0);
                 graphicContext._gc->CancelClippingRect();
             }
+            
             graphicContext._references = 1;
         }
         else
@@ -221,6 +294,10 @@ public:
         return graphicContext;
     }
     
+    /**
+     * @brief Call this when you are finished with drawing into the control.
+     * All context information will be cleaned up.
+     */
     void EndDraw()
     {
         GraphicContext& graphicContext = WorkingContext();
@@ -238,8 +315,8 @@ public:
                 // deactivate context
                 if (!graphicContext._drawingActive)
                 {
-                    /*RootControl()->*/Window().EndRedraw();
-                    /*RootControl()->*/DeactivateGc();                    
+                    Window().EndRedraw();
+                    DeactivateGc();                    
                 }
             }
         }
@@ -254,6 +331,11 @@ public:
         //    ComponentControl(i)->DrawDeferred();
     }
 
+    /**
+     * @brief Deal with "mouse" events. 
+     * Don't forget to call CCoeControl::HandlePointerEventL otherwise
+     * the event is not delivered to the children.
+     */
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {
         // start
@@ -283,11 +365,18 @@ public:
             root->_pointerEventConsumed = false;
     }
             
+    /**
+     * @brief Add a child control.
+     */
     void AddControl(CControl* control)
     {
         _controls.push_back(control);
     }
 
+    /**
+     * @brief Remove a child control. 
+     * Note that removing a child will not cause the window reference to be released.
+     */
     void RemoveControl(CControl* control)
     {
         size_t size = _controls.size();
@@ -297,12 +386,14 @@ public:
         assert(_controls.size() == size-1);
     }
     
+    /**
+     * @brief Recursively adjust the relative positions of a control.
+     * 
+     * @param childrenOnly Flag to start with the children and to ignore the current position.
+     */
     void ReadjustRelativePosition(bool childrenOnly)
     {
-        if (RootControl() == this)
-            return;
-        
-        if (!childrenOnly)
+        if (!childrenOnly && _apiWidgetImpl.parent())
         {
             Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
             CControl* parentControl = impl.nativeControl();
@@ -321,16 +412,29 @@ public:
     }
         
 protected:
+    /**
+     * @brief From CCoeControl: Return a nested control.
+     * @see CountComponentControls
+     * 
+     * @param aIndex Index to control.
+     */
     virtual CCoeControl* ComponentControl(TInt aIndex) const
     {
         return _controls.at(aIndex);
     }
     
+    /**
+     * @brief From CCoeControl: Return the number of nested controls.
+     * @see ComponentControl
+     */
     virtual TInt CountComponentControls() const
     {
         return _controls.size();
     }
 
+    /**
+     * @brief From CCoeControl: Is called when the size of this control is changed.
+     */
     virtual void SizeChanged()
     {
         // If size has changed redraw our parent
@@ -342,7 +446,11 @@ protected:
     }
     
 private:
-    // Traverse widget hierarchy up to the root widget
+    /**
+     * @brief Get the root control of this control
+     * The root is the control which is the top level control which owns the window.
+     * => Traverse widget hierarchy up to the root widget.
+     */
     CControl* RootControl() const
     {
         // find root window
@@ -358,16 +466,21 @@ private:
         return this_->impl().nativeControl();
     }
     
-    // When accessing the graphic context information
-    // we always take it from the root widget
+    /**
+     * @brief Provide access to the context information of the root control.
+     * When accessing the graphic context information we always take it 
+     * from the root widget.
+     * @see BeginDraw
+     * @see RootControl
+     */
     GraphicContext& WorkingContext() const
     {
         return RootControl()->_graphicContext;        
     }
 
     /**
-     * From CCoeControl,Draw.
-     * @param Specified area for drawing
+     * @brief From CCoeControl: Draw control content.
+     * @param rect Specified area for drawing.
      */
     void Draw(const TRect& rect) const
     {
@@ -390,6 +503,12 @@ private:
         graphicContext._drawingActive--;        
     }
     
+    /**
+     * @brief Internally used to translate a symbian pointer event 
+     * into a Pt event and dispatch it.
+     * 
+     * @param aPointerEvent Symbian pointer event.
+     */
     void TranslateMouseEvent(const TPointerEvent& aPointerEvent)
     {
         unsigned int modifiers = 0;
@@ -453,6 +572,9 @@ private:
 
     }
     
+    /**
+     * @brief Adjust window owning of nested control.
+     */
     void ReadjustWindowOwning()
     {
         Pt::Gui::WidgetImpl& impl = _apiWidgetImpl.parent()->impl();
@@ -465,10 +587,14 @@ private:
             (*it)->ReadjustWindowOwning();
     }
 
+    /**
+     * @brief Provide access to the ApiWidget.
+     */
     Pt::Gui::Widget& apiWidget() const { return _apiWidgetImpl.apiWidget(); }
 
     Pt::Gui::WidgetImpl& _apiWidgetImpl;    
     RWindowGroup _windowGroup;
+    const CFont& _defaultFont;
     mutable GraphicContext _graphicContext;
     bool _pointerEventConsumed;
     bool _allowParentRedrawing;
@@ -492,18 +618,15 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 , _control(0)
 {
     // register widget
-    ResourceRegistry::instance().registerWidget(this);
-    
-    // application instance is running, it's ok to construct the widget right now
-    if (Pt::Gui::ApplicationImpl::_self && Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
-        construct();
+    ResourceRegistry::instance().registerResource(this);    
+    construct();
 }
 
 
 WidgetImpl::~WidgetImpl()
 {
-    ResourceRegistry::instance().unregisterWidget(this);
     destruct();
+    ResourceRegistry::instance().unregisterResource(this);
 }
 
 Pt::String WidgetImpl::title() const
@@ -577,7 +700,10 @@ void WidgetImpl::setParent(Widget* parent)
     }
 
     _parent = parent;
-    _control->Reparent();
+    TRAPD(errorCode, _control->ReparentL());
+    if (errorCode != KErrNone)
+        throw std::runtime_error("Could not set new parent." + PT_SOURCEINFO);                
+    
     _control->ReadjustRelativePosition(false);
     _control->DrawDeferred();
 }
@@ -587,11 +713,16 @@ void WidgetImpl::move(size_t x, size_t y)
 {
     if (isConstructed())
     {
+        // since nested controls are positioned in an absolute
+        // fashion we need to make a difference between 
+        // child controls and top level windows here
         if (_parent)
             _control->SetRelativePosition(TPoint(x, y));
         else
             _control->SetPosition(TPoint(x, y));
         
+        // adjust all children, but only children, as we already adjusted 
+        // our own position
         _control->ReadjustRelativePosition(true);
         
         synchronize(false);
@@ -621,74 +752,73 @@ void WidgetImpl::construct()
     if (_control)
         destruct();
     
-    assert(Pt::Gui::ApplicationImpl::_self);        
+    SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+
+    CControl* control = 0;
+    TRAPD(errorCode, control = new (ELeave)CControl(*this, ui.Font()));
+    if (errorCode != KErrNone)
+        throw std::bad_alloc();
     
-    if (Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
+    Pt::Math::Point location(_initialLocation);
+    Pt::Math::Size size(_initialSize);        
+    
+    if (_parent)
     {
-        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi();
-        // TODO: Handle leave
-        CControl* control = new (ELeave)CControl(*this);
+        assert(_parent->impl().nativeControl());
+        
+        if (location.x() == KUnused)
+            location.setX(0);
+        if (location.y() == KUnused)
+            location.setY(0);        
+        if ((ssize_t)size.width() == KUnused)
+            size.setWidth(_parent->impl().nativeControl()->Size().iWidth);
+        if ((ssize_t)size.height() == KUnused)
+            size.setHeight(_parent->impl().nativeControl()->Size().iHeight);            
 
-        Pt::Math::Point location(_initialLocation);
-        Pt::Math::Size size(_initialSize);        
+        int x = location.x() + _parent->impl().nativeControl()->AbsolutePosition().iX;
+        int y = location.y() + _parent->impl().nativeControl()->AbsolutePosition().iY;
         
-        if (_parent)
-        {
-            assert(_parent->impl().nativeControl());
-            
-            if (location.x() == KUnused)
-                location.setX(0);
-            if (location.y() == KUnused)
-                location.setY(0);        
-            if ((ssize_t)size.width() == KUnused)
-                size.setWidth(_parent->impl().nativeControl()->Size().iWidth);
-            if ((ssize_t)size.height() == KUnused)
-                size.setHeight(_parent->impl().nativeControl()->Size().iHeight);            
-
-            int x = location.x() + _parent->impl().nativeControl()->AbsolutePosition().iX;
-            int y = location.y() + _parent->impl().nativeControl()->AbsolutePosition().iY;
-            
-            location.set(x, y);            
-        }
-        else
-        {
-            if (location.x() == KUnused)
-                location.setX(ui.ClientRect().iTl.iX);
-            if (location.y() == KUnused)
-                location.setY(ui.ClientRect().iTl.iY);        
-            if ((ssize_t)size.width() == KUnused)
-                size.setWidth(ui.ClientRect().Width());
-            if ((ssize_t)size.height() == KUnused)
-                size.setHeight(ui.ClientRect().Height());            
-        }
-                
-        control->ConstructL(SymbianTools::makeTRect(location, size));
-        // TODO: Handle leave
-        if (!_parent)
-            ui.AddToStackL(control);
-        
-        control->SetMopParent(&ui);
-        control->MakeVisible(_initialVisibility ? ETrue : EFalse);
-        _control = control;    
-        
-        synchronize(true);
-        
-        _control->SetAllowParentRedrawing(true);
+        location.set(x, y);            
     }
+    else
+    {
+        if (location.x() == KUnused)
+            location.setX(ui.ClientRect().iTl.iX);
+        if (location.y() == KUnused)
+            location.setY(ui.ClientRect().iTl.iY);        
+        if ((ssize_t)size.width() == KUnused)
+            size.setWidth(ui.ClientRect().Width());
+        if ((ssize_t)size.height() == KUnused)
+            size.setHeight(ui.ClientRect().Height());            
+    }
+            
+    TRAP(errorCode, control->ConstructL(SymbianTools::makeTRect(location, size)));
+    if (errorCode != KErrNone)
+        throw std::runtime_error("Widget control creation failed." + PT_SOURCEINFO);                    
+    
+    // Only top level windows are added to the control stack
+    if (!_parent)
+    {
+        TRAP(errorCode, ui.AddToStackL(control));
+        if (errorCode != KErrNone)
+            throw std::runtime_error("Failed to add control to control stack." + PT_SOURCEINFO);                    
+    }
+    
+    control->SetMopParent(&ui);
+    control->MakeVisible(_initialVisibility ? ETrue : EFalse);
+    _control = control;    
+    
+    synchronize(true);
+    
+    _control->SetAllowParentRedrawing(true);
 }
 
-void WidgetImpl::destruct(bool destructPainterResources/* = true*/)
+void WidgetImpl::destruct()
 {
-    // got backend but no application instance running?
-    // => invalid state
-    if (_control && !Pt::Gui::ApplicationImpl::_self)
-        assert(false);        
-
-    if (_control && 
-        Pt::Gui::ApplicationImpl::_self &&
-        Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
+    if (_control)
     {
-        SymbAppUi& ui = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi();
+        SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+        // it doesn't matter whether we have been added to the stack or not
         ui.RemoveFromStack(_control); 
     }
 
@@ -698,14 +828,12 @@ void WidgetImpl::destruct(bool destructPainterResources/* = true*/)
         _control = 0;
     }
     
-    if (destructPainterResources)
-        _painter.destructResources();
+    _painter.destructResources();
 }
 
 void WidgetImpl::dispatchEvent(Pt::Event& event)
 {    
-    assert(Pt::Gui::ApplicationImpl::_self);        
-    Pt::Gui::ApplicationImpl::_self->dispatchEvent(event);
+    Pt::Gui::ResourceRegistry::instance().dispatchEvent(event);
 }
 
 PainterImpl::ContextInfo WidgetImpl::beginDraw()            

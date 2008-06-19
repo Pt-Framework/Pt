@@ -24,71 +24,152 @@
 
 #include <aknappui.h>
 
-namespace Pt
-{
-namespace Gui
-{
-class Widget;
-class ApplicationImpl;
-}
+// forward declarations
+namespace Pt { 
+namespace Gui { 
+
+    class Widget; 
+    class ApplicationImpl; 
+    
+} 
 }
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// IMPORTANT NOTE:
-// ALL Symbian classes have to reside in the global namespace
-// otherwise results are undefined
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/**
+ * @brief Symbian view class used by Eikon framework.
+ * 
+ * This class is the last class in the MVC based application being instantiated 
+ * by the Eikon framework.
+ * 
+ * In this class all the Pt-Widgets and Pixmaps which have been created
+ * prior to Application::run() will be finally constructed.
+ * It will also start the event loop which is held in the application implementation.
+ * 
+ * During runtime this class will handle key events and dispatch them to all
+ * top level widgets.
+ * 
+ * <b>IMPORTANT NOTE:</b>
+ * ALL Symbian classes have to reside in the global namespace
+ * otherwise results are undefined
+ */
 class SymbAppUi : public CAknAppUi
 {
 public:     
+    /**
+     * @brief second phase constructor.
+     */ 
     void ConstructL();    
+    
+    /**
+     * @brief Destructor.
+     */
     ~SymbAppUi();
-    void CloseApp();
+    
+    /**
+     * @brief Provide access to the UI default font.
+     */
+    const CFont& Font() const { return *_font; }
 
-    void SetParentDoc(class SymbDoc* parentDoc);
-    
-    Pt::Gui::ApplicationImpl& ApplicationImpl();
-    
-    const CFont* Font() const { return _font; }
+    /**
+     * @brief Handle exit.
+     */
+    void HandleExit();    
     
 private:
+    /**
+     * @brief From CAknAppUi: Does nothing.
+     */
     void DynInitMenuPaneL(TInt, CEikMenuPane*);
 
+    /**
+     * @brief From CAknAppUi: Does nothing.
+     */
     void HandleCommandL(TInt);
     
+    /**
+     * @brief From CAknAppUi: Handle key events. Is called by Eikon framework.
+     */
     virtual TKeyResponse HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType);
 
+    /**
+     * @brief Handle key down events.
+     */
     bool HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType);
+
+    /**
+     * @brief Handle key events.
+     */
     bool HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType);
+
+    /**
+     * @brief Handle key up events.
+     */
     bool HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType);
     
-    void HandleExit();
-    
+    /**
+     * @brief This will dispatch a fake pointer event to all top level windows.
+     */
     void DispatchFakePointerEvent(const TPointerEvent& event);
+    
+    /**
+     * @brief This will simulate fake pointer events from various key codes.
+     */
     bool HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset = 5);
 
+    /**
+     * @brief This will force a redraw of all top level windows.
+     */
     void RedrawWindows();
+    
+    /**
+     * @brief This will construct a KeyEvent and dispatch it to all top level windows.
+     * @param type Pt keyboard event type (Pressed/Released)
+     * @param code Pt keyboard event code
+     * @param chr Wide character code of event if readable character.
+     */
     void DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
             Pt::Gui::KeyEvent::KeyCode code,
             wchar_t chr);
     
+    /**
+     * @brief Mark a key as pressed
+     */
     void MarkKeyDown(TUint scanCode, TUint keyCode);
+
+    /**
+     * @brief Mark a key as not pressed.
+     */
     void ResetKeyDown(TUint scanCode);
+    
+    /**
+     * @brief Query state of key (pressed/unpressed).
+     */
     bool IsKeyDown(TUint scanCode, TUint& keyCode);
     
+    /**
+     * @brief Mark a key as first pressed.
+     * When key is held down key events are coming repeatedly, this will
+     * mark the first event.
+     */
     void MarkFirstKey(TUint scanCode, bool down = true);
+    
+    /**
+     * @brief Query first pressed state of key.
+     * @see MarkFirstKey
+     */
     bool IsFirstKey(TUint scanCode);    
     
-    class SymbDoc* _parentDoc;
+    // This is the document that has created us
+    //class SymbDoc* _parentDoc;
 
+    // default font we're providing to widgets and pixmaps
     CFont* _font;
     
+    // little top level window to simulate mouse cursor
+    // TODO: decide whether to leave that in
     class CCursorControl* _cursorControl;
 
-    enum
-    {
-        KMaxScancode = 256
-    };
+    // greatest scancode
+    enum { KMaxScancode = 256 };
     // Flag that indicates if this is the first key event being produced
     // (for each scancode)
     bool _firstKey[KMaxScancode];

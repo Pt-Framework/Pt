@@ -20,7 +20,9 @@
 #ifndef PT_GUI_SYMBIAN_WIDGETIMPL_H
 #define PT_GUI_SYMBIAN_WIDGETIMPL_H
 
-#include "WidgetPainter.h"
+#include "Drawable.h"
+#include "PainterImpl.h"
+#include "ApplicationImpl.h"
 #include <Pt/Gui/Api.h>
 #include <Pt/Gui/Painter.h>
 #include <Pt/Gui/Widget.h>
@@ -28,6 +30,7 @@
 #include <Pt/Math/Rect.h>
 #include <Pt/String.h>
 
+// forward declarations
 class CControl;
 class CGraphicsContext;
 class CGraphicsDevice;
@@ -37,62 +40,156 @@ namespace Pt {
 
 namespace Gui {
 
-    class WidgetImpl
+    /**
+     * @brief Widget implementation using symbian CCoeControl derived class.
+     * 
+     * The underlying resources can only be allocated from the OS
+     * when there is a connection to the window server available.
+     * This is usually provided by the Eikon application framework.
+     * 
+     * The methods construct() and destruct() are provided so the resource registry
+     * can construct the symbian backends when the application is launched.
+     * 
+     * @see ResourceRegistry
+     * 
+     * <b>Note</b> that accessing widgets from other threads than the main creation
+     * thread is not possible on Symbian. You will cause a panic if you try.
+     */
+    class WidgetImpl : public Drawable, public Resource
     {
         public:
+            /**
+             * @brief Indicate default position and size values.
+             */
             static const ssize_t KUnused;
             
+            /**
+             * @brief Construct widget with default location and size.
+             */
             WidgetImpl( Widget& apiWidget, Widget* parent,
                          const Math::Point& at = Math::Point(KUnused, KUnused),
                          const Math::Size& size = Math::Size(KUnused, KUnused) );
 
+            /**
+             * @brief Regular constructor.
+             */
             virtual ~WidgetImpl();
 
+            /**
+             * @brief Set title of window. Not used on symbian yet. Window does not
+             * provide a caption.
+             */
             void setTitle(const Pt::String& text);
 
+            /**
+             * @brief Get title of the window. Not used on symbian. See above.
+             */
             Pt::String title() const;
 
+            /**
+             * @brief Provide painter to paint into widget.
+             */
             Painter painter();
 
+            /**
+             * @brief Set new parent of a widget.
+             * Note that detaching a control into a parentless window does not work.
+             */
             void setParent(Widget* parent);
 
+            /**
+             * @brief Move the widget to a specific location.
+             */
             void move(size_t x, size_t y);
 
+            /**
+             * @brief Set new widget size.
+             */
             void resize(size_t width, size_t height);
 
+            /**
+             * @brief Show widget if it is hidden.
+             */
             void show();
 
+            /**
+             * @brief Hide widget if it is shown.
+             */
             void hide();
             
+            /**
+             * @brief Is widget visible?
+             */
             bool isVisible() const;
 
+            /**
+             * Force redraw of widget.
+             */
             void repaint();
 
-            // construct symbian backend control
+            /**
+             * @brief Construct underlying symbian resources (CCoeControl etc.)
+             * This is called by the ResourceRegistry when the application 
+             * framework has successfully launched our application.
+             * 
+             * @see ResourceRegistry
+             */
             void construct();
             
-            // destruct
-            void destruct(bool destructPainterResources = true);
+            /**
+             * @brief Destruct underlying symbian resources.
+             * This is called by the ResourceRegistry when the application
+             * framework shuts down the application.
+             */
+            void destruct();
             
+            /**
+             * @brief See whether the widget has a symbian CCoeControl attached to it.
+             */
             bool isConstructed() const { return _control != 0; }
             
-            // dispatch events to slots
+            /**
+             * @brief Dispatch event using ApplicationImpl::dispatchEvent().
+             */
             void dispatchEvent(Pt::Event& event);    
             
+            /**
+             * @brief Provide access to parent widget.
+             */
             Widget* parent() { return _parent; }
             
-            // get backend control
+            /**
+             * @brief Provide access to backend control.
+             */
             CControl* nativeControl() { return _control; }
             
-            // enable drawing to native graphics context                        
-            PainterImpl::ContextInfo beginDraw();            
+            /** 
+             * @brief From Drawable: Enable drawing to native graphics context.
+             * This will be called by the painer to retrieve context information.
+             */ 
+            virtual PainterImpl::ContextInfo beginDraw();            
             
-            // disable drawing to native gfx context
-            void endDraw();
+            /**
+             * @brief From Drawable: Disable drawing to native gfx context.
+             * This will be called by the painer to end drawing.
+             */
+            virtual void endDraw();
             
+            /**
+             * @brief This will synchronize the position/size attributes to the
+             * ApiWidget (make sure they reflect valid position/size).
+             */
             void synchronize(bool initial = false);
             
+            /**
+             * @brief Provide access to api widget.
+             */
             Widget& apiWidget() const { return _apiWidget; }
+            
+            /**
+             * @brief From Resource: Get type of resource.
+             */
+            virtual Types Type() const { return TypeWidget; }
             
         private:
             Widget& _apiWidget;
@@ -101,7 +198,7 @@ namespace Gui {
             Pt::Math::Size _initialSize;
             bool _initialVisibility;
 
-            WidgetPainter _painter;
+            ConcretePainter _painter;
             
             // symbian control
             CControl* _control;

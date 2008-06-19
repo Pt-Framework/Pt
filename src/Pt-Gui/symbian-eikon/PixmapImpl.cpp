@@ -18,12 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PixmapImpl.h"
-#include "ApplicationImpl.h"
-#include "SymbApp.h"
-#include "SymbDoc.h"
-#include "SymbAppUi.h"
-
 #include <iostream>
+
+#include "ApplicationImpl.h"
+#include "SymbAppUi.h"
 
 // symbian APIs
 #include <fbs.h>
@@ -36,12 +34,13 @@ namespace Gui {
 PixmapImpl::PixmapImpl(size_t width, size_t height)
 : _size( std::max(width, size_t(1)), std::max(height, size_t(1)) )
 , _painter(*this) 
+, _defaultFont(0)
 , _bitmap(0)
 , _bitmapGc(0) 
 , _bitmapDevice(0)
 , _lastError(0)
 {
-    ResourceRegistry::instance().registerPixmap(this);
+    ResourceRegistry::instance().registerResource(this);
     construct();
 }
 
@@ -49,19 +48,21 @@ PixmapImpl::PixmapImpl(size_t width, size_t height)
 PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 : _size( pimpl.size() )
 , _painter(*this)
+, _defaultFont(0)
 , _bitmap(0)
 , _bitmapGc(0)
 , _bitmapDevice(0)
 {
-    ResourceRegistry::instance().registerPixmap(this);
+    ResourceRegistry::instance().registerResource(this);
     construct();
+    //TODO: Copy over contents from existing bitmap?
 }
 
 
 PixmapImpl::~PixmapImpl()
 {
-    ResourceRegistry::instance().unregisterPixmap(this);
     destruct();
+    ResourceRegistry::instance().unregisterResource(this);
 }
 
 
@@ -80,14 +81,9 @@ PainterImpl::ContextInfo PixmapImpl::beginDraw()
     if (_bitmapGc)
     {
         contextInfo._gc = _bitmapGc;
-        contextInfo._device = _bitmapDevice;
-        
-        assert(Pt::Gui::ApplicationImpl::_self);        
-        assert(Pt::Gui::ApplicationImpl::_self && Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized());
-        const CFont* font = Pt::Gui::ApplicationImpl::_self->_symbApp->Document().AppUi().Font();
-        contextInfo._nativeFont = font;
-        
-        _bitmapGc->UseFont(font);
+        contextInfo._device = _bitmapDevice;        
+        contextInfo._nativeFont = _defaultFont;        
+        _bitmapGc->UseFont(_defaultFont);
         contextInfo._coeEnv = CEikonEnv::Static();
     }
 
@@ -100,42 +96,60 @@ void PixmapImpl::endDraw()
 
 void PixmapImpl::construct()
 {
+    // TODO: handle bit depth if bitmap is supporting other bit depths
+    // no reason to create yet another bitmap
     if (_bitmap && _bitmap->SizeInPixels() == TSize(_size.width(), _size.height()))
         return;
     
-    if (Pt::Gui::ApplicationImpl::_self && 
-        Pt::Gui::ApplicationImpl::_self->_symbApp->HasInitialized())
+    destruct();
+
+    // get default font from UI
+    SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+
+    _defaultFont = &ui.Font();
+
+    // try to create bitmap instance
+    TRAP(_lastError, _bitmap = new(ELeave) CFbsBitmap());
+    if (_lastError != KErrNone)
+        throw std::bad_alloc();            
+
+    // TODO: For now bitmap is always of type EColor16M
+    _lastError = _bitmap->Create(TSize(_size.width(), _size.height()), EColor16M);
+    if (_lastError != KErrNone)
     {
-        destruct();
-
-        // TODO: Handle leave
-        _bitmap = new(ELeave) CFbsBitmap();    
-        // TODO: check error code and handle bit depth
-        // handle errors    
-        _lastError = _bitmap->Create(TSize(_size.width(), _size.height()), EColor16M);
-        if (_lastError != KErrNone)
-        {
-            delete _bitmap;
-            _bitmap = 0;
-            // TODO: Throw error
-            std::cout << "Bitmap creation failed";
-        }
-
-        TRAP(_lastError, _bitmapDevice = CFbsBitmapDevice::NewL(_bitmap));
-        if (_lastError == KErrNone)
-        {
-            _bitmap->SetSizeInTwips(CEikonEnv::Static()->ScreenDevice());
-            
-            //TSize sizeInTwips = _bitmap->SizeInTwips();
-            //TSize sizeInPixels = _bitmap->SizeInPixels();            
-            //float xs = (float)sizeInTwips.iWidth / (float)sizeInPixels.iWidth;
-            //float ys = (float)sizeInTwips.iHeight / (float)sizeInPixels.iHeight;
-            
-            // TODO: Handle leave
-            _bitmapGc = CFbsBitGc::NewL();
-            _bitmapGc->Activate(_bitmapDevice);
-        }
+        delete _bitmap;
+        _bitmap = 0;
+        throw std::runtime_error("Bitmap creation failed" + PT_SOURCEINFO);
     }
+
+    TRAP(_lastError, _bitmapDevice = CFbsBitmapDevice::NewL(_bitmap));
+    if (_lastError != KErrNone)
+    {
+        delete _bitmap;
+        _bitmap = 0;
+        throw std::runtime_error("Bitmap device creation failed" + PT_SOURCEINFO);            
+    }
+
+    _bitmap->SetSizeInTwips(CEikonEnv::Static()->ScreenDevice());
+        
+    // for debugging purpose I'm leaving this in, sometimes
+    // it's interesting to check the aspect ration between twips and pixels
+    //TSize sizeInTwips = _bitmap->SizeInTwips();
+    //TSize sizeInPixels = _bitmap->SizeInPixels();            
+    //float xs = (float)sizeInTwips.iWidth / (float)sizeInPixels.iWidth;
+    //float ys = (float)sizeInTwips.iHeight / (float)sizeInPixels.iHeight;
+
+    TRAP(_lastError, _bitmapGc = CFbsBitGc::NewL());
+    if (_lastError != KErrNone)        
+    {
+        delete _bitmapDevice;
+        _bitmapDevice = 0;
+        delete _bitmap;
+        _bitmap = 0;
+        throw std::runtime_error("Bitmap context creation failed" + PT_SOURCEINFO);                        
+    }
+    
+    _bitmapGc->Activate(_bitmapDevice);
 }
 
 void PixmapImpl::destruct()
@@ -157,6 +171,8 @@ void PixmapImpl::destruct()
         delete _bitmapGc;
         _bitmapGc = 0;
     }
+    
+    _defaultFont = 0;
     
     _painter.destructResources();
 }

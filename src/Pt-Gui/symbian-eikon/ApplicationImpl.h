@@ -1,6 +1,7 @@
 /***************************************************************************
  *   Copyright (C) 2006 Marc Boris Duerner                                 *
  *   Copyright (C) 2008 Peter Barth                                        *
+ *   Copyright (C) 2006-2008 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -23,7 +24,6 @@
 
 #include <Pt/Api.h>
 #include <memory>
-#include <iostream>
 #include <list>
 #include <assert.h>
 
@@ -33,8 +33,10 @@
 #include <Pt/Event.h>
 #include <Pt/System/Mutex.h>
 
-class SymbApp;
+class SymbAppUi;
 class SymbEventLoop;
+class CApaApplication;
+class CEikonEnv;
 
 namespace Pt {
 
@@ -45,6 +47,10 @@ namespace Gui {
     class PixmapImpl;
     class Event;
     
+    /**
+     * @brief This class is an internal exit event used to wake the event loop
+     * and exit the application.
+     */ 
     class ExitEvent : public Pt::Event
     {
         public:
@@ -62,112 +68,166 @@ namespace Gui {
             }
     };
     
+    class Resource
+    {
+        public:
+            enum Types 
+            {
+                TypeApplication,
+                TypeWidget,
+                TypePixmap
+            };
+            
+            virtual ~Resource()
+            { }
+            
+            virtual Types Type() const = 0;
+    };
+    
+    /**
+     * @brief This class will manage backend resources like widgets and pixmaps.
+     * Pt-Gui allows to create Widgets and Pixmaps before the actual application
+     * is running. This is not yet possible when using the Eikon-framework on Symbian.
+     *
+     * Explanation:
+     * To access windows, bitmaps or similar resources it is necessary to connect
+     * to their respective servers (i.e. window server, bitmap server etc.).
+     * The connection to these servers is created when the application framework
+     * instantiates the necessary MVC classes.
+     * 
+     * The solution is to keep track of all resources and instantiate their
+     * backends when the application instance is fully running.
+     * Until then widgets and pixmaps will behave gracefully when invoking
+     * their painter methods even if no symbian backend is available.
+     * 
+     */     
     class ResourceRegistry : public Pt::Singleton<ResourceRegistry>
     {
         public:
+            /**
+             * @brief Constructor used to initialize the registry.
+             * Note that this is a singleton class.
+             */
             ResourceRegistry();
 
+            /**
+             * @brief Destructor used to destroy the registry.
+             */
             ~ResourceRegistry();
 
-            // Widget backend construction becomes delayed until 
-            // application instance is running and MVC hierachy is built
-            // (window server connection is made)
-            void registerWidget(WidgetImpl* widget);
-            void unregisterWidget(WidgetImpl* widget);
-            void constructWidgets();             
-            void destructWidgets();
+            void registerResource(Resource* resource);
+            void unregisterResource(Resource* resource);
+            
+            SymbAppUi& symbAppUi() const;
+            
+            void startWaitLoop();
+            void stopWaitLoop();
 
-            // same goes for the pixmaps
-            void registerPixmap(PixmapImpl* pixmap);
-            void unregisterPixmap(PixmapImpl* pixmap);
-            void constructPixmaps();             
-            void destructPixmaps();
+            /**
+             * @brief Dispatch events to their receivers using signal.
+             */
+            void dispatchEvent(const Pt::Event& event);
             
-            std::list<WidgetImpl*>& getWidgets() { return _widgets; }         
+            /**
+             * @brief Get all resources.
+             * Kept public for easier handling within implementation scope. 
+             */
+            std::list<Resource*>& resources() { return _resources; }
             
+            /**
+             * @brief Signal to dispatch events. 
+             * Kept public for easier handling within implementation scope. 
+             */
+            Signal<const Pt::Event&> eventQueueSignal;
+                        
         private:
-            // Widgets we need to construct when the application is run
-            std::list<WidgetImpl*> _widgets;
-            // Pixmaps we need to construct when the application is run
-            std::list<PixmapImpl*> _pixmaps;
+            std::list<Resource*> _resources;
             
-            template<class type>
-            static void registerResource(std::list<type*>& container, type* resource)
-            {
-                container.push_back(resource);                
-            }
+            // Eikon environment
+            CEikonEnv* _coe;
+            // Eikon main UI
+            SymbAppUi* _ui;        
             
-            template<class type>
-            static void unregisterResource(std::list<type*>& container, type* resource)
-            {
-                size_t size = container.size();
-                typename std::list<type*>::iterator where;
-                where = std::remove(container.begin(), container.end(), resource);
-                container.erase(where, container.end());
-                assert(container.size() == size-1);
-            }
-
-            template<class type>
-            static void constructResources(std::list<type*>& container)
-            {
-                typename std::list<type*>::iterator i;
-                for (i = container.begin(); i != container.end(); ++i)
-                    (*i)->construct();
-            }
+            /**
+             * @brief Used to initialize the Eikon framework environment.
+             */
+            void initFramework();
             
-            template<class type>
-            static void destructResources(std::list<type*>& container)
-            {
-                typename std::list<type*>::iterator i;
-                for (i = container.begin(); i != container.end(); ++i)
-                    (*i)->destruct();
-            }
-            
+            /**
+             * @brief Used to destroy the Eikon framework environment.
+             */
+            void destroyFramework();
     };    
     
     /**
      * @brief Basic Application implementation for GUI application.
+     * 
+     * Note that on symbian only one application instance can be running
+     * at the same time. Creating a second application instance will block
+     * upon construction.
+     * 
+     * @see Application
      */
-    class ApplicationImpl
+    class ApplicationImpl : public Resource
     {
         public:
+            /**
+             * @brief Construct application impl.
+             * Note that on symbian only one application instance can be running
+             * at the same time. Creating a second application instance will block
+             * upon construction.
+             *
+             * @param app Reference to application instance
+             * @throws std::runtime_exception If initialization of event loop fails 
+             */
             ApplicationImpl(Application& app);
-            ~ApplicationImpl();
+            
+            /**
+             * @brief Destruct application impl
+             */
+            virtual ~ApplicationImpl();
 
-            //! @see Pt::Application::commitEvent(Pt::Event)
+            /**
+             * @see Application::commitEvent(Pt::Event&)
+             */
             void commitEvent(const Pt::Event& e);
 
-            //! @see Pt::Application::queueEvent(Pt::Event)
+            /**
+             * @see Application::queueEvent(Pt::Event&)
+             */
             void queueEvent(const Pt::Event& e);
 
-            //! @see Pt::Application::processEvents()
+            /**
+             * @see Application::processEvents()
+             */
             void processEvents();
 
-            //! @see Pt::Application::run()
+            /**
+             * @see Application::run()
+             */
             int run();
 
-            //! @see Pt::Application::exit()
+            /**
+             * @see Application::exit()
+             */
             int exit();
             
+            /**
+             * @brief From Resource: Get type of resource.
+             */
+            virtual Types Type() const { return TypeApplication; }
+
         private:
+            // application frontend
             Application& _app;
             
+            // event loop
             SymbEventLoop* _eventLoop;
 
+            // mutex used to protect static "singleton" instance
             static System::Mutex _mutex;
 
-            friend class Widget;
-            
-        public:
-            SymbEventLoop& eventLoop() { return *_eventLoop; }
-                        
-            Signal<const Pt::Event&> eventQueueSignal;
-            
-            void dispatchEvent(const Pt::Event& event);
-            
-            SymbApp* _symbApp;
-            static ApplicationImpl* _self;
-
+            // used to protect static "singleton" instance using the mutex from above.
             static void lockAppInstance();
             static void unlockAppInstance();
     };

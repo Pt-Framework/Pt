@@ -7,9 +7,7 @@ Library Pt-Gui-symbian-eikon : ApplicationImpl.cpp
                                PixmapPainter.cpp
                                WidgetImpl.cpp
                                WidgetPainter.cpp
-                               SymbApp.cpp
                                SymbAppUi.cpp
-                               SymbDoc.cpp
                                SymbEventLoop.cpp
                                ;
 

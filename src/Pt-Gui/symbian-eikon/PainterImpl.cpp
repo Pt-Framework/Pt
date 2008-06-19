@@ -18,15 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "PainterImpl.h"
+#include "Drawable.h"
+#include <iostream>
+#include "SymbianTools.h"
+
 #include "PixmapImpl.h"
+
 #include "Pt/Gui/Pixmap.h"
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Text/Utf16Codec.h"
 #include "Pt/Text/AsciiCodec.h"
 #include "Pt/Text/TextStream.h"
-#include "SymbianTools.h"
-
-#include <iostream>
 
 // symbian APIs
 #include <gdi.h>
@@ -36,8 +38,22 @@ namespace Pt {
 
 namespace Gui {
 
+enum 
+{ 
+    KMaxStringSize = 1024
+};
+
+const Gfx::Pen PainterImpl::_defaultPen;
+const Gfx::Brush PainterImpl::_defaultBrush;
+const Gfx::Font PainterImpl::_defaultFont("sans-serif");
+
 PainterImpl::PainterImpl()
-: _font("sans-serif")
+: _pen(_defaultPen)
+, _brush(_defaultBrush)
+, _font(_defaultFont)
+, _oldPen(_defaultPen)
+, _oldBrush(_defaultBrush)
+, _oldFont(_defaultFont)
 , _oldPenRef(0)
 , _oldBrushRef(0)
 , _oldFontRef(0)
@@ -62,10 +78,9 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::freeFont()
 {
+    // only destroy the font if we created it
     if (_fontOwner && _nativeFont)
     {
-        //assert(_coeEnv);
-        //_coeEnv->ReleaseScreenFont(const_cast<CFont*>(_nativeFont));
         assert(_device);
         _device->ReleaseFont(const_cast<CFont*>(_nativeFont));
         _nativeFont = 0;
@@ -75,6 +90,8 @@ void PainterImpl::freeFont()
 
 void PainterImpl::destructResources()
 {
+    // context should not be active
+    // otherwise we're deleting resources the context holds references to
     assert(!_gc);
     
     if (_brushBitmap)
@@ -89,6 +106,14 @@ void PainterImpl::destructResources()
         _drawBitmap = 0;
     }
 
+    // brush/pen is shared using a smart pointer
+    // we assign it to a global const object to release the current
+    // reference
+    
+    _pen = _oldPen = _defaultPen;
+    _brush = _oldBrush = _defaultBrush;
+    _font = _oldFont = _defaultFont;
+    
     freeFont();
 }
 
@@ -123,6 +148,7 @@ void PainterImpl::end()
 
 void PainterImpl::applyContextInfo(const ContextInfo& contextInfo)
 {
+    // we are getting a new default font, make sure the old one is gone
     freeFont();
     
     _gc = contextInfo._gc;
@@ -171,6 +197,10 @@ const Gfx::Font& PainterImpl::font() const
 
 Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
+    // fontMetrics is const but ensureActiveContext can't be const
+    // still we know what we are doing, try to activate context,
+    // otherwise we can't activate and the font and thus can't 
+    // return font metrics.
     if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
         return Gfx::FontMetrics(0, 0, 0, 0); 
     
@@ -184,15 +214,19 @@ Gfx::FontMetrics PainterImpl::fontMetrics() const
 
 Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
+    // see comment above
     if (!const_cast<PainterImpl*>(this)->ensureActiveContext())
         return Gfx::FontMetrics(0, 0, 0, 0); 
 
     const_cast<PainterImpl*>(this)->activateFont();
 
     std::string narrowString = text.narrow();
+    // TODO: Find dynamic size solution and correctly handle Unicode strings
+    if (narrowString.length() > KMaxStringSize)
+        throw std::runtime_error("Input string too long" + PT_SOURCEINFO);        
+        
     TPtrC8 temp(reinterpret_cast<const TUint8*>(narrowString.c_str()));
-    // TODO: Find dynamic size solution
-    TBuf<1024> desc;
+    TBuf<KMaxStringSize> desc;
     desc.Copy(temp);
 
     return Gfx::FontMetrics(_nativeFont->AscentInPixels(), 
@@ -217,11 +251,12 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
             TTypeface& typeface = myTypefaceSupportNow.iTypeface;
             
             // construct string vector
+            // TODO: what if name contains wide characters?
             std::vector<char> strVec;            
             for (int j = 0; j < typeface.iName.Length(); ++j)
-            {
                 strVec.push_back((char)typeface.iName[j]);
-            }
+
+            // terminate string
             strVec.push_back((char)0);
             // convert string vector to std::string
             std::string str((const char*)&strVec[0]);
@@ -262,6 +297,8 @@ void PainterImpl::drawRect(const Gfx::Rect& rect)
 
     activatePen();    
     
+    // symbian can't draw outline rect, do it ourselves
+    // rect must be normalized btw.
     TPoint p1(rect.x(), rect.y());
     TPoint p2(rect.x()+rect.width(), rect.y());
     TPoint p3(rect.x()+rect.width(), rect.y()+rect.height());
@@ -287,17 +324,24 @@ void PainterImpl::drawText(const Math::Point& to, const Pt::String& text)
     activateFont();
     
     std::string narrowString = text.narrow();
+    if (narrowString.length() > KMaxStringSize)
+        throw std::runtime_error("Input string too long" + PT_SOURCEINFO);        
+
     const TUint8* str = reinterpret_cast<const TUint8*>(narrowString.c_str());
     TPtrC8 temp(str);
     // TODO: Find dynamic size solution
-    TBuf<1024> desc;
+    TBuf<KMaxStringSize> desc;
     desc.Copy(temp);
 
     // make sure font is enabled
+    // otherwise panics will occur
     _gc->DrawText(desc, SymbianTools::makeTPoint(to) + _offset);
 }
 
-static void translatePoints(const Math::Point* points, const size_t pointCount, 
+/**
+ * @brief Helper function to convert Pt points into a TPoint vector
+ */
+static inline void translatePoints(const Math::Point* points, const size_t pointCount, 
         std::vector<TPoint>& points_, const TPoint& offset)
 {
     for (size_t i = 0; i < pointCount; i++)
@@ -316,12 +360,7 @@ void PainterImpl::drawPolyline(const Math::Point* points, const size_t pointCoun
     activatePen();
     
     std::vector<TPoint> points_;
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        TPoint point(SymbianTools::makeTPoint(points[i]));
-        point+=_offset;
-        points_.push_back(point);
-    }   
+    translatePoints(points, pointCount, points_, _offset);
     
     _gc->DrawPolyLine(&points_[0], pointCount);
 }
@@ -371,8 +410,10 @@ void PainterImpl::fillEllipse(const Math::Point& topLeft, const Math::Size& size
     activateBrush();
 
     // ellipse has got outline with pen color
+    // just remove the pen and use only inner part with brush color
     _gc->SetPenStyle(CGraphicsContext::ENullPen);
     TRect rect = SymbianTools::makeTRect(topLeft, size);
+    // adjust size a little. Necessary?
     rect.Move(-1, -1);
     rect.Grow(1, 1);
     rect.Move(_offset);
@@ -390,12 +431,7 @@ void PainterImpl::fillPolygon(const Math::Point* points, const size_t pointCount
     activateBrush();
 
     std::vector<TPoint> points_;
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        TPoint point(SymbianTools::makeTPoint(points[i]));
-        point+=_offset;
-        points_.push_back(point);
-    }   
+    translatePoints(points, pointCount, points_, _offset);
     
     _gc->DrawPolygon(&points_[0], pointCount);    
 }
@@ -410,6 +446,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
     if (!bitmap)
         return;
     
+    // TODO: DrawBitmap is rather slow, find faster solution (e.g. BitBlt)
     _gc->DrawBitmap(SymbianTools::makeTPoint(to) + _offset, bitmap);
 }
 
@@ -427,6 +464,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
     TRect rect(SymbianTools::makeTRect(to, pmRegion.size()));
     rect.Move(_offset);
     TRect pmRect(SymbianTools::makeTRect(pmRegion));
+    // TODO: DrawBitmap is rather slow, find faster solution (e.g. BitBlit)
     _gc->DrawBitmap(rect, bitmap, pmRect);
 }
 
@@ -460,12 +498,18 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, const char* data, size
     // TODO: find faster solution
     // 1. Hold CFbsBitmap* cache pool
     // 2. Use BitBlt instead of DrawImage
+    // 3. deal with different bit depths
     if (_drawBitmap && TSize(width, height) != _drawBitmap->SizeInPixels())
         _drawBitmap->Resize(TSize(width, height));
     else if (!_drawBitmap)
     {
-        _drawBitmap = new CFbsBitmap();
-        _drawBitmap->Create(TSize(width, height), EColor16M);        
+        TRAPD(errorCode, _drawBitmap = new(ELeave) CFbsBitmap());
+        if (errorCode != KErrNone)
+            throw std::bad_alloc();        
+            
+        errorCode = _drawBitmap->Create(TSize(width, height), EColor16M);        
+        if (errorCode != KErrNone)
+            std::runtime_error("Bitmap creation failed." + PT_SOURCEINFO);
     }
     
     CFbsBitmap* bitmap = _drawBitmap;
@@ -535,6 +579,7 @@ void PainterImpl::activatePen()
              break;
          
          case Gfx::Pen::DoubleDash:
+             // TODO: Actually doesn't exist on symbian, just use something else
              _gc->SetPenStyle(CGraphicsContext::EDotDashPen);
              break;
          
@@ -592,9 +637,12 @@ void PainterImpl::activateBrush()
                      _brushBitmap = 0;
                  }
                  
-                 // TODO: handle leave
-                 _brushBitmap = new CFbsBitmap();
-                 _brushBitmap->Create(TSize(texture.width(), texture.height()), EColor16M);
+                 TRAPD(errorCode, _brushBitmap = new(ELeave) CFbsBitmap());
+                 if (errorCode != KErrNone)
+                     throw std::bad_alloc();        
+                 errorCode = _brushBitmap->Create(TSize(texture.width(), texture.height()), EColor16M);
+                 if (errorCode != KErrNone)
+                     std::runtime_error("Bitmap creation failed." + PT_SOURCEINFO);
                  
                  // convert bitmap data
                  // symbian bitmap is 24 bits = 3 bytes
@@ -659,17 +707,19 @@ void PainterImpl::activateFont()
         return;
     
     std::string narrowString = _font.name();
+    if (narrowString.length() > KMaxStringSize)
+        std::runtime_error("Font name too long." + PT_SOURCEINFO);
+        
     const TUint8* str = reinterpret_cast<const TUint8*>(narrowString.c_str());
     TPtrC8 temp(str);
     // TODO: Find dynamic size solution
-    TBuf<1024> desc;
+    TBuf<KMaxStringSize> desc;
     desc.Copy(temp);
 
     TFontSpec spec(desc, _device->VerticalPixelsToTwips(_font.size()));
-    // TODO: Handle leave
-    //_nativeFont = _coeEnv->CreateScreenFontL(spec);    
     CFont* newFont = 0;
-    if (_device->GetNearestFontToDesignHeightInTwips(newFont, spec) == KErrNone && newFont)
+    if (_device->GetNearestFontToDesignHeightInTwips(newFont, spec) == KErrNone && 
+        newFont)
     {
         freeFont();
         _nativeFont = newFont;        
@@ -693,6 +743,47 @@ bool PainterImpl::ensureActiveContext()
             return false;
     }
     return true;
+}
+
+ConcretePainter::ConcretePainter(Drawable& drawable)
+: _drawable(drawable)
+, _active(false)
+{
+}
+
+
+ConcretePainter::~ConcretePainter()
+{
+    if (_active)
+        end(); 
+}
+
+
+void ConcretePainter::begin()
+{
+    if (!_active)
+    {
+        ContextInfo contextInfo = _drawable.beginDraw();
+        
+        applyContextInfo(contextInfo);
+        
+        if (_gc)
+            _active = true;
+    }
+    
+    PainterImpl::begin();
+}
+
+
+void ConcretePainter::end()
+{
+    PainterImpl::end();
+    
+    if (_active)
+    {
+        _drawable.endDraw();        
+        _active = false;
+    }
 }
 
 } // namespace Gui

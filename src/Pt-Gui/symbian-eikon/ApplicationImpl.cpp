@@ -37,100 +37,137 @@
 
 // Symbian APIs
 #include <eikstart.h>
+#include <eikproc.h>
 // Our own classes
 #include "SymbAppUi.h"
-#include "SymbDoc.h"
-#include "SymbApp.h"
 #include "SymbEventLoop.h"
 
 using namespace std;
-
-// this is used as symbian application factory
-static CApaApplication* NewApplication()
-{
-    return Pt::Gui::ApplicationImpl::_self->_symbApp;
-}
 
 namespace Pt {
 
 namespace Gui {
 
 ResourceRegistry::ResourceRegistry() 
+: _coe(0)
+, _ui(0)
 {
 }
 
 ResourceRegistry::~ResourceRegistry()
 {
+    destroyFramework();
 }
 
-void ResourceRegistry::registerWidget(WidgetImpl* widget)
+void ResourceRegistry::registerResource(Resource* resource)
 {
-    registerResource<WidgetImpl>(_widgets, widget);
+    _resources.push_back(resource);
+    if (_resources.size() == 1 && !_coe)
+        initFramework();
 }
 
-void ResourceRegistry::unregisterWidget(WidgetImpl* widget)
+void ResourceRegistry::unregisterResource(Resource* resource)
 {
-    unregisterResource<WidgetImpl>(_widgets, widget);
+    size_t size = _resources.size();
+    std::list<Resource*>::iterator where;
+    where = std::remove(_resources.begin(), _resources.end(), resource);
+    _resources.erase(where, _resources.end());
+    assert(_resources.size() == size-1);
+
+    // TODO: Destroy framework when resource count drops to zero?
+    // For now we'll better leave it
+    //if (_resources.size() == 0)
+    //    destroyFramework();
 }
 
-void ResourceRegistry::constructWidgets()
+void ResourceRegistry::initFramework()
 {
-    constructResources<WidgetImpl>(_widgets);
+    assert(!_coe);
+    assert(!_ui);
+    
+    _coe = new CEikonEnv();
+
+    TRAPD(err, _coe->ConstructL());
+    __ASSERT_ALWAYS(!err, User::Panic(_L("PPR_PANIC1"), err));
+    
+    _coe->RootWin().SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
+
+    _ui = new SymbAppUi();    
+    TRAP(err, _ui->ConstructL());
+    
+    __ASSERT_ALWAYS(!err, User::Panic(_L("PPR_PANIC2"), err));    
+
+    _coe->SetAppUi(_ui);
 }
 
-void ResourceRegistry::destructWidgets()
-{
-    destructResources<WidgetImpl>(_widgets);
+void ResourceRegistry::destroyFramework()
+{   
+    if (_ui)
+    {
+        delete _ui;
+        _ui = 0;        
+    }
+    
+    if (_coe)
+    {
+        if (0 == _ui)
+            _coe->SetAppUi(0);
+        _coe->DestroyEnvironment();
+        // TODO: Sure above is enough?
+        //delete _coe;
+        _coe = 0;
+    }
 }
 
-void ResourceRegistry::registerPixmap(PixmapImpl* pixmap)
+void ResourceRegistry::startWaitLoop()
 {
-    registerResource<PixmapImpl>(_pixmaps, pixmap);
+    // owned by CEikonEnv
+    CActiveScheduler::Start();
 }
 
-void ResourceRegistry::unregisterPixmap(PixmapImpl* pixmap)
+void ResourceRegistry::stopWaitLoop()
 {
-    unregisterResource<PixmapImpl>(_pixmaps, pixmap);
+    // owned by CEikonEnv
+    CActiveScheduler::Stop();
 }
 
-void ResourceRegistry::constructPixmaps()
-{
-    constructResources<PixmapImpl>(_pixmaps);
+SymbAppUi& ResourceRegistry::symbAppUi() const 
+{ 
+    return *_ui; 
 }
 
-void ResourceRegistry::destructPixmaps()
+void ResourceRegistry::dispatchEvent(const Pt::Event& event)
 {
-    destructResources<PixmapImpl>(_pixmaps);
+    eventQueueSignal.send(event);
 }
 
 ApplicationImpl::ApplicationImpl(Application& app) 
 : _app(app)
 , _eventLoop(0)
-, _symbApp(new SymbApp(this))
 {
-    connect(eventQueueSignal, app.event);
+    ResourceRegistry::instance().registerResource(this);
+    
+    connect(ResourceRegistry::instance().eventQueueSignal, app.event);
+    
+    // In case somebody tries to create another Application instance from
+    // another thread, this is simply not possible
     lockAppInstance();
-    assert(ApplicationImpl::_self == 0);
-    ApplicationImpl::_self = this;
 
-    // TODO: Handle leave
-    // This only created an event loop, it's not being run until
-    // the view has been created
-    // The view will also stop the event loop
+    // This only created the eventloop, it's not being run until
+    // the view has been created. The view will also stop the loop.
     TRAPD(createError, _eventLoop = SymbEventLoop::NewL(*this));
     if (createError != KErrNone)
     {
-        delete _symbApp;
         unlockAppInstance();
-        throw std::runtime_error("Event loop creation failed" + PT_SOURCEINFO);
+        throw std::runtime_error("Eventloop creation failed" + PT_SOURCEINFO);
     }
 }
 
 ApplicationImpl::~ApplicationImpl()
 {
-    ApplicationImpl::_self = 0;
     unlockAppInstance();
     delete _eventLoop;
+    ResourceRegistry::instance().unregisterResource(this);
 }
 
 void ApplicationImpl::commitEvent(const Pt::Event& e)
@@ -144,12 +181,21 @@ void ApplicationImpl::queueEvent(const Pt::Event& e)
     _eventLoop->QueueEvent(e);
 }
 
-
 int ApplicationImpl::run()
 {
-    return EikStart::RunApplication(NewApplication);
-}
+    if (!_eventLoop->Start())
+    {
+        _eventLoop->Stop();        
+        return 0;
+    }
+    
+    _eventLoop->WaitForEvents();
+    ResourceRegistry::instance().startWaitLoop();
+    _eventLoop->Stop();
 
+    // TODO: Deliver some exit code?
+    return 0;
+}
 
 int ApplicationImpl::exit()
 {
@@ -167,23 +213,7 @@ void ApplicationImpl::processEvents()
     _eventLoop->ProcessEvents();
 }
 
-void ApplicationImpl::dispatchEvent(const Pt::Event& event)
-{
-    // If we're having an exit event we simply quit the application
-    if (event.typeInfo() == typeid(ExitEvent)) 
-    {
-        // since the application is going to exit the event we're getting
-        // will not be deleted, we NEED to do it here
-        delete &event;
-        _symbApp->Document().AppUi().Exit(); 
-        return;
-    }
-
-    eventQueueSignal.send(event);
-}
-
 // assuming that there is only one Application instance at a time
-ApplicationImpl* ApplicationImpl::_self = 0;
 System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
 
 void ApplicationImpl::lockAppInstance()

@@ -30,19 +30,34 @@ namespace Pt {
 
 namespace Gui {
 
+/**
+ * @brief Various helper methods when dealing with Symbian.
+ * 
+ * This mainly helps in converting basic structures from Symbian to Pt 
+ * and vice versa.
+ */
 namespace SymbianTools {
 
+/**
+ * @brief Make a symbian TPoint from Pt::Math::Point
+ */
 static TPoint makeTPoint(const Math::Point& point)
 {
     return TPoint(point.x(), point.y());
 }
 
+/**
+ * @brief Make a symbian TRect from Pt::Math::Rect
+ */
 static TRect makeTRect(const Gfx::Rect& rect)
 {
     return TRect(rect.x(), rect.y(), 
             rect.x() + rect.width(), rect.y() + rect.height());
 }
 
+/**
+ * @brief Make a symbian TRect from Pt::Math::Point and Pt::Math::Size
+ */
 static TRect makeTRect(const Math::Point& point, const Math::Size& size)
 {
     return TRect(point.x(), point.y(), 
@@ -50,12 +65,18 @@ static TRect makeTRect(const Math::Point& point, const Math::Size& size)
             point.y() + size.height());
 }
 
+/**
+ * @brief Make a symbian TRect from Pt::Gfx::Region
+ */
 static TRect makeTRect(const Pt::Gfx::Region& rgn)
 {
     return TRect(rgn.x(), rgn.y(), 
             rgn.x() + rgn.width(), rgn.y() + rgn.height());
 }
 
+/**
+ * @brief Make Pt::Gfx::Region from symbian TRect.
+ */
 static Pt::Gfx::Region makeRegion(const TRect& rect)
 {
     return Pt::Gfx::Region(

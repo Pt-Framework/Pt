@@ -19,18 +19,33 @@
  ***************************************************************************/
 
 #include "SymbEventLoop.h"
-#include "ApplicationImpl.h"
-
 #include <iostream>
+#include "ApplicationImpl.h"
 
 #include <Pt/System/MutexLock.h>
 
+#include <basched.h>
+
 SymbEventLoop* SymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
 {
-    // TODO: Apparently SymbEventLoop could leave AND throw a regular
-    // c++ exception due to Pt attributes. 
-    // This should be considered in the future.
-    SymbEventLoop* self = new (ELeave) SymbEventLoop(appImpl);
+    SymbEventLoop* self = 0;
+    
+    // The constructor could actually throw an exception derived from
+    // std::exception due to Pt attributes being initialized.
+    // If this is the case we catch it and convert it into a leave.
+    // On Symbian 9.x a leave itself is based on the c++ exception mechanism 
+    // but the exception thrown is not a standard c++ exception.
+    // (e.g. std::bad_alloc or std::exception).
+    // Take a look at the definition of TRAP/TRAPD
+    try
+    {
+        self = new (ELeave) SymbEventLoop(appImpl);
+    }
+    catch (std::exception& e)
+    {
+        User::Leave(KErrGeneral);
+    }
+    
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop();
@@ -53,9 +68,23 @@ void SymbEventLoop::ConstructL()
 {
     _mainThreadId = RThread().Id();
     
-    bool res = CreateThread();
+    bool res = false;
+    
+    // in case the Pt primitives throw any exception take care of them
+    // by converting them into an error code
+    try
+    {
+        res = CreateThread();
+    }
+    catch (std::exception& e)
+    {
+        res = false;
+    }
+    
     if (!res)
+    {
         User::Leave(KErrGeneral);
+    }
 }
 
 SymbEventLoop::~SymbEventLoop()
@@ -68,9 +97,21 @@ void SymbEventLoop::RunL()
 {
     if (iStatus.Int() == KErrNone)
     {
-        ProcessEvents();    
-        WaitForEvents();
+        if (ProcessEvents())
+        {
+            WaitForEvents();
+        }
     }
+}
+
+TInt SymbEventLoop::RunError(TInt err)
+{
+    if (err == KLeaveExit) //-1003
+    {
+        return err;
+    }
+    //handle other error codes
+    return KErrNone;    
 }
 
 void SymbEventLoop::DoCancel()
@@ -111,9 +152,7 @@ bool SymbEventLoop::Start()
 {
     CActiveScheduler::Add(this);
     
-    ProcessQueuedEvents();
-    
-    return true;
+    return ProcessQueuedEvents();
 }
 
 bool SymbEventLoop::Stop()
@@ -180,14 +219,16 @@ void SymbEventLoop::QueueEvent(const Pt::Event& event)
 
 void SymbEventLoop::Wake()
 {
-    //Pt::System::MutexLock lock(_queueMutex);
-    
+    // TODO: If selector is used to wait for events
+    // use a mutex to protect it
+    // Currently this is unused
+    //Pt::System::MutexLock lock(_queueMutex);    
     //_selector.wake();
 
     _wakeCondition.signal();
 }
 
-void SymbEventLoop::ProcessQueuedEvents()
+bool SymbEventLoop::ProcessQueuedEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
     
@@ -206,12 +247,20 @@ void SymbEventLoop::ProcessQueuedEvents()
 
         _queueMutex.unlock();
         
-        _appImpl.dispatchEvent(*ev);        
+        // if this returns false it means the we just processed an exit event
+        if (!DispatchEvent(ev))
+        {
+            delete ev;
+            return false;
+        }
+
         delete ev;
     }    
+    
+    return true;
 }
 
-void SymbEventLoop::ProcessEvents()
+bool SymbEventLoop::ProcessEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
 
@@ -230,10 +279,19 @@ void SymbEventLoop::ProcessEvents()
 
         _queueMutex.unlock();
 
-        _appImpl.dispatchEvent(*ev);
+        // if this returns false it means the we just processed an exit event
+        if (!DispatchEvent(ev))
+        {
+            delete ev;
+            return false;
+        }
         
+        // note that when the above function fails
+        // it it responsible for deleting ev before leaving
         delete ev;
     }
+    
+    return true;
 }
 
 void SymbEventLoop::DrainQueue()
@@ -243,13 +301,28 @@ void SymbEventLoop::DrainQueue()
     while (true)
     {
         if (_eventQueue.empty())
+        {
             break;
+        }
 
         Pt::Event* ev = _eventQueue.front();
         _eventQueue.remove(ev);
 
         delete ev;
     }    
+}
+
+bool SymbEventLoop::DispatchEvent(Pt::Event* event)
+{
+    // If we're having an exit event we simply quit the application
+    if (event->typeInfo() == typeid(Pt::Gui::ExitEvent)) 
+    {
+        Pt::Gui::ResourceRegistry::instance().stopWaitLoop();    
+        return false;
+    }    
+    
+    Pt::Gui::ResourceRegistry::instance().dispatchEvent(*event);
+    return true;
 }
 
 void* SymbEventLoop::EventLoopThreadEntry(void* threadID)
