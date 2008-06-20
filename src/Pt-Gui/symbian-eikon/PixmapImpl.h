@@ -42,11 +42,6 @@ namespace Gui {
      * The underlying resources can only be allocated from the OS
      * when there is a connection to the bitmap server available.
      * This is usually provided by the Eikon application framework.
-     * 
-     * The methods construct() and destruct() are provided so the resource registry
-     * can construct the symbian backends when the application is launched.
-     * 
-     * @see ResourceRegistry
      */
     class PixmapImpl : public Drawable, public Resource
     {
@@ -92,30 +87,24 @@ namespace Gui {
              * @brief Get native bitmap. 
              * This might return 0 if the bitmap has not been constructed properly.
              */
-            CFbsBitmap* getNativeBitmap() { return _bitmap; }
+            const CFbsBitmap* getNativeBitmap() const { return _bitmap; }
             
-            /**
-             * @brief Construct underlying symbian resources (bitmap etc.)
-             * This is called by the ResourceRegistry when the application 
-             * framework has successfully launched our application.
-             * 
-             * @see ResourceRegistry
-             */
-            void construct();
-            
-            /**
-             * @brief Destruct underlying symbian resources.
-             * This is called by the ResourceRegistry when the application
-             * framework shuts down the application.
-             */
-            void destruct();
-
             /**
              * @brief From Resource: Get type of resource.
              */
             virtual Types Type() const { return TypePixmap; }
             
         private:            
+            /**
+             * @brief Construct underlying symbian resources (bitmap etc.)
+             */
+            void construct();
+            
+            /**
+             * @brief Destruct underlying symbian resources.
+             */
+            void destruct();
+
             Pt::Math::Size _size;
             ConcretePainter _painter;
 

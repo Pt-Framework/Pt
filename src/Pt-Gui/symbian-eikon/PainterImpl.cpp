@@ -441,7 +441,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm)
     if (!ensureActiveContext())
         return;
     
-    CFbsBitmap* bitmap = pm.impl().getNativeBitmap();
+    const CFbsBitmap* bitmap = pm.impl().getNativeBitmap();
 
     if (!bitmap)
         return;
@@ -456,7 +456,7 @@ void PainterImpl::drawPixmap(const Math::Point& to, Pixmap& pm, const Gfx::Regio
     if (!ensureActiveContext())
         return;
 
-    CFbsBitmap* bitmap = pm.impl().getNativeBitmap();
+    const CFbsBitmap* bitmap = pm.impl().getNativeBitmap();
 
     if (!bitmap)
         return;

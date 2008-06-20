@@ -68,6 +68,18 @@ namespace Gui {
             }
     };
     
+    /**
+     * @brief This class is used to provide an interface to identify a resource.
+     * There are three types of resources which are registered to the Environment
+     * singleton class:
+     * 1. Application 
+     * 2. Widget
+     * 3. Pixmap
+     * 
+     * The Environment will keep track these resources.
+     * 
+     * @see Environment
+     */
     class Resource
     {
         public:
@@ -85,42 +97,55 @@ namespace Gui {
     };
     
     /**
-     * @brief This class will manage backend resources like widgets and pixmaps.
-     * Pt-Gui allows to create Widgets and Pixmaps before the actual application
-     * is running. This is not yet possible when using the Eikon-framework on Symbian.
-     *
-     * Explanation:
-     * To access windows, bitmaps or similar resources it is necessary to connect
-     * to their respective servers (i.e. window server, bitmap server etc.).
-     * The connection to these servers is created when the application framework
-     * instantiates the necessary MVC classes.
+     * @brief This class will provide the environment necessary to create
+     * GUI applications using the Eikon (Uikon) framework.
      * 
-     * The solution is to keep track of all resources and instantiate their
-     * backends when the application instance is fully running.
-     * Until then widgets and pixmaps will behave gracefully when invoking
-     * their painter methods even if no symbian backend is available.
-     * 
+     * Additionally the environment keeps track of resources and dispatches
+     * events to widgets. It is also used to start the application wait loop.
      */     
-    class ResourceRegistry : public Pt::Singleton<ResourceRegistry>
+    class Environment : public Pt::Singleton<Environment>
     {
         public:
             /**
-             * @brief Constructor used to initialize the registry.
+             * @brief Constructor used to initialize the environment.
              * Note that this is a singleton class.
              */
-            ResourceRegistry();
+            Environment();
 
             /**
              * @brief Destructor used to destroy the registry.
              */
-            ~ResourceRegistry();
+            ~Environment();
 
+            /**
+             * @brief Register a resource in with the environment.
+             * This should happen in the constructor of the resource.
+             */
             void registerResource(Resource* resource);
+
+            /**
+             * @brief Unregister a resource in with the environment.
+             * This should happen in the destructor of the resource.
+             */
             void unregisterResource(Resource* resource);
             
+            /**
+             * @brief Get access to the UI provided by the Eikon framework.
+             */
             SymbAppUi& symbAppUi() const;
             
+            /**
+             * @brief Start application wait loop.
+             * This starts the application wait loop by starting the active scheduler
+             * provided by the Eikon framework.
+             */
             void startWaitLoop();
+
+            /**
+             * @brief Stop application wait loop.
+             * This stops the application wait loop by stopping the active scheduler
+             * provided by the Eikon framework.
+             */
             void stopWaitLoop();
 
             /**
@@ -141,13 +166,6 @@ namespace Gui {
             Signal<const Pt::Event&> eventQueueSignal;
                         
         private:
-            std::list<Resource*> _resources;
-            
-            // Eikon environment
-            CEikonEnv* _coe;
-            // Eikon main UI
-            SymbAppUi* _ui;        
-            
             /**
              * @brief Used to initialize the Eikon framework environment.
              */
@@ -157,6 +175,14 @@ namespace Gui {
              * @brief Used to destroy the Eikon framework environment.
              */
             void destroyFramework();
+
+            std::list<Resource*> _resources;
+            
+            // Eikon environment
+            CEikonEnv* _coe;
+            // Eikon main UI
+            SymbAppUi* _ui;        
+            
     };    
     
     /**

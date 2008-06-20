@@ -40,7 +40,7 @@ PixmapImpl::PixmapImpl(size_t width, size_t height)
 , _bitmapDevice(0)
 , _lastError(0)
 {
-    ResourceRegistry::instance().registerResource(this);
+    Environment::instance().registerResource(this);
     construct();
 }
 
@@ -53,7 +53,7 @@ PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 , _bitmapGc(0)
 , _bitmapDevice(0)
 {
-    ResourceRegistry::instance().registerResource(this);
+    Environment::instance().registerResource(this);
     construct();
     //TODO: Copy over contents from existing bitmap?
 }
@@ -62,7 +62,7 @@ PixmapImpl::PixmapImpl(const PixmapImpl& pimpl)
 PixmapImpl::~PixmapImpl()
 {
     destruct();
-    ResourceRegistry::instance().unregisterResource(this);
+    Environment::instance().unregisterResource(this);
 }
 
 
@@ -104,7 +104,7 @@ void PixmapImpl::construct()
     destruct();
 
     // get default font from UI
-    SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+    SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
 
     _defaultFont = &ui.Font();
 

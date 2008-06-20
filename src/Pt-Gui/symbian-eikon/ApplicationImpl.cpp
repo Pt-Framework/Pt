@@ -48,25 +48,25 @@ namespace Pt {
 
 namespace Gui {
 
-ResourceRegistry::ResourceRegistry() 
+Environment::Environment() 
 : _coe(0)
 , _ui(0)
 {
 }
 
-ResourceRegistry::~ResourceRegistry()
+Environment::~Environment()
 {
     destroyFramework();
 }
 
-void ResourceRegistry::registerResource(Resource* resource)
+void Environment::registerResource(Resource* resource)
 {
     _resources.push_back(resource);
     if (_resources.size() == 1 && !_coe)
         initFramework();
 }
 
-void ResourceRegistry::unregisterResource(Resource* resource)
+void Environment::unregisterResource(Resource* resource)
 {
     size_t size = _resources.size();
     std::list<Resource*>::iterator where;
@@ -80,7 +80,7 @@ void ResourceRegistry::unregisterResource(Resource* resource)
     //    destroyFramework();
 }
 
-void ResourceRegistry::initFramework()
+void Environment::initFramework()
 {
     assert(!_coe);
     assert(!_ui);
@@ -100,7 +100,7 @@ void ResourceRegistry::initFramework()
     _coe->SetAppUi(_ui);
 }
 
-void ResourceRegistry::destroyFramework()
+void Environment::destroyFramework()
 {   
     if (_ui)
     {
@@ -119,24 +119,24 @@ void ResourceRegistry::destroyFramework()
     }
 }
 
-void ResourceRegistry::startWaitLoop()
+void Environment::startWaitLoop()
 {
     // owned by CEikonEnv
     CActiveScheduler::Start();
 }
 
-void ResourceRegistry::stopWaitLoop()
+void Environment::stopWaitLoop()
 {
     // owned by CEikonEnv
     CActiveScheduler::Stop();
 }
 
-SymbAppUi& ResourceRegistry::symbAppUi() const 
+SymbAppUi& Environment::symbAppUi() const 
 { 
     return *_ui; 
 }
 
-void ResourceRegistry::dispatchEvent(const Pt::Event& event)
+void Environment::dispatchEvent(const Pt::Event& event)
 {
     eventQueueSignal.send(event);
 }
@@ -145,9 +145,9 @@ ApplicationImpl::ApplicationImpl(Application& app)
 : _app(app)
 , _eventLoop(0)
 {
-    ResourceRegistry::instance().registerResource(this);
+    Environment::instance().registerResource(this);
     
-    connect(ResourceRegistry::instance().eventQueueSignal, app.event);
+    connect(Environment::instance().eventQueueSignal, app.event);
     
     // In case somebody tries to create another Application instance from
     // another thread, this is simply not possible
@@ -167,7 +167,7 @@ ApplicationImpl::~ApplicationImpl()
 {
     unlockAppInstance();
     delete _eventLoop;
-    ResourceRegistry::instance().unregisterResource(this);
+    Environment::instance().unregisterResource(this);
 }
 
 void ApplicationImpl::commitEvent(const Pt::Event& e)
@@ -183,6 +183,11 @@ void ApplicationImpl::queueEvent(const Pt::Event& e)
 
 int ApplicationImpl::run()
 {
+    // If widgets are created prior to application instantiation
+    // not all events were delivered. 
+    // Make sure widgets get the important events (e.g. resize/move)
+    Environment::instance().symbAppUi().SynchronizeWidgets();
+    
     if (!_eventLoop->Start())
     {
         _eventLoop->Stop();        
@@ -190,7 +195,7 @@ int ApplicationImpl::run()
     }
     
     _eventLoop->WaitForEvents();
-    ResourceRegistry::instance().startWaitLoop();
+    Environment::instance().startWaitLoop();
     _eventLoop->Stop();
 
     // TODO: Deliver some exit code?
@@ -213,7 +218,7 @@ void ApplicationImpl::processEvents()
     _eventLoop->ProcessEvents();
 }
 
-// assuming that there is only one Application instance at a time
+// assuring that there is only one Application instance at a time
 System::Mutex ApplicationImpl::_mutex(System::Mutex::Normal);
 
 void ApplicationImpl::lockAppInstance()

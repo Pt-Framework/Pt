@@ -324,7 +324,23 @@ bool SymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
 
 void SymbAppUi::HandleExit()
 {
-    Pt::Gui::ResourceRegistry::instance().stopWaitLoop();    
+    Pt::Gui::Environment::instance().stopWaitLoop();    
+}
+
+void SymbAppUi::SynchronizeWidgets()
+{
+    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
+
+    for (std::list<Pt::Gui::Resource*>::iterator i = resources.begin(); i != resources.end(); ++i) 
+    {
+        Pt::Gui::Resource* resource = *i;
+        if (resource->Type() == Pt::Gui::Resource::TypeWidget)
+        {
+            Pt::Gui::WidgetImpl* impl = dynamic_cast<Pt::Gui::WidgetImpl*>(resource);
+            assert(impl);
+            impl->synchronize(true);
+        }
+    }
 }
 
 // Dirty trick: Declare CControl with public HandlePointerEventL
@@ -337,14 +353,15 @@ public:
 void SymbAppUi::DispatchFakePointerEvent(const TPointerEvent& event)
 {
     // dispatch fake pointer event to all main windows
-    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::ResourceRegistry::instance().resources();
+    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
 
     for (std::list<Pt::Gui::Resource*>::iterator i = resources.begin(); i != resources.end(); ++i) 
     {
         Pt::Gui::Resource* resource = *i;
         if (resource->Type() == Pt::Gui::Resource::TypeWidget)
         {
-            Pt::Gui::WidgetImpl* impl = static_cast<Pt::Gui::WidgetImpl*>(resource);
+            Pt::Gui::WidgetImpl* impl = dynamic_cast<Pt::Gui::WidgetImpl*>(resource);
+            assert(impl);
             if (!impl->parent())
             {
                 TRect rect(impl->nativeControl()->Position(), impl->nativeControl()->Size());
@@ -454,14 +471,15 @@ bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, 
 
 void SymbAppUi::RedrawWindows()
 {
-    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::ResourceRegistry::instance().resources();
+    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
 
     for (std::list<Pt::Gui::Resource*>::iterator i = resources.begin(); i != resources.end(); ++i) 
     {
         Pt::Gui::Resource* resource = *i;
         if (resource->Type() == Pt::Gui::Resource::TypeWidget)
         {
-            Pt::Gui::WidgetImpl* impl = static_cast<Pt::Gui::WidgetImpl*>(resource);
+            Pt::Gui::WidgetImpl* impl = dynamic_cast<Pt::Gui::WidgetImpl*>(resource);
+            assert(impl);
             if (!impl->parent())
             {
                 impl->repaint();       
@@ -475,18 +493,19 @@ void SymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
         wchar_t chr)
 {
     // dispatch key event to all top level windows
-    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::ResourceRegistry::instance().resources();
+    std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
 
     for (std::list<Pt::Gui::Resource*>::iterator i = resources.begin(); i != resources.end(); ++i) 
     {
         Pt::Gui::Resource* resource = *i;
         if (resource->Type() == Pt::Gui::Resource::TypeWidget)
         {
-            Pt::Gui::WidgetImpl* impl = static_cast<Pt::Gui::WidgetImpl*>(resource);
+            Pt::Gui::WidgetImpl* impl = dynamic_cast<Pt::Gui::WidgetImpl*>(resource);
+            assert(impl);
             if (!impl->parent())
             {
                 Pt::Gui::KeyEvent keyEvent(impl->apiWidget(), type, code, chr);                        
-                Pt::Gui::ResourceRegistry::instance().dispatchEvent(keyEvent);
+                Pt::Gui::Environment::instance().dispatchEvent(keyEvent);
             }
         }
     }

@@ -74,6 +74,12 @@ public:
      */
     void HandleExit();    
     
+    /**
+     * @brief This will synchronize the current widgets with their frontend.
+     * It will force a resize and move event being sent to all widgets.
+     */
+    void SynchronizeWidgets();
+    
 private:
     /**
      * @brief From CAknAppUi: Does nothing.

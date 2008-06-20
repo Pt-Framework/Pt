@@ -317,11 +317,11 @@ bool SymbEventLoop::DispatchEvent(Pt::Event* event)
     // If we're having an exit event we simply quit the application
     if (event->typeInfo() == typeid(Pt::Gui::ExitEvent)) 
     {
-        Pt::Gui::ResourceRegistry::instance().stopWaitLoop();    
+        Pt::Gui::Environment::instance().stopWaitLoop();    
         return false;
     }    
     
-    Pt::Gui::ResourceRegistry::instance().dispatchEvent(*event);
+    Pt::Gui::Environment::instance().dispatchEvent(*event);
     return true;
 }
 

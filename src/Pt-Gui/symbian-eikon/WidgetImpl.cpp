@@ -316,7 +316,16 @@ public:
                 if (!graphicContext._drawingActive)
                 {
                     Window().EndRedraw();
-                    DeactivateGc();                    
+                    DeactivateGc();        
+                    
+                    // whenever the window content has been accessed we redraw the children
+                    // to make sure they're still visible and nobody has drawn over them. 
+                    // Must only be done when we were not invoked from the Draw() method 
+                    // because Draw() will ensure the children are properly redrawn.
+                    for (int i = 0; i < CountComponentControls(); i++)
+                    {
+                        ComponentControl(i)->DrawDeferred();
+                    }
                 }
             }
         }
@@ -618,7 +627,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 , _control(0)
 {
     // register widget
-    ResourceRegistry::instance().registerResource(this);    
+    Environment::instance().registerResource(this);    
     construct();
 }
 
@@ -626,7 +635,7 @@ WidgetImpl::WidgetImpl(Widget& apiWidget, Widget* parent, const Math::Point& at,
 WidgetImpl::~WidgetImpl()
 {
     destruct();
-    ResourceRegistry::instance().unregisterResource(this);
+    Environment::instance().unregisterResource(this);
 }
 
 Pt::String WidgetImpl::title() const
@@ -752,7 +761,7 @@ void WidgetImpl::construct()
     if (_control)
         destruct();
     
-    SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+    SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
 
     CControl* control = 0;
     TRAPD(errorCode, control = new (ELeave)CControl(*this, ui.Font()));
@@ -817,7 +826,7 @@ void WidgetImpl::destruct()
 {
     if (_control)
     {
-        SymbAppUi& ui = Pt::Gui::ResourceRegistry::instance().symbAppUi();
+        SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
         // it doesn't matter whether we have been added to the stack or not
         ui.RemoveFromStack(_control); 
     }
@@ -833,7 +842,7 @@ void WidgetImpl::destruct()
 
 void WidgetImpl::dispatchEvent(Pt::Event& event)
 {    
-    Pt::Gui::ResourceRegistry::instance().dispatchEvent(event);
+    Pt::Gui::Environment::instance().dispatchEvent(event);
 }
 
 PainterImpl::ContextInfo WidgetImpl::beginDraw()            

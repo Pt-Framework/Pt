@@ -47,12 +47,9 @@ namespace Gui {
      * when there is a connection to the window server available.
      * This is usually provided by the Eikon application framework.
      * 
-     * The methods construct() and destruct() are provided so the resource registry
-     * can construct the symbian backends when the application is launched.
+     * Nested controls share the graphic context of the root window.
      * 
-     * @see ResourceRegistry
-     * 
-     * <b>Note</b> that accessing widgets from other threads than the main creation
+     * Note that accessing widgets from other threads than the main creation
      * thread is not possible on Symbian. You will cause a panic if you try.
      */
     class WidgetImpl : public Drawable, public Resource
@@ -128,22 +125,6 @@ namespace Gui {
             void repaint();
 
             /**
-             * @brief Construct underlying symbian resources (CCoeControl etc.)
-             * This is called by the ResourceRegistry when the application 
-             * framework has successfully launched our application.
-             * 
-             * @see ResourceRegistry
-             */
-            void construct();
-            
-            /**
-             * @brief Destruct underlying symbian resources.
-             * This is called by the ResourceRegistry when the application
-             * framework shuts down the application.
-             */
-            void destruct();
-            
-            /**
              * @brief See whether the widget has a symbian CCoeControl attached to it.
              */
             bool isConstructed() const { return _control != 0; }
@@ -192,6 +173,16 @@ namespace Gui {
             virtual Types Type() const { return TypeWidget; }
             
         private:
+            /**
+             * @brief Construct underlying symbian resources (CCoeControl etc.)
+             */
+            void construct();
+            
+            /**
+             * @brief Destruct underlying symbian resources.
+             */
+            void destruct();
+            
             Widget& _apiWidget;
             Widget* _parent;
             Pt::Math::Point _initialLocation;
