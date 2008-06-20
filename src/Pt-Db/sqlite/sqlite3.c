@@ -327,7 +327,7 @@
 **
 ** See also ticket #2741.
 */
-#if !defined(_XOPEN_SOURCE) && !defined(__MACOS__) && SQLITE_THREADSAFE
+#if !defined(_XOPEN_SOURCE) && !defined(__MACOS__) && !defined(D__SYMBIAN32__) && SQLITE_THREADSAFE
 #  define _XOPEN_SOURCE 500  /* Needed to enable pthread recursive mutexes */
 #endif
 

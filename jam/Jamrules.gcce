@@ -28,9 +28,12 @@ if ! $(VARIANT_HRH)
 	Exit "Please specify path to the variant resource header (VARIANT_HRH)" ;
 }
 
+Echo Using VARIANT_HRH $(VARIANT_HRH) ;
+
 CCFLAGS += -Wall -march=armv5t -mapcs -pipe -nostdinc -c -msoft-float ;
 CCFLAGS += -D_UNICODE -D__SYMBIAN32__ -D__SERIES60_30__ -D__SERIES60_3X__ -D__GCCE__ ;
 CCFLAGS += -D__EPOC32__ -D__MARM__ -D__EABI__ -D__MARM_ARMV5__ -D__EXE__ -D__SUPPORT_CPP_EXCEPTIONS__ ;
+CCFLAGS += -D__REMOVE_PLATSEC_DIAGNOSTIC_STRINGS__ ;
 CCFLAGS += -D__PRODUCT_INCLUDE__=\\\"$(VARIANT_HRH)\\\" ;
 CCFLAGS += -include $(EPOCROOT)\\EPOC32\\INCLUDE\\GCCE\\GCCE.h ;
 
