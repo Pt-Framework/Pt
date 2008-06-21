@@ -28,13 +28,27 @@ int main(int argc, char** argv)
         Pt::System::PluginManager<TestPlugin> pm;
         pm.loadPlugin( shlibName );
 
+		Pt::System::PluginManager<TestPlugin>::Iterator it;
+		for(it = pm.begin(); it != pm.end(); ++it)
+		{
+			std::cerr << "FEATURE  : " << it->feature() << std::endl;
+			std::cerr << "INFO     : " << it->info() << std::endl;
+
+			TestPlugin*  p2 = pm.create( it );
+			if( p2 )
+			{
+				p2->test();
+				pm.destroy(p2);
+			}
+		}
+
         TestPlugin* pl = pm.create("MyPlugin");
         if(pl == 0)
             throw std::runtime_error(PT_SOURCEINFO + "No such plugin");
 
         pl->test();
-
         pm.destroy(pl);
+
         return 0;
     }
     catch(const std::exception& e)

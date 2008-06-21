@@ -85,10 +85,39 @@ namespace System {
 
 
     template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
-    class PluginManager /*: private PluginManagerBase*/ {
+    class PluginManager
+    {
         public:
-            typedef typename std::map< std::string, PluginT* > PluginMap;
+            typedef typename std::multimap< std::string, PluginT* > PluginMap;
             typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;
+
+			class Iterator
+			{
+				public:
+					Iterator()
+					{}
+
+					Iterator(typename PluginMap::const_iterator it)
+					: _it( it)
+					{}
+
+					Iterator& operator++()
+					{ ++_it; return *this; }
+	
+					const PluginId& operator*() const
+					{ return *(_it->second); }
+
+					const PluginId* operator->() const
+					{ return _it->second; }
+
+					bool operator==(const Iterator& it) const
+					{ return _it == it._it; }
+
+					bool operator!=(const Iterator& it) const
+					{ return _it != it._it; }
+
+					typename PluginMap::const_iterator _it;
+			};
 
         public:
             PluginManager()
@@ -105,7 +134,15 @@ namespace System {
 
             IfaceT* create(const std::string& feature);
 
+            IfaceT* create(const Iterator& feature);
+
             void destroy(IfaceT* inst);
+
+			Iterator begin() const
+			{ return Iterator( _plugins.begin() ); }
+			
+			Iterator end() const
+			{ return Iterator( _plugins.end() ); }
 
         protected:
             PluginMap& plugins()
@@ -133,7 +170,8 @@ namespace System {
     PluginManager<IfaceT, PluginT>::~PluginManager()
     {
         // Destroy all instances. If any are left its actually a bug.
-        for(typename InstanceMap::iterator it = _instances.begin(); it != _instances.end(); ++it) {
+        for(typename InstanceMap::iterator it = _instances.begin(); it != _instances.end(); ++it)
+        {
             it->second->destroy( it->first );
         }
         _instances.clear();
@@ -190,6 +228,22 @@ namespace System {
         {
             return 0;
         }
+
+        PluginT* plugin = it->second;
+        IfaceT* iface = plugin->create();
+        if(iface) 
+        {
+            _instances.insert( std::make_pair(iface, plugin) );
+        }
+
+        return iface;
+    }
+
+
+    template <class IfaceT, typename PluginT >
+    IfaceT* PluginManager<IfaceT, PluginT>::create(const Iterator& pit)
+    {
+        typename PluginMap::const_iterator it = pit._it;
 
         PluginT* plugin = it->second;
         IfaceT* iface = plugin->create();
