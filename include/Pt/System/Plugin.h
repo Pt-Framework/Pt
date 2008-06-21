@@ -84,29 +84,6 @@ namespace System {
     };
 
 
-	// @internal DEPRECATED do not use
-    class PT_SYSTEM_API PluginManagerBase {
-        public:
-            PluginManagerBase();
-
-            virtual ~PluginManagerBase();
-
-        protected:
-            //! Override to change how a SharedLib is opened.
-            virtual SharedLib* openPlugin(const std::string& path);
-
-			virtual void closePlugin(const std::string& path);
-
-            //! Override to change how plugins are extracted from a shared library.
-            virtual PluginId** resolvePlugin(SharedLib& shlib);
-
-            std::list<SharedLib*>& sharedLibs();
-
-        private:
-            class PluginManagerBaseImpl* _impl;
-    };
-
-
     template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
     class PluginManager /*: private PluginManagerBase*/ {
         public:
@@ -119,8 +96,6 @@ namespace System {
             { }
 
             ~PluginManager();
-
-            void openDir(const std::string& path);
 
             void loadPlugin(const std::string& path);
 
@@ -162,22 +137,6 @@ namespace System {
             it->second->destroy( it->first );
         }
         _instances.clear();
-    }
-
-
-    template <class IfaceT, typename PluginT >
-    void PluginManager<IfaceT, PluginT>::openDir(const std::string& dirPath)
-    {
-        throw std::runtime_error("PluginManager::openDir not implemented." + PT_SOURCEINFO);
-        /*try {
-            Directory dir(dirPath);
-            for(Directory::Iterator it = dir.begin(); it != dir.end(); ++it) {
-                std::string path = dir.path() + Directory::separator() + *it;
-                try {
-                    this->loadPlugin(path);
-                } catch(...) { }
-            }
-        } catch(...) {}*/
     }
 
 
