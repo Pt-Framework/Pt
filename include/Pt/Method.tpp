@@ -10,12 +10,12 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>()
         { this->operator=(rhs); }
 
@@ -72,8 +72,8 @@ class Method : public Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
+Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>(obj,ptr);
 }
@@ -124,7 +124,7 @@ class MethodSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
 };
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>( callable( obj, memFunc ) );
 }
@@ -139,12 +139,12 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8,A9);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>()
         { this->operator=(rhs); }
 
@@ -201,14 +201,14 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public Callable<R, A1,
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
+Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8,A9> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8,A9>( callable( obj, memFunc ) );
 }
@@ -223,12 +223,12 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7,A8);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>()
         { this->operator=(rhs); }
 
@@ -285,14 +285,14 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public Callable<R, A
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
+Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7,A8> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7,A8>( callable( obj, memFunc ) );
 }
@@ -307,12 +307,12 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6,A7);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -369,14 +369,14 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public Callable<R,
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
+Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5,A6,A7>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6,A7> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6,A7>( callable( obj, memFunc ) );
 }
@@ -391,12 +391,12 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5,A6);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -453,14 +453,14 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public Callable<
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-Method<R,ClassT,A1,A2,A3,A4,A5,A6> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
+Method<R,ClassT,A1,A2,A3,A4,A5,A6> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5,A6>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5,A6> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5,A6) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5,A6>( callable( obj, memFunc ) );
 }
@@ -475,12 +475,12 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4,A5);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -537,14 +537,14 @@ class Method<R,ClassT, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public Callabl
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4, class A5>
-Method<R,ClassT,A1,A2,A3,A4,A5> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5>
+Method<R,ClassT,A1,A2,A3,A4,A5> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5))
 {
     return Method<R,ClassT,A1,A2,A3,A4,A5>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5>
-MethodSlot<R,BaseT,A1,A2,A3,A4,A5> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4,A5> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4,A5) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4,A5>( callable( obj, memFunc ) );
 }
@@ -559,12 +559,12 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
         typedef R (ClassT::*MemFuncT)(A1,A2,A3,A4);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -621,14 +621,14 @@ class Method<R,ClassT, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public Calla
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3, class A4>
-Method<R,ClassT,A1,A2,A3,A4> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4>
+Method<R,ClassT,A1,A2,A3,A4> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3, A4 a4))
 {
     return Method<R,ClassT,A1,A2,A3,A4>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3, class A4>
-MethodSlot<R,BaseT,A1,A2,A3,A4> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3,A4> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3,A4) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3,A4>( callable( obj, memFunc ) );
 }
@@ -643,12 +643,12 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
         typedef R (ClassT::*MemFuncT)(A1,A2,A3);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -705,14 +705,14 @@ class Method<R,ClassT, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Cal
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2, class A3>
-Method<R,ClassT,A1,A2,A3> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2, A3 a3)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2, class A3>
+Method<R,ClassT,A1,A2,A3> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2, A3 a3))
 {
     return Method<R,ClassT,A1,A2,A3>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2, class A3>
-MethodSlot<R,BaseT,A1,A2,A3> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3) ) throw()
+MethodSlot<R,ClassT,A1,A2,A3> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2,A3) )
 {
     return MethodSlot<R,ClassT,A1,A2,A3>( callable( obj, memFunc ) );
 }
@@ -727,12 +727,12 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
         typedef R (ClassT::*MemFuncT)(A1,A2);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -789,14 +789,14 @@ class Method<R,ClassT, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public C
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1, class A2>
-Method<R,ClassT,A1,A2> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1, A2 a2)) throw()
+template <class R, class BaseT, class ClassT,class A1, class A2>
+Method<R,ClassT,A1,A2> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1, A2 a2))
 {
     return Method<R,ClassT,A1,A2>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1, class A2>
-MethodSlot<R,BaseT,A1,A2> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2) ) throw()
+MethodSlot<R,ClassT,A1,A2> slot( ClassT & obj, R (BaseT::*memFunc)(A1,A2) )
 {
     return MethodSlot<R,ClassT,A1,A2>( callable( obj, memFunc ) );
 }
@@ -811,12 +811,12 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
         typedef R (ClassT::*MemFuncT)(A1);
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -873,14 +873,14 @@ class Method<R,ClassT, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT,class A1>
-Method<R,ClassT,A1> callable( ClassT & obj, R (ClassT::*ptr)(A1 a1)) throw()
+template <class R, class BaseT, class ClassT,class A1>
+Method<R,ClassT,A1> callable( ClassT & obj, R (BaseT::*ptr)(A1 a1))
 {
     return Method<R,ClassT,A1>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT,class A1>
-MethodSlot<R,BaseT,A1> slot( ClassT & obj, R (BaseT::*memFunc)(A1) ) throw()
+MethodSlot<R,ClassT,A1> slot( ClassT & obj, R (BaseT::*memFunc)(A1) )
 {
     return MethodSlot<R,ClassT,A1>( callable( obj, memFunc ) );
 }
@@ -895,12 +895,12 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
         typedef R (ClassT::*MemFuncT)();
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>()
         { this->operator=(rhs); }
 
@@ -958,15 +958,15 @@ class Method<R,ClassT, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : publ
 Creates and returns a Method object for the given object/method pair.
 */
 template <class R, class BaseT, class ClassT>
-Method<R, ClassT> callable( ClassT & obj, R (BaseT::*ptr)()) throw()
+Method<R,ClassT> callable( ClassT & obj, R (BaseT::*ptr)())
 {
-    return Method<R, ClassT>(obj,ptr);
+    return Method<R,ClassT>(obj,ptr);
 }
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT>
-MethodSlot<R, ClassT> slot( ClassT & obj, R (BaseT::*memFunc)() ) throw()
+MethodSlot<R,ClassT> slot( ClassT & obj, R (BaseT::*memFunc)() )
 {
-    return MethodSlot<R, ClassT>( callable( obj, memFunc ) );
+    return MethodSlot<R,ClassT>( callable( obj, memFunc ) );
 }
 
 // END_Method 0

@@ -637,11 +637,11 @@ print << "EOF"
         typedef R (*FuncT)(${arg_tmpl_types});
 
         /** Wraps func. */
-        Function(FuncT func) throw()
+        Function(FuncT func)
         : _funcPtr(func) { }
 
         /** Deeply copies f. */
-        Function(const Function& f) throw()
+        Function(const Function& f)
         { this->operator=(f); }
 
         /** Call the wrapped function, passing it the arguments as-is and returning
@@ -722,12 +722,12 @@ print << "EOF"
 
 /** Creates and returns a Function wrapper for the given free/static function. */
 template <typename R${comma_arg_tmpl_decl}>
-Function<R${comma_arg_tmpl_types}> callable(R (*func)(${arg_type_list_named})) throw()
+Function<R${comma_arg_tmpl_types}> callable(R (*func)(${arg_type_list_named}))
 { return Function<R${comma_arg_tmpl_types}>(func); }
 
 /** Creates and returns a FunctionSlot object for the given free/static function. */
 template <typename R${comma_arg_tmpl_decl}>
-FunctionSlot<R${comma_arg_tmpl_types}> slot( R (*func)(${arg_type_list_named}) ) throw()
+FunctionSlot<R${comma_arg_tmpl_types}> slot( R (*func)(${arg_type_list_named}) )
 { return FunctionSlot<R${comma_arg_tmpl_types}>( callable(func) ); }
 
 // END_Function ${argc}
@@ -763,12 +763,12 @@ print << "EOF"
         typedef R (ClassT::*MemFuncT)(${arg_tmpl_types}) const;
 
         /** Wraps the given member function of the given object. */
-        ConstMethod(ClassT& object, MemFuncT ptr) throw()
+        ConstMethod(ClassT& object, MemFuncT ptr)
         : _object(&object), _method(ptr)
         { }
 
         /** Deeply copies rhs. */
-        ConstMethod(const ConstMethod& rhs) throw()
+        ConstMethod(const ConstMethod& rhs)
         : Callable<R${comma_arg_tmpl_types_all}>()
         { this->operator=(rhs); }
 
@@ -803,8 +803,8 @@ print << "EOF"
 };
 
 /** Creates and  returns a ConstMethod object from the given object and method pair. */
-template <class R, class ClassT${comma_arg_tmpl_decl}>
-ConstMethod<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (ClassT::*ptr)(${arg_type_list_named}) const ) throw()
+template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
+ConstMethod<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (BaseT::*ptr)(${arg_type_list_named}) const )
 { return ConstMethod<R,ClassT${comma_arg_tmpl_types}>(obj,ptr); }
 
 EOF
@@ -862,7 +862,7 @@ print << "EOF"
   Creates and returns a ConstMethodSlot for the given object/method pair.
 */
 template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
-ConstMethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) const ) throw()
+ConstMethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) const )
 {
     return ConstMethodSlot<R,ClassT${comma_arg_tmpl_types}>( callable( obj, memFunc ) );
 }
@@ -897,12 +897,12 @@ print << "EOF"
         typedef R (ClassT::*MemFuncT)(${arg_tmpl_types});
 
         /** Wraps the given object/member pair. */
-        explicit Method(ClassT& object, MemFuncT ptr) throw()
+        explicit Method(ClassT& object, MemFuncT ptr)
         : _object(&object), _memFunc(ptr)
         { }
 
         /** Deeply copies rhs. */
-        Method(const Method& rhs) throw()
+        Method(const Method& rhs)
         : Callable<R${comma_arg_tmpl_types_all}>()
         { this->operator=(rhs); }
 
@@ -959,8 +959,8 @@ print << "EOF"
 /**
 Creates and returns a Method object for the given object/method pair.
 */
-template <class R, class ClassT${comma_arg_tmpl_decl}>
-Method<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (ClassT::*ptr)(${arg_type_list_named})) throw()
+template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
+Method<R,ClassT${comma_arg_tmpl_types}> callable( ClassT & obj, R (BaseT::*ptr)(${arg_type_list_named}))
 {
     return Method<R,ClassT${comma_arg_tmpl_types}>(obj,ptr);
 }
@@ -1021,7 +1021,7 @@ EOF
 print << "EOF"
 /** Creates and returns a MethodSlot object for the given object/member pair. */
 template <class R, class BaseT, class ClassT${comma_arg_tmpl_decl}>
-MethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) ) throw()
+MethodSlot<R,BaseT${comma_arg_tmpl_types}> slot( ClassT & obj, R (BaseT::*memFunc)(${arg_tmpl_types}) )
 {
     return MethodSlot<R,ClassT${comma_arg_tmpl_types}>( callable( obj, memFunc ) );
 }
