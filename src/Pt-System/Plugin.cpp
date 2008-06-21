@@ -74,6 +74,11 @@ SharedLib* PluginManagerBase::openPlugin(const std::string& path)
 }
 
 
+void PluginManagerBase::closePlugin(const std::string& path)
+{
+}
+
+
 PluginId** PluginManagerBase::resolvePlugin(SharedLib& shlib)
 {
     void* symbol = shlib.resolve( "PluginList" );

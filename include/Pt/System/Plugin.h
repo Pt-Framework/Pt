@@ -84,6 +84,7 @@ namespace System {
     };
 
 
+	// @internal DEPRECATED do not use
     class PT_SYSTEM_API PluginManagerBase {
         public:
             PluginManagerBase();
@@ -93,6 +94,8 @@ namespace System {
         protected:
             //! Override to change how a SharedLib is opened.
             virtual SharedLib* openPlugin(const std::string& path);
+
+			virtual void closePlugin(const std::string& path);
 
             //! Override to change how plugins are extracted from a shared library.
             virtual PluginId** resolvePlugin(SharedLib& shlib);
@@ -105,7 +108,7 @@ namespace System {
 
 
     template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
-    class PluginManager : private PluginManagerBase {
+    class PluginManager /*: private PluginManagerBase*/ {
         public:
             typedef typename std::map< std::string, PluginT* > PluginMap;
             typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;
@@ -125,9 +128,9 @@ namespace System {
 
             void unregisterPlugin(PluginT& plugin);
 
-            virtual IfaceT* create(const std::string& feature);
+            IfaceT* create(const std::string& feature);
 
-            virtual void destroy(IfaceT* inst);
+            void destroy(IfaceT* inst);
 
         protected:
             PluginMap& plugins()
@@ -139,6 +142,9 @@ namespace System {
         private:
             /// A string representation of the interface id
             const std::type_info& _iface;
+
+            /// A list of all loaded libraries
+			std::list<SharedLib> _libs;
 
             /// A map of a feature string and the Plugin* which handles it.
             PluginMap _plugins;
@@ -177,26 +183,25 @@ namespace System {
 
     template <class IfaceT, typename PluginT >
     void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& path)
-    {
-        SharedLib* shlib = this->openPlugin(path);
-        if( ! shlib ) {
-            return;
-        }
+    {       
+        SharedLib shlib(path);
 
-        PluginId** plugins = this->resolvePlugin(*shlib);
-        if( !plugins ) {
-            delete shlib;
-            return;
-        }
+    	void* symbol = shlib.resolve( "PluginList" );
+    	if( ! symbol )
+    	    return;
 
-        for(; *plugins != 0; ++plugins) {
-            if( (*plugins)->iface() == _iface ) {
+		PluginId** plugins = (PluginId**) symbol;
+
+        for(; *plugins != 0; ++plugins) 
+        {
+            if( (*plugins)->iface() == _iface ) 
+            {
                 PluginT* p = (PluginT*)(*plugins);
                 this->registerPlugin(*p);
             }
         }
 
-        this->sharedLibs().push_back(shlib);
+        _libs.push_back(shlib);
     }
 
 
@@ -211,7 +216,8 @@ namespace System {
     void PluginManager<IfaceT, PluginT>::unregisterPlugin(PluginT& plugin)
     {
         typename PluginMap::iterator it = _plugins.find( plugin.feature() );
-        if( it != _plugins.end() ) {
+        if( it != _plugins.end() ) 
+        {
             _plugins.erase(it);
         }
     }
@@ -221,13 +227,15 @@ namespace System {
     IfaceT* PluginManager<IfaceT, PluginT>::create(const std::string& feature)
     {
         typename PluginMap::iterator it = _plugins.find(feature);
-        if( it == _plugins.end() ) {
+        if( it == _plugins.end() ) 
+        {
             return 0;
         }
 
         PluginT* plugin = it->second;
         IfaceT* iface = plugin->create();
-        if(iface) {
+        if(iface) 
+        {
             _instances.insert( std::make_pair(iface, plugin) );
         }
 
@@ -239,7 +247,8 @@ namespace System {
     void PluginManager<IfaceT, PluginT>::destroy(IfaceT* inst)
     {
         typename InstanceMap::iterator it = _instances.find(inst);
-        if( it == _instances.end() ) {
+        if( it == _instances.end() ) 
+        {
             throw SystemError("Could not destroy object.", PT_SOURCEINFO);
         }
 

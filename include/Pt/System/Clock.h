@@ -17,7 +17,6 @@ class PT_SYSTEM_API Clock
         /** @brief Contructs a Clock
         */
         Clock();
-
         /** @brief Destructor
         */
         ~Clock();
@@ -39,8 +38,11 @@ class PT_SYSTEM_API Clock
 
         /** @brief Gets the system time
             The getTime function retrieves the system time, in milliseconds. 
+
             The system time is the time elapsed since the system was started.
+
             @return Returns the system time, in milliseconds.
+
         */  
         static Pt::size_t getTime();
 
