@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Duerner                              *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -16,19 +16,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef PT_SYSTEM_RWLOCK_H
 #define PT_SYSTEM_RWLOCK_H
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 
-
 namespace Pt {
 
 namespace System {
-
-
 
 /// A reader writer lock allows multiple concurrent
 /// readers or one exclusive writer.
@@ -65,6 +61,98 @@ class PT_SYSTEM_API RWLock : public NonCopyable
 
     private:
         class RWLockImpl* _impl;
+};
+
+
+class ReadLock
+{
+    public:
+    	ReadLock(RWLock& m, bool doLock = true)
+    	: _mutex(m)
+    	, _locked(false)
+    	{
+      		if(doLock)
+        		this->lock();
+		}
+
+    	~ReadLock()
+    	{
+    		try 
+    		{
+     			if(_locked)
+        			this->unlock();
+        	}
+        	catch(...)
+        	{}
+   		}
+
+   		void lock()
+    	{
+    		if( ! _locked )
+       		{
+      			_mutex.readLock();
+        		_locked = true;
+			}
+    	}
+
+    	void unlock()     
+    	{
+    		if( _locked)
+        	{
+      			_mutex.unlock();
+        		_locked = false;
+			}
+    	}
+
+	private:
+    	RWLock& _mutex;
+    	bool _locked;
+};
+
+
+class WriteLock
+{
+    public:
+    	WriteLock(RWLock& m, bool doLock = true)
+    	: _mutex(m)
+    	, _locked(false)
+    	{
+      		if(doLock)
+        		this->lock();
+		}
+
+    	~WriteLock()
+    	{
+    		try 
+    		{
+     			if(_locked)
+        			this->unlock();
+        	}
+        	catch(...)
+        	{}
+   		}
+
+   		void lock()
+    	{
+    		if( ! _locked )
+       		{
+      			_mutex.writeLock();
+        		_locked = true;
+			}
+    	}
+
+    	void unlock()     
+    	{
+    		if( _locked)
+        	{
+      			_mutex.unlock();
+        		_locked = false;
+			}
+    	}
+
+	private:
+    	RWLock& _mutex;
+    	bool _locked;
 };
 
 } // !namespace System
