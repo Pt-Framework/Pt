@@ -34,7 +34,7 @@ class RWMutexImpl
                 throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
         }
 
-        ~RWLockImpl()
+        ~RWMutexImpl()
         {
             pthread_rwlock_destroy(&_rwl);
         }

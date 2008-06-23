@@ -26,40 +26,49 @@ namespace Pt {
 
 namespace System {
 
-/// A reader writer lock allows multiple concurrent
-/// readers or one exclusive writer.
+/** @brief Synchronisation device similar to a POSIX rwlock
+
+    A %RWMutex allows multiple concurrent readers or one exclusive writer to
+    access a resource.
+*/
 class PT_SYSTEM_API RWMutex : public NonCopyable
 {
     public:
+        //! @brief Creates the Reader/Writer lock.
         RWMutex();
-            /// Creates the Reader/Writer lock.
-
+ 
+        //! @brief Destroys the Reader/Writer lock.
         ~RWMutex();
-            /// Destroys the Reader/Writer lock.
 
         void readLock();
-            /// Acquires a read lock. If another thread currently holds a write lock,
-            /// waits until the write lock is released.
+        /** @brief Acquires a read lock.
 
+            If another thread currently holds a write lock, this method
+            waits until the write lock is released.
+        */
         bool tryReadLock();
-            /// Tries to acquire a read lock. Immediately returns true if successful, or
-            /// false if another thread currently holds a write lock.
 
+        /** @brief Acquires a write lock.
+
+            If one or more other threads currently hold locks, this method
+            waits until all locks are released. The results are undefined
+            if the same thread already holds a read or write lock.
+        */
         void writeLock();
-            /// Acquires a write lock. If one or more other threads currently hold 
-            /// locks, waits until all locks are released. The results are undefined
-            /// if the same thread already holds a read or write lock
 
+        /** @brief Tries to acquire a write lock.
+
+            Immediately returns true if successful, or false if one or more
+            other threads currently hold locks. The result is undefined if
+            the same thread already holds a read or write lock.
+        */
         bool tryWriteLock();
-            /// Tries to acquire a write lock. Immediately returns true if successful,
-            /// or false if one or more other threads currently hold 
-            /// locks. The result is undefined if the same thread already
-            /// holds a read or write lock.
 
+        //! @brief Releases the read or write lock.
         void unlock();
-            /// Releases the read or write lock.
 
     private:
+        //! @internal
         class RWMutexImpl* _impl;
 };
 
@@ -67,92 +76,92 @@ class PT_SYSTEM_API RWMutex : public NonCopyable
 class ReadLock
 {
     public:
-    	ReadLock(RWMutex& m, bool doLock = true)
-    	: _mutex(m)
-    	, _locked(false)
-    	{
-      		if(doLock)
-        		this->lock();
-		}
+        ReadLock(RWMutex& m, bool doLock = true)
+        : _mutex(m)
+        , _locked(false)
+        {
+            if(doLock)
+                this->lock();
+        }
 
-    	~ReadLock()
-    	{
-    		try 
-    		{
-     			if(_locked)
-        			this->unlock();
-        	}
-        	catch(...)
-        	{}
-   		}
+        ~ReadLock()
+        {
+            try
+            {
+                if(_locked)
+                    this->unlock();
+            }
+            catch(...)
+            {}
+        }
 
-   		void lock()
-    	{
-    		if( ! _locked )
-       		{
-      			_mutex.readLock();
-        		_locked = true;
-			}
-    	}
+        void lock()
+        {
+            if( ! _locked )
+            {
+                _mutex.readLock();
+                _locked = true;
+            }
+        }
 
-    	void unlock()     
-    	{
-    		if( _locked)
-        	{
-      			_mutex.unlock();
-        		_locked = false;
-			}
-    	}
+        void unlock()
+        {
+            if( _locked)
+            {
+                _mutex.unlock();
+                _locked = false;
+            }
+        }
 
-	private:
-    	RWMutex& _mutex;
-    	bool _locked;
+    private:
+        RWMutex& _mutex;
+        bool _locked;
 };
 
 
 class WriteLock
 {
     public:
-    	WriteLock(RWMutex& m, bool doLock = true)
-    	: _mutex(m)
-    	, _locked(false)
-    	{
-      		if(doLock)
-        		this->lock();
-		}
+        WriteLock(RWMutex& m, bool doLock = true)
+        : _mutex(m)
+        , _locked(false)
+        {
+            if(doLock)
+                this->lock();
+        }
 
-    	~WriteLock()
-    	{
-    		try 
-    		{
-     			if(_locked)
-        			this->unlock();
-        	}
-        	catch(...)
-        	{}
-   		}
+        ~WriteLock()
+        {
+            try
+            {
+                if(_locked)
+                    this->unlock();
+            }
+            catch(...)
+            {}
+        }
 
-   		void lock()
-    	{
-    		if( ! _locked )
-       		{
-      			_mutex.writeLock();
-        		_locked = true;
-			}
-    	}
+        void lock()
+        {
+            if( ! _locked )
+            {
+                _mutex.writeLock();
+                _locked = true;
+            }
+        }
 
-    	void unlock()     
-    	{
-    		if( _locked)
-        	{
-      			_mutex.unlock();
-        		_locked = false;
-			}
-    	}
+        void unlock()
+        {
+            if( _locked)
+            {
+                _mutex.unlock();
+                _locked = false;
+            }
+        }
 
-	private:
-    	RWMutex& _mutex;
-    	bool _locked;
+    private:
+        RWMutex& _mutex;
+        bool _locked;
 };
 
 } // !namespace System

@@ -7,6 +7,8 @@
 #include <errno.h>
 #include <cstring> // strerror()
 #include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 namespace Pt {
 
@@ -108,8 +110,8 @@ void ProcessImpl::start()
             }
         }
         cpArgs[j] = 0;
-        
-	// call exec
+
+        // call exec
         if( 0 > execvp(cpArgs[0], cpArgs))
         {
             throw SystemError("System call EXECVP() Failed!",PT_SOURCEINFO);
@@ -143,6 +145,17 @@ int ProcessImpl::wait()
         throw SystemError(std::strerror(errno),PT_SOURCEINFO);
     }
     return iStatus;
+}
+
+
+unsigned long ProcessImpl::usedMemory()
+{
+    struct rusage usage;
+    int r =  getrusage(RUSAGE_SELF, &usage);
+    if( r == -1)
+        throw SystemError("getrusage failed", PT_SOURCEINFO);
+
+    return usage.ru_idrss;
 }
 
 } // namespace Pt

@@ -49,25 +49,26 @@ class PT_API ProcessImpl
         static void sleep(size_t milliSec){
             usleep(milliSec*1000);
         }
-    
+
         const std::string& command();
-    
+
         void start();
-    
+
         void kill();
-    
+
         int wait();
-    
+
+        static unsigned long usedMemory();
     private:
         pid_t m_pid;
         std::string m_command;
         std::string m_args;
 
         std::bitset<3> m_mask;
-        
-		IODevice* m_devIn;
-		IODevice* m_devOut;
-		IODevice* m_devErr;
+
+        IODevice* m_devIn;
+        IODevice* m_devOut;
+        IODevice* m_devErr;
  
 };
 

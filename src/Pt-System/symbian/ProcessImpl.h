@@ -37,9 +37,9 @@ class PT_API ProcessImpl
 {
     public:
         ProcessImpl(const std::string& command);
-        
+
         ProcessImpl(const ProcessInfo& procInfo);
-        
+
         ~ProcessImpl();
 
         static void setEnvVar(const std::string& name, const std::string& value)
@@ -58,7 +58,7 @@ class PT_API ProcessImpl
         static std::string getEnvVar(const std::string& name)
         {
             std::string ret;
-			const char* cp = std::getenv(name.c_str());
+            const char* cp = std::getenv(name.c_str());
             if( NULL == cp )
             {
                 return ret;
@@ -70,15 +70,18 @@ class PT_API ProcessImpl
         static void sleep(size_t milliSec){
             User::After(milliSec*1000);
         }
-    
+
         const std::string& command();
-    
+
         void start();
-    
+
         void kill();
-    
+
         int wait();
-    
+
+        static unsigned long usedMemory()
+        { return 0;}
+
     private:
         RProcess m_process;
         std::string m_command;

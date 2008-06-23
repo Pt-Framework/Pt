@@ -20,7 +20,6 @@
  ***************************************************************************/
 #include "Pt/System/Thread.h"
 #include "Pt/System/Mutex.h"
-#include "Pt/System/MutexLock.h"
 #include "Pt/System/Condition.h"
 
 #include "Pt/Net/TcpSocket.h"

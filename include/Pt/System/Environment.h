@@ -90,15 +90,6 @@ namespace System {
              *  tmp directory does not exist, the current directory is returned.                                       
              */
             static Directory tempDirectory();
-        
-            /*
-             * @return the total physical memory in kiloByte (kB)
-             */
-            static unsigned long getTotalMemory();
-            /*
-             * @return the available physical memory in kiloByte (kB)
-             */
-            static unsigned long getFreeMemory();
 
             /*
              * @return the amount of memory used by the calling process in kiloByte (kB)

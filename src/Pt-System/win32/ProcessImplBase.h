@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Marc Boris Dürner                               *
+ *   Copyright (C) 2005 by Marc Boris Dï¿½rner                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -50,17 +50,19 @@ namespace System {
 
             int wait();
 
+            static unsigned long usedMemory();
+
     private:
-		PROCESS_INFORMATION m_pid;
-	
+        PROCESS_INFORMATION m_pid;
+
         std::string m_command;
-        
+
         std::bitset<3> m_mask;
-        
+
         IODevice* m_devIn;
         IODevice* m_devOut;
         IODevice* m_devErr;
-		
+
         std::string m_args;
     };
 

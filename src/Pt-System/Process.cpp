@@ -78,7 +78,6 @@ std::string ProcessInfo::getArgument( unsigned idx) const
     return (idx < m_argList.size()) ? m_argList[idx] : std::string();
 }
 
-// -------------------
 
 Process::Process(const std::string& command)
 {
@@ -142,6 +141,12 @@ std::string Process::getEnvVar(const std::string& name)
 void Process::sleep(size_t milliSec)
 {
      ProcessImpl::sleep(milliSec);
+}
+
+
+unsigned long Process::usedMemory()
+{
+     return ProcessImpl::usedMemory();
 }
 
 } // namespace System

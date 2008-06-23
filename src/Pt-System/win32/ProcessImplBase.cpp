@@ -6,6 +6,10 @@
 #include <vector>
 #include <string>
 
+#ifndef _WIN32_WCE
+    #include <psapi.h>
+#endif
+
 namespace Pt {
 
 namespace System {
@@ -128,6 +132,25 @@ int ProcessImplBase::wait()
     DWORD exitCode;
     GetExitCodeProcess( m_pid.hProcess, &exitCode);
     return exitCode;
+}
+
+
+unsigned long ProcessImplBase::usedMemory()
+{
+#ifndef _WIN32_WCE
+    PROCESS_MEMORY_COUNTERS pmc;
+
+    if(GetProcessMemoryInfo( GetCurrentProcess(), &pmc, sizeof(pmc)))
+    {
+        return (unsigned long)(pmc.PagefileUsage / 1024);
+    }
+    else
+    {
+        return 0;
+    }
+#else
+    return 0;
+#endif
 }
 
 } // namespace Pt
