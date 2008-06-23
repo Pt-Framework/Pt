@@ -27,15 +27,15 @@ namespace Pt {
 
 namespace System {
 
-class RWLockImpl
+class RWMutexImpl
 {
     public:
-        RWLockImpl()
+        RWMutexImpl()
         {
             throw SystemError("not implemented", PT_SOURCEINFO);
         }
 
-        ~RWLockImpl()
+        ~RWMutexImpl()
         {}
 
         void readLock()

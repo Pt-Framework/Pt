@@ -16,53 +16,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/System/RWLock.h"
-
-#include "RWLockImpl.h"
-
+#include "Pt/System/RWMutex.h"
+#include "RWMutexImpl.h"
 
 namespace Pt {
 
 namespace System {
 
-RWLock::RWLock()
+RWMutex::RWMutex()
 {
-    _impl = new RWLockImpl();
+    _impl = new RWMutexImpl();
 }
 
 
-RWLock::~RWLock()
+RWMutex::~RWMutex()
 {
     delete _impl;
 }
 
 
-void RWLock::readLock()
+void RWMutex::readLock()
 {
     _impl->readLock();
 }
 
 
-bool RWLock::tryReadLock()
+bool RWMutex::tryReadLock()
 {
     return _impl->tryReadLock();
 }
 
 
-void RWLock::writeLock()
+void RWMutex::writeLock()
 {
     _impl->writeLock();
 }
 
 
-bool RWLock::tryWriteLock()
+bool RWMutex::tryWriteLock()
 {
     return _impl->tryWriteLock();
 }
 
 
-void RWLock::unlock()
+void RWMutex::unlock()
 {
     _impl->unlock();
 }

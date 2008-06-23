@@ -16,8 +16,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_RWLOCK_H
-#define PT_SYSTEM_RWLOCK_H
+#ifndef PT_SYSTEM_RWMUTEX_H
+#define PT_SYSTEM_RWMUTEX_H
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
@@ -28,13 +28,13 @@ namespace System {
 
 /// A reader writer lock allows multiple concurrent
 /// readers or one exclusive writer.
-class PT_SYSTEM_API RWLock : public NonCopyable
+class PT_SYSTEM_API RWMutex : public NonCopyable
 {
     public:
-        RWLock();
+        RWMutex();
             /// Creates the Reader/Writer lock.
 
-        ~RWLock();
+        ~RWMutex();
             /// Destroys the Reader/Writer lock.
 
         void readLock();
@@ -60,14 +60,14 @@ class PT_SYSTEM_API RWLock : public NonCopyable
             /// Releases the read or write lock.
 
     private:
-        class RWLockImpl* _impl;
+        class RWMutexImpl* _impl;
 };
 
 
 class ReadLock
 {
     public:
-    	ReadLock(RWLock& m, bool doLock = true)
+    	ReadLock(RWMutex& m, bool doLock = true)
     	: _mutex(m)
     	, _locked(false)
     	{
@@ -105,7 +105,7 @@ class ReadLock
     	}
 
 	private:
-    	RWLock& _mutex;
+    	RWMutex& _mutex;
     	bool _locked;
 };
 
@@ -113,7 +113,7 @@ class ReadLock
 class WriteLock
 {
     public:
-    	WriteLock(RWLock& m, bool doLock = true)
+    	WriteLock(RWMutex& m, bool doLock = true)
     	: _mutex(m)
     	, _locked(false)
     	{
@@ -151,7 +151,7 @@ class WriteLock
     	}
 
 	private:
-    	RWLock& _mutex;
+    	RWMutex& _mutex;
     	bool _locked;
 };
 

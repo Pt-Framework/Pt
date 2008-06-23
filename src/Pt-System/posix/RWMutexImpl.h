@@ -16,22 +16,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #include <pthread.h>
 #include <errno.h>
-
 #include "Pt/System/SystemError.h"
-
 
 namespace Pt {
 
 namespace System {
 
 
-class RWLockImpl
+class RWMutexImpl
 {
     public:
-        RWLockImpl()
+        RWMutexImpl()
         {
             if( pthread_rwlock_init(&_rwl, NULL) )
                 throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
