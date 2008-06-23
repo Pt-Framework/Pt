@@ -4,7 +4,6 @@ SubDirC++Flags [ FDefines PT_UNIT_API_EXPORT ] ;
 
 PT_UNIT_SOURCES = Application.cpp
                   Assertion.cpp
-                  PerformanceTest.cpp
                   RegisterTest.cpp
                   Reporter.cpp
                   Test.cpp

@@ -14,7 +14,6 @@ Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
-                          [ FDirName $(SYS:L) EnvironmentImpl.cpp ]
                           [ FDirName $(SYS:L) FileImpl.cpp ]
                           [ FDirName $(SYS:L) FileDeviceImpl.cpp ]
                           [ FDirName $(SYS:L) MutexImpl.cpp ]
@@ -31,7 +30,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Clock.cpp
                           Condition.cpp
                           Directory.cpp
-                          Environment.cpp
+                          #Environment.cpp
                           EventLoop.cpp
                           File.cpp
                           FileDevice.cpp
@@ -39,7 +38,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           FileStream.cpp
                           IOError.cpp
                           Mutex.cpp
-                          MutexLock.cpp
                           Pipe.cpp
                           Plugin.cpp
                           Process.cpp
