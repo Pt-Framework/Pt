@@ -21,7 +21,6 @@
 #include "ConsoleChannel.h"
 #include "FileChannel.h"
 #include "SerialChannel.h"
-#include "Pt/System/MutexLock.h"
 #include <Pt/Log/Target.h>
 #include <Pt/Log/Logger.h>
 #include <Pt/Text/TextStream.h>

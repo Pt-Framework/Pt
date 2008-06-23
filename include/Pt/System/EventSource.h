@@ -25,7 +25,6 @@
 #include <Pt/Event.h>
 #include <Pt/Slot.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/MutexLock.h>
 #include <Pt/System/EventLoop.h>
 #include <list>
 

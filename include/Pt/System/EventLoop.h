@@ -26,7 +26,6 @@
 #include <Pt/System/Api.h>
 #include <Pt/System/Condition.h>
 #include <Pt/System/Mutex.h>
-#include <Pt/System/MutexLock.h>
 #include <Pt/System/Runnable.h>
 #include <Pt/System/Selector.h>
 #include <Pt/Event.h>
