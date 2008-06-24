@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Christian Prochnow                              *
- *   cproch@seculogix.de                                                   *
+ *   Copyright (C) 2008 by Marc Boris Duerner                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,43 +17,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ThreadKeyImpl.h"
-
 #include "Pt/System/ThreadKey.h"
-
-
 
 namespace Pt {
 
 namespace System {
 
 
-ThreadKeyBase::ThreadKeyBase() throw(SystemError)
+ThreadKeyBase::ThreadKeyBase()
 : _impl(0)
 {
     _impl = new ThreadKeyImpl();
 }
 
 
-ThreadKeyBase::ThreadKeyBase(const ThreadKeyBase& k) throw(SystemError)
+ThreadKeyBase::ThreadKeyBase(const ThreadKeyBase& k)
 : _impl(0)
 {
     _impl = new ThreadKeyImpl();
 }
 
 
-ThreadKeyBase::~ThreadKeyBase() throw()
+ThreadKeyBase::~ThreadKeyBase()
 {
     delete _impl;
 }
 
 
-void ThreadKeyBase::set(void* ptr) throw(SystemError)
+void ThreadKeyBase::set(void* ptr)
 {
     _impl->set(ptr);
 }
 
 
-void* ThreadKeyBase::get() const throw(SystemError)
+void* ThreadKeyBase::get() const
 {
     return _impl->get();
 }

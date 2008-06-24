@@ -1,6 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2005 by Marc Boris Dürner                               *
- *   Copyright (C) 2004 by Christian Prochnow                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -17,13 +16,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
 #ifndef Pt_ThreadKey_h
 #define Pt_ThreadKey_h
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
-
 
 namespace Pt {
 
@@ -31,15 +28,15 @@ namespace System {
 
     class PT_SYSTEM_API ThreadKeyBase : public NonCopyable {
         public:
-            ThreadKeyBase() throw(SystemError);
+            ThreadKeyBase();
 
-            ThreadKeyBase(const ThreadKeyBase& k) throw(SystemError);
+            ThreadKeyBase(const ThreadKeyBase& k);
 
-            ~ThreadKeyBase() throw();
+            ~ThreadKeyBase();
 
-            void set(void* ptr) throw(SystemError);
+            void set(void* ptr);
 
-            void* get() const throw(SystemError);
+            void* get() const;
 
         private:
             class ThreadKeyImpl* _impl;
@@ -50,30 +47,30 @@ namespace System {
     template <class T>
     class ThreadKey: private ThreadKeyBase {
         public:
-            ThreadKey() throw(SystemError)
+            ThreadKey()
             : ThreadKeyBase()
             {}
 
-            ThreadKey(const ThreadKey& k) throw(SystemError)
+            ThreadKey(const ThreadKey& k)
             : ThreadKeyBase()
             { ThreadKeyBase::set( k.get() ); }
 
-            ~ThreadKey() throw()
+            ~ThreadKey()
             {}
 
-            ThreadKey& operator=(const ThreadKey& k) throw(SystemError)
+            ThreadKey& operator=(const ThreadKey& k)
             {
                 ThreadKeyBase::set( k.get() );
                 return *this;
             }
 
-            ThreadKey& operator=(T* val) throw(SystemError)
+            ThreadKey& operator=(T* val)
             {
                 ThreadKeyBase::set( static_cast<void*>(val) );
                 return *this;
             }
-    
-            operator T*() throw(SystemError)
+
+            operator T*()
             { return (T*)ThreadKeyBase::get(); }
     };
 
