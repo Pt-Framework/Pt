@@ -46,7 +46,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Semaphore.cpp
                           SharedLib.cpp
                           SharedMemory.cpp
-                          Spinlock.cpp
                           SystemError.cpp
                           Thread.cpp
                           ThreadKey.cpp
