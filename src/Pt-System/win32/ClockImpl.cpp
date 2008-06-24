@@ -57,7 +57,7 @@ Timespan ClockImpl::stop()
     else
     {
         return Timespan(delta.QuadPart / _frequency.QuadPart,
-                        delta.QuadPart * 1000000) / _frequency.QuadPart )%1000000 );
+                        (delta.QuadPart * 1000000) / _frequency.QuadPart )%1000000 );
     }
 
     return Timespan();
