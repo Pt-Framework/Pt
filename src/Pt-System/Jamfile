@@ -51,7 +51,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Thread.cpp
                           ThreadKey.cpp
                           Timer.cpp
-                          TimeValue.cpp
                           Url.cpp
                           ;
 
@@ -91,10 +90,6 @@ PtUnitTest ProcessTest : ProcessTest.cpp ;
 Main_LinkSharedLibraries ProcessTest : Pt Pt-System Pt-Unit ;
 PtUnitTest_MakeLocate ProcessTest : $(OUTPUT_TARGET) ;
 Depends ProcessTest : ProcessTestChild ;
-
-PtUnitTest TimeValueTest : TimeValueTest.cpp ;
-Main_LinkSharedLibraries TimeValueTest : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate TimeValueTest : $(OUTPUT_TARGET) ;
 
 Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;

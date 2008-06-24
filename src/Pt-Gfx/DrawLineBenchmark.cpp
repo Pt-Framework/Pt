@@ -133,7 +133,7 @@ class DrawLineDemo : public Pt::Gui::Widget
         virtual void _paintEvent(const Pt::Gui::PaintEvent& event)
         {
             Pt::System::Clock clock;
-            Pt::System::TimeValue time;
+            Pt::Timespan time;
             Pt::StringStream ss;
 
             clock.start();
@@ -145,7 +145,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             this->drawStar( _imagePainter, Pt::Math::Point(360, 150), 8);
             time = clock.stop();
 
-             ss << "Image: " << time.seconds() * 1000.0 + time.microSeconds() / 1000.0 << " ms";
+             ss << "Image: " << time.totalMSecs() << " ms";
             _imageTime.setText( ss.str() );
 
             painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
@@ -163,7 +163,7 @@ class DrawLineDemo : public Pt::Gui::Widget
             ss.str(L"");
             ss.clear();
 
-            ss << "Native: " << time.seconds() * 1000.0 + time.microSeconds() / 1000.0 << " ms";
+            ss << "Native: " << time.totalMSecs() << " ms";
             _nativeTime.setText( ss.str() );
 
         }

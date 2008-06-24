@@ -98,8 +98,8 @@ class ImagePainterDemo : public Pt::Gui::Widget
 
 		clock.start();
 		_imagePainter.drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));
-		Pt::System::TimeValue time = clock.stop();
-		std::cerr<<"Image time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ;
+		Pt::Timespan time = clock.stop();
+		std::cerr << "Image time: " << time.totalMSecs() << std::endl;
 
 		painter().drawImage( Pt::Math::Point( 0, 0 ), _image );
 		painter().setPen(Pt::Gfx::Pen(pens, Pt::Gfx::ARgbColor( 0,0,0xffff)));
@@ -107,7 +107,7 @@ class ImagePainterDemo : public Pt::Gui::Widget
 		clock.start();
 		painter().drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));
 		time = clock.stop();
-		std::cerr<<"System time:"<< time.seconds() + time.microSeconds() / 1000000.0<<std::endl ;
+		std::cerr << "System time:" << time.totalMSecs() << std::endl;
 
 		painter().setPen(Pt::Gfx::Pen(1, Pt::Gfx::ARgbColor( 0,0xffff,0)));
 		painter().drawLine( Pt::Math::Point( 10,10), Pt::Math::Point( 100,100));

@@ -4,7 +4,6 @@
 #include <time.h>
 #include <mmsystem.h>
 
-
 namespace Pt {
 
 namespace System {
@@ -42,7 +41,7 @@ void ClockImpl::start()
     QueryPerformanceCounter( &_startValue );
 }
 
-TimeValue ClockImpl::stop()
+Timespan ClockImpl::stop()
 {
     QueryPerformanceCounter( &_stopValue );
     _secondStopValue = timeGetTime();
@@ -51,23 +50,17 @@ TimeValue ClockImpl::stop()
     delta.QuadPart      = _stopValue.QuadPart - _startValue.QuadPart;
     DWORD secondDelta   = _secondStopValue - _secondStartValue;
 
-    TimeValue result;
-
     if( secondDelta > 100 )
     {
-        result.setSeconds( secondDelta / 1000 );
-        result.setMicroSeconds ( ( secondDelta * 1000 ) % 1000000 );
+        return Timespan(secondDelta / 1000 , ( secondDelta * 1000 ) % 1000000 );
     }
     else
     {
-        size_t seconds = static_cast<size_t>( delta.QuadPart / _frequency.QuadPart );
-        result.setSeconds( seconds );
-
-        size_t microSeconds = static_cast<size_t>( ( ( delta.QuadPart * 1000000 ) / _frequency.QuadPart ) % 1000000 );
-        result.setMicroSeconds( microSeconds );
+        return Timespan(delta.QuadPart / _frequency.QuadPart,
+                        delta.QuadPart * 1000000) / _frequency.QuadPart )%1000000 );
     }
 
-    return result;
+    return Timespan();
 }
 
 Pt::DateTime ClockImpl::getCurrentTime()

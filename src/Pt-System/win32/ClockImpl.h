@@ -1,10 +1,6 @@
-#if !defined(PT_ClockImpl_H)
-#define PT_ClockImpl_H
-
-#include <windows.h>
 #include "Pt/DateTime.h"
-#include "Pt/System/TimeValue.h"
-
+#include "Pt/Timespan.h"
+#include <windows.h>
 
 namespace Pt {
 
@@ -12,33 +8,31 @@ namespace System {
 
 class ClockImpl
 {
-public:
-    ClockImpl();
+    public:
+        ClockImpl();
 
-    ~ClockImpl();
+        ~ClockImpl();
 
-    void start();
+        void start();
 
-    TimeValue stop();
+        Timespan stop();
 
-    static DateTime getCurrentTime();
+        static DateTime getCurrentTime();
 
-    static Pt::size_t getTime();
+        static Pt::size_t getTime();
 
-private:
-    DWORD           _procAffinity;
-    DWORD           _sysAffinity;
-    HANDLE          _currentProcessHandle;
-    LARGE_INTEGER   _frequency;
-    LARGE_INTEGER   _startValue;
-    LARGE_INTEGER   _stopValue;
-    DWORD           _secondStartValue;
-    DWORD           _secondStopValue;
+    private:
+        DWORD           _procAffinity;
+        DWORD           _sysAffinity;
+        HANDLE          _currentProcessHandle;
+        LARGE_INTEGER   _frequency;
+        LARGE_INTEGER   _startValue;
+        LARGE_INTEGER   _stopValue;
+        DWORD           _secondStartValue;
+        DWORD           _secondStopValue;
 };
 
 } // namespace Pt
 
 } // namespace System
 
-
-#endif // PT_SysTimeImpl_H

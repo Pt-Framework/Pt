@@ -1,8 +1,6 @@
 #include "ClockImpl.h"
-#include "Pt/System/TimeValue.h"
 #include "Pt/SourceInfo.h"
 #include "time.h"
-
 
 namespace Pt {
 
@@ -19,12 +17,14 @@ void ClockImpl::start()
    gettimeofday( &_startTime, 0 );
 }
 
-TimeValue ClockImpl::stop()
+Timespan ClockImpl::stop()
 {
     gettimeofday( &_stopTime, 0 );
-    TimeValue stop(_stopTime.tv_sec, _stopTime.tv_usec);
-    TimeValue start(_startTime.tv_sec, _startTime.tv_usec);
-    return stop - start;
+
+    time_t secs = _stopTime.tv_sec - _startTime.tv_sec;
+    suseconds_t usecs = _stopTime.tv_usec - _startTime.tv_usec;
+
+    return Timespan(secs, usecs);
 }
 
 DateTime ClockImpl::getCurrentTime()

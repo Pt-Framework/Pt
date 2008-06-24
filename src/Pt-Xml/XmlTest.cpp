@@ -16,7 +16,6 @@
 #include "Pt/Text/TextStream.h"
 
 #include "Pt/System/Clock.h"
-#include "Pt/System/TimeValue.h"
 #include "Pt/System/Process.h"
 
 #include "Pt/Char.h"
@@ -430,7 +429,7 @@ void XmlTest::testErrorIncorrectAttribute()
 
     XmlReader::Iterator it = reader.current();
 
-    // TODO Aktuell wird hier fälschlicherweise ein Attribut "blub" mit dem Wert "b" gelesen.
+    // TODO Aktuell wird hier fï¿½lschlicherweise ein Attribut "blub" mit dem Wert "b" gelesen.
     //PT_UNIT_ASSERT_THROW(reader.current(), LogicError);
 }
 
@@ -746,6 +745,6 @@ void XmlTest::testPerf()
 
     for(XmlReader::Iterator it = reader.current(); it != reader.end(); ++it)
     {}
-    Pt::System::TimeValue v = c.stop();
-    cerr << "seconds: " << v.seconds() << "   ms: " << (v.microSeconds() /1000) << endl;
+    Pt::Timespan ts = c.stop();
+    cerr << "msecs: " << ts.totalMSecs() << endl;
 }

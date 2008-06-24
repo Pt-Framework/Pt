@@ -1,6 +1,5 @@
-#include "Pt/System/Clock.h"
 #include "ClockImpl.h"
-
+#include "Pt/System/Clock.h"
 
 namespace Pt {
 
@@ -21,7 +20,7 @@ void Clock::start()
     _impl->start();
 }
 
-TimeValue Clock::stop()
+Timespan Clock::stop()
 {
     return _impl->stop();
 }

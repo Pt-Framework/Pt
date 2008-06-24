@@ -2,7 +2,6 @@
 #include "Pt/System/Selector.h"
 #include "Pt/System/Timer.h"
 #include "Pt/System/Clock.h"
-#include "Pt/System/TimeValue.h"
 
 namespace Pt {
 
