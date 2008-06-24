@@ -16,18 +16,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <windows.h>
 #include "Pt/System/SystemError.h"
+#include <windows.h>
 
 namespace Pt {
 
 namespace System {
 
-
-class RWMutexImpl
+class ReadWriteMutexImpl
 {
     public:
-        RWMutexImpl()
+        ReadWriteMutexImpl()
         : _readers(0), _writers(0)
         {
             _mutex = CreateMutex(NULL, FALSE, NULL);
@@ -44,7 +43,7 @@ class RWMutexImpl
                 throw SystemError("Could not create reader/writer lock", PT_SOURCEINFO);
         }
 
-        ~RWMutexImpl()
+        ~ReadWriteMutexImpl()
         {
             CloseHandle(_mutex);
             CloseHandle(_readEvent);

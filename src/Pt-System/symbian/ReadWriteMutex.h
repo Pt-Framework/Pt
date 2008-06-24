@@ -16,26 +16,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include <pthread.h>
-#include <errno.h>
-
 #include "Pt/System/SystemError.h"
-
 
 namespace Pt {
 
 namespace System {
 
-class RWMutexImpl
+class ReadWriteMutexImpl
 {
     public:
-        RWMutexImpl()
+        ReadWriteMutexImpl()
         {
             throw SystemError("not implemented", PT_SOURCEINFO);
         }
 
-        ~RWMutexImpl()
+        ~ReadWriteMutexImpl()
         {}
 
         void readLock()

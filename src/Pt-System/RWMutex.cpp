@@ -17,52 +17,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Pt/System/RWMutex.h"
-#include "RWMutexImpl.h"
+
 
 namespace Pt {
 
 namespace System {
 
-RWMutex::RWMutex()
-{
-    _impl = new RWMutexImpl();
-}
 
-
-RWMutex::~RWMutex()
-{
-    delete _impl;
-}
-
-
-void RWMutex::readLock()
-{
-    _impl->readLock();
-}
-
-
-bool RWMutex::tryReadLock()
-{
-    return _impl->tryReadLock();
-}
-
-
-void RWMutex::writeLock()
-{
-    _impl->writeLock();
-}
-
-
-bool RWMutex::tryWriteLock()
-{
-    return _impl->tryWriteLock();
-}
-
-
-void RWMutex::unlock()
-{
-    _impl->unlock();
-}
 
 }
 

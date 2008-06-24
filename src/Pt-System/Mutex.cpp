@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005-2006 by Marc Boris Duerner                          *
+ *   Copyright (C) 2005-2008 by Marc Boris Duerner                         *
  *   Copyright (C) 2005-2006 by Sebastian Pieck                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,26 +17,23 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#include "Pt/System/Mutex.h"
-
 #include "MutexImpl.h"
-
+#include "ReadWriteMutexImpl.h"
+#include "Pt/System/Mutex.h"
 
 namespace Pt {
 
 namespace System {
 
-
 Mutex::Mutex(Mode mode)
 : _mode(mode)
 {
-	_impl = new MutexImpl(*this, mode);
+    _impl = new MutexImpl(*this, mode);
 }
 
 
 Mutex::~Mutex()
-{    
+{
     delete _impl;
 }
 
@@ -52,6 +49,47 @@ void Mutex::unlock()
     _impl->unlock();
 }
 
+
+RWMutex::RWMutex()
+{
+    _impl = new RWMutexImpl();
+}
+
+
+RWMutex::~RWMutex()
+{
+    delete _impl;
+}
+
+
+void RWMutex::readLock()
+{
+    _impl->readLock();
+}
+
+
+bool RWMutex::tryReadLock()
+{
+    return _impl->tryReadLock();
+}
+
+
+void RWMutex::writeLock()
+{
+    _impl->writeLock();
+}
+
+
+bool RWMutex::tryWriteLock()
+{
+    return _impl->tryWriteLock();
+}
+
+
+void RWMutex::unlock()
+{
+    _impl->unlock();
+}
 
 }
 
