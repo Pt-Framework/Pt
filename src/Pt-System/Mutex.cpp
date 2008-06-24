@@ -50,43 +50,43 @@ void Mutex::unlock()
 }
 
 
-RWMutex::RWMutex()
+ReadWriteMutex::ReadWriteMutex()
 {
-    _impl = new RWMutexImpl();
+    _impl = new ReadWriteMutexImpl();
 }
 
 
-RWMutex::~RWMutex()
+ReadWriteMutex::~ReadWriteMutex()
 {
     delete _impl;
 }
 
 
-void RWMutex::readLock()
+void ReadWriteMutex::readLock()
 {
     _impl->readLock();
 }
 
 
-bool RWMutex::tryReadLock()
+bool ReadWriteMutex::tryReadLock()
 {
     return _impl->tryReadLock();
 }
 
 
-void RWMutex::writeLock()
+void ReadWriteMutex::writeLock()
 {
     _impl->writeLock();
 }
 
 
-bool RWMutex::tryWriteLock()
+bool ReadWriteMutex::tryWriteLock()
 {
     return _impl->tryWriteLock();
 }
 
 
-void RWMutex::unlock()
+void ReadWriteMutex::unlock()
 {
     _impl->unlock();
 }

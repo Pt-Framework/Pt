@@ -41,7 +41,6 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Pipe.cpp
                           Plugin.cpp
                           Process.cpp
-                          RWMutex.cpp
                           Selector.cpp
                           SerialDevice.cpp
                           Semaphore.cpp
