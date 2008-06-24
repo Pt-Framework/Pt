@@ -30,7 +30,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           Clock.cpp
                           Condition.cpp
                           Directory.cpp
-                          #Environment.cpp
+                          EventSource.cpp
                           EventLoop.cpp
                           File.cpp
                           FileDevice.cpp
