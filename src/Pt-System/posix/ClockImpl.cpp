@@ -1,6 +1,7 @@
 #include "ClockImpl.h"
 #include "Pt/SourceInfo.h"
-#include "time.h"
+#include <sys/time.h>
+#include <time.h>
 
 namespace Pt {
 
@@ -33,8 +34,9 @@ DateTime ClockImpl::getCurrentTime()
     gettimeofday(&timeValue, NULL);
 
     struct tm* currentTimeStruct;
-    currentTimeStruct = localtime(&timeValue.tv_sec);
-
+    time_t time = timeValue.tv_sec;
+    currentTimeStruct = localtime(&time);
+    
     return DateTime( currentTimeStruct->tm_year + 1900,
                      currentTimeStruct->tm_mon + 1,
                      currentTimeStruct->tm_mday,
