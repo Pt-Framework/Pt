@@ -82,6 +82,7 @@ PT_SYSTEM_TESTS = ProcessTest.cpp
                   PipeTest.cpp
                   SerialDeviceTest.cpp
                   DirectoryTest.cpp
+                  TimerTest.cpp
                   ;
 
 PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
