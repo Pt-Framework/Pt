@@ -70,7 +70,10 @@ namespace System {
                 return *this;
             }
 
-            operator T*()
+            T* get()
+            { return (T*)ThreadKeyBase::get(); }
+
+            const T* get() const
             { return (T*)ThreadKeyBase::get(); }
     };
 
