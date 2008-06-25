@@ -321,6 +321,9 @@ namespace std {
     };
 
 #if PT_STLPORT
+    
+    // When STLport is used we provide a num_put<Pt::Char> facet
+    // which will use num_put<wchar_t> internally.
     template <>
     class PT_API num_put<Pt::Char> : public locale::facet {
 	public:
@@ -401,104 +404,6 @@ namespace std {
             const void*) const;
 	};
 
-    template <>
-    class PT_API num_get<Pt::Char> : public locale::facet {
-    public:
-        typedef Pt::Char    char_type;
-        typedef istreambuf_iterator<Pt::Char>   iter_type;
-
-        typedef istreambuf_iterator<wchar_t,char_traits<wchar_t> > iter_type_w;
-        locale loc;
-        const num_get<wchar_t,iter_type_w>& numget_wchar;
-
-        explicit num_get(size_t refs = 0);
-
-#if !defined (_STLP_NO_BOOL)
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, bool& val) const;
-#endif
-        
-        iter_type get(iter_type, iter_type, ios_base& ,
-            ios_base::iostate&, long&) const;
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned short& val) const;
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned int& val) const;
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned long& val) const;
-
-#if defined (_STLP_LONG_LONG)
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, long long& val) const;
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned long long& val) const;
-#endif
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, float& val) const;
-
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, double& val) const;
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, long double& val) const;
-#endif
-        
-        iter_type get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, void*& val) const;
-
-        static locale::id id;
-    protected:
-        virtual ~num_get()
-        {
-        }
-
-#if !defined (_STLP_NO_BOOL)
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, bool& val) const;
-#endif
-        
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate&, long& val) const;
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned short& val) const;
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned int& val) const;
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned long& val) const;
-
-#if defined (_STLP_LONG_LONG)
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, long long& val) const;
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, unsigned long long& val) const;
-#endif
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, float& val) const;
-
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, double& val) const;
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, long double& val) const;
-#endif
-        
-        virtual iter_type do_get(iter_type s, iter_type e, ios_base& f,
-            ios_base::iostate& state, void*& val) const;
-    };
-
-
 #endif
     
 #if (defined _MSC_VER || defined __QNX__)
@@ -574,6 +479,22 @@ namespace std {
 
 }
 
+// TODO: Move this into STLport?
+#if PT_STLPORT
+
+_STLP_BEGIN_NAMESPACE
+_STLP_MOVE_TO_PRIV_NAMESPACE
+
+void  _Initialize_get_float( const ctype<Pt::Char>& ct,
+        Pt::Char& Plus, Pt::Char& Minus,
+        Pt::Char& pow_e, Pt::Char& pow_E,
+        Pt::Char* digits);
+
+_STLP_MOVE_TO_STD_NAMESPACE
+_STLP_END_NAMESPACE    
+    
+#endif
+    
 namespace Pt {
 
 static struct PT_API InitLocale

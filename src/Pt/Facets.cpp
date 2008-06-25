@@ -304,203 +304,29 @@ num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f,
 num_put<Pt::Char>::iter_type num_put<Pt::Char>::do_put(iter_type s, ios_base& f, char_type fill, 
                                                        const void* val) const
 {
+    // Note:
+    // The STLport internal routine for serializing a pointer 
+    // performs hexadecimal conversion i.e. the result is a hexadecimal string.
+    // The routines for deserializing does NOT expect a hexadecimal string
+    // Is this a bug in STLport?
+    // 
+    // Here we force a numerical conversion because we don't provide a num_get
+    // facet where we could force hexadecimal deserialization.
+    
     // force writing with hexadecimal value
-    ios_base::fmtflags flags = f.flags();
-    f.setf(ios_base::hex, ios_base::basefield);
-    f.setf(ios_base::showbase);	
-    iter_type result = put_val<const void*>(numput_wchar, s, f, fill, val);
-    f.flags(flags);
-    return result;
-}
-
-//
-// num_get facet
-//
-template<class val_type>
-static num_get<Pt::Char>::iter_type get_val(const num_get<wchar_t,num_get<Pt::Char>::iter_type_w>& numget_wchar,
-                                     num_get<Pt::Char>::iter_type s, num_get<Pt::Char>::iter_type e, ios_base& f,
-                                     ios_base::iostate& state, val_type val)
-{
-    typedef ostreambuf_iterator<wchar_t,char_traits<wchar_t> > oiter_type_w;
-    typedef istreambuf_iterator<wchar_t,char_traits<wchar_t> > iiter_type_w;
-
-    // convert Pt::Char stream into wchar_t
-    basic_ostringstream<wchar_t> tmpstream;
-    oiter_type_w dst(tmpstream);
-
-    while (s != e)
-        *dst++ = *s++;
-
-    // take the result as input stream
-    basic_string<wchar_t> str = tmpstream.str();
-
-    basic_istringstream<wchar_t> ins(str);
-    iiter_type_w begin(ins);
-    iiter_type_w end;
-
-    // take over format flags and other settings
-    ins.flags(f.flags());
-    ins.precision(f.precision());
-    ins.width(f.width());
-    numget_wchar.get(begin, end, ins, state, val);
-    return s;
-}
-
-locale::id num_get<Pt::Char>::id;
-
-num_get<Pt::Char>::num_get(size_t refs) 
-: locale::facet(refs), numget_wchar(use_facet<num_get<wchar_t,iter_type_w> >(loc))
-{
-}
-
-#if !defined (_STLP_NO_BOOL)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, bool& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-#endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, long& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, unsigned short& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, unsigned int& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, unsigned long& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
+    //ios_base::fmtflags flags = f.flags();
+    //f.setf(ios_base::hex, ios_base::basefield);
+    //f.setf(ios_base::showbase);	
+    //iter_type result = put_val<size_t>(numput_wchar, s, f, fill, val_);
+    //f.flags(flags);
+    //return result;
 
 #if defined (_STLP_LONG_LONG)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, long long& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, unsigned long long& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
+    long long val_ = reinterpret_cast<long long>(val);
+#else
+    long val_ = reinterpret_cast<long>(val);
 #endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, float& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, double& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, long double& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-#endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, void*& val) const
-{
-    return this->do_get(s, e, f, state, val);
-}
-
-#if !defined (_STLP_NO_BOOL)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                    ios_base::iostate& state, bool& val) const
-{
-    return get_val<bool&>(numget_wchar, s, e, f, state, val);
-}
-#endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, long& val) const
-{
-    return get_val<long&>(numget_wchar, s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, unsigned short& val) const
-{
-    return get_val<unsigned short&>(numget_wchar, s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, unsigned int& val) const
-{
-    return get_val<unsigned int&>(numget_wchar, s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, unsigned long& val) const
-{
-    return get_val<unsigned long&>(numget_wchar, s, e, f, state, val);
-}
-
-#if defined (_STLP_LONG_LONG)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, long long& val) const
-{
-    return get_val<long long&>(numget_wchar, s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, unsigned long long& val) const
-{
-    return get_val<unsigned long long&>(numget_wchar, s, e, f, state, val);
-}
-#endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, float& val) const
-{
-    return get_val<float&>(numget_wchar, s, e, f, state, val);
-}
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, double& val) const
-{
-    return get_val<double&>(numget_wchar, s, e, f, state, val);
-}
-
-#if !defined (_STLP_NO_LONG_DOUBLE)
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, long double& val) const
-{
-    return get_val<long double&>(numget_wchar, s, e, f, state, val);
-}
-#endif
-
-num_get<Pt::Char>::iter_type num_get<Pt::Char>::do_get(iter_type s, iter_type e, ios_base& f,
-                                                       ios_base::iostate& state, void*& val) const
-{
-    // force reading with hexadecimal value
-    ios_base::fmtflags flags = f.flags();
-    f.setf(ios_base::hex, ios_base::basefield);
-    f.setf(ios_base::showbase);	
-    iter_type result = get_val<void*&>(numget_wchar, s, e, f, state, val);
-    f.flags(flags);
-    return result;
+    return do_put(s, f, fill, val_);    
 }
 
 #endif
@@ -590,3 +416,25 @@ codecvt<Pt::Char, char, mbstate_t>::~codecvt()
 {}
 
 } // namespace std
+
+#if PT_STLPORT
+
+_STLP_BEGIN_NAMESPACE
+_STLP_MOVE_TO_PRIV_NAMESPACE
+
+void  _Initialize_get_float( const ctype<Pt::Char>& ct,
+        Pt::Char& Plus, Pt::Char& Minus,
+        Pt::Char& pow_e, Pt::Char& pow_E,
+        Pt::Char* digits) {
+  char ndigits[11] = "0123456789";
+  Plus  = ct.widen('+');
+  Minus = ct.widen('-');
+  pow_e = ct.widen('e');
+  pow_E = ct.widen('E');
+  ct.widen(ndigits + 0, ndigits + 10, digits);
+}    
+
+_STLP_MOVE_TO_STD_NAMESPACE
+_STLP_END_NAMESPACE  
+
+#endif

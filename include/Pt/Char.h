@@ -549,4 +549,18 @@ namespace Pt {
 
 } // namespace Pt
 
+// TODO: Move this into STLport?
+#if PT_STLPORT
+
+_STLP_BEGIN_NAMESPACE
+_STLP_MOVE_TO_PRIV_NAMESPACE
+
+    bool __get_fdigit(Pt::Char& c, const Pt::Char* digits);
+    bool __get_fdigit_or_sep(Pt::Char& c, Pt::Char sep, const Pt::Char* digits);
+
+_STLP_MOVE_TO_STD_NAMESPACE
+_STLP_END_NAMESPACE    
+    
+#endif
+
 #endif
