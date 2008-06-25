@@ -1,14 +1,27 @@
 /***************************************************************************
- *   Copyright (C) 2006 by PTV AG                                          *
+ *   Copyright (C) 2005-2008 by Dr Marc Boris Duerner                       *
  *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU Library General Public License as       *
+ *   published by the Free Software Foundation; either version 2 of the    *
+ *   License, or (at your option) any later version.                       *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU Library General Public     *
+ *   License along with this program; if not, write to the                 *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#if !defined(PTV_Thread_H)
-#define PTV_Thread_H
+#if !defined(PT_SYSTEM_THREAD_H)
+#define PT_SYSTEM_THREAD_H
 
 #include <Pt/System/Api.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/System/Runnable.h>
-
 
 namespace Pt {
 
@@ -104,105 +117,96 @@ namespace System {
             };
 
         public:
-            //! @brief Default Constructor.
-            ///
-            /// Constructs a thread object. The Thread is not started on construction,
-            /// but when Thread::start() is called. Threads can either be detached or
-            /// joinable.
-            ///
-            /// @param runnable specify a runnable object with a run methode
-            /// @param mode Joinable or Detached
+            /** @brief Contruct a thread with a runnable and mode.
+
+                Constructs a thread object to execute the \a runnable. The
+                Thread is not started on construction, but when Thread::start()
+                is called. The \a mode can either be Detached or Joinable.
+            */
             Thread(Runnable& runnable, Mode mode = Joinable);
 
-            //! @brief Destructor
-            ///
-            /// Deleting a running joinable Thread (i.e. state is Running ) will result 
-            /// in a program crash. You can wait() on a thread to make sure that it has 
-            /// finished. Detached Threads do not depend on the Thread object lifetime.
+            /** @brief Destructor
+
+                Deleting a running joinable Thread (i.e. state is Running )
+                will block until the thread ha finished. You can wait()
+                on a thread to make sure that it has finished. Detached
+                Threads do not depend on the Thread object lifetime.
+            */
             virtual ~Thread();
 
             //! @brief Returns the current mode of the thread.
-            ///
-            /// @return the Thread mode, either Joinable or Detached
             Mode mode() const;
 
             //! @brief Returns the current state of the thread.
-            ///
-            /// @return the Thread state
             State state() const;
 
             //! @brief Returns true if thread is detached.
-            ///
-            /// @return true if the thread is detached
             bool detached() const;
 
             //! @brief Returns true if thread is joinable.
-            ///
-            /// @return true if the thread is joinable
             bool joinable() const;
 
-            //! @brief Starts the thread and calls Thread::run()
-            ///
-            /// This starts the execution of the thread. This means Thread::run()
-            /// will be called, which needs to be overriden in derived classes.
-            ///
-            /// @return a self reference for error checking
-            virtual Thread& start();
+            /** @brief Starts the thread
 
-            //! @brief Wait until a joinable thread has exited.
-            ///
-            /// @return a self reference for error checking
-            virtual Thread& wait();
+                This starts the execution of the thread. This means Thread::run()
+                will be called, which needs to be overriden in derived classes.
+                Returns a self reference for error checking
+            */
+            void start();
 
-            //! @brief Terminates the thread.
-            ///
-            /// Terminates the thread without respect for any allocated resources.
-            /// Use with caution.
-            ///
-            /// @return a self reference for error checking
-            virtual Thread& terminate();
+            /** @brief Wait until a joinable thread has exited.
+            */
+            void wait();
 
-            //! @brief Detaches a joinable thread.
-            ///
-            /// Detached threads can not be waited on and become independent of the lifetime
-            /// of the Thread object, since no resources need to be reclaimed for them.
-            ///
-            /// @return a self reference for error checking
-            Thread& detach();
+            /** @brief Terminates the thread.
 
-            //! @brief Exits a joinable thread.
-            ///
-            /// This function is meant to be called from within a thread. Thread::exit()
-            /// is implicitly called when Thread::run() returns.
+                Terminates the thread without respect for any allocated resources.
+                Use with caution.
+            */
+            void terminate();
+
+            /** @brief Detaches a joinable thread.
+
+                Detached threads can not be waited on and become independent of the lifetime
+                of the Thread object, since no resources need to be reclaimed for them.
+            */
+            void detach();
+
+            /** @brief Exits a joinable thread.
+
+                This function is meant to be called from within a thread. Thread::exit()
+                is implicitly called when Thread::run() returns.
+            */
             static void exit();
 
-            //! @brief Yield CPU time
-            ///
-            /// This function is meant to be called from within a thread.
+            /** @brief Yield CPU time
+
+                This function is meant to be called from within a thread.
+            */
             static void yield();
 
-            //! @brief Sleep for some time
-            ///
-            /// @param ms millisecs to sleep
+            /** @brief Sleep for some time
+
+                The calling thread sleeps for \a ms milliseconds.
+            */
             static void sleep(unsigned int ms);
 
         protected:
-            //! @brief Constructor
-            ///
-            /// @param mode Joinable or Detached
+            /** @brief Constructor a joinable or detached thread
+            */
             Thread(Mode mode = Joinable);
 
-            //! @brief Thread entry point
-            /**  This function needs to be overridden by derived classes.
-            *    Starting the thread causes the object's run method to be called
-            *    in that separately executing thread.
+            /** @brief Thread entry point
+
+                This function needs to be overridden by derived classes.
+                Starting the thread causes the object's run method to be called
+                in that separately executing thread.
             */
             virtual void run();
 
         private:
             Runnable* _runnable;
     };
-
 
 } // !namespace System
 
