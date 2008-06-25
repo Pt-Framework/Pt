@@ -70,18 +70,10 @@ Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
 Main_MakeLocate EventLoopDemo : $(OUTPUT_TARGET) ;
 
-Main SelectorDemo : SelectorDemo.cpp ;
-Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
-Main_MakeLocate SelectorDemo : $(OUTPUT_TARGET) ;
-
-Main TimerDemo : TimerDemo.cpp ;
-Main_LinkSharedLibraries TimerDemo : Pt Pt-System Pt-Text ;
-Main_MakeLocate TimerDemo : $(OUTPUT_TARGET) ;
-
-PT_SYSTEM_TESTS = ProcessTest.cpp
+PT_SYSTEM_TESTS = DirectoryTest.cpp
                   PipeTest.cpp
+                  ProcessTest.cpp
                   SerialDeviceTest.cpp
-                  DirectoryTest.cpp
                   TimerTest.cpp
                   ;
 
@@ -91,7 +83,6 @@ PtUnitTest_MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
 
 Main ProcessTestChild : ProcessTestChild.cpp ;
 Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
-
 Depends Pt-System-test : ProcessTestChild ;
 
 NOTFILE Pt-System-all ;
