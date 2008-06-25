@@ -16,15 +16,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
- 
 #include "Pt/System/Process.h"
 #include "Pt/System/Pipe.h"
-
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/TestMain.h"
 #include "Pt/Unit/RegisterTest.h"
-  
+
 class ProcessTest : public Pt::Unit::TestSuite
 {
 public:

@@ -4,13 +4,6 @@ SubDirHdrs $(TOP)/include ;
 SubDirHdrs $(TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 
-Main PipeDemo : PipeDemo.cpp ;
-Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
-Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
-
-Main ProcessTestChild : ProcessTestChild.cpp ;
-Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
-
 SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           [ FDirName $(SYS:L) ConditionImpl.cpp ]
                           [ FDirName $(SYS:L) DirectoryImpl.cpp ]
@@ -65,30 +58,13 @@ Main PluginDemo : PluginDemo.cpp ;
 Main_LinkSharedLibraries PluginDemo : Pt Pt-System ;
 Main_MakeLocate PluginDemo : $(OUTPUT_TARGET) ;
 
-PtUnitTest DirectoryTest : DirectoryTest.cpp ;
-Main_LinkSharedLibraries DirectoryTest : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate DirectoryTest : $(OUTPUT_TARGET) ;
-
 Main SerialDeviceDemo : SerialDeviceDemo.cpp ;
 Main_LinkSharedLibraries SerialDeviceDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SerialDeviceDemo : $(OUTPUT_TARGET) ;
 
-PtUnitTest SerialDeviceTest : SerialDeviceTest.cpp ;
-Main_LinkSharedLibraries SerialDeviceTest : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate SerialDeviceTest : $(OUTPUT_TARGET) ;
-
-#PtUnitTest SelectorTest : SelectorTest.cpp ;
-#Main_LinkSharedLibraries SelectorTest : Pt Pt-System ;
-#PtUnitTest_MakeLocate SelectorTest : $(OUTPUT_TARGET) ;
-
-PtUnitTest PipeTest : PipeTest.cpp ;
-Main_LinkSharedLibraries PipeTest : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate PipeTest : $(OUTPUT_TARGET) ;
-
-PtUnitTest ProcessTest : ProcessTest.cpp ;
-Main_LinkSharedLibraries ProcessTest : Pt Pt-System Pt-Unit ;
-PtUnitTest_MakeLocate ProcessTest : $(OUTPUT_TARGET) ;
-Depends ProcessTest : ProcessTestChild ;
+Main PipeDemo : PipeDemo.cpp ;
+Main_LinkSharedLibraries PipeDemo : Pt Pt-System Pt-Text ;
+Main_MakeLocate PipeDemo : $(OUTPUT_TARGET) ;
 
 Main EventLoopDemo : EventLoopDemo.cpp ;
 Main_LinkSharedLibraries EventLoopDemo : Pt Pt-System Pt-Text  ;
@@ -98,8 +74,24 @@ Main SelectorDemo : SelectorDemo.cpp ;
 Main_LinkSharedLibraries SelectorDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate SelectorDemo : $(OUTPUT_TARGET) ;
 
-
-
 Main TimerDemo : TimerDemo.cpp ;
 Main_LinkSharedLibraries TimerDemo : Pt Pt-System Pt-Text ;
 Main_MakeLocate TimerDemo : $(OUTPUT_TARGET) ;
+
+PT_SYSTEM_TESTS = ProcessTest.cpp
+                  PipeTest.cpp
+                  SerialDeviceTest.cpp
+                  DirectoryTest.cpp
+                  ;
+
+PtUnitTest Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
+Main_LinkSharedLibraries Pt-System-test : Pt Pt-System Pt-Text Pt-Unit ;
+PtUnitTest_MakeLocate Pt-System-test : $(OUTPUT_TARGET) ;
+
+Main ProcessTestChild : ProcessTestChild.cpp ;
+Main_MakeLocate ProcessTestChild : $(OUTPUT_TARGET) ;
+
+Depends Pt-System-test : ProcessTestChild ;
+
+NOTFILE Pt-System-all ;
+DEPENDS Pt-System-all : Pt-System Pt-System-test ;
