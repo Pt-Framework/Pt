@@ -18,8 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_SYSTEM_IOMONITOR_H
-#define PT_SYSTEM_IOMONITOR_H
+#ifndef PT_SYSTEM_SELECTOR_H
+#define PT_SYSTEM_SELECTOR_H
 
 #include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
