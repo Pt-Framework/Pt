@@ -73,7 +73,7 @@ HANDLE PipeIODevice::deviceHandle() const
     return _handle;
 }
 
-IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
+IOResult& PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     DWORD readBytes = 0;
 
@@ -81,7 +81,7 @@ IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
-			eof = true;            
+            eof = true;
         }
         else if( ERROR_IO_PENDING != GetLastError() )
         {
@@ -94,21 +94,21 @@ IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
-{    
-	assert(&result == &_readResult);
-    
+size_t PipeIODevice::onEndRead(IOResult& result, bool& eof)
+{
+    assert(&result == &_readResult);
+
     DWORD readBytes = 0;
     if (GetOverlappedResult(_handle, &_readOv, &readBytes, FALSE) == FALSE )
     {
         if( ERROR_HANDLE_EOF == GetLastError() )
         {
-			eof = true;            
+            eof = true;
         }
         else
         {
             throw IOError("Could not read from file handle", PT_SOURCEINFO);
-        }        
+        }
     }
 
     _readOv.Offset += readBytes;
@@ -118,7 +118,7 @@ size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
 }
 
 
-IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
+IOResult& PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 { 
 	return IODeviceImpl::beginWrite(buffer, n); 
 }
@@ -130,7 +130,7 @@ size_t PipeIODevice::_endWrite(IOResult& result)
 }
 
 
-void PipeIODevice::_close()
+void PipeIODevice::onClose()
 {
     if(_readOv.hEvent != NULL)
         ::CloseHandle(_readOv.hEvent);
@@ -148,7 +148,7 @@ void PipeIODevice::_close()
 }
 
 
-size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
     eof = false;
     DWORD readBytes = 0;
@@ -176,7 +176,7 @@ size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t PipeIODevice::_write(const char* buffer, size_t count)
+size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 {
     DWORD writtenBytes = 0;
 
@@ -198,7 +198,7 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
 }
 
 
-void PipeIODevice::_sync() const
+void PipeIODevice::onSync() const
 {
     if( FALSE == ::FlushFileBuffers(_handle) ) {
         throw IOError("Could not flush file buffer", PT_SOURCEINFO);

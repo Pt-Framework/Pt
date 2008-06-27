@@ -84,7 +84,7 @@ class BasicIODevice : public IO, protected NonCopyable {
         void close()
         {
             if( this->valid() ) {
-                _close();
+                onClose();
                 _valid = false;
             }
         }
@@ -94,14 +94,14 @@ class BasicIODevice : public IO, protected NonCopyable {
             if ( !async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            IOResult& result = _beginRead(buffer, n, _eof);
+            IOResult& result = onBeginRead(buffer, n, _eof);
             result.setDevice(this);
             return result;
         }
 
         size_t endRead(IOResult& result)
         {
-            return _endRead(result, _eof);
+            return onEndRead(result, _eof);
         }
 
         //! @brief Read data from I/O device
@@ -125,7 +125,7 @@ class BasicIODevice : public IO, protected NonCopyable {
                 return endRead(ioResult);
             }
 
-            return this->_read(buffer, n, _eof);
+            return this->onRead(buffer, n, _eof);
         }
 
         IOResult& beginWrite(const CharT* buffer, size_t n)
@@ -133,14 +133,14 @@ class BasicIODevice : public IO, protected NonCopyable {
             if ( !async() )
                 throw std::logic_error("Device not in async mode." + PT_SOURCEINFO);
 
-            IOResult& result = _beginWrite(buffer, n);
+            IOResult& result = onBeginWrite(buffer, n);
             result.setDevice(this);
             return result;
         }
 
         size_t endWrite(IOResult& result)
         {
-            return _endWrite(result);
+            return onEndWrite(result);
         }
 
         //! @brief Write data to I/O device
@@ -164,7 +164,7 @@ class BasicIODevice : public IO, protected NonCopyable {
                 return endWrite(ioResult);
             }
 
-            return this->_write(buffer, n);
+            return this->onWrite(buffer, n);
         }
 
         //! @brief Returns true if device is seekable
@@ -174,7 +174,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             \return true if the device is seekable, false otherwise.
         */
         bool seekable() const
-        { return _seekable(); }
+        { return onSeekable(); }
 
         //! @brief Move the next read position to the given offset
         /**
@@ -188,7 +188,7 @@ class BasicIODevice : public IO, protected NonCopyable {
         */
         pos_type seek(off_type offset, std::ios::seekdir sd)
         {
-            off_type ret = this->_seek(offset, sd);
+            off_type ret = this->onSeek(offset, sd);
             if( ret != off_type(-1) )
                 setEof(false);
 
@@ -207,7 +207,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             \throw IOError
         */
         size_t peek(CharT* buffer, size_t n)
-        { return this->_peek(buffer, n); }
+        { return this->onPeek(buffer, n); }
 
         //! @brief Synchronize device
         /**
@@ -216,7 +216,7 @@ class BasicIODevice : public IO, protected NonCopyable {
             \throw IOError
         */
         void sync()
-        { return this->_sync(); }
+        { return this->onSync(); }
 
         //! @brief Returns the current I/O position
         /**
@@ -279,40 +279,40 @@ class BasicIODevice : public IO, protected NonCopyable {
         { }
 
         //! @brief Closes the I/O device
-        virtual void _close() = 0;
+        virtual void onClose() = 0;
 
-        virtual IOResult& _beginRead(CharT* buffer, size_t n, bool& eof) = 0;
+        virtual IOResult& onBeginRead(CharT* buffer, size_t n, bool& eof) = 0;
 
-        virtual size_t _endRead(IOResult& result, bool& eof) = 0;
+        virtual size_t onEndRead(IOResult& result, bool& eof) = 0;
 
         //! @brief Read bytes from device
-        virtual size_t _read(CharT* buffer, size_t count, bool& eof) = 0;
+        virtual size_t onRead(CharT* buffer, size_t count, bool& eof) = 0;
 
-        virtual IOResult& _beginWrite(const CharT* buffer, size_t n) = 0;
+        virtual IOResult& onBeginWrite(const CharT* buffer, size_t n) = 0;
 
-        virtual size_t _endWrite(IOResult& result) = 0;
+        virtual size_t onEndWrite(IOResult& result) = 0;
 
         //! @brief Write bytes to device
-        virtual size_t _write(const CharT* buffer, size_t count) = 0;
+        virtual size_t onWrite(const CharT* buffer, size_t count) = 0;
 
         //! @brief Read data from I/O device without consuming them
-        virtual size_t _peek(CharT*, size_t)
+        virtual size_t onPeek(CharT*, size_t)
         { return 0; }
 
         //! @brief Returns true if device is seekable
-        virtual bool _seekable() const
+        virtual bool onSeekable() const
         { return false; }
 
         //! @brief Move the next read position to the given offset
-        virtual pos_type _seek(off_type, std::ios::seekdir)
+        virtual pos_type _onSeek(off_type, std::ios::seekdir)
         { throw IOError("Could not seek on device.", PT_SOURCEINFO); }
 
         //! @brief Synchronize device
-        virtual void _sync() const
+        virtual void onSync() const
         { }
 
         //! @brief Returns the size of the device
-        virtual size_t _size() const
+        virtual size_t onSize() const
         { return 0; }
 
         //! @brief Sets or unsets the device invalid

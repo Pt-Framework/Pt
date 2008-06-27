@@ -55,30 +55,30 @@ class PT_SYSTEM_API FileDevice : public IODevice
         { return (IODeviceImpl*) _impl; }
 
     protected:
-        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
 
-        size_t _endRead(IOResult& result, bool& eof);
+        size_t onEndRead(IOResult& result, bool& eof);
 
-        IOResult& _beginWrite(const char* buffer, size_t n);
+        IOResult& onBeginWrite(const char* buffer, size_t n);
 
-        size_t _endWrite(IOResult& result);
+        size_t onEndWrite(IOResult& result);
 
-        void _close();
+        void onClose();
 
         bool _waitable() const;
 
-        bool _seekable() const
+        bool onSeekable() const
         { return true; }
 
-        pos_type _seek(off_type offset, std::ios::seekdir sd) ;
+        pos_type onSeek(off_type offset, std::ios::seekdir sd) ;
 
-        size_t _read(char* buffer, size_t count, bool& eof);
+        size_t onRead(char* buffer, size_t count, bool& eof);
 
-        size_t _write(const char* buffer, size_t count);
+        size_t onWrite(const char* buffer, size_t count);
 
-        size_t _peek(char* buffer, size_t count);
+        size_t onPeek(char* buffer, size_t count);
 
-        void _sync() const;
+        void onSync() const;
 
     private:
         std::string             _path;

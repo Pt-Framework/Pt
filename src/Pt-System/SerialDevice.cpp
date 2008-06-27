@@ -67,25 +67,25 @@ void SerialDevice::open( const std::string& file, std::ios_base::openmode mode, 
 }
 
 
-IOResult& SerialDevice::_beginRead(char* buffer, size_t n, bool& eof)
+IOResult& SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 { 
     return _impl->beginRead(buffer, n, eof); 
 }
 
 
-size_t SerialDevice::_endRead(IOResult& result, bool& eof)
+size_t SerialDevice::onEndRead(IOResult& result, bool& eof)
 {
     return _impl->endRead(result, eof); 
 }
 
 
-IOResult& SerialDevice::_beginWrite(const char* buffer, size_t n)
+IOResult& SerialDevice::onBeginWrite(const char* buffer, size_t n)
 {
     return _impl->beginWrite(buffer, n);
 }
 
 
-size_t SerialDevice::_endWrite(IOResult& result)
+size_t SerialDevice::onEndWrite(IOResult& result)
 {
     return _impl->endWrite(result);
 }
@@ -164,19 +164,19 @@ size_t SerialDevice::timeout() const
 }
 
 
-void SerialDevice::_close()
+void SerialDevice::onClose()
 {
     _impl->close();
 }
 
 
-size_t SerialDevice::_read(char* buffer, size_t count, bool& eof)
+size_t SerialDevice::onRead(char* buffer, size_t count, bool& eof)
 {
     return _impl->read( buffer, count, eof );
 }
 
 
-size_t SerialDevice::_write(const char* buffer, size_t count)
+size_t SerialDevice::onWrite(const char* buffer, size_t count)
 {
     return _impl->write( buffer, count );
 }

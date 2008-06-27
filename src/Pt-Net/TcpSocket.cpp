@@ -75,7 +75,7 @@ unsigned long TcpSocket::availableBytes(void)
 }
 
 
-size_t TcpSocket::_read(char* buffer, size_t count, bool& eof)
+size_t TcpSocket::onRead(char* buffer, size_t count, bool& eof)
 {
     if (!_impl)
         throw std::logic_error("socket is not connected" + PT_SOURCEINFO);
@@ -84,7 +84,7 @@ size_t TcpSocket::_read(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t TcpSocket::_write(const char* buffer, size_t count)
+size_t TcpSocket::onWrite(const char* buffer, size_t count)
 {
     if (!_impl)
         throw std::logic_error("socket is not connected" + PT_SOURCEINFO);
@@ -102,7 +102,7 @@ bool TcpSocket::_wait(Socket::WaitMode mode, unsigned int msec)
 }
 
 
-void TcpSocket::_close()
+void TcpSocket::onClose()
 {
   if (_impl)
     _impl->close();

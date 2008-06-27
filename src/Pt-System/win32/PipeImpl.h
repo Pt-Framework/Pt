@@ -46,27 +46,27 @@ class PipeIODevice : public IODevice, private IODeviceImpl
         { return this; }
 
     protected:
-        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
 
-		size_t _endRead(IOResult& resule, bool& eof);
+		size_t onEndRead(IOResult& resule, bool& eof);
 
-        IOResult& _beginWrite(const char* buffer, size_t n);
+        IOResult& onBeginWrite(const char* buffer, size_t n);
 
-        size_t _endWrite(IOResult& result);
+        size_t onEndWrite(IOResult& result);
 
         //! @brief Closes the I/O device
-        virtual void _close();
+        virtual void onClose();
 
         //! @brief Read bytes from device
-        virtual size_t _read(char* buffer, size_t count, bool& eof);
+        virtual size_t onRead(char* buffer, size_t count, bool& eof);
 
         //! @brief Write bytes to device
-        virtual size_t _write(const char* buffer, size_t count);
+        virtual size_t onWrite(const char* buffer, size_t count);
 
         virtual bool _waitable() const
         { return true; }
 
-        virtual void _sync() const;
+        virtual void onSync() const;
 
      private:
      	ReadResult _readResult;

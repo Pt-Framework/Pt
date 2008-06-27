@@ -39,24 +39,24 @@ class PipeIODevice : public Pt::System::IODevice, private IODeviceImpl
         void open(int fd, bool isAsync);
 
     protected:
-        void _close()
+        void onClose()
         { IODeviceImpl::close(); }
 
-        IOResult& _beginRead(char* buffer, size_t n, bool& eof);
+        IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
 
-        size_t _endRead(IOResult& result, bool& eof);
+        size_t onEndRead(IOResult& result, bool& eof);
 
-        virtual size_t _read(char* buffer, size_t count, bool& eof);
+        virtual size_t onRead(char* buffer, size_t count, bool& eof);
 
-        virtual IOResult& _beginWrite(const char* buffer, size_t n);
+        virtual IOResult& onBeginWrite(const char* buffer, size_t n);
 
-        virtual size_t _endWrite(IOResult& result);
+        virtual size_t onEndWrite(IOResult& result);
 
-        virtual size_t _write(const char* buffer, size_t count);
+        virtual size_t onWrite(const char* buffer, size_t count);
 
-        virtual void _sync() const;
+        virtual void onSync() const;
 
-		virtual IODeviceImpl* impl(){ return this; }
+        virtual IODeviceImpl* impl() { return this; }
 };
 
 

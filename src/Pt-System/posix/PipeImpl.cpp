@@ -50,43 +50,43 @@ void PipeIODevice::open(int fd, bool isAsync)
 }
 
 
-IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
+IOResult& PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return IODeviceImpl::beginRead(buffer, n, eof);
 }
 
 
-size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
+size_t PipeIODevice::onEndRead(IOResult& result, bool& eof)
 {
     return IODeviceImpl::endRead(result, eof);
 }
 
 
-size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
     return IODeviceImpl::read(buffer, count, eof);
 }
 
 
-IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
+IOResult& PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
     return IODeviceImpl::beginWrite(buffer, n);
 }
 
 
-size_t PipeIODevice::_endWrite(IOResult& result)
+size_t PipeIODevice::onEndWrite(IOResult& result)
 {
     return IODeviceImpl::endWrite(result);
 }
 
 
-size_t PipeIODevice::_write(const char* buffer, size_t count)
+size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 {
     return IODeviceImpl::write(buffer, count);
 }
 
 
-void PipeIODevice::_sync() const
+void PipeIODevice::onSync() const
 {
     IODeviceImpl::sync();
 }

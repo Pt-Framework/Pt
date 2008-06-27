@@ -67,25 +67,25 @@ namespace Net {
             { return 0;}
 
         protected:
-            System::IOResult& _beginRead(char* buffer, size_t n, bool& eof)
+            System::IOResult& onBeginRead(char* buffer, size_t n, bool& eof)
             { System::IOResult* res = 0; return *res; }
 
-            size_t _endRead(System::IOResult& result, bool& eof)
+            size_t onEndRead(System::IOResult& result, bool& eof)
             { return 0;}
 
-            System::IOResult& _beginWrite(const char* buffer, size_t n)
+            System::IOResult& onBeginWrite(const char* buffer, size_t n)
             { System::IOResult* res = 0; return *res; }
 
-            size_t _endWrite(System::IOResult& result)
+            size_t onEndWrite(System::IOResult& result)
             { return 0;}
 
-            size_t _read(char* buffer, size_t count, bool& eof);
+            size_t onRead(char* buffer, size_t count, bool& eof);
 
-            size_t _write(const char* buffer, size_t count);
+            size_t onWrite(const char* buffer, size_t count);
 
             bool _wait(Socket::WaitMode, unsigned int);
 
-            void _close();
+            void onClose();
 
             bool _waitable() const
             { return true; }

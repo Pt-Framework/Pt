@@ -62,31 +62,31 @@ void FileDevice::open( const char* path, std::ios_base::openmode mode, bool isAs
     IODevice::setAsync(isAsync);
 }
 
-void FileDevice::_close()
+void FileDevice::onClose()
 {
     _impl->close();
     IODevice::setValid(false);
     IODevice::setEof(false);
 }
 
-IOResult& FileDevice::_beginRead(char* buffer, size_t n, bool& eof)
+IOResult& FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     return _impl->beginRead(buffer, n, eof);
 }
 
-size_t FileDevice::_endRead(IOResult& result, bool& eof)
+size_t FileDevice::onEndRead(IOResult& result, bool& eof)
 {
     return _impl->endRead(result, eof);
 }
 
 
-IOResult& FileDevice::_beginWrite(const char* buffer, size_t n)
+IOResult& FileDevice::onBeginWrite(const char* buffer, size_t n)
 {
     return _impl->beginWrite(buffer, n);
 }
 
 
-size_t FileDevice::_endWrite(IOResult& result)
+size_t FileDevice::onEndWrite(IOResult& result)
 {
     return _impl->endWrite(result);
 }
@@ -98,12 +98,12 @@ size_t FileDevice::size() const
 }
 
 
-FileDevice::pos_type FileDevice::_seek(off_type offset, std::ios::seekdir sd)
+FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
     return _impl->seek(offset, sd);
 }
 
-size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
+size_t FileDevice::onRead( char* buffer, size_t count, bool& eof )
 {
     //if(count > SSIZE_MAX)
     //    count = SSIZE_MAX;
@@ -112,7 +112,7 @@ size_t FileDevice::_read( char* buffer, size_t count, bool& eof )
     return ret;
 }
 
-size_t FileDevice::_write(const char* buffer, size_t count)
+size_t FileDevice::onWrite(const char* buffer, size_t count)
 {
     if( _mode & std::ios_base::out )
         return _impl->write(buffer, count);
@@ -120,12 +120,12 @@ size_t FileDevice::_write(const char* buffer, size_t count)
     return 0;
 }
 
-size_t FileDevice::_peek(char* buffer, size_t count)
+size_t FileDevice::onPeek(char* buffer, size_t count)
 {
     return _impl->peek(buffer, count);
 }
 
-void FileDevice::_sync() const
+void FileDevice::onSync() const
 {
     if( _mode & std::ios_base::out )
         _impl->sync();
