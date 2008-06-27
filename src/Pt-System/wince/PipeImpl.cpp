@@ -71,7 +71,7 @@ void PipeIODevice::open(HANDLE handle, bool isAsync)
     this->setAsync(isAsync);
 }
 
-IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
+IOResult& PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
     {
@@ -92,7 +92,7 @@ IOResult& PipeIODevice::_beginRead(char* buffer, size_t n, bool& eof)
 
 }
 
-size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
+size_t PipeIODevice::onEndRead(IOResult& result, bool& eof)
 {
     DWORD readBytes = 0;
     DWORD flags     = 0;
@@ -129,7 +129,7 @@ size_t PipeIODevice::_endRead(IOResult& result, bool& eof)
     return bytesToCopy;
 }
 
-IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
+IOResult& PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 {
     if( Write != _mode )
     {
@@ -142,7 +142,7 @@ IOResult& PipeIODevice::_beginWrite(const char* buffer, size_t n)
     return _writeResult;
 }
 
-size_t PipeIODevice::_endWrite(IOResult& result)
+size_t PipeIODevice::onEndWrite(IOResult& result)
 {
     DWORD bytesToWrite = std::min(_writeResult.bufferSize(), _msgSize);
 
@@ -176,7 +176,7 @@ void PipeIODevice::_close()
     }
 }
 
-size_t PipeIODevice::_read(char* buffer, size_t count, bool& eof)
+size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 {
     if( Read != _mode ) {
         throw IOError("Could not read from write only pipe", PT_SOURCEINFO);
@@ -234,7 +234,7 @@ void PipeIODevice::writeMessage(const char* buffer, size_t count)
 
 
 }
-size_t PipeIODevice::_write(const char* buffer, size_t count)
+size_t PipeIODevice::onWrite(const char* buffer, size_t count)
 {
     size_t offset = 0;
     for (int n = count; ; n -= _msgSize )
@@ -251,7 +251,7 @@ size_t PipeIODevice::_write(const char* buffer, size_t count)
     return count;
 }
 
-void PipeIODevice::_sync() const
+void PipeIODevice::onSync() const
 {
 }
 
