@@ -161,7 +161,7 @@ HANDLE PipeIODevice::deviceHandle() const
     return _handle;
 }
 
-void PipeIODevice::_close()
+void PipeIODevice::onClose()
 {
     if(_handle != INVALID_HANDLE_VALUE)
     {

@@ -127,7 +127,7 @@ class PipeIODevice : public IODevice, private IODeviceImpl
 
     protected:
         //! @brief Closes the I/O device
-        virtual void _close();
+        virtual void onClose();
 
         virtual IOResult& onBeginRead(char* buffer, size_t n, bool& eof);
 
