@@ -124,7 +124,7 @@ IOResult& PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::_endWrite(IOResult& result)
+size_t PipeIODevice::onEndWrite(IOResult& result)
 {
 	return IODeviceImpl::endWrite(result);
 }
