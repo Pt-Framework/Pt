@@ -304,7 +304,7 @@ class BasicIODevice : public IO, protected NonCopyable {
         { return false; }
 
         //! @brief Move the next read position to the given offset
-        virtual pos_type _onSeek(off_type, std::ios::seekdir)
+        virtual pos_type onSeek(off_type, std::ios::seekdir)
         { throw IOError("Could not seek on device.", PT_SOURCEINFO); }
 
         //! @brief Synchronize device
