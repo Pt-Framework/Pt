@@ -646,6 +646,10 @@ rule Lex
 rule Library
 {
     local _l = $(PRELIB)$(<)$(SUFLIB) ;
+
+    # save the complete target name in a global variable
+    $(<)_target = $(_l) ;
+
     Depends $(<) : $(_l) ;
     NotFile $(<) ;
 
@@ -749,13 +753,17 @@ rule Link
 
 rule LinkLibraries
 {
-	# make library dependencies of target
-	# set NEEDLIBS variable used by 'actions Main'
+    local _t = $($(<)_target) ;
+    if ! $(_t)
+    {
+        Exit "LinkLibraries failed: No such target " $(<) ;
+    }
 
-	local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    # make library dependencies of target
+    # set NEEDLIBS variable used by 'actions Main'
 
-	DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
-	NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+    DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
+    NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
 }
 
 
@@ -764,11 +772,15 @@ rule Main
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
 
+    # save the complete target name in a global variable
+    $(<)_target = $(_target) ;
+
     Depends exe : $(<) ;
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
+
     Objects $(>) ;
-    
+
     MainImpl $(<) : $(>) ;
 }
 
@@ -855,29 +867,44 @@ rule MainLinkExtLibraries
 
 rule MakeLocate
 {
+    local _t = $($(<)_target) ;
+
+    if ! $(_t)
+    {
+        _t = $(<) ;
+    }
+
+
     if $(SUBDIR) = $(>)
     {
         # directory already exists, because it is part of the source tree,
         # so only set LOCATE
-        LOCATE on $(<) = $(>) ;
+        LOCATE on $(_t) = $(>) ;
     }
     else if $(>)
     {
         # directory possibly does not exist, so create it and
         # add a dependency to the directory, besides setting LOCATE
-        LOCATE on $(<) = $(>) ;
-        Depends $(<) : $(>[1]) ;
+        LOCATE on $(_t) = $(>) ;
+        Depends $(_t) : $(>[1]) ;
         MkDir $(>[1]) ;
     }
 
-    if $(<:D)
+    if $(_t:D)
     {
         # target to be located is passed with a path, so we create it
         # and add a dependency to the directory
         local _dir = [ FDirName $(>) $(_i:D) ] ;
-        Depends $(<) : $(_dir) ;
+        Depends $(_t) : $(_dir) ;
         MkDir $(_dir) ;
     }
+
+    MakeLocateImpl $(_t) : $(>) ;
+}
+
+
+rule MakeLocateImpl
+{
 }
 
 
@@ -1091,7 +1118,12 @@ rule Setuid
 #
 rule SharedLibrary
 {
+    # build complete target name
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+
+    # save complete target name in a global variable
+    $(<)_target = $(_target) ;
+
     Depends $(<) : $(_target) ;
     NotFile $(<) ;
 
