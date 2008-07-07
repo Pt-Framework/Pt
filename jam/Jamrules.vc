@@ -80,7 +80,8 @@ rule Main_LinkSharedLibrariesImpl
   }
   else
   {
-    LinkLibraries $(<) : $(>) ;
+    Main_LinkLibraries $(<) : $(>) ;
+    Depends $(_target) : $(>:S=$(SUFDLL)) ;
   }
 }
 
@@ -142,19 +143,13 @@ rule SharedLibrary_LinkSharedLibrariesImpl
 
   if $(3) 
   {
-    LINKLIBS on $(_target) += $(2).lib ;
+    LINKLIBS on $(_target) += $(>).lib ;
     LINKLIBS on $(_target) += /LIBPATH:$(3) ;
   }
   else
   {
-    LinkLibraries $(<) : $(>) ;
-     
-    # make library dependency of target   
-    Depends $(_target) : $(>:S=$(SUFLIB)) ;
+    SharedLibrary_LinkLibraries $(<) : $(>) ;
     Depends $(_target) : $(>:S=$(SUFDLL)) ;
-    
-    # set NEEDLIBS variable used by 'Link'    
-    NEEDLIBS on $(_target) += $(>:S=$(SUFLIB)) ;
   }
 }
 
