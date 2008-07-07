@@ -192,10 +192,11 @@ NOTFILE all-test ;
 #
 rule PtUnitTest
 {
+  Main $(<) : $(>) ;
+  $(<)_type = "PtUnitTest" ;
+
   local _target = $(<:S=$(SUFEXE)) ;
   local _output = $(<:S=.unit) ;
-
-  Main $(<) : $(>) ;
 
   Depends $(_output) : $(_target) ;
   Depends test : $(_output) ;
@@ -206,12 +207,25 @@ rule PtUnitTest
   PtUnitTestAction $(_output) : $(_target) ;
 }
 
+
 rule PtUnitTest_MakeLocate
 {
   local _output = $(<:S=.unit) ;
 
   Main_MakeLocate $(<) : $(>) ;
   MakeLocate $(_output) : $(>) ;
+}
+
+
+rule PtUnitTest_LinkLibraries
+{
+  Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
+}
+
+
+rule PtUnitTest_LinkSharedLibraries
+{
+  Main_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
 }
 
 

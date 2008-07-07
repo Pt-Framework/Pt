@@ -645,10 +645,10 @@ rule Lex
 
 rule Library
 {
-    local _l = $(PRELIB)$(<)$(SUFLIB) ;
+    # save the type so we can resolve rule names later
+    $(<)_type = "Library" ;
 
-    # save the complete target name in a global variable
-    $(<)_target = $(_l) ;
+    local _l = $(PRELIB)$(<)$(SUFLIB) ;
 
     Depends $(<) : $(_l) ;
     NotFile $(<) ;
@@ -734,10 +734,10 @@ rule LibraryFromObjects
 rule Library_MakeLocate
 {
     local _l = $(PRELIB)$(<:S=$(SUFLIB)) ;
-    MakeLocate $(_l) : $(2) ;
-    
+    _MakeLocate $(_l) : $(2) ;
     Library_MakeLocateImpl $(<) : $(>) ;
 }
+
 
 rule Library_MakeLocateImpl
 {
@@ -753,32 +753,51 @@ rule Link
 
 rule LinkLibraries
 {
-    local _t = $($(<)_target) ;
-    if ! $(_t)
+    local _type = $($(<)_type) ;
+    if $(_type)
     {
-        Exit "LinkLibraries failed: No such target " $(<) ;
+        Echo Calling $(_type)_LinkLibraries for $(1) ;
+        $(_type)_LinkLibraries $(<) : $(>) ;
     }
+    else
+    {
+        # make library dependencies of target
+        # set NEEDLIBS variable used by 'actions Main'
 
-    # make library dependencies of target
-    # set NEEDLIBS variable used by 'actions Main'
+        local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
-    DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
-    NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+        DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
+        NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+    }
+}
+
+
+rule LinkSharedLibraries
+{
+    local _type = $($(<)_type) ;
+    if $(_type)
+    {
+        Echo Calling $(_type)_LinkSharedLibraries for $(1) ;
+        $(_type)_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
+    }
+    else
+    {
+        Exit "ERROR:" No such target: $(1) ;
+    }
 }
 
 
 rule Main
 {
+    # save the type to resolve rule names later
+    $(<)_type = "Main" ;
+
     # Add executable name decoration
     local _target = $(<:S=$(SUFEXE)) ;
-
-    # save the complete target name in a global variable
-    $(<)_target = $(_target) ;
 
     Depends exe : $(<) ;
 
     MainFromObjects $(<) : $(>:S=$(SUFOBJ)) ;
-
     Objects $(>) ;
 
     MainImpl $(<) : $(>) ;
@@ -809,7 +828,7 @@ rule MainFromObjects
     # make compiled sources a dependency of target
 
     DEPENDS $(_t) : $(_s) ;
-    MakeLocate $(_t) : $(LOCATE_TARGET) ;
+    _MakeLocate $(_t) : $(LOCATE_TARGET) ;
 
     Clean clean : $(_t) ;
 
@@ -819,7 +838,9 @@ rule MainFromObjects
 
 rule Main_LinkLibraries
 {
-	LinkLibraries $(<) : $(>) ;
+    local _t = $(<:S=$(SUFEXE)) ;
+    DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
+    NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
 }
 
 
@@ -836,7 +857,7 @@ rule Main_LinkSharedLibrariesImpl
 
 rule Main_MakeLocate
 {
-	MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
+	_MakeLocate $(<:S=$(SUFEXE)) : $(>) ;
 	Main_MakeLocateImpl $(<) : $(>) ;
 }
 
@@ -865,46 +886,47 @@ rule MainLinkExtLibraries
 	LINKLIBS on $(<)$(SUFEXE) += $(LINKLIBS) $(PRELIB)$(>:S=$(SUFLIB)) ;
 }
 
-rule MakeLocate
+
+rule _MakeLocate
 {
-    local _t = $($(<)_target) ;
-
-    if ! $(_t)
-    {
-        _t = $(<) ;
-    }
-
-
     if $(SUBDIR) = $(>)
     {
         # directory already exists, because it is part of the source tree,
         # so only set LOCATE
-        LOCATE on $(_t) = $(>) ;
+        LOCATE on $(<) = $(>) ;
     }
     else if $(>)
     {
         # directory possibly does not exist, so create it and
         # add a dependency to the directory, besides setting LOCATE
-        LOCATE on $(_t) = $(>) ;
-        Depends $(_t) : $(>[1]) ;
+        LOCATE on $(<) = $(>) ;
+        Depends $(<) : $(>[1]) ;
         MkDir $(>[1]) ;
     }
 
-    if $(_t:D)
+    if $(<:D)
     {
         # target to be located is passed with a path, so we create it
         # and add a dependency to the directory
         local _dir = [ FDirName $(>) $(_i:D) ] ;
-        Depends $(_t) : $(_dir) ;
+        Depends $(<) : $(_dir) ;
         MkDir $(_dir) ;
     }
-
-    MakeLocateImpl $(_t) : $(>) ;
 }
 
 
-rule MakeLocateImpl
+rule MakeLocate
 {
+    local _type = $($(<)_type) ;
+    if $(_type)
+    {
+        Echo Calling $(_type)_MakeLocate for $(1) ;
+        $(_type)_MakeLocate $(<) : $(>) ;
+    }
+    else
+    {
+        _MakeLocate $(1) : $(2) : $(3) ;
+    }
 }
 
 
@@ -1118,18 +1140,16 @@ rule Setuid
 #
 rule SharedLibrary
 {
-    # build complete target name
+    # save the type so we can resolve rule names later
+    $(<)_type = "SharedLibrary" ;
+
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-
-    # save complete target name in a global variable
-    $(<)_target = $(_target) ;
-
     Depends $(<) : $(_target) ;
     NotFile $(<) ;
 
     SharedLibraryFromObjects $(1) : $(2:S=$(SUFOBJ)) ;
     Objects $(2) ;
-    
+
     SharedLibraryImpl $(<) : $(>) ;
 }
 
@@ -1216,9 +1236,11 @@ rule SharedLibrary_LinkSharedLibraries
     SharedLibrary_LinkSharedLibrariesImpl $(<) : $(>) : $(3) ;
 }
 
+
 rule SharedLibrary_LinkSharedLibrariesImpl
 {
 }
+
 
 rule Shell
 {
