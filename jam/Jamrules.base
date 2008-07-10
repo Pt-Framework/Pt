@@ -751,6 +751,20 @@ rule Link
 }
 
 
+rule LinkFlags
+{
+    local _type = $($(<)_type) ;
+    if $(_type)
+    {
+        $(_type)_LinkFlags $(<) : $(>) ;
+    }
+    else
+    {
+        Exit "ERROR:" No such target: $(1) ;
+    }
+}
+
+
 rule LinkLibraries
 {
     local _type = $($(<)_type) ;
@@ -833,6 +847,13 @@ rule MainFromObjects
     Clean clean : $(_t) ;
 
     Link $(_t) : $(_s) ;    
+}
+
+
+rule Main_LinkFlags
+{
+    local _target = $(<:S=$(SUFEXE)) ;
+    LINKFLAGS on $(_target) = $(>) ;
 }
 
 
@@ -1197,6 +1218,13 @@ rule SharedLibrary_Install
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
     InstallLib $(LIBDIR) : $(_target) ;
+}
+
+
+rule SharedLibrary_LinkFlags
+{
+    local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
+    LINKFLAGS on $(_target) = $(>) ;
 }
 
 
