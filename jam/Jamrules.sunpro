@@ -8,7 +8,7 @@ RANLIB ?= ranlib ;
 ##############################################################################
 # Compiler flags
 ##############################################################################
-WARN ?= +w  -erroff=doubunder -errtags=yes ; # , hidef,hidevf -errtags=yes ;
+WARN ?= +w -errtags=yes ;
 
 if $(CONFIG:L) = debug
 {
@@ -24,12 +24,11 @@ else if $(CONFIG:L) = release
 if $(TARGET_OSPLAT) = sparc9
 {
     CCFLAGS += -xtarget=ultra -xarch=v9 ;
-	LINKFLAGS += -xtarget=ultra -xarch=v9 ;
+    LINKFLAGS += -xtarget=ultra -xarch=v9 ;
 }
 
-CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ -features=extensions ;
-
-C++FLAGS  += $(CCFLAGS) ;
+CCFLAGS   += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
+C++FLAGS  += $(CCFLAGS) -features=extensions ;
 
 ##############################################################################
 # Linker flags
