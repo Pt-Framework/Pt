@@ -854,7 +854,7 @@ rule MainFromObjects
 rule Main_LinkFlags
 {
     local _target = $(<:S=$(SUFEXE)) ;
-    LINKFLAGS on $(_target) = $(>) ;
+    LINKFLAGS on $(_target) += $(>) ;
 }
 
 
@@ -1203,7 +1203,7 @@ rule SharedLibrary_Install
 rule SharedLibrary_LinkFlags
 {
     local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-    LINKFLAGS on $(_target) = $(>) ;
+    LINKFLAGS on $(_target) += $(>) ;
 }
 
 
