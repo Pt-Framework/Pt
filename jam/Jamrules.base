@@ -746,6 +746,7 @@ rule Library_MakeLocateImpl
 
 rule Link
 {
+    LINKLIBS on $(<) = $(LINKLIBS) $(SUBDIRLINKFLAGS) ;
     MODE on $(<) = $(EXEMODE) ;
     Chmod $(<) ;
 }
@@ -885,16 +886,6 @@ rule Main_MakeLocate
 
 rule Main_MakeLocateImpl
 {
-}
-
-# @brief Adds libraries as linker flags to a shared library target
-#
-# @param < the target
-# @param > list of flags
-rule Main_AddLibraries
-{
-	local _target = $(<:S=$(SUFEXE)) ;
-	LINKLIBS on $(_target) += $(LINKLIBS) $(>) ;
 }
 
 
@@ -1180,18 +1171,6 @@ rule SharedLibraryImpl
 }
 
 
-# @brief Adds libraries as linker flags to a shared library target
-#
-# @param < the target
-# @param > list of flags
-#
-rule SharedLibrary_AddLibraries
-{
-	local _target = $(PRELIB)$(<:S=$(SUFDLL)) ;
-	LINKLIBS on $(_target) += $(LINKLIBS) $(>) ;
-}
-
-
 # @brief builds a shared library from object files
 #
 rule SharedLibraryFromObjects
@@ -1357,6 +1336,7 @@ rule SubDir
 
     SUBDIRCCFLAGS = ;
     SUBDIRC++FLAGS = ;
+    SUBDIRLINKFLAGS = ;
     SUBDIRHDRS = ;
 }
 
@@ -1382,6 +1362,12 @@ rule SubDirCcFlags
 rule SubDirC++Flags
 {
     SUBDIRC++FLAGS += $(<) ;
+}
+
+
+rule SubDirLinkFlags
+{
+    SUBDIRLINKFLAGS += $(<) ;
 }
 
 

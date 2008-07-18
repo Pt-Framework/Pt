@@ -27,10 +27,9 @@ SharedLibrary Pt-Gui :  Application.cpp
                         SimpleGridLayout.cpp
                         VerticalLayout.cpp
                        ;
-	
 SharedLibrary_LinkLibraries Pt-Gui : Pt-Gui-$(GUI:L) ;
 SharedLibrary_LinkSharedLibraries Pt-Gui : Pt Pt-System Pt-Gfx Pt-Text ;
-SharedLibrary_AddLibraries Pt-Gui : $(GUILIBS) ;
+LINKLIBS on $(PRELIB)Pt-Gui$(SUFDLL) = $(LINKLIBS) $(GUILIBS) ;
 SharedLibrary_MakeLocate Pt-Gui : $(OUTPUT_TARGET) ;
 
 Main WidgetDemo : WidgetDemo.cpp ;

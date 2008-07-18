@@ -47,7 +47,7 @@ SharedLibrary Pt-System : [ FDirName $(SYS:L) ClockImpl.cpp ]
                           ;
 
 SharedLibrary_LinkSharedLibraries Pt-System : Pt ;
-SharedLibrary_AddLibraries Pt-System : $(SYSLIBS) ;
+LINKLIBS on $(PRELIB)Pt-System$(SUFDLL) = $(LINKLIBS) $(SYSLIBS) ;
 SharedLibrary_MakeLocate Pt-System : $(OUTPUT_TARGET) ;
 
 SharedLibrary TestPlugin : TestPlugin.cpp ;

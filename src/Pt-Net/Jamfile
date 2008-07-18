@@ -13,8 +13,8 @@ SharedLibrary Pt-Net : AddrInfo.cpp
                        ;
 
 SharedLibrary_LinkSharedLibraries Pt-Net : Pt Pt-System ;
-SharedLibrary_AddLibraries Pt-Net : $(NETLIBS) ;
 SharedLibrary_MakeLocate Pt-Net : $(OUTPUT_TARGET) ;
+LINKLIBS on $(PRELIB)Pt-Net$(SUFDLL) = $(LINKLIBS) $(NETLIBS) ;
 
 PtUnitTest TcpSocketTest : TcpSocketTest.cpp ;
 Main_LinkSharedLibraries TcpSocketTest : Pt Pt-Net Pt-System Pt-Unit ;
