@@ -223,6 +223,12 @@ rule PtUnitTest_LinkLibraries
 }
 
 
+rule PtUnitTest_LinkLibraries
+{
+  Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
+}
+
+
 rule PtUnitTest_LinkSharedLibraries
 {
   Main_LinkSharedLibraries $(<) : $(>) : $(3) : $(4) ;
