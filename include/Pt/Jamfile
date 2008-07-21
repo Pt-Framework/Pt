@@ -2,6 +2,8 @@ SubDir TOP include Pt ;
 
 HdrMacroFile Atomicity.h ;
 
+InstallFile system : Connection.h ;
+
 SubInclude TOP include Pt Db ;
 SubInclude TOP include Pt Gfx ;
 SubInclude TOP include Pt Gui ;

@@ -506,9 +506,8 @@ rule InstallInto
 {
     # InstallInto dir : sources ;
 
-    local i t ;
-
-    t = $(>:G=$(INSTALLGRIST)) ;
+    local g = [ FGrist $(INSTALLGRIST) $(SOURCE_GRIST) ] ;
+    local t = $(>:G=$(g)) ;
 
     # Arrange for jam install
     # Arrange for jam uninstall
@@ -523,24 +522,24 @@ rule InstallInto
     # For each source, make gristed target name
     # and Install, Chmod, Chown, and Chgrp
 
-    for i in $(>)
+    for local i in $(>)
     {
-        local tt = $(i:G=$(INSTALLGRIST)) ;
+        local tt = $(i:G=$(g)) ;
 
         Depends $(tt) : $(i) ;
         Install $(tt) : $(i) ;
         Chmod $(tt) ;
 
         if $(OWNER) && $(CHOWN) 
-        { 
-        Chown $(tt) ;
-        OWNER on $(tt) = $(OWNER) ;
+        {
+            Chown $(tt) ;
+            OWNER on $(tt) = $(OWNER) ;
         }
 
         if $(GROUP) && $(CHGRP) 
-        { 
-        Chgrp $(tt) ;
-        GROUP on $(tt) = $(GROUP) ;
+        {
+            Chgrp $(tt) ;
+            GROUP on $(tt) = $(GROUP) ;
         }
     }
 }
@@ -549,56 +548,28 @@ rule InstallInto
 rule InstallBin
 {
     local _t = [ FAppendSuffix $(>) : $(SUFEXE) ] ;
-
     InstallInto $(<) : $(_t) ;
-    MODE on $(_t:G=installed) = $(EXEMODE) ;
+
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(_t:G=$(_grist)) = $(EXEMODE) ;
 }
 
 
 rule InstallFile
 {
     InstallInto $(<) : $(>) ;
-    MODE on $(>:G=installed) = $(FILEMODE) ;
-}
 
-
-# Installs all header files from a directory to a subdirectory
-# within INCLUDEDIR
-#
-# $(<) subdirectory destination within INCLUDEDIR
-# $(>) directory to search for headers
-#
-# Example
-#   InstallHeaders dir : TOP d1 [ d2 [ d3 [ d4 ] ] ]
-#
-# to install all headers from TOP d1 d2... to the subdirectory
-# dir in INCLUDEDIR.
-#
-rule InstallHeaders
-{
-	if ! $($(>[1]))
-	{
-			EXIT Top level of source tree has not been set with $(>[1]) ;
-	}
-	
-	local _s = [ FDirName $(>[2-]) ] ;
-	local _targetdir = $(_s:R=$($(>[1]))) ;
-  local _includedir = [ FDirName $(INCLUDEDIR) $(<) ] ;
-
-	local _headers ;
-	for local h in [ GLOB  $(_targetdir) : *.h ]
-	{
-		_headers += $(h:BS) ;
-	}
-
-	InstallFile $(_includedir) : $(_headers) ;
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(>:G=$(_grist)) = $(FILEMODE) ;
 }
 
 
 rule InstallLib
 {
     InstallInto $(<) : $(>) ;
-    MODE on $(>:G=installed) = $(FILEMODE) ;
+
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(>:G=$(_grist)) = $(FILEMODE) ;
 }
 
 
@@ -612,10 +583,10 @@ rule InstallMan
     {
         switch $(i:S)
         {
-        case .1 : s = 1 ; case .2 : s = 2 ; case .3 : s = 3 ;
-        case .4 : s = 4 ; case .5 : s = 5 ; case .6 : s = 6 ;
-        case .7 : s = 7 ; case .8 : s = 8 ; case .l : s = l ;
-        case .n : s = n ; case .man : s = 1 ;
+            case .1 : s = 1 ; case .2 : s = 2 ; case .3 : s = 3 ;
+            case .4 : s = 4 ; case .5 : s = 5 ; case .6 : s = 6 ;
+            case .7 : s = 7 ; case .8 : s = 8 ; case .l : s = l ;
+            case .n : s = n ; case .man : s = 1 ;
         }
 
         d = man$(s) ;
@@ -623,14 +594,17 @@ rule InstallMan
         InstallInto $(d:R=$(<)) : $(i) ;
     }
 
-    MODE on $(>:G=installed) = $(FILEMODE) ;
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(>:G=$(_grist)) = $(FILEMODE) ;
 }
 
 
 rule InstallShell
 {
     InstallInto $(<) : $(>) ;
-    MODE on $(>:G=installed) = $(SHELLMODE) ;
+
+    local _grist = [ FGrist $(INSTALLGRIST) $(SUBDIR_TOKENS) ] ;
+    MODE on $(>:G=$(_grist)) = $(SHELLMODE) ;
 }
 
 
