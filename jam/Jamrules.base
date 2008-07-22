@@ -745,8 +745,7 @@ rule LinkLibraries
     local _type = $($(<)_type) ;
     if $(_type)
     {
-        Echo Calling $(_type)_LinkLibraries for $(1) ;
-        $(_type)_LinkLibraries $(<) : $(>) ;
+        $(_type)_LinkLibraries $(<) : $(>) : $(3) ;
     }
     else
     {
@@ -754,9 +753,9 @@ rule LinkLibraries
         # set NEEDLIBS variable used by 'actions Main'
 
         local _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-
         DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
         NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+        LINKLIBS on $(_t) += $(3) ;
     }
 }
 
@@ -837,6 +836,7 @@ rule Main_LinkLibraries
     local _t = $(<:S=$(SUFEXE)) ;
     DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
     NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+    LINKLIBS on $(_t) += $(3) ;
 }
 
 
@@ -1181,16 +1181,12 @@ rule SharedLibrary_LinkFlags
 }
 
 
-# @brief Links static libraries to a shared library
-#
-# @param < the target name
-# @param > list of libraries to link
-#
 rule SharedLibrary_LinkLibraries
 {
-	local _t = $(PRELIB)$(<)$(SUFDLL) ;
-	DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
-	NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+    local _t = $(PRELIB)$(<)$(SUFDLL) ;
+    DEPENDS $(_t) : $(PRELIB)$(>:S=$(SUFLIB)) ;
+    NEEDLIBS on $(_t) += $(PRELIB)$(>:S=$(SUFLIB)) ;
+    LINKLIBS on $(_t) += $(3) ;
 }
 
 
