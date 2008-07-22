@@ -217,6 +217,12 @@ rule PtUnitTest_MakeLocate
 }
 
 
+rule PtUnitTest_LinkFlags
+{
+  Main_LinkFlags $(<) : $(>) : $(3) : $(4) ;
+}
+
+
 rule PtUnitTest_LinkLibraries
 {
   Main_LinkLibraries $(<) : $(>) : $(3) : $(4) ;
