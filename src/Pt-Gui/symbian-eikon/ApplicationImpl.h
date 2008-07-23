@@ -76,7 +76,7 @@ namespace Gui {
      * 2. Widget
      * 3. Pixmap
      * 
-     * The Environment will keep track these resources.
+     * The Environment will keep track of these resources.
      * 
      * @see Environment
      */

@@ -38,6 +38,7 @@
 // Symbian APIs
 #include <eikstart.h>
 #include <eikproc.h>
+#include <eikenv.h>
 // Our own classes
 #include "SymbAppUi.h"
 #include "SymbEventLoop.h"

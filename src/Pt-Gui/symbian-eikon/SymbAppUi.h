@@ -22,7 +22,11 @@
 
 #include <Pt/Gui/KeyEvent.h>
 
+#ifdef __SERIES60_3X__
 #include <aknappui.h>
+#else
+#include <eikappui.h>
+#endif
 
 // forward declarations
 namespace Pt { 
@@ -40,10 +44,6 @@ namespace Gui {
  * This class is the last class in the MVC based application being instantiated 
  * by the Eikon framework.
  * 
- * In this class all the Pt-Widgets and Pixmaps which have been created
- * prior to Application::run() will be finally constructed.
- * It will also start the event loop which is held in the application implementation.
- * 
  * During runtime this class will handle key events and dispatch them to all
  * top level widgets.
  * 
@@ -51,7 +51,12 @@ namespace Gui {
  * ALL Symbian classes have to reside in the global namespace
  * otherwise results are undefined
  */
+
+#ifdef __SERIES60_3X__
 class SymbAppUi : public CAknAppUi
+#else
+class SymbAppUi : public CEikAppUi
+#endif
 {
 public:     
     /**

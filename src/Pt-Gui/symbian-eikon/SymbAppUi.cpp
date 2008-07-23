@@ -22,6 +22,8 @@
 
 #include <assert.h>
 #include <coecntrl.h>
+#include <eikenv.h>
+#include <eikspane.h>
 #include <w32std.h>
 
 #include <Pt/Gui/Widget.h>
@@ -111,8 +113,10 @@ void SymbAppUi::ConstructL()
     // Hide status pane? Gives more client area.
     iEikonEnv->AppUiFactory()->StatusPane()->MakeVisible(EFalse);
     
+#ifdef __SERIES60_3X__
     // Allow multiple keys being pressed at the same time.
     SetKeyBlockMode(ENoKeyBlock);
+#endif
     
     // TODO: Does nothing on series 60
     //iEikonEnv->WsSession().SetPointerCursorArea(ClientRect());

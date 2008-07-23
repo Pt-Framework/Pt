@@ -524,16 +524,20 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, const char* data, size
     bitmap->LockHeap();
     char* dst = reinterpret_cast<char*>(bitmap->DataAddress());
     
+    const int pitch = CFbsBitmap::ScanLineLength(width, EColor16M);
+    
     for (unsigned int i = 0; i < height; ++i)
     {
+        char* dst_ = dst;
         for (unsigned int j = 0; j < width; ++j)
         {
-            *dst = *src;
-            *(dst+1) = *(src+1);
-            *(dst+2) = *(src+2);
+            *dst_ = *src;
+            *(dst_+1) = *(src+1);
+            *(dst_+2) = *(src+2);
             src+=4;
-            dst+=3;
+            dst_+=3;
         }
+        dst+=pitch;
     }
     bitmap->UnlockHeap();
     
@@ -656,16 +660,20 @@ void PainterImpl::activateBrush()
                  
                  const int height = texture.height();
                  const int width = texture.width();
+                 const int pitch = CFbsBitmap::ScanLineLength(width, EColor16M);
+
                  for (int y = 0; y < height; ++y)
                  {
-                     for (int x = 0; x < height; ++x)
+                     char* dst_ = dst;
+                     for (int x = 0; x < width; ++x)
                      {
-                         *dst = *src;
-                         *(dst+1) = *(src+1);
-                         *(dst+2) = *(src+2);
+                         *dst_ = *src;
+                         *(dst_+1) = *(src+1);
+                         *(dst_+2) = *(src+2);
                          src+=4;
-                         dst+=3;
+                         dst_+=3;
                      }
+                     dst+=pitch;
                  }
                  _brushBitmap->UnlockHeap();
                  

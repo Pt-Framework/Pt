@@ -37,6 +37,7 @@
 #include "SymbianTools.h"
 
 // symbian APIs
+#include <eikenv.h>
 #include <coecntrl.h>
 #include <w32std.h>
 
