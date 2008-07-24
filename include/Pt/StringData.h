@@ -47,9 +47,6 @@ namespace std {
             allocator()
             { }
 
-            allocator(const allocator&)
-            { }
-
             template<typename U>
             allocator(const allocator<U>&)
             { }
