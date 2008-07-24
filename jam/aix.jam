@@ -1,0 +1,14 @@
+PRELIB    = lib ;
+SUFLIB    = .a ;
+SUFDLL    = .a ;
+SUFEXE    = "" ;
+SUFDBG    = "" ;
+SUFOBJ = .o ;
+
+if $(CONFIG:L) = debug
+{
+    SUFLIB  = d.a ;
+    SUFDLL  = d.a ;
+    SUFEXE  = d ;
+    SUFDBG  = d ;
+}
