@@ -51,8 +51,21 @@ class basic_string< Pt::Char > {
         typedef allocator_type::const_pointer const_pointer;
         typedef value_type* iterator;
         typedef const value_type* const_iterator;
+
+#ifdef _RWSTD_NO_CLASS_PARTIAL_SPEC
+        typedef std::reverse_iterator<const_iterator,
+                                      random_access_iterator_tag, value_type,
+                                      const_reference, const_pointer, difference_type>
+                                      const_reverse_iterator;
+
+        typedef std::reverse_iterator<iterator,
+                                      random_access_iterator_tag, value_type,
+                                      reference, pointer, difference_type>
+                                      reverse_iterator;
+#else
         typedef std::reverse_iterator<iterator> reverse_iterator;
         typedef const std::reverse_iterator<const_iterator> const_reverse_iterator;
+#endif
 
         static const size_type npos = static_cast<size_type>(-1);
 
