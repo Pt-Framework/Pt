@@ -92,7 +92,7 @@ private:
     RWindowGroup _windowGroup;
 };
 
-void SymbAppUi::ConstructL()
+void CSymbAppUi::ConstructL()
 {
     // No resource file present. 
     BaseConstructL(ENoAppResourceFile);
@@ -129,7 +129,7 @@ void SymbAppUi::ConstructL()
     _cursorControl->SetMopParent(this);
 }
 
-SymbAppUi::~SymbAppUi()
+CSymbAppUi::~CSymbAppUi()
 {
     RemoveFromStack(_cursorControl);
     delete _cursorControl;
@@ -137,17 +137,17 @@ SymbAppUi::~SymbAppUi()
     iEikonEnv->ReleaseScreenFont(_font);
 }
 
-void SymbAppUi::DynInitMenuPaneL(TInt, CEikMenuPane*) 
+void CSymbAppUi::DynInitMenuPaneL(TInt, CEikMenuPane*) 
 {
     // left empty on purpose
 }
 
-void SymbAppUi::HandleCommandL(TInt commandID)
+void CSymbAppUi::HandleCommandL(TInt commandID)
 {
     // left empty on purpose
 }
 
-TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
+TKeyResponse CSymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
     TKeyCode code;
     
@@ -178,7 +178,7 @@ TKeyResponse SymbAppUi::HandleKeyEventL(const TKeyEvent& aKeyEvent, TEventCode a
     return EKeyWasNotConsumed;
 }
 
-bool SymbAppUi::HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType)
+bool CSymbAppUi::HandleEventKeyDown(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
     // initialize firstkey flag to false for this key's scancode
     MarkFirstKey(aKeyEvent.iScanCode, false);
@@ -265,7 +265,7 @@ static Pt::Gui::KeyEvent::KeyCode TranslateKeycode(TUint nativeCode)
     return code;
 }
 
-bool SymbAppUi::HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType)
+bool CSymbAppUi::HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
     // remember key code for key being pressed    
     MarkKeyDown(aKeyEvent.iScanCode, aKeyEvent.iCode);
@@ -302,7 +302,7 @@ bool SymbAppUi::HandleEventKey(const TKeyEvent& aKeyEvent, TEventCode aType)
     return false;    
 }
 
-bool SymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
+bool CSymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
 {
     if (HandleFakePointer(aKeyEvent, aType))
     {
@@ -326,12 +326,12 @@ bool SymbAppUi::HandleEventKeyUp(const TKeyEvent& aKeyEvent, TEventCode aType)
     return false;    
 }
 
-void SymbAppUi::HandleExit()
+void CSymbAppUi::HandleExit()
 {
     Pt::Gui::Environment::instance().stopWaitLoop();    
 }
 
-void SymbAppUi::SynchronizeWidgets()
+void CSymbAppUi::SynchronizeWidgets()
 {
     std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
 
@@ -354,7 +354,7 @@ public:
     virtual void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 };
 
-void SymbAppUi::DispatchFakePointerEvent(const TPointerEvent& event)
+void CSymbAppUi::DispatchFakePointerEvent(const TPointerEvent& event)
 {
     // dispatch fake pointer event to all main windows
     std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
@@ -380,7 +380,7 @@ void SymbAppUi::DispatchFakePointerEvent(const TPointerEvent& event)
     }    
 }
 
-bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset/* = 5*/)
+bool CSymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, int offset/* = 5*/)
 {
     if (aType == EEventKeyDown || aType == EEventKey)
     {
@@ -473,7 +473,7 @@ bool SymbAppUi::HandleFakePointer(const TKeyEvent& aKeyEvent, TEventCode aType, 
     return false;
 }
 
-void SymbAppUi::RedrawWindows()
+void CSymbAppUi::RedrawWindows()
 {
     std::list<Pt::Gui::Resource*>& resources = Pt::Gui::Environment::instance().resources();
 
@@ -492,7 +492,7 @@ void SymbAppUi::RedrawWindows()
     }
 }
 
-void SymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
+void CSymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
         Pt::Gui::KeyEvent::KeyCode code,
         wchar_t chr)
 {
@@ -515,7 +515,7 @@ void SymbAppUi::DispatchKeyEvent(Pt::Gui::KeyEvent::Type type,
     }
 }
 
-void SymbAppUi::MarkKeyDown(TUint scanCode, TUint keyCode)
+void CSymbAppUi::MarkKeyDown(TUint scanCode, TUint keyCode)
 {
     if (scanCode && scanCode < KMaxScancode)
     {
@@ -523,12 +523,12 @@ void SymbAppUi::MarkKeyDown(TUint scanCode, TUint keyCode)
     }
 }
 
-void SymbAppUi::ResetKeyDown(TUint scanCode)
+void CSymbAppUi::ResetKeyDown(TUint scanCode)
 {
     MarkKeyDown(scanCode, 0);
 }
 
-bool SymbAppUi::IsKeyDown(TUint scanCode, TUint& keyCode)
+bool CSymbAppUi::IsKeyDown(TUint scanCode, TUint& keyCode)
 {
     keyCode = 0;
     if (scanCode && scanCode < KMaxScancode)
@@ -539,7 +539,7 @@ bool SymbAppUi::IsKeyDown(TUint scanCode, TUint& keyCode)
     return keyCode != 0;
 }
 
-void SymbAppUi::MarkFirstKey(TUint scanCode, bool down/* = true*/)
+void CSymbAppUi::MarkFirstKey(TUint scanCode, bool down/* = true*/)
 {
     if (scanCode && scanCode < KMaxScancode)
     {
@@ -547,7 +547,7 @@ void SymbAppUi::MarkFirstKey(TUint scanCode, bool down/* = true*/)
     }
 }
 
-bool SymbAppUi::IsFirstKey(TUint scanCode) 
+bool CSymbAppUi::IsFirstKey(TUint scanCode) 
 {
     if (scanCode && scanCode < KMaxScancode)
     {

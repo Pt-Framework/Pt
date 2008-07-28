@@ -69,7 +69,7 @@ class ApplicationImpl;
  * http://developer.symbian.com/wiki/download/attachments/1411/Porting+TightVNC+to+Symbian+OS+using+P.I.P.S..pdf?version=1
  * 
  */
-class SymbEventLoop : public CActive
+class CSymbEventLoop : public CActive
 {
 public:
     /**
@@ -77,12 +77,12 @@ public:
      *
      * @param appImpl Reference to running platform specific application implementation.
      */
-    static SymbEventLoop* NewL(Pt::Gui::ApplicationImpl& appImpl);
+    static CSymbEventLoop* NewL(Pt::Gui::ApplicationImpl& appImpl);
 
     /**
      * @brief Regular destructor.
      */
-    ~SymbEventLoop();    
+    ~CSymbEventLoop();    
     
     /**
      * @brief Add event loop to the active scheduler and process events that
@@ -146,7 +146,7 @@ private:
      * 
      * @param appImpl Reference to running platform specific application implementation.
      */
-    SymbEventLoop(Pt::Gui::ApplicationImpl& appImpl);
+    CSymbEventLoop(Pt::Gui::ApplicationImpl& appImpl);
 
     /**
      * @brief Private second constructor (Symbian two phase construction). 

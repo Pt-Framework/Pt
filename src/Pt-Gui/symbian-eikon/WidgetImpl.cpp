@@ -762,7 +762,7 @@ void WidgetImpl::construct()
     if (_control)
         destruct();
     
-    SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
+    CSymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
 
     CControl* control = 0;
     TRAPD(errorCode, control = new (ELeave)CControl(*this, ui.Font()));
@@ -827,7 +827,7 @@ void WidgetImpl::destruct()
 {
     if (_control)
     {
-        SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
+        CSymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
         // it doesn't matter whether we have been added to the stack or not
         ui.RemoveFromStack(_control); 
     }

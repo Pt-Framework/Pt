@@ -33,8 +33,8 @@
 #include <Pt/Event.h>
 #include <Pt/System/Mutex.h>
 
-class SymbAppUi;
-class SymbEventLoop;
+class CSymbAppUi;
+class CSymbEventLoop;
 class CApaApplication;
 class CEikonEnv;
 
@@ -132,7 +132,7 @@ namespace Gui {
             /**
              * @brief Get access to the UI provided by the Eikon framework.
              */
-            SymbAppUi& symbAppUi() const;
+            CSymbAppUi& symbAppUi() const;
             
             /**
              * @brief Start application wait loop.
@@ -181,7 +181,7 @@ namespace Gui {
             // Eikon environment
             CEikonEnv* _coe;
             // Eikon main UI
-            SymbAppUi* _ui;        
+            CSymbAppUi* _ui;        
             
     };    
     
@@ -248,7 +248,7 @@ namespace Gui {
             Application& _app;
             
             // event loop
-            SymbEventLoop* _eventLoop;
+            CSymbEventLoop* _eventLoop;
 
             // mutex used to protect static "singleton" instance
             static System::Mutex _mutex;

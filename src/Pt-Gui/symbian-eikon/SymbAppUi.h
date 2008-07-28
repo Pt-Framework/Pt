@@ -53,9 +53,9 @@ namespace Gui {
  */
 
 #ifdef __SERIES60_3X__
-class SymbAppUi : public CAknAppUi
+class CSymbAppUi : public CAknAppUi
 #else
-class SymbAppUi : public CEikAppUi
+class CSymbAppUi : public CEikAppUi
 #endif
 {
 public:     
@@ -67,7 +67,7 @@ public:
     /**
      * @brief Destructor.
      */
-    ~SymbAppUi();
+    ~CSymbAppUi();
     
     /**
      * @brief Provide access to the UI default font.

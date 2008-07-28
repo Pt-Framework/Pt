@@ -104,7 +104,7 @@ void PixmapImpl::construct()
     destruct();
 
     // get default font from UI
-    SymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
+    CSymbAppUi& ui = Pt::Gui::Environment::instance().symbAppUi();
 
     _defaultFont = &ui.Font();
 

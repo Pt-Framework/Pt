@@ -26,9 +26,9 @@
 
 #include <basched.h>
 
-SymbEventLoop* SymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
+CSymbEventLoop* CSymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
 {
-    SymbEventLoop* self = 0;
+    CSymbEventLoop* self = 0;
     
     // The constructor could actually throw an exception derived from
     // std::exception due to Pt attributes being initialized.
@@ -39,7 +39,7 @@ SymbEventLoop* SymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
     // Take a look at the definition of TRAP/TRAPD
     try
     {
-        self = new (ELeave) SymbEventLoop(appImpl);
+        self = new (ELeave) CSymbEventLoop(appImpl);
     }
     catch (std::exception& e)
     {
@@ -52,7 +52,7 @@ SymbEventLoop* SymbEventLoop::NewL(Pt::Gui::ApplicationImpl& appImpl)
     return self;
 }
 
-SymbEventLoop::SymbEventLoop(Pt::Gui::ApplicationImpl& appImpl)
+CSymbEventLoop::CSymbEventLoop(Pt::Gui::ApplicationImpl& appImpl)
 : CActive(EPriorityIdle)
 , _appImpl(appImpl)
 , _running(false)
@@ -64,7 +64,7 @@ SymbEventLoop::SymbEventLoop(Pt::Gui::ApplicationImpl& appImpl)
 {
 }
 
-void SymbEventLoop::ConstructL()
+void CSymbEventLoop::ConstructL()
 {
     _mainThreadId = RThread().Id();
     
@@ -87,13 +87,13 @@ void SymbEventLoop::ConstructL()
     }
 }
 
-SymbEventLoop::~SymbEventLoop()
+CSymbEventLoop::~CSymbEventLoop()
 {
     Stop();
     DrainQueue();
 }
 
-void SymbEventLoop::RunL()
+void CSymbEventLoop::RunL()
 {
     if (iStatus.Int() == KErrNone)
     {
@@ -104,7 +104,7 @@ void SymbEventLoop::RunL()
     }
 }
 
-TInt SymbEventLoop::RunError(TInt err)
+TInt CSymbEventLoop::RunError(TInt err)
 {
     if (err == KLeaveExit) //-1003
     {
@@ -114,13 +114,13 @@ TInt SymbEventLoop::RunError(TInt err)
     return KErrNone;    
 }
 
-void SymbEventLoop::DoCancel()
+void CSymbEventLoop::DoCancel()
 {
     TRequestStatus* status = &iStatus;
     User::RequestComplete(status, KErrCancel);
 }
 
-void SymbEventLoop::WaitForEvents()
+void CSymbEventLoop::WaitForEvents()
 {
     if (IsRunning())
     {
@@ -132,7 +132,7 @@ void SymbEventLoop::WaitForEvents()
     }
 }
 
-bool SymbEventLoop::CreateThread()
+bool CSymbEventLoop::CreateThread()
 {
     int rc = ::pthread_create(&_thread, NULL, EventLoopThreadEntry, 
             reinterpret_cast<void*>(this));
@@ -148,14 +148,14 @@ bool SymbEventLoop::CreateThread()
     return false;    
 }
 
-bool SymbEventLoop::Start()
+bool CSymbEventLoop::Start()
 {
     CActiveScheduler::Add(this);
     
     return ProcessQueuedEvents();
 }
 
-bool SymbEventLoop::Stop()
+bool CSymbEventLoop::Stop()
 {
     if (!IsRunning())
         return false;
@@ -173,7 +173,7 @@ bool SymbEventLoop::Stop()
     return rc == 0;
 }
 
-void SymbEventLoop::CommitEvent(const Pt::Event& event)
+void CSymbEventLoop::CommitEvent(const Pt::Event& event)
 {
     TThreadId id = RThread().Id();
     
@@ -197,7 +197,7 @@ void SymbEventLoop::CommitEvent(const Pt::Event& event)
     }    
 }
 
-void SymbEventLoop::QueueEvent(const Pt::Event& event)
+void CSymbEventLoop::QueueEvent(const Pt::Event& event)
 {
     TThreadId id = RThread().Id();
     
@@ -217,7 +217,7 @@ void SymbEventLoop::QueueEvent(const Pt::Event& event)
     }
 }
 
-void SymbEventLoop::Wake()
+void CSymbEventLoop::Wake()
 {
     // TODO: If selector is used to wait for events
     // use a mutex to protect it
@@ -228,7 +228,7 @@ void SymbEventLoop::Wake()
     _wakeCondition.signal();
 }
 
-bool SymbEventLoop::ProcessQueuedEvents()
+bool CSymbEventLoop::ProcessQueuedEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
     
@@ -260,7 +260,7 @@ bool SymbEventLoop::ProcessQueuedEvents()
     return true;
 }
 
-bool SymbEventLoop::ProcessEvents()
+bool CSymbEventLoop::ProcessEvents()
 {
     Pt::System::MutexLock lock(_processMutex);
 
@@ -294,7 +294,7 @@ bool SymbEventLoop::ProcessEvents()
     return true;
 }
 
-void SymbEventLoop::DrainQueue()
+void CSymbEventLoop::DrainQueue()
 {
     Pt::System::MutexLock lock(_queueMutex);
 
@@ -312,7 +312,7 @@ void SymbEventLoop::DrainQueue()
     }    
 }
 
-bool SymbEventLoop::DispatchEvent(Pt::Event* event)
+bool CSymbEventLoop::DispatchEvent(Pt::Event* event)
 {
     // If we're having an exit event we simply quit the application
     if (event->typeInfo() == typeid(Pt::Gui::ExitEvent)) 
@@ -325,10 +325,10 @@ bool SymbEventLoop::DispatchEvent(Pt::Event* event)
     return true;
 }
 
-void* SymbEventLoop::EventLoopThreadEntry(void* threadID)
+void* CSymbEventLoop::EventLoopThreadEntry(void* threadID)
 {
-    SymbEventLoop* self = 
-        reinterpret_cast<SymbEventLoop*>(threadID);
+    CSymbEventLoop* self = 
+        reinterpret_cast<CSymbEventLoop*>(threadID);
 
     self->EventLoopThread();
 
@@ -337,7 +337,7 @@ void* SymbEventLoop::EventLoopThreadEntry(void* threadID)
     return 0;
 }
 
-void SymbEventLoop::EventLoopThread()
+void CSymbEventLoop::EventLoopThread()
 {   
     RThread thread;
     thread.Open(_mainThreadId);
@@ -383,13 +383,13 @@ void SymbEventLoop::EventLoopThread()
     thread.Close();
 }
 
-void SymbEventLoop::SetRunning(bool running)
+void CSymbEventLoop::SetRunning(bool running)
 {
     Pt::System::MutexLock lock(_runningMutex);
     _running = running;
 }
 
-bool SymbEventLoop::IsRunning()
+bool CSymbEventLoop::IsRunning()
 {
     Pt::System::MutexLock lock(_runningMutex);
     return _running;

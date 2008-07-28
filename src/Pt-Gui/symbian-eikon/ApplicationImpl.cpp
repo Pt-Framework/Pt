@@ -93,7 +93,7 @@ void Environment::initFramework()
     
     _coe->RootWin().SetOrdinalPosition(0, ECoeWinPriorityAlwaysAtFront);
 
-    _ui = new SymbAppUi();    
+    _ui = new CSymbAppUi();    
     TRAP(err, _ui->ConstructL());
     
     __ASSERT_ALWAYS(!err, User::Panic(_L("PPR_PANIC2"), err));    
@@ -132,7 +132,7 @@ void Environment::stopWaitLoop()
     CActiveScheduler::Stop();
 }
 
-SymbAppUi& Environment::symbAppUi() const 
+CSymbAppUi& Environment::symbAppUi() const 
 { 
     return *_ui; 
 }
@@ -156,7 +156,7 @@ ApplicationImpl::ApplicationImpl(Application& app)
 
     // This only created the eventloop, it's not being run until
     // the view has been created. The view will also stop the loop.
-    TRAPD(createError, _eventLoop = SymbEventLoop::NewL(*this));
+    TRAPD(createError, _eventLoop = CSymbEventLoop::NewL(*this));
     if (createError != KErrNone)
     {
         unlockAppInstance();
