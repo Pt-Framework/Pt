@@ -49,15 +49,56 @@ inline std::string toString(LogLevel level)
 {
     switch (level)
     {
-        case None:  return "NONE";
-        case Fatal: return "FATAL";
-        case Error: return "ERROR";
-        case Warn:  return "WARN";
-        case Info:  return "INFO";
-        case Debug: return "DEBUG";
-        case Trace: return "TRACE";
+        case None:  return "None";
+        case Fatal: return "Fatal";
+        case Error: return "Error";
+        case Warn:  return "Warning";
+        case Info:  return "Info";
+        case Debug: return "Debug";
+        case Trace: return "Trace";
         default:    throw std::logic_error("Unknown log level in LogLevel::toString() method.");
     };
+}
+
+/**
+ * @brief Converts a string to the appropriate log level.
+ * @ingroup Logging
+ *
+ * @param levelStr The log level string to convert.
+ * @return The appropriate log level object.
+ */
+inline LogLevel toLogLevel(std::string levelString)
+{
+    if(levelString == "None")
+    {
+        return None;
+    }
+    else if(levelString == "Fatal")
+    {
+        return Fatal;
+    }
+    else if(levelString == "Error")
+    {
+        return Error;
+    }
+    else if(levelString == "Warning")
+    {
+        return Warn;
+    }
+    else if(levelString == "Info")
+    {
+        return Info;
+    }
+    else if(levelString == "Debug")
+    {
+        return Debug;
+    }
+    else if(levelString == "Trace")
+    {
+        return Trace;
+    }
+
+    throw std::logic_error("Specified log level string doesn't fit to a log level in LogLevel::toLogLevel() method.");
 }
 
 
