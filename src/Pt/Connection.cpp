@@ -89,8 +89,13 @@ void Connection::close()
     if( !this->valid() )
         return;
 
-    _data->setValid(false);
     _data->slot().closed( *this );
+    // We set the valid flag here to false since the call above may 
+    // fail for any reason. If setting the valid flag before, a
+    // connection may pretend to be closed but it is not and it 
+    // may reside e.g. in the list of connections of the 
+    // Connectable class and then provoke an infinite loop.
+    _data->setValid(false);
     _data->sender().closed( *this );
 }
 
